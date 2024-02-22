@@ -46,14 +46,14 @@ defineProps({
     <nav class="flex flex-1 flex-col mt-4">
         <div class="flex justify-center">
             <router-link :to="{ name: 'home' }">
-                <h3 class="text-xl text-white">Help Center</h3>
+                <h3 class="text-xl">Help Center</h3>
             </router-link>
         </div>
 
         <ul role="list" class="flex flex-1 flex-col gap-y-7 mt-4">
             <li v-for="category in categories" :key="category.id">
                 <div
-                    class="bg-gray-100 text-gray-800 group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
+                    class="bg-gray-100 text-gray-800 group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold items-center"
                 >
                     <span v-if="category.icon"
                           v-html="category.icon"

@@ -41,6 +41,8 @@ use AdvisingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEmbeddab
 use AdvisingApp\Portal\Http\Controllers\KnowledgeManagement\KnowledgeManagementPortalSearchController;
 use AdvisingApp\Portal\Http\Controllers\KnowledgeManagement\KnowledgeManagementPortalArticleController;
 use AdvisingApp\Portal\Http\Controllers\KnowledgeManagement\KnowledgeManagementPortalCategoryController;
+use AdvisingApp\Portal\Http\Controllers\KnowledgeManagement\KnowledgeManagementPortalServiceRequestController;
+use AdvisingApp\Portal\Http\Controllers\KnowledgeManagement\KnowledgeManagementPortalServiceRequestTypeController;
 
 Route::prefix('api')
     ->middleware([
@@ -62,5 +64,9 @@ Route::prefix('api')
                     ->name('category.show');
                 Route::get('/categories/{category}/articles/{article}', [KnowledgeManagementPortalArticleController::class, 'show'])
                     ->name('article.show');
+                Route::get('/new-request', [KnowledgeManagementPortalServiceRequestController::class, 'show'])
+                    ->name('service-request.show');
+                Route::get('/new-request/{type}', [KnowledgeManagementPortalServiceRequestTypeController::class, 'show'])
+                    ->name('service-request-type.show');
             });
     });

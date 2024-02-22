@@ -39,6 +39,10 @@ defineProps({
         type: Object,
         required: true,
     },
+    serviceRequests: {
+        type: Object,
+        required: true,
+    },
 });
 </script>
 
@@ -46,46 +50,82 @@ defineProps({
     <h3 class="text-xl">Help Center</h3>
 
     <div
-        class="mt-4 divide-y divide-gray-100 overflow-hidden rounded-lg bg-gray-100 shadow sm:grid sm:grid-cols-2 sm:gap-px sm:divide-y-0"
+        class="mt-4 grid gap-y-4"
     >
         <div
-            v-for="(category, categoryId) in categories"
+            v-for="category in categories"
             :key="category.id"
-            :class="[
-                categoryId === 0 ? 'rounded-tl-lg rounded-tr-lg sm:rounded-tr-none' : '',
-                categoryId === 1 ? 'sm:rounded-tr-lg' : '',
-                categoryId === categories.length - 2 ? 'sm:rounded-bl-lg' : '',
-                categoryId === categories.length - 1 ? 'rounded-bl-lg rounded-br-lg sm:rounded-bl-none' : '',
-                'group relative bg-white p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-primary-500',
-            ]"
+            class="group relative bg-white p-6 rounded shadow"
         >
-            <span v-if="category.icon"
-                  v-html="category.icon"
-                  class="pointer-events-none absolute top-6 text-primary-600 dark:text-primary-400"
-                  aria-hidden="true"
-            >
-            </span>
-            <div class="mt-8">
-                <h3 class="text-base font-semibold leading-6 text-gray-900">
-                    <router-link :to="{ name: 'view-category', params: { categoryId: category.id } }">
-                        <span class="absolute inset-0" aria-hidden="true" />
-                        {{ category.name }}
-                    </router-link>
-                </h3>
-                <p class="mt-2 text-sm text-gray-500">
-                    {{ category.description }}
-                </p>
+            <div class="grid">
+                <div class="flex"
+                    :class="[category.icon ? 'justify-between' : 'justify-end']"
+                >
+                    <div v-if="category.icon"
+                          v-html="category.icon"
+                          class="pointer-events-none text-primary-600 dark:text-primary-400"
+                          aria-hidden="true"
+                    >
+                    </div>
+
+                    <div
+                        class="pointer-events-none text-gray-300 group-hover:text-primary-600 group-hover:dark:text-primary-400"
+                        aria-hidden="true"
+                    >
+                        <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M20 4h1a1 1 0 00-1-1v1zm-1 12a1 1 0 102 0h-2zM8 3a1 1 0 000 2V3zM3.293 19.293a1 1 0 101.414 1.414l-1.414-1.414zM19 4v12h2V4h-2zm1-1H8v2h12V3zm-.707.293l-16 16 1.414 1.414 16-16-1.414-1.414z"
+                            />
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="w-full">
+                    <h3 class="text-base font-semibold leading-6 text-gray-900">
+                        <router-link :to="{ name: 'view-category', params: { categoryId: category.id } }">
+                            <span class="absolute inset-0" aria-hidden="true" />
+                            {{ category.name }}
+                        </router-link>
+                    </h3>
+                    <p class="text-sm text-gray-500">
+                        {{ category.description }}
+                    </p>
+                </div>
             </div>
-            <span
-                class="pointer-events-none absolute right-6 top-6 text-gray-300 group-hover:text-primary-400"
-                aria-hidden="true"
-            >
-                <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                    <path
-                        d="M20 4h1a1 1 0 00-1-1v1zm-1 12a1 1 0 102 0h-2zM8 3a1 1 0 000 2V3zM3.293 19.293a1 1 0 101.414 1.414l-1.414-1.414zM19 4v12h2V4h-2zm1-1H8v2h12V3zm-.707.293l-16 16 1.414 1.414 16-16-1.414-1.414z"
-                    />
-                </svg>
-            </span>
+        </div>
+    </div>
+
+    <h3 class="text-xl">Service Requests</h3>
+
+    <div
+        class="mt-4 grid gap-y-4"
+    >
+        <div
+            v-for="serviceRequest in serviceRequests"
+            :key="serviceRequest.id"
+            class="group relative bg-white p-6 rounded shadow"
+        >
+            <div class="flex items-center gap-x-3">
+                <span v-if="serviceRequest.icon"
+                      v-html="serviceRequest.icon"
+                      class="pointer-events-none text-primary-600 dark:text-primary-400"
+                      aria-hidden="true"
+                >
+                </span>
+                <div class="w-full">
+                    <h3 class="text-base font-semibold leading-6 text-gray-900">
+                        {{ serviceRequest.title }}
+                    </h3>
+                    <div class="items-center">
+                        <span class="px-2 py-1 text-sm font-bold text-white bg-red-600 rounded">
+                            {{ serviceRequest.status.name }}
+                        </span>
+                        <span class="text-xs text-gray-500">
+                            Last Updated: {{ serviceRequest.updated_at}}
+                        </span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </template>

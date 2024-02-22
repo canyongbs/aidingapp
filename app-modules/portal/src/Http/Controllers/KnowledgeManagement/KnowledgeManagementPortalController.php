@@ -36,6 +36,8 @@
 
 namespace AdvisingApp\Portal\Http\Controllers\KnowledgeManagement;
 
+use AdvisingApp\ServiceManagement\Models\ServiceRequest;
+use App\Settings\LicenseSettings;
 use Illuminate\Http\JsonResponse;
 use Filament\Support\Colors\Color;
 use App\Http\Controllers\Controller;
@@ -48,12 +50,14 @@ class KnowledgeManagementPortalController extends Controller
     public function show(): JsonResponse
     {
         $settings = resolve(PortalSettings::class);
+        $license = resolve(LicenseSettings::class);
 
         return response()->json([
             'primary_color' => Color::all()[$settings->knowledge_management_portal_primary_color ?? 'blue'],
             'rounding' => $settings->knowledge_management_portal_rounding,
             'categories' => KnowledgeBaseCategoryData::collection(
                 KnowledgeBaseCategory::query()
+                    ->orderBy('name')
                     ->get()
                     ->map(function (KnowledgeBaseCategory $category) {
                         return [
@@ -65,6 +69,19 @@ class KnowledgeManagementPortalController extends Controller
                     })
                     ->toArray()
             ),
+            'service_requests' => $license->data->addons->serviceManagement && $settings->knowledge_management_portal_service_management
+                ? ServiceRequest::query()
+                    ->get()
+                    ->map(function (ServiceRequest $serviceRequest) {
+                        return [
+                            'id' => $serviceRequest->getKey(),
+                            'title' => $serviceRequest->title,
+                            'status' => $serviceRequest->status,
+                            'icon' => $serviceRequest->priority->type->icon ? svg($serviceRequest->priority->type->icon, 'h-6 w-6')->toHtml() : null,
+                            'updated_at' => $serviceRequest->serviceRequestUpdates()->latest('updated_at')->first()->updated_at->format('n-j-y g:i a'),
+                        ];
+                    })
+                : null,
         ]);
     }
 }

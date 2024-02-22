@@ -36,6 +36,7 @@
 
 namespace AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages;
 
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Table;
 use Filament\Actions\CreateAction;
 use Filament\Tables\Actions\EditAction;
@@ -64,6 +65,10 @@ class ListServiceRequestTypes extends ListRecords
                 TextColumn::make('service_requests_count')
                     ->label('# of Service Requests')
                     ->counts('serviceRequests')
+                    ->sortable(),
+                IconColumn::make('icon')
+                    ->icon(fn (string $state): string => $state)
+                    ->tooltip(fn (?string $state): ?string => filled($state) ? str($state)->after('heroicon-o-')->headline()->toString() : null)
                     ->sortable(),
                 TextColumn::make('deleted_at')
                     ->dateTime()

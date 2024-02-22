@@ -36,6 +36,8 @@
 
 namespace AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages;
 
+use App\Filament\Forms\Components\IconSelect;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Get;
 use Filament\Forms\Form;
 use Filament\Actions\Action;
@@ -65,6 +67,7 @@ class EditServiceRequestType extends EditRecord
                             ->label('Name')
                             ->required()
                             ->string(),
+                        IconSelect::make('icon'),
                         Group::make()
                             ->schema([
                                 Toggle::make('has_enabled_feedback_collection')
@@ -77,6 +80,9 @@ class EditServiceRequestType extends EditRecord
                                     ->label('NPS')
                                     ->visible(fn (Get $get) => $get('has_enabled_feedback_collection')),
                             ]),
+                        Textarea::make('description')
+                            ->string()
+                            ->columnSpanFull(),
                     ]),
             ])
             ->disabled(fn (ServiceRequestType $record) => $record->trashed());

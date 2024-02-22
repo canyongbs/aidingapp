@@ -41,6 +41,7 @@ use App\Models\User;
 use Carbon\CarbonImmutable;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Illuminate\Database\Eloquent\Model;
 use AdvisingApp\Division\Models\Division;
 use Filament\Forms\Components\DateTimePicker;
@@ -99,6 +100,10 @@ class ServiceRequestBlock extends CampaignActionBlock
                 ->label('Assign Service Request to')
                 ->nullable()
                 ->exists((new User())->getTable(), 'id'),
+            TextInput::make($fieldPrefix . 'title')
+                ->label('Title')
+                ->string()
+                ->maxLength(255),
             Textarea::make($fieldPrefix . 'close_details')
                 ->label('Close Details/Description')
                 ->nullable()

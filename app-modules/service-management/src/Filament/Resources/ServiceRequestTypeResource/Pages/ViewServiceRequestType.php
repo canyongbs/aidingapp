@@ -37,6 +37,7 @@
 namespace AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages;
 
 use Filament\Actions\EditAction;
+use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Infolist;
 use Filament\Infolists\Components\Group;
 use Filament\Resources\Pages\ViewRecord;
@@ -59,6 +60,9 @@ class ViewServiceRequestType extends ViewRecord
                     ->schema([
                         TextEntry::make('name')
                             ->label('Name'),
+                        TextEntry::make('icon')
+                            ->state(fn (ServiceRequestType $record): string => str($record->icon)->after('heroicon-o-')->headline()->toString())
+                            ->icon(fn (ServiceRequestType $record): string => $record->icon),
                         TextEntry::make('form.name')
                             ->label('Form')
                             ->hidden(fn (ServiceRequestType $record) => ! $record->form)
@@ -82,6 +86,9 @@ class ViewServiceRequestType extends ViewRecord
                                     ->badge()
                                     ->color(fn (ServiceRequestType $record) => $record->has_enabled_nps ? 'success' : 'gray'),
                             ]),
+                        TextEntry::make('description')
+                            ->label('Description')
+                            ->columnSpanFull(),
                     ]),
             ]);
     }

@@ -36,8 +36,10 @@
 
 namespace AdvisingApp\KnowledgeBase\Database\Factories;
 
+use BladeUI\Icons\Factory as BladeUIIconsFactory;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use AdvisingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
+use Illuminate\Support\Facades\File;
 
 /**
  * @extends Factory<KnowledgeBaseCategory>
@@ -47,8 +49,32 @@ class KnowledgeBaseCategoryFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->word(),
-            'description' => $this->faker->sentences(2, true),
+            'name' => str(fake()->word())->ucfirst()->toString(),
+            'description' => fake()->optional()->sentences(2, true),
+            'icon' => fake()->optional()->randomElement($this->icons()),
         ];
+    }
+
+    private function icons(): array
+    {
+        return cache()->remember('heroicon-factory-options', now()->addMinutes(5), function (): array {
+            $paths = app(BladeUIIconsFactory::class)->all()['heroicons']['paths'];
+
+            $options = [];
+
+            foreach ($paths as $path) {
+                foreach (File::files($path) as $file) {
+                    $id = $file->getFilenameWithoutExtension();
+
+                    if (! str($id)->startsWith('o-')) {
+                        continue;
+                    }
+
+                    $options[] = "heroicon-{$id}";
+                }
+            }
+
+            return $options;
+        });
     }
 }

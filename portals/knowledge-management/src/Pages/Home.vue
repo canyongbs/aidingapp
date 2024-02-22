@@ -50,6 +50,10 @@ const props = defineProps({
         type: Object,
         required: true,
     },
+    serviceRequests: {
+        type: Object,
+        required: true,
+    },
 });
 
 const urlParams = new URLSearchParams(window.location.search);
@@ -109,6 +113,14 @@ function debounce(func, delay) {
         </button>
 
         <div class="flex h-full w-full flex-col rounded bg-primary-700 px-12 py-4">
+            <div class="text-right">
+                <button class="p-2 font-bold rounded bg-white text-primary-600 dark:text-primary-400">
+                    <router-link :to="{ name: 'new-request' }">
+                        New Request
+                    </router-link>
+                </button>
+            </div>
+
             <div class="flex flex-col text-left">
                 <h3 class="text-3xl text-white">Need help?</h3>
                 <p class="text-white">Search our knowledge base for advice and answers</p>
@@ -136,6 +148,6 @@ function debounce(func, delay) {
             :loadingResults="loadingResults"
         ></SearchResults>
 
-        <HelpCenter v-else :categories="categories"></HelpCenter>
+        <HelpCenter v-else :categories="categories" :service-requests="serviceRequests"></HelpCenter>
     </main>
 </template>

@@ -99,6 +99,7 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
         'res_details',
         'created_by_id',
         'status_updated_at',
+        'title',
     ];
 
     protected $casts = [
@@ -229,6 +230,7 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
                 $request = ServiceRequest::create([
                     'respondent_type' => $educatable->getMorphClass(),
                     'respondent_id' => $educatable->getKey(),
+                    'title' => $action->data['title'],
                     'close_details' => $action->data['close_details'],
                     'res_details' => $action->data['res_details'],
                     'division_id' => $action->data['division_id'],

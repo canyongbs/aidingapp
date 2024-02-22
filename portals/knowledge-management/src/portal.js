@@ -38,6 +38,8 @@ import { createMemoryHistory, createRouter, createWebHistory } from 'vue-router'
 import Home from '@/Pages/Home.vue';
 import ViewCategory from '@/Pages/ViewCategory.vue';
 import ViewArticle from '@/Pages/ViewArticle.vue';
+import NewRequest from "@/Pages/NewRequest.vue";
+import NewRequestType from "@/Pages/NewRequestType.vue";
 
 customElements.define(
     'knowledge-management-portal-embed',
@@ -78,6 +80,16 @@ customElements.define(
                         path: baseUrl + '/categories/:categoryId/articles/:articleId',
                         name: 'view-article',
                         component: ViewArticle,
+                    },
+                    {
+                        path: baseUrl + '/new-request',
+                        name: 'new-request',
+                        component: NewRequest,
+                    },
+                    {
+                        path: baseUrl + '/new-request/:typeId',
+                        name: 'new-request-type',
+                        component: NewRequestType,
                     },
                 ],
             });

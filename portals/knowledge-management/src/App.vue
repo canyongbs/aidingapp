@@ -75,6 +75,7 @@ const hostUrl = `${protocol}//${scriptHostname}`;
 const portalPrimaryColor = ref('');
 const portalRounding = ref('');
 const categories = ref({});
+const serviceRequests = ref({});
 
 async function getKnowledgeManagementPortal() {
     await fetch(props.url)
@@ -87,6 +88,8 @@ async function getKnowledgeManagementPortal() {
             }
 
             categories.value = json.categories;
+
+            serviceRequests.value = json.service_requests;
 
             portalPrimaryColor.value = json.primary_color;
 
@@ -181,7 +184,11 @@ async function getKnowledgeManagementPortal() {
 
                 <div class="lg:pl-72">
                     <div class="px-4 sm:px-6 lg:px-8">
-                        <RouterView :search-url="searchUrl" :api-url="apiUrl" :categories="categories"></RouterView>
+                        <RouterView :search-url="searchUrl"
+                                    :api-url="apiUrl"
+                                    :categories="categories"
+                                    :service-requests="serviceRequests">
+                        </RouterView>
                     </div>
                 </div>
             </div>

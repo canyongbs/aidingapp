@@ -36,6 +36,7 @@
 
 namespace AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages;
 
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Forms\Form;
@@ -98,14 +99,21 @@ class CreateServiceRequest extends CreateRecord
                             ->exists(ServiceRequestPriority::class, 'id')
                             ->visible(fn (Get $get): bool => filled($get('type_id'))),
                     ]),
+                TextInput::make('title')
+                    ->required()
+                    ->string()
+                    ->maxLength(255)
+                    ->columnSpanFull(),
                 Textarea::make('close_details')
                     ->label('Close Details/Description')
                     ->nullable()
-                    ->string(),
+                    ->string()
+                    ->columnSpanFull(),
                 Textarea::make('res_details')
                     ->label('Internal Service Request Details')
                     ->nullable()
-                    ->string(),
+                    ->string()
+                    ->columnSpanFull(),
                 EducatableSelect::make('respondent')
                     ->label('Related To')
                     ->required()
