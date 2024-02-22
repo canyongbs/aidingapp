@@ -47,82 +47,92 @@ defineProps({
 </script>
 
 <template>
-    <h3 class="text-xl">Help Center</h3>
-
-    <div
-        class="mt-4 grid gap-y-4"
+    <div class="grid gap-4"
+         :class="[
+            serviceRequests?.length > 0 ? 'lg:grid-cols-2' : 'lg:grid-cols-1',
+        ]"
     >
-        <div
-            v-for="category in categories"
-            :key="category.id"
-            class="group relative bg-white p-6 rounded shadow"
-        >
-            <div class="grid">
-                <div class="flex"
-                    :class="[category.icon ? 'justify-between' : 'justify-end']"
+        <div>
+            <h3 class="text-xl">Help Center</h3>
+            <div
+                class="mt-4 grid gap-4"
+                :class="[
+                    serviceRequests?.length > 0 ? 'lg:grid-cols-1' : 'lg:grid-cols-2',
+                ]"
+            >
+                <div
+                    v-for="category in categories"
+                    :key="category.id"
+                    class="group relative bg-white p-6 rounded shadow"
                 >
-                    <div v-if="category.icon"
-                          v-html="category.icon"
-                          class="pointer-events-none text-primary-600 dark:text-primary-400"
-                          aria-hidden="true"
-                    >
-                    </div>
+                    <div class="grid">
+                        <div class="flex"
+                             :class="[category.icon ? 'justify-between' : 'justify-end']"
+                        >
+                            <div v-if="category.icon"
+                                 v-html="category.icon"
+                                 class="pointer-events-none text-primary-600 dark:text-primary-400"
+                                 aria-hidden="true"
+                            >
+                            </div>
 
-                    <div
-                        class="pointer-events-none text-gray-300 group-hover:text-primary-600 group-hover:dark:text-primary-400"
-                        aria-hidden="true"
-                    >
-                        <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                            <path
-                                d="M20 4h1a1 1 0 00-1-1v1zm-1 12a1 1 0 102 0h-2zM8 3a1 1 0 000 2V3zM3.293 19.293a1 1 0 101.414 1.414l-1.414-1.414zM19 4v12h2V4h-2zm1-1H8v2h12V3zm-.707.293l-16 16 1.414 1.414 16-16-1.414-1.414z"
-                            />
-                        </svg>
-                    </div>
-                </div>
+                            <div
+                                class="pointer-events-none text-gray-300 group-hover:text-primary-600 group-hover:dark:text-primary-400"
+                                aria-hidden="true"
+                            >
+                                <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        d="M20 4h1a1 1 0 00-1-1v1zm-1 12a1 1 0 102 0h-2zM8 3a1 1 0 000 2V3zM3.293 19.293a1 1 0 101.414 1.414l-1.414-1.414zM19 4v12h2V4h-2zm1-1H8v2h12V3zm-.707.293l-16 16 1.414 1.414 16-16-1.414-1.414z"
+                                    />
+                                </svg>
+                            </div>
+                        </div>
 
-                <div class="w-full">
-                    <h3 class="text-base font-semibold leading-6 text-gray-900">
-                        <router-link :to="{ name: 'view-category', params: { categoryId: category.id } }">
-                            <span class="absolute inset-0" aria-hidden="true" />
-                            {{ category.name }}
-                        </router-link>
-                    </h3>
-                    <p class="text-sm text-gray-500">
-                        {{ category.description }}
-                    </p>
+                        <div class="w-full">
+                            <h3 class="text-base font-semibold leading-6 text-gray-900">
+                                <router-link :to="{ name: 'view-category', params: { categoryId: category.id } }">
+                                    <span class="absolute inset-0" aria-hidden="true" />
+                                    {{ category.name }}
+                                </router-link>
+                            </h3>
+                            <p class="text-sm text-gray-500">
+                                {{ category.description }}
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-
-    <h3 class="text-xl">Service Requests</h3>
-
-    <div
-        class="mt-4 grid gap-y-4"
-    >
-        <div
-            v-for="serviceRequest in serviceRequests"
-            :key="serviceRequest.id"
-            class="group relative bg-white p-6 rounded shadow"
-        >
-            <div class="flex items-center gap-x-3">
-                <span v-if="serviceRequest.icon"
-                      v-html="serviceRequest.icon"
-                      class="pointer-events-none text-primary-600 dark:text-primary-400"
-                      aria-hidden="true"
+        <div v-if="serviceRequests?.length > 0">
+            <h3 class="text-xl">Service Requests</h3>
+            <div
+                class="mt-4 grid gap-y-4"
+            >
+                <div
+                    v-for="serviceRequest in serviceRequests"
+                    :key="serviceRequest.id"
+                    class="group relative bg-white p-6 rounded shadow"
                 >
-                </span>
-                <div class="w-full">
-                    <h3 class="text-base font-semibold leading-6 text-gray-900">
-                        {{ serviceRequest.title }}
-                    </h3>
-                    <div class="items-center">
-                        <span class="px-2 py-1 text-sm font-bold text-white bg-red-600 rounded">
-                            {{ serviceRequest.status.name }}
+                    <div class="flex items-center gap-x-3">
+                        <span v-if="serviceRequest.icon"
+                              v-html="serviceRequest.icon"
+                              class="pointer-events-none text-primary-600 dark:text-primary-400"
+                              aria-hidden="true"
+                        >
                         </span>
-                        <span class="text-xs text-gray-500">
-                            Last Updated: {{ serviceRequest.updated_at}}
-                        </span>
+                        <div class="grid w-full gap-y-1.5">
+                            <h3 class="text-base font-semibold leading-6 text-gray-900">
+                                {{ serviceRequest.title }}
+                            </h3>
+                            <div>
+                                <span class="px-2 py-1 text-sm font-bold text-white bg-red-600 rounded">
+                                    {{ serviceRequest.status.name }}
+                                </span>
+                            </div>
+                            <p class="text-xs text-gray-500">
+                                Last Updated: {{ serviceRequest.updated_at}}
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>

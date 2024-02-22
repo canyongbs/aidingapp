@@ -78,10 +78,10 @@ class KnowledgeManagementPortalController extends Controller
                             'title' => $serviceRequest->title,
                             'status' => $serviceRequest->status,
                             'icon' => $serviceRequest->priority->type->icon ? svg($serviceRequest->priority->type->icon, 'h-6 w-6')->toHtml() : null,
-                            'updated_at' => $serviceRequest->serviceRequestUpdates()->latest('updated_at')->first()->updated_at->format('n-j-y g:i a'),
+                            'updated_at' => $serviceRequest->serviceRequestUpdates()->latest('updated_at')->first()->updated_at->format('n-j-y'),
                         ];
                     })
-                : null,
+                : [],
         ]);
     }
 }
