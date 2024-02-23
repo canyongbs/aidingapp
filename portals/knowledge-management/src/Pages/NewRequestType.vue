@@ -15,6 +15,7 @@ const props = defineProps({
 });
 
 const loadingResults = ref(true);
+const description = ref('');
 
 watch(
     route,
@@ -78,9 +79,12 @@ function getData() {
                 <textarea
                     class="w-full rounded border-gray-300 shadow focus:border-primary-600 focus:ring focus:ring-primary-400 focus:ring-opacity-50"
                     rows="6"
-                    placeholder="Please describe your issue here"></textarea>
+                    placeholder="Please describe your issue here"
+                    v-model="description"
+                ></textarea>
 
                 <h3 class="text-xl">Additional Form Information</h3>
+
             </main>
         </div>
     </div>
