@@ -73,8 +73,12 @@ function getData() {
                 </div>
             </div>
 
-            <main class="py-10">
+            <main class="grid py-10 gap-4">
                 <h3 class="text-xl">Describe Your Issue</h3>
+                <textarea
+                    class="w-full rounded border-gray-300 shadow focus:border-primary-600 focus:ring focus:ring-primary-400 focus:ring-opacity-50"
+                    rows="6"
+                    placeholder="Please describe your issue here"></textarea>
 
                 <h3 class="text-xl">Additional Form Information</h3>
             </main>
