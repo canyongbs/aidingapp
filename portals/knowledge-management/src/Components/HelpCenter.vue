@@ -125,8 +125,10 @@ defineProps({
                                 {{ serviceRequest.title }}
                             </h3>
                             <div>
-                                <span class="px-2 py-1 text-sm font-bold text-white bg-red-600 rounded">
-                                    {{ serviceRequest.status.name }}
+                                <span class="px-2 py-1 text-sm font-bold text-white rounded"
+                                      :style="'background-color: rgb(' + serviceRequest.status_color + ')'"
+                                >
+                                    {{ serviceRequest.status_name }}
                                 </span>
                             </div>
                             <p class="text-xs text-gray-500">

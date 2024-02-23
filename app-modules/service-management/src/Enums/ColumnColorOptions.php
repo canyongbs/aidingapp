@@ -36,6 +36,7 @@
 
 namespace AdvisingApp\ServiceManagement\Enums;
 
+use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
 
 // TODO This might belong in a more generalized space so we can re-use this across modules

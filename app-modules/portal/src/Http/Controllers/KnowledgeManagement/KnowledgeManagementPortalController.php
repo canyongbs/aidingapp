@@ -36,12 +36,13 @@
 
 namespace AdvisingApp\Portal\Http\Controllers\KnowledgeManagement;
 
-use AdvisingApp\ServiceManagement\Models\ServiceRequest;
 use App\Settings\LicenseSettings;
 use Illuminate\Http\JsonResponse;
 use Filament\Support\Colors\Color;
 use App\Http\Controllers\Controller;
+use Filament\Support\Colors\ColorManager;
 use AdvisingApp\Portal\Settings\PortalSettings;
+use AdvisingApp\ServiceManagement\Models\ServiceRequest;
 use AdvisingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AdvisingApp\Portal\DataTransferObjects\KnowledgeBaseCategoryData;
 
@@ -51,6 +52,11 @@ class KnowledgeManagementPortalController extends Controller
     {
         $settings = resolve(PortalSettings::class);
         $license = resolve(LicenseSettings::class);
+
+        $colors = [
+            ...app(ColorManager::class)->getColors(),
+            ...Color::all(),
+        ];
 
         return response()->json([
             'primary_color' => Color::all()[$settings->knowledge_management_portal_primary_color ?? 'blue'],
@@ -72,13 +78,14 @@ class KnowledgeManagementPortalController extends Controller
             'service_requests' => $license->data->addons->serviceManagement && $settings->knowledge_management_portal_service_management
                 ? ServiceRequest::query()
                     ->get()
-                    ->map(function (ServiceRequest $serviceRequest) {
+                    ->map(function (ServiceRequest $serviceRequest) use ($colors) {
                         return [
                             'id' => $serviceRequest->getKey(),
                             'title' => $serviceRequest->title,
-                            'status' => $serviceRequest->status,
+                            'status_name' => $serviceRequest->status->name,
+                            'status_color' => $colors[$serviceRequest->status->color->value][600],
                             'icon' => $serviceRequest->priority->type->icon ? svg($serviceRequest->priority->type->icon, 'h-6 w-6')->toHtml() : null,
-                            'updated_at' => $serviceRequest->serviceRequestUpdates()->latest('updated_at')->first()->updated_at->format('n-j-y'),
+                            'updated_at' => $serviceRequest->serviceRequestUpdates()->latest('updated_at')->first()->updated_at->format('n-j-y g:i A'),
                         ];
                     })
                 : [],
