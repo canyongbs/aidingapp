@@ -44,10 +44,10 @@ use Illuminate\Support\Facades\DB;
 use AdvisingApp\Alert\Models\Alert;
 use Illuminate\Support\Facades\Schema;
 use AdvisingApp\CareTeam\Models\CareTeam;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use AdvisingApp\Interaction\Models\Interaction;
-use AdvisingApp\Prospect\Models\ProspectSource;
-use AdvisingApp\Prospect\Models\ProspectStatus;
+use AdvisingApp\Contact\Models\ContactSource;
+use AdvisingApp\Contact\Models\ContactStatus;
 use AdvisingApp\StudentDataModel\Models\Program;
 use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\IntegrationAI\Client\AzureOpenAI;
@@ -161,7 +161,7 @@ class AIReportChatClient extends AzureOpenAI
             Alert::class,
             CareTeam::class,
             Interaction::class, InteractionCampaign::class, InteractionDriver::class, InteractionOutcome::class, InteractionRelation::class, InteractionStatus::class, InteractionType::class,
-            Prospect::class, ProspectSource::class, ProspectStatus::class,
+            Contact::class, ContactSource::class, ContactStatus::class,
             Student::class, Enrollment::class, Performance::class, Program::class,
             Subscription::class,
             Task::class,

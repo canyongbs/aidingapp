@@ -34,45 +34,45 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Prospect\Providers;
+namespace AdvisingApp\Contact\Providers;
 
 use Filament\Panel;
 use App\Concerns\ImplementsGraphQL;
 use Illuminate\Support\ServiceProvider;
-use AdvisingApp\Prospect\ProspectPlugin;
-use AdvisingApp\Prospect\Models\Prospect;
-use AdvisingApp\Prospect\Models\ProspectSource;
-use AdvisingApp\Prospect\Models\ProspectStatus;
+use AdvisingApp\Contact\ContactPlugin;
+use AdvisingApp\Contact\Models\Contact;
+use AdvisingApp\Contact\Models\ContactSource;
+use AdvisingApp\Contact\Models\ContactStatus;
 use App\Registries\RoleBasedAccessControlRegistry;
-use AdvisingApp\Prospect\Observers\ProspectObserver;
+use AdvisingApp\Contact\Observers\ContactObserver;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use AdvisingApp\Prospect\Registries\ProspectRbacRegistry;
-use AdvisingApp\Prospect\Enums\ProspectStatusColorOptions;
-use AdvisingApp\Prospect\Enums\SystemProspectClassification;
+use AdvisingApp\Contact\Registries\ContactRbacRegistry;
+use AdvisingApp\Contact\Enums\ContactStatusColorOptions;
+use AdvisingApp\Contact\Enums\SystemContactClassification;
 
-class ProspectServiceProvider extends ServiceProvider
+class ContactServiceProvider extends ServiceProvider
 {
     use ImplementsGraphQL;
 
     public function register(): void
     {
-        Panel::configureUsing(fn (Panel $panel) => ($panel->getId() !== 'admin') || $panel->plugin(new ProspectPlugin()));
+        Panel::configureUsing(fn (Panel $panel) => ($panel->getId() !== 'admin') || $panel->plugin(new ContactPlugin()));
     }
 
     public function boot(): void
     {
         Relation::morphMap([
-            'prospect' => Prospect::class,
-            'prospect_source' => ProspectSource::class,
-            'prospect_status' => ProspectStatus::class,
+            'contact' => Contact::class,
+            'contact_source' => ContactSource::class,
+            'contact_status' => ContactStatus::class,
         ]);
 
-        Prospect::observe(ProspectObserver::class);
+        Contact::observe(ContactObserver::class);
 
         $this->discoverSchema(__DIR__ . '/../../graphql/*');
-        $this->registerEnum(ProspectStatusColorOptions::class);
-        $this->registerEnum(SystemProspectClassification::class);
+        $this->registerEnum(ContactStatusColorOptions::class);
+        $this->registerEnum(SystemContactClassification::class);
 
-        RoleBasedAccessControlRegistry::register(ProspectRbacRegistry::class);
+        RoleBasedAccessControlRegistry::register(ContactRbacRegistry::class);
     }
 }

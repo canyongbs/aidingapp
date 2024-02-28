@@ -1,6 +1,6 @@
 <?php
 
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use AdvisingApp\StudentDataModel\Models\Student;
 
 /*
@@ -88,9 +88,9 @@ return [
             'provider' => 'students',
         ],
 
-        'prospect' => [
+        'contact' => [
             'driver' => 'session',
-            'provider' => 'prospects',
+            'provider' => 'contacts',
         ],
     ],
 
@@ -127,9 +127,9 @@ return [
             'model' => Student::class,
         ],
 
-        'prospects' => [
+        'contacts' => [
             'driver' => 'eloquent',
-            'model' => Prospect::class,
+            'model' => Contact::class,
         ],
 
         // 'users' => [

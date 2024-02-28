@@ -37,7 +37,7 @@
 namespace AdvisingApp\Form\Models;
 
 use App\Models\BaseModel;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use Illuminate\Database\Eloquent\Collection;
 use AdvisingApp\StudentDataModel\Models\Student;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -47,7 +47,7 @@ use AdvisingApp\StudentDataModel\Models\Concerns\BelongsToEducatable;
 /**
  * @property-read Submissible $submissible
  * @property-read Collection<int, SubmissibleField> $fields
- * @property-read Student|Prospect|null $author
+ * @property-read Student|Contact|null $author
  */
 abstract class Submission extends BaseModel
 {

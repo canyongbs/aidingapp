@@ -48,7 +48,7 @@ use Filament\Actions\CreateAction;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use App\Actions\GetRecordFromMorphAndKey;
 use AdvisingApp\Engagement\Models\Engagement;
 use AdvisingApp\Authorization\Enums\LicenseType;
@@ -225,9 +225,9 @@ class MessageCenter extends Page
         return $this->getEducatableIds(engagementScope: 'sentToStudent', engagementResponseScope: 'sentByStudent');
     }
 
-    public function getProspectIds(): Collection
+    public function getContactIds(): Collection
     {
-        return $this->getEducatableIds(engagementScope: 'sentToProspect', engagementResponseScope: 'sentByProspect');
+        return $this->getEducatableIds(engagementScope: 'sentToContact', engagementResponseScope: 'sentByContact');
     }
 
     public function getEducatableIds($engagementScope, $engagementResponseScope): Collection
@@ -319,16 +319,16 @@ class MessageCenter extends Page
         $this->loadingInbox = true;
 
         $studentPopulationQuery = null;
-        $prospectPopulationQuery = null;
+        $contactPopulationQuery = null;
 
         /** @var Authenticatable $user */
         $user = auth()->user();
 
         $canAccessStudents = $user->hasLicense(Student::getLicenseType());
-        $canAccessProspects = $user->hasLicense(Prospect::getLicenseType());
+        $canAccessContacts = $user->hasLicense(Contact::getLicenseType());
 
-        if (! ($canAccessStudents && $canAccessProspects)) {
-            $this->filterPeopleType = $canAccessStudents ? 'students' : 'prospects';
+        if (! ($canAccessStudents && $canAccessContacts)) {
+            $this->filterPeopleType = $canAccessStudents ? 'students' : 'contacts';
         }
 
         if ($this->filterPeopleType === 'students' || $this->filterPeopleType === 'all') {
@@ -350,26 +350,26 @@ class MessageCenter extends Page
                 ->select('students.sisid', 'students.full_name', 'latest_activity.latest_activity', DB::raw("'student' as type"));
         }
 
-        if ($this->filterPeopleType === 'prospects' || $this->filterPeopleType === 'all') {
-            $prospectIds = $this->getProspectIds();
-            $prospectLatestActivity = $this->getLatestActivityForEducatables($prospectIds);
+        if ($this->filterPeopleType === 'contacts' || $this->filterPeopleType === 'all') {
+            $contactIds = $this->getContactIds();
+            $contactLatestActivity = $this->getLatestActivityForEducatables($contactIds);
 
-            $prospectPopulationQuery = Prospect::query()
+            $contactPopulationQuery = Contact::query()
                 ->when($this->search, function ($query, $search) {
                     $query->where('full_name', 'like', "%{$search}%");
                 })
-                ->joinSub($prospectLatestActivity, 'latest_activity', function ($join) {
-                    $join->on(DB::raw('prospects.id::VARCHAR'), '=', 'latest_activity.educatable_id');
+                ->joinSub($contactLatestActivity, 'latest_activity', function ($join) {
+                    $join->on(DB::raw('contacts.id::VARCHAR'), '=', 'latest_activity.educatable_id');
                 })
-                ->select(DB::raw('prospects.id::VARCHAR'), 'prospects.full_name', 'latest_activity.latest_activity', DB::raw("'prospect' as type"));
+                ->select(DB::raw('contacts.id::VARCHAR'), 'contacts.full_name', 'latest_activity.latest_activity', DB::raw("'contact' as type"));
         }
 
         if ($this->filterPeopleType === 'students') {
             $educatables = $studentPopulationQuery;
-        } elseif ($this->filterPeopleType === 'prospects') {
-            $educatables = $prospectPopulationQuery;
+        } elseif ($this->filterPeopleType === 'contacts') {
+            $educatables = $contactPopulationQuery;
         } else {
-            $educatables = $studentPopulationQuery->unionAll($prospectPopulationQuery);
+            $educatables = $studentPopulationQuery->unionAll($contactPopulationQuery);
         }
 
         $this->loadingInbox = false;

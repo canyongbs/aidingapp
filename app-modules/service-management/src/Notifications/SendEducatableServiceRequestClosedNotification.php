@@ -37,7 +37,7 @@
 namespace AdvisingApp\ServiceManagement\Notifications;
 
 use App\Models\NotificationSetting;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\Notification\Models\OutboundDeliverable;
 use AdvisingApp\ServiceManagement\Models\ServiceRequest;
@@ -62,7 +62,7 @@ class SendEducatableServiceRequestClosedNotification extends BaseNotification im
 
         $name = match ($notifiable::class) {
             Student::class => $educatable->first,
-            Prospect::class => $educatable->first_name,
+            Contact::class => $educatable->first_name,
         };
 
         $status = $this->serviceRequest->status;

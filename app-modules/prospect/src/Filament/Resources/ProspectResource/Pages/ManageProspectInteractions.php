@@ -34,19 +34,19 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Prospect\Filament\Resources\ProspectResource\Pages;
+namespace AdvisingApp\Contact\Filament\Resources\ContactResource\Pages;
 
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ManageRelatedRecords;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource;
+use AdvisingApp\Contact\Filament\Resources\ContactResource;
 use AdvisingApp\Interaction\Filament\Resources\InteractionResource\Pages\CreateInteraction;
 use AdvisingApp\Interaction\Filament\Resources\InteractionResource\RelationManagers\HasManyMorphedInteractionsRelationManager;
 
-class ManageProspectInteractions extends ManageRelatedRecords
+class ManageContactInteractions extends ManageRelatedRecords
 {
-    protected static string $resource = ProspectResource::class;
+    protected static string $resource = ContactResource::class;
 
     protected static string $relationship = 'interactions';
 

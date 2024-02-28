@@ -49,7 +49,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\EditRecord;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use AdvisingApp\Report\Enums\ReportModel;
 use Filament\Actions\Exports\ExportColumn;
 use Filament\Forms\Components\CheckboxList;
@@ -83,7 +83,7 @@ class EditReport extends EditRecord implements HasTable
                         Select::make('model')
                             ->options(ReportModel::class)
                             ->disabled()
-                            ->visible(auth()->user()->hasLicense([Student::getLicenseType(), Prospect::getLicenseType()]) || auth()->user()->can('viewAny', User::class)),
+                            ->visible(auth()->user()->hasLicense([Student::getLicenseType(), Contact::getLicenseType()]) || auth()->user()->can('viewAny', User::class)),
                         TextInput::make('user.name')
                             ->label('User')
                             ->disabled(),

@@ -40,49 +40,49 @@ use function Tests\asSuperAdmin;
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
-use AdvisingApp\Prospect\Models\Prospect;
-use AdvisingApp\Prospect\Models\ProspectStatus;
-use AdvisingApp\Prospect\Filament\Resources\ProspectStatusResource;
-use AdvisingApp\Prospect\Filament\Resources\ProspectStatusResource\Pages\ListProspectStatuses;
+use AdvisingApp\Contact\Models\Contact;
+use AdvisingApp\Contact\Models\ContactStatus;
+use AdvisingApp\Contact\Filament\Resources\ContactStatusResource;
+use AdvisingApp\Contact\Filament\Resources\ContactStatusResource\Pages\ListContactStatuses;
 
-test('The correct details are displayed on the ListProspectStatuses page', function () {
-    $prospectStatuses = ProspectStatus::factory()
-        // TODO: Fix this once Prospect factory is created
+test('The correct details are displayed on the ListContactStatuses page', function () {
+    $contactStatuses = ContactStatus::factory()
+        // TODO: Fix this once Contact factory is created
         //->has(ServiceRequest::factory()->count(fake()->randomNumber(1)), 'serviceRequests')
         ->count(10)
         ->create();
 
     asSuperAdmin();
 
-    $component = livewire(ListProspectStatuses::class);
+    $component = livewire(ListContactStatuses::class);
 
     $component
         ->assertSuccessful()
-        ->assertCanSeeTableRecords($prospectStatuses)
+        ->assertCanSeeTableRecords($contactStatuses)
         ->assertCountTableRecords(10)
-        ->assertTableColumnExists('prospects_count');
+        ->assertTableColumnExists('contacts_count');
 
-    $prospectStatuses->each(
-        fn (ProspectStatus $prospectStatus) => $component
+    $contactStatuses->each(
+        fn (ContactStatus $contactStatus) => $component
             ->assertTableColumnStateSet(
                 'id',
-                $prospectStatus->id,
-                $prospectStatus
+                $contactStatus->id,
+                $contactStatus
             )
             ->assertTableColumnStateSet(
                 'name',
-                $prospectStatus->name,
-                $prospectStatus
+                $contactStatus->name,
+                $contactStatus
             )
             ->assertTableColumnFormattedStateSet(
                 'classification',
-                $prospectStatus->classification->getLabel(),
-                $prospectStatus
+                $contactStatus->classification->getLabel(),
+                $contactStatus
             )
             ->assertTableColumnFormattedStateSet(
                 'color',
-                $prospectStatus->color->getLabel(),
-                $prospectStatus
+                $contactStatus->color->getLabel(),
+                $contactStatus
             )
         // Currently setting not test for service_requests_count as there is no easy way to check now, relying on underlying package tests
     );
@@ -92,18 +92,18 @@ test('The correct details are displayed on the ListProspectStatuses page', funct
 
 // Permission Tests
 
-test('ListProspectStatuses is gated with proper access control', function () {
-    $user = User::factory()->licensed(Prospect::getLicenseType())->create();
+test('ListContactStatuses is gated with proper access control', function () {
+    $user = User::factory()->licensed(Contact::getLicenseType())->create();
 
     actingAs($user)
         ->get(
-            ProspectStatusResource::getUrl('index')
+            ContactStatusResource::getUrl('index')
         )->assertForbidden();
 
-    $user->givePermissionTo('prospect_status.view-any');
+    $user->givePermissionTo('contact_status.view-any');
 
     actingAs($user)
         ->get(
-            ProspectStatusResource::getUrl('index')
+            ContactStatusResource::getUrl('index')
         )->assertSuccessful();
 });

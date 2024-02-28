@@ -39,7 +39,7 @@ Our robust personal assistant is designed to support your student service profes
 
 ### Student Service CRM
 
-Our student service CRM is designed to support the management of prospective and enrolled students. Some key features include:
+Our student service CRM is designed to support the management of enrolled students. Some key features include:
 
 * Record Mangement
 * Email and SMS

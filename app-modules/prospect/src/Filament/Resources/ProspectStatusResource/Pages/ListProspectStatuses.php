@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Prospect\Filament\Resources\ProspectStatusResource\Pages;
+namespace AdvisingApp\Contact\Filament\Resources\ContactStatusResource\Pages;
 
 use Filament\Actions;
 use Filament\Tables\Table;
@@ -45,12 +45,12 @@ use App\Filament\Tables\Columns\IdColumn;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
-use AdvisingApp\Prospect\Models\ProspectStatus;
-use AdvisingApp\Prospect\Filament\Resources\ProspectStatusResource;
+use AdvisingApp\Contact\Models\ContactStatus;
+use AdvisingApp\Contact\Filament\Resources\ContactStatusResource;
 
-class ListProspectStatuses extends ListRecords
+class ListContactStatuses extends ListRecords
 {
-    protected static string $resource = ProspectStatusResource::class;
+    protected static string $resource = ContactStatusResource::class;
 
     public function table(Table $table): Table
     {
@@ -68,10 +68,10 @@ class ListProspectStatuses extends ListRecords
                 TextColumn::make('color')
                     ->label('Color')
                     ->badge()
-                    ->color(fn (ProspectStatus $prospectStatus) => $prospectStatus->color->value),
-                TextColumn::make('prospects_count')
-                    ->label('# of Prospects')
-                    ->counts('prospects')
+                    ->color(fn (ContactStatus $contactStatus) => $contactStatus->color->value),
+                TextColumn::make('contacts_count')
+                    ->label('# of Contacts')
+                    ->counts('contacts')
                     ->sortable(),
             ])
             ->actions([

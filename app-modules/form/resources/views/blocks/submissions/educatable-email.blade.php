@@ -34,8 +34,8 @@
 @php
     use AdvisingApp\StudentDataModel\Models\Student;
     use AdvisingApp\StudentDataModel\Filament\Resources\StudentResource;
-    use AdvisingApp\Prospect\Models\Prospect;
-    use AdvisingApp\Prospect\Filament\Resources\ProspectResource;
+    use AdvisingApp\Contact\Models\Contact;
+    use AdvisingApp\Contact\Filament\Resources\ContactResource;
 @endphp
 
 <x-form::blocks.field-wrapper
@@ -55,13 +55,13 @@
                         Student
                     </x-filament::badge>
                 </a>
-            @elseif ($authorType === Prospect::class)
+            @elseif ($authorType === Contact::class)
                 <a
-                    href="{{ ProspectResource::getUrl('view', ['record' => $authorKey]) }}"
+                    href="{{ ContactResource::getUrl('view', ['record' => $authorKey]) }}"
                     target="_blank"
                 >
                     <x-filament::badge color="success">
-                        Prospect
+                        Contact
                     </x-filament::badge>
                 </a>
             @else

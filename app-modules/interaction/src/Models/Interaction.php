@@ -43,7 +43,7 @@ use App\Models\Authenticatable;
 use Illuminate\Support\Collection;
 use OwenIt\Auditing\Contracts\Auditable;
 use AdvisingApp\Division\Models\Division;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use AdvisingApp\Campaign\Models\CampaignAction;
@@ -199,11 +199,11 @@ class Interaction extends BaseModel implements Auditable, CanTriggerAutoSubscrip
                         ),
                     )
                     ->when(
-                        ! $user->hasLicense(Prospect::getLicenseType()),
+                        ! $user->hasLicense(Contact::getLicenseType()),
                         fn (Builder $query) => $query->whereHasMorph(
                             'interactable',
                             ServiceRequest::class,
-                            fn (Builder $query) => $query->where($serviceRequestRespondentTypeColumn, '!=', app(Prospect::class)->getMorphClass()),
+                            fn (Builder $query) => $query->where($serviceRequestRespondentTypeColumn, '!=', app(Contact::class)->getMorphClass()),
                         ),
                     ));
         });

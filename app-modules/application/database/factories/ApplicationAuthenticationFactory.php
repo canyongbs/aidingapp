@@ -37,7 +37,7 @@
 namespace AdvisingApp\Application\Database\Factories;
 
 use Illuminate\Support\Facades\Hash;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use AdvisingApp\Application\Models\Application;
 use AdvisingApp\StudentDataModel\Models\Student;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -53,12 +53,12 @@ class ApplicationAuthenticationFactory extends Factory
         return [
             'author_type' => fake()->randomElement([
                 (new Student())->getMorphClass(),
-                (new Prospect())->getMorphClass(),
+                (new Contact())->getMorphClass(),
             ]),
             'author_id' => function (array $attributes) {
                 $senderClass = Relation::getMorphedModel($attributes['author_type']);
 
-                /** @var Student|Prospect $senderModel */
+                /** @var Student|Contact $senderModel */
                 $senderModel = new $senderClass();
 
                 $sender = $senderClass === Student::class

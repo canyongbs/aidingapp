@@ -34,21 +34,21 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Prospect\Models;
+namespace AdvisingApp\Contact\Models;
 
 use DateTimeInterface;
 use App\Models\BaseModel;
 use OwenIt\Auditing\Contracts\Auditable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use AdvisingApp\Prospect\Enums\ProspectStatusColorOptions;
-use AdvisingApp\Prospect\Enums\SystemProspectClassification;
+use AdvisingApp\Contact\Enums\ContactStatusColorOptions;
+use AdvisingApp\Contact\Enums\SystemContactClassification;
 use AdvisingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 
 /**
- * @mixin IdeHelperProspectStatus
+ * @mixin IdeHelperContactStatus
  */
-class ProspectStatus extends BaseModel implements Auditable
+class ContactStatus extends BaseModel implements Auditable
 {
     use SoftDeletes;
     use AuditableTrait;
@@ -60,13 +60,13 @@ class ProspectStatus extends BaseModel implements Auditable
     ];
 
     protected $casts = [
-        'classification' => SystemProspectClassification::class,
-        'color' => ProspectStatusColorOptions::class,
+        'classification' => SystemContactClassification::class,
+        'color' => ContactStatusColorOptions::class,
     ];
 
-    public function prospects(): HasMany
+    public function contacts(): HasMany
     {
-        return $this->hasMany(Prospect::class, 'status_id');
+        return $this->hasMany(Contact::class, 'status_id');
     }
 
     protected function serializeDate(DateTimeInterface $date): string

@@ -41,7 +41,7 @@ use Filament\Actions\Action;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use Filament\Forms\Components\DateTimePicker;
 use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\InventoryManagement\Models\Asset;
@@ -73,7 +73,7 @@ class CheckOutAssetHeaderAction extends Action
                 ->label('Check out to')
                 ->options([
                     Student::class => 'Student',
-                    Prospect::class => 'Prospect',
+                    Contact::class => 'Contact',
                 ])
                 ->default(Student::class)
                 ->required()
@@ -81,13 +81,13 @@ class CheckOutAssetHeaderAction extends Action
             Select::make('checked_out_to_id')
                 ->label(fn (Get $get): string => match ($get('checked_out_to_type')) {
                     Student::class => 'Select Student',
-                    Prospect::class => 'Select Prospect',
+                    Contact::class => 'Select Contact',
                 })
                 ->visible(fn (Get $get): bool => filled($get('checked_out_to_type')))
                 ->getSearchResultsUsing(function (string $search, Get $get) {
                     return match ($get('checked_out_to_type')) {
                         Student::class => Student::where('full_name', 'like', "%{$search}%")->orWhere('first', 'like', "{$search}")->orWhere('last', 'like', "{$search}")->pluck('full_name', 'sisid')->toArray(),
-                        Prospect::class => Prospect::where('full_name', 'like', "%{$search}%")->orWhere('first_name', 'like', "{$search}")->orWhere('last_name', 'like', "{$search}")->pluck('full_name', 'id')->toArray(),
+                        Contact::class => Contact::where('full_name', 'like', "%{$search}%")->orWhere('first_name', 'like', "{$search}")->orWhere('last_name', 'like', "{$search}")->pluck('full_name', 'id')->toArray(),
                     };
                 })
                 ->searchable()

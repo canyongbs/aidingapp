@@ -39,7 +39,7 @@ namespace AdvisingApp\Engagement\Models;
 use App\Models\BaseModel;
 use Spatie\MediaLibrary\HasMedia;
 use OwenIt\Auditing\Contracts\Auditable;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Prunable;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -83,15 +83,15 @@ class EngagementFile extends BaseModel implements HasMedia, Auditable
             ->withTimestamps();
     }
 
-    public function prospects(): MorphToMany
+    public function contacts(): MorphToMany
     {
         return $this->morphedByMany(
-            related: Prospect::class,
+            related: Contact::class,
             name: 'entity',
             table: 'engagement_file_entities',
             foreignPivotKey: 'engagement_file_id',
             relatedPivotKey: 'entity_id',
-            relation: 'prospects',
+            relation: 'contacts',
         )
             ->using(EngagementFileEntities::class)
             ->withTimestamps();

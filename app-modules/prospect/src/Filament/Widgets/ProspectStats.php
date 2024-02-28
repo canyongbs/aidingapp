@@ -34,18 +34,18 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Prospect\Filament\Widgets;
+namespace AdvisingApp\Contact\Filament\Widgets;
 
 use App\Models\User;
 use Illuminate\Support\Number;
 use Illuminate\Support\Facades\Cache;
 use AdvisingApp\Alert\Enums\AlertStatus;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use AdvisingApp\CaseloadManagement\Enums\CaseloadModel;
 
-class ProspectStats extends StatsOverviewWidget
+class ContactStats extends StatsOverviewWidget
 {
     protected function getStats(): array
     {
@@ -53,24 +53,24 @@ class ProspectStats extends StatsOverviewWidget
         $user = auth()->user();
 
         return [
-            Stat::make('Prospects', Number::abbreviate(
-                Cache::tags(['prospects'])
-                    ->remember('prospects-count', now()->addHour(), function (): int {
-                        return Prospect::count();
+            Stat::make('Contacts', Number::abbreviate(
+                Cache::tags(['contacts'])
+                    ->remember('contacts-count', now()->addHour(), function (): int {
+                        return Contact::count();
                     }),
                 maxPrecision: 2,
             )),
-            Stat::make('Subscriptions', Cache::tags(['prospects', "user-{$user->getKey()}-prospect-subscriptions"])
-                ->remember("user-{$user->getKey()}-prospect-subscriptions-count", now()->addHour(), function () use ($user): int {
-                    return $user->prospectSubscriptions()->count();
+            Stat::make('Subscriptions', Cache::tags(['contacts', "user-{$user->getKey()}-contact-subscriptions"])
+                ->remember("user-{$user->getKey()}-contact-subscriptions-count", now()->addHour(), function () use ($user): int {
+                    return $user->contactSubscriptions()->count();
                 })),
-            Stat::make('Alerts', Cache::tags(['prospects', "user-{$user->getKey()}-prospect-alerts"])
-                ->remember("user-{$user->getKey()}-prospect-alerts-count", now()->addHour(), function () use ($user): int {
-                    return $user->prospectAlerts()->status(AlertStatus::Active)->count();
+            Stat::make('Alerts', Cache::tags(['contacts', "user-{$user->getKey()}-contact-alerts"])
+                ->remember("user-{$user->getKey()}-contact-alerts-count", now()->addHour(), function () use ($user): int {
+                    return $user->contactAlerts()->status(AlertStatus::Active)->count();
                 })),
-            Stat::make('Caseloads', Cache::tags(["user-{$user->getKey()}-prospect-caseloads"])
-                ->remember("user-{$user->getKey()}-prospect-caseloads-count", now()->addHour(), function () use ($user): int {
-                    return $user->caseloads()->model(CaseloadModel::Prospect)->count();
+            Stat::make('Caseloads', Cache::tags(["user-{$user->getKey()}-contact-caseloads"])
+                ->remember("user-{$user->getKey()}-contact-caseloads-count", now()->addHour(), function () use ($user): int {
+                    return $user->caseloads()->model(CaseloadModel::Contact)->count();
                 })),
         ];
     }

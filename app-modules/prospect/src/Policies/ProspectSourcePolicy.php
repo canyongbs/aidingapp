@@ -34,18 +34,18 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Prospect\Policies;
+namespace AdvisingApp\Contact\Policies;
 
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
-use AdvisingApp\Prospect\Models\Prospect;
-use AdvisingApp\Prospect\Models\ProspectSource;
+use AdvisingApp\Contact\Models\Contact;
+use AdvisingApp\Contact\Models\ContactSource;
 
-class ProspectSourcePolicy
+class ContactSourcePolicy
 {
     public function before(Authenticatable $authenticatable): ?Response
     {
-        if (! $authenticatable->hasLicense(Prospect::getLicenseType())) {
+        if (! $authenticatable->hasLicense(Contact::getLicenseType())) {
             return Response::deny('You are not licensed for the Recruitment CRM.');
         }
 
@@ -55,56 +55,56 @@ class ProspectSourcePolicy
     public function viewAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: 'prospect_source.view-any',
-            denyResponse: 'You do not have permission to view prospect sources.'
+            abilities: 'contact_source.view-any',
+            denyResponse: 'You do not have permission to view contact sources.'
         );
     }
 
-    public function view(Authenticatable $authenticatable, ProspectSource $prospectSource): Response
+    public function view(Authenticatable $authenticatable, ContactSource $contactSource): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['prospect_source.*.view', "prospect_source.{$prospectSource->id}.view"],
-            denyResponse: 'You do not have permission to view this prospect source.'
+            abilities: ['contact_source.*.view', "contact_source.{$contactSource->id}.view"],
+            denyResponse: 'You do not have permission to view this contact source.'
         );
     }
 
     public function create(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: 'prospect_source.create',
-            denyResponse: 'You do not have permission to create prospect sources.'
+            abilities: 'contact_source.create',
+            denyResponse: 'You do not have permission to create contact sources.'
         );
     }
 
-    public function update(Authenticatable $authenticatable, ProspectSource $prospectSource): Response
+    public function update(Authenticatable $authenticatable, ContactSource $contactSource): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['prospect_source.*.update', "prospect_source.{$prospectSource->id}.update"],
-            denyResponse: 'You do not have permission to update this prospect source.'
+            abilities: ['contact_source.*.update', "contact_source.{$contactSource->id}.update"],
+            denyResponse: 'You do not have permission to update this contact source.'
         );
     }
 
-    public function delete(Authenticatable $authenticatable, ProspectSource $prospectSource): Response
+    public function delete(Authenticatable $authenticatable, ContactSource $contactSource): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['prospect_source.*.delete', "prospect_source.{$prospectSource->id}.delete"],
-            denyResponse: 'You do not have permission to delete this prospect source.'
+            abilities: ['contact_source.*.delete', "contact_source.{$contactSource->id}.delete"],
+            denyResponse: 'You do not have permission to delete this contact source.'
         );
     }
 
-    public function restore(Authenticatable $authenticatable, ProspectSource $prospectSource): Response
+    public function restore(Authenticatable $authenticatable, ContactSource $contactSource): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['prospect_source.*.restore', "prospect_source.{$prospectSource->id}.restore"],
-            denyResponse: 'You do not have permission to restore this prospect source.'
+            abilities: ['contact_source.*.restore', "contact_source.{$contactSource->id}.restore"],
+            denyResponse: 'You do not have permission to restore this contact source.'
         );
     }
 
-    public function forceDelete(Authenticatable $authenticatable, ProspectSource $prospectSource): Response
+    public function forceDelete(Authenticatable $authenticatable, ContactSource $contactSource): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['prospect_source.*.force-delete', "prospect_source.{$prospectSource->id}.force-delete"],
-            denyResponse: 'You do not have permission to force delete this prospect source.'
+            abilities: ['contact_source.*.force-delete', "contact_source.{$contactSource->id}.force-delete"],
+            denyResponse: 'You do not have permission to force delete this contact source.'
         );
     }
 }

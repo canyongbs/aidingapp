@@ -34,16 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Prospect\Database\Seeders;
+namespace AdvisingApp\Contact\Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 
-class ProspectSeeder extends Seeder
+class ContactSeeder extends Seeder
 {
     public function run(): void
     {
-        Prospect::factory()
+        Contact::factory()
             ->count(25)
             ->create();
     }

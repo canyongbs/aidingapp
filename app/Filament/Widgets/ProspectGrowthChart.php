@@ -39,11 +39,11 @@ namespace App\Filament\Widgets;
 use Illuminate\Support\Carbon;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Facades\Cache;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 
-class ProspectGrowthChart extends ChartWidget
+class ContactGrowthChart extends ChartWidget
 {
-    protected static ?string $heading = 'Prospects (Cumulative)';
+    protected static ?string $heading = 'Contacts (Cumulative)';
 
     protected static ?string $maxHeight = '200px';
 
@@ -67,9 +67,9 @@ class ProspectGrowthChart extends ChartWidget
 
     protected function getData(): array
     {
-        $runningTotalPerMonth = Cache::tags(['prospects'])
-            ->remember('prospect-growth-chart-data', now()->addHour(), function (): array {
-                $totalCreatedPerMonth = Prospect::query()
+        $runningTotalPerMonth = Cache::tags(['contacts'])
+            ->remember('contact-growth-chart-data', now()->addHour(), function (): array {
+                $totalCreatedPerMonth = Contact::query()
                     ->toBase()
                     ->selectRaw('date_trunc(\'month\', created_at) as month')
                     ->selectRaw('count(*) as total')
@@ -78,7 +78,7 @@ class ProspectGrowthChart extends ChartWidget
                     ->orderBy('month')
                     ->pluck('total', 'month');
 
-                $runningTotal = Prospect::query()
+                $runningTotal = Contact::query()
                     ->where('created_at', '<', now()->subYear())
                     ->count();
 

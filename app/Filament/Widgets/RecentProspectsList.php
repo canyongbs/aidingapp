@@ -39,12 +39,12 @@ namespace App\Filament\Widgets;
 use Filament\Tables\Table;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Widgets\TableWidget as BaseWidget;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource;
+use AdvisingApp\Contact\Filament\Resources\ContactResource;
 
-class RecentProspectsList extends BaseWidget
+class RecentContactsList extends BaseWidget
 {
     protected int | string | array $columnSpan = [
         'sm' => 1,
@@ -64,23 +64,23 @@ class RecentProspectsList extends BaseWidget
     public function table(Table $table): Table
     {
         return $table
-            ->heading('Latest Prospects (5)')
+            ->heading('Latest Contacts (5)')
             ->query(
-                Prospect::latest()->limit(5)
+                Contact::latest()->limit(5)
             )
             ->columns([
                 IdColumn::make(),
-                TextColumn::make(Prospect::displayNameKey())
+                TextColumn::make(Contact::displayNameKey())
                     ->label('Name'),
                 TextColumn::make('email'),
                 TextColumn::make('mobile')
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('status')
                     ->badge()
-                    ->state(function (Prospect $record) {
+                    ->state(function (Contact $record) {
                         return $record->status->name;
                     })
-                    ->color(function (Prospect $record) {
+                    ->color(function (Contact $record) {
                         return $record->status->color->value;
                     })
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -94,10 +94,10 @@ class RecentProspectsList extends BaseWidget
             ])
             ->actions([
                 ViewAction::make()
-                    ->url(fn (Prospect $record): string => ProspectResource::getUrl(name: 'view', parameters: ['record' => $record])),
+                    ->url(fn (Contact $record): string => ContactResource::getUrl(name: 'view', parameters: ['record' => $record])),
             ])
             ->recordUrl(
-                fn (Prospect $record): string => ProspectResource::getUrl(name: 'view', parameters: ['record' => $record]),
+                fn (Contact $record): string => ContactResource::getUrl(name: 'view', parameters: ['record' => $record]),
             )
             ->paginated(false);
     }

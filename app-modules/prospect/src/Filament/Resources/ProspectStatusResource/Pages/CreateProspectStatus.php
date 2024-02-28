@@ -34,19 +34,19 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Prospect\Filament\Resources\ProspectStatusResource\Pages;
+namespace AdvisingApp\Contact\Filament\Resources\ContactStatusResource\Pages;
 
 use Filament\Forms\Form;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\CreateRecord;
-use AdvisingApp\Prospect\Enums\ProspectStatusColorOptions;
-use AdvisingApp\Prospect\Enums\SystemProspectClassification;
-use AdvisingApp\Prospect\Filament\Resources\ProspectStatusResource;
+use AdvisingApp\Contact\Enums\ContactStatusColorOptions;
+use AdvisingApp\Contact\Enums\SystemContactClassification;
+use AdvisingApp\Contact\Filament\Resources\ContactStatusResource;
 
-class CreateProspectStatus extends CreateRecord
+class CreateContactStatus extends CreateRecord
 {
-    protected static string $resource = ProspectStatusResource::class;
+    protected static string $resource = ContactStatusResource::class;
 
     public function form(Form $form): Form
     {
@@ -59,15 +59,15 @@ class CreateProspectStatus extends CreateRecord
                 Select::make('classification')
                     ->label('Classification')
                     ->searchable()
-                    ->options(SystemProspectClassification::class)
+                    ->options(SystemContactClassification::class)
                     ->required()
-                    ->enum(SystemProspectClassification::class),
+                    ->enum(SystemContactClassification::class),
                 Select::make('color')
                     ->label('Color')
                     ->searchable()
-                    ->options(ProspectStatusColorOptions::class)
+                    ->options(ContactStatusColorOptions::class)
                     ->required()
-                    ->enum(ProspectStatusColorOptions::class),
+                    ->enum(ContactStatusColorOptions::class),
             ]);
     }
 }

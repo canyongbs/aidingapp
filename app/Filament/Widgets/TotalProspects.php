@@ -37,16 +37,16 @@
 namespace App\Filament\Widgets;
 
 use Illuminate\Support\Number;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
-class TotalProspects extends StatsOverviewWidget
+class TotalContacts extends StatsOverviewWidget
 {
     protected function getStats(): array
     {
         return [
-            Stat::make('Total Prospects', Number::abbreviate(Prospect::count())),
+            Stat::make('Total Contacts', Number::abbreviate(Contact::count())),
         ];
     }
 }

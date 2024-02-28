@@ -41,7 +41,7 @@ use Filament\Actions\CreateAction;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Actions\DeleteAction;
@@ -64,7 +64,7 @@ class ListCaseloads extends ListRecords
                 TextColumn::make('model')
                     ->label('Population')
                     ->sortable()
-                    ->visible(auth()->user()->hasLicense([Student::getLicenseType(), Prospect::getLicenseType()])),
+                    ->visible(auth()->user()->hasLicense([Student::getLicenseType(), Contact::getLicenseType()])),
                 TextColumn::make('type')
                     ->sortable(),
                 TextColumn::make('user.name')

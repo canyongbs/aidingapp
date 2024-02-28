@@ -42,7 +42,7 @@ use App\Settings\LicenseSettings;
 
 use function Pest\Laravel\actingAs;
 
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusResource;
@@ -70,14 +70,14 @@ test('The correct details are displayed on the ViewServiceRequestStatus page', f
 // Permission Tests
 
 test('ViewServiceRequestStatus is gated with proper access control', function () {
-    $user = User::factory()->licensed([Student::getLicenseType(), Prospect::getLicenseType()])->create();
+    $user = User::factory()->licensed([Student::getLicenseType(), Contact::getLicenseType()])->create();
 
-    $prospectSource = ServiceRequestStatus::factory()->create();
+    $contactSource = ServiceRequestStatus::factory()->create();
 
     actingAs($user)
         ->get(
             ServiceRequestStatusResource::getUrl('view', [
-                'record' => $prospectSource,
+                'record' => $contactSource,
             ])
         )->assertForbidden();
 
@@ -87,7 +87,7 @@ test('ViewServiceRequestStatus is gated with proper access control', function ()
     actingAs($user)
         ->get(
             ServiceRequestStatusResource::getUrl('view', [
-                'record' => $prospectSource,
+                'record' => $contactSource,
             ])
         )->assertSuccessful();
 });
@@ -99,7 +99,7 @@ test('ViewServiceRequestStatus is gated with proper feature access control', fun
 
     $settings->save();
 
-    $user = User::factory()->licensed([Student::getLicenseType(), Prospect::getLicenseType()])->create();
+    $user = User::factory()->licensed([Student::getLicenseType(), Contact::getLicenseType()])->create();
 
     $user->givePermissionTo('service_request_status.view-any');
     $user->givePermissionTo('service_request_status.*.view');

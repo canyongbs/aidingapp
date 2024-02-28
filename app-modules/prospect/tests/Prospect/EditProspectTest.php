@@ -39,71 +39,71 @@ use App\Models\User;
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
-use AdvisingApp\Prospect\Models\Prospect;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource;
-use AdvisingApp\Prospect\Tests\Prospect\RequestFactories\EditProspectRequestFactory;
+use AdvisingApp\Contact\Models\Contact;
+use AdvisingApp\Contact\Filament\Resources\ContactResource;
+use AdvisingApp\Contact\Tests\Contact\RequestFactories\EditContactRequestFactory;
 
-// TODO: Write EditProspect page tests
-//test('A successful action on the EditProspect page', function () {});
+// TODO: Write EditContact page tests
+//test('A successful action on the EditContact page', function () {});
 //
-//test('EditProspect requires valid data', function ($data, $errors) {})->with([]);
+//test('EditContact requires valid data', function ($data, $errors) {})->with([]);
 
 // Permission Tests
 
-test('EditProspect is gated with proper access control', function () {
-    $user = User::factory()->licensed(Prospect::getLicenseType())->create();
+test('EditContact is gated with proper access control', function () {
+    $user = User::factory()->licensed(Contact::getLicenseType())->create();
 
-    $prospect = Prospect::factory()->create();
+    $contact = Contact::factory()->create();
 
     actingAs($user)
         ->get(
-            ProspectResource::getUrl('edit', [
-                'record' => $prospect,
+            ContactResource::getUrl('edit', [
+                'record' => $contact,
             ])
         )->assertForbidden();
 
-    livewire(ProspectResource\Pages\EditProspect::class, [
-        'record' => $prospect->getRouteKey(),
+    livewire(ContactResource\Pages\EditContact::class, [
+        'record' => $contact->getRouteKey(),
     ])
         ->assertForbidden();
 
-    $user->givePermissionTo('prospect.view-any');
-    $user->givePermissionTo('prospect.*.update');
+    $user->givePermissionTo('contact.view-any');
+    $user->givePermissionTo('contact.*.update');
 
     actingAs($user)
         ->get(
-            ProspectResource::getUrl('edit', [
-                'record' => $prospect,
+            ContactResource::getUrl('edit', [
+                'record' => $contact,
             ])
         )->assertSuccessful();
 
     // TODO: Finish these tests to ensure changes are allowed
-    $request = collect(EditProspectRequestFactory::new()->create());
+    $request = collect(EditContactRequestFactory::new()->create());
 
-    livewire(ProspectResource\Pages\EditProspect::class, [
-        'record' => $prospect->getRouteKey(),
+    livewire(ContactResource\Pages\EditContact::class, [
+        'record' => $contact->getRouteKey(),
     ])
         ->fillForm($request->toArray())
         ->call('save')
         ->assertHasNoFormErrors();
 
-    expect($prospect->fresh()->status_id)->toEqual($request->get('status_id'))
-        ->and($prospect->fresh()->source_id)->toEqual($request->get('source_id'))
-        ->and($prospect->fresh()->first_name)->toEqual($request->get('first_name'))
-        ->and($prospect->fresh()->last_name)->toEqual($request->get('last_name'))
-        ->and($prospect->fresh()->full_name)->toEqual($request->get('full_name'))
-        ->and($prospect->fresh()->preferred)->toEqual($request->get('preferred'))
-        ->and($prospect->fresh()->description)->toEqual($request->get('description'))
-        ->and($prospect->fresh()->email)->toEqual($request->get('email'))
-        ->and($prospect->fresh()->email_2)->toEqual($request->get('email_2'))
-        ->and($prospect->fresh()->mobile)->toEqual($request->get('mobile'))
-        ->and($prospect->fresh()->sms_opt_out)->toEqual($request->get('sms_opt_out'))
-        ->and($prospect->fresh()->email_bounce)->toEqual($request->get('email_bounce'))
-        ->and($prospect->fresh()->phone)->toEqual($request->get('phone'))
-        ->and($prospect->fresh()->address)->toEqual($request->get('address'))
-        ->and($prospect->fresh()->address_2)->toEqual($request->get('address_2'))
-        ->and($prospect->fresh()->birthdate->toDateString())->toEqual($request->get('birthdate'))
-        ->and($prospect->fresh()->hsgrad)->toEqual($request->get('hsgrad'))
-        ->and($prospect->fresh()->assigned_to_id)->toEqual($request->get('assigned_to_id'))
-        ->and($prospect->fresh()->created_by_id)->toEqual($request->get('created_by_id'));
+    expect($contact->fresh()->status_id)->toEqual($request->get('status_id'))
+        ->and($contact->fresh()->source_id)->toEqual($request->get('source_id'))
+        ->and($contact->fresh()->first_name)->toEqual($request->get('first_name'))
+        ->and($contact->fresh()->last_name)->toEqual($request->get('last_name'))
+        ->and($contact->fresh()->full_name)->toEqual($request->get('full_name'))
+        ->and($contact->fresh()->preferred)->toEqual($request->get('preferred'))
+        ->and($contact->fresh()->description)->toEqual($request->get('description'))
+        ->and($contact->fresh()->email)->toEqual($request->get('email'))
+        ->and($contact->fresh()->email_2)->toEqual($request->get('email_2'))
+        ->and($contact->fresh()->mobile)->toEqual($request->get('mobile'))
+        ->and($contact->fresh()->sms_opt_out)->toEqual($request->get('sms_opt_out'))
+        ->and($contact->fresh()->email_bounce)->toEqual($request->get('email_bounce'))
+        ->and($contact->fresh()->phone)->toEqual($request->get('phone'))
+        ->and($contact->fresh()->address)->toEqual($request->get('address'))
+        ->and($contact->fresh()->address_2)->toEqual($request->get('address_2'))
+        ->and($contact->fresh()->birthdate->toDateString())->toEqual($request->get('birthdate'))
+        ->and($contact->fresh()->hsgrad)->toEqual($request->get('hsgrad'))
+        ->and($contact->fresh()->assigned_to_id)->toEqual($request->get('assigned_to_id'))
+        ->and($contact->fresh()->created_by_id)->toEqual($request->get('created_by_id'));
 });

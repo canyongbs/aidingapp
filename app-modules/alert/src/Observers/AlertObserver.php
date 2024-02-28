@@ -39,7 +39,7 @@ namespace AdvisingApp\Alert\Observers;
 use App\Models\User;
 use AdvisingApp\Alert\Models\Alert;
 use Illuminate\Support\Facades\Cache;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use AdvisingApp\Alert\Events\AlertCreated;
 use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\Notification\Actions\SubscriptionCreate;
@@ -55,7 +55,7 @@ class AlertObserver
             resolve(SubscriptionCreate::class)->handle($user, $alert->getSubscribable(), false);
 
             Cache::tags([match ($alert->concern_type) {
-                app(Prospect::class)->getMorphClass() => "user-{$user->getKey()}-prospect-alerts",
+                app(Contact::class)->getMorphClass() => "user-{$user->getKey()}-contact-alerts",
                 app(Student::class)->getMorphClass() => "user-{$user->getKey()}-student-alerts",
             }])->flush();
         }
@@ -77,7 +77,7 @@ class AlertObserver
 
         if ($user) {
             Cache::tags([match ($alert->concern_type) {
-                app(Prospect::class)->getMorphClass() => "user-{$user->getKey()}-prospect-alerts",
+                app(Contact::class)->getMorphClass() => "user-{$user->getKey()}-contact-alerts",
                 app(Student::class)->getMorphClass() => "user-{$user->getKey()}-student-alerts",
             }])->flush();
         }

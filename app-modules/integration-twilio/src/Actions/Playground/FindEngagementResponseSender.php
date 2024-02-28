@@ -36,13 +36,13 @@
 
 namespace AdvisingApp\IntegrationTwilio\Actions\Playground;
 
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\Engagement\Actions\Contracts\EngagementResponseSenderFinder;
 
 class FindEngagementResponseSender implements EngagementResponseSenderFinder
 {
-    public function find(string $phoneNumber): Student|Prospect|null
+    public function find(string $phoneNumber): Student|Contact|null
     {
         return Student::query()
             ->where('mobile', $phoneNumber)

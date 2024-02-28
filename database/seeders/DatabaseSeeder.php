@@ -46,12 +46,12 @@ use AdvisingApp\Team\Database\Seeders\TeamSeeder;
 use AdvisingApp\Alert\Database\Seeders\AlertSeeder;
 use AdvisingApp\Assistant\Database\Seeders\PromptSeeder;
 use AdvisingApp\Division\Database\Seeders\DivisionSeeder;
-use AdvisingApp\Prospect\Database\Seeders\ProspectSeeder;
+use AdvisingApp\Contact\Database\Seeders\ContactSeeder;
 use AdvisingApp\MeetingCenter\Database\Seeders\EventSeeder;
 use AdvisingApp\Assistant\Database\Seeders\PromptTypeSeeder;
 use AdvisingApp\Interaction\Database\Seeders\InteractionSeeder;
-use AdvisingApp\Prospect\Database\Seeders\ProspectSourceSeeder;
-use AdvisingApp\Prospect\Database\Seeders\ProspectStatusSeeder;
+use AdvisingApp\Contact\Database\Seeders\ContactSourceSeeder;
+use AdvisingApp\Contact\Database\Seeders\ContactStatusSeeder;
 use AdvisingApp\Consent\Database\Seeders\ConsentAgreementSeeder;
 use AdvisingApp\InventoryManagement\Database\Seeders\AssetSeeder;
 use AdvisingApp\Analytics\Database\Seeders\AnalyticsResourceSeeder;
@@ -95,8 +95,8 @@ class DatabaseSeeder extends Seeder
             DivisionSeeder::class,
             ServiceRequestStatusSeeder::class,
             ServiceRequestTypeSeeder::class,
-            ProspectStatusSeeder::class,
-            ProspectSourceSeeder::class,
+            ContactStatusSeeder::class,
+            ContactSourceSeeder::class,
             KnowledgeBaseCategorySeeder::class,
             KnowledgeBaseQualitySeeder::class,
             KnowledgeBaseStatusSeeder::class,
@@ -106,7 +106,7 @@ class DatabaseSeeder extends Seeder
 
             ServiceRequestSeeder::class,
             ServiceRequestUpdateSeeder::class,
-            ProspectSeeder::class,
+            ContactSeeder::class,
             KnowledgeBaseItemSeeder::class,
             TaskSeeder::class,
             FormSeeder::class,

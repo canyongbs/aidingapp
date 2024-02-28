@@ -42,7 +42,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Model;
 use AdvisingApp\Division\Models\Division;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use AdvisingApp\StudentDataModel\Models\Student;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -119,7 +119,7 @@ class ServiceRequestHistory extends BaseModel implements ProvidesATimeline
             'division_id' => [Division::class, 'name'],
             'type_id' => [ServiceRequestType::class, 'name'],
             'respondent_id' => [
-                [Prospect::class, Student::class],
+                [Contact::class, Student::class],
             ],
         ];
 
@@ -133,7 +133,7 @@ class ServiceRequestHistory extends BaseModel implements ProvidesATimeline
                     foreach ($relationsMap[$key][0] as $educatableClass) {
                         $found = null;
 
-                        // This is to overcome an issue that comes from an incorrect type when trying to find a prospect or student with the wrong data type
+                        // This is to overcome an issue that comes from an incorrect type when trying to find a contact or student with the wrong data type
                         try {
                             $found = $educatableClass::find($value[$key]);
                         } catch (Exception $e) {

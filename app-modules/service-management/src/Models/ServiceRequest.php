@@ -45,7 +45,7 @@ use Illuminate\Support\Facades\DB;
 use Kirschbaum\PowerJoins\PowerJoins;
 use OwenIt\Auditing\Contracts\Auditable;
 use AdvisingApp\Division\Models\Division;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use AdvisingApp\Campaign\Models\CampaignAction;
@@ -75,7 +75,7 @@ use AdvisingApp\ServiceManagement\Exceptions\ServiceRequestNumberExceededReRolls
 use AdvisingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
 
 /**
- * @property-read Student|Prospect $respondent
+ * @property-read Student|Contact $respondent
  *
  * @mixin IdeHelperServiceRequest
  */

@@ -34,20 +34,20 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Prospect\Tests\ProspectStatus\RequestFactories;
+namespace AdvisingApp\Contact\Tests\ContactStatus\RequestFactories;
 
 use Worksome\RequestFactories\RequestFactory;
-use AdvisingApp\Prospect\Enums\ProspectStatusColorOptions;
-use AdvisingApp\Prospect\Enums\SystemProspectClassification;
+use AdvisingApp\Contact\Enums\ContactStatusColorOptions;
+use AdvisingApp\Contact\Enums\SystemContactClassification;
 
-class EditProspectStatusRequestFactory extends RequestFactory
+class EditContactStatusRequestFactory extends RequestFactory
 {
     public function definition(): array
     {
         return [
-            'classification' => fake()->randomElement(SystemProspectClassification::cases()),
+            'classification' => fake()->randomElement(SystemContactClassification::cases()),
             'name' => fake()->name(),
-            'color' => fake()->randomElement(ProspectStatusColorOptions::cases()),
+            'color' => fake()->randomElement(ContactStatusColorOptions::cases()),
         ];
     }
 }

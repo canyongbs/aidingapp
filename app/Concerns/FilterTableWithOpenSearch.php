@@ -39,7 +39,7 @@ namespace App\Concerns;
 use Exception;
 use Filament\Tables\Columns\Column;
 use Filament\Tables\Filters\BaseFilter;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use Illuminate\Database\Eloquent\Builder;
 use OpenSearch\Adapter\Documents\Document;
 use OpenSearch\ScoutDriverPlus\Support\Query;
@@ -114,7 +114,7 @@ trait FilterTableWithOpenSearch
         if ($filterWithOpenSearchQuery) {
             $query->whereIn(
                 'id',
-                Prospect::searchQuery($openSearchQuery)
+                Contact::searchQuery($openSearchQuery)
                     ->execute()
                     ->documents()
                     ->map(fn (Document $document) => $document->id())

@@ -29,7 +29,7 @@ type Alert @model(class: "AdvisingApp\\Alert\\Models\\Alert") {
 
 input AlertConcernsQuery {
     student: StudentsQuery
-    prospect: ProspectsQuery
+    contact: ContactsQuery
 }
 
 input AlertsQuery {
@@ -76,7 +76,7 @@ input CreateAlertInput {
 
     "The type of Concern related to the alert."
     concern_type: EducatableType!
-        @rules(apply: ["required", "in:student,prospect"])
+        @rules(apply: ["required", "in:student,contact"])
 
     "The description of the alert."
     description: String! @rules(apply: ["required", "string"])

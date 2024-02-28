@@ -39,12 +39,12 @@ namespace AdvisingApp\CaseloadManagement\Importers;
 use Illuminate\Support\Str;
 use Filament\Actions\Imports\Importer;
 use Illuminate\Database\Eloquent\Model;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Models\Import;
 use AdvisingApp\CaseloadManagement\Models\CaseloadSubject;
 
-class ProspectCaseloadSubjectImporter extends Importer
+class ContactCaseloadSubjectImporter extends Importer
 {
     protected static ?string $model = CaseloadSubject::class;
 
@@ -55,7 +55,7 @@ class ProspectCaseloadSubjectImporter extends Importer
                 ->label('Email address')
                 ->rules(['required', 'email'])
                 ->relationship(
-                    resolveUsing: fn (mixed $state) => Prospect::query()
+                    resolveUsing: fn (mixed $state) => Contact::query()
                         ->where('email', $state)
                         ->orWhere('email_2', $state)
                         ->first(),
@@ -79,10 +79,10 @@ class ProspectCaseloadSubjectImporter extends Importer
 
     public static function getCompletedNotificationBody(Import $import): string
     {
-        $body = 'Your caseload import has completed and ' . number_format($import->successful_rows) . ' ' . Str::plural('prospect', $import->successful_rows) . ' imported.';
+        $body = 'Your caseload import has completed and ' . number_format($import->successful_rows) . ' ' . Str::plural('contact', $import->successful_rows) . ' imported.';
 
         if ($failedRowsCount = $import->getFailedRowsCount()) {
-            $body .= ' ' . number_format($failedRowsCount) . ' ' . Str::plural('prospect', $failedRowsCount) . ' failed to import.';
+            $body .= ' ' . number_format($failedRowsCount) . ' ' . Str::plural('contact', $failedRowsCount) . ' failed to import.';
         }
 
         return $body;

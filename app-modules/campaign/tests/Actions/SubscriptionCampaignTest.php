@@ -36,7 +36,7 @@
 
 use App\Models\User;
 use AdvisingApp\Campaign\Models\Campaign;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use Illuminate\Database\Eloquent\Collection;
 use AdvisingApp\Campaign\Models\CampaignAction;
 use AdvisingApp\StudentDataModel\Models\Student;
@@ -99,24 +99,24 @@ it('will create the subscription records for subscribables in the caseload', fun
     );
 })->with(
     [
-        'no prior subscriptions | prospects | remove prior false' => [
+        'no prior subscriptions | contacts | remove prior false' => [
             'priorSubscriptions' => [],
-            'subscribables' => fn () => Prospect::factory()->count(3)->create(),
+            'subscribables' => fn () => Contact::factory()->count(3)->create(),
             'removePrior' => false,
         ],
-        'no prior subscriptions | prospects | remove prior true' => [
+        'no prior subscriptions | contacts | remove prior true' => [
             'priorSubscriptions' => [],
-            'subscribables' => fn () => Prospect::factory()->count(3)->create(),
+            'subscribables' => fn () => Contact::factory()->count(3)->create(),
             'removePrior' => true,
         ],
-        'prior subscriptions | prospects | remove prior false' => [
+        'prior subscriptions | contacts | remove prior false' => [
             'priorSubscriptions' => fn () => User::factory()->count(3)->create()->pluck('id')->toArray(),
-            'subscribables' => fn () => Prospect::factory()->count(3)->create(),
+            'subscribables' => fn () => Contact::factory()->count(3)->create(),
             'removePrior' => false,
         ],
-        'prior subscriptions | prospects | remove prior true' => [
+        'prior subscriptions | contacts | remove prior true' => [
             'priorSubscriptions' => fn () => User::factory()->count(3)->create()->pluck('id')->toArray(),
-            'subscribables' => fn () => Prospect::factory()->count(3)->create(),
+            'subscribables' => fn () => Contact::factory()->count(3)->create(),
             'removePrior' => true,
         ],
         'no prior subscriptions | students | remove prior false' => [

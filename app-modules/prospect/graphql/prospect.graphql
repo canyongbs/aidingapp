@@ -1,80 +1,80 @@
-type Prospect @model(class: "AdvisingApp\\Prospect\\Models\\Prospect") {
+type Contact @model(class: "AdvisingApp\\Contact\\Models\\Contact") {
     "Unique primary key."
     id: UUID!
 
-    "The status of the prospect."
-    status: ProspectStatus! @belongsTo
+    "The status of the contact."
+    status: ContactStatus! @belongsTo
 
-    "The source of the prospect."
-    source: ProspectSource! @belongsTo
+    "The source of the contact."
+    source: ContactSource! @belongsTo
 
-    "The first name of the prospect."
+    "The first name of the contact."
     first_name: String!
 
-    "The last name of the prospect."
+    "The last name of the contact."
     last_name: String!
 
-    "The full name of the prospect."
+    "The full name of the contact."
     full_name: String!
 
-    "The preferred name of the prospect."
+    "The preferred name of the contact."
     preferred: String
 
-    "The display name of the prospect."
+    "The display name of the contact."
     display_name: String
 
-    "The description of the prospect."
+    "The description of the contact."
     description: String
 
-    "The email of the prospect."
+    "The email of the contact."
     email: Email
 
-    "The email 2 of the prospect."
+    "The email 2 of the contact."
     email_2: Email
 
-    "The mobile number of the prospect."
+    "The mobile number of the contact."
     mobile: String
 
-    "The phone number of the prospect."
+    "The phone number of the contact."
     phone: String
 
-    "If the prospect is opted out of SMS messages."
+    "If the contact is opted out of SMS messages."
     sms_opt_out: Boolean
 
-    "If the prospect's email bounces."
+    "If the contact's email bounces."
     email_bounce: Boolean
 
-    "The address of the prospect."
+    "The address of the contact."
     address: String
 
-    "The address 2 of the prospect."
+    "The address 2 of the contact."
     address_2: String
 
-    "The address 3 of the prospect."
+    "The address 3 of the contact."
     address_3: String
 
-    "The city of the prospect."
+    "The city of the contact."
     city: String
 
-    "The state of the prospect."
+    "The state of the contact."
     state: String
 
-    "The postal code of the prospect."
+    "The postal code of the contact."
     postal: String
 
-    "The birthdate of the prospect."
+    "The birthdate of the contact."
     birthdate: Date
 
-    "The High School graduation year of the prospect."
+    "The High School graduation year of the contact."
     hsgrad: String
 
-    "The created date of the prospect."
+    "The created date of the contact."
     created_at: DateTime
 
-    "The updated date of the prospect."
+    "The updated date of the contact."
     updated_at: DateTime
 
-    "The deleted date of the prospect."
+    "The deleted date of the contact."
     deleted_at: DateTime
 
     audits: [Audit!] @hasMany
@@ -86,86 +86,86 @@ type Prospect @model(class: "AdvisingApp\\Prospect\\Models\\Prospect") {
     assigned_to: User @belongsTo(relation: "assignedTo")
 }
 
-input ProspectsQuery {
+input ContactsQuery {
     "Unique primary key."
     id: UUID
 
-    "The status ID of the prospect."
+    "The status ID of the contact."
     status_id: UUID
 
-    "The status of the prospect."
-    status: ProspectStatusesQuery
+    "The status of the contact."
+    status: ContactStatusesQuery
 
-    "The source ID of the prospect."
+    "The source ID of the contact."
     source_id: UUID
 
-    "The source of the prospect."
-    source: ProspectSourcesQuery
+    "The source of the contact."
+    source: ContactSourcesQuery
 
-    "The first name of the prospect."
+    "The first name of the contact."
     first_name: String
 
-    "The last name of the prospect."
+    "The last name of the contact."
     last_name: String
 
-    "The full name of the prospect."
+    "The full name of the contact."
     full_name: String
 
-    "The preferred name of the prospect."
+    "The preferred name of the contact."
     preferred: String
 
-    "The description of the prospect."
+    "The description of the contact."
     description: String
 
-    "The email of the prospect."
+    "The email of the contact."
     email: Email
 
-    "The email 2 of the prospect."
+    "The email 2 of the contact."
     email_2: Email
 
-    "The mobile number of the prospect."
+    "The mobile number of the contact."
     mobile: String
 
-    "The phone number of the prospect."
+    "The phone number of the contact."
     phone: String
 
-    "If the prospect is opted out of SMS messages."
+    "If the contact is opted out of SMS messages."
     sms_opt_out: Boolean
 
-    "If the prospect's email bounces."
+    "If the contact's email bounces."
     email_bounce: Boolean
 
-    "The address of the prospect."
+    "The address of the contact."
     address: String
 
-    "The address 2 of the prospect."
+    "The address 2 of the contact."
     address_2: String
 
-    "The address 3 of the prospect."
+    "The address 3 of the contact."
     address_3: String
 
-    "The city of the prospect."
+    "The city of the contact."
     city: String
 
-    "The state of the prospect."
+    "The state of the contact."
     state: String
 
-    "The postal code of the prospect."
+    "The postal code of the contact."
     postal: String
 
-    "The birthdate of the prospect."
+    "The birthdate of the contact."
     birthdate: Date
 
-    "The High School graduation year of the prospect."
+    "The High School graduation year of the contact."
     hsgrad: String
 
-    "The created date of the prospect."
+    "The created date of the contact."
     created_at: DateTime
 
-    "The updated date of the prospect."
+    "The updated date of the contact."
     updated_at: DateTime
 
-    "The deleted date of the prospect."
+    "The deleted date of the contact."
     deleted_at: DateTime
 
     audits: AuditsQuery
@@ -175,194 +175,194 @@ input ProspectsQuery {
     assigned_to: UsersQuery
 }
 
-type ProspectQueries {
-    "Find a single prospect by an identifying attribute."
+type ContactQueries {
+    "Find a single contact by an identifying attribute."
     find(
         "The value of the attribute to match."
         id: UUID!
             @whereKey
-            @rules(apply: ["required", "uuid", "exists:prospects"])
-    ): Prospect @find @canResolved(ability: "view")
+            @rules(apply: ["required", "uuid", "exists:contacts"])
+    ): Contact @find @canResolved(ability: "view")
 
-    "List multiple prospects."
+    "List multiple contacts."
     list(
-        where: ProspectsQuery @searchBy
-        order: ProspectsQuery @sortBy
-    ): [Prospect!]! @paginate @canModel(ability: "viewAny")
+        where: ContactsQuery @searchBy
+        order: ContactsQuery @sortBy
+    ): [Contact!]! @paginate @canModel(ability: "viewAny")
 }
 
 extend type Query {
-    prospect: ProspectQueries! @namespaced
+    contact: ContactQueries! @namespaced
 }
 
-input CreateProspectInput {
-    "The status of the prospect."
-    status_id: UUID! @rules(apply: ["required", "exists:prospect_statuses,id"])
+input CreateContactInput {
+    "The status of the contact."
+    status_id: UUID! @rules(apply: ["required", "exists:contact_statuses,id"])
 
-    "The source of the prospect."
-    source_id: UUID! @rules(apply: ["required", "exists:prospect_sources,id"])
+    "The source of the contact."
+    source_id: UUID! @rules(apply: ["required", "exists:contact_sources,id"])
 
-    "The first name of the prospect."
+    "The first name of the contact."
     first_name: String! @rules(apply: ["required", "string", "max:255"])
 
-    "The last name of the prospect."
+    "The last name of the contact."
     last_name: String! @rules(apply: ["required", "string", "max:255"])
 
-    "The full name of the prospect."
+    "The full name of the contact."
     full_name: String! @rules(apply: ["required", "string", "max:255"])
 
-    "The preferred name of the prospect."
+    "The preferred name of the contact."
     preferred: String @rules(apply: ["string", "max:255"])
 
-    "The description of the prospect."
+    "The description of the contact."
     description: String @rules(apply: ["string", "max:4294967295"])
 
-    "The email of the prospect."
+    "The email of the contact."
     email: Email @rules(apply: ["string", "email", "max:255"])
 
-    "The email 2 of the prospect."
+    "The email 2 of the contact."
     email_2: Email @rules(apply: ["string", "email", "max:255"])
 
-    "The mobile number of the prospect."
+    "The mobile number of the contact."
     mobile: String @rules(apply: ["string", "max:255"])
 
-    "The phone number of the prospect."
+    "The phone number of the contact."
     phone: String @rules(apply: ["string", "max:255"])
 
-    "If the prospect is opted out of SMS messages."
+    "If the contact is opted out of SMS messages."
     sms_opt_out: Boolean @rules(apply: ["boolean"])
 
-    "If the prospect's email bounces."
+    "If the contact's email bounces."
     email_bounce: Boolean @rules(apply: ["boolean"])
 
-    "The address of the prospect."
+    "The address of the contact."
     address: String @rules(apply: ["string", "max:255"])
 
-    "The address 2 of the prospect."
+    "The address 2 of the contact."
     address_2: String @rules(apply: ["string", "max:255"])
 
-    "The address 3 of the prospect."
+    "The address 3 of the contact."
     address_3: String @rules(apply: ["string", "max:255"])
 
-    "The city of the prospect."
+    "The city of the contact."
     city: String @rules(apply: ["string", "max:255"])
 
-    "The state of the prospect."
+    "The state of the contact."
     state: String @rules(apply: ["string", "max:255"])
 
-    "The postal code of the prospect."
+    "The postal code of the contact."
     postal: String @rules(apply: ["string", "max:255"])
 
-    "The birthdate of the prospect."
+    "The birthdate of the contact."
     birthdate: Date @rules(apply: ["date_format:Y-m-d"])
 
-    "The High School graduation year of the prospect."
+    "The High School graduation year of the contact."
     hsgrad: Year @rules(apply: ["integer", "date_format:Y"])
 
-    "The user that created the prospect."
+    "The user that created the contact."
     created_by_id: UUID @rules(apply: ["exists:users,id"])
 
-    "The user the prospect is assigned to."
+    "The user the contact is assigned to."
     assigned_to_id: UUID @rules(apply: ["exists:users,id"])
 }
 
-input UpdateProspectInput {
-    "The status of the prospect."
-    status_id: UUID @rules(apply: ["exists:prospect_statuses,id"])
+input UpdateContactInput {
+    "The status of the contact."
+    status_id: UUID @rules(apply: ["exists:contact_statuses,id"])
 
-    "The source of the prospect."
-    source_id: UUID @rules(apply: ["exists:prospect_sources,id"])
+    "The source of the contact."
+    source_id: UUID @rules(apply: ["exists:contact_sources,id"])
 
-    "The first name of the prospect."
+    "The first name of the contact."
     first_name: String @rules(apply: ["string", "max:255"])
 
-    "The last name of the prospect."
+    "The last name of the contact."
     last_name: String @rules(apply: ["string", "max:255"])
 
-    "The full name of the prospect."
+    "The full name of the contact."
     full_name: String @rules(apply: ["string", "max:255"])
 
-    "The preferred name of the prospect."
+    "The preferred name of the contact."
     preferred: String @rules(apply: ["string", "max:255"])
 
-    "The description of the prospect."
+    "The description of the contact."
     description: String @rules(apply: ["string", "max:4294967295"])
 
-    "The email of the prospect."
+    "The email of the contact."
     email: Email @rules(apply: ["string", "email", "max:255"])
 
-    "The email 2 of the prospect."
+    "The email 2 of the contact."
     email_2: Email @rules(apply: ["string", "email", "max:255"])
 
-    "The mobile number of the prospect."
+    "The mobile number of the contact."
     mobile: String @rules(apply: ["string", "max:255"])
 
-    "The phone number of the prospect."
+    "The phone number of the contact."
     phone: String @rules(apply: ["string", "max:255"])
 
-    "If the prospect is opted out of SMS messages."
+    "If the contact is opted out of SMS messages."
     sms_opt_out: Boolean @rules(apply: ["boolean"])
 
-    "If the prospect's email bounces."
+    "If the contact's email bounces."
     email_bounce: Boolean @rules(apply: ["boolean"])
 
-    "The address of the prospect."
+    "The address of the contact."
     address: String @rules(apply: ["string", "max:255"])
 
-    "The address 2 of the prospect."
+    "The address 2 of the contact."
     address_2: String @rules(apply: ["string", "max:255"])
 
-    "The address 3 of the prospect."
+    "The address 3 of the contact."
     address_3: String @rules(apply: ["string", "max:255"])
 
-    "The city of the prospect."
+    "The city of the contact."
     city: String @rules(apply: ["string", "max:255"])
 
-    "The state of the prospect."
+    "The state of the contact."
     state: String @rules(apply: ["string", "max:255"])
 
-    "The postal code of the prospect."
+    "The postal code of the contact."
     postal: String @rules(apply: ["string", "max:255"])
 
-    "The birthdate of the prospect."
+    "The birthdate of the contact."
     birthdate: Date @rules(apply: ["date_format:Y-m-d"])
 
-    "The High School graduation year of the prospect."
+    "The High School graduation year of the contact."
     hsgrad: Year @rules(apply: ["integer", "date_format:Y"])
 
-    "The user that created the prospect."
+    "The user that created the contact."
     created_by_id: UUID @rules(apply: ["exists:users,id"])
 
-    "The user the prospect is assigned to."
+    "The user the contact is assigned to."
     assigned_to_id: UUID @rules(apply: ["exists:users,id"])
 }
 
-type ProspectMutations {
-    "Create an prospect."
-    create(input: CreateProspectInput! @spread): Prospect!
+type ContactMutations {
+    "Create an contact."
+    create(input: CreateContactInput! @spread): Contact!
         @create
         @canModel(ability: "create")
 
-    "Update an prospect."
+    "Update an contact."
     update(
-        "The identifier of the prospect you would like to update."
+        "The identifier of the contact you would like to update."
         id: UUID!
             @whereKey
-            @rules(apply: ["required", "uuid", "exists:prospects"])
+            @rules(apply: ["required", "uuid", "exists:contacts"])
 
         "The fields you would like to update."
-        input: UpdateProspectInput! @spread
-    ): Prospect! @canFind(ability: "update", find: "id") @update
+        input: UpdateContactInput! @spread
+    ): Contact! @canFind(ability: "update", find: "id") @update
 
-    "Delete an prospect."
+    "Delete an contact."
     delete(
-        "The identifier of the prospect you would like to delete."
+        "The identifier of the contact you would like to delete."
         id: UUID!
             @whereKey
-            @rules(apply: ["required", "uuid", "exists:prospects"])
-    ): Prospect @canFind(ability: "delete", find: "id") @delete
+            @rules(apply: ["required", "uuid", "exists:contacts"])
+    ): Contact @canFind(ability: "delete", find: "id") @delete
 }
 
 extend type Mutation {
-    prospect: ProspectMutations! @namespaced
+    contact: ContactMutations! @namespaced
 }

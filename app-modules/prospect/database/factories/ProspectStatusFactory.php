@@ -34,24 +34,24 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Prospect\Database\Factories;
+namespace AdvisingApp\Contact\Database\Factories;
 
-use AdvisingApp\Prospect\Models\ProspectStatus;
+use AdvisingApp\Contact\Models\ContactStatus;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use AdvisingApp\Prospect\Enums\ProspectStatusColorOptions;
-use AdvisingApp\Prospect\Enums\SystemProspectClassification;
+use AdvisingApp\Contact\Enums\ContactStatusColorOptions;
+use AdvisingApp\Contact\Enums\SystemContactClassification;
 
 /**
- * @extends Factory<ProspectStatus>
+ * @extends Factory<ContactStatus>
  */
-class ProspectStatusFactory extends Factory
+class ContactStatusFactory extends Factory
 {
     public function definition(): array
     {
         return [
-            'classification' => $this->faker->randomElement(SystemProspectClassification::cases()),
+            'classification' => $this->faker->randomElement(SystemContactClassification::cases()),
             'name' => $this->faker->word,
-            'color' => $this->faker->randomElement(ProspectStatusColorOptions::cases()),
+            'color' => $this->faker->randomElement(ContactStatusColorOptions::cases()),
         ];
     }
 }

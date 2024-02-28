@@ -37,7 +37,7 @@
 namespace AdvisingApp\Form\Models;
 
 use App\Models\BaseModel;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use AdvisingApp\StudentDataModel\Models\Student;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -66,7 +66,7 @@ class FormEmailAutoReply extends BaseModel
         return $this->belongsTo(Form::class);
     }
 
-    public function getBody(Student|Prospect|null $author): string
+    public function getBody(Student|Contact|null $author): string
     {
         return app(GenerateEmailMarkdownContent::class)(
             [$this->body],
@@ -74,7 +74,7 @@ class FormEmailAutoReply extends BaseModel
         );
     }
 
-    public function getMergeData(Student|Prospect|null $author): array
+    public function getMergeData(Student|Contact|null $author): array
     {
         return [
             'student full name' => $author->getAttribute($author->displayNameKey()),

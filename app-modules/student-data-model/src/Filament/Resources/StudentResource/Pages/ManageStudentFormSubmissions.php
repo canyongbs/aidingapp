@@ -41,7 +41,7 @@ use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\Cache;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Tables\Actions\DeleteAction;
 use AdvisingApp\Form\Models\FormSubmission;
@@ -114,7 +114,7 @@ class ManageStudentFormSubmissions extends ManageRelatedRecords
 
         $ownerRecord = $urlParameters['record'];
 
-        /** @var Prospect $ownerRecord */
+        /** @var Contact $ownerRecord */
         $formSubmissionsCount = Cache::tags('form-submission-count')
             ->remember(
                 "form-submission-count-{$ownerRecord->getKey()}",

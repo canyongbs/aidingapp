@@ -40,7 +40,7 @@ use App\Models\BaseModel;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Contracts\Auditable;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use AdvisingApp\Timeline\Models\Timeline;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use AdvisingApp\StudentDataModel\Models\Student;
@@ -99,8 +99,8 @@ class EngagementResponse extends BaseModel implements Auditable, ProvidesATimeli
         $query->where('sender_type', resolve(Student::class)->getMorphClass());
     }
 
-    public function scopeSentByProspect(Builder $query): void
+    public function scopeSentByContact(Builder $query): void
     {
-        $query->where('sender_type', resolve(Prospect::class)->getMorphClass());
+        $query->where('sender_type', resolve(Contact::class)->getMorphClass());
     }
 }

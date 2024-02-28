@@ -34,14 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Prospect\Tests\Prospect\RequestFactories;
+namespace AdvisingApp\Contact\Tests\Contact\RequestFactories;
 
 use App\Models\User;
 use Worksome\RequestFactories\RequestFactory;
-use AdvisingApp\Prospect\Models\ProspectSource;
-use AdvisingApp\Prospect\Models\ProspectStatus;
+use AdvisingApp\Contact\Models\ContactSource;
+use AdvisingApp\Contact\Models\ContactStatus;
 
-class CreateProspectRequestFactory extends RequestFactory
+class CreateContactRequestFactory extends RequestFactory
 {
     public function definition(): array
     {
@@ -49,8 +49,8 @@ class CreateProspectRequestFactory extends RequestFactory
         $lastName = $this->faker->lastName();
 
         return [
-            'status_id' => ProspectStatus::inRandomOrder()->first() ?? ProspectStatus::factory()->create()->id,
-            'source_id' => ProspectSource::inRandomOrder()->first() ?? ProspectSource::factory()->create()->id,
+            'status_id' => ContactStatus::inRandomOrder()->first() ?? ContactStatus::factory()->create()->id,
+            'source_id' => ContactSource::inRandomOrder()->first() ?? ContactSource::factory()->create()->id,
             'first_name' => $firstName,
             'last_name' => $lastName,
             'full_name' => "{$firstName} {$lastName}",

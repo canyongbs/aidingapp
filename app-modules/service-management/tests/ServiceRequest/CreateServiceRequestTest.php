@@ -43,7 +43,7 @@ use App\Settings\LicenseSettings;
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 
 use function PHPUnit\Framework\assertCount;
 use function Pest\Laravel\assertDatabaseHas;
@@ -69,7 +69,7 @@ test('A successful action on the CreateServiceRequest page', function () {
     livewire(CreateServiceRequest::class)
         ->fillForm($request->toArray())
         ->fillForm([
-            'respondent_id' => Prospect::factory()->create()->getKey(),
+            'respondent_id' => Contact::factory()->create()->getKey(),
         ])
         ->call('create')
         ->assertHasNoFormErrors();
@@ -162,7 +162,7 @@ test('CreateServiceRequest is gated with proper access control', function () {
     livewire(CreateServiceRequest::class)
         ->fillForm($request->toArray())
         ->fillForm([
-            'respondent_id' => Prospect::factory()->create()->getKey(),
+            'respondent_id' => Contact::factory()->create()->getKey(),
         ])
         ->call('create')
         ->assertHasNoFormErrors();
@@ -226,7 +226,7 @@ test('CreateServiceRequest is gated with proper feature access control', functio
     livewire(CreateServiceRequest::class)
         ->fillForm($request->toArray())
         ->fillForm([
-            'respondent_id' => Prospect::factory()->create()->getKey(),
+            'respondent_id' => Contact::factory()->create()->getKey(),
         ])
         ->call('create')
         ->assertHasNoFormErrors();

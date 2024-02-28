@@ -37,7 +37,7 @@
 namespace AdvisingApp\StudentDataModel\Models\Scopes;
 
 use Illuminate\Support\Facades\DB;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use Illuminate\Database\Eloquent\Builder;
 use AdvisingApp\StudentDataModel\Models\Student;
 
@@ -51,17 +51,17 @@ class EducatableSort
     {
         $studentNameColumn = Student::displayNameKey();
 
-        $prospectNameColumn = Prospect::displayNameKey();
+        $contactNameColumn = Contact::displayNameKey();
 
         $query->leftJoin('students', function ($join) {
             $join->on('service_requests.respondent_type', '=', DB::raw("'student'"))
                 ->on(DB::raw('service_requests.respondent_id::VARCHAR'), '=', 'students.sisid');
         })
-            ->leftJoin('prospects', function ($join) {
-                $join->on('service_requests.respondent_type', '=', DB::raw("'prospect'"))
-                    ->on(DB::raw('CAST(service_requests.respondent_id AS VARCHAR)'), '=', DB::raw('CAST(prospects.id AS VARCHAR)'));
+            ->leftJoin('contacts', function ($join) {
+                $join->on('service_requests.respondent_type', '=', DB::raw("'contact'"))
+                    ->on(DB::raw('CAST(service_requests.respondent_id AS VARCHAR)'), '=', DB::raw('CAST(contacts.id AS VARCHAR)'));
             })
-            ->select('service_requests.*', DB::raw("COALESCE(students.{$studentNameColumn}, prospects.{$prospectNameColumn}) as respondent_name"))
+            ->select('service_requests.*', DB::raw("COALESCE(students.{$studentNameColumn}, contacts.{$contactNameColumn}) as respondent_name"))
             ->orderBy('respondent_name', $this->direction);
     }
 }

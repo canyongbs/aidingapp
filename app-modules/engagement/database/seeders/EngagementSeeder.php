@@ -60,19 +60,19 @@ class EngagementSeeder extends Seeder
             ->deliverLater()
             ->create();
 
-        // For Prospect - deliver now
+        // For Contact - deliver now
         Engagement::factory()
             ->count(10)
             ->has(EngagementDeliverable::factory()->deliverySuccessful()->count(1), 'engagementDeliverable')
-            ->forProspect()
+            ->forContact()
             ->deliverNow()
             ->create();
 
-        // For Prospect - deliver later
+        // For Contact - deliver later
         Engagement::factory()
             ->count(7)
             ->has(EngagementDeliverable::factory()->count(1), 'engagementDeliverable')
-            ->forProspect()
+            ->forContact()
             ->deliverLater()
             ->create();
     }

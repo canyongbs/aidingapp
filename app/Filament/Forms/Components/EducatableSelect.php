@@ -41,7 +41,7 @@ use App\Models\Authenticatable;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Component;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use Filament\Forms\Components\MorphToSelect;
 use Filament\Forms\Components\Concerns\HasName;
 use AdvisingApp\StudentDataModel\Models\Student;
@@ -63,12 +63,12 @@ class EducatableSelect extends Component
 
     public static function make(string $name): EducatableSelect | MorphToSelect
     {
-        if (auth()->user()->hasLicense([Student::getLicenseType(), Prospect::getLicenseType()])) {
+        if (auth()->user()->hasLicense([Student::getLicenseType(), Contact::getLicenseType()])) {
             return MorphToSelect::make($name)
                 ->searchable()
                 ->types([
                     static::getStudentType(),
-                    static::getProspectType(),
+                    static::getContactType(),
                 ]);
         }
 
@@ -84,10 +84,10 @@ class EducatableSelect extends Component
             ->titleAttribute(Student::displayNameKey());
     }
 
-    public static function getProspectType(): Type
+    public static function getContactType(): Type
     {
-        return Type::make(Prospect::class)
-            ->titleAttribute(Prospect::displayNameKey());
+        return Type::make(Contact::class)
+            ->titleAttribute(Contact::displayNameKey());
     }
 
     public function getChildComponents(): array
@@ -97,7 +97,7 @@ class EducatableSelect extends Component
 
         $type = match (true) {
             $user->hasLicense(Student::getLicenseType()) => static::getStudentType(),
-            $user->hasLicense(Prospect::getLicenseType()) => static::getProspectType(),
+            $user->hasLicense(Contact::getLicenseType()) => static::getContactType(),
             default => null,
         };
 
@@ -150,6 +150,6 @@ class EducatableSelect extends Component
             return false;
         }
 
-        return ! auth()->user()->hasAnyLicense([Student::getLicenseType(), Prospect::getLicenseType()]);
+        return ! auth()->user()->hasAnyLicense([Student::getLicenseType(), Contact::getLicenseType()]);
     }
 }

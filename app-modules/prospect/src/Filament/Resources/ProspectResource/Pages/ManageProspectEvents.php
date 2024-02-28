@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Prospect\Filament\Resources\ProspectResource\Pages;
+namespace AdvisingApp\Contact\Filament\Resources\ContactResource\Pages;
 
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
@@ -43,14 +43,14 @@ use Illuminate\Database\Eloquent\Builder;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use AdvisingApp\MeetingCenter\Models\EventAttendee;
 use AdvisingApp\MeetingCenter\Enums\EventAttendeeStatus;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource;
+use AdvisingApp\Contact\Filament\Resources\ContactResource;
 use AdvisingApp\MeetingCenter\Filament\Resources\EventResource;
 use AdvisingApp\MeetingCenter\Filament\Actions\InviteEventAttendeeAction;
 use AdvisingApp\MeetingCenter\Filament\Actions\Table\ViewEventAttendeeAction;
 
-class ManageProspectEvents extends ManageRelatedRecords
+class ManageContactEvents extends ManageRelatedRecords
 {
-    protected static string $resource = ProspectResource::class;
+    protected static string $resource = ContactResource::class;
 
     protected static string $relationship = 'eventAttendeeRecords';
 

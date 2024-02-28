@@ -27,7 +27,7 @@ The credentials and host of your OpenSearch instance should be set in the remain
 
 ## Indices
 
-OpenSearch indices are created by our open search migration files. For example the [Prospect Index Migration file](../../app-modules/prospect/opensearch/migrations/2023_10_12_164523_create_prospects_index.php)
+OpenSearch indices are created by our open search migration files. For example the [Contact Index Migration file](../../app-modules/contact/opensearch/migrations/2023_10_12_164523_create_contacts_index.php)
 
 These migrations are tracked separately from database schema migrations. And can be run with the following commands:
 
@@ -52,9 +52,9 @@ php artisan opensearch:clear-indices
 
 ## Documents & Searching
 
-Examples of how to set up a Model to be synced with OpenSearch can be found in the [Prospect Model](../../app-modules/prospect/src/Models/Prospect.php)
+Examples of how to set up a Model to be synced with OpenSearch can be found in the [Contact Model](../../app-modules/contact/src/Models/Contact.php)
 
-And how to set up searching with it in the (ListProspects)[app-modules/prospect/src/Filament/Resources/ProspectResource/Pages/ListProspects.php] page
+And how to set up searching with it in the (ListContacts)[app-modules/contact/src/Filament/Resources/ContactResource/Pages/ListContacts.php] page
 
 ## Other Notes
 

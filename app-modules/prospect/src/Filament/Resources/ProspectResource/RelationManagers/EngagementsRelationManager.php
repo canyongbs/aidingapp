@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Prospect\Filament\Resources\ProspectResource\RelationManagers;
+namespace AdvisingApp\Contact\Filament\Resources\ContactResource\RelationManagers;
 
 use Filament\Forms\Form;
 use Filament\Tables\Table;

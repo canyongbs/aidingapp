@@ -41,110 +41,110 @@ use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 use Illuminate\Validation\Rules\Enum;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 
 use function Pest\Laravel\assertDatabaseHas;
 use function PHPUnit\Framework\assertEquals;
 
-use AdvisingApp\Prospect\Models\ProspectStatus;
-use AdvisingApp\Prospect\Filament\Resources\ProspectStatusResource;
-use AdvisingApp\Prospect\Tests\ProspectStatus\RequestFactories\EditProspectStatusRequestFactory;
+use AdvisingApp\Contact\Models\ContactStatus;
+use AdvisingApp\Contact\Filament\Resources\ContactStatusResource;
+use AdvisingApp\Contact\Tests\ContactStatus\RequestFactories\EditContactStatusRequestFactory;
 
-test('A successful action on the EditProspectStatus page', function () {
-    $prospectStatus = ProspectStatus::factory()->create();
+test('A successful action on the EditContactStatus page', function () {
+    $contactStatus = ContactStatus::factory()->create();
 
     asSuperAdmin()
         ->get(
-            ProspectStatusResource::getUrl('edit', [
-                'record' => $prospectStatus->getRouteKey(),
+            ContactStatusResource::getUrl('edit', [
+                'record' => $contactStatus->getRouteKey(),
             ])
         )
         ->assertSuccessful();
 
-    $editRequest = EditProspectStatusRequestFactory::new()->create();
+    $editRequest = EditContactStatusRequestFactory::new()->create();
 
-    livewire(ProspectStatusResource\Pages\EditProspectStatus::class, [
-        'record' => $prospectStatus->getRouteKey(),
+    livewire(ContactStatusResource\Pages\EditContactStatus::class, [
+        'record' => $contactStatus->getRouteKey(),
     ])
         ->assertFormSet([
-            'classification' => $prospectStatus->classification->value,
-            'name' => $prospectStatus->name,
-            'color' => $prospectStatus->color->value,
+            'classification' => $contactStatus->classification->value,
+            'name' => $contactStatus->name,
+            'color' => $contactStatus->color->value,
         ])
         ->fillForm($editRequest)
         ->call('save')
         ->assertHasNoFormErrors();
 
-    assertEquals($editRequest['name'], $prospectStatus->fresh()->name);
-    assertEquals($editRequest['classification'], $prospectStatus->fresh()->classification);
-    assertEquals($editRequest['color'], $prospectStatus->fresh()->color);
+    assertEquals($editRequest['name'], $contactStatus->fresh()->name);
+    assertEquals($editRequest['classification'], $contactStatus->fresh()->classification);
+    assertEquals($editRequest['color'], $contactStatus->fresh()->color);
 });
 
-test('EditProspectStatus requires valid data', function ($data, $errors) {
+test('EditContactStatus requires valid data', function ($data, $errors) {
     asSuperAdmin();
 
-    $prospectStatus = ProspectStatus::factory()->create();
+    $contactStatus = ContactStatus::factory()->create();
 
-    livewire(ProspectStatusResource\Pages\EditProspectStatus::class, [
-        'record' => $prospectStatus->getRouteKey(),
+    livewire(ContactStatusResource\Pages\EditContactStatus::class, [
+        'record' => $contactStatus->getRouteKey(),
     ])
         ->assertFormSet([
-            'classification' => $prospectStatus->classification->value,
-            'name' => $prospectStatus->name,
-            'color' => $prospectStatus->color->value,
+            'classification' => $contactStatus->classification->value,
+            'name' => $contactStatus->name,
+            'color' => $contactStatus->color->value,
         ])
-        ->fillForm(EditProspectStatusRequestFactory::new($data)->create())
+        ->fillForm(EditContactStatusRequestFactory::new($data)->create())
         ->call('save')
         ->assertHasFormErrors($errors);
 
-    assertDatabaseHas(ProspectStatus::class, $prospectStatus->toArray());
+    assertDatabaseHas(ContactStatus::class, $contactStatus->toArray());
 })->with(
     [
-        'name missing' => [EditProspectStatusRequestFactory::new()->state(['name' => null]), ['name' => 'required']],
-        'name not a string' => [EditProspectStatusRequestFactory::new()->state(['name' => 1]), ['name' => 'string']],
-        'color missing' => [EditProspectStatusRequestFactory::new()->state(['color' => null]), ['color' => 'required']],
-        'color not within enum' => [EditProspectStatusRequestFactory::new()->state(['color' => 'not-a-color']), ['color' => Enum::class]],
+        'name missing' => [EditContactStatusRequestFactory::new()->state(['name' => null]), ['name' => 'required']],
+        'name not a string' => [EditContactStatusRequestFactory::new()->state(['name' => 1]), ['name' => 'string']],
+        'color missing' => [EditContactStatusRequestFactory::new()->state(['color' => null]), ['color' => 'required']],
+        'color not within enum' => [EditContactStatusRequestFactory::new()->state(['color' => 'not-a-color']), ['color' => Enum::class]],
     ]
 );
 
 // Permission Tests
 
-test('EditProspectStatus is gated with proper access control', function () {
-    $user = User::factory()->licensed(Prospect::getLicenseType())->create();
+test('EditContactStatus is gated with proper access control', function () {
+    $user = User::factory()->licensed(Contact::getLicenseType())->create();
 
-    $prospectStatus = ProspectStatus::factory()->create();
+    $contactStatus = ContactStatus::factory()->create();
 
     actingAs($user)
         ->get(
-            ProspectStatusResource::getUrl('edit', [
-                'record' => $prospectStatus,
+            ContactStatusResource::getUrl('edit', [
+                'record' => $contactStatus,
             ])
         )->assertForbidden();
 
-    livewire(ProspectStatusResource\Pages\EditProspectStatus::class, [
-        'record' => $prospectStatus->getRouteKey(),
+    livewire(ContactStatusResource\Pages\EditContactStatus::class, [
+        'record' => $contactStatus->getRouteKey(),
     ])
         ->assertForbidden();
 
-    $user->givePermissionTo('prospect_status.view-any');
-    $user->givePermissionTo('prospect_status.*.update');
+    $user->givePermissionTo('contact_status.view-any');
+    $user->givePermissionTo('contact_status.*.update');
 
     actingAs($user)
         ->get(
-            ProspectStatusResource::getUrl('edit', [
-                'record' => $prospectStatus,
+            ContactStatusResource::getUrl('edit', [
+                'record' => $contactStatus,
             ])
         )->assertSuccessful();
 
-    $request = collect(EditProspectStatusRequestFactory::new()->create());
+    $request = collect(EditContactStatusRequestFactory::new()->create());
 
-    livewire(ProspectStatusResource\Pages\EditProspectStatus::class, [
-        'record' => $prospectStatus->getRouteKey(),
+    livewire(ContactStatusResource\Pages\EditContactStatus::class, [
+        'record' => $contactStatus->getRouteKey(),
     ])
         ->fillForm($request->toArray())
         ->call('save')
         ->assertHasNoFormErrors();
 
-    assertEquals($request['name'], $prospectStatus->fresh()->name);
-    assertEquals($request['color'], $prospectStatus->fresh()->color);
+    assertEquals($request['name'], $contactStatus->fresh()->name);
+    assertEquals($request['color'], $contactStatus->fresh()->color);
 });

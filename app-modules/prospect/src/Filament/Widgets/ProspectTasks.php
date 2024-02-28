@@ -34,20 +34,20 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Prospect\Filament\Widgets;
+namespace AdvisingApp\Contact\Filament\Widgets;
 
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use AdvisingApp\Task\Filament\Widgets\TasksWidget;
 
-class ProspectTasks extends TasksWidget
+class ContactTasks extends TasksWidget
 {
     public function title(): string
     {
-        return 'My Tasks for Prospects';
+        return 'My Tasks for Contacts';
     }
 
     public function concern(): string
     {
-        return Prospect::class;
+        return Contact::class;
     }
 }

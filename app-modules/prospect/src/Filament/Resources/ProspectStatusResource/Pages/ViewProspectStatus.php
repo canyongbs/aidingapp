@@ -34,19 +34,19 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Prospect\Filament\Resources\ProspectStatusResource\Pages;
+namespace AdvisingApp\Contact\Filament\Resources\ContactStatusResource\Pages;
 
 use Filament\Actions;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
-use AdvisingApp\Prospect\Models\ProspectStatus;
-use AdvisingApp\Prospect\Filament\Resources\ProspectStatusResource;
+use AdvisingApp\Contact\Models\ContactStatus;
+use AdvisingApp\Contact\Filament\Resources\ContactStatusResource;
 
-class ViewProspectStatus extends ViewRecord
+class ViewContactStatus extends ViewRecord
 {
-    protected static string $resource = ProspectStatusResource::class;
+    protected static string $resource = ContactStatusResource::class;
 
     public function infolist(Infolist $infolist): Infolist
     {
@@ -64,7 +64,7 @@ class ViewProspectStatus extends ViewRecord
                             ->label('Color')
                             ->translateLabel()
                             ->badge()
-                            ->color(fn (ProspectStatus $prospectStatus) => $prospectStatus->color->value),
+                            ->color(fn (ContactStatus $contactStatus) => $contactStatus->color->value),
                     ])
                     ->columns(),
             ]);

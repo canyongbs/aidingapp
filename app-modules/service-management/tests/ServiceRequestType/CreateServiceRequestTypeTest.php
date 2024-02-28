@@ -43,7 +43,7 @@ use App\Settings\LicenseSettings;
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 
 use function PHPUnit\Framework\assertCount;
 use function PHPUnit\Framework\assertEmpty;
@@ -93,7 +93,7 @@ test('CreateServiceRequestType requires valid data', function ($data, $errors) {
 // Permission Tests
 
 test('CreateServiceRequestType is gated with proper access control', function () {
-    $user = User::factory()->licensed([Student::getLicenseType(), Prospect::getLicenseType()])->create();
+    $user = User::factory()->licensed([Student::getLicenseType(), Contact::getLicenseType()])->create();
 
     actingAs($user)
         ->get(
@@ -130,7 +130,7 @@ test('CreateServiceRequestType is gated with proper feature access control', fun
 
     $settings->save();
 
-    $user = User::factory()->licensed([Student::getLicenseType(), Prospect::getLicenseType()])->create();
+    $user = User::factory()->licensed([Student::getLicenseType(), Contact::getLicenseType()])->create();
 
     $user->givePermissionTo('service_request_type.view-any');
     $user->givePermissionTo('service_request_type.create');

@@ -34,14 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Prospect\Filament\Resources\ProspectResource\Pages;
+namespace AdvisingApp\Contact\Filament\Resources\ContactResource\Pages;
 
 use Filament\Tables\Table;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\Cache;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Tables\Actions\DeleteAction;
 use AdvisingApp\Form\Models\FormSubmission;
@@ -51,12 +51,12 @@ use AdvisingApp\Form\Enums\FormSubmissionStatus;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use AdvisingApp\Form\Filament\Resources\FormResource;
 use AdvisingApp\Form\Filament\Actions\RequestFormSubmission;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource;
+use AdvisingApp\Contact\Filament\Resources\ContactResource;
 use AdvisingApp\Form\Filament\Tables\Filters\FormSubmissionStatusFilter;
 
-class ManageProspectFormSubmissions extends ManageRelatedRecords
+class ManageContactFormSubmissions extends ManageRelatedRecords
 {
-    protected static string $resource = ProspectResource::class;
+    protected static string $resource = ContactResource::class;
 
     protected static string $relationship = 'formSubmissions';
 
@@ -114,7 +114,7 @@ class ManageProspectFormSubmissions extends ManageRelatedRecords
 
         $ownerRecord = $urlParameters['record'];
 
-        /** @var Prospect $ownerRecord */
+        /** @var Contact $ownerRecord */
         $formSubmissionsCount = Cache::tags('form-submission-count')
             ->remember(
                 "form-submission-count-{$ownerRecord->getKey()}",

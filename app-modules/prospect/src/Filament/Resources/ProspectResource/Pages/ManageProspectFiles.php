@@ -34,16 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Prospect\Filament\Resources\ProspectResource\Pages;
+namespace AdvisingApp\Contact\Filament\Resources\ContactResource\Pages;
 
 use Illuminate\Database\Eloquent\Model;
 use Filament\Resources\Pages\ManageRelatedRecords;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource;
+use AdvisingApp\Contact\Filament\Resources\ContactResource;
 use AdvisingApp\Engagement\Filament\Resources\EngagementFileResource\RelationManagers\EngagementFilesRelationManager;
 
-class ManageProspectFiles extends ManageRelatedRecords
+class ManageContactFiles extends ManageRelatedRecords
 {
-    protected static string $resource = ProspectResource::class;
+    protected static string $resource = ContactResource::class;
 
     // TODO: Obsolete when there is no table, remove from Filament
     protected static string $relationship = 'engagementFiles';

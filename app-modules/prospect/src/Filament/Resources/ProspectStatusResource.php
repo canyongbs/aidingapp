@@ -34,20 +34,20 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Prospect\Filament\Resources;
+namespace AdvisingApp\Contact\Filament\Resources;
 
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use App\Filament\Clusters\ProspectManagement;
-use AdvisingApp\Prospect\Models\ProspectStatus;
-use AdvisingApp\Prospect\Filament\Resources\ProspectStatusResource\Pages\EditProspectStatus;
-use AdvisingApp\Prospect\Filament\Resources\ProspectStatusResource\Pages\ViewProspectStatus;
-use AdvisingApp\Prospect\Filament\Resources\ProspectStatusResource\Pages\CreateProspectStatus;
-use AdvisingApp\Prospect\Filament\Resources\ProspectStatusResource\Pages\ListProspectStatuses;
+use App\Filament\Clusters\ContactManagement;
+use AdvisingApp\Contact\Models\ContactStatus;
+use AdvisingApp\Contact\Filament\Resources\ContactStatusResource\Pages\EditContactStatus;
+use AdvisingApp\Contact\Filament\Resources\ContactStatusResource\Pages\ViewContactStatus;
+use AdvisingApp\Contact\Filament\Resources\ContactStatusResource\Pages\CreateContactStatus;
+use AdvisingApp\Contact\Filament\Resources\ContactStatusResource\Pages\ListContactStatuses;
 
-class ProspectStatusResource extends Resource
+class ContactStatusResource extends Resource
 {
-    protected static ?string $model = ProspectStatus::class;
+    protected static ?string $model = ContactStatus::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-tag';
 
@@ -55,7 +55,7 @@ class ProspectStatusResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
-    protected static ?string $cluster = ProspectManagement::class;
+    protected static ?string $cluster = ContactManagement::class;
 
     public static function form(Form $form): Form
     {
@@ -73,10 +73,10 @@ class ProspectStatusResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => ListProspectStatuses::route('/'),
-            'create' => CreateProspectStatus::route('/create'),
-            'view' => ViewProspectStatus::route('/{record}'),
-            'edit' => EditProspectStatus::route('/{record}/edit'),
+            'index' => ListContactStatuses::route('/'),
+            'create' => CreateContactStatus::route('/create'),
+            'view' => ViewContactStatus::route('/{record}'),
+            'edit' => EditContactStatus::route('/{record}/edit'),
         ];
     }
 }

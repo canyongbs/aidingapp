@@ -34,13 +34,13 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Prospect\Filament\Resources\ProspectResource\Pages;
+namespace AdvisingApp\Contact\Filament\Resources\ContactResource\Pages;
 
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Cache;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Tables\Actions\DeleteAction;
 use Illuminate\Database\Eloquent\Builder;
@@ -51,11 +51,11 @@ use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use AdvisingApp\Form\Filament\Resources\FormResource;
 use AdvisingApp\Application\Models\ApplicationSubmission;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource;
+use AdvisingApp\Contact\Filament\Resources\ContactResource;
 
-class ManageProspectApplicationSubmissions extends ManageRelatedRecords
+class ManageContactApplicationSubmissions extends ManageRelatedRecords
 {
-    protected static string $resource = ProspectResource::class;
+    protected static string $resource = ContactResource::class;
 
     protected static string $relationship = 'applicationSubmissions';
 
@@ -132,7 +132,7 @@ class ManageProspectApplicationSubmissions extends ManageRelatedRecords
 
         $ownerRecord = $urlParameters['record'];
 
-        /** @var Prospect $ownerRecord */
+        /** @var Contact $ownerRecord */
         $applicationSubmissionsCount = Cache::tags('application-submission-count')
             ->remember(
                 "application-submission-count-{$ownerRecord->getKey()}",

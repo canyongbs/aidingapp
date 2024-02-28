@@ -60,7 +60,7 @@ return new class () extends SettingsMigration {
             The database uses PostgreSQL, and follows Laravel Eloquent relationship schema conventions. You
             must fully qualify column names with the table name, and you must use the exact column names from the schema.
             Where there are matching `_id` and `_type` columns on a table, they indicate a singular polymorphic relationship.
-            When faced with a singular polymorphic relationship, you can usually specify either the `student` or `prospect` values for these columns.
+            When faced with a singular polymorphic relationship, you can usually specify either the `student` or `contact` values for these columns.
             Example columns for polymorphic relationships are `concern_id` and `concern_type`.
 
             If you do find the columns in the schema that you need to answer a question, never guess them.

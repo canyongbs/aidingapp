@@ -39,53 +39,53 @@ use App\Models\User;
 use function Tests\asSuperAdmin;
 use function Pest\Laravel\actingAs;
 
-use AdvisingApp\Prospect\Models\Prospect;
-use AdvisingApp\Prospect\Models\ProspectStatus;
-use AdvisingApp\Prospect\Filament\Resources\ProspectStatusResource;
+use AdvisingApp\Contact\Models\Contact;
+use AdvisingApp\Contact\Models\ContactStatus;
+use AdvisingApp\Contact\Filament\Resources\ContactStatusResource;
 
-test('The correct details are displayed on the ViewProspectStatus page', function () {
-    $prospectStatus = ProspectStatus::factory()->create();
+test('The correct details are displayed on the ViewContactStatus page', function () {
+    $contactStatus = ContactStatus::factory()->create();
 
     asSuperAdmin()
         ->get(
-            ProspectStatusResource::getUrl('view', [
-                'record' => $prospectStatus,
+            ContactStatusResource::getUrl('view', [
+                'record' => $contactStatus,
             ])
         )
         ->assertSuccessful()
         ->assertSeeTextInOrder(
             [
                 'Name',
-                $prospectStatus->name,
+                $contactStatus->name,
                 'Classification',
-                $prospectStatus->classification->getLabel(),
+                $contactStatus->classification->getLabel(),
                 'Color',
-                $prospectStatus->color,
+                $contactStatus->color,
             ]
         );
 });
 
 // Permission Tests
 
-test('ViewProspectStatus is gated with proper access control', function () {
-    $user = User::factory()->licensed(Prospect::getLicenseType())->create();
+test('ViewContactStatus is gated with proper access control', function () {
+    $user = User::factory()->licensed(Contact::getLicenseType())->create();
 
-    $prospectStatus = ProspectStatus::factory()->create();
+    $contactStatus = ContactStatus::factory()->create();
 
     actingAs($user)
         ->get(
-            ProspectStatusResource::getUrl('view', [
-                'record' => $prospectStatus,
+            ContactStatusResource::getUrl('view', [
+                'record' => $contactStatus,
             ])
         )->assertForbidden();
 
-    $user->givePermissionTo('prospect_status.view-any');
-    $user->givePermissionTo('prospect_status.*.view');
+    $user->givePermissionTo('contact_status.view-any');
+    $user->givePermissionTo('contact_status.*.view');
 
     actingAs($user)
         ->get(
-            ProspectStatusResource::getUrl('view', [
-                'record' => $prospectStatus,
+            ContactStatusResource::getUrl('view', [
+                'record' => $contactStatus,
             ])
         )->assertSuccessful();
 });

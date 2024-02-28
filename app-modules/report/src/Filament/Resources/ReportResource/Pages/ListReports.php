@@ -42,7 +42,7 @@ use Filament\Actions\CreateAction;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Actions\DeleteAction;
@@ -64,7 +64,7 @@ class ListReports extends ListRecords
                     ->sortable(),
                 TextColumn::make('model')
                     ->sortable()
-                    ->visible(auth()->user()->hasLicense([Student::getLicenseType(), Prospect::getLicenseType()]) || auth()->user()->can('viewAny', User::class)),
+                    ->visible(auth()->user()->hasLicense([Student::getLicenseType(), Contact::getLicenseType()]) || auth()->user()->can('viewAny', User::class)),
                 TextColumn::make('user.name')
                     ->label('Owner')
                     ->sortable()

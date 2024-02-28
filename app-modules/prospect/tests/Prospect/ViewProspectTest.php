@@ -38,33 +38,33 @@ use App\Models\User;
 
 use function Pest\Laravel\actingAs;
 
-use AdvisingApp\Prospect\Models\Prospect;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource;
+use AdvisingApp\Contact\Models\Contact;
+use AdvisingApp\Contact\Filament\Resources\ContactResource;
 
-// TODO: Write ViewProspectSource page test
-//test('The correct details are displayed on the ViewProspect page', function () {});
+// TODO: Write ViewContactSource page test
+//test('The correct details are displayed on the ViewContact page', function () {});
 
 // Permission Tests
 
-test('ViewProspect is gated with proper access control', function () {
-    $user = User::factory()->licensed(Prospect::getLicenseType())->create();
+test('ViewContact is gated with proper access control', function () {
+    $user = User::factory()->licensed(Contact::getLicenseType())->create();
 
-    $prospect = Prospect::factory()->create();
+    $contact = Contact::factory()->create();
 
     actingAs($user)
         ->get(
-            ProspectResource::getUrl('view', [
-                'record' => $prospect,
+            ContactResource::getUrl('view', [
+                'record' => $contact,
             ])
         )->assertForbidden();
 
-    $user->givePermissionTo('prospect.view-any');
-    $user->givePermissionTo('prospect.*.view');
+    $user->givePermissionTo('contact.view-any');
+    $user->givePermissionTo('contact.*.view');
 
     actingAs($user)
         ->get(
-            ProspectResource::getUrl('view', [
-                'record' => $prospect,
+            ContactResource::getUrl('view', [
+                'record' => $contact,
             ])
         )->assertSuccessful();
 });

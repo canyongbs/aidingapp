@@ -34,17 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Prospect\Filament\Resources\ProspectSourceResource\Pages;
+namespace AdvisingApp\Contact\Filament\Resources\ContactSourceResource\Pages;
 
 use Filament\Actions;
 use Filament\Forms\Form;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\EditRecord;
-use AdvisingApp\Prospect\Filament\Resources\ProspectSourceResource;
+use AdvisingApp\Contact\Filament\Resources\ContactSourceResource;
 
-class EditProspectSource extends EditRecord
+class EditContactSource extends EditRecord
 {
-    protected static string $resource = ProspectSourceResource::class;
+    protected static string $resource = ContactSourceResource::class;
 
     public function form(Form $form): Form
     {

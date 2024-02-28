@@ -45,7 +45,7 @@ return [
             'engagement_management',
             'journey_management',
             'knowledge_base_management',
-            'prospect_management',
+            'contact_management',
         ],
     ],
 ];

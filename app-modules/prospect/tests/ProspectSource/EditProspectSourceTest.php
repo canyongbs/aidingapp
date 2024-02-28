@@ -40,101 +40,101 @@ use function Tests\asSuperAdmin;
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 
 use function Pest\Laravel\assertDatabaseHas;
 use function PHPUnit\Framework\assertEquals;
 
-use AdvisingApp\Prospect\Models\ProspectSource;
-use AdvisingApp\Prospect\Filament\Resources\ProspectSourceResource;
-use AdvisingApp\Prospect\Tests\ProspectSource\RequestFactories\EditProspectSourceRequestFactory;
+use AdvisingApp\Contact\Models\ContactSource;
+use AdvisingApp\Contact\Filament\Resources\ContactSourceResource;
+use AdvisingApp\Contact\Tests\ContactSource\RequestFactories\EditContactSourceRequestFactory;
 
-test('A successful action on the EditProspectSource page', function () {
-    $prospectSource = ProspectSource::factory()->create();
+test('A successful action on the EditContactSource page', function () {
+    $contactSource = ContactSource::factory()->create();
 
     asSuperAdmin()
         ->get(
-            ProspectSourceResource::getUrl('edit', [
-                'record' => $prospectSource->getRouteKey(),
+            ContactSourceResource::getUrl('edit', [
+                'record' => $contactSource->getRouteKey(),
             ])
         )
         ->assertSuccessful();
 
-    $editRequest = EditProspectSourceRequestFactory::new()->create();
+    $editRequest = EditContactSourceRequestFactory::new()->create();
 
-    livewire(ProspectSourceResource\Pages\EditProspectSource::class, [
-        'record' => $prospectSource->getRouteKey(),
+    livewire(ContactSourceResource\Pages\EditContactSource::class, [
+        'record' => $contactSource->getRouteKey(),
     ])
         ->assertFormSet([
-            'name' => $prospectSource->name,
+            'name' => $contactSource->name,
         ])
         ->fillForm($editRequest)
         ->call('save')
         ->assertHasNoFormErrors();
 
-    assertEquals($editRequest['name'], $prospectSource->fresh()->name);
+    assertEquals($editRequest['name'], $contactSource->fresh()->name);
 });
 
-test('EditProspectSource requires valid data', function ($data, $errors) {
+test('EditContactSource requires valid data', function ($data, $errors) {
     asSuperAdmin();
 
-    $prospectSource = ProspectSource::factory()->create();
+    $contactSource = ContactSource::factory()->create();
 
-    livewire(ProspectSourceResource\Pages\EditProspectSource::class, [
-        'record' => $prospectSource->getRouteKey(),
+    livewire(ContactSourceResource\Pages\EditContactSource::class, [
+        'record' => $contactSource->getRouteKey(),
     ])
         ->assertFormSet([
-            'name' => $prospectSource->name,
+            'name' => $contactSource->name,
         ])
-        ->fillForm(EditProspectSourceRequestFactory::new($data)->create())
+        ->fillForm(EditContactSourceRequestFactory::new($data)->create())
         ->call('save')
         ->assertHasFormErrors($errors);
 
-    assertDatabaseHas(ProspectSource::class, $prospectSource->toArray());
+    assertDatabaseHas(ContactSource::class, $contactSource->toArray());
 })->with(
     [
-        'name missing' => [EditProspectSourceRequestFactory::new()->state(['name' => null]), ['name' => 'required']],
-        'name not a string' => [EditProspectSourceRequestFactory::new()->state(['name' => 1]), ['name' => 'string']],
+        'name missing' => [EditContactSourceRequestFactory::new()->state(['name' => null]), ['name' => 'required']],
+        'name not a string' => [EditContactSourceRequestFactory::new()->state(['name' => 1]), ['name' => 'string']],
     ]
 );
 
 // Permission Tests
 
-test('EditProspectSource is gated with proper access control', function () {
-    $user = User::factory()->licensed(Prospect::getLicenseType())->create();
+test('EditContactSource is gated with proper access control', function () {
+    $user = User::factory()->licensed(Contact::getLicenseType())->create();
 
-    $prospectSource = ProspectSource::factory()->create();
+    $contactSource = ContactSource::factory()->create();
 
     actingAs($user)
         ->get(
-            ProspectSourceResource::getUrl('edit', [
-                'record' => $prospectSource,
+            ContactSourceResource::getUrl('edit', [
+                'record' => $contactSource,
             ])
         )->assertForbidden();
 
-    livewire(ProspectSourceResource\Pages\EditProspectSource::class, [
-        'record' => $prospectSource->getRouteKey(),
+    livewire(ContactSourceResource\Pages\EditContactSource::class, [
+        'record' => $contactSource->getRouteKey(),
     ])
         ->assertForbidden();
 
-    $user->givePermissionTo('prospect_source.view-any');
-    $user->givePermissionTo('prospect_source.*.update');
+    $user->givePermissionTo('contact_source.view-any');
+    $user->givePermissionTo('contact_source.*.update');
 
     actingAs($user)
         ->get(
-            ProspectSourceResource::getUrl('edit', [
-                'record' => $prospectSource,
+            ContactSourceResource::getUrl('edit', [
+                'record' => $contactSource,
             ])
         )->assertSuccessful();
 
-    $request = collect(EditProspectSourceRequestFactory::new()->create());
+    $request = collect(EditContactSourceRequestFactory::new()->create());
 
-    livewire(ProspectSourceResource\Pages\EditProspectSource::class, [
-        'record' => $prospectSource->getRouteKey(),
+    livewire(ContactSourceResource\Pages\EditContactSource::class, [
+        'record' => $contactSource->getRouteKey(),
     ])
         ->fillForm($request->toArray())
         ->call('save')
         ->assertHasNoFormErrors();
 
-    assertEquals($request['name'], $prospectSource->fresh()->name);
+    assertEquals($request['name'], $contactSource->fresh()->name);
 });

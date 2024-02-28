@@ -34,15 +34,15 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Prospect\Filament\Pages;
+namespace AdvisingApp\Contact\Filament\Pages;
 
 use App\Models\User;
-use AdvisingApp\Prospect\Models\Prospect;
-use App\Filament\Widgets\ProspectGrowthChart;
+use AdvisingApp\Contact\Models\Contact;
+use App\Filament\Widgets\ContactGrowthChart;
 use Filament\Pages\Dashboard as BaseDashboard;
 use Symfony\Component\HttpFoundation\Response;
-use AdvisingApp\Prospect\Filament\Widgets\ProspectStats;
-use AdvisingApp\Prospect\Filament\Widgets\ProspectTasks;
+use AdvisingApp\Contact\Filament\Widgets\ContactStats;
+use AdvisingApp\Contact\Filament\Widgets\ContactTasks;
 
 class RecruitmentCrmDashboard extends BaseDashboard
 {
@@ -61,7 +61,7 @@ class RecruitmentCrmDashboard extends BaseDashboard
         /** @var User $user */
         $user = auth()->user();
 
-        return $user->hasLicense(Prospect::getLicenseType());
+        return $user->hasLicense(Contact::getLicenseType());
     }
 
     public function mount(): void
@@ -69,15 +69,15 @@ class RecruitmentCrmDashboard extends BaseDashboard
         /** @var User $user */
         $user = auth()->user();
 
-        abort_unless($user->hasLicense(Prospect::getLicenseType()), Response::HTTP_FORBIDDEN);
+        abort_unless($user->hasLicense(Contact::getLicenseType()), Response::HTTP_FORBIDDEN);
     }
 
     public function getWidgets(): array
     {
         return [
-            ProspectStats::class,
-            ProspectGrowthChart::class,
-            ProspectTasks::class,
+            ContactStats::class,
+            ContactGrowthChart::class,
+            ContactTasks::class,
         ];
     }
 }

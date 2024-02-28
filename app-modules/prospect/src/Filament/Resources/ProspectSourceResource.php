@@ -34,19 +34,19 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Prospect\Filament\Resources;
+namespace AdvisingApp\Contact\Filament\Resources;
 
 use Filament\Resources\Resource;
-use App\Filament\Clusters\ProspectManagement;
-use AdvisingApp\Prospect\Models\ProspectSource;
-use AdvisingApp\Prospect\Filament\Resources\ProspectSourceResource\Pages\EditProspectSource;
-use AdvisingApp\Prospect\Filament\Resources\ProspectSourceResource\Pages\ViewProspectSource;
-use AdvisingApp\Prospect\Filament\Resources\ProspectSourceResource\Pages\ListProspectSources;
-use AdvisingApp\Prospect\Filament\Resources\ProspectSourceResource\Pages\CreateProspectSource;
+use App\Filament\Clusters\ContactManagement;
+use AdvisingApp\Contact\Models\ContactSource;
+use AdvisingApp\Contact\Filament\Resources\ContactSourceResource\Pages\EditContactSource;
+use AdvisingApp\Contact\Filament\Resources\ContactSourceResource\Pages\ViewContactSource;
+use AdvisingApp\Contact\Filament\Resources\ContactSourceResource\Pages\ListContactSources;
+use AdvisingApp\Contact\Filament\Resources\ContactSourceResource\Pages\CreateContactSource;
 
-class ProspectSourceResource extends Resource
+class ContactSourceResource extends Resource
 {
-    protected static ?string $model = ProspectSource::class;
+    protected static ?string $model = ContactSource::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-viewfinder-circle';
 
@@ -54,7 +54,7 @@ class ProspectSourceResource extends Resource
 
     protected static ?int $navigationSort = 2;
 
-    protected static ?string $cluster = ProspectManagement::class;
+    protected static ?string $cluster = ContactManagement::class;
 
     public static function getRelations(): array
     {
@@ -64,10 +64,10 @@ class ProspectSourceResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => ListProspectSources::route('/'),
-            'create' => CreateProspectSource::route('/create'),
-            'view' => ViewProspectSource::route('/{record}'),
-            'edit' => EditProspectSource::route('/{record}/edit'),
+            'index' => ListContactSources::route('/'),
+            'create' => CreateContactSource::route('/create'),
+            'view' => ViewContactSource::route('/{record}'),
+            'edit' => EditContactSource::route('/{record}/edit'),
         ];
     }
 }

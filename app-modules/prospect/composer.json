@@ -1,5 +1,5 @@
 {
-  "name": "canyon-gbs/advising-app-prospect",
+  "name": "canyon-gbs/advising-app-contact",
   "description": "",
   "type": "library",
   "version": "1.0",
@@ -9,17 +9,17 @@
   },
   "autoload": {
     "psr-4": {
-      "AdvisingApp\\Prospect\\": "src/",
-      "AdvisingApp\\Prospect\\Tests\\": "tests/",
-      "AdvisingApp\\Prospect\\Database\\Factories\\": "database/factories/",
-      "AdvisingApp\\Prospect\\Database\\Seeders\\": "database/seeders/"
+      "AdvisingApp\\Contact\\": "src/",
+      "AdvisingApp\\Contact\\Tests\\": "tests/",
+      "AdvisingApp\\Contact\\Database\\Factories\\": "database/factories/",
+      "AdvisingApp\\Contact\\Database\\Seeders\\": "database/seeders/"
     }
   },
   "minimum-stability": "stable",
   "extra": {
     "laravel": {
       "providers": [
-        "AdvisingApp\\Prospect\\Providers\\ProspectServiceProvider"
+        "AdvisingApp\\Contact\\Providers\\ContactServiceProvider"
       ]
     }
   }

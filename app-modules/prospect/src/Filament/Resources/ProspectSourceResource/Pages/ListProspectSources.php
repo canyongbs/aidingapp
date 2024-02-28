@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Prospect\Filament\Resources\ProspectSourceResource\Pages;
+namespace AdvisingApp\Contact\Filament\Resources\ContactSourceResource\Pages;
 
 use Filament\Actions;
 use Filament\Tables\Table;
@@ -45,11 +45,11 @@ use App\Filament\Tables\Columns\IdColumn;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
-use AdvisingApp\Prospect\Filament\Resources\ProspectSourceResource;
+use AdvisingApp\Contact\Filament\Resources\ContactSourceResource;
 
-class ListProspectSources extends ListRecords
+class ListContactSources extends ListRecords
 {
-    protected static string $resource = ProspectSourceResource::class;
+    protected static string $resource = ContactSourceResource::class;
 
     public function table(Table $table): Table
     {
@@ -60,9 +60,9 @@ class ListProspectSources extends ListRecords
                     ->label('Name')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('prospects_count')
-                    ->label('# of Prospects')
-                    ->counts('prospects')
+                TextColumn::make('contacts_count')
+                    ->label('# of Contacts')
+                    ->counts('contacts')
                     ->sortable(),
             ])
             ->actions([

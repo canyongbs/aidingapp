@@ -41,82 +41,82 @@ use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 use Illuminate\Validation\Rules\Enum;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 
 use function PHPUnit\Framework\assertCount;
 use function PHPUnit\Framework\assertEmpty;
 use function Pest\Laravel\assertDatabaseHas;
 
-use AdvisingApp\Prospect\Models\ProspectStatus;
-use AdvisingApp\Prospect\Filament\Resources\ProspectStatusResource;
-use AdvisingApp\Prospect\Tests\ProspectStatus\RequestFactories\CreateProspectStatusRequestFactory;
+use AdvisingApp\Contact\Models\ContactStatus;
+use AdvisingApp\Contact\Filament\Resources\ContactStatusResource;
+use AdvisingApp\Contact\Tests\ContactStatus\RequestFactories\CreateContactStatusRequestFactory;
 
-test('A successful action on the CreateProspectStatus page', function () {
+test('A successful action on the CreateContactStatus page', function () {
     asSuperAdmin()
         ->get(
-            ProspectStatusResource::getUrl('create')
+            ContactStatusResource::getUrl('create')
         )
         ->assertSuccessful();
 
-    $request = CreateProspectStatusRequestFactory::new()->create();
+    $request = CreateContactStatusRequestFactory::new()->create();
 
-    livewire(ProspectStatusResource\Pages\CreateProspectStatus::class)
+    livewire(ContactStatusResource\Pages\CreateContactStatus::class)
         ->fillForm($request)
         ->call('create')
         ->assertHasNoFormErrors();
 
-    assertCount(1, ProspectStatus::all());
+    assertCount(1, ContactStatus::all());
 
-    assertDatabaseHas(ProspectStatus::class, $request);
+    assertDatabaseHas(ContactStatus::class, $request);
 });
 
-test('CreateProspectStatus requires valid data', function ($data, $errors) {
+test('CreateContactStatus requires valid data', function ($data, $errors) {
     asSuperAdmin();
 
-    livewire(ProspectStatusResource\Pages\CreateProspectStatus::class)
-        ->fillForm(CreateProspectStatusRequestFactory::new($data)->create())
+    livewire(ContactStatusResource\Pages\CreateContactStatus::class)
+        ->fillForm(CreateContactStatusRequestFactory::new($data)->create())
         ->call('create')
         ->assertHasFormErrors($errors);
 
-    assertEmpty(ProspectStatus::all());
+    assertEmpty(ContactStatus::all());
 })->with(
     [
-        'name missing' => [CreateProspectStatusRequestFactory::new()->without('name'), ['name' => 'required']],
-        'name not a string' => [CreateProspectStatusRequestFactory::new()->state(['name' => 1]), ['name' => 'string']],
-        'color missing' => [CreateProspectStatusRequestFactory::new()->state(['color' => null]), ['color' => 'required']],
-        'color not within enum' => [CreateProspectStatusRequestFactory::new()->state(['color' => 'not-a-color']), ['color' => Enum::class]],
+        'name missing' => [CreateContactStatusRequestFactory::new()->without('name'), ['name' => 'required']],
+        'name not a string' => [CreateContactStatusRequestFactory::new()->state(['name' => 1]), ['name' => 'string']],
+        'color missing' => [CreateContactStatusRequestFactory::new()->state(['color' => null]), ['color' => 'required']],
+        'color not within enum' => [CreateContactStatusRequestFactory::new()->state(['color' => 'not-a-color']), ['color' => Enum::class]],
     ]
 );
 
 // Permission Tests
 
-test('CreateProspectStatus is gated with proper access control', function () {
-    $user = User::factory()->licensed(Prospect::getLicenseType())->create();
+test('CreateContactStatus is gated with proper access control', function () {
+    $user = User::factory()->licensed(Contact::getLicenseType())->create();
 
     actingAs($user)
         ->get(
-            ProspectStatusResource::getUrl('create')
+            ContactStatusResource::getUrl('create')
         )->assertForbidden();
 
-    livewire(ProspectStatusResource\Pages\CreateProspectStatus::class)
+    livewire(ContactStatusResource\Pages\CreateContactStatus::class)
         ->assertForbidden();
 
-    $user->givePermissionTo('prospect_status.view-any');
-    $user->givePermissionTo('prospect_status.create');
+    $user->givePermissionTo('contact_status.view-any');
+    $user->givePermissionTo('contact_status.create');
 
     actingAs($user)
         ->get(
-            ProspectStatusResource::getUrl('create')
+            ContactStatusResource::getUrl('create')
         )->assertSuccessful();
 
-    $request = collect(CreateProspectStatusRequestFactory::new()->create());
+    $request = collect(CreateContactStatusRequestFactory::new()->create());
 
-    livewire(ProspectStatusResource\Pages\CreateProspectStatus::class)
+    livewire(ContactStatusResource\Pages\CreateContactStatus::class)
         ->fillForm($request->toArray())
         ->call('create')
         ->assertHasNoFormErrors();
 
-    assertCount(1, ProspectStatus::all());
+    assertCount(1, ContactStatus::all());
 
-    assertDatabaseHas(ProspectStatus::class, $request->toArray());
+    assertDatabaseHas(ContactStatus::class, $request->toArray());
 });

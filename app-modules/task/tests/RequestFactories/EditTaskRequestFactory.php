@@ -38,14 +38,14 @@ namespace AdvisingApp\Task\Tests\RequestFactories;
 
 use App\Models\User;
 use AdvisingApp\Task\Enums\TaskStatus;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use Worksome\RequestFactories\RequestFactory;
 
 class EditTaskRequestFactory extends RequestFactory
 {
     public function definition(): array
     {
-        $prospect = Prospect::factory()->create();
+        $contact = Contact::factory()->create();
 
         return [
             'title' => str(fake()->words(asText: 3))->title()->toString(),
@@ -53,8 +53,8 @@ class EditTaskRequestFactory extends RequestFactory
             'status' => fake()->randomElement(TaskStatus::cases())->value,
             'due' => now()->addWeek(),
             'assigned_to' => User::factory()->create()->id,
-            'concern_type' => $prospect->getMorphClass(),
-            'concern_id' => $prospect->getKey(),
+            'concern_type' => $contact->getMorphClass(),
+            'concern_id' => $contact->getKey(),
         ];
     }
 }

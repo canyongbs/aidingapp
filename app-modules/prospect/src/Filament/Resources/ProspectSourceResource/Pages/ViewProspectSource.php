@@ -34,18 +34,18 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Prospect\Filament\Resources\ProspectSourceResource\Pages;
+namespace AdvisingApp\Contact\Filament\Resources\ContactSourceResource\Pages;
 
 use Filament\Actions;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
-use AdvisingApp\Prospect\Filament\Resources\ProspectSourceResource;
+use AdvisingApp\Contact\Filament\Resources\ContactSourceResource;
 
-class ViewProspectSource extends ViewRecord
+class ViewContactSource extends ViewRecord
 {
-    protected static string $resource = ProspectSourceResource::class;
+    protected static string $resource = ContactSourceResource::class;
 
     public function infolist(Infolist $infolist): Infolist
     {

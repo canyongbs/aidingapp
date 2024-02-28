@@ -34,23 +34,23 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Prospect\Filament\Resources\ProspectResource\Pages;
+namespace AdvisingApp\Contact\Filament\Resources\ContactResource\Pages;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Contracts\Support\Htmlable;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use App\Filament\Concerns\FiltersManagersFromGroups;
 use Filament\Resources\RelationManagers\RelationGroup;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource\RelationManagers\AssetCheckInRelationManager;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource\RelationManagers\AssetCheckOutRelationManager;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource\RelationManagers\ServiceRequestsRelationManager;
+use AdvisingApp\Contact\Filament\Resources\ContactResource;
+use AdvisingApp\Contact\Filament\Resources\ContactResource\RelationManagers\AssetCheckInRelationManager;
+use AdvisingApp\Contact\Filament\Resources\ContactResource\RelationManagers\AssetCheckOutRelationManager;
+use AdvisingApp\Contact\Filament\Resources\ContactResource\RelationManagers\ServiceRequestsRelationManager;
 
-class ProspectServiceManagement extends ManageRelatedRecords
+class ContactServiceManagement extends ManageRelatedRecords
 {
     use FiltersManagersFromGroups;
 
-    protected static string $resource = ProspectResource::class;
+    protected static string $resource = ContactResource::class;
 
     protected static string $relationship = 'serviceRequests';
 
@@ -62,7 +62,7 @@ class ProspectServiceManagement extends ManageRelatedRecords
 
     public function getTitle(): string | Htmlable
     {
-        return 'Prospect Service Management';
+        return 'Contact Service Management';
     }
 
     public static function canAccess(array $arguments = []): bool

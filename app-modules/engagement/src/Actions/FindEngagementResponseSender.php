@@ -37,13 +37,13 @@
 namespace AdvisingApp\Engagement\Actions;
 
 use Illuminate\Support\Facades\Log;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\Engagement\Actions\Contracts\EngagementResponseSenderFinder;
 
 class FindEngagementResponseSender implements EngagementResponseSenderFinder
 {
-    public function find(string $phoneNumber): Student|Prospect|null
+    public function find(string $phoneNumber): Student|Contact|null
     {
         // Student currently takes priority, but determine if we potentially want to store this response
         // For *all* potential matches instead of just a singular result.
@@ -51,12 +51,12 @@ class FindEngagementResponseSender implements EngagementResponseSenderFinder
             return $student;
         }
 
-        if (! is_null($prospect = Prospect::where('mobile', $phoneNumber)->orWhere('phone', $phoneNumber)->first())) {
-            return $prospect;
+        if (! is_null($contact = Contact::where('mobile', $phoneNumber)->orWhere('phone', $phoneNumber)->first())) {
+            return $contact;
         }
 
         // TODO Perhaps send a notification to an admin, but don't need to throw an exception.
-        Log::error("Could not find a Student or Prospect with the given phone number: {$phoneNumber}");
+        Log::error("Could not find a Student or Contact with the given phone number: {$phoneNumber}");
 
         return null;
     }

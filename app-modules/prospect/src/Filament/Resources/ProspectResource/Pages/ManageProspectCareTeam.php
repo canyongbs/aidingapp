@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Prospect\Filament\Resources\ProspectResource\Pages;
+namespace AdvisingApp\Contact\Filament\Resources\ContactResource\Pages;
 
 use App\Models\User;
 use Filament\Tables\Table;
@@ -42,7 +42,7 @@ use App\Models\Scopes\HasLicense;
 use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\TextColumn;
 use App\Filament\Resources\UserResource;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Tables\Actions\AttachAction;
 use Filament\Tables\Actions\DetachAction;
@@ -50,11 +50,11 @@ use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DetachBulkAction;
 use Filament\Resources\Pages\ManageRelatedRecords;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource;
+use AdvisingApp\Contact\Filament\Resources\ContactResource;
 
-class ManageProspectCareTeam extends ManageRelatedRecords
+class ManageContactCareTeam extends ManageRelatedRecords
 {
-    protected static string $resource = ProspectResource::class;
+    protected static string $resource = ContactResource::class;
 
     protected static string $relationship = 'careTeam';
 
@@ -82,10 +82,10 @@ class ManageProspectCareTeam extends ManageRelatedRecords
                 AttachAction::make()
                     ->label('Add to Care Team')
                     ->modalHeading(function () {
-                        /** @var Prospect $prospect */
-                        $prospect = $this->getOwnerRecord();
+                        /** @var Contact $contact */
+                        $contact = $this->getOwnerRecord();
 
-                        return "Add a User to {$prospect->display_name}'s Care Team";
+                        return "Add a User to {$contact->display_name}'s Care Team";
                     })
                     ->modalSubmitActionLabel('Add')
                     ->attachAnother(false)
@@ -94,30 +94,30 @@ class ManageProspectCareTeam extends ManageRelatedRecords
                         fn (Select $select) => $select->placeholder('Select a User'),
                     )
                     ->recordSelectOptionsQuery(
-                        fn (Builder $query) => $query->tap(new HasLicense(Prospect::getLicenseType())),
+                        fn (Builder $query) => $query->tap(new HasLicense(Contact::getLicenseType())),
                     )
                     ->successNotificationTitle(function (User $record) {
-                        /** @var Prospect $prospect */
-                        $prospect = $this->getOwnerRecord();
+                        /** @var Contact $contact */
+                        $contact = $this->getOwnerRecord();
 
-                        return "{$record->name} was added to {$prospect->display_name}'s Care Team";
+                        return "{$record->name} was added to {$contact->display_name}'s Care Team";
                     }),
             ])
             ->actions([
                 DetachAction::make()
                     ->label('Remove')
                     ->modalHeading(function (User $record) {
-                        /** @var Prospect $prospect */
-                        $prospect = $this->getOwnerRecord();
+                        /** @var Contact $contact */
+                        $contact = $this->getOwnerRecord();
 
-                        return "Remove {$record->name} from {$prospect->display_name}'s Care Team";
+                        return "Remove {$record->name} from {$contact->display_name}'s Care Team";
                     })
                     ->modalSubmitActionLabel('Remove')
                     ->successNotificationTitle(function (User $record) {
-                        /** @var Prospect $prospect */
-                        $prospect = $this->getOwnerRecord();
+                        /** @var Contact $contact */
+                        $contact = $this->getOwnerRecord();
 
-                        return "{$record->name} was removed from {$prospect->display_name}'s Care Team";
+                        return "{$record->name} was removed from {$contact->display_name}'s Care Team";
                     }),
             ])
             ->bulkActions([
@@ -125,21 +125,21 @@ class ManageProspectCareTeam extends ManageRelatedRecords
                     DetachBulkAction::make()
                         ->label('Remove selected')
                         ->modalHeading(function () {
-                            /** @var Prospect $prospect */
-                            $prospect = $this->getOwnerRecord();
+                            /** @var Contact $contact */
+                            $contact = $this->getOwnerRecord();
 
-                            return "Remove selected users from {$prospect->display_name}'s Care Team";
+                            return "Remove selected users from {$contact->display_name}'s Care Team";
                         })
                         ->modalSubmitActionLabel('Remove')
                         ->successNotificationTitle(function () {
-                            /** @var Prospect $prospect */
-                            $prospect = $this->getOwnerRecord();
+                            /** @var Contact $contact */
+                            $contact = $this->getOwnerRecord();
 
-                            return "All selected users were removed from {$prospect->display_name}'s Care Team";
+                            return "All selected users were removed from {$contact->display_name}'s Care Team";
                         }),
                 ]),
             ])
             ->emptyStateHeading('No Users')
-            ->inverseRelationship('prospectCareTeams');
+            ->inverseRelationship('contactCareTeams');
     }
 }

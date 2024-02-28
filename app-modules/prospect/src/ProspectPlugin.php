@@ -34,16 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Prospect;
+namespace AdvisingApp\Contact;
 
 use Filament\Panel;
 use Filament\Contracts\Plugin;
 
-class ProspectPlugin implements Plugin
+class ContactPlugin implements Plugin
 {
     public function getId(): string
     {
-        return 'prospect';
+        return 'contact';
     }
 
     public function register(Panel $panel): void
@@ -51,15 +51,15 @@ class ProspectPlugin implements Plugin
         $panel
             ->discoverResources(
                 in: __DIR__ . '/Filament/Resources',
-                for: 'AdvisingApp\\Prospect\\Filament\\Resources'
+                for: 'AdvisingApp\\Contact\\Filament\\Resources'
             )
             ->discoverPages(
                 in: __DIR__ . '/Filament/Pages',
-                for: 'AdvisingApp\\Prospect\\Filament\\Pages'
+                for: 'AdvisingApp\\Contact\\Filament\\Pages'
             )
             ->discoverWidgets(
                 in: __DIR__ . '/Filament/Widgets',
-                for: 'AdvisingApp\\Prospect\\Filament\\Widgets'
+                for: 'AdvisingApp\\Contact\\Filament\\Widgets'
             );
     }
 

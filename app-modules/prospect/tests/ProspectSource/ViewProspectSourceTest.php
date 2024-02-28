@@ -39,49 +39,49 @@ use App\Models\User;
 use function Tests\asSuperAdmin;
 use function Pest\Laravel\actingAs;
 
-use AdvisingApp\Prospect\Models\Prospect;
-use AdvisingApp\Prospect\Models\ProspectSource;
-use AdvisingApp\Prospect\Filament\Resources\ProspectSourceResource;
+use AdvisingApp\Contact\Models\Contact;
+use AdvisingApp\Contact\Models\ContactSource;
+use AdvisingApp\Contact\Filament\Resources\ContactSourceResource;
 
-test('The correct details are displayed on the ViewProspectSource page', function () {
-    $prospectSource = ProspectSource::factory()->create();
+test('The correct details are displayed on the ViewContactSource page', function () {
+    $contactSource = ContactSource::factory()->create();
 
     asSuperAdmin()
         ->get(
-            ProspectSourceResource::getUrl('view', [
-                'record' => $prospectSource,
+            ContactSourceResource::getUrl('view', [
+                'record' => $contactSource,
             ])
         )
         ->assertSuccessful()
         ->assertSeeTextInOrder(
             [
                 'Name',
-                $prospectSource->name,
+                $contactSource->name,
             ]
         );
 });
 
 // Permission Tests
 
-test('ViewProspectSource is gated with proper access control', function () {
-    $user = User::factory()->licensed(Prospect::getLicenseType())->create();
+test('ViewContactSource is gated with proper access control', function () {
+    $user = User::factory()->licensed(Contact::getLicenseType())->create();
 
-    $prospectSource = ProspectSource::factory()->create();
+    $contactSource = ContactSource::factory()->create();
 
     actingAs($user)
         ->get(
-            ProspectSourceResource::getUrl('view', [
-                'record' => $prospectSource,
+            ContactSourceResource::getUrl('view', [
+                'record' => $contactSource,
             ])
         )->assertForbidden();
 
-    $user->givePermissionTo('prospect_source.view-any');
-    $user->givePermissionTo('prospect_source.*.view');
+    $user->givePermissionTo('contact_source.view-any');
+    $user->givePermissionTo('contact_source.*.view');
 
     actingAs($user)
         ->get(
-            ProspectSourceResource::getUrl('view', [
-                'record' => $prospectSource,
+            ContactSourceResource::getUrl('view', [
+                'record' => $contactSource,
             ])
         )->assertSuccessful();
 });

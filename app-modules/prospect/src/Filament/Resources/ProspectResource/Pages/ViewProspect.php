@@ -34,21 +34,21 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Prospect\Filament\Resources\ProspectResource\Pages;
+namespace AdvisingApp\Contact\Filament\Resources\ContactResource\Pages;
 
 use Filament\Actions\EditAction;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource;
+use AdvisingApp\Contact\Filament\Resources\ContactResource;
 use AdvisingApp\Notification\Filament\Actions\SubscribeHeaderAction;
 
-class ViewProspect extends ViewRecord
+class ViewContact extends ViewRecord
 {
-    protected static string $resource = ProspectResource::class;
+    protected static string $resource = ContactResource::class;
 
     // TODO: Automatically set from Filament
     protected static ?string $navigationLabel = 'View';
@@ -65,7 +65,7 @@ class ViewProspect extends ViewRecord
                         TextEntry::make('last_name')
                             ->label('Last Name')
                             ->translateLabel(),
-                        TextEntry::make(Prospect::displayNameKey())
+                        TextEntry::make(Contact::displayNameKey())
                             ->label('Full Name')
                             ->translateLabel(),
                         TextEntry::make('preferred')

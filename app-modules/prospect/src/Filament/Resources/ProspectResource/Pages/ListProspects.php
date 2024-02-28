@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Prospect\Filament\Resources\ProspectResource\Pages;
+namespace AdvisingApp\Contact\Filament\Resources\ContactResource\Pages;
 
 use App\Models\User;
 use Filament\Forms\Get;
@@ -51,7 +51,7 @@ use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Filters\SelectFilter;
@@ -59,12 +59,12 @@ use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Actions\BulkActionGroup;
 use Illuminate\Database\Eloquent\Collection;
 use Filament\Tables\Actions\DeleteBulkAction;
-use AdvisingApp\Prospect\Models\ProspectSource;
-use AdvisingApp\Prospect\Models\ProspectStatus;
-use AdvisingApp\Prospect\Imports\ProspectImporter;
+use AdvisingApp\Contact\Models\ContactSource;
+use AdvisingApp\Contact\Models\ContactStatus;
+use AdvisingApp\Contact\Imports\ContactImporter;
 use AdvisingApp\CaseloadManagement\Models\Caseload;
 use AdvisingApp\CaseloadManagement\Enums\CaseloadModel;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource;
+use AdvisingApp\Contact\Filament\Resources\ContactResource;
 use AdvisingApp\Engagement\Filament\Actions\BulkEngagementAction;
 use AdvisingApp\Notification\Filament\Actions\SubscribeBulkAction;
 use AdvisingApp\CareTeam\Filament\Actions\ToggleCareTeamBulkAction;
@@ -73,18 +73,18 @@ use AdvisingApp\CaseloadManagement\Actions\TranslateCaseloadFilters;
 use AdvisingApp\Engagement\Filament\Actions\Contracts\HasBulkEngagementAction;
 use AdvisingApp\Engagement\Filament\Actions\Concerns\ImplementsHasBulkEngagementAction;
 
-class ListProspects extends ListRecords implements HasBulkEngagementAction
+class ListContacts extends ListRecords implements HasBulkEngagementAction
 {
     use ImplementsHasBulkEngagementAction;
 
-    protected static string $resource = ProspectResource::class;
+    protected static string $resource = ContactResource::class;
 
     public function table(Table $table): Table
     {
         return $table
             ->columns([
                 IdColumn::make(),
-                TextColumn::make(Prospect::displayNameKey())
+                TextColumn::make(Contact::displayNameKey())
                     ->label('Name')
                     ->searchable()
                     ->sortable(),
@@ -101,16 +101,16 @@ class ListProspects extends ListRecords implements HasBulkEngagementAction
                 TextColumn::make('status')
                     ->badge()
                     ->translateLabel()
-                    ->state(function (Prospect $record) {
+                    ->state(function (Contact $record) {
                         return $record->status->name;
                     })
-                    ->color(function (Prospect $record) {
+                    ->color(function (Contact $record) {
                         return $record->status->color->value;
                     })
                     ->sortable(query: function (Builder $query, string $direction): Builder {
                         return $query
-                            ->join('prospect_statuses', 'prospects.status_id', '=', 'prospect_statuses.id')
-                            ->orderBy('prospect_statuses.name', $direction);
+                            ->join('contact_statuses', 'contacts.status_id', '=', 'contact_statuses.id')
+                            ->orderBy('contact_statuses.name', $direction);
                     }),
                 TextColumn::make('source.name')
                     ->label('Source')
@@ -126,7 +126,7 @@ class ListProspects extends ListRecords implements HasBulkEngagementAction
                     ->label('My Caseloads')
                     ->options(
                         auth()->user()->caseloads()
-                            ->where('model', CaseloadModel::Prospect)
+                            ->where('model', CaseloadModel::Contact)
                             ->pluck('name', 'id'),
                     )
                     ->searchable()
@@ -136,7 +136,7 @@ class ListProspects extends ListRecords implements HasBulkEngagementAction
                     ->label('All Caseloads')
                     ->options(
                         Caseload::all()
-                            ->where('model', CaseloadModel::Prospect)
+                            ->where('model', CaseloadModel::Contact)
                             ->pluck('name', 'id'),
                     )
                     ->searchable()
@@ -168,7 +168,7 @@ class ListProspects extends ListRecords implements HasBulkEngagementAction
             ->bulkActions([
                 BulkActionGroup::make([
                     SubscribeBulkAction::make(),
-                    BulkEngagementAction::make(context: 'prospects'),
+                    BulkEngagementAction::make(context: 'contacts'),
                     DeleteBulkAction::make(),
                     ToggleCareTeamBulkAction::make(),
                     BulkAction::make('bulk_update')
@@ -221,8 +221,8 @@ class ListProspects extends ListRecords implements HasBulkEngagementAction
                                 ->label('Source')
                                 ->relationship('source', 'name')
                                 ->exists(
-                                    table: (new ProspectSource())->getTable(),
-                                    column: (new ProspectSource())->getKeyName()
+                                    table: (new ContactSource())->getTable(),
+                                    column: (new ContactSource())->getKeyName()
                                 )
                                 ->required()
                                 ->visible(fn (Get $get) => $get('field') === 'source_id'),
@@ -230,21 +230,21 @@ class ListProspects extends ListRecords implements HasBulkEngagementAction
                                 ->label('Status')
                                 ->relationship('status', 'name')
                                 ->exists(
-                                    table: (new ProspectStatus())->getTable(),
-                                    column: (new ProspectStatus())->getKeyName()
+                                    table: (new ContactStatus())->getTable(),
+                                    column: (new ContactStatus())->getKeyName()
                                 )
                                 ->required()
                                 ->visible(fn (Get $get) => $get('field') === 'status_id'),
                         ])
                         ->action(function (Collection $records, array $data) {
                             $records->each(
-                                fn (Prospect $prospect) => $prospect
+                                fn (Contact $contact) => $contact
                                     ->forceFill([$data['field'] => $data[$data['field']]])
                                     ->save()
                             );
 
                             Notification::make()
-                                ->title($records->count() . ' ' . str('Prospect')->plural($records->count()) . ' Updated')
+                                ->title($records->count() . ' ' . str('Contact')->plural($records->count()) . ' Updated')
                                 ->success()
                                 ->send();
                         }),
@@ -269,8 +269,8 @@ class ListProspects extends ListRecords implements HasBulkEngagementAction
     {
         return [
             ImportAction::make()
-                ->importer(ProspectImporter::class)
-                ->authorize('import', Prospect::class),
+                ->importer(ContactImporter::class)
+                ->authorize('import', Contact::class),
             CreateAction::make(),
         ];
     }

@@ -40,11 +40,11 @@ use App\Models\User;
 use Filament\Actions\ViewAction;
 use Illuminate\Support\HtmlString;
 use App\Filament\Resources\UserResource;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use Filament\Infolists\Components\TextEntry;
 use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\Notification\Models\OutboundDeliverable;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource;
+use AdvisingApp\Contact\Filament\Resources\ContactResource;
 use AdvisingApp\StudentDataModel\Filament\Resources\StudentResource;
 
 class OutboundDeliverableViewAction extends ViewAction
@@ -58,7 +58,7 @@ class OutboundDeliverableViewAction extends ViewAction
                 ->getStateUsing(fn (OutboundDeliverable $record): ?string => $record->recipient?->{$record->recipient::displayNameKey()})
                 ->url(fn (OutboundDeliverable $record) => match ($record->recipient ? $record->recipient::class : null) {
                     Student::class => StudentResource::getUrl('view', ['record' => $record->recipient]),
-                    Prospect::class => ProspectResource::getUrl('view', ['record' => $record->recipient]),
+                    Contact::class => ContactResource::getUrl('view', ['record' => $record->recipient]),
                     User::class => UserResource::getUrl('view', ['record' => $record->recipient]),
                     default => null,
                 })

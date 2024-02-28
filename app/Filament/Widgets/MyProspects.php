@@ -37,19 +37,19 @@
 namespace App\Filament\Widgets;
 
 use Illuminate\Support\Number;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
-class MyProspects extends StatsOverviewWidget
+class MyContacts extends StatsOverviewWidget
 {
     protected function getStats(): array
     {
         return [
             Stat::make(
-                'Prospects (Subscribed)',
+                'Contacts (Subscribed)',
                 Number::abbreviate(
-                    auth()->user()->subscriptions()->where('subscribable_type', (new Prospect())->getMorphClass())->count()
+                    auth()->user()->subscriptions()->where('subscribable_type', (new Contact())->getMorphClass())->count()
                 )
             ),
         ];

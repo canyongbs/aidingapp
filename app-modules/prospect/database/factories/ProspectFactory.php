@@ -34,18 +34,18 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Prospect\Database\Factories;
+namespace AdvisingApp\Contact\Database\Factories;
 
 use App\Models\User;
-use AdvisingApp\Prospect\Models\Prospect;
-use AdvisingApp\Prospect\Models\ProspectSource;
-use AdvisingApp\Prospect\Models\ProspectStatus;
+use AdvisingApp\Contact\Models\Contact;
+use AdvisingApp\Contact\Models\ContactSource;
+use AdvisingApp\Contact\Models\ContactStatus;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends Factory<Prospect>
+ * @extends Factory<Contact>
  */
-class ProspectFactory extends Factory
+class ContactFactory extends Factory
 {
     public function definition(): array
     {
@@ -54,8 +54,8 @@ class ProspectFactory extends Factory
         $address3 = fake()->optional()->words(asText: true);
 
         return [
-            'status_id' => ProspectStatus::inRandomOrder()->first() ?? ProspectStatus::factory(),
-            'source_id' => ProspectSource::inRandomOrder()->first() ?? ProspectSource::factory(),
+            'status_id' => ContactStatus::inRandomOrder()->first() ?? ContactStatus::factory(),
+            'source_id' => ContactSource::inRandomOrder()->first() ?? ContactSource::factory(),
             'first_name' => $firstName,
             'last_name' => $lastName,
             'full_name' => "{$firstName} {$lastName}",

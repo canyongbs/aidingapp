@@ -34,16 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Prospect\Filament\Resources\ProspectSourceResource\Pages;
+namespace AdvisingApp\Contact\Filament\Resources\ContactSourceResource\Pages;
 
 use Filament\Forms\Form;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\CreateRecord;
-use AdvisingApp\Prospect\Filament\Resources\ProspectSourceResource;
+use AdvisingApp\Contact\Filament\Resources\ContactSourceResource;
 
-class CreateProspectSource extends CreateRecord
+class CreateContactSource extends CreateRecord
 {
-    protected static string $resource = ProspectSourceResource::class;
+    protected static string $resource = ContactSourceResource::class;
 
     public function form(Form $form): Form
     {

@@ -40,39 +40,39 @@ use function Tests\asSuperAdmin;
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
-use AdvisingApp\Prospect\Models\Prospect;
-use AdvisingApp\Prospect\Models\ProspectSource;
-use AdvisingApp\Prospect\Filament\Resources\ProspectSourceResource;
-use AdvisingApp\Prospect\Filament\Resources\ProspectSourceResource\Pages\ListProspectSources;
+use AdvisingApp\Contact\Models\Contact;
+use AdvisingApp\Contact\Models\ContactSource;
+use AdvisingApp\Contact\Filament\Resources\ContactSourceResource;
+use AdvisingApp\Contact\Filament\Resources\ContactSourceResource\Pages\ListContactSources;
 
-test('The correct details are displayed on the ListProspectSources page', function () {
-    $prospectSources = ProspectSource::factory()
-        // TODO: Fix this once Prospect factory is created
+test('The correct details are displayed on the ListContactSources page', function () {
+    $contactSources = ContactSource::factory()
+        // TODO: Fix this once Contact factory is created
         //->has(ServiceRequest::factory()->count(fake()->randomNumber(1)), 'serviceRequests')
         ->count(10)
         ->create();
 
     asSuperAdmin();
 
-    $component = livewire(ListProspectSources::class);
+    $component = livewire(ListContactSources::class);
 
     $component
         ->assertSuccessful()
-        ->assertCanSeeTableRecords($prospectSources)
+        ->assertCanSeeTableRecords($contactSources)
         ->assertCountTableRecords(10)
-        ->assertTableColumnExists('prospects_count');
+        ->assertTableColumnExists('contacts_count');
 
-    $prospectSources->each(
-        fn (ProspectSource $prospectSource) => $component
+    $contactSources->each(
+        fn (ContactSource $contactSource) => $component
             ->assertTableColumnStateSet(
                 'id',
-                $prospectSource->id,
-                $prospectSource
+                $contactSource->id,
+                $contactSource
             )
             ->assertTableColumnStateSet(
                 'name',
-                $prospectSource->name,
-                $prospectSource
+                $contactSource->name,
+                $contactSource
             )
         // Currently setting not test for service_requests_count as there is no easy way to check now, relying on underlying package tests
     );
@@ -82,18 +82,18 @@ test('The correct details are displayed on the ListProspectSources page', functi
 
 // Permission Tests
 
-test('ListProspectSources is gated with proper access control', function () {
-    $user = User::factory()->licensed(Prospect::getLicenseType())->create();
+test('ListContactSources is gated with proper access control', function () {
+    $user = User::factory()->licensed(Contact::getLicenseType())->create();
 
     actingAs($user)
         ->get(
-            ProspectSourceResource::getUrl('index')
+            ContactSourceResource::getUrl('index')
         )->assertForbidden();
 
-    $user->givePermissionTo('prospect_source.view-any');
+    $user->givePermissionTo('contact_source.view-any');
 
     actingAs($user)
         ->get(
-            ProspectSourceResource::getUrl('index')
+            ContactSourceResource::getUrl('index')
         )->assertSuccessful();
 });

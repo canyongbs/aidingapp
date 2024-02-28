@@ -41,14 +41,14 @@ use Filament\Actions\EditAction;
 use Filament\Infolists\Infolist;
 use Filament\Infolists\Components\Group;
 use Filament\Resources\Pages\ViewRecord;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\ViewEntry;
 use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\ServiceManagement\Models\ServiceRequest;
 use AdvisingApp\ServiceManagement\Enums\SlaComplianceStatus;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource;
+use AdvisingApp\Contact\Filament\Resources\ContactResource;
 use AdvisingApp\StudentDataModel\Filament\Resources\StudentResource;
 use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 
@@ -92,21 +92,21 @@ class ViewServiceRequest extends ViewRecord
                             ->label('Related To')
                             ->color('primary')
                             ->state(function (ServiceRequest $record): string {
-                                /** @var Student|Prospect $respondent */
+                                /** @var Student|Contact $respondent */
                                 $respondent = $record->respondent;
 
                                 return match ($respondent::class) {
                                     Student::class => "{$respondent->{Student::displayNameKey()}} (Student)",
-                                    Prospect::class => "{$respondent->{Prospect::displayNameKey()}} (Prospect)",
+                                    Contact::class => "{$respondent->{Contact::displayNameKey()}} (Contact)",
                                 };
                             })
                             ->url(function (ServiceRequest $record) {
-                                /** @var Student|Prospect $respondent */
+                                /** @var Student|Contact $respondent */
                                 $respondent = $record->respondent;
 
                                 return match ($respondent::class) {
                                     Student::class => StudentResource::getUrl('view', ['record' => $respondent->sisid]),
-                                    Prospect::class => ProspectResource::getUrl('view', ['record' => $respondent->id]),
+                                    Contact::class => ContactResource::getUrl('view', ['record' => $respondent->id]),
                                 };
                             }),
                     ])

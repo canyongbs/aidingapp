@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Prospect\Filament\Resources\ProspectResource\Pages;
+namespace AdvisingApp\Contact\Filament\Resources\ContactResource\Pages;
 
 use App\Models\User;
 use Filament\Tables\Table;
@@ -42,7 +42,7 @@ use App\Models\Scopes\HasLicense;
 use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\TextColumn;
 use App\Filament\Resources\UserResource;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Tables\Actions\AttachAction;
 use Filament\Tables\Actions\DetachAction;
@@ -50,11 +50,11 @@ use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DetachBulkAction;
 use Filament\Resources\Pages\ManageRelatedRecords;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource;
+use AdvisingApp\Contact\Filament\Resources\ContactResource;
 
-class ManageProspectSubscriptions extends ManageRelatedRecords
+class ManageContactSubscriptions extends ManageRelatedRecords
 {
-    protected static string $resource = ProspectResource::class;
+    protected static string $resource = ContactResource::class;
 
     protected static string $relationship = 'subscribedUsers';
 
@@ -84,10 +84,10 @@ class ManageProspectSubscriptions extends ManageRelatedRecords
                 AttachAction::make()
                     ->label('Create Subscription')
                     ->modalHeading(function () {
-                        /** @var Prospect $prospect */
-                        $prospect = $this->getOwnerRecord();
+                        /** @var Contact $contact */
+                        $contact = $this->getOwnerRecord();
 
-                        return 'Subscribe a User to ' . $prospect->display_name;
+                        return 'Subscribe a User to ' . $contact->display_name;
                     })
                     ->modalSubmitActionLabel('Subscribe')
                     ->attachAnother(false)
@@ -96,30 +96,30 @@ class ManageProspectSubscriptions extends ManageRelatedRecords
                         fn (Select $select) => $select->placeholder('Select a User'),
                     )
                     ->recordSelectOptionsQuery(
-                        fn (Builder $query) => $query->tap(new HasLicense(Prospect::getLicenseType())),
+                        fn (Builder $query) => $query->tap(new HasLicense(Contact::getLicenseType())),
                     )
                     ->successNotificationTitle(function (User $record) {
-                        /** @var Prospect $prospect */
-                        $prospect = $this->getOwnerRecord();
+                        /** @var Contact $contact */
+                        $contact = $this->getOwnerRecord();
 
-                        return "{$record->name} was subscribed to {$prospect->display_name}";
+                        return "{$record->name} was subscribed to {$contact->display_name}";
                     }),
             ])
             ->actions([
                 DetachAction::make()
                     ->label('Unsubscribe')
                     ->modalHeading(function (User $record) {
-                        /** @var Prospect $prospect */
-                        $prospect = $this->getOwnerRecord();
+                        /** @var Contact $contact */
+                        $contact = $this->getOwnerRecord();
 
-                        return "Unsubscribe {$record->name} from {$prospect->display_name}";
+                        return "Unsubscribe {$record->name} from {$contact->display_name}";
                     })
                     ->modalSubmitActionLabel('Unsubscribe')
                     ->successNotificationTitle(function (User $record) {
-                        /** @var Prospect $prospect */
-                        $prospect = $this->getOwnerRecord();
+                        /** @var Contact $contact */
+                        $contact = $this->getOwnerRecord();
 
-                        return "{$record->name} was unsubscribed from {$prospect->display_name}";
+                        return "{$record->name} was unsubscribed from {$contact->display_name}";
                     }),
             ])
             ->bulkActions([
@@ -127,21 +127,21 @@ class ManageProspectSubscriptions extends ManageRelatedRecords
                     DetachBulkAction::make()
                         ->label('Unsubscribe selected')
                         ->modalHeading(function () {
-                            /** @var Prospect $prospect */
-                            $prospect = $this->getOwnerRecord();
+                            /** @var Contact $contact */
+                            $contact = $this->getOwnerRecord();
 
-                            return "Unsubscribe selected from {$prospect->display_name}";
+                            return "Unsubscribe selected from {$contact->display_name}";
                         })
                         ->modalSubmitActionLabel('Unsubscribe')
                         ->successNotificationTitle(function () {
-                            /** @var Prospect $prospect */
-                            $prospect = $this->getOwnerRecord();
+                            /** @var Contact $contact */
+                            $contact = $this->getOwnerRecord();
 
-                            return "All selected were unsubscribed from {$prospect->display_name}";
+                            return "All selected were unsubscribed from {$contact->display_name}";
                         }),
                 ]),
             ])
             ->emptyStateHeading('No Subscriptions')
-            ->inverseRelationship('prospectSubscriptions');
+            ->inverseRelationship('contactSubscriptions');
     }
 }

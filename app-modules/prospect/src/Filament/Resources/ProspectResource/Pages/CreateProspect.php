@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Prospect\Filament\Resources\ProspectResource\Pages;
+namespace AdvisingApp\Contact\Filament\Resources\ContactResource\Pages;
 
 use App\Models\User;
 use Filament\Forms\Form;
@@ -43,17 +43,17 @@ use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use Filament\Forms\Components\DatePicker;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Resources\Pages\CreateRecord;
-use AdvisingApp\Prospect\Models\ProspectSource;
-use AdvisingApp\Prospect\Models\ProspectStatus;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource;
+use AdvisingApp\Contact\Models\ContactSource;
+use AdvisingApp\Contact\Models\ContactStatus;
+use AdvisingApp\Contact\Filament\Resources\ContactResource;
 
-class CreateProspect extends CreateRecord
+class CreateContact extends CreateRecord
 {
-    protected static string $resource = ProspectResource::class;
+    protected static string $resource = ContactResource::class;
 
     public function form(Form $form): Form
     {
@@ -64,16 +64,16 @@ class CreateProspect extends CreateRecord
                     ->required()
                     ->relationship('status', 'name')
                     ->exists(
-                        table: (new ProspectStatus())->getTable(),
-                        column: (new ProspectStatus())->getKeyName()
+                        table: (new ContactStatus())->getTable(),
+                        column: (new ContactStatus())->getKeyName()
                     ),
                 Select::make('source_id')
                     ->label('Source')
                     ->required()
                     ->relationship('source', 'name')
                     ->exists(
-                        table: (new ProspectSource())->getTable(),
-                        column: (new ProspectSource())->getKeyName()
+                        table: (new ContactSource())->getTable(),
+                        column: (new ContactSource())->getKeyName()
                     ),
                 TextInput::make('first_name')
                     ->label('First Name')
@@ -83,7 +83,7 @@ class CreateProspect extends CreateRecord
                     ->label('Last Name')
                     ->required()
                     ->string(),
-                TextInput::make(Prospect::displayNameKey())
+                TextInput::make(Contact::displayNameKey())
                     ->label('Full Name')
                     ->required()
                     ->string(),
@@ -138,7 +138,7 @@ class CreateProspect extends CreateRecord
                     ->relationship(
                         'assignedTo',
                         'name',
-                        fn (Builder $query) => $query->tap(new HasLicense(Prospect::getLicenseType())),
+                        fn (Builder $query) => $query->tap(new HasLicense(Contact::getLicenseType())),
                     )
                     ->searchable()
                     ->nullable()

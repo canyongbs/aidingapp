@@ -39,96 +39,96 @@ use App\Models\User;
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
-use AdvisingApp\Prospect\Models\Prospect;
-use AdvisingApp\Prospect\Models\ProspectSource;
-use AdvisingApp\Prospect\Models\ProspectStatus;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource;
+use AdvisingApp\Contact\Models\Contact;
+use AdvisingApp\Contact\Models\ContactSource;
+use AdvisingApp\Contact\Models\ContactStatus;
+use AdvisingApp\Contact\Filament\Resources\ContactResource;
 
-// TODO: Write ListProspects page test
-//test('The correct details are displayed on the ListProspects page', function () {});
+// TODO: Write ListContacts page test
+//test('The correct details are displayed on the ListContacts page', function () {});
 
 // TODO: Sorting and Searching tests
 
 // Permission Tests
 
-test('ListProspects is gated with proper access control', function () {
-    $user = User::factory()->licensed(Prospect::getLicenseType())->create();
+test('ListContacts is gated with proper access control', function () {
+    $user = User::factory()->licensed(Contact::getLicenseType())->create();
 
     actingAs($user)
         ->get(
-            ProspectResource::getUrl('index')
+            ContactResource::getUrl('index')
         )->assertForbidden();
 
-    $user->givePermissionTo('prospect.view-any');
+    $user->givePermissionTo('contact.view-any');
 
     actingAs($user)
         ->get(
-            ProspectResource::getUrl('index')
+            ContactResource::getUrl('index')
         )->assertSuccessful();
 });
 
-test('ListProspects can bulk update characteristics', function () {
-    $user = User::factory()->licensed(Prospect::getLicenseType())->create();
+test('ListContacts can bulk update characteristics', function () {
+    $user = User::factory()->licensed(Contact::getLicenseType())->create();
 
-    $user->givePermissionTo('prospect.view-any');
+    $user->givePermissionTo('contact.view-any');
 
     actingAs($user);
 
-    $prospects = Prospect::factory()->count(3)->create();
+    $contacts = Contact::factory()->count(3)->create();
 
-    $component = livewire(ProspectResource\Pages\ListProspects::class);
+    $component = livewire(ContactResource\Pages\ListContacts::class);
 
-    $component->assertCanSeeTableRecords($prospects)
-        ->assertCountTableRecords($prospects->count())
+    $component->assertCanSeeTableRecords($contacts)
+        ->assertCountTableRecords($contacts->count())
         ->assertTableBulkActionExists('bulk_update');
 
-    $source = ProspectSource::factory()->create();
+    $source = ContactSource::factory()->create();
 
-    $status = ProspectStatus::factory()->create();
+    $status = ContactStatus::factory()->create();
 
     $description = 'abc123';
     $hsgrad = '2000';
 
     $component
-        ->callTableBulkAction('bulk_update', $prospects, [
+        ->callTableBulkAction('bulk_update', $contacts, [
             'field' => 'assigned_to_id',
             'assigned_to_id' => $user->id,
         ])
         ->assertHasNoTableBulkActionErrors()
-        ->callTableBulkAction('bulk_update', $prospects, [
+        ->callTableBulkAction('bulk_update', $contacts, [
             'field' => 'description',
             'description' => $description,
         ])
         ->assertHasNoTableBulkActionErrors()
-        ->callTableBulkAction('bulk_update', $prospects, [
+        ->callTableBulkAction('bulk_update', $contacts, [
             'field' => 'email_bounce',
             'email_bounce' => true,
         ])
         ->assertHasNoTableBulkActionErrors()
-        ->callTableBulkAction('bulk_update', $prospects, [
+        ->callTableBulkAction('bulk_update', $contacts, [
             'field' => 'hsgrad',
             'hsgrad' => $hsgrad,
         ])
         ->assertHasNoTableBulkActionErrors()
-        ->callTableBulkAction('bulk_update', $prospects, [
+        ->callTableBulkAction('bulk_update', $contacts, [
             'field' => 'sms_opt_out',
             'sms_opt_out' => true,
         ])
         ->assertHasNoTableBulkActionErrors()
-        ->callTableBulkAction('bulk_update', $prospects, [
+        ->callTableBulkAction('bulk_update', $contacts, [
             'field' => 'source_id',
             'source_id' => $source->id,
         ])
         ->assertHasNoTableBulkActionErrors()
-        ->callTableBulkAction('bulk_update', $prospects, [
+        ->callTableBulkAction('bulk_update', $contacts, [
             'field' => 'status_id',
             'status_id' => $status->id,
         ])
         ->assertHasNoTableBulkActionErrors();
 
-    expect($prospects)
+    expect($contacts)
         ->each(
-            fn ($prospect) => $prospect
+            fn ($contact) => $contact
                 ->refresh()
                 ->assigned_to_id->toBe($user->id)
                 ->description->toBe($description)

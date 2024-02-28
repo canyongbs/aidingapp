@@ -38,7 +38,7 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use AdvisingApp\Engagement\Models\Engagement;
 use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\Engagement\Models\EngagementResponse;
@@ -70,15 +70,15 @@ class SuperAdminSeeder extends Seeder
                 ]);
             });
 
-        // Prospect subscriptions
-        Prospect::query()
+        // Contact subscriptions
+        Contact::query()
             ->orderBy('id')
             ->limit(25)
             ->get()
-            ->each(function (Prospect $prospect) use ($user) {
+            ->each(function (Contact $contact) use ($user) {
                 $user->subscriptions()->create([
-                    'subscribable_id' => $prospect->id,
-                    'subscribable_type' => resolve(Prospect::class)->getMorphClass(),
+                    'subscribable_id' => $contact->id,
+                    'subscribable_type' => resolve(Contact::class)->getMorphClass(),
                 ]);
             });
     }
@@ -108,18 +108,18 @@ class SuperAdminSeeder extends Seeder
                     ->create();
             });
 
-        // Prospect Engagements
-        Prospect::query()
+        // Contact Engagements
+        Contact::query()
             ->orderBy('id')
             ->limit(25)
             ->get()
-            ->each(function (Prospect $prospect) use ($user) {
+            ->each(function (Contact $contact) use ($user) {
                 $numberOfEngagements = rand(1, 10);
 
                 for ($i = 0; $i < $numberOfEngagements; $i++) {
                     Engagement::factory()
                         ->has(EngagementDeliverable::factory()->count(1)->randomizeState(['deliveryAwaiting', 'deliverySuccessful', 'deliveryFailed']), 'engagementDeliverable')
-                        ->for($prospect, 'recipient')
+                        ->for($contact, 'recipient')
                         ->create([
                             'user_id' => $user->id,
                         ]);
@@ -127,7 +127,7 @@ class SuperAdminSeeder extends Seeder
 
                 EngagementResponse::factory()
                     ->count(rand(1, 10))
-                    ->for($prospect, 'sender')
+                    ->for($contact, 'sender')
                     ->create();
             });
     }

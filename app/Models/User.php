@@ -50,7 +50,7 @@ use Filament\Models\Contracts\HasAvatar;
 use Illuminate\Notifications\Notifiable;
 use OwenIt\Auditing\Contracts\Auditable;
 use AdvisingApp\CareTeam\Models\CareTeam;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use AdvisingApp\Authorization\Models\Role;
 use Lab404\Impersonate\Models\Impersonate;
 use Filament\Models\Contracts\FilamentUser;
@@ -231,10 +231,10 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
         return $this->hasMany(Subscription::class);
     }
 
-    public function prospectSubscriptions(): MorphToMany
+    public function contactSubscriptions(): MorphToMany
     {
         return $this->morphedByMany(
-            related: Prospect::class,
+            related: Contact::class,
             name: 'subscribable',
             table: 'subscriptions'
         )
@@ -260,15 +260,15 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
         return $this->hasManyDeepFromRelations($this->studentSubscriptions(), (new Student())->alerts());
     }
 
-    public function prospectAlerts(): HasManyDeep
+    public function contactAlerts(): HasManyDeep
     {
-        return $this->hasManyDeepFromRelations($this->prospectSubscriptions(), (new Prospect())->alerts());
+        return $this->hasManyDeepFromRelations($this->contactSubscriptions(), (new Contact())->alerts());
     }
 
-    public function prospectCareTeams(): MorphToMany
+    public function contactCareTeams(): MorphToMany
     {
         return $this->morphedByMany(
-            related: Prospect::class,
+            related: Contact::class,
             name: 'educatable',
             table: 'care_teams'
         )

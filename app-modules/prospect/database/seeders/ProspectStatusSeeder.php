@@ -34,49 +34,49 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Prospect\Database\Seeders;
+namespace AdvisingApp\Contact\Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use AdvisingApp\Prospect\Models\ProspectStatus;
-use AdvisingApp\Prospect\Enums\ProspectStatusColorOptions;
-use AdvisingApp\Prospect\Enums\SystemProspectClassification;
+use AdvisingApp\Contact\Models\ContactStatus;
+use AdvisingApp\Contact\Enums\ContactStatusColorOptions;
+use AdvisingApp\Contact\Enums\SystemContactClassification;
 
-class ProspectStatusSeeder extends Seeder
+class ContactStatusSeeder extends Seeder
 {
     public function run(): void
     {
-        ProspectStatus::factory()
+        ContactStatus::factory()
             ->createMany(
                 [
                     [
-                        'classification' => SystemProspectClassification::New,
+                        'classification' => SystemContactClassification::New,
                         'name' => 'New',
-                        'color' => ProspectStatusColorOptions::Info->value,
+                        'color' => ContactStatusColorOptions::Info->value,
                     ],
                     [
-                        'classification' => SystemProspectClassification::Assigned,
+                        'classification' => SystemContactClassification::Assigned,
                         'name' => 'Assigned',
-                        'color' => ProspectStatusColorOptions::Warning->value,
+                        'color' => ContactStatusColorOptions::Warning->value,
                     ],
                     [
-                        'classification' => SystemProspectClassification::InProgress,
+                        'classification' => SystemContactClassification::InProgress,
                         'name' => 'In-Progress',
-                        'color' => ProspectStatusColorOptions::Primary->value,
+                        'color' => ContactStatusColorOptions::Primary->value,
                     ],
                     [
-                        'classification' => SystemProspectClassification::Converted,
+                        'classification' => SystemContactClassification::Converted,
                         'name' => 'Converted',
-                        'color' => ProspectStatusColorOptions::Success->value,
+                        'color' => ContactStatusColorOptions::Success->value,
                     ],
                     [
-                        'classification' => SystemProspectClassification::Recycled,
+                        'classification' => SystemContactClassification::Recycled,
                         'name' => 'Recycled',
-                        'color' => ProspectStatusColorOptions::Gray->value,
+                        'color' => ContactStatusColorOptions::Gray->value,
                     ],
                     [
-                        'classification' => SystemProspectClassification::NotInterested,
+                        'classification' => SystemContactClassification::NotInterested,
                         'name' => 'Not Interested',
-                        'color' => ProspectStatusColorOptions::Danger->value,
+                        'color' => ContactStatusColorOptions::Danger->value,
                     ],
                 ]
             );

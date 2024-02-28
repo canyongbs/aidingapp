@@ -37,7 +37,7 @@
 namespace AdvisingApp\StudentDataModel\Models\Scopes;
 
 use Illuminate\Support\Facades\DB;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use Illuminate\Database\Eloquent\Builder;
 use AdvisingApp\StudentDataModel\Models\Student;
 
@@ -54,7 +54,7 @@ class EducatableSearch
 
         $query->whereHasMorph(
             $this->relationship,
-            [Student::class, Prospect::class],
+            [Student::class, Contact::class],
             function (Builder $query, string $type) use ($search) {
                 $column = app($type)::displayNameKey();
 

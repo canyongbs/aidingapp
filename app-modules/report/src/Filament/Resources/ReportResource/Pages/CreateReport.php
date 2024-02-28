@@ -47,7 +47,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Forms\Components\TextInput;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use AdvisingApp\Report\Enums\ReportModel;
 use Filament\Actions\Exports\ExportColumn;
 use Filament\Forms\Components\Wizard\Step;
@@ -145,7 +145,7 @@ class CreateReport extends CreateRecord implements HasTable
     {
         return [
             ...(auth()->user()->hasLicense(Student::getLicenseType()) ? [ReportModel::Student] : []),
-            ...(auth()->user()->hasLicense(Prospect::getLicenseType()) ? [ReportModel::Prospect] : []),
+            ...(auth()->user()->hasLicense(Contact::getLicenseType()) ? [ReportModel::Contact] : []),
             ...(auth()->user()->can('viewAny', User::class) ? [ReportModel::User] : []),
         ];
     }

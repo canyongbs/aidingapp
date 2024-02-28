@@ -41,7 +41,7 @@ use App\Models\BaseModel;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Contracts\Auditable;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use AdvisingApp\Timeline\Models\Timeline;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -180,9 +180,9 @@ class Engagement extends BaseModel implements Auditable, CanTriggerAutoSubscript
         $query->where('recipient_type', resolve(Student::class)->getMorphClass());
     }
 
-    public function scopeSentToProspect(Builder $query): void
+    public function scopeSentToContact(Builder $query): void
     {
-        $query->where('recipient_type', resolve(Prospect::class)->getMorphClass());
+        $query->where('recipient_type', resolve(Contact::class)->getMorphClass());
     }
 
     public function hasBeenDelivered(): bool

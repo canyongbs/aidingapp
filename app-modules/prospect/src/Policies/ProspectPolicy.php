@@ -34,17 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Prospect\Policies;
+namespace AdvisingApp\Contact\Policies;
 
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 
-class ProspectPolicy
+class ContactPolicy
 {
     public function before(Authenticatable $authenticatable): ?Response
     {
-        if (! $authenticatable->hasLicense(Prospect::getLicenseType())) {
+        if (! $authenticatable->hasLicense(Contact::getLicenseType())) {
             return Response::deny('You are not licensed for the Recruitment CRM.');
         }
 
@@ -54,64 +54,64 @@ class ProspectPolicy
     public function viewAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: 'prospect.view-any',
-            denyResponse: 'You do not have permission to view prospects.'
+            abilities: 'contact.view-any',
+            denyResponse: 'You do not have permission to view contacts.'
         );
     }
 
-    public function view(Authenticatable $authenticatable, Prospect $prospect): Response
+    public function view(Authenticatable $authenticatable, Contact $contact): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['prospect.*.view', "prospect.{$prospect->id}.view"],
-            denyResponse: 'You do not have permission to view this prospect.'
+            abilities: ['contact.*.view', "contact.{$contact->id}.view"],
+            denyResponse: 'You do not have permission to view this contact.'
         );
     }
 
     public function create(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: 'prospect.create',
-            denyResponse: 'You do not have permission to create prospects.'
+            abilities: 'contact.create',
+            denyResponse: 'You do not have permission to create contacts.'
         );
     }
 
     public function import(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: 'prospect.import',
-            denyResponse: 'You do not have permission to import prospects.',
+            abilities: 'contact.import',
+            denyResponse: 'You do not have permission to import contacts.',
         );
     }
 
-    public function update(Authenticatable $authenticatable, Prospect $prospect): Response
+    public function update(Authenticatable $authenticatable, Contact $contact): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['prospect.*.update', "prospect.{$prospect->id}.update"],
-            denyResponse: 'You do not have permission to update this prospect.'
+            abilities: ['contact.*.update', "contact.{$contact->id}.update"],
+            denyResponse: 'You do not have permission to update this contact.'
         );
     }
 
-    public function delete(Authenticatable $authenticatable, Prospect $prospect): Response
+    public function delete(Authenticatable $authenticatable, Contact $contact): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['prospect.*.delete', "prospect.{$prospect->id}.delete"],
-            denyResponse: 'You do not have permission to delete this prospect.'
+            abilities: ['contact.*.delete', "contact.{$contact->id}.delete"],
+            denyResponse: 'You do not have permission to delete this contact.'
         );
     }
 
-    public function restore(Authenticatable $authenticatable, Prospect $prospect): Response
+    public function restore(Authenticatable $authenticatable, Contact $contact): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['prospect.*.restore', "prospect.{$prospect->id}.restore"],
-            denyResponse: 'You do not have permission to restore this prospect.'
+            abilities: ['contact.*.restore', "contact.{$contact->id}.restore"],
+            denyResponse: 'You do not have permission to restore this contact.'
         );
     }
 
-    public function forceDelete(Authenticatable $authenticatable, Prospect $prospect): Response
+    public function forceDelete(Authenticatable $authenticatable, Contact $contact): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['prospect.*.force-delete', "prospect.{$prospect->id}.force-delete"],
-            denyResponse: 'You do not have permission to force delete this prospect.'
+            abilities: ['contact.*.force-delete', "contact.{$contact->id}.force-delete"],
+            denyResponse: 'You do not have permission to force delete this contact.'
         );
     }
 }

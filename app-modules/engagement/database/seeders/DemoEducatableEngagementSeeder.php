@@ -37,7 +37,7 @@
 namespace AdvisingApp\Engagement\Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use AdvisingApp\Engagement\Models\Engagement;
 use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\Engagement\Models\EngagementResponse;
@@ -64,21 +64,21 @@ class DemoEducatableEngagementSeeder extends Seeder
             ->for($sampleStudentForDemo, 'recipient')
             ->create();
 
-        $sampleProspectForDemo = Prospect::factory()->create([
+        $sampleContactForDemo = Contact::factory()->create([
             'first_name' => 'Demo',
-            'last_name' => 'Prospect',
-            'email' => 'demo@prospect.com',
+            'last_name' => 'Contact',
+            'email' => 'demo@contact.com',
         ]);
 
         EngagementResponse::factory()
             ->count(5)
-            ->for($sampleProspectForDemo, 'sender')
+            ->for($sampleContactForDemo, 'sender')
             ->create();
 
         Engagement::factory()
             ->count(7)
             ->has(EngagementDeliverable::factory()->deliverySuccessful()->count(1), 'engagementDeliverable')
-            ->for($sampleProspectForDemo, 'recipient')
+            ->for($sampleContactForDemo, 'recipient')
             ->create();
     }
 }

@@ -447,10 +447,10 @@ namespace App\Models{
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AdvisingApp\Authorization\Models\Permission> $permissions
  * @property-read int|null $permissions_count
  * @property-read \App\Models\Pronouns|null $pronouns
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AdvisingApp\Prospect\Models\Prospect> $prospectCareTeams
- * @property-read int|null $prospect_care_teams_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AdvisingApp\Prospect\Models\Prospect> $prospectSubscriptions
- * @property-read int|null $prospect_subscriptions_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \AdvisingApp\Contact\Models\Contact> $contactCareTeams
+ * @property-read int|null $contact_care_teams_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \AdvisingApp\Contact\Models\Contact> $contactSubscriptions
+ * @property-read int|null $contact_subscriptions_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AdvisingApp\Authorization\Models\RoleGroup> $roleGroups
  * @property-read int|null $role_groups_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AdvisingApp\Authorization\Models\Role> $roles
@@ -469,8 +469,8 @@ namespace App\Models{
  * @property-read int|null $trait_role_groups_count
  * @property-read \Illuminate\Database\Eloquent\Collection|\AdvisingApp\Alert\Models\Alert[] $studentAlerts
  * @property-read int|null $student_alerts_count
- * @property-read \Illuminate\Database\Eloquent\Collection|\AdvisingApp\Alert\Models\Alert[] $prospectAlerts
- * @property-read int|null $prospect_alerts_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\AdvisingApp\Alert\Models\Alert[] $contactAlerts
+ * @property-read int|null $contact_alerts_count
  * @property-read \Illuminate\Database\Eloquent\Collection|\AdvisingApp\Authorization\Models\Permission[] $permissionsFromRoles
  * @property-read int|null $permissions_from_roles_count
  * @property-read \Illuminate\Database\Eloquent\Collection|\AdvisingApp\ServiceManagement\Models\ServiceRequest[] $serviceRequests
@@ -533,7 +533,7 @@ namespace AdvisingApp\Alert\Models{
 /**
  * AdvisingApp\Alert\Models\Alert
  *
- * @property-read Student|Prospect $concern
+ * @property-read Student|Contact $concern
  * @property string $id
  * @property string $concern_type
  * @property string $concern_id
@@ -1634,7 +1634,7 @@ namespace AdvisingApp\Engagement\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|Engagement newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Engagement newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Engagement query()
- * @method static \Illuminate\Database\Eloquent\Builder|Engagement sentToProspect()
+ * @method static \Illuminate\Database\Eloquent\Builder|Engagement sentToContact()
  * @method static \Illuminate\Database\Eloquent\Builder|Engagement sentToStudent()
  * @method static \Illuminate\Database\Eloquent\Builder|Engagement whereBody($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Engagement whereCreatedAt($value)
@@ -1734,8 +1734,8 @@ namespace AdvisingApp\Engagement\Models{
  * @property-read int|null $audits_count
  * @property-read \Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection<int, \Spatie\MediaLibrary\MediaCollections\Models\Media> $media
  * @property-read int|null $media_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AdvisingApp\Prospect\Models\Prospect> $prospects
- * @property-read int|null $prospects_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \AdvisingApp\Contact\Models\Contact> $contacts
+ * @property-read int|null $contacts_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AdvisingApp\StudentDataModel\Models\Student> $students
  * @property-read int|null $students_count
  * @method static \AdvisingApp\Engagement\Database\Factories\EngagementFileFactory factory($count = null, $state = [])
@@ -1797,7 +1797,7 @@ namespace AdvisingApp\Engagement\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|EngagementResponse newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|EngagementResponse newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|EngagementResponse query()
- * @method static \Illuminate\Database\Eloquent\Builder|EngagementResponse sentByProspect()
+ * @method static \Illuminate\Database\Eloquent\Builder|EngagementResponse sentByContact()
  * @method static \Illuminate\Database\Eloquent\Builder|EngagementResponse sentByStudent()
  * @method static \Illuminate\Database\Eloquent\Builder|EngagementResponse whereContent($value)
  * @method static \Illuminate\Database\Eloquent\Builder|EngagementResponse whereCreatedAt($value)
@@ -2017,7 +2017,7 @@ namespace AdvisingApp\Form\Models{
 /**
  * AdvisingApp\Form\Models\FormSubmission
  *
- * @property Student|Prospect|null $author
+ * @property Student|Contact|null $author
  * @property string $id
  * @property string $form_id
  * @property string|null $author_id
@@ -2970,8 +2970,8 @@ namespace AdvisingApp\MeetingCenter\Models{
  * @property-read \AdvisingApp\MeetingCenter\Models\Event $event
  * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<int, \Illuminate\Notifications\DatabaseNotification> $notifications
  * @property-read int|null $notifications_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AdvisingApp\Prospect\Models\Prospect> $prospects
- * @property-read int|null $prospects_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \AdvisingApp\Contact\Models\Contact> $contacts
+ * @property-read int|null $contacts_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AdvisingApp\StudentDataModel\Models\Student> $students
  * @property-read int|null $students_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AdvisingApp\MeetingCenter\Models\EventRegistrationFormSubmission> $submissions
@@ -3276,9 +3276,9 @@ namespace AdvisingApp\Portal\Models{
  class IdeHelperPortalAuthentication {}
 }
 
-namespace AdvisingApp\Prospect\Models{
+namespace AdvisingApp\Contact\Models{
 /**
- * AdvisingApp\Prospect\Models\Prospect
+ * AdvisingApp\Contact\Models\Contact
  *
  * @property string $display_name
  * @property string $id
@@ -3342,57 +3342,57 @@ namespace AdvisingApp\Prospect\Models{
  * @property-read int|null $ordered_engagements_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AdvisingApp\ServiceManagement\Models\ServiceRequest> $serviceRequests
  * @property-read int|null $service_requests_count
- * @property-read \AdvisingApp\Prospect\Models\ProspectSource $source
- * @property-read \AdvisingApp\Prospect\Models\ProspectStatus $status
+ * @property-read \AdvisingApp\Contact\Models\ContactSource $source
+ * @property-read \AdvisingApp\Contact\Models\ContactStatus $status
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $subscribedUsers
  * @property-read int|null $subscribed_users_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AdvisingApp\Notification\Models\Subscription> $subscriptions
  * @property-read int|null $subscriptions_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AdvisingApp\Task\Models\Task> $tasks
  * @property-read int|null $tasks_count
- * @method static \AdvisingApp\Prospect\Database\Factories\ProspectFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder|Prospect newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Prospect newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Prospect onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|Prospect query()
- * @method static \Illuminate\Database\Eloquent\Builder|Prospect whereAddress($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Prospect whereAddress2($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Prospect whereAddress3($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Prospect whereAssignedToId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Prospect whereBirthdate($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Prospect whereCity($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Prospect whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Prospect whereCreatedById($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Prospect whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Prospect whereDescription($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Prospect whereEmail($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Prospect whereEmail2($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Prospect whereEmailBounce($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Prospect whereFirstName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Prospect whereFullName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Prospect whereHsgrad($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Prospect whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Prospect whereLastName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Prospect whereMobile($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Prospect wherePhone($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Prospect wherePostal($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Prospect wherePreferred($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Prospect whereSmsOptOut($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Prospect whereSourceId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Prospect whereState($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Prospect whereStatusId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Prospect whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Prospect withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|Prospect withoutTrashed()
+ * @method static \AdvisingApp\Contact\Database\Factories\ContactFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|Contact newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Contact newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Contact onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|Contact query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Contact whereAddress($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Contact whereAddress2($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Contact whereAddress3($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Contact whereAssignedToId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Contact whereBirthdate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Contact whereCity($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Contact whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Contact whereCreatedById($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Contact whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Contact whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Contact whereEmail($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Contact whereEmail2($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Contact whereEmailBounce($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Contact whereFirstName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Contact whereFullName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Contact whereHsgrad($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Contact whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Contact whereLastName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Contact whereMobile($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Contact wherePhone($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Contact wherePostal($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Contact wherePreferred($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Contact whereSmsOptOut($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Contact whereSourceId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Contact whereState($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Contact whereStatusId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Contact whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Contact withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|Contact withoutTrashed()
  * @mixin \Eloquent
  */
 	#[\AllowDynamicProperties]
- class IdeHelperProspect {}
+ class IdeHelperContact {}
 }
 
-namespace AdvisingApp\Prospect\Models{
+namespace AdvisingApp\Contact\Models{
 /**
- * AdvisingApp\Prospect\Models\ProspectSource
+ * AdvisingApp\Contact\Models\ContactSource
  *
  * @property string $id
  * @property string $name
@@ -3401,59 +3401,59 @@ namespace AdvisingApp\Prospect\Models{
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AdvisingApp\Audit\Models\Audit> $audits
  * @property-read int|null $audits_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AdvisingApp\Prospect\Models\Prospect> $prospects
- * @property-read int|null $prospects_count
- * @method static \AdvisingApp\Prospect\Database\Factories\ProspectSourceFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder|ProspectSource newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|ProspectSource newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|ProspectSource onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|ProspectSource query()
- * @method static \Illuminate\Database\Eloquent\Builder|ProspectSource whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|ProspectSource whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|ProspectSource whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|ProspectSource whereName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|ProspectSource whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|ProspectSource withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|ProspectSource withoutTrashed()
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \AdvisingApp\Contact\Models\Contact> $contacts
+ * @property-read int|null $contacts_count
+ * @method static \AdvisingApp\Contact\Database\Factories\ContactSourceFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|ContactSource newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|ContactSource newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|ContactSource onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|ContactSource query()
+ * @method static \Illuminate\Database\Eloquent\Builder|ContactSource whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ContactSource whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ContactSource whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ContactSource whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ContactSource whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ContactSource withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|ContactSource withoutTrashed()
  * @mixin \Eloquent
  */
 	#[\AllowDynamicProperties]
- class IdeHelperProspectSource {}
+ class IdeHelperContactSource {}
 }
 
-namespace AdvisingApp\Prospect\Models{
+namespace AdvisingApp\Contact\Models{
 /**
- * AdvisingApp\Prospect\Models\ProspectStatus
+ * AdvisingApp\Contact\Models\ContactStatus
  *
  * @property string $id
- * @property \AdvisingApp\Prospect\Enums\SystemProspectClassification $classification
+ * @property \AdvisingApp\Contact\Enums\SystemContactClassification $classification
  * @property string $name
- * @property \AdvisingApp\Prospect\Enums\ProspectStatusColorOptions $color
+ * @property \AdvisingApp\Contact\Enums\ContactStatusColorOptions $color
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AdvisingApp\Audit\Models\Audit> $audits
  * @property-read int|null $audits_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AdvisingApp\Prospect\Models\Prospect> $prospects
- * @property-read int|null $prospects_count
- * @method static \AdvisingApp\Prospect\Database\Factories\ProspectStatusFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder|ProspectStatus newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|ProspectStatus newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|ProspectStatus onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|ProspectStatus query()
- * @method static \Illuminate\Database\Eloquent\Builder|ProspectStatus whereClassification($value)
- * @method static \Illuminate\Database\Eloquent\Builder|ProspectStatus whereColor($value)
- * @method static \Illuminate\Database\Eloquent\Builder|ProspectStatus whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|ProspectStatus whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|ProspectStatus whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|ProspectStatus whereName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|ProspectStatus whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|ProspectStatus withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|ProspectStatus withoutTrashed()
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \AdvisingApp\Contact\Models\Contact> $contacts
+ * @property-read int|null $contacts_count
+ * @method static \AdvisingApp\Contact\Database\Factories\ContactStatusFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|ContactStatus newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|ContactStatus newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|ContactStatus onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|ContactStatus query()
+ * @method static \Illuminate\Database\Eloquent\Builder|ContactStatus whereClassification($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ContactStatus whereColor($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ContactStatus whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ContactStatus whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ContactStatus whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ContactStatus whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ContactStatus whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ContactStatus withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|ContactStatus withoutTrashed()
  * @mixin \Eloquent
  */
 	#[\AllowDynamicProperties]
- class IdeHelperProspectStatus {}
+ class IdeHelperContactStatus {}
 }
 
 namespace AdvisingApp\Report\Models{
@@ -3650,7 +3650,7 @@ namespace AdvisingApp\ServiceManagement\Models{
 /**
  * AdvisingApp\ServiceManagement\Models\ServiceRequest
  *
- * @property-read Student|Prospect $respondent
+ * @property-read Student|Contact $respondent
  * @property string $id
  * @property string $service_request_number
  * @property string $respondent_type
@@ -3898,7 +3898,7 @@ namespace AdvisingApp\ServiceManagement\Models{
 /**
  * AdvisingApp\ServiceManagement\Models\ServiceRequestFormSubmission
  *
- * @property Student|Prospect|null $author
+ * @property Student|Contact|null $author
  * @property string $id
  * @property string $service_request_form_id
  * @property string|null $service_request_priority_id
@@ -4542,7 +4542,7 @@ namespace AdvisingApp\Survey\Models{
 /**
  * AdvisingApp\Survey\Models\SurveySubmission
  *
- * @property Student|Prospect|null $author
+ * @property Student|Contact|null $author
  * @property string $id
  * @property string $survey_id
  * @property string|null $author_id
@@ -4591,7 +4591,7 @@ namespace AdvisingApp\Task\Models{
 /**
  * AdvisingApp\Task\Models\Task
  *
- * @property-read Student|Prospect $concern
+ * @property-read Student|Contact $concern
  * @property string $id
  * @property string $title
  * @property string $description

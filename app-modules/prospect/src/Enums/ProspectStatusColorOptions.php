@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Prospect\Enums;
+namespace AdvisingApp\Contact\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
-enum ProspectStatusColorOptions: string implements HasLabel
+enum ContactStatusColorOptions: string implements HasLabel
 {
     case Success = 'success';
 

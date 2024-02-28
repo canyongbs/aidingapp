@@ -38,7 +38,7 @@ namespace AdvisingApp\Alert\Database\Factories;
 
 use AdvisingApp\Alert\Models\Alert;
 use AdvisingApp\Alert\Enums\AlertStatus;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use AdvisingApp\Alert\Enums\AlertSeverity;
 use AdvisingApp\StudentDataModel\Models\Student;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -52,11 +52,11 @@ class AlertFactory extends Factory
     public function definition(): array
     {
         return [
-            'concern_type' => fake()->randomElement([(new Student())->getMorphClass(), (new Prospect())->getMorphClass()]),
+            'concern_type' => fake()->randomElement([(new Student())->getMorphClass(), (new Contact())->getMorphClass()]),
             'concern_id' => function (array $attributes) {
                 $concernClass = Relation::getMorphedModel($attributes['concern_type']);
 
-                /** @var Student|Prospect $concernModel */
+                /** @var Student|Contact $concernModel */
                 $concernModel = new $concernClass();
 
                 $concern = $concernClass === Student::class

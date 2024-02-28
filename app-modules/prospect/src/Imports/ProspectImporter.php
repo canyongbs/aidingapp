@@ -34,22 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Prospect\Imports;
+namespace AdvisingApp\Contact\Imports;
 
 use App\Models\User;
 use Illuminate\Support\Str;
 use Filament\Actions\Imports\Importer;
 use Illuminate\Database\Eloquent\Model;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Models\Import;
-use AdvisingApp\Prospect\Models\ProspectSource;
-use AdvisingApp\Prospect\Models\ProspectStatus;
+use AdvisingApp\Contact\Models\ContactSource;
+use AdvisingApp\Contact\Models\ContactStatus;
 
-class ProspectImporter extends Importer
+class ContactImporter extends Importer
 {
-    protected static ?string $model = Prospect::class;
+    protected static ?string $model = Contact::class;
 
     public static function getColumns(): array
     {
@@ -70,7 +70,7 @@ class ProspectImporter extends Importer
                 ->example('John'),
             ImportColumn::make('status')
                 ->relationship(
-                    resolveUsing: fn (mixed $state) => ProspectStatus::query()
+                    resolveUsing: fn (mixed $state) => ContactStatus::query()
                         ->when(
                             Str::isUuid($state),
                             fn (Builder $query) => $query->whereKey($state),
@@ -80,10 +80,10 @@ class ProspectImporter extends Importer
                 )
                 ->guess(['status_id', 'status_name'])
                 ->requiredMapping()
-                ->example(fn (): ?string => ProspectStatus::query()->value('name')),
+                ->example(fn (): ?string => ContactStatus::query()->value('name')),
             ImportColumn::make('source')
                 ->relationship(
-                    resolveUsing: fn (mixed $state) => ProspectSource::query()
+                    resolveUsing: fn (mixed $state) => ContactSource::query()
                         ->when(
                             Str::isUuid($state),
                             fn (Builder $query) => $query->whereKey($state),
@@ -93,9 +93,9 @@ class ProspectImporter extends Importer
                 )
                 ->guess(['source_id', 'source_name'])
                 ->requiredMapping()
-                ->example(fn (): ?string => ProspectSource::query()->value('name')),
+                ->example(fn (): ?string => ContactSource::query()->value('name')),
             ImportColumn::make('description')
-                ->example('A description of the prospect.'),
+                ->example('A description of the contact.'),
             ImportColumn::make('email')
                 ->rules(['required', 'email'])
                 ->requiredMapping()
@@ -138,12 +138,12 @@ class ProspectImporter extends Importer
             ...filled($email2) ? [$email2] : [],
         ];
 
-        $prospect = Prospect::query()
+        $contact = Contact::query()
             ->whereIn('email', $emails)
             ->orWhereIn('email_2', $emails)
             ->first();
 
-        return $prospect ?? new Prospect([
+        return $contact ?? new Contact([
             'email' => $email,
             'email_2' => $email2,
         ]);
@@ -151,7 +151,7 @@ class ProspectImporter extends Importer
 
     public function beforeCreate(): void
     {
-        /** @var Prospect $record */
+        /** @var Contact $record */
         $record = $this->record;
 
         /** @var User $user */
@@ -163,7 +163,7 @@ class ProspectImporter extends Importer
 
     public static function getCompletedNotificationBody(Import $import): string
     {
-        $body = 'Your prospect import has completed and ' . number_format($import->successful_rows) . ' ' . Str::plural('row', $import->successful_rows) . ' imported.';
+        $body = 'Your contact import has completed and ' . number_format($import->successful_rows) . ' ' . Str::plural('row', $import->successful_rows) . ' imported.';
 
         if ($failedRowsCount = $import->getFailedRowsCount()) {
             $body .= ' ' . number_format($failedRowsCount) . ' ' . Str::plural('row', $failedRowsCount) . ' failed to import.';

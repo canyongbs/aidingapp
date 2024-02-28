@@ -38,11 +38,11 @@ namespace AdvisingApp\Notification\Listeners;
 
 use Illuminate\Support\HtmlString;
 use Filament\Notifications\Notification;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\Notification\Events\SubscriptionCreated;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource;
+use AdvisingApp\Contact\Filament\Resources\ContactResource;
 use AdvisingApp\StudentDataModel\Filament\Resources\StudentResource;
 
 class NotifyUserOfSubscriptionCreated implements ShouldQueue
@@ -54,7 +54,7 @@ class NotifyUserOfSubscriptionCreated implements ShouldQueue
         $name = $subscribable->{$subscribable->displayNameKey()};
 
         $target = match ($subscribable::class) {
-            Prospect::class => ProspectResource::class,
+            Contact::class => ContactResource::class,
             Student::class => StudentResource::class,
         };
 

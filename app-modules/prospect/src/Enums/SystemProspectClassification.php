@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Prospect\Enums;
+namespace AdvisingApp\Contact\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
-enum SystemProspectClassification: string implements HasLabel
+enum SystemContactClassification: string implements HasLabel
 {
     case New = 'new';
 
@@ -57,8 +57,8 @@ enum SystemProspectClassification: string implements HasLabel
     public function getLabel(): ?string
     {
         return match ($this) {
-            SystemProspectClassification::InProgress => 'In Progress',
-            SystemProspectClassification::NotInterested => 'Not Interested',
+            SystemContactClassification::InProgress => 'In Progress',
+            SystemContactClassification::NotInterested => 'Not Interested',
             default => $this->name,
         };
     }

@@ -34,16 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Prospect\Database\Seeders;
+namespace AdvisingApp\Contact\Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use AdvisingApp\Prospect\Models\ProspectSource;
+use AdvisingApp\Contact\Models\ContactSource;
 
-class ProspectSourceSeeder extends Seeder
+class ContactSourceSeeder extends Seeder
 {
     public function run(): void
     {
-        ProspectSource::factory()
+        ContactSource::factory()
             ->createMany(
                 [
                     ['name' => 'Advising App'],

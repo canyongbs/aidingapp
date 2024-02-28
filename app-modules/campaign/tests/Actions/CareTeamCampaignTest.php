@@ -36,7 +36,7 @@
 
 use App\Models\User;
 use AdvisingApp\Campaign\Models\Campaign;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use Illuminate\Database\Eloquent\Collection;
 use AdvisingApp\Campaign\Models\CampaignAction;
 use AdvisingApp\Authorization\Enums\LicenseType;
@@ -91,24 +91,24 @@ it('will create the appropriate records for educatables in the caseload', functi
     );
 })->with(
     [
-        'no prior care team | prospects | remove prior false' => [
+        'no prior care team | contacts | remove prior false' => [
             'priorCareTeam' => [],
-            'educatables' => fn () => Prospect::factory()->count(3)->create(),
+            'educatables' => fn () => Contact::factory()->count(3)->create(),
             'removePrior' => false,
         ],
-        'no prior care team | prospects | remove prior true' => [
+        'no prior care team | contacts | remove prior true' => [
             'priorCareTeam' => [],
-            'educatables' => fn () => Prospect::factory()->count(3)->create(),
+            'educatables' => fn () => Contact::factory()->count(3)->create(),
             'removePrior' => true,
         ],
-        'prior care team | prospects | remove prior false' => [
+        'prior care team | contacts | remove prior false' => [
             'priorCareTeam' => fn () => User::factory()->licensed(LicenseType::cases())->count(3)->create()->pluck('id')->toArray(),
-            'educatables' => fn () => Prospect::factory()->count(3)->create(),
+            'educatables' => fn () => Contact::factory()->count(3)->create(),
             'removePrior' => false,
         ],
-        'prior care team | prospects | remove prior true' => [
+        'prior care team | contacts | remove prior true' => [
             'priorCareTeam' => fn () => User::factory()->licensed(LicenseType::cases())->count(3)->create()->pluck('id')->toArray(),
-            'educatables' => fn () => Prospect::factory()->count(3)->create(),
+            'educatables' => fn () => Contact::factory()->count(3)->create(),
             'removePrior' => true,
         ],
         'no prior care team | students | remove prior false' => [

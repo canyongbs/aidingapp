@@ -38,13 +38,13 @@ namespace AdvisingApp\Report\Filament\Exports;
 
 use Filament\Actions\Exports\Exporter;
 use Filament\Tables\Columns\TextColumn;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Models\Export;
 
-class ProspectExporter extends Exporter
+class ContactExporter extends Exporter
 {
-    protected static ?string $model = Prospect::class;
+    protected static ?string $model = Contact::class;
 
     /**
      * @param class-string<TextColumn | ExportColumn> $type
@@ -81,7 +81,7 @@ class ProspectExporter extends Exporter
 
     public static function getCompletedNotificationBody(Export $export): string
     {
-        $body = 'Your prospect report export has completed and ' . number_format($export->successful_rows) . ' ' . str('row')->plural($export->successful_rows) . ' exported.';
+        $body = 'Your contact report export has completed and ' . number_format($export->successful_rows) . ' ' . str('row')->plural($export->successful_rows) . ' exported.';
 
         if ($failedRowsCount = $export->getFailedRowsCount()) {
             $body .= ' ' . number_format($failedRowsCount) . ' ' . str('row')->plural($failedRowsCount) . ' failed to export.';

@@ -1,145 +1,145 @@
-type ProspectStatus
-    @model(class: "AdvisingApp\\Prospect\\Models\\ProspectStatus") {
+type ContactStatus
+    @model(class: "AdvisingApp\\Contact\\Models\\ContactStatus") {
     "Unique primary key."
     id: UUID!
 
-    "The name of the prospect status."
+    "The name of the contact status."
     name: String!
 
-    "The classification of the prospect status."
-    classification: SystemProspectClassification!
+    "The classification of the contact status."
+    classification: SystemContactClassification!
 
-    "The color of the prospect status."
-    color: ProspectStatusColorOptions!
+    "The color of the contact status."
+    color: ContactStatusColorOptions!
 
-    "The created date of the prospect status."
+    "The created date of the contact status."
     created_at: DateTime
 
-    "The updated date of the prospect status."
+    "The updated date of the contact status."
     updated_at: DateTime
 
-    "The deleted date of the prospect status."
+    "The deleted date of the contact status."
     deleted_at: DateTime
 
-    "Prospects related to this prospect status."
-    prospects: [Prospect!] @hasMany
+    "Contacts related to this contact status."
+    contacts: [Contact!] @hasMany
 
-    "The count of prospects related to this prospect status."
-    prospects_count: Int @count(relation: "prospects")
+    "The count of contacts related to this contact status."
+    contacts_count: Int @count(relation: "contacts")
 
-    "The audits related to this prospect status."
+    "The audits related to this contact status."
     audits: [Audit!] @hasMany
 
-    "The count of audits related to this prospect status."
+    "The count of audits related to this contact status."
     audits_count: Int @count(relation: "audits")
 }
 
-input ProspectStatusesQuery {
-    "The unique primary key of the prospect status."
+input ContactStatusesQuery {
+    "The unique primary key of the contact status."
     id: UUID
 
-    "The name of the prospect status."
+    "The name of the contact status."
     name: String
 
-    "The classification of the prospect status."
-    classification: SystemProspectClassification
+    "The classification of the contact status."
+    classification: SystemContactClassification
 
-    "The color of the prospect status."
-    color: ProspectStatusColorOptions
+    "The color of the contact status."
+    color: ContactStatusColorOptions
 
-    "The created date of the prospect status."
+    "The created date of the contact status."
     created_at: DateTime
 
-    "The updated date of the prospect status."
+    "The updated date of the contact status."
     updated_at: DateTime
 
-    "The deleted date of the prospect status."
+    "The deleted date of the contact status."
     deleted_at: DateTime
 
-    "The prospects related to this prospect status."
-    prospects: ProspectsQuery
+    "The contacts related to this contact status."
+    contacts: ContactsQuery
 
-    "The audits related to this prospect status."
+    "The audits related to this contact status."
     audits: AuditsQuery
 }
 
-type ProspectStatusQueries {
-    "Get a specific prospect status by ID."
+type ContactStatusQueries {
+    "Get a specific contact status by ID."
     find(
         id: UUID!
             @whereKey
-            @rules(apply: ["required", "uuid", "exists:prospect_statuses"])
-    ): ProspectStatus @find @softDeletes @canResolved(ability: "view")
+            @rules(apply: ["required", "uuid", "exists:contact_statuses"])
+    ): ContactStatus @find @softDeletes @canResolved(ability: "view")
 
-    "List multiple prospects statuses."
+    "List multiple contacts statuses."
     list(
-        "Filter by the prospect statuses attributes and relations."
-        where: ProspectStatusesQuery @searchBy
-        order: ProspectStatusesQuery @sortBy
-    ): [ProspectStatus!]! @paginate @softDeletes @canModel(ability: "viewAny")
+        "Filter by the contact statuses attributes and relations."
+        where: ContactStatusesQuery @searchBy
+        order: ContactStatusesQuery @sortBy
+    ): [ContactStatus!]! @paginate @softDeletes @canModel(ability: "viewAny")
 }
 
 extend type Query {
-    prospectStatus: ProspectStatusQueries! @namespaced
+    contactStatus: ContactStatusQueries! @namespaced
 }
 
-input CreateProspectStatusInput {
-    "The name of the prospect status."
+input CreateContactStatusInput {
+    "The name of the contact status."
     name: String!
         @rules(
             apply: [
                 "required"
                 "string"
                 "max:255"
-                "unique:prospect_statuses,name"
+                "unique:contact_statuses,name"
             ]
         )
 
-    "The classification of the prospect status."
-    classification: SystemProspectClassification!
+    "The classification of the contact status."
+    classification: SystemContactClassification!
 
-    "The color of the prospect status."
-    color: ProspectStatusColorOptions!
+    "The color of the contact status."
+    color: ContactStatusColorOptions!
 }
 
-input UpdateProspectStatusInput {
-    "The name of the prospect status."
+input UpdateContactStatusInput {
+    "The name of the contact status."
     name: String
-        @rules(apply: ["string", "max:255", "unique:prospect_statuses,name"])
+        @rules(apply: ["string", "max:255", "unique:contact_statuses,name"])
 
-    "The classification of the prospect status."
-    classification: SystemProspectClassification
+    "The classification of the contact status."
+    classification: SystemContactClassification
 
-    "The color of the prospect status."
-    color: ProspectStatusColorOptions
+    "The color of the contact status."
+    color: ContactStatusColorOptions
 }
 
-type ProspectStatusMutations {
-    "Create an prospect status."
-    create(input: CreateProspectStatusInput! @spread): ProspectStatus!
+type ContactStatusMutations {
+    "Create an contact status."
+    create(input: CreateContactStatusInput! @spread): ContactStatus!
         @create
         @canModel(ability: "create")
 
-    "Update an existing prospect status."
+    "Update an existing contact status."
     update(
-        "The identifier of the prospect status you would like to update."
+        "The identifier of the contact status you would like to update."
         id: UUID!
             @whereKey
-            @rules(apply: ["required", "uuid", "exists:prospect_statuses"])
+            @rules(apply: ["required", "uuid", "exists:contact_statuses"])
 
         "The fields you would like to update."
-        input: UpdateProspectStatusInput! @spread
-    ): ProspectStatus! @canFind(ability: "update", find: "id") @update
+        input: UpdateContactStatusInput! @spread
+    ): ContactStatus! @canFind(ability: "update", find: "id") @update
 
-    "Delete an existing prospect status."
+    "Delete an existing contact status."
     delete(
-        "The identifier of the prospect status you would like to delete."
+        "The identifier of the contact status you would like to delete."
         id: UUID!
             @whereKey
-            @rules(apply: ["required", "uuid", "exists:prospect_statuses"])
-    ): ProspectStatus @canFind(ability: "delete", find: "id") @delete
+            @rules(apply: ["required", "uuid", "exists:contact_statuses"])
+    ): ContactStatus @canFind(ability: "delete", find: "id") @delete
 }
 
 extend type Mutation {
-    prospectStatus: ProspectStatusMutations! @namespaced
+    contactStatus: ContactStatusMutations! @namespaced
 }

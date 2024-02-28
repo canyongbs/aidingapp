@@ -37,14 +37,14 @@
 namespace AdvisingApp\MeetingCenter\Filament\Actions\Table;
 
 use Filament\Tables\Actions\ViewAction;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use Filament\Infolists\Components\Fieldset;
 use Filament\Infolists\Components\Livewire;
 use Filament\Infolists\Components\TextEntry;
 use AdvisingApp\StudentDataModel\Models\Student;
 use Filament\Infolists\Components\RepeatableEntry;
 use AdvisingApp\MeetingCenter\Models\EventAttendee;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource;
+use AdvisingApp\Contact\Filament\Resources\ContactResource;
 use AdvisingApp\StudentDataModel\Filament\Resources\StudentResource;
 
 class ViewEventAttendeeAction extends ViewAction
@@ -67,15 +67,15 @@ class ViewEventAttendeeAction extends ViewAction
 
                 Fieldset::make('Relations')
                     ->schema([
-                        RepeatableEntry::make('prospects')
+                        RepeatableEntry::make('contacts')
                             ->schema([
-                                TextEntry::make(Prospect::displayNameKey())
+                                TextEntry::make(Contact::displayNameKey())
                                     ->label('Name')
                                     ->color('primary')
-                                    ->url(fn (Prospect $record): string => ProspectResource::getUrl('view', ['record' => $record])),
+                                    ->url(fn (Contact $record): string => ContactResource::getUrl('view', ['record' => $record])),
                             ])
                             ->columns()
-                            ->visible(fn (EventAttendee $record): bool => $record->prospects->isNotEmpty()),
+                            ->visible(fn (EventAttendee $record): bool => $record->contacts->isNotEmpty()),
                         RepeatableEntry::make('students')
                             ->schema([
                                 TextEntry::make(Student::displayNameKey())
@@ -86,7 +86,7 @@ class ViewEventAttendeeAction extends ViewAction
                             ->columns()
                             ->visible(fn (EventAttendee $record): bool => $record->students->isNotEmpty()),
                     ])
-                    ->visible(fn (EventAttendee $record): bool => $record->prospects->isNotEmpty() || $record->students->isNotEmpty())
+                    ->visible(fn (EventAttendee $record): bool => $record->contacts->isNotEmpty() || $record->students->isNotEmpty())
                     ->columns(),
 
                 Fieldset::make('Attendee Submissions')

@@ -38,7 +38,7 @@ namespace App\Filament\Clusters;
 
 use Filament\Clusters\Cluster;
 
-class ProspectManagement extends Cluster
+class ContactManagement extends Cluster
 {
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
 

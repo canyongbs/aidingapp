@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Prospect\Tests\ProspectSource\RequestFactories;
+namespace AdvisingApp\Contact\Tests\ContactSource\RequestFactories;
 
 use Worksome\RequestFactories\RequestFactory;
 
-class EditProspectSourceRequestFactory extends RequestFactory
+class EditContactSourceRequestFactory extends RequestFactory
 {
     public function definition(): array
     {

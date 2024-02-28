@@ -34,15 +34,15 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Prospect\Database\Factories;
+namespace AdvisingApp\Contact\Database\Factories;
 
-use AdvisingApp\Prospect\Models\ProspectSource;
+use AdvisingApp\Contact\Models\ContactSource;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends Factory<ProspectSource>
+ * @extends Factory<ContactSource>
  */
-class ProspectSourceFactory extends Factory
+class ContactSourceFactory extends Factory
 {
     public function definition(): array
     {

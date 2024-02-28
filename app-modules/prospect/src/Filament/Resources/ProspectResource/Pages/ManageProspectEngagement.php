@@ -34,18 +34,18 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Prospect\Filament\Resources\ProspectResource\Pages;
+namespace AdvisingApp\Contact\Filament\Resources\ContactResource\Pages;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Contracts\Support\Htmlable;
 use Filament\Resources\Pages\ManageRelatedRecords;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource\RelationManagers\EngagementsRelationManager;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource\RelationManagers\EngagementResponsesRelationManager;
+use AdvisingApp\Contact\Filament\Resources\ContactResource;
+use AdvisingApp\Contact\Filament\Resources\ContactResource\RelationManagers\EngagementsRelationManager;
+use AdvisingApp\Contact\Filament\Resources\ContactResource\RelationManagers\EngagementResponsesRelationManager;
 
-class ManageProspectEngagement extends ManageRelatedRecords
+class ManageContactEngagement extends ManageRelatedRecords
 {
-    protected static string $resource = ProspectResource::class;
+    protected static string $resource = ContactResource::class;
 
     // TODO: Obsolete when there is no table, remove from Filament
     protected static string $relationship = 'engagements';
@@ -58,7 +58,7 @@ class ManageProspectEngagement extends ManageRelatedRecords
 
     public function getTitle(): string | Htmlable
     {
-        return 'Manage Prospect Email and Texts';
+        return 'Manage Contact Email and Texts';
     }
 
     public static function canAccess(array $arguments = []): bool

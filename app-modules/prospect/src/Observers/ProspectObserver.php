@@ -34,30 +34,30 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Prospect\Observers;
+namespace AdvisingApp\Contact\Observers;
 
 use App\Models\User;
 use Illuminate\Support\Facades\Cache;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 
-class ProspectObserver
+class ContactObserver
 {
-    public function creating(Prospect $prospect): void
+    public function creating(Contact $contact): void
     {
         $user = auth()->user();
 
-        if ($user instanceof User && ! $prospect->createdBy) {
-            $prospect->createdBy()->associate($user);
+        if ($user instanceof User && ! $contact->createdBy) {
+            $contact->createdBy()->associate($user);
         }
     }
 
     public function created(): void
     {
-        Cache::tags('prospects')->flush();
+        Cache::tags('contacts')->flush();
     }
 
     public function deleted(): void
     {
-        Cache::tags('prospects')->flush();
+        Cache::tags('contacts')->flush();
     }
 }

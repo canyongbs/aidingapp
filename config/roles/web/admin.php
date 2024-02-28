@@ -63,18 +63,18 @@ return [
         'support_page.show',
         'support_page.delete',
         'support_page.access',
-        'prospect_menu.access',
+        'contact_menu.access',
         'report_menu.access',
         'report_student.create',
         'report_student.edit',
         'report_student.show',
         'report_student.delete',
         'report_student.access',
-        'report_prospect.create',
-        'report_prospect.edit',
-        'report_prospect.show',
-        'report_prospect.delete',
-        'report_prospect.access',
+        'report_contact.create',
+        'report_contact.edit',
+        'report_contact.show',
+        'report_contact.delete',
+        'report_contact.access',
         'journey_menu.access',
         'license_settings.manage',
     ],
@@ -149,13 +149,13 @@ return [
         'kb_item_status' => [
             '*',
         ],
-        'prospect_item' => [
+        'contact_item' => [
             '*',
         ],
-        'prospect_source' => [
+        'contact_source' => [
             '*',
         ],
-        'prospect_status' => [
+        'contact_status' => [
             '*',
         ],
         'support_page' => [

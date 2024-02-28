@@ -38,7 +38,7 @@ namespace AdvisingApp\Form\Notifications;
 
 use App\Models\Tenant;
 use AdvisingApp\Form\Models\Form;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use AdvisingApp\Form\Models\FormSubmission;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use AdvisingApp\StudentDataModel\Models\Student;
@@ -65,7 +65,7 @@ class FormSubmissionAutoReplyNotification extends BaseNotification implements Em
         /** @var Form $form */
         $form = $this->submission->submissible;
 
-        /** @var Student|Prospect|null $author */
+        /** @var Student|Contact|null $author */
         $author = $this->submission->author;
 
         return MailMessage::make()

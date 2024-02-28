@@ -34,22 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Prospect\Filament\Resources\ProspectResource\Pages;
+namespace AdvisingApp\Contact\Filament\Resources\ContactResource\Pages;
 
 use AdvisingApp\Engagement\Models\Engagement;
 use AdvisingApp\Engagement\Models\EngagementResponse;
 use AdvisingApp\Timeline\Filament\Pages\TimelinePage;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource;
+use AdvisingApp\Contact\Filament\Resources\ContactResource;
 
-class ProspectEngagementTimeline extends TimelinePage
+class ContactEngagementTimeline extends TimelinePage
 {
-    protected static string $resource = ProspectResource::class;
+    protected static string $resource = ContactResource::class;
 
     protected static ?string $navigationLabel = 'Timeline';
 
-    public string $emptyStateMessage = 'There are no engagements to show for this prospect.';
+    public string $emptyStateMessage = 'There are no engagements to show for this contact.';
 
-    public string $noMoreRecordsMessage = "You have reached the end of this prospects's engagement timeline.";
+    public string $noMoreRecordsMessage = "You have reached the end of this contacts's engagement timeline.";
 
     public array $modelsToTimeline = [
         Engagement::class,

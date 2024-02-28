@@ -34,29 +34,29 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Prospect\Filament\Tables;
+namespace AdvisingApp\Contact\Filament\Tables;
 
 use Filament\Tables\Table;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use Filament\Tables\Filters\QueryBuilder;
 use Illuminate\Database\Eloquent\Builder;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource;
+use AdvisingApp\Contact\Filament\Resources\ContactResource;
 use Filament\Tables\Filters\QueryBuilder\Constraints\TextConstraint;
 use Filament\Tables\Filters\QueryBuilder\Constraints\BooleanConstraint;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
 
-class ProspectsTable
+class ContactsTable
 {
     public function __invoke(Table $table): Table
     {
         return $table
-            ->query(fn () => Prospect::query())
+            ->query(fn () => Contact::query())
             ->columns([
-                TextColumn::make(Prospect::displayNameKey())
+                TextColumn::make(Contact::displayNameKey())
                     ->label('Name')
                     ->sortable(),
                 TextColumn::make('email')
@@ -67,16 +67,16 @@ class ProspectsTable
                     ->sortable(),
                 TextColumn::make('status')
                     ->badge()
-                    ->state(function (Prospect $record) {
+                    ->state(function (Contact $record) {
                         return $record->status->name;
                     })
-                    ->color(function (Prospect $record) {
+                    ->color(function (Contact $record) {
                         return $record->status->color->value;
                     })
                     ->sortable(query: function (Builder $query, string $direction): Builder {
                         return $query
-                            ->join('prospect_statuses', 'prospects.status_id', '=', 'prospect_statuses.id')
-                            ->orderBy('prospect_statuses.name', $direction);
+                            ->join('contact_statuses', 'contacts.status_id', '=', 'contact_statuses.id')
+                            ->orderBy('contact_statuses.name', $direction);
                     }),
                 TextColumn::make('source.name')
                     ->label('Source')
@@ -149,7 +149,7 @@ class ProspectsTable
             ->actions([
                 ViewAction::make()
                     ->authorize('view')
-                    ->url(fn (Prospect $record) => ProspectResource::getUrl('view', ['record' => $record])),
+                    ->url(fn (Contact $record) => ContactResource::getUrl('view', ['record' => $record])),
             ]);
     }
 }

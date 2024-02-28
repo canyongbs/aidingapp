@@ -36,7 +36,7 @@
 
 return [
     'model' => [
-        'prospect' => [
+        'contact' => [
             '*',
         ],
     ],

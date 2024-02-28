@@ -39,50 +39,50 @@ use App\Models\User;
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 
 use function PHPUnit\Framework\assertCount;
 use function Pest\Laravel\assertDatabaseHas;
 
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource;
-use AdvisingApp\Prospect\Tests\Prospect\RequestFactories\CreateProspectRequestFactory;
+use AdvisingApp\Contact\Filament\Resources\ContactResource;
+use AdvisingApp\Contact\Tests\Contact\RequestFactories\CreateContactRequestFactory;
 
-// TODO: Write CreateProspect page tests
-//test('A successful action on the CreateProspect page', function () {});
+// TODO: Write CreateContact page tests
+//test('A successful action on the CreateContact page', function () {});
 //
-//test('CreateProspect requires valid data', function ($data, $errors) {})->with([]);
+//test('CreateContact requires valid data', function ($data, $errors) {})->with([]);
 
 // Permission Tests
 
-test('CreateProspect is gated with proper access control', function () {
-    $user = User::factory()->licensed(Prospect::getLicenseType())->create();
+test('CreateContact is gated with proper access control', function () {
+    $user = User::factory()->licensed(Contact::getLicenseType())->create();
 
     actingAs($user)
         ->get(
-            ProspectResource::getUrl('create')
+            ContactResource::getUrl('create')
         )->assertForbidden();
 
-    livewire(ProspectResource\Pages\CreateProspect::class)
+    livewire(ContactResource\Pages\CreateContact::class)
         ->assertForbidden();
 
-    $user->givePermissionTo('prospect.view-any');
-    $user->givePermissionTo('prospect.create');
+    $user->givePermissionTo('contact.view-any');
+    $user->givePermissionTo('contact.create');
 
     actingAs($user)
         ->get(
-            ProspectResource::getUrl('create')
+            ContactResource::getUrl('create')
         )->assertSuccessful();
 
-    $request = collect(CreateProspectRequestFactory::new()->create([
+    $request = collect(CreateContactRequestFactory::new()->create([
         'created_by_id' => $user->id,
     ]));
 
-    livewire(ProspectResource\Pages\CreateProspect::class)
+    livewire(ContactResource\Pages\CreateContact::class)
         ->fillForm($request->toArray())
         ->call('create')
         ->assertHasNoFormErrors();
 
-    assertCount(1, Prospect::all());
+    assertCount(1, Contact::all());
 
-    assertDatabaseHas(Prospect::class, $request->toArray());
+    assertDatabaseHas(Contact::class, $request->toArray());
 });

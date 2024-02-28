@@ -34,37 +34,37 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Prospect\Registries;
+namespace AdvisingApp\Contact\Registries;
 
 use AdvisingApp\Authorization\AuthorizationRoleRegistry;
 use App\Registries\Contracts\RegistersRolesAndPermissions;
 use AdvisingApp\Authorization\AuthorizationPermissionRegistry;
 
-class ProspectRbacRegistry implements RegistersRolesAndPermissions
+class ContactRbacRegistry implements RegistersRolesAndPermissions
 {
     public function registerRolesAndPermissions(): void
     {
         $permissionRegistry = app(AuthorizationPermissionRegistry::class);
 
         $permissionRegistry->registerApiPermissions(
-            module: 'prospect',
+            module: 'contact',
             path: 'permissions/api/custom'
         );
 
         $permissionRegistry->registerWebPermissions(
-            module: 'prospect',
+            module: 'contact',
             path: 'permissions/web/custom'
         );
 
         $roleRegistry = app(AuthorizationRoleRegistry::class);
 
         $roleRegistry->registerApiRoles(
-            module: 'prospect',
+            module: 'contact',
             path: 'roles/api'
         );
 
         $roleRegistry->registerWebRoles(
-            module: 'prospect',
+            module: 'contact',
             path: 'roles/web'
         );
     }

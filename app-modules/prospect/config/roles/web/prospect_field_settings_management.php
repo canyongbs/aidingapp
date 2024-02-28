@@ -36,10 +36,10 @@
 
 return [
     'model' => [
-        'prospect_source' => [
+        'contact_source' => [
             '*',
         ],
-        'prospect_status' => [
+        'contact_status' => [
             '*',
         ],
     ],

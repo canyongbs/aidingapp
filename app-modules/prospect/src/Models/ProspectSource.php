@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Prospect\Models;
+namespace AdvisingApp\Contact\Models;
 
 use DateTimeInterface;
 use App\Models\BaseModel;
@@ -45,9 +45,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use AdvisingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 
 /**
- * @mixin IdeHelperProspectSource
+ * @mixin IdeHelperContactSource
  */
-class ProspectSource extends BaseModel implements Auditable
+class ContactSource extends BaseModel implements Auditable
 {
     use HasUuids;
     use SoftDeletes;
@@ -57,9 +57,9 @@ class ProspectSource extends BaseModel implements Auditable
         'name',
     ];
 
-    public function prospects(): HasMany
+    public function contacts(): HasMany
     {
-        return $this->hasMany(Prospect::class, 'source_id');
+        return $this->hasMany(Contact::class, 'source_id');
     }
 
     protected function serializeDate(DateTimeInterface $date): string

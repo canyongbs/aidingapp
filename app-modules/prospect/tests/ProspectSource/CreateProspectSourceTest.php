@@ -40,80 +40,80 @@ use function Tests\asSuperAdmin;
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 
 use function PHPUnit\Framework\assertCount;
 use function PHPUnit\Framework\assertEmpty;
 use function Pest\Laravel\assertDatabaseHas;
 
-use AdvisingApp\Prospect\Models\ProspectSource;
-use AdvisingApp\Prospect\Filament\Resources\ProspectSourceResource;
-use AdvisingApp\Prospect\Tests\ProspectSource\RequestFactories\CreateProspectSourceRequestFactory;
+use AdvisingApp\Contact\Models\ContactSource;
+use AdvisingApp\Contact\Filament\Resources\ContactSourceResource;
+use AdvisingApp\Contact\Tests\ContactSource\RequestFactories\CreateContactSourceRequestFactory;
 
-test('A successful action on the CreateProspectSource page', function () {
+test('A successful action on the CreateContactSource page', function () {
     asSuperAdmin()
         ->get(
-            ProspectSourceResource::getUrl('create')
+            ContactSourceResource::getUrl('create')
         )
         ->assertSuccessful();
 
-    $request = CreateProspectSourceRequestFactory::new()->create();
+    $request = CreateContactSourceRequestFactory::new()->create();
 
-    livewire(ProspectSourceResource\Pages\CreateProspectSource::class)
+    livewire(ContactSourceResource\Pages\CreateContactSource::class)
         ->fillForm($request)
         ->call('create')
         ->assertHasNoFormErrors();
 
-    assertCount(1, ProspectSource::all());
+    assertCount(1, ContactSource::all());
 
-    assertDatabaseHas(ProspectSource::class, $request);
+    assertDatabaseHas(ContactSource::class, $request);
 });
 
-test('CreateProspectSource requires valid data', function ($data, $errors) {
+test('CreateContactSource requires valid data', function ($data, $errors) {
     asSuperAdmin();
 
-    livewire(ProspectSourceResource\Pages\CreateProspectSource::class)
-        ->fillForm(CreateProspectSourceRequestFactory::new($data)->create())
+    livewire(ContactSourceResource\Pages\CreateContactSource::class)
+        ->fillForm(CreateContactSourceRequestFactory::new($data)->create())
         ->call('create')
         ->assertHasFormErrors($errors);
 
-    assertEmpty(ProspectSource::all());
+    assertEmpty(ContactSource::all());
 })->with(
     [
-        'name missing' => [CreateProspectSourceRequestFactory::new()->without('name'), ['name' => 'required']],
-        'name not a string' => [CreateProspectSourceRequestFactory::new()->state(['name' => 1]), ['name' => 'string']],
+        'name missing' => [CreateContactSourceRequestFactory::new()->without('name'), ['name' => 'required']],
+        'name not a string' => [CreateContactSourceRequestFactory::new()->state(['name' => 1]), ['name' => 'string']],
     ]
 );
 
 // Permission Tests
 
-test('CreateProspectSource is gated with proper access control', function () {
-    $user = User::factory()->licensed(Prospect::getLicenseType())->create();
+test('CreateContactSource is gated with proper access control', function () {
+    $user = User::factory()->licensed(Contact::getLicenseType())->create();
 
     actingAs($user)
         ->get(
-            ProspectSourceResource::getUrl('create')
+            ContactSourceResource::getUrl('create')
         )->assertForbidden();
 
-    livewire(ProspectSourceResource\Pages\CreateProspectSource::class)
+    livewire(ContactSourceResource\Pages\CreateContactSource::class)
         ->assertForbidden();
 
-    $user->givePermissionTo('prospect_source.view-any');
-    $user->givePermissionTo('prospect_source.create');
+    $user->givePermissionTo('contact_source.view-any');
+    $user->givePermissionTo('contact_source.create');
 
     actingAs($user)
         ->get(
-            ProspectSourceResource::getUrl('create')
+            ContactSourceResource::getUrl('create')
         )->assertSuccessful();
 
-    $request = collect(CreateProspectSourceRequestFactory::new()->create());
+    $request = collect(CreateContactSourceRequestFactory::new()->create());
 
-    livewire(ProspectSourceResource\Pages\CreateProspectSource::class)
+    livewire(ContactSourceResource\Pages\CreateContactSource::class)
         ->fillForm($request->toArray())
         ->call('create')
         ->assertHasNoFormErrors();
 
-    assertCount(1, ProspectSource::all());
+    assertCount(1, ContactSource::all());
 
-    assertDatabaseHas(ProspectSource::class, $request->toArray());
+    assertDatabaseHas(ContactSource::class, $request->toArray());
 });

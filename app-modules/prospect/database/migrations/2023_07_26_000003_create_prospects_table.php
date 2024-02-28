@@ -38,15 +38,15 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateProspectsTable extends Migration
+class CreateContactsTable extends Migration
 {
     public function up(): void
     {
-        Schema::create('prospects', function (Blueprint $table) {
+        Schema::create('contacts', function (Blueprint $table) {
             $table->uuid('id')->primary();
 
-            $table->foreignUuid('status_id')->references('id')->on('prospect_statuses');
-            $table->foreignUuid('source_id')->references('id')->on('prospect_sources');
+            $table->foreignUuid('status_id')->references('id')->on('contact_statuses');
+            $table->foreignUuid('source_id')->references('id')->on('contact_sources');
             $table->string('first_name');
             $table->string('last_name');
             $table->string('full_name');

@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Prospect\Models;
+namespace AdvisingApp\Contact\Models;
 
 use App\Models\User;
 use DateTimeInterface;
@@ -67,7 +67,7 @@ use AdvisingApp\Engagement\Models\EngagementFileEntities;
 use AdvisingApp\InventoryManagement\Models\AssetCheckOut;
 use AdvisingApp\Notification\Models\Contracts\Subscribable;
 use Illuminate\Foundation\Auth\User as BaseAuthenticatable;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource;
+use AdvisingApp\Contact\Filament\Resources\ContactResource;
 use AdvisingApp\StudentDataModel\Models\Contracts\Educatable;
 use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 use AdvisingApp\Notification\Models\Concerns\HasSubscriptions;
@@ -83,9 +83,9 @@ use AdvisingApp\Engagement\Models\Concerns\HasManyMorphedEngagementResponses;
 /**
  * @property string $display_name
  *
- * @mixin IdeHelperProspect
+ * @mixin IdeHelperContact
  */
-class Prospect extends BaseAuthenticatable implements Auditable, Subscribable, Educatable, HasFilamentResource, NotifiableInterface
+class Contact extends BaseAuthenticatable implements Auditable, Subscribable, Educatable, HasFilamentResource, NotifiableInterface
 {
     use AuditableTrait;
     use DefinesPermissions;
@@ -160,12 +160,12 @@ class Prospect extends BaseAuthenticatable implements Auditable, Subscribable, E
 
     public function status(): BelongsTo
     {
-        return $this->belongsTo(ProspectStatus::class);
+        return $this->belongsTo(ContactStatus::class);
     }
 
     public function source(): BelongsTo
     {
-        return $this->belongsTo(ProspectSource::class);
+        return $this->belongsTo(ContactSource::class);
     }
 
     public function engagementFiles(): MorphToMany
@@ -232,7 +232,7 @@ class Prospect extends BaseAuthenticatable implements Auditable, Subscribable, E
 
     public static function filamentResource(): string
     {
-        return ProspectResource::class;
+        return ContactResource::class;
     }
 
     public function subscribedUsers(): MorphToMany
@@ -294,7 +294,7 @@ class Prospect extends BaseAuthenticatable implements Auditable, Subscribable, E
             /** @var Authenticatable $user */
             $user = auth()->user();
 
-            if (! $user->hasLicense(Prospect::getLicenseType())) {
+            if (! $user->hasLicense(Contact::getLicenseType())) {
                 $builder->whereRaw('1 = 0');
             }
         });

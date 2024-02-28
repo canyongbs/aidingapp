@@ -34,32 +34,32 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Prospect\Filament\Resources;
+namespace AdvisingApp\Contact\Filament\Resources;
 
 use Filament\Resources\Resource;
 use Filament\Resources\Pages\Page;
 use Illuminate\Database\Eloquent\Model;
-use AdvisingApp\Prospect\Models\Prospect;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource\Pages\EditProspect;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource\Pages\ViewProspect;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource\Pages\ListProspects;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource\Pages\CreateProspect;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource\Pages\ManageProspectFiles;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource\Pages\ManageProspectTasks;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource\Pages\ManageProspectAlerts;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource\Pages\ManageProspectEvents;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource\Pages\ManageProspectCareTeam;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource\Pages\ManageProspectEngagement;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource\Pages\ProspectServiceManagement;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource\Pages\ManageProspectInteractions;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource\Pages\ProspectEngagementTimeline;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource\Pages\ManageProspectSubscriptions;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource\Pages\ManageProspectFormSubmissions;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource\Pages\ManageProspectApplicationSubmissions;
+use AdvisingApp\Contact\Models\Contact;
+use AdvisingApp\Contact\Filament\Resources\ContactResource\Pages\EditContact;
+use AdvisingApp\Contact\Filament\Resources\ContactResource\Pages\ViewContact;
+use AdvisingApp\Contact\Filament\Resources\ContactResource\Pages\ListContacts;
+use AdvisingApp\Contact\Filament\Resources\ContactResource\Pages\CreateContact;
+use AdvisingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactFiles;
+use AdvisingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactTasks;
+use AdvisingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactAlerts;
+use AdvisingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactEvents;
+use AdvisingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactCareTeam;
+use AdvisingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactEngagement;
+use AdvisingApp\Contact\Filament\Resources\ContactResource\Pages\ContactServiceManagement;
+use AdvisingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactInteractions;
+use AdvisingApp\Contact\Filament\Resources\ContactResource\Pages\ContactEngagementTimeline;
+use AdvisingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactSubscriptions;
+use AdvisingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactFormSubmissions;
+use AdvisingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactApplicationSubmissions;
 
-class ProspectResource extends Resource
+class ContactResource extends Resource
 {
-    protected static ?string $model = Prospect::class;
+    protected static ?string $model = Contact::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-users';
 
@@ -72,20 +72,20 @@ class ProspectResource extends Resource
     public static function getRecordSubNavigation(Page $page): array
     {
         return $page->generateNavigationItems([
-            ViewProspect::class,
-            EditProspect::class,
-            ManageProspectEngagement::class,
-            ManageProspectFiles::class,
-            ManageProspectAlerts::class,
-            ManageProspectTasks::class,
-            ManageProspectSubscriptions::class,
-            ManageProspectInteractions::class,
-            ProspectEngagementTimeline::class,
-            ManageProspectCareTeam::class,
-            ManageProspectFormSubmissions::class,
-            ManageProspectApplicationSubmissions::class,
-            ProspectServiceManagement::class,
-            ManageProspectEvents::class,
+            ViewContact::class,
+            EditContact::class,
+            ManageContactEngagement::class,
+            ManageContactFiles::class,
+            ManageContactAlerts::class,
+            ManageContactTasks::class,
+            ManageContactSubscriptions::class,
+            ManageContactInteractions::class,
+            ContactEngagementTimeline::class,
+            ManageContactCareTeam::class,
+            ManageContactFormSubmissions::class,
+            ManageContactApplicationSubmissions::class,
+            ContactServiceManagement::class,
+            ManageContactEvents::class,
         ]);
     }
 
@@ -107,22 +107,22 @@ class ProspectResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => ListProspects::route('/'),
-            'create' => CreateProspect::route('/create'),
-            'edit' => EditProspect::route('/{record}/edit'),
-            'manage-alerts' => ManageProspectAlerts::route('/{record}/alerts'),
-            'manage-engagement' => ManageProspectEngagement::route('/{record}/engagement'),
-            'manage-files' => ManageProspectFiles::route('/{record}/files'),
-            'manage-form-submissions' => ManageProspectFormSubmissions::route('/{record}/form-submissions'),
-            'manage-application-submissions' => ManageProspectApplicationSubmissions::route('/{record}/application-submissions'),
-            'manage-interactions' => ManageProspectInteractions::route('/{record}/interactions'),
-            'manage-subscriptions' => ManageProspectSubscriptions::route('/{record}/subscriptions'),
-            'manage-tasks' => ManageProspectTasks::route('/{record}/tasks'),
-            'view' => ViewProspect::route('/{record}'),
-            'timeline' => ProspectEngagementTimeline::route('/{record}/timeline'),
-            'care-team' => ManageProspectCareTeam::route('/{record}/care-team'),
-            'service-management' => ProspectServiceManagement::route('/{record}/service-management'),
-            'events' => ManageProspectEvents::route('/{record}/events'),
+            'index' => ListContacts::route('/'),
+            'create' => CreateContact::route('/create'),
+            'edit' => EditContact::route('/{record}/edit'),
+            'manage-alerts' => ManageContactAlerts::route('/{record}/alerts'),
+            'manage-engagement' => ManageContactEngagement::route('/{record}/engagement'),
+            'manage-files' => ManageContactFiles::route('/{record}/files'),
+            'manage-form-submissions' => ManageContactFormSubmissions::route('/{record}/form-submissions'),
+            'manage-application-submissions' => ManageContactApplicationSubmissions::route('/{record}/application-submissions'),
+            'manage-interactions' => ManageContactInteractions::route('/{record}/interactions'),
+            'manage-subscriptions' => ManageContactSubscriptions::route('/{record}/subscriptions'),
+            'manage-tasks' => ManageContactTasks::route('/{record}/tasks'),
+            'view' => ViewContact::route('/{record}'),
+            'timeline' => ContactEngagementTimeline::route('/{record}/timeline'),
+            'care-team' => ManageContactCareTeam::route('/{record}/care-team'),
+            'service-management' => ContactServiceManagement::route('/{record}/service-management'),
+            'events' => ManageContactEvents::route('/{record}/events'),
         ];
     }
 }
