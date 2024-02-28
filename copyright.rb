@@ -7,7 +7,7 @@ COPYRIGHT = <<EOM
     Copyright © 2016-#{YEAR}, Canyon GBS LLC. All rights reserved.
 
     Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    see https://github.com/canyongbs/aidingapp/blob/main/LICENSE.
 
     Notice:
 

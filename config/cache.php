@@ -6,7 +6,7 @@
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
     Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    see https://github.com/canyongbs/aidingapp/blob/main/LICENSE.
 
     Notice:
 
@@ -106,5 +106,5 @@ return [
     |
     */
 
-    'prefix' => env('CACHE_PREFIX', '{advisingapp_landlord_cache}'),
+    'prefix' => env('CACHE_PREFIX', '{aidingapp_landlord_cache}'),
 ];

@@ -9,7 +9,7 @@ services:
       LARAVEL_QUEUE_ENABLED: '${LARAVEL_QUEUE_ENABLED:-true}'
       LARAVEL_OCTANE_WATCH: '${LARAVEL_OCTANE_WATCH:-false}'
     labels:
-      - dev.orbstack.domains=*.advisingapp.local
+      - dev.orbstack.domains=*.aidingapp.local
     extra_hosts:
       - 'host.docker.internal:host-gateway'
     ports:
@@ -30,7 +30,7 @@ services:
     ports:
       - '${FORWARD_REDIS_PORT:-6379}:6379'
     volumes:
-      - 'advisingapp-redis:/data'
+      - 'aidingapp-redis:/data'
     networks:
       - development
     healthcheck:
@@ -46,10 +46,10 @@ services:
       - '${FORWARD_MINIO_PORT:-9000}:9000'
       - '${FORWARD_MINIO_CONSOLE_PORT:-8900}:8900'
     environment:
-      MINIO_ROOT_USER: advisingapp
+      MINIO_ROOT_USER: aidingapp
       MINIO_ROOT_PASSWORD: password
     volumes:
-      - 'advisingapp-minio:/data/minio'
+      - 'aidingapp-minio:/data/minio'
     networks:
       - development
     command: 'minio server /data/minio --console-address ":8900"'
@@ -78,7 +78,7 @@ services:
       POSTGRES_USER: '${DB_USERNAME}'
       POSTGRES_PASSWORD: '${DB_PASSWORD:-secret}'
     volumes:
-      - 'advisingapp-pgsql:/var/lib/postgresql/data'
+      - 'aidingapp-pgsql:/var/lib/postgresql/data'
       - './docker/pgsql/create-testing-database.sql:/docker-entrypoint-initdb.d/10-create-testing-database.sql'
     networks:
       - development
@@ -96,9 +96,9 @@ services:
 networks:
   development:
 volumes:
-  advisingapp-redis:
+  aidingapp-redis:
     driver: local
-  advisingapp-minio:
+  aidingapp-minio:
     driver: local
-  advisingapp-pgsql:
+  aidingapp-pgsql:
     driver: local

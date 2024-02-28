@@ -6,7 +6,7 @@
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
     Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    see https://github.com/canyongbs/aidingapp/blob/main/LICENSE.
 
     Notice:
 
@@ -97,7 +97,7 @@ abstract class TestCase extends BaseTestCase
 
         $this->createTenant(
             name: 'Test Tenant',
-            domain: 'test.advisingapp.local',
+            domain: 'test.aidingapp.local',
             database: ParallelTesting::token() ? 'testing_tenant_test_' . ParallelTesting::token() : 'testing_tenant',
         );
     }

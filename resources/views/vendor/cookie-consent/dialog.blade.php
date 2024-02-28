@@ -4,7 +4,7 @@
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
     Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    see https://github.com/canyongbs/aidingapp/blob/main/LICENSE.
 
     Notice:
 
@@ -40,7 +40,7 @@
                         {!! trans('cookie-consent::texts.message') !!}
                     </p>
                 </div>
-                
+
                 <div class="mt-2 flex-shrink-0 w-full sm:mt-0 sm:w-auto">
                     <x-filament::button class="js-cookie-consent-agree cookie-consent__agree">
                         {{ trans('cookie-consent::texts.agree') }}
