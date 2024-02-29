@@ -41,8 +41,8 @@ use App\Models\BaseModel;
 use OwenIt\Auditing\Contracts\Auditable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\Concerns\HasRelationBasedStateMachine;
 use AdvisingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AdvisingApp\Application\Models\Concerns\HasRelationBasedStateMachine;
 use AdvisingApp\ServiceManagement\Enums\SystemChangeRequestClassification;
 
 /**

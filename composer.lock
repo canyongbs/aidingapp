@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "64703699f74b561e32850bc8b440bf97",
+    "content-hash": "be32dc9e8a8f4c8f434920af593831fe",
     "packages": [
         {
             "name": "amphp/amp",
@@ -1652,42 +1652,6 @@
             }
         },
         {
-            "name": "canyon-gbs/advising-app-application",
-            "version": "1.0",
-            "dist": {
-                "type": "path",
-                "url": "app-modules/application",
-                "reference": "eab99f1452d2c4f3c726d2a0a923f2d09b7a7319"
-            },
-            "require": {
-                "canyon-gbs/advising-app-form": "*",
-                "filament/filament": "^3.0.0"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "AdvisingApp\\Application\\Providers\\ApplicationServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "AdvisingApp\\Application\\": "src/",
-                    "AdvisingApp\\Application\\Tests\\": "tests/",
-                    "AdvisingApp\\Application\\Database\\Factories\\": "database/factories/",
-                    "AdvisingApp\\Application\\Database\\Seeders\\": "database/seeders/"
-                }
-            },
-            "license": [
-                "proprietary"
-            ],
-            "transport-options": {
-                "symlink": true,
-                "relative": true
-            }
-        },
-        {
             "name": "canyon-gbs/advising-app-assistant",
             "version": "1.0",
             "dist": {
@@ -1926,6 +1890,41 @@
                     "AdvisingApp\\Consent\\Tests\\": "tests/",
                     "AdvisingApp\\Consent\\Database\\Factories\\": "database/factories/",
                     "AdvisingApp\\Consent\\Database\\Seeders\\": "database/seeders/"
+                }
+            },
+            "license": [
+                "proprietary"
+            ],
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "canyon-gbs/advising-app-contact",
+            "version": "1.0",
+            "dist": {
+                "type": "path",
+                "url": "app-modules/contact",
+                "reference": "c8be1ca16f15a8c26868f96238adc6d2082ebc0a"
+            },
+            "require": {
+                "filament/filament": "^3.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "AdvisingApp\\Contact\\Providers\\ContactServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "AdvisingApp\\Contact\\": "src/",
+                    "AdvisingApp\\Contact\\Tests\\": "tests/",
+                    "AdvisingApp\\Contact\\Database\\Factories\\": "database/factories/",
+                    "AdvisingApp\\Contact\\Database\\Seeders\\": "database/seeders/"
                 }
             },
             "license": [
@@ -2494,41 +2493,6 @@
                     "AdvisingApp\\Portal\\Tests\\": "tests/",
                     "AdvisingApp\\Portal\\Database\\Factories\\": "database/factories/",
                     "AdvisingApp\\Portal\\Database\\Seeders\\": "database/seeders/"
-                }
-            },
-            "license": [
-                "proprietary"
-            ],
-            "transport-options": {
-                "symlink": true,
-                "relative": true
-            }
-        },
-        {
-            "name": "canyon-gbs/advising-app-contact",
-            "version": "1.0",
-            "dist": {
-                "type": "path",
-                "url": "app-modules/contact",
-                "reference": "8ff61c69bd1972b9597ee0a4238b6362be5116fa"
-            },
-            "require": {
-                "filament/filament": "^3.0"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "AdvisingApp\\Contact\\Providers\\ContactServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "AdvisingApp\\Contact\\": "src/",
-                    "AdvisingApp\\Contact\\Tests\\": "tests/",
-                    "AdvisingApp\\Contact\\Database\\Factories\\": "database/factories/",
-                    "AdvisingApp\\Contact\\Database\\Seeders\\": "database/seeders/"
                 }
             },
             "license": [

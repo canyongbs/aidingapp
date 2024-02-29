@@ -62,7 +62,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use AdvisingApp\InventoryManagement\Models\AssetCheckIn;
 use AdvisingApp\ServiceManagement\Models\ServiceRequest;
-use AdvisingApp\Application\Models\ApplicationSubmission;
 use AdvisingApp\Engagement\Models\EngagementFileEntities;
 use AdvisingApp\InventoryManagement\Models\AssetCheckOut;
 use AdvisingApp\Contact\Filament\Resources\ContactResource;
@@ -208,11 +207,6 @@ class Contact extends BaseAuthenticatable implements Auditable, Subscribable, Ed
     public function formSubmissions(): MorphMany
     {
         return $this->morphMany(FormSubmission::class, 'author');
-    }
-
-    public function applicationSubmissions(): MorphMany
-    {
-        return $this->morphMany(ApplicationSubmission::class, 'author');
     }
 
     public static function displayNameKey(): string

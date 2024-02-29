@@ -20,7 +20,6 @@
         "bvtterfly/model-state-machine": "^0.3.0",
         "canyon-gbs/advising-app-alert": "*",
         "canyon-gbs/advising-app-analytics": "*",
-        "canyon-gbs/advising-app-application": "*",
         "canyon-gbs/advising-app-assistant": "*",
         "canyon-gbs/advising-app-audit": "*",
         "canyon-gbs/advising-app-authorization": "*",

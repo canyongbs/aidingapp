@@ -34,16 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Application\Models\State;
+namespace App\Models\States;
 
 use BackedEnum;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Bvtterfly\ModelStateMachine\ConfigLoader;
+use App\Models\Concerns\TargetsRelationships;
 use Bvtterfly\ModelStateMachine\TransitionManager;
 use Bvtterfly\ModelStateMachine\Exceptions\UnknownState;
 use Bvtterfly\ModelStateMachine\Exceptions\InvalidTransition;
-use AdvisingApp\Application\Models\Concerns\TargetsRelationships;
 use Bvtterfly\ModelStateMachine\DataTransferObjects\StateMachineConfig;
 
 class StateMachine

@@ -34,19 +34,58 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Application\Models\Scopes;
+namespace App\Models\Concerns;
 
-use Illuminate\Database\Eloquent\Builder;
-use AdvisingApp\Application\Enums\ApplicationSubmissionStateClassification;
+use Exception;
+use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Model;
 
-class ClassifiedAs
+trait TargetsRelationships
 {
-    public function __construct(
-        protected ApplicationSubmissionStateClassification $classification,
-    ) {}
-
-    public function __invoke(Builder $query): void
+    public function targetingRelationship(string $state): bool
     {
-        $query->where('classification', $this->classification);
+        return Str::contains($state, '.');
+    }
+
+    public function accessNestedRelations(Model $model, array $relations)
+    {
+        $current = $model;
+
+        foreach ($relations as $relation) {
+            if (! method_exists($current, $relation)) {
+                throw new Exception("Relation '{$relation}' does not exist on " . get_class($current));
+            }
+
+            // This is a workaround for if the relation is a soft-deleted model
+            // This should be removed when we rework state machines to enforce minimum/maximum classification mappings
+            $relatedClass = $current->{$relation}()->getRelated();
+
+            if (method_exists($relatedClass, 'trashed')) {
+                $current = $current->{$relation}()->withTrashed()->first();
+            } else {
+                $current = $current->{$relation};
+            }
+
+            if ($current === null) {
+                return null;
+            }
+        }
+
+        return $current;
+    }
+
+    public function dynamicMethodChain(Model $model, array $methods)
+    {
+        $current = $model;
+
+        foreach ($methods as $method) {
+            if (! method_exists($current, $method)) {
+                throw new Exception("Method '{$method}' does not exist on " . get_class($current));
+            }
+
+            $current = $current->$method();
+        }
+
+        return $current;
     }
 }

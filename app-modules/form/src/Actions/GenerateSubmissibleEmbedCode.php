@@ -41,7 +41,6 @@ use AdvisingApp\Form\Models\Form;
 use Illuminate\Support\Facades\URL;
 use AdvisingApp\Survey\Models\Survey;
 use AdvisingApp\Form\Models\Submissible;
-use AdvisingApp\Application\Models\Application;
 use AdvisingApp\MeetingCenter\Models\EventRegistrationForm;
 use AdvisingApp\ServiceManagement\Models\ServiceRequestForm;
 
@@ -49,7 +48,6 @@ class GenerateSubmissibleEmbedCode
 {
     public function handle(Submissible $submissible): string
     {
-        // TODO Clean this up
         return match ($submissible::class) {
             Form::class => (function () use ($submissible) {
                 $scriptUrl = url('js/widgets/form/advising-app-form-widget.js?');
@@ -63,21 +61,6 @@ class GenerateSubmissibleEmbedCode
 
                 return <<<EOD
                 <form-embed url="{$formDefinitionUrl}"></form-embed>
-                <script src="{$scriptUrl}"></script>
-                EOD;
-            })(),
-            Application::class => (function () use ($submissible) {
-                $scriptUrl = url('js/widgets/application/advising-app-application-widget.js?');
-                $applicationDefinitionUrl = URL::to(
-                    URL::signedRoute(
-                        name: 'applications.define',
-                        parameters: ['application' => $submissible],
-                        absolute: false,
-                    )
-                );
-
-                return <<<EOD
-                <application-embed url="{$applicationDefinitionUrl}"></application-embed>
                 <script src="{$scriptUrl}"></script>
                 EOD;
             })(),

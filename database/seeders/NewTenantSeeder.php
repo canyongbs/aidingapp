@@ -54,7 +54,6 @@ use AdvisingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseCategorySeeder;
 use AdvisingApp\ServiceManagement\Database\Seeders\ChangeRequestTypeSeeder;
 use AdvisingApp\ServiceManagement\Database\Seeders\ServiceRequestTypeSeeder;
 use AdvisingApp\ServiceManagement\Database\Seeders\ChangeRequestStatusSeeder;
-use AdvisingApp\Application\Database\Seeders\ApplicationSubmissionStateSeeder;
 use AdvisingApp\ServiceManagement\Database\Seeders\ServiceRequestStatusSeeder;
 use AdvisingApp\InventoryManagement\Database\Seeders\MaintenanceProviderSeeder;
 
@@ -88,7 +87,6 @@ class NewTenantSeeder extends Seeder
             ...InteractionSeeder::metadataSeeders(),
             ConsentAgreementSeeder::class,
             PronounsSeeder::class,
-            ApplicationSubmissionStateSeeder::class,
             // InventoryManagement
             ...AssetSeeder::metadataSeeders(),
             AssetSeeder::class,

@@ -34,13 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Application\Models\Concerns;
+namespace AdvisingApp\ServiceManagement\Models\Concerns;
 
 use Bvtterfly\ModelStateMachine\StateMachine;
+use App\Models\Concerns\TargetsRelationships;
 use Bvtterfly\ModelStateMachine\HasStateMachine;
 use Bvtterfly\ModelStateMachine\Exceptions\FieldWithoutCast;
+use App\Models\States\StateMachine as RelationBasedStateMachine;
 use Bvtterfly\ModelStateMachine\Exceptions\CouldNotFindStateMachineField;
-use AdvisingApp\Application\Models\State\StateMachine as RelationBasedStateMachine;
 
 trait HasRelationBasedStateMachine
 {
