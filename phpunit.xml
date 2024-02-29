@@ -13,8 +13,8 @@
     </testsuites>
     <php>
         <server name="APP_ENV" value="testing"/>
-        <server name="LANDLORD_APP_URL" value="http://advisingapp.local"/>
-        <server name="APP_URL" value="http://test.advisingapp.local"/>
+        <server name="LANDLORD_APP_URL" value="http://aidingapp.local"/>
+        <server name="APP_URL" value="http://test.aidingapp.local"/>
         <server name="BCRYPT_ROUNDS" value="4"/>
         <server name="CACHE_DRIVER" value="array"/>
         <server name="MAIL_MAILER" value="array"/>
@@ -26,7 +26,7 @@
         <env name="TENANT_DB_HOST" value="pgsql"/>
         <env name="TENANT_DB_PORT" value="5432"/>
         <env name="TENANT_DB_DATABASE" value="testing_tenant"/>
-        <env name="TENANT_DB_USERNAME" value="advisingapp"/>
+        <env name="TENANT_DB_USERNAME" value="aidingapp"/>
         <env name="TENANT_DB_PASSWORD" value="password"/>
         <env name="AZURE_OPEN_AI_ENABLE_TEST_MODE" value="true"/>
         <env name="SCOUT_DRIVER" value="database"/>

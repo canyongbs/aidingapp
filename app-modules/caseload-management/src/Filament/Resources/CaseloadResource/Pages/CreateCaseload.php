@@ -48,12 +48,12 @@ use App\Support\ChunkIterator;
 use Filament\Forms\Components\View;
 use Illuminate\Support\Facades\Bus;
 use Filament\Forms\Components\Select;
+use AdvisingApp\Contact\Models\Contact;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Contracts\HasTable;
 use Illuminate\Support\Facades\Storage;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
-use AdvisingApp\Prospect\Models\Prospect;
 use Filament\Forms\Components\FileUpload;
 use Illuminate\Filesystem\AwsS3V3Adapter;
 use Filament\Forms\Components\Wizard\Step;
@@ -100,7 +100,7 @@ class CreateCaseload extends CreateRecord implements HasTable
                         }),
                 ])
                 ->columns(2)
-                ->visible(auth()->user()->hasLicense([Student::getLicenseType(), Prospect::getLicenseType()])),
+                ->visible(auth()->user()->hasLicense([Student::getLicenseType(), Contact::getLicenseType()])),
             Step::make('Identify Population')
                 ->schema([
                     Select::make('type')
@@ -123,7 +123,7 @@ class CreateCaseload extends CreateRecord implements HasTable
                         ->visible(fn (Get $get): bool => CaseloadType::tryFromCaseOrValue($get('type')) === CaseloadType::Static)
                         ->helperText(fn (): string => match ($this->getCaseloadModel()) {
                             CaseloadModel::Student => 'Upload a file of Student IDs or Other IDs, with each on a new line.',
-                            CaseloadModel::Prospect => 'Upload a file of prospect email addresses, with each on a new line.',
+                            CaseloadModel::Contact => 'Upload a file of contact email addresses, with each on a new line.',
                         }),
                 ]),
         ];
@@ -290,13 +290,13 @@ class CreateCaseload extends CreateRecord implements HasTable
     protected function getCaseloadModel(): CaseloadModel
     {
         $canAccessStudents = auth()->user()->hasLicense(Student::getLicenseType());
-        $canAccessProspects = auth()->user()->hasLicense(Prospect::getLicenseType());
+        $canAccessContacts = auth()->user()->hasLicense(Contact::getLicenseType());
 
         return match (true) {
-            $canAccessStudents && $canAccessProspects => CaseloadModel::tryFromCaseOrValue($this->form->getRawState()['model']) ?? throw new Exception('Neither students nor prospects were selected.'),
+            $canAccessStudents && $canAccessContacts => CaseloadModel::tryFromCaseOrValue($this->form->getRawState()['model']) ?? throw new Exception('Neither students nor contacts were selected.'),
             $canAccessStudents => CaseloadModel::Student,
-            $canAccessProspects => CaseloadModel::Prospect,
-            default => throw new Exception('User cannot access students or prospects.'),
+            $canAccessContacts => CaseloadModel::Contact,
+            default => throw new Exception('User cannot access students or contacts.'),
         };
     }
 

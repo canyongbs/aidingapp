@@ -37,7 +37,7 @@
 namespace AdvisingApp\Form\Models;
 
 use App\Models\User;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use Illuminate\Database\Eloquent\Builder;
 use AdvisingApp\Form\Enums\FormSubmissionStatus;
 use AdvisingApp\StudentDataModel\Models\Student;
@@ -47,7 +47,7 @@ use AdvisingApp\Form\Enums\FormSubmissionRequestDeliveryMethod;
 use AdvisingApp\StudentDataModel\Models\Scopes\LicensedToEducatable;
 
 /**
- * @property Student|Prospect|null $author
+ * @property Student|Contact|null $author
  *
  * @mixin IdeHelperFormSubmission
  */

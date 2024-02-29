@@ -55,7 +55,7 @@ class CaseloadObserver
 
         if ($user) {
             Cache::tags([match ($caseload->model) {
-                CaseloadModel::Prospect => "user-{$user->getKey()}-prospect-caseloads",
+                CaseloadModel::Contact => "user-{$user->getKey()}-contact-caseloads",
                 CaseloadModel::Student => "user-{$user->getKey()}-student-caseloads",
             }])->flush();
         }
@@ -68,7 +68,7 @@ class CaseloadObserver
 
         if ($user) {
             Cache::tags([match ($caseload->model) {
-                CaseloadModel::Prospect => "user-{$user->getKey()}-prospect-caseloads",
+                CaseloadModel::Contact => "user-{$user->getKey()}-contact-caseloads",
                 CaseloadModel::Student => "user-{$user->getKey()}-student-caseloads",
             }])->flush();
         }

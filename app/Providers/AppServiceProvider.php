@@ -67,7 +67,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         resolve(MigrationStorage::class)->registerPaths([
-            'app-modules/prospect/opensearch/migrations',
+            'app-modules/contact/opensearch/migrations',
         ]);
 
         Relation::morphMap([

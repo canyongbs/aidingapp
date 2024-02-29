@@ -37,11 +37,11 @@
 namespace AdvisingApp\Application\Notifications;
 
 use Illuminate\Support\HtmlString;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\Application\Models\ApplicationSubmission;
+use AdvisingApp\Contact\Filament\Resources\ContactResource;
 use AdvisingApp\Notification\Notifications\BaseNotification;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource;
 use AdvisingApp\Notification\Notifications\DatabaseNotification;
 use Filament\Notifications\Notification as FilamentNotification;
 use AdvisingApp\StudentDataModel\Filament\Resources\StudentResource;
@@ -60,7 +60,7 @@ class AuthorLinkedApplicationSubmissionCreatedNotification extends BaseNotificat
         $name = $author->{$author->displayNameKey()};
 
         $target = match ($author::class) {
-            Prospect::class => ProspectResource::class,
+            Contact::class => ContactResource::class,
             Student::class => StudentResource::class,
         };
 

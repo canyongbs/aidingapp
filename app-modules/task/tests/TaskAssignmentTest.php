@@ -113,7 +113,7 @@ it('it properly subscriptions the creator and assigned Users to the Subscribable
 
     $task = Task::factory()
         ->assigned()
-        ->concerningProspect()
+        ->concerningContact()
         ->create();
 
     expect($task->createdBy->id)->not->toBe($task->assignedTo->id);

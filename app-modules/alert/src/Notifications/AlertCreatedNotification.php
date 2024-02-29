@@ -38,10 +38,10 @@ namespace AdvisingApp\Alert\Notifications;
 
 use Illuminate\Support\HtmlString;
 use AdvisingApp\Alert\Models\Alert;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use AdvisingApp\StudentDataModel\Models\Student;
+use AdvisingApp\Contact\Filament\Resources\ContactResource;
 use AdvisingApp\Notification\Notifications\BaseNotification;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource;
 use AdvisingApp\Notification\Notifications\DatabaseNotification;
 use Filament\Notifications\Notification as FilamentNotification;
 use AdvisingApp\StudentDataModel\Filament\Resources\StudentResource;
@@ -60,7 +60,7 @@ class AlertCreatedNotification extends BaseNotification implements DatabaseNotif
         $name = $concern->{$concern->displayNameKey()};
 
         $target = match ($concern::class) {
-            Prospect::class => ProspectResource::class,
+            Contact::class => ContactResource::class,
             Student::class => StudentResource::class,
         };
 

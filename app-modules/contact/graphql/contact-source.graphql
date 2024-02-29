@@ -1,0 +1,121 @@
+type ContactSource
+    @model(class: "AdvisingApp\\Contact\\Models\\ContactSource") {
+    "Unique primary key."
+    id: UUID!
+
+    "The name of the contact source."
+    name: String!
+
+    "The created date of the contact source."
+    created_at: DateTime
+
+    "The updated date of the contact source."
+    updated_at: DateTime
+
+    "The deleted date of the contact source."
+    deleted_at: DateTime
+
+    "Contacts related to this contact source."
+    contacts: [Contact!] @hasMany
+
+    "The count of contacts related to this contact source."
+    contacts_count: Int @count(relation: "contacts")
+
+    "The audits related to this contact source."
+    audits: [Audit!] @hasMany
+
+    "The count of audits related to this contact source."
+    audits_count: Int @count(relation: "audits")
+}
+
+input ContactSourcesQuery {
+    "The unique primary key of the contact source."
+    id: UUID
+
+    "The name of the contact source."
+    name: String
+
+    "The created date of the contact source."
+    created_at: DateTime
+
+    "The updated date of the contact source."
+    updated_at: DateTime
+
+    "The deleted date of the contact source."
+    deleted_at: DateTime
+
+    "The contacts related to this contact source."
+    contacts: ContactsQuery
+
+    "The audits related to this contact source."
+    audits: AuditsQuery
+}
+
+type ContactSourceQueries {
+    "Get a specific contact source by ID."
+    find(
+        id: UUID!
+            @whereKey
+            @rules(apply: ["required", "uuid", "exists:contact_sources"])
+    ): ContactSource @find @softDeletes @canResolved(ability: "view")
+
+    "List multiple contact sources."
+    list(
+        "Filter by the contact sources attributes and relations."
+        where: ContactSourcesQuery @searchBy
+        order: ContactSourcesQuery @sortBy
+    ): [ContactSource!]! @paginate @softDeletes @canModel(ability: "viewAny")
+}
+
+extend type Query {
+    contactSource: ContactSourceQueries! @namespaced
+}
+
+input CreateContactSourceInput {
+    "The name of the contact source."
+    name: String!
+        @rules(
+            apply: [
+                "required"
+                "string"
+                "max:255"
+                "unique:contact_sources,name"
+            ]
+        )
+}
+
+input UpdateContactSourceInput {
+    "The name of the contact source."
+    name: String
+        @rules(apply: ["string", "max:255", "unique:contact_sources,name"])
+}
+
+type ContactSourceMutations {
+    "Create an contact source."
+    create(input: CreateContactSourceInput! @spread): ContactSource!
+        @create
+        @canModel(ability: "create")
+
+    "Update an existing contact source."
+    update(
+        "The identifier of the contact source you would like to update."
+        id: UUID!
+            @whereKey
+            @rules(apply: ["required", "uuid", "exists:contact_sources"])
+
+        "The fields you would like to update."
+        input: UpdateContactSourceInput! @spread
+    ): ContactSource! @canFind(ability: "update", find: "id") @update
+
+    "Delete an existing contact source."
+    delete(
+        "The identifier of the contact source you would like to delete."
+        id: UUID!
+            @whereKey
+            @rules(apply: ["required", "uuid", "exists:contact_sources"])
+    ): ContactSource @canFind(ability: "delete", find: "id") @delete
+}
+
+extend type Mutation {
+    contactSource: ContactSourceMutations! @namespaced
+}

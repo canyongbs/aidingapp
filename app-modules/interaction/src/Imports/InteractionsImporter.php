@@ -39,9 +39,9 @@ namespace AdvisingApp\Interaction\Imports;
 use App\Models\User;
 use Illuminate\Support\Str;
 use Filament\Actions\Imports\Importer;
+use AdvisingApp\Contact\Models\Contact;
 use Illuminate\Database\Eloquent\Model;
 use AdvisingApp\Division\Models\Division;
-use AdvisingApp\Prospect\Models\Prospect;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Models\Import;
@@ -75,7 +75,7 @@ class InteractionsImporter extends Importer
 
                         if (str($state)->contains(':')) {
                             return $resolveFromModel(match ((string) str($state)->before(':')) {
-                                'prospect' => Prospect::class,
+                                'contact' => Contact::class,
                                 'student' => Student::class,
                             }, (string) str($state)->after(':'));
                         }
@@ -84,7 +84,7 @@ class InteractionsImporter extends Importer
 
                         $model = match (true) {
                             $user->hasLicense(Student::getLicenseType()) => Student::class,
-                            $user->hasLicense(Prospect::getLicenseType()) => Prospect::class,
+                            $user->hasLicense(Contact::getLicenseType()) => Contact::class,
                             default => null,
                         };
 
@@ -93,14 +93,14 @@ class InteractionsImporter extends Importer
                 )
                 ->requiredMapping()
                 ->rules(function (InteractionsImporter $importer) {
-                    if (! $importer->getImport()->user->hasLicense([Student::getLicenseType(), Prospect::getLicenseType()])) {
+                    if (! $importer->getImport()->user->hasLicense([Student::getLicenseType(), Contact::getLicenseType()])) {
                         return [];
                     }
 
-                    return ['starts_with:prospect:,student:'];
+                    return ['starts_with:contact:,student:'];
                 })
                 ->example(function () {
-                    if (auth()->user()?->hasLicense([Student::getLicenseType(), Prospect::getLicenseType()]) ?? true) {
+                    if (auth()->user()?->hasLicense([Student::getLicenseType(), Contact::getLicenseType()]) ?? true) {
                         return 'student:johnsmith@gmail.com';
                     }
 

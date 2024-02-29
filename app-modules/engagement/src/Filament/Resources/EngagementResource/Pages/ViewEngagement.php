@@ -38,15 +38,15 @@ namespace AdvisingApp\Engagement\Filament\Resources\EngagementResource\Pages;
 
 use Filament\Actions\EditAction;
 use Filament\Infolists\Infolist;
+use AdvisingApp\Contact\Models\Contact;
 use App\Filament\Resources\UserResource;
 use Filament\Resources\Pages\ViewRecord;
-use AdvisingApp\Prospect\Models\Prospect;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\Fieldset;
 use Filament\Infolists\Components\TextEntry;
 use AdvisingApp\Engagement\Models\Engagement;
 use AdvisingApp\StudentDataModel\Models\Student;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource;
+use AdvisingApp\Contact\Filament\Resources\ContactResource;
 use AdvisingApp\Engagement\Filament\Resources\EngagementResource;
 use AdvisingApp\StudentDataModel\Filament\Resources\StudentResource;
 
@@ -71,21 +71,21 @@ class ViewEngagement extends ViewRecord
                             ->translateLabel()
                             ->color('primary')
                             ->state(function (Engagement $record): string {
-                                /** @var Student|Prospect $recipient */
+                                /** @var Student|Contact $recipient */
                                 $recipient = $record->recipient;
 
                                 return match ($recipient::class) {
                                     Student::class => "{$recipient->{Student::displayNameKey()}} (Student)",
-                                    Prospect::class => "{$recipient->{Prospect::displayNameKey()}} (Prospect)",
+                                    Contact::class => "{$recipient->{Contact::displayNameKey()}} (Contact)",
                                 };
                             })
                             ->url(function (Engagement $record) {
-                                /** @var Student|Prospect $recipient */
+                                /** @var Student|Contact $recipient */
                                 $recipient = $record->recipient;
 
                                 return match ($recipient::class) {
                                     Student::class => StudentResource::getUrl('view', ['record' => $recipient->sisid]),
-                                    Prospect::class => ProspectResource::getUrl('view', ['record' => $recipient->id]),
+                                    Contact::class => ContactResource::getUrl('view', ['record' => $recipient->id]),
                                 };
                             }),
                         Fieldset::make('Content')

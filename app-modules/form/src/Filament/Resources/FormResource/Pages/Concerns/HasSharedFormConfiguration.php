@@ -94,7 +94,7 @@ trait HasSharedFormConfiguration
                 ->columnSpanFull(),
             Toggle::make('is_authenticated')
                 ->label('Requires authentication')
-                ->helperText('If enabled, only students and prospects can submit this form, and they must verify their email address first.'),
+                ->helperText('If enabled, only students and contacts can submit this form, and they must verify their email address first.'),
             Toggle::make('is_wizard')
                 ->label('Multi-step form')
                 ->live()

@@ -37,7 +37,7 @@
 namespace AdvisingApp\Form\Database\Factories;
 
 use AdvisingApp\Form\Models\Form;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use AdvisingApp\Form\Models\FormSubmission;
 use AdvisingApp\StudentDataModel\Models\Student;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -55,11 +55,11 @@ class FormSubmissionFactory extends Factory
     {
         return [
             'form_id' => Form::factory(),
-            'author_type' => fake()->randomElement([(new Student())->getMorphClass(), (new Prospect())->getMorphClass()]),
+            'author_type' => fake()->randomElement([(new Student())->getMorphClass(), (new Contact())->getMorphClass()]),
             'author_id' => function (array $attributes) {
                 $authorClass = Relation::getMorphedModel($attributes['author_type']);
 
-                /** @var Student|Prospect $authorModel */
+                /** @var Student|Contact $authorModel */
                 $authorModel = new $authorClass();
 
                 $author = $authorClass === Student::class

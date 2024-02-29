@@ -37,7 +37,7 @@
 namespace AdvisingApp\Form\Listeners;
 
 use AdvisingApp\Form\Models\Form;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\Form\Events\FormSubmissionCreated;
@@ -47,7 +47,7 @@ class SendFormSubmissionAutoReplyEmailToSubmitter implements ShouldQueue
 {
     public function handle(FormSubmissionCreated $event): void
     {
-        /** @var Student|Prospect|null $author */
+        /** @var Student|Contact|null $author */
         $author = $event->submission->author;
 
         if (! $author) {

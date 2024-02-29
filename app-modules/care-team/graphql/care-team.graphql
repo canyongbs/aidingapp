@@ -17,7 +17,7 @@ type CareTeam @model(class: "AdvisingApp\\CareTeam\\Models\\CareTeam") {
 
 input CareTeamEducatablesQuery {
     student: StudentsQuery
-    prospect: ProspectsQuery
+    contact: ContactsQuery
 }
 
 input CareTeamsQuery {
@@ -71,7 +71,7 @@ input CreateCareTeamInput {
 
     "The type of Educatable to add to the care team."
     educatable_type: EducatableType!
-        @rules(apply: ["required", "in:student,prospect"])
+        @rules(apply: ["required", "in:student,contact"])
 }
 
 type CareTeamMutations {

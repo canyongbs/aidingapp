@@ -42,8 +42,8 @@ use App\Models\BaseModel;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use AdvisingApp\Task\Enums\TaskStatus;
+use AdvisingApp\Contact\Models\Contact;
 use OwenIt\Auditing\Contracts\Auditable;
-use AdvisingApp\Prospect\Models\Prospect;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use AdvisingApp\Campaign\Models\CampaignAction;
@@ -62,7 +62,7 @@ use AdvisingApp\Campaign\Models\Contracts\ExecutableFromACampaignAction;
 use AdvisingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
 
 /**
- * @property-read Student|Prospect $concern
+ * @property-read Student|Contact $concern
  *
  * @mixin IdeHelperTask
  */

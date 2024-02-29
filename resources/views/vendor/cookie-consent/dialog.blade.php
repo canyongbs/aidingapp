@@ -40,7 +40,7 @@
                         {!! trans('cookie-consent::texts.message') !!}
                     </p>
                 </div>
-                
+
                 <div class="mt-2 flex-shrink-0 w-full sm:mt-0 sm:w-auto">
                     <x-filament::button class="js-cookie-consent-agree cookie-consent__agree">
                         {{ trans('cookie-consent::texts.agree') }}

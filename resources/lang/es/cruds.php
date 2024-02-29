@@ -647,13 +647,11 @@ return [
             'deleted_at_helper' => ' ',
         ],
     ],
-    'prospectMenu' => [
-        'title' => 'Prospect Menu',
-        'title_singular' => 'Prospect Menu',
+    'contactMenu' => [
+        'title' => 'Contact Menu',
+        'title_singular' => 'Contact Menu',
     ],
-    'prospectItem' => [
-        'title' => 'Prospective Student',
-        'title_singular' => 'Prospective Student',
+    'contactItem' => [
         'fields' => [
             'id' => 'ID',
             'id_helper' => ' ',
@@ -737,9 +735,9 @@ return [
         'title' => 'Student Reporting',
         'title_singular' => 'Student Reporting',
     ],
-    'reportProspect' => [
-        'title' => 'Prospect Reporting',
-        'title_singular' => 'Prospect Reporting',
+    'reportContact' => [
+        'title' => 'Contact Reporting',
+        'title_singular' => 'Contact Reporting',
     ],
     'journeyMenu' => [
         'title' => 'Journeys',
@@ -843,9 +841,9 @@ return [
             'deleted_at_helper' => ' ',
         ],
     ],
-    'prospectStatus' => [
-        'title' => 'Prospect Status',
-        'title_singular' => 'Prospect Status',
+    'contactStatus' => [
+        'title' => 'Contact Status',
+        'title_singular' => 'Contact Status',
         'fields' => [
             'id' => 'ID',
             'id_helper' => ' ',
@@ -859,9 +857,9 @@ return [
             'deleted_at_helper' => ' ',
         ],
     ],
-    'prospectSource' => [
-        'title' => 'Prospect Source',
-        'title_singular' => 'Prospect Source',
+    'contactSource' => [
+        'title' => 'Contact Source',
+        'title_singular' => 'Contact Source',
         'fields' => [
             'id' => 'ID',
             'id_helper' => ' ',

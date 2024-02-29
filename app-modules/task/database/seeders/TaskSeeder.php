@@ -52,11 +52,11 @@ class TaskSeeder extends Seeder
             ->pastDue()
             ->create();
 
-        // Past due, Prospect Concerned
+        // Past due, Contact Concerned
         Task::factory()
             ->count(3)
             ->assigned(User::first())
-            ->concerningProspect()
+            ->concerningContact()
             ->pastDue()
             ->create();
 
@@ -68,11 +68,11 @@ class TaskSeeder extends Seeder
             ->dueLater()
             ->create();
 
-        // Due Later, Prospect Concerned
+        // Due Later, Contact Concerned
         Task::factory()
             ->count(3)
             ->assigned(User::first())
-            ->concerningProspect()
+            ->concerningContact()
             ->dueLater()
             ->create();
 

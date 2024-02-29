@@ -39,7 +39,7 @@ use Tests\Unit\ClientMock;
 use Twilio\Rest\Api\V2010;
 use Twilio\Rest\MessagingBase;
 use App\Settings\LicenseSettings;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 
 use function Pest\Laravel\assertDatabaseCount;
 
@@ -51,7 +51,7 @@ use AdvisingApp\Notification\Enums\NotificationDeliveryStatus;
 use AdvisingApp\Notification\Exceptions\NotificationQuotaExceeded;
 
 it('An sms is allowed to be sent if there is available quota and it\'s quota usage is tracked', function () {
-    $notifiable = Prospect::factory()->create();
+    $notifiable = Contact::factory()->create();
 
     $notification = new Tests\Unit\TestSmsNotification();
 
@@ -99,7 +99,7 @@ it('An sms is allowed to be sent if there is available quota and it\'s quota usa
 });
 
 it('An sms is prevented from being sent if there is no available quota', function () {
-    $notifiable = Prospect::factory()->create();
+    $notifiable = Contact::factory()->create();
 
     $notification = new Tests\Unit\TestSmsNotification();
 

@@ -41,11 +41,11 @@ use Filament\Tables\Table;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
+use AdvisingApp\Contact\Models\Contact;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\EditRecord;
-use AdvisingApp\Prospect\Models\Prospect;
 use Illuminate\Database\Eloquent\Builder;
 use AdvisingApp\StudentDataModel\Models\Student;
 use Filament\Tables\Concerns\InteractsWithTable;
@@ -83,7 +83,7 @@ class EditCaseload extends EditRecord implements HasTable
                             ->label('Population')
                             ->options(CaseloadModel::class)
                             ->disabled()
-                            ->visible(auth()->user()->hasLicense([Student::getLicenseType(), Prospect::getLicenseType()])),
+                            ->visible(auth()->user()->hasLicense([Student::getLicenseType(), Contact::getLicenseType()])),
                         TextInput::make('user.name')
                             ->label('User')
                             ->disabled(),

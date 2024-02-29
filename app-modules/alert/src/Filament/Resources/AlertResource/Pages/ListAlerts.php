@@ -43,12 +43,12 @@ use AdvisingApp\Alert\Models\Alert;
 use Filament\Tables\Filters\Filter;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Select;
+use AdvisingApp\Contact\Models\Contact;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Model;
 use AdvisingApp\Alert\Enums\AlertStatus;
-use AdvisingApp\Prospect\Models\Prospect;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Filters\SelectFilter;
@@ -63,7 +63,7 @@ use App\Filament\Forms\Components\EducatableSelect;
 use AdvisingApp\Alert\Filament\Resources\AlertResource;
 use AdvisingApp\StudentDataModel\Models\Scopes\EducatableSearch;
 use AdvisingApp\CaseloadManagement\Actions\TranslateCaseloadFilters;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource\Pages\ManageProspectAlerts;
+use AdvisingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactAlerts;
 use AdvisingApp\StudentDataModel\Filament\Resources\StudentResource\Pages\ManageStudentAlerts;
 
 class ListAlerts extends ListRecords
@@ -80,7 +80,7 @@ class ListAlerts extends ListRecords
                     ->getStateUsing(fn (Alert $record): ?string => $record->concern?->{$record->concern::displayNameKey()})
                     ->url(fn (Alert $record) => match ($record->concern ? $record->concern::class : null) {
                         Student::class => ManageStudentAlerts::getUrl(['record' => $record->concern]),
-                        Prospect::class => ManageProspectAlerts::getUrl(['record' => $record->concern]),
+                        Contact::class => ManageContactAlerts::getUrl(['record' => $record->concern]),
                         default => null,
                     }),
                 TextEntry::make('description'),
@@ -100,7 +100,7 @@ class ListAlerts extends ListRecords
                     ->getStateUsing(fn (Alert $record): ?string => $record->concern?->{$record->concern::displayNameKey()})
                     ->url(fn (Alert $record) => match ($record->concern ? $record->concern::class : null) {
                         Student::class => ManageStudentAlerts::getUrl(['record' => $record->concern]),
-                        Prospect::class => ManageProspectAlerts::getUrl(['record' => $record->concern]),
+                        Contact::class => ManageContactAlerts::getUrl(['record' => $record->concern]),
                         default => null,
                     })
                     ->searchable(query: fn (Builder $query, $search) => $query->tap(new EducatableSearch(relationship: 'concern', search: $search)))

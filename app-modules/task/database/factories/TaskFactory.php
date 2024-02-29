@@ -39,7 +39,7 @@ namespace AdvisingApp\Task\Database\Factories;
 use App\Models\User;
 use AdvisingApp\Task\Models\Task;
 use AdvisingApp\Task\Enums\TaskStatus;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use AdvisingApp\StudentDataModel\Models\Student;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -70,11 +70,11 @@ class TaskFactory extends Factory
         ]);
     }
 
-    public function concerningProspect(Prospect $prospect = null): self
+    public function concerningContact(Contact $contact = null): self
     {
         return $this->state([
-            'concern_id' => $prospect?->id ?? Prospect::factory(),
-            'concern_type' => (new Prospect())->getMorphClass(),
+            'concern_id' => $contact?->id ?? Contact::factory(),
+            'concern_type' => (new Contact())->getMorphClass(),
         ]);
     }
 

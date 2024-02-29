@@ -40,9 +40,9 @@ use App\Models\Tenant;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Artisan;
 use AdvisingApp\Division\Database\Seeders\DivisionSeeder;
+use AdvisingApp\Contact\Database\Seeders\ContactSourceSeeder;
+use AdvisingApp\Contact\Database\Seeders\ContactStatusSeeder;
 use AdvisingApp\Interaction\Database\Seeders\InteractionSeeder;
-use AdvisingApp\Prospect\Database\Seeders\ProspectSourceSeeder;
-use AdvisingApp\Prospect\Database\Seeders\ProspectStatusSeeder;
 use AdvisingApp\Consent\Database\Seeders\ConsentAgreementSeeder;
 use AdvisingApp\InventoryManagement\Database\Seeders\AssetSeeder;
 use AdvisingApp\Authorization\Console\Commands\SyncRolesAndPermissions;
@@ -80,8 +80,8 @@ class NewTenantSeeder extends Seeder
             DivisionSeeder::class,
             ServiceRequestStatusSeeder::class,
             ServiceRequestTypeSeeder::class,
-            ProspectStatusSeeder::class,
-            ProspectSourceSeeder::class,
+            ContactStatusSeeder::class,
+            ContactSourceSeeder::class,
             KnowledgeBaseCategorySeeder::class,
             KnowledgeBaseQualitySeeder::class,
             KnowledgeBaseStatusSeeder::class,

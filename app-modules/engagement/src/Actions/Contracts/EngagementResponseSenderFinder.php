@@ -36,10 +36,10 @@
 
 namespace AdvisingApp\Engagement\Actions\Contracts;
 
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use AdvisingApp\StudentDataModel\Models\Student;
 
 interface EngagementResponseSenderFinder
 {
-    public function find(string $phoneNumber): Student|Prospect|null;
+    public function find(string $phoneNumber): Student|Contact|null;
 }

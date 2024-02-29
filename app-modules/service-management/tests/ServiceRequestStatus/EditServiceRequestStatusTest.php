@@ -44,7 +44,7 @@ use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 use Illuminate\Validation\Rules\Enum;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 
 use function Pest\Laravel\assertDatabaseHas;
 use function PHPUnit\Framework\assertEquals;
@@ -115,7 +115,7 @@ test('EditServiceRequestStatus requires valid data', function ($data, $errors) {
 // Permission Tests
 
 test('EditServiceRequestStatus is gated with proper access control', function () {
-    $user = User::factory()->licensed([Student::getLicenseType(), Prospect::getLicenseType()])->create();
+    $user = User::factory()->licensed([Student::getLicenseType(), Contact::getLicenseType()])->create();
 
     $serviceRequestStatus = ServiceRequestStatus::factory()->create();
 
@@ -160,7 +160,7 @@ test('EditServiceRequestStatus is gated with proper feature access control', fun
 
     $settings->save();
 
-    $user = User::factory()->licensed([Student::getLicenseType(), Prospect::getLicenseType()])->create();
+    $user = User::factory()->licensed([Student::getLicenseType(), Contact::getLicenseType()])->create();
 
     $user->givePermissionTo('service_request_status.view-any');
     $user->givePermissionTo('service_request_status.*.update');

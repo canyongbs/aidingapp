@@ -41,7 +41,7 @@ use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
 use Illuminate\Support\Facades\Gate;
 use App\Support\FeatureAccessResponse;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\InventoryManagement\Models\AssetStatus;
 
@@ -49,7 +49,7 @@ class AssetStatusPolicy
 {
     public function before(Authenticatable $authenticatable): ?Response
     {
-        if (! $authenticatable->hasAnyLicense([Student::getLicenseType(), Prospect::getLicenseType()])) {
+        if (! $authenticatable->hasAnyLicense([Student::getLicenseType(), Contact::getLicenseType()])) {
             return Response::deny('You are not licensed for the Retention or Recruitment CRM.');
         }
 

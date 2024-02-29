@@ -38,7 +38,7 @@ namespace AdvisingApp\StudentDataModel\Models\Scopes;
 
 use Exception;
 use App\Models\Authenticatable;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use Illuminate\Database\Eloquent\Builder;
 use AdvisingApp\StudentDataModel\Models\Student;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -75,8 +75,8 @@ class LicensedToEducatable
                 fn (Builder $query) => $query->where($typeColumn, '!=', app(Student::class)->getMorphClass()),
             )
             ->when(
-                ! $user->hasLicense(Prospect::getLicenseType()),
-                fn (Builder $query) => $query->where($typeColumn, '!=', app(Prospect::class)->getMorphClass()),
+                ! $user->hasLicense(Contact::getLicenseType()),
+                fn (Builder $query) => $query->where($typeColumn, '!=', app(Contact::class)->getMorphClass()),
             );
     }
 }

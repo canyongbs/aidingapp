@@ -39,7 +39,7 @@ Our robust personal assistant is designed to support your student service profes
 
 ### Student Service CRM
 
-Our student service CRM is designed to support the management of prospective and enrolled students. Some key features include:
+Our student service CRM is designed to support the management of enrolled students. Some key features include:
 
 * Record Mangement
 * Email and SMS
@@ -65,7 +65,7 @@ A [PHP](https://php.net) TALL Stack is used to create our software:
 
 ### Dependences for AI + CRM (800+)
 
-* [GitHub Insights: Dependencies](https://github.com/canyongbs/advisingapp/network/dependencies)
+* [GitHub Insights: Dependencies](https://github.com/canyongbs/aidingapp/network/dependencies)
 
 ### Recommended Cloud Infrastructure
 
@@ -101,7 +101,7 @@ _Note: More documentation coming soon._
 
 For SaaS customers, please channel your feature requests through your customer success associate. For issues, please open a support request so that your issue can be promptly addressed.\
 \
-For DIY customers, please open your feature request or issue using [GitHub Issues](https://github.com/canyongbs/advisingapp/issues).
+For DIY customers, please open your feature request or issue using [GitHub Issues](https://github.com/canyongbs/aidingapp/issues).
 
 ## Contributing
 
@@ -152,15 +152,15 @@ The creation and successful release of this ambitious project would not have bee
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/canyongbs/advisingapp.svg?style=for-the-badge
-[contributors-url]: https://github.com/canyongbs/advisingapp/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/canyongbs/advisingapp.svg?style=for-the-badge
-[forks-url]: https://github.com/canyongbs/advisingapp/network/members
-[stars-shield]: https://img.shields.io/github/stars/canyongbs/advisingapp.svg?style=for-the-badge
-[stars-url]: https://github.com/canyongbs/advisingapp/stargazers
-[issues-shield]: https://img.shields.io/github/issues/canyongbs/advisingapp.svg?style=for-the-badge
-[issues-url]: https://github.com/canyongbs/advisingapp/issues
-<!-- [license-shield]: https://img.shields.io/github/license/canyongbs/advisingapp.svg?style=for-the-badge -->
-[license-url]: https://github.com/canyongbs/advisingapp/blob/main/LICENSE
+[contributors-shield]: https://img.shields.io/github/contributors/canyongbs/aidingapp.svg?style=for-the-badge
+[contributors-url]: https://github.com/canyongbs/aidingapp/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/canyongbs/aidingapp.svg?style=for-the-badge
+[forks-url]: https://github.com/canyongbs/aidingapp/network/members
+[stars-shield]: https://img.shields.io/github/stars/canyongbs/aidingapp.svg?style=for-the-badge
+[stars-url]: https://github.com/canyongbs/aidingapp/stargazers
+[issues-shield]: https://img.shields.io/github/issues/canyongbs/aidingapp.svg?style=for-the-badge
+[issues-url]: https://github.com/canyongbs/aidingapp/issues
+<!-- [license-shield]: https://img.shields.io/github/license/canyongbs/aidingapp.svg?style=for-the-badge -->
+[license-url]: https://github.com/canyongbs/aidingapp/blob/main/LICENSE
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://www.linkedin.com/company/canyongbs

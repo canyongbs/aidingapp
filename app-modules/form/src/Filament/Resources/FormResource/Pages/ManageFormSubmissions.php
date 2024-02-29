@@ -97,7 +97,7 @@ class ManageFormSubmissions extends ManageRelatedRecords
                 SelectFilter::make('author_type')
                     ->options([
                         'student' => 'Student',
-                        'prospect' => 'Prospect',
+                        'contact' => 'Contact',
                     ]),
             ])
             ->headerActions([

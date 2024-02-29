@@ -36,7 +36,7 @@
 
 namespace AdvisingApp\MeetingCenter\Database\Factories;
 
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use AdvisingApp\MeetingCenter\Models\Event;
 use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\MeetingCenter\Models\EventAttendee;
@@ -58,7 +58,7 @@ class EventAttendeeFactory extends Factory
             'email' => fake()->unique()->randomElement([
                 fake()->email(),
                 Student::inRandomOrder()->value('email'),
-                Prospect::inRandomOrder()->value('email'),
+                Contact::inRandomOrder()->value('email'),
             ]),
             'event_id' => Event::inRandomOrder()->first() ?? Event::factory()->create(),
         ];

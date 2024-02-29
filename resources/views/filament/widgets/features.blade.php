@@ -34,7 +34,7 @@
 @php
     use AdvisingApp\Assistant\Filament\Pages\PersonalAssistant;
     use AdvisingApp\Authorization\Enums\LicenseType;
-    use AdvisingApp\Prospect\Filament\Pages\RecruitmentCrmDashboard;
+    use AdvisingApp\Contact\Filament\Pages\RecruitmentCrmDashboard;
     use AdvisingApp\StudentDataModel\Filament\Pages\RetentionCrmDashboard;
 @endphp
 

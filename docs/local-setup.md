@@ -140,7 +140,7 @@ port you want.
 ### Minio (S3 Compatible Storage)
 Minio is a S3 compatible storage solution that is used for storing files locally.
 
-When first setting up you will need to create a bucket. This can be done by going to `localhost:8900` in your browser and logging in with `advisingapp` as the username and `password` as the password. Once logged in, you can create a bucket.
+When first setting up you will need to create a bucket. This can be done by going to `localhost:8900` in your browser and logging in with `aidingapp` as the username and `password` as the password. Once logged in, you can create a bucket.
 
 By default, the application is set up in the `.env.example` to reference a bucket named `local`. Create a bucket with this name in Minio. Then change its access policy to "Custom" with the following policy configuration:
 

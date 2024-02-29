@@ -37,18 +37,18 @@
 namespace AdvisingApp\CaseloadManagement\Enums;
 
 use Filament\Tables\Table;
+use AdvisingApp\Contact\Models\Contact;
 use Filament\Support\Contracts\HasLabel;
-use AdvisingApp\Prospect\Models\Prospect;
 use Illuminate\Database\Eloquent\Builder;
 use AdvisingApp\StudentDataModel\Models\Student;
-use AdvisingApp\Prospect\Filament\Tables\ProspectsTable;
+use AdvisingApp\Contact\Filament\Tables\ContactsTable;
 use AdvisingApp\StudentDataModel\Filament\Tables\StudentsTable;
+use AdvisingApp\CaseloadManagement\Importers\ContactCaseloadSubjectImporter;
 use AdvisingApp\CaseloadManagement\Importers\StudentCaseloadSubjectImporter;
-use AdvisingApp\CaseloadManagement\Importers\ProspectCaseloadSubjectImporter;
 
 enum CaseloadModel: string implements HasLabel
 {
-    case Prospect = 'prospect';
+    case Contact = 'contact';
 
     case Student = 'student';
 
@@ -66,7 +66,7 @@ enum CaseloadModel: string implements HasLabel
     {
         return match ($this) {
             static::Student => Student::query(),
-            static::Prospect => Prospect::query(),
+            static::Contact => Contact::query(),
         };
     }
 
@@ -74,7 +74,7 @@ enum CaseloadModel: string implements HasLabel
     {
         return match ($this) {
             static::Student => Student::class,
-            static::Prospect => Prospect::class,
+            static::Contact => Contact::class,
         };
     }
 
@@ -82,7 +82,7 @@ enum CaseloadModel: string implements HasLabel
     {
         return $table->tap(app(match ($this) {
             static::Student => StudentsTable::class,
-            static::Prospect => ProspectsTable::class,
+            static::Contact => ContactsTable::class,
         }));
     }
 
@@ -101,7 +101,7 @@ enum CaseloadModel: string implements HasLabel
     public function getSubjectImporter(): string
     {
         return match ($this) {
-            static::Prospect => ProspectCaseloadSubjectImporter::class,
+            static::Contact => ContactCaseloadSubjectImporter::class,
             static::Student => StudentCaseloadSubjectImporter::class,
         };
     }

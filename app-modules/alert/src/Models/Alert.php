@@ -38,9 +38,9 @@ namespace AdvisingApp\Alert\Models;
 
 use Exception;
 use App\Models\BaseModel;
+use AdvisingApp\Contact\Models\Contact;
 use AdvisingApp\Alert\Enums\AlertStatus;
 use OwenIt\Auditing\Contracts\Auditable;
-use AdvisingApp\Prospect\Models\Prospect;
 use Illuminate\Database\Eloquent\Builder;
 use AdvisingApp\Alert\Enums\AlertSeverity;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -56,7 +56,7 @@ use AdvisingApp\Campaign\Models\Contracts\ExecutableFromACampaignAction;
 use AdvisingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
 
 /**
- * @property-read Student|Prospect $concern
+ * @property-read Student|Contact $concern
  *
  * @mixin IdeHelperAlert
  */

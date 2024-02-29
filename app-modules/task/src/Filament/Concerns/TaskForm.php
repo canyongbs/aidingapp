@@ -42,7 +42,7 @@ use Filament\Forms\Get;
 use Filament\Forms\Set;
 use App\Models\Authenticatable;
 use App\Models\Scopes\HasLicense;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use Illuminate\Database\Eloquent\Builder;
 use AdvisingApp\StudentDataModel\Models\Student;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -62,15 +62,15 @@ trait TaskForm
             $user = auth()->user();
 
             $canAccessStudents = $user->hasLicense(Student::getLicenseType());
-            $canAccessProspects = $user->hasLicense(Prospect::getLicenseType());
+            $canAccessContacts = $user->hasLicense(Contact::getLicenseType());
 
-            if ($canAccessStudents && $canAccessProspects) {
+            if ($canAccessStudents && $canAccessContacts) {
                 return $query;
             }
 
             return match (true) {
                 $canAccessStudents => $query->tap(new HasLicense(Student::getLicenseType())),
-                $canAccessProspects => $query->tap(new HasLicense(Prospect::getLicenseType())),
+                $canAccessContacts => $query->tap(new HasLicense(Contact::getLicenseType())),
                 default => $query,
             };
         };
@@ -95,18 +95,18 @@ trait TaskForm
             $user = auth()->user();
 
             $canAccessStudents = $user->hasLicense(Student::getLicenseType());
-            $canAccessProspects = $user->hasLicense(Prospect::getLicenseType());
+            $canAccessContacts = $user->hasLicense(Contact::getLicenseType());
 
             $concernType = $get('concern_type');
 
-            if ($canAccessStudents && $canAccessProspects && blank($concernType)) {
+            if ($canAccessStudents && $canAccessContacts && blank($concernType)) {
                 return;
             }
 
             $concernType = match (true) {
-                $canAccessStudents && $canAccessProspects => Relation::getMorphedModel($concernType) ?? $concernType,
+                $canAccessStudents && $canAccessContacts => Relation::getMorphedModel($concernType) ?? $concernType,
                 $canAccessStudents => Student::class,
-                $canAccessProspects => Prospect::class,
+                $canAccessContacts => Contact::class,
             };
 
             $assignedTo = User::find($assignedTo);

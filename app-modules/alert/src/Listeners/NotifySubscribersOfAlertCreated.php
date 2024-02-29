@@ -36,7 +36,7 @@
 
 namespace AdvisingApp\Alert\Listeners;
 
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use AdvisingApp\Alert\Events\AlertCreated;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use AdvisingApp\StudentDataModel\Models\Student;
@@ -47,7 +47,7 @@ class NotifySubscribersOfAlertCreated implements ShouldQueue
 {
     public function handle(AlertCreated $event): void
     {
-        /** @var Student|Prospect $concern */
+        /** @var Student|Contact $concern */
         $concern = $event->alert->concern;
 
         $concern->subscriptions?->each(function (Subscription $subscription) use ($event) {

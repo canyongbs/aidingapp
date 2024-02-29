@@ -37,7 +37,7 @@
 namespace AdvisingApp\Engagement\Database\Factories;
 
 use App\Models\User;
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use AdvisingApp\Engagement\Models\Engagement;
 use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\Engagement\Models\EngagementBatch;
@@ -55,12 +55,12 @@ class EngagementFactory extends Factory
             'user_id' => User::factory(),
             'recipient_type' => fake()->randomElement([
                 (new Student())->getMorphClass(),
-                (new Prospect())->getMorphClass(),
+                (new Contact())->getMorphClass(),
             ]),
             'recipient_id' => function (array $attributes) {
                 $senderClass = Relation::getMorphedModel($attributes['recipient_type']);
 
-                /** @var Student|Prospect $senderModel */
+                /** @var Student|Contact $senderModel */
                 $senderModel = new $senderClass();
 
                 $sender = $senderClass === Student::class
@@ -84,11 +84,11 @@ class EngagementFactory extends Factory
         ]);
     }
 
-    public function forProspect(): self
+    public function forContact(): self
     {
         return $this->state([
-            'recipient_id' => Prospect::factory(),
-            'recipient_type' => (new Prospect())->getMorphClass(),
+            'recipient_id' => Contact::factory(),
+            'recipient_type' => (new Contact())->getMorphClass(),
         ]);
     }
 

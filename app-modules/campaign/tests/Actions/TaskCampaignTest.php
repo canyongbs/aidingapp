@@ -36,8 +36,8 @@
 
 use App\Models\User;
 use AdvisingApp\Task\Models\Task;
+use AdvisingApp\Contact\Models\Contact;
 use AdvisingApp\Campaign\Models\Campaign;
-use AdvisingApp\Prospect\Models\Prospect;
 use Illuminate\Database\Eloquent\Collection;
 use AdvisingApp\Campaign\Models\CampaignAction;
 use AdvisingApp\StudentDataModel\Models\Student;
@@ -53,10 +53,10 @@ it('will create the task records for educatables in the caseload', function (Col
         'type' => CaseloadType::Static,
     ]);
 
-    $educatables->each(function (Educatable $prospect) use ($caseload) {
+    $educatables->each(function (Educatable $contact) use ($caseload) {
         $caseload->subjects()->create([
-            'subject_id' => $prospect->getKey(),
-            'subject_type' => $prospect->getMorphClass(),
+            'subject_id' => $contact->getKey(),
+            'subject_type' => $contact->getMorphClass(),
         ]);
     });
 
@@ -96,8 +96,8 @@ it('will create the task records for educatables in the caseload', function (Col
         expect($task->concern_type)->toBe($educatable->getMorphClass());
     });
 })->with([
-    'prospects' => [
-        'educatables' => fn () => Prospect::factory()->count(3)->create(),
+    'contacts' => [
+        'educatables' => fn () => Contact::factory()->count(3)->create(),
     ],
     'students' => [
         'educatables' => fn () => Student::factory()->count(3)->create(),

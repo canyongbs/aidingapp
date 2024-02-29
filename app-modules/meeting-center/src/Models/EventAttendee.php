@@ -37,8 +37,8 @@
 namespace AdvisingApp\MeetingCenter\Models;
 
 use App\Models\BaseModel;
+use AdvisingApp\Contact\Models\Contact;
 use Illuminate\Notifications\Notifiable;
-use AdvisingApp\Prospect\Models\Prospect;
 use AdvisingApp\StudentDataModel\Models\Student;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -72,10 +72,10 @@ class EventAttendee extends BaseModel implements NotifiableInterface
         return $this->hasMany(EventRegistrationFormSubmission::class, 'event_attendee_id');
     }
 
-    public function prospects(): HasMany
+    public function contacts(): HasMany
     {
         return $this->hasMany(
-            related: Prospect::class,
+            related: Contact::class,
             foreignKey: 'email',
             localKey: 'email',
         );

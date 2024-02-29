@@ -97,7 +97,7 @@ abstract class TestCase extends BaseTestCase
 
         $this->createTenant(
             name: 'Test Tenant',
-            domain: 'test.advisingapp.local',
+            domain: 'test.aidingapp.local',
             database: ParallelTesting::token() ? 'testing_tenant_test_' . ParallelTesting::token() : 'testing_tenant',
         );
     }

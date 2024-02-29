@@ -36,7 +36,7 @@
 
 namespace AdvisingApp\Application\Listeners;
 
-use AdvisingApp\Prospect\Models\Prospect;
+use AdvisingApp\Contact\Models\Contact;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\Notification\Models\Subscription;
@@ -47,7 +47,7 @@ class NotifySubscribersOfApplicationSubmission implements ShouldQueue
 {
     public function handle(ApplicationSubmissionCreated $event): void
     {
-        /** @var Student|Prospect|null $author */
+        /** @var Student|Contact|null $author */
         $author = $event->submission->author;
 
         $author?->subscriptions?->each(function (Subscription $subscription) use ($event) {

@@ -106,5 +106,5 @@ return [
     |
     */
 
-    'prefix' => env('CACHE_PREFIX', '{advisingapp_landlord_cache}'),
+    'prefix' => env('CACHE_PREFIX', '{aidingapp_landlord_cache}'),
 ];

@@ -35,9 +35,9 @@
 */
 
 use AdvisingApp\Alert\Models\Alert;
+use AdvisingApp\Contact\Models\Contact;
 use AdvisingApp\Alert\Enums\AlertStatus;
 use AdvisingApp\Campaign\Models\Campaign;
-use AdvisingApp\Prospect\Models\Prospect;
 use AdvisingApp\Alert\Enums\AlertSeverity;
 use AdvisingApp\Campaign\Models\CampaignAction;
 use AdvisingApp\Campaign\Enums\CampaignActionType;
@@ -49,7 +49,7 @@ it('will create the appropriate records for educatables in the caseload', functi
     expect(Alert::count())->toBe(0);
 
     // But we have a caseload, a campaign, and an action that defines we should create an alert at a certain point in time
-    $prospects = Prospect::factory()->count(3)->create([
+    $contacts = Contact::factory()->count(3)->create([
         'first_name' => 'TestTest',
     ]);
 
@@ -57,10 +57,10 @@ it('will create the appropriate records for educatables in the caseload', functi
         'type' => CaseloadType::Static,
     ]);
 
-    $prospects->each(function (Prospect $prospect) use ($caseload) {
+    $contacts->each(function (Contact $contact) use ($caseload) {
         $caseload->subjects()->create([
-            'subject_id' => $prospect->getKey(),
-            'subject_type' => $prospect->getMorphClass(),
+            'subject_id' => $contact->getKey(),
+            'subject_type' => $contact->getMorphClass(),
         ]);
     });
 

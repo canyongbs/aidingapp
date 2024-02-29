@@ -37,8 +37,8 @@
 namespace AdvisingApp\Interaction\Database\Factories;
 
 use App\Models\User;
+use AdvisingApp\Contact\Models\Contact;
 use AdvisingApp\Division\Models\Division;
-use AdvisingApp\Prospect\Models\Prospect;
 use AdvisingApp\Interaction\Models\Interaction;
 use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\Interaction\Models\InteractionType;
@@ -59,7 +59,7 @@ class InteractionFactory extends Factory
     {
         $interactable = fake()->randomElement([
             Student::inRandomOrder()->first() ?? Student::factory()->create(),
-            Prospect::factory()->create(),
+            Contact::factory()->create(),
             ServiceRequest::factory()->create(),
         ]);
 
