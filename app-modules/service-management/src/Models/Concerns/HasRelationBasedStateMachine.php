@@ -36,8 +36,8 @@
 
 namespace AdvisingApp\ServiceManagement\Models\Concerns;
 
-use Bvtterfly\ModelStateMachine\StateMachine;
 use App\Models\Concerns\TargetsRelationships;
+use Bvtterfly\ModelStateMachine\StateMachine;
 use Bvtterfly\ModelStateMachine\HasStateMachine;
 use Bvtterfly\ModelStateMachine\Exceptions\FieldWithoutCast;
 use App\Models\States\StateMachine as RelationBasedStateMachine;
