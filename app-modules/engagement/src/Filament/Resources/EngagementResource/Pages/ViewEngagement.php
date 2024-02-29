@@ -38,9 +38,9 @@ namespace AdvisingApp\Engagement\Filament\Resources\EngagementResource\Pages;
 
 use Filament\Actions\EditAction;
 use Filament\Infolists\Infolist;
+use AdvisingApp\Contact\Models\Contact;
 use App\Filament\Resources\UserResource;
 use Filament\Resources\Pages\ViewRecord;
-use AdvisingApp\Contact\Models\Contact;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\Fieldset;
 use Filament\Infolists\Components\TextEntry;

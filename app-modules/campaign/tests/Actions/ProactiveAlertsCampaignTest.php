@@ -35,9 +35,9 @@
 */
 
 use AdvisingApp\Alert\Models\Alert;
+use AdvisingApp\Contact\Models\Contact;
 use AdvisingApp\Alert\Enums\AlertStatus;
 use AdvisingApp\Campaign\Models\Campaign;
-use AdvisingApp\Contact\Models\Contact;
 use AdvisingApp\Alert\Enums\AlertSeverity;
 use AdvisingApp\Campaign\Models\CampaignAction;
 use AdvisingApp\Campaign\Enums\CampaignActionType;

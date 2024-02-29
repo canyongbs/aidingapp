@@ -38,8 +38,8 @@ namespace App\Concerns;
 
 use Exception;
 use Filament\Tables\Columns\Column;
-use Filament\Tables\Filters\BaseFilter;
 use AdvisingApp\Contact\Models\Contact;
+use Filament\Tables\Filters\BaseFilter;
 use Illuminate\Database\Eloquent\Builder;
 use OpenSearch\Adapter\Documents\Document;
 use OpenSearch\ScoutDriverPlus\Support\Query;

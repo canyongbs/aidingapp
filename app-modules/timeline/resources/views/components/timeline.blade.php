@@ -94,7 +94,7 @@
                         }, {
                             root: null
                         })
-
+                
                         observer.observe(this.$el)
                     }
                 }"

@@ -38,10 +38,10 @@ namespace AdvisingApp\Task\Filament\Concerns;
 
 use AdvisingApp\Task\Models\Task;
 use AdvisingApp\Task\Enums\TaskStatus;
+use AdvisingApp\Contact\Models\Contact;
 use Filament\Infolists\Components\Grid;
 use App\Filament\Resources\UserResource;
 use Filament\Infolists\Components\Split;
-use AdvisingApp\Contact\Models\Contact;
 use Filament\Infolists\Components\Fieldset;
 use Filament\Infolists\Components\TextEntry;
 use AdvisingApp\StudentDataModel\Models\Student;

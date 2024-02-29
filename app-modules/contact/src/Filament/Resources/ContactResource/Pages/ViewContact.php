@@ -38,8 +38,8 @@ namespace AdvisingApp\Contact\Filament\Resources\ContactResource\Pages;
 
 use Filament\Actions\EditAction;
 use Filament\Infolists\Infolist;
-use Filament\Resources\Pages\ViewRecord;
 use AdvisingApp\Contact\Models\Contact;
+use Filament\Resources\Pages\ViewRecord;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;

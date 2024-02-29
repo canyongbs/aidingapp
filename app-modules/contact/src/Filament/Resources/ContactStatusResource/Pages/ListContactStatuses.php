@@ -44,8 +44,8 @@ use Filament\Tables\Columns\TextColumn;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DeleteBulkAction;
 use AdvisingApp\Contact\Models\ContactStatus;
+use Filament\Tables\Actions\DeleteBulkAction;
 use AdvisingApp\Contact\Filament\Resources\ContactStatusResource;
 
 class ListContactStatuses extends ListRecords

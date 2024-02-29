@@ -37,8 +37,8 @@
 namespace AdvisingApp\Interaction\Database\Factories;
 
 use App\Models\User;
-use AdvisingApp\Division\Models\Division;
 use AdvisingApp\Contact\Models\Contact;
+use AdvisingApp\Division\Models\Division;
 use AdvisingApp\Interaction\Models\Interaction;
 use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\Interaction\Models\InteractionType;

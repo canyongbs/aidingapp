@@ -41,7 +41,6 @@
         api-url="http://test.aidingapp.local/api/portal/knowledge-management"
     >
     </knowledge-management-portal-embed>
-    <script
-        src="http://test.aidingapp.local/js/portals/knowledge-management/advising-app-knowledge-management-portal.js?">
+    <script src="http://test.aidingapp.local/js/portals/knowledge-management/advising-app-knowledge-management-portal.js?">
     </script>
 </div>

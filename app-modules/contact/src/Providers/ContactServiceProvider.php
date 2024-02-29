@@ -38,13 +38,13 @@ namespace AdvisingApp\Contact\Providers;
 
 use Filament\Panel;
 use App\Concerns\ImplementsGraphQL;
-use Illuminate\Support\ServiceProvider;
 use AdvisingApp\Contact\ContactPlugin;
 use AdvisingApp\Contact\Models\Contact;
+use Illuminate\Support\ServiceProvider;
 use AdvisingApp\Contact\Models\ContactSource;
 use AdvisingApp\Contact\Models\ContactStatus;
-use App\Registries\RoleBasedAccessControlRegistry;
 use AdvisingApp\Contact\Observers\ContactObserver;
+use App\Registries\RoleBasedAccessControlRegistry;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use AdvisingApp\Contact\Registries\ContactRbacRegistry;
 use AdvisingApp\Contact\Enums\ContactStatusColorOptions;

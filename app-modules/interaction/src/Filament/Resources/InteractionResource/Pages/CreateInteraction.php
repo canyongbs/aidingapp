@@ -38,11 +38,11 @@ namespace AdvisingApp\Interaction\Filament\Resources\InteractionResource\Pages;
 
 use Filament\Forms\Form;
 use Filament\Forms\Components\Select;
+use AdvisingApp\Contact\Models\Contact;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use AdvisingApp\Division\Models\Division;
-use AdvisingApp\Contact\Models\Contact;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Forms\Components\MorphToSelect;
 use Filament\Forms\Components\DateTimePicker;

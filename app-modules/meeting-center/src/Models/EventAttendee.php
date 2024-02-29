@@ -37,8 +37,8 @@
 namespace AdvisingApp\MeetingCenter\Models;
 
 use App\Models\BaseModel;
-use Illuminate\Notifications\Notifiable;
 use AdvisingApp\Contact\Models\Contact;
+use Illuminate\Notifications\Notifiable;
 use AdvisingApp\StudentDataModel\Models\Student;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

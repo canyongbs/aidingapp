@@ -38,8 +38,8 @@ namespace AdvisingApp\Engagement\Models;
 
 use App\Models\BaseModel;
 use Spatie\MediaLibrary\HasMedia;
-use OwenIt\Auditing\Contracts\Auditable;
 use AdvisingApp\Contact\Models\Contact;
+use OwenIt\Auditing\Contracts\Auditable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Prunable;
 use Spatie\MediaLibrary\InteractsWithMedia;

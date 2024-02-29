@@ -38,9 +38,9 @@ namespace AdvisingApp\Alert\Models;
 
 use Exception;
 use App\Models\BaseModel;
+use AdvisingApp\Contact\Models\Contact;
 use AdvisingApp\Alert\Enums\AlertStatus;
 use OwenIt\Auditing\Contracts\Auditable;
-use AdvisingApp\Contact\Models\Contact;
 use Illuminate\Database\Eloquent\Builder;
 use AdvisingApp\Alert\Enums\AlertSeverity;
 use Illuminate\Database\Eloquent\SoftDeletes;

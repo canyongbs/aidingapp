@@ -37,8 +37,8 @@
 namespace AdvisingApp\Notification\Listeners;
 
 use Illuminate\Support\HtmlString;
-use Filament\Notifications\Notification;
 use AdvisingApp\Contact\Models\Contact;
+use Filament\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\Notification\Events\SubscriptionDeleted;

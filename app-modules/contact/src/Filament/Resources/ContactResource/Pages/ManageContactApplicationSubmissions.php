@@ -38,9 +38,9 @@ namespace AdvisingApp\Contact\Filament\Resources\ContactResource\Pages;
 
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Cache;
+use AdvisingApp\Contact\Models\Contact;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
-use AdvisingApp\Contact\Models\Contact;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Tables\Actions\DeleteAction;
 use Illuminate\Database\Eloquent\Builder;

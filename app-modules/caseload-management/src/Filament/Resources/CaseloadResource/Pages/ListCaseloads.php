@@ -39,9 +39,9 @@ namespace AdvisingApp\CaseloadManagement\Filament\Resources\CaseloadResource\Pag
 use Filament\Tables\Table;
 use Filament\Actions\CreateAction;
 use Filament\Tables\Filters\Filter;
+use AdvisingApp\Contact\Models\Contact;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
-use AdvisingApp\Contact\Models\Contact;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Actions\DeleteAction;

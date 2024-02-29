@@ -36,8 +36,8 @@
 
 namespace AdvisingApp\ServiceManagement\Tests\RequestFactories;
 
-use AdvisingApp\Division\Models\Division;
 use AdvisingApp\Contact\Models\Contact;
+use AdvisingApp\Division\Models\Division;
 use Worksome\RequestFactories\RequestFactory;
 use AdvisingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AdvisingApp\ServiceManagement\Models\ServiceRequestPriority;

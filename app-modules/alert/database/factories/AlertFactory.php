@@ -37,8 +37,8 @@
 namespace AdvisingApp\Alert\Database\Factories;
 
 use AdvisingApp\Alert\Models\Alert;
-use AdvisingApp\Alert\Enums\AlertStatus;
 use AdvisingApp\Contact\Models\Contact;
+use AdvisingApp\Alert\Enums\AlertStatus;
 use AdvisingApp\Alert\Enums\AlertSeverity;
 use AdvisingApp\StudentDataModel\Models\Student;
 use Illuminate\Database\Eloquent\Factories\Factory;

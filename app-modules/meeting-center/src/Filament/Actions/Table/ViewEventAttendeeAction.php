@@ -36,8 +36,8 @@
 
 namespace AdvisingApp\MeetingCenter\Filament\Actions\Table;
 
-use Filament\Tables\Actions\ViewAction;
 use AdvisingApp\Contact\Models\Contact;
+use Filament\Tables\Actions\ViewAction;
 use Filament\Infolists\Components\Fieldset;
 use Filament\Infolists\Components\Livewire;
 use Filament\Infolists\Components\TextEntry;

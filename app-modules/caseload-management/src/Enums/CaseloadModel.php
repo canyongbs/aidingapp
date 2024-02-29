@@ -37,14 +37,14 @@
 namespace AdvisingApp\CaseloadManagement\Enums;
 
 use Filament\Tables\Table;
-use Filament\Support\Contracts\HasLabel;
 use AdvisingApp\Contact\Models\Contact;
+use Filament\Support\Contracts\HasLabel;
 use Illuminate\Database\Eloquent\Builder;
 use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\Contact\Filament\Tables\ContactsTable;
 use AdvisingApp\StudentDataModel\Filament\Tables\StudentsTable;
-use AdvisingApp\CaseloadManagement\Importers\StudentCaseloadSubjectImporter;
 use AdvisingApp\CaseloadManagement\Importers\ContactCaseloadSubjectImporter;
+use AdvisingApp\CaseloadManagement\Importers\StudentCaseloadSubjectImporter;
 
 enum CaseloadModel: string implements HasLabel
 {

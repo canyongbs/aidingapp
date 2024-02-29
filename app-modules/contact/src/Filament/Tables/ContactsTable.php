@@ -37,10 +37,10 @@
 namespace AdvisingApp\Contact\Filament\Tables;
 
 use Filament\Tables\Table;
+use AdvisingApp\Contact\Models\Contact;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
-use AdvisingApp\Contact\Models\Contact;
 use Filament\Tables\Filters\QueryBuilder;
 use Illuminate\Database\Eloquent\Builder;
 use AdvisingApp\Contact\Filament\Resources\ContactResource;

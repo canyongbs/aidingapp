@@ -38,9 +38,9 @@ namespace AdvisingApp\Engagement\Models;
 
 use App\Models\BaseModel;
 use Illuminate\Support\Collection;
+use AdvisingApp\Contact\Models\Contact;
 use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Contracts\Auditable;
-use AdvisingApp\Contact\Models\Contact;
 use AdvisingApp\Timeline\Models\Timeline;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use AdvisingApp\StudentDataModel\Models\Student;

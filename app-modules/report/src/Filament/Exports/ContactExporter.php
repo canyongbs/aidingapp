@@ -37,8 +37,8 @@
 namespace AdvisingApp\Report\Filament\Exports;
 
 use Filament\Actions\Exports\Exporter;
-use Filament\Tables\Columns\TextColumn;
 use AdvisingApp\Contact\Models\Contact;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Models\Export;
 

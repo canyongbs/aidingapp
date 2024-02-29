@@ -37,9 +37,9 @@
 namespace AdvisingApp\Contact\Tests\Contact\RequestFactories;
 
 use App\Models\User;
-use Worksome\RequestFactories\RequestFactory;
 use AdvisingApp\Contact\Models\ContactSource;
 use AdvisingApp\Contact\Models\ContactStatus;
+use Worksome\RequestFactories\RequestFactory;
 
 class CreateContactRequestFactory extends RequestFactory
 {

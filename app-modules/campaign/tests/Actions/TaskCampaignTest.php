@@ -36,8 +36,8 @@
 
 use App\Models\User;
 use AdvisingApp\Task\Models\Task;
-use AdvisingApp\Campaign\Models\Campaign;
 use AdvisingApp\Contact\Models\Contact;
+use AdvisingApp\Campaign\Models\Campaign;
 use Illuminate\Database\Eloquent\Collection;
 use AdvisingApp\Campaign\Models\CampaignAction;
 use AdvisingApp\StudentDataModel\Models\Student;

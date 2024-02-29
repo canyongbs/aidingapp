@@ -37,8 +37,8 @@
 namespace AdvisingApp\ServiceManagement\Models;
 
 use App\Models\User;
-use AdvisingApp\Form\Models\Submission;
 use AdvisingApp\Contact\Models\Contact;
+use AdvisingApp\Form\Models\Submission;
 use Illuminate\Database\Eloquent\Builder;
 use AdvisingApp\Form\Enums\FormSubmissionStatus;
 use AdvisingApp\StudentDataModel\Models\Student;
