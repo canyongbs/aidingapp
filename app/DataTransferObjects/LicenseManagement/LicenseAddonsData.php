@@ -46,7 +46,6 @@ class LicenseAddonsData extends Data
     public function __construct(
         public bool $onlineForms,
         public bool $onlineSurveys,
-        public bool $onlineAdmissions,
         public bool $serviceManagement,
         public bool $knowledgeManagement,
         public bool $eventManagement,

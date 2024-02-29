@@ -46,8 +46,6 @@ enum Feature: string
 
     case OnlineSurveys = 'online-surveys';
 
-    case OnlineAdmissions = 'online-admissions';
-
     case ServiceManagement = 'service-management';
 
     case KnowledgeManagement = 'knowledge-management';

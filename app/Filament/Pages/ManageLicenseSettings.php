@@ -136,8 +136,6 @@ class ManageLicenseSettings extends SettingsPage
                                 ->label('Online Forms'),
                             Toggle::make('data.addons.onlineSurveys')
                                 ->label('Online Surveys'),
-                            Toggle::make('data.addons.onlineAdmissions')
-                                ->label('Online Admissions'),
                             Toggle::make('data.addons.serviceManagement')
                                 ->label('Service Management'),
                             Toggle::make('data.addons.knowledgeManagement')
