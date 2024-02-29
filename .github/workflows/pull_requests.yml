@@ -13,4 +13,4 @@ jobs:
 
     uses: ./.github/workflows/ci.yml
     secrets:
-      pat-token: ${{ secrets.PAT }}
+      pat-token: ${{ secrets.PAT-AIDAPP }}
