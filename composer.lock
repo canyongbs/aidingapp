@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "be32dc9e8a8f4c8f434920af593831fe",
+    "content-hash": "84e126bc7834a508a7205fdb35e9648d",
     "packages": [
         {
             "name": "amphp/amp",
@@ -1750,41 +1750,6 @@
                     "AdvisingApp\\Authorization\\Tests\\": "tests/",
                     "AdvisingApp\\Authorization\\Database\\Factories\\": "database/factories/",
                     "AdvisingApp\\Authorization\\Database\\Seeders\\": "database/seeders/"
-                }
-            },
-            "license": [
-                "proprietary"
-            ],
-            "transport-options": {
-                "symlink": true,
-                "relative": true
-            }
-        },
-        {
-            "name": "canyon-gbs/advising-app-campaign",
-            "version": "1.0",
-            "dist": {
-                "type": "path",
-                "url": "app-modules/campaign",
-                "reference": "9ed07874a81db2e2eb65ad3d2346612e632e163b"
-            },
-            "require": {
-                "filament/filament": "^3.0.0"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "AdvisingApp\\Campaign\\Providers\\CampaignServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "AdvisingApp\\Campaign\\": "src/",
-                    "AdvisingApp\\Campaign\\Tests\\": "tests/",
-                    "AdvisingApp\\Campaign\\Database\\Factories\\": "database/factories/",
-                    "AdvisingApp\\Campaign\\Database\\Seeders\\": "database/seeders/"
                 }
             },
             "license": [

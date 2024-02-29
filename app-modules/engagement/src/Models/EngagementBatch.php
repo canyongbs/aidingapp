@@ -36,20 +36,15 @@
 
 namespace AdvisingApp\Engagement\Models;
 
-use Exception;
 use App\Models\User;
 use App\Models\BaseModel;
-use AdvisingApp\Campaign\Models\CampaignAction;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use AdvisingApp\Engagement\Actions\CreateEngagementBatch;
 use AdvisingApp\Engagement\Models\Concerns\HasManyEngagements;
-use AdvisingApp\Campaign\Models\Contracts\ExecutableFromACampaignAction;
-use AdvisingApp\Engagement\DataTransferObjects\EngagementBatchCreationData;
 
 /**
  * @mixin IdeHelperEngagementBatch
  */
-class EngagementBatch extends BaseModel implements ExecutableFromACampaignAction
+class EngagementBatch extends BaseModel
 {
     use HasManyEngagements;
 
@@ -60,24 +55,5 @@ class EngagementBatch extends BaseModel implements ExecutableFromACampaignAction
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
-    }
-
-    public static function executeFromCampaignAction(CampaignAction $action): bool|string
-    {
-        try {
-            CreateEngagementBatch::dispatch(EngagementBatchCreationData::from([
-                'user' => $action->campaign->user,
-                'records' => $action->campaign->caseload->retrieveRecords(),
-                'deliveryMethod' => $action->data['delivery_method'],
-                'subject' => $action->data['subject'] ?? null,
-                'body' => $action->data['body'] ?? null,
-            ]));
-
-            return true;
-        } catch (Exception $e) {
-            return $e->getMessage();
-        }
-
-        // Do we need to be able to relate campaigns/actions to the RESULT of their actions?
     }
 }
