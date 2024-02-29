@@ -48,7 +48,7 @@
 
     <div class="flex w-full justify-center pb-4 pt-2">
         <span class="w-11/12 text-center text-xs lg:w-3/4 xl:w-7/12">
-            © 2016-{{ date('Y') }} Canyon GBS LLC. All Rights Reserved. Canyon GBS™ and Advising App™ are trademarks
+            © 2016-{{ date('Y') }} Canyon GBS LLC. All Rights Reserved. Canyon GBS™ and Aiding App™ are trademarks
             of Canyon GBS
             LLC. For more information or inquiries, please visit our website at <a
                 class="text-blue-600 underline dark:text-blue-400"
