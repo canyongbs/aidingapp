@@ -34,23 +34,58 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Form\Actions;
+namespace App\Models\Concerns;
 
-use AdvisingApp\Form\Models\Form;
-use AdvisingApp\Survey\Models\Survey;
-use AdvisingApp\Form\Models\Submissible;
-use AdvisingApp\MeetingCenter\Models\EventRegistrationForm;
-use AdvisingApp\Form\Filament\Blocks\FormFieldBlockRegistry;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestForm;
-use AdvisingApp\Survey\Filament\Blocks\SurveyFieldBlockRegistry;
+use Exception;
+use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Model;
 
-class ResolveBlockRegistry
+trait TargetsRelationships
 {
-    public function __invoke(Submissible $submissible): array
+    public function targetingRelationship(string $state): bool
     {
-        return match ($submissible::class) {
-            Form::class, EventRegistrationForm::class, ServiceRequestForm::class => FormFieldBlockRegistry::keyByType(),
-            Survey::class => SurveyFieldBlockRegistry::keyByType(),
-        };
+        return Str::contains($state, '.');
+    }
+
+    public function accessNestedRelations(Model $model, array $relations)
+    {
+        $current = $model;
+
+        foreach ($relations as $relation) {
+            if (! method_exists($current, $relation)) {
+                throw new Exception("Relation '{$relation}' does not exist on " . get_class($current));
+            }
+
+            // This is a workaround for if the relation is a soft-deleted model
+            // This should be removed when we rework state machines to enforce minimum/maximum classification mappings
+            $relatedClass = $current->{$relation}()->getRelated();
+
+            if (method_exists($relatedClass, 'trashed')) {
+                $current = $current->{$relation}()->withTrashed()->first();
+            } else {
+                $current = $current->{$relation};
+            }
+
+            if ($current === null) {
+                return null;
+            }
+        }
+
+        return $current;
+    }
+
+    public function dynamicMethodChain(Model $model, array $methods)
+    {
+        $current = $model;
+
+        foreach ($methods as $method) {
+            if (! method_exists($current, $method)) {
+                throw new Exception("Method '{$method}' does not exist on " . get_class($current));
+            }
+
+            $current = $current->$method();
+        }
+
+        return $current;
     }
 }

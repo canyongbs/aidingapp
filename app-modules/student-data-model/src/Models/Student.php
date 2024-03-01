@@ -59,7 +59,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use AdvisingApp\InventoryManagement\Models\AssetCheckIn;
 use AdvisingApp\ServiceManagement\Models\ServiceRequest;
-use AdvisingApp\Application\Models\ApplicationSubmission;
 use AdvisingApp\Engagement\Models\EngagementFileEntities;
 use AdvisingApp\InventoryManagement\Models\AssetCheckOut;
 use AdvisingApp\Notification\Models\Contracts\Subscribable;
@@ -179,11 +178,6 @@ class Student extends BaseAuthenticatable implements Auditable, Subscribable, Ed
     public function formSubmissions(): MorphMany
     {
         return $this->morphMany(FormSubmission::class, 'author');
-    }
-
-    public function applicationSubmissions(): MorphMany
-    {
-        return $this->morphMany(ApplicationSubmission::class, 'author');
     }
 
     public function careTeam(): MorphToMany

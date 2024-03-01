@@ -66,7 +66,6 @@ use AdvisingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseCategorySeeder;
 use AdvisingApp\ServiceManagement\Database\Seeders\ChangeRequestTypeSeeder;
 use AdvisingApp\ServiceManagement\Database\Seeders\ServiceRequestTypeSeeder;
 use AdvisingApp\ServiceManagement\Database\Seeders\ChangeRequestStatusSeeder;
-use AdvisingApp\Application\Database\Seeders\ApplicationSubmissionStateSeeder;
 use AdvisingApp\ServiceManagement\Database\Seeders\ServiceRequestStatusSeeder;
 use AdvisingApp\ServiceManagement\Database\Seeders\ServiceRequestUpdateSeeder;
 use AdvisingApp\InventoryManagement\Database\Seeders\MaintenanceProviderSeeder;
@@ -117,7 +116,6 @@ class DatabaseSeeder extends Seeder
             // DemoEducatableEngagementSeeder::class,
             SuperAdminSeeder::class,
             TwilioStudentSeeder::class,
-            ApplicationSubmissionStateSeeder::class,
             EventSeeder::class,
 
             // InventoryManagement

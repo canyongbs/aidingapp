@@ -36,7 +36,6 @@
 
 namespace AdvisingApp\ServiceManagement\Models;
 
-use Exception;
 use App\Models\User;
 use DateTimeInterface;
 use App\Models\BaseModel;
@@ -48,7 +47,6 @@ use OwenIt\Auditing\Contracts\Auditable;
 use AdvisingApp\Division\Models\Division;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use AdvisingApp\Campaign\Models\CampaignAction;
 use AdvisingApp\StudentDataModel\Models\Student;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -68,7 +66,6 @@ use AdvisingApp\StudentDataModel\Models\Concerns\BelongsToEducatable;
 use AdvisingApp\ServiceManagement\Enums\ServiceRequestUpdateDirection;
 use AdvisingApp\Interaction\Models\Concerns\HasManyMorphedInteractions;
 use AdvisingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
-use AdvisingApp\Campaign\Models\Contracts\ExecutableFromACampaignAction;
 use AdvisingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
 use AdvisingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AdvisingApp\ServiceManagement\Exceptions\ServiceRequestNumberExceededReRollsException;
@@ -79,7 +76,7 @@ use AdvisingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\Servic
  *
  * @mixin IdeHelperServiceRequest
  */
-class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubscription, Identifiable, ExecutableFromACampaignAction
+class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubscription, Identifiable
 {
     use BelongsToEducatable;
     use SoftDeletes;
@@ -220,37 +217,6 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
             'status_id',
             ServiceRequestStatus::where('classification', SystemServiceRequestClassification::Open)->pluck('id')
         );
-    }
-
-    public static function executeFromCampaignAction(CampaignAction $action): bool|string
-    {
-        try {
-            $action->campaign->caseload->retrieveRecords()->each(function (Educatable $educatable) use ($action) {
-                $request = ServiceRequest::create([
-                    'respondent_type' => $educatable->getMorphClass(),
-                    'respondent_id' => $educatable->getKey(),
-                    'close_details' => $action->data['close_details'],
-                    'res_details' => $action->data['res_details'],
-                    'division_id' => $action->data['division_id'],
-                    'status_id' => $action->data['status_id'],
-                    'priority_id' => $action->data['priority_id'],
-                    'created_by_id' => $action->campaign->user->id,
-                ]);
-
-                if ($action->data['assigned_to_id']) {
-                    $request->assignments()->create([
-                        'user_id' => $action->data['assigned_to_id'],
-                        'assigned_by_id' => $action->campaign->user->id,
-                        'assigned_at' => now(),
-                        'status' => ServiceRequestAssignmentStatus::Active,
-                    ]);
-                }
-            });
-
-            return true;
-        } catch (Exception $e) {
-            return $e->getMessage();
-        }
     }
 
     public function latestInboundServiceRequestUpdate(): HasOne

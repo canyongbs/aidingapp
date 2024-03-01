@@ -36,7 +36,6 @@
 
 namespace AdvisingApp\Alert\Models;
 
-use Exception;
 use App\Models\BaseModel;
 use AdvisingApp\Contact\Models\Contact;
 use AdvisingApp\Alert\Enums\AlertStatus;
@@ -44,15 +43,12 @@ use OwenIt\Auditing\Contracts\Auditable;
 use Illuminate\Database\Eloquent\Builder;
 use AdvisingApp\Alert\Enums\AlertSeverity;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use AdvisingApp\Campaign\Models\CampaignAction;
 use AdvisingApp\StudentDataModel\Models\Student;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use AdvisingApp\Notification\Models\Contracts\Subscribable;
-use AdvisingApp\StudentDataModel\Models\Contracts\Educatable;
 use AdvisingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AdvisingApp\StudentDataModel\Models\Scopes\LicensedToEducatable;
 use AdvisingApp\StudentDataModel\Models\Concerns\BelongsToEducatable;
-use AdvisingApp\Campaign\Models\Contracts\ExecutableFromACampaignAction;
 use AdvisingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
 
 /**
@@ -60,7 +56,7 @@ use AdvisingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
  *
  * @mixin IdeHelperAlert
  */
-class Alert extends BaseModel implements Auditable, CanTriggerAutoSubscription, ExecutableFromACampaignAction
+class Alert extends BaseModel implements Auditable, CanTriggerAutoSubscription
 {
     use SoftDeletes;
     use AuditableTrait;
@@ -93,28 +89,6 @@ class Alert extends BaseModel implements Auditable, CanTriggerAutoSubscription, 
     public function scopeStatus(Builder $query, AlertStatus $status): void
     {
         $query->where('status', $status);
-    }
-
-    public static function executeFromCampaignAction(CampaignAction $action): bool|string
-    {
-        try {
-            $action->campaign->caseload->retrieveRecords()->each(function (Educatable $educatable) use ($action) {
-                Alert::create([
-                    'concern_type' => $educatable->getMorphClass(),
-                    'concern_id' => $educatable->getKey(),
-                    'description' => $action->data['description'],
-                    'severity' => $action->data['severity'],
-                    'status' => $action->data['status'],
-                    'suggested_intervention' => $action->data['suggested_intervention'],
-                ]);
-            });
-
-            return true;
-        } catch (Exception $e) {
-            return $e->getMessage();
-        }
-
-        // Do we need to be able to relate campaigns/actions to the RESULT of their actions?
     }
 
     protected static function booted(): void

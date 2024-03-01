@@ -36,7 +36,6 @@
 
 namespace AdvisingApp\Interaction\Models;
 
-use Exception;
 use App\Models\User;
 use App\Models\BaseModel;
 use App\Models\Authenticatable;
@@ -46,23 +45,20 @@ use OwenIt\Auditing\Contracts\Auditable;
 use AdvisingApp\Division\Models\Division;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use AdvisingApp\Campaign\Models\CampaignAction;
 use AdvisingApp\StudentDataModel\Models\Student;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use AdvisingApp\ServiceManagement\Models\ServiceRequest;
 use AdvisingApp\Notification\Models\Contracts\Subscribable;
-use AdvisingApp\StudentDataModel\Models\Contracts\Educatable;
 use AdvisingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AdvisingApp\StudentDataModel\Models\Scopes\LicensedToEducatable;
 use AdvisingApp\StudentDataModel\Models\Concerns\BelongsToEducatable;
-use AdvisingApp\Campaign\Models\Contracts\ExecutableFromACampaignAction;
 use AdvisingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
 
 /**
  * @mixin IdeHelperInteraction
  */
-class Interaction extends BaseModel implements Auditable, CanTriggerAutoSubscription, ExecutableFromACampaignAction
+class Interaction extends BaseModel implements Auditable, CanTriggerAutoSubscription
 {
     use AuditableTrait;
     use BelongsToEducatable;
@@ -147,32 +143,6 @@ class Interaction extends BaseModel implements Auditable, CanTriggerAutoSubscrip
     public function type(): BelongsTo
     {
         return $this->belongsTo(InteractionType::class, 'interaction_type_id');
-    }
-
-    public static function executeFromCampaignAction(CampaignAction $action): bool|string
-    {
-        try {
-            $action->campaign->caseload->retrieveRecords()->each(function (Educatable $educatable) use ($action) {
-                Interaction::create([
-                    'user_id' => $action->campaign->user_id,
-                    'interactable_type' => $educatable->getMorphClass(),
-                    'interactable_id' => $educatable->getKey(),
-                    'interaction_type_id' => $action->data['interaction_type_id'],
-                    'interaction_relation_id' => $action->data['interaction_relation_id'],
-                    'interaction_campaign_id' => $action->data['interaction_campaign_id'],
-                    'interaction_driver_id' => $action->data['interaction_driver_id'],
-                    'interaction_status_id' => $action->data['interaction_status_id'],
-                    'interaction_outcome_id' => $action->data['interaction_outcome_id'],
-                    'division_id' => $action->data['division_id'],
-                ]);
-            });
-
-            return true;
-        } catch (Exception $e) {
-            return $e->getMessage();
-        }
-
-        // Do we need to be able to relate campaigns/actions to the RESULT of their actions?
     }
 
     protected static function booted(): void

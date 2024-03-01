@@ -43,7 +43,6 @@ return new class () extends SettingsMigration {
         $this->migrator->add('portal.primary_color');
         $this->migrator->add('portal.secondary_color');
 
-        $this->migrator->add('portal.has_applications', false);
         $this->migrator->add('portal.has_message_center', false);
         $this->migrator->add('portal.has_user_chat', false);
         $this->migrator->add('portal.has_care_team', false);
