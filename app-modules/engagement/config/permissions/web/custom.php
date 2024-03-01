@@ -34,6 +34,4 @@
 </COPYRIGHT>
 */
 
-return [
-    'view_message_center',
-];
+return [];

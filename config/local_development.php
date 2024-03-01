@@ -36,6 +36,6 @@
 
 return [
     'super_admin' => [
-        'email' => 'sampleadmin@advising.app',
+        'email' => 'sampleadmin@aiding.app',
     ],
 ];

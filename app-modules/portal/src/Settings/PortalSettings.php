@@ -46,8 +46,6 @@ class PortalSettings extends Settings
 
     public ?string $secondary_color = null;
 
-    public bool $has_message_center = false;
-
     public bool $has_user_chat = false;
 
     public bool $has_care_team = false;

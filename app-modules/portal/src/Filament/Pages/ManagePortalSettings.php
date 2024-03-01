@@ -106,8 +106,6 @@ class ManagePortalSettings extends SettingsPage
                     ->columns(2),
                 Section::make('CRM Portal')
                     ->schema([
-                        Toggle::make('has_message_center')
-                            ->label('Message Center'),
                         Toggle::make('has_user_chat')
                             ->label('Realtime Chat')
                             ->disabled(! Gate::check(Feature::RealtimeChat->getGateName()))
