@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f9a7e1d7d6e216bf837bf71fa77135b2",
+    "content-hash": "c745dea50963bb9146a8f57fc5524036",
     "packages": [
         {
             "name": "amphp/amp",
@@ -1606,41 +1606,6 @@
                     "AdvisingApp\\Alert\\Tests\\": "tests/",
                     "AdvisingApp\\Alert\\Database\\Factories\\": "database/factories/",
                     "AdvisingApp\\Alert\\Database\\Seeders\\": "database/seeders/"
-                }
-            },
-            "license": [
-                "proprietary"
-            ],
-            "transport-options": {
-                "symlink": true,
-                "relative": true
-            }
-        },
-        {
-            "name": "canyon-gbs/advising-app-analytics",
-            "version": "1.0",
-            "dist": {
-                "type": "path",
-                "url": "app-modules/analytics",
-                "reference": "20bf4d89a69ac1f56cfcf0e0395714be2b53e1cd"
-            },
-            "require": {
-                "filament/filament": "^3.0.0"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "AdvisingApp\\Analytics\\Providers\\AnalyticsServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "AdvisingApp\\Analytics\\": "src/",
-                    "AdvisingApp\\Analytics\\Tests\\": "tests/",
-                    "AdvisingApp\\Analytics\\Database\\Factories\\": "database/factories/",
-                    "AdvisingApp\\Analytics\\Database\\Seeders\\": "database/seeders/"
                 }
             },
             "license": [
