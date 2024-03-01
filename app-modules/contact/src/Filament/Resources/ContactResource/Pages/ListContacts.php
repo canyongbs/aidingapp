@@ -62,14 +62,11 @@ use AdvisingApp\Contact\Models\ContactSource;
 use AdvisingApp\Contact\Models\ContactStatus;
 use Filament\Tables\Actions\DeleteBulkAction;
 use AdvisingApp\Contact\Imports\ContactImporter;
-use AdvisingApp\CaseloadManagement\Models\Caseload;
-use AdvisingApp\CaseloadManagement\Enums\CaseloadModel;
 use AdvisingApp\Contact\Filament\Resources\ContactResource;
 use AdvisingApp\Engagement\Filament\Actions\BulkEngagementAction;
 use AdvisingApp\Notification\Filament\Actions\SubscribeBulkAction;
 use AdvisingApp\CareTeam\Filament\Actions\ToggleCareTeamBulkAction;
 use AdvisingApp\Notification\Filament\Actions\SubscribeTableAction;
-use AdvisingApp\CaseloadManagement\Actions\TranslateCaseloadFilters;
 use AdvisingApp\Engagement\Filament\Actions\Contracts\HasBulkEngagementAction;
 use AdvisingApp\Engagement\Filament\Actions\Concerns\ImplementsHasBulkEngagementAction;
 
@@ -122,26 +119,6 @@ class ListContacts extends ListRecords implements HasBulkEngagementAction
                     ->sortable(),
             ])
             ->filters([
-                SelectFilter::make('my_caseloads')
-                    ->label('My Caseloads')
-                    ->options(
-                        auth()->user()->caseloads()
-                            ->where('model', CaseloadModel::Contact)
-                            ->pluck('name', 'id'),
-                    )
-                    ->searchable()
-                    ->optionsLimit(20)
-                    ->query(fn (Builder $query, array $data) => $this->caseloadFilter($query, $data)),
-                SelectFilter::make('all_caseloads')
-                    ->label('All Caseloads')
-                    ->options(
-                        Caseload::all()
-                            ->where('model', CaseloadModel::Contact)
-                            ->pluck('name', 'id'),
-                    )
-                    ->searchable()
-                    ->optionsLimit(20)
-                    ->query(fn (Builder $query, array $data) => $this->caseloadFilter($query, $data)),
                 SelectFilter::make('status_id')
                     ->relationship('status', 'name')
                     ->multiple()
@@ -250,19 +227,6 @@ class ListContacts extends ListRecords implements HasBulkEngagementAction
                         }),
                 ]),
             ]);
-    }
-
-    protected function caseloadFilter(Builder $query, array $data): void
-    {
-        if (blank($data['value'])) {
-            return;
-        }
-
-        $query->whereKey(
-            app(TranslateCaseloadFilters::class)
-                ->handle($data['value'])
-                ->pluck($query->getModel()->getQualifiedKeyName()),
-        );
     }
 
     protected function getHeaderActions(): array
