@@ -47,7 +47,6 @@ use Illuminate\Notifications\Notifiable;
 use OwenIt\Auditing\Contracts\Auditable;
 use AdvisingApp\CareTeam\Models\CareTeam;
 use Illuminate\Database\Eloquent\Builder;
-use AdvisingApp\Form\Models\FormSubmission;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use AdvisingApp\Authorization\Enums\LicenseType;
 use AdvisingApp\Engagement\Models\EngagementFile;
@@ -200,11 +199,6 @@ class Contact extends BaseAuthenticatable implements Auditable, Subscribable, Ed
             ->withPivot('id')
             ->withTimestamps()
             ->tap(new HasLicense($this->getLicenseType()));
-    }
-
-    public function formSubmissions(): MorphMany
-    {
-        return $this->morphMany(FormSubmission::class, 'author');
     }
 
     public static function displayNameKey(): string

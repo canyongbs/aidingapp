@@ -36,10 +36,11 @@
 
 namespace AdvisingApp\Form\Enums;
 
-use Filament\Support\Contracts\HasLabel;
-use AdvisingApp\Form\Models\FormSubmission;
-use AdvisingApp\Form\Actions\DeliverFormSubmissionRequestBySms;
 use AdvisingApp\Form\Actions\DeliverFormSubmissionRequestByEmail;
+use AdvisingApp\Form\Actions\DeliverFormSubmissionRequestBySms;
+use AdvisingApp\Form\Models\FormSubmission;
+use AdvisingApp\Form\Models\Submission;
+use Filament\Support\Contracts\HasLabel;
 
 enum FormSubmissionRequestDeliveryMethod: string implements HasLabel
 {
@@ -54,7 +55,7 @@ enum FormSubmissionRequestDeliveryMethod: string implements HasLabel
         };
     }
 
-    public function deliver(FormSubmission $submission): void
+    public function deliver(Submission $submission): void
     {
         match ($this) {
             static::Email => DeliverFormSubmissionRequestByEmail::dispatch($submission),

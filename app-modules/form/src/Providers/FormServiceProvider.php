@@ -38,19 +38,7 @@ namespace AdvisingApp\Form\Providers;
 
 use Filament\Panel;
 use AdvisingApp\Form\FormPlugin;
-use AdvisingApp\Form\Models\Form;
-use Illuminate\Support\Facades\Event;
-use AdvisingApp\Form\Models\FormField;
 use Illuminate\Support\ServiceProvider;
-use AdvisingApp\Form\Models\FormSubmission;
-use AdvisingApp\Form\Observers\FormObserver;
-use AdvisingApp\Form\Registries\FormRbacRegistry;
-use AdvisingApp\Form\Events\FormSubmissionCreated;
-use App\Registries\RoleBasedAccessControlRegistry;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use AdvisingApp\Form\Observers\FormSubmissionObserver;
-use AdvisingApp\Form\Listeners\NotifySubscribersOfFormSubmission;
-use AdvisingApp\Form\Listeners\SendFormSubmissionAutoReplyEmailToSubmitter;
 
 class FormServiceProvider extends ServiceProvider
 {
@@ -59,36 +47,5 @@ class FormServiceProvider extends ServiceProvider
         Panel::configureUsing(fn (Panel $panel) => ($panel->getId() !== 'admin') || $panel->plugin(new FormPlugin()));
     }
 
-    public function boot()
-    {
-        Relation::morphMap([
-            'form' => Form::class,
-            'form_field' => FormField::class,
-            'form_submission' => FormSubmission::class,
-        ]);
-
-        $this->registerObservers();
-        $this->registerEvents();
-
-        RoleBasedAccessControlRegistry::register(FormRbacRegistry::class);
-    }
-
-    public function registerObservers(): void
-    {
-        FormSubmission::observe(FormSubmissionObserver::class);
-        Form::observe(FormObserver::class);
-    }
-
-    public function registerEvents(): void
-    {
-        Event::listen(
-            events: FormSubmissionCreated::class,
-            listener: NotifySubscribersOfFormSubmission::class,
-        );
-
-        Event::listen(
-            events: FormSubmissionCreated::class,
-            listener: SendFormSubmissionAutoReplyEmailToSubmitter::class,
-        );
-    }
+    public function boot(): void {}
 }

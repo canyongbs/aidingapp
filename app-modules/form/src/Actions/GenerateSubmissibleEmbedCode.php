@@ -37,7 +37,6 @@
 namespace AdvisingApp\Form\Actions;
 
 use Exception;
-use AdvisingApp\Form\Models\Form;
 use Illuminate\Support\Facades\URL;
 use AdvisingApp\Survey\Models\Survey;
 use AdvisingApp\Form\Models\Submissible;
@@ -48,21 +47,6 @@ class GenerateSubmissibleEmbedCode
     public function handle(Submissible $submissible): string
     {
         return match ($submissible::class) {
-            Form::class => (function () use ($submissible) {
-                $scriptUrl = url('js/widgets/form/advising-app-form-widget.js?');
-                $formDefinitionUrl = URL::to(
-                    URL::signedRoute(
-                        name: 'forms.define',
-                        parameters: ['form' => $submissible],
-                        absolute: false,
-                    )
-                );
-
-                return <<<EOD
-                <form-embed url="{$formDefinitionUrl}"></form-embed>
-                <script src="{$scriptUrl}"></script>
-                EOD;
-            })(),
             Survey::class => (function () use ($submissible) {
                 $scriptUrl = url('js/widgets/survey/advising-app-survey-widget.js?');
                 $surveyDefinitionUrl = URL::to(

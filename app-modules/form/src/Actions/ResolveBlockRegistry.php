@@ -48,7 +48,7 @@ class ResolveBlockRegistry
     public function __invoke(Submissible $submissible): array
     {
         return match ($submissible::class) {
-            Form::class, ServiceRequestForm::class => FormFieldBlockRegistry::keyByType(),
+            ServiceRequestForm::class => FormFieldBlockRegistry::keyByType(),
             Survey::class => SurveyFieldBlockRegistry::keyByType(),
         };
     }
