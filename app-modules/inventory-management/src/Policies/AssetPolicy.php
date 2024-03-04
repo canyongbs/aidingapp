@@ -49,8 +49,8 @@ class AssetPolicy
 {
     public function before(Authenticatable $authenticatable): ?Response
     {
-        if (! $authenticatable->hasAnyLicense([Student::getLicenseType(), Contact::getLicenseType()])) {
-            return Response::deny('You are not licensed for the Retention or Recruitment CRM.');
+        if (! $authenticatable->hasAnyLicense([Contact::getLicenseType()])) {
+            return Response::deny('You are not licensed for the Recruitment CRM.');
         }
 
         if (! Gate::check(

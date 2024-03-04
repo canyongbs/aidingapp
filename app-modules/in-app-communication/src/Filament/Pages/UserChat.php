@@ -107,7 +107,7 @@ class UserChat extends Page implements HasForms, HasActions
         /** @var User $user */
         $user = auth()->user();
 
-        if (! $user->hasAnyLicense([LicenseType::RetentionCrm, LicenseType::RecruitmentCrm])) {
+        if (! $user->hasAnyLicense([LicenseType::RecruitmentCrm])) {
             return false;
         }
 

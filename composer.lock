@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f94077f901cbb354e5cfa1f7fc7330f0",
+    "content-hash": "9b42b0ae83eb11ac43a123eac5193252",
     "packages": [
         {
             "name": "amphp/amp",
@@ -2420,42 +2420,6 @@
                     "AdvisingApp\\ServiceManagement\\Tests\\": "tests/",
                     "AdvisingApp\\ServiceManagement\\Database\\Factories\\": "database/factories/",
                     "AdvisingApp\\ServiceManagement\\Database\\Seeders\\": "database/seeders/"
-                }
-            },
-            "license": [
-                "proprietary"
-            ],
-            "transport-options": {
-                "symlink": true,
-                "relative": true
-            }
-        },
-        {
-            "name": "canyon-gbs/advising-app-student-data-model",
-            "version": "1.0",
-            "dist": {
-                "type": "path",
-                "url": "app-modules/student-data-model",
-                "reference": "97787a2aedc5da23f7907add6646513bb8f39a97"
-            },
-            "require": {
-                "canyon-gbs/advising-app-notification": "*",
-                "filament/filament": "^3.0"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "AdvisingApp\\StudentDataModel\\Providers\\StudentDataModelServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "AdvisingApp\\StudentDataModel\\": "src/",
-                    "AdvisingApp\\StudentDataModel\\Tests\\": "tests/",
-                    "AdvisingApp\\StudentDataModel\\Database\\Factories\\": "database/factories/",
-                    "AdvisingApp\\StudentDataModel\\Database\\Seeders\\": "database/seeders/"
                 }
             },
             "license": [
@@ -22807,5 +22771,5 @@
         "ext-pdo": "*"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.3.0"
+    "plugin-api-version": "2.6.0"
 }

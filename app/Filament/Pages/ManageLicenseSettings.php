@@ -107,10 +107,6 @@ class ManageLicenseSettings extends SettingsPage
                                 ->label('Artificial Intelligence Seats')
                                 ->numeric()
                                 ->required(),
-                            TextInput::make('data.limits.retentionCrmSeats')
-                                ->label('Student Success / Retention Seats')
-                                ->numeric()
-                                ->required(),
                             TextInput::make('data.limits.recruitmentCrmSeats')
                                 ->label('Recruitment CRM Seats')
                                 ->numeric()

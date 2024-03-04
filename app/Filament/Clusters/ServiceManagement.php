@@ -54,6 +54,6 @@ class ServiceManagement extends Cluster
         /** @var User $user */
         $user = auth()->user();
 
-        return $user->hasAnyLicense([LicenseType::RetentionCrm, LicenseType::RecruitmentCrm]);
+        return $user->hasAnyLicense([LicenseType::RecruitmentCrm]);
     }
 }

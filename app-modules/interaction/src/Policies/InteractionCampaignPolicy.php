@@ -47,7 +47,7 @@ class InteractionCampaignPolicy
     public function before(Authenticatable $authenticatable): ?Response
     {
         if (! $authenticatable->hasAnyLicense([Student::getLicenseType(), Contact::getLicenseType()])) {
-            return Response::deny('You are not licensed for the Retention or Recruitment CRM.');
+            return Response::deny('You are not licensed for the Recruitment CRM.');
         }
 
         return null;

@@ -44,15 +44,12 @@ enum LicenseType: string implements HasLabel
 {
     case ConversationalAi = 'conversational_ai';
 
-    case RetentionCrm = 'retention_crm';
-
     case RecruitmentCrm = 'recruitment_crm';
 
     public function getLabel(): ?string
     {
         return match ($this) {
             LicenseType::ConversationalAi => 'Conversational AI',
-            LicenseType::RetentionCrm => 'Retention CRM',
             LicenseType::RecruitmentCrm => 'Recruitment CRM',
         };
     }
@@ -73,7 +70,6 @@ enum LicenseType: string implements HasLabel
 
         return match ($this) {
             LicenseType::ConversationalAi => $licenseSettings->data->limits->conversationalAiSeats,
-            LicenseType::RetentionCrm => $licenseSettings->data->limits->retentionCrmSeats,
             LicenseType::RecruitmentCrm => $licenseSettings->data->limits->recruitmentCrmSeats,
         };
     }

@@ -56,7 +56,6 @@ return new class () extends SettingsMigration {
                 ],
                 'limits' => [
                     'conversational_ai_seats' => 50,
-                    'retention_crm_seats' => 25,
                     'recruitment_crm_seats' => 10,
                     'emails' => 1000,
                     'sms' => 1000,
