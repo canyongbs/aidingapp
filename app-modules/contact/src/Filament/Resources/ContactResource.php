@@ -47,7 +47,6 @@ use AdvisingApp\Contact\Filament\Resources\ContactResource\Pages\CreateContact;
 use AdvisingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactFiles;
 use AdvisingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactTasks;
 use AdvisingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactAlerts;
-use AdvisingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactEvents;
 use AdvisingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactCareTeam;
 use AdvisingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactEngagement;
 use AdvisingApp\Contact\Filament\Resources\ContactResource\Pages\ContactServiceManagement;
