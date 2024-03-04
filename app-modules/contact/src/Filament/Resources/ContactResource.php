@@ -83,7 +83,6 @@ class ContactResource extends Resource
             ManageContactCareTeam::class,
             ManageContactFormSubmissions::class,
             ContactServiceManagement::class,
-            ManageContactEvents::class,
         ]);
     }
 
@@ -119,7 +118,6 @@ class ContactResource extends Resource
             'timeline' => ContactEngagementTimeline::route('/{record}/timeline'),
             'care-team' => ManageContactCareTeam::route('/{record}/care-team'),
             'service-management' => ContactServiceManagement::route('/{record}/service-management'),
-            'events' => ManageContactEvents::route('/{record}/events'),
         ];
     }
 }

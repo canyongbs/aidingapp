@@ -50,7 +50,6 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Support\Enums\Alignment;
 use Filament\Support\Exceptions\Halt;
-use Filament\Forms\Components\Actions;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Checkbox;
 use Illuminate\Database\Eloquent\Model;
@@ -65,7 +64,6 @@ use Filament\Forms\Components\DateTimePicker;
 use Illuminate\Contracts\Auth\Authenticatable;
 use AdvisingApp\Authorization\Enums\LicenseType;
 use Filament\Pages\Concerns\InteractsWithFormActions;
-use AdvisingApp\MeetingCenter\Managers\CalendarManager;
 use Filament\Forms\Components\Actions\Action as FormAction;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Tapp\FilamentTimezoneField\Forms\Components\TimezoneSelect;
@@ -90,57 +88,6 @@ class EditProfile extends Page
     {
         /** @var User $user */
         $user = auth()->user();
-
-        $connectedAccounts = collect([
-            Grid::make()
-                ->schema([
-                    Placeholder::make('calendar')
-                        ->label(function (): string {
-                            /** @var User $user */
-                            $user = auth()->user();
-
-                            return "{$user->calendar->provider_type->getLabel()} Calendar";
-                        })
-                        ->content(function (): ?string {
-                            /** @var User $user */
-                            $user = auth()->user();
-
-                            return $user->calendar?->name;
-                        }),
-                    Actions::make([
-                        FormAction::make('Disconnect')
-                            ->icon('heroicon-m-trash')
-                            ->color('danger')
-                            ->requiresConfirmation()
-                            ->action(function () {
-                                /** @var User $user */
-                                $user = auth()->user();
-
-                                $calendar = $user->calendar;
-
-                                $revoked = resolve(CalendarManager::class)
-                                    ->driver($calendar->provider_type->value)
-                                    ->revokeToken($calendar);
-
-                                if ($revoked) {
-                                    $calendar->delete();
-
-                                    Notification::make()
-                                        ->title("Disconnected {$calendar->provider_type->getLabel()} Calendar")
-                                        ->success()
-                                        ->send();
-                                }
-                            }),
-                    ])->alignRight()
-                        ->verticallyAlignCenter(),
-                ])
-                ->visible(function (): bool {
-                    /** @var User $user */
-                    $user = auth()->user();
-
-                    return filled($user->calendar?->oauth_token);
-                }),
-        ])->filter(fn (Component $component) => $component->isVisible());
 
         return $form
             ->schema([
@@ -248,11 +195,6 @@ class EditProfile extends Page
                             ->required()
                             ->selectablePlaceholder(false),
                     ]),
-                Section::make('Connected Accounts')
-                    ->description('Disconnect your external accounts.')
-                    ->aside()
-                    ->schema($connectedAccounts->toArray())
-                    ->visible($connectedAccounts->count()),
                 Section::make('Working Hours')
                     ->aside()
                     ->schema([

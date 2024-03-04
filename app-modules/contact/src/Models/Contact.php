@@ -53,9 +53,7 @@ use AdvisingApp\Authorization\Enums\LicenseType;
 use AdvisingApp\Engagement\Models\EngagementFile;
 use AdvisingApp\Notification\Models\Subscription;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use AdvisingApp\MeetingCenter\Models\EventAttendee;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -240,15 +238,6 @@ class Contact extends BaseAuthenticatable implements Auditable, Subscribable, Ed
             ->withPivot('id')
             ->withTimestamps()
             ->tap(new HasLicense($this->getLicenseType()));
-    }
-
-    public function eventAttendeeRecords(): HasMany
-    {
-        return $this->hasMany(
-            related: EventAttendee::class,
-            foreignKey: 'email',
-            localKey: 'email',
-        );
     }
 
     public function assetCheckIns(): MorphMany

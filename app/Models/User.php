@@ -57,15 +57,12 @@ use Filament\Models\Contracts\FilamentUser;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use AdvisingApp\Authorization\Models\License;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use AdvisingApp\MeetingCenter\Models\Calendar;
 use AdvisingApp\Assistant\Models\AssistantChat;
 use AdvisingApp\Authorization\Enums\LicenseType;
 use AdvisingApp\StudentDataModel\Models\Student;
 use Staudenmeir\EloquentHasManyDeep\HasManyDeep;
 use AdvisingApp\Notification\Models\Subscription;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use AdvisingApp\Consent\Models\Concerns\CanConsent;
-use AdvisingApp\MeetingCenter\Models\CalendarEvent;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use AdvisingApp\Assistant\Models\AssistantChatFolder;
@@ -360,11 +357,6 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
         return $this->hasMany(AssistantChatFolder::class);
     }
 
-    public function events(): HasMany
-    {
-        return $this->hasMany(CalendarEvent::class);
-    }
-
     public function teams(): BelongsToMany
     {
         return $this
@@ -373,11 +365,6 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
             //TODO: remove this if we support multiple teams
             ->limit(1)
             ->withTimestamps();
-    }
-
-    public function calendar(): HasOne
-    {
-        return $this->hasOne(Calendar::class);
     }
 
     public function assistantChatMessageLogs(): HasMany

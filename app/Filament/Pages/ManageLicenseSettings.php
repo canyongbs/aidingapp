@@ -140,8 +140,6 @@ class ManageLicenseSettings extends SettingsPage
                                 ->label('Service Management'),
                             Toggle::make('data.addons.knowledgeManagement')
                                 ->label('Knowledge Management'),
-                            Toggle::make('data.addons.eventManagement')
-                                ->label('Event Management'),
                             Toggle::make('data.addons.realtimeChat')
                                 ->label('Realtime Chat'),
                             Toggle::make('data.addons.mobileApps')
