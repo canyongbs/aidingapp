@@ -64,8 +64,7 @@ input CreateCareTeamInput {
     )
 
   "The type of Educatable to add to the care team."
-  educatable_type: EducatableType!
-    @rules(apply: ["required", "in:student,contact"])
+  educatable_type: EducatableType! @rules(apply: ["required", "in:contact"])
 }
 
 type CareTeamMutations {

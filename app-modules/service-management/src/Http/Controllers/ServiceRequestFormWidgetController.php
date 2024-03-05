@@ -101,7 +101,7 @@ class ServiceRequestFormWidgetController extends Controller
 
         if (! $author) {
             throw ValidationException::withMessages([
-                'email' => 'A student with that email address could not be found. Please contact your system administrator.',
+                'email' => 'A contact with that email address could not be found. Please contact your system administrator.',
             ]);
         }
 

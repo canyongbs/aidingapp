@@ -45,7 +45,6 @@ use Filament\Infolists\Components\Section;
 use AidingApp\Engagement\Models\Engagement;
 use Filament\Infolists\Components\Fieldset;
 use Filament\Infolists\Components\TextEntry;
-use AidingApp\StudentDataModel\Models\Student;
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Engagement\Filament\Resources\EngagementResource;
 
@@ -70,7 +69,7 @@ class ViewEngagement extends ViewRecord
                             ->translateLabel()
                             ->color('primary')
                             ->state(function (Engagement $record): string {
-                                /** @var Student|Contact $recipient */
+                                /** @var Contact $recipient */
                                 $recipient = $record->recipient;
 
                                 return match ($recipient::class) {
@@ -78,7 +77,7 @@ class ViewEngagement extends ViewRecord
                                 };
                             })
                             ->url(function (Engagement $record) {
-                                /** @var Student|Contact $recipient */
+                                /** @var Contact $recipient */
                                 $recipient = $record->recipient;
 
                                 return match ($recipient::class) {

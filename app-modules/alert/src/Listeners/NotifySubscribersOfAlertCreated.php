@@ -39,7 +39,6 @@ namespace AidingApp\Alert\Listeners;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Alert\Events\AlertCreated;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use AidingApp\StudentDataModel\Models\Student;
 use AidingApp\Notification\Models\Subscription;
 use AidingApp\Alert\Notifications\AlertCreatedNotification;
 
@@ -47,7 +46,7 @@ class NotifySubscribersOfAlertCreated implements ShouldQueue
 {
     public function handle(AlertCreated $event): void
     {
-        /** @var Student|Contact $concern */
+        /** @var Contact $concern */
         $concern = $event->alert->concern;
 
         $concern->subscriptions?->each(function (Subscription $subscription) use ($event) {

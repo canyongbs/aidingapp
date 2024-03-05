@@ -54,7 +54,7 @@ class SubscribableIdExistsRule implements DataAwareRule, ValidationRule
         $morph = Relation::getMorphedModel($type);
 
         if (! $morph) {
-            $fail('The subscribable type must be student or contact.');
+            $fail('The subscribable type must be contact.');
         } elseif ($morph::query()->whereKey($value)->doesntExist()) {
             $fail('The subscribable does not exist.');
         }

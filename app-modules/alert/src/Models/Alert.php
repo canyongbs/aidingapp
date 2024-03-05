@@ -45,14 +45,13 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Models\Scopes\LicensedToEducatable;
 use App\Models\Concerns\BelongsToEducatable;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use AidingApp\StudentDataModel\Models\Student;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use AidingApp\Notification\Models\Contracts\Subscribable;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
 
 /**
- * @property-read Student|Contact $concern
+ * @property-read Contact $concern
  *
  * @mixin IdeHelperAlert
  */

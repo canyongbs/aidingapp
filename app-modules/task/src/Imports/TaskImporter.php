@@ -122,11 +122,11 @@ class TaskImporter extends Importer
                         return [];
                     }
 
-                    return ['starts_with:contact:,student:'];
+                    return ['starts_with:contact:'];
                 })
                 ->example(function () {
                     if (auth()->user()?->hasLicense([Contact::getLicenseType()]) ?? true) {
-                        return 'student:johnsmith@gmail.com';
+                        return 'contact:johnsmith@gmail.com';
                     }
 
                     return 'johnsmith@gmail.com';

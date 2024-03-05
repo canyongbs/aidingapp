@@ -58,7 +58,7 @@ class KnowledgeManagementPortalRequestAuthenticationController extends Controlle
 
         if (! $educatable) {
             throw ValidationException::withMessages([
-                'email' => 'A student with that email address could not be found. Please contact your system administrator.',
+                'email' => 'A contact with that email address could not be found. Please contact your system administrator.',
             ]);
         }
 

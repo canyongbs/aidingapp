@@ -45,7 +45,6 @@ use Filament\Resources\Pages\ViewRecord;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\ViewEntry;
-use AidingApp\StudentDataModel\Models\Student;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
@@ -91,7 +90,7 @@ class ViewServiceRequest extends ViewRecord
                             ->label('Related To')
                             ->color('primary')
                             ->state(function (ServiceRequest $record): string {
-                                /** @var Student|Contact $respondent */
+                                /** @var Contact $respondent */
                                 $respondent = $record->respondent;
 
                                 return match ($respondent::class) {
@@ -99,7 +98,7 @@ class ViewServiceRequest extends ViewRecord
                                 };
                             })
                             ->url(function (ServiceRequest $record) {
-                                /** @var Student|Contact $respondent */
+                                /** @var Contact $respondent */
                                 $respondent = $record->respondent;
 
                                 return match ($respondent::class) {

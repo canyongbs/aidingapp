@@ -54,7 +54,7 @@ class ConcernIdExistsRule implements DataAwareRule, ValidationRule
         $morph = Relation::getMorphedModel($type);
 
         if (! $morph) {
-            $fail('The concern type must be either student or contact.');
+            $fail('The concern type must be contact.');
         } elseif ($morph::query()->whereKey($value)->doesntExist()) {
             $fail('The concern does not exist.');
         }

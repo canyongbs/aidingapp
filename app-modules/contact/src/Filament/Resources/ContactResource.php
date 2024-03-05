@@ -91,7 +91,6 @@ class ContactResource extends Resource
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return array_filter([
-            'Student ID' => $record->sisid,
             'Other ID' => $record->otherid,
             'Email Address' => collect([$record->email, $record->email_id])->filter()->implode(', '),
             'Phone' => collect([$record->mobile, $record->phone])->filter()->implode(', '),

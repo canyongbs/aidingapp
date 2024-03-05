@@ -40,14 +40,13 @@ use App\Models\BaseModel;
 use AidingApp\Contact\Models\Contact;
 use App\Models\Concerns\BelongsToEducatable;
 use Illuminate\Database\Eloquent\Collection;
-use AidingApp\StudentDataModel\Models\Student;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
  * @property-read Submissible $submissible
  * @property-read Collection<int, SubmissibleField> $fields
- * @property-read Student|Contact|null $author
+ * @property-read Contact|null $author
  */
 abstract class Submission extends BaseModel
 {

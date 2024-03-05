@@ -62,8 +62,8 @@ class EditSmsTemplate extends EditRecord
                     ->string(),
                 TiptapEditor::make('content')
                     ->mergeTags([
-                        'student full name',
-                        'student email',
+                        'contact full name',
+                        'contact email',
                     ])
                     ->profile('sms')
                     ->output(TiptapOutput::Json)

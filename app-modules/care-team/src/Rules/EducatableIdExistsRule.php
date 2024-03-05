@@ -54,7 +54,7 @@ class EducatableIdExistsRule implements DataAwareRule, ValidationRule
         $morph = Relation::getMorphedModel($type);
 
         if (! $morph) {
-            $fail('The educatable type must be either student or contact.');
+            $fail('The educatable type must be contact.');
         } elseif ($morph::query()->whereKey($value)->doesntExist()) {
             $fail('The educatable does not exist.');
         }

@@ -61,8 +61,8 @@ class EngagementSmsBodyField
         return TiptapEditor::make('body')
             ->label('Body')
             ->mergeTags([
-                'student full name',
-                'student email',
+                'contact full name',
+                'contact email',
             ])
             ->showMergeTagsInBlocksPanel(is_null($form) ? false : ! ($form->getLivewire() instanceof RelationManager))
             ->profile('sms')
@@ -123,7 +123,7 @@ class EngagementSmsBodyField
             ->when($context === 'edit', function (Field $field) {
                 $field->visible(fn (Engagement $record): bool => $record->deliverable->channel === EngagementDeliveryMethod::Sms);
             })
-            ->helperText('You can insert student information by typing {{ and choosing a tag to insert.')
+            ->helperText('You can insert contact information by typing {{ and choosing a tag to insert.')
             ->columnSpanFull();
     }
 }

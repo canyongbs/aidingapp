@@ -88,8 +88,8 @@ class CreateEngagement extends CreateRecord
                             ->directory('editor-images/engagements')
                             ->label('Body')
                             ->mergeTags([
-                                'student full name',
-                                'student email',
+                                'contact full name',
+                                'contact email',
                             ])
                             ->showMergeTagsInBlocksPanel(! ($form->getLivewire() instanceof RelationManager))
                             ->profile('email')
@@ -145,7 +145,7 @@ class CreateEngagement extends CreateRecord
                                     $component->state($template->content);
                                 }))
                             ->hidden(fn (Get $get): bool => $get('delivery_method') === EngagementDeliveryMethod::Sms->value)
-                            ->helperText('You can insert student information by typing {{ and choosing a merge value to insert.')
+                            ->helperText('You can insert contact information by typing {{ and choosing a merge value to insert.')
                             ->columnSpanFull(),
                         EngagementSmsBodyField::make(context: 'create', form: $form),
                     ]),

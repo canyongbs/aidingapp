@@ -72,7 +72,6 @@ class ViewPublicUserProfileController extends Controller
                 'office_hours' => $user->office_hours_are_enabled && $officeHours->keys()->count()
                     ? $officeHours
                     : false,
-                'appointments_are_restricted_to_existing_students' => $user->appointments_are_restricted_to_existing_students,
                 'working_hours' => $user->working_hours_are_enabled && $user->are_working_hours_visible_on_profile && $workingHours->keys()->count()
                     ? $workingHours
                     : false,

@@ -65,8 +65,8 @@ class CreateEmailTemplate extends CreateRecord
                     ->visibility('public')
                     ->directory('editor-images/email-templates')
                     ->mergeTags([
-                        'student full name',
-                        'student email',
+                        'contact full name',
+                        'contact email',
                     ])
                     ->profile('email')
                     ->output(TiptapOutput::Json)

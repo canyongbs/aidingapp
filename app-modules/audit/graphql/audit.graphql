@@ -1,6 +1,5 @@
 #TODO: This can be basically any model that supports auditing
 union Auditable =
-  | Student
   | Contact
   | User
   | SystemUser

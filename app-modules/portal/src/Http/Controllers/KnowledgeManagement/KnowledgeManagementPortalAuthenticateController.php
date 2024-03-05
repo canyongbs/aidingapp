@@ -68,7 +68,6 @@ class KnowledgeManagementPortalAuthenticateController extends Controller
         $educatable = $authentication->educatable;
 
         match ($educatable->getMorphClass()) {
-            'student' => Auth::guard('student')->login($educatable),
             'contact' => Auth::guard('contact')->login($educatable),
             default => throw new EducatableIsNotAuthenticatable('The educatable type is not supported.'),
         };

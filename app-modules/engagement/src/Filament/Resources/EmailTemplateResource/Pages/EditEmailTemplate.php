@@ -64,8 +64,8 @@ class EditEmailTemplate extends EditRecord
                     ->disk('s3-public')
                     ->visibility('public')
                     ->mergeTags([
-                        'student full name',
-                        'student email',
+                        'contact full name',
+                        'contact email',
                     ])
                     ->profile('email')
                     ->output(TiptapOutput::Json)

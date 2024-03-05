@@ -34,7 +34,6 @@
 @php
     use AidingApp\Authorization\Enums\LicenseType;
     use AidingApp\Contact\Models\Contact;
-    use AidingApp\StudentDataModel\Models\Student;
 @endphp
 
 <div
@@ -47,7 +46,6 @@
         <x-filament::input.wrapper>
             <x-filament::input.select wire:model.live="filterPeopleType">
                 <option value="all">All</option>
-                <option value="students">Students</option>
                 <option value="contacts">Contacts</option>
             </x-filament::input.select>
         </x-filament::input.wrapper>
