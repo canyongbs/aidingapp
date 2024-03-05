@@ -34,15 +34,15 @@
 function getAppContext(accessUrl) {
     const host = window.location.hostname;
     const expectedHost = new URL(accessUrl).hostname;
-    const isEmbeddedInAdvisingApp = host.replace(/\/$/, '') === expectedHost.replace(/\/$/, '');
+    const isEmbeddedInAidingApp = host.replace(/\/$/, '') === expectedHost.replace(/\/$/, '');
 
     let baseUrl = '/';
 
-    if (isEmbeddedInAdvisingApp) {
+    if (isEmbeddedInAidingApp) {
         baseUrl = '/portals/knowledge-management';
     }
 
-    return { isEmbeddedInAdvisingApp, baseUrl };
+    return { isEmbeddedInAidingApp, baseUrl };
 }
 
 export default getAppContext;

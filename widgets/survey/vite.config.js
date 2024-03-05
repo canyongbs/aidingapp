@@ -41,8 +41,8 @@ export default defineConfig({
         manifest: true,
         lib: {
             entry: resolve(__dirname, 'src/widget.js'),
-            name: 'AdvisingAppSurveyWidget',
-            fileName: 'advising-app-survey-widget',
+            name: 'AidingAppSurveyWidget',
+            fileName: 'aiding-app-survey-widget',
             formats: ['es'],
         },
         outDir: resolve(__dirname, '../../public/js/widgets/survey'),

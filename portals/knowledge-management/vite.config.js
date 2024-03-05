@@ -42,7 +42,7 @@ export default defineConfig({
         lib: {
             entry: resolve(__dirname, './src/portal.js'),
             name: 'KnowledgeManagementPortal',
-            fileName: 'advising-app-knowledge-management-portal',
+            fileName: 'aiding-app-knowledge-management-portal',
             formats: ['es'],
         },
         outDir: resolve(__dirname, '../../public/js/portals/knowledge-management'),

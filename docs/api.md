@@ -1,4 +1,4 @@
-# AdvisingAPP API
+# AidingAPP API
 
 ## Generating local helper files
 
