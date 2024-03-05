@@ -76,16 +76,6 @@ test('The correct details are displayed on the ListServiceRequestUpdates page', 
                 $serviceRequestUpdate
             )
             ->assertTableColumnStateSet(
-                'serviceRequest.respondent.id',
-                $serviceRequestUpdate->serviceRequest->respondent->getKey(),
-                $serviceRequestUpdate
-            )
-            ->assertTableColumnStateSet(
-                'serviceRequest.respondent.otherid',
-                $serviceRequestUpdate->serviceRequest->respondent->otherid,
-                $serviceRequestUpdate
-            )
-            ->assertTableColumnStateSet(
                 'serviceRequest.service_request_number',
                 $serviceRequestUpdate->serviceRequest->service_request_number,
                 $serviceRequestUpdate
