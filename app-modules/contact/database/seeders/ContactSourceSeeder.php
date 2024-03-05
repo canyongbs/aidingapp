@@ -46,7 +46,7 @@ class ContactSourceSeeder extends Seeder
         ContactSource::factory()
             ->createMany(
                 [
-                    ['name' => 'Advising App'],
+                    ['name' => 'Aiding App'],
                     ['name' => 'Import'],
                 ]
             );

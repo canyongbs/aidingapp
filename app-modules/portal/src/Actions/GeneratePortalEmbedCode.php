@@ -46,7 +46,7 @@ class GeneratePortalEmbedCode
     {
         return match ($portal) {
             PortalType::KnowledgeManagement => (function () {
-                $scriptUrl = url('js/portals/knowledge-management/advising-app-knowledge-management-portal.js?');
+                $scriptUrl = url('js/portals/knowledge-management/aiding-app-knowledge-management-portal.js?');
 
                 $portalAccessUrl = route('portal.knowledge-management.show');
 

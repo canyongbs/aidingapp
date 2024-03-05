@@ -23,7 +23,7 @@ This means that if a Role is removed from a User, but that Role belongs to a Rol
 
 A good example of how Role Groups are used in the application and how they interact with Roles and Permissions can be understood as follows.
 
-The Advising App provides a model called ServiceRequest. This represents service requests opened and managed within the Advising App system. Associated with this model are many permissions pertaining to the viewing, creating, updating, and deleting of cases. In order to group these permissions, we may want to create a "Service Request Manager" Role. This Role can be directly applied to a User, but it may also be applied to a User through a Role Group.
+The Aiding App provides a model called ServiceRequest. This represents service requests opened and managed within the Aiding App system. Associated with this model are many permissions pertaining to the viewing, creating, updating, and deleting of cases. In order to group these permissions, we may want to create a "Service Request Manager" Role. This Role can be directly applied to a User, but it may also be applied to a User through a Role Group.
 
 We can create a Role Group called "Administrator", which could receive the "Service Request Manager" Role, as well as the "Knowledge Base Manager" Role, among others. Then, when a new administrator is added to the system, they can simply be granted the "Administrator" Role Group in order to inherit all of the roles and subsequent permissions that fall into this grouping.
 
@@ -111,7 +111,7 @@ return [
    2. "role_group" by assigning a RoleGroup to a User, wherein they inherit all of the Roles that belong to this group
 
 ## Registering Roles and Permissions
-In order to register Roles and Permissions, the `authorization` module exposes registries that every other module can interact with. The Advising App platform expects that your Roles and Permissions are defined within configuration files.
+In order to register Roles and Permissions, the `authorization` module exposes registries that every other module can interact with. The Aiding App platform expects that your Roles and Permissions are defined within configuration files.
 
 The two registries available are:
 
@@ -140,6 +140,6 @@ NewModuleServiceProvider class extends ServiceProvider
 
 The `AuthorizationPermissionRegistry` and `AuthorizationRoleRegistry` expose methods that allow you to register web or api roles and permissions by passing in your module name and the relative config path to your definitions.
 
-By default, the Advising App platform will already take care of adding standardized permissions for every model that your application introduces, so you'll need to ensure you register those models with the `Relation::morphMap()`. So, the only permissions that you need to explicitly define here are custom permissions that are not related to models.
+By default, the Aiding App platform will already take care of adding standardized permissions for every model that your application introduces, so you'll need to ensure you register those models with the `Relation::morphMap()`. So, the only permissions that you need to explicitly define here are custom permissions that are not related to models.
 
 The roles that you add can relate to any model or custom permissions that your or another module defines, and they should follow the convention defined above.

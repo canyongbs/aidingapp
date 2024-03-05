@@ -48,10 +48,10 @@ class InteractionTypeSeeder extends Seeder
                 [
                     ['name' => 'Phone'],
                     ['name' => 'Live Chat'],
-                    ['name' => 'SMS (Outside Advising App)'],
+                    ['name' => 'SMS (Outside Aiding App)'],
                     ['name' => 'In-Person'],
                     ['name' => 'Virtual Meeting'],
-                    ['name' => 'Email (Outside Advising App)'],
+                    ['name' => 'Email (Outside Aiding App)'],
                     ['name' => 'Postal Mail'],
                 ]
             );
