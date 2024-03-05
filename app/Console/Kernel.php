@@ -46,7 +46,6 @@ use AdvisingApp\Engagement\Models\EngagementFile;
 use Filament\Actions\Imports\Models\FailedImportRow;
 use AdvisingApp\Assistant\Models\AssistantChatMessageLog;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
-use AdvisingApp\MeetingCenter\Console\Commands\RefreshCalendarRefreshTokens;
 
 class Kernel extends ConsoleKernel
 {
@@ -85,16 +84,6 @@ class Kernel extends ConsoleKernel
                             ->onOneServer()
                             ->withoutOverlapping()
                     );
-
-                $schedule->command(
-                    command: RefreshCalendarRefreshTokens::class,
-                    parameters: [
-                        "--tenant={$tenant->id}",
-                    ]
-                )
-                    ->daily()
-                    ->onOneServer()
-                    ->withoutOverlapping();
 
                 $schedule->command("tenants:artisan \"health:schedule-check-heartbeat\" --tenant={$tenant->id}")
                     ->everyMinute()

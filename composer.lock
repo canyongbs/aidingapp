@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f9a7e1d7d6e216bf837bf71fa77135b2",
+    "content-hash": "f94077f901cbb354e5cfa1f7fc7330f0",
     "packages": [
         {
             "name": "amphp/amp",
@@ -1617,41 +1617,6 @@
             }
         },
         {
-            "name": "canyon-gbs/advising-app-analytics",
-            "version": "1.0",
-            "dist": {
-                "type": "path",
-                "url": "app-modules/analytics",
-                "reference": "20bf4d89a69ac1f56cfcf0e0395714be2b53e1cd"
-            },
-            "require": {
-                "filament/filament": "^3.0.0"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "AdvisingApp\\Analytics\\Providers\\AnalyticsServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "AdvisingApp\\Analytics\\": "src/",
-                    "AdvisingApp\\Analytics\\Tests\\": "tests/",
-                    "AdvisingApp\\Analytics\\Database\\Factories\\": "database/factories/",
-                    "AdvisingApp\\Analytics\\Database\\Seeders\\": "database/seeders/"
-                }
-            },
-            "license": [
-                "proprietary"
-            ],
-            "transport-options": {
-                "symlink": true,
-                "relative": true
-            }
-        },
-        {
             "name": "canyon-gbs/advising-app-assistant",
             "version": "1.0",
             "dist": {
@@ -2315,44 +2280,6 @@
                     "AdvisingApp\\KnowledgeBase\\Tests\\": "tests/",
                     "AdvisingApp\\KnowledgeBase\\Database\\Factories\\": "database/factories/",
                     "AdvisingApp\\KnowledgeBase\\Database\\Seeders\\": "database/seeders/"
-                }
-            },
-            "license": [
-                "proprietary"
-            ],
-            "transport-options": {
-                "symlink": true,
-                "relative": true
-            }
-        },
-        {
-            "name": "canyon-gbs/advising-app-meeting-center",
-            "version": "1.0",
-            "dist": {
-                "type": "path",
-                "url": "app-modules/meeting-center",
-                "reference": "2c43537fcf2e4bb3642572f5c31f81d7c2714c97"
-            },
-            "require": {
-                "filament/filament": "^3.0.0"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "AdvisingApp\\MeetingCenter\\Providers\\MeetingCenterServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "files": [
-                    "src/helpers.php"
-                ],
-                "psr-4": {
-                    "AdvisingApp\\MeetingCenter\\": "src/",
-                    "AdvisingApp\\MeetingCenter\\Tests\\": "tests/",
-                    "AdvisingApp\\MeetingCenter\\Database\\Factories\\": "database/factories/",
-                    "AdvisingApp\\MeetingCenter\\Database\\Seeders\\": "database/seeders/"
                 }
             },
             "license": [

@@ -47,7 +47,6 @@ use AdvisingApp\Contact\Filament\Resources\ContactResource\Pages\CreateContact;
 use AdvisingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactFiles;
 use AdvisingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactTasks;
 use AdvisingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactAlerts;
-use AdvisingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactEvents;
 use AdvisingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactCareTeam;
 use AdvisingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactEngagement;
 use AdvisingApp\Contact\Filament\Resources\ContactResource\Pages\ContactServiceManagement;
@@ -83,7 +82,6 @@ class ContactResource extends Resource
             ManageContactCareTeam::class,
             ManageContactFormSubmissions::class,
             ContactServiceManagement::class,
-            ManageContactEvents::class,
         ]);
     }
 
@@ -119,7 +117,6 @@ class ContactResource extends Resource
             'timeline' => ContactEngagementTimeline::route('/{record}/timeline'),
             'care-team' => ManageContactCareTeam::route('/{record}/care-team'),
             'service-management' => ContactServiceManagement::route('/{record}/service-management'),
-            'events' => ManageContactEvents::route('/{record}/events'),
         ];
     }
 }
