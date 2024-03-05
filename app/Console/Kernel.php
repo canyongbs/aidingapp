@@ -41,7 +41,6 @@ use App\Models\Tenant;
 use AdvisingApp\Audit\Models\Audit;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Console\Scheduling\Schedule;
-use AdvisingApp\Form\Models\FormAuthentication;
 use AdvisingApp\Engagement\Models\EngagementFile;
 use Filament\Actions\Imports\Models\FailedImportRow;
 use AdvisingApp\Assistant\Models\AssistantChatMessageLog;
@@ -76,7 +75,6 @@ class Kernel extends ConsoleKernel
                     AssistantChatMessageLog::class,
                     EngagementFile::class,
                     FailedImportRow::class,
-                    FormAuthentication::class,
                 ])
                     ->each(
                         fn ($model) => $schedule->command("tenants:artisan \"model:prune --model={$model}\" --tenant={$tenant->id}")

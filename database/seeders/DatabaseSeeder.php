@@ -40,7 +40,6 @@ use App\Models\Tenant;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Notification;
-use AdvisingApp\Form\Database\Seeders\FormSeeder;
 use AdvisingApp\Task\Database\Seeders\TaskSeeder;
 use AdvisingApp\Team\Database\Seeders\TeamSeeder;
 use AdvisingApp\Alert\Database\Seeders\AlertSeeder;
@@ -104,7 +103,6 @@ class DatabaseSeeder extends Seeder
             ContactSeeder::class,
             KnowledgeBaseItemSeeder::class,
             TaskSeeder::class,
-            FormSeeder::class,
             AlertSeeder::class,
             TeamSeeder::class,
             SuperAdminSeeder::class,

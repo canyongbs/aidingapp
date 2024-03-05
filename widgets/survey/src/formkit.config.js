@@ -33,7 +33,7 @@
 */
 import { generateClasses } from '@formkit/themes';
 import { genesisIcons } from '@formkit/icons';
-import theme from '../../form/src/FormKit/theme';
+import theme from '../../service-request-form/src/FormKit/theme';
 import inputs from './FormKit/Inputs/index';
 
 export default {

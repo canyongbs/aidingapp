@@ -36,7 +36,7 @@
 
 namespace AdvisingApp\Form\Notifications;
 
-use AdvisingApp\Form\Models\FormSubmission;
+use AdvisingApp\Form\Models\Submission;
 use AdvisingApp\Notification\Notifications\BaseNotification;
 use AdvisingApp\Notification\Notifications\EmailNotification;
 use AdvisingApp\Notification\Notifications\Messages\MailMessage;
@@ -47,7 +47,7 @@ class FormSubmissionRequestNotification extends BaseNotification implements Emai
     use EmailChannelTrait;
 
     public function __construct(
-        public FormSubmission $submission,
+        public Submission $submission,
     ) {}
 
     public function toEmail(object $notifiable): MailMessage
