@@ -50,7 +50,6 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Models\Scopes\LicensedToEducatable;
 use App\Models\Concerns\BelongsToEducatable;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use AdvisingApp\StudentDataModel\Models\Student;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -71,7 +70,7 @@ use AdvisingApp\ServiceManagement\Exceptions\ServiceRequestNumberExceededReRolls
 use AdvisingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
 
 /**
- * @property-read Student|Contact $respondent
+ * @property-read Contact $respondent
  *
  * @mixin IdeHelperServiceRequest
  */

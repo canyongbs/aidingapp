@@ -103,35 +103,11 @@ class ServiceRequestUpdateResource extends Resource
                     ->sortable(query: function (Builder $query, string $direction, $record): Builder {
                         // TODO: Update this to work with other respondent types
                         return $query->join('service_requests', 'service_request_updates.service_request_id', '=', 'service_requests.id')
-                            ->join('students', function ($join) {
-                                $join->on('service_requests.respondent_id', '=', 'students.sisid')
-                                    ->where('service_requests.respondent_type', '=', 'student');
+                            ->join('contacts', function ($join) {
+                                $join->on('service_requests.respondent_id', '=', 'contacts.id')
+                                    ->where('service_requests.respondent_type', '=', 'contact');
                             })
                             ->orderBy('full', $direction);
-                    })
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('serviceRequest.respondent.sisid')
-                    ->label('SIS ID')
-                    ->sortable(query: function (Builder $query, string $direction, $record): Builder {
-                        // TODO: Update this to work with other respondent types
-                        return $query->join('service_requests', 'service_request_updates.service_request_id', '=', 'service_requests.id')
-                            ->join('students', function ($join) {
-                                $join->on('service_requests.respondent_id', '=', 'students.sisid')
-                                    ->where('service_requests.respondent_type', '=', 'student');
-                            })
-                            ->orderBy('sisid', $direction);
-                    })
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('serviceRequest.respondent.otherid')
-                    ->label('Other ID')
-                    ->sortable(query: function (Builder $query, string $direction, $record): Builder {
-                        // TODO: Update this to work with other respondent types
-                        return $query->join('service_requests', 'service_request_updates.service_request_id', '=', 'service_requests.id')
-                            ->join('students', function ($join) {
-                                $join->on('service_requests.respondent_id', '=', 'students.sisid')
-                                    ->where('service_requests.respondent_type', '=', 'student');
-                            })
-                            ->orderBy('otherid', $direction);
                     })
                     ->searchable(),
                 Tables\Columns\TextColumn::make('serviceRequest.service_request_number')

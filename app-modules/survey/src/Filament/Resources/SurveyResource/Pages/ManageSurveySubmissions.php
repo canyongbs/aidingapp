@@ -91,7 +91,6 @@ class ManageSurveySubmissions extends ManageRelatedRecords
                 FormSubmissionStatusFilter::make(),
                 SelectFilter::make('author_type')
                     ->options([
-                        'student' => 'Student',
                         'contact' => 'Contact',
                     ]),
             ])

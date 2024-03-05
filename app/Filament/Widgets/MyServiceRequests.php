@@ -44,7 +44,6 @@ use Filament\Tables\Columns\TextColumn;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Query\JoinClause;
 use Filament\Widgets\TableWidget as BaseWidget;
 use AdvisingApp\ServiceManagement\Models\ServiceRequest;
 use AdvisingApp\ServiceManagement\Models\ServiceRequestPriority;
@@ -80,16 +79,6 @@ class MyServiceRequests extends BaseWidget
                     ->getStateUsing(fn (ServiceRequest $record) => $record->respondent->{$record->respondent::displayNameKey()})
                     ->searchable(query: fn (Builder $query, $search) => $query->tap(new EducatableSearch(relationship: 'respondent', search: $search)))
                     ->sortable(query: fn (Builder $query, string $direction): Builder => $query->tap(new EducatableSort($direction))),
-                TextColumn::make('respondent.sisid')
-                    ->label('SIS ID')
-                    ->searchable()
-                    ->sortable(query: function (Builder $query, string $direction): Builder {
-                        // Update this if any other relations are added to the ServiceRequest model respondent relationship
-                        return $query->join('students', function (JoinClause $join) {
-                            $join->on('service_requests.respondent_id', '=', 'students.sisid')
-                                ->where('service_requests.respondent_type', '=', 'student');
-                        })->orderBy('sisid', $direction);
-                    }),
             ])
             ->filters([
                 SelectFilter::make('priority')

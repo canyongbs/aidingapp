@@ -81,8 +81,8 @@ class EditEngagement extends EditRecord
                     ->directory('editor-images/engagements')
                     ->label('Body')
                     ->mergeTags([
-                        'student full name',
-                        'student email',
+                        'contact full name',
+                        'contact email',
                     ])
                     ->profile('email')
                     ->output(TiptapOutput::Json)
@@ -138,7 +138,7 @@ class EditEngagement extends EditRecord
                         }))
                     ->visible(fn (Engagement $record): bool => $record->deliverable->channel === EngagementDeliveryMethod::Email)
                     ->showMergeTagsInBlocksPanel($form->getLivewire() instanceof Page)
-                    ->helperText('You can insert student information by typing {{ and choosing a merge value to insert.')
+                    ->helperText('You can insert contact information by typing {{ and choosing a merge value to insert.')
                     ->columnSpanFull(),
                 EngagementSmsBodyField::make(context: 'edit', form: $form),
                 EducatableSelect::make('recipient')

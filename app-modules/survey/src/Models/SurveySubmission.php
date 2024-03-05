@@ -42,13 +42,12 @@ use AdvisingApp\Form\Models\Submission;
 use Illuminate\Database\Eloquent\Builder;
 use App\Models\Scopes\LicensedToEducatable;
 use AdvisingApp\Form\Enums\FormSubmissionStatus;
-use AdvisingApp\StudentDataModel\Models\Student;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use AdvisingApp\Form\Enums\FormSubmissionRequestDeliveryMethod;
 
 /**
- * @property Student|Contact|null $author
+ * @property Contact|null $author
  *
  * @mixin IdeHelperSurveySubmission
  */

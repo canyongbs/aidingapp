@@ -44,7 +44,6 @@ use AdvisingApp\Contact\Models\Contact;
 use Illuminate\Database\Eloquent\Model;
 use AdvisingApp\Division\Models\Division;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use AdvisingApp\StudentDataModel\Models\Student;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use AdvisingApp\Timeline\Models\Contracts\ProvidesATimeline;
@@ -133,7 +132,7 @@ class ServiceRequestHistory extends BaseModel implements ProvidesATimeline
                     foreach ($relationsMap[$key][0] as $educatableClass) {
                         $found = null;
 
-                        // This is to overcome an issue that comes from an incorrect type when trying to find a contact or student with the wrong data type
+                        // This is to overcome an issue that comes from an incorrect type when trying to find a contact with the wrong data type
                         try {
                             $found = $educatableClass::find($value[$key]);
                         } catch (Exception $e) {

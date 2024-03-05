@@ -218,9 +218,6 @@ class EditProfile extends Page
                             ->label('Enable Office Hours')
                             ->live()
                             ->lockedWithoutAnyLicenses(user: auth()->user(), licenses: [LicenseType::RecruitmentCrm]),
-                        Checkbox::make('appointments_are_restricted_to_existing_students')
-                            ->label('Restrict appointments to existing students')
-                            ->visible(fn (Get $get) => $get('office_hours_are_enabled')),
                         Section::make('Days')
                             ->schema($this->getHoursForDays('office_hours'))
                             ->visible(fn (Get $get) => $get('office_hours_are_enabled')),
