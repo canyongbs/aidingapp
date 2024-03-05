@@ -9,17 +9,17 @@
     },
     "autoload": {
         "psr-4": {
-            "AdvisingApp\\Webhook\\": "src/",
-            "AdvisingApp\\Webhook\\Tests\\": "tests/",
-            "AdvisingApp\\Webhook\\Database\\Factories\\": "database/factories/",
-            "AdvisingApp\\Webhook\\Database\\Seeders\\": "database/seeders/"
+            "AidingApp\\Webhook\\": "src/",
+            "AidingApp\\Webhook\\Tests\\": "tests/",
+            "AidingApp\\Webhook\\Database\\Factories\\": "database/factories/",
+            "AidingApp\\Webhook\\Database\\Seeders\\": "database/seeders/"
         }
     },
     "minimum-stability": "stable",
     "extra": {
         "laravel": {
             "providers": [
-                "AdvisingApp\\Webhook\\Providers\\WebhookServiceProvider"
+                "AidingApp\\Webhook\\Providers\\WebhookServiceProvider"
             ]
         }
     }

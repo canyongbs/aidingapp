@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Portal\Settings;
+namespace AidingApp\Portal\Settings;
 
 use Spatie\LaravelSettings\Settings;
 

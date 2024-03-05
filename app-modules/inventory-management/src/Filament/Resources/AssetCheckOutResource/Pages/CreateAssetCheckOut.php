@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InventoryManagement\Filament\Resources\AssetCheckOutResource\Pages;
+namespace AidingApp\InventoryManagement\Filament\Resources\AssetCheckOutResource\Pages;
 
 use Filament\Resources\Pages\CreateRecord;
-use AdvisingApp\InventoryManagement\Filament\Resources\AssetCheckOutResource;
+use AidingApp\InventoryManagement\Filament\Resources\AssetCheckOutResource;
 
 class CreateAssetCheckOut extends CreateRecord
 {

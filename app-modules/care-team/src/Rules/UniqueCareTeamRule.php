@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\CareTeam\Rules;
+namespace AidingApp\CareTeam\Rules;
 
 use Closure;
-use AdvisingApp\CareTeam\Models\CareTeam;
+use AidingApp\CareTeam\Models\CareTeam;
 use Illuminate\Contracts\Validation\DataAwareRule;
 use Illuminate\Contracts\Validation\ValidationRule;
 

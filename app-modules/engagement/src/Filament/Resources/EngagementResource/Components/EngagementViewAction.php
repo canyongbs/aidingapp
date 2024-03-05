@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Filament\Resources\EngagementResource\Components;
+namespace AidingApp\Engagement\Filament\Resources\EngagementResource\Components;
 
 use Filament\Actions\ViewAction;
-use AdvisingApp\Engagement\Filament\Concerns\EngagementInfolist;
+use AidingApp\Engagement\Filament\Concerns\EngagementInfolist;
 
 class EngagementViewAction extends ViewAction
 {

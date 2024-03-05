@@ -34,15 +34,15 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\KnowledgeBase\Policies;
+namespace AidingApp\KnowledgeBase\Policies;
 
 use App\Enums\Feature;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
 use App\Concerns\PerformsFeatureChecks;
 use App\Concerns\PerformsLicenseChecks;
-use AdvisingApp\Authorization\Enums\LicenseType;
-use AdvisingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
+use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use App\Policies\Contracts\PerformsChecksBeforeAuthorization;
 
 class KnowledgeBaseStatusPolicy implements PerformsChecksBeforeAuthorization

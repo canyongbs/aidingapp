@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Filament\Actions\Concerns;
+namespace AidingApp\Engagement\Filament\Actions\Concerns;
 
 use Filament\Actions\Action;
 use Filament\Actions\StaticAction;

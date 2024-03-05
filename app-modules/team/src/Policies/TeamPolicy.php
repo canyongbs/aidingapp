@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Team\Policies;
+namespace AidingApp\Team\Policies;
 
+use AidingApp\Team\Models\Team;
 use App\Models\Authenticatable;
-use AdvisingApp\Team\Models\Team;
 use Illuminate\Auth\Access\Response;
 
 class TeamPolicy

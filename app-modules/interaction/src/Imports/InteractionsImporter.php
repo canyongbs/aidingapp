@@ -34,24 +34,24 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Interaction\Imports;
+namespace AidingApp\Interaction\Imports;
 
 use App\Models\User;
 use Illuminate\Support\Str;
+use AidingApp\Contact\Models\Contact;
 use Filament\Actions\Imports\Importer;
-use AdvisingApp\Contact\Models\Contact;
+use AidingApp\Division\Models\Division;
 use Illuminate\Database\Eloquent\Model;
-use AdvisingApp\Division\Models\Division;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Models\Import;
-use AdvisingApp\Interaction\Models\Interaction;
-use AdvisingApp\Interaction\Models\InteractionType;
-use AdvisingApp\Interaction\Models\InteractionDriver;
-use AdvisingApp\Interaction\Models\InteractionStatus;
-use AdvisingApp\Interaction\Models\InteractionOutcome;
-use AdvisingApp\Interaction\Models\InteractionCampaign;
-use AdvisingApp\Interaction\Models\InteractionRelation;
+use AidingApp\Interaction\Models\Interaction;
+use AidingApp\Interaction\Models\InteractionType;
+use AidingApp\Interaction\Models\InteractionDriver;
+use AidingApp\Interaction\Models\InteractionStatus;
+use AidingApp\Interaction\Models\InteractionOutcome;
+use AidingApp\Interaction\Models\InteractionCampaign;
+use AidingApp\Interaction\Models\InteractionRelation;
 
 class InteractionsImporter extends Importer
 {

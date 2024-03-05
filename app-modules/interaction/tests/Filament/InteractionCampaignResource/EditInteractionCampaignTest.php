@@ -38,9 +38,9 @@ use App\Models\User;
 
 use function Pest\Laravel\actingAs;
 
-use AdvisingApp\Authorization\Enums\LicenseType;
-use AdvisingApp\Interaction\Models\InteractionCampaign;
-use AdvisingApp\Interaction\Filament\Resources\InteractionCampaignResource;
+use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\Interaction\Models\InteractionCampaign;
+use AidingApp\Interaction\Filament\Resources\InteractionCampaignResource;
 
 test('EditInteractionCampaign is gated with proper access control', function () {
     $user = User::factory()->licensed(LicenseType::cases())->create();

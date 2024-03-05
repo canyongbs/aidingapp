@@ -38,13 +38,13 @@ use function Pest\Laravel\get;
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
-use AdvisingApp\Assistant\Models\PromptType;
+use AidingApp\Assistant\Models\PromptType;
+use AidingApp\Authorization\Enums\LicenseType;
 
 use function Pest\Laravel\assertDatabaseCount;
 
-use AdvisingApp\Authorization\Enums\LicenseType;
-use AdvisingApp\Assistant\Filament\Resources\PromptTypeResource;
-use AdvisingApp\Assistant\Filament\Resources\PromptTypeResource\Pages\ListPromptTypes;
+use AidingApp\Assistant\Filament\Resources\PromptTypeResource;
+use AidingApp\Assistant\Filament\Resources\PromptTypeResource\Pages\ListPromptTypes;
 
 /** @var array<LicenseType> $licenses */
 $licenses = [

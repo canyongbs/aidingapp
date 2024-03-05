@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Actions\ServiceRequest;
+namespace AidingApp\ServiceManagement\Actions\ServiceRequest;
 
-use AdvisingApp\ServiceManagement\Models\ServiceRequestFormSubmission;
+use AidingApp\ServiceManagement\Models\ServiceRequestFormSubmission;
 
 class CreateServiceRequestFromSubmission
 {

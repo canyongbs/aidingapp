@@ -1,145 +1,139 @@
-type ContactStatus
-    @model(class: "AdvisingApp\\Contact\\Models\\ContactStatus") {
-    "Unique primary key."
-    id: UUID!
+type ContactStatus @model(class: "AidingApp\\Contact\\Models\\ContactStatus") {
+  "Unique primary key."
+  id: UUID!
 
-    "The name of the contact status."
-    name: String!
+  "The name of the contact status."
+  name: String!
 
-    "The classification of the contact status."
-    classification: SystemContactClassification!
+  "The classification of the contact status."
+  classification: SystemContactClassification!
 
-    "The color of the contact status."
-    color: ContactStatusColorOptions!
+  "The color of the contact status."
+  color: ContactStatusColorOptions!
 
-    "The created date of the contact status."
-    created_at: DateTime
+  "The created date of the contact status."
+  created_at: DateTime
 
-    "The updated date of the contact status."
-    updated_at: DateTime
+  "The updated date of the contact status."
+  updated_at: DateTime
 
-    "The deleted date of the contact status."
-    deleted_at: DateTime
+  "The deleted date of the contact status."
+  deleted_at: DateTime
 
-    "Contacts related to this contact status."
-    contacts: [Contact!] @hasMany
+  "Contacts related to this contact status."
+  contacts: [Contact!] @hasMany
 
-    "The count of contacts related to this contact status."
-    contacts_count: Int @count(relation: "contacts")
+  "The count of contacts related to this contact status."
+  contacts_count: Int @count(relation: "contacts")
 
-    "The audits related to this contact status."
-    audits: [Audit!] @hasMany
+  "The audits related to this contact status."
+  audits: [Audit!] @hasMany
 
-    "The count of audits related to this contact status."
-    audits_count: Int @count(relation: "audits")
+  "The count of audits related to this contact status."
+  audits_count: Int @count(relation: "audits")
 }
 
 input ContactStatusesQuery {
-    "The unique primary key of the contact status."
-    id: UUID
+  "The unique primary key of the contact status."
+  id: UUID
 
-    "The name of the contact status."
-    name: String
+  "The name of the contact status."
+  name: String
 
-    "The classification of the contact status."
-    classification: SystemContactClassification
+  "The classification of the contact status."
+  classification: SystemContactClassification
 
-    "The color of the contact status."
-    color: ContactStatusColorOptions
+  "The color of the contact status."
+  color: ContactStatusColorOptions
 
-    "The created date of the contact status."
-    created_at: DateTime
+  "The created date of the contact status."
+  created_at: DateTime
 
-    "The updated date of the contact status."
-    updated_at: DateTime
+  "The updated date of the contact status."
+  updated_at: DateTime
 
-    "The deleted date of the contact status."
-    deleted_at: DateTime
+  "The deleted date of the contact status."
+  deleted_at: DateTime
 
-    "The contacts related to this contact status."
-    contacts: ContactsQuery
+  "The contacts related to this contact status."
+  contacts: ContactsQuery
 
-    "The audits related to this contact status."
-    audits: AuditsQuery
+  "The audits related to this contact status."
+  audits: AuditsQuery
 }
 
 type ContactStatusQueries {
-    "Get a specific contact status by ID."
-    find(
-        id: UUID!
-            @whereKey
-            @rules(apply: ["required", "uuid", "exists:contact_statuses"])
-    ): ContactStatus @find @softDeletes @canResolved(ability: "view")
+  "Get a specific contact status by ID."
+  find(
+    id: UUID!
+      @whereKey
+      @rules(apply: ["required", "uuid", "exists:contact_statuses"])
+  ): ContactStatus @find @softDeletes @canResolved(ability: "view")
 
-    "List multiple contacts statuses."
-    list(
-        "Filter by the contact statuses attributes and relations."
-        where: ContactStatusesQuery @searchBy
-        order: ContactStatusesQuery @sortBy
-    ): [ContactStatus!]! @paginate @softDeletes @canModel(ability: "viewAny")
+  "List multiple contacts statuses."
+  list(
+    "Filter by the contact statuses attributes and relations."
+    where: ContactStatusesQuery @searchBy
+    order: ContactStatusesQuery @sortBy
+  ): [ContactStatus!]! @paginate @softDeletes @canModel(ability: "viewAny")
 }
 
 extend type Query {
-    contactStatus: ContactStatusQueries! @namespaced
+  contactStatus: ContactStatusQueries! @namespaced
 }
 
 input CreateContactStatusInput {
-    "The name of the contact status."
-    name: String!
-        @rules(
-            apply: [
-                "required"
-                "string"
-                "max:255"
-                "unique:contact_statuses,name"
-            ]
-        )
+  "The name of the contact status."
+  name: String!
+    @rules(
+      apply: ["required", "string", "max:255", "unique:contact_statuses,name"]
+    )
 
-    "The classification of the contact status."
-    classification: SystemContactClassification!
+  "The classification of the contact status."
+  classification: SystemContactClassification!
 
-    "The color of the contact status."
-    color: ContactStatusColorOptions!
+  "The color of the contact status."
+  color: ContactStatusColorOptions!
 }
 
 input UpdateContactStatusInput {
-    "The name of the contact status."
-    name: String
-        @rules(apply: ["string", "max:255", "unique:contact_statuses,name"])
+  "The name of the contact status."
+  name: String
+    @rules(apply: ["string", "max:255", "unique:contact_statuses,name"])
 
-    "The classification of the contact status."
-    classification: SystemContactClassification
+  "The classification of the contact status."
+  classification: SystemContactClassification
 
-    "The color of the contact status."
-    color: ContactStatusColorOptions
+  "The color of the contact status."
+  color: ContactStatusColorOptions
 }
 
 type ContactStatusMutations {
-    "Create an contact status."
-    create(input: CreateContactStatusInput! @spread): ContactStatus!
-        @create
-        @canModel(ability: "create")
+  "Create an contact status."
+  create(input: CreateContactStatusInput! @spread): ContactStatus!
+    @create
+    @canModel(ability: "create")
 
-    "Update an existing contact status."
-    update(
-        "The identifier of the contact status you would like to update."
-        id: UUID!
-            @whereKey
-            @rules(apply: ["required", "uuid", "exists:contact_statuses"])
+  "Update an existing contact status."
+  update(
+    "The identifier of the contact status you would like to update."
+    id: UUID!
+      @whereKey
+      @rules(apply: ["required", "uuid", "exists:contact_statuses"])
 
-        "The fields you would like to update."
-        input: UpdateContactStatusInput! @spread
-    ): ContactStatus! @canFind(ability: "update", find: "id") @update
+    "The fields you would like to update."
+    input: UpdateContactStatusInput! @spread
+  ): ContactStatus! @canFind(ability: "update", find: "id") @update
 
-    "Delete an existing contact status."
-    delete(
-        "The identifier of the contact status you would like to delete."
-        id: UUID!
-            @whereKey
-            @rules(apply: ["required", "uuid", "exists:contact_statuses"])
-    ): ContactStatus @canFind(ability: "delete", find: "id") @delete
+  "Delete an existing contact status."
+  delete(
+    "The identifier of the contact status you would like to delete."
+    id: UUID!
+      @whereKey
+      @rules(apply: ["required", "uuid", "exists:contact_statuses"])
+  ): ContactStatus @canFind(ability: "delete", find: "id") @delete
 }
 
 extend type Mutation {
-    contactStatus: ContactStatusMutations! @namespaced
+  contactStatus: ContactStatusMutations! @namespaced
 }

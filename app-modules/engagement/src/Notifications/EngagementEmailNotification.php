@@ -34,16 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Notifications;
+namespace AidingApp\Engagement\Notifications;
 
 use App\Models\Tenant;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
-use AdvisingApp\Engagement\Models\EngagementDeliverable;
-use AdvisingApp\Notification\Models\OutboundDeliverable;
-use AdvisingApp\Notification\Notifications\BaseNotification;
-use AdvisingApp\Notification\Notifications\EmailNotification;
-use AdvisingApp\Notification\Notifications\Messages\MailMessage;
-use AdvisingApp\Notification\Notifications\Concerns\EmailChannelTrait;
+use AidingApp\Engagement\Models\EngagementDeliverable;
+use AidingApp\Notification\Models\OutboundDeliverable;
+use AidingApp\Notification\Notifications\BaseNotification;
+use AidingApp\Notification\Notifications\EmailNotification;
+use AidingApp\Notification\Notifications\Messages\MailMessage;
+use AidingApp\Notification\Notifications\Concerns\EmailChannelTrait;
 
 class EngagementEmailNotification extends BaseNotification implements EmailNotification, ShouldBeUnique
 {

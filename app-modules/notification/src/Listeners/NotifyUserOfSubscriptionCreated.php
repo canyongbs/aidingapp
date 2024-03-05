@@ -34,14 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Notification\Listeners;
+namespace AidingApp\Notification\Listeners;
 
 use Illuminate\Support\HtmlString;
-use AdvisingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\Contact;
 use Filament\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use AdvisingApp\Notification\Events\SubscriptionCreated;
-use AdvisingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Notification\Events\SubscriptionCreated;
+use AidingApp\Contact\Filament\Resources\ContactResource;
 
 class NotifyUserOfSubscriptionCreated implements ShouldQueue
 {

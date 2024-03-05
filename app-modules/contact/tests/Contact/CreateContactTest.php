@@ -39,13 +39,13 @@ use App\Models\User;
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
-use AdvisingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\Contact;
 
 use function PHPUnit\Framework\assertCount;
 use function Pest\Laravel\assertDatabaseHas;
 
-use AdvisingApp\Contact\Filament\Resources\ContactResource;
-use AdvisingApp\Contact\Tests\Contact\RequestFactories\CreateContactRequestFactory;
+use AidingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Contact\Tests\Contact\RequestFactories\CreateContactRequestFactory;
 
 // TODO: Write CreateContact page tests
 //test('A successful action on the CreateContact page', function () {});

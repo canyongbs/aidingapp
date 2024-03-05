@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Filament\Resources\ChangeRequestResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\ChangeRequestResource\Pages;
 
 use Carbon\CarbonInterface;
 use Filament\Actions\Action;
@@ -47,13 +47,13 @@ use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\ViewEntry;
 use Filament\Infolists\Components\RepeatableEntry;
-use AdvisingApp\ServiceManagement\Models\ChangeRequest;
-use AdvisingApp\ServiceManagement\Models\ChangeRequestStatus;
-use AdvisingApp\ServiceManagement\Models\Scopes\ClassifiedAs;
+use AidingApp\ServiceManagement\Models\ChangeRequest;
+use AidingApp\ServiceManagement\Models\ChangeRequestStatus;
+use AidingApp\ServiceManagement\Models\Scopes\ClassifiedAs;
 use Filament\Infolists\Components\Actions\Action as InfolistAction;
-use AdvisingApp\ServiceManagement\Enums\SystemChangeRequestClassification;
-use AdvisingApp\ServiceManagement\Filament\Resources\ChangeRequestResource;
-use AdvisingApp\ServiceManagement\Actions\ChangeRequest\ApproveChangeRequest;
+use AidingApp\ServiceManagement\Enums\SystemChangeRequestClassification;
+use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestResource;
+use AidingApp\ServiceManagement\Actions\ChangeRequest\ApproveChangeRequest;
 
 class ViewChangeRequest extends ViewRecord
 {

@@ -34,16 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Contact\Models;
+namespace AidingApp\Contact\Models;
 
 use DateTimeInterface;
 use App\Models\BaseModel;
 use OwenIt\Auditing\Contracts\Auditable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use AdvisingApp\Contact\Enums\ContactStatusColorOptions;
-use AdvisingApp\Contact\Enums\SystemContactClassification;
-use AdvisingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Contact\Enums\ContactStatusColorOptions;
+use AidingApp\Contact\Enums\SystemContactClassification;
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 
 /**
  * @mixin IdeHelperContactStatus

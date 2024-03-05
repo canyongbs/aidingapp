@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Portal\Http\Controllers\KnowledgeManagement;
+namespace AidingApp\Portal\Http\Controllers\KnowledgeManagement;
 
 use Closure;
 use Illuminate\Http\Request;
@@ -42,8 +42,8 @@ use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use AdvisingApp\Portal\Models\PortalAuthentication;
-use AdvisingApp\Portal\Exceptions\EducatableIsNotAuthenticatable;
+use AidingApp\Portal\Models\PortalAuthentication;
+use AidingApp\Portal\Exceptions\EducatableIsNotAuthenticatable;
 
 class KnowledgeManagementPortalAuthenticateController extends Controller
 {

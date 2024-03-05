@@ -1,26 +1,26 @@
 {
-  "name": "canyon-gbs/advising-app-contact",
-  "description": "",
-  "type": "library",
-  "version": "1.0",
-  "license": "proprietary",
-  "require": {
-    "filament/filament": "^3.0"
-  },
-  "autoload": {
-    "psr-4": {
-      "AdvisingApp\\Contact\\": "src/",
-      "AdvisingApp\\Contact\\Tests\\": "tests/",
-      "AdvisingApp\\Contact\\Database\\Factories\\": "database/factories/",
-      "AdvisingApp\\Contact\\Database\\Seeders\\": "database/seeders/"
+    "name": "canyon-gbs/advising-app-contact",
+    "description": "",
+    "type": "library",
+    "version": "1.0",
+    "license": "proprietary",
+    "require": {
+        "filament/filament": "^3.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "AidingApp\\Contact\\": "src/",
+            "AidingApp\\Contact\\Tests\\": "tests/",
+            "AidingApp\\Contact\\Database\\Factories\\": "database/factories/",
+            "AidingApp\\Contact\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "minimum-stability": "stable",
+    "extra": {
+        "laravel": {
+            "providers": [
+                "AidingApp\\Contact\\Providers\\ContactServiceProvider"
+            ]
+        }
     }
-  },
-  "minimum-stability": "stable",
-  "extra": {
-    "laravel": {
-      "providers": [
-        "AdvisingApp\\Contact\\Providers\\ContactServiceProvider"
-      ]
-    }
-  }
 }

@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Webhook\Http\Middleware;
+namespace AidingApp\Webhook\Http\Middleware;
 
 use Closure;
 use Exception;

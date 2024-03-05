@@ -35,14 +35,14 @@
 */
 
 use App\Models\User;
-use AdvisingApp\Alert\Models\Alert;
-use AdvisingApp\Contact\Models\Contact;
-use AdvisingApp\Authorization\Enums\LicenseType;
-use AdvisingApp\Alert\Notifications\AlertCreatedNotification;
+use AidingApp\Alert\Models\Alert;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\Alert\Notifications\AlertCreatedNotification;
 
 use function Tests\Helpers\testItIsDispatchedToTheProperChannels;
 
-use AdvisingApp\Notification\Notifications\Channels\DatabaseChannel;
+use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
 
 testItIsDispatchedToTheProperChannels(
     notification: AlertCreatedNotification::class,

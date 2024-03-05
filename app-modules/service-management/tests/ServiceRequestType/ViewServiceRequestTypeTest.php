@@ -42,9 +42,9 @@ use App\Settings\LicenseSettings;
 
 use function Pest\Laravel\actingAs;
 
-use AdvisingApp\Contact\Models\Contact;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestType;
-use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
 
 test('The correct details are displayed on the ViewServiceRequestType page', function () {
     $serviceRequestType = ServiceRequestType::factory()->create();

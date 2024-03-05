@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Contact\Filament\Resources\ContactResource\Pages;
+namespace AidingApp\Contact\Filament\Resources\ContactResource\Pages;
 
 use App\Models\User;
 use Filament\Forms\Form;
@@ -42,17 +42,17 @@ use Filament\Actions\ViewAction;
 use App\Models\Scopes\HasLicense;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Radio;
+use AidingApp\Contact\Models\Contact;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
-use AdvisingApp\Contact\Models\Contact;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Forms\Components\DatePicker;
 use Illuminate\Database\Eloquent\Builder;
-use AdvisingApp\Contact\Models\ContactSource;
-use AdvisingApp\Contact\Models\ContactStatus;
-use AdvisingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Contact\Models\ContactSource;
+use AidingApp\Contact\Models\ContactStatus;
+use AidingApp\Contact\Filament\Resources\ContactResource;
 
 class EditContact extends EditRecord
 {

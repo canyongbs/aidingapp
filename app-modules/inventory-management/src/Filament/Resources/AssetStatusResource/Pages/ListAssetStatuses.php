@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InventoryManagement\Filament\Resources\AssetStatusResource\Pages;
+namespace AidingApp\InventoryManagement\Filament\Resources\AssetStatusResource\Pages;
 
 use Filament\Tables\Table;
 use Filament\Actions\CreateAction;
@@ -44,7 +44,7 @@ use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
-use AdvisingApp\InventoryManagement\Filament\Resources\AssetStatusResource;
+use AidingApp\InventoryManagement\Filament\Resources\AssetStatusResource;
 
 class ListAssetStatuses extends ListRecords
 {

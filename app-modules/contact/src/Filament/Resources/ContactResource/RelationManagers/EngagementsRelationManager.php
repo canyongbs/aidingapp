@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Contact\Filament\Resources\ContactResource\RelationManagers;
+namespace AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers;
 
 use Filament\Forms\Form;
 use Filament\Tables\Table;
@@ -44,14 +44,14 @@ use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Model;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Tables\Actions\CreateAction;
+use AidingApp\Engagement\Models\Engagement;
 use Filament\Infolists\Components\Fieldset;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
-use AdvisingApp\Engagement\Models\Engagement;
+use AidingApp\Engagement\Enums\EngagementDeliveryStatus;
 use Filament\Resources\RelationManagers\RelationManager;
-use AdvisingApp\Engagement\Enums\EngagementDeliveryStatus;
-use AdvisingApp\Engagement\Actions\CreateEngagementDeliverable;
-use AdvisingApp\Engagement\Filament\Resources\EngagementResource\Pages\CreateEngagement;
+use AidingApp\Engagement\Actions\CreateEngagementDeliverable;
+use AidingApp\Engagement\Filament\Resources\EngagementResource\Pages\CreateEngagement;
 
 class EngagementsRelationManager extends RelationManager
 {

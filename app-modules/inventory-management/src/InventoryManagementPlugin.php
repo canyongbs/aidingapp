@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InventoryManagement;
+namespace AidingApp\InventoryManagement;
 
 use Filament\Panel;
 use Filament\Contracts\Plugin;
@@ -50,7 +50,7 @@ class InventoryManagementPlugin implements Plugin
     {
         $panel->discoverResources(
             in: __DIR__ . '/Filament/Resources',
-            for: 'AdvisingApp\\InventoryManagement\\Filament\\Resources'
+            for: 'AidingApp\\InventoryManagement\\Filament\\Resources'
         );
     }
 

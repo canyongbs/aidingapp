@@ -34,16 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Alert\Notifications;
+namespace AidingApp\Alert\Notifications;
 
+use AidingApp\Alert\Models\Alert;
 use Illuminate\Support\HtmlString;
-use AdvisingApp\Alert\Models\Alert;
-use AdvisingApp\Contact\Models\Contact;
-use AdvisingApp\Contact\Filament\Resources\ContactResource;
-use AdvisingApp\Notification\Notifications\BaseNotification;
-use AdvisingApp\Notification\Notifications\DatabaseNotification;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Notification\Notifications\BaseNotification;
+use AidingApp\Notification\Notifications\DatabaseNotification;
 use Filament\Notifications\Notification as FilamentNotification;
-use AdvisingApp\Notification\Notifications\Concerns\DatabaseChannelTrait;
+use AidingApp\Notification\Notifications\Concerns\DatabaseChannelTrait;
 
 class AlertCreatedNotification extends BaseNotification implements DatabaseNotification
 {

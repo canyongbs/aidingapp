@@ -34,16 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Assistant\Filament\Resources\PromptResource\Pages;
+namespace AidingApp\Assistant\Filament\Resources\PromptResource\Pages;
 
 use Filament\Actions\EditAction;
 use Filament\Infolists\Infolist;
-use AdvisingApp\Assistant\Models\Prompt;
+use AidingApp\Assistant\Models\Prompt;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
-use AdvisingApp\Assistant\Filament\Resources\PromptResource;
-use AdvisingApp\Assistant\Filament\Resources\PromptTypeResource;
+use AidingApp\Assistant\Filament\Resources\PromptResource;
+use AidingApp\Assistant\Filament\Resources\PromptTypeResource;
 
 class ViewPrompt extends ViewRecord
 {

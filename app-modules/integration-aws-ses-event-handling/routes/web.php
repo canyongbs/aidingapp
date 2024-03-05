@@ -35,9 +35,9 @@
 */
 
 use Illuminate\Support\Facades\Route;
-use AdvisingApp\Webhook\Http\Middleware\HandleAwsSnsRequest;
-use AdvisingApp\Webhook\Http\Middleware\VerifyAwsSnsRequest;
-use AdvisingApp\IntegrationAwsSesEventHandling\Http\Controllers\AwsSesInboundWebhookController;
+use AidingApp\Webhook\Http\Middleware\HandleAwsSnsRequest;
+use AidingApp\Webhook\Http\Middleware\VerifyAwsSnsRequest;
+use AidingApp\IntegrationAwsSesEventHandling\Http\Controllers\AwsSesInboundWebhookController;
 
 Route::post('/inbound/webhook/awsses', AwsSesInboundWebhookController::class)
     ->middleware(

@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Consent\Enums;
+namespace AidingApp\Consent\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 

@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InventoryManagement\Database\Seeders;
+namespace AidingApp\InventoryManagement\Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use AdvisingApp\InventoryManagement\Models\AssetLocation;
+use AidingApp\InventoryManagement\Models\AssetLocation;
 
 class AssetLocationSeeder extends Seeder
 {

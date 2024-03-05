@@ -34,19 +34,19 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Portal\Http\Controllers\KnowledgeManagement;
+namespace AidingApp\Portal\Http\Controllers\KnowledgeManagement;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\URL;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
-use AdvisingApp\Portal\Enums\PortalType;
+use AidingApp\Portal\Enums\PortalType;
 use App\Actions\ResolveEducatableFromEmail;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\ValidationException;
-use AdvisingApp\Portal\Models\PortalAuthentication;
-use AdvisingApp\Portal\Notifications\AuthenticatePortalNotification;
-use AdvisingApp\Portal\Http\Requests\KnowledgeManagementPortalAuthenticationRequest;
+use AidingApp\Portal\Models\PortalAuthentication;
+use AidingApp\Portal\Notifications\AuthenticatePortalNotification;
+use AidingApp\Portal\Http\Requests\KnowledgeManagementPortalAuthenticationRequest;
 
 class KnowledgeManagementPortalRequestAuthenticationController extends Controller
 {

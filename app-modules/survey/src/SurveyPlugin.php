@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Survey;
+namespace AidingApp\Survey;
 
 use Filament\Panel;
 use Filament\Contracts\Plugin;
@@ -51,7 +51,7 @@ class SurveyPlugin implements Plugin
         $panel
             ->discoverResources(
                 in: __DIR__ . '/Filament/Resources',
-                for: 'AdvisingApp\\Survey\\Filament\\Resources'
+                for: 'AidingApp\\Survey\\Filament\\Resources'
             );
     }
 

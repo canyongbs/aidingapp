@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Authorization\Rules;
+namespace AidingApp\Authorization\Rules;
 
 use Closure;
-use AdvisingApp\Authorization\Enums\LicenseType;
+use AidingApp\Authorization\Enums\LicenseType;
 use Illuminate\Contracts\Validation\ValidationRule;
 
 class LicenseTypeUsageRule implements ValidationRule

@@ -34,18 +34,18 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\IntegrationTwilio\Http\Controllers;
+namespace AidingApp\IntegrationTwilio\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Twilio\TwiML\MessagingResponse;
 use App\Http\Controllers\Controller;
-use AdvisingApp\Webhook\Enums\InboundWebhookSource;
-use AdvisingApp\Webhook\Actions\StoreInboundWebhook;
-use AdvisingApp\Webhook\Exceptions\UnknownInboundWebhookEvent;
-use AdvisingApp\IntegrationTwilio\Actions\TwilioWebhookProcessor;
-use AdvisingApp\IntegrationTwilio\DataTransferObjects\TwilioStatusCallbackData;
-use AdvisingApp\IntegrationTwilio\DataTransferObjects\TwilioMessageReceivedData;
+use AidingApp\Webhook\Enums\InboundWebhookSource;
+use AidingApp\Webhook\Actions\StoreInboundWebhook;
+use AidingApp\Webhook\Exceptions\UnknownInboundWebhookEvent;
+use AidingApp\IntegrationTwilio\Actions\TwilioWebhookProcessor;
+use AidingApp\IntegrationTwilio\DataTransferObjects\TwilioStatusCallbackData;
+use AidingApp\IntegrationTwilio\DataTransferObjects\TwilioMessageReceivedData;
 
 class TwilioInboundWebhookController extends Controller
 {

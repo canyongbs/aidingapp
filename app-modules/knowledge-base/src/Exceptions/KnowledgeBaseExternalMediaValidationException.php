@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\KnowledgeBase\Exceptions;
+namespace AidingApp\KnowledgeBase\Exceptions;
 
 use Exception;
 

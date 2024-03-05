@@ -34,15 +34,15 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Filament\Resources\ChangeRequestStatusResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\ChangeRequestStatusResource\Pages;
 
 use Filament\Forms\Form;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\CreateRecord;
-use AdvisingApp\ServiceManagement\Enums\SystemChangeRequestClassification;
-use AdvisingApp\ServiceManagement\Filament\Resources\ChangeRequestStatusResource;
+use AidingApp\ServiceManagement\Enums\SystemChangeRequestClassification;
+use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestStatusResource;
 
 class CreateChangeRequestStatus extends CreateRecord
 {

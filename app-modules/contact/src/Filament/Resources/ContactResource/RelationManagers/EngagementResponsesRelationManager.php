@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Contact\Filament\Resources\ContactResource\RelationManagers;
+namespace AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers;
 
 use Filament\Tables\Table;
 use Filament\Infolists\Infolist;

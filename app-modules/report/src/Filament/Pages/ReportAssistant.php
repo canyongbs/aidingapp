@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Report\Filament\Pages;
+namespace AidingApp\Report\Filament\Pages;
 
 use App\Models\User;
 use App\Enums\Feature;
@@ -43,18 +43,18 @@ use Livewire\Attributes\On;
 use Livewire\Attributes\Rule;
 use App\Filament\Pages\Dashboard;
 use Livewire\Attributes\Computed;
-use AdvisingApp\Assistant\Models\AssistantChat;
-use AdvisingApp\Authorization\Enums\LicenseType;
-use AdvisingApp\Consent\Models\ConsentAgreement;
-use AdvisingApp\Report\Client\AIReportChatClient;
-use AdvisingApp\Consent\Enums\ConsentAgreementType;
-use AdvisingApp\Assistant\Models\AssistantChatFolder;
-use AdvisingApp\IntegrationAI\Exceptions\ContentFilterException;
-use AdvisingApp\IntegrationAI\Exceptions\TokensExceededException;
+use AidingApp\Assistant\Models\AssistantChat;
+use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\Consent\Models\ConsentAgreement;
+use AidingApp\Report\Client\AIReportChatClient;
+use AidingApp\Consent\Enums\ConsentAgreementType;
+use AidingApp\Assistant\Models\AssistantChatFolder;
+use AidingApp\IntegrationAI\Exceptions\ContentFilterException;
+use AidingApp\IntegrationAI\Exceptions\TokensExceededException;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
-use AdvisingApp\Assistant\Services\AIInterface\Enums\AIChatMessageFrom;
-use AdvisingApp\Assistant\Services\AIInterface\DataTransferObjects\Chat;
-use AdvisingApp\Assistant\Services\AIInterface\DataTransferObjects\ChatMessage;
+use AidingApp\Assistant\Services\AIInterface\Enums\AIChatMessageFrom;
+use AidingApp\Assistant\Services\AIInterface\DataTransferObjects\Chat;
+use AidingApp\Assistant\Services\AIInterface\DataTransferObjects\ChatMessage;
 
 /**
  * @property EloquentCollection $chats

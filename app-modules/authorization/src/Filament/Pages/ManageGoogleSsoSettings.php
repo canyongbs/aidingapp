@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Authorization\Filament\Pages;
+namespace AidingApp\Authorization\Filament\Pages;
 
 use Filament\Forms\Get;
 use Filament\Forms\Form;
@@ -43,7 +43,7 @@ use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
 use App\Filament\Clusters\ProductIntegrations;
-use AdvisingApp\Authorization\Settings\GoogleSsoSettings;
+use AidingApp\Authorization\Settings\GoogleSsoSettings;
 
 class ManageGoogleSsoSettings extends SettingsPage
 {

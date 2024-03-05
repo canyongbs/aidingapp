@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Audit\Filament\Pages;
+namespace AidingApp\Audit\Filament\Pages;
 
 use App\Models\User;
 use Filament\Forms\Form;
@@ -42,8 +42,8 @@ use Filament\Pages\SettingsPage;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use App\Filament\Clusters\GlobalSettings;
-use AdvisingApp\Audit\Settings\AuditSettings;
-use AdvisingApp\Audit\Actions\Finders\AuditableModels;
+use AidingApp\Audit\Settings\AuditSettings;
+use AidingApp\Audit\Actions\Finders\AuditableModels;
 
 class ManageAuditSettings extends SettingsPage
 {

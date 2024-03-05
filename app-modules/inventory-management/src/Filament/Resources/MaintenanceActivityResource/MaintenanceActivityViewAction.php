@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InventoryManagement\Filament\Resources\MaintenanceActivityResource;
+namespace AidingApp\InventoryManagement\Filament\Resources\MaintenanceActivityResource;
 
 use Filament\Actions\ViewAction;
-use AdvisingApp\InventoryManagement\Filament\Concerns\MaintenanceActivityInfolist;
+use AidingApp\InventoryManagement\Filament\Concerns\MaintenanceActivityInfolist;
 
 class MaintenanceActivityViewAction extends ViewAction
 {

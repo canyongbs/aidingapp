@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Filament\Resources\EngagementResource\Pages;
+namespace AidingApp\Engagement\Filament\Resources\EngagementResource\Pages;
 
 use Filament\Forms\Get;
 use Filament\Forms\Set;
@@ -51,15 +51,15 @@ use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\Expression;
+use AidingApp\Engagement\Models\Engagement;
 use FilamentTiptapEditor\Enums\TiptapOutput;
-use AdvisingApp\Engagement\Models\Engagement;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\DateTimePicker;
-use AdvisingApp\Engagement\Models\EmailTemplate;
+use AidingApp\Engagement\Models\EmailTemplate;
 use App\Filament\Forms\Components\EducatableSelect;
-use AdvisingApp\Engagement\Enums\EngagementDeliveryMethod;
-use AdvisingApp\Engagement\Filament\Resources\EngagementResource;
-use AdvisingApp\Engagement\Filament\Resources\EngagementResource\Fields\EngagementSmsBodyField;
+use AidingApp\Engagement\Enums\EngagementDeliveryMethod;
+use AidingApp\Engagement\Filament\Resources\EngagementResource;
+use AidingApp\Engagement\Filament\Resources\EngagementResource\Fields\EngagementSmsBodyField;
 
 class EditEngagement extends EditRecord
 {

@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Models\Concerns;
+namespace AidingApp\Engagement\Models\Concerns;
 
-use AdvisingApp\Engagement\Models\EngagementResponse;
+use AidingApp\Engagement\Models\EngagementResponse;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 trait HasManyMorphedEngagementResponses

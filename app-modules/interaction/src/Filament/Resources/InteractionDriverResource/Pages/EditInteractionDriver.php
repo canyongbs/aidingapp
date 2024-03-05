@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Interaction\Filament\Resources\InteractionDriverResource\Pages;
+namespace AidingApp\Interaction\Filament\Resources\InteractionDriverResource\Pages;
 
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
-use AdvisingApp\Interaction\Filament\Resources\InteractionDriverResource;
+use AidingApp\Interaction\Filament\Resources\InteractionDriverResource;
 
 class EditInteractionDriver extends EditRecord
 {

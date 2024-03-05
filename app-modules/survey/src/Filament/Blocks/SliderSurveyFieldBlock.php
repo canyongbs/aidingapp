@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Survey\Filament\Blocks;
+namespace AidingApp\Survey\Filament\Blocks;
 
-use AdvisingApp\Form\Models\SubmissibleField;
-use AdvisingApp\Form\Filament\Blocks\FormFieldBlock;
+use AidingApp\Form\Models\SubmissibleField;
+use AidingApp\Form\Filament\Blocks\FormFieldBlock;
 
 class SliderSurveyFieldBlock extends FormFieldBlock
 {

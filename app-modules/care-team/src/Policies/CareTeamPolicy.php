@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\CareTeam\Policies;
+namespace AidingApp\CareTeam\Policies;
 
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
-use AdvisingApp\CareTeam\Models\CareTeam;
+use AidingApp\CareTeam\Models\CareTeam;
 
 class CareTeamPolicy
 {

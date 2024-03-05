@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Audit;
+namespace AidingApp\Audit;
 
 use Filament\Panel;
 use Filament\Contracts\Plugin;
-use AdvisingApp\Audit\Filament\Pages\ManageAuditSettings;
+use AidingApp\Audit\Filament\Pages\ManageAuditSettings;
 
 class AuditPlugin implements Plugin
 {
@@ -52,7 +52,7 @@ class AuditPlugin implements Plugin
         $panel
             ->discoverResources(
                 in: __DIR__ . '/Filament/Resources',
-                for: 'AdvisingApp\\Audit\\Filament\\Resources'
+                for: 'AidingApp\\Audit\\Filament\\Resources'
             )
             ->pages(
                 [

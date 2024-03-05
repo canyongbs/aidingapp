@@ -34,15 +34,15 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Division\Filament\Resources;
+namespace AidingApp\Division\Filament\Resources;
 
 use Filament\Resources\Resource;
-use AdvisingApp\Division\Models\Division;
-use AdvisingApp\Division\Filament\Resources\DivisionResource\Pages\EditDivision;
-use AdvisingApp\Division\Filament\Resources\DivisionResource\Pages\ViewDivision;
-use AdvisingApp\Division\Filament\Resources\DivisionResource\Pages\ListDivisions;
-use AdvisingApp\Division\Filament\Resources\DivisionResource\Pages\CreateDivision;
-use AdvisingApp\Division\Filament\Resources\DivisionResource\RelationManagers\TeamsRelationManager;
+use AidingApp\Division\Models\Division;
+use AidingApp\Division\Filament\Resources\DivisionResource\Pages\EditDivision;
+use AidingApp\Division\Filament\Resources\DivisionResource\Pages\ViewDivision;
+use AidingApp\Division\Filament\Resources\DivisionResource\Pages\ListDivisions;
+use AidingApp\Division\Filament\Resources\DivisionResource\Pages\CreateDivision;
+use AidingApp\Division\Filament\Resources\DivisionResource\RelationManagers\TeamsRelationManager;
 
 class DivisionResource extends Resource
 {

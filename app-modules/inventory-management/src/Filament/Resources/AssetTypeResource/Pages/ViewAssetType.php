@@ -34,14 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InventoryManagement\Filament\Resources\AssetTypeResource\Pages;
+namespace AidingApp\InventoryManagement\Filament\Resources\AssetTypeResource\Pages;
 
 use Filament\Actions\EditAction;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
-use AdvisingApp\InventoryManagement\Filament\Resources\AssetTypeResource;
+use AidingApp\InventoryManagement\Filament\Resources\AssetTypeResource;
 
 class ViewAssetType extends ViewRecord
 {

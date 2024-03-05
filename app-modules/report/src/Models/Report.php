@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Report\Models;
+namespace AidingApp\Report\Models;
 
 use App\Models\User;
 use App\Models\BaseModel;
 use App\Models\Authenticatable;
-use AdvisingApp\Report\Enums\ReportModel;
+use AidingApp\Report\Enums\ReportModel;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 

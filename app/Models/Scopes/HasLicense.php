@@ -38,7 +38,7 @@ namespace App\Models\Scopes;
 
 use Illuminate\Support\Arr;
 use Illuminate\Database\Eloquent\Builder;
-use AdvisingApp\Authorization\Enums\LicenseType;
+use AidingApp\Authorization\Enums\LicenseType;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
 class HasLicense

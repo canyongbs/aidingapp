@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Contact\Database\Seeders;
+namespace AidingApp\Contact\Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use AdvisingApp\Contact\Models\ContactSource;
+use AidingApp\Contact\Models\ContactSource;
 
 class ContactSourceSeeder extends Seeder
 {

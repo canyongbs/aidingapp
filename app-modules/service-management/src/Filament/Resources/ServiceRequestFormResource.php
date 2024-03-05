@@ -34,14 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Filament\Resources;
+namespace AidingApp\ServiceManagement\Filament\Resources;
 
 use Filament\Resources\Resource;
+use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use App\Filament\Clusters\ServiceManagementAdministration;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestForm;
-use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestFormResource\Pages\EditServiceRequestForm;
-use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestFormResource\Pages\ListServiceRequestForms;
-use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestFormResource\Pages\CreateServiceRequestForm;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestFormResource\Pages\EditServiceRequestForm;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestFormResource\Pages\ListServiceRequestForms;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestFormResource\Pages\CreateServiceRequestForm;
 
 class ServiceRequestFormResource extends Resource
 {

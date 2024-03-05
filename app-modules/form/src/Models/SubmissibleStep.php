@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Form\Models;
+namespace AidingApp\Form\Models;
 
 use App\Models\BaseModel;
 use Illuminate\Database\Query\Builder;

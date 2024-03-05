@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Filament\Concerns;
+namespace AidingApp\ServiceManagement\Filament\Concerns;
 
 use Filament\Infolists\Components\TextEntry;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestHistory;
-use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
+use AidingApp\ServiceManagement\Models\ServiceRequestHistory;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 
 // TODO Re-use this trait across other places where infolist is rendered
 trait ServiceRequestHistoryInfolist

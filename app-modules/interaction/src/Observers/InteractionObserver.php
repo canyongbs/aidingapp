@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Interaction\Observers;
+namespace AidingApp\Interaction\Observers;
 
 use App\Models\User;
-use AdvisingApp\Interaction\Models\Interaction;
-use AdvisingApp\Notification\Events\TriggeredAutoSubscription;
+use AidingApp\Interaction\Models\Interaction;
+use AidingApp\Notification\Events\TriggeredAutoSubscription;
 
 class InteractionObserver
 {

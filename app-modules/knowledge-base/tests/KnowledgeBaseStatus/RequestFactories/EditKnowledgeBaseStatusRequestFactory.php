@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\KnowledgeBase\Tests\KnowledgeBaseStatus\RequestFactories;
+namespace AidingApp\KnowledgeBase\Tests\KnowledgeBaseStatus\RequestFactories;
 
 use Worksome\RequestFactories\RequestFactory;
 

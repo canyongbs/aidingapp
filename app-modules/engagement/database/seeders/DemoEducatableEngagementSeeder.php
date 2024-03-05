@@ -34,13 +34,13 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Database\Seeders;
+namespace AidingApp\Engagement\Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use AdvisingApp\Contact\Models\Contact;
-use AdvisingApp\Engagement\Models\Engagement;
-use AdvisingApp\Engagement\Models\EngagementResponse;
-use AdvisingApp\Engagement\Models\EngagementDeliverable;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Engagement\Models\Engagement;
+use AidingApp\Engagement\Models\EngagementResponse;
+use AidingApp\Engagement\Models\EngagementDeliverable;
 
 class DemoEducatableEngagementSeeder extends Seeder
 {

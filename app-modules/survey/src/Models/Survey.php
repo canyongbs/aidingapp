@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Survey\Models;
+namespace AidingApp\Survey\Models;
 
-use AdvisingApp\Form\Enums\Rounding;
-use AdvisingApp\Form\Models\Submissible;
+use AidingApp\Form\Enums\Rounding;
+use AidingApp\Form\Models\Submissible;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**

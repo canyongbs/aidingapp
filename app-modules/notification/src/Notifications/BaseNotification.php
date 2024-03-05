@@ -34,23 +34,23 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Notification\Notifications;
+namespace AidingApp\Notification\Notifications;
 
 use Exception;
 use Illuminate\Support\Str;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use AdvisingApp\Notification\Models\OutboundDeliverable;
-use AdvisingApp\Notification\Actions\MakeOutboundDeliverable;
-use AdvisingApp\Notification\Notifications\Channels\SmsChannel;
-use AdvisingApp\Notification\Notifications\Channels\EmailChannel;
-use AdvisingApp\Notification\Notifications\Concerns\ChannelTrait;
-use AdvisingApp\Notification\Notifications\Channels\DatabaseChannel;
-use AdvisingApp\Notification\DataTransferObjects\SmsChannelResultData;
-use AdvisingApp\Notification\DataTransferObjects\EmailChannelResultData;
-use AdvisingApp\Notification\DataTransferObjects\NotificationResultData;
-use AdvisingApp\Notification\DataTransferObjects\DatabaseChannelResultData;
+use AidingApp\Notification\Models\OutboundDeliverable;
+use AidingApp\Notification\Actions\MakeOutboundDeliverable;
+use AidingApp\Notification\Notifications\Channels\SmsChannel;
+use AidingApp\Notification\Notifications\Channels\EmailChannel;
+use AidingApp\Notification\Notifications\Concerns\ChannelTrait;
+use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
+use AidingApp\Notification\DataTransferObjects\SmsChannelResultData;
+use AidingApp\Notification\DataTransferObjects\EmailChannelResultData;
+use AidingApp\Notification\DataTransferObjects\NotificationResultData;
+use AidingApp\Notification\DataTransferObjects\DatabaseChannelResultData;
 
 abstract class BaseNotification extends Notification implements ShouldQueue
 {

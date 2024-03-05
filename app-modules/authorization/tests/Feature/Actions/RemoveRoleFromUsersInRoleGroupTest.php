@@ -35,9 +35,9 @@
 */
 
 use App\Models\User;
-use AdvisingApp\Authorization\Models\Role;
-use AdvisingApp\Authorization\Models\RoleGroup;
-use AdvisingApp\Authorization\Enums\ModelHasRolesViaEnum;
+use AidingApp\Authorization\Models\Role;
+use AidingApp\Authorization\Models\RoleGroup;
+use AidingApp\Authorization\Enums\ModelHasRolesViaEnum;
 
 it('will remove the Role from all Users that were assigned via the RoleGroup', function () {
     // Given that we have some Users

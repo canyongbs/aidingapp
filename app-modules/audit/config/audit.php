@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-use AdvisingApp\Audit\Models\Audit;
+use AidingApp\Audit\Models\Audit;
 
 return [
     'enabled' => env('AUDITING_ENABLED', true),

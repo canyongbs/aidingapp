@@ -35,7 +35,7 @@
 */
 
 use Illuminate\Support\Facades\Route;
-use AdvisingApp\Survey\Livewire\RenderSurvey;
+use AidingApp\Survey\Livewire\RenderSurvey;
 
 Route::middleware('web')
     ->prefix('surveys')

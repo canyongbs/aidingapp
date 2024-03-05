@@ -37,7 +37,7 @@
 namespace App\Models\Contracts;
 
 use Illuminate\Database\Eloquent\Collection;
-use AdvisingApp\Authorization\Enums\LicenseType;
+use AidingApp\Authorization\Enums\LicenseType;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 /**

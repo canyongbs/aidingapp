@@ -34,17 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Contact\Filament\Resources\ContactResource\Pages;
+namespace AidingApp\Contact\Filament\Resources\ContactResource\Pages;
 
 use Filament\Actions\EditAction;
 use Filament\Infolists\Infolist;
-use AdvisingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\Contact;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
-use AdvisingApp\Contact\Filament\Resources\ContactResource;
-use AdvisingApp\Notification\Filament\Actions\SubscribeHeaderAction;
+use AidingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Notification\Filament\Actions\SubscribeHeaderAction;
 
 class ViewContact extends ViewRecord
 {

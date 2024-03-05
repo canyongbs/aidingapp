@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Contact\Filament\Resources\ContactResource\Pages;
+namespace AidingApp\Contact\Filament\Resources\ContactResource\Pages;
 
 use App\Models\User;
 use Filament\Forms\Get;
@@ -43,8 +43,8 @@ use Filament\Actions\CreateAction;
 use Filament\Actions\ImportAction;
 use Filament\Tables\Filters\Filter;
 use Filament\Forms\Components\Radio;
+use AidingApp\Contact\Models\Contact;
 use Filament\Forms\Components\Select;
-use AdvisingApp\Contact\Models\Contact;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Actions\EditAction;
@@ -56,19 +56,19 @@ use App\Filament\Tables\Columns\IdColumn;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
+use AidingApp\Contact\Models\ContactSource;
+use AidingApp\Contact\Models\ContactStatus;
 use Filament\Tables\Actions\BulkActionGroup;
 use Illuminate\Database\Eloquent\Collection;
-use AdvisingApp\Contact\Models\ContactSource;
-use AdvisingApp\Contact\Models\ContactStatus;
 use Filament\Tables\Actions\DeleteBulkAction;
-use AdvisingApp\Contact\Imports\ContactImporter;
-use AdvisingApp\Contact\Filament\Resources\ContactResource;
-use AdvisingApp\Engagement\Filament\Actions\BulkEngagementAction;
-use AdvisingApp\Notification\Filament\Actions\SubscribeBulkAction;
-use AdvisingApp\CareTeam\Filament\Actions\ToggleCareTeamBulkAction;
-use AdvisingApp\Notification\Filament\Actions\SubscribeTableAction;
-use AdvisingApp\Engagement\Filament\Actions\Contracts\HasBulkEngagementAction;
-use AdvisingApp\Engagement\Filament\Actions\Concerns\ImplementsHasBulkEngagementAction;
+use AidingApp\Contact\Imports\ContactImporter;
+use AidingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Engagement\Filament\Actions\BulkEngagementAction;
+use AidingApp\Notification\Filament\Actions\SubscribeBulkAction;
+use AidingApp\CareTeam\Filament\Actions\ToggleCareTeamBulkAction;
+use AidingApp\Notification\Filament\Actions\SubscribeTableAction;
+use AidingApp\Engagement\Filament\Actions\Contracts\HasBulkEngagementAction;
+use AidingApp\Engagement\Filament\Actions\Concerns\ImplementsHasBulkEngagementAction;
 
 class ListContacts extends ListRecords implements HasBulkEngagementAction
 {

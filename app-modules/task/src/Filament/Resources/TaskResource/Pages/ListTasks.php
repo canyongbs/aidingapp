@@ -34,35 +34,35 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Task\Filament\Resources\TaskResource\Pages;
+namespace AidingApp\Task\Filament\Resources\TaskResource\Pages;
 
 use App\Models\User;
 use Filament\Forms\Set;
 use Filament\Tables\Table;
 use Filament\Actions\Action;
-use AdvisingApp\Task\Models\Task;
+use AidingApp\Task\Models\Task;
 use Filament\Actions\CreateAction;
 use Filament\Actions\ImportAction;
 use Filament\Tables\Filters\Filter;
-use AdvisingApp\Task\Enums\TaskStatus;
-use AdvisingApp\Contact\Models\Contact;
+use AidingApp\Task\Enums\TaskStatus;
+use AidingApp\Contact\Models\Contact;
 use App\Models\Scopes\EducatableSearch;
 use Filament\Forms\Components\Checkbox;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\BaseFilter;
+use AidingApp\Task\Imports\TaskImporter;
 use App\Filament\Resources\UserResource;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
-use AdvisingApp\Task\Imports\TaskImporter;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Pages\Concerns\ExposesTableToWidgets;
-use AdvisingApp\Task\Filament\Resources\TaskResource;
-use AdvisingApp\Contact\Filament\Resources\ContactResource;
-use AdvisingApp\Task\Filament\Resources\TaskResource\Components\TaskViewAction;
+use AidingApp\Task\Filament\Resources\TaskResource;
+use AidingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Task\Filament\Resources\TaskResource\Components\TaskViewAction;
 
 class ListTasks extends ListRecords
 {

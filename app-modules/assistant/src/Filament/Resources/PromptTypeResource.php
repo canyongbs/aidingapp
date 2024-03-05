@@ -34,16 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Assistant\Filament\Resources;
+namespace AidingApp\Assistant\Filament\Resources;
 
 use Filament\Resources\Resource;
-use AdvisingApp\Assistant\Models\PromptType;
+use AidingApp\Assistant\Models\PromptType;
 use App\Filament\Clusters\ArtificialIntelligence;
-use AdvisingApp\Assistant\Filament\Resources\PromptTypeResource\Pages\EditPromptType;
-use AdvisingApp\Assistant\Filament\Resources\PromptTypeResource\Pages\ViewPromptType;
-use AdvisingApp\Assistant\Filament\Resources\PromptTypeResource\Pages\ListPromptTypes;
-use AdvisingApp\Assistant\Filament\Resources\PromptTypeResource\Pages\CreatePromptType;
-use AdvisingApp\Assistant\Filament\Resources\PromptTypeResource\RelationManagers\PromptsRelationManager;
+use AidingApp\Assistant\Filament\Resources\PromptTypeResource\Pages\EditPromptType;
+use AidingApp\Assistant\Filament\Resources\PromptTypeResource\Pages\ViewPromptType;
+use AidingApp\Assistant\Filament\Resources\PromptTypeResource\Pages\ListPromptTypes;
+use AidingApp\Assistant\Filament\Resources\PromptTypeResource\Pages\CreatePromptType;
+use AidingApp\Assistant\Filament\Resources\PromptTypeResource\RelationManagers\PromptsRelationManager;
 
 class PromptTypeResource extends Resource
 {

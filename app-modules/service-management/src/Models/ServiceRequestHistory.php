@@ -34,21 +34,21 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Models;
+namespace AidingApp\ServiceManagement\Models;
 
 use Exception;
 use App\Models\BaseModel;
 use Illuminate\Support\Str;
 use Illuminate\Support\Collection;
-use AdvisingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Division\Models\Division;
 use Illuminate\Database\Eloquent\Model;
-use AdvisingApp\Division\Models\Division;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use AdvisingApp\StudentDataModel\Models\Student;
+use AidingApp\StudentDataModel\Models\Student;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use AdvisingApp\Timeline\Models\Contracts\ProvidesATimeline;
-use AdvisingApp\Timeline\Timelines\ServiceRequestHistoryTimeline;
+use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
+use AidingApp\Timeline\Timelines\ServiceRequestHistoryTimeline;
 
 /**
  * @mixin IdeHelperServiceRequestHistory

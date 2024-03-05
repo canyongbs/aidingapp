@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Alert\Rules;
+namespace AidingApp\Alert\Rules;
 
 use Closure;
 use Illuminate\Database\Eloquent\Model;

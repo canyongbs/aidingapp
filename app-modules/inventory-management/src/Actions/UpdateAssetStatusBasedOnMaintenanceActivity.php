@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InventoryManagement\Actions;
+namespace AidingApp\InventoryManagement\Actions;
 
-use AdvisingApp\InventoryManagement\Models\MaintenanceActivity;
-use AdvisingApp\InventoryManagement\Enums\MaintenanceActivityStatus;
+use AidingApp\InventoryManagement\Models\MaintenanceActivity;
+use AidingApp\InventoryManagement\Enums\MaintenanceActivityStatus;
 
 class UpdateAssetStatusBasedOnMaintenanceActivity
 {

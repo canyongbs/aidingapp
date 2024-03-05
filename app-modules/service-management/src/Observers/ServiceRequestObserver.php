@@ -34,17 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Observers;
+namespace AidingApp\ServiceManagement\Observers;
 
 use App\Models\User;
-use AdvisingApp\ServiceManagement\Models\ServiceRequest;
-use AdvisingApp\Notification\Events\TriggeredAutoSubscription;
-use AdvisingApp\ServiceManagement\Actions\CreateServiceRequestHistory;
-use AdvisingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
-use AdvisingApp\ServiceManagement\Exceptions\ServiceRequestNumberUpdateAttemptException;
-use AdvisingApp\ServiceManagement\Notifications\SendEducatableServiceRequestClosedNotification;
-use AdvisingApp\ServiceManagement\Notifications\SendEducatableServiceRequestOpenedNotification;
-use AdvisingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\Notification\Events\TriggeredAutoSubscription;
+use AidingApp\ServiceManagement\Actions\CreateServiceRequestHistory;
+use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
+use AidingApp\ServiceManagement\Exceptions\ServiceRequestNumberUpdateAttemptException;
+use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestClosedNotification;
+use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestOpenedNotification;
+use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
 
 class ServiceRequestObserver
 {

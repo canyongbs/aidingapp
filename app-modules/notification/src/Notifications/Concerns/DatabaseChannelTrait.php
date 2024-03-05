@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Notification\Notifications\Concerns;
+namespace AidingApp\Notification\Notifications\Concerns;
 
-use AdvisingApp\Notification\Notifications\Channels\DatabaseChannel;
+use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
 
 trait DatabaseChannelTrait
 {

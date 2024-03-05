@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Contact;
+namespace AidingApp\Contact;
 
 use Filament\Panel;
 use Filament\Contracts\Plugin;
@@ -51,15 +51,15 @@ class ContactPlugin implements Plugin
         $panel
             ->discoverResources(
                 in: __DIR__ . '/Filament/Resources',
-                for: 'AdvisingApp\\Contact\\Filament\\Resources'
+                for: 'AidingApp\\Contact\\Filament\\Resources'
             )
             ->discoverPages(
                 in: __DIR__ . '/Filament/Pages',
-                for: 'AdvisingApp\\Contact\\Filament\\Pages'
+                for: 'AidingApp\\Contact\\Filament\\Pages'
             )
             ->discoverWidgets(
                 in: __DIR__ . '/Filament/Widgets',
-                for: 'AdvisingApp\\Contact\\Filament\\Widgets'
+                for: 'AidingApp\\Contact\\Filament\\Widgets'
             );
     }
 

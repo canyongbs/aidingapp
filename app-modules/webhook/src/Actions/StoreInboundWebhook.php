@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Webhook\Actions;
+namespace AidingApp\Webhook\Actions;
 
-use AdvisingApp\Webhook\Models\InboundWebhook;
-use AdvisingApp\Webhook\Enums\InboundWebhookSource;
+use AidingApp\Webhook\Models\InboundWebhook;
+use AidingApp\Webhook\Enums\InboundWebhookSource;
 
 class StoreInboundWebhook
 {

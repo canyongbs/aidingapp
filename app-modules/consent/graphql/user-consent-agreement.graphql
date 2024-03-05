@@ -1,73 +1,70 @@
 type UserConsentAgreement
-    @model(class: "AdvisingApp\\Consent\\Models\\UserConsentAgreement") {
-    id: UUID!
+  @model(class: "AidingApp\\Consent\\Models\\UserConsentAgreement") {
+  id: UUID!
 
-    ip_address: String!
+  ip_address: String!
 
-    created_at: DateTime
+  created_at: DateTime
 
-    updated_at: DateTime
+  updated_at: DateTime
 
-    deleted_at: DateTime
+  deleted_at: DateTime
 
-    user: User! @belongsTo
+  user: User! @belongsTo
 
-    consent_agreement: ConsentAgreement!
-        @belongsTo(relation: "consentAgreement")
+  consent_agreement: ConsentAgreement! @belongsTo(relation: "consentAgreement")
 
-    audits: [Audit!] @hasMany
+  audits: [Audit!] @hasMany
 
-    audits_count: Int @count(relation: "audits")
+  audits_count: Int @count(relation: "audits")
 }
 
 input UserConsentAgreementsQuery {
-    id: UUID
+  id: UUID
 
-    ip_address: String
+  ip_address: String
 
-    created_at: DateTime
+  created_at: DateTime
 
-    updated_at: DateTime
+  updated_at: DateTime
 
-    deleted_at: DateTime
+  deleted_at: DateTime
 
-    user: UsersQuery
+  user: UsersQuery
 
-    consent_agreement: ConsentAgreementsQuery
+  consent_agreement: ConsentAgreementsQuery
 
-    audits: AuditsQuery
+  audits: AuditsQuery
 }
 
 type UserConsentAgreementQueries {
-    "Get a specific user consent agreement by ID."
-    find(
-        id: UUID!
-            @whereKey
-            @rules(
-                apply: ["required", "uuid", "exists:user_consent_agreements"]
-            )
-    ): UserConsentAgreement
-        @find
-        @softDeletes
-        @canModel(
-            model: "AdvisingApp\\Consent\\Models\\ConsentAgreement"
-            ability: "viewAny"
-        )
+  "Get a specific user consent agreement by ID."
+  find(
+    id: UUID!
+      @whereKey
+      @rules(apply: ["required", "uuid", "exists:user_consent_agreements"])
+  ): UserConsentAgreement
+    @find
+    @softDeletes
+    @canModel(
+      model: "AidingApp\\Consent\\Models\\ConsentAgreement"
+      ability: "viewAny"
+    )
 
-    "List multiple user consent agreements."
-    list(
-        "Filter by the user consent agreements attributes and relations."
-        where: UserConsentAgreementsQuery @searchBy
-        order: UserConsentAgreementsQuery @sortBy
-    ): [UserConsentAgreement!]!
-        @paginate
-        @softDeletes
-        @canModel(
-            model: "AdvisingApp\\Consent\\Models\\ConsentAgreement"
-            ability: "viewAny"
-        )
+  "List multiple user consent agreements."
+  list(
+    "Filter by the user consent agreements attributes and relations."
+    where: UserConsentAgreementsQuery @searchBy
+    order: UserConsentAgreementsQuery @sortBy
+  ): [UserConsentAgreement!]!
+    @paginate
+    @softDeletes
+    @canModel(
+      model: "AidingApp\\Consent\\Models\\ConsentAgreement"
+      ability: "viewAny"
+    )
 }
 
 extend type Query {
-    userConsentAgreement: UserConsentAgreementQueries! @namespaced
+  userConsentAgreement: UserConsentAgreementQueries! @namespaced
 }

@@ -39,7 +39,7 @@ namespace Database\Factories;
 use App\Models\User;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
-use AdvisingApp\Authorization\Enums\LicenseType;
+use AidingApp\Authorization\Enums\LicenseType;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

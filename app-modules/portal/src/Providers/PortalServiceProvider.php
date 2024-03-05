@@ -34,14 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Portal\Providers;
+namespace AidingApp\Portal\Providers;
 
 use Filament\Panel;
-use AdvisingApp\Portal\PortalPlugin;
+use AidingApp\Portal\PortalPlugin;
 use Illuminate\Support\ServiceProvider;
 use App\Registries\RoleBasedAccessControlRegistry;
+use AidingApp\Portal\Registries\PortalRbacRegistry;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use AdvisingApp\Portal\Registries\PortalRbacRegistry;
 
 class PortalServiceProvider extends ServiceProvider
 {

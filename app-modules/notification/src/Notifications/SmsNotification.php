@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Notification\Notifications;
+namespace AidingApp\Notification\Notifications;
 
-use AdvisingApp\Notification\Notifications\Messages\TwilioMessage;
+use AidingApp\Notification\Notifications\Messages\TwilioMessage;
 
 /**
  * @mixin BaseNotification

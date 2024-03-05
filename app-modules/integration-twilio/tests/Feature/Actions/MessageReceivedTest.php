@@ -35,14 +35,14 @@
 */
 
 use Illuminate\Http\Request;
-use AdvisingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\Contact;
 
 use function Tests\loadFixtureFromModule;
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\assertDatabaseMissing;
 
-use AdvisingApp\IntegrationTwilio\Actions\MessageReceived;
-use AdvisingApp\IntegrationTwilio\DataTransferObjects\TwilioMessageReceivedData;
+use AidingApp\IntegrationTwilio\Actions\MessageReceived;
+use AidingApp\IntegrationTwilio\DataTransferObjects\TwilioMessageReceivedData;
 
 it('will not create an engagement response when it cannot find an associated message sender', function () {
     $request = Request::create('/', 'POST', loadFixtureFromModule('integration-twilio', 'MessageReceived/payload'));

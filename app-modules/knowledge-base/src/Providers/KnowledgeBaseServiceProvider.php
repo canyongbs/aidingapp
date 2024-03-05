@@ -34,20 +34,20 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\KnowledgeBase\Providers;
+namespace AidingApp\KnowledgeBase\Providers;
 
 use Filament\Panel;
 use App\Concerns\ImplementsGraphQL;
 use Illuminate\Support\ServiceProvider;
-use AdvisingApp\KnowledgeBase\KnowledgeBasePlugin;
+use AidingApp\KnowledgeBase\KnowledgeBasePlugin;
 use App\Registries\RoleBasedAccessControlRegistry;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use AdvisingApp\KnowledgeBase\Models\KnowledgeBaseItem;
-use AdvisingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
-use AdvisingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
-use AdvisingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
-use AdvisingApp\KnowledgeBase\Observers\KnowledgeBaseItemObserver;
-use AdvisingApp\KnowledgeBase\Registries\KnowledgeBaseRbacRegistry;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
+use AidingApp\KnowledgeBase\Observers\KnowledgeBaseItemObserver;
+use AidingApp\KnowledgeBase\Registries\KnowledgeBaseRbacRegistry;
 
 class KnowledgeBaseServiceProvider extends ServiceProvider
 {

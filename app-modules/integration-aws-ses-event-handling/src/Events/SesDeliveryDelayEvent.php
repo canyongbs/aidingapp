@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\IntegrationAwsSesEventHandling\Events;
+namespace AidingApp\IntegrationAwsSesEventHandling\Events;
 
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use AdvisingApp\IntegrationAwsSesEventHandling\DataTransferObjects\SesEventData;
+use AidingApp\IntegrationAwsSesEventHandling\DataTransferObjects\SesEventData;
 
 class SesDeliveryDelayEvent
 {

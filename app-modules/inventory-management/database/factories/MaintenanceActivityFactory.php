@@ -34,16 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InventoryManagement\Database\Factories;
+namespace AidingApp\InventoryManagement\Database\Factories;
 
+use AidingApp\InventoryManagement\Models\Asset;
 use Database\Factories\Concerns\RandomizeState;
-use AdvisingApp\InventoryManagement\Models\Asset;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use AdvisingApp\InventoryManagement\Models\MaintenanceProvider;
-use AdvisingApp\InventoryManagement\Enums\MaintenanceActivityStatus;
+use AidingApp\InventoryManagement\Models\MaintenanceProvider;
+use AidingApp\InventoryManagement\Enums\MaintenanceActivityStatus;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AdvisingApp\InventoryManagement\Models\MaintenanceActivity>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AidingApp\InventoryManagement\Models\MaintenanceActivity>
  */
 class MaintenanceActivityFactory extends Factory
 {

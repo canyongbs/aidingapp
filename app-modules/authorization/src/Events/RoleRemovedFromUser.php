@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Authorization\Events;
+namespace AidingApp\Authorization\Events;
 
 use App\Models\User;
 use Illuminate\Queue\SerializesModels;
-use AdvisingApp\Authorization\Models\Role;
+use AidingApp\Authorization\Models\Role;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
 

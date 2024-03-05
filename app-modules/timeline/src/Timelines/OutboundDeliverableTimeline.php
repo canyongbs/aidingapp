@@ -34,14 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Timeline\Timelines;
+namespace AidingApp\Timeline\Timelines;
 
 use Filament\Actions\ViewAction;
-use AdvisingApp\Timeline\Models\CustomTimeline;
-use AdvisingApp\Notification\Enums\NotificationChannel;
-use AdvisingApp\Notification\Models\OutboundDeliverable;
-use AdvisingApp\ServiceManagement\Models\ServiceRequest;
-use AdvisingApp\Notification\Filament\Actions\OutboundDeliverableViewAction;
+use AidingApp\Timeline\Models\CustomTimeline;
+use AidingApp\Notification\Enums\NotificationChannel;
+use AidingApp\Notification\Models\OutboundDeliverable;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\Notification\Filament\Actions\OutboundDeliverableViewAction;
 
 class OutboundDeliverableTimeline extends CustomTimeline
 {

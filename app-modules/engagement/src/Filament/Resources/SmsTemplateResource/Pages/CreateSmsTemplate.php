@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Filament\Resources\SmsTemplateResource\Pages;
+namespace AidingApp\Engagement\Filament\Resources\SmsTemplateResource\Pages;
 
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -43,7 +43,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\CreateRecord;
 use FilamentTiptapEditor\Enums\TiptapOutput;
-use AdvisingApp\Engagement\Filament\Resources\SmsTemplateResource;
+use AidingApp\Engagement\Filament\Resources\SmsTemplateResource;
 
 class CreateSmsTemplate extends CreateRecord
 {

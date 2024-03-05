@@ -34,29 +34,29 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Survey\Http\Controllers;
+namespace AidingApp\Survey\Http\Controllers;
 
 use Closure;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Filament\Support\Colors\Color;
+use AidingApp\Survey\Models\Survey;
 use Illuminate\Support\Facades\URL;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
-use AdvisingApp\Survey\Models\Survey;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Notification;
+use AidingApp\Survey\Models\SurveySubmission;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response;
-use AdvisingApp\Survey\Models\SurveySubmission;
-use AdvisingApp\Form\Actions\GenerateFormKitSchema;
-use AdvisingApp\Survey\Models\SurveyAuthentication;
-use AdvisingApp\Form\Actions\GenerateSubmissibleValidation;
-use AdvisingApp\Form\Actions\ResolveSubmissionAuthorFromEmail;
-use AdvisingApp\Form\Notifications\AuthenticateFormNotification;
-use AdvisingApp\Form\Filament\Blocks\EducatableEmailFormFieldBlock;
-use AdvisingApp\IntegrationGoogleRecaptcha\Settings\GoogleRecaptchaSettings;
+use AidingApp\Form\Actions\GenerateFormKitSchema;
+use AidingApp\Survey\Models\SurveyAuthentication;
+use AidingApp\Form\Actions\GenerateSubmissibleValidation;
+use AidingApp\Form\Actions\ResolveSubmissionAuthorFromEmail;
+use AidingApp\Form\Notifications\AuthenticateFormNotification;
+use AidingApp\Form\Filament\Blocks\EducatableEmailFormFieldBlock;
+use AidingApp\IntegrationGoogleRecaptcha\Settings\GoogleRecaptchaSettings;
 
 class SurveyWidgetController extends Controller
 {

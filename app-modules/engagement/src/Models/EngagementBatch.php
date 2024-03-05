@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Models;
+namespace AidingApp\Engagement\Models;
 
 use App\Models\User;
 use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use AdvisingApp\Engagement\Models\Concerns\HasManyEngagements;
+use AidingApp\Engagement\Models\Concerns\HasManyEngagements;
 
 /**
  * @mixin IdeHelperEngagementBatch

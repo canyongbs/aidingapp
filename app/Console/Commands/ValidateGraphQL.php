@@ -140,7 +140,7 @@ class ValidateGraphQL extends Command implements PromptsForMissingInput
 
                 $line = $line->remove('*')->trim();
 
-                if ($line->startsWith(['App', 'AdvisingApp'])) {
+                if ($line->startsWith(['App', 'AidingApp'])) {
                     $line = $line->prepend('\\')->append('::class');
                 }
 

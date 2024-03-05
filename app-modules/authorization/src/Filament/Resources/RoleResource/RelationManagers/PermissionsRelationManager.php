@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Authorization\Filament\Resources\RoleResource\RelationManagers;
+namespace AidingApp\Authorization\Filament\Resources\RoleResource\RelationManagers;
 
 use Filament\Forms\Form;
 use Filament\Tables\Table;

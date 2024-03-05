@@ -49,12 +49,12 @@ use function PHPUnit\Framework\assertCount;
 use function PHPUnit\Framework\assertEmpty;
 use function Pest\Laravel\assertDatabaseHas;
 
-use AdvisingApp\Authorization\Enums\LicenseType;
-use AdvisingApp\Notification\Events\TriggeredAutoSubscription;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestUpdate;
-use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource;
-use AdvisingApp\ServiceManagement\Tests\RequestFactories\CreateServiceRequestUpdateRequestFactory;
-use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource\Pages\CreateServiceRequestUpdate;
+use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\Notification\Events\TriggeredAutoSubscription;
+use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource;
+use AidingApp\ServiceManagement\Tests\RequestFactories\CreateServiceRequestUpdateRequestFactory;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource\Pages\CreateServiceRequestUpdate;
 
 test('A successful action on the CreateServiceRequestUpdate page', function () {
     // Because we create a ServiceRequest there is already a Subscription created.

@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Form\Actions;
+namespace AidingApp\Form\Actions;
 
 use Illuminate\Bus\Queueable;
+use AidingApp\Form\Models\Submission;
 use Illuminate\Queue\SerializesModels;
-use AdvisingApp\Form\Models\Submission;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;

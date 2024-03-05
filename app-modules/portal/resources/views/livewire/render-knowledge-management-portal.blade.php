@@ -32,8 +32,8 @@
 </COPYRIGHT>
 --}}
 @php
-    use AdvisingApp\Portal\Enums\PortalType;
-    use AdvisingApp\Portal\Actions\GeneratePortalEmbedCode;
+    use AidingApp\Portal\Enums\PortalType;
+    use AidingApp\Portal\Actions\GeneratePortalEmbedCode;
 @endphp
 
 <div class="flex items-center justify-center">

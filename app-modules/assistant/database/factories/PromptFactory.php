@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Assistant\Database\Factories;
+namespace AidingApp\Assistant\Database\Factories;
 
-use AdvisingApp\Assistant\Models\Prompt;
-use AdvisingApp\Assistant\Models\PromptType;
+use AidingApp\Assistant\Models\Prompt;
+use AidingApp\Assistant\Models\PromptType;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Timeline\Timelines;
+namespace AidingApp\Timeline\Timelines;
 
 use Filament\Actions\ViewAction;
-use AdvisingApp\Timeline\Models\CustomTimeline;
-use AdvisingApp\InventoryManagement\Models\AssetCheckOut;
-use AdvisingApp\InventoryManagement\Filament\Resources\AssetCheckOutResource\Components\AssetCheckOutViewAction;
+use AidingApp\Timeline\Models\CustomTimeline;
+use AidingApp\InventoryManagement\Models\AssetCheckOut;
+use AidingApp\InventoryManagement\Filament\Resources\AssetCheckOutResource\Components\AssetCheckOutViewAction;
 
 // TODO Decide where these belong - might want to keep these in the context of the original module
 class AssetCheckOutTimeline extends CustomTimeline

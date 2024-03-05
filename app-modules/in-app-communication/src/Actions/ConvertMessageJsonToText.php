@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InAppCommunication\Actions;
+namespace AidingApp\InAppCommunication\Actions;
 
 use App\Models\User;
 

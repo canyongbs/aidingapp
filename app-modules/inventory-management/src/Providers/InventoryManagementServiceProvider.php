@@ -34,25 +34,25 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InventoryManagement\Providers;
+namespace AidingApp\InventoryManagement\Providers;
 
 use Filament\Panel;
 use Illuminate\Support\ServiceProvider;
-use AdvisingApp\InventoryManagement\Models\Asset;
+use AidingApp\InventoryManagement\Models\Asset;
 use App\Registries\RoleBasedAccessControlRegistry;
+use AidingApp\InventoryManagement\Models\AssetType;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use AdvisingApp\InventoryManagement\Models\AssetType;
-use AdvisingApp\InventoryManagement\Models\AssetStatus;
-use AdvisingApp\InventoryManagement\Models\AssetCheckIn;
-use AdvisingApp\InventoryManagement\Models\AssetCheckOut;
-use AdvisingApp\InventoryManagement\Models\AssetLocation;
-use AdvisingApp\InventoryManagement\InventoryManagementPlugin;
-use AdvisingApp\InventoryManagement\Models\MaintenanceActivity;
-use AdvisingApp\InventoryManagement\Models\MaintenanceProvider;
-use AdvisingApp\InventoryManagement\Observers\AssetCheckInObserver;
-use AdvisingApp\InventoryManagement\Observers\AssetCheckOutObserver;
-use AdvisingApp\InventoryManagement\Observers\MaintenanceActivityObserver;
-use AdvisingApp\InventoryManagement\Registries\InventoryManagementRbacRegistry;
+use AidingApp\InventoryManagement\Models\AssetStatus;
+use AidingApp\InventoryManagement\Models\AssetCheckIn;
+use AidingApp\InventoryManagement\Models\AssetCheckOut;
+use AidingApp\InventoryManagement\Models\AssetLocation;
+use AidingApp\InventoryManagement\InventoryManagementPlugin;
+use AidingApp\InventoryManagement\Models\MaintenanceActivity;
+use AidingApp\InventoryManagement\Models\MaintenanceProvider;
+use AidingApp\InventoryManagement\Observers\AssetCheckInObserver;
+use AidingApp\InventoryManagement\Observers\AssetCheckOutObserver;
+use AidingApp\InventoryManagement\Observers\MaintenanceActivityObserver;
+use AidingApp\InventoryManagement\Registries\InventoryManagementRbacRegistry;
 
 class InventoryManagementServiceProvider extends ServiceProvider
 {

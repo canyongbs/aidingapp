@@ -32,10 +32,10 @@
 </COPYRIGHT>
 --}}
 @php
-    use AdvisingApp\StudentDataModel\Models\Student;
-    use AdvisingApp\StudentDataModel\Filament\Resources\StudentResource;
-    use AdvisingApp\Contact\Models\Contact;
-    use AdvisingApp\Contact\Filament\Resources\ContactResource;
+    use AidingApp\StudentDataModel\Models\Student;
+    use AidingApp\StudentDataModel\Filament\Resources\StudentResource;
+    use AidingApp\Contact\Models\Contact;
+    use AidingApp\Contact\Filament\Resources\ContactResource;
 @endphp
 
 <x-form::blocks.field-wrapper

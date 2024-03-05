@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Authorization\Console\Commands;
+namespace AidingApp\Authorization\Console\Commands;
 
 use Illuminate\Console\Command;
 use Spatie\Multitenancy\Commands\Concerns\TenantAware;
-use AdvisingApp\Authorization\Actions\CreateAndSyncRoleGroups;
+use AidingApp\Authorization\Actions\CreateAndSyncRoleGroups;
 
 class SetupRoleGroups extends Command
 {

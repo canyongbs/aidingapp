@@ -34,17 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InventoryManagement\Database\Factories;
+namespace AidingApp\InventoryManagement\Database\Factories;
 
 use Carbon\Carbon;
 use App\Models\User;
-use AdvisingApp\Contact\Models\Contact;
-use AdvisingApp\InventoryManagement\Models\Asset;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\InventoryManagement\Models\Asset;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AdvisingApp\InventoryManagement\Models\AssetCheckOut>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AidingApp\InventoryManagement\Models\AssetCheckOut>
  */
 class AssetCheckOutFactory extends Factory
 {

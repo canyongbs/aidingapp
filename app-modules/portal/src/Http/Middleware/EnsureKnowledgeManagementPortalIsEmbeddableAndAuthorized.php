@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Portal\Http\Middleware;
+namespace AidingApp\Portal\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use AidingApp\Portal\Settings\PortalSettings;
 use Symfony\Component\HttpFoundation\Response;
-use AdvisingApp\Portal\Settings\PortalSettings;
 
 class EnsureKnowledgeManagementPortalIsEmbeddableAndAuthorized
 {

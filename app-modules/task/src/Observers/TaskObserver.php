@@ -34,15 +34,15 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Task\Observers;
+namespace AidingApp\Task\Observers;
 
 use Exception;
 use App\Models\User;
-use AdvisingApp\Task\Models\Task;
+use AidingApp\Task\Models\Task;
 use Illuminate\Support\Facades\DB;
-use AdvisingApp\Authorization\Models\Permission;
-use AdvisingApp\Notification\Events\TriggeredAutoSubscription;
-use AdvisingApp\Task\Notifications\TaskAssignedToUserNotification;
+use AidingApp\Authorization\Models\Permission;
+use AidingApp\Notification\Events\TriggeredAutoSubscription;
+use AidingApp\Task\Notifications\TaskAssignedToUserNotification;
 
 class TaskObserver
 {

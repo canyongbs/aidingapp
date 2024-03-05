@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Portal\Models;
+namespace AidingApp\Portal\Models;
 
 use App\Models\BaseModel;
 use Illuminate\Support\Carbon;
-use AdvisingApp\Portal\Enums\PortalType;
+use AidingApp\Portal\Enums\PortalType;
 use App\Models\Attributes\NoPermissions;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\MassPrunable;

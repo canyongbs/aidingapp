@@ -38,7 +38,7 @@ namespace App\Models\Scopes;
 
 use Exception;
 use App\Models\Authenticatable;
-use AdvisingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\Contact;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 

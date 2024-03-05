@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InventoryManagement\Policies;
+namespace AidingApp\InventoryManagement\Policies;
 
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
-use AdvisingApp\InventoryManagement\Models\MaintenanceActivity;
+use AidingApp\InventoryManagement\Models\MaintenanceActivity;
 
 class MaintenanceActivityPolicy
 {

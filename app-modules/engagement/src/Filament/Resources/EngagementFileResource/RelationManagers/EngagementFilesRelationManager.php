@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Filament\Resources\EngagementFileResource\RelationManagers;
+namespace AidingApp\Engagement\Filament\Resources\EngagementFileResource\RelationManagers;
 
 use Filament\Forms\Form;
 use Filament\Tables\Table;
@@ -47,7 +47,7 @@ use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
-use AdvisingApp\Engagement\Filament\Resources\EngagementFileResource;
+use AidingApp\Engagement\Filament\Resources\EngagementFileResource;
 
 class EngagementFilesRelationManager extends RelationManager
 {

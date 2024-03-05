@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Filament\Resources\SlaResource\RelationManagers;
+namespace AidingApp\ServiceManagement\Filament\Resources\SlaResource\RelationManagers;
 
 use Filament\Forms\Get;
 use Filament\Tables\Table;
@@ -47,8 +47,8 @@ use Filament\Tables\Actions\AssociateAction;
 use Filament\Tables\Actions\DissociateAction;
 use Filament\Tables\Actions\DissociateBulkAction;
 use Filament\Resources\RelationManagers\RelationManager;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestPriority;
-use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
+use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
 
 class ServiceRequestPrioritiesRelationManager extends RelationManager
 {

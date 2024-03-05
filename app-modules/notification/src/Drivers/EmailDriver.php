@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Notification\Drivers;
+namespace AidingApp\Notification\Drivers;
 
-use AdvisingApp\Notification\Models\OutboundDeliverable;
-use AdvisingApp\Notification\DataTransferObjects\UpdateDeliveryStatusData;
+use AidingApp\Notification\Models\OutboundDeliverable;
+use AidingApp\Notification\DataTransferObjects\UpdateDeliveryStatusData;
 
 class EmailDriver implements OutboundDeliverableDriver
 {

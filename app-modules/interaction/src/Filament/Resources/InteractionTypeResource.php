@@ -34,16 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Interaction\Filament\Resources;
+namespace AidingApp\Interaction\Filament\Resources;
 
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Forms\Components\TextInput;
 use App\Filament\Clusters\InteractionManagement;
-use AdvisingApp\Interaction\Models\InteractionType;
-use AdvisingApp\Interaction\Filament\Resources\InteractionTypeResource\Pages\EditInteractionType;
-use AdvisingApp\Interaction\Filament\Resources\InteractionTypeResource\Pages\ListInteractionTypes;
-use AdvisingApp\Interaction\Filament\Resources\InteractionTypeResource\Pages\CreateInteractionType;
+use AidingApp\Interaction\Models\InteractionType;
+use AidingApp\Interaction\Filament\Resources\InteractionTypeResource\Pages\EditInteractionType;
+use AidingApp\Interaction\Filament\Resources\InteractionTypeResource\Pages\ListInteractionTypes;
+use AidingApp\Interaction\Filament\Resources\InteractionTypeResource\Pages\CreateInteractionType;
 
 class InteractionTypeResource extends Resource
 {

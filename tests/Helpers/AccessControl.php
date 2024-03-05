@@ -41,7 +41,7 @@ use Illuminate\Support\Arr;
 
 use function Pest\Laravel\actingAs;
 
-use AdvisingApp\Authorization\Enums\LicenseType;
+use AidingApp\Authorization\Enums\LicenseType;
 
 function testResourceRequiresPermissionForAccess(string $resource, string|array $permissions, string $method)
 {

@@ -34,15 +34,15 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Contact\Filament\Pages;
+namespace AidingApp\Contact\Filament\Pages;
 
 use App\Models\User;
-use AdvisingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\Contact;
 use App\Filament\Widgets\ContactGrowthChart;
 use Filament\Pages\Dashboard as BaseDashboard;
 use Symfony\Component\HttpFoundation\Response;
-use AdvisingApp\Contact\Filament\Widgets\ContactStats;
-use AdvisingApp\Contact\Filament\Widgets\ContactTasks;
+use AidingApp\Contact\Filament\Widgets\ContactStats;
+use AidingApp\Contact\Filament\Widgets\ContactTasks;
 
 class RecruitmentCrmDashboard extends BaseDashboard
 {

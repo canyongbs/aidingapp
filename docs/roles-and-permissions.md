@@ -40,7 +40,7 @@ The application defines two distinct types of permissions: those related directl
 The application defines a sane set of defaults for each model in the application, but also provides extensibility. In order to ensure that any new model introduced in the application automatically has the default `model` permissions defined for it, the following needs to be done:
 
 1. Register the model with the `Relation::morphMap()` in your module service provider
-2. Extend the `BaseModel`, or directly use the `AdvisingApp\Authorization\Models\Concerns\DefinesPermissions.php` trait on your model.
+2. Extend the `BaseModel`, or directly use the `AidingApp\Authorization\Models\Concerns\DefinesPermissions.php` trait on your model.
 
 Doing the following will ensure your model gets the following permission definitions:
 

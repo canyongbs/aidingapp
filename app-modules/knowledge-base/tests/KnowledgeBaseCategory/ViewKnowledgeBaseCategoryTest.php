@@ -39,9 +39,9 @@ use App\Settings\LicenseSettings;
 
 use function Pest\Laravel\actingAs;
 
-use AdvisingApp\Authorization\Enums\LicenseType;
-use AdvisingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
-use AdvisingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource;
+use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource;
 
 // TODO: Write ViewKnowledgeBaseCategory tests
 //test('The correct details are displayed on the ViewKnowledgeBaseCategory page', function () {});

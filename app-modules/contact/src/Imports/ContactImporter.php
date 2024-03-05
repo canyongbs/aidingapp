@@ -34,18 +34,18 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Contact\Imports;
+namespace AidingApp\Contact\Imports;
 
 use App\Models\User;
 use Illuminate\Support\Str;
+use AidingApp\Contact\Models\Contact;
 use Filament\Actions\Imports\Importer;
-use AdvisingApp\Contact\Models\Contact;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Actions\Imports\ImportColumn;
+use AidingApp\Contact\Models\ContactSource;
+use AidingApp\Contact\Models\ContactStatus;
 use Filament\Actions\Imports\Models\Import;
-use AdvisingApp\Contact\Models\ContactSource;
-use AdvisingApp\Contact\Models\ContactStatus;
 
 class ContactImporter extends Importer
 {

@@ -34,47 +34,47 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Contact\Models;
+namespace AidingApp\Contact\Models;
 
 use App\Models\User;
 use DateTimeInterface;
+use AidingApp\Task\Models\Task;
 use App\Models\Authenticatable;
-use AdvisingApp\Task\Models\Task;
+use AidingApp\Alert\Models\Alert;
 use App\Models\Scopes\HasLicense;
 use Illuminate\Support\Collection;
-use AdvisingApp\Alert\Models\Alert;
 use App\Models\Contracts\Educatable;
+use AidingApp\CareTeam\Models\CareTeam;
 use Illuminate\Notifications\Notifiable;
 use OwenIt\Auditing\Contracts\Auditable;
-use AdvisingApp\CareTeam\Models\CareTeam;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use AdvisingApp\Authorization\Enums\LicenseType;
-use AdvisingApp\Engagement\Models\EngagementFile;
-use AdvisingApp\Notification\Models\Subscription;
+use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\Engagement\Models\EngagementFile;
+use AidingApp\Notification\Models\Subscription;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use AidingApp\InventoryManagement\Models\AssetCheckIn;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use AidingApp\Engagement\Models\EngagementFileEntities;
+use AidingApp\InventoryManagement\Models\AssetCheckOut;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
-use AdvisingApp\InventoryManagement\Models\AssetCheckIn;
-use AdvisingApp\ServiceManagement\Models\ServiceRequest;
-use AdvisingApp\Engagement\Models\EngagementFileEntities;
-use AdvisingApp\InventoryManagement\Models\AssetCheckOut;
-use AdvisingApp\Contact\Filament\Resources\ContactResource;
-use AdvisingApp\Notification\Models\Contracts\Subscribable;
+use AidingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Notification\Models\Contracts\Subscribable;
 use Illuminate\Foundation\Auth\User as BaseAuthenticatable;
+use AidingApp\Notification\Models\Concerns\HasSubscriptions;
+use AidingApp\Notification\Models\Concerns\NotifiableViaSms;
+use AidingApp\Timeline\Models\Contracts\HasFilamentResource;
 use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
-use AdvisingApp\Notification\Models\Concerns\HasSubscriptions;
-use AdvisingApp\Notification\Models\Concerns\NotifiableViaSms;
-use AdvisingApp\Timeline\Models\Contracts\HasFilamentResource;
-use AdvisingApp\Authorization\Models\Concerns\DefinesPermissions;
-use AdvisingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AdvisingApp\Notification\Models\Contracts\NotifiableInterface;
-use AdvisingApp\Engagement\Models\Concerns\HasManyMorphedEngagements;
-use AdvisingApp\Interaction\Models\Concerns\HasManyMorphedInteractions;
-use AdvisingApp\Engagement\Models\Concerns\HasManyMorphedEngagementResponses;
+use AidingApp\Authorization\Models\Concerns\DefinesPermissions;
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Notification\Models\Contracts\NotifiableInterface;
+use AidingApp\Engagement\Models\Concerns\HasManyMorphedEngagements;
+use AidingApp\Interaction\Models\Concerns\HasManyMorphedInteractions;
+use AidingApp\Engagement\Models\Concerns\HasManyMorphedEngagementResponses;
 
 /**
  * @property string $display_name

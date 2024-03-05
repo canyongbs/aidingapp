@@ -37,12 +37,12 @@
 namespace App\Filament\Widgets;
 
 use Filament\Tables\Table;
-use AdvisingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\Contact;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Widgets\TableWidget as BaseWidget;
-use AdvisingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Contact\Filament\Resources\ContactResource;
 
 class RecentContactsList extends BaseWidget
 {

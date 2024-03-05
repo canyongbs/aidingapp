@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InventoryManagement\Filament\Resources\AssetCheckOutResource\Pages;
+namespace AidingApp\InventoryManagement\Filament\Resources\AssetCheckOutResource\Pages;
 
 use Filament\Tables\Table;
 use Filament\Tables\Actions\ViewAction;
@@ -42,10 +42,10 @@ use Filament\Tables\Columns\TextColumn;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
-use AdvisingApp\InventoryManagement\Models\AssetCheckOut;
-use AdvisingApp\InventoryManagement\Enums\AssetCheckOutStatus;
-use AdvisingApp\InventoryManagement\Filament\Resources\AssetResource;
-use AdvisingApp\InventoryManagement\Filament\Resources\AssetCheckOutResource;
+use AidingApp\InventoryManagement\Models\AssetCheckOut;
+use AidingApp\InventoryManagement\Enums\AssetCheckOutStatus;
+use AidingApp\InventoryManagement\Filament\Resources\AssetResource;
+use AidingApp\InventoryManagement\Filament\Resources\AssetCheckOutResource;
 
 class ListAssetCheckOuts extends ListRecords
 {

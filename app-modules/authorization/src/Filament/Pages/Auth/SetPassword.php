@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Authorization\Filament\Pages\Auth;
+namespace AidingApp\Authorization\Filament\Pages\Auth;
 
 use Filament\Panel;
 use App\Models\User;
@@ -52,7 +52,7 @@ use Filament\Notifications\Notification;
 use Illuminate\Validation\Rules\Password;
 use DanHarrin\LivewireRateLimiting\WithRateLimiting;
 use Filament\Pages\Concerns\InteractsWithFormActions;
-use AdvisingApp\Authorization\Http\Middleware\RedirectIfPasswordNotSet;
+use AidingApp\Authorization\Http\Middleware\RedirectIfPasswordNotSet;
 use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
 
 /**

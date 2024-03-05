@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Assistant\Database\Seeders;
+namespace AidingApp\Assistant\Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use AdvisingApp\Assistant\Models\PromptType;
+use AidingApp\Assistant\Models\PromptType;
 
 class PromptTypeSeeder extends Seeder
 {

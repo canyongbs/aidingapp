@@ -37,13 +37,13 @@
 namespace App\Filament\Widgets;
 
 use Filament\Tables\Table;
-use AdvisingApp\Task\Models\Task;
-use AdvisingApp\Task\Enums\TaskStatus;
+use AidingApp\Task\Models\Task;
+use AidingApp\Task\Enums\TaskStatus;
 use Filament\Tables\Columns\TextColumn;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Widgets\TableWidget as BaseWidget;
-use AdvisingApp\Task\Filament\Resources\TaskResource\Components\TaskViewAction;
+use AidingApp\Task\Filament\Resources\TaskResource\Components\TaskViewAction;
 
 class MyTasks extends BaseWidget
 {

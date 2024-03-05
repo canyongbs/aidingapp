@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement;
+namespace AidingApp\Engagement;
 
 use Filament\Panel;
 use Filament\Contracts\Plugin;
@@ -51,11 +51,11 @@ class EngagementPlugin implements Plugin
         $panel
             ->discoverResources(
                 in: __DIR__ . '/Filament/Resources',
-                for: 'AdvisingApp\\Engagement\\Filament\\Resources'
+                for: 'AidingApp\\Engagement\\Filament\\Resources'
             )
             ->discoverPages(
                 in: __DIR__ . '/Filament/Pages',
-                for: 'AdvisingApp\\Engagement\\Filament\\Pages'
+                for: 'AidingApp\\Engagement\\Filament\\Pages'
             );
     }
 

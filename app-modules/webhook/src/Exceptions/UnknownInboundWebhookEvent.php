@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Webhook\Exceptions;
+namespace AidingApp\Webhook\Exceptions;
 
 use Exception;
 

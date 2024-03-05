@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Notification\Observers;
+namespace AidingApp\Notification\Observers;
 
-use AdvisingApp\Notification\Models\OutboundDeliverable;
-use AdvisingApp\Timeline\Events\TimelineableRecordCreated;
-use AdvisingApp\Timeline\Events\TimelineableRecordDeleted;
+use AidingApp\Notification\Models\OutboundDeliverable;
+use AidingApp\Timeline\Events\TimelineableRecordCreated;
+use AidingApp\Timeline\Events\TimelineableRecordDeleted;
 
 class OutboundDeliverableObserver
 {

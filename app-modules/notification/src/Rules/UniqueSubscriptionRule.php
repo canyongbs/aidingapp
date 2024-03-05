@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Notification\Rules;
+namespace AidingApp\Notification\Rules;
 
 use Closure;
-use AdvisingApp\Notification\Models\Subscription;
+use AidingApp\Notification\Models\Subscription;
 use Illuminate\Contracts\Validation\DataAwareRule;
 use Illuminate\Contracts\Validation\ValidationRule;
 

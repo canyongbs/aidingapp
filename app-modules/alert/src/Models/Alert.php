@@ -34,22 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Alert\Models;
+namespace AidingApp\Alert\Models;
 
 use App\Models\BaseModel;
-use AdvisingApp\Contact\Models\Contact;
-use AdvisingApp\Alert\Enums\AlertStatus;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Alert\Enums\AlertStatus;
+use AidingApp\Alert\Enums\AlertSeverity;
 use OwenIt\Auditing\Contracts\Auditable;
 use Illuminate\Database\Eloquent\Builder;
-use AdvisingApp\Alert\Enums\AlertSeverity;
 use App\Models\Scopes\LicensedToEducatable;
 use App\Models\Concerns\BelongsToEducatable;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use AdvisingApp\StudentDataModel\Models\Student;
+use AidingApp\StudentDataModel\Models\Student;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use AdvisingApp\Notification\Models\Contracts\Subscribable;
-use AdvisingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AdvisingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
+use AidingApp\Notification\Models\Contracts\Subscribable;
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
 
 /**
  * @property-read Student|Contact $concern

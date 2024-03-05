@@ -47,9 +47,9 @@
 
 use App\Models\User;
 use Illuminate\Support\Collection;
-use AdvisingApp\Authorization\Models\Role;
-use AdvisingApp\Authorization\Models\RoleGroup;
-use AdvisingApp\Authorization\Enums\LicenseType;
+use AidingApp\Authorization\Models\Role;
+use AidingApp\Authorization\Models\RoleGroup;
+use AidingApp\Authorization\Enums\LicenseType;
 
 uses(Tests\TestCase::class)->in('../tests', '../app-modules/*/tests');
 

@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\IntegrationAI\Client\Playground;
+namespace AidingApp\IntegrationAI\Client\Playground;
 
 use Illuminate\Support\Str;
 

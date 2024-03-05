@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Assistant\Jobs;
+namespace AidingApp\Assistant\Jobs;
 
 use App\Models\User;
 use Illuminate\Bus\Batchable;
@@ -43,11 +43,11 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use AdvisingApp\Assistant\Models\AssistantChat;
+use AidingApp\Assistant\Models\AssistantChat;
+use AidingApp\Assistant\Enums\AssistantChatShareVia;
+use AidingApp\Assistant\Models\AssistantChatMessage;
 use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
-use AdvisingApp\Assistant\Enums\AssistantChatShareVia;
-use AdvisingApp\Assistant\Models\AssistantChatMessage;
-use AdvisingApp\Assistant\Notifications\SendAssistantTranscriptNotification;
+use AidingApp\Assistant\Notifications\SendAssistantTranscriptNotification;
 
 class ShareAssistantChatJob implements ShouldQueue
 {

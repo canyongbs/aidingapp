@@ -34,14 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Database\Factories;
+namespace AidingApp\Engagement\Database\Factories;
 
-use AdvisingApp\Engagement\Models\Engagement;
+use AidingApp\Engagement\Models\Engagement;
 use Database\Factories\Concerns\RandomizeState;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use AdvisingApp\Engagement\Models\EngagementDeliverable;
-use AdvisingApp\Engagement\Enums\EngagementDeliveryMethod;
-use AdvisingApp\Engagement\Enums\EngagementDeliveryStatus;
+use AidingApp\Engagement\Models\EngagementDeliverable;
+use AidingApp\Engagement\Enums\EngagementDeliveryMethod;
+use AidingApp\Engagement\Enums\EngagementDeliveryStatus;
 
 /**
  * @extends Factory<EngagementDeliverable>

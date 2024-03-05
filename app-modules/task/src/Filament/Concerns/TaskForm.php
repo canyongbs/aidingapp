@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Task\Filament\Concerns;
+namespace AidingApp\Task\Filament\Concerns;
 
 use Closure;
 use App\Models\User;
@@ -42,7 +42,7 @@ use Filament\Forms\Get;
 use Filament\Forms\Set;
 use App\Models\Authenticatable;
 use App\Models\Scopes\HasLicense;
-use AdvisingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\Contact;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 

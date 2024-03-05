@@ -34,15 +34,15 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\KnowledgeBase\Filament\Resources;
+namespace AidingApp\KnowledgeBase\Filament\Resources;
 
 use Filament\Resources\Resource;
 use App\Filament\Clusters\KnowledgeManagement;
-use AdvisingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
-use AdvisingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualityResource\Pages\EditKnowledgeBaseQuality;
-use AdvisingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualityResource\Pages\ViewKnowledgeBaseQuality;
-use AdvisingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualityResource\Pages\CreateKnowledgeBaseQuality;
-use AdvisingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualityResource\Pages\ListKnowledgeBaseQualities;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualityResource\Pages\EditKnowledgeBaseQuality;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualityResource\Pages\ViewKnowledgeBaseQuality;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualityResource\Pages\CreateKnowledgeBaseQuality;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualityResource\Pages\ListKnowledgeBaseQualities;
 
 class KnowledgeBaseQualityResource extends Resource
 {

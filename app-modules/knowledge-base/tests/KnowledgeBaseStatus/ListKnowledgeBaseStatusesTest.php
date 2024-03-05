@@ -39,8 +39,8 @@ use App\Settings\LicenseSettings;
 
 use function Pest\Laravel\actingAs;
 
-use AdvisingApp\Authorization\Enums\LicenseType;
-use AdvisingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource;
+use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource;
 
 // TODO: Write ListKnowledgeBaseStatuses tests
 //test('The correct details are displayed on the ListKnowledgeBaseStatuses page', function () {});

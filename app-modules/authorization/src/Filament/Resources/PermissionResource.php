@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Authorization\Filament\Resources;
+namespace AidingApp\Authorization\Filament\Resources;
 
 use Filament\Forms\Form;
 use Filament\Tables\Table;
@@ -43,10 +43,10 @@ use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use App\Filament\Tables\Columns\IdColumn;
-use AdvisingApp\Authorization\Models\Permission;
-use AdvisingApp\Authorization\Filament\Resources\PermissionResource\Pages\ViewPermission;
-use AdvisingApp\Authorization\Filament\Resources\PermissionResource\Pages\ListPermissions;
-use AdvisingApp\Authorization\Filament\Resources\PermissionResource\RelationManagers\RolesRelationManager;
+use AidingApp\Authorization\Models\Permission;
+use AidingApp\Authorization\Filament\Resources\PermissionResource\Pages\ViewPermission;
+use AidingApp\Authorization\Filament\Resources\PermissionResource\Pages\ListPermissions;
+use AidingApp\Authorization\Filament\Resources\PermissionResource\RelationManagers\RolesRelationManager;
 
 class PermissionResource extends Resource
 {

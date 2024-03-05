@@ -34,16 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Report\Filament\Pages;
+namespace AidingApp\Report\Filament\Pages;
 
 use App\Models\User;
 use App\Enums\Feature;
 use Filament\Forms\Form;
 use Filament\Pages\SettingsPage;
 use Filament\Forms\Components\Textarea;
-use AdvisingApp\Authorization\Enums\LicenseType;
+use AidingApp\Authorization\Enums\LicenseType;
 use App\Filament\Clusters\ArtificialIntelligence;
-use AdvisingApp\Report\Settings\ReportAssistantSettings;
+use AidingApp\Report\Settings\ReportAssistantSettings;
 
 class ManageReportAssistantSettings extends SettingsPage
 {

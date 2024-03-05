@@ -38,8 +38,8 @@ namespace Tests;
 
 use App\Models\User;
 use App\Actions\Paths\ModulePath;
-use AdvisingApp\Authorization\Models\Role;
-use AdvisingApp\Authorization\Enums\LicenseType;
+use AidingApp\Authorization\Models\Role;
+use AidingApp\Authorization\Enums\LicenseType;
 
 function asSuperAdmin(?User $user = null): TestCase
 {

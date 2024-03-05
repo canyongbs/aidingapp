@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InventoryManagement\Filament\Resources\AssetResource\RelationManagers;
+namespace AidingApp\InventoryManagement\Filament\Resources\AssetResource\RelationManagers;
 
 use Filament\Forms\Form;
 use Filament\Tables\Table;
@@ -48,8 +48,8 @@ use Filament\Tables\Actions\CreateAction;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Resources\RelationManagers\RelationManager;
-use AdvisingApp\InventoryManagement\Models\MaintenanceProvider;
-use AdvisingApp\InventoryManagement\Enums\MaintenanceActivityStatus;
+use AidingApp\InventoryManagement\Models\MaintenanceProvider;
+use AidingApp\InventoryManagement\Enums\MaintenanceActivityStatus;
 
 class MaintenanceActivitiesRelationManager extends RelationManager
 {

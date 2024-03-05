@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Tests\RequestFactories;
+namespace AidingApp\ServiceManagement\Tests\RequestFactories;
 
 use Worksome\RequestFactories\RequestFactory;
-use AdvisingApp\ServiceManagement\Enums\ColumnColorOptions;
-use AdvisingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
+use AidingApp\ServiceManagement\Enums\ColumnColorOptions;
+use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 
 class CreateServiceRequestStatusRequestFactory extends RequestFactory
 {

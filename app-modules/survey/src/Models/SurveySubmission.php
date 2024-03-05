@@ -34,18 +34,18 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Survey\Models;
+namespace AidingApp\Survey\Models;
 
 use App\Models\User;
-use AdvisingApp\Contact\Models\Contact;
-use AdvisingApp\Form\Models\Submission;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Form\Models\Submission;
 use Illuminate\Database\Eloquent\Builder;
 use App\Models\Scopes\LicensedToEducatable;
-use AdvisingApp\Form\Enums\FormSubmissionStatus;
-use AdvisingApp\StudentDataModel\Models\Student;
+use AidingApp\Form\Enums\FormSubmissionStatus;
+use AidingApp\StudentDataModel\Models\Student;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use AdvisingApp\Form\Enums\FormSubmissionRequestDeliveryMethod;
+use AidingApp\Form\Enums\FormSubmissionRequestDeliveryMethod;
 
 /**
  * @property Student|Contact|null $author

@@ -38,7 +38,7 @@ namespace App\Http\Controllers;
 
 use Symfony\Component\HttpFoundation\Response;
 use App\Http\Requests\SetAzureSsoSettingRequest;
-use AdvisingApp\Authorization\Settings\AzureSsoSettings;
+use AidingApp\Authorization\Settings\AzureSsoSettings;
 
 class SetAzureSsoSettingController extends Controller
 {

@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Interaction\Database\Factories;
+namespace AidingApp\Interaction\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AdvisingApp\Interaction\Models\InteractionRelation>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AidingApp\Interaction\Models\InteractionRelation>
  */
 class InteractionRelationFactory extends Factory
 {

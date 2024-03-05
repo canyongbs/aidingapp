@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Task\Filament\Resources\TaskResource\Pages;
+namespace AidingApp\Task\Filament\Resources\TaskResource\Pages;
 
 use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
-use AdvisingApp\Task\Filament\Resources\TaskResource;
+use AidingApp\Task\Filament\Resources\TaskResource;
 
 class ViewTask extends ViewRecord
 {

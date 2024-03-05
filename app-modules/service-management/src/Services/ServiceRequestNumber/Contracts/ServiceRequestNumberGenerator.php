@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts;
+namespace AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts;
 
 interface ServiceRequestNumberGenerator
 {

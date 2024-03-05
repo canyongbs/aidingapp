@@ -34,13 +34,13 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Task\Filament\Resources\TaskResource\Pages;
+namespace AidingApp\Task\Filament\Resources\TaskResource\Pages;
 
 use Filament\Actions;
 use Filament\Forms\Form;
 use Filament\Resources\Pages\EditRecord;
-use AdvisingApp\Task\Filament\Concerns\TaskEditForm;
-use AdvisingApp\Task\Filament\Resources\TaskResource;
+use AidingApp\Task\Filament\Concerns\TaskEditForm;
+use AidingApp\Task\Filament\Resources\TaskResource;
 
 class EditTask extends EditRecord
 {

@@ -34,14 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Form\Notifications;
+namespace AidingApp\Form\Notifications;
 
-use AdvisingApp\Form\Models\SubmissibleAuthentication;
-use AdvisingApp\Notification\Notifications\BaseNotification;
-use AdvisingApp\Notification\Notifications\EmailNotification;
-use AdvisingApp\Notification\Notifications\Messages\MailMessage;
-use AdvisingApp\Notification\Notifications\OnDemandNotification;
-use AdvisingApp\Notification\Notifications\Concerns\EmailChannelTrait;
+use AidingApp\Form\Models\SubmissibleAuthentication;
+use AidingApp\Notification\Notifications\BaseNotification;
+use AidingApp\Notification\Notifications\EmailNotification;
+use AidingApp\Notification\Notifications\Messages\MailMessage;
+use AidingApp\Notification\Notifications\OnDemandNotification;
+use AidingApp\Notification\Notifications\Concerns\EmailChannelTrait;
 
 class AuthenticateFormNotification extends BaseNotification implements EmailNotification, OnDemandNotification
 {

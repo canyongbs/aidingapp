@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Division\Database\Factories;
+namespace AidingApp\Division\Database\Factories;
 
 use App\Models\User;
-use AdvisingApp\Division\Models\Division;
+use AidingApp\Division\Models\Division;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

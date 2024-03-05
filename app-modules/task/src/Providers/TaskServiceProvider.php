@@ -34,16 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Task\Providers;
+namespace AidingApp\Task\Providers;
 
 use Filament\Panel;
+use AidingApp\Task\TaskPlugin;
+use AidingApp\Task\Models\Task;
 use Filament\Support\Assets\Js;
-use AdvisingApp\Task\TaskPlugin;
-use AdvisingApp\Task\Models\Task;
 use Illuminate\Support\ServiceProvider;
+use AidingApp\Task\Observers\TaskObserver;
 use Filament\Support\Facades\FilamentAsset;
-use AdvisingApp\Task\Observers\TaskObserver;
-use AdvisingApp\Task\Registries\TaskRbacRegistry;
+use AidingApp\Task\Registries\TaskRbacRegistry;
 use App\Registries\RoleBasedAccessControlRegistry;
 use Illuminate\Database\Eloquent\Relations\Relation;
 

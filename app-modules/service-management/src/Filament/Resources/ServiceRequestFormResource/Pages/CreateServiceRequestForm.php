@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestFormResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestFormResource\Pages;
 
 use Filament\Forms\Form;
 use Filament\Resources\Pages\CreateRecord;
-use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestFormResource;
-use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestFormResource\Pages\Concerns\HasSharedFormConfiguration;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestFormResource;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestFormResource\Pages\Concerns\HasSharedFormConfiguration;
 
 class CreateServiceRequestForm extends CreateRecord
 {

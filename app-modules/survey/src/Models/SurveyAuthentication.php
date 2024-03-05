@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Survey\Models;
+namespace AidingApp\Survey\Models;
 
 use App\Models\Attributes\NoPermissions;
+use AidingApp\Form\Models\SubmissibleAuthentication;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use AdvisingApp\Form\Models\SubmissibleAuthentication;
 
 /**
  * @mixin IdeHelperSurveyAuthentication

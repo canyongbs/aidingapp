@@ -34,19 +34,19 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\KnowledgeBase\Models;
+namespace AidingApp\KnowledgeBase\Models;
 
 use DateTimeInterface;
 use App\Models\BaseModel;
 use Spatie\MediaLibrary\HasMedia;
+use AidingApp\Division\Models\Division;
 use OwenIt\Auditing\Contracts\Auditable;
-use AdvisingApp\Division\Models\Division;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use AdvisingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 
 /**
  * @mixin IdeHelperKnowledgeBaseItem

@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Contact\Filament\Resources\ContactStatusResource\Pages;
+namespace AidingApp\Contact\Filament\Resources\ContactStatusResource\Pages;
 
 use Filament\Actions;
 use Filament\Tables\Table;
@@ -43,10 +43,10 @@ use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Resources\Pages\ListRecords;
+use AidingApp\Contact\Models\ContactStatus;
 use Filament\Tables\Actions\BulkActionGroup;
-use AdvisingApp\Contact\Models\ContactStatus;
 use Filament\Tables\Actions\DeleteBulkAction;
-use AdvisingApp\Contact\Filament\Resources\ContactStatusResource;
+use AidingApp\Contact\Filament\Resources\ContactStatusResource;
 
 class ListContactStatuses extends ListRecords
 {

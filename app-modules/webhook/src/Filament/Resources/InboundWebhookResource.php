@@ -34,13 +34,13 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Webhook\Filament\Resources;
+namespace AidingApp\Webhook\Filament\Resources;
 
 use Filament\Resources\Resource;
 use App\Filament\Clusters\GlobalSettings;
-use AdvisingApp\Webhook\Models\InboundWebhook;
-use AdvisingApp\Webhook\Filament\Resources\InboundWebhookResource\Pages\ViewInboundWebhook;
-use AdvisingApp\Webhook\Filament\Resources\InboundWebhookResource\Pages\ListInboundWebhooks;
+use AidingApp\Webhook\Models\InboundWebhook;
+use AidingApp\Webhook\Filament\Resources\InboundWebhookResource\Pages\ViewInboundWebhook;
+use AidingApp\Webhook\Filament\Resources\InboundWebhookResource\Pages\ListInboundWebhooks;
 
 class InboundWebhookResource extends Resource
 {

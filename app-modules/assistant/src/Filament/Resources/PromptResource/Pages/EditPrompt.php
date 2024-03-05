@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Assistant\Filament\Resources\PromptResource\Pages;
+namespace AidingApp\Assistant\Filament\Resources\PromptResource\Pages;
 
 use Filament\Forms\Form;
 use Filament\Actions\ViewAction;
@@ -44,7 +44,7 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\EditRecord;
-use AdvisingApp\Assistant\Filament\Resources\PromptResource;
+use AidingApp\Assistant\Filament\Resources\PromptResource;
 
 class EditPrompt extends EditRecord
 {

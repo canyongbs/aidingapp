@@ -32,9 +32,9 @@
 </COPYRIGHT>
 --}}
 @php
-    use AdvisingApp\Authorization\Enums\LicenseType;
-    use AdvisingApp\Contact\Models\Contact;
-    use AdvisingApp\StudentDataModel\Models\Student;
+    use AidingApp\Authorization\Enums\LicenseType;
+    use AidingApp\Contact\Models\Contact;
+    use AidingApp\StudentDataModel\Models\Student;
 @endphp
 
 <div

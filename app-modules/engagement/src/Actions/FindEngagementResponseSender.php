@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Actions;
+namespace AidingApp\Engagement\Actions;
 
 use Illuminate\Support\Facades\Log;
-use AdvisingApp\Contact\Models\Contact;
-use AdvisingApp\Engagement\Actions\Contracts\EngagementResponseSenderFinder;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Engagement\Actions\Contracts\EngagementResponseSenderFinder;
 
 class FindEngagementResponseSender implements EngagementResponseSenderFinder
 {

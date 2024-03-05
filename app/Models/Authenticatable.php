@@ -37,12 +37,12 @@
 namespace App\Models;
 
 use App\Models\Concerns\CanOrElse;
-use AdvisingApp\Authorization\Enums\LicenseType;
+use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\Authorization\Models\Concerns\HasRoleGroups;
 use Illuminate\Foundation\Auth\User as BaseAuthenticatable;
-use AdvisingApp\Authorization\Models\Concerns\HasRoleGroups;
 use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
-use AdvisingApp\Authorization\Models\Concerns\HasRolesWithPivot;
-use AdvisingApp\Authorization\Models\Concerns\DefinesPermissions;
+use AidingApp\Authorization\Models\Concerns\HasRolesWithPivot;
+use AidingApp\Authorization\Models\Concerns\DefinesPermissions;
 
 abstract class Authenticatable extends BaseAuthenticatable
 {

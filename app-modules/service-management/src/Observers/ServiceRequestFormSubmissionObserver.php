@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Observers;
+namespace AidingApp\ServiceManagement\Observers;
 
-use AdvisingApp\ServiceManagement\Models\ServiceRequestFormSubmission;
-use AdvisingApp\ServiceManagement\Actions\ServiceRequest\CreateServiceRequestFromSubmission;
+use AidingApp\ServiceManagement\Models\ServiceRequestFormSubmission;
+use AidingApp\ServiceManagement\Actions\ServiceRequest\CreateServiceRequestFromSubmission;
 
 class ServiceRequestFormSubmissionObserver
 {

@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Audit\Overrides\Concerns;
+namespace AidingApp\Audit\Overrides\Concerns;
 
 use ReflectionClass;
 use Illuminate\Support\Facades\Event;

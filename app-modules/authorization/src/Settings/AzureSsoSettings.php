@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Authorization\Settings;
+namespace AidingApp\Authorization\Settings;
 
 use Spatie\LaravelSettings\Settings;
 

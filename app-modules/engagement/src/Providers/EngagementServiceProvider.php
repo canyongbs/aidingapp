@@ -34,31 +34,31 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Providers;
+namespace AidingApp\Engagement\Providers;
 
 use Filament\Panel;
 use App\Models\Tenant;
 use Illuminate\Support\ServiceProvider;
 use Spatie\Multitenancy\TenantCollection;
+use AidingApp\Engagement\EngagementPlugin;
+use AidingApp\Engagement\Models\Engagement;
 use Illuminate\Console\Scheduling\Schedule;
-use AdvisingApp\Engagement\EngagementPlugin;
-use AdvisingApp\Engagement\Models\Engagement;
-use AdvisingApp\Engagement\Models\SmsTemplate;
-use AdvisingApp\Engagement\Models\EmailTemplate;
-use AdvisingApp\Engagement\Models\EngagementFile;
-use AdvisingApp\Engagement\Models\EngagementBatch;
+use AidingApp\Engagement\Models\SmsTemplate;
+use AidingApp\Engagement\Models\EmailTemplate;
+use AidingApp\Engagement\Models\EngagementFile;
+use AidingApp\Engagement\Models\EngagementBatch;
 use App\Registries\RoleBasedAccessControlRegistry;
+use AidingApp\Engagement\Models\EngagementResponse;
+use AidingApp\Engagement\Actions\DeliverEngagements;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use AdvisingApp\Engagement\Models\EngagementResponse;
-use AdvisingApp\Engagement\Actions\DeliverEngagements;
-use AdvisingApp\Engagement\Models\EngagementDeliverable;
-use AdvisingApp\Engagement\Observers\EngagementObserver;
-use AdvisingApp\Engagement\Models\EngagementFileEntities;
-use AdvisingApp\Engagement\Observers\SmsTemplateObserver;
-use AdvisingApp\Engagement\Observers\EmailTemplateObserver;
-use AdvisingApp\Engagement\Observers\EngagementBatchObserver;
-use AdvisingApp\Engagement\Registries\EngagementRbacRegistry;
-use AdvisingApp\Engagement\Observers\EngagementFileEntitiesObserver;
+use AidingApp\Engagement\Models\EngagementDeliverable;
+use AidingApp\Engagement\Observers\EngagementObserver;
+use AidingApp\Engagement\Models\EngagementFileEntities;
+use AidingApp\Engagement\Observers\SmsTemplateObserver;
+use AidingApp\Engagement\Observers\EmailTemplateObserver;
+use AidingApp\Engagement\Observers\EngagementBatchObserver;
+use AidingApp\Engagement\Registries\EngagementRbacRegistry;
+use AidingApp\Engagement\Observers\EngagementFileEntitiesObserver;
 
 class EngagementServiceProvider extends ServiceProvider
 {

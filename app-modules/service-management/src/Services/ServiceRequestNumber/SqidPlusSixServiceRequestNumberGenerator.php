@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Services\ServiceRequestNumber;
+namespace AidingApp\ServiceManagement\Services\ServiceRequestNumber;
 
 use Sqids\Sqids;
-use AdvisingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
+use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
 
 class SqidPlusSixServiceRequestNumberGenerator implements ServiceRequestNumberGenerator
 {

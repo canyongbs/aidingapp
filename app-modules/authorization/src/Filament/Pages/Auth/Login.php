@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Authorization\Filament\Pages\Auth;
+namespace AidingApp\Authorization\Filament\Pages\Auth;
 
 use Filament\Actions\Action;
 use Filament\Pages\Auth\Login as FilamentLogin;
-use AdvisingApp\Authorization\Settings\AzureSsoSettings;
-use AdvisingApp\Authorization\Settings\GoogleSsoSettings;
+use AidingApp\Authorization\Settings\AzureSsoSettings;
+use AidingApp\Authorization\Settings\GoogleSsoSettings;
 
 class Login extends FilamentLogin
 {

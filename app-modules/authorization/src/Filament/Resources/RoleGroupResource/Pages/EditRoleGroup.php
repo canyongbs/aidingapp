@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Authorization\Filament\Resources\RoleGroupResource\Pages;
+namespace AidingApp\Authorization\Filament\Resources\RoleGroupResource\Pages;
 
 use Filament\Forms\Form;
 use Filament\Actions\DeleteAction;
@@ -42,7 +42,7 @@ use Filament\Actions\RestoreAction;
 use Filament\Actions\ForceDeleteAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\EditRecord;
-use AdvisingApp\Authorization\Filament\Resources\RoleGroupResource;
+use AidingApp\Authorization\Filament\Resources\RoleGroupResource;
 
 class EditRoleGroup extends EditRecord
 {

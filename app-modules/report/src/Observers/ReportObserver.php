@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Report\Observers;
+namespace AidingApp\Report\Observers;
 
-use AdvisingApp\Report\Models\Report;
+use AidingApp\Report\Models\Report;
 
 class ReportObserver
 {

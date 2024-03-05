@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Models\Concerns;
+namespace AidingApp\Engagement\Models\Concerns;
 
-use AdvisingApp\Engagement\Models\Engagement;
+use AidingApp\Engagement\Models\Engagement;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 trait HasManyEngagements

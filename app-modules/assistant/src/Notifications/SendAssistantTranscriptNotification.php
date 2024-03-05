@@ -34,16 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Assistant\Notifications;
+namespace AidingApp\Assistant\Notifications;
 
 use App\Models\User;
 use App\Models\NotificationSetting;
-use AdvisingApp\Assistant\Models\AssistantChat;
-use AdvisingApp\Notification\Notifications\BaseNotification;
-use AdvisingApp\Notification\Notifications\EmailNotification;
-use AdvisingApp\Notification\Notifications\Messages\MailMessage;
-use AdvisingApp\Notification\Notifications\Concerns\EmailChannelTrait;
-use AdvisingApp\Assistant\Services\AIInterface\Enums\AIChatMessageFrom;
+use AidingApp\Assistant\Models\AssistantChat;
+use AidingApp\Notification\Notifications\BaseNotification;
+use AidingApp\Notification\Notifications\EmailNotification;
+use AidingApp\Notification\Notifications\Messages\MailMessage;
+use AidingApp\Notification\Notifications\Concerns\EmailChannelTrait;
+use AidingApp\Assistant\Services\AIInterface\Enums\AIChatMessageFrom;
 
 class SendAssistantTranscriptNotification extends BaseNotification implements EmailNotification
 {

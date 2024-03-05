@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Filament\Resources\SmsTemplateResource\Pages;
+namespace AidingApp\Engagement\Filament\Resources\SmsTemplateResource\Pages;
 
 use Filament\Tables\Table;
 use Filament\Actions\CreateAction;
@@ -43,7 +43,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
-use AdvisingApp\Engagement\Filament\Resources\SmsTemplateResource;
+use AidingApp\Engagement\Filament\Resources\SmsTemplateResource;
 
 class ListSmsTemplates extends ListRecords
 {

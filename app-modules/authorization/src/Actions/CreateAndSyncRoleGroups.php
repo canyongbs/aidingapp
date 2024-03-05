@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Authorization\Actions;
+namespace AidingApp\Authorization\Actions;
 
 use Illuminate\Support\Facades\File;
-use AdvisingApp\Authorization\Models\Role;
-use AdvisingApp\Authorization\Models\RoleGroup;
+use AidingApp\Authorization\Models\Role;
+use AidingApp\Authorization\Models\RoleGroup;
 
 // TODO Refactor if we're going to use this moving forward
 // Delete if we decide we just want to let orgs handle this manually through Filament

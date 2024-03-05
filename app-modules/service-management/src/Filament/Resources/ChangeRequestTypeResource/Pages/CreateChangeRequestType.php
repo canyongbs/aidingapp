@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Filament\Resources\ChangeRequestTypeResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypeResource\Pages;
 
 use App\Models\User;
 use Filament\Forms\Form;
@@ -42,7 +42,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\CreateRecord;
-use AdvisingApp\ServiceManagement\Filament\Resources\ChangeRequestTypeResource;
+use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypeResource;
 
 class CreateChangeRequestType extends CreateRecord
 {

@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\IntegrationTwilio\Actions;
+namespace AidingApp\IntegrationTwilio\Actions;
 
 use Illuminate\Http\Response;
 use Twilio\TwiML\MessagingResponse;
-use AdvisingApp\IntegrationTwilio\DataTransferObjects\TwilioWebhookData;
+use AidingApp\IntegrationTwilio\DataTransferObjects\TwilioWebhookData;
 
 class TwilioWebhookProcessor
 {

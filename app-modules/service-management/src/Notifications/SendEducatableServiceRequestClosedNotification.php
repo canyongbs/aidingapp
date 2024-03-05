@@ -34,17 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Notifications;
+namespace AidingApp\ServiceManagement\Notifications;
 
 use App\Models\NotificationSetting;
 use App\Models\Contracts\Educatable;
-use AdvisingApp\Contact\Models\Contact;
-use AdvisingApp\Notification\Models\OutboundDeliverable;
-use AdvisingApp\ServiceManagement\Models\ServiceRequest;
-use AdvisingApp\Notification\Notifications\BaseNotification;
-use AdvisingApp\Notification\Notifications\EmailNotification;
-use AdvisingApp\Notification\Notifications\Messages\MailMessage;
-use AdvisingApp\Notification\Notifications\Concerns\EmailChannelTrait;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Notification\Models\OutboundDeliverable;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\Notification\Notifications\BaseNotification;
+use AidingApp\Notification\Notifications\EmailNotification;
+use AidingApp\Notification\Notifications\Messages\MailMessage;
+use AidingApp\Notification\Notifications\Concerns\EmailChannelTrait;
 
 class SendEducatableServiceRequestClosedNotification extends BaseNotification implements EmailNotification
 {

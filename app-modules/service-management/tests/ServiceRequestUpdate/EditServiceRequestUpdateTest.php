@@ -48,11 +48,11 @@ use Illuminate\Validation\Rules\Enum;
 use function Pest\Laravel\assertDatabaseHas;
 use function PHPUnit\Framework\assertEquals;
 
-use AdvisingApp\Authorization\Enums\LicenseType;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestUpdate;
-use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource;
-use AdvisingApp\ServiceManagement\Tests\RequestFactories\EditServiceRequestUpdateRequestFactory;
-use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource\Pages\EditServiceRequestUpdate;
+use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource;
+use AidingApp\ServiceManagement\Tests\RequestFactories\EditServiceRequestUpdateRequestFactory;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource\Pages\EditServiceRequestUpdate;
 
 test('A successful action on the EditServiceRequestUpdate page', function () {
     $serviceRequestUpdate = ServiceRequestUpdate::factory()->create();

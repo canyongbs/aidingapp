@@ -34,13 +34,13 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Livewire;
+namespace AidingApp\ServiceManagement\Livewire;
 
 use Livewire\Component;
 use Illuminate\Contracts\View\View;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Concerns\InteractsWithForms;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestForm;
+use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 
 class RenderServiceRequestForm extends Component implements HasForms
 {

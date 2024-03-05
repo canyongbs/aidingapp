@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Notification\Actions;
+namespace AidingApp\Notification\Actions;
 
 use App\Models\User;
-use AdvisingApp\Notification\Models\Contracts\Subscribable;
+use AidingApp\Notification\Models\Contracts\Subscribable;
 
 class SubscriptionToggle
 {

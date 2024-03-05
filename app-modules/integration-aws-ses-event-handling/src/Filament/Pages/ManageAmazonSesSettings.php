@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\IntegrationAwsSesEventHandling\Filament\Pages;
+namespace AidingApp\IntegrationAwsSesEventHandling\Filament\Pages;
 
 use App\Models\User;
 use Filament\Forms\Form;
@@ -42,7 +42,7 @@ use Filament\Pages\SettingsPage;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
 use App\Filament\Clusters\ProductIntegrations;
-use AdvisingApp\IntegrationAwsSesEventHandling\Settings\SesSettings;
+use AidingApp\IntegrationAwsSesEventHandling\Settings\SesSettings;
 
 class ManageAmazonSesSettings extends SettingsPage
 {

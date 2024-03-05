@@ -38,7 +38,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Spatie\Permission\PermissionRegistrar;
 use Illuminate\Database\Migrations\Migration;
-use AdvisingApp\Authorization\Enums\ModelHasRolesViaEnum;
+use AidingApp\Authorization\Enums\ModelHasRolesViaEnum;
 
 class CreatePermissionTables extends Migration
 {

@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Http\Controllers;
+namespace AidingApp\Engagement\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use AdvisingApp\Engagement\Models\EngagementFile;
-use AdvisingApp\Engagement\Http\Requests\EngagementFileDownloadRequest;
+use AidingApp\Engagement\Models\EngagementFile;
+use AidingApp\Engagement\Http\Requests\EngagementFileDownloadRequest;
 
 class EngagementFileDownloadController extends Controller
 {

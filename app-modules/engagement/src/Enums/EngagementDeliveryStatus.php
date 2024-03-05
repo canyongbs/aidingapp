@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Enums;
+namespace AidingApp\Engagement\Enums;
 
 enum EngagementDeliveryStatus: string
 {

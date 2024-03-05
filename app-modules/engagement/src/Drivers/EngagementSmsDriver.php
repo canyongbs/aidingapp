@@ -34,13 +34,13 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Drivers;
+namespace AidingApp\Engagement\Drivers;
 
-use AdvisingApp\Engagement\Models\EngagementDeliverable;
-use AdvisingApp\Engagement\Actions\QueuedEngagementDelivery;
-use AdvisingApp\Engagement\Actions\EngagementSmsChannelDelivery;
-use AdvisingApp\Notification\DataTransferObjects\UpdateDeliveryStatusData;
-use AdvisingApp\IntegrationTwilio\DataTransferObjects\TwilioStatusCallbackData;
+use AidingApp\Engagement\Models\EngagementDeliverable;
+use AidingApp\Engagement\Actions\QueuedEngagementDelivery;
+use AidingApp\Engagement\Actions\EngagementSmsChannelDelivery;
+use AidingApp\Notification\DataTransferObjects\UpdateDeliveryStatusData;
+use AidingApp\IntegrationTwilio\DataTransferObjects\TwilioStatusCallbackData;
 
 class EngagementSmsDriver implements EngagementDeliverableDriver
 {

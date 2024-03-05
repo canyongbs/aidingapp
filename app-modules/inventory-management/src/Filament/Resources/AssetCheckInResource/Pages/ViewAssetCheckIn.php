@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InventoryManagement\Filament\Resources\AssetCheckInResource\Pages;
+namespace AidingApp\InventoryManagement\Filament\Resources\AssetCheckInResource\Pages;
 
 use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
-use AdvisingApp\InventoryManagement\Filament\Resources\AssetCheckInResource;
-use AdvisingApp\InventoryManagement\Filament\Resources\AssetCheckInResource\Concerns\HasAssetCheckInInfolist;
+use AidingApp\InventoryManagement\Filament\Resources\AssetCheckInResource;
+use AidingApp\InventoryManagement\Filament\Resources\AssetCheckInResource\Concerns\HasAssetCheckInInfolist;
 
 class ViewAssetCheckIn extends ViewRecord
 {

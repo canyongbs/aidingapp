@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestFormResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestFormResource\Pages;
 
 use Filament\Tables\Table;
 use Filament\Actions\CreateAction;
@@ -45,8 +45,8 @@ use App\Filament\Tables\Columns\IdColumn;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestForm;
-use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestFormResource;
+use AidingApp\ServiceManagement\Models\ServiceRequestForm;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestFormResource;
 
 class ListServiceRequestForms extends ListRecords
 {

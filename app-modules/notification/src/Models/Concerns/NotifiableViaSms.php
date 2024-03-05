@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Notification\Models\Concerns;
+namespace AidingApp\Notification\Models\Concerns;
 
 trait NotifiableViaSms
 {

@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\RelationManagers;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\RelationManagers;
 
 use Filament\Tables\Table;
 use Filament\Tables\Actions\ViewAction;
@@ -42,7 +42,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\RelationManagers\RelationManager;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestFormSubmission;
+use AidingApp\ServiceManagement\Models\ServiceRequestFormSubmission;
 
 class ServiceRequestFormSubmissionRelationManager extends RelationManager
 {

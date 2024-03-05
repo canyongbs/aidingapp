@@ -34,13 +34,13 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Contact\Filament\Widgets;
+namespace AidingApp\Contact\Filament\Widgets;
 
 use App\Models\User;
 use Illuminate\Support\Number;
+use AidingApp\Contact\Models\Contact;
 use Illuminate\Support\Facades\Cache;
-use AdvisingApp\Contact\Models\Contact;
-use AdvisingApp\Alert\Enums\AlertStatus;
+use AidingApp\Alert\Enums\AlertStatus;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 

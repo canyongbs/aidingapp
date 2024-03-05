@@ -34,22 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Notification\Models;
+namespace AidingApp\Notification\Models;
 
 use App\Models\BaseModel;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Model;
+use AidingApp\Notification\Drivers\SmsDriver;
+use AidingApp\Timeline\Models\CustomTimeline;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use AdvisingApp\Notification\Drivers\SmsDriver;
-use AdvisingApp\Timeline\Models\CustomTimeline;
-use AdvisingApp\Notification\Drivers\EmailDriver;
+use AidingApp\Notification\Drivers\EmailDriver;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use AdvisingApp\Notification\Enums\NotificationChannel;
-use AdvisingApp\ServiceManagement\Models\ServiceRequest;
-use AdvisingApp\Timeline\Models\Contracts\ProvidesATimeline;
-use AdvisingApp\Notification\Enums\NotificationDeliveryStatus;
-use AdvisingApp\Notification\Drivers\OutboundDeliverableDriver;
-use AdvisingApp\Timeline\Timelines\OutboundDeliverableTimeline;
+use AidingApp\Notification\Enums\NotificationChannel;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
+use AidingApp\Notification\Enums\NotificationDeliveryStatus;
+use AidingApp\Notification\Drivers\OutboundDeliverableDriver;
+use AidingApp\Timeline\Timelines\OutboundDeliverableTimeline;
 
 /**
  * @mixin IdeHelperOutboundDeliverable

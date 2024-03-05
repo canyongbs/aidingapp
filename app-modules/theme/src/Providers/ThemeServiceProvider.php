@@ -34,16 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Theme\Providers;
+namespace AidingApp\Theme\Providers;
 
 use Filament\Panel;
-use AdvisingApp\Theme\ThemePlugin;
+use AidingApp\Theme\ThemePlugin;
 use Illuminate\Support\ServiceProvider;
+use AidingApp\Theme\Registries\ThemeRbacRegistry;
 use App\Registries\RoleBasedAccessControlRegistry;
-use AdvisingApp\Theme\Registries\ThemeRbacRegistry;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use AdvisingApp\Authorization\AuthorizationRoleRegistry;
-use AdvisingApp\Authorization\AuthorizationPermissionRegistry;
+use AidingApp\Authorization\AuthorizationRoleRegistry;
+use AidingApp\Authorization\AuthorizationPermissionRegistry;
 
 class ThemeServiceProvider extends ServiceProvider
 {

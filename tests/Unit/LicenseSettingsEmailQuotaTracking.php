@@ -40,9 +40,9 @@ use Illuminate\Mail\Events\MessageSent;
 
 use function Pest\Laravel\assertDatabaseCount;
 
-use AdvisingApp\Notification\Models\OutboundDeliverable;
-use AdvisingApp\Notification\Exceptions\NotificationQuotaExceeded;
-use AdvisingApp\IntegrationAwsSesEventHandling\Settings\SesSettings;
+use AidingApp\Notification\Models\OutboundDeliverable;
+use AidingApp\Notification\Exceptions\NotificationQuotaExceeded;
+use AidingApp\IntegrationAwsSesEventHandling\Settings\SesSettings;
 
 it('An email is allowed to be sent if there is available quota and it\'s quota usage is tracked', function () {
     Event::fake(MessageSent::class);

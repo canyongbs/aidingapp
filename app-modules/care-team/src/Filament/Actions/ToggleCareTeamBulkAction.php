@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\CareTeam\Filament\Actions;
+namespace AidingApp\CareTeam\Filament\Actions;
 
 use App\Models\User;
 use App\Models\Contracts\Educatable;

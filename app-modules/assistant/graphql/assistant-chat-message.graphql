@@ -1,50 +1,48 @@
 type AssistantChatMessage
-    @model(class: "AdvisingApp\\Assistant\\Models\\AssistantChatMessage") {
-    id: UUID!
+  @model(class: "AidingApp\\Assistant\\Models\\AssistantChatMessage") {
+  id: UUID!
 
-    message: String!
+  message: String!
 
-    from: AIChatMessageFrom!
+  from: AIChatMessageFrom!
 
-    created_at: DateTime
+  created_at: DateTime
 
-    updated_at: DateTime
+  updated_at: DateTime
 
-    chat: AssistantChat! @belongsTo
+  chat: AssistantChat! @belongsTo
 }
 
 input AssistantChatMessagesQuery {
-    id: UUID
+  id: UUID
 
-    message: String
+  message: String
 
-    from: AIChatMessageFrom
+  from: AIChatMessageFrom
 
-    created_at: DateTime
+  created_at: DateTime
 
-    updated_at: DateTime
+  updated_at: DateTime
 
-    chat: AssistantChatsQuery
+  chat: AssistantChatsQuery
 }
 
 type AssistantChatMessageQueries {
-    "Get a specific assistant chat message by ID."
-    find(
-        id: UUID!
-            @whereKey
-            @rules(
-                apply: ["required", "uuid", "exists:assistant_chat_messages"]
-            )
-    ): AssistantChatMessage @find @canResolved(ability: "view")
+  "Get a specific assistant chat message by ID."
+  find(
+    id: UUID!
+      @whereKey
+      @rules(apply: ["required", "uuid", "exists:assistant_chat_messages"])
+  ): AssistantChatMessage @find @canResolved(ability: "view")
 
-    "List multiple assistant chat messages."
-    list(
-        "Filter by the assistant chat messages attributes and relations."
-        where: AssistantChatMessagesQuery @searchBy
-        order: AssistantChatMessagesQuery @sortBy
-    ): [AssistantChatMessage!]! @paginate @canModel(ability: "viewAny")
+  "List multiple assistant chat messages."
+  list(
+    "Filter by the assistant chat messages attributes and relations."
+    where: AssistantChatMessagesQuery @searchBy
+    order: AssistantChatMessagesQuery @sortBy
+  ): [AssistantChatMessage!]! @paginate @canModel(ability: "viewAny")
 }
 
 extend type Query {
-    assistantChatMessage: AssistantChatMessageQueries! @namespaced
+  assistantChatMessage: AssistantChatMessageQueries! @namespaced
 }

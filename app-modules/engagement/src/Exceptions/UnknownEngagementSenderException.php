@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Exceptions;
+namespace AidingApp\Engagement\Exceptions;
 
 use Exception;
 

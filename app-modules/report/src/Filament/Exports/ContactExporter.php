@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Report\Filament\Exports;
+namespace AidingApp\Report\Filament\Exports;
 
+use AidingApp\Contact\Models\Contact;
 use Filament\Actions\Exports\Exporter;
-use AdvisingApp\Contact\Models\Contact;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Models\Export;

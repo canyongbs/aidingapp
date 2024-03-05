@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\IntegrationMicrosoftClarity\Filament\Pages;
+namespace AidingApp\IntegrationMicrosoftClarity\Filament\Pages;
 
 use App\Models\User;
 use Filament\Forms\Get;
@@ -43,7 +43,7 @@ use Filament\Pages\SettingsPage;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\TextInput;
 use App\Filament\Clusters\ProductIntegrations;
-use AdvisingApp\IntegrationMicrosoftClarity\Settings\MicrosoftClaritySettings;
+use AidingApp\IntegrationMicrosoftClarity\Settings\MicrosoftClaritySettings;
 
 class ManageMicrosoftClaritySettings extends SettingsPage
 {

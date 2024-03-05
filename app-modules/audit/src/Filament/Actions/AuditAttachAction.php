@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Audit\Filament\Actions;
+namespace AidingApp\Audit\Filament\Actions;
 
 use OwenIt\Auditing\Contracts\Auditable;
 use Filament\Tables\Actions\AttachAction;

@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InventoryManagement\Filament\Resources\AssetCheckInResource\Components;
+namespace AidingApp\InventoryManagement\Filament\Resources\AssetCheckInResource\Components;
 
 use Filament\Actions\ViewAction;
-use AdvisingApp\InventoryManagement\Filament\Resources\AssetCheckInResource\Concerns\HasAssetCheckInInfolist;
+use AidingApp\InventoryManagement\Filament\Resources\AssetCheckInResource\Concerns\HasAssetCheckInInfolist;
 
 class AssetCheckInViewAction extends ViewAction
 {

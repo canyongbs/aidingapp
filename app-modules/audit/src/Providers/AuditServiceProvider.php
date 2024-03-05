@@ -34,15 +34,15 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Audit\Providers;
+namespace AidingApp\Audit\Providers;
 
 use Filament\Panel;
-use AdvisingApp\Audit\AuditPlugin;
-use AdvisingApp\Audit\Models\Audit;
+use AidingApp\Audit\AuditPlugin;
+use AidingApp\Audit\Models\Audit;
 use App\Concerns\ImplementsGraphQL;
 use Illuminate\Support\ServiceProvider;
+use AidingApp\Audit\Registries\AuditRbacRegistry;
 use App\Registries\RoleBasedAccessControlRegistry;
-use AdvisingApp\Audit\Registries\AuditRbacRegistry;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
 class AuditServiceProvider extends ServiceProvider

@@ -41,10 +41,10 @@ use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 use function PHPUnit\Framework\assertEquals;
 
-use AdvisingApp\Authorization\Enums\LicenseType;
-use AdvisingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
-use AdvisingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource;
-use AdvisingApp\KnowledgeBase\Tests\KnowledgeBaseStatus\RequestFactories\EditKnowledgeBaseStatusRequestFactory;
+use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource;
+use AidingApp\KnowledgeBase\Tests\KnowledgeBaseStatus\RequestFactories\EditKnowledgeBaseStatusRequestFactory;
 
 // TODO: Write EditKnowledgeBaseStatus tests
 //test('A successful action on the EditKnowledgeBaseStatus page', function () {});

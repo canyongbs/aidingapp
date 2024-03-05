@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Exceptions;
+namespace AidingApp\ServiceManagement\Exceptions;
 
 use Exception;
 

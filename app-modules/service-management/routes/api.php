@@ -35,9 +35,9 @@
 */
 
 use Illuminate\Support\Facades\Route;
-use AdvisingApp\Form\Http\Middleware\EnsureSubmissibleIsEmbeddableAndAuthorized;
-use AdvisingApp\ServiceManagement\Http\Controllers\ServiceRequestFormWidgetController;
-use AdvisingApp\ServiceManagement\Http\Middleware\EnsureServiceManagementFeatureIsActive;
+use AidingApp\Form\Http\Middleware\EnsureSubmissibleIsEmbeddableAndAuthorized;
+use AidingApp\ServiceManagement\Http\Controllers\ServiceRequestFormWidgetController;
+use AidingApp\ServiceManagement\Http\Middleware\EnsureServiceManagementFeatureIsActive;
 
 Route::prefix('api')
     ->middleware([

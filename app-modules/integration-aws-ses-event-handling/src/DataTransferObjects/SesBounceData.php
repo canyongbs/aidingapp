@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\IntegrationAwsSesEventHandling\DataTransferObjects;
+namespace AidingApp\IntegrationAwsSesEventHandling\DataTransferObjects;
 
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Optional;

@@ -34,13 +34,13 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Notification\Filament\Actions;
+namespace AidingApp\Notification\Filament\Actions;
 
 use Filament\Actions\Action;
 use Illuminate\Database\Eloquent\Builder;
+use AidingApp\Notification\Actions\SubscriptionToggle;
 use Filament\Pages\Concerns\InteractsWithHeaderActions;
-use AdvisingApp\Notification\Actions\SubscriptionToggle;
-use AdvisingApp\Notification\Models\Contracts\Subscribable;
+use AidingApp\Notification\Models\Contracts\Subscribable;
 
 class SubscribeHeaderAction extends Action
 {

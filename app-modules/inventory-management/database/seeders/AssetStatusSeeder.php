@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InventoryManagement\Database\Seeders;
+namespace AidingApp\InventoryManagement\Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use AdvisingApp\InventoryManagement\Models\AssetStatus;
-use AdvisingApp\InventoryManagement\Enums\SystemAssetStatusClassification;
+use AidingApp\InventoryManagement\Models\AssetStatus;
+use AidingApp\InventoryManagement\Enums\SystemAssetStatusClassification;
 
 class AssetStatusSeeder extends Seeder
 {

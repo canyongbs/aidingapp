@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\KnowledgeBase\Observers;
+namespace AidingApp\KnowledgeBase\Observers;
 
-use AdvisingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use AidingApp\KnowledgeBase\Jobs\KnowledgeBaseItemDownloadExternalMedia;
 use App\Support\MediaEncoding\Concerns\ImplementsEncodedMediaProcessing;
-use AdvisingApp\KnowledgeBase\Jobs\KnowledgeBaseItemDownloadExternalMedia;
 
 class KnowledgeBaseItemObserver
 {

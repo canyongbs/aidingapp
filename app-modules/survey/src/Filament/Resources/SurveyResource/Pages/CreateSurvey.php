@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Survey\Filament\Resources\SurveyResource\Pages;
+namespace AidingApp\Survey\Filament\Resources\SurveyResource\Pages;
 
 use Filament\Forms\Form;
 use Filament\Resources\Pages\CreateRecord;
-use AdvisingApp\Survey\Filament\Resources\SurveyResource;
-use AdvisingApp\Survey\Filament\Resources\SurveyResource\Pages\Concerns\HasSharedFormConfiguration;
+use AidingApp\Survey\Filament\Resources\SurveyResource;
+use AidingApp\Survey\Filament\Resources\SurveyResource\Pages\Concerns\HasSharedFormConfiguration;
 
 class CreateSurvey extends CreateRecord
 {

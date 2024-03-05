@@ -37,7 +37,7 @@
 namespace App\Filament\Widgets;
 
 use Illuminate\Support\Number;
-use AdvisingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\Contact;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 

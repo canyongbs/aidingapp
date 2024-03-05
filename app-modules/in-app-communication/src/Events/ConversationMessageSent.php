@@ -34,14 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InAppCommunication\Events;
+namespace AidingApp\InAppCommunication\Events;
 
 use App\Models\User;
 use Carbon\CarbonInterface;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use AdvisingApp\InAppCommunication\Models\TwilioConversation;
+use AidingApp\InAppCommunication\Models\TwilioConversation;
 
 class ConversationMessageSent
 {

@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InAppCommunication\Actions;
+namespace AidingApp\InAppCommunication\Actions;
 
 use Exception;
 use Twilio\Rest\Client;
-use AdvisingApp\InAppCommunication\Enums\ConversationType;
-use AdvisingApp\InAppCommunication\Models\TwilioConversation;
+use AidingApp\InAppCommunication\Enums\ConversationType;
+use AidingApp\InAppCommunication\Models\TwilioConversation;
 
 class DeleteTwilioConversation
 {

@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Authorization\Filament\Resources\PermissionResource\Pages;
+namespace AidingApp\Authorization\Filament\Resources\PermissionResource\Pages;
 
 use Filament\Resources\Pages\ViewRecord;
-use AdvisingApp\Authorization\Filament\Resources\PermissionResource;
+use AidingApp\Authorization\Filament\Resources\PermissionResource;
 
 class ViewPermission extends ViewRecord
 {

@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InventoryManagement\Enums;
+namespace AidingApp\InventoryManagement\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 

@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Survey\Filament\Blocks;
+namespace AidingApp\Survey\Filament\Blocks;
 
-use AdvisingApp\Form\Filament\Blocks\FormFieldBlock;
-use AdvisingApp\Form\Filament\Blocks\EmailFormFieldBlock;
-use AdvisingApp\Form\Filament\Blocks\NumberFormFieldBlock;
-use AdvisingApp\Form\Filament\Blocks\EducatableEmailFormFieldBlock;
+use AidingApp\Form\Filament\Blocks\FormFieldBlock;
+use AidingApp\Form\Filament\Blocks\EmailFormFieldBlock;
+use AidingApp\Form\Filament\Blocks\NumberFormFieldBlock;
+use AidingApp\Form\Filament\Blocks\EducatableEmailFormFieldBlock;
 
 class SurveyFieldBlockRegistry
 {

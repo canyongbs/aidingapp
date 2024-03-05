@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Filament\Resources\EmailTemplateResource\Pages;
+namespace AidingApp\Engagement\Filament\Resources\EmailTemplateResource\Pages;
 
 use Filament\Tables\Table;
 use Filament\Actions\CreateAction;
@@ -43,7 +43,7 @@ use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
 use App\Filament\Tables\Columns\OpenSearch\TextColumn;
-use AdvisingApp\Engagement\Filament\Resources\EmailTemplateResource;
+use AidingApp\Engagement\Filament\Resources\EmailTemplateResource;
 
 class ListEmailTemplates extends ListRecords
 {

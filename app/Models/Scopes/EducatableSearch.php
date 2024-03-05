@@ -37,7 +37,7 @@
 namespace App\Models\Scopes;
 
 use Illuminate\Support\Facades\DB;
-use AdvisingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\Contact;
 use Illuminate\Database\Eloquent\Builder;
 
 class EducatableSearch

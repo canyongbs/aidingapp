@@ -34,13 +34,13 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\IntegrationAI\Client\Playground;
+namespace AidingApp\IntegrationAI\Client\Playground;
 
 use Closure;
 use OpenAI\Testing\ClientFake;
 use OpenAI\Responses\StreamResponse;
 use OpenAI\Responses\Chat\CreateStreamedResponse;
-use AdvisingApp\IntegrationAI\Client\BaseAIChatClient;
+use AidingApp\IntegrationAI\Client\BaseAIChatClient;
 
 class AzureOpenAI extends BaseAIChatClient
 {

@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\IntegrationAI\Client\Contracts;
+namespace AidingApp\IntegrationAI\Client\Contracts;
 
 use Closure;
-use AdvisingApp\Assistant\Services\AIInterface\DataTransferObjects\Chat;
+use AidingApp\Assistant\Services\AIInterface\DataTransferObjects\Chat;
 
 interface AIChatClient
 {

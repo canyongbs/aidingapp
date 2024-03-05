@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Authorization\Console\Commands;
+namespace AidingApp\Authorization\Console\Commands;
 
 use Illuminate\Console\Command;
+use AidingApp\Authorization\Actions\CreatePermissions;
 use Spatie\Multitenancy\Commands\Concerns\TenantAware;
-use AdvisingApp\Authorization\Actions\CreatePermissions;
 
 class SetupPermissions extends Command
 {

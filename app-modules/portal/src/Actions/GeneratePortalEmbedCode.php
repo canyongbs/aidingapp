@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Portal\Actions;
+namespace AidingApp\Portal\Actions;
 
 use Exception;
 use Illuminate\Support\Facades\URL;
-use AdvisingApp\Portal\Enums\PortalType;
+use AidingApp\Portal\Enums\PortalType;
 
 class GeneratePortalEmbedCode
 {

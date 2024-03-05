@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Contact\Filament\Resources\ContactResource\Pages;
+namespace AidingApp\Contact\Filament\Resources\ContactResource\Pages;
 
-use AdvisingApp\Contact\Filament\Resources\ContactResource;
-use AdvisingApp\Task\Filament\RelationManagers\BaseTaskRelationManager;
+use AidingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Task\Filament\RelationManagers\BaseTaskRelationManager;
 
 class ManageContactTasks extends BaseTaskRelationManager
 {

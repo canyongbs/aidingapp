@@ -41,15 +41,17 @@ use Filament\Actions\DeleteAction;
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
-use AdvisingApp\Assistant\Models\Prompt;
+use AidingApp\Assistant\Models\Prompt;
 
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\assertModelMissing;
+
+use AidingApp\Authorization\Enums\LicenseType;
+
 use function Pest\Laravel\assertDatabaseCount;
 
-use AdvisingApp\Authorization\Enums\LicenseType;
-use AdvisingApp\Assistant\Filament\Resources\PromptResource;
-use AdvisingApp\Assistant\Filament\Resources\PromptResource\Pages\EditPrompt;
+use AidingApp\Assistant\Filament\Resources\PromptResource;
+use AidingApp\Assistant\Filament\Resources\PromptResource\Pages\EditPrompt;
 
 /** @var array<LicenseType> $licenses */
 $licenses = [

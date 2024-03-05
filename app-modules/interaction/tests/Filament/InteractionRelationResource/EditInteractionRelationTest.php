@@ -38,9 +38,9 @@ use App\Models\User;
 
 use function Pest\Laravel\actingAs;
 
-use AdvisingApp\Authorization\Enums\LicenseType;
-use AdvisingApp\Interaction\Models\InteractionRelation;
-use AdvisingApp\Interaction\Filament\Resources\InteractionRelationResource;
+use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\Interaction\Models\InteractionRelation;
+use AidingApp\Interaction\Filament\Resources\InteractionRelationResource;
 
 test('EditInteractionRelation is gated with proper access control', function () {
     $user = User::factory()->licensed(LicenseType::cases())->create();

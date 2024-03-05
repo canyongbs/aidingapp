@@ -37,7 +37,7 @@
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
-use AdvisingApp\InventoryManagement\Enums\MaintenanceActivityStatus;
+use AidingApp\InventoryManagement\Enums\MaintenanceActivityStatus;
 
 return new class () extends Migration {
     public function up(): void

@@ -34,19 +34,19 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Report\Filament\Resources\ReportResource\Pages;
+namespace AidingApp\Report\Filament\Resources\ReportResource\Pages;
 
 use App\Models\User;
 use Filament\Tables\Table;
 use Filament\Actions\CreateAction;
 use Filament\Tables\Filters\Filter;
-use AdvisingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\Contact;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Actions\DeleteAction;
-use AdvisingApp\Report\Filament\Resources\ReportResource;
+use AidingApp\Report\Filament\Resources\ReportResource;
 
 class ListReports extends ListRecords
 {

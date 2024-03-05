@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Drivers;
+namespace AidingApp\Engagement\Drivers;
 
-use AdvisingApp\Engagement\Models\EngagementDeliverable;
-use AdvisingApp\Engagement\Actions\QueuedEngagementDelivery;
-use AdvisingApp\Engagement\Actions\EngagementEmailChannelDelivery;
-use AdvisingApp\Notification\DataTransferObjects\UpdateDeliveryStatusData;
+use AidingApp\Engagement\Models\EngagementDeliverable;
+use AidingApp\Engagement\Actions\QueuedEngagementDelivery;
+use AidingApp\Engagement\Actions\EngagementEmailChannelDelivery;
+use AidingApp\Notification\DataTransferObjects\UpdateDeliveryStatusData;
 
 class EngagementEmailDriver implements EngagementDeliverableDriver
 {

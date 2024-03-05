@@ -11,17 +11,17 @@
     },
     "autoload": {
         "psr-4": {
-            "AdvisingApp\\IntegrationTwilio\\": "src/",
-            "AdvisingApp\\IntegrationTwilio\\Tests\\": "tests/",
-            "AdvisingApp\\IntegrationTwilio\\Database\\Factories\\": "database/factories/",
-            "AdvisingApp\\IntegrationTwilio\\Database\\Seeders\\": "database/seeders/"
+            "AidingApp\\IntegrationTwilio\\": "src/",
+            "AidingApp\\IntegrationTwilio\\Tests\\": "tests/",
+            "AidingApp\\IntegrationTwilio\\Database\\Factories\\": "database/factories/",
+            "AidingApp\\IntegrationTwilio\\Database\\Seeders\\": "database/seeders/"
         }
     },
     "minimum-stability": "stable",
     "extra": {
         "laravel": {
             "providers": [
-                "AdvisingApp\\IntegrationTwilio\\Providers\\IntegrationTwilioServiceProvider"
+                "AidingApp\\IntegrationTwilio\\Providers\\IntegrationTwilioServiceProvider"
             ]
         }
     }

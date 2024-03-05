@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Notification\Models\Contracts;
+namespace AidingApp\Notification\Models\Contracts;
 
 interface NotifiableInterface
 {

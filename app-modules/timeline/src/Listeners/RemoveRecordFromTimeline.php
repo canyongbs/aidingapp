@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Timeline\Listeners;
+namespace AidingApp\Timeline\Listeners;
 
+use AidingApp\Timeline\Models\Timeline;
 use Illuminate\Database\Eloquent\Model;
-use AdvisingApp\Timeline\Models\Timeline;
-use AdvisingApp\Timeline\Events\TimelineableRecordDeleted;
+use AidingApp\Timeline\Events\TimelineableRecordDeleted;
 
 class RemoveRecordFromTimeline
 {

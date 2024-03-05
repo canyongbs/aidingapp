@@ -39,21 +39,21 @@ namespace Database\Seeders;
 use App\Models\Tenant;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Artisan;
-use AdvisingApp\Division\Database\Seeders\DivisionSeeder;
-use AdvisingApp\Contact\Database\Seeders\ContactSourceSeeder;
-use AdvisingApp\Contact\Database\Seeders\ContactStatusSeeder;
-use AdvisingApp\Interaction\Database\Seeders\InteractionSeeder;
-use AdvisingApp\Consent\Database\Seeders\ConsentAgreementSeeder;
-use AdvisingApp\InventoryManagement\Database\Seeders\AssetSeeder;
-use AdvisingApp\Authorization\Console\Commands\SyncRolesAndPermissions;
-use AdvisingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseStatusSeeder;
-use AdvisingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseQualitySeeder;
-use AdvisingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseCategorySeeder;
-use AdvisingApp\ServiceManagement\Database\Seeders\ChangeRequestTypeSeeder;
-use AdvisingApp\ServiceManagement\Database\Seeders\ServiceRequestTypeSeeder;
-use AdvisingApp\ServiceManagement\Database\Seeders\ChangeRequestStatusSeeder;
-use AdvisingApp\ServiceManagement\Database\Seeders\ServiceRequestStatusSeeder;
-use AdvisingApp\InventoryManagement\Database\Seeders\MaintenanceProviderSeeder;
+use AidingApp\Division\Database\Seeders\DivisionSeeder;
+use AidingApp\Contact\Database\Seeders\ContactSourceSeeder;
+use AidingApp\Contact\Database\Seeders\ContactStatusSeeder;
+use AidingApp\Interaction\Database\Seeders\InteractionSeeder;
+use AidingApp\Consent\Database\Seeders\ConsentAgreementSeeder;
+use AidingApp\InventoryManagement\Database\Seeders\AssetSeeder;
+use AidingApp\Authorization\Console\Commands\SyncRolesAndPermissions;
+use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseStatusSeeder;
+use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseQualitySeeder;
+use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseCategorySeeder;
+use AidingApp\ServiceManagement\Database\Seeders\ChangeRequestTypeSeeder;
+use AidingApp\ServiceManagement\Database\Seeders\ServiceRequestTypeSeeder;
+use AidingApp\ServiceManagement\Database\Seeders\ChangeRequestStatusSeeder;
+use AidingApp\ServiceManagement\Database\Seeders\ServiceRequestStatusSeeder;
+use AidingApp\InventoryManagement\Database\Seeders\MaintenanceProviderSeeder;
 
 class NewTenantSeeder extends Seeder
 {

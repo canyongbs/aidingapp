@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Portal\DataTransferObjects;
+namespace AidingApp\Portal\DataTransferObjects;
 
 use Spatie\LaravelData\Data;
 

@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Form\Filament\Blocks;
+namespace AidingApp\Form\Filament\Blocks;
 
 use FilamentTiptapEditor\TiptapBlock;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\TextInput;
-use AdvisingApp\Form\Models\SubmissibleField;
+use AidingApp\Form\Models\SubmissibleField;
 
 abstract class FormFieldBlock extends TiptapBlock
 {

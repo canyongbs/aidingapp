@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestFormResource\Pages\Concerns;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestFormResource\Pages\Concerns;
 
 use Filament\Forms\Get;
+use AidingApp\Form\Enums\Rounding;
+use AidingApp\Form\Rules\IsDomain;
 use Filament\Forms\Components\Grid;
-use AdvisingApp\Form\Enums\Rounding;
-use AdvisingApp\Form\Rules\IsDomain;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Section;
@@ -50,12 +50,12 @@ use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\TextInput;
 use FilamentTiptapEditor\Enums\TiptapOutput;
 use App\Filament\Forms\Components\ColorSelect;
-use AdvisingApp\Form\Filament\Blocks\FormFieldBlockRegistry;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestForm;
+use AidingApp\Form\Filament\Blocks\FormFieldBlockRegistry;
+use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestFormStep;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestFormField;
-use AdvisingApp\IntegrationGoogleRecaptcha\Settings\GoogleRecaptchaSettings;
+use AidingApp\ServiceManagement\Models\ServiceRequestFormStep;
+use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
+use AidingApp\IntegrationGoogleRecaptcha\Settings\GoogleRecaptchaSettings;
 
 trait HasSharedFormConfiguration
 {

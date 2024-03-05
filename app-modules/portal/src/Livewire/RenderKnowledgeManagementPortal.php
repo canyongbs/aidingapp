@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Portal\Livewire;
+namespace AidingApp\Portal\Livewire;
 
 use Livewire\Component;
 use Illuminate\Contracts\View\View;

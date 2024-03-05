@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Form\Filament\Blocks;
+namespace AidingApp\Form\Filament\Blocks;
 
 use Filament\Forms\Components\KeyValue;
-use AdvisingApp\Form\Models\SubmissibleField;
+use AidingApp\Form\Models\SubmissibleField;
 
 class RadioFormFieldBlock extends FormFieldBlock
 {

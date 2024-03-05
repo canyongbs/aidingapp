@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-use AdvisingApp\Survey\Http\Controllers\SurveyWidgetController;
-use AdvisingApp\Survey\Http\Middleware\EnsureSurveysFeatureIsActive;
-use AdvisingApp\Form\Http\Middleware\EnsureSubmissibleIsEmbeddableAndAuthorized;
+use AidingApp\Survey\Http\Controllers\SurveyWidgetController;
+use AidingApp\Survey\Http\Middleware\EnsureSurveysFeatureIsActive;
+use AidingApp\Form\Http\Middleware\EnsureSubmissibleIsEmbeddableAndAuthorized;
 
 Route::prefix('api')
     ->middleware([

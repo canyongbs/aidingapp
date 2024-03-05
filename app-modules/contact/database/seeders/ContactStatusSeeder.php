@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Contact\Database\Seeders;
+namespace AidingApp\Contact\Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use AdvisingApp\Contact\Models\ContactStatus;
-use AdvisingApp\Contact\Enums\ContactStatusColorOptions;
-use AdvisingApp\Contact\Enums\SystemContactClassification;
+use AidingApp\Contact\Models\ContactStatus;
+use AidingApp\Contact\Enums\ContactStatusColorOptions;
+use AidingApp\Contact\Enums\SystemContactClassification;
 
 class ContactStatusSeeder extends Seeder
 {

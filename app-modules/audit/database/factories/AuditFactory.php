@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Audit\Database\Factories;
+namespace AidingApp\Audit\Database\Factories;
 
 use App\Models\User;
-use AdvisingApp\Audit\Models\Audit;
+use AidingApp\Audit\Models\Audit;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use AdvisingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 
 /**
  * @extends Factory<Audit>

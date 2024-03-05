@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Consent\Policies;
+namespace AidingApp\Consent\Policies;
 
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
-use AdvisingApp\Authorization\Enums\LicenseType;
-use AdvisingApp\Consent\Models\ConsentAgreement;
+use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\Consent\Models\ConsentAgreement;
 
 class ConsentAgreementPolicy
 {

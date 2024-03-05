@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Actions;
+namespace AidingApp\ServiceManagement\Actions;
 
-use AdvisingApp\Form\Models\Submissible;
-use AdvisingApp\Form\Actions\GenerateFormKitSchema;
+use AidingApp\Form\Models\Submissible;
+use AidingApp\Form\Actions\GenerateFormKitSchema;
 
 class GenerateServiceRequestFormKitSchema extends GenerateFormKitSchema
 {

@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Http\Controllers;
+namespace AidingApp\ServiceManagement\Http\Controllers;
 
 use Closure;
 use Illuminate\Support\Str;
@@ -48,15 +48,15 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response;
-use AdvisingApp\Form\Actions\GenerateSubmissibleValidation;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestForm;
-use AdvisingApp\Form\Actions\ResolveSubmissionAuthorFromEmail;
-use AdvisingApp\Form\Notifications\AuthenticateFormNotification;
-use AdvisingApp\Form\Filament\Blocks\EducatableEmailFormFieldBlock;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestFormSubmission;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestFormAuthentication;
-use AdvisingApp\IntegrationGoogleRecaptcha\Settings\GoogleRecaptchaSettings;
-use AdvisingApp\ServiceManagement\Actions\GenerateServiceRequestFormKitSchema;
+use AidingApp\Form\Actions\GenerateSubmissibleValidation;
+use AidingApp\ServiceManagement\Models\ServiceRequestForm;
+use AidingApp\Form\Actions\ResolveSubmissionAuthorFromEmail;
+use AidingApp\Form\Notifications\AuthenticateFormNotification;
+use AidingApp\Form\Filament\Blocks\EducatableEmailFormFieldBlock;
+use AidingApp\ServiceManagement\Models\ServiceRequestFormSubmission;
+use AidingApp\ServiceManagement\Models\ServiceRequestFormAuthentication;
+use AidingApp\IntegrationGoogleRecaptcha\Settings\GoogleRecaptchaSettings;
+use AidingApp\ServiceManagement\Actions\GenerateServiceRequestFormKitSchema;
 
 class ServiceRequestFormWidgetController extends Controller
 {

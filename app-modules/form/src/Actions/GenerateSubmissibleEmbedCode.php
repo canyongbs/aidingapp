@@ -34,13 +34,13 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Form\Actions;
+namespace AidingApp\Form\Actions;
 
 use Exception;
+use AidingApp\Survey\Models\Survey;
 use Illuminate\Support\Facades\URL;
-use AdvisingApp\Survey\Models\Survey;
-use AdvisingApp\Form\Models\Submissible;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestForm;
+use AidingApp\Form\Models\Submissible;
+use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 
 class GenerateSubmissibleEmbedCode
 {

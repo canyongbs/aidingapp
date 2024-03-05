@@ -10,17 +10,17 @@
     },
     "autoload": {
         "psr-4": {
-            "AdvisingApp\\Engagement\\": "src/",
-            "AdvisingApp\\Engagement\\Tests\\": "tests/",
-            "AdvisingApp\\Engagement\\Database\\Factories\\": "database/factories/",
-            "AdvisingApp\\Engagement\\Database\\Seeders\\": "database/seeders/"
+            "AidingApp\\Engagement\\": "src/",
+            "AidingApp\\Engagement\\Tests\\": "tests/",
+            "AidingApp\\Engagement\\Database\\Factories\\": "database/factories/",
+            "AidingApp\\Engagement\\Database\\Seeders\\": "database/seeders/"
         }
     },
     "minimum-stability": "stable",
     "extra": {
         "laravel": {
             "providers": [
-                "AdvisingApp\\Engagement\\Providers\\EngagementServiceProvider"
+                "AidingApp\\Engagement\\Providers\\EngagementServiceProvider"
             ]
         }
     }

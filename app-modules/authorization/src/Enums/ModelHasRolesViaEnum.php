@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Authorization\Enums;
+namespace AidingApp\Authorization\Enums;
 
 enum ModelHasRolesViaEnum: string
 {

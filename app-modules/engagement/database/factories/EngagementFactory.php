@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Database\Factories;
+namespace AidingApp\Engagement\Database\Factories;
 
 use App\Models\User;
-use AdvisingApp\Contact\Models\Contact;
-use AdvisingApp\Engagement\Models\Engagement;
-use AdvisingApp\Engagement\Models\EngagementBatch;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Engagement\Models\Engagement;
+use AidingApp\Engagement\Models\EngagementBatch;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Relations\Relation;
 

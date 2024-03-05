@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Survey\Database\Factories;
+namespace AidingApp\Survey\Database\Factories;
 
-use AdvisingApp\Survey\Models\SurveyField;
+use AidingApp\Survey\Models\SurveyField;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

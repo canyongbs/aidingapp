@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InAppCommunication\Models;
+namespace AidingApp\InAppCommunication\Models;
 
 use App\Models\User;
 use Illuminate\Support\Str;
@@ -42,8 +42,8 @@ use Filament\Notifications\Notification;
 use Filament\Notifications\Actions\Action;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use AdvisingApp\InAppCommunication\Filament\Pages\UserChat;
-use AdvisingApp\InAppCommunication\Enums\ConversationNotificationPreference;
+use AidingApp\InAppCommunication\Filament\Pages\UserChat;
+use AidingApp\InAppCommunication\Enums\ConversationNotificationPreference;
 
 /**
  * @mixin IdeHelperTwilioConversationUser

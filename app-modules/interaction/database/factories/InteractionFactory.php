@@ -34,20 +34,20 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Interaction\Database\Factories;
+namespace AidingApp\Interaction\Database\Factories;
 
 use App\Models\User;
-use AdvisingApp\Contact\Models\Contact;
-use AdvisingApp\Division\Models\Division;
-use AdvisingApp\Interaction\Models\Interaction;
-use AdvisingApp\Interaction\Models\InteractionType;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Division\Models\Division;
+use AidingApp\Interaction\Models\Interaction;
+use AidingApp\Interaction\Models\InteractionType;
+use AidingApp\Interaction\Models\InteractionDriver;
+use AidingApp\Interaction\Models\InteractionStatus;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use AdvisingApp\Interaction\Models\InteractionDriver;
-use AdvisingApp\Interaction\Models\InteractionStatus;
-use AdvisingApp\Interaction\Models\InteractionOutcome;
-use AdvisingApp\Interaction\Models\InteractionCampaign;
-use AdvisingApp\Interaction\Models\InteractionRelation;
-use AdvisingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\Interaction\Models\InteractionOutcome;
+use AidingApp\Interaction\Models\InteractionCampaign;
+use AidingApp\Interaction\Models\InteractionRelation;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 
 /**
  * @extends Factory<Interaction>

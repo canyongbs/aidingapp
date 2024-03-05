@@ -34,14 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\IntegrationMicrosoftClarity\Providers;
+namespace AidingApp\IntegrationMicrosoftClarity\Providers;
 
 use Filament\Panel;
 use Illuminate\Support\ServiceProvider;
 use App\Registries\RoleBasedAccessControlRegistry;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use AdvisingApp\IntegrationMicrosoftClarity\IntegrationMicrosoftClarityPlugin;
-use AdvisingApp\IntegrationMicrosoftClarity\Registries\IntegrationMicrosoftClarityRbacRegistry;
+use AidingApp\IntegrationMicrosoftClarity\IntegrationMicrosoftClarityPlugin;
+use AidingApp\IntegrationMicrosoftClarity\Registries\IntegrationMicrosoftClarityRbacRegistry;
 
 class IntegrationMicrosoftClarityServiceProvider extends ServiceProvider
 {

@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Contact\Database\Factories;
+namespace AidingApp\Contact\Database\Factories;
 
 use App\Models\User;
-use AdvisingApp\Contact\Models\Contact;
-use AdvisingApp\Contact\Models\ContactSource;
-use AdvisingApp\Contact\Models\ContactStatus;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\ContactSource;
+use AidingApp\Contact\Models\ContactStatus;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

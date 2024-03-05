@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InventoryManagement\Models\Scopes;
+namespace AidingApp\InventoryManagement\Models\Scopes;
 
 use Illuminate\Database\Eloquent\Builder;
-use AdvisingApp\InventoryManagement\Enums\SystemAssetStatusClassification;
+use AidingApp\InventoryManagement\Enums\SystemAssetStatusClassification;
 
 // TODO Make this somewhat re-usable across any system classifications
 class ClassifiedAs

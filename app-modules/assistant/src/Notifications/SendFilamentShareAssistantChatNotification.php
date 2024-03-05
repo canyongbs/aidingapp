@@ -34,13 +34,13 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Assistant\Notifications;
+namespace AidingApp\Assistant\Notifications;
 
-use AdvisingApp\Assistant\Enums\AssistantChatShareVia;
-use AdvisingApp\Notification\Notifications\BaseNotification;
-use AdvisingApp\Notification\Notifications\DatabaseNotification;
+use AidingApp\Assistant\Enums\AssistantChatShareVia;
+use AidingApp\Notification\Notifications\BaseNotification;
+use AidingApp\Notification\Notifications\DatabaseNotification;
 use Filament\Notifications\Notification as FilamentNotification;
-use AdvisingApp\Notification\Notifications\Concerns\DatabaseChannelTrait;
+use AidingApp\Notification\Notifications\Concerns\DatabaseChannelTrait;
 
 class SendFilamentShareAssistantChatNotification extends BaseNotification implements DatabaseNotification
 {

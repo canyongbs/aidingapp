@@ -34,18 +34,18 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Models;
+namespace AidingApp\Engagement\Models;
 
 use App\Models\BaseModel;
 use OwenIt\Auditing\Contracts\Auditable;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use AidingApp\Engagement\Drivers\EngagementSmsDriver;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use AdvisingApp\Engagement\Drivers\EngagementSmsDriver;
-use AdvisingApp\Engagement\Drivers\EngagementEmailDriver;
-use AdvisingApp\Engagement\Enums\EngagementDeliveryMethod;
-use AdvisingApp\Engagement\Enums\EngagementDeliveryStatus;
-use AdvisingApp\Engagement\Drivers\EngagementDeliverableDriver;
-use AdvisingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Engagement\Drivers\EngagementEmailDriver;
+use AidingApp\Engagement\Enums\EngagementDeliveryMethod;
+use AidingApp\Engagement\Enums\EngagementDeliveryStatus;
+use AidingApp\Engagement\Drivers\EngagementDeliverableDriver;
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 
 /**
  * @mixin IdeHelperEngagementDeliverable

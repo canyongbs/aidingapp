@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\IntegrationAwsSesEventHandling\Listeners;
+namespace AidingApp\IntegrationAwsSesEventHandling\Listeners;
 
 use Exception;
 use Illuminate\Mail\Events\MessageSending;
-use AdvisingApp\IntegrationAwsSesEventHandling\Settings\SesSettings;
+use AidingApp\IntegrationAwsSesEventHandling\Settings\SesSettings;
 
 class EnsureSesConfigurationSetHeadersArePresent
 {

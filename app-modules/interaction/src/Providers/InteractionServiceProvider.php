@@ -34,24 +34,24 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Interaction\Providers;
+namespace AidingApp\Interaction\Providers;
 
 use Filament\Panel;
 use App\Concerns\ImplementsGraphQL;
 use Illuminate\Support\ServiceProvider;
-use AdvisingApp\Interaction\InteractionPlugin;
-use AdvisingApp\Interaction\Models\Interaction;
+use AidingApp\Interaction\InteractionPlugin;
+use AidingApp\Interaction\Models\Interaction;
+use AidingApp\Interaction\Models\InteractionType;
 use App\Registries\RoleBasedAccessControlRegistry;
-use AdvisingApp\Interaction\Models\InteractionType;
+use AidingApp\Interaction\Models\InteractionDriver;
+use AidingApp\Interaction\Models\InteractionStatus;
+use AidingApp\Interaction\Models\InteractionOutcome;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use AdvisingApp\Interaction\Models\InteractionDriver;
-use AdvisingApp\Interaction\Models\InteractionStatus;
-use AdvisingApp\Interaction\Models\InteractionOutcome;
-use AdvisingApp\Interaction\Models\InteractionCampaign;
-use AdvisingApp\Interaction\Models\InteractionRelation;
-use AdvisingApp\Interaction\Observers\InteractionObserver;
-use AdvisingApp\Interaction\Registries\InteractionRbacRegistry;
-use AdvisingApp\Interaction\Enums\InteractionStatusColorOptions;
+use AidingApp\Interaction\Models\InteractionCampaign;
+use AidingApp\Interaction\Models\InteractionRelation;
+use AidingApp\Interaction\Observers\InteractionObserver;
+use AidingApp\Interaction\Registries\InteractionRbacRegistry;
+use AidingApp\Interaction\Enums\InteractionStatusColorOptions;
 
 class InteractionServiceProvider extends ServiceProvider
 {

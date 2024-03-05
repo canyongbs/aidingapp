@@ -34,13 +34,13 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Assistant\Policies;
+namespace AidingApp\Assistant\Policies;
 
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
+use AidingApp\Assistant\Models\Prompt;
 use App\Concerns\PerformsLicenseChecks;
-use AdvisingApp\Assistant\Models\Prompt;
-use AdvisingApp\Authorization\Enums\LicenseType;
+use AidingApp\Authorization\Enums\LicenseType;
 use App\Policies\Contracts\PerformsChecksBeforeAuthorization;
 
 class PromptPolicy implements PerformsChecksBeforeAuthorization

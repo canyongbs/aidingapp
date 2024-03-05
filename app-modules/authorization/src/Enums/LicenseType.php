@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Authorization\Enums;
+namespace AidingApp\Authorization\Enums;
 
 use App\Settings\LicenseSettings;
 use Filament\Support\Contracts\HasLabel;
-use AdvisingApp\Authorization\Models\License;
+use AidingApp\Authorization\Models\License;
 
 enum LicenseType: string implements HasLabel
 {

@@ -34,16 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Task\Filament\Widgets;
+namespace AidingApp\Task\Filament\Widgets;
 
 use App\Models\User;
 use Filament\Tables\Table;
-use AdvisingApp\Task\Enums\TaskStatus;
+use AidingApp\Task\Enums\TaskStatus;
 use Filament\Tables\Columns\TextColumn;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Widgets\TableWidget as BaseWidget;
-use AdvisingApp\Task\Filament\Resources\TaskResource\Components\TaskViewAction;
+use AidingApp\Task\Filament\Resources\TaskResource\Components\TaskViewAction;
 
 abstract class TasksWidget extends BaseWidget
 {

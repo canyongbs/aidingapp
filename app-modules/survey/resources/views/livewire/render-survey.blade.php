@@ -32,7 +32,7 @@
 </COPYRIGHT>
 --}}
 @php
-    use AdvisingApp\Form\Actions\GenerateSubmissibleEmbedCode;
+    use AidingApp\Form\Actions\GenerateSubmissibleEmbedCode;
 @endphp
 
 <div class="flex items-center justify-center px-4 py-16">

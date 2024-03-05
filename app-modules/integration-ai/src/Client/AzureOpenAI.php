@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\IntegrationAI\Client;
+namespace AidingApp\IntegrationAI\Client;
 
 use OpenAI;
-use AdvisingApp\Report\Client\AIReportChatClient;
+use AidingApp\Report\Client\AIReportChatClient;
 
 class AzureOpenAI extends BaseAIChatClient
 {

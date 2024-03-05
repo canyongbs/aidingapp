@@ -34,13 +34,13 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Form\Notifications;
+namespace AidingApp\Form\Notifications;
 
-use AdvisingApp\Form\Models\Submission;
-use AdvisingApp\Notification\Notifications\SmsNotification;
-use AdvisingApp\Notification\Notifications\BaseNotification;
-use AdvisingApp\Notification\Notifications\Messages\TwilioMessage;
-use AdvisingApp\Notification\Notifications\Concerns\SmsChannelTrait;
+use AidingApp\Form\Models\Submission;
+use AidingApp\Notification\Notifications\SmsNotification;
+use AidingApp\Notification\Notifications\BaseNotification;
+use AidingApp\Notification\Notifications\Messages\TwilioMessage;
+use AidingApp\Notification\Notifications\Concerns\SmsChannelTrait;
 
 class FormSubmissionRequestSmsNotification extends BaseNotification implements SmsNotification
 {

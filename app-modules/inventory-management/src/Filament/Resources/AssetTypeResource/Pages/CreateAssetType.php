@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InventoryManagement\Filament\Resources\AssetTypeResource\Pages;
+namespace AidingApp\InventoryManagement\Filament\Resources\AssetTypeResource\Pages;
 
 use Filament\Forms\Form;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\CreateRecord;
-use AdvisingApp\InventoryManagement\Filament\Resources\AssetTypeResource;
+use AidingApp\InventoryManagement\Filament\Resources\AssetTypeResource;
 
 class CreateAssetType extends CreateRecord
 {

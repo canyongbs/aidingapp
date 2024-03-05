@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Models\Concerns;
+namespace AidingApp\ServiceManagement\Models\Concerns;
 
 use App\Models\Concerns\TargetsRelationships;
 use Bvtterfly\ModelStateMachine\StateMachine;

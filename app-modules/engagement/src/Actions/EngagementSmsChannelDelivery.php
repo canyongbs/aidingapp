@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Actions;
+namespace AidingApp\Engagement\Actions;
 
-use AdvisingApp\Engagement\Notifications\EngagementSmsNotification;
+use AidingApp\Engagement\Notifications\EngagementSmsNotification;
 
 class EngagementSmsChannelDelivery extends QueuedEngagementDelivery
 {

@@ -34,15 +34,15 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Policies;
+namespace AidingApp\ServiceManagement\Policies;
 
 use App\Enums\Feature;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
 use App\Concerns\PerformsFeatureChecks;
 use App\Concerns\PerformsLicenseChecks;
-use AdvisingApp\Authorization\Enums\LicenseType;
-use AdvisingApp\ServiceManagement\Models\ChangeRequestType;
+use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\ServiceManagement\Models\ChangeRequestType;
 use App\Policies\Contracts\PerformsChecksBeforeAuthorization;
 
 class ChangeRequestTypePolicy implements PerformsChecksBeforeAuthorization
