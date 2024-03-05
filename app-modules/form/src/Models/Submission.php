@@ -36,14 +36,13 @@
 
 namespace AdvisingApp\Form\Models;
 
-use AdvisingApp\Contact\Models\Contact;
-use AdvisingApp\StudentDataModel\Models\Student;
 use App\Models\BaseModel;
+use AdvisingApp\Contact\Models\Contact;
 use App\Models\Concerns\BelongsToEducatable;
 use Illuminate\Database\Eloquent\Collection;
+use AdvisingApp\StudentDataModel\Models\Student;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-
 
 /**
  * @property-read Submissible $submissible

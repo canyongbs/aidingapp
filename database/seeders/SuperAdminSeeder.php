@@ -39,9 +39,6 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use AdvisingApp\Contact\Models\Contact;
-use AdvisingApp\Engagement\Models\Engagement;
-use AdvisingApp\Engagement\Models\EngagementResponse;
-use AdvisingApp\Engagement\Models\EngagementDeliverable;
 
 class SuperAdminSeeder extends Seeder
 {

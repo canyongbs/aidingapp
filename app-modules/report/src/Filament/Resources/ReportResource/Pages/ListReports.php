@@ -46,7 +46,6 @@ use Filament\Tables\Columns\TextColumn;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Actions\DeleteAction;
-use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\Report\Filament\Resources\ReportResource;
 
 class ListReports extends ListRecords

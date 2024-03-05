@@ -39,7 +39,6 @@ namespace AdvisingApp\InventoryManagement\Database\Factories;
 use Carbon\Carbon;
 use App\Models\User;
 use AdvisingApp\Contact\Models\Contact;
-use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\InventoryManagement\Models\Asset;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Relations\Relation;

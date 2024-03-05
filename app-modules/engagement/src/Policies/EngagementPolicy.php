@@ -40,7 +40,6 @@ use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
 use AdvisingApp\Contact\Models\Contact;
 use AdvisingApp\Engagement\Models\Engagement;
-use AdvisingApp\StudentDataModel\Models\Student;
 
 class EngagementPolicy
 {

@@ -42,10 +42,8 @@ use Illuminate\Support\HtmlString;
 use AdvisingApp\Contact\Models\Contact;
 use App\Filament\Resources\UserResource;
 use Filament\Infolists\Components\TextEntry;
-use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\Notification\Models\OutboundDeliverable;
 use AdvisingApp\Contact\Filament\Resources\ContactResource;
-use AdvisingApp\StudentDataModel\Filament\Resources\StudentResource;
 
 class OutboundDeliverableViewAction extends ViewAction
 {

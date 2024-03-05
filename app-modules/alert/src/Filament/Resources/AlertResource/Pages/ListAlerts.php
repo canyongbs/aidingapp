@@ -36,31 +36,30 @@
 
 namespace AdvisingApp\Alert\Filament\Resources\AlertResource\Pages;
 
-use AdvisingApp\Alert\Enums\AlertSeverity;
-use AdvisingApp\Alert\Enums\AlertStatus;
-use AdvisingApp\Alert\Filament\Resources\AlertResource;
-use AdvisingApp\Alert\Models\Alert;
-use AdvisingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactAlerts;
-use AdvisingApp\Contact\Models\Contact;
-use App\Filament\Forms\Components\EducatableSelect;
-use App\Filament\Tables\Columns\IdColumn;
-use App\Models\Scopes\EducatableSearch;
+use Filament\Tables\Table;
+use Filament\Infolists\Infolist;
 use Filament\Actions\CreateAction;
+use AdvisingApp\Alert\Models\Alert;
+use Filament\Tables\Filters\Filter;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Select;
+use AdvisingApp\Contact\Models\Contact;
+use App\Models\Scopes\EducatableSearch;
 use Filament\Forms\Components\Textarea;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Infolist;
-use Filament\Resources\Pages\ListRecords;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\Filter;
+use AdvisingApp\Alert\Enums\AlertStatus;
+use App\Filament\Tables\Columns\IdColumn;
+use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Filters\SelectFilter;
-
-use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use AdvisingApp\Alert\Enums\AlertSeverity;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Tables\Actions\DeleteBulkAction;
+use App\Filament\Forms\Components\EducatableSelect;
+use AdvisingApp\Alert\Filament\Resources\AlertResource;
+use AdvisingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactAlerts;
 
 class ListAlerts extends ListRecords
 {

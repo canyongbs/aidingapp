@@ -46,7 +46,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Models\Import;
 use AdvisingApp\Interaction\Models\Interaction;
-use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\Interaction\Models\InteractionType;
 use AdvisingApp\Interaction\Models\InteractionDriver;
 use AdvisingApp\Interaction\Models\InteractionStatus;

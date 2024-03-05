@@ -44,9 +44,7 @@ use App\Filament\Resources\UserResource;
 use Filament\Infolists\Components\Split;
 use Filament\Infolists\Components\Fieldset;
 use Filament\Infolists\Components\TextEntry;
-use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\Contact\Filament\Resources\ContactResource;
-use AdvisingApp\StudentDataModel\Filament\Resources\StudentResource;
 
 trait TaskViewActionInfoList
 {

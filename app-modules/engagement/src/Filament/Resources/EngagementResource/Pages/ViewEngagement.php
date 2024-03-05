@@ -48,7 +48,6 @@ use AdvisingApp\Engagement\Models\Engagement;
 use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\Contact\Filament\Resources\ContactResource;
 use AdvisingApp\Engagement\Filament\Resources\EngagementResource;
-use AdvisingApp\StudentDataModel\Filament\Resources\StudentResource;
 
 class ViewEngagement extends ViewRecord
 {

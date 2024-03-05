@@ -43,7 +43,6 @@ use OwenIt\Auditing\Contracts\Auditable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Prunable;
 use Spatie\MediaLibrary\InteractsWithMedia;
-use AdvisingApp\StudentDataModel\Models\Student;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use AdvisingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 

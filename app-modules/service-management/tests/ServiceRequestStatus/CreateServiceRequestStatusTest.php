@@ -50,7 +50,6 @@ use function PHPUnit\Framework\assertCount;
 use function PHPUnit\Framework\assertEmpty;
 use function Pest\Laravel\assertDatabaseHas;
 
-use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusResource;
 use AdvisingApp\ServiceManagement\Tests\RequestFactories\CreateServiceRequestStatusRequestFactory;

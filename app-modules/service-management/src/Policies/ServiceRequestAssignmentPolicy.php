@@ -42,7 +42,6 @@ use Illuminate\Auth\Access\Response;
 use Illuminate\Support\Facades\Gate;
 use App\Support\FeatureAccessResponse;
 use AdvisingApp\Contact\Models\Contact;
-use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\ServiceManagement\Models\ServiceRequestAssignment;
 
 class ServiceRequestAssignmentPolicy

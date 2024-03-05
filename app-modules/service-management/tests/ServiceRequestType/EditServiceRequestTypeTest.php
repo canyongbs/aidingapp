@@ -48,7 +48,6 @@ use AdvisingApp\Contact\Models\Contact;
 use function Pest\Laravel\assertDatabaseHas;
 use function PHPUnit\Framework\assertEquals;
 
-use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\ServiceManagement\Models\ServiceRequestType;
 use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
 use AdvisingApp\ServiceManagement\Tests\RequestFactories\EditServiceRequestTypeRequestFactory;

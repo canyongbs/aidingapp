@@ -46,7 +46,6 @@ use AdvisingApp\Division\Models\Division;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Forms\Components\MorphToSelect;
 use Filament\Forms\Components\DateTimePicker;
-use AdvisingApp\StudentDataModel\Models\Student;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use AdvisingApp\Interaction\Models\InteractionType;
 use AdvisingApp\Interaction\Models\InteractionDriver;

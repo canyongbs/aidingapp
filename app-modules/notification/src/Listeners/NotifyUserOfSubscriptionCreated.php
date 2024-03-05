@@ -40,10 +40,8 @@ use Illuminate\Support\HtmlString;
 use AdvisingApp\Contact\Models\Contact;
 use Filament\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\Notification\Events\SubscriptionCreated;
 use AdvisingApp\Contact\Filament\Resources\ContactResource;
-use AdvisingApp\StudentDataModel\Filament\Resources\StudentResource;
 
 class NotifyUserOfSubscriptionCreated implements ShouldQueue
 {

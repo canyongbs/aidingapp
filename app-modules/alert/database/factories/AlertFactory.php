@@ -40,7 +40,6 @@ use AdvisingApp\Alert\Models\Alert;
 use AdvisingApp\Contact\Models\Contact;
 use AdvisingApp\Alert\Enums\AlertStatus;
 use AdvisingApp\Alert\Enums\AlertSeverity;
-use AdvisingApp\StudentDataModel\Models\Student;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Relations\Relation;
 

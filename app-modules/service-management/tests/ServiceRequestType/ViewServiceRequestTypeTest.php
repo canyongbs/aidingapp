@@ -43,7 +43,6 @@ use App\Settings\LicenseSettings;
 use function Pest\Laravel\actingAs;
 
 use AdvisingApp\Contact\Models\Contact;
-use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\ServiceManagement\Models\ServiceRequestType;
 use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
 

@@ -57,10 +57,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Tables\Actions\DetachBulkAction;
-use AdvisingApp\StudentDataModel\Models\Student;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use AdvisingApp\Contact\Filament\Resources\ContactResource;
-use AdvisingApp\StudentDataModel\Filament\Resources\StudentResource;
 use AdvisingApp\Task\Filament\Resources\TaskResource\Components\TaskViewAction;
 
 abstract class BaseTaskRelationManager extends ManageRelatedRecords

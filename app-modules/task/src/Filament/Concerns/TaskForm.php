@@ -44,7 +44,6 @@ use App\Models\Authenticatable;
 use App\Models\Scopes\HasLicense;
 use AdvisingApp\Contact\Models\Contact;
 use Illuminate\Database\Eloquent\Builder;
-use AdvisingApp\StudentDataModel\Models\Student;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
 trait TaskForm

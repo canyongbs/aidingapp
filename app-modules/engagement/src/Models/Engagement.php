@@ -36,28 +36,28 @@
 
 namespace AdvisingApp\Engagement\Models;
 
-use AdvisingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use App\Models\User;
+use App\Models\BaseModel;
+use Illuminate\Support\Collection;
 use AdvisingApp\Contact\Models\Contact;
-use AdvisingApp\Engagement\Actions\GenerateEmailMarkdownContent;
+use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
+use AdvisingApp\Timeline\Models\Timeline;
+use Illuminate\Database\Eloquent\Builder;
+use App\Models\Scopes\LicensedToEducatable;
+use App\Models\Concerns\BelongsToEducatable;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use AdvisingApp\Timeline\Timelines\EngagementTimeline;
 use AdvisingApp\Engagement\Enums\EngagementDeliveryStatus;
-use AdvisingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
 use AdvisingApp\Notification\Models\Contracts\Subscribable;
 use AdvisingApp\Timeline\Models\Contracts\ProvidesATimeline;
-use AdvisingApp\Timeline\Models\Timeline;
-use AdvisingApp\Timeline\Timelines\EngagementTimeline;
-use App\Models\BaseModel;
-use App\Models\Concerns\BelongsToEducatable;
-use App\Models\Scopes\LicensedToEducatable;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Relations\MorphOne;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Collection;
-use OwenIt\Auditing\Contracts\Auditable;
+use AdvisingApp\Engagement\Actions\GenerateEmailMarkdownContent;
+use AdvisingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AdvisingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
 
 /**
  * @property-read Educatable $recipient

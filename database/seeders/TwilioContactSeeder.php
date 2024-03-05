@@ -36,8 +36,8 @@
 
 namespace Database\Seeders;
 
-use AdvisingApp\Contact\Models\Contact;
 use Illuminate\Database\Seeder;
+use AdvisingApp\Contact\Models\Contact;
 
 class TwilioContactSeeder extends Seeder
 {

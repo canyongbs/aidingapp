@@ -49,7 +49,6 @@ use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\ServiceManagement\Models\ServiceRequest;
 use AdvisingApp\Contact\Filament\Resources\ContactResource;
 use AdvisingApp\ServiceManagement\Enums\SlaComplianceStatus;
-use AdvisingApp\StudentDataModel\Filament\Resources\StudentResource;
 use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 
 class ViewServiceRequest extends ViewRecord

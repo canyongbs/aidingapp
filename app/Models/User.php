@@ -59,7 +59,6 @@ use AdvisingApp\Authorization\Models\License;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use AdvisingApp\Assistant\Models\AssistantChat;
 use AdvisingApp\Authorization\Enums\LicenseType;
-use AdvisingApp\StudentDataModel\Models\Student;
 use Staudenmeir\EloquentHasManyDeep\HasManyDeep;
 use AdvisingApp\Notification\Models\Subscription;
 use AdvisingApp\Consent\Models\Concerns\CanConsent;
