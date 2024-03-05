@@ -47,7 +47,6 @@ use AdvisingApp\Contact\Models\Contact;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
-use Illuminate\Database\Eloquent\Model;
 use AdvisingApp\Alert\Enums\AlertStatus;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Resources\Pages\ListRecords;
@@ -58,11 +57,9 @@ use Filament\Infolists\Components\TextEntry;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
 use AdvisingApp\StudentDataModel\Models\Student;
-use AdvisingApp\CaseloadManagement\Models\Caseload;
 use App\Filament\Forms\Components\EducatableSelect;
 use AdvisingApp\Alert\Filament\Resources\AlertResource;
 use AdvisingApp\StudentDataModel\Models\Scopes\EducatableSearch;
-use AdvisingApp\CaseloadManagement\Actions\TranslateCaseloadFilters;
 use AdvisingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactAlerts;
 use AdvisingApp\StudentDataModel\Filament\Resources\StudentResource\Pages\ManageStudentAlerts;
 
@@ -132,24 +129,6 @@ class ListAlerts extends ListRecords
                             callback: fn (Builder $query) => $query->whereRelation('careTeam', 'user_id', auth()->id())
                         )
                     ),
-                SelectFilter::make('my_caseloads')
-                    ->label('My Caseloads')
-                    ->options(
-                        auth()->user()->caseloads()
-                            ->pluck('name', 'id'),
-                    )
-                    ->searchable()
-                    ->optionsLimit(20)
-                    ->query(fn (Builder $query, array $data) => $this->caseloadFilter($query, $data)),
-                SelectFilter::make('all_caseloads')
-                    ->label('All Caseloads')
-                    ->options(
-                        Caseload::all()
-                            ->pluck('name', 'id'),
-                    )
-                    ->searchable()
-                    ->optionsLimit(20)
-                    ->query(fn (Builder $query, array $data) => $this->caseloadFilter($query, $data)),
                 SelectFilter::make('severity')
                     ->options(AlertSeverity::class),
                 SelectFilter::make('status')
@@ -200,24 +179,5 @@ class ListAlerts extends ListRecords
                         ->columns(),
                 ]),
         ];
-    }
-
-    protected function caseloadFilter(Builder $query, array $data): void
-    {
-        if (blank($data['value'])) {
-            return;
-        }
-
-        $caseload = Caseload::find($data['value']);
-
-        /** @var Model $model */
-        $model = resolve($caseload->model->class());
-
-        $query->whereIn(
-            'concern_id',
-            app(TranslateCaseloadFilters::class)
-                ->handle($data['value'])
-                ->pluck($model->getQualifiedKeyName()),
-        );
     }
 }

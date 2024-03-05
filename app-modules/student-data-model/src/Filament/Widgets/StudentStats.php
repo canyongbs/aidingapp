@@ -43,7 +43,6 @@ use AdvisingApp\Alert\Enums\AlertStatus;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use AdvisingApp\StudentDataModel\Models\Student;
-use AdvisingApp\CaseloadManagement\Enums\CaseloadModel;
 
 class StudentStats extends StatsOverviewWidget
 {
@@ -67,10 +66,6 @@ class StudentStats extends StatsOverviewWidget
             Stat::make('Alerts', Cache::tags(['students', "user-{$user->getKey()}-student-alerts"])
                 ->remember("user-{$user->getKey()}-student-alerts-count", now()->addHour(), function () use ($user): int {
                     return $user->studentAlerts()->status(AlertStatus::Active)->count();
-                })),
-            Stat::make('Caseloads', Cache::tags(["user-{$user->getKey()}-student-caseloads"])
-                ->remember("user-{$user->getKey()}-student-caseloads-count", now()->addHour(), function () use ($user): int {
-                    return $user->caseloads()->model(CaseloadModel::Student)->count();
                 })),
         ];
     }

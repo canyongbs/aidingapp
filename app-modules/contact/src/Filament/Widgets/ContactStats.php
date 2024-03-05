@@ -43,7 +43,6 @@ use AdvisingApp\Contact\Models\Contact;
 use AdvisingApp\Alert\Enums\AlertStatus;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
-use AdvisingApp\CaseloadManagement\Enums\CaseloadModel;
 
 class ContactStats extends StatsOverviewWidget
 {
@@ -67,10 +66,6 @@ class ContactStats extends StatsOverviewWidget
             Stat::make('Alerts', Cache::tags(['contacts', "user-{$user->getKey()}-contact-alerts"])
                 ->remember("user-{$user->getKey()}-contact-alerts-count", now()->addHour(), function () use ($user): int {
                     return $user->contactAlerts()->status(AlertStatus::Active)->count();
-                })),
-            Stat::make('Caseloads', Cache::tags(["user-{$user->getKey()}-contact-caseloads"])
-                ->remember("user-{$user->getKey()}-contact-caseloads-count", now()->addHour(), function () use ($user): int {
-                    return $user->caseloads()->model(CaseloadModel::Contact)->count();
                 })),
         ];
     }

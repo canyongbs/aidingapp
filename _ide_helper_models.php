@@ -444,8 +444,6 @@ namespace App\Models{
  * @property-read \AdvisingApp\MeetingCenter\Models\Calendar|null $calendar
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AdvisingApp\CareTeam\Models\CareTeam> $careTeams
  * @property-read int|null $care_teams_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AdvisingApp\CaseloadManagement\Models\Caseload> $caseloads
- * @property-read int|null $caseloads_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AdvisingApp\ServiceManagement\Models\ChangeRequestResponse> $changeRequestResponses
  * @property-read int|null $change_request_responses_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AdvisingApp\ServiceManagement\Models\ChangeRequestType> $changeRequestTypes
@@ -1142,76 +1140,6 @@ namespace AdvisingApp\CareTeam\Models{
  */
 	#[\AllowDynamicProperties]
 	class IdeHelperCareTeam {}
-}
-
-namespace AdvisingApp\CaseloadManagement\Models{
-/**
- * AdvisingApp\CaseloadManagement\Models\Caseload
- *
- * @property string $id
- * @property string $name
- * @property string|null $description
- * @property array|null $filters
- * @property \AdvisingApp\CaseloadManagement\Enums\CaseloadModel $model
- * @property \AdvisingApp\CaseloadManagement\Enums\CaseloadType $type
- * @property string $user_id
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property string|null $deleted_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AdvisingApp\CaseloadManagement\Models\CaseloadSubject> $subjects
- * @property-read int|null $subjects_count
- * @property-read \App\Models\User $user
- * @method static \AdvisingApp\CaseloadManagement\Database\Factories\CaseloadFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder|Caseload model(\AdvisingApp\CaseloadManagement\Enums\CaseloadModel $model)
- * @method static \Illuminate\Database\Eloquent\Builder|Caseload newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Caseload newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Caseload query()
- * @method static \Illuminate\Database\Eloquent\Builder|Caseload whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Caseload whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Caseload whereDescription($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Caseload whereFilters($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Caseload whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Caseload whereModel($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Caseload whereName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Caseload whereType($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Caseload whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Caseload whereUserId($value)
- * @mixin \Eloquent
- */
-	#[\AllowDynamicProperties]
-	class IdeHelperCaseload {}
-}
-
-namespace AdvisingApp\CaseloadManagement\Models{
-/**
- * AdvisingApp\CaseloadManagement\Models\CaseloadSubject
- *
- * @property string $id
- * @property string $subject_id
- * @property string $subject_type
- * @property string $caseload_id
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \AdvisingApp\CaseloadManagement\Models\Caseload $caseload
- * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $subject
- * @method static \Illuminate\Database\Eloquent\Builder|CaseloadSubject newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|CaseloadSubject newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|CaseloadSubject onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|CaseloadSubject query()
- * @method static \Illuminate\Database\Eloquent\Builder|CaseloadSubject whereCaseloadId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CaseloadSubject whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CaseloadSubject whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CaseloadSubject whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CaseloadSubject whereSubjectId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CaseloadSubject whereSubjectType($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CaseloadSubject whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CaseloadSubject withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|CaseloadSubject withoutTrashed()
- * @mixin \Eloquent
- */
-	#[\AllowDynamicProperties]
-	class IdeHelperCaseloadSubject {}
 }
 
 namespace AdvisingApp\Consent\Models{
@@ -4067,7 +3995,7 @@ namespace AdvisingApp\StudentDataModel\Models{
  * @property int $cum_att
  * @property int $cum_ern
  * @property int $pct_ern
- * @property float $cum_gpa
+ * @property string $cum_gpa
  * @property \Illuminate\Support\Carbon $max_dt
  * @property-read \AdvisingApp\StudentDataModel\Models\Student|null $student
  * @method static \AdvisingApp\StudentDataModel\Database\Factories\PerformanceFactory factory($count = null, $state = [])
@@ -4099,7 +4027,7 @@ namespace AdvisingApp\StudentDataModel\Models{
  * @property string $division
  * @property string $acad_plan
  * @property string $prog_status
- * @property float $cum_gpa
+ * @property string $cum_gpa
  * @property string $semester
  * @property string $descr
  * @property string $foi

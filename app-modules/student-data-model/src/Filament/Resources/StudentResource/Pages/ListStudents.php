@@ -42,19 +42,15 @@ use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
 use AdvisingApp\StudentDataModel\Models\Student;
-use AdvisingApp\CaseloadManagement\Models\Caseload;
-use AdvisingApp\CaseloadManagement\Enums\CaseloadModel;
 use AdvisingApp\Engagement\Filament\Actions\BulkEngagementAction;
 use AdvisingApp\Notification\Filament\Actions\SubscribeBulkAction;
 use AdvisingApp\CareTeam\Filament\Actions\ToggleCareTeamBulkAction;
 use AdvisingApp\Notification\Filament\Actions\SubscribeTableAction;
-use AdvisingApp\CaseloadManagement\Actions\TranslateCaseloadFilters;
 use AdvisingApp\StudentDataModel\Filament\Resources\StudentResource;
 use AdvisingApp\Engagement\Filament\Actions\Contracts\HasBulkEngagementAction;
 use AdvisingApp\Engagement\Filament\Actions\Concerns\ImplementsHasBulkEngagementAction;
@@ -85,26 +81,6 @@ class ListStudents extends ListRecords implements HasBulkEngagementAction
                     ->searchable(),
             ])
             ->filters([
-                SelectFilter::make('my_caseloads')
-                    ->label('My Caseloads')
-                    ->options(
-                        auth()->user()->caseloads()
-                            ->where('model', CaseloadModel::Student)
-                            ->pluck('name', 'id'),
-                    )
-                    ->searchable()
-                    ->optionsLimit(20)
-                    ->query(fn (Builder $query, array $data) => $this->caseloadFilter($query, $data)),
-                SelectFilter::make('all_caseloads')
-                    ->label('All Caseloads')
-                    ->options(
-                        Caseload::all()
-                            ->where('model', CaseloadModel::Student)
-                            ->pluck('name', 'id'),
-                    )
-                    ->searchable()
-                    ->optionsLimit(20)
-                    ->query(fn (Builder $query, array $data) => $this->caseloadFilter($query, $data)),
                 Filter::make('subscribed')
                     ->query(fn (Builder $query): Builder => $query->whereRelation('subscriptions.user', 'id', auth()->id())),
                 TernaryFilter::make('sap')
@@ -145,19 +121,6 @@ class ListStudents extends ListRecords implements HasBulkEngagementAction
                     ToggleCareTeamBulkAction::make(),
                 ]),
             ]);
-    }
-
-    protected function caseloadFilter(Builder $query, array $data): void
-    {
-        if (blank($data['value'])) {
-            return;
-        }
-
-        $query->whereKey(
-            app(TranslateCaseloadFilters::class)
-                ->handle($data['value'])
-                ->pluck($query->getModel()->getQualifiedKeyName()),
-        );
     }
 
     protected function getHeaderActions(): array

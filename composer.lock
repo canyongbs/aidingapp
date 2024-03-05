@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "84e126bc7834a508a7205fdb35e9648d",
+    "content-hash": "f9a7e1d7d6e216bf837bf71fa77135b2",
     "packages": [
         {
             "name": "amphp/amp",
@@ -1785,41 +1785,6 @@
                     "AdvisingApp\\CareTeam\\Tests\\": "tests/",
                     "AdvisingApp\\CareTeam\\Database\\Factories\\": "database/factories/",
                     "AdvisingApp\\CareTeam\\Database\\Seeders\\": "database/seeders/"
-                }
-            },
-            "license": [
-                "proprietary"
-            ],
-            "transport-options": {
-                "symlink": true,
-                "relative": true
-            }
-        },
-        {
-            "name": "canyon-gbs/advising-app-caseload-management",
-            "version": "1.0",
-            "dist": {
-                "type": "path",
-                "url": "app-modules/caseload-management",
-                "reference": "8d0e90d94e710181086fd8087935b2f7370d0505"
-            },
-            "require": {
-                "filament/filament": "^3.0.0"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "AdvisingApp\\CaseloadManagement\\Providers\\CaseloadManagementServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "AdvisingApp\\CaseloadManagement\\": "src/",
-                    "AdvisingApp\\CaseloadManagement\\Tests\\": "tests/",
-                    "AdvisingApp\\CaseloadManagement\\Database\\Factories\\": "database/factories/",
-                    "AdvisingApp\\CaseloadManagement\\Database\\Seeders\\": "database/seeders/"
                 }
             },
             "license": [
@@ -22915,5 +22880,5 @@
         "ext-pdo": "*"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.3.0"
 }
