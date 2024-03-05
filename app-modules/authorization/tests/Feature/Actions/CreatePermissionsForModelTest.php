@@ -50,7 +50,7 @@ use AdvisingApp\Authorization\Actions\CreatePermissionsForModel;
 
 beforeEach(function () {
     Relation::morphMap([
-        'user' => Mockery_1_App_Models_User::class,
+        'user' => Mockery_3_App_Models_User::class,
     ]);
 
     (new Helpers())->truncateTables();
