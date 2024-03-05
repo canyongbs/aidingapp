@@ -28,7 +28,6 @@ type Alert @model(class: "AidingApp\\Alert\\Models\\Alert") {
 }
 
 input AlertConcernsQuery {
-  student: StudentsQuery
   contact: ContactsQuery
 }
 

@@ -16,7 +16,6 @@ type CareTeam @model(class: "AidingApp\\CareTeam\\Models\\CareTeam") {
 }
 
 input CareTeamEducatablesQuery {
-  student: StudentsQuery
   contact: ContactsQuery
 }
 

@@ -13,7 +13,6 @@ type UserSubscription
 }
 
 input UserSubscriptionSubscribablesQuery {
-  student: StudentsQuery
   contact: ContactsQuery
 }
 

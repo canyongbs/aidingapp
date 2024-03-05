@@ -61,7 +61,6 @@ type Interaction @model(class: "AidingApp\\Interaction\\Models\\Interaction") {
 }
 
 input InteractionInteractablesQuery {
-  student: StudentsQuery
   contact: ContactsQuery
   service_request: ServiceRequestQuery
 }
