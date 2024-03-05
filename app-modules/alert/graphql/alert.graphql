@@ -66,9 +66,7 @@ extend type Query {
 input CreateAlertInput {
   "The Concern related to the alert."
   concern_id: EducatableId!
-    @rules(
-      apply: ["required", "AdvisingApp\\Alert\\Rules\\ConcernIdExistsRule"]
-    )
+    @rules(apply: ["required", "AidingApp\\Alert\\Rules\\ConcernIdExistsRule"])
 
   "The type of Concern related to the alert."
   concern_type: EducatableType! @rules(apply: ["required", "in:contact"])
