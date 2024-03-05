@@ -61,7 +61,6 @@ class AuthorLinkedFormSubmissionCreatedNotification extends BaseNotification imp
 
         $target = match ($author::class) {
             Contact::class => ContactResource::class,
-            Student::class => StudentResource::class,
         };
 
         $formSubmissionUrl = $target::getUrl('manage-form-submissions', ['record' => $author]);

@@ -54,7 +54,6 @@ class ServiceRequestTypeSeeder extends Seeder
                     ['name' => 'Holds'],
                     ['name' => 'International'],
                     ['name' => 'Other Support'],
-                    ['name' => 'Student Progress'],
                     ['name' => 'Recruitment'],
                     ['name' => 'Technology'],
                     ['name' => 'Tutoring'],

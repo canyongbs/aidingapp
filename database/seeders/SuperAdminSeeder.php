@@ -40,7 +40,6 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 use AdvisingApp\Contact\Models\Contact;
 use AdvisingApp\Engagement\Models\Engagement;
-use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\Engagement\Models\EngagementResponse;
 use AdvisingApp\Engagement\Models\EngagementDeliverable;
 
@@ -53,23 +52,10 @@ class SuperAdminSeeder extends Seeder
 
         // Data for super admin
         $this->seedSubscribersFor($superAdmin);
-        // $this->seedEngagementsFor($superAdmin);
     }
 
     protected function seedSubscribersFor(User $user): void
     {
-        // Student subscriptions
-        Student::query()
-            ->orderBy('sisid')
-            ->limit(25)
-            ->get()
-            ->each(function (Student $student) use ($user) {
-                $user->subscriptions()->create([
-                    'subscribable_id' => $student->sisid,
-                    'subscribable_type' => resolve(Student::class)->getMorphClass(),
-                ]);
-            });
-
         // Contact subscriptions
         Contact::query()
             ->orderBy('id')
@@ -80,55 +66,6 @@ class SuperAdminSeeder extends Seeder
                     'subscribable_id' => $contact->id,
                     'subscribable_type' => resolve(Contact::class)->getMorphClass(),
                 ]);
-            });
-    }
-
-    protected function seedEngagementsFor(User $user): void
-    {
-        // Student Engagements
-        Student::query()
-            ->orderBy('sisid')
-            ->limit(25)
-            ->get()
-            ->each(function (Student $student) use ($user) {
-                $numberOfEngagements = rand(1, 10);
-
-                for ($i = 0; $i < $numberOfEngagements; $i++) {
-                    Engagement::factory()
-                        ->has(EngagementDeliverable::factory()->count(1)->randomizeState(['deliveryAwaiting', 'deliverySuccessful', 'deliveryFailed']), 'engagementDeliverable')
-                        ->for($student, 'recipient')
-                        ->create([
-                            'user_id' => $user->id,
-                        ]);
-                }
-
-                EngagementResponse::factory()
-                    ->count(rand(1, 10))
-                    ->for($student, 'sender')
-                    ->create();
-            });
-
-        // Contact Engagements
-        Contact::query()
-            ->orderBy('id')
-            ->limit(25)
-            ->get()
-            ->each(function (Contact $contact) use ($user) {
-                $numberOfEngagements = rand(1, 10);
-
-                for ($i = 0; $i < $numberOfEngagements; $i++) {
-                    Engagement::factory()
-                        ->has(EngagementDeliverable::factory()->count(1)->randomizeState(['deliveryAwaiting', 'deliverySuccessful', 'deliveryFailed']), 'engagementDeliverable')
-                        ->for($contact, 'recipient')
-                        ->create([
-                            'user_id' => $user->id,
-                        ]);
-                }
-
-                EngagementResponse::factory()
-                    ->count(rand(1, 10))
-                    ->for($contact, 'sender')
-                    ->create();
             });
     }
 }

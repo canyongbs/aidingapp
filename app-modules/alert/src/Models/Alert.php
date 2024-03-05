@@ -42,13 +42,13 @@ use AdvisingApp\Alert\Enums\AlertStatus;
 use OwenIt\Auditing\Contracts\Auditable;
 use Illuminate\Database\Eloquent\Builder;
 use AdvisingApp\Alert\Enums\AlertSeverity;
+use App\Models\Scopes\LicensedToEducatable;
+use App\Models\Concerns\BelongsToEducatable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use AdvisingApp\StudentDataModel\Models\Student;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use AdvisingApp\Notification\Models\Contracts\Subscribable;
 use AdvisingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AdvisingApp\StudentDataModel\Models\Scopes\LicensedToEducatable;
-use AdvisingApp\StudentDataModel\Models\Concerns\BelongsToEducatable;
 use AdvisingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
 
 /**

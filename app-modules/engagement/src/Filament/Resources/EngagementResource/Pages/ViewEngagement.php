@@ -75,7 +75,6 @@ class ViewEngagement extends ViewRecord
                                 $recipient = $record->recipient;
 
                                 return match ($recipient::class) {
-                                    Student::class => "{$recipient->{Student::displayNameKey()}} (Student)",
                                     Contact::class => "{$recipient->{Contact::displayNameKey()}} (Contact)",
                                 };
                             })
@@ -84,7 +83,6 @@ class ViewEngagement extends ViewRecord
                                 $recipient = $record->recipient;
 
                                 return match ($recipient::class) {
-                                    Student::class => StudentResource::getUrl('view', ['record' => $recipient->sisid]),
                                     Contact::class => ContactResource::getUrl('view', ['record' => $recipient->id]),
                                 };
                             }),

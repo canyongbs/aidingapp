@@ -46,16 +46,7 @@
     @if (filled($response ?? null))
         <div class="not-prose flex flex-wrap items-center gap-3">
             <span>{{ $response ?? null }}</span>
-            @if ($authorType === Student::class)
-                <a
-                    href="{{ StudentResource::getUrl('view', ['record' => $authorKey]) }}"
-                    target="_blank"
-                >
-                    <x-filament::badge color="success">
-                        Student
-                    </x-filament::badge>
-                </a>
-            @elseif ($authorType === Contact::class)
+            @if ($authorType === Contact::class)
                 <a
                     href="{{ ContactResource::getUrl('view', ['record' => $authorKey]) }}"
                     target="_blank"

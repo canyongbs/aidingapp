@@ -32,21 +32,8 @@ Our robust personal assistant is designed to support your student service profes
 * Draft Communication
 * Language Translation
 * Content Creation
-* Student Profile Analysis
 * Project Planning
 * Ideation
-* And Much More...
-
-### Student Service CRM
-
-Our student service CRM is designed to support the management of enrolled students. Some key features include:
-
-* Record Mangement
-* Email and SMS
-* Service Management
-* Task Management
-* Interaction Tracking
-* Files and Documents
 * And Much More...
 
 ## Technology

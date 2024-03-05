@@ -115,7 +115,6 @@ abstract class BaseTaskRelationManager extends ManageRelatedRecords
                 TextColumn::make('concern.full')
                     ->label('Related To')
                     ->url(fn (Task $record) => match ($record->concern ? $record->concern::class : null) {
-                        Student::class => StudentResource::getUrl('view', ['record' => $record->concern]),
                         Contact::class => ContactResource::getUrl('view', ['record' => $record->concern]),
                         default => null,
                     }),

@@ -37,15 +37,14 @@
 namespace AdvisingApp\IntegrationTwilio\Actions\Playground;
 
 use AdvisingApp\Contact\Models\Contact;
-use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\Engagement\Actions\Contracts\EngagementResponseSenderFinder;
 
 class FindEngagementResponseSender implements EngagementResponseSenderFinder
 {
-    public function find(string $phoneNumber): Student|Contact|null
+    public function find(string $phoneNumber): Contact|null
     {
-        return Student::query()
+        return Contact::query()
             ->where('mobile', $phoneNumber)
-            ->firstOr(fn () => Student::query()->inRandomOrder()->first());
+            ->firstOr(fn () => Contact::query()->inRandomOrder()->first());
     }
 }

@@ -56,7 +56,6 @@ class SubscriptionObserver
         if ($user) {
             Cache::tags([match ($subscription->subscribable_type) {
                 app(Contact::class)->getMorphClass() => "user-{$user->getKey()}-contact-subscriptions",
-                app(Student::class)->getMorphClass() => "user-{$user->getKey()}-student-subscriptions",
             }])->flush();
         }
     }
@@ -71,7 +70,6 @@ class SubscriptionObserver
         if ($user) {
             Cache::tags([match ($subscription->subscribable_type) {
                 app(Contact::class)->getMorphClass() => "user-{$user->getKey()}-contact-subscriptions",
-                app(Student::class)->getMorphClass() => "user-{$user->getKey()}-student-subscriptions",
             }])->flush();
         }
     }

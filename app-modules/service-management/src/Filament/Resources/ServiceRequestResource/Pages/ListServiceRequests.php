@@ -38,6 +38,8 @@ namespace AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestResourc
 
 use Filament\Tables\Table;
 use Filament\Actions\CreateAction;
+use App\Models\Scopes\EducatableSort;
+use App\Models\Scopes\EducatableSearch;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
@@ -51,9 +53,7 @@ use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
 use AdvisingApp\ServiceManagement\Models\ServiceRequest;
 use AdvisingApp\ServiceManagement\Enums\SlaComplianceStatus;
-use AdvisingApp\StudentDataModel\Models\Scopes\EducatableSort;
 use AdvisingApp\ServiceManagement\Models\ServiceRequestPriority;
-use AdvisingApp\StudentDataModel\Models\Scopes\EducatableSearch;
 use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 
 class ListServiceRequests extends ListRecords

@@ -234,23 +234,6 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
             ->withTimestamps();
     }
 
-    public function studentSubscriptions(): MorphToMany
-    {
-        return $this->morphedByMany(
-            related: Student::class,
-            name: 'subscribable',
-            table: 'subscriptions'
-        )
-            ->using(Subscription::class)
-            ->withPivot('id')
-            ->withTimestamps();
-    }
-
-    public function studentAlerts(): HasManyDeep
-    {
-        return $this->hasManyDeepFromRelations($this->studentSubscriptions(), (new Student())->alerts());
-    }
-
     public function contactAlerts(): HasManyDeep
     {
         return $this->hasManyDeepFromRelations($this->contactSubscriptions(), (new Contact())->alerts());
@@ -260,18 +243,6 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
     {
         return $this->morphedByMany(
             related: Contact::class,
-            name: 'educatable',
-            table: 'care_teams'
-        )
-            ->using(CareTeam::class)
-            ->withPivot('id')
-            ->withTimestamps();
-    }
-
-    public function studentCareTeams(): MorphToMany
-    {
-        return $this->morphedByMany(
-            related: Student::class,
             name: 'educatable',
             table: 'care_teams'
         )

@@ -41,11 +41,11 @@ use Illuminate\Support\Facades\URL;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use AdvisingApp\Portal\Enums\PortalType;
+use App\Actions\ResolveEducatableFromEmail;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\ValidationException;
 use AdvisingApp\Portal\Models\PortalAuthentication;
 use AdvisingApp\Portal\Notifications\AuthenticatePortalNotification;
-use AdvisingApp\StudentDataModel\Actions\ResolveEducatableFromEmail;
 use AdvisingApp\Portal\Http\Requests\KnowledgeManagementPortalAuthenticationRequest;
 
 class KnowledgeManagementPortalRequestAuthenticationController extends Controller

@@ -49,7 +49,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Models\Import;
 use Illuminate\Validation\ValidationException;
-use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\Interaction\Imports\InteractionsImporter;
 
 /**
@@ -104,14 +103,12 @@ class TaskImporter extends Importer
                         if (str($state)->contains(':')) {
                             return $resolveFromModel(match ((string) str($state)->before(':')) {
                                 'contact' => Contact::class,
-                                'student' => Student::class,
                             }, (string) str($state)->after(':'));
                         }
 
                         $user = $importer->getImport()->user;
 
                         $model = match (true) {
-                            $user->hasLicense(Student::getLicenseType()) => Student::class,
                             $user->hasLicense(Contact::getLicenseType()) => Contact::class,
                             default => null,
                         };
@@ -121,14 +118,14 @@ class TaskImporter extends Importer
                 )
                 ->requiredMapping()
                 ->rules(function (InteractionsImporter $importer) {
-                    if (! $importer->getImport()->user->hasLicense([Student::getLicenseType(), Contact::getLicenseType()])) {
+                    if (! $importer->getImport()->user->hasLicense([Contact::getLicenseType()])) {
                         return [];
                     }
 
                     return ['starts_with:contact:,student:'];
                 })
                 ->example(function () {
-                    if (auth()->user()?->hasLicense([Student::getLicenseType(), Contact::getLicenseType()]) ?? true) {
+                    if (auth()->user()?->hasLicense([Contact::getLicenseType()]) ?? true) {
                         return 'student:johnsmith@gmail.com';
                     }
 

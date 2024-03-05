@@ -96,7 +96,6 @@ class ViewServiceRequest extends ViewRecord
                                 $respondent = $record->respondent;
 
                                 return match ($respondent::class) {
-                                    Student::class => "{$respondent->{Student::displayNameKey()}} (Student)",
                                     Contact::class => "{$respondent->{Contact::displayNameKey()}} (Contact)",
                                 };
                             })
@@ -105,7 +104,6 @@ class ViewServiceRequest extends ViewRecord
                                 $respondent = $record->respondent;
 
                                 return match ($respondent::class) {
-                                    Student::class => StudentResource::getUrl('view', ['record' => $respondent->sisid]),
                                     Contact::class => ContactResource::getUrl('view', ['record' => $respondent->id]),
                                 };
                             }),

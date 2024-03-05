@@ -55,7 +55,6 @@ class NotifyUserOfSubscriptionCreated implements ShouldQueue
 
         $target = match ($subscribable::class) {
             Contact::class => ContactResource::class,
-            Student::class => StudentResource::class,
         };
 
         $url = $target::getUrl('view', ['record' => $subscribable]);

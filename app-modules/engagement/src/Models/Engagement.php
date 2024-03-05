@@ -36,30 +36,28 @@
 
 namespace AdvisingApp\Engagement\Models;
 
-use App\Models\User;
-use App\Models\BaseModel;
-use Illuminate\Support\Collection;
+use AdvisingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AdvisingApp\Contact\Models\Contact;
-use Illuminate\Database\Eloquent\Model;
-use OwenIt\Auditing\Contracts\Auditable;
-use AdvisingApp\Timeline\Models\Timeline;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use AdvisingApp\StudentDataModel\Models\Student;
-use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Database\Eloquent\Relations\MorphOne;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use AdvisingApp\Timeline\Timelines\EngagementTimeline;
+use AdvisingApp\Engagement\Actions\GenerateEmailMarkdownContent;
 use AdvisingApp\Engagement\Enums\EngagementDeliveryStatus;
+use AdvisingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
 use AdvisingApp\Notification\Models\Contracts\Subscribable;
 use AdvisingApp\Timeline\Models\Contracts\ProvidesATimeline;
-use AdvisingApp\StudentDataModel\Models\Contracts\Educatable;
-use AdvisingApp\Engagement\Actions\GenerateEmailMarkdownContent;
-use AdvisingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AdvisingApp\StudentDataModel\Models\Scopes\LicensedToEducatable;
-use AdvisingApp\StudentDataModel\Models\Concerns\BelongsToEducatable;
-use AdvisingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
+use AdvisingApp\Timeline\Models\Timeline;
+use AdvisingApp\Timeline\Timelines\EngagementTimeline;
+use App\Models\BaseModel;
+use App\Models\Concerns\BelongsToEducatable;
+use App\Models\Scopes\LicensedToEducatable;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Collection;
+use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * @property-read Educatable $recipient
@@ -173,11 +171,6 @@ class Engagement extends BaseModel implements Auditable, CanTriggerAutoSubscript
     public function scopeIsNotPartOfABatch(Builder $query): void
     {
         $query->whereNull('engagement_batch_id');
-    }
-
-    public function scopeSentToStudent(Builder $query): void
-    {
-        $query->where('recipient_type', resolve(Student::class)->getMorphClass());
     }
 
     public function scopeSentToContact(Builder $query): void

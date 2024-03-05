@@ -54,7 +54,7 @@ test('ListTasks page displays the correct details for available my tasks', funct
     $tasks = Task::factory()
         ->count(10)
         ->assigned(User::first())
-        ->concerningStudent()
+        ->concerningContact()
         ->create(
             [
                 'status' => TaskStatus::InProgress->value,

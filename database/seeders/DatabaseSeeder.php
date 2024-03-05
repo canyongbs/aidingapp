@@ -107,11 +107,8 @@ class DatabaseSeeder extends Seeder
             FormSeeder::class,
             AlertSeeder::class,
             TeamSeeder::class,
-            // EngagementSeeder::class,
-            // EngagementResponseSeeder::class,
-            // DemoEducatableEngagementSeeder::class,
             SuperAdminSeeder::class,
-            TwilioStudentSeeder::class,
+            TwilioContactSeeder::class,
 
             // InventoryManagement
             ...AssetSeeder::metadataSeeders(),

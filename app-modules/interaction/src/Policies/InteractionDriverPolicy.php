@@ -46,7 +46,7 @@ class InteractionDriverPolicy
 {
     public function before(Authenticatable $authenticatable): ?Response
     {
-        if (! $authenticatable->hasAnyLicense([Student::getLicenseType(), Contact::getLicenseType()])) {
+        if (! $authenticatable->hasAnyLicense([Contact::getLicenseType()])) {
             return Response::deny('You are not licensed for the Recruitment CRM.');
         }
 

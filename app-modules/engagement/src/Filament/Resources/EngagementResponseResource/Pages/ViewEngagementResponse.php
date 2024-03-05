@@ -44,7 +44,6 @@ use Filament\Infolists\Components\TextEntry;
 use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\Engagement\Models\EngagementResponse;
 use AdvisingApp\Contact\Filament\Resources\ContactResource;
-use AdvisingApp\StudentDataModel\Filament\Resources\StudentResource;
 use AdvisingApp\Engagement\Filament\Resources\EngagementResponseResource;
 
 class ViewEngagementResponse extends ViewRecord
@@ -66,7 +65,6 @@ class ViewEngagementResponse extends ViewRecord
                                 $sender = $record->sender;
 
                                 return match ($sender::class) {
-                                    Student::class => "{$sender->full} (Student)",
                                     Contact::class => "{$sender->full} (Contact)",
                                 };
                             })
@@ -75,7 +73,6 @@ class ViewEngagementResponse extends ViewRecord
                                 $sender = $record->sender;
 
                                 return match ($sender::class) {
-                                    Student::class => StudentResource::getUrl('view', ['record' => $sender->sisid]),
                                     Contact::class => ContactResource::getUrl('view', ['record' => $sender->id]),
                                 };
                             }),

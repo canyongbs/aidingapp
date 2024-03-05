@@ -40,7 +40,6 @@ use App\Models\User;
 use AdvisingApp\Contact\Models\Contact;
 use AdvisingApp\Division\Models\Division;
 use AdvisingApp\Interaction\Models\Interaction;
-use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\Interaction\Models\InteractionType;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use AdvisingApp\Interaction\Models\InteractionDriver;
@@ -58,7 +57,6 @@ class InteractionFactory extends Factory
     public function definition(): array
     {
         $interactable = fake()->randomElement([
-            Student::inRandomOrder()->first() ?? Student::factory()->create(),
             Contact::factory()->create(),
             ServiceRequest::factory()->create(),
         ]);

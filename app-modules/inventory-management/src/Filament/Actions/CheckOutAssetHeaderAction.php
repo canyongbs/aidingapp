@@ -72,21 +72,18 @@ class CheckOutAssetHeaderAction extends Action
             Radio::make('checked_out_to_type')
                 ->label('Check out to')
                 ->options([
-                    Student::class => 'Student',
                     Contact::class => 'Contact',
                 ])
-                ->default(Student::class)
+                ->default(Contact::class)
                 ->required()
                 ->live(),
             Select::make('checked_out_to_id')
                 ->label(fn (Get $get): string => match ($get('checked_out_to_type')) {
-                    Student::class => 'Select Student',
                     Contact::class => 'Select Contact',
                 })
                 ->visible(fn (Get $get): bool => filled($get('checked_out_to_type')))
                 ->getSearchResultsUsing(function (string $search, Get $get) {
                     return match ($get('checked_out_to_type')) {
-                        Student::class => Student::where('full_name', 'like', "%{$search}%")->orWhere('first', 'like', "{$search}")->orWhere('last', 'like', "{$search}")->pluck('full_name', 'sisid')->toArray(),
                         Contact::class => Contact::where('full_name', 'like', "%{$search}%")->orWhere('first_name', 'like', "{$search}")->orWhere('last_name', 'like', "{$search}")->pluck('full_name', 'id')->toArray(),
                     };
                 })

@@ -1,7 +1,6 @@
 <?php
 
 use AdvisingApp\Contact\Models\Contact;
-use AdvisingApp\StudentDataModel\Models\Student;
 
 /*
 <COPYRIGHT>
@@ -83,11 +82,6 @@ return [
             'hash' => false,
         ],
 
-        'student' => [
-            'driver' => 'session',
-            'provider' => 'students',
-        ],
-
         'contact' => [
             'driver' => 'session',
             'provider' => 'contacts',
@@ -120,11 +114,6 @@ return [
         'system-users' => [
             'driver' => 'eloquent',
             'model' => App\Models\SystemUser::class,
-        ],
-
-        'students' => [
-            'driver' => 'eloquent',
-            'model' => Student::class,
         ],
 
         'contacts' => [

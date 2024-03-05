@@ -40,12 +40,12 @@ use App\Models\User;
 use AdvisingApp\Contact\Models\Contact;
 use AdvisingApp\Form\Models\Submission;
 use Illuminate\Database\Eloquent\Builder;
+use App\Models\Scopes\LicensedToEducatable;
 use AdvisingApp\Form\Enums\FormSubmissionStatus;
 use AdvisingApp\StudentDataModel\Models\Student;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use AdvisingApp\Form\Enums\FormSubmissionRequestDeliveryMethod;
-use AdvisingApp\StudentDataModel\Models\Scopes\LicensedToEducatable;
 
 /**
  * @property Student|Contact|null $author

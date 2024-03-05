@@ -89,7 +89,6 @@ class InteractionDriverSeeder extends Seeder
                     ['name' => 'Master Promissory Note'],
                     ['name' => 'Military Benefits'],
                     ['name' => 'MOV Activity'],
-                    ['name' => 'New Student Orientation'],
                     ['name' => 'No Longer Interested'],
                     ['name' => 'On Campus Outreach Recruitment Event'],
                     ['name' => 'Other or General Information'],

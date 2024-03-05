@@ -43,18 +43,13 @@ use App\Filament\Tables\UsersTable;
 use AdvisingApp\Contact\Models\Contact;
 use Filament\Support\Contracts\HasLabel;
 use Illuminate\Database\Eloquent\Builder;
-use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\Report\Filament\Exports\UserExporter;
 use AdvisingApp\Contact\Filament\Tables\ContactsTable;
 use AdvisingApp\Report\Filament\Exports\ContactExporter;
-use AdvisingApp\Report\Filament\Exports\StudentExporter;
-use AdvisingApp\StudentDataModel\Filament\Tables\StudentsTable;
 
 enum ReportModel: string implements HasLabel
 {
     case Contact = 'contact';
-
-    case Student = 'student';
 
     case User = 'user';
 
@@ -65,13 +60,12 @@ enum ReportModel: string implements HasLabel
 
     public static function default(): static
     {
-        return static::Student;
+        return static::Contact;
     }
 
     public function query(): Builder
     {
         return match ($this) {
-            static::Student => Student::query(),
             static::Contact => Contact::query(),
             static::User => User::query(),
         };
@@ -80,7 +74,6 @@ enum ReportModel: string implements HasLabel
     public function table(Table $table): Table
     {
         return $table->tap(app(match ($this) {
-            static::Student => StudentsTable::class,
             static::Contact => ContactsTable::class,
             static::User => UsersTable::class,
         }));
@@ -89,7 +82,6 @@ enum ReportModel: string implements HasLabel
     public function class(): string
     {
         return match ($this) {
-            static::Student => Student::class,
             static::Contact => Contact::class,
             static::User => User::class,
         };
@@ -98,7 +90,6 @@ enum ReportModel: string implements HasLabel
     public function exporter(): string
     {
         return match ($this) {
-            static::Student => StudentExporter::class,
             static::Contact => ContactExporter::class,
             static::User => UserExporter::class,
         };
@@ -107,7 +98,7 @@ enum ReportModel: string implements HasLabel
     public function canBeAccessed(Authenticatable $user): bool
     {
         return match ($this) {
-            static::Student, static::Contact => $user->hasLicense($this->class()::getLicenseType()),
+            static::Contact => $user->hasLicense($this->class()::getLicenseType()),
             static::User => $user->can('viewAny', User::class),
         };
     }

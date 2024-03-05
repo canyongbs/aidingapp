@@ -36,8 +36,8 @@
 
 use App\Models\User;
 use AdvisingApp\Alert\Models\Alert;
+use AdvisingApp\Contact\Models\Contact;
 use AdvisingApp\Authorization\Enums\LicenseType;
-use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\Alert\Notifications\AlertCreatedNotification;
 
 use function Tests\Helpers\testItIsDispatchedToTheProperChannels;
@@ -49,15 +49,15 @@ testItIsDispatchedToTheProperChannels(
     deliveryChannels: [DatabaseChannel::class],
     triggerNotificationToNotifiable: function () {
         $user = User::factory()->licensed(LicenseType::cases())->create();
-        $student = Student::factory()->create();
+        $contact = Contact::factory()->create();
 
-        $student->subscriptions()->create([
+        $contact->subscriptions()->create([
             'user_id' => $user->id,
         ]);
 
         Alert::factory()->create([
-            'concern_id' => $student->sisid,
-            'concern_type' => Student::class,
+            'concern_id' => $contact->getKey(),
+            'concern_type' => Contact::class,
         ]);
 
         return $user;

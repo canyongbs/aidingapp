@@ -119,7 +119,7 @@ class ServiceRequestHistory extends BaseModel implements ProvidesATimeline
             'division_id' => [Division::class, 'name'],
             'type_id' => [ServiceRequestType::class, 'name'],
             'respondent_id' => [
-                [Contact::class, Student::class],
+                [Contact::class],
             ],
         ];
 

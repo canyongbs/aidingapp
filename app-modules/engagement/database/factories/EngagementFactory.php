@@ -54,18 +54,15 @@ class EngagementFactory extends Factory
         return [
             'user_id' => User::factory(),
             'recipient_type' => fake()->randomElement([
-                (new Student())->getMorphClass(),
                 (new Contact())->getMorphClass(),
             ]),
             'recipient_id' => function (array $attributes) {
                 $senderClass = Relation::getMorphedModel($attributes['recipient_type']);
 
-                /** @var Student|Contact $senderModel */
+                /** @var Contact $senderModel */
                 $senderModel = new $senderClass();
 
-                $sender = $senderClass === Student::class
-                    ? Student::inRandomOrder()->first() ?? Student::factory()->create()
-                    : $senderModel::factory()->create();
+                $sender = $senderModel::factory()->create();
 
                 return $sender->getKey();
             },
@@ -74,14 +71,6 @@ class EngagementFactory extends Factory
             'deliver_at' => fake()->dateTimeBetween('-1 year', '-1 day'),
             'scheduled' => true,
         ];
-    }
-
-    public function forStudent(): self
-    {
-        return $this->state([
-            'recipient_id' => Student::inRandomOrder()->first()->sisid ?? Student::factory(),
-            'recipient_type' => (new Student())->getMorphClass(),
-        ]);
     }
 
     public function forContact(): self

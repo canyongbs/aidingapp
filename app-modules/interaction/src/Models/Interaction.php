@@ -36,24 +36,23 @@
 
 namespace AdvisingApp\Interaction\Models;
 
-use App\Models\User;
-use App\Models\BaseModel;
-use App\Models\Authenticatable;
-use Illuminate\Support\Collection;
-use AdvisingApp\Contact\Models\Contact;
-use OwenIt\Auditing\Contracts\Auditable;
-use AdvisingApp\Division\Models\Division;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use AdvisingApp\StudentDataModel\Models\Student;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use AdvisingApp\ServiceManagement\Models\ServiceRequest;
-use AdvisingApp\Notification\Models\Contracts\Subscribable;
 use AdvisingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AdvisingApp\StudentDataModel\Models\Scopes\LicensedToEducatable;
-use AdvisingApp\StudentDataModel\Models\Concerns\BelongsToEducatable;
+use AdvisingApp\Contact\Models\Contact;
+use AdvisingApp\Division\Models\Division;
 use AdvisingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
+use AdvisingApp\Notification\Models\Contracts\Subscribable;
+use AdvisingApp\ServiceManagement\Models\ServiceRequest;
+use App\Models\Authenticatable;
+use App\Models\BaseModel;
+use App\Models\Concerns\BelongsToEducatable;
+use App\Models\Scopes\LicensedToEducatable;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Collection;
+use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * @mixin IdeHelperInteraction
@@ -160,14 +159,6 @@ class Interaction extends BaseModel implements Auditable, CanTriggerAutoSubscrip
             $builder
                 ->where(fn (Builder $query) => $query
                     ->tap(new LicensedToEducatable('interactable'))
-                    ->when(
-                        ! $user->hasLicense(Student::getLicenseType()),
-                        fn (Builder $query) => $query->whereHasMorph(
-                            'interactable',
-                            ServiceRequest::class,
-                            fn (Builder $query) => $query->where($serviceRequestRespondentTypeColumn, '!=', app(Student::class)->getMorphClass()),
-                        ),
-                    )
                     ->when(
                         ! $user->hasLicense(Contact::getLicenseType()),
                         fn (Builder $query) => $query->whereHasMorph(

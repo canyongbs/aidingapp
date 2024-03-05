@@ -39,12 +39,10 @@ namespace AdvisingApp\Alert\Notifications;
 use Illuminate\Support\HtmlString;
 use AdvisingApp\Alert\Models\Alert;
 use AdvisingApp\Contact\Models\Contact;
-use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\Contact\Filament\Resources\ContactResource;
 use AdvisingApp\Notification\Notifications\BaseNotification;
 use AdvisingApp\Notification\Notifications\DatabaseNotification;
 use Filament\Notifications\Notification as FilamentNotification;
-use AdvisingApp\StudentDataModel\Filament\Resources\StudentResource;
 use AdvisingApp\Notification\Notifications\Concerns\DatabaseChannelTrait;
 
 class AlertCreatedNotification extends BaseNotification implements DatabaseNotification
@@ -61,7 +59,6 @@ class AlertCreatedNotification extends BaseNotification implements DatabaseNotif
 
         $target = match ($concern::class) {
             Contact::class => ContactResource::class,
-            Student::class => StudentResource::class,
         };
 
         $alertUrl = $target::getUrl('manage-alerts', ['record' => $concern]);

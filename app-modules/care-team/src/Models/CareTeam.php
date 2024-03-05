@@ -37,12 +37,12 @@
 namespace AdvisingApp\CareTeam\Models;
 
 use App\Models\User;
+use App\Models\Contracts\Educatable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphPivot;
-use AdvisingApp\StudentDataModel\Models\Contracts\Educatable;
 use AdvisingApp\Authorization\Models\Concerns\DefinesPermissions;
 
 /**

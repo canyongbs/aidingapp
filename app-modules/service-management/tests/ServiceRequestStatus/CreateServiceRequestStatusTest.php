@@ -96,7 +96,7 @@ test('CreateServiceRequestStatus requires valid data', function ($data, $errors)
 // Permission Tests
 
 test('CreateServiceRequestStatus is gated with proper access control', function () {
-    $user = User::factory()->licensed([Student::getLicenseType(), Contact::getLicenseType()])->create();
+    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
 
     actingAs($user)
         ->get(
@@ -133,7 +133,7 @@ test('CreateServiceRequestStatus is gated with proper feature access control', f
 
     $settings->save();
 
-    $user = User::factory()->licensed([Student::getLicenseType(), Contact::getLicenseType()])->create();
+    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
 
     $user->givePermissionTo('service_request_status.view-any');
     $user->givePermissionTo('service_request_status.create');

@@ -37,8 +37,8 @@
 namespace AdvisingApp\ServiceManagement\Database\Factories;
 
 use App\Models\User;
+use AdvisingApp\Contact\Models\Contact;
 use AdvisingApp\Division\Models\Division;
-use AdvisingApp\StudentDataModel\Models\Student;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use AdvisingApp\ServiceManagement\Models\ServiceRequest;
 use AdvisingApp\ServiceManagement\Models\ServiceRequestStatus;
@@ -52,9 +52,9 @@ class ServiceRequestFactory extends Factory
     public function definition(): array
     {
         return [
-            'respondent_id' => Student::inRandomOrder()->first()->sisid ?? Student::factory(),
+            'respondent_id' => Contact::factory(),
             'respondent_type' => function (array $attributes) {
-                return Student::find($attributes['respondent_id'])->getMorphClass();
+                return Contact::find($attributes['respondent_id'])->getMorphClass();
             },
             'close_details' => $this->faker->sentence(),
             'res_details' => $this->faker->sentence(),

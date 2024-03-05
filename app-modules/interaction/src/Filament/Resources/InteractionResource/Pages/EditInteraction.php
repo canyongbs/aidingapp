@@ -71,8 +71,6 @@ class EditInteraction extends EditRecord
                     ->searchable()
                     ->required()
                     ->types([
-                        ...(auth()->user()->hasLicense(Student::getLicenseType()) ? [MorphToSelect\Type::make(Student::class)
-                            ->titleAttribute(Student::displayNameKey())] : []),
                         ...(auth()->user()->hasLicense(Contact::getLicenseType()) ? [MorphToSelect\Type::make(Contact::class)
                             ->titleAttribute(Contact::displayNameKey())] : []),
                         MorphToSelect\Type::make(ServiceRequest::class)

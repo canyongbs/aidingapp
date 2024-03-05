@@ -40,7 +40,6 @@ use App\Models\User;
 use AdvisingApp\Task\Models\Task;
 use AdvisingApp\Task\Enums\TaskStatus;
 use AdvisingApp\Contact\Models\Contact;
-use AdvisingApp\StudentDataModel\Models\Student;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -60,14 +59,6 @@ class TaskFactory extends Factory
             'concern_id' => null,
             'concern_type' => null,
         ];
-    }
-
-    public function concerningStudent(Student $student = null): self
-    {
-        return $this->state([
-            'concern_id' => $student?->id ?? fn () => Student::inRandomOrder()->first()->sisid ?? Student::factory(),
-            'concern_type' => (new Student())->getMorphClass(),
-        ]);
     }
 
     public function concerningContact(Contact $contact = null): self

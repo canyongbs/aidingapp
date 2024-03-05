@@ -52,16 +52,14 @@ class AlertFactory extends Factory
     public function definition(): array
     {
         return [
-            'concern_type' => fake()->randomElement([(new Student())->getMorphClass(), (new Contact())->getMorphClass()]),
+            'concern_type' => fake()->randomElement([(new Contact())->getMorphClass()]),
             'concern_id' => function (array $attributes) {
                 $concernClass = Relation::getMorphedModel($attributes['concern_type']);
 
-                /** @var Student|Contact $concernModel */
+                /** @var Contact $concernModel */
                 $concernModel = new $concernClass();
 
-                $concern = $concernClass === Student::class
-                    ? Student::inRandomOrder()->first() ?? Student::factory()->create()
-                    : $concernModel::factory()->create();
+                $concern = $concernModel::factory()->create();
 
                 return $concern->getKey();
             },

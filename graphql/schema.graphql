@@ -3,38 +3,37 @@ scalar Date @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Date")
 
 "A datetime string with format `Y-m-d H:i:s`, e.g. `2018-05-23 13:43:32`."
 scalar DateTime
-    @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\DateTime")
+  @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\DateTime")
 
 scalar UUID
-    @scalar(class: "App\\GraphQL\\Scalars\\UUID")
-    @searchByOperators(type: "ID")
+  @scalar(class: "App\\GraphQL\\Scalars\\UUID")
+  @searchByOperators(type: "ID")
 
 scalar EducatableId
-    @scalar(class: "App\\GraphQL\\Scalars\\EducatableId")
-    @searchByOperators(type: "ID")
+  @scalar(class: "App\\GraphQL\\Scalars\\EducatableId")
+  @searchByOperators(type: "ID")
 
 scalar JSON
-    @scalar(class: "MLL\\GraphQLScalars\\JSON")
-    @searchByOperators(type: "String")
+  @scalar(class: "MLL\\GraphQLScalars\\JSON")
+  @searchByOperators(type: "String")
 
 scalar Email
-    @scalar(class: "MLL\\GraphQLScalars\\Email")
-    @searchByOperators(type: "String")
+  @scalar(class: "MLL\\GraphQLScalars\\Email")
+  @searchByOperators(type: "String")
 
 "A four digit integer year, e.g. `2018`."
 scalar Year
-    @scalar(class: "App\\GraphQL\\Scalars\\Year")
-    @searchByOperators(type: "Date")
+  @scalar(class: "App\\GraphQL\\Scalars\\Year")
+  @searchByOperators(type: "Date")
 
 type Query
 
 type Mutation
 
-union Educatable = Contact | Student
+union Educatable = Contact
 
 enum EducatableType {
-    Student @enum(value: "student")
-    Contact @enum(value: "contact")
+  Contact @enum(value: "contact")
 }
 
 union Authenticatable = User | SystemUser

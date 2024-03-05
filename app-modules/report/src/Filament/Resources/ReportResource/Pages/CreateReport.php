@@ -144,7 +144,6 @@ class CreateReport extends CreateRecord implements HasTable
     protected function getReportModels(): array
     {
         return [
-            ...(auth()->user()->hasLicense(Student::getLicenseType()) ? [ReportModel::Student] : []),
             ...(auth()->user()->hasLicense(Contact::getLicenseType()) ? [ReportModel::Contact] : []),
             ...(auth()->user()->can('viewAny', User::class) ? [ReportModel::User] : []),
         ];

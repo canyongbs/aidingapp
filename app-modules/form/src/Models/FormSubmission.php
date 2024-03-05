@@ -36,15 +36,15 @@
 
 namespace AdvisingApp\Form\Models;
 
-use App\Models\User;
 use AdvisingApp\Contact\Models\Contact;
-use Illuminate\Database\Eloquent\Builder;
+use AdvisingApp\Form\Enums\FormSubmissionRequestDeliveryMethod;
 use AdvisingApp\Form\Enums\FormSubmissionStatus;
 use AdvisingApp\StudentDataModel\Models\Student;
+use App\Models\Scopes\LicensedToEducatable;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use AdvisingApp\Form\Enums\FormSubmissionRequestDeliveryMethod;
-use AdvisingApp\StudentDataModel\Models\Scopes\LicensedToEducatable;
 
 /**
  * @property Student|Contact|null $author

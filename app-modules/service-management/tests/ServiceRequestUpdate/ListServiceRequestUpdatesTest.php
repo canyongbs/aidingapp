@@ -109,7 +109,7 @@ test('The correct details are displayed on the ListServiceRequestUpdates page', 
 // Permission Tests
 
 test('ListServiceRequestUpdates is gated with proper access control', function () {
-    $user = User::factory()->licensed([Student::getLicenseType(), Contact::getLicenseType()])->create();
+    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
 
     actingAs($user)
         ->get(
@@ -131,7 +131,7 @@ test('ListServiceRequestUpdates is gated with proper feature access control', fu
 
     $settings->save();
 
-    $user = User::factory()->licensed([Student::getLicenseType(), Contact::getLicenseType()])->create();
+    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
 
     $user->givePermissionTo('service_request_update.view-any');
 

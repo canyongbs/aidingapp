@@ -36,32 +36,31 @@
 
 namespace AdvisingApp\Alert\Filament\Resources\AlertResource\Pages;
 
-use Filament\Tables\Table;
-use Filament\Infolists\Infolist;
-use Filament\Actions\CreateAction;
+use AdvisingApp\Alert\Enums\AlertSeverity;
+use AdvisingApp\Alert\Enums\AlertStatus;
+use AdvisingApp\Alert\Filament\Resources\AlertResource;
 use AdvisingApp\Alert\Models\Alert;
-use Filament\Tables\Filters\Filter;
+use AdvisingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactAlerts;
+use AdvisingApp\Contact\Models\Contact;
+use App\Filament\Forms\Components\EducatableSelect;
+use App\Filament\Tables\Columns\IdColumn;
+use App\Models\Scopes\EducatableSearch;
+use Filament\Actions\CreateAction;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Select;
-use AdvisingApp\Contact\Models\Contact;
 use Filament\Forms\Components\Textarea;
-use Filament\Tables\Actions\ViewAction;
-use Filament\Tables\Columns\TextColumn;
-use AdvisingApp\Alert\Enums\AlertStatus;
-use App\Filament\Tables\Columns\IdColumn;
-use Filament\Resources\Pages\ListRecords;
-use Filament\Tables\Filters\SelectFilter;
-use Illuminate\Database\Eloquent\Builder;
-use AdvisingApp\Alert\Enums\AlertSeverity;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Infolist;
+use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
-use AdvisingApp\StudentDataModel\Models\Student;
-use App\Filament\Forms\Components\EducatableSelect;
-use AdvisingApp\Alert\Filament\Resources\AlertResource;
-use AdvisingApp\StudentDataModel\Models\Scopes\EducatableSearch;
-use AdvisingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactAlerts;
-use AdvisingApp\StudentDataModel\Filament\Resources\StudentResource\Pages\ManageStudentAlerts;
+use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
+
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class ListAlerts extends ListRecords
 {
@@ -76,7 +75,6 @@ class ListAlerts extends ListRecords
                     ->label('Related To')
                     ->getStateUsing(fn (Alert $record): ?string => $record->concern?->{$record->concern::displayNameKey()})
                     ->url(fn (Alert $record) => match ($record->concern ? $record->concern::class : null) {
-                        Student::class => ManageStudentAlerts::getUrl(['record' => $record->concern]),
                         Contact::class => ManageContactAlerts::getUrl(['record' => $record->concern]),
                         default => null,
                     }),
@@ -96,7 +94,6 @@ class ListAlerts extends ListRecords
                     ->label('Related To')
                     ->getStateUsing(fn (Alert $record): ?string => $record->concern?->{$record->concern::displayNameKey()})
                     ->url(fn (Alert $record) => match ($record->concern ? $record->concern::class : null) {
-                        Student::class => ManageStudentAlerts::getUrl(['record' => $record->concern]),
                         Contact::class => ManageContactAlerts::getUrl(['record' => $record->concern]),
                         default => null,
                     })

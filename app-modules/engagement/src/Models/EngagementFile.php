@@ -69,20 +69,6 @@ class EngagementFile extends BaseModel implements HasMedia, Auditable
             ->singleFile();
     }
 
-    public function students(): MorphToMany
-    {
-        return $this->morphedByMany(
-            related: Student::class,
-            name: 'entity',
-            table: 'engagement_file_entities',
-            foreignPivotKey: 'engagement_file_id',
-            relatedPivotKey: 'entity_id',
-            relation: 'engagementFiles',
-        )
-            ->using(EngagementFileEntities::class)
-            ->withTimestamps();
-    }
-
     public function contacts(): MorphToMany
     {
         return $this->morphedByMany(

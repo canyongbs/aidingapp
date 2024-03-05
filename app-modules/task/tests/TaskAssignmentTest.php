@@ -101,7 +101,7 @@ it('it properly subscriptions the creator and assigned Users to the Subscribable
     $task = Task::factory()
         ->recycle(User::factory()->create())
         ->assigned()
-        ->concerningStudent()
+        ->concerningContact()
         ->create();
 
     expect($task->createdBy->id)->toBe($task->assignedTo->id);
