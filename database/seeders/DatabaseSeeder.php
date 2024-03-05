@@ -47,6 +47,7 @@ use AdvisingApp\Alert\Database\Seeders\AlertSeeder;
 use AdvisingApp\Contact\Database\Seeders\ContactSeeder;
 use AdvisingApp\Assistant\Database\Seeders\PromptSeeder;
 use AdvisingApp\Division\Database\Seeders\DivisionSeeder;
+use AdvisingApp\MeetingCenter\Database\Seeders\EventSeeder;
 use AdvisingApp\Assistant\Database\Seeders\PromptTypeSeeder;
 use AdvisingApp\Contact\Database\Seeders\ContactSourceSeeder;
 use AdvisingApp\Contact\Database\Seeders\ContactStatusSeeder;
@@ -112,6 +113,7 @@ class DatabaseSeeder extends Seeder
             // DemoEducatableEngagementSeeder::class,
             SuperAdminSeeder::class,
             TwilioStudentSeeder::class,
+            EventSeeder::class,
 
             // InventoryManagement
             ...AssetSeeder::metadataSeeders(),
