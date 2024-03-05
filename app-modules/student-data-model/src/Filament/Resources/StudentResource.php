@@ -52,7 +52,6 @@ use AdvisingApp\StudentDataModel\Filament\Resources\StudentResource\Pages\Studen
 use AdvisingApp\StudentDataModel\Filament\Resources\StudentResource\Pages\ManageStudentInteractions;
 use AdvisingApp\StudentDataModel\Filament\Resources\StudentResource\Pages\StudentEngagementTimeline;
 use AdvisingApp\StudentDataModel\Filament\Resources\StudentResource\Pages\ManageStudentSubscriptions;
-use AdvisingApp\StudentDataModel\Filament\Resources\StudentResource\Pages\ManageStudentFormSubmissions;
 
 class StudentResource extends Resource
 {
@@ -79,7 +78,6 @@ class StudentResource extends Resource
             ManageStudentInteractions::class,
             StudentEngagementTimeline::class,
             ManageStudentCareTeam::class,
-            ManageStudentFormSubmissions::class,
             StudentServiceManagement::class,
         ]);
     }
@@ -107,7 +105,6 @@ class StudentResource extends Resource
             'manage-alerts' => ManageStudentAlerts::route('/{record}/alerts'),
             'manage-engagement' => ManageStudentEngagement::route('/{record}/engagement'),
             'manage-files' => ManageStudentFiles::route('/{record}/files'),
-            'manage-form-submissions' => ManageStudentFormSubmissions::route('/{record}/form-submissions'),
             'manage-information' => ManageStudentInformation::route('/{record}/information'),
             'manage-interactions' => ManageStudentInteractions::route('/{record}/interactions'),
             'manage-subscriptions' => ManageStudentSubscriptions::route('/{record}/subscriptions'),

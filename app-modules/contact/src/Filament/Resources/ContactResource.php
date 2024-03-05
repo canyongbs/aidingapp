@@ -53,7 +53,6 @@ use AdvisingApp\Contact\Filament\Resources\ContactResource\Pages\ContactServiceM
 use AdvisingApp\Contact\Filament\Resources\ContactResource\Pages\ContactEngagementTimeline;
 use AdvisingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactInteractions;
 use AdvisingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactSubscriptions;
-use AdvisingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactFormSubmissions;
 
 class ContactResource extends Resource
 {
@@ -80,7 +79,6 @@ class ContactResource extends Resource
             ManageContactInteractions::class,
             ContactEngagementTimeline::class,
             ManageContactCareTeam::class,
-            ManageContactFormSubmissions::class,
             ContactServiceManagement::class,
         ]);
     }
@@ -109,7 +107,6 @@ class ContactResource extends Resource
             'manage-alerts' => ManageContactAlerts::route('/{record}/alerts'),
             'manage-engagement' => ManageContactEngagement::route('/{record}/engagement'),
             'manage-files' => ManageContactFiles::route('/{record}/files'),
-            'manage-form-submissions' => ManageContactFormSubmissions::route('/{record}/form-submissions'),
             'manage-interactions' => ManageContactInteractions::route('/{record}/interactions'),
             'manage-subscriptions' => ManageContactSubscriptions::route('/{record}/subscriptions'),
             'manage-tasks' => ManageContactTasks::route('/{record}/tasks'),

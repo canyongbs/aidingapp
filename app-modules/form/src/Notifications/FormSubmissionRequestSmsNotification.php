@@ -36,7 +36,7 @@
 
 namespace AdvisingApp\Form\Notifications;
 
-use AdvisingApp\Form\Models\FormSubmission;
+use AdvisingApp\Form\Models\Submission;
 use AdvisingApp\Notification\Notifications\SmsNotification;
 use AdvisingApp\Notification\Notifications\BaseNotification;
 use AdvisingApp\Notification\Notifications\Messages\TwilioMessage;
@@ -47,7 +47,7 @@ class FormSubmissionRequestSmsNotification extends BaseNotification implements S
     use SmsChannelTrait;
 
     public function __construct(
-        public FormSubmission $submission,
+        public Submission $submission,
     ) {}
 
     public function toSms(object $notifiable): TwilioMessage

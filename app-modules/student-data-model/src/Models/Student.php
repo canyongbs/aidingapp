@@ -47,7 +47,6 @@ use Illuminate\Notifications\Notifiable;
 use OwenIt\Auditing\Contracts\Auditable;
 use AdvisingApp\CareTeam\Models\CareTeam;
 use Illuminate\Database\Eloquent\Builder;
-use AdvisingApp\Form\Models\FormSubmission;
 use AdvisingApp\Authorization\Enums\LicenseType;
 use AdvisingApp\Engagement\Models\EngagementFile;
 use AdvisingApp\Notification\Models\Subscription;
@@ -172,11 +171,6 @@ class Student extends BaseAuthenticatable implements Auditable, Subscribable, Ed
     public function enrollments(): HasMany
     {
         return $this->hasMany(Enrollment::class, 'sisid', 'sisid');
-    }
-
-    public function formSubmissions(): MorphMany
-    {
-        return $this->morphMany(FormSubmission::class, 'author');
     }
 
     public function careTeam(): MorphToMany

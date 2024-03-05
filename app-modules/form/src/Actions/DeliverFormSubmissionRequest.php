@@ -38,8 +38,8 @@ namespace AdvisingApp\Form\Actions;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
+use AdvisingApp\Form\Models\Submission;
 use Illuminate\Queue\InteractsWithQueue;
-use AdvisingApp\Form\Models\FormSubmission;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 
@@ -51,7 +51,7 @@ abstract class DeliverFormSubmissionRequest implements ShouldQueue
     use SerializesModels;
 
     public function __construct(
-        public FormSubmission $submission,
+        public Submission $submission,
     ) {}
 
     abstract public function handle(): void;
