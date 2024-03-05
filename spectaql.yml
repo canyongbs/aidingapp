@@ -1,6 +1,6 @@
 spectaql:
-#  logoFile: ./test/fixtures/logo.png
-#  faviconFile: ./test/fixtures/favicon.png
+  #  logoFile: ./test/fixtures/logo.png
+  #  faviconFile: ./test/fixtures/favicon.png
   displayAllServers: true
   targetDir: ./storage/app/api-docs
   oneFile: true
@@ -9,8 +9,8 @@ spectaql:
 introspection:
   removeTrailingPeriodFromDescriptions: false
   schemaFile: ./storage/app/public/lighthouse-schema.graphql
-#  metadataFile: ./examples/data/metadata.json
-#  dynamicExamplesProcessingModule: ./examples/customizations/examples
+  #  metadataFile: ./examples/data/metadata.json
+  #  dynamicExamplesProcessingModule: ./examples/customizations/examples
   queryNameStrategy: capitalizeFirst
   fieldExpansionDepth: 2
 
@@ -21,8 +21,8 @@ extensions:
   graphqlScalarExamples: true
 
 info:
-  title: Advising App API Reference
-  description: Documentation for the Advising App API
+  title: Aiding App API Reference
+  description: Documentation for the Aiding App API
   termsOfService: https://www.example.com/terms
   contact:
     name: API Support
@@ -41,7 +41,6 @@ info:
         This is due to the fields having different type definitions. In order to get around this you will need to define an alias for the field you are querying.
 
         For example, you can query for `student_full_name: full_name` and `contact_full_name: full_name` to get back the data you are looking for.
-
 
 servers:
   - url: ${APP_URL}/graphql

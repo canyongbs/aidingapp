@@ -42,7 +42,7 @@
             </div>
 
             <h3 class="text-sm font-medium text-warning-800 dark:text-warning-200">
-                Your account currently does not have a license to access features in Advising App.
+                Your account currently does not have a license to access features in Aiding App.
             </h3>
         </div>
     </x-filament::section>
