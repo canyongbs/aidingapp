@@ -1,6 +1,6 @@
 ### Ticket(s) or GitHub Issue
 
-- https://canyongbs.atlassian.net/browse/ADVAPP-
+- https://canyongbs.atlassian.net/browse/AIDAPP-
 
 ### Technical Description
 
