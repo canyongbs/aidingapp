@@ -80,8 +80,8 @@ test('The correct details are displayed on the ListServiceRequests page', functi
                 $serviceRequest
             )
             ->assertTableColumnStateSet(
-                'respondent.sisid',
-                $serviceRequest->respondent->sisid,
+                'respondent.id',
+                $serviceRequest->respondent->getKey(),
                 $serviceRequest
             )
             ->assertTableColumnStateSet(

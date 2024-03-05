@@ -76,8 +76,8 @@ test('The correct details are displayed on the ListServiceRequestUpdates page', 
                 $serviceRequestUpdate
             )
             ->assertTableColumnStateSet(
-                'serviceRequest.respondent.sisid',
-                $serviceRequestUpdate->serviceRequest->respondent->sisid,
+                'serviceRequest.respondent.id',
+                $serviceRequestUpdate->serviceRequest->respondent->getKey(),
                 $serviceRequestUpdate
             )
             ->assertTableColumnStateSet(
