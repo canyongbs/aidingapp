@@ -1128,16 +1128,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.300.10",
+            "version": "3.300.11",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "b24bf7882fed0ef029996dcdcba6c273b69db8fe"
+                "reference": "b1c05a5d3cb429aa5d9ffa69066ce46e3d7aca52"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/b24bf7882fed0ef029996dcdcba6c273b69db8fe",
-                "reference": "b24bf7882fed0ef029996dcdcba6c273b69db8fe",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/b1c05a5d3cb429aa5d9ffa69066ce46e3d7aca52",
+                "reference": "b1c05a5d3cb429aa5d9ffa69066ce46e3d7aca52",
                 "shasum": ""
             },
             "require": {
@@ -1217,9 +1217,9 @@
             "support": {
                 "forum": "https://forums.aws.amazon.com/forum.jspa?forumID=80",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.300.10"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.300.11"
             },
-            "time": "2024-03-04T19:06:07+00:00"
+            "time": "2024-03-05T19:08:14+00:00"
         },
         {
             "name": "barryvdh/laravel-debugbar",
@@ -8628,16 +8628,16 @@
         },
         {
             "name": "livewire/livewire",
-            "version": "v3.4.6",
+            "version": "v3.4.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/livewire/livewire.git",
-                "reference": "7e7d638183b34fb61621455891869f5abfd55a82"
+                "reference": "05f25dab062cd6a1ec24d8df9e889f890c832cb0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/livewire/livewire/zipball/7e7d638183b34fb61621455891869f5abfd55a82",
-                "reference": "7e7d638183b34fb61621455891869f5abfd55a82",
+                "url": "https://api.github.com/repos/livewire/livewire/zipball/05f25dab062cd6a1ec24d8df9e889f890c832cb0",
+                "reference": "05f25dab062cd6a1ec24d8df9e889f890c832cb0",
                 "shasum": ""
             },
             "require": {
@@ -8691,7 +8691,7 @@
             "description": "A front-end framework for Laravel.",
             "support": {
                 "issues": "https://github.com/livewire/livewire/issues",
-                "source": "https://github.com/livewire/livewire/tree/v3.4.6"
+                "source": "https://github.com/livewire/livewire/tree/v3.4.7"
             },
             "funding": [
                 {
@@ -8699,7 +8699,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-02-20T14:04:25+00:00"
+            "time": "2024-03-05T15:54:03+00:00"
         },
         {
             "name": "maatwebsite/excel",
@@ -9640,16 +9640,16 @@
         },
         {
             "name": "nikic/php-parser",
-            "version": "v5.0.1",
+            "version": "v5.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/nikic/PHP-Parser.git",
-                "reference": "2218c2252c874a4624ab2f613d86ac32d227bc69"
+                "reference": "139676794dc1e9231bf7bcd123cfc0c99182cb13"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/2218c2252c874a4624ab2f613d86ac32d227bc69",
-                "reference": "2218c2252c874a4624ab2f613d86ac32d227bc69",
+                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/139676794dc1e9231bf7bcd123cfc0c99182cb13",
+                "reference": "139676794dc1e9231bf7bcd123cfc0c99182cb13",
                 "shasum": ""
             },
             "require": {
@@ -9692,9 +9692,9 @@
             ],
             "support": {
                 "issues": "https://github.com/nikic/PHP-Parser/issues",
-                "source": "https://github.com/nikic/PHP-Parser/tree/v5.0.1"
+                "source": "https://github.com/nikic/PHP-Parser/tree/v5.0.2"
             },
-            "time": "2024-02-21T19:24:10+00:00"
+            "time": "2024-03-05T20:51:40+00:00"
         },
         {
             "name": "nunomaduro/termwind",
