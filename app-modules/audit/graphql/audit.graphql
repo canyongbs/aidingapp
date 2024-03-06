@@ -1,95 +1,95 @@
 #TODO: This can be basically any model that supports auditing
 union Auditable =
-  | Contact
-  | User
-  | SystemUser
-  | ConsentAgreement
-  | UserConsentAgreement
+    | Contact
+    | User
+    | SystemUser
+    | ConsentAgreement
+    | UserConsentAgreement
 
 input AuditableablesQuery {
-  contact: ContactsQuery
-  user: UsersQuery
-  system_user: SystemUsersQuery
-  consent_agreement: ConsentAgreementsQuery
-  user_consent_agreement: UserConsentAgreementsQuery
+    contact: ContactsQuery
+    user: UsersQuery
+    system_user: SystemUsersQuery
+    consent_agreement: ConsentAgreementsQuery
+    user_consent_agreement: UserConsentAgreementsQuery
 }
 
 type Audit @model(class: "AidingApp\\Audit\\Models\\Audit") {
-  "Unique primary key."
-  id: UUID!
+    "Unique primary key."
+    id: UUID!
 
-  change_agent_type: String
+    change_agent_type: String
 
-  change_agent_id: UUID
+    change_agent_id: UUID
 
-  event: String!
+    event: String!
 
-  old_values: JSON
+    old_values: JSON
 
-  new_values: JSON
+    new_values: JSON
 
-  url: String
+    url: String
 
-  ip_address: String
+    ip_address: String
 
-  user_agent: String
+    user_agent: String
 
-  tags: String
+    tags: String
 
-  created_at: DateTime
+    created_at: DateTime
 
-  updated_at: DateTime
+    updated_at: DateTime
 
-  auditable: Auditable @morphTo
+    auditable: Auditable @morphTo
 
-  user: Authenticatable @morphTo
+    user: Authenticatable @morphTo
 }
 
 input AuthenticatablesQuery {
-  user: UsersQuery
-  system_user: SystemUsersQuery
+    user: UsersQuery
+    system_user: SystemUsersQuery
 }
 
 input AuditsQuery {
-  id: UUID
+    id: UUID
 
-  change_agent_type: String
+    change_agent_type: String
 
-  change_agent_id: UUID
+    change_agent_id: UUID
 
-  event: String
+    event: String
 
-  old_values: JSON
+    old_values: JSON
 
-  new_values: JSON
+    new_values: JSON
 
-  url: String
+    url: String
 
-  ip_address: String
+    ip_address: String
 
-  user_agent: String
+    user_agent: String
 
-  tags: String
+    tags: String
 
-  created_at: DateTime
+    created_at: DateTime
 
-  updated_at: DateTime
+    updated_at: DateTime
 
-  auditable: AuditableablesQuery @morphToRelation
+    auditable: AuditableablesQuery @morphToRelation
 
-  user: AuthenticatablesQuery @morphToRelation
+    user: AuthenticatablesQuery @morphToRelation
 }
 
 type AuditQueries {
-  find(
-    id: UUID! @whereKey @rules(apply: ["required", "uuid", "exists:audits"])
-  ): Audit @find @canResolved(ability: "view")
+    find(
+        id: UUID! @whereKey @rules(apply: ["required", "uuid", "exists:audits"])
+    ): Audit @find @canResolved(ability: "view")
 
-  list(where: AuditsQuery @searchBy, order: AuditsQuery @sortBy): [Audit!]!
-    @paginate
-    @canModel(ability: "viewAny")
+    list(where: AuditsQuery @searchBy, order: AuditsQuery @sortBy): [Audit!]!
+        @paginate
+        @canModel(ability: "viewAny")
 }
 
 extend type Query {
-  audit: AuditQueries! @namespaced
+    audit: AuditQueries! @namespaced
 }

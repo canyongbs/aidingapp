@@ -1,16 +1,16 @@
 type Division @model(class: "AidingApp\\Division\\Models\\Division") {
-  "Unique primary key."
-  id: UUID!
+    "Unique primary key."
+    id: UUID!
 
-  "The name of the division."
-  name: String!
+    "The name of the division."
+    name: String!
 
-  # TODO: Finish fields
+    # TODO: Finish fields
 }
 
 input DivisionQuery {
-  "The name of the division."
-  name: String
+    "The name of the division."
+    name: String
 }
 
 # TODO: Query and Mutate
