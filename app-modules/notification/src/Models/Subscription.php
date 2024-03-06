@@ -39,14 +39,14 @@ namespace AdvisingApp\Notification\Models;
 use App\Models\User;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Builder;
+use App\Models\Scopes\LicensedToEducatable;
+use App\Models\Concerns\BelongsToEducatable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphPivot;
 use AdvisingApp\Authorization\Models\Concerns\DefinesPermissions;
-use AdvisingApp\StudentDataModel\Models\Scopes\LicensedToEducatable;
-use AdvisingApp\StudentDataModel\Models\Concerns\BelongsToEducatable;
 
 /**
  * @mixin IdeHelperSubscription

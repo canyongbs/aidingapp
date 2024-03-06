@@ -41,10 +41,8 @@ use AdvisingApp\Contact\Models\Contact;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
-use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\Engagement\Models\EngagementResponse;
 use AdvisingApp\Contact\Filament\Resources\ContactResource;
-use AdvisingApp\StudentDataModel\Filament\Resources\StudentResource;
 use AdvisingApp\Engagement\Filament\Resources\EngagementResponseResource;
 
 class ViewEngagementResponse extends ViewRecord
@@ -62,20 +60,18 @@ class ViewEngagementResponse extends ViewRecord
                             ->translateLabel()
                             ->color('primary')
                             ->state(function (EngagementResponse $record): string {
-                                /** @var Student|Contact $sender */
+                                /** @var Contact $sender */
                                 $sender = $record->sender;
 
                                 return match ($sender::class) {
-                                    Student::class => "{$sender->full} (Student)",
                                     Contact::class => "{$sender->full} (Contact)",
                                 };
                             })
                             ->url(function (EngagementResponse $record) {
-                                /** @var Student|Contact $sender */
+                                /** @var Contact $sender */
                                 $sender = $record->sender;
 
                                 return match ($sender::class) {
-                                    Student::class => StudentResource::getUrl('view', ['record' => $sender->sisid]),
                                     Contact::class => ContactResource::getUrl('view', ['record' => $sender->id]),
                                 };
                             }),

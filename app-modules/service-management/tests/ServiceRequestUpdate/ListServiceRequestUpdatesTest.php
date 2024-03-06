@@ -45,7 +45,6 @@ use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 use AdvisingApp\Contact\Models\Contact;
-use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\ServiceManagement\Models\ServiceRequest;
 use AdvisingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource;
@@ -77,16 +76,6 @@ test('The correct details are displayed on the ListServiceRequestUpdates page', 
                 $serviceRequestUpdate
             )
             ->assertTableColumnStateSet(
-                'serviceRequest.respondent.sisid',
-                $serviceRequestUpdate->serviceRequest->respondent->sisid,
-                $serviceRequestUpdate
-            )
-            ->assertTableColumnStateSet(
-                'serviceRequest.respondent.otherid',
-                $serviceRequestUpdate->serviceRequest->respondent->otherid,
-                $serviceRequestUpdate
-            )
-            ->assertTableColumnStateSet(
                 'serviceRequest.service_request_number',
                 $serviceRequestUpdate->serviceRequest->service_request_number,
                 $serviceRequestUpdate
@@ -109,7 +98,7 @@ test('The correct details are displayed on the ListServiceRequestUpdates page', 
 // Permission Tests
 
 test('ListServiceRequestUpdates is gated with proper access control', function () {
-    $user = User::factory()->licensed([Student::getLicenseType(), Contact::getLicenseType()])->create();
+    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
 
     actingAs($user)
         ->get(
@@ -131,7 +120,7 @@ test('ListServiceRequestUpdates is gated with proper feature access control', fu
 
     $settings->save();
 
-    $user = User::factory()->licensed([Student::getLicenseType(), Contact::getLicenseType()])->create();
+    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
 
     $user->givePermissionTo('service_request_update.view-any');
 

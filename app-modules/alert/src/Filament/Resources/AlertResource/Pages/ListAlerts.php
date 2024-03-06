@@ -44,6 +44,7 @@ use Filament\Tables\Filters\Filter;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Select;
 use AdvisingApp\Contact\Models\Contact;
+use App\Models\Scopes\EducatableSearch;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
@@ -56,12 +57,9 @@ use AdvisingApp\Alert\Enums\AlertSeverity;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
-use AdvisingApp\StudentDataModel\Models\Student;
 use App\Filament\Forms\Components\EducatableSelect;
 use AdvisingApp\Alert\Filament\Resources\AlertResource;
-use AdvisingApp\StudentDataModel\Models\Scopes\EducatableSearch;
 use AdvisingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactAlerts;
-use AdvisingApp\StudentDataModel\Filament\Resources\StudentResource\Pages\ManageStudentAlerts;
 
 class ListAlerts extends ListRecords
 {
@@ -76,7 +74,6 @@ class ListAlerts extends ListRecords
                     ->label('Related To')
                     ->getStateUsing(fn (Alert $record): ?string => $record->concern?->{$record->concern::displayNameKey()})
                     ->url(fn (Alert $record) => match ($record->concern ? $record->concern::class : null) {
-                        Student::class => ManageStudentAlerts::getUrl(['record' => $record->concern]),
                         Contact::class => ManageContactAlerts::getUrl(['record' => $record->concern]),
                         default => null,
                     }),
@@ -96,7 +93,6 @@ class ListAlerts extends ListRecords
                     ->label('Related To')
                     ->getStateUsing(fn (Alert $record): ?string => $record->concern?->{$record->concern::displayNameKey()})
                     ->url(fn (Alert $record) => match ($record->concern ? $record->concern::class : null) {
-                        Student::class => ManageStudentAlerts::getUrl(['record' => $record->concern]),
                         Contact::class => ManageContactAlerts::getUrl(['record' => $record->concern]),
                         default => null,
                     })

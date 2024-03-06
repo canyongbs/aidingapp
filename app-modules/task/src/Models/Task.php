@@ -39,32 +39,28 @@ namespace AdvisingApp\Task\Models;
 use App\Models\User;
 use App\Models\BaseModel;
 use Illuminate\Support\Collection;
+use App\Models\Contracts\Educatable;
 use AdvisingApp\Task\Enums\TaskStatus;
 use AdvisingApp\Contact\Models\Contact;
 use OwenIt\Auditing\Contracts\Auditable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use AdvisingApp\StudentDataModel\Models\Student;
 use Bvtterfly\ModelStateMachine\HasStateMachine;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use AdvisingApp\Notification\Models\Contracts\Subscribable;
-use AdvisingApp\StudentDataModel\Models\Contracts\Educatable;
 use AdvisingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AdvisingApp\StudentDataModel\Models\Scopes\LicensedToEducatable;
-use AdvisingApp\StudentDataModel\Models\Concerns\BelongsToEducatable;
 use AdvisingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
 
 /**
- * @property-read Student|Contact $concern
+ * @property-read Contact $concern
  *
  * @mixin IdeHelperTask
  */
 class Task extends BaseModel implements Auditable, CanTriggerAutoSubscription
 {
-    use BelongsToEducatable;
     use HasFactory;
     use HasUuids;
     use AuditableTrait;
@@ -126,12 +122,5 @@ class Task extends BaseModel implements Auditable, CanTriggerAutoSubscription
     {
         $query->where('status', '=', TaskStatus::Pending)
             ->orWhere('status', '=', TaskStatus::InProgress);
-    }
-
-    protected static function booted(): void
-    {
-        static::addGlobalScope('licensed', function (Builder $builder) {
-            $builder->tap(new LicensedToEducatable('concern'));
-        });
     }
 }

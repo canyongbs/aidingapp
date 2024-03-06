@@ -30,10 +30,9 @@ type Query
 
 type Mutation
 
-union Educatable = Contact | Student
+union Educatable = Contact
 
 enum EducatableType {
-    Student @enum(value: "student")
     Contact @enum(value: "contact")
 }
 

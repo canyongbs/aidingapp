@@ -1,6 +1,5 @@
 #TODO: This can be basically any model that supports auditing
 union Auditable =
-    | Student
     | Contact
     | User
     | SystemUser
@@ -8,7 +7,6 @@ union Auditable =
     | UserConsentAgreement
 
 input AuditableablesQuery {
-    student: StudentsQuery
     contact: ContactsQuery
     user: UsersQuery
     system_user: SystemUsersQuery

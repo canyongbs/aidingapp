@@ -49,7 +49,6 @@ use AdvisingApp\Contact\Models\Contact;
 use function Pest\Laravel\assertDatabaseHas;
 use function PHPUnit\Framework\assertEquals;
 
-use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusResource;
 use AdvisingApp\ServiceManagement\Tests\RequestFactories\EditServiceRequestStatusRequestFactory;
@@ -115,7 +114,7 @@ test('EditServiceRequestStatus requires valid data', function ($data, $errors) {
 // Permission Tests
 
 test('EditServiceRequestStatus is gated with proper access control', function () {
-    $user = User::factory()->licensed([Student::getLicenseType(), Contact::getLicenseType()])->create();
+    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
 
     $serviceRequestStatus = ServiceRequestStatus::factory()->create();
 
@@ -160,7 +159,7 @@ test('EditServiceRequestStatus is gated with proper feature access control', fun
 
     $settings->save();
 
-    $user = User::factory()->licensed([Student::getLicenseType(), Contact::getLicenseType()])->create();
+    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
 
     $user->givePermissionTo('service_request_status.view-any');
     $user->givePermissionTo('service_request_status.*.update');

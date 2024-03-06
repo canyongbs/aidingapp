@@ -46,7 +46,6 @@ class LicenseLimitsData extends Data
 {
     public function __construct(
         public int $conversationalAiSeats,
-        public int $retentionCrmSeats,
         public int $recruitmentCrmSeats,
         public int $emails,
         public int $sms,

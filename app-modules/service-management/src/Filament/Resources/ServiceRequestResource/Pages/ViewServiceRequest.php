@@ -45,11 +45,9 @@ use Filament\Resources\Pages\ViewRecord;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\ViewEntry;
-use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\ServiceManagement\Models\ServiceRequest;
 use AdvisingApp\Contact\Filament\Resources\ContactResource;
 use AdvisingApp\ServiceManagement\Enums\SlaComplianceStatus;
-use AdvisingApp\StudentDataModel\Filament\Resources\StudentResource;
 use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 
 class ViewServiceRequest extends ViewRecord
@@ -92,20 +90,18 @@ class ViewServiceRequest extends ViewRecord
                             ->label('Related To')
                             ->color('primary')
                             ->state(function (ServiceRequest $record): string {
-                                /** @var Student|Contact $respondent */
+                                /** @var Contact $respondent */
                                 $respondent = $record->respondent;
 
                                 return match ($respondent::class) {
-                                    Student::class => "{$respondent->{Student::displayNameKey()}} (Student)",
                                     Contact::class => "{$respondent->{Contact::displayNameKey()}} (Contact)",
                                 };
                             })
                             ->url(function (ServiceRequest $record) {
-                                /** @var Student|Contact $respondent */
+                                /** @var Contact $respondent */
                                 $respondent = $record->respondent;
 
                                 return match ($respondent::class) {
-                                    Student::class => StudentResource::getUrl('view', ['record' => $respondent->sisid]),
                                     Contact::class => ContactResource::getUrl('view', ['record' => $respondent->id]),
                                 };
                             }),

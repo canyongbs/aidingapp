@@ -43,6 +43,7 @@ use AdvisingApp\Task\Models\Task;
 use App\Models\Scopes\HasLicense;
 use Illuminate\Support\Collection;
 use AdvisingApp\Alert\Models\Alert;
+use App\Models\Contracts\Educatable;
 use Illuminate\Notifications\Notifiable;
 use OwenIt\Auditing\Contracts\Auditable;
 use AdvisingApp\CareTeam\Models\CareTeam;
@@ -64,7 +65,6 @@ use AdvisingApp\InventoryManagement\Models\AssetCheckOut;
 use AdvisingApp\Contact\Filament\Resources\ContactResource;
 use AdvisingApp\Notification\Models\Contracts\Subscribable;
 use Illuminate\Foundation\Auth\User as BaseAuthenticatable;
-use AdvisingApp\StudentDataModel\Models\Contracts\Educatable;
 use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 use AdvisingApp\Notification\Models\Concerns\HasSubscriptions;
 use AdvisingApp\Notification\Models\Concerns\NotifiableViaSms;
@@ -127,11 +127,6 @@ class Contact extends BaseAuthenticatable implements Auditable, Subscribable, Ed
         'email_bounce' => 'boolean',
         'birthdate' => 'date',
     ];
-
-    public function identifier(): string
-    {
-        return $this->id;
-    }
 
     public function assignedTo(): BelongsTo
     {

@@ -37,24 +37,13 @@
 namespace AdvisingApp\Form\Actions;
 
 use AdvisingApp\Contact\Models\Contact;
-use AdvisingApp\StudentDataModel\Models\Student;
 
 class ResolveSubmissionAuthorFromEmail
 {
-    public function __invoke(?string $email): Student | Contact | null
+    public function __invoke(?string $email): Contact | null
     {
         if (blank($email)) {
             return null;
-        }
-
-        /** @var Student $student */
-        $student = Student::query()
-            ->where('email', $email)
-            ->orWhere('email_2', $email)
-            ->first();
-
-        if ($student) {
-            return $student;
         }
 
         /** @var Contact $contact */

@@ -43,7 +43,6 @@ use OwenIt\Auditing\Contracts\Auditable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Prunable;
 use Spatie\MediaLibrary\InteractsWithMedia;
-use AdvisingApp\StudentDataModel\Models\Student;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use AdvisingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 
@@ -67,20 +66,6 @@ class EngagementFile extends BaseModel implements HasMedia, Auditable
             ->addMediaCollection('file')
             ->useDisk('s3')
             ->singleFile();
-    }
-
-    public function students(): MorphToMany
-    {
-        return $this->morphedByMany(
-            related: Student::class,
-            name: 'entity',
-            table: 'engagement_file_entities',
-            foreignPivotKey: 'engagement_file_id',
-            relatedPivotKey: 'entity_id',
-            relation: 'engagementFiles',
-        )
-            ->using(EngagementFileEntities::class)
-            ->withTimestamps();
     }
 
     public function contacts(): MorphToMany

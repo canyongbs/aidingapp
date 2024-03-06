@@ -35,12 +35,10 @@
 */
 
 use Illuminate\Http\Request;
+use AdvisingApp\Contact\Models\Contact;
 
 use function Tests\loadFixtureFromModule;
 use function Pest\Laravel\assertDatabaseHas;
-
-use AdvisingApp\StudentDataModel\Models\Student;
-
 use function Pest\Laravel\assertDatabaseMissing;
 
 use AdvisingApp\IntegrationTwilio\Actions\MessageReceived;
@@ -60,7 +58,7 @@ it('will not create an engagement response when it cannot find an associated mes
 it('will create an engagement response when a message is received', function () {
     $request = Request::create('/', 'POST', loadFixtureFromModule('integration-twilio', 'MessageReceived/payload'));
 
-    $student = Student::factory()->create([
+    $contact = Contact::factory()->create([
         'mobile' => $request->all()['From'],
     ]);
 
@@ -69,8 +67,8 @@ it('will create an engagement response when a message is received', function () 
     $messageReceived->handle();
 
     assertDatabaseHas('engagement_responses', [
-        'sender_id' => $student->getKey(),
-        'sender_type' => (new Student())->getMorphClass(),
+        'sender_id' => $contact->getKey(),
+        'sender_type' => $contact->getMorphClass(),
         'content' => $request->all()['Body'],
     ]);
 });

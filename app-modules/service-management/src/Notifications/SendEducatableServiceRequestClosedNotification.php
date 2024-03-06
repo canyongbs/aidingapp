@@ -37,13 +37,12 @@
 namespace AdvisingApp\ServiceManagement\Notifications;
 
 use App\Models\NotificationSetting;
+use App\Models\Contracts\Educatable;
 use AdvisingApp\Contact\Models\Contact;
-use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\Notification\Models\OutboundDeliverable;
 use AdvisingApp\ServiceManagement\Models\ServiceRequest;
 use AdvisingApp\Notification\Notifications\BaseNotification;
 use AdvisingApp\Notification\Notifications\EmailNotification;
-use AdvisingApp\StudentDataModel\Models\Contracts\Educatable;
 use AdvisingApp\Notification\Notifications\Messages\MailMessage;
 use AdvisingApp\Notification\Notifications\Concerns\EmailChannelTrait;
 
@@ -61,7 +60,6 @@ class SendEducatableServiceRequestClosedNotification extends BaseNotification im
         $educatable = $notifiable;
 
         $name = match ($notifiable::class) {
-            Student::class => $educatable->first,
             Contact::class => $educatable->first_name,
         };
 

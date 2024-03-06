@@ -47,7 +47,6 @@ use Filament\Resources\Pages\EditRecord;
 use AdvisingApp\Division\Models\Division;
 use Filament\Forms\Components\MorphToSelect;
 use Filament\Forms\Components\DateTimePicker;
-use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\Interaction\Models\InteractionType;
 use AdvisingApp\Interaction\Models\InteractionDriver;
 use AdvisingApp\Interaction\Models\InteractionStatus;
@@ -71,8 +70,6 @@ class EditInteraction extends EditRecord
                     ->searchable()
                     ->required()
                     ->types([
-                        ...(auth()->user()->hasLicense(Student::getLicenseType()) ? [MorphToSelect\Type::make(Student::class)
-                            ->titleAttribute(Student::displayNameKey())] : []),
                         ...(auth()->user()->hasLicense(Contact::getLicenseType()) ? [MorphToSelect\Type::make(Contact::class)
                             ->titleAttribute(Contact::displayNameKey())] : []),
                         MorphToSelect\Type::make(ServiceRequest::class)

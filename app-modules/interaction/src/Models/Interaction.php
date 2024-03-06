@@ -44,15 +44,14 @@ use AdvisingApp\Contact\Models\Contact;
 use OwenIt\Auditing\Contracts\Auditable;
 use AdvisingApp\Division\Models\Division;
 use Illuminate\Database\Eloquent\Builder;
+use App\Models\Scopes\LicensedToEducatable;
+use App\Models\Concerns\BelongsToEducatable;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use AdvisingApp\StudentDataModel\Models\Student;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use AdvisingApp\ServiceManagement\Models\ServiceRequest;
 use AdvisingApp\Notification\Models\Contracts\Subscribable;
 use AdvisingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AdvisingApp\StudentDataModel\Models\Scopes\LicensedToEducatable;
-use AdvisingApp\StudentDataModel\Models\Concerns\BelongsToEducatable;
 use AdvisingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
 
 /**
@@ -160,14 +159,6 @@ class Interaction extends BaseModel implements Auditable, CanTriggerAutoSubscrip
             $builder
                 ->where(fn (Builder $query) => $query
                     ->tap(new LicensedToEducatable('interactable'))
-                    ->when(
-                        ! $user->hasLicense(Student::getLicenseType()),
-                        fn (Builder $query) => $query->whereHasMorph(
-                            'interactable',
-                            ServiceRequest::class,
-                            fn (Builder $query) => $query->where($serviceRequestRespondentTypeColumn, '!=', app(Student::class)->getMorphClass()),
-                        ),
-                    )
                     ->when(
                         ! $user->hasLicense(Contact::getLicenseType()),
                         fn (Builder $query) => $query->whereHasMorph(

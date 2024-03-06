@@ -45,7 +45,6 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use AdvisingApp\Engagement\Models\Engagement;
-use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\Engagement\Models\EngagementBatch;
 use AdvisingApp\Engagement\Models\EngagementDeliverable;
 use AdvisingApp\Engagement\DataTransferObjects\EngagementBatchCreationData;
@@ -69,11 +68,11 @@ class CreateEngagementBatch implements ShouldQueue
             'user_id' => $this->data->user->id,
         ]);
 
-        $this->data->records->each(function (Student|Contact $record) use ($engagementBatch) {
+        $this->data->records->each(function (Contact $record) use ($engagementBatch) {
             /** @var Engagement $engagement */
             $engagement = $engagementBatch->engagements()->create([
                 'user_id' => $engagementBatch->user_id,
-                'recipient_id' => $record->identifier(),
+                'recipient_id' => $record->getKey(),
                 'recipient_type' => $record->getMorphClass(),
                 'subject' => $this->data->subject,
                 'body' => $this->data->body,

@@ -13,7 +13,6 @@ type UserSubscription
 }
 
 input UserSubscriptionSubscribablesQuery {
-    student: StudentsQuery
     contact: ContactsQuery
 }
 
@@ -67,8 +66,7 @@ input CreateUserSubscriptionInput {
         )
 
     "The type of subscribable to subscribe to."
-    subscribable_type: EducatableType!
-        @rules(apply: ["required", "in:student,contact"])
+    subscribable_type: EducatableType! @rules(apply: ["required", "in:contact"])
 }
 
 type UserSubscriptionMutations {

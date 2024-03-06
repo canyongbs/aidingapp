@@ -39,9 +39,9 @@ use AdvisingApp\Alert\Models\Alert;
 
 use function Pest\Laravel\actingAs;
 
+use AdvisingApp\Contact\Models\Contact;
 use Illuminate\Support\Facades\Notification;
 use AdvisingApp\Authorization\Enums\LicenseType;
-use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\Alert\Notifications\AlertCreatedNotification;
 
 it('creates a subscription for the user that created the Alert', function () {
@@ -63,20 +63,20 @@ it('dispatches the proper notifications to subscribers on created', function () 
 
     $users = User::factory()->licensed(LicenseType::cases())->count(5)->create();
 
-    /** @var Student $student */
-    $student = Student::factory()->create();
+    /** @var Contact $contact */
+    $contact = Contact::factory()->create();
 
-    $student->subscriptions()->createMany($users->map(fn (User $user) => [
+    $contact->subscriptions()->createMany($users->map(fn (User $user) => [
         'user_id' => $user->id,
     ])->toArray());
 
     Alert::factory()->create([
-        'concern_id' => $student->sisid,
-        'concern_type' => Student::class,
+        'concern_id' => $contact->getKey(),
+        'concern_type' => Contact::class,
     ]);
 
-    $student->refresh();
+    $contact->refresh();
 
     Notification::assertSentTo($users, AlertCreatedNotification::class);
-    Notification::assertSentTimes(AlertCreatedNotification::class, $student->subscriptions()->count());
+    Notification::assertSentTimes(AlertCreatedNotification::class, $contact->subscriptions()->count());
 });

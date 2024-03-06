@@ -46,7 +46,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Models\Import;
 use AdvisingApp\Interaction\Models\Interaction;
-use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\Interaction\Models\InteractionType;
 use AdvisingApp\Interaction\Models\InteractionDriver;
 use AdvisingApp\Interaction\Models\InteractionStatus;
@@ -76,14 +75,12 @@ class InteractionsImporter extends Importer
                         if (str($state)->contains(':')) {
                             return $resolveFromModel(match ((string) str($state)->before(':')) {
                                 'contact' => Contact::class,
-                                'student' => Student::class,
                             }, (string) str($state)->after(':'));
                         }
 
                         $user = $importer->getImport()->user;
 
                         $model = match (true) {
-                            $user->hasLicense(Student::getLicenseType()) => Student::class,
                             $user->hasLicense(Contact::getLicenseType()) => Contact::class,
                             default => null,
                         };
@@ -93,15 +90,15 @@ class InteractionsImporter extends Importer
                 )
                 ->requiredMapping()
                 ->rules(function (InteractionsImporter $importer) {
-                    if (! $importer->getImport()->user->hasLicense([Student::getLicenseType(), Contact::getLicenseType()])) {
+                    if (! $importer->getImport()->user->hasLicense([Contact::getLicenseType()])) {
                         return [];
                     }
 
-                    return ['starts_with:contact:,student:'];
+                    return ['starts_with:contact:'];
                 })
                 ->example(function () {
-                    if (auth()->user()?->hasLicense([Student::getLicenseType(), Contact::getLicenseType()]) ?? true) {
-                        return 'student:johnsmith@gmail.com';
+                    if (auth()->user()?->hasLicense([Contact::getLicenseType()]) ?? true) {
+                        return 'contact:johnsmith@gmail.com';
                     }
 
                     return 'johnsmith@gmail.com';

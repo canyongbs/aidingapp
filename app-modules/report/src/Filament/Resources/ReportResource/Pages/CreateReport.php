@@ -53,7 +53,6 @@ use Filament\Actions\Exports\ExportColumn;
 use Filament\Forms\Components\Wizard\Step;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Forms\Components\CheckboxList;
-use AdvisingApp\StudentDataModel\Models\Student;
 use Filament\Tables\Concerns\InteractsWithTable;
 use AdvisingApp\Report\Filament\Resources\ReportResource;
 
@@ -144,7 +143,6 @@ class CreateReport extends CreateRecord implements HasTable
     protected function getReportModels(): array
     {
         return [
-            ...(auth()->user()->hasLicense(Student::getLicenseType()) ? [ReportModel::Student] : []),
             ...(auth()->user()->hasLicense(Contact::getLicenseType()) ? [ReportModel::Contact] : []),
             ...(auth()->user()->can('viewAny', User::class) ? [ReportModel::User] : []),
         ];

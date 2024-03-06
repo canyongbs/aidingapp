@@ -44,22 +44,6 @@ class EngagementSeeder extends Seeder
 {
     public function run(): void
     {
-        // For Student - deliver now
-        Engagement::factory()
-            ->count(10)
-            ->has(EngagementDeliverable::factory()->deliverySuccessful()->count(1), 'engagementDeliverable')
-            ->forStudent()
-            ->deliverNow()
-            ->create();
-
-        // For Student - deliver later
-        Engagement::factory()
-            ->count(7)
-            ->has(EngagementDeliverable::factory()->count(1), 'engagementDeliverable')
-            ->forStudent()
-            ->deliverLater()
-            ->create();
-
         // For Contact - deliver now
         Engagement::factory()
             ->count(10)

@@ -39,7 +39,6 @@ namespace AdvisingApp\Survey\Database\Factories;
 use AdvisingApp\Survey\Models\Survey;
 use AdvisingApp\Contact\Models\Contact;
 use AdvisingApp\Survey\Models\SurveySubmission;
-use AdvisingApp\StudentDataModel\Models\Student;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
@@ -55,16 +54,14 @@ class SurveySubmissionFactory extends Factory
     {
         return [
             'survey_id' => Survey::factory(),
-            'author_type' => fake()->randomElement([(new Student())->getMorphClass(), (new Contact())->getMorphClass()]),
+            'author_type' => fake()->randomElement([(new Contact())->getMorphClass()]),
             'author_id' => function (array $attributes) {
                 $authorClass = Relation::getMorphedModel($attributes['author_type']);
 
-                /** @var Student|Contact $authorModel */
+                /** @var Contact $authorModel */
                 $authorModel = new $authorClass();
 
-                $author = $authorClass === Student::class
-                    ? Student::inRandomOrder()->first() ?? Student::factory()->create()
-                    : $authorModel::factory()->create();
+                $author = $authorModel::factory()->create();
 
                 return $author->getKey();
             },

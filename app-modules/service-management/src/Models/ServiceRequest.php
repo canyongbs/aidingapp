@@ -41,13 +41,15 @@ use DateTimeInterface;
 use App\Models\BaseModel;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\DB;
+use App\Models\Contracts\Educatable;
 use Kirschbaum\PowerJoins\PowerJoins;
 use AdvisingApp\Contact\Models\Contact;
 use OwenIt\Auditing\Contracts\Auditable;
 use AdvisingApp\Division\Models\Division;
 use Illuminate\Database\Eloquent\Builder;
+use App\Models\Scopes\LicensedToEducatable;
+use App\Models\Concerns\BelongsToEducatable;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use AdvisingApp\StudentDataModel\Models\Student;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -58,11 +60,7 @@ use AdvisingApp\Notification\Models\OutboundDeliverable;
 use AdvisingApp\Notification\Models\Contracts\Subscribable;
 use Illuminate\Database\UniqueConstraintViolationException;
 use AdvisingApp\ServiceManagement\Enums\SlaComplianceStatus;
-use AdvisingApp\StudentDataModel\Models\Contracts\Educatable;
-use AdvisingApp\StudentDataModel\Models\Contracts\Identifiable;
 use AdvisingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AdvisingApp\StudentDataModel\Models\Scopes\LicensedToEducatable;
-use AdvisingApp\StudentDataModel\Models\Concerns\BelongsToEducatable;
 use AdvisingApp\ServiceManagement\Enums\ServiceRequestUpdateDirection;
 use AdvisingApp\Interaction\Models\Concerns\HasManyMorphedInteractions;
 use AdvisingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
@@ -72,11 +70,11 @@ use AdvisingApp\ServiceManagement\Exceptions\ServiceRequestNumberExceededReRolls
 use AdvisingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
 
 /**
- * @property-read Student|Contact $respondent
+ * @property-read Contact $respondent
  *
  * @mixin IdeHelperServiceRequest
  */
-class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubscription, Identifiable
+class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubscription
 {
     use BelongsToEducatable;
     use SoftDeletes;
@@ -136,11 +134,6 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
         } while ($attempts < 3);
 
         return $save;
-    }
-
-    public function identifier(): string
-    {
-        return $this->id;
     }
 
     public function getSubscribable(): ?Subscribable

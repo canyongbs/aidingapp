@@ -49,7 +49,6 @@ use function PHPUnit\Framework\assertCount;
 use function PHPUnit\Framework\assertEmpty;
 use function Pest\Laravel\assertDatabaseHas;
 
-use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\ServiceManagement\Models\ServiceRequestType;
 use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
 use AdvisingApp\ServiceManagement\Tests\RequestFactories\CreateServiceRequestTypeRequestFactory;
@@ -93,7 +92,7 @@ test('CreateServiceRequestType requires valid data', function ($data, $errors) {
 // Permission Tests
 
 test('CreateServiceRequestType is gated with proper access control', function () {
-    $user = User::factory()->licensed([Student::getLicenseType(), Contact::getLicenseType()])->create();
+    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
 
     actingAs($user)
         ->get(
@@ -130,7 +129,7 @@ test('CreateServiceRequestType is gated with proper feature access control', fun
 
     $settings->save();
 
-    $user = User::factory()->licensed([Student::getLicenseType(), Contact::getLicenseType()])->create();
+    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
 
     $user->givePermissionTo('service_request_type.view-any');
     $user->givePermissionTo('service_request_type.create');

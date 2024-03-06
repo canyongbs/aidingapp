@@ -39,7 +39,6 @@ namespace AdvisingApp\Engagement\Database\Seeders;
 use Illuminate\Database\Seeder;
 use AdvisingApp\Contact\Models\Contact;
 use AdvisingApp\Engagement\Models\Engagement;
-use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\Engagement\Models\EngagementResponse;
 use AdvisingApp\Engagement\Models\EngagementDeliverable;
 
@@ -47,23 +46,6 @@ class DemoEducatableEngagementSeeder extends Seeder
 {
     public function run(): void
     {
-        $sampleStudentForDemo = Student::factory()->create([
-            'first' => 'Demo',
-            'last' => 'Student',
-            'email' => 'demo@student.com',
-        ]);
-
-        EngagementResponse::factory()
-            ->count(5)
-            ->for($sampleStudentForDemo, 'sender')
-            ->create();
-
-        Engagement::factory()
-            ->count(7)
-            ->has(EngagementDeliverable::factory()->deliverySuccessful()->count(1), 'engagementDeliverable')
-            ->for($sampleStudentForDemo, 'recipient')
-            ->create();
-
         $sampleContactForDemo = Contact::factory()->create([
             'first_name' => 'Demo',
             'last_name' => 'Contact',

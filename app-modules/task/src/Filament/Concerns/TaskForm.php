@@ -44,7 +44,6 @@ use App\Models\Authenticatable;
 use App\Models\Scopes\HasLicense;
 use AdvisingApp\Contact\Models\Contact;
 use Illuminate\Database\Eloquent\Builder;
-use AdvisingApp\StudentDataModel\Models\Student;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
 trait TaskForm
@@ -61,15 +60,13 @@ trait TaskForm
             /** @var Authenticatable $user */
             $user = auth()->user();
 
-            $canAccessStudents = $user->hasLicense(Student::getLicenseType());
             $canAccessContacts = $user->hasLicense(Contact::getLicenseType());
 
-            if ($canAccessStudents && $canAccessContacts) {
+            if ($canAccessContacts) {
                 return $query;
             }
 
             return match (true) {
-                $canAccessStudents => $query->tap(new HasLicense(Student::getLicenseType())),
                 $canAccessContacts => $query->tap(new HasLicense(Contact::getLicenseType())),
                 default => $query,
             };
@@ -94,18 +91,15 @@ trait TaskForm
             /** @var Authenticatable $user */
             $user = auth()->user();
 
-            $canAccessStudents = $user->hasLicense(Student::getLicenseType());
             $canAccessContacts = $user->hasLicense(Contact::getLicenseType());
 
             $concernType = $get('concern_type');
 
-            if ($canAccessStudents && $canAccessContacts && blank($concernType)) {
+            if ($canAccessContacts && blank($concernType)) {
                 return;
             }
 
             $concernType = match (true) {
-                $canAccessStudents && $canAccessContacts => Relation::getMorphedModel($concernType) ?? $concernType,
-                $canAccessStudents => Student::class,
                 $canAccessContacts => Contact::class,
             };
 

@@ -38,6 +38,8 @@ namespace AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestResourc
 
 use Filament\Tables\Table;
 use Filament\Actions\CreateAction;
+use App\Models\Scopes\EducatableSort;
+use App\Models\Scopes\EducatableSearch;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
@@ -46,14 +48,11 @@ use App\Filament\Tables\Columns\IdColumn;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Query\JoinClause;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
 use AdvisingApp\ServiceManagement\Models\ServiceRequest;
 use AdvisingApp\ServiceManagement\Enums\SlaComplianceStatus;
-use AdvisingApp\StudentDataModel\Models\Scopes\EducatableSort;
 use AdvisingApp\ServiceManagement\Models\ServiceRequestPriority;
-use AdvisingApp\StudentDataModel\Models\Scopes\EducatableSearch;
 use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 
 class ListServiceRequests extends ListRecords
@@ -84,26 +83,6 @@ class ListServiceRequests extends ListRecords
                     ->getStateUsing(fn (ServiceRequest $record) => $record->respondent->{$record->respondent::displayNameKey()})
                     ->searchable(query: fn (Builder $query, $search) => $query->tap(new EducatableSearch(relationship: 'respondent', search: $search)))
                     ->sortable(query: fn (Builder $query, string $direction): Builder => $query->tap(new EducatableSort($direction))),
-                TextColumn::make('respondent.sisid')
-                    ->label('SIS ID')
-                    ->searchable()
-                    ->sortable(query: function (Builder $query, string $direction): Builder {
-                        // Update this if any other relations are added to the ServiceRequest model respondent relationship
-                        return $query->join('students', function (JoinClause $join) {
-                            $join->on('service_requests.respondent_id', '=', 'students.sisid')
-                                ->where('service_requests.respondent_type', '=', 'student');
-                        })->orderBy('sisid', $direction);
-                    }),
-                TextColumn::make('respondent.otherid')
-                    ->label('Other ID')
-                    ->searchable()
-                    ->sortable(query: function (Builder $query, string $direction): Builder {
-                        // Update this if any other relations are added to the ServiceRequest model respondent relationship
-                        return $query->join('students', function (JoinClause $join) {
-                            $join->on('service_requests.respondent_id', '=', 'students.sisid')
-                                ->where('service_requests.respondent_type', '=', 'student');
-                        })->orderBy('otherid', $direction);
-                    }),
                 TextColumn::make('division.name')
                     ->label('Division')
                     ->searchable()

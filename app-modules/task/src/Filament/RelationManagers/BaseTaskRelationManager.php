@@ -57,10 +57,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Tables\Actions\DetachBulkAction;
-use AdvisingApp\StudentDataModel\Models\Student;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use AdvisingApp\Contact\Filament\Resources\ContactResource;
-use AdvisingApp\StudentDataModel\Filament\Resources\StudentResource;
 use AdvisingApp\Task\Filament\Resources\TaskResource\Components\TaskViewAction;
 
 abstract class BaseTaskRelationManager extends ManageRelatedRecords
@@ -115,7 +113,6 @@ abstract class BaseTaskRelationManager extends ManageRelatedRecords
                 TextColumn::make('concern.full')
                     ->label('Related To')
                     ->url(fn (Task $record) => match ($record->concern ? $record->concern::class : null) {
-                        Student::class => StudentResource::getUrl('view', ['record' => $record->concern]),
                         Contact::class => ContactResource::getUrl('view', ['record' => $record->concern]),
                         default => null,
                     }),

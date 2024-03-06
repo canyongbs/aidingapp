@@ -42,10 +42,8 @@ use Illuminate\Support\HtmlString;
 use AdvisingApp\Contact\Models\Contact;
 use App\Filament\Resources\UserResource;
 use Filament\Infolists\Components\TextEntry;
-use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\Notification\Models\OutboundDeliverable;
 use AdvisingApp\Contact\Filament\Resources\ContactResource;
-use AdvisingApp\StudentDataModel\Filament\Resources\StudentResource;
 
 class OutboundDeliverableViewAction extends ViewAction
 {
@@ -57,7 +55,6 @@ class OutboundDeliverableViewAction extends ViewAction
             TextEntry::make('recipient')
                 ->getStateUsing(fn (OutboundDeliverable $record): ?string => $record->recipient?->{$record->recipient::displayNameKey()})
                 ->url(fn (OutboundDeliverable $record) => match ($record->recipient ? $record->recipient::class : null) {
-                    Student::class => StudentResource::getUrl('view', ['record' => $record->recipient]),
                     Contact::class => ContactResource::getUrl('view', ['record' => $record->recipient]),
                     User::class => UserResource::getUrl('view', ['record' => $record->recipient]),
                     default => null,

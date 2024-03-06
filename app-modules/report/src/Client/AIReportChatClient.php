@@ -48,14 +48,10 @@ use AdvisingApp\CareTeam\Models\CareTeam;
 use AdvisingApp\Contact\Models\ContactSource;
 use AdvisingApp\Contact\Models\ContactStatus;
 use AdvisingApp\Interaction\Models\Interaction;
-use AdvisingApp\StudentDataModel\Models\Program;
-use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\IntegrationAI\Client\AzureOpenAI;
 use AdvisingApp\Notification\Models\Subscription;
 use Illuminate\Auth\Access\AuthorizationException;
 use AdvisingApp\Interaction\Models\InteractionType;
-use AdvisingApp\StudentDataModel\Models\Enrollment;
-use AdvisingApp\StudentDataModel\Models\Performance;
 use AdvisingApp\Interaction\Models\InteractionDriver;
 use AdvisingApp\Interaction\Models\InteractionStatus;
 use AdvisingApp\Interaction\Models\InteractionOutcome;
@@ -162,7 +158,6 @@ class AIReportChatClient extends AzureOpenAI
             CareTeam::class,
             Interaction::class, InteractionCampaign::class, InteractionDriver::class, InteractionOutcome::class, InteractionRelation::class, InteractionStatus::class, InteractionType::class,
             Contact::class, ContactSource::class, ContactStatus::class,
-            Student::class, Enrollment::class, Performance::class, Program::class,
             Subscription::class,
             Task::class,
         ])

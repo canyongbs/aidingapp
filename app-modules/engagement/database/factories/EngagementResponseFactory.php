@@ -37,7 +37,6 @@
 namespace AdvisingApp\Engagement\Database\Factories;
 
 use AdvisingApp\Contact\Models\Contact;
-use AdvisingApp\StudentDataModel\Models\Student;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use AdvisingApp\Engagement\Models\EngagementResponse;
@@ -51,18 +50,15 @@ class EngagementResponseFactory extends Factory
     {
         return [
             'sender_type' => fake()->randomElement([
-                (new Student())->getMorphClass(),
                 (new Contact())->getMorphClass(),
             ]),
             'sender_id' => function (array $attributes) {
                 $senderClass = Relation::getMorphedModel($attributes['sender_type']);
 
-                /** @var Student|Contact $senderModel */
+                /** @var Contact $senderModel */
                 $senderModel = new $senderClass();
 
-                $sender = $senderClass === Student::class
-                    ? Student::inRandomOrder()->first() ?? Student::factory()->create()
-                    : $senderModel::factory()->create();
+                $sender = $senderModel::factory()->create();
 
                 return $sender->getKey();
             },

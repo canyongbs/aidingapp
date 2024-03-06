@@ -39,7 +39,6 @@ namespace AdvisingApp\Notification\Observers;
 use App\Models\User;
 use Illuminate\Support\Facades\Cache;
 use AdvisingApp\Contact\Models\Contact;
-use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\Notification\Models\Subscription;
 use AdvisingApp\Notification\Events\SubscriptionCreated;
 use AdvisingApp\Notification\Events\SubscriptionDeleted;
@@ -56,7 +55,6 @@ class SubscriptionObserver
         if ($user) {
             Cache::tags([match ($subscription->subscribable_type) {
                 app(Contact::class)->getMorphClass() => "user-{$user->getKey()}-contact-subscriptions",
-                app(Student::class)->getMorphClass() => "user-{$user->getKey()}-student-subscriptions",
             }])->flush();
         }
     }
@@ -71,7 +69,6 @@ class SubscriptionObserver
         if ($user) {
             Cache::tags([match ($subscription->subscribable_type) {
                 app(Contact::class)->getMorphClass() => "user-{$user->getKey()}-contact-subscriptions",
-                app(Student::class)->getMorphClass() => "user-{$user->getKey()}-student-subscriptions",
             }])->flush();
         }
     }

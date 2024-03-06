@@ -44,8 +44,9 @@ use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Contracts\Auditable;
 use AdvisingApp\Timeline\Models\Timeline;
 use Illuminate\Database\Eloquent\Builder;
+use App\Models\Scopes\LicensedToEducatable;
+use App\Models\Concerns\BelongsToEducatable;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use AdvisingApp\StudentDataModel\Models\Student;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
@@ -54,11 +55,8 @@ use AdvisingApp\Timeline\Timelines\EngagementTimeline;
 use AdvisingApp\Engagement\Enums\EngagementDeliveryStatus;
 use AdvisingApp\Notification\Models\Contracts\Subscribable;
 use AdvisingApp\Timeline\Models\Contracts\ProvidesATimeline;
-use AdvisingApp\StudentDataModel\Models\Contracts\Educatable;
 use AdvisingApp\Engagement\Actions\GenerateEmailMarkdownContent;
 use AdvisingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AdvisingApp\StudentDataModel\Models\Scopes\LicensedToEducatable;
-use AdvisingApp\StudentDataModel\Models\Concerns\BelongsToEducatable;
 use AdvisingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
 
 /**
@@ -175,11 +173,6 @@ class Engagement extends BaseModel implements Auditable, CanTriggerAutoSubscript
         $query->whereNull('engagement_batch_id');
     }
 
-    public function scopeSentToStudent(Builder $query): void
-    {
-        $query->where('recipient_type', resolve(Student::class)->getMorphClass());
-    }
-
     public function scopeSentToContact(Builder $query): void
     {
         $query->where('recipient_type', resolve(Contact::class)->getMorphClass());
@@ -206,8 +199,8 @@ class Engagement extends BaseModel implements Auditable, CanTriggerAutoSubscript
     public function getMergeData(): array
     {
         return [
-            'student full name' => $this->recipient->getAttribute($this->recipient->displayNameKey()),
-            'student email' => $this->recipient->getAttribute($this->recipient->displayEmailKey()),
+            'contact full name' => $this->recipient->getAttribute($this->recipient->displayNameKey()),
+            'contact email' => $this->recipient->getAttribute($this->recipient->displayEmailKey()),
         ];
     }
 

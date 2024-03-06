@@ -46,6 +46,7 @@ use Filament\Actions\ImportAction;
 use Filament\Tables\Filters\Filter;
 use AdvisingApp\Task\Enums\TaskStatus;
 use AdvisingApp\Contact\Models\Contact;
+use App\Models\Scopes\EducatableSearch;
 use Filament\Forms\Components\Checkbox;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
@@ -58,12 +59,9 @@ use Illuminate\Database\Eloquent\Builder;
 use AdvisingApp\Task\Imports\TaskImporter;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
-use AdvisingApp\StudentDataModel\Models\Student;
 use Filament\Pages\Concerns\ExposesTableToWidgets;
 use AdvisingApp\Task\Filament\Resources\TaskResource;
 use AdvisingApp\Contact\Filament\Resources\ContactResource;
-use AdvisingApp\StudentDataModel\Models\Scopes\EducatableSearch;
-use AdvisingApp\StudentDataModel\Filament\Resources\StudentResource;
 use AdvisingApp\Task\Filament\Resources\TaskResource\Components\TaskViewAction;
 
 class ListTasks extends ListRecords
@@ -109,7 +107,6 @@ class ListTasks extends ListRecords
                     ->getStateUsing(fn (Task $record): ?string => $record->concern?->{$record->concern::displayNameKey()})
                     ->searchable(query: fn (Builder $query, $search) => $query->tap(new EducatableSearch(relationship: 'concern', search: $search)))
                     ->url(fn (Task $record) => match ($record->concern ? $record->concern::class : null) {
-                        Student::class => StudentResource::getUrl('view', ['record' => $record->concern]),
                         Contact::class => ContactResource::getUrl('view', ['record' => $record->concern]),
                         default => null,
                     }),

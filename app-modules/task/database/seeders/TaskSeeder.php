@@ -44,28 +44,12 @@ class TaskSeeder extends Seeder
 {
     public function run(): void
     {
-        // Past due, Student Concerned
-        Task::factory()
-            ->count(3)
-            ->assigned(User::first())
-            ->concerningStudent()
-            ->pastDue()
-            ->create();
-
         // Past due, Contact Concerned
         Task::factory()
             ->count(3)
             ->assigned(User::first())
             ->concerningContact()
             ->pastDue()
-            ->create();
-
-        // Due Later, Student Concerned
-        Task::factory()
-            ->count(3)
-            ->assigned(User::first())
-            ->concerningStudent()
-            ->dueLater()
             ->create();
 
         // Due Later, Contact Concerned
@@ -79,13 +63,13 @@ class TaskSeeder extends Seeder
         // Unassigned
         Task::factory()
             ->count(3)
-            ->concerningStudent()
+            ->concerningContact()
             ->create();
 
         // Unassigned, Past Due
         Task::factory()
             ->count(3)
-            ->concerningStudent()
+            ->concerningContact()
             ->pastDue()
             ->create();
 
@@ -93,7 +77,7 @@ class TaskSeeder extends Seeder
         Task::factory()
             ->count(10)
             ->assigned()
-            ->concerningStudent()
+            ->concerningContact()
             ->create();
     }
 }

@@ -38,7 +38,6 @@ namespace AdvisingApp\InventoryManagement\Database\Factories;
 
 use App\Models\User;
 use AdvisingApp\Contact\Models\Contact;
-use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\InventoryManagement\Models\Asset;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -57,18 +56,15 @@ class AssetCheckInFactory extends Factory
             'checked_in_by_type' => $checkedInBy->getMorphClass(),
             'checked_in_by_id' => $checkedInBy->getKey(),
             'checked_in_from_type' => fake()->randomElement([
-                (new Student())->getMorphClass(),
                 (new Contact())->getMorphClass(),
             ]),
             'checked_in_from_id' => function (array $attributes) {
                 $checkedInFromClass = Relation::getMorphedModel($attributes['checked_in_from_type']);
 
-                /** @var Student|Contact $senderModel */
+                /** @var Contact $senderModel */
                 $checkedInFromModel = new $checkedInFromClass();
 
-                $checkedInFromModel = $checkedInFromClass === Student::class
-                    ? Student::inRandomOrder()->first() ?? Student::factory()->create()
-                    : $checkedInFromModel::factory()->create();
+                $checkedInFromModel = $checkedInFromModel::factory()->create();
 
                 return $checkedInFromModel->getKey();
             },

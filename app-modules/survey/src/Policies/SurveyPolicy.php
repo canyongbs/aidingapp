@@ -52,7 +52,7 @@ class SurveyPolicy implements PerformsChecksBeforeAuthorization
 
     public function before(Authenticatable $authenticatable): ?Response
     {
-        if (! is_null($response = $this->hasAnyLicense($authenticatable, [LicenseType::RetentionCrm, LicenseType::RecruitmentCrm]))) {
+        if (! is_null($response = $this->hasAnyLicense($authenticatable, [LicenseType::RecruitmentCrm]))) {
             return $response;
         }
 

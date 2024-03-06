@@ -37,9 +37,9 @@
 namespace AdvisingApp\CareTeam\Filament\Actions;
 
 use App\Models\User;
+use App\Models\Contracts\Educatable;
 use Filament\Tables\Actions\BulkAction;
 use Illuminate\Database\Eloquent\Collection;
-use AdvisingApp\StudentDataModel\Models\Contracts\Educatable;
 
 class ToggleCareTeamBulkAction extends BulkAction
 {

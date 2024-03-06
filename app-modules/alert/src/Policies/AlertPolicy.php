@@ -40,14 +40,13 @@ use App\Models\Authenticatable;
 use AdvisingApp\Alert\Models\Alert;
 use Illuminate\Auth\Access\Response;
 use AdvisingApp\Contact\Models\Contact;
-use AdvisingApp\StudentDataModel\Models\Student;
 
 class AlertPolicy
 {
     public function before(Authenticatable $authenticatable): ?Response
     {
-        if (! $authenticatable->hasAnyLicense([Student::getLicenseType(), Contact::getLicenseType()])) {
-            return Response::deny('You are not licensed for the Retention or Recruitment CRM.');
+        if (! $authenticatable->hasAnyLicense([Contact::getLicenseType()])) {
+            return Response::deny('You are not licensed for the Recruitment CRM.');
         }
 
         return null;

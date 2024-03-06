@@ -43,7 +43,6 @@ use App\Settings\LicenseSettings;
 use function Pest\Laravel\actingAs;
 
 use AdvisingApp\Contact\Models\Contact;
-use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusResource;
 
@@ -70,7 +69,7 @@ test('The correct details are displayed on the ViewServiceRequestStatus page', f
 // Permission Tests
 
 test('ViewServiceRequestStatus is gated with proper access control', function () {
-    $user = User::factory()->licensed([Student::getLicenseType(), Contact::getLicenseType()])->create();
+    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
 
     $contactSource = ServiceRequestStatus::factory()->create();
 
@@ -99,7 +98,7 @@ test('ViewServiceRequestStatus is gated with proper feature access control', fun
 
     $settings->save();
 
-    $user = User::factory()->licensed([Student::getLicenseType(), Contact::getLicenseType()])->create();
+    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
 
     $user->givePermissionTo('service_request_status.view-any');
     $user->givePermissionTo('service_request_status.*.view');

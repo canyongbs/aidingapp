@@ -45,10 +45,8 @@ use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\Fieldset;
 use Filament\Infolists\Components\TextEntry;
 use AdvisingApp\Engagement\Models\Engagement;
-use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\Contact\Filament\Resources\ContactResource;
 use AdvisingApp\Engagement\Filament\Resources\EngagementResource;
-use AdvisingApp\StudentDataModel\Filament\Resources\StudentResource;
 
 class ViewEngagement extends ViewRecord
 {
@@ -71,20 +69,18 @@ class ViewEngagement extends ViewRecord
                             ->translateLabel()
                             ->color('primary')
                             ->state(function (Engagement $record): string {
-                                /** @var Student|Contact $recipient */
+                                /** @var Contact $recipient */
                                 $recipient = $record->recipient;
 
                                 return match ($recipient::class) {
-                                    Student::class => "{$recipient->{Student::displayNameKey()}} (Student)",
                                     Contact::class => "{$recipient->{Contact::displayNameKey()}} (Contact)",
                                 };
                             })
                             ->url(function (Engagement $record) {
-                                /** @var Student|Contact $recipient */
+                                /** @var Contact $recipient */
                                 $recipient = $record->recipient;
 
                                 return match ($recipient::class) {
-                                    Student::class => StudentResource::getUrl('view', ['record' => $recipient->sisid]),
                                     Contact::class => ContactResource::getUrl('view', ['record' => $recipient->id]),
                                 };
                             }),

@@ -44,7 +44,6 @@ use AdvisingApp\Contact\Models\Contact;
 use Filament\Forms\Components\Component;
 use Filament\Forms\Components\MorphToSelect;
 use Filament\Forms\Components\Concerns\HasName;
-use AdvisingApp\StudentDataModel\Models\Student;
 use Filament\Forms\Components\MorphToSelect\Type;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
@@ -63,11 +62,10 @@ class EducatableSelect extends Component
 
     public static function make(string $name): EducatableSelect | MorphToSelect
     {
-        if (auth()->user()->hasLicense([Student::getLicenseType(), Contact::getLicenseType()])) {
+        if (auth()->user()->hasLicense([Contact::getLicenseType()])) {
             return MorphToSelect::make($name)
                 ->searchable()
                 ->types([
-                    static::getStudentType(),
                     static::getContactType(),
                 ]);
         }
@@ -76,12 +74,6 @@ class EducatableSelect extends Component
         $static->configure();
 
         return $static;
-    }
-
-    public static function getStudentType(): Type
-    {
-        return Type::make(Student::class)
-            ->titleAttribute(Student::displayNameKey());
     }
 
     public static function getContactType(): Type
@@ -96,7 +88,6 @@ class EducatableSelect extends Component
         $user = auth()->user();
 
         $type = match (true) {
-            $user->hasLicense(Student::getLicenseType()) => static::getStudentType(),
             $user->hasLicense(Contact::getLicenseType()) => static::getContactType(),
             default => null,
         };
@@ -150,6 +141,6 @@ class EducatableSelect extends Component
             return false;
         }
 
-        return ! auth()->user()->hasAnyLicense([Student::getLicenseType(), Contact::getLicenseType()]);
+        return ! auth()->user()->hasAnyLicense([Contact::getLicenseType()]);
     }
 }

@@ -50,7 +50,7 @@ use App\Multitenancy\DataTransferObjects\TenantS3FilesystemConfig;
 
 class CreateTenantCommand extends Command
 {
-    protected $signature = 'tenants:create {name} {domain} {--m|run-queue} {--s|seed}';
+    protected $signature = 'tenants:create {name} {domain} {--m|run-queue}';
 
     protected $description = 'Temporary command to test the tenant creation process.';
 
@@ -132,13 +132,6 @@ class CreateTenantCommand extends Command
                 command: "queue:work --queue={$queue} --stop-when-empty",
                 outputBuffer: $this->output,
             );
-
-            if ($this->option('seed') || $this->confirm('Seed students in the tenant database?')) {
-                Artisan::call(
-                    command: "tenants:artisan \"db:seed --database=tenant --class=SisDataSeeder\" --tenant={$tenant->id}",
-                    outputBuffer: $this->output,
-                );
-            }
 
             if ($this->confirm('Would you like to seed sample super admin?')) {
                 Artisan::call(

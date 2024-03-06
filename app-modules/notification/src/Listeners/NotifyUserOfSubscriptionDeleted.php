@@ -40,10 +40,8 @@ use Illuminate\Support\HtmlString;
 use AdvisingApp\Contact\Models\Contact;
 use Filament\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\Notification\Events\SubscriptionDeleted;
 use AdvisingApp\Contact\Filament\Resources\ContactResource;
-use AdvisingApp\StudentDataModel\Filament\Resources\StudentResource;
 
 class NotifyUserOfSubscriptionDeleted implements ShouldQueue
 {
@@ -55,7 +53,6 @@ class NotifyUserOfSubscriptionDeleted implements ShouldQueue
 
         $target = match ($subscribable::class) {
             Contact::class => ContactResource::class,
-            Student::class => StudentResource::class,
         };
 
         $url = $target::getUrl('view', ['record' => $subscribable]);

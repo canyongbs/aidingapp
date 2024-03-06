@@ -41,7 +41,6 @@ use AdvisingApp\Alert\Models\Alert;
 use Illuminate\Support\Facades\Cache;
 use AdvisingApp\Contact\Models\Contact;
 use AdvisingApp\Alert\Events\AlertCreated;
-use AdvisingApp\StudentDataModel\Models\Student;
 use AdvisingApp\Notification\Actions\SubscriptionCreate;
 
 class AlertObserver
@@ -56,7 +55,6 @@ class AlertObserver
 
             Cache::tags([match ($alert->concern_type) {
                 app(Contact::class)->getMorphClass() => "user-{$user->getKey()}-contact-alerts",
-                app(Student::class)->getMorphClass() => "user-{$user->getKey()}-student-alerts",
             }])->flush();
         }
 
@@ -78,7 +76,6 @@ class AlertObserver
         if ($user) {
             Cache::tags([match ($alert->concern_type) {
                 app(Contact::class)->getMorphClass() => "user-{$user->getKey()}-contact-alerts",
-                app(Student::class)->getMorphClass() => "user-{$user->getKey()}-student-alerts",
             }])->flush();
         }
     }

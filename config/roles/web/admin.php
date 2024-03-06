@@ -65,11 +65,6 @@ return [
         'support_page.access',
         'contact_menu.access',
         'report_menu.access',
-        'report_student.create',
-        'report_student.edit',
-        'report_student.show',
-        'report_student.delete',
-        'report_student.access',
         'report_contact.create',
         'report_contact.edit',
         'report_contact.show',
@@ -114,9 +109,6 @@ return [
             '*',
         ],
         'engagement_interaction_type' => [
-            '*',
-        ],
-        'engagement_student_file' => [
             '*',
         ],
         'engagement_text_item' => [

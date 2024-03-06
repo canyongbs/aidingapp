@@ -59,7 +59,6 @@ use AdvisingApp\Authorization\Models\License;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use AdvisingApp\Assistant\Models\AssistantChat;
 use AdvisingApp\Authorization\Enums\LicenseType;
-use AdvisingApp\StudentDataModel\Models\Student;
 use Staudenmeir\EloquentHasManyDeep\HasManyDeep;
 use AdvisingApp\Notification\Models\Subscription;
 use AdvisingApp\Consent\Models\Concerns\CanConsent;
@@ -124,7 +123,6 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
         'email_verified_at' => 'datetime',
         'has_enabled_public_profile' => 'boolean',
         'office_hours_are_enabled' => 'boolean',
-        'appointments_are_restricted_to_existing_students' => 'boolean',
         'office_hours' => 'array',
         'out_of_office_is_enabled' => 'boolean',
         'out_of_office_starts_at' => 'datetime',
@@ -155,7 +153,6 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
         'has_enabled_public_profile',
         'public_profile_slug',
         'office_hours_are_enabled',
-        'appointments_are_restricted_to_existing_students',
         'office_hours',
         'out_of_office_is_enabled',
         'out_of_office_starts_at',
@@ -234,23 +231,6 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
             ->withTimestamps();
     }
 
-    public function studentSubscriptions(): MorphToMany
-    {
-        return $this->morphedByMany(
-            related: Student::class,
-            name: 'subscribable',
-            table: 'subscriptions'
-        )
-            ->using(Subscription::class)
-            ->withPivot('id')
-            ->withTimestamps();
-    }
-
-    public function studentAlerts(): HasManyDeep
-    {
-        return $this->hasManyDeepFromRelations($this->studentSubscriptions(), (new Student())->alerts());
-    }
-
     public function contactAlerts(): HasManyDeep
     {
         return $this->hasManyDeepFromRelations($this->contactSubscriptions(), (new Contact())->alerts());
@@ -260,18 +240,6 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
     {
         return $this->morphedByMany(
             related: Contact::class,
-            name: 'educatable',
-            table: 'care_teams'
-        )
-            ->using(CareTeam::class)
-            ->withPivot('id')
-            ->withTimestamps();
-    }
-
-    public function studentCareTeams(): MorphToMany
-    {
-        return $this->morphedByMany(
-            related: Student::class,
             name: 'educatable',
             table: 'care_teams'
         )

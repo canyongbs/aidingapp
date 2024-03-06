@@ -46,7 +46,6 @@ use AdvisingApp\Division\Models\Division;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Forms\Components\MorphToSelect;
 use Filament\Forms\Components\DateTimePicker;
-use AdvisingApp\StudentDataModel\Models\Student;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use AdvisingApp\Interaction\Models\InteractionType;
 use AdvisingApp\Interaction\Models\InteractionDriver;
@@ -72,8 +71,6 @@ class CreateInteraction extends CreateRecord
                     ->searchable()
                     ->required()
                     ->types([
-                        ...(auth()->user()->hasLicense(Student::getLicenseType()) ? [MorphToSelect\Type::make(Student::class)
-                            ->titleAttribute(Student::displayNameKey())] : []),
                         ...(auth()->user()->hasLicense(Contact::getLicenseType()) ? [MorphToSelect\Type::make(Contact::class)
                             ->titleAttribute(Contact::displayNameKey())] : []),
                         MorphToSelect\Type::make(ServiceRequest::class)
