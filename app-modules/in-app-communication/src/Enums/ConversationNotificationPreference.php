@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InAppCommunication\Enums;
+namespace AidingApp\InAppCommunication\Enums;
 
 use Filament\Support\Contracts\HasIcon;
 use Filament\Support\Contracts\HasColor;

@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InAppCommunication\Actions;
+namespace AidingApp\InAppCommunication\Actions;
 
 use App\Models\User;
 use Twilio\Rest\Client;
-use AdvisingApp\InAppCommunication\Models\TwilioConversation;
-use AdvisingApp\InAppCommunication\Models\TwilioConversationUser;
+use AidingApp\InAppCommunication\Models\TwilioConversation;
+use AidingApp\InAppCommunication\Models\TwilioConversationUser;
 
 class TogglePinConversation
 {

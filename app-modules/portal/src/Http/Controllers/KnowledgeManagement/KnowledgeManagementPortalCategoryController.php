@@ -34,13 +34,13 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Portal\Http\Controllers\KnowledgeManagement;
+namespace AidingApp\Portal\Http\Controllers\KnowledgeManagement;
 
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
-use AdvisingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
-use AdvisingApp\Portal\DataTransferObjects\KnowledgeBaseArticleData;
-use AdvisingApp\Portal\DataTransferObjects\KnowledgeBaseCategoryData;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
+use AidingApp\Portal\DataTransferObjects\KnowledgeBaseArticleData;
+use AidingApp\Portal\DataTransferObjects\KnowledgeBaseCategoryData;
 
 class KnowledgeManagementPortalCategoryController extends Controller
 {

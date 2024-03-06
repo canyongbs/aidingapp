@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InAppCommunication\Filament\Pages;
+namespace AidingApp\InAppCommunication\Filament\Pages;
 
 use Exception;
 use App\Models\User;
@@ -60,24 +60,24 @@ use Illuminate\Database\Eloquent\Builder;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Components\CheckboxList;
 use Illuminate\Database\Eloquent\Collection;
+use AidingApp\Authorization\Enums\LicenseType;
 use Filament\Forms\Concerns\InteractsWithForms;
-use AdvisingApp\Authorization\Enums\LicenseType;
 use Filament\Actions\Concerns\InteractsWithActions;
+use AidingApp\InAppCommunication\Enums\ConversationType;
+use AidingApp\IntegrationTwilio\Actions\GetTwilioApiKey;
+use AidingApp\IntegrationTwilio\Settings\TwilioSettings;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use AdvisingApp\InAppCommunication\Enums\ConversationType;
-use AdvisingApp\IntegrationTwilio\Actions\GetTwilioApiKey;
-use AdvisingApp\IntegrationTwilio\Settings\TwilioSettings;
-use AdvisingApp\InAppCommunication\Models\TwilioConversation;
-use AdvisingApp\InAppCommunication\Actions\AddUserToConversation;
-use AdvisingApp\InAppCommunication\Actions\TogglePinConversation;
-use AdvisingApp\InAppCommunication\Events\ConversationMessageSent;
-use AdvisingApp\InAppCommunication\Actions\CreateTwilioConversation;
-use AdvisingApp\InAppCommunication\Actions\DeleteTwilioConversation;
-use AdvisingApp\InAppCommunication\Actions\RemoveUserFromConversation;
-use AdvisingApp\InAppCommunication\Actions\PromoteUserToChannelManager;
-use AdvisingApp\InAppCommunication\Jobs\NotifyConversationParticipants;
-use AdvisingApp\InAppCommunication\Actions\DemoteUserFromChannelManager;
-use AdvisingApp\InAppCommunication\Enums\ConversationNotificationPreference;
+use AidingApp\InAppCommunication\Models\TwilioConversation;
+use AidingApp\InAppCommunication\Actions\AddUserToConversation;
+use AidingApp\InAppCommunication\Actions\TogglePinConversation;
+use AidingApp\InAppCommunication\Events\ConversationMessageSent;
+use AidingApp\InAppCommunication\Actions\CreateTwilioConversation;
+use AidingApp\InAppCommunication\Actions\DeleteTwilioConversation;
+use AidingApp\InAppCommunication\Actions\RemoveUserFromConversation;
+use AidingApp\InAppCommunication\Actions\PromoteUserToChannelManager;
+use AidingApp\InAppCommunication\Jobs\NotifyConversationParticipants;
+use AidingApp\InAppCommunication\Actions\DemoteUserFromChannelManager;
+use AidingApp\InAppCommunication\Enums\ConversationNotificationPreference;
 
 /**
  * @property Collection $conversations

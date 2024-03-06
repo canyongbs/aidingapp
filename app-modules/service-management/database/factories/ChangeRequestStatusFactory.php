@@ -34,13 +34,13 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Database\Factories;
+namespace AidingApp\ServiceManagement\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use AdvisingApp\ServiceManagement\Enums\SystemChangeRequestClassification;
+use AidingApp\ServiceManagement\Enums\SystemChangeRequestClassification;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AdvisingApp\ServiceManagement\Models\ChangeRequestStatus>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AidingApp\ServiceManagement\Models\ChangeRequestStatus>
  */
 class ChangeRequestStatusFactory extends Factory
 {

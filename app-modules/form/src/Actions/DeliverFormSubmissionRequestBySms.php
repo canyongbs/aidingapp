@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Form\Actions;
+namespace AidingApp\Form\Actions;
 
-use AdvisingApp\Form\Notifications\FormSubmissionRequestSmsNotification;
+use AidingApp\Form\Notifications\FormSubmissionRequestSmsNotification;
 
 class DeliverFormSubmissionRequestBySms extends DeliverFormSubmissionRequest
 {

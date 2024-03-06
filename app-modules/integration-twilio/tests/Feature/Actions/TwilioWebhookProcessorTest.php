@@ -41,8 +41,8 @@ use Illuminate\Support\Facades\Queue;
 use function Tests\loadFixtureFromModule;
 use function Pest\Laravel\withoutMiddleware;
 
-use AdvisingApp\IntegrationTwilio\Actions\StatusCallback;
-use AdvisingApp\IntegrationTwilio\Actions\MessageReceived;
+use AidingApp\IntegrationTwilio\Actions\StatusCallback;
+use AidingApp\IntegrationTwilio\Actions\MessageReceived;
 
 it('will dispatch the correct job to handle the incoming webhook', function (string $event, string $payloadPath, string $expectedJob, array $unexpectedJobs = []) {
     withoutMiddleware();

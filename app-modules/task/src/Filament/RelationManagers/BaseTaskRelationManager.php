@@ -34,16 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Task\Filament\RelationManagers;
+namespace AidingApp\Task\Filament\RelationManagers;
 
 use Filament\Forms\Form;
 use Filament\Tables\Table;
-use AdvisingApp\Task\Models\Task;
+use AidingApp\Task\Models\Task;
 use App\Models\Scopes\HasLicense;
 use Filament\Tables\Filters\Filter;
+use AidingApp\Task\Enums\TaskStatus;
+use AidingApp\Contact\Models\Contact;
 use Filament\Forms\Components\Select;
-use AdvisingApp\Task\Enums\TaskStatus;
-use AdvisingApp\Contact\Models\Contact;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Model;
@@ -58,8 +58,8 @@ use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Tables\Actions\DetachBulkAction;
 use Filament\Resources\Pages\ManageRelatedRecords;
-use AdvisingApp\Contact\Filament\Resources\ContactResource;
-use AdvisingApp\Task\Filament\Resources\TaskResource\Components\TaskViewAction;
+use AidingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Task\Filament\Resources\TaskResource\Components\TaskViewAction;
 
 abstract class BaseTaskRelationManager extends ManageRelatedRecords
 {

@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Form\Models;
+namespace AidingApp\Form\Models;
 
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Model;
@@ -44,7 +44,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
-use AdvisingApp\Authorization\Models\Concerns\DefinesPermissions;
+use AidingApp\Authorization\Models\Concerns\DefinesPermissions;
 
 /**
  * @property string $name

@@ -35,10 +35,10 @@
 */
 
 use App\Models\User;
-use AdvisingApp\Task\Models\Task;
+use AidingApp\Task\Models\Task;
 use Illuminate\Support\Facades\Notification;
-use AdvisingApp\Authorization\Models\Permission;
-use AdvisingApp\Task\Notifications\TaskAssignedToUserNotification;
+use AidingApp\Authorization\Models\Permission;
+use AidingApp\Task\Notifications\TaskAssignedToUserNotification;
 
 beforeEach(function () {
     Notification::fake();

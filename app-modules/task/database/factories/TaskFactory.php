@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Task\Database\Factories;
+namespace AidingApp\Task\Database\Factories;
 
 use App\Models\User;
-use AdvisingApp\Task\Models\Task;
-use AdvisingApp\Task\Enums\TaskStatus;
-use AdvisingApp\Contact\Models\Contact;
+use AidingApp\Task\Models\Task;
+use AidingApp\Task\Enums\TaskStatus;
+use AidingApp\Contact\Models\Contact;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

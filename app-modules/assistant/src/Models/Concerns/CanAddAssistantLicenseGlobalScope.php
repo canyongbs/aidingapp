@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Assistant\Models\Concerns;
+namespace AidingApp\Assistant\Models\Concerns;
 
 use App\Models\Authenticatable;
 use Illuminate\Database\Eloquent\Builder;
-use AdvisingApp\Authorization\Enums\LicenseType;
+use AidingApp\Authorization\Enums\LicenseType;
 
 trait CanAddAssistantLicenseGlobalScope
 {

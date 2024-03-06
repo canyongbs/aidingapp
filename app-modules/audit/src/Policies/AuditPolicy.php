@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Audit\Policies;
+namespace AidingApp\Audit\Policies;
 
 use App\Models\Authenticatable;
-use AdvisingApp\Audit\Models\Audit;
+use AidingApp\Audit\Models\Audit;
 use Illuminate\Auth\Access\Response;
 
 class AuditPolicy

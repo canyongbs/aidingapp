@@ -52,7 +52,7 @@ return [
     |
     */
 
-    'modules_namespace' => 'AdvisingApp',
+    'modules_namespace' => 'AidingApp',
 
     /*
     |--------------------------------------------------------------------------

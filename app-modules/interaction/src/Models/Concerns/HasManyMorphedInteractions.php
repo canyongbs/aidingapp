@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Interaction\Models\Concerns;
+namespace AidingApp\Interaction\Models\Concerns;
 
-use AdvisingApp\Interaction\Models\Interaction;
+use AidingApp\Interaction\Models\Interaction;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 trait HasManyMorphedInteractions

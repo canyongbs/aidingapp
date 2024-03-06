@@ -34,13 +34,13 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Actions;
+namespace AidingApp\Engagement\Actions;
 
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Notifications\Events\NotificationSent;
-use AdvisingApp\Engagement\Notifications\EngagementEmailNotification;
-use AdvisingApp\Engagement\Notifications\EngagementEmailSentNotification;
+use AidingApp\Engagement\Notifications\EngagementEmailNotification;
+use AidingApp\Engagement\Notifications\EngagementEmailSentNotification;
 
 class HandleEngagementEmailNotificationSent implements ShouldQueue
 {

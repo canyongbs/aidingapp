@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Timeline\Timelines;
+namespace AidingApp\Timeline\Timelines;
 
 use Filament\Actions\ViewAction;
-use AdvisingApp\Timeline\Models\CustomTimeline;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestUpdate;
-use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource\Components\ServiceRequestUpdateViewAction;
+use AidingApp\Timeline\Models\CustomTimeline;
+use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource\Components\ServiceRequestUpdateViewAction;
 
 // TODO Decide where these belong - might want to keep these in the context of the original module
 class ServiceRequestUpdateTimeline extends CustomTimeline

@@ -34,17 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Task\Filament\Concerns;
+namespace AidingApp\Task\Filament\Concerns;
 
-use AdvisingApp\Task\Models\Task;
-use AdvisingApp\Task\Enums\TaskStatus;
-use AdvisingApp\Contact\Models\Contact;
+use AidingApp\Task\Models\Task;
+use AidingApp\Task\Enums\TaskStatus;
+use AidingApp\Contact\Models\Contact;
 use Filament\Infolists\Components\Grid;
 use App\Filament\Resources\UserResource;
 use Filament\Infolists\Components\Split;
 use Filament\Infolists\Components\Fieldset;
 use Filament\Infolists\Components\TextEntry;
-use AdvisingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Contact\Filament\Resources\ContactResource;
 
 trait TaskViewActionInfoList
 {

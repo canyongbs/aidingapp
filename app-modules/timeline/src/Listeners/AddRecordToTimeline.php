@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Timeline\Listeners;
+namespace AidingApp\Timeline\Listeners;
 
-use AdvisingApp\Timeline\Models\Timeline;
-use AdvisingApp\Timeline\Events\TimelineableRecordCreated;
+use AidingApp\Timeline\Models\Timeline;
+use AidingApp\Timeline\Events\TimelineableRecordCreated;
 
 class AddRecordToTimeline
 {

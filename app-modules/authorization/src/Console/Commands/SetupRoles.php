@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Authorization\Console\Commands;
+namespace AidingApp\Authorization\Console\Commands;
 
 use Illuminate\Console\Command;
-use AdvisingApp\Authorization\Actions\CreateRoles;
+use AidingApp\Authorization\Actions\CreateRoles;
 use Spatie\Multitenancy\Commands\Concerns\TenantAware;
 
 class SetupRoles extends Command

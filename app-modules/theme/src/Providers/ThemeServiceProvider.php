@@ -34,16 +34,13 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Theme\Providers;
+namespace AidingApp\Theme\Providers;
 
 use Filament\Panel;
-use AdvisingApp\Theme\ThemePlugin;
+use AidingApp\Theme\ThemePlugin;
 use Illuminate\Support\ServiceProvider;
+use AidingApp\Theme\Registries\ThemeRbacRegistry;
 use App\Registries\RoleBasedAccessControlRegistry;
-use AdvisingApp\Theme\Registries\ThemeRbacRegistry;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use AdvisingApp\Authorization\AuthorizationRoleRegistry;
-use AdvisingApp\Authorization\AuthorizationPermissionRegistry;
 
 class ThemeServiceProvider extends ServiceProvider
 {
@@ -52,12 +49,8 @@ class ThemeServiceProvider extends ServiceProvider
         Panel::configureUsing(fn (Panel $panel) => ($panel->getId() !== 'admin') || $panel->plugin(new ThemePlugin()));
     }
 
-    public function boot(AuthorizationPermissionRegistry $permissionRegistry, AuthorizationRoleRegistry $roleRegistry): void
+    public function boot(): void
     {
-        Relation::morphMap(
-            [],
-        );
-
         RoleBasedAccessControlRegistry::register(ThemeRbacRegistry::class);
     }
 }

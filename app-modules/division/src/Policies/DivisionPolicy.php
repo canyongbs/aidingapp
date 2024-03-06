@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Division\Policies;
+namespace AidingApp\Division\Policies;
 
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
-use AdvisingApp\Division\Models\Division;
+use AidingApp\Division\Models\Division;
 
 class DivisionPolicy
 {

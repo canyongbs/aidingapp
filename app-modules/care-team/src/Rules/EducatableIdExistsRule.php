@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\CareTeam\Rules;
+namespace AidingApp\CareTeam\Rules;
 
 use Closure;
 use Illuminate\Database\Eloquent\Model;

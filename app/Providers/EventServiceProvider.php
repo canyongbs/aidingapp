@@ -38,18 +38,18 @@ namespace App\Providers;
 
 use OwenIt\Auditing\Events\Auditing;
 use Illuminate\Auth\Events\Registered;
-use AdvisingApp\Audit\Listeners\AuditingListener;
-use AdvisingApp\Authorization\Events\RoleRemovedFromUser;
-use AdvisingApp\Authorization\Events\RoleAttachedToRoleGroup;
-use AdvisingApp\Authorization\Events\UserAttachedToRoleGroup;
-use AdvisingApp\Authorization\Events\RoleRemovedFromRoleGroup;
-use AdvisingApp\Authorization\Events\UserRemovedFromRoleGroup;
+use AidingApp\Audit\Listeners\AuditingListener;
+use AidingApp\Authorization\Events\RoleRemovedFromUser;
+use AidingApp\Authorization\Events\RoleAttachedToRoleGroup;
+use AidingApp\Authorization\Events\UserAttachedToRoleGroup;
+use AidingApp\Authorization\Events\RoleRemovedFromRoleGroup;
+use AidingApp\Authorization\Events\UserRemovedFromRoleGroup;
+use AidingApp\Authorization\Listeners\HandleRoleRemovedFromUser;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
-use AdvisingApp\Authorization\Listeners\HandleRoleRemovedFromUser;
-use AdvisingApp\Authorization\Listeners\HandleRoleAttachedToRoleGroup;
-use AdvisingApp\Authorization\Listeners\HandleUserAttachedToRoleGroup;
-use AdvisingApp\Authorization\Listeners\HandleRoleRemovedFromRoleGroup;
-use AdvisingApp\Authorization\Listeners\HandleUserRemovedFromRoleGroup;
+use AidingApp\Authorization\Listeners\HandleRoleAttachedToRoleGroup;
+use AidingApp\Authorization\Listeners\HandleUserAttachedToRoleGroup;
+use AidingApp\Authorization\Listeners\HandleRoleRemovedFromRoleGroup;
+use AidingApp\Authorization\Listeners\HandleUserRemovedFromRoleGroup;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
 class EventServiceProvider extends ServiceProvider

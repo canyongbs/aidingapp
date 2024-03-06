@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Notification\Notifications\Messages;
+namespace AidingApp\Notification\Notifications\Messages;
 
-use AdvisingApp\IntegrationTwilio\Settings\TwilioSettings;
-use AdvisingApp\Notification\Notifications\Messages\Contracts\Message;
+use AidingApp\IntegrationTwilio\Settings\TwilioSettings;
+use AidingApp\Notification\Notifications\Messages\Contracts\Message;
 
 class TwilioMessage implements Message
 {

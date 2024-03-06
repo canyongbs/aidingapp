@@ -34,14 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource\Pages;
+namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource\Pages;
 
 use Filament\Actions;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
-use AdvisingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource;
 
 class ViewKnowledgeBaseStatus extends ViewRecord
 {

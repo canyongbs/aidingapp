@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Observers;
+namespace AidingApp\Engagement\Observers;
 
-use AdvisingApp\Engagement\Models\SmsTemplate;
+use AidingApp\Engagement\Models\SmsTemplate;
 
 class SmsTemplateObserver
 {

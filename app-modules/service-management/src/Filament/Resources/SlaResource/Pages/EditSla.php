@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Filament\Resources\SlaResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\SlaResource\Pages;
 
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
-use AdvisingApp\ServiceManagement\Filament\Resources\SlaResource;
+use AidingApp\ServiceManagement\Filament\Resources\SlaResource;
 
 class EditSla extends EditRecord
 {

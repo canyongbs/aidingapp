@@ -34,15 +34,15 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Authorization\Models;
+namespace AidingApp\Authorization\Models;
 
 use App\Models\User;
 use App\Models\BaseModel;
 use OwenIt\Auditing\Contracts\Auditable;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use AdvisingApp\Authorization\Enums\LicenseType;
+use AidingApp\Authorization\Enums\LicenseType;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use AdvisingApp\Audit\Models\Concerns\Auditable as AuditableConcern;
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableConcern;
 
 /**
  * @mixin IdeHelperLicense

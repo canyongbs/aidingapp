@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Interaction\Filament\Resources\InteractionResource\Pages;
+namespace AidingApp\Interaction\Filament\Resources\InteractionResource\Pages;
 
 use Filament\Actions;
 use Filament\Tables\Table;
@@ -45,10 +45,10 @@ use Filament\Tables\Columns\TextColumn;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Actions\BulkActionGroup;
+use AidingApp\Interaction\Models\Interaction;
 use Filament\Tables\Actions\DeleteBulkAction;
-use AdvisingApp\Interaction\Models\Interaction;
-use AdvisingApp\Interaction\Imports\InteractionsImporter;
-use AdvisingApp\Interaction\Filament\Resources\InteractionResource;
+use AidingApp\Interaction\Imports\InteractionsImporter;
+use AidingApp\Interaction\Filament\Resources\InteractionResource;
 
 class ListInteractions extends ListRecords
 {

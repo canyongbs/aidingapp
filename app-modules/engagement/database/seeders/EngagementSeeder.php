@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Database\Seeders;
+namespace AidingApp\Engagement\Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use AdvisingApp\Engagement\Models\Engagement;
-use AdvisingApp\Engagement\Models\EngagementDeliverable;
+use AidingApp\Engagement\Models\Engagement;
+use AidingApp\Engagement\Models\EngagementDeliverable;
 
 class EngagementSeeder extends Seeder
 {

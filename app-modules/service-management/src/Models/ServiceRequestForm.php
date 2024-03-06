@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Models;
+namespace AidingApp\ServiceManagement\Models;
 
-use AdvisingApp\Form\Enums\Rounding;
-use AdvisingApp\Form\Models\Submissible;
+use AidingApp\Form\Enums\Rounding;
+use AidingApp\Form\Models\Submissible;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 

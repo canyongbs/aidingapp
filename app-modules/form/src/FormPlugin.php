@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Form;
+namespace AidingApp\Form;
 
 use Filament\Panel;
 use Filament\Contracts\Plugin;
@@ -51,7 +51,7 @@ class FormPlugin implements Plugin
         $panel
             ->discoverResources(
                 in: __DIR__ . '/Filament/Resources',
-                for: 'AdvisingApp\\Form\\Filament\\Resources'
+                for: 'AidingApp\\Form\\Filament\\Resources'
             );
     }
 

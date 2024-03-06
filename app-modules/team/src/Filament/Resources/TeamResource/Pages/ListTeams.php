@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Team\Filament\Resources\TeamResource\Pages;
+namespace AidingApp\Team\Filament\Resources\TeamResource\Pages;
 
 use Filament\Tables\Table;
 use Filament\Actions\CreateAction;
@@ -46,7 +46,7 @@ use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
-use AdvisingApp\Team\Filament\Resources\TeamResource;
+use AidingApp\Team\Filament\Resources\TeamResource;
 
 class ListTeams extends ListRecords
 {

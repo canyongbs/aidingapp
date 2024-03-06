@@ -36,7 +36,7 @@
 
 use Illuminate\Support\Facades\Event;
 use Illuminate\Notifications\Events\NotificationFailed;
-use AdvisingApp\Notification\Listeners\HandleNotificationFailed;
+use AidingApp\Notification\Listeners\HandleNotificationFailed;
 
 it('is listening to notification failed events', function () {
     Event::fake();

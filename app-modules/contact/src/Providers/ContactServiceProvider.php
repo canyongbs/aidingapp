@@ -34,21 +34,21 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Contact\Providers;
+namespace AidingApp\Contact\Providers;
 
 use Filament\Panel;
 use App\Concerns\ImplementsGraphQL;
-use AdvisingApp\Contact\ContactPlugin;
-use AdvisingApp\Contact\Models\Contact;
+use AidingApp\Contact\ContactPlugin;
+use AidingApp\Contact\Models\Contact;
 use Illuminate\Support\ServiceProvider;
-use AdvisingApp\Contact\Models\ContactSource;
-use AdvisingApp\Contact\Models\ContactStatus;
-use AdvisingApp\Contact\Observers\ContactObserver;
+use AidingApp\Contact\Models\ContactSource;
+use AidingApp\Contact\Models\ContactStatus;
+use AidingApp\Contact\Observers\ContactObserver;
 use App\Registries\RoleBasedAccessControlRegistry;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use AdvisingApp\Contact\Registries\ContactRbacRegistry;
-use AdvisingApp\Contact\Enums\ContactStatusColorOptions;
-use AdvisingApp\Contact\Enums\SystemContactClassification;
+use AidingApp\Contact\Registries\ContactRbacRegistry;
+use AidingApp\Contact\Enums\ContactStatusColorOptions;
+use AidingApp\Contact\Enums\SystemContactClassification;
 
 class ContactServiceProvider extends ServiceProvider
 {

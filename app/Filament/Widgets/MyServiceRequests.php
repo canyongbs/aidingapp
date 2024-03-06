@@ -45,9 +45,9 @@ use App\Filament\Tables\Columns\IdColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Widgets\TableWidget as BaseWidget;
-use AdvisingApp\ServiceManagement\Models\ServiceRequest;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestPriority;
-use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 
 class MyServiceRequests extends BaseWidget
 {

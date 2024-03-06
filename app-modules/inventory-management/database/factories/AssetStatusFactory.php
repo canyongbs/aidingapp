@@ -34,13 +34,13 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InventoryManagement\Database\Factories;
+namespace AidingApp\InventoryManagement\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use AdvisingApp\InventoryManagement\Enums\SystemAssetStatusClassification;
+use AidingApp\InventoryManagement\Enums\SystemAssetStatusClassification;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AdvisingApp\InventoryManagement\Models\AssetStatus>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AidingApp\InventoryManagement\Models\AssetStatus>
  */
 class AssetStatusFactory extends Factory
 {

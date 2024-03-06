@@ -34,13 +34,13 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Alert\Listeners;
+namespace AidingApp\Alert\Listeners;
 
-use AdvisingApp\Contact\Models\Contact;
-use AdvisingApp\Alert\Events\AlertCreated;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Alert\Events\AlertCreated;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use AdvisingApp\Notification\Models\Subscription;
-use AdvisingApp\Alert\Notifications\AlertCreatedNotification;
+use AidingApp\Notification\Models\Subscription;
+use AidingApp\Alert\Notifications\AlertCreatedNotification;
 
 class NotifySubscribersOfAlertCreated implements ShouldQueue
 {

@@ -34,8 +34,8 @@
 @props(['content', 'submission'])
 
 @php
-    use AdvisingApp\Form\Actions\ResolveBlockRegistry;
-    use AdvisingApp\Form\Actions\InjectSubmissionStateIntoTipTapContent;
+    use AidingApp\Form\Actions\ResolveBlockRegistry;
+    use AidingApp\Form\Actions\InjectSubmissionStateIntoTipTapContent;
 
     $blocks = app(ResolveBlockRegistry::class)($submission->submissible);
 

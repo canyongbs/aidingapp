@@ -34,14 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Assistant\Filament\Resources;
+namespace AidingApp\Assistant\Filament\Resources;
 
 use Filament\Resources\Resource;
-use AdvisingApp\Assistant\Models\Prompt;
-use AdvisingApp\Assistant\Filament\Resources\PromptResource\Pages\EditPrompt;
-use AdvisingApp\Assistant\Filament\Resources\PromptResource\Pages\ViewPrompt;
-use AdvisingApp\Assistant\Filament\Resources\PromptResource\Pages\ListPrompts;
-use AdvisingApp\Assistant\Filament\Resources\PromptResource\Pages\CreatePrompt;
+use AidingApp\Assistant\Models\Prompt;
+use AidingApp\Assistant\Filament\Resources\PromptResource\Pages\EditPrompt;
+use AidingApp\Assistant\Filament\Resources\PromptResource\Pages\ViewPrompt;
+use AidingApp\Assistant\Filament\Resources\PromptResource\Pages\ListPrompts;
+use AidingApp\Assistant\Filament\Resources\PromptResource\Pages\CreatePrompt;
 
 class PromptResource extends Resource
 {

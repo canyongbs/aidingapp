@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InAppCommunication\Livewire;
+namespace AidingApp\InAppCommunication\Livewire;
 
 use Livewire\Component;
 use Livewire\Attributes\Lazy;

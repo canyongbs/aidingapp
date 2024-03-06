@@ -34,6 +34,6 @@
 </COPYRIGHT>
 */
 
-use AdvisingApp\Engagement\Http\Controllers\EngagementFileDownloadController;
+use AidingApp\Engagement\Http\Controllers\EngagementFileDownloadController;
 
 Route::middleware(['web', 'auth'])->get('/file/{file}/download', EngagementFileDownloadController::class)->name('engagement-file-download');

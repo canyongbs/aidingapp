@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InventoryManagement\Filament\Resources\AssetResource\Pages;
+namespace AidingApp\InventoryManagement\Filament\Resources\AssetResource\Pages;
 
 use Filament\Forms\Form;
 use Illuminate\Support\Carbon;
@@ -43,11 +43,11 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\DatePicker;
 use Filament\Resources\Pages\CreateRecord;
-use AdvisingApp\InventoryManagement\Models\Asset;
-use AdvisingApp\InventoryManagement\Models\AssetType;
-use AdvisingApp\InventoryManagement\Models\AssetStatus;
-use AdvisingApp\InventoryManagement\Models\AssetLocation;
-use AdvisingApp\InventoryManagement\Filament\Resources\AssetResource;
+use AidingApp\InventoryManagement\Models\Asset;
+use AidingApp\InventoryManagement\Models\AssetType;
+use AidingApp\InventoryManagement\Models\AssetStatus;
+use AidingApp\InventoryManagement\Models\AssetLocation;
+use AidingApp\InventoryManagement\Filament\Resources\AssetResource;
 
 class CreateAsset extends CreateRecord
 {

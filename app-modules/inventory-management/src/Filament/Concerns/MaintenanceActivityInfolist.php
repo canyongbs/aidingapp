@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InventoryManagement\Filament\Concerns;
+namespace AidingApp\InventoryManagement\Filament\Concerns;
 
 use Filament\Infolists\Components\Fieldset;
 use Filament\Infolists\Components\TextEntry;

@@ -34,16 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Authorization\Console\Commands;
+namespace AidingApp\Authorization\Console\Commands;
 
 use App\Models\Tenant;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Artisan;
-use AdvisingApp\Authorization\Models\Role;
+use AidingApp\Authorization\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 use App\Actions\Finders\ApplicationModules;
-use AdvisingApp\Authorization\Models\Permission;
+use AidingApp\Authorization\Models\Permission;
 use App\Registries\RoleBasedAccessControlRegistry;
 use Spatie\Multitenancy\Commands\Concerns\TenantAware;
 

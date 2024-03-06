@@ -34,13 +34,13 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InventoryManagement\Filament\Resources\AssetCheckOutResource\Concerns;
+namespace AidingApp\InventoryManagement\Filament\Resources\AssetCheckOutResource\Concerns;
 
 use App\Filament\Resources\UserResource;
 use Filament\Infolists\Components\Fieldset;
 use Filament\Infolists\Components\TextEntry;
-use AdvisingApp\InventoryManagement\Models\AssetCheckOut;
-use AdvisingApp\InventoryManagement\Enums\AssetCheckOutStatus;
+use AidingApp\InventoryManagement\Models\AssetCheckOut;
+use AidingApp\InventoryManagement\Enums\AssetCheckOutStatus;
 
 trait HasAssetCheckOutInfolist
 {

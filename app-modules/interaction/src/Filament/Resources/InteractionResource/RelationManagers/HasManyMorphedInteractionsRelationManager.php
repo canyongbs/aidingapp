@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Interaction\Filament\Resources\InteractionResource\RelationManagers;
+namespace AidingApp\Interaction\Filament\Resources\InteractionResource\RelationManagers;
 
 use Filament\Tables\Table;
 use Carbon\CarbonInterface;

@@ -1,4 +1,4 @@
-type Division @model(class: "AdvisingApp\\Division\\Models\\Division") {
+type Division @model(class: "AidingApp\\Division\\Models\\Division") {
     "Unique primary key."
     id: UUID!
 

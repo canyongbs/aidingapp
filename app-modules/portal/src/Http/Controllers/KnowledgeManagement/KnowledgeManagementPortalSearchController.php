@@ -34,17 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Portal\Http\Controllers\KnowledgeManagement;
+namespace AidingApp\Portal\Http\Controllers\KnowledgeManagement;
 
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\Scopes\SearchBy;
 use App\Http\Controllers\Controller;
-use AdvisingApp\KnowledgeBase\Models\KnowledgeBaseItem;
-use AdvisingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
-use AdvisingApp\Portal\DataTransferObjects\KnowledgeBaseArticleData;
-use AdvisingApp\Portal\DataTransferObjects\KnowledgeBaseCategoryData;
-use AdvisingApp\Portal\DataTransferObjects\KnowledgeManagementSearchData;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
+use AidingApp\Portal\DataTransferObjects\KnowledgeBaseArticleData;
+use AidingApp\Portal\DataTransferObjects\KnowledgeBaseCategoryData;
+use AidingApp\Portal\DataTransferObjects\KnowledgeManagementSearchData;
 
 class KnowledgeManagementPortalSearchController extends Controller
 {

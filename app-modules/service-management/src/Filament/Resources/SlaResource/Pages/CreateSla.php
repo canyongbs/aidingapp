@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Filament\Resources\SlaResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\SlaResource\Pages;
 
 use Filament\Resources\Pages\CreateRecord;
-use AdvisingApp\ServiceManagement\Filament\Resources\SlaResource;
+use AidingApp\ServiceManagement\Filament\Resources\SlaResource;
 
 class CreateSla extends CreateRecord
 {

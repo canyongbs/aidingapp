@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Form\Filament\Blocks;
+namespace AidingApp\Form\Filament\Blocks;
 
-use AdvisingApp\Form\Models\SubmissibleField;
+use AidingApp\Form\Models\SubmissibleField;
 
 class EmailFormFieldBlock extends FormFieldBlock
 {

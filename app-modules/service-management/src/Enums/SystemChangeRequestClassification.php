@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Enums;
+namespace AidingApp\ServiceManagement\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 use Bvtterfly\ModelStateMachine\Attributes\InitialState;

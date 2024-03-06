@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Division;
+namespace AidingApp\Division;
 
 use Filament\Panel;
 use Filament\Contracts\Plugin;
@@ -50,7 +50,7 @@ class DivisionPlugin implements Plugin
     {
         $panel->discoverResources(
             in: __DIR__ . '/Filament/Resources',
-            for: 'AdvisingApp\\Division\\Filament\\Resources'
+            for: 'AidingApp\\Division\\Filament\\Resources'
         );
     }
 

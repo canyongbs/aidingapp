@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Consent\Database\Seeders;
+namespace AidingApp\Consent\Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use AdvisingApp\Consent\Models\ConsentAgreement;
-use AdvisingApp\Consent\Enums\ConsentAgreementType;
+use AidingApp\Consent\Models\ConsentAgreement;
+use AidingApp\Consent\Enums\ConsentAgreementType;
 
 class ConsentAgreementSeeder extends Seeder
 {

@@ -34,17 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Division\Filament\Resources\DivisionResource\Pages;
+namespace AidingApp\Division\Filament\Resources\DivisionResource\Pages;
 
 use Filament\Actions\EditAction;
 use Filament\Infolists\Infolist;
+use AidingApp\Division\Models\Division;
 use App\Filament\Resources\UserResource;
 use Filament\Resources\Pages\ViewRecord;
-use AdvisingApp\Division\Models\Division;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use App\Filament\Resources\NotificationSettingResource;
-use AdvisingApp\Division\Filament\Resources\DivisionResource;
+use AidingApp\Division\Filament\Resources\DivisionResource;
 
 class ViewDivision extends ViewRecord
 {

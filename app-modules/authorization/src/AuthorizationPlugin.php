@@ -34,15 +34,15 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Authorization;
+namespace AidingApp\Authorization;
 
 use Filament\Panel;
 use Livewire\Livewire;
 use Filament\Contracts\Plugin;
 use Filament\Navigation\MenuItem;
 use Livewire\Mechanisms\ComponentRegistry;
-use AdvisingApp\Authorization\Filament\Pages\Auth\SetPassword;
-use AdvisingApp\Authorization\Http\Middleware\RedirectIfPasswordNotSet;
+use AidingApp\Authorization\Filament\Pages\Auth\SetPassword;
+use AidingApp\Authorization\Http\Middleware\RedirectIfPasswordNotSet;
 
 class AuthorizationPlugin implements Plugin
 {
@@ -56,15 +56,15 @@ class AuthorizationPlugin implements Plugin
         $panel
             ->discoverResources(
                 in: __DIR__ . '/Filament/Resources',
-                for: 'AdvisingApp\\Authorization\\Filament\\Resources'
+                for: 'AidingApp\\Authorization\\Filament\\Resources'
             )
             ->discoverWidgets(
                 in: __DIR__ . '/Filament/Widgets',
-                for: 'AdvisingApp\\Authorization\\Filament\\Widgets'
+                for: 'AidingApp\\Authorization\\Filament\\Widgets'
             )
             ->discoverPages(
                 in: __DIR__ . '/Filament/Pages',
-                for: 'AdvisingApp\\Authorization\\Filament\\Pages'
+                for: 'AidingApp\\Authorization\\Filament\\Pages'
             )
             ->databaseNotifications()
             ->databaseNotificationsPolling('10s')

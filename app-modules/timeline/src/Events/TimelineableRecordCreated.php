@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Timeline\Events;
+namespace AidingApp\Timeline\Events;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;

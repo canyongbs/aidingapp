@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Policies;
+namespace AidingApp\Engagement\Policies;
 
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
-use AdvisingApp\Contact\Models\Contact;
-use AdvisingApp\Engagement\Models\Engagement;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Engagement\Models\Engagement;
 
 class EngagementPolicy
 {

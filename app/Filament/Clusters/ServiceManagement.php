@@ -38,7 +38,7 @@ namespace App\Filament\Clusters;
 
 use App\Models\User;
 use Filament\Clusters\Cluster;
-use AdvisingApp\Authorization\Enums\LicenseType;
+use AidingApp\Authorization\Enums\LicenseType;
 
 class ServiceManagement extends Cluster
 {

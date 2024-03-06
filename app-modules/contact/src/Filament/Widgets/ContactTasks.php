@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Contact\Filament\Widgets;
+namespace AidingApp\Contact\Filament\Widgets;
 
-use AdvisingApp\Contact\Models\Contact;
-use AdvisingApp\Task\Filament\Widgets\TasksWidget;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Task\Filament\Widgets\TasksWidget;
 
 class ContactTasks extends TasksWidget
 {

@@ -34,13 +34,13 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualityResource\Pages;
+namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualityResource\Pages;
 
 use Filament\Actions;
 use Filament\Forms\Form;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\EditRecord;
-use AdvisingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualityResource;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualityResource;
 
 class EditKnowledgeBaseQuality extends EditRecord
 {

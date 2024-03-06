@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Timeline\Events;
+namespace AidingApp\Timeline\Events;
 
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Database\Eloquent\Model;

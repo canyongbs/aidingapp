@@ -32,8 +32,8 @@
 </COPYRIGHT>
 --}}
 @php
-    use AdvisingApp\Contact\Models\Contact;
-    use AdvisingApp\Contact\Filament\Resources\ContactResource;
+    use AidingApp\Contact\Models\Contact;
+    use AidingApp\Contact\Filament\Resources\ContactResource;
 @endphp
 
 <x-form::blocks.field-wrapper

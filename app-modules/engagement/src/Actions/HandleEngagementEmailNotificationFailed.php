@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Actions;
+namespace AidingApp\Engagement\Actions;
 
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Notifications\Events\NotificationFailed;
-use AdvisingApp\Engagement\Notifications\EngagementEmailNotification;
+use AidingApp\Engagement\Notifications\EngagementEmailNotification;
 
 class HandleEngagementEmailNotificationFailed implements ShouldQueue
 {

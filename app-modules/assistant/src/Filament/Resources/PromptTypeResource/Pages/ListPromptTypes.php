@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Assistant\Filament\Resources\PromptTypeResource\Pages;
+namespace AidingApp\Assistant\Filament\Resources\PromptTypeResource\Pages;
 
 use Filament\Tables\Table;
 use Filament\Actions\CreateAction;
@@ -46,7 +46,7 @@ use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
-use AdvisingApp\Assistant\Filament\Resources\PromptTypeResource;
+use AidingApp\Assistant\Filament\Resources\PromptTypeResource;
 
 class ListPromptTypes extends ListRecords
 {

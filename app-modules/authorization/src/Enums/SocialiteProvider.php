@@ -34,15 +34,15 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Authorization\Enums;
+namespace AidingApp\Authorization\Enums;
 
 use Exception;
 use Mockery\MockInterface;
 use SocialiteProviders\Manager\Config;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Contracts\Provider;
-use AdvisingApp\Authorization\Settings\AzureSsoSettings;
-use AdvisingApp\Authorization\Settings\GoogleSsoSettings;
+use AidingApp\Authorization\Settings\AzureSsoSettings;
+use AidingApp\Authorization\Settings\GoogleSsoSettings;
 
 enum SocialiteProvider: string
 {

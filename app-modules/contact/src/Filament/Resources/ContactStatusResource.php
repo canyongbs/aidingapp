@@ -34,16 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Contact\Filament\Resources;
+namespace AidingApp\Contact\Filament\Resources;
 
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use AidingApp\Contact\Models\ContactStatus;
 use App\Filament\Clusters\ContactManagement;
-use AdvisingApp\Contact\Models\ContactStatus;
-use AdvisingApp\Contact\Filament\Resources\ContactStatusResource\Pages\EditContactStatus;
-use AdvisingApp\Contact\Filament\Resources\ContactStatusResource\Pages\ViewContactStatus;
-use AdvisingApp\Contact\Filament\Resources\ContactStatusResource\Pages\CreateContactStatus;
-use AdvisingApp\Contact\Filament\Resources\ContactStatusResource\Pages\ListContactStatuses;
+use AidingApp\Contact\Filament\Resources\ContactStatusResource\Pages\EditContactStatus;
+use AidingApp\Contact\Filament\Resources\ContactStatusResource\Pages\ViewContactStatus;
+use AidingApp\Contact\Filament\Resources\ContactStatusResource\Pages\CreateContactStatus;
+use AidingApp\Contact\Filament\Resources\ContactStatusResource\Pages\ListContactStatuses;
 
 class ContactStatusResource extends Resource
 {

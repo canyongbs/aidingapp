@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Filament\Resources\ChangeRequestResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\ChangeRequestResource\Pages;
 
 use Filament\Forms\Form;
 use Filament\Actions\ViewAction;
@@ -47,9 +47,9 @@ use Filament\Forms\Components\ViewField;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Components\DateTimePicker;
-use AdvisingApp\ServiceManagement\Models\ChangeRequest;
-use AdvisingApp\ServiceManagement\Models\ChangeRequestType;
-use AdvisingApp\ServiceManagement\Filament\Resources\ChangeRequestResource;
+use AidingApp\ServiceManagement\Models\ChangeRequest;
+use AidingApp\ServiceManagement\Models\ChangeRequestType;
+use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestResource;
 
 class EditChangeRequest extends EditRecord
 {

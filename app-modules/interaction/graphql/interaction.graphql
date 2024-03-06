@@ -9,8 +9,7 @@ scalar InteractableId
     @scalar(class: "App\\GraphQL\\Scalars\\InteractableId")
     @searchByOperators(type: "ID")
 
-type Interaction
-    @model(class: "AdvisingApp\\Interaction\\Models\\Interaction") {
+type Interaction @model(class: "AidingApp\\Interaction\\Models\\Interaction") {
     "Unique primary key."
     id: UUID!
 
@@ -119,7 +118,7 @@ input CreateInteractionInput {
         @rules(
             apply: [
                 "required"
-                "AdvisingApp\\Interaction\\Rules\\InteractableIdExistsRule"
+                "AidingApp\\Interaction\\Rules\\InteractableIdExistsRule"
             ]
         )
 
@@ -177,7 +176,7 @@ input UpdateInteractionInput {
     interactable_id: InteractableId
         @rules(
             apply: [
-                "AdvisingApp\\Interaction\\Rules\\InteractableIdExistsRule"
+                "AidingApp\\Interaction\\Rules\\InteractableIdExistsRule"
                 "required_with:interactable_type"
             ]
         )

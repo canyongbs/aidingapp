@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Audit\Actions\Finders;
+namespace AidingApp\Audit\Actions\Finders;
 
 use ReflectionClass;
 use Illuminate\Support\Collection;

@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Interaction\Enums;
+namespace AidingApp\Interaction\Enums;
 
 enum InteractionStatusColorOptions: string
 {

@@ -34,13 +34,13 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Contact\Filament\Resources\ContactResource\Pages;
+namespace AidingApp\Contact\Filament\Resources\ContactResource\Pages;
 
 use App\Models\User;
 use Filament\Tables\Table;
 use App\Models\Scopes\HasLicense;
+use AidingApp\Contact\Models\Contact;
 use Filament\Forms\Components\Select;
-use AdvisingApp\Contact\Models\Contact;
 use Filament\Tables\Columns\TextColumn;
 use App\Filament\Resources\UserResource;
 use App\Filament\Tables\Columns\IdColumn;
@@ -50,7 +50,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DetachBulkAction;
 use Filament\Resources\Pages\ManageRelatedRecords;
-use AdvisingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Contact\Filament\Resources\ContactResource;
 
 class ManageContactSubscriptions extends ManageRelatedRecords
 {

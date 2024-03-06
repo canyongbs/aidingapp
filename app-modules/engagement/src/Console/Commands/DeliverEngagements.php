@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Console\Commands;
+namespace AidingApp\Engagement\Console\Commands;
 
 use Illuminate\Console\Command;
 use Spatie\Multitenancy\Commands\Concerns\TenantAware;
-use AdvisingApp\Engagement\Actions\DeliverEngagements as DeliverEngagementsJob;
+use AidingApp\Engagement\Actions\DeliverEngagements as DeliverEngagementsJob;
 
 class DeliverEngagements extends Command
 {

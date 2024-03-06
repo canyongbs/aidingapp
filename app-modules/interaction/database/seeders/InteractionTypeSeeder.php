@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Interaction\Database\Seeders;
+namespace AidingApp\Interaction\Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use AdvisingApp\Interaction\Models\InteractionType;
+use AidingApp\Interaction\Models\InteractionType;
 
 class InteractionTypeSeeder extends Seeder
 {
@@ -48,10 +48,10 @@ class InteractionTypeSeeder extends Seeder
                 [
                     ['name' => 'Phone'],
                     ['name' => 'Live Chat'],
-                    ['name' => 'SMS (Outside Advising App)'],
+                    ['name' => 'SMS (Outside Aiding App)'],
                     ['name' => 'In-Person'],
                     ['name' => 'Virtual Meeting'],
-                    ['name' => 'Email (Outside Advising App)'],
+                    ['name' => 'Email (Outside Aiding App)'],
                     ['name' => 'Postal Mail'],
                 ]
             );

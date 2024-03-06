@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Assistant\Policies;
+namespace AidingApp\Assistant\Policies;
 
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
-use AdvisingApp\Authorization\Enums\LicenseType;
-use AdvisingApp\Assistant\Models\AssistantChatMessageLog;
+use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\Assistant\Models\AssistantChatMessageLog;
 
 class AssistantChatMessageLogPolicy
 {

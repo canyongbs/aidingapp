@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\IntegrationTwilio\Filament\Pages;
+namespace AidingApp\IntegrationTwilio\Filament\Pages;
 
 use App\Models\User;
 use Filament\Forms\Get;
@@ -44,7 +44,7 @@ use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
 use App\Filament\Clusters\ProductIntegrations;
-use AdvisingApp\IntegrationTwilio\Settings\TwilioSettings;
+use AidingApp\IntegrationTwilio\Settings\TwilioSettings;
 
 class ManageTwilioSettings extends SettingsPage
 {

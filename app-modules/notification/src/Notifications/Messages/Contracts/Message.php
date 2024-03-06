@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Notification\Notifications\Messages\Contracts;
+namespace AidingApp\Notification\Notifications\Messages\Contracts;
 
 interface Message
 {

@@ -34,14 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\IntegrationGoogleAnalytics\Providers;
+namespace AidingApp\IntegrationGoogleAnalytics\Providers;
 
 use Filament\Panel;
 use Illuminate\Support\ServiceProvider;
 use App\Registries\RoleBasedAccessControlRegistry;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use AdvisingApp\IntegrationGoogleAnalytics\IntegrationGoogleAnalyticsPlugin;
-use AdvisingApp\IntegrationGoogleAnalytics\Registries\IntegrationGoogleAnalyticsRbacRegistry;
+use AidingApp\IntegrationGoogleAnalytics\IntegrationGoogleAnalyticsPlugin;
+use AidingApp\IntegrationGoogleAnalytics\Registries\IntegrationGoogleAnalyticsRbacRegistry;
 
 class IntegrationGoogleAnalyticsServiceProvider extends ServiceProvider
 {

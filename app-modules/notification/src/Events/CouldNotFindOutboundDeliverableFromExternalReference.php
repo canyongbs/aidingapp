@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Notification\Events;
+namespace AidingApp\Notification\Events;
 
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use AdvisingApp\IntegrationTwilio\DataTransferObjects\TwilioStatusCallbackData;
+use AidingApp\IntegrationTwilio\DataTransferObjects\TwilioStatusCallbackData;
 
 class CouldNotFindOutboundDeliverableFromExternalReference
 {

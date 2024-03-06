@@ -34,15 +34,15 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Filament\Resources;
+namespace AidingApp\Engagement\Filament\Resources;
 
 use Filament\Resources\Resource;
-use AdvisingApp\Engagement\Models\Engagement;
-use AdvisingApp\Engagement\Filament\Resources\EngagementResource\Pages\EditEngagement;
-use AdvisingApp\Engagement\Filament\Resources\EngagementResource\Pages\ViewEngagement;
-use AdvisingApp\Engagement\Filament\Resources\EngagementResource\Pages\ListEngagements;
-use AdvisingApp\Engagement\Filament\Resources\EngagementResource\Pages\CreateEngagement;
-use AdvisingApp\Engagement\Filament\Resources\EngagementResource\RelationManagers\EngagementDeliverablesRelationManager;
+use AidingApp\Engagement\Models\Engagement;
+use AidingApp\Engagement\Filament\Resources\EngagementResource\Pages\EditEngagement;
+use AidingApp\Engagement\Filament\Resources\EngagementResource\Pages\ViewEngagement;
+use AidingApp\Engagement\Filament\Resources\EngagementResource\Pages\ListEngagements;
+use AidingApp\Engagement\Filament\Resources\EngagementResource\Pages\CreateEngagement;
+use AidingApp\Engagement\Filament\Resources\EngagementResource\RelationManagers\EngagementDeliverablesRelationManager;
 
 class EngagementResource extends Resource
 {

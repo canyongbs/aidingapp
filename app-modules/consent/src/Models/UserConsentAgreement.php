@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Consent\Models;
+namespace AidingApp\Consent\Models;
 
 use App\Models\User;
 use App\Models\BaseModel;
@@ -43,7 +43,7 @@ use OwenIt\Auditing\Contracts\Auditable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Concerns\AsPivot;
-use AdvisingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 
 /**
  * @mixin IdeHelperUserConsentAgreement

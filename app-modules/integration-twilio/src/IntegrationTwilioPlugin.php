@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\IntegrationTwilio;
+namespace AidingApp\IntegrationTwilio;
 
 use Filament\Panel;
 use Filament\Contracts\Plugin;
@@ -50,7 +50,7 @@ class IntegrationTwilioPlugin implements Plugin
     {
         $panel->discoverPages(
             in: __DIR__ . '/Filament/Pages',
-            for: 'AdvisingApp\\IntegrationTwilio\\Filament\\Pages'
+            for: 'AidingApp\\IntegrationTwilio\\Filament\\Pages'
         );
     }
 

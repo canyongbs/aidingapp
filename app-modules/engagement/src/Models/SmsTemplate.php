@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Models;
+namespace AidingApp\Engagement\Models;
 
 use App\Models\User;
 use App\Models\BaseModel;

@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Models;
+namespace AidingApp\ServiceManagement\Models;
 
 use App\Models\User;
 use DateTimeInterface;
@@ -42,10 +42,10 @@ use App\Models\BaseModel;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\DB;
 use App\Models\Contracts\Educatable;
+use AidingApp\Contact\Models\Contact;
 use Kirschbaum\PowerJoins\PowerJoins;
-use AdvisingApp\Contact\Models\Contact;
+use AidingApp\Division\Models\Division;
 use OwenIt\Auditing\Contracts\Auditable;
-use AdvisingApp\Division\Models\Division;
 use Illuminate\Database\Eloquent\Builder;
 use App\Models\Scopes\LicensedToEducatable;
 use App\Models\Concerns\BelongsToEducatable;
@@ -56,18 +56,18 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Staudenmeir\EloquentHasManyDeep\HasRelationships;
-use AdvisingApp\Notification\Models\OutboundDeliverable;
-use AdvisingApp\Notification\Models\Contracts\Subscribable;
+use AidingApp\Notification\Models\OutboundDeliverable;
+use AidingApp\Notification\Models\Contracts\Subscribable;
+use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
 use Illuminate\Database\UniqueConstraintViolationException;
-use AdvisingApp\ServiceManagement\Enums\SlaComplianceStatus;
-use AdvisingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AdvisingApp\ServiceManagement\Enums\ServiceRequestUpdateDirection;
-use AdvisingApp\Interaction\Models\Concerns\HasManyMorphedInteractions;
-use AdvisingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
-use AdvisingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
-use AdvisingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
-use AdvisingApp\ServiceManagement\Exceptions\ServiceRequestNumberExceededReRollsException;
-use AdvisingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateDirection;
+use AidingApp\Interaction\Models\Concerns\HasManyMorphedInteractions;
+use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
+use AidingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
+use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
+use AidingApp\ServiceManagement\Exceptions\ServiceRequestNumberExceededReRollsException;
+use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
 
 /**
  * @property-read Contact $respondent

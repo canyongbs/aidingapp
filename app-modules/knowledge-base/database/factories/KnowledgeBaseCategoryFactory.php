@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\KnowledgeBase\Database\Factories;
+namespace AidingApp\KnowledgeBase\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use AdvisingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 
 /**
  * @extends Factory<KnowledgeBaseCategory>

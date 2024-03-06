@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Models\Scopes;
+namespace AidingApp\ServiceManagement\Models\Scopes;
 
 use Illuminate\Database\Eloquent\Builder;
-use AdvisingApp\ServiceManagement\Enums\SystemChangeRequestClassification;
+use AidingApp\ServiceManagement\Enums\SystemChangeRequestClassification;
 
 class ClassifiedAs
 {

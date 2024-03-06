@@ -34,13 +34,13 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\IntegrationGoogleRecaptcha\Rules;
+namespace AidingApp\IntegrationGoogleRecaptcha\Rules;
 
 use Closure;
 use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Contracts\Validation\ValidationRule;
-use AdvisingApp\IntegrationGoogleRecaptcha\Settings\GoogleRecaptchaSettings;
+use AidingApp\IntegrationGoogleRecaptcha\Settings\GoogleRecaptchaSettings;
 
 class RecaptchaTokenValid implements ValidationRule
 {

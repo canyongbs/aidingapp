@@ -1,4 +1,4 @@
-type Alert @model(class: "AdvisingApp\\Alert\\Models\\Alert") {
+type Alert @model(class: "AidingApp\\Alert\\Models\\Alert") {
     "Unique primary key."
     id: UUID!
 
@@ -67,10 +67,7 @@ input CreateAlertInput {
     "The Concern related to the alert."
     concern_id: EducatableId!
         @rules(
-            apply: [
-                "required"
-                "AdvisingApp\\Alert\\Rules\\ConcernIdExistsRule"
-            ]
+            apply: ["required", "AidingApp\\Alert\\Rules\\ConcernIdExistsRule"]
         )
 
     "The type of Concern related to the alert."

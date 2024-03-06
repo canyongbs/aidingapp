@@ -38,7 +38,7 @@ namespace App\Concerns;
 
 use Exception;
 use Filament\Tables\Columns\Column;
-use AdvisingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\Contact;
 use Filament\Tables\Filters\BaseFilter;
 use Illuminate\Database\Eloquent\Builder;
 use OpenSearch\Adapter\Documents\Document;

@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Authorization\Filament\Resources\RoleGroupResource\Pages;
+namespace AidingApp\Authorization\Filament\Resources\RoleGroupResource\Pages;
 
 use Filament\Forms\Form;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\CreateRecord;
-use AdvisingApp\Authorization\Filament\Resources\RoleGroupResource;
+use AidingApp\Authorization\Filament\Resources\RoleGroupResource;
 
 class CreateRoleGroup extends CreateRecord
 {

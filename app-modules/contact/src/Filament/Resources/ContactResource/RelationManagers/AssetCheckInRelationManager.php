@@ -34,14 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Contact\Filament\Resources\ContactResource\RelationManagers;
+namespace AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers;
 
 use Filament\Tables\Table;
 use Filament\Infolists\Infolist;
 use Illuminate\Database\Eloquent\Model;
 use Filament\Resources\RelationManagers\RelationManager;
-use AdvisingApp\InventoryManagement\Filament\Resources\AssetCheckInResource\Pages\ListAssetCheckIns;
-use AdvisingApp\InventoryManagement\Filament\Resources\AssetCheckInResource\Concerns\HasAssetCheckInInfolist;
+use AidingApp\InventoryManagement\Filament\Resources\AssetCheckInResource\Pages\ListAssetCheckIns;
+use AidingApp\InventoryManagement\Filament\Resources\AssetCheckInResource\Concerns\HasAssetCheckInInfolist;
 
 class AssetCheckInRelationManager extends RelationManager
 {

@@ -39,8 +39,8 @@ use App\Models\User;
 use function Tests\asSuperAdmin;
 use function Pest\Laravel\actingAs;
 
-use AdvisingApp\Authorization\Enums\LicenseType;
-use AdvisingApp\Assistant\Filament\Pages\ManageAiSettings;
+use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\Assistant\Filament\Pages\ManageAiSettings;
 
 it('renders successfully', function () {
     asSuperAdmin();

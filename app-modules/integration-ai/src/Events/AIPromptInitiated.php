@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\IntegrationAI\Events;
+namespace AidingApp\IntegrationAI\Events;
 
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use AdvisingApp\IntegrationAI\DataTransferObjects\AIPrompt;
+use AidingApp\IntegrationAI\DataTransferObjects\AIPrompt;
 
 class AIPromptInitiated
 {

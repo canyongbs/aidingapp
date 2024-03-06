@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Authorization\Models;
+namespace AidingApp\Authorization\Models;
 
 use App\Models\User;
 use App\Models\SystemUser;
@@ -46,11 +46,11 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Staudenmeir\EloquentHasManyDeep\HasRelationships;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use AidingApp\Authorization\Models\Pivots\RoleGroupRolePivot;
+use AidingApp\Authorization\Models\Pivots\RoleGroupUserPivot;
 use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
-use AdvisingApp\Authorization\Models\Pivots\RoleGroupRolePivot;
-use AdvisingApp\Authorization\Models\Pivots\RoleGroupUserPivot;
-use AdvisingApp\Authorization\Models\Concerns\DefinesPermissions;
-use AdvisingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Authorization\Models\Concerns\DefinesPermissions;
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 
 /**
  * @mixin IdeHelperRoleGroup

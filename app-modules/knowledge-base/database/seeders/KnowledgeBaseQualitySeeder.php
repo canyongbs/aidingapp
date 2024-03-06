@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\KnowledgeBase\Database\Seeders;
+namespace AidingApp\KnowledgeBase\Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use AdvisingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
 
 class KnowledgeBaseQualitySeeder extends Seeder
 {

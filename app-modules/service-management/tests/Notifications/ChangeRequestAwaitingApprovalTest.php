@@ -2,9 +2,9 @@
 
 use App\Models\User;
 use Illuminate\Support\Facades\Notification;
-use AdvisingApp\ServiceManagement\Models\ChangeRequest;
-use AdvisingApp\ServiceManagement\Models\ChangeRequestType;
-use AdvisingApp\ServiceManagement\Notifications\ChangeRequestAwaitingApprovalNotification;
+use AidingApp\ServiceManagement\Models\ChangeRequest;
+use AidingApp\ServiceManagement\Models\ChangeRequestType;
+use AidingApp\ServiceManagement\Notifications\ChangeRequestAwaitingApprovalNotification;
 
 /*
 <COPYRIGHT>

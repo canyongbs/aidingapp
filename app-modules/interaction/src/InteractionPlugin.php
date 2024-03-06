@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Interaction;
+namespace AidingApp\Interaction;
 
 use Filament\Panel;
 use Filament\Contracts\Plugin;
@@ -50,7 +50,7 @@ class InteractionPlugin implements Plugin
     {
         $panel->discoverResources(
             in: __DIR__ . '/Filament/Resources',
-            for: 'AdvisingApp\\Interaction\\Filament\\Resources'
+            for: 'AidingApp\\Interaction\\Filament\\Resources'
         );
     }
 

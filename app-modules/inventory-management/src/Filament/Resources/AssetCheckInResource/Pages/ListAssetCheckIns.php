@@ -34,17 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InventoryManagement\Filament\Resources\AssetCheckInResource\Pages;
+namespace AidingApp\InventoryManagement\Filament\Resources\AssetCheckInResource\Pages;
 
 use Filament\Tables\Table;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Resources\Pages\ListRecords;
-use AdvisingApp\InventoryManagement\Models\AssetCheckIn;
-use AdvisingApp\InventoryManagement\Enums\AssetCheckOutStatus;
-use AdvisingApp\InventoryManagement\Filament\Resources\AssetResource;
-use AdvisingApp\InventoryManagement\Filament\Resources\AssetCheckInResource;
+use AidingApp\InventoryManagement\Models\AssetCheckIn;
+use AidingApp\InventoryManagement\Enums\AssetCheckOutStatus;
+use AidingApp\InventoryManagement\Filament\Resources\AssetResource;
+use AidingApp\InventoryManagement\Filament\Resources\AssetCheckInResource;
 
 class ListAssetCheckIns extends ListRecords
 {

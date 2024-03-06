@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Theme;
+namespace AidingApp\Theme;
 
 use Filament\Panel;
 use Filament\Contracts\Plugin;
@@ -50,7 +50,7 @@ class ThemePlugin implements Plugin
     {
         $panel->discoverPages(
             in: __DIR__ . '/Filament/Pages',
-            for: 'AdvisingApp\\Theme\\Filament\\Pages'
+            for: 'AidingApp\\Theme\\Filament\\Pages'
         );
     }
 

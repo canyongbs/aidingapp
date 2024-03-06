@@ -1,4 +1,4 @@
-type CareTeam @model(class: "AdvisingApp\\CareTeam\\Models\\CareTeam") {
+type CareTeam @model(class: "AidingApp\\CareTeam\\Models\\CareTeam") {
     "Unique primary key."
     id: UUID!
 
@@ -55,7 +55,7 @@ input CreateCareTeamInput {
             apply: [
                 "required"
                 "exists:users,id"
-                "AdvisingApp\\CareTeam\\Rules\\UniqueCareTeamRule"
+                "AidingApp\\CareTeam\\Rules\\UniqueCareTeamRule"
             ]
         )
 
@@ -64,7 +64,7 @@ input CreateCareTeamInput {
         @rules(
             apply: [
                 "required"
-                "AdvisingApp\\CareTeam\\Rules\\EducatableIdExistsRule"
+                "AidingApp\\CareTeam\\Rules\\EducatableIdExistsRule"
             ]
         )
 

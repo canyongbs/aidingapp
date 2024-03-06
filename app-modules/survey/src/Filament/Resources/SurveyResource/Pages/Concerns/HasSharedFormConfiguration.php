@@ -34,28 +34,28 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Survey\Filament\Resources\SurveyResource\Pages\Concerns;
+namespace AidingApp\Survey\Filament\Resources\SurveyResource\Pages\Concerns;
 
 use Filament\Forms\Get;
+use AidingApp\Form\Enums\Rounding;
+use AidingApp\Form\Rules\IsDomain;
+use AidingApp\Survey\Models\Survey;
 use Filament\Forms\Components\Grid;
-use AdvisingApp\Form\Enums\Rounding;
-use AdvisingApp\Form\Rules\IsDomain;
-use AdvisingApp\Survey\Models\Survey;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Section;
 use FilamentTiptapEditor\TiptapEditor;
+use AidingApp\Survey\Models\SurveyStep;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Textarea;
+use AidingApp\Survey\Models\SurveyField;
 use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\TextInput;
-use AdvisingApp\Survey\Models\SurveyStep;
-use AdvisingApp\Survey\Models\SurveyField;
 use FilamentTiptapEditor\Enums\TiptapOutput;
 use App\Filament\Forms\Components\ColorSelect;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
-use AdvisingApp\Survey\Filament\Blocks\SurveyFieldBlockRegistry;
-use AdvisingApp\IntegrationGoogleRecaptcha\Settings\GoogleRecaptchaSettings;
+use AidingApp\Survey\Filament\Blocks\SurveyFieldBlockRegistry;
+use AidingApp\IntegrationGoogleRecaptcha\Settings\GoogleRecaptchaSettings;
 
 trait HasSharedFormConfiguration
 {

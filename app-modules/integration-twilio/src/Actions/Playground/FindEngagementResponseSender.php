@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\IntegrationTwilio\Actions\Playground;
+namespace AidingApp\IntegrationTwilio\Actions\Playground;
 
-use AdvisingApp\Contact\Models\Contact;
-use AdvisingApp\Engagement\Actions\Contracts\EngagementResponseSenderFinder;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Engagement\Actions\Contracts\EngagementResponseSenderFinder;
 
 class FindEngagementResponseSender implements EngagementResponseSenderFinder
 {

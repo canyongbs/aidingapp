@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Interaction\Policies;
+namespace AidingApp\Interaction\Policies;
 
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
-use AdvisingApp\Contact\Models\Contact;
-use AdvisingApp\Interaction\Models\InteractionDriver;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Interaction\Models\InteractionDriver;
 
 class InteractionDriverPolicy
 {

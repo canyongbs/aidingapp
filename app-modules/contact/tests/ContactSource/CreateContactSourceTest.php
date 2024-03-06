@@ -40,15 +40,15 @@ use function Tests\asSuperAdmin;
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
-use AdvisingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\ContactSource;
 
 use function PHPUnit\Framework\assertCount;
 use function PHPUnit\Framework\assertEmpty;
 use function Pest\Laravel\assertDatabaseHas;
 
-use AdvisingApp\Contact\Models\ContactSource;
-use AdvisingApp\Contact\Filament\Resources\ContactSourceResource;
-use AdvisingApp\Contact\Tests\ContactSource\RequestFactories\CreateContactSourceRequestFactory;
+use AidingApp\Contact\Filament\Resources\ContactSourceResource;
+use AidingApp\Contact\Tests\ContactSource\RequestFactories\CreateContactSourceRequestFactory;
 
 test('A successful action on the CreateContactSource page', function () {
     asSuperAdmin()

@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Database\Factories;
+namespace AidingApp\Engagement\Database\Factories;
 
-use AdvisingApp\Engagement\Models\EngagementFile;
+use AidingApp\Engagement\Models\EngagementFile;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

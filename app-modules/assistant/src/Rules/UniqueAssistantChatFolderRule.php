@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Assistant\Rules;
+namespace AidingApp\Assistant\Rules;
 
 use Closure;
 use Illuminate\Contracts\Validation\DataAwareRule;
+use AidingApp\Assistant\Models\AssistantChatFolder;
 use Illuminate\Contracts\Validation\ValidationRule;
-use AdvisingApp\Assistant\Models\AssistantChatFolder;
 
 class UniqueAssistantChatFolderRule implements DataAwareRule, ValidationRule
 {

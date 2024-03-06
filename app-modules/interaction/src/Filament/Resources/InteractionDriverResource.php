@@ -34,16 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Interaction\Filament\Resources;
+namespace AidingApp\Interaction\Filament\Resources;
 
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Forms\Components\TextInput;
 use App\Filament\Clusters\InteractionManagement;
-use AdvisingApp\Interaction\Models\InteractionDriver;
-use AdvisingApp\Interaction\Filament\Resources\InteractionDriverResource\Pages\EditInteractionDriver;
-use AdvisingApp\Interaction\Filament\Resources\InteractionDriverResource\Pages\ListInteractionDrivers;
-use AdvisingApp\Interaction\Filament\Resources\InteractionDriverResource\Pages\CreateInteractionDriver;
+use AidingApp\Interaction\Models\InteractionDriver;
+use AidingApp\Interaction\Filament\Resources\InteractionDriverResource\Pages\EditInteractionDriver;
+use AidingApp\Interaction\Filament\Resources\InteractionDriverResource\Pages\ListInteractionDrivers;
+use AidingApp\Interaction\Filament\Resources\InteractionDriverResource\Pages\CreateInteractionDriver;
 
 class InteractionDriverResource extends Resource
 {

@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Filament\Resources\EngagementFileResource\Pages;
+namespace AidingApp\Engagement\Filament\Resources\EngagementFileResource\Pages;
 
 use Filament\Actions;
 use Filament\Tables\Table;
@@ -45,7 +45,7 @@ use App\Filament\Tables\Columns\IdColumn;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
-use AdvisingApp\Engagement\Filament\Resources\EngagementFileResource;
+use AidingApp\Engagement\Filament\Resources\EngagementFileResource;
 
 class ListEngagementFiles extends ListRecords
 {

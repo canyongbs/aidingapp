@@ -34,15 +34,15 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Timeline\Filament\Pages;
+namespace AidingApp\Timeline\Filament\Pages;
 
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\Page;
 use Illuminate\Database\Eloquent\Model;
 use App\Actions\GetRecordFromMorphAndKey;
-use AdvisingApp\Timeline\Actions\SyncTimelineData;
+use AidingApp\Timeline\Actions\SyncTimelineData;
 use Filament\Resources\Pages\Concerns\InteractsWithRecord;
-use AdvisingApp\Timeline\Filament\Pages\Concerns\LoadsTimelineRecords;
+use AidingApp\Timeline\Filament\Pages\Concerns\LoadsTimelineRecords;
 
 abstract class TimelinePage extends Page
 {

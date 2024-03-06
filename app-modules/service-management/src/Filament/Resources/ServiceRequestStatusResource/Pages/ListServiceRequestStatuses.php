@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusResource\Pages;
 
 use Filament\Tables\Table;
 use Filament\Actions\CreateAction;
@@ -46,8 +46,8 @@ use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestStatus;
-use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusResource;
+use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusResource;
 
 class ListServiceRequestStatuses extends ListRecords
 {

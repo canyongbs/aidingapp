@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\IntegrationTwilio\DataTransferObjects;
+namespace AidingApp\IntegrationTwilio\DataTransferObjects;
 
 use Illuminate\Http\Request;
 

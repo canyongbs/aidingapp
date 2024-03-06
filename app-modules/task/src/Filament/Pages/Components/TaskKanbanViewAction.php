@@ -34,13 +34,13 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Task\Filament\Pages\Components;
+namespace AidingApp\Task\Filament\Pages\Components;
 
 use Filament\Actions\Action;
+use AidingApp\Task\Models\Task;
 use Filament\Actions\ViewAction;
-use AdvisingApp\Task\Models\Task;
-use AdvisingApp\Task\Enums\TaskStatus;
-use AdvisingApp\Task\Filament\Concerns\TaskViewActionInfoList;
+use AidingApp\Task\Enums\TaskStatus;
+use AidingApp\Task\Filament\Concerns\TaskViewActionInfoList;
 
 class TaskKanbanViewAction extends ViewAction
 {

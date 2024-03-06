@@ -44,11 +44,11 @@ use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 use function Pest\Laravel\assertDatabaseHas;
 
-use AdvisingApp\Authorization\Enums\LicenseType;
-use AdvisingApp\ServiceManagement\Models\ServiceRequest;
-use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
-use AdvisingApp\ServiceManagement\Tests\RequestFactories\EditServiceRequestRequestFactory;
-use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\EditServiceRequest;
+use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
+use AidingApp\ServiceManagement\Tests\RequestFactories\EditServiceRequestRequestFactory;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\EditServiceRequest;
 
 test('A successful action on the EditServiceRequest page', function () {
     $serviceRequest = ServiceRequest::factory()->create();

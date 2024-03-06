@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Notification\DataTransferObjects;
+namespace AidingApp\Notification\DataTransferObjects;
 
 use Spatie\LaravelData\Data;
-use AdvisingApp\IntegrationTwilio\DataTransferObjects\TwilioStatusCallbackData;
+use AidingApp\IntegrationTwilio\DataTransferObjects\TwilioStatusCallbackData;
 
 class UpdateDeliveryStatusData extends Data
 {

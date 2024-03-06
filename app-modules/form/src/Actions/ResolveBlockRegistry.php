@@ -34,13 +34,13 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Form\Actions;
+namespace AidingApp\Form\Actions;
 
-use AdvisingApp\Survey\Models\Survey;
-use AdvisingApp\Form\Models\Submissible;
-use AdvisingApp\Form\Filament\Blocks\FormFieldBlockRegistry;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestForm;
-use AdvisingApp\Survey\Filament\Blocks\SurveyFieldBlockRegistry;
+use AidingApp\Survey\Models\Survey;
+use AidingApp\Form\Models\Submissible;
+use AidingApp\Form\Filament\Blocks\FormFieldBlockRegistry;
+use AidingApp\ServiceManagement\Models\ServiceRequestForm;
+use AidingApp\Survey\Filament\Blocks\SurveyFieldBlockRegistry;
 
 class ResolveBlockRegistry
 {

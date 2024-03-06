@@ -1,5 +1,5 @@
 type UserConsentAgreement
-    @model(class: "AdvisingApp\\Consent\\Models\\UserConsentAgreement") {
+    @model(class: "AidingApp\\Consent\\Models\\UserConsentAgreement") {
     id: UUID!
 
     ip_address: String!
@@ -50,7 +50,7 @@ type UserConsentAgreementQueries {
         @find
         @softDeletes
         @canModel(
-            model: "AdvisingApp\\Consent\\Models\\ConsentAgreement"
+            model: "AidingApp\\Consent\\Models\\ConsentAgreement"
             ability: "viewAny"
         )
 
@@ -63,7 +63,7 @@ type UserConsentAgreementQueries {
         @paginate
         @softDeletes
         @canModel(
-            model: "AdvisingApp\\Consent\\Models\\ConsentAgreement"
+            model: "AidingApp\\Consent\\Models\\ConsentAgreement"
             ability: "viewAny"
         )
 }

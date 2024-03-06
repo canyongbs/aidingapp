@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Survey\Database\Factories;
+namespace AidingApp\Survey\Database\Factories;
 
 use Illuminate\Support\Str;
-use AdvisingApp\Survey\Models\Survey;
-use AdvisingApp\Survey\Models\SurveyField;
+use AidingApp\Survey\Models\Survey;
+use AidingApp\Survey\Models\SurveyField;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

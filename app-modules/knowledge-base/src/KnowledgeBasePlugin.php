@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\KnowledgeBase;
+namespace AidingApp\KnowledgeBase;
 
 use Filament\Panel;
 use Filament\Contracts\Plugin;
@@ -50,7 +50,7 @@ class KnowledgeBasePlugin implements Plugin
     {
         $panel->discoverResources(
             in: __DIR__ . '/Filament/Resources',
-            for: 'AdvisingApp\\KnowledgeBase\\Filament\\Resources'
+            for: 'AidingApp\\KnowledgeBase\\Filament\\Resources'
         );
     }
 

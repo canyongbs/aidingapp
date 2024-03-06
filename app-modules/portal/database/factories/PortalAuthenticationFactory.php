@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Portal\Database\Factories;
+namespace AidingApp\Portal\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AdvisingApp\Portal\Models\PortalAuthentication>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AidingApp\Portal\Models\PortalAuthentication>
  */
 class PortalAuthenticationFactory extends Factory
 {

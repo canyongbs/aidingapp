@@ -34,13 +34,13 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Models;
+namespace AidingApp\Engagement\Models;
 
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphPivot;
-use AdvisingApp\Notification\Models\Contracts\Subscribable;
-use AdvisingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
+use AidingApp\Notification\Models\Contracts\Subscribable;
+use AidingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
 
 /**
  * @mixin IdeHelperEngagementFileEntities

@@ -1,4 +1,4 @@
-type Contact @model(class: "AdvisingApp\\Contact\\Models\\Contact") {
+type Contact @model(class: "AidingApp\\Contact\\Models\\Contact") {
     "Unique primary key."
     id: UUID!
 

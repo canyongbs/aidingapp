@@ -38,12 +38,12 @@ namespace App\Console;
 
 use Throwable;
 use App\Models\Tenant;
-use AdvisingApp\Audit\Models\Audit;
+use AidingApp\Audit\Models\Audit;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Console\Scheduling\Schedule;
-use AdvisingApp\Engagement\Models\EngagementFile;
+use AidingApp\Engagement\Models\EngagementFile;
 use Filament\Actions\Imports\Models\FailedImportRow;
-use AdvisingApp\Assistant\Models\AssistantChatMessageLog;
+use AidingApp\Assistant\Models\AssistantChatMessageLog;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
 class Kernel extends ConsoleKernel

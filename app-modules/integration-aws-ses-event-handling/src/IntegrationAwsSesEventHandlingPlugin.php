@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\IntegrationAwsSesEventHandling;
+namespace AidingApp\IntegrationAwsSesEventHandling;
 
 use Filament\Panel;
 use Filament\Contracts\Plugin;
@@ -50,12 +50,12 @@ class IntegrationAwsSesEventHandlingPlugin implements Plugin
     {
         $panel->discoverResources(
             in: __DIR__ . '/Filament/Resources',
-            for: 'AdvisingApp\\IntegrationAwsSesEventHandling\\Filament\\Resources'
+            for: 'AidingApp\\IntegrationAwsSesEventHandling\\Filament\\Resources'
         );
 
         $panel->discoverPages(
             in: __DIR__ . '/Filament/Pages',
-            for: 'AdvisingApp\\IntegrationAwsSesEventHandling\\Filament\\Pages'
+            for: 'AidingApp\\IntegrationAwsSesEventHandling\\Filament\\Pages'
         );
     }
 

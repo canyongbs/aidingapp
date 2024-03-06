@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Policies;
+namespace AidingApp\Engagement\Policies;
 
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
-use AdvisingApp\Engagement\Models\EngagementResponse;
+use AidingApp\Engagement\Models\EngagementResponse;
 
 class EngagementResponsePolicy
 {

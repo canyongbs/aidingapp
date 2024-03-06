@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Team\Models;
+namespace AidingApp\Team\Models;
 
 use App\Models\User;
 use App\Models\BaseModel;
-use AdvisingApp\Division\Models\Division;
+use AidingApp\Division\Models\Division;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 

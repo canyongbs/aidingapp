@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Authorization\Models;
+namespace AidingApp\Authorization\Models;
 
 use App\Models\SystemUser;
 use Illuminate\Support\Collection;
@@ -44,8 +44,8 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Spatie\Permission\Models\Permission as SpatiePermission;
 use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
-use AdvisingApp\Authorization\Models\Concerns\DefinesPermissions;
-use AdvisingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Authorization\Models\Concerns\DefinesPermissions;
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 
 /**
  * @mixin IdeHelperPermission

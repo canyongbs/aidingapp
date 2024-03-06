@@ -34,19 +34,19 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Survey\Providers;
+namespace AidingApp\Survey\Providers;
 
 use Filament\Panel;
-use AdvisingApp\Survey\SurveyPlugin;
-use AdvisingApp\Survey\Models\Survey;
+use AidingApp\Survey\SurveyPlugin;
+use AidingApp\Survey\Models\Survey;
+use AidingApp\Survey\Models\SurveyStep;
 use Illuminate\Support\ServiceProvider;
-use AdvisingApp\Survey\Models\SurveyStep;
-use AdvisingApp\Survey\Models\SurveyField;
-use AdvisingApp\Survey\Models\SurveySubmission;
+use AidingApp\Survey\Models\SurveyField;
+use AidingApp\Survey\Models\SurveySubmission;
+use AidingApp\Survey\Models\SurveyAuthentication;
 use App\Registries\RoleBasedAccessControlRegistry;
-use AdvisingApp\Survey\Models\SurveyAuthentication;
+use AidingApp\Survey\Registries\SurveyRbacRegistry;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use AdvisingApp\Survey\Registries\SurveyRbacRegistry;
 
 class SurveyServiceProvider extends ServiceProvider
 {

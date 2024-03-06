@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Database\Factories;
+namespace AidingApp\ServiceManagement\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AdvisingApp\ServiceManagement\Models\ChangeRequestType>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AidingApp\ServiceManagement\Models\ChangeRequestType>
  */
 class ChangeRequestTypeFactory extends Factory
 {

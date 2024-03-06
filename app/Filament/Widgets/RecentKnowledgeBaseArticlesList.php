@@ -41,8 +41,8 @@ use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Widgets\TableWidget as BaseWidget;
-use AdvisingApp\KnowledgeBase\Models\KnowledgeBaseItem;
-use AdvisingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource;
 
 class RecentKnowledgeBaseArticlesList extends BaseWidget
 {

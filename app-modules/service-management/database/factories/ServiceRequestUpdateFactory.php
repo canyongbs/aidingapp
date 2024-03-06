@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Database\Factories;
+namespace AidingApp\ServiceManagement\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use AdvisingApp\ServiceManagement\Models\ServiceRequest;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestUpdate;
-use AdvisingApp\ServiceManagement\Enums\ServiceRequestUpdateDirection;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateDirection;
 
 /**
  * @extends Factory<ServiceRequestUpdate>

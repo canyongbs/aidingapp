@@ -32,7 +32,7 @@
 </COPYRIGHT>
 --}}
 @php
-    use AdvisingApp\InAppCommunication\Filament\Pages\UserChat;
+    use AidingApp\InAppCommunication\Filament\Pages\UserChat;
 
     $notifications = $this->getNotifications();
 @endphp

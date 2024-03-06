@@ -34,21 +34,21 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Assistant\Filament\Resources\PromptResource\Pages;
+namespace AidingApp\Assistant\Filament\Resources\PromptResource\Pages;
 
 use Filament\Tables\Table;
 use Filament\Actions\CreateAction;
+use AidingApp\Assistant\Models\Prompt;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
-use AdvisingApp\Assistant\Models\Prompt;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
-use AdvisingApp\Assistant\Filament\Resources\PromptResource;
-use AdvisingApp\Assistant\Filament\Resources\PromptTypeResource;
+use AidingApp\Assistant\Filament\Resources\PromptResource;
+use AidingApp\Assistant\Filament\Resources\PromptTypeResource;
 
 class ListPrompts extends ListRecords
 {

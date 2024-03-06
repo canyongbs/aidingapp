@@ -34,19 +34,19 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Survey\Filament\Resources\SurveyResource\Pages;
+namespace AidingApp\Survey\Filament\Resources\SurveyResource\Pages;
 
 use Filament\Tables\Table;
 use Filament\Actions\CreateAction;
+use AidingApp\Survey\Models\Survey;
 use Filament\Tables\Actions\Action;
-use AdvisingApp\Survey\Models\Survey;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
-use AdvisingApp\Survey\Filament\Resources\SurveyResource;
+use AidingApp\Survey\Filament\Resources\SurveyResource;
 
 class ListSurveys extends ListRecords
 {

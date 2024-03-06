@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InventoryManagement\Filament\Resources\AssetCheckInResource\Pages;
+namespace AidingApp\InventoryManagement\Filament\Resources\AssetCheckInResource\Pages;
 
 use Filament\Resources\Pages\CreateRecord;
-use AdvisingApp\InventoryManagement\Filament\Resources\AssetCheckInResource;
+use AidingApp\InventoryManagement\Filament\Resources\AssetCheckInResource;
 
 class CreateAssetCheckIn extends CreateRecord
 {

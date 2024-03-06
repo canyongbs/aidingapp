@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Tests\RequestFactories;
+namespace AidingApp\ServiceManagement\Tests\RequestFactories;
 
 use Worksome\RequestFactories\RequestFactory;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestPriority;
+use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 
 class CreateServiceRequestPriorityRequestFactory extends RequestFactory
 {

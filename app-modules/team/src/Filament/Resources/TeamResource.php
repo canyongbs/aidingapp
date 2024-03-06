@@ -34,15 +34,15 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Team\Filament\Resources;
+namespace AidingApp\Team\Filament\Resources;
 
+use AidingApp\Team\Models\Team;
 use Filament\Resources\Resource;
-use AdvisingApp\Team\Models\Team;
-use AdvisingApp\Team\Filament\Resources\TeamResource\Pages\EditTeam;
-use AdvisingApp\Team\Filament\Resources\TeamResource\Pages\ViewTeam;
-use AdvisingApp\Team\Filament\Resources\TeamResource\Pages\ListTeams;
-use AdvisingApp\Team\Filament\Resources\TeamResource\Pages\CreateTeam;
-use AdvisingApp\Team\Filament\Resources\TeamResource\RelationManagers\UsersRelationManager;
+use AidingApp\Team\Filament\Resources\TeamResource\Pages\EditTeam;
+use AidingApp\Team\Filament\Resources\TeamResource\Pages\ViewTeam;
+use AidingApp\Team\Filament\Resources\TeamResource\Pages\ListTeams;
+use AidingApp\Team\Filament\Resources\TeamResource\Pages\CreateTeam;
+use AidingApp\Team\Filament\Resources\TeamResource\RelationManagers\UsersRelationManager;
 
 class TeamResource extends Resource
 {

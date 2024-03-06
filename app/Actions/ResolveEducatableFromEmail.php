@@ -36,7 +36,7 @@
 
 namespace App\Actions;
 
-use AdvisingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\Contact;
 
 class ResolveEducatableFromEmail
 {

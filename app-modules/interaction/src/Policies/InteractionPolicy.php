@@ -34,13 +34,13 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Interaction\Policies;
+namespace AidingApp\Interaction\Policies;
 
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
 use App\Concerns\PerformsLicenseChecks;
-use AdvisingApp\Interaction\Models\Interaction;
-use AdvisingApp\Authorization\Enums\LicenseType;
+use AidingApp\Interaction\Models\Interaction;
+use AidingApp\Authorization\Enums\LicenseType;
 use App\Policies\Contracts\PerformsChecksBeforeAuthorization;
 
 class InteractionPolicy implements PerformsChecksBeforeAuthorization

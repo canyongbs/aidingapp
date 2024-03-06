@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement;
+namespace AidingApp\ServiceManagement;
 
 use Filament\Panel;
 use Filament\Contracts\Plugin;
@@ -50,7 +50,7 @@ class ServiceManagementPlugin implements Plugin
     {
         $panel->discoverResources(
             in: __DIR__ . '/Filament/Resources',
-            for: 'AdvisingApp\\ServiceManagement\\Filament\\Resources'
+            for: 'AidingApp\\ServiceManagement\\Filament\\Resources'
         );
     }
 

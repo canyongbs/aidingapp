@@ -34,16 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Assistant\Models;
+namespace AidingApp\Assistant\Models;
 
 use App\Models\User;
 use App\Models\BaseModel;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Builder;
-use AdvisingApp\Audit\Settings\AuditSettings;
+use AidingApp\Audit\Settings\AuditSettings;
 use Illuminate\Database\Eloquent\MassPrunable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use AdvisingApp\Assistant\Models\Concerns\CanAddAssistantLicenseGlobalScope;
+use AidingApp\Assistant\Models\Concerns\CanAddAssistantLicenseGlobalScope;
 
 /**
  * @mixin IdeHelperAssistantChatMessageLog

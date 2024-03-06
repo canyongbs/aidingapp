@@ -34,18 +34,18 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Report\Enums;
+namespace AidingApp\Report\Enums;
 
 use App\Models\User;
 use Filament\Tables\Table;
 use App\Models\Authenticatable;
 use App\Filament\Tables\UsersTable;
-use AdvisingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\Contact;
 use Filament\Support\Contracts\HasLabel;
 use Illuminate\Database\Eloquent\Builder;
-use AdvisingApp\Report\Filament\Exports\UserExporter;
-use AdvisingApp\Contact\Filament\Tables\ContactsTable;
-use AdvisingApp\Report\Filament\Exports\ContactExporter;
+use AidingApp\Report\Filament\Exports\UserExporter;
+use AidingApp\Contact\Filament\Tables\ContactsTable;
+use AidingApp\Report\Filament\Exports\ContactExporter;
 
 enum ReportModel: string implements HasLabel
 {

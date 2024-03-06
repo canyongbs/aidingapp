@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Survey\Filament\Blocks;
+namespace AidingApp\Survey\Filament\Blocks;
 
-use AdvisingApp\Form\Filament\Blocks\SelectFormFieldBlock;
+use AidingApp\Form\Filament\Blocks\SelectFormFieldBlock;
 
 class SelectSurveyFieldBlock extends SelectFormFieldBlock
 {

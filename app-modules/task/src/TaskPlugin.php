@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Task;
+namespace AidingApp\Task;
 
 use Filament\Panel;
 use Filament\Contracts\Plugin;
@@ -51,15 +51,15 @@ class TaskPlugin implements Plugin
         $panel
             ->discoverResources(
                 in: __DIR__ . '/Filament/Resources',
-                for: 'AdvisingApp\\Task\\Filament\\Resources'
+                for: 'AidingApp\\Task\\Filament\\Resources'
             )
             ->discoverPages(
                 in: __DIR__ . '/Filament/Pages',
-                for: 'AdvisingApp\\Task\\Filament\\Pages'
+                for: 'AidingApp\\Task\\Filament\\Pages'
             )
             ->discoverWidgets(
                 in: __DIR__ . '/Filament/Widgets',
-                for: 'AdvisingApp\\Task\\Filament\\Widgets'
+                for: 'AidingApp\\Task\\Filament\\Widgets'
             );
     }
 

@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Drivers;
+namespace AidingApp\Engagement\Drivers;
 
-use AdvisingApp\Engagement\Actions\QueuedEngagementDelivery;
-use AdvisingApp\Notification\DataTransferObjects\UpdateDeliveryStatusData;
+use AidingApp\Engagement\Actions\QueuedEngagementDelivery;
+use AidingApp\Notification\DataTransferObjects\UpdateDeliveryStatusData;
 
 interface EngagementDeliverableDriver
 {

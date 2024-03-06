@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Models;
+namespace AidingApp\ServiceManagement\Models;
 
 use App\Models\Attributes\NoPermissions;
+use AidingApp\Form\Models\SubmissibleAuthentication;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use AdvisingApp\Form\Models\SubmissibleAuthentication;
 
 /**
  * @mixin IdeHelperServiceRequestFormAuthentication

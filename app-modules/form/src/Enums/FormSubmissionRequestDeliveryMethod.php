@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Form\Enums;
+namespace AidingApp\Form\Enums;
 
-use AdvisingApp\Form\Models\Submission;
+use AidingApp\Form\Models\Submission;
 use Filament\Support\Contracts\HasLabel;
-use AdvisingApp\Form\Actions\DeliverFormSubmissionRequestBySms;
-use AdvisingApp\Form\Actions\DeliverFormSubmissionRequestByEmail;
+use AidingApp\Form\Actions\DeliverFormSubmissionRequestBySms;
+use AidingApp\Form\Actions\DeliverFormSubmissionRequestByEmail;
 
 enum FormSubmissionRequestDeliveryMethod: string implements HasLabel
 {

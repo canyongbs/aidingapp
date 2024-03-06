@@ -34,14 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Notification\Observers;
+namespace AidingApp\Notification\Observers;
 
 use App\Models\User;
+use AidingApp\Contact\Models\Contact;
 use Illuminate\Support\Facades\Cache;
-use AdvisingApp\Contact\Models\Contact;
-use AdvisingApp\Notification\Models\Subscription;
-use AdvisingApp\Notification\Events\SubscriptionCreated;
-use AdvisingApp\Notification\Events\SubscriptionDeleted;
+use AidingApp\Notification\Models\Subscription;
+use AidingApp\Notification\Events\SubscriptionCreated;
+use AidingApp\Notification\Events\SubscriptionDeleted;
 
 class SubscriptionObserver
 {

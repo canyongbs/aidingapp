@@ -34,17 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\IntegrationTwilio\Actions;
+namespace AidingApp\IntegrationTwilio\Actions;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use AdvisingApp\Notification\Models\OutboundDeliverable;
-use AdvisingApp\Notification\Actions\UpdateOutboundDeliverableStatus;
-use AdvisingApp\IntegrationTwilio\DataTransferObjects\TwilioStatusCallbackData;
-use AdvisingApp\Notification\Events\CouldNotFindOutboundDeliverableFromExternalReference;
+use AidingApp\Notification\Models\OutboundDeliverable;
+use AidingApp\Notification\Actions\UpdateOutboundDeliverableStatus;
+use AidingApp\IntegrationTwilio\DataTransferObjects\TwilioStatusCallbackData;
+use AidingApp\Notification\Events\CouldNotFindOutboundDeliverableFromExternalReference;
 
 class StatusCallback implements ShouldQueue
 {

@@ -41,7 +41,7 @@ use App\Filament\Widgets\Features;
 use App\Filament\Widgets\Notifications;
 use App\Filament\Widgets\WelcomeWidget;
 use Filament\Pages\Dashboard as BasePage;
-use AdvisingApp\Authorization\Filament\Widgets\UnlicensedNotice;
+use AidingApp\Authorization\Filament\Widgets\UnlicensedNotice;
 
 class Dashboard extends BasePage
 {

@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Form\Actions;
+namespace AidingApp\Form\Actions;
 
-use AdvisingApp\Form\Models\Submissible;
-use AdvisingApp\Form\Models\SubmissibleStep;
+use AidingApp\Form\Models\Submissible;
+use AidingApp\Form\Models\SubmissibleStep;
 use Illuminate\Database\Eloquent\Collection;
 
 class GenerateFormKitSchema

@@ -34,27 +34,27 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Assistant\Providers;
+namespace AidingApp\Assistant\Providers;
 
 use Filament\Panel;
 use Filament\Support\Assets\Js;
 use App\Concerns\ImplementsGraphQL;
 use Illuminate\Support\Facades\Event;
+use AidingApp\Assistant\Models\Prompt;
 use Illuminate\Support\ServiceProvider;
-use AdvisingApp\Assistant\Models\Prompt;
-use AdvisingApp\Assistant\AssistantPlugin;
+use AidingApp\Assistant\AssistantPlugin;
+use AidingApp\Assistant\Models\PromptType;
 use Filament\Support\Facades\FilamentAsset;
-use AdvisingApp\Assistant\Models\PromptType;
-use AdvisingApp\Assistant\Models\AssistantChat;
+use AidingApp\Assistant\Models\AssistantChat;
 use App\Registries\RoleBasedAccessControlRegistry;
+use AidingApp\Assistant\Models\AssistantChatFolder;
+use AidingApp\Assistant\Models\AssistantChatMessage;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use AdvisingApp\Assistant\Models\AssistantChatFolder;
-use AdvisingApp\Assistant\Models\AssistantChatMessage;
-use AdvisingApp\IntegrationAI\Events\AIPromptInitiated;
-use AdvisingApp\Assistant\Models\AssistantChatMessageLog;
-use AdvisingApp\Assistant\Registries\AssistantRbacRegistry;
-use AdvisingApp\Assistant\Listeners\LogAssistantChatMessage;
-use AdvisingApp\Assistant\Services\AIInterface\Enums\AIChatMessageFrom;
+use AidingApp\IntegrationAI\Events\AIPromptInitiated;
+use AidingApp\Assistant\Models\AssistantChatMessageLog;
+use AidingApp\Assistant\Registries\AssistantRbacRegistry;
+use AidingApp\Assistant\Listeners\LogAssistantChatMessage;
+use AidingApp\Assistant\Services\AIInterface\Enums\AIChatMessageFrom;
 
 class AssistantServiceProvider extends ServiceProvider
 {

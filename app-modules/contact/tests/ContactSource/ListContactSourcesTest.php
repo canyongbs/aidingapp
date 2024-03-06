@@ -40,10 +40,10 @@ use function Tests\asSuperAdmin;
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
-use AdvisingApp\Contact\Models\Contact;
-use AdvisingApp\Contact\Models\ContactSource;
-use AdvisingApp\Contact\Filament\Resources\ContactSourceResource;
-use AdvisingApp\Contact\Filament\Resources\ContactSourceResource\Pages\ListContactSources;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\ContactSource;
+use AidingApp\Contact\Filament\Resources\ContactSourceResource;
+use AidingApp\Contact\Filament\Resources\ContactSourceResource\Pages\ListContactSources;
 
 test('The correct details are displayed on the ListContactSources page', function () {
     $contactSources = ContactSource::factory()

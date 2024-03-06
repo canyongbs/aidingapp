@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Models;
+namespace AidingApp\ServiceManagement\Models;
 
 use DateTimeInterface;
 use App\Models\BaseModel;
@@ -44,7 +44,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
-use AdvisingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 
 /**
  * @mixin IdeHelperServiceRequestType

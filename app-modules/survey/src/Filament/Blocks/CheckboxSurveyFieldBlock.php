@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Survey\Filament\Blocks;
+namespace AidingApp\Survey\Filament\Blocks;
 
-use AdvisingApp\Form\Filament\Blocks\CheckboxFormFieldBlock;
+use AidingApp\Form\Filament\Blocks\CheckboxFormFieldBlock;
 
 class CheckboxSurveyFieldBlock extends CheckboxFormFieldBlock
 {

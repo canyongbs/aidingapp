@@ -36,10 +36,10 @@
 
 use App\Models\User;
 use Illuminate\Support\Facades\Event;
-use AdvisingApp\Authorization\Models\RoleGroup;
-use AdvisingApp\Authorization\Events\RoleAttachedToRoleGroup;
-use AdvisingApp\Authorization\Events\UserAttachedToRoleGroup;
-use AdvisingApp\Authorization\Listeners\HandleUserAttachedToRoleGroup;
+use AidingApp\Authorization\Models\RoleGroup;
+use AidingApp\Authorization\Events\RoleAttachedToRoleGroup;
+use AidingApp\Authorization\Events\UserAttachedToRoleGroup;
+use AidingApp\Authorization\Listeners\HandleUserAttachedToRoleGroup;
 
 it('will fire when a user has been attached to a role group', function () {
     Event::fake();

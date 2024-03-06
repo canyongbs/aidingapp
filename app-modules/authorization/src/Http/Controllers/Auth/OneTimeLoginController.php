@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Authorization\Http\Controllers\Auth;
+namespace AidingApp\Authorization\Http\Controllers\Auth;
 
 use App\Models\User;
 use Filament\Facades\Filament;

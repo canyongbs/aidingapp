@@ -39,10 +39,10 @@ use App\Models\User;
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
-use AdvisingApp\Contact\Models\Contact;
-use AdvisingApp\Contact\Models\ContactSource;
-use AdvisingApp\Contact\Models\ContactStatus;
-use AdvisingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\ContactSource;
+use AidingApp\Contact\Models\ContactStatus;
+use AidingApp\Contact\Filament\Resources\ContactResource;
 
 // TODO: Write ListContacts page test
 //test('The correct details are displayed on the ListContacts page', function () {});

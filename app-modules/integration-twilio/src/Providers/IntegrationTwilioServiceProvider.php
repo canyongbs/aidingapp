@@ -34,18 +34,18 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\IntegrationTwilio\Providers;
+namespace AidingApp\IntegrationTwilio\Providers;
 
 use Filament\Panel;
 use Twilio\Rest\Client;
 use Illuminate\Support\ServiceProvider;
 use App\Registries\RoleBasedAccessControlRegistry;
-use AdvisingApp\IntegrationTwilio\IntegrationTwilioPlugin;
-use AdvisingApp\IntegrationTwilio\Settings\TwilioSettings;
-use AdvisingApp\Engagement\Actions\FindEngagementResponseSender;
-use AdvisingApp\IntegrationTwilio\Registries\IntegrationTwilioRbacRegistry;
-use AdvisingApp\Engagement\Actions\Contracts\EngagementResponseSenderFinder;
-use AdvisingApp\IntegrationTwilio\Actions\Playground\FindEngagementResponseSender as PlaygroundFindEngagementResponseSender;
+use AidingApp\IntegrationTwilio\IntegrationTwilioPlugin;
+use AidingApp\IntegrationTwilio\Settings\TwilioSettings;
+use AidingApp\Engagement\Actions\FindEngagementResponseSender;
+use AidingApp\IntegrationTwilio\Registries\IntegrationTwilioRbacRegistry;
+use AidingApp\Engagement\Actions\Contracts\EngagementResponseSenderFinder;
+use AidingApp\IntegrationTwilio\Actions\Playground\FindEngagementResponseSender as PlaygroundFindEngagementResponseSender;
 
 class IntegrationTwilioServiceProvider extends ServiceProvider
 {

@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Authorization\Filament\Resources\RoleGroupResource\RelationManagers;
+namespace AidingApp\Authorization\Filament\Resources\RoleGroupResource\RelationManagers;
 
 use Filament\Forms\Form;
 use Filament\Tables\Table;
@@ -46,8 +46,8 @@ use Filament\Tables\Actions\AttachAction;
 use Filament\Tables\Actions\DetachAction;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Actions\BulkActionGroup;
+use AidingApp\Authorization\Models\RoleGroup;
 use Filament\Tables\Actions\DetachBulkAction;
-use AdvisingApp\Authorization\Models\RoleGroup;
 use Filament\Resources\RelationManagers\RelationManager;
 
 class RolesRelationManager extends RelationManager

@@ -34,18 +34,18 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Interaction\Filament\Resources;
+namespace AidingApp\Interaction\Filament\Resources;
 
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use App\Filament\Clusters\InteractionManagement;
-use AdvisingApp\Interaction\Models\InteractionStatus;
-use AdvisingApp\Interaction\Enums\InteractionStatusColorOptions;
-use AdvisingApp\Interaction\Filament\Resources\InteractionStatusResource\Pages\EditInteractionStatus;
-use AdvisingApp\Interaction\Filament\Resources\InteractionStatusResource\Pages\CreateInteractionStatus;
-use AdvisingApp\Interaction\Filament\Resources\InteractionStatusResource\Pages\ListInteractionStatuses;
+use AidingApp\Interaction\Models\InteractionStatus;
+use AidingApp\Interaction\Enums\InteractionStatusColorOptions;
+use AidingApp\Interaction\Filament\Resources\InteractionStatusResource\Pages\EditInteractionStatus;
+use AidingApp\Interaction\Filament\Resources\InteractionStatusResource\Pages\CreateInteractionStatus;
+use AidingApp\Interaction\Filament\Resources\InteractionStatusResource\Pages\ListInteractionStatuses;
 
 class InteractionStatusResource extends Resource
 {

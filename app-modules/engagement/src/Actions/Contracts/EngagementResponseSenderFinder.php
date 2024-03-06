@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Actions\Contracts;
+namespace AidingApp\Engagement\Actions\Contracts;
 
-use AdvisingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\Contact;
 
 interface EngagementResponseSenderFinder
 {

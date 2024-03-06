@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Authorization\Filament\Widgets;
+namespace AidingApp\Authorization\Filament\Widgets;
 
 use Filament\Widgets\Widget;
 use App\Models\Authenticatable;
-use AdvisingApp\Authorization\Enums\LicenseType;
+use AidingApp\Authorization\Enums\LicenseType;
 
 class UnlicensedNotice extends Widget
 {

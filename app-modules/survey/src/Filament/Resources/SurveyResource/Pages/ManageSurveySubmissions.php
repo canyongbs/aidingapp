@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Survey\Filament\Resources\SurveyResource\Pages;
+namespace AidingApp\Survey\Filament\Resources\SurveyResource\Pages;
 
 use Filament\Tables\Table;
 use Filament\Tables\Actions\Action;
@@ -47,14 +47,14 @@ use Filament\Tables\Actions\DeleteAction;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Tables\Actions\BulkActionGroup;
+use AidingApp\Survey\Models\SurveySubmission;
 use Filament\Tables\Actions\DeleteBulkAction;
-use AdvisingApp\Survey\Models\SurveySubmission;
-use AdvisingApp\Form\Enums\FormSubmissionStatus;
-use AdvisingApp\Form\Exports\FormSubmissionExport;
+use AidingApp\Form\Enums\FormSubmissionStatus;
+use AidingApp\Form\Exports\FormSubmissionExport;
 use Filament\Resources\Pages\ManageRelatedRecords;
+use AidingApp\Survey\Filament\Resources\SurveyResource;
 use App\Filament\Tables\Filters\OpenSearch\SelectFilter;
-use AdvisingApp\Survey\Filament\Resources\SurveyResource;
-use AdvisingApp\Form\Filament\Tables\Filters\FormSubmissionStatusFilter;
+use AidingApp\Form\Filament\Tables\Filters\FormSubmissionStatusFilter;
 
 class ManageSurveySubmissions extends ManageRelatedRecords
 {

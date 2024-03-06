@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Audit\Overrides;
+namespace AidingApp\Audit\Overrides;
 
-use AdvisingApp\Audit\Overrides\Concerns\AttachOverrides;
+use AidingApp\Audit\Overrides\Concerns\AttachOverrides;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany as IlluminateBelongsToMany;
 
 class BelongsToMany extends IlluminateBelongsToMany

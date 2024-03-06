@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InAppCommunication\Actions;
+namespace AidingApp\InAppCommunication\Actions;
 
 use Exception;
 use Throwable;
@@ -42,8 +42,8 @@ use App\Models\User;
 use Twilio\Rest\Client;
 use Twilio\Exceptions\TwilioException;
 use Illuminate\Database\Eloquent\Builder;
-use AdvisingApp\InAppCommunication\Enums\ConversationType;
-use AdvisingApp\InAppCommunication\Models\TwilioConversation;
+use AidingApp\InAppCommunication\Enums\ConversationType;
+use AidingApp\InAppCommunication\Models\TwilioConversation;
 
 class CreateTwilioConversation
 {

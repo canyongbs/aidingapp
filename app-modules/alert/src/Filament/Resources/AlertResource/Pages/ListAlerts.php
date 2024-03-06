@@ -34,32 +34,32 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Alert\Filament\Resources\AlertResource\Pages;
+namespace AidingApp\Alert\Filament\Resources\AlertResource\Pages;
 
 use Filament\Tables\Table;
 use Filament\Infolists\Infolist;
+use AidingApp\Alert\Models\Alert;
 use Filament\Actions\CreateAction;
-use AdvisingApp\Alert\Models\Alert;
 use Filament\Tables\Filters\Filter;
 use Filament\Forms\Components\Group;
+use AidingApp\Contact\Models\Contact;
 use Filament\Forms\Components\Select;
-use AdvisingApp\Contact\Models\Contact;
+use AidingApp\Alert\Enums\AlertStatus;
 use App\Models\Scopes\EducatableSearch;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
-use AdvisingApp\Alert\Enums\AlertStatus;
+use AidingApp\Alert\Enums\AlertSeverity;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
-use AdvisingApp\Alert\Enums\AlertSeverity;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
 use App\Filament\Forms\Components\EducatableSelect;
-use AdvisingApp\Alert\Filament\Resources\AlertResource;
-use AdvisingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactAlerts;
+use AidingApp\Alert\Filament\Resources\AlertResource;
+use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactAlerts;
 
 class ListAlerts extends ListRecords
 {

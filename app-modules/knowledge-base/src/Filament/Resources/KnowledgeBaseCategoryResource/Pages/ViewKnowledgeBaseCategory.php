@@ -34,15 +34,15 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\Pages;
+namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\Pages;
 
 use Filament\Actions\EditAction;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
-use AdvisingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
-use AdvisingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource;
 
 class ViewKnowledgeBaseCategory extends ViewRecord
 {

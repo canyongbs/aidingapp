@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Survey\Models;
+namespace AidingApp\Survey\Models;
 
-use AdvisingApp\Form\Models\SubmissibleField;
+use AidingApp\Form\Models\SubmissibleField;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 

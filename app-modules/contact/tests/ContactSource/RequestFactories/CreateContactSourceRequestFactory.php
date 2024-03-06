@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Contact\Tests\ContactSource\RequestFactories;
+namespace AidingApp\Contact\Tests\ContactSource\RequestFactories;
 
 use Worksome\RequestFactories\RequestFactory;
 

@@ -34,16 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource\Pages;
+namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource\Pages;
 
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Section;
+use AidingApp\Division\Models\Division;
 use Filament\Forms\Components\Textarea;
-use AdvisingApp\Division\Models\Division;
-use AdvisingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
-use AdvisingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
-use AdvisingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 
 class EditKnowledgeBaseItemMetadata
 {

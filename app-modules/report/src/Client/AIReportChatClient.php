@@ -34,32 +34,32 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Report\Client;
+namespace AidingApp\Report\Client;
 
 use Closure;
 use Throwable;
 use Illuminate\Support\Arr;
-use AdvisingApp\Task\Models\Task;
+use AidingApp\Task\Models\Task;
+use AidingApp\Alert\Models\Alert;
 use Illuminate\Support\Facades\DB;
-use AdvisingApp\Alert\Models\Alert;
+use AidingApp\Contact\Models\Contact;
 use Illuminate\Support\Facades\Schema;
-use AdvisingApp\Contact\Models\Contact;
-use AdvisingApp\CareTeam\Models\CareTeam;
-use AdvisingApp\Contact\Models\ContactSource;
-use AdvisingApp\Contact\Models\ContactStatus;
-use AdvisingApp\Interaction\Models\Interaction;
-use AdvisingApp\IntegrationAI\Client\AzureOpenAI;
-use AdvisingApp\Notification\Models\Subscription;
+use AidingApp\CareTeam\Models\CareTeam;
+use AidingApp\Contact\Models\ContactSource;
+use AidingApp\Contact\Models\ContactStatus;
+use AidingApp\Interaction\Models\Interaction;
+use AidingApp\IntegrationAI\Client\AzureOpenAI;
+use AidingApp\Notification\Models\Subscription;
+use AidingApp\Interaction\Models\InteractionType;
 use Illuminate\Auth\Access\AuthorizationException;
-use AdvisingApp\Interaction\Models\InteractionType;
-use AdvisingApp\Interaction\Models\InteractionDriver;
-use AdvisingApp\Interaction\Models\InteractionStatus;
-use AdvisingApp\Interaction\Models\InteractionOutcome;
-use AdvisingApp\Interaction\Models\InteractionCampaign;
-use AdvisingApp\Interaction\Models\InteractionRelation;
-use AdvisingApp\Report\Settings\ReportAssistantSettings;
-use AdvisingApp\Assistant\Services\AIInterface\Enums\AIChatMessageFrom;
-use AdvisingApp\Assistant\Services\AIInterface\DataTransferObjects\Chat;
+use AidingApp\Interaction\Models\InteractionDriver;
+use AidingApp\Interaction\Models\InteractionStatus;
+use AidingApp\Interaction\Models\InteractionOutcome;
+use AidingApp\Interaction\Models\InteractionCampaign;
+use AidingApp\Interaction\Models\InteractionRelation;
+use AidingApp\Report\Settings\ReportAssistantSettings;
+use AidingApp\Assistant\Services\AIInterface\Enums\AIChatMessageFrom;
+use AidingApp\Assistant\Services\AIInterface\DataTransferObjects\Chat;
 
 class AIReportChatClient extends AzureOpenAI
 {

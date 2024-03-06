@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Interaction\Filament\Resources\InteractionRelationResource\Pages;
+namespace AidingApp\Interaction\Filament\Resources\InteractionRelationResource\Pages;
 
 use Filament\Resources\Pages\CreateRecord;
-use AdvisingApp\Interaction\Filament\Resources\InteractionRelationResource;
+use AidingApp\Interaction\Filament\Resources\InteractionRelationResource;
 
 class CreateInteractionRelation extends CreateRecord
 {

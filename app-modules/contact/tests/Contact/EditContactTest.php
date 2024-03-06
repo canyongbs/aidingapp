@@ -39,9 +39,9 @@ use App\Models\User;
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
-use AdvisingApp\Contact\Models\Contact;
-use AdvisingApp\Contact\Filament\Resources\ContactResource;
-use AdvisingApp\Contact\Tests\Contact\RequestFactories\EditContactRequestFactory;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Contact\Tests\Contact\RequestFactories\EditContactRequestFactory;
 
 // TODO: Write EditContact page tests
 //test('A successful action on the EditContact page', function () {});

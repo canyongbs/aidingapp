@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Notification\Console\Commands;
+namespace AidingApp\Notification\Console\Commands;
 
 use App\Models\User;
 use Illuminate\Console\Command;

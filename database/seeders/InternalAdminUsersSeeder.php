@@ -40,8 +40,8 @@ use App\Models\User;
 use Illuminate\Support\Str;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-use AdvisingApp\Authorization\Models\RoleGroup;
-use AdvisingApp\Authorization\Enums\LicenseType;
+use AidingApp\Authorization\Models\RoleGroup;
+use AidingApp\Authorization\Enums\LicenseType;
 
 class InternalAdminUsersSeeder extends Seeder
 {

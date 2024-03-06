@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Portal\Http\Requests;
+namespace AidingApp\Portal\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 

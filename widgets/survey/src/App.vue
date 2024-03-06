@@ -198,7 +198,7 @@ async function getForm() {
             display.value = true;
         })
         .catch((error) => {
-            console.error(`Advising App Embed Survey ${error}`);
+            console.error(`Aiding App Embed Survey ${error}`);
         });
 }
 

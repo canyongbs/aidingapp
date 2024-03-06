@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Form\Rules;
+namespace AidingApp\Form\Rules;
 
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;

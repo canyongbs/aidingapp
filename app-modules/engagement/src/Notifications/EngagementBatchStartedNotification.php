@@ -34,18 +34,18 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Notifications;
+namespace AidingApp\Engagement\Notifications;
 
 use App\Models\User;
 use App\Models\NotificationSetting;
-use AdvisingApp\Engagement\Models\EngagementBatch;
-use AdvisingApp\Notification\Notifications\BaseNotification;
-use AdvisingApp\Notification\Notifications\EmailNotification;
-use AdvisingApp\Notification\Notifications\DatabaseNotification;
-use AdvisingApp\Notification\Notifications\Messages\MailMessage;
+use AidingApp\Engagement\Models\EngagementBatch;
+use AidingApp\Notification\Notifications\BaseNotification;
+use AidingApp\Notification\Notifications\EmailNotification;
+use AidingApp\Notification\Notifications\DatabaseNotification;
+use AidingApp\Notification\Notifications\Messages\MailMessage;
 use Filament\Notifications\Notification as FilamentNotification;
-use AdvisingApp\Notification\Notifications\Concerns\EmailChannelTrait;
-use AdvisingApp\Notification\Notifications\Concerns\DatabaseChannelTrait;
+use AidingApp\Notification\Notifications\Concerns\EmailChannelTrait;
+use AidingApp\Notification\Notifications\Concerns\DatabaseChannelTrait;
 
 class EngagementBatchStartedNotification extends BaseNotification implements DatabaseNotification, EmailNotification
 {

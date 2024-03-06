@@ -34,13 +34,13 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InventoryManagement\Models;
+namespace AidingApp\InventoryManagement\Models;
 
 use App\Models\BaseModel;
 use OwenIt\Auditing\Contracts\Auditable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use AdvisingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 
 /**
  * @mixin IdeHelperAssetLocation

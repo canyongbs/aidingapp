@@ -34,14 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Filament\Resources\EngagementResponseResource\Pages;
+namespace AidingApp\Engagement\Filament\Resources\EngagementResponseResource\Pages;
 
 use Filament\Tables\Table;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Resources\Pages\ListRecords;
-use AdvisingApp\Engagement\Filament\Resources\EngagementResponseResource;
+use AidingApp\Engagement\Filament\Resources\EngagementResponseResource;
 
 class ListEngagementResponses extends ListRecords
 {

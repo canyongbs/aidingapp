@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Notification\Drivers;
+namespace AidingApp\Notification\Drivers;
 
-use AdvisingApp\Notification\DataTransferObjects\UpdateDeliveryStatusData;
+use AidingApp\Notification\DataTransferObjects\UpdateDeliveryStatusData;
 
 interface OutboundDeliverableDriver
 {

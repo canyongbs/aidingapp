@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InventoryManagement\Filament\Resources\AssetResource\Pages;
+namespace AidingApp\InventoryManagement\Filament\Resources\AssetResource\Pages;
 
 use Filament\Tables\Table;
 use Filament\Actions\CreateAction;
@@ -45,12 +45,12 @@ use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
-use AdvisingApp\InventoryManagement\Models\Asset;
+use AidingApp\InventoryManagement\Models\Asset;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use App\Filament\Tables\Columns\OpenSearch\TextColumn;
-use AdvisingApp\InventoryManagement\Models\Scopes\ClassifiedAs;
-use AdvisingApp\InventoryManagement\Filament\Resources\AssetResource;
-use AdvisingApp\InventoryManagement\Enums\SystemAssetStatusClassification;
+use AidingApp\InventoryManagement\Models\Scopes\ClassifiedAs;
+use AidingApp\InventoryManagement\Filament\Resources\AssetResource;
+use AidingApp\InventoryManagement\Enums\SystemAssetStatusClassification;
 
 class ListAssets extends ListRecords
 {

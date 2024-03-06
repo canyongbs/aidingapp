@@ -34,15 +34,15 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InventoryManagement\Policies;
+namespace AidingApp\InventoryManagement\Policies;
 
 use App\Enums\Feature;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
 use Illuminate\Support\Facades\Gate;
+use AidingApp\Contact\Models\Contact;
 use App\Support\FeatureAccessResponse;
-use AdvisingApp\Contact\Models\Contact;
-use AdvisingApp\InventoryManagement\Models\AssetCheckIn;
+use AidingApp\InventoryManagement\Models\AssetCheckIn;
 
 class AssetCheckInPolicy
 {

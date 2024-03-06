@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Database\Factories;
+namespace AidingApp\Engagement\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AdvisingApp\Engagement\Models\SmsTemplate>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AidingApp\Engagement\Models\SmsTemplate>
  */
 class SmsTemplateFactory extends Factory
 {

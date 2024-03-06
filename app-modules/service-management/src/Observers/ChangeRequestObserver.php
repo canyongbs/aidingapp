@@ -34,14 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Observers;
+namespace AidingApp\ServiceManagement\Observers;
 
 use Illuminate\Support\Facades\Notification;
-use AdvisingApp\ServiceManagement\Models\ChangeRequest;
-use AdvisingApp\ServiceManagement\Models\ChangeRequestStatus;
-use AdvisingApp\ServiceManagement\Models\Scopes\ClassifiedAs;
-use AdvisingApp\ServiceManagement\Enums\SystemChangeRequestClassification;
-use AdvisingApp\ServiceManagement\Notifications\ChangeRequestAwaitingApprovalNotification;
+use AidingApp\ServiceManagement\Models\ChangeRequest;
+use AidingApp\ServiceManagement\Models\ChangeRequestStatus;
+use AidingApp\ServiceManagement\Models\Scopes\ClassifiedAs;
+use AidingApp\ServiceManagement\Enums\SystemChangeRequestClassification;
+use AidingApp\ServiceManagement\Notifications\ChangeRequestAwaitingApprovalNotification;
 
 class ChangeRequestObserver
 {

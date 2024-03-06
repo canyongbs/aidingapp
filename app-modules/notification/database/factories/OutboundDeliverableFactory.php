@@ -34,16 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Notification\Database\Factories;
+namespace AidingApp\Notification\Database\Factories;
 
 use Tests\Unit\TestSmsNotification;
 use Tests\Unit\TestEmailNotification;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use AdvisingApp\Notification\Enums\NotificationChannel;
-use AdvisingApp\Notification\Enums\NotificationDeliveryStatus;
+use AidingApp\Notification\Enums\NotificationChannel;
+use AidingApp\Notification\Enums\NotificationDeliveryStatus;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AdvisingApp\Notification\Models\OutboundDeliverable>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AidingApp\Notification\Models\OutboundDeliverable>
  */
 class OutboundDeliverableFactory extends Factory
 {

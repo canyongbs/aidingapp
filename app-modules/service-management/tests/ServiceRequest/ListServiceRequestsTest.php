@@ -43,10 +43,10 @@ use App\Settings\LicenseSettings;
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
-use AdvisingApp\Contact\Models\Contact;
-use AdvisingApp\ServiceManagement\Models\ServiceRequest;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestAssignment;
-use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 
 test('The correct details are displayed on the ListServiceRequests page', function () {
     $serviceRequests = ServiceRequest::factory()

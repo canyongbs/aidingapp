@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Alert\Policies;
+namespace AidingApp\Alert\Policies;
 
 use App\Models\Authenticatable;
-use AdvisingApp\Alert\Models\Alert;
+use AidingApp\Alert\Models\Alert;
 use Illuminate\Auth\Access\Response;
-use AdvisingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\Contact;
 
 class AlertPolicy
 {

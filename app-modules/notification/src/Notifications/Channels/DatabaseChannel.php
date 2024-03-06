@@ -34,13 +34,13 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Notification\Notifications\Channels;
+namespace AidingApp\Notification\Notifications\Channels;
 
 use Illuminate\Notifications\Notification;
-use AdvisingApp\Notification\Models\OutboundDeliverable;
-use AdvisingApp\Notification\Notifications\BaseNotification;
-use AdvisingApp\Notification\DataTransferObjects\NotificationResultData;
-use AdvisingApp\Notification\DataTransferObjects\DatabaseChannelResultData;
+use AidingApp\Notification\Models\OutboundDeliverable;
+use AidingApp\Notification\Notifications\BaseNotification;
+use AidingApp\Notification\DataTransferObjects\NotificationResultData;
+use AidingApp\Notification\DataTransferObjects\DatabaseChannelResultData;
 use Illuminate\Notifications\Channels\DatabaseChannel as BaseDatabaseChannel;
 
 class DatabaseChannel extends BaseDatabaseChannel

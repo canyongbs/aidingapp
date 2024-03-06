@@ -36,7 +36,7 @@
 
 use function Tests\Helpers\testResourceRequiresPermissionForAccess;
 
-use AdvisingApp\ServiceManagement\Filament\Resources\ChangeRequestTypeResource;
+use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypeResource;
 
 testResourceRequiresPermissionForAccess(
     resource: ChangeRequestTypeResource::class,

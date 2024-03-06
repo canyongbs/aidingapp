@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Authorization\Policies;
+namespace AidingApp\Authorization\Policies;
 
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
-use AdvisingApp\Authorization\Models\RoleGroup;
+use AidingApp\Authorization\Models\RoleGroup;
 
 class RoleGroupPolicy
 {

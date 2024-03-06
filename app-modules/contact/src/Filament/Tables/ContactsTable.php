@@ -34,16 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Contact\Filament\Tables;
+namespace AidingApp\Contact\Filament\Tables;
 
 use Filament\Tables\Table;
-use AdvisingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\Contact;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\QueryBuilder;
 use Illuminate\Database\Eloquent\Builder;
-use AdvisingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Contact\Filament\Resources\ContactResource;
 use Filament\Tables\Filters\QueryBuilder\Constraints\TextConstraint;
 use Filament\Tables\Filters\QueryBuilder\Constraints\BooleanConstraint;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint;

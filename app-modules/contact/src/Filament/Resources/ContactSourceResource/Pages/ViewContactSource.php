@@ -34,14 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Contact\Filament\Resources\ContactSourceResource\Pages;
+namespace AidingApp\Contact\Filament\Resources\ContactSourceResource\Pages;
 
 use Filament\Actions;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
-use AdvisingApp\Contact\Filament\Resources\ContactSourceResource;
+use AidingApp\Contact\Filament\Resources\ContactSourceResource;
 
 class ViewContactSource extends ViewRecord
 {

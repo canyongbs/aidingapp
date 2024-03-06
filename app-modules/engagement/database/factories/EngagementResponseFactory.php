@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Database\Factories;
+namespace AidingApp\Engagement\Database\Factories;
 
-use AdvisingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Engagement\Models\EngagementResponse;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use AdvisingApp\Engagement\Models\EngagementResponse;
 
 /**
  * @extends Factory<EngagementResponse>

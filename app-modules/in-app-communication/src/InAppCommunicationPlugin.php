@@ -34,14 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InAppCommunication;
+namespace AidingApp\InAppCommunication;
 
 use Filament\Panel;
 use Filament\Contracts\Plugin;
 use Filament\View\PanelsRenderHook;
 use Illuminate\Support\Facades\Blade;
-use AdvisingApp\InAppCommunication\Filament\Pages\UserChat;
-use AdvisingApp\InAppCommunication\Livewire\ChatNotifications;
+use AidingApp\InAppCommunication\Filament\Pages\UserChat;
+use AidingApp\InAppCommunication\Livewire\ChatNotifications;
 
 class InAppCommunicationPlugin implements Plugin
 {
@@ -54,12 +54,12 @@ class InAppCommunicationPlugin implements Plugin
     {
         $panel->discoverResources(
             in: __DIR__ . '/Filament/Resources',
-            for: 'AdvisingApp\\InAppCommunication\\Filament\\Resources'
+            for: 'AidingApp\\InAppCommunication\\Filament\\Resources'
         );
 
         $panel->discoverPages(
             in: __DIR__ . '/Filament/Pages',
-            for: 'AdvisingApp\\InAppCommunication\\Filament\\Pages'
+            for: 'AidingApp\\InAppCommunication\\Filament\\Pages'
         );
 
         $panel->livewireComponents([
@@ -68,7 +68,7 @@ class InAppCommunicationPlugin implements Plugin
 
         $panel->renderHook(
             PanelsRenderHook::GLOBAL_SEARCH_AFTER,
-            fn () => (auth()->user() && UserChat::canAccess()) ? Blade::render('@livewire(\\AdvisingApp\\InAppCommunication\\Livewire\\ChatNotifications::class)') : null,
+            fn () => (auth()->user() && UserChat::canAccess()) ? Blade::render('@livewire(\\AidingApp\\InAppCommunication\\Livewire\\ChatNotifications::class)') : null,
         );
     }
 

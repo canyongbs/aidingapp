@@ -34,18 +34,18 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Filament\Resources;
+namespace AidingApp\ServiceManagement\Filament\Resources;
 
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Filament\Clusters\ServiceManagementAdministration;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestType;
-use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\EditServiceRequestType;
-use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\ViewServiceRequestType;
-use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\ListServiceRequestTypes;
-use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\CreateServiceRequestType;
-use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\RelationManagers\ServiceRequestPrioritiesRelationManager;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\EditServiceRequestType;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\ViewServiceRequestType;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\ListServiceRequestTypes;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\CreateServiceRequestType;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\RelationManagers\ServiceRequestPrioritiesRelationManager;
 
 class ServiceRequestTypeResource extends Resource
 {

@@ -34,22 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Task\Imports;
+namespace AidingApp\Task\Imports;
 
 use App\Models\User;
 use AllowDynamicProperties;
 use Illuminate\Support\Str;
-use AdvisingApp\Task\Models\Task;
+use AidingApp\Task\Models\Task;
+use AidingApp\Task\Enums\TaskStatus;
+use AidingApp\Contact\Models\Contact;
 use Illuminate\Validation\Rules\Enum;
-use AdvisingApp\Task\Enums\TaskStatus;
 use Filament\Actions\Imports\Importer;
-use AdvisingApp\Contact\Models\Contact;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Models\Import;
 use Illuminate\Validation\ValidationException;
-use AdvisingApp\Interaction\Imports\InteractionsImporter;
+use AidingApp\Interaction\Imports\InteractionsImporter;
 
 /**
  * @property ?Task $record

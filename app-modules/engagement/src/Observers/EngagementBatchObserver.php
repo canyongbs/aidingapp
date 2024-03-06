@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Observers;
+namespace AidingApp\Engagement\Observers;
 
-use AdvisingApp\Engagement\Models\EngagementBatch;
+use AidingApp\Engagement\Models\EngagementBatch;
 
 class EngagementBatchObserver
 {

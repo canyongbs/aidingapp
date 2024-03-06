@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InventoryManagement\Filament\Resources\AssetCheckOutResource\Pages;
+namespace AidingApp\InventoryManagement\Filament\Resources\AssetCheckOutResource\Pages;
 
 use Filament\Resources\Pages\EditRecord;
-use AdvisingApp\InventoryManagement\Filament\Resources\AssetCheckOutResource;
+use AidingApp\InventoryManagement\Filament\Resources\AssetCheckOutResource;
 
 class EditAssetCheckOut extends EditRecord
 {

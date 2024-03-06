@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Portal\Exceptions;
+namespace AidingApp\Portal\Exceptions;
 
 use Exception;
 

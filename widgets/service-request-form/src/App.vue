@@ -197,7 +197,7 @@ async function getForm() {
             display.value = true;
         })
         .catch((error) => {
-            console.error(`Advising App Embed Service Request Form ${error}`);
+            console.error(`Aiding App Embed Service Request Form ${error}`);
         });
 }
 

@@ -34,14 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Alert\Observers;
+namespace AidingApp\Alert\Observers;
 
 use App\Models\User;
-use AdvisingApp\Alert\Models\Alert;
+use AidingApp\Alert\Models\Alert;
+use AidingApp\Contact\Models\Contact;
 use Illuminate\Support\Facades\Cache;
-use AdvisingApp\Contact\Models\Contact;
-use AdvisingApp\Alert\Events\AlertCreated;
-use AdvisingApp\Notification\Actions\SubscriptionCreate;
+use AidingApp\Alert\Events\AlertCreated;
+use AidingApp\Notification\Actions\SubscriptionCreate;
 
 class AlertObserver
 {

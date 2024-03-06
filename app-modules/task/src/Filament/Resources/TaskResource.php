@@ -34,13 +34,13 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Task\Filament\Resources;
+namespace AidingApp\Task\Filament\Resources;
 
+use AidingApp\Task\Models\Task;
 use Filament\Resources\Resource;
-use AdvisingApp\Task\Models\Task;
-use AdvisingApp\Task\Filament\Resources\TaskResource\Pages\EditTask;
-use AdvisingApp\Task\Filament\Resources\TaskResource\Pages\ListTasks;
-use AdvisingApp\Task\Filament\Resources\TaskResource\Pages\CreateTask;
+use AidingApp\Task\Filament\Resources\TaskResource\Pages\EditTask;
+use AidingApp\Task\Filament\Resources\TaskResource\Pages\ListTasks;
+use AidingApp\Task\Filament\Resources\TaskResource\Pages\CreateTask;
 
 class TaskResource extends Resource
 {

@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Filament\Resources;
+namespace AidingApp\ServiceManagement\Filament\Resources;
 
 use Filament\Tables;
 use Filament\Forms\Form;
@@ -45,13 +45,13 @@ use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Textarea;
 use App\Filament\Tables\Columns\IdColumn;
 use Illuminate\Database\Eloquent\Builder;
-use AdvisingApp\ServiceManagement\Models\ServiceRequest;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestUpdate;
-use AdvisingApp\ServiceManagement\Enums\ServiceRequestUpdateDirection;
-use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource\Pages\EditServiceRequestUpdate;
-use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource\Pages\ViewServiceRequestUpdate;
-use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource\Pages\ListServiceRequestUpdates;
-use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource\Pages\CreateServiceRequestUpdate;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateDirection;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource\Pages\EditServiceRequestUpdate;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource\Pages\ViewServiceRequestUpdate;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource\Pages\ListServiceRequestUpdates;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource\Pages\CreateServiceRequestUpdate;
 
 class ServiceRequestUpdateResource extends Resource
 {

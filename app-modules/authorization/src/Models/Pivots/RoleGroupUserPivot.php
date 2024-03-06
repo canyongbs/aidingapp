@@ -34,14 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Authorization\Models\Pivots;
+namespace AidingApp\Authorization\Models\Pivots;
 
 use Illuminate\Database\Eloquent\Relations\Pivot;
-use AdvisingApp\Authorization\Events\UserAttachedToRoleGroup;
-use AdvisingApp\Authorization\Events\UserRemovedFromRoleGroup;
+use AidingApp\Authorization\Events\UserAttachedToRoleGroup;
+use AidingApp\Authorization\Events\UserRemovedFromRoleGroup;
 
 /**
- * AdvisingApp\Authorization\Models\Pivots\RoleGroupUserPivot
+ * AidingApp\Authorization\Models\Pivots\RoleGroupUserPivot
  *
  * @method static \Illuminate\Database\Eloquent\Builder|RoleGroupUserPivot newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|RoleGroupUserPivot newQuery()

@@ -41,8 +41,8 @@ use App\Models\Tenant;
 use Illuminate\Support\Str;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Hash;
+use AidingApp\Authorization\Models\Role;
 use Illuminate\Support\Facades\Validator;
-use AdvisingApp\Authorization\Models\Role;
 
 class CreateSuperAdmin extends Command
 {

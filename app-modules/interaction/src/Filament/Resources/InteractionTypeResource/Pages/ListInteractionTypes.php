@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Interaction\Filament\Resources\InteractionTypeResource\Pages;
+namespace AidingApp\Interaction\Filament\Resources\InteractionTypeResource\Pages;
 
 use Filament\Actions;
 use Filament\Tables\Table;
@@ -44,7 +44,7 @@ use App\Filament\Tables\Columns\IdColumn;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
-use AdvisingApp\Interaction\Filament\Resources\InteractionTypeResource;
+use AidingApp\Interaction\Filament\Resources\InteractionTypeResource;
 
 class ListInteractionTypes extends ListRecords
 {

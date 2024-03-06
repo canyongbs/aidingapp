@@ -34,21 +34,21 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Filament\Resources;
+namespace AidingApp\ServiceManagement\Filament\Resources;
 
 use Filament\Resources\Resource;
 use Filament\Resources\Pages\Page;
 use App\Filament\Clusters\ServiceManagement;
-use AdvisingApp\ServiceManagement\Models\ServiceRequest;
-use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\EditServiceRequest;
-use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ViewServiceRequest;
-use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ListServiceRequests;
-use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\CreateServiceRequest;
-use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ServiceRequestTimeline;
-use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ManageServiceRequestUpdate;
-use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ManageServiceRequestAssignment;
-use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ManageServiceRequestInteraction;
-use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ManageServiceRequestFormSubmission;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\EditServiceRequest;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ViewServiceRequest;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ListServiceRequests;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\CreateServiceRequest;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ServiceRequestTimeline;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ManageServiceRequestUpdate;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ManageServiceRequestAssignment;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ManageServiceRequestInteraction;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ManageServiceRequestFormSubmission;
 
 class ServiceRequestResource extends Resource
 {

@@ -34,13 +34,13 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Contact\Filament\Resources\ContactSourceResource\Pages;
+namespace AidingApp\Contact\Filament\Resources\ContactSourceResource\Pages;
 
 use Filament\Actions;
 use Filament\Forms\Form;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\EditRecord;
-use AdvisingApp\Contact\Filament\Resources\ContactSourceResource;
+use AidingApp\Contact\Filament\Resources\ContactSourceResource;
 
 class EditContactSource extends EditRecord
 {

@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Assistant\Filament\Pages;
+namespace AidingApp\Assistant\Filament\Pages;
 
 use App\Models\User;
 use Filament\Forms\Get;
@@ -42,7 +42,7 @@ use Filament\Pages\Page;
 use Livewire\Attributes\On;
 use Filament\Actions\Action;
 use Livewire\Attributes\Rule;
-use AdvisingApp\Team\Models\Team;
+use AidingApp\Team\Models\Team;
 use App\Filament\Pages\Dashboard;
 use Livewire\Attributes\Computed;
 use Filament\Actions\StaticAction;
@@ -53,23 +53,23 @@ use Filament\Support\Enums\Alignment;
 use Filament\Support\Enums\ActionSize;
 use Illuminate\Validation\Rules\Unique;
 use Filament\Forms\Components\TextInput;
-use AdvisingApp\Assistant\Models\AssistantChat;
-use AdvisingApp\Authorization\Enums\LicenseType;
-use AdvisingApp\Consent\Models\ConsentAgreement;
-use AdvisingApp\Consent\Enums\ConsentAgreementType;
+use AidingApp\Assistant\Models\AssistantChat;
+use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\Consent\Models\ConsentAgreement;
+use AidingApp\Consent\Enums\ConsentAgreementType;
+use AidingApp\Assistant\Models\AssistantChatFolder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use AdvisingApp\Assistant\Models\AssistantChatFolder;
-use AdvisingApp\Assistant\Enums\AssistantChatShareVia;
-use AdvisingApp\Assistant\Jobs\ShareAssistantChatsJob;
-use AdvisingApp\Assistant\Enums\AssistantChatShareWith;
-use AdvisingApp\IntegrationAI\Client\Contracts\AIChatClient;
-use AdvisingApp\IntegrationAI\Exceptions\ContentFilterException;
-use AdvisingApp\IntegrationAI\DataTransferObjects\DynamicContext;
-use AdvisingApp\IntegrationAI\Exceptions\TokensExceededException;
+use AidingApp\Assistant\Enums\AssistantChatShareVia;
+use AidingApp\Assistant\Jobs\ShareAssistantChatsJob;
+use AidingApp\Assistant\Enums\AssistantChatShareWith;
+use AidingApp\IntegrationAI\Client\Contracts\AIChatClient;
+use AidingApp\IntegrationAI\Exceptions\ContentFilterException;
+use AidingApp\IntegrationAI\DataTransferObjects\DynamicContext;
+use AidingApp\IntegrationAI\Exceptions\TokensExceededException;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
-use AdvisingApp\Assistant\Services\AIInterface\Enums\AIChatMessageFrom;
-use AdvisingApp\Assistant\Services\AIInterface\DataTransferObjects\Chat;
-use AdvisingApp\Assistant\Services\AIInterface\DataTransferObjects\ChatMessage;
+use AidingApp\Assistant\Services\AIInterface\Enums\AIChatMessageFrom;
+use AidingApp\Assistant\Services\AIInterface\DataTransferObjects\Chat;
+use AidingApp\Assistant\Services\AIInterface\DataTransferObjects\ChatMessage;
 
 /**
  * @property EloquentCollection $chats

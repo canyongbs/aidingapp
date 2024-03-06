@@ -34,16 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Report\Providers;
+namespace AidingApp\Report\Providers;
 
 use Filament\Panel;
-use AdvisingApp\Report\ReportPlugin;
-use AdvisingApp\Report\Models\Report;
+use AidingApp\Report\ReportPlugin;
+use AidingApp\Report\Models\Report;
 use Illuminate\Support\ServiceProvider;
-use AdvisingApp\Report\Observers\ReportObserver;
+use AidingApp\Report\Observers\ReportObserver;
 use App\Registries\RoleBasedAccessControlRegistry;
+use AidingApp\Report\Registries\ReportRbacRegistry;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use AdvisingApp\Report\Registries\ReportRbacRegistry;
 
 class ReportServiceProvider extends ServiceProvider
 {

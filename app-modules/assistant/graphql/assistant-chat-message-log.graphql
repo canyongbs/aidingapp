@@ -1,5 +1,5 @@
 type AssistantChatMessageLog
-    @model(class: "AdvisingApp\\Assistant\\Models\\AssistantChatMessageLog") {
+    @model(class: "AidingApp\\Assistant\\Models\\AssistantChatMessageLog") {
     id: UUID!
 
     message: String!

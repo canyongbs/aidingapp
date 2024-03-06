@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InventoryManagement\Filament\Resources;
+namespace AidingApp\InventoryManagement\Filament\Resources;
 
 use Filament\Resources\Resource;
-use AdvisingApp\InventoryManagement\Models\AssetCheckOut;
-use AdvisingApp\InventoryManagement\Filament\Resources\AssetCheckOutResource\Pages\ListAssetCheckOuts;
+use AidingApp\InventoryManagement\Models\AssetCheckOut;
+use AidingApp\InventoryManagement\Filament\Resources\AssetCheckOutResource\Pages\ListAssetCheckOuts;
 
 class AssetCheckOutResource extends Resource
 {

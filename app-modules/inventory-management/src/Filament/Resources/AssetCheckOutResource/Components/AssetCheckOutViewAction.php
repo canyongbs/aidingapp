@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InventoryManagement\Filament\Resources\AssetCheckOutResource\Components;
+namespace AidingApp\InventoryManagement\Filament\Resources\AssetCheckOutResource\Components;
 
 use Filament\Actions\ViewAction;
-use AdvisingApp\InventoryManagement\Filament\Resources\AssetCheckOutResource\Concerns\HasAssetCheckOutInfolist;
+use AidingApp\InventoryManagement\Filament\Resources\AssetCheckOutResource\Concerns\HasAssetCheckOutInfolist;
 
 class AssetCheckOutViewAction extends ViewAction
 {

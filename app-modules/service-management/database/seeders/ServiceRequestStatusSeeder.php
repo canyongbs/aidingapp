@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Database\Seeders;
+namespace AidingApp\ServiceManagement\Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use AdvisingApp\ServiceManagement\Enums\ColumnColorOptions;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestStatus;
-use AdvisingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
+use AidingApp\ServiceManagement\Enums\ColumnColorOptions;
+use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 
 class ServiceRequestStatusSeeder extends Seeder
 {

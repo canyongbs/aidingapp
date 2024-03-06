@@ -34,19 +34,19 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InventoryManagement\Filament\Actions;
+namespace AidingApp\InventoryManagement\Filament\Actions;
 
 use Filament\Forms\Get;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Radio;
+use AidingApp\Contact\Models\Contact;
 use Filament\Forms\Components\Select;
-use AdvisingApp\Contact\Models\Contact;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\DateTimePicker;
-use AdvisingApp\InventoryManagement\Models\Asset;
-use AdvisingApp\InventoryManagement\Models\AssetStatus;
-use AdvisingApp\InventoryManagement\Models\Scopes\ClassifiedAs;
-use AdvisingApp\InventoryManagement\Enums\SystemAssetStatusClassification;
+use AidingApp\InventoryManagement\Models\Asset;
+use AidingApp\InventoryManagement\Models\AssetStatus;
+use AidingApp\InventoryManagement\Models\Scopes\ClassifiedAs;
+use AidingApp\InventoryManagement\Enums\SystemAssetStatusClassification;
 
 class CheckOutAssetHeaderAction extends Action
 {

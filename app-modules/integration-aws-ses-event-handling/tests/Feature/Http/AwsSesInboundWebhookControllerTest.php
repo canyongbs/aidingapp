@@ -40,17 +40,17 @@ use function Pest\Laravel\withHeaders;
 use function Tests\loadFixtureFromModule;
 use function Pest\Laravel\withoutMiddleware;
 
-use AdvisingApp\Webhook\Http\Middleware\VerifyAwsSnsRequest;
-use AdvisingApp\IntegrationAwsSesEventHandling\Events\SesOpenEvent;
-use AdvisingApp\IntegrationAwsSesEventHandling\Events\SesSendEvent;
-use AdvisingApp\IntegrationAwsSesEventHandling\Events\SesClickEvent;
-use AdvisingApp\IntegrationAwsSesEventHandling\Events\SesBounceEvent;
-use AdvisingApp\IntegrationAwsSesEventHandling\Events\SesRejectEvent;
-use AdvisingApp\IntegrationAwsSesEventHandling\Events\SesDeliveryEvent;
-use AdvisingApp\IntegrationAwsSesEventHandling\Events\SesComplaintEvent;
-use AdvisingApp\IntegrationAwsSesEventHandling\Events\SesSubscriptionEvent;
-use AdvisingApp\IntegrationAwsSesEventHandling\Events\SesDeliveryDelayEvent;
-use AdvisingApp\IntegrationAwsSesEventHandling\Events\SesRenderingFailureEvent;
+use AidingApp\Webhook\Http\Middleware\VerifyAwsSnsRequest;
+use AidingApp\IntegrationAwsSesEventHandling\Events\SesOpenEvent;
+use AidingApp\IntegrationAwsSesEventHandling\Events\SesSendEvent;
+use AidingApp\IntegrationAwsSesEventHandling\Events\SesClickEvent;
+use AidingApp\IntegrationAwsSesEventHandling\Events\SesBounceEvent;
+use AidingApp\IntegrationAwsSesEventHandling\Events\SesRejectEvent;
+use AidingApp\IntegrationAwsSesEventHandling\Events\SesDeliveryEvent;
+use AidingApp\IntegrationAwsSesEventHandling\Events\SesComplaintEvent;
+use AidingApp\IntegrationAwsSesEventHandling\Events\SesSubscriptionEvent;
+use AidingApp\IntegrationAwsSesEventHandling\Events\SesDeliveryDelayEvent;
+use AidingApp\IntegrationAwsSesEventHandling\Events\SesRenderingFailureEvent;
 
 beforeEach(function () {
     Event::fake();

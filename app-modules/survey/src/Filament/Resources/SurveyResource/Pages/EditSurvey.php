@@ -34,17 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Survey\Filament\Resources\SurveyResource\Pages;
+namespace AidingApp\Survey\Filament\Resources\SurveyResource\Pages;
 
 use Filament\Forms\Form;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
-use AdvisingApp\Survey\Models\Survey;
+use AidingApp\Survey\Models\Survey;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Infolists\Components\TextEntry;
-use AdvisingApp\Survey\Filament\Resources\SurveyResource;
-use AdvisingApp\Form\Actions\GenerateSubmissibleEmbedCode;
-use AdvisingApp\Survey\Filament\Resources\SurveyResource\Pages\Concerns\HasSharedFormConfiguration;
+use AidingApp\Survey\Filament\Resources\SurveyResource;
+use AidingApp\Form\Actions\GenerateSubmissibleEmbedCode;
+use AidingApp\Survey\Filament\Resources\SurveyResource\Pages\Concerns\HasSharedFormConfiguration;
 
 class EditSurvey extends EditRecord
 {

@@ -34,30 +34,30 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Models;
+namespace AidingApp\Engagement\Models;
 
 use App\Models\User;
 use App\Models\BaseModel;
 use Illuminate\Support\Collection;
-use AdvisingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Timeline\Models\Timeline;
 use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Contracts\Auditable;
-use AdvisingApp\Timeline\Models\Timeline;
 use Illuminate\Database\Eloquent\Builder;
 use App\Models\Scopes\LicensedToEducatable;
 use App\Models\Concerns\BelongsToEducatable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use AidingApp\Timeline\Timelines\EngagementTimeline;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use AdvisingApp\Timeline\Timelines\EngagementTimeline;
-use AdvisingApp\Engagement\Enums\EngagementDeliveryStatus;
-use AdvisingApp\Notification\Models\Contracts\Subscribable;
-use AdvisingApp\Timeline\Models\Contracts\ProvidesATimeline;
-use AdvisingApp\Engagement\Actions\GenerateEmailMarkdownContent;
-use AdvisingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AdvisingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
+use AidingApp\Engagement\Enums\EngagementDeliveryStatus;
+use AidingApp\Notification\Models\Contracts\Subscribable;
+use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
+use AidingApp\Engagement\Actions\GenerateEmailMarkdownContent;
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
 
 /**
  * @property-read Educatable $recipient

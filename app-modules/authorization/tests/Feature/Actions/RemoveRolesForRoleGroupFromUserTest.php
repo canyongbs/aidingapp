@@ -35,8 +35,8 @@
 */
 
 use App\Models\User;
-use AdvisingApp\Authorization\Models\Role;
-use AdvisingApp\Authorization\Models\RoleGroup;
+use AidingApp\Authorization\Models\Role;
+use AidingApp\Authorization\Models\RoleGroup;
 
 it('will remove all Roles in the RoleGroup when a User is removed from a RoleGroup', function () {
     // Given that we have a User

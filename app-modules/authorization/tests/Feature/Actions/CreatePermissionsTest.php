@@ -39,15 +39,15 @@ use Mockery\MockInterface;
 
 use function Pest\Laravel\partialMock;
 
+use AidingApp\Authorization\Tests\Helpers;
 use App\Actions\Finders\ApplicationModels;
-use AdvisingApp\Authorization\Tests\Helpers;
 
 use function Pest\Laravel\assertDatabaseHas;
 
-use AdvisingApp\Authorization\Models\Permission;
+use AidingApp\Authorization\Models\Permission;
 use Spatie\Permission\Commands\CreatePermission;
-use AdvisingApp\Authorization\Actions\CreatePermissions;
-use AdvisingApp\Authorization\AuthorizationPermissionRegistry;
+use AidingApp\Authorization\Actions\CreatePermissions;
+use AidingApp\Authorization\AuthorizationPermissionRegistry;
 
 beforeEach(function () {
     (new Helpers())->truncateTables();

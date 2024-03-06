@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Authorization\Listeners;
+namespace AidingApp\Authorization\Listeners;
 
 class HandleRoleRemovedFromUser
 {

@@ -34,21 +34,21 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Models;
+namespace AidingApp\Engagement\Models;
 
 use App\Models\BaseModel;
 use Illuminate\Support\Collection;
-use AdvisingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Timeline\Models\Timeline;
 use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Contracts\Auditable;
-use AdvisingApp\Timeline\Models\Timeline;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
-use AdvisingApp\Timeline\Models\Contracts\ProvidesATimeline;
-use AdvisingApp\Timeline\Timelines\EngagementResponseTimeline;
-use AdvisingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
+use AidingApp\Timeline\Timelines\EngagementResponseTimeline;
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 
 /**
  * @mixin IdeHelperEngagementResponse

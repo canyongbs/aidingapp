@@ -34,22 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Authorization\Filament\Resources;
+namespace AidingApp\Authorization\Filament\Resources;
 
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
+use AidingApp\Authorization\Models\Role;
 use Filament\Forms\Components\TextInput;
 use App\Filament\Tables\Columns\IdColumn;
 use Illuminate\Database\Eloquent\Builder;
-use AdvisingApp\Authorization\Models\Role;
-use AdvisingApp\Authorization\Filament\Resources\RoleResource\Pages\EditRole;
-use AdvisingApp\Authorization\Filament\Resources\RoleResource\Pages\ViewRole;
-use AdvisingApp\Authorization\Filament\Resources\RoleResource\Pages\ListRoles;
-use AdvisingApp\Authorization\Filament\Resources\RoleResource\Pages\CreateRole;
-use AdvisingApp\Authorization\Filament\Resources\RoleResource\RelationManagers\PermissionsRelationManager;
+use AidingApp\Authorization\Filament\Resources\RoleResource\Pages\EditRole;
+use AidingApp\Authorization\Filament\Resources\RoleResource\Pages\ViewRole;
+use AidingApp\Authorization\Filament\Resources\RoleResource\Pages\ListRoles;
+use AidingApp\Authorization\Filament\Resources\RoleResource\Pages\CreateRole;
+use AidingApp\Authorization\Filament\Resources\RoleResource\RelationManagers\PermissionsRelationManager;
 
 class RoleResource extends Resource
 {

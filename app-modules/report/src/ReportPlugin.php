@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Report;
+namespace AidingApp\Report;
 
 use Filament\Panel;
 use Filament\Contracts\Plugin;
@@ -51,11 +51,11 @@ class ReportPlugin implements Plugin
         $panel
             ->discoverResources(
                 in: __DIR__ . '/Filament/Resources',
-                for: 'AdvisingApp\\Report\\Filament\\Resources'
+                for: 'AidingApp\\Report\\Filament\\Resources'
             )
             ->discoverPages(
                 in: __DIR__ . '/Filament/Pages',
-                for: 'AdvisingApp\\Report\\Filament\\Pages'
+                for: 'AidingApp\\Report\\Filament\\Pages'
             );
     }
 

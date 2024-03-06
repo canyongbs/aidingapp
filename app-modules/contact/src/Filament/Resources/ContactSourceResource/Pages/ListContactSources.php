@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Contact\Filament\Resources\ContactSourceResource\Pages;
+namespace AidingApp\Contact\Filament\Resources\ContactSourceResource\Pages;
 
 use Filament\Actions;
 use Filament\Tables\Table;
@@ -45,7 +45,7 @@ use App\Filament\Tables\Columns\IdColumn;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
-use AdvisingApp\Contact\Filament\Resources\ContactSourceResource;
+use AidingApp\Contact\Filament\Resources\ContactSourceResource;
 
 class ListContactSources extends ListRecords
 {

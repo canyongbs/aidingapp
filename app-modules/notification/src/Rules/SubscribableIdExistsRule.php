@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Notification\Rules;
+namespace AidingApp\Notification\Rules;
 
 use Closure;
 use Illuminate\Database\Eloquent\Model;

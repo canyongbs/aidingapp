@@ -32,7 +32,7 @@
 </COPYRIGHT>
 --}}
 @php
-    use AdvisingApp\Survey\Filament\Blocks\LikertScaleSurveyBlock;
+    use AidingApp\Survey\Filament\Blocks\LikertScaleSurveyBlock;
 @endphp
 
 <x-form::blocks.field-wrapper

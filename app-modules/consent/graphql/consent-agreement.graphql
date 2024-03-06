@@ -1,5 +1,5 @@
 type ConsentAgreement
-    @model(class: "AdvisingApp\\Consent\\Models\\ConsentAgreement") {
+    @model(class: "AidingApp\\Consent\\Models\\ConsentAgreement") {
     id: UUID!
 
     type: ConsentAgreementType!
@@ -104,7 +104,7 @@ type ConsentAgreementMutations {
     ): ConsentAgreement!
         @canFind(ability: "update", find: "id")
         @field(
-            resolver: "AdvisingApp\\Consent\\GraphQL\\Mutations\\UpdateConsentAgreement"
+            resolver: "AidingApp\\Consent\\GraphQL\\Mutations\\UpdateConsentAgreement"
         )
 
     "Consent a user to a consent agreement."
@@ -116,7 +116,7 @@ type ConsentAgreementMutations {
     ): ConsentAgreement!
         @canFind(ability: "update", find: "id")
         @field(
-            resolver: "AdvisingApp\\Consent\\GraphQL\\Mutations\\ConsentUserToConsentAgreement"
+            resolver: "AidingApp\\Consent\\GraphQL\\Mutations\\ConsentUserToConsentAgreement"
         )
 }
 

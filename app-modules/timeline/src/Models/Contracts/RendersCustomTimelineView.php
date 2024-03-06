@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Timeline\Models\Contracts;
+namespace AidingApp\Timeline\Models\Contracts;
 
 interface RendersCustomTimelineView
 {

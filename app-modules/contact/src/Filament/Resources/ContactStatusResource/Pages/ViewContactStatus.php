@@ -34,15 +34,15 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Contact\Filament\Resources\ContactStatusResource\Pages;
+namespace AidingApp\Contact\Filament\Resources\ContactStatusResource\Pages;
 
 use Filament\Actions;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Infolists\Components\Section;
+use AidingApp\Contact\Models\ContactStatus;
 use Filament\Infolists\Components\TextEntry;
-use AdvisingApp\Contact\Models\ContactStatus;
-use AdvisingApp\Contact\Filament\Resources\ContactStatusResource;
+use AidingApp\Contact\Filament\Resources\ContactStatusResource;
 
 class ViewContactStatus extends ViewRecord
 {

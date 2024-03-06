@@ -32,7 +32,7 @@
 </COPYRIGHT>
 --}}
 @php
-    use AdvisingApp\ServiceManagement\Models\ChangeRequest;
+    use AidingApp\ServiceManagement\Models\ChangeRequest;
 
     $livewireData = $getLivewire()->data;
     $impact = $livewireData['impact'];

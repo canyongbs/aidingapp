@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\Pages;
+namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\Pages;
 
 use Filament\Forms\Form;
 use Filament\Actions\ViewAction;
@@ -43,7 +43,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\EditRecord;
 use App\Filament\Forms\Components\IconSelect;
-use AdvisingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource;
 
 class EditKnowledgeBaseCategory extends EditRecord
 {

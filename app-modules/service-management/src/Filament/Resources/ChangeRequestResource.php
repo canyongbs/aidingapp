@@ -34,15 +34,15 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Filament\Resources;
+namespace AidingApp\ServiceManagement\Filament\Resources;
 
 use Filament\Resources\Resource;
 use App\Filament\Clusters\ServiceManagement;
-use AdvisingApp\ServiceManagement\Models\ChangeRequest;
-use AdvisingApp\ServiceManagement\Filament\Resources\ChangeRequestResource\Pages\EditChangeRequest;
-use AdvisingApp\ServiceManagement\Filament\Resources\ChangeRequestResource\Pages\ViewChangeRequest;
-use AdvisingApp\ServiceManagement\Filament\Resources\ChangeRequestResource\Pages\ListChangeRequests;
-use AdvisingApp\ServiceManagement\Filament\Resources\ChangeRequestResource\Pages\CreateChangeRequest;
+use AidingApp\ServiceManagement\Models\ChangeRequest;
+use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestResource\Pages\EditChangeRequest;
+use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestResource\Pages\ViewChangeRequest;
+use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestResource\Pages\ListChangeRequests;
+use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestResource\Pages\CreateChangeRequest;
 
 class ChangeRequestResource extends Resource
 {

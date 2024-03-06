@@ -34,16 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InventoryManagement\Filament\Resources;
+namespace AidingApp\InventoryManagement\Filament\Resources;
 
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Forms\Components\TextInput;
 use App\Filament\Clusters\AssetManagement;
-use AdvisingApp\InventoryManagement\Models\AssetType;
-use AdvisingApp\InventoryManagement\Filament\Resources\AssetTypeResource\Pages\ViewAssetType;
-use AdvisingApp\InventoryManagement\Filament\Resources\AssetTypeResource\Pages\ListAssetTypes;
-use AdvisingApp\InventoryManagement\Filament\Resources\AssetTypeResource\Pages\CreateAssetType;
+use AidingApp\InventoryManagement\Models\AssetType;
+use AidingApp\InventoryManagement\Filament\Resources\AssetTypeResource\Pages\ViewAssetType;
+use AidingApp\InventoryManagement\Filament\Resources\AssetTypeResource\Pages\ListAssetTypes;
+use AidingApp\InventoryManagement\Filament\Resources\AssetTypeResource\Pages\CreateAssetType;
 
 class AssetTypeResource extends Resource
 {

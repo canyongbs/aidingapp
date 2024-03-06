@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Portal\Filament\Pages;
+namespace AidingApp\Portal\Filament\Pages;
 
 use App\Models\User;
 use App\Enums\Feature;
@@ -42,23 +42,23 @@ use Filament\Forms\Get;
 use Filament\Forms\Form;
 use App\Models\SettingsProperty;
 use Filament\Pages\SettingsPage;
-use AdvisingApp\Form\Enums\Rounding;
+use AidingApp\Form\Enums\Rounding;
 use Illuminate\Support\Facades\Gate;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
+use AidingApp\Portal\Enums\PortalType;
 use Filament\Forms\Components\Actions;
 use Filament\Forms\Components\Section;
-use AdvisingApp\Portal\Enums\PortalType;
 use Filament\Forms\Components\TextInput;
 use App\Filament\Clusters\GlobalSettings;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Infolists\Components\TextEntry;
 use FilamentTiptapEditor\Enums\TiptapOutput;
+use AidingApp\Portal\Settings\PortalSettings;
 use Filament\Forms\Components\Actions\Action;
 use App\Filament\Forms\Components\ColorSelect;
-use AdvisingApp\Portal\Settings\PortalSettings;
 use App\Filament\Forms\Components\TiptapEditor;
-use AdvisingApp\Portal\Actions\GeneratePortalEmbedCode;
+use AidingApp\Portal\Actions\GeneratePortalEmbedCode;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 
 class ManagePortalSettings extends SettingsPage

@@ -34,25 +34,25 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Interaction\Models;
+namespace AidingApp\Interaction\Models;
 
 use App\Models\User;
 use App\Models\BaseModel;
 use App\Models\Authenticatable;
 use Illuminate\Support\Collection;
-use AdvisingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Division\Models\Division;
 use OwenIt\Auditing\Contracts\Auditable;
-use AdvisingApp\Division\Models\Division;
 use Illuminate\Database\Eloquent\Builder;
 use App\Models\Scopes\LicensedToEducatable;
 use App\Models\Concerns\BelongsToEducatable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use AdvisingApp\ServiceManagement\Models\ServiceRequest;
-use AdvisingApp\Notification\Models\Contracts\Subscribable;
-use AdvisingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AdvisingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\Notification\Models\Contracts\Subscribable;
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
 
 /**
  * @mixin IdeHelperInteraction

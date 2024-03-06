@@ -40,16 +40,16 @@ use function Tests\asSuperAdmin;
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
+use AidingApp\Contact\Models\Contact;
 use Illuminate\Validation\Rules\Enum;
-use AdvisingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\ContactStatus;
 
 use function PHPUnit\Framework\assertCount;
 use function PHPUnit\Framework\assertEmpty;
 use function Pest\Laravel\assertDatabaseHas;
 
-use AdvisingApp\Contact\Models\ContactStatus;
-use AdvisingApp\Contact\Filament\Resources\ContactStatusResource;
-use AdvisingApp\Contact\Tests\ContactStatus\RequestFactories\CreateContactStatusRequestFactory;
+use AidingApp\Contact\Filament\Resources\ContactStatusResource;
+use AidingApp\Contact\Tests\ContactStatus\RequestFactories\CreateContactStatusRequestFactory;
 
 test('A successful action on the CreateContactStatus page', function () {
     asSuperAdmin()

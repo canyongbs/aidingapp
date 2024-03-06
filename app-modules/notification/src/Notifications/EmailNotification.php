@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Notification\Notifications;
+namespace AidingApp\Notification\Notifications;
 
-use AdvisingApp\Notification\Notifications\Messages\MailMessage;
+use AidingApp\Notification\Notifications\Messages\MailMessage;
 
 interface EmailNotification
 {

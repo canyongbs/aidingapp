@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Models\Concerns;
+namespace AidingApp\Engagement\Models\Concerns;
 
-use AdvisingApp\Engagement\Models\EngagementBatch;
+use AidingApp\Engagement\Models\EngagementBatch;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 trait HasManyEngagementBatches

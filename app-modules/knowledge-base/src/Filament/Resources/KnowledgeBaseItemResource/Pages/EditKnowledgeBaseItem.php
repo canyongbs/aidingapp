@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource\Pages;
+namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource\Pages;
 
 use Filament\Forms\Form;
 use Filament\Actions\EditAction;
@@ -46,7 +46,7 @@ use Filament\Resources\Pages\EditRecord;
 use Filament\Actions\Action as BaseAction;
 use Filament\Forms\Components\Actions\Action;
 use App\Filament\Forms\Components\TiptapEditor;
-use AdvisingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource;
 
 class EditKnowledgeBaseItem extends EditRecord
 {

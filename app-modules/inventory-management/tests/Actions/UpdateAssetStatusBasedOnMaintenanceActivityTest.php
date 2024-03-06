@@ -36,10 +36,10 @@
 
 use function Pest\Laravel\seed;
 
-use AdvisingApp\InventoryManagement\Models\Asset;
-use AdvisingApp\InventoryManagement\Models\MaintenanceActivity;
-use AdvisingApp\InventoryManagement\Database\Seeders\AssetStatusSeeder;
-use AdvisingApp\InventoryManagement\Enums\SystemAssetStatusClassification;
+use AidingApp\InventoryManagement\Models\Asset;
+use AidingApp\InventoryManagement\Models\MaintenanceActivity;
+use AidingApp\InventoryManagement\Database\Seeders\AssetStatusSeeder;
+use AidingApp\InventoryManagement\Enums\SystemAssetStatusClassification;
 
 beforeEach(function () {
     seed(AssetStatusSeeder::class);

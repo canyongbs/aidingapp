@@ -1,5 +1,5 @@
 type UserSubscription
-    @model(class: "AdvisingApp\\Notification\\Models\\Subscription") {
+    @model(class: "AidingApp\\Notification\\Models\\Subscription") {
     "Unique primary key."
     id: UUID!
     "The User related to this subscription."
@@ -52,7 +52,7 @@ input CreateUserSubscriptionInput {
             apply: [
                 "required"
                 "exists:users,id"
-                "AdvisingApp\\Notification\\Rules\\UniqueSubscriptionRule"
+                "AidingApp\\Notification\\Rules\\UniqueSubscriptionRule"
             ]
         )
 
@@ -61,7 +61,7 @@ input CreateUserSubscriptionInput {
         @rules(
             apply: [
                 "required"
-                "AdvisingApp\\Notification\\Rules\\SubscribableIdExistsRule"
+                "AidingApp\\Notification\\Rules\\SubscribableIdExistsRule"
             ]
         )
 

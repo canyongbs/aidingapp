@@ -36,12 +36,12 @@
 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Queue;
+use AidingApp\Engagement\Models\Engagement;
 use Illuminate\Support\Facades\Notification;
-use AdvisingApp\Engagement\Models\Engagement;
-use AdvisingApp\Engagement\Actions\DeliverEngagements;
-use AdvisingApp\Engagement\Models\EngagementDeliverable;
-use AdvisingApp\Engagement\Actions\EngagementSmsChannelDelivery;
-use AdvisingApp\Engagement\Actions\EngagementEmailChannelDelivery;
+use AidingApp\Engagement\Actions\DeliverEngagements;
+use AidingApp\Engagement\Models\EngagementDeliverable;
+use AidingApp\Engagement\Actions\EngagementSmsChannelDelivery;
+use AidingApp\Engagement\Actions\EngagementEmailChannelDelivery;
 
 it('will dispatch a job to send all engagements that should be delivered via email', function () {
     Queue::fake(EngagementEmailChannelDelivery::class);

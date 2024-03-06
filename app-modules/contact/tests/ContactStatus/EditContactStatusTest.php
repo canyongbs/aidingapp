@@ -40,15 +40,15 @@ use function Tests\asSuperAdmin;
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
+use AidingApp\Contact\Models\Contact;
 use Illuminate\Validation\Rules\Enum;
-use AdvisingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\ContactStatus;
 
 use function Pest\Laravel\assertDatabaseHas;
 use function PHPUnit\Framework\assertEquals;
 
-use AdvisingApp\Contact\Models\ContactStatus;
-use AdvisingApp\Contact\Filament\Resources\ContactStatusResource;
-use AdvisingApp\Contact\Tests\ContactStatus\RequestFactories\EditContactStatusRequestFactory;
+use AidingApp\Contact\Filament\Resources\ContactStatusResource;
+use AidingApp\Contact\Tests\ContactStatus\RequestFactories\EditContactStatusRequestFactory;
 
 test('A successful action on the EditContactStatus page', function () {
     $contactStatus = ContactStatus::factory()->create();

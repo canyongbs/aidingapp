@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Report\Database\Factories;
+namespace AidingApp\Report\Database\Factories;
 
 use App\Models\User;
-use AdvisingApp\Report\Models\Report;
-use AdvisingApp\Report\Enums\ReportModel;
+use AidingApp\Report\Models\Report;
+use AidingApp\Report\Enums\ReportModel;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

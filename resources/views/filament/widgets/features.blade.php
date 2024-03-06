@@ -32,9 +32,9 @@
 </COPYRIGHT>
 --}}
 @php
-    use AdvisingApp\Assistant\Filament\Pages\PersonalAssistant;
-    use AdvisingApp\Authorization\Enums\LicenseType;
-    use AdvisingApp\Contact\Filament\Pages\RecruitmentCrmDashboard;
+    use AidingApp\Assistant\Filament\Pages\PersonalAssistant;
+    use AidingApp\Authorization\Enums\LicenseType;
+    use AidingApp\Contact\Filament\Pages\RecruitmentCrmDashboard;
 @endphp
 
 <x-filament-widgets::widget>

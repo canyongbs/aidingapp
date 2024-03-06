@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Assistant;
+namespace AidingApp\Assistant;
 
 use Filament\Panel;
 use Filament\Contracts\Plugin;
@@ -51,11 +51,11 @@ class AssistantPlugin implements Plugin
         $panel
             ->discoverResources(
                 in: __DIR__ . '/Filament/Resources',
-                for: 'AdvisingApp\\Assistant\\Filament\\Resources'
+                for: 'AidingApp\\Assistant\\Filament\\Resources'
             )
             ->discoverPages(
                 in: __DIR__ . '/Filament/Pages',
-                for: 'AdvisingApp\\Assistant\\Filament\\Pages'
+                for: 'AidingApp\\Assistant\\Filament\\Pages'
             );
     }
 

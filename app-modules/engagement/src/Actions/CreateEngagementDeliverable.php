@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Actions;
+namespace AidingApp\Engagement\Actions;
 
-use AdvisingApp\Engagement\Models\Engagement;
+use AidingApp\Engagement\Models\Engagement;
 
 class CreateEngagementDeliverable
 {

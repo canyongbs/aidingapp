@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InAppCommunication\Jobs;
+namespace AidingApp\InAppCommunication\Jobs;
 
 use App\Models\User;
 use Illuminate\Bus\Queueable;
@@ -42,10 +42,10 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use AdvisingApp\InAppCommunication\Events\ConversationMessageSent;
-use AdvisingApp\InAppCommunication\Actions\ConvertMessageJsonToText;
-use AdvisingApp\InAppCommunication\Enums\ConversationNotificationPreference;
-use AdvisingApp\InAppCommunication\Actions\CheckConversationMessageContentForMention;
+use AidingApp\InAppCommunication\Events\ConversationMessageSent;
+use AidingApp\InAppCommunication\Actions\ConvertMessageJsonToText;
+use AidingApp\InAppCommunication\Enums\ConversationNotificationPreference;
+use AidingApp\InAppCommunication\Actions\CheckConversationMessageContentForMention;
 
 class NotifyConversationParticipant implements ShouldQueue
 {

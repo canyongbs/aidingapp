@@ -34,19 +34,19 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Consent\Providers;
+namespace AidingApp\Consent\Providers;
 
 use Filament\Panel;
 use App\Concerns\ImplementsGraphQL;
-use AdvisingApp\Consent\ConsentPlugin;
+use AidingApp\Consent\ConsentPlugin;
 use Illuminate\Support\ServiceProvider;
-use AdvisingApp\Consent\Models\ConsentAgreement;
+use AidingApp\Consent\Models\ConsentAgreement;
+use AidingApp\Consent\Enums\ConsentAgreementType;
+use AidingApp\Consent\Models\UserConsentAgreement;
 use App\Registries\RoleBasedAccessControlRegistry;
-use AdvisingApp\Consent\Enums\ConsentAgreementType;
-use AdvisingApp\Consent\Models\UserConsentAgreement;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use AdvisingApp\Consent\Registries\ConsentRbacRegistry;
-use AdvisingApp\Consent\Observers\ConsentAgreementObserver;
+use AidingApp\Consent\Registries\ConsentRbacRegistry;
+use AidingApp\Consent\Observers\ConsentAgreementObserver;
 
 class ConsentServiceProvider extends ServiceProvider
 {

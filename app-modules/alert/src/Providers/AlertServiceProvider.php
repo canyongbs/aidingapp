@@ -34,22 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Alert\Providers;
+namespace AidingApp\Alert\Providers;
 
 use Filament\Panel;
-use AdvisingApp\Alert\AlertPlugin;
-use AdvisingApp\Alert\Models\Alert;
+use AidingApp\Alert\AlertPlugin;
+use AidingApp\Alert\Models\Alert;
 use App\Concerns\ImplementsGraphQL;
 use Illuminate\Support\Facades\Event;
+use AidingApp\Alert\Enums\AlertStatus;
 use Illuminate\Support\ServiceProvider;
-use AdvisingApp\Alert\Enums\AlertStatus;
-use AdvisingApp\Alert\Enums\AlertSeverity;
-use AdvisingApp\Alert\Events\AlertCreated;
-use AdvisingApp\Alert\Observers\AlertObserver;
+use AidingApp\Alert\Enums\AlertSeverity;
+use AidingApp\Alert\Events\AlertCreated;
+use AidingApp\Alert\Observers\AlertObserver;
+use AidingApp\Alert\Registries\AlertRbacRegistry;
 use App\Registries\RoleBasedAccessControlRegistry;
-use AdvisingApp\Alert\Registries\AlertRbacRegistry;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use AdvisingApp\Alert\Listeners\NotifySubscribersOfAlertCreated;
+use AidingApp\Alert\Listeners\NotifySubscribersOfAlertCreated;
 
 class AlertServiceProvider extends ServiceProvider
 {

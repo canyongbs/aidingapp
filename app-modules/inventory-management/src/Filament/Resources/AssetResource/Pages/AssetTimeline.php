@@ -34,13 +34,13 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InventoryManagement\Filament\Resources\AssetResource\Pages;
+namespace AidingApp\InventoryManagement\Filament\Resources\AssetResource\Pages;
 
-use AdvisingApp\Timeline\Filament\Pages\TimelinePage;
-use AdvisingApp\InventoryManagement\Models\AssetCheckIn;
-use AdvisingApp\InventoryManagement\Models\AssetCheckOut;
-use AdvisingApp\InventoryManagement\Models\MaintenanceActivity;
-use AdvisingApp\InventoryManagement\Filament\Resources\AssetResource;
+use AidingApp\Timeline\Filament\Pages\TimelinePage;
+use AidingApp\InventoryManagement\Models\AssetCheckIn;
+use AidingApp\InventoryManagement\Models\AssetCheckOut;
+use AidingApp\InventoryManagement\Models\MaintenanceActivity;
+use AidingApp\InventoryManagement\Filament\Resources\AssetResource;
 
 class AssetTimeline extends TimelinePage
 {

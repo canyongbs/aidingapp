@@ -42,10 +42,10 @@ use function Pest\Livewire\livewire;
 use function PHPUnit\Framework\assertCount;
 use function Pest\Laravel\assertDatabaseHas;
 
-use AdvisingApp\Authorization\Enums\LicenseType;
-use AdvisingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
-use AdvisingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource;
-use AdvisingApp\KnowledgeBase\Tests\KnowledgeBaseCategory\RequestFactories\CreateKnowledgeBaseCategoryRequestFactory;
+use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource;
+use AidingApp\KnowledgeBase\Tests\KnowledgeBaseCategory\RequestFactories\CreateKnowledgeBaseCategoryRequestFactory;
 
 // TODO: Write CreateKnowledgeBaseCategory tests
 //test('A successful action on the CreateKnowledgeBaseCategory page', function () {});

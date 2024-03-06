@@ -1,5 +1,5 @@
 type InteractionCampaign
-    @model(class: "AdvisingApp\\Interaction\\Models\\InteractionCampaign") {
+    @model(class: "AidingApp\\Interaction\\Models\\InteractionCampaign") {
     "Unique primary key."
     id: UUID!
 

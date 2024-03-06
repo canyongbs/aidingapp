@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Interaction\Filament\Resources\InteractionStatusResource\Pages;
+namespace AidingApp\Interaction\Filament\Resources\InteractionStatusResource\Pages;
 
 use Filament\Actions;
 use Filament\Tables\Table;
@@ -44,8 +44,8 @@ use App\Filament\Tables\Columns\IdColumn;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
-use AdvisingApp\Interaction\Models\InteractionStatus;
-use AdvisingApp\Interaction\Filament\Resources\InteractionStatusResource;
+use AidingApp\Interaction\Models\InteractionStatus;
+use AidingApp\Interaction\Filament\Resources\InteractionStatusResource;
 
 class ListInteractionStatuses extends ListRecords
 {

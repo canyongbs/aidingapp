@@ -42,9 +42,9 @@ use App\Settings\LicenseSettings;
 
 use function Pest\Laravel\actingAs;
 
-use AdvisingApp\Authorization\Enums\LicenseType;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestUpdate;
-use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource;
+use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource;
 
 test('The correct details are displayed on the ViewServiceRequestUpdate page', function () {
     $serviceRequestUpdate = ServiceRequestUpdate::factory()->create();

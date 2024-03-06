@@ -34,13 +34,13 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InAppCommunication\Models;
+namespace AidingApp\InAppCommunication\Models;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use AidingApp\InAppCommunication\Enums\ConversationType;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use AdvisingApp\InAppCommunication\Enums\ConversationType;
 use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**

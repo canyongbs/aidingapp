@@ -14,7 +14,7 @@ input AuditableablesQuery {
     user_consent_agreement: UserConsentAgreementsQuery
 }
 
-type Audit @model(class: "AdvisingApp\\Audit\\Models\\Audit") {
+type Audit @model(class: "AidingApp\\Audit\\Models\\Audit") {
     "Unique primary key."
     id: UUID!
 

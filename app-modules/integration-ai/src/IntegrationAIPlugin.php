@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\IntegrationAI;
+namespace AidingApp\IntegrationAI;
 
 use Filament\Panel;
 use Filament\Contracts\Plugin;
@@ -50,7 +50,7 @@ class IntegrationAIPlugin implements Plugin
     {
         $panel->discoverResources(
             in: __DIR__ . '/Filament/Resources',
-            for: 'AdvisingApp\\IntegrationAI\\Filament\\Resources'
+            for: 'AidingApp\\IntegrationAI\\Filament\\Resources'
         );
     }
 

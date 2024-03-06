@@ -1,5 +1,5 @@
 type InteractionRelation
-    @model(class: "AdvisingApp\\Interaction\\Models\\InteractionRelation") {
+    @model(class: "AidingApp\\Interaction\\Models\\InteractionRelation") {
     "Unique primary key."
     id: UUID!
 

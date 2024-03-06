@@ -51,9 +51,9 @@ const showMobileMenu = ref(false);
 const userIsAuthenticated = ref(false);
 
 onMounted(async () => {
-    const { isEmbeddedInAdvisingApp } = getAppContext(props.accessUrl);
+    const { isEmbeddedInAidingApp } = getAppContext(props.accessUrl);
 
-    if (isEmbeddedInAdvisingApp) {
+    if (isEmbeddedInAidingApp) {
         await axios.get(props.appUrl + '/sanctum/csrf-cookie');
     }
 
@@ -178,9 +178,9 @@ async function authenticate(formData, node) {
 
     const { setToken } = useTokenStore();
 
-    const { isEmbeddedInAdvisingApp } = getAppContext(props.accessUrl);
+    const { isEmbeddedInAidingApp } = getAppContext(props.accessUrl);
 
-    if (isEmbeddedInAdvisingApp) {
+    if (isEmbeddedInAidingApp) {
         await axios.get(props.appUrl + '/sanctum/csrf-cookie');
     }
 
@@ -221,7 +221,7 @@ async function authenticate(formData, node) {
     axios
         .post(authentication.value.requestUrl, {
             email: formData.email,
-            isSpa: isEmbeddedInAdvisingApp,
+            isSpa: isEmbeddedInAidingApp,
         })
         .then((response) => {
             if (response.errors) {

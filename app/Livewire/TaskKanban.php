@@ -40,12 +40,12 @@ use Exception;
 use Livewire\Component;
 use Illuminate\Support\Arr;
 use Filament\Actions\Action;
+use AidingApp\Task\Models\Task;
 use Filament\Actions\EditAction;
-use AdvisingApp\Task\Models\Task;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Collection;
+use AidingApp\Task\Enums\TaskStatus;
 use Filament\Forms\Components\Select;
-use AdvisingApp\Task\Enums\TaskStatus;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -53,14 +53,14 @@ use Filament\Notifications\Notification;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Concerns\InteractsWithForms;
+use AidingApp\Task\Filament\Concerns\TaskEditForm;
 use App\Filament\Forms\Components\EducatableSelect;
 use Filament\Actions\Concerns\InteractsWithActions;
-use AdvisingApp\Task\Filament\Concerns\TaskEditForm;
 use Filament\Widgets\Concerns\InteractsWithPageTable;
 use Bvtterfly\ModelStateMachine\Exceptions\InvalidTransition;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
-use AdvisingApp\Task\Filament\Pages\Components\TaskKanbanViewAction;
-use AdvisingApp\Task\Filament\Resources\TaskResource\Pages\ListTasks;
+use AidingApp\Task\Filament\Pages\Components\TaskKanbanViewAction;
+use AidingApp\Task\Filament\Resources\TaskResource\Pages\ListTasks;
 
 class TaskKanban extends Component implements HasForms, HasActions
 {

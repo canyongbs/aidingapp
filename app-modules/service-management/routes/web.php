@@ -35,7 +35,7 @@
 */
 
 use Illuminate\Support\Facades\Route;
-use AdvisingApp\ServiceManagement\Livewire\RenderServiceRequestForm;
+use AidingApp\ServiceManagement\Livewire\RenderServiceRequestForm;
 
 Route::middleware('web')
     ->prefix('service-request-forms')

@@ -34,16 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\IntegrationAI\Providers;
+namespace AidingApp\IntegrationAI\Providers;
 
 use Filament\Panel;
 use Illuminate\Support\ServiceProvider;
-use AdvisingApp\IntegrationAI\Client\AzureOpenAI;
-use AdvisingApp\IntegrationAI\IntegrationAIPlugin;
+use AidingApp\IntegrationAI\Client\AzureOpenAI;
+use AidingApp\IntegrationAI\IntegrationAIPlugin;
 use App\Registries\RoleBasedAccessControlRegistry;
-use AdvisingApp\IntegrationAI\Client\Contracts\AIChatClient;
-use AdvisingApp\IntegrationAI\Registries\IntegrationAIRbacRegistry;
-use AdvisingApp\IntegrationAI\Client\Playground\AzureOpenAI as PlaygroundAzureOpenAI;
+use AidingApp\IntegrationAI\Client\Contracts\AIChatClient;
+use AidingApp\IntegrationAI\Registries\IntegrationAIRbacRegistry;
+use AidingApp\IntegrationAI\Client\Playground\AzureOpenAI as PlaygroundAzureOpenAI;
 
 class IntegrationAIServiceProvider extends ServiceProvider
 {

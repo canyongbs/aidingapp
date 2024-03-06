@@ -34,15 +34,15 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\KnowledgeBase\Filament\Resources;
+namespace AidingApp\KnowledgeBase\Filament\Resources;
 
 use Filament\Resources\Resource;
 use App\Filament\Clusters\KnowledgeManagement;
-use AdvisingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
-use AdvisingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource\Pages\EditKnowledgeBaseStatus;
-use AdvisingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource\Pages\ViewKnowledgeBaseStatus;
-use AdvisingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource\Pages\CreateKnowledgeBaseStatus;
-use AdvisingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource\Pages\ListKnowledgeBaseStatuses;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource\Pages\EditKnowledgeBaseStatus;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource\Pages\ViewKnowledgeBaseStatus;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource\Pages\CreateKnowledgeBaseStatus;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource\Pages\ListKnowledgeBaseStatuses;
 
 class KnowledgeBaseStatusResource extends Resource
 {

@@ -32,9 +32,9 @@
 </COPYRIGHT>
 --}}
 @php
-    use AdvisingApp\InAppCommunication\Enums\ConversationType;
-    use AdvisingApp\InAppCommunication\Models\TwilioConversation;
-    use AdvisingApp\InAppCommunication\Models\TwilioConversationUser;
+    use AidingApp\InAppCommunication\Enums\ConversationType;
+    use AidingApp\InAppCommunication\Models\TwilioConversation;
+    use AidingApp\InAppCommunication\Models\TwilioConversationUser;
     use Filament\Support\Facades\FilamentAsset;
 
     $conversationGroups = $this->conversations->reduce(

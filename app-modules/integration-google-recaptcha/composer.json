@@ -1,5 +1,5 @@
 {
-    "name": "canyon-gbs/advising-app-integration-google-recaptcha",
+    "name": "canyon-gbs/aiding-app-integration-google-recaptcha",
     "description": "",
     "type": "library",
     "version": "1.0",
@@ -9,17 +9,17 @@
     },
     "autoload": {
         "psr-4": {
-            "AdvisingApp\\IntegrationGoogleRecaptcha\\": "src/",
-            "AdvisingApp\\IntegrationGoogleRecaptcha\\Tests\\": "tests/",
-            "AdvisingApp\\IntegrationGoogleRecaptcha\\Database\\Factories\\": "database/factories/",
-            "AdvisingApp\\IntegrationGoogleRecaptcha\\Database\\Seeders\\": "database/seeders/"
+            "AidingApp\\IntegrationGoogleRecaptcha\\": "src/",
+            "AidingApp\\IntegrationGoogleRecaptcha\\Tests\\": "tests/",
+            "AidingApp\\IntegrationGoogleRecaptcha\\Database\\Factories\\": "database/factories/",
+            "AidingApp\\IntegrationGoogleRecaptcha\\Database\\Seeders\\": "database/seeders/"
         }
     },
     "minimum-stability": "dev",
     "extra": {
         "laravel": {
             "providers": [
-                "AdvisingApp\\IntegrationGoogleRecaptcha\\Providers\\IntegrationGoogleRecaptchaServiceProvider"
+                "AidingApp\\IntegrationGoogleRecaptcha\\Providers\\IntegrationGoogleRecaptchaServiceProvider"
             ]
         }
     }

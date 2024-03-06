@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Contact\Database\Factories;
+namespace AidingApp\Contact\Database\Factories;
 
-use AdvisingApp\Contact\Models\ContactSource;
+use AidingApp\Contact\Models\ContactSource;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

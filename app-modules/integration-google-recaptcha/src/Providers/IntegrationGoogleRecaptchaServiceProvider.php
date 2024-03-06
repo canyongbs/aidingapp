@@ -34,13 +34,13 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\IntegrationGoogleRecaptcha\Providers;
+namespace AidingApp\IntegrationGoogleRecaptcha\Providers;
 
 use Filament\Panel;
 use Illuminate\Support\ServiceProvider;
 use App\Registries\RoleBasedAccessControlRegistry;
-use AdvisingApp\IntegrationGoogleRecaptcha\IntegrationGoogleRecaptchaPlugin;
-use AdvisingApp\IntegrationGoogleRecaptcha\Registries\IntegrationGoogleRecaptchaRbacRegistry;
+use AidingApp\IntegrationGoogleRecaptcha\IntegrationGoogleRecaptchaPlugin;
+use AidingApp\IntegrationGoogleRecaptcha\Registries\IntegrationGoogleRecaptchaRbacRegistry;
 
 class IntegrationGoogleRecaptchaServiceProvider extends ServiceProvider
 {

@@ -34,13 +34,13 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Interaction\Filament\Resources;
+namespace AidingApp\Interaction\Filament\Resources;
 
 use Filament\Resources\Resource;
-use AdvisingApp\Interaction\Models\Interaction;
-use AdvisingApp\Interaction\Filament\Resources\InteractionResource\Pages\EditInteraction;
-use AdvisingApp\Interaction\Filament\Resources\InteractionResource\Pages\ListInteractions;
-use AdvisingApp\Interaction\Filament\Resources\InteractionResource\Pages\CreateInteraction;
+use AidingApp\Interaction\Models\Interaction;
+use AidingApp\Interaction\Filament\Resources\InteractionResource\Pages\EditInteraction;
+use AidingApp\Interaction\Filament\Resources\InteractionResource\Pages\ListInteractions;
+use AidingApp\Interaction\Filament\Resources\InteractionResource\Pages\CreateInteraction;
 
 class InteractionResource extends Resource
 {

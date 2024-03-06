@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Alert;
+namespace AidingApp\Alert;
 
 use Filament\Panel;
 use Filament\Contracts\Plugin;
@@ -50,7 +50,7 @@ class AlertPlugin implements Plugin
     {
         $panel->discoverResources(
             in: __DIR__ . '/Filament/Resources',
-            for: 'AdvisingApp\\Alert\\Filament\\Resources'
+            for: 'AidingApp\\Alert\\Filament\\Resources'
         );
     }
 

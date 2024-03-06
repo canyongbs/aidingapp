@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Authorization\Events;
+namespace AidingApp\Authorization\Events;
 
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use AdvisingApp\Authorization\Models\Pivots\RoleGroupRolePivot;
+use AidingApp\Authorization\Models\Pivots\RoleGroupRolePivot;
 
 class RoleAttachedToRoleGroup
 {

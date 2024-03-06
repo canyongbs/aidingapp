@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Authorization\View\Components;
+namespace AidingApp\Authorization\View\Components;
 
 use Closure;
 use Illuminate\View\Component;

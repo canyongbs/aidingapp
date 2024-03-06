@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Notification\Notifications\Messages;
+namespace AidingApp\Notification\Notifications\Messages;
 
 use App\Models\NotificationSetting;
 use Illuminate\Notifications\Messages\MailMessage as BaseMailMessage;

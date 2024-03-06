@@ -35,5 +35,5 @@
 */
 
 return [
-    'site_title' => 'Advising App',
+    'site_title' => 'Aiding App',
 ];

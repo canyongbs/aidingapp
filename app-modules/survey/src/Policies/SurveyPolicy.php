@@ -34,15 +34,15 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Survey\Policies;
+namespace AidingApp\Survey\Policies;
 
 use App\Enums\Feature;
 use App\Models\Authenticatable;
+use AidingApp\Survey\Models\Survey;
 use Illuminate\Auth\Access\Response;
-use AdvisingApp\Survey\Models\Survey;
 use App\Concerns\PerformsFeatureChecks;
 use App\Concerns\PerformsLicenseChecks;
-use AdvisingApp\Authorization\Enums\LicenseType;
+use AidingApp\Authorization\Enums\LicenseType;
 use App\Policies\Contracts\PerformsChecksBeforeAuthorization;
 
 class SurveyPolicy implements PerformsChecksBeforeAuthorization

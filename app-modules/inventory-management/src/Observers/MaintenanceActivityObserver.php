@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InventoryManagement\Observers;
+namespace AidingApp\InventoryManagement\Observers;
 
-use AdvisingApp\Timeline\Events\TimelineableRecordCreated;
-use AdvisingApp\Timeline\Events\TimelineableRecordDeleted;
-use AdvisingApp\InventoryManagement\Models\MaintenanceActivity;
-use AdvisingApp\InventoryManagement\Actions\UpdateAssetStatusBasedOnMaintenanceActivity;
+use AidingApp\Timeline\Events\TimelineableRecordCreated;
+use AidingApp\Timeline\Events\TimelineableRecordDeleted;
+use AidingApp\InventoryManagement\Models\MaintenanceActivity;
+use AidingApp\InventoryManagement\Actions\UpdateAssetStatusBasedOnMaintenanceActivity;
 
 class MaintenanceActivityObserver
 {

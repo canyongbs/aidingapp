@@ -34,17 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestFormResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestFormResource\Pages;
 
 use Filament\Forms\Form;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Infolists\Components\TextEntry;
-use AdvisingApp\Form\Actions\GenerateSubmissibleEmbedCode;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestForm;
-use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestFormResource;
-use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestFormResource\Pages\Concerns\HasSharedFormConfiguration;
+use AidingApp\Form\Actions\GenerateSubmissibleEmbedCode;
+use AidingApp\ServiceManagement\Models\ServiceRequestForm;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestFormResource;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestFormResource\Pages\Concerns\HasSharedFormConfiguration;
 
 class EditServiceRequestForm extends EditRecord
 {

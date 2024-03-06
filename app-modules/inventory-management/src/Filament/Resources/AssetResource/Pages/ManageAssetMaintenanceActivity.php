@@ -34,13 +34,13 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InventoryManagement\Filament\Resources\AssetResource\Pages;
+namespace AidingApp\InventoryManagement\Filament\Resources\AssetResource\Pages;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Contracts\Support\Htmlable;
 use Filament\Resources\Pages\ManageRelatedRecords;
-use AdvisingApp\InventoryManagement\Filament\Resources\AssetResource;
-use AdvisingApp\InventoryManagement\Filament\Resources\AssetResource\RelationManagers\MaintenanceActivitiesRelationManager;
+use AidingApp\InventoryManagement\Filament\Resources\AssetResource;
+use AidingApp\InventoryManagement\Filament\Resources\AssetResource\RelationManagers\MaintenanceActivitiesRelationManager;
 
 class ManageAssetMaintenanceActivity extends ManageRelatedRecords
 {

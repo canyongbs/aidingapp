@@ -34,14 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Report\Policies;
+namespace AidingApp\Report\Policies;
 
 use App\Models\User;
 use App\Models\Authenticatable;
+use AidingApp\Report\Models\Report;
 use Illuminate\Auth\Access\Response;
-use AdvisingApp\Report\Models\Report;
 use App\Concerns\PerformsLicenseChecks;
-use AdvisingApp\Authorization\Enums\LicenseType;
+use AidingApp\Authorization\Enums\LicenseType;
 use App\Policies\Contracts\PerformsChecksBeforeAuthorization;
 
 class ReportPolicy implements PerformsChecksBeforeAuthorization

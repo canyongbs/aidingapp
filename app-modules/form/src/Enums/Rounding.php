@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Form\Enums;
+namespace AidingApp\Form\Enums;
 
 use Illuminate\Support\Str;
 use Filament\Support\Contracts\HasLabel;

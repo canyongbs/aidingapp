@@ -34,21 +34,21 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Assistant\Jobs;
+namespace AidingApp\Assistant\Jobs;
 
 use App\Models\User;
 use Illuminate\Bus\Queueable;
-use AdvisingApp\Team\Models\Team;
+use AidingApp\Team\Models\Team;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Queue\SerializesModels;
 use Filament\Notifications\Notification;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use AdvisingApp\Assistant\Models\AssistantChat;
-use AdvisingApp\Assistant\Enums\AssistantChatShareVia;
-use AdvisingApp\Assistant\Enums\AssistantChatShareWith;
-use AdvisingApp\Assistant\Notifications\SendFilamentShareAssistantChatNotification;
+use AidingApp\Assistant\Models\AssistantChat;
+use AidingApp\Assistant\Enums\AssistantChatShareVia;
+use AidingApp\Assistant\Enums\AssistantChatShareWith;
+use AidingApp\Assistant\Notifications\SendFilamentShareAssistantChatNotification;
 
 class ShareAssistantChatsJob implements ShouldQueue
 {

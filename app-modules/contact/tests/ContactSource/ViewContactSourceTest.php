@@ -39,9 +39,9 @@ use App\Models\User;
 use function Tests\asSuperAdmin;
 use function Pest\Laravel\actingAs;
 
-use AdvisingApp\Contact\Models\Contact;
-use AdvisingApp\Contact\Models\ContactSource;
-use AdvisingApp\Contact\Filament\Resources\ContactSourceResource;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\ContactSource;
+use AidingApp\Contact\Filament\Resources\ContactSourceResource;
 
 test('The correct details are displayed on the ViewContactSource page', function () {
     $contactSource = ContactSource::factory()->create();

@@ -34,13 +34,13 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Form\Actions;
+namespace AidingApp\Form\Actions;
 
 use Exception;
+use AidingApp\Survey\Models\Survey;
 use Illuminate\Support\Facades\URL;
-use AdvisingApp\Survey\Models\Survey;
-use AdvisingApp\Form\Models\Submissible;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestForm;
+use AidingApp\Form\Models\Submissible;
+use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 
 class GenerateSubmissibleEmbedCode
 {
@@ -48,7 +48,7 @@ class GenerateSubmissibleEmbedCode
     {
         return match ($submissible::class) {
             Survey::class => (function () use ($submissible) {
-                $scriptUrl = url('js/widgets/survey/advising-app-survey-widget.js?');
+                $scriptUrl = url('js/widgets/survey/aiding-app-survey-widget.js?');
                 $surveyDefinitionUrl = URL::to(
                     URL::signedRoute(
                         name: 'surveys.define',
@@ -64,7 +64,7 @@ class GenerateSubmissibleEmbedCode
             })(),
             ServiceRequestForm::class => (function () use ($submissible) {
                 /** @var ServiceRequestForm $submissible */
-                $scriptUrl = url('js/widgets/service-request-form/advising-app-service-request-form-widget.js?');
+                $scriptUrl = url('js/widgets/service-request-form/aiding-app-service-request-form-widget.js?');
                 $formDefinitionUrl = URL::to(
                     URL::signedRoute(
                         name: 'service-request-forms.define',

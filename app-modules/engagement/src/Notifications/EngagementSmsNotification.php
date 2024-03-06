@@ -34,16 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Notifications;
+namespace AidingApp\Engagement\Notifications;
 
 use App\Models\Tenant;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
-use AdvisingApp\Engagement\Models\EngagementDeliverable;
-use AdvisingApp\Notification\Models\OutboundDeliverable;
-use AdvisingApp\Notification\Notifications\SmsNotification;
-use AdvisingApp\Notification\Notifications\BaseNotification;
-use AdvisingApp\Notification\Notifications\Messages\TwilioMessage;
-use AdvisingApp\Notification\Notifications\Concerns\SmsChannelTrait;
+use AidingApp\Engagement\Models\EngagementDeliverable;
+use AidingApp\Notification\Models\OutboundDeliverable;
+use AidingApp\Notification\Notifications\SmsNotification;
+use AidingApp\Notification\Notifications\BaseNotification;
+use AidingApp\Notification\Notifications\Messages\TwilioMessage;
+use AidingApp\Notification\Notifications\Concerns\SmsChannelTrait;
 
 class EngagementSmsNotification extends BaseNotification implements SmsNotification, ShouldBeUnique
 {

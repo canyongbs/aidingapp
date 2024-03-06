@@ -1,26 +1,26 @@
 {
-  "name": "canyon-gbs/advising-app-in-app-communication",
-  "description": "",
-  "type": "library",
-  "version": "1.0",
-  "license": "proprietary",
-  "require": {
-    "filament/filament": "^3.0.0"
-  },
-  "autoload": {
-    "psr-4": {
-      "AdvisingApp\\InAppCommunication\\": "src/",
-      "AdvisingApp\\InAppCommunication\\Tests\\": "tests/",
-      "AdvisingApp\\InAppCommunication\\Database\\Factories\\": "database/factories/",
-      "AdvisingApp\\InAppCommunication\\Database\\Seeders\\": "database/seeders/"
+    "name": "canyon-gbs/aiding-app-in-app-communication",
+    "description": "",
+    "type": "library",
+    "version": "1.0",
+    "license": "proprietary",
+    "require": {
+        "filament/filament": "^3.0.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "AidingApp\\InAppCommunication\\": "src/",
+            "AidingApp\\InAppCommunication\\Tests\\": "tests/",
+            "AidingApp\\InAppCommunication\\Database\\Factories\\": "database/factories/",
+            "AidingApp\\InAppCommunication\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "minimum-stability": "dev",
+    "extra": {
+        "laravel": {
+            "providers": [
+                "AidingApp\\InAppCommunication\\Providers\\InAppCommunicationServiceProvider"
+            ]
+        }
     }
-  },
-  "minimum-stability": "dev",
-  "extra": {
-    "laravel": {
-      "providers": [
-        "AdvisingApp\\InAppCommunication\\Providers\\InAppCommunicationServiceProvider"
-      ]
-    }
-  }
 }

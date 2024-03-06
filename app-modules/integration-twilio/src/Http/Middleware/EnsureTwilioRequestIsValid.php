@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\IntegrationTwilio\Http\Middleware;
+namespace AidingApp\IntegrationTwilio\Http\Middleware;
 
 use Closure;
 use Twilio\Security\RequestValidator;
-use AdvisingApp\IntegrationTwilio\Settings\TwilioSettings;
+use AidingApp\IntegrationTwilio\Settings\TwilioSettings;
 
 class EnsureTwilioRequestIsValid
 {

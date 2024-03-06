@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Notification\DataTransferObjects;
+namespace AidingApp\Notification\DataTransferObjects;
 
 use Spatie\LaravelData\Data;
 

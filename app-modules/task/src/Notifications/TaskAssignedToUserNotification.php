@@ -34,21 +34,21 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Task\Notifications;
+namespace AidingApp\Task\Notifications;
 
 use App\Models\User;
-use AdvisingApp\Task\Models\Task;
+use AidingApp\Task\Models\Task;
 use Illuminate\Support\HtmlString;
 use App\Models\NotificationSetting;
 use Illuminate\Queue\SerializesModels;
-use AdvisingApp\Notification\Notifications\BaseNotification;
-use AdvisingApp\Notification\Notifications\EmailNotification;
-use AdvisingApp\Notification\Notifications\DatabaseNotification;
-use AdvisingApp\Notification\Notifications\Messages\MailMessage;
+use AidingApp\Notification\Notifications\BaseNotification;
+use AidingApp\Notification\Notifications\EmailNotification;
+use AidingApp\Notification\Notifications\DatabaseNotification;
+use AidingApp\Notification\Notifications\Messages\MailMessage;
 use Filament\Notifications\Notification as FilamentNotification;
-use AdvisingApp\Task\Filament\Resources\TaskResource\Pages\EditTask;
-use AdvisingApp\Notification\Notifications\Concerns\EmailChannelTrait;
-use AdvisingApp\Notification\Notifications\Concerns\DatabaseChannelTrait;
+use AidingApp\Task\Filament\Resources\TaskResource\Pages\EditTask;
+use AidingApp\Notification\Notifications\Concerns\EmailChannelTrait;
+use AidingApp\Notification\Notifications\Concerns\DatabaseChannelTrait;
 
 class TaskAssignedToUserNotification extends BaseNotification implements DatabaseNotification, EmailNotification
 {

@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Authorization\Models\Concerns;
+namespace AidingApp\Authorization\Models\Concerns;
 
 use ReflectionClass;
 use Illuminate\Support\Collection;

@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Form\Filament\Tables\Filters;
+namespace AidingApp\Form\Filament\Tables\Filters;
 
 use Illuminate\Database\Eloquent\Builder;
-use AdvisingApp\Form\Enums\FormSubmissionStatus;
+use AidingApp\Form\Enums\FormSubmissionStatus;
 use App\Filament\Tables\Filters\OpenSearch\SelectFilter;
 
 class FormSubmissionStatusFilter extends SelectFilter

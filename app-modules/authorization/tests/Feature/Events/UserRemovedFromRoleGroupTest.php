@@ -35,10 +35,10 @@
 */
 
 use Illuminate\Support\Facades\Event;
-use AdvisingApp\Authorization\Models\RoleGroup;
-use AdvisingApp\Authorization\Events\RoleRemovedFromRoleGroup;
-use AdvisingApp\Authorization\Events\UserRemovedFromRoleGroup;
-use AdvisingApp\Authorization\Listeners\HandleUserRemovedFromRoleGroup;
+use AidingApp\Authorization\Models\RoleGroup;
+use AidingApp\Authorization\Events\RoleRemovedFromRoleGroup;
+use AidingApp\Authorization\Events\UserRemovedFromRoleGroup;
+use AidingApp\Authorization\Listeners\HandleUserRemovedFromRoleGroup;
 
 it('will fire when a user has been detached from a role group', function () {
     Event::fake();

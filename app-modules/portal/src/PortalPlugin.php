@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Portal;
+namespace AidingApp\Portal;
 
 use Filament\Panel;
 use Filament\Contracts\Plugin;
@@ -50,7 +50,7 @@ class PortalPlugin implements Plugin
     {
         $panel->discoverPages(
             in: __DIR__ . '/Filament/Pages',
-            for: 'AdvisingApp\\Portal\\Filament\\Pages'
+            for: 'AidingApp\\Portal\\Filament\\Pages'
         );
     }
 

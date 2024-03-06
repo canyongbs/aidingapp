@@ -43,8 +43,8 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Fieldset;
 use Filament\Notifications\Notification;
 use Filament\Forms\Components\Placeholder;
-use AdvisingApp\Authorization\Models\License;
-use AdvisingApp\Authorization\Enums\LicenseType;
+use AidingApp\Authorization\Models\License;
+use AidingApp\Authorization\Enums\LicenseType;
 
 class Licenses extends Section
 {

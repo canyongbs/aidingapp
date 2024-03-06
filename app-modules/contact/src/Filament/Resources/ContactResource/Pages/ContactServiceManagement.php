@@ -34,17 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Contact\Filament\Resources\ContactResource\Pages;
+namespace AidingApp\Contact\Filament\Resources\ContactResource\Pages;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Contracts\Support\Htmlable;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use App\Filament\Concerns\FiltersManagersFromGroups;
 use Filament\Resources\RelationManagers\RelationGroup;
-use AdvisingApp\Contact\Filament\Resources\ContactResource;
-use AdvisingApp\Contact\Filament\Resources\ContactResource\RelationManagers\AssetCheckInRelationManager;
-use AdvisingApp\Contact\Filament\Resources\ContactResource\RelationManagers\AssetCheckOutRelationManager;
-use AdvisingApp\Contact\Filament\Resources\ContactResource\RelationManagers\ServiceRequestsRelationManager;
+use AidingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers\AssetCheckInRelationManager;
+use AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers\AssetCheckOutRelationManager;
+use AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers\ServiceRequestsRelationManager;
 
 class ContactServiceManagement extends ManageRelatedRecords
 {

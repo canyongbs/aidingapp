@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Authorization\Models\Concerns;
+namespace AidingApp\Authorization\Models\Concerns;
 
-use AdvisingApp\Authorization\Models\Role;
-use AdvisingApp\Authorization\Models\RoleGroup;
+use AidingApp\Authorization\Models\Role;
+use AidingApp\Authorization\Models\RoleGroup;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 trait HasRoleGroups

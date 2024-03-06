@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\IntegrationAwsSesEventHandling\Settings;
+namespace AidingApp\IntegrationAwsSesEventHandling\Settings;
 
 use Spatie\LaravelSettings\Settings;
 

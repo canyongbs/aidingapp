@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Survey\Livewire;
+namespace AidingApp\Survey\Livewire;
 
 use Livewire\Component;
+use AidingApp\Survey\Models\Survey;
 use Illuminate\Contracts\View\View;
-use AdvisingApp\Survey\Models\Survey;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Concerns\InteractsWithForms;
 

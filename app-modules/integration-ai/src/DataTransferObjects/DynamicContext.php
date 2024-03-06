@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\IntegrationAI\DataTransferObjects;
+namespace AidingApp\IntegrationAI\DataTransferObjects;
 
 use Spatie\LaravelData\Data;
-use AdvisingApp\IntegrationAI\Models\Concerns\ProvidesDynamicContext;
+use AidingApp\IntegrationAI\Models\Concerns\ProvidesDynamicContext;
 
 class DynamicContext extends Data
 {

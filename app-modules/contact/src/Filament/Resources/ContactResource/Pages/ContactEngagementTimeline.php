@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Contact\Filament\Resources\ContactResource\Pages;
+namespace AidingApp\Contact\Filament\Resources\ContactResource\Pages;
 
-use AdvisingApp\Engagement\Models\Engagement;
-use AdvisingApp\Engagement\Models\EngagementResponse;
-use AdvisingApp\Timeline\Filament\Pages\TimelinePage;
-use AdvisingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Engagement\Models\Engagement;
+use AidingApp\Engagement\Models\EngagementResponse;
+use AidingApp\Timeline\Filament\Pages\TimelinePage;
+use AidingApp\Contact\Filament\Resources\ContactResource;
 
 class ContactEngagementTimeline extends TimelinePage
 {

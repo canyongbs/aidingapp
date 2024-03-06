@@ -34,16 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Notification\Filament\Actions;
+namespace AidingApp\Notification\Filament\Actions;
 
 use App\Models\User;
 use Filament\Actions\ViewAction;
 use Illuminate\Support\HtmlString;
-use AdvisingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\Contact;
 use App\Filament\Resources\UserResource;
 use Filament\Infolists\Components\TextEntry;
-use AdvisingApp\Notification\Models\OutboundDeliverable;
-use AdvisingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Notification\Models\OutboundDeliverable;
+use AidingApp\Contact\Filament\Resources\ContactResource;
 
 class OutboundDeliverableViewAction extends ViewAction
 {

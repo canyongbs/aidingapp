@@ -32,7 +32,7 @@
 </COPYRIGHT>
 --}}
 @php
-    use AdvisingApp\ServiceManagement\Models\ServiceRequest;
+    use AidingApp\ServiceManagement\Models\ServiceRequest;
 @endphp
 
 @props(['component', 'record'])

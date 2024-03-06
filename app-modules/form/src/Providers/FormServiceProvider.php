@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Form\Providers;
+namespace AidingApp\Form\Providers;
 
 use Filament\Panel;
-use AdvisingApp\Form\FormPlugin;
+use AidingApp\Form\FormPlugin;
 use Illuminate\Support\ServiceProvider;
 
 class FormServiceProvider extends ServiceProvider

@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InventoryManagement\Filament\Resources;
+namespace AidingApp\InventoryManagement\Filament\Resources;
 
 use Filament\Forms\Form;
 use Illuminate\Support\Carbon;
@@ -45,15 +45,15 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\DatePicker;
 use App\Filament\Clusters\ServiceManagement;
-use AdvisingApp\InventoryManagement\Models\Asset;
-use AdvisingApp\InventoryManagement\Models\AssetType;
-use AdvisingApp\InventoryManagement\Models\AssetStatus;
-use AdvisingApp\InventoryManagement\Models\AssetLocation;
-use AdvisingApp\InventoryManagement\Filament\Resources\AssetResource\Pages\ViewAsset;
-use AdvisingApp\InventoryManagement\Filament\Resources\AssetResource\Pages\ListAssets;
-use AdvisingApp\InventoryManagement\Filament\Resources\AssetResource\Pages\CreateAsset;
-use AdvisingApp\InventoryManagement\Filament\Resources\AssetResource\Pages\AssetTimeline;
-use AdvisingApp\InventoryManagement\Filament\Resources\AssetResource\Pages\ManageAssetMaintenanceActivity;
+use AidingApp\InventoryManagement\Models\Asset;
+use AidingApp\InventoryManagement\Models\AssetType;
+use AidingApp\InventoryManagement\Models\AssetStatus;
+use AidingApp\InventoryManagement\Models\AssetLocation;
+use AidingApp\InventoryManagement\Filament\Resources\AssetResource\Pages\ViewAsset;
+use AidingApp\InventoryManagement\Filament\Resources\AssetResource\Pages\ListAssets;
+use AidingApp\InventoryManagement\Filament\Resources\AssetResource\Pages\CreateAsset;
+use AidingApp\InventoryManagement\Filament\Resources\AssetResource\Pages\AssetTimeline;
+use AidingApp\InventoryManagement\Filament\Resources\AssetResource\Pages\ManageAssetMaintenanceActivity;
 
 // TODO: Can delete this and all underlying pages once we fork
 class AssetResource extends Resource

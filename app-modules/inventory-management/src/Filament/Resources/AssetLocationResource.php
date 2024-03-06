@@ -34,16 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InventoryManagement\Filament\Resources;
+namespace AidingApp\InventoryManagement\Filament\Resources;
 
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Forms\Components\TextInput;
 use App\Filament\Clusters\AssetManagement;
-use AdvisingApp\InventoryManagement\Models\AssetLocation;
-use AdvisingApp\InventoryManagement\Filament\Resources\AssetLocationResource\Pages\ViewAssetLocation;
-use AdvisingApp\InventoryManagement\Filament\Resources\AssetLocationResource\Pages\ListAssetLocations;
-use AdvisingApp\InventoryManagement\Filament\Resources\AssetLocationResource\Pages\CreateAssetLocation;
+use AidingApp\InventoryManagement\Models\AssetLocation;
+use AidingApp\InventoryManagement\Filament\Resources\AssetLocationResource\Pages\ViewAssetLocation;
+use AidingApp\InventoryManagement\Filament\Resources\AssetLocationResource\Pages\ListAssetLocations;
+use AidingApp\InventoryManagement\Filament\Resources\AssetLocationResource\Pages\CreateAssetLocation;
 
 class AssetLocationResource extends Resource
 {

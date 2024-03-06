@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Notification\Notifications\Concerns;
+namespace AidingApp\Notification\Notifications\Concerns;
 
-use AdvisingApp\Notification\Notifications\Channels\SmsChannel;
+use AidingApp\Notification\Notifications\Channels\SmsChannel;
 
 trait SmsChannelTrait
 {

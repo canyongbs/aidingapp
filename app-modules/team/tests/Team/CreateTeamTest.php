@@ -35,15 +35,15 @@
 */
 
 use App\Models\User;
-use AdvisingApp\Team\Models\Team;
+use AidingApp\Team\Models\Team;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 use function PHPUnit\Framework\assertCount;
 use function Pest\Laravel\assertDatabaseHas;
 
-use AdvisingApp\Team\Filament\Resources\TeamResource;
-use AdvisingApp\Team\Filament\Resources\TeamResource\Pages\CreateTeam;
+use AidingApp\Team\Filament\Resources\TeamResource;
+use AidingApp\Team\Filament\Resources\TeamResource\Pages\CreateTeam;
 
 // Permission Tests
 

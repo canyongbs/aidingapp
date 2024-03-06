@@ -34,16 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Survey\Filament\Resources;
+namespace AidingApp\Survey\Filament\Resources;
 
 use Filament\Resources\Resource;
 use Filament\Resources\Pages\Page;
-use AdvisingApp\Survey\Models\Survey;
+use AidingApp\Survey\Models\Survey;
 use Illuminate\Database\Eloquent\Builder;
-use AdvisingApp\Survey\Filament\Resources\SurveyResource\Pages\EditSurvey;
-use AdvisingApp\Survey\Filament\Resources\SurveyResource\Pages\ListSurveys;
-use AdvisingApp\Survey\Filament\Resources\SurveyResource\Pages\CreateSurvey;
-use AdvisingApp\Survey\Filament\Resources\SurveyResource\Pages\ManageSurveySubmissions;
+use AidingApp\Survey\Filament\Resources\SurveyResource\Pages\EditSurvey;
+use AidingApp\Survey\Filament\Resources\SurveyResource\Pages\ListSurveys;
+use AidingApp\Survey\Filament\Resources\SurveyResource\Pages\CreateSurvey;
+use AidingApp\Survey\Filament\Resources\SurveyResource\Pages\ManageSurveySubmissions;
 
 class SurveyResource extends Resource
 {

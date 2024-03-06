@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Contact\Tests\ContactStatus\RequestFactories;
+namespace AidingApp\Contact\Tests\ContactStatus\RequestFactories;
 
 use Worksome\RequestFactories\RequestFactory;
-use AdvisingApp\Contact\Enums\ContactStatusColorOptions;
-use AdvisingApp\Contact\Enums\SystemContactClassification;
+use AidingApp\Contact\Enums\ContactStatusColorOptions;
+use AidingApp\Contact\Enums\SystemContactClassification;
 
 class EditContactStatusRequestFactory extends RequestFactory
 {

@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\IntegrationAI\Models\Concerns;
+namespace AidingApp\IntegrationAI\Models\Concerns;
 
 use Illuminate\Database\Eloquent\Model;
 

@@ -34,14 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Audit\Filament\Resources\AuditResource\Pages;
+namespace AidingApp\Audit\Filament\Resources\AuditResource\Pages;
 
 use Filament\Infolists\Infolist;
-use AdvisingApp\Audit\Models\Audit;
+use AidingApp\Audit\Models\Audit;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
-use AdvisingApp\Audit\Filament\Resources\AuditResource;
+use AidingApp\Audit\Filament\Resources\AuditResource;
 
 class ViewAudit extends ViewRecord
 {

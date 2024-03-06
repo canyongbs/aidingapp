@@ -34,13 +34,13 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Actions\ChangeRequest;
+namespace AidingApp\ServiceManagement\Actions\ChangeRequest;
 
 use App\Models\User;
-use AdvisingApp\ServiceManagement\Models\ChangeRequest;
-use AdvisingApp\ServiceManagement\Models\ChangeRequestStatus;
-use AdvisingApp\ServiceManagement\Models\Scopes\ClassifiedAs;
-use AdvisingApp\ServiceManagement\Enums\SystemChangeRequestClassification;
+use AidingApp\ServiceManagement\Models\ChangeRequest;
+use AidingApp\ServiceManagement\Models\ChangeRequestStatus;
+use AidingApp\ServiceManagement\Models\Scopes\ClassifiedAs;
+use AidingApp\ServiceManagement\Enums\SystemChangeRequestClassification;
 
 class ApproveChangeRequest
 {

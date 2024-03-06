@@ -35,14 +35,14 @@
 */
 
 use App\Models\User;
-use AdvisingApp\Task\Models\Task;
+use AidingApp\Task\Models\Task;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
-use AdvisingApp\Authorization\Enums\LicenseType;
-use AdvisingApp\Task\Filament\Resources\TaskResource;
-use AdvisingApp\Task\Tests\RequestFactories\EditTaskRequestFactory;
+use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\Task\Filament\Resources\TaskResource;
+use AidingApp\Task\Tests\RequestFactories\EditTaskRequestFactory;
 
 // TODO: Write EditTask page tests
 //test('A successful action on the EditTask page', function () {});

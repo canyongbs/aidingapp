@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Database\Factories;
+namespace AidingApp\ServiceManagement\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
 
 /**
  * @extends Factory<ServiceRequestType>

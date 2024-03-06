@@ -34,19 +34,19 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Filament\Resources\EngagementResource\Pages;
+namespace AidingApp\Engagement\Filament\Resources\EngagementResource\Pages;
 
 use Filament\Actions\EditAction;
 use Filament\Infolists\Infolist;
-use AdvisingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\Contact;
 use App\Filament\Resources\UserResource;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Infolists\Components\Section;
+use AidingApp\Engagement\Models\Engagement;
 use Filament\Infolists\Components\Fieldset;
 use Filament\Infolists\Components\TextEntry;
-use AdvisingApp\Engagement\Models\Engagement;
-use AdvisingApp\Contact\Filament\Resources\ContactResource;
-use AdvisingApp\Engagement\Filament\Resources\EngagementResource;
+use AidingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Engagement\Filament\Resources\EngagementResource;
 
 class ViewEngagement extends ViewRecord
 {

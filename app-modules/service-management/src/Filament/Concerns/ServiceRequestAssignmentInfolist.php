@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Filament\Concerns;
+namespace AidingApp\ServiceManagement\Filament\Concerns;
 
 use App\Filament\Resources\UserResource;
 use Filament\Infolists\Components\TextEntry;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestAssignment;
-use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
+use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 
 // TODO Re-use this trait across other places where infolist is rendered
 trait ServiceRequestAssignmentInfolist

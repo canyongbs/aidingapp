@@ -34,13 +34,13 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Task\Policies;
+namespace AidingApp\Task\Policies;
 
+use AidingApp\Task\Models\Task;
 use App\Models\Authenticatable;
-use AdvisingApp\Task\Models\Task;
 use Illuminate\Auth\Access\Response;
 use App\Concerns\PerformsLicenseChecks;
-use AdvisingApp\Authorization\Enums\LicenseType;
+use AidingApp\Authorization\Enums\LicenseType;
 use App\Policies\Contracts\PerformsChecksBeforeAuthorization;
 
 class TaskPolicy implements PerformsChecksBeforeAuthorization

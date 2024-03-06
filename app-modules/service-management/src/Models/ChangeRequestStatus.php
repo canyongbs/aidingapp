@@ -34,14 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Models;
+namespace AidingApp\ServiceManagement\Models;
 
 use App\Models\BaseModel;
 use OwenIt\Auditing\Contracts\Auditable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use AdvisingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AdvisingApp\ServiceManagement\Enums\SystemChangeRequestClassification;
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\ServiceManagement\Enums\SystemChangeRequestClassification;
 
 /**
  * @mixin IdeHelperChangeRequestStatus

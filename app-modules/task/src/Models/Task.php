@@ -34,14 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Task\Models;
+namespace AidingApp\Task\Models;
 
 use App\Models\User;
 use App\Models\BaseModel;
 use Illuminate\Support\Collection;
+use AidingApp\Task\Enums\TaskStatus;
 use App\Models\Contracts\Educatable;
-use AdvisingApp\Task\Enums\TaskStatus;
-use AdvisingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\Contact;
 use OwenIt\Auditing\Contracts\Auditable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -50,9 +50,9 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use AdvisingApp\Notification\Models\Contracts\Subscribable;
-use AdvisingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AdvisingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
+use AidingApp\Notification\Models\Contracts\Subscribable;
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
 
 /**
  * @property-read Contact $concern

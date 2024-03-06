@@ -34,16 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\CareTeam\Providers;
+namespace AidingApp\CareTeam\Providers;
 
 use Filament\Panel;
 use App\Concerns\ImplementsGraphQL;
+use AidingApp\CareTeam\CareTeamPlugin;
+use AidingApp\CareTeam\Models\CareTeam;
 use Illuminate\Support\ServiceProvider;
-use AdvisingApp\CareTeam\CareTeamPlugin;
-use AdvisingApp\CareTeam\Models\CareTeam;
 use App\Registries\RoleBasedAccessControlRegistry;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use AdvisingApp\CareTeam\Registries\CareTeamRbacRegistry;
+use AidingApp\CareTeam\Registries\CareTeamRbacRegistry;
 
 class CareTeamServiceProvider extends ServiceProvider
 {

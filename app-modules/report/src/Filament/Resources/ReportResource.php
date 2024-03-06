@@ -34,13 +34,13 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Report\Filament\Resources;
+namespace AidingApp\Report\Filament\Resources;
 
 use Filament\Resources\Resource;
-use AdvisingApp\Report\Models\Report;
-use AdvisingApp\Report\Filament\Resources\ReportResource\Pages\EditReport;
-use AdvisingApp\Report\Filament\Resources\ReportResource\Pages\ListReports;
-use AdvisingApp\Report\Filament\Resources\ReportResource\Pages\CreateReport;
+use AidingApp\Report\Models\Report;
+use AidingApp\Report\Filament\Resources\ReportResource\Pages\EditReport;
+use AidingApp\Report\Filament\Resources\ReportResource\Pages\ListReports;
+use AidingApp\Report\Filament\Resources\ReportResource\Pages\CreateReport;
 
 class ReportResource extends Resource
 {

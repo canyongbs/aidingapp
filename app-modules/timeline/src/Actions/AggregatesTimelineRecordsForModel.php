@@ -34,13 +34,13 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Timeline\Actions;
+namespace AidingApp\Timeline\Actions;
 
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Model;
-use AdvisingApp\Timeline\Exceptions\ModelMustHaveATimeline;
-use AdvisingApp\Timeline\Models\Contracts\ProvidesATimeline;
+use AidingApp\Timeline\Exceptions\ModelMustHaveATimeline;
+use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
 
 class AggregatesTimelineRecordsForModel
 {

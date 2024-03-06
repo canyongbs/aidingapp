@@ -37,9 +37,9 @@
 use App\Models\Tenant;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Artisan;
-use AdvisingApp\Authorization\Models\Role;
-use AdvisingApp\Authorization\Tests\Helpers;
-use AdvisingApp\Authorization\Console\Commands\SyncRolesAndPermissions;
+use AidingApp\Authorization\Models\Role;
+use AidingApp\Authorization\Tests\Helpers;
+use AidingApp\Authorization\Console\Commands\SyncRolesAndPermissions;
 
 beforeEach(function () {
     (new Helpers())->truncateTables();

@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\IntegrationGoogleRecaptcha\Settings;
+namespace AidingApp\IntegrationGoogleRecaptcha\Settings;
 
 use Spatie\LaravelSettings\Settings;
 

@@ -34,17 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Division\Providers;
+namespace AidingApp\Division\Providers;
 
 use Filament\Panel;
 use App\Concerns\ImplementsGraphQL;
+use AidingApp\Division\DivisionPlugin;
+use AidingApp\Division\Models\Division;
 use Illuminate\Support\ServiceProvider;
-use AdvisingApp\Division\DivisionPlugin;
-use AdvisingApp\Division\Models\Division;
+use AidingApp\Division\Observers\DivisionObserver;
 use App\Registries\RoleBasedAccessControlRegistry;
-use AdvisingApp\Division\Observers\DivisionObserver;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use AdvisingApp\Division\Registries\DivisionRbacRegistry;
+use AidingApp\Division\Registries\DivisionRbacRegistry;
 
 class DivisionServiceProvider extends ServiceProvider
 {

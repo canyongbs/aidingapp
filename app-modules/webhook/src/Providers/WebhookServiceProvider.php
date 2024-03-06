@@ -34,16 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Webhook\Providers;
+namespace AidingApp\Webhook\Providers;
 
 use Filament\Panel;
 use Aws\Sns\MessageValidator;
-use AdvisingApp\Webhook\WebhookPlugin;
+use AidingApp\Webhook\WebhookPlugin;
 use Illuminate\Support\ServiceProvider;
-use AdvisingApp\Webhook\Models\InboundWebhook;
+use AidingApp\Webhook\Models\InboundWebhook;
 use App\Registries\RoleBasedAccessControlRegistry;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use AdvisingApp\Webhook\Registries\WebhookRbacRegistry;
+use AidingApp\Webhook\Registries\WebhookRbacRegistry;
 
 class WebhookServiceProvider extends ServiceProvider
 {

@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Notification\Registries;
+namespace AidingApp\Notification\Registries;
 
-use AdvisingApp\Authorization\AuthorizationRoleRegistry;
+use AidingApp\Authorization\AuthorizationRoleRegistry;
 use App\Registries\Contracts\RegistersRolesAndPermissions;
-use AdvisingApp\Authorization\AuthorizationPermissionRegistry;
+use AidingApp\Authorization\AuthorizationPermissionRegistry;
 
 class NotificationRbacRegistry implements RegistersRolesAndPermissions
 {

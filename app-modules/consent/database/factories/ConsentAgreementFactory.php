@@ -34,13 +34,13 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Consent\Database\Factories;
+namespace AidingApp\Consent\Database\Factories;
 
-use AdvisingApp\Consent\Enums\ConsentAgreementType;
+use AidingApp\Consent\Enums\ConsentAgreementType;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \AdvisingApp\Consent\Models\ConsentAgreement>
+ * @extends \AidingApp\Consent\Models\ConsentAgreement>
  */
 class ConsentAgreementFactory extends Factory
 {

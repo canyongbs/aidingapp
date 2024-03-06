@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InAppCommunication\Providers;
+namespace AidingApp\InAppCommunication\Providers;
 
 use Filament\Panel;
 use Filament\Support\Assets\Js;
@@ -42,9 +42,9 @@ use Illuminate\Support\ServiceProvider;
 use Filament\Support\Facades\FilamentAsset;
 use App\Registries\RoleBasedAccessControlRegistry;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use AdvisingApp\InAppCommunication\InAppCommunicationPlugin;
-use AdvisingApp\InAppCommunication\Models\TwilioConversation;
-use AdvisingApp\InAppCommunication\Registries\InAppCommunicationRbacRegistry;
+use AidingApp\InAppCommunication\InAppCommunicationPlugin;
+use AidingApp\InAppCommunication\Models\TwilioConversation;
+use AidingApp\InAppCommunication\Registries\InAppCommunicationRbacRegistry;
 
 class InAppCommunicationServiceProvider extends ServiceProvider
 {

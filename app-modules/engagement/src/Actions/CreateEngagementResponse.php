@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Actions;
+namespace AidingApp\Engagement\Actions;
 
-use AdvisingApp\Engagement\Models\EngagementResponse;
-use AdvisingApp\Engagement\DataTransferObjects\EngagementResponseData;
-use AdvisingApp\Engagement\Actions\Contracts\EngagementResponseSenderFinder;
+use AidingApp\Engagement\Models\EngagementResponse;
+use AidingApp\Engagement\DataTransferObjects\EngagementResponseData;
+use AidingApp\Engagement\Actions\Contracts\EngagementResponseSenderFinder;
 
 class CreateEngagementResponse
 {

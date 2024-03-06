@@ -34,13 +34,13 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Webhook\Filament\Resources\InboundWebhookResource\Pages;
+namespace AidingApp\Webhook\Filament\Resources\InboundWebhookResource\Pages;
 
 use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
-use AdvisingApp\Webhook\Filament\Resources\InboundWebhookResource;
+use AidingApp\Webhook\Filament\Resources\InboundWebhookResource;
 
 class ViewInboundWebhook extends ViewRecord
 {

@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Alert\Events;
+namespace AidingApp\Alert\Events;
 
-use AdvisingApp\Alert\Models\Alert;
+use AidingApp\Alert\Models\Alert;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;

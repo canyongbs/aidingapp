@@ -38,8 +38,8 @@ namespace App\Filament\Widgets;
 
 use Illuminate\Support\Carbon;
 use Filament\Widgets\ChartWidget;
+use AidingApp\Contact\Models\Contact;
 use Illuminate\Support\Facades\Cache;
-use AdvisingApp\Contact\Models\Contact;
 
 class ContactGrowthChart extends ChartWidget
 {

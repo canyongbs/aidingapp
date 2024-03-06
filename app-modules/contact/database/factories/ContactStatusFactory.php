@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Contact\Database\Factories;
+namespace AidingApp\Contact\Database\Factories;
 
-use AdvisingApp\Contact\Models\ContactStatus;
+use AidingApp\Contact\Models\ContactStatus;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use AdvisingApp\Contact\Enums\ContactStatusColorOptions;
-use AdvisingApp\Contact\Enums\SystemContactClassification;
+use AidingApp\Contact\Enums\ContactStatusColorOptions;
+use AidingApp\Contact\Enums\SystemContactClassification;
 
 /**
  * @extends Factory<ContactStatus>

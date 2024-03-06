@@ -34,15 +34,15 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Contact\Filament\Resources\ContactStatusResource\Pages;
+namespace AidingApp\Contact\Filament\Resources\ContactStatusResource\Pages;
 
 use Filament\Forms\Form;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\CreateRecord;
-use AdvisingApp\Contact\Enums\ContactStatusColorOptions;
-use AdvisingApp\Contact\Enums\SystemContactClassification;
-use AdvisingApp\Contact\Filament\Resources\ContactStatusResource;
+use AidingApp\Contact\Enums\ContactStatusColorOptions;
+use AidingApp\Contact\Enums\SystemContactClassification;
+use AidingApp\Contact\Filament\Resources\ContactStatusResource;
 
 class CreateContactStatus extends CreateRecord
 {

@@ -34,15 +34,15 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Team\Providers;
+namespace AidingApp\Team\Providers;
 
 use Filament\Panel;
-use AdvisingApp\Team\TeamPlugin;
-use AdvisingApp\Team\Models\Team;
-use AdvisingApp\Team\Models\TeamUser;
+use AidingApp\Team\TeamPlugin;
+use AidingApp\Team\Models\Team;
+use AidingApp\Team\Models\TeamUser;
 use Illuminate\Support\ServiceProvider;
-use AdvisingApp\Team\Observers\TeamUserObserver;
-use AdvisingApp\Team\Registries\TeamRbacRegistry;
+use AidingApp\Team\Observers\TeamUserObserver;
+use AidingApp\Team\Registries\TeamRbacRegistry;
 use App\Registries\RoleBasedAccessControlRegistry;
 use Illuminate\Database\Eloquent\Relations\Relation;
 

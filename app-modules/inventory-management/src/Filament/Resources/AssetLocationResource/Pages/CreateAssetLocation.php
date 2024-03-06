@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InventoryManagement\Filament\Resources\AssetLocationResource\Pages;
+namespace AidingApp\InventoryManagement\Filament\Resources\AssetLocationResource\Pages;
 
 use Filament\Forms\Form;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\CreateRecord;
-use AdvisingApp\InventoryManagement\Filament\Resources\AssetLocationResource;
+use AidingApp\InventoryManagement\Filament\Resources\AssetLocationResource;
 
 class CreateAssetLocation extends CreateRecord
 {

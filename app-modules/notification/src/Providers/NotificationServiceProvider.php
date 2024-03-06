@@ -34,28 +34,28 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Notification\Providers;
+namespace AidingApp\Notification\Providers;
 
 use App\Concerns\ImplementsGraphQL;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
-use AdvisingApp\Notification\Models\Subscription;
+use AidingApp\Notification\Models\Subscription;
 use App\Registries\RoleBasedAccessControlRegistry;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Notifications\Events\NotificationSent;
+use AidingApp\Notification\Events\SubscriptionCreated;
+use AidingApp\Notification\Events\SubscriptionDeleted;
+use AidingApp\Notification\Models\OutboundDeliverable;
 use Illuminate\Notifications\Events\NotificationFailed;
-use AdvisingApp\Notification\Events\SubscriptionCreated;
-use AdvisingApp\Notification\Events\SubscriptionDeleted;
-use AdvisingApp\Notification\Models\OutboundDeliverable;
-use AdvisingApp\Notification\Observers\SubscriptionObserver;
-use AdvisingApp\Notification\Events\TriggeredAutoSubscription;
-use AdvisingApp\Notification\Listeners\CreateAutoSubscription;
-use AdvisingApp\Notification\Listeners\HandleNotificationSent;
-use AdvisingApp\Notification\Listeners\HandleNotificationFailed;
-use AdvisingApp\Notification\Registries\NotificationRbacRegistry;
-use AdvisingApp\Notification\Observers\OutboundDeliverableObserver;
-use AdvisingApp\Notification\Listeners\NotifyUserOfSubscriptionCreated;
-use AdvisingApp\Notification\Listeners\NotifyUserOfSubscriptionDeleted;
+use AidingApp\Notification\Observers\SubscriptionObserver;
+use AidingApp\Notification\Events\TriggeredAutoSubscription;
+use AidingApp\Notification\Listeners\CreateAutoSubscription;
+use AidingApp\Notification\Listeners\HandleNotificationSent;
+use AidingApp\Notification\Listeners\HandleNotificationFailed;
+use AidingApp\Notification\Registries\NotificationRbacRegistry;
+use AidingApp\Notification\Observers\OutboundDeliverableObserver;
+use AidingApp\Notification\Listeners\NotifyUserOfSubscriptionCreated;
+use AidingApp\Notification\Listeners\NotifyUserOfSubscriptionDeleted;
 
 class NotificationServiceProvider extends ServiceProvider
 {

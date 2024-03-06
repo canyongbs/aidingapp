@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Assistant\Services\AIInterface\DataTransferObjects;
+namespace AidingApp\Assistant\Services\AIInterface\DataTransferObjects;
 
 use Livewire\Wireable;
 use Spatie\LaravelData\Data;

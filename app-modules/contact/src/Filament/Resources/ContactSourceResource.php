@@ -34,15 +34,15 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Contact\Filament\Resources;
+namespace AidingApp\Contact\Filament\Resources;
 
 use Filament\Resources\Resource;
+use AidingApp\Contact\Models\ContactSource;
 use App\Filament\Clusters\ContactManagement;
-use AdvisingApp\Contact\Models\ContactSource;
-use AdvisingApp\Contact\Filament\Resources\ContactSourceResource\Pages\EditContactSource;
-use AdvisingApp\Contact\Filament\Resources\ContactSourceResource\Pages\ViewContactSource;
-use AdvisingApp\Contact\Filament\Resources\ContactSourceResource\Pages\ListContactSources;
-use AdvisingApp\Contact\Filament\Resources\ContactSourceResource\Pages\CreateContactSource;
+use AidingApp\Contact\Filament\Resources\ContactSourceResource\Pages\EditContactSource;
+use AidingApp\Contact\Filament\Resources\ContactSourceResource\Pages\ViewContactSource;
+use AidingApp\Contact\Filament\Resources\ContactSourceResource\Pages\ListContactSources;
+use AidingApp\Contact\Filament\Resources\ContactSourceResource\Pages\CreateContactSource;
 
 class ContactSourceResource extends Resource
 {

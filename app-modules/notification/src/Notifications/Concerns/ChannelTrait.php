@@ -34,6 +34,6 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Notification\Notifications\Concerns;
+namespace AidingApp\Notification\Notifications\Concerns;
 
 trait ChannelTrait {}

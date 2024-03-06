@@ -34,16 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Filament\Resources\EngagementResponseResource\Pages;
+namespace AidingApp\Engagement\Filament\Resources\EngagementResponseResource\Pages;
 
 use Filament\Infolists\Infolist;
-use AdvisingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\Contact;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
-use AdvisingApp\Engagement\Models\EngagementResponse;
-use AdvisingApp\Contact\Filament\Resources\ContactResource;
-use AdvisingApp\Engagement\Filament\Resources\EngagementResponseResource;
+use AidingApp\Engagement\Models\EngagementResponse;
+use AidingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Engagement\Filament\Resources\EngagementResponseResource;
 
 class ViewEngagementResponse extends ViewRecord
 {

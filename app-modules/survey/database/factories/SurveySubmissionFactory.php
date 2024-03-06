@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Survey\Database\Factories;
+namespace AidingApp\Survey\Database\Factories;
 
-use AdvisingApp\Survey\Models\Survey;
-use AdvisingApp\Contact\Models\Contact;
-use AdvisingApp\Survey\Models\SurveySubmission;
+use AidingApp\Survey\Models\Survey;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Survey\Models\SurveySubmission;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Relations\Relation;
 

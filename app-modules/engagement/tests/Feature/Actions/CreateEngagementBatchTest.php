@@ -37,18 +37,18 @@
 use App\Models\User;
 use Illuminate\Bus\PendingBatch;
 use Illuminate\Support\Facades\Bus;
+use AidingApp\Contact\Models\Contact;
 use Illuminate\Support\Facades\Queue;
-use AdvisingApp\Contact\Models\Contact;
+use AidingApp\Engagement\Models\Engagement;
 use Illuminate\Support\Facades\Notification;
-use AdvisingApp\Engagement\Models\Engagement;
-use AdvisingApp\Engagement\Models\EngagementBatch;
-use AdvisingApp\Engagement\Models\EngagementDeliverable;
-use AdvisingApp\Engagement\Actions\CreateEngagementBatch;
-use AdvisingApp\Engagement\Enums\EngagementDeliveryMethod;
-use AdvisingApp\Engagement\Actions\EngagementSmsChannelDelivery;
-use AdvisingApp\Engagement\Actions\EngagementEmailChannelDelivery;
-use AdvisingApp\Engagement\DataTransferObjects\EngagementBatchCreationData;
-use AdvisingApp\Engagement\Notifications\EngagementBatchFinishedNotification;
+use AidingApp\Engagement\Models\EngagementBatch;
+use AidingApp\Engagement\Models\EngagementDeliverable;
+use AidingApp\Engagement\Actions\CreateEngagementBatch;
+use AidingApp\Engagement\Enums\EngagementDeliveryMethod;
+use AidingApp\Engagement\Actions\EngagementSmsChannelDelivery;
+use AidingApp\Engagement\Actions\EngagementEmailChannelDelivery;
+use AidingApp\Engagement\DataTransferObjects\EngagementBatchCreationData;
+use AidingApp\Engagement\Notifications\EngagementBatchFinishedNotification;
 
 it('will create a new engagement batch', function () {
     Queue::fake([EngagementEmailChannelDelivery::class, EngagementSmsChannelDelivery::class]);

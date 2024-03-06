@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Tests\RequestFactories;
+namespace AidingApp\ServiceManagement\Tests\RequestFactories;
 
 use Worksome\RequestFactories\RequestFactory;
-use AdvisingApp\ServiceManagement\Models\ServiceRequest;
-use AdvisingApp\ServiceManagement\Enums\ServiceRequestUpdateDirection;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateDirection;
 
 class CreateServiceRequestUpdateRequestFactory extends RequestFactory
 {

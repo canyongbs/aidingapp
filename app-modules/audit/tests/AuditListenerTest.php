@@ -36,8 +36,8 @@
 
 use function Tests\asSuperAdmin;
 
-use AdvisingApp\Audit\Settings\AuditSettings;
-use AdvisingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\Audit\Settings\AuditSettings;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 
 test('Audit logs are only created if the Model is set to be Audited by audit settings', function () {
     asSuperAdmin();

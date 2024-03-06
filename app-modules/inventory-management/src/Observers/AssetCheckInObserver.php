@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InventoryManagement\Observers;
+namespace AidingApp\InventoryManagement\Observers;
 
-use AdvisingApp\InventoryManagement\Models\AssetCheckIn;
-use AdvisingApp\Timeline\Events\TimelineableRecordCreated;
-use AdvisingApp\Timeline\Events\TimelineableRecordDeleted;
+use AidingApp\InventoryManagement\Models\AssetCheckIn;
+use AidingApp\Timeline\Events\TimelineableRecordCreated;
+use AidingApp\Timeline\Events\TimelineableRecordDeleted;
 
 class AssetCheckInObserver
 {

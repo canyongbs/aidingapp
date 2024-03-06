@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Contact\Observers;
+namespace AidingApp\Contact\Observers;
 
 use App\Models\User;
+use AidingApp\Contact\Models\Contact;
 use Illuminate\Support\Facades\Cache;
-use AdvisingApp\Contact\Models\Contact;
 
 class ContactObserver
 {

@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Notification\Notifications;
+namespace AidingApp\Notification\Notifications;
 
 interface OnDemandNotification
 {

@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Form\Actions;
+namespace AidingApp\Form\Actions;
 
-use AdvisingApp\Form\Models\Submission;
-use AdvisingApp\Form\Models\SubmissibleField;
+use AidingApp\Form\Models\Submission;
+use AidingApp\Form\Models\SubmissibleField;
 
 class InjectSubmissionStateIntoTipTapContent
 {

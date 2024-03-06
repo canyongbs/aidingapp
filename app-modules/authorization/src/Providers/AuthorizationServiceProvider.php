@@ -34,26 +34,26 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Authorization\Providers;
+namespace AidingApp\Authorization\Providers;
 
 use Filament\Panel;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
-use AdvisingApp\Authorization\Models\Role;
-use AdvisingApp\Authorization\Models\License;
-use AdvisingApp\Authorization\Models\RoleGroup;
-use AdvisingApp\Authorization\Models\Permission;
-use AdvisingApp\Authorization\AuthorizationPlugin;
+use AidingApp\Authorization\Models\Role;
+use AidingApp\Authorization\Models\License;
+use AidingApp\Authorization\Models\RoleGroup;
+use AidingApp\Authorization\Models\Permission;
+use AidingApp\Authorization\AuthorizationPlugin;
 use App\Registries\RoleBasedAccessControlRegistry;
 use SocialiteProviders\Azure\AzureExtendSocialite;
 use SocialiteProviders\Manager\SocialiteWasCalled;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use SocialiteProviders\Google\GoogleExtendSocialite;
-use AdvisingApp\Authorization\AuthorizationRoleRegistry;
-use AdvisingApp\Authorization\Observers\LicenseObserver;
-use AdvisingApp\Authorization\AuthorizationPermissionRegistry;
-use AdvisingApp\Authorization\Registries\AuthorizationRbacRegistry;
-use AdvisingApp\Authorization\Http\Controllers\Auth\LogoutController;
+use AidingApp\Authorization\AuthorizationRoleRegistry;
+use AidingApp\Authorization\Observers\LicenseObserver;
+use AidingApp\Authorization\AuthorizationPermissionRegistry;
+use AidingApp\Authorization\Registries\AuthorizationRbacRegistry;
+use AidingApp\Authorization\Http\Controllers\Auth\LogoutController;
 use Filament\Http\Controllers\Auth\LogoutController as FilamentLogoutController;
 
 class AuthorizationServiceProvider extends ServiceProvider
@@ -77,7 +77,7 @@ class AuthorizationServiceProvider extends ServiceProvider
         app('config')->set('permission', require base_path('app-modules/authorization/config/permission.php'));
     }
 
-    public function boot(AuthorizationPermissionRegistry $permissionRegistry, AuthorizationRoleRegistry $roleRegistry): void
+    public function boot(): void
     {
         Relation::morphMap([
             'role' => Role::class,

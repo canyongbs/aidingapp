@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Portal\Actions;
+namespace AidingApp\Portal\Actions;
 
 use Exception;
 use Illuminate\Support\Facades\URL;
-use AdvisingApp\Portal\Enums\PortalType;
+use AidingApp\Portal\Enums\PortalType;
 
 class GeneratePortalEmbedCode
 {
@@ -46,7 +46,7 @@ class GeneratePortalEmbedCode
     {
         return match ($portal) {
             PortalType::KnowledgeManagement => (function () {
-                $scriptUrl = url('js/portals/knowledge-management/advising-app-knowledge-management-portal.js?');
+                $scriptUrl = url('js/portals/knowledge-management/aiding-app-knowledge-management-portal.js?');
 
                 $portalAccessUrl = route('portal.knowledge-management.show');
 

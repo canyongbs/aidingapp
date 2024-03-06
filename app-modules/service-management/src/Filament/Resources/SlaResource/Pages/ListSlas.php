@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Filament\Resources\SlaResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\SlaResource\Pages;
 
 use Filament\Tables\Table;
 use Filament\Actions\CreateAction;
@@ -43,7 +43,7 @@ use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
 use App\Filament\Tables\Columns\OpenSearch\TextColumn;
-use AdvisingApp\ServiceManagement\Filament\Resources\SlaResource;
+use AidingApp\ServiceManagement\Filament\Resources\SlaResource;
 
 class ListSlas extends ListRecords
 {

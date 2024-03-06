@@ -34,20 +34,20 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InventoryManagement\Models;
+namespace AidingApp\InventoryManagement\Models;
 
 use App\Models\BaseModel;
 use Illuminate\Support\Collection;
+use AidingApp\Timeline\Models\Timeline;
 use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Contracts\Auditable;
-use AdvisingApp\Timeline\Models\Timeline;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use AdvisingApp\Timeline\Models\Contracts\ProvidesATimeline;
-use AdvisingApp\Timeline\Timelines\MaintenanceActivityTimeline;
-use AdvisingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AdvisingApp\InventoryManagement\Enums\MaintenanceActivityStatus;
+use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
+use AidingApp\Timeline\Timelines\MaintenanceActivityTimeline;
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\InventoryManagement\Enums\MaintenanceActivityStatus;
 
 /**
  * @mixin IdeHelperMaintenanceActivity

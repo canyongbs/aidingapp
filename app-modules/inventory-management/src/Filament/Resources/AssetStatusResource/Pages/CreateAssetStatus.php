@@ -34,14 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InventoryManagement\Filament\Resources\AssetStatusResource\Pages;
+namespace AidingApp\InventoryManagement\Filament\Resources\AssetStatusResource\Pages;
 
 use Filament\Forms\Form;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\CreateRecord;
-use AdvisingApp\InventoryManagement\Enums\SystemAssetStatusClassification;
-use AdvisingApp\InventoryManagement\Filament\Resources\AssetStatusResource;
+use AidingApp\InventoryManagement\Enums\SystemAssetStatusClassification;
+use AidingApp\InventoryManagement\Filament\Resources\AssetStatusResource;
 
 class CreateAssetStatus extends CreateRecord
 {

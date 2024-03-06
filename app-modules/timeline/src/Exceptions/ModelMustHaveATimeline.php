@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Timeline\Exceptions;
+namespace AidingApp\Timeline\Exceptions;
 
 use Exception;
 

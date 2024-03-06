@@ -34,14 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Filament\Resources;
+namespace AidingApp\Engagement\Filament\Resources;
 
 use Filament\Resources\Resource;
 use App\Filament\Clusters\GlobalSettings;
-use AdvisingApp\Engagement\Models\EmailTemplate;
-use AdvisingApp\Engagement\Filament\Resources\EmailTemplateResource\Pages\EditEmailTemplate;
-use AdvisingApp\Engagement\Filament\Resources\EmailTemplateResource\Pages\ListEmailTemplates;
-use AdvisingApp\Engagement\Filament\Resources\EmailTemplateResource\Pages\CreateEmailTemplate;
+use AidingApp\Engagement\Models\EmailTemplate;
+use AidingApp\Engagement\Filament\Resources\EmailTemplateResource\Pages\EditEmailTemplate;
+use AidingApp\Engagement\Filament\Resources\EmailTemplateResource\Pages\ListEmailTemplates;
+use AidingApp\Engagement\Filament\Resources\EmailTemplateResource\Pages\CreateEmailTemplate;
 
 class EmailTemplateResource extends Resource
 {

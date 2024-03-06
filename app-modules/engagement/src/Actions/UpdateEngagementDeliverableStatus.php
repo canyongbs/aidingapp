@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Actions;
+namespace AidingApp\Engagement\Actions;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
@@ -42,7 +42,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
-use AdvisingApp\Engagement\Models\EngagementDeliverable;
+use AidingApp\Engagement\Models\EngagementDeliverable;
 
 class UpdateEngagementDeliverableStatus implements ShouldQueue
 {

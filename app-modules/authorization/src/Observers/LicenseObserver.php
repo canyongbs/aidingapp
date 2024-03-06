@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Authorization\Observers;
+namespace AidingApp\Authorization\Observers;
 
 use Exception;
-use AdvisingApp\Authorization\Models\License;
+use AidingApp\Authorization\Models\License;
 
 class LicenseObserver
 {

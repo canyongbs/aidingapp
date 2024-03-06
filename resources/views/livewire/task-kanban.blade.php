@@ -32,7 +32,7 @@
 </COPYRIGHT>
 --}}
 @php
-    use AdvisingApp\Task\Enums\TaskStatus;
+    use AidingApp\Task\Enums\TaskStatus;
 @endphp
 <div>
     <div class="mt-2 flex flex-col">

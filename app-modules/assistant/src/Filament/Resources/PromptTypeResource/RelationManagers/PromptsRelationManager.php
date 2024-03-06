@@ -34,20 +34,20 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Assistant\Filament\Resources\PromptTypeResource\RelationManagers;
+namespace AidingApp\Assistant\Filament\Resources\PromptTypeResource\RelationManagers;
 
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Filament\Infolists\Infolist;
+use AidingApp\Assistant\Models\Prompt;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
-use AdvisingApp\Assistant\Models\Prompt;
 use Filament\Tables\Actions\CreateAction;
 use Filament\Resources\RelationManagers\RelationManager;
-use AdvisingApp\Assistant\Filament\Resources\PromptResource;
-use AdvisingApp\Assistant\Filament\Resources\PromptResource\Pages\EditPrompt;
-use AdvisingApp\Assistant\Filament\Resources\PromptResource\Pages\ViewPrompt;
-use AdvisingApp\Assistant\Filament\Resources\PromptResource\Pages\ListPrompts;
+use AidingApp\Assistant\Filament\Resources\PromptResource;
+use AidingApp\Assistant\Filament\Resources\PromptResource\Pages\EditPrompt;
+use AidingApp\Assistant\Filament\Resources\PromptResource\Pages\ViewPrompt;
+use AidingApp\Assistant\Filament\Resources\PromptResource\Pages\ListPrompts;
 
 class PromptsRelationManager extends RelationManager
 {

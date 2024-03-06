@@ -34,14 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages;
 
-use AdvisingApp\Timeline\Filament\Pages\TimelinePage;
-use AdvisingApp\Notification\Models\OutboundDeliverable;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestUpdate;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestHistory;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestAssignment;
-use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
+use AidingApp\Timeline\Filament\Pages\TimelinePage;
+use AidingApp\Notification\Models\OutboundDeliverable;
+use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use AidingApp\ServiceManagement\Models\ServiceRequestHistory;
+use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 
 class ServiceRequestTimeline extends TimelinePage
 {

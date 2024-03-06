@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Filament\Resources\EngagementResponseResource\Components;
+namespace AidingApp\Engagement\Filament\Resources\EngagementResponseResource\Components;
 
 use Filament\Actions\ViewAction;
-use AdvisingApp\Engagement\Filament\Concerns\EngagementResponseInfolist;
+use AidingApp\Engagement\Filament\Concerns\EngagementResponseInfolist;
 
 // TODO Move this
 class EngagementResponseViewAction extends ViewAction

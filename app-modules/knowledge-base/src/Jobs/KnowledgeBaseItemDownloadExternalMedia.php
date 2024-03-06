@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\KnowledgeBase\Jobs;
+namespace AidingApp\KnowledgeBase\Jobs;
 
 use Exception;
 use Illuminate\Support\Str;
@@ -45,9 +45,9 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use AdvisingApp\KnowledgeBase\Models\KnowledgeBaseItem;
-use AdvisingApp\KnowledgeBase\Exceptions\KnowledgeBaseExternalMediaFileAccessException;
-use AdvisingApp\KnowledgeBase\Exceptions\KnowledgeBaseExternalMediaValidationException;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use AidingApp\KnowledgeBase\Exceptions\KnowledgeBaseExternalMediaFileAccessException;
+use AidingApp\KnowledgeBase\Exceptions\KnowledgeBaseExternalMediaValidationException;
 
 class KnowledgeBaseItemDownloadExternalMedia implements ShouldQueue
 {
