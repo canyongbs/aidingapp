@@ -34,7 +34,7 @@
 @props(['url', 'settings' => null])
 @php
     use App\Models\SettingsProperty;
-    use AdvisingApp\Theme\Settings\ThemeSettings;
+    use AidingApp\Theme\Settings\ThemeSettings;
 
     $themeSettings = app(ThemeSettings::class);
     $settingsProperty = SettingsProperty::getInstance('theme.is_logo_active');

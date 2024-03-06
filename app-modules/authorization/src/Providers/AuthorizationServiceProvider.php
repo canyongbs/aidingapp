@@ -77,7 +77,7 @@ class AuthorizationServiceProvider extends ServiceProvider
         app('config')->set('permission', require base_path('app-modules/authorization/config/permission.php'));
     }
 
-    public function boot(AuthorizationPermissionRegistry $permissionRegistry, AuthorizationRoleRegistry $roleRegistry): void
+    public function boot(): void
     {
         Relation::morphMap([
             'role' => Role::class,
