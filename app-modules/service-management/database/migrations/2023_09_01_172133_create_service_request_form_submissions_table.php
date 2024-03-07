@@ -48,6 +48,8 @@ return new class () extends Migration {
             $table->foreignUuid('service_request_priority_id')->nullable()->constrained('service_request_priorities');
             $table->string('author_id')->nullable();
             $table->string('author_type')->nullable();
+            // TODO We may want to create a form field to store this data, but for now we will just add it to the base submission record
+            $table->text('description')->nullable();
             $table->timestamp('submitted_at')->nullable();
             $table->timestamp('canceled_at')->nullable();
             $table->string('request_method')->nullable();

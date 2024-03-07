@@ -51,7 +51,8 @@ return new class () extends Migration {
             $table->longText('res_details')->nullable();
 
             $table->foreignUuid('service_request_form_submission_id')->nullable()->constrained('service_request_form_submissions');
-            $table->foreignUuid('division_id')->constrained('divisions');
+            // TODO Can this column be nullable?
+            $table->foreignUuid('division_id')->nullable()->constrained('divisions');
             $table->foreignUuid('status_id')->nullable()->constrained('service_request_statuses');
             $table->foreignUuid('priority_id')->nullable()->constrained('service_request_priorities');
             $table->foreignUuid('created_by_id')->nullable()->constrained('users');

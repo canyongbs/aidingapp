@@ -42,8 +42,6 @@ class KnowledgeManagementPortalAuthenticationRequest extends FormRequest
 {
     public function rules(): array
     {
-        ray(request());
-
         return [
             'email' => ['required', 'email'],
             'isSpa' => ['required', 'boolean'],

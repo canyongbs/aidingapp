@@ -55,13 +55,15 @@ class ServiceRequestObserver
 
     public function created(ServiceRequest $serviceRequest): void
     {
+        ray('created...', $serviceRequest);
+
         $user = auth()->user();
 
         if ($user instanceof User) {
             TriggeredAutoSubscription::dispatch($user, $serviceRequest);
         }
 
-        if ($serviceRequest->status->classification === SystemServiceRequestClassification::Open) {
+        if ($serviceRequest->status?->classification === SystemServiceRequestClassification::Open) {
             $serviceRequest->respondent->notify(new SendEducatableServiceRequestOpenedNotification($serviceRequest));
         }
     }
@@ -80,11 +82,13 @@ class ServiceRequestObserver
 
     public function saved(ServiceRequest $serviceRequest): void
     {
+        ray('saved...', $serviceRequest);
+
         CreateServiceRequestHistory::dispatch($serviceRequest, $serviceRequest->getChanges(), $serviceRequest->getOriginal());
 
         if (
             $serviceRequest->wasChanged('status_id')
-            && $serviceRequest->status->classification === SystemServiceRequestClassification::Closed
+            && $serviceRequest->status?->classification === SystemServiceRequestClassification::Closed
         ) {
             $serviceRequest->respondent->notify(new SendEducatableServiceRequestClosedNotification($serviceRequest));
         }

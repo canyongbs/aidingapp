@@ -64,7 +64,7 @@ class KnowledgeManagementPortalController extends Controller
             'rounding' => $settings->knowledge_management_portal_rounding,
             'authentication_url' => URL::to(
                 URL::signedRoute(
-                    name: 'portal.knowledge-management.request-authentication',
+                    name: 'api.portal.knowledge-management.request-authentication',
                     absolute: false,
                 )
             ),
@@ -82,8 +82,9 @@ class KnowledgeManagementPortalController extends Controller
                     })
                     ->toArray()
             ),
-            'service_requests' => $license->data->addons->serviceManagement && $settings->knowledge_management_portal_service_management
-                ? ServiceRequest::query()
+            'service_requests' => $license->data->addons->serviceManagement && $settings->knowledge_management_portal_service_management && auth('contact')->check()
+                ? auth('contact')->user()
+                    ->serviceRequests()
                     ->get()
                     ->map(function (ServiceRequest $serviceRequest) use ($colors) {
                         return [

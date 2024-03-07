@@ -2,33 +2,39 @@
 
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 use Symfony\Component\HttpFoundation\Response;
+use AidingApp\Form\Actions\GenerateFormKitSchema;
 use AidingApp\Form\Actions\GenerateSubmissibleValidation;
-use AidingApp\ServiceManagement\Models\ServiceRequestForm;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\Form\Actions\ResolveSubmissionAuthorFromEmail;
-use AidingApp\ServiceManagement\Models\ServiceRequestFormAuthentication;
+use AidingApp\Form\Filament\Blocks\EducatableEmailFormFieldBlock;
 
-class KnowledgeManagementPortalCreateServiceRequestController extends Controller
+class CreateServiceRequestController extends Controller
 {
+    public function create(GenerateFormKitSchema $generateSchema, ServiceRequestType $type): JsonResponse
+    {
+        return response()->json([
+            'schema' => $generateSchema($type->form),
+            'priorities' => $type->priorities()->orderBy('order', 'desc')->get()->pluck('name', 'id')->map(fn ($name, $id) => ['id' => $id, 'name' => $name]),
+        ]);
+    }
+
     public function store(
         Request $request,
         GenerateSubmissibleValidation $generateValidation,
         ResolveSubmissionAuthorFromEmail $resolveSubmissionAuthorFromEmail,
-        ServiceRequestForm $serviceRequestForm,
+        ServiceRequestType $type,
     ): JsonResponse {
-        $authentication = $request->query('authentication');
-
-        if (filled($authentication)) {
-            $authentication = ServiceRequestFormAuthentication::findOrFail($authentication);
-        }
+        $contact = auth('contact')->user();
+        $serviceRequestForm = $type->form;
 
         if (
-            $serviceRequestForm->is_authenticated &&
-            ($authentication?->isExpired() ?? true)
+            is_null($contact)
         ) {
             abort(Response::HTTP_UNAUTHORIZED);
         }
@@ -47,25 +53,27 @@ class KnowledgeManagementPortalCreateServiceRequestController extends Controller
             );
         }
 
-        /** @var ?ServiceRequestFormSubmission $submission */
-        $submission = $authentication ? $serviceRequestForm->submissions()
-            ->requested()
-            ->whereMorphedTo('author', $authentication->author)
-            ->first() : null;
-
         $submission ??= $serviceRequestForm->submissions()->make();
 
+        // Ahhh - we must be failing because there is no priority set...
         $submission
             ->priority()
-            ->associate($serviceRequestForm->type->priorities()->findOrFail($request->input('priority')));
+            ->associate(
+                $serviceRequestForm
+                    ->type
+                    ->priorities()
+                    ->findOrFail(
+                        $request->input('priority')
+                    )
+            );
 
-        if ($authentication) {
-            $submission->author()->associate($authentication->author);
-
-            $authentication->delete();
+        if ($contact) {
+            $submission->author()->associate($contact);
         }
 
         $submission->submitted_at = now();
+
+        $submission->description = $request->input('description');
 
         $submission->save();
 

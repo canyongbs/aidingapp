@@ -56,16 +56,17 @@ class ServiceRequestFormSubmission extends Submission
 {
     protected $fillable = [
         'canceled_at',
-        'service_request_form_id',
+        'description',
         'request_method',
         'request_note',
+        'service_request_form_id',
         'submitted_at',
     ];
 
     protected $casts = [
-        'submitted_at' => 'immutable_datetime',
         'canceled_at' => 'immutable_datetime',
         'request_method' => FormSubmissionRequestDeliveryMethod::class,
+        'submitted_at' => 'immutable_datetime',
     ];
 
     public function serviceRequest(): HasOne

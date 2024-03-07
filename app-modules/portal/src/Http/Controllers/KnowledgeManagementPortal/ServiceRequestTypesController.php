@@ -6,12 +6,15 @@ use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 
-class KnowledgeManagementPortalServiceRequestController extends Controller
+class ServiceRequestTypesController extends Controller
 {
-    public function show(): JsonResponse
+    public function index(): JsonResponse
     {
         return response()->json([
             'types' => ServiceRequestType::query()
+                // TODO We might not ultimately want to restrict this to only types with forms
+                // But it will require some refactoring to support non-form-having service request types
+                ->whereHas('form')
                 ->orderBy('name')
                 ->get()
                 ->map(function (ServiceRequestType $type) {

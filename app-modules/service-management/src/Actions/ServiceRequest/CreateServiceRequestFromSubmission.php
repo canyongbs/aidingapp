@@ -42,11 +42,18 @@ class CreateServiceRequestFromSubmission
 {
     public function handle(ServiceRequestFormSubmission $serviceRequestFormSubmission): void
     {
-        $serviceRequestFormSubmission->serviceRequest()->create([
-            'title' => $serviceRequestFormSubmission->submissible->name,
-            'respondent_type' => $serviceRequestFormSubmission->author->getMorphClass(),
-            'respondent_id' => $serviceRequestFormSubmission->author->getKey(),
-            'priority_id' => $serviceRequestFormSubmission->service_request_priority_id,
-        ]);
+        ray('CreateServiceRequestFromSubmission()', $serviceRequestFormSubmission);
+
+        try {
+            $serviceRequestFormSubmission->serviceRequest()->create([
+                'title' => $serviceRequestFormSubmission->submissible->name,
+                'respondent_type' => $serviceRequestFormSubmission->author->getMorphClass(),
+                'respondent_id' => $serviceRequestFormSubmission->author->getKey(),
+                'priority_id' => $serviceRequestFormSubmission->service_request_priority_id,
+            ]);
+            ray('here...');
+        } catch (\Exception $e) {
+            ray($e);
+        }
     }
 }

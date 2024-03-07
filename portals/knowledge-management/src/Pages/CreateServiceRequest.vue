@@ -26,6 +26,9 @@ const loadingResults = ref(true);
 const description = ref('');
 const user = ref(null);
 const schema = ref([]);
+const priorities = ref(null);
+const priority = ref(null);
+const submittedSuccess = ref(false);
 
 watch(
     route,
@@ -70,7 +73,9 @@ const data = reactive({
         const { getToken } = useTokenStore();
         let token = await getToken();
 
-        data.issue = description.value;
+        // TODO Validate these fields
+        data.description = description.value;
+        data.priority = priority.value;
 
         // let recaptchaToken = null;
 
@@ -88,11 +93,6 @@ const data = reactive({
             })
             .then((response) => {
                 console.log('submit response', response.data);
-                if (response.errors) {
-                    node.setErrors([], response.errors);
-
-                    return;
-                }
 
                 submittedSuccess.value = true;
             })
@@ -123,6 +123,7 @@ async function getData() {
 
             console.log(response.data);
             schema.value = response.data.schema;
+            priorities.value = response.data.priorities;
         });
 }
 </script>
@@ -150,6 +151,11 @@ async function getData() {
                 </button>
 
                 <div class="flex h-full w-full flex-col rounded bg-primary-700 px-12 py-4">
+                    <div class="text-right" v-if="submittedSuccess">
+                        <button class="p-2 font-bold rounded bg-white text-primary-700 dark:text-primary-400">
+                            <router-link :to="{ name: 'create-service-request' }"> Submit Another Request </router-link>
+                        </button>
+                    </div>
                     <div class="flex flex-col text-left">
                         <h3 class="text-3xl text-white">Help Center</h3>
                         <p class="text-white">Welcome {{ user.first_name }}!</p>
@@ -158,13 +164,27 @@ async function getData() {
                 </div>
             </div>
 
-            <main class="grid py-10 gap-4">
-                <h3 class="text-xl">Describe Your Issue</h3>
+            <main class="grid py-10 gap-4" v-if="submittedSuccess">Thanks for submitting your form</main>
+            <main class="grid py-10 gap-4" v-else>
+                <label for="priority" class="block text-sm font-medium text-gray-700">Priority</label>
+                <select
+                    id="priority"
+                    v-model="priority"
+                    class="w-full rounded border-gray-300 shadow focus:border-primary-600 focus:ring focus:ring-primary-400 focus:ring-opacity-50"
+                    required
+                >
+                    <option default disabled value="Select a priority">Select a priority</option>
+                    <option :value="p.id" v-for="p in priorities" :key="p.id">{{ p.name }}</option>
+                </select>
+
+                <label for="description" class="block text-sm font-medium text-gray-700">Describe your issue</label>
                 <textarea
+                    id="description"
                     class="w-full rounded border-gray-300 shadow focus:border-primary-600 focus:ring focus:ring-primary-400 focus:ring-opacity-50"
                     rows="6"
                     placeholder="Please describe your issue here"
                     v-model="description"
+                    required
                 ></textarea>
 
                 <h3 class="text-xl">Additional Form Information</h3>
