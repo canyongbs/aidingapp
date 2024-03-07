@@ -1,5 +1,5 @@
 type InteractionStatus
-    @model(class: "AdvisingApp\\Interaction\\Models\\InteractionStatus") {
+    @model(class: "AidingApp\\Interaction\\Models\\InteractionStatus") {
     "Unique primary key."
     id: UUID!
 

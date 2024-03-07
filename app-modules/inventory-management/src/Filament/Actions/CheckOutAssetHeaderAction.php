@@ -5,8 +5,8 @@
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
-    Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -20,7 +20,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Advising App™ are registered trademarks of
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
       Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
@@ -29,25 +29,24 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InventoryManagement\Filament\Actions;
+namespace AidingApp\InventoryManagement\Filament\Actions;
 
 use Filament\Forms\Get;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Radio;
+use AidingApp\Contact\Models\Contact;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
-use AdvisingApp\Prospect\Models\Prospect;
 use Filament\Forms\Components\DateTimePicker;
-use AdvisingApp\StudentDataModel\Models\Student;
-use AdvisingApp\InventoryManagement\Models\Asset;
-use AdvisingApp\InventoryManagement\Models\AssetStatus;
-use AdvisingApp\InventoryManagement\Models\Scopes\ClassifiedAs;
-use AdvisingApp\InventoryManagement\Enums\SystemAssetStatusClassification;
+use AidingApp\InventoryManagement\Models\Asset;
+use AidingApp\InventoryManagement\Models\AssetStatus;
+use AidingApp\InventoryManagement\Models\Scopes\ClassifiedAs;
+use AidingApp\InventoryManagement\Enums\SystemAssetStatusClassification;
 
 class CheckOutAssetHeaderAction extends Action
 {
@@ -72,22 +71,19 @@ class CheckOutAssetHeaderAction extends Action
             Radio::make('checked_out_to_type')
                 ->label('Check out to')
                 ->options([
-                    Student::class => 'Student',
-                    Prospect::class => 'Prospect',
+                    Contact::class => 'Contact',
                 ])
-                ->default(Student::class)
+                ->default(Contact::class)
                 ->required()
                 ->live(),
             Select::make('checked_out_to_id')
                 ->label(fn (Get $get): string => match ($get('checked_out_to_type')) {
-                    Student::class => 'Select Student',
-                    Prospect::class => 'Select Prospect',
+                    Contact::class => 'Select Contact',
                 })
                 ->visible(fn (Get $get): bool => filled($get('checked_out_to_type')))
                 ->getSearchResultsUsing(function (string $search, Get $get) {
                     return match ($get('checked_out_to_type')) {
-                        Student::class => Student::where('full_name', 'like', "%{$search}%")->orWhere('first', 'like', "{$search}")->orWhere('last', 'like', "{$search}")->pluck('full_name', 'sisid')->toArray(),
-                        Prospect::class => Prospect::where('full_name', 'like', "%{$search}%")->orWhere('first_name', 'like', "{$search}")->orWhere('last_name', 'like', "{$search}")->pluck('full_name', 'id')->toArray(),
+                        Contact::class => Contact::where('full_name', 'like', "%{$search}%")->orWhere('first_name', 'like', "{$search}")->orWhere('last_name', 'like', "{$search}")->pluck('full_name', 'id')->toArray(),
                     };
                 })
                 ->searchable()

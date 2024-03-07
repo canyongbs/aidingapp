@@ -5,8 +5,8 @@
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
-    Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -20,7 +20,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Advising App™ are registered trademarks of
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
       Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
@@ -29,23 +29,21 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Filament\Resources\EngagementResponseResource\Pages;
+namespace AidingApp\Engagement\Filament\Resources\EngagementResponseResource\Pages;
 
 use Filament\Infolists\Infolist;
+use AidingApp\Contact\Models\Contact;
 use Filament\Resources\Pages\ViewRecord;
-use AdvisingApp\Prospect\Models\Prospect;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
-use AdvisingApp\StudentDataModel\Models\Student;
-use AdvisingApp\Engagement\Models\EngagementResponse;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource;
-use AdvisingApp\StudentDataModel\Filament\Resources\StudentResource;
-use AdvisingApp\Engagement\Filament\Resources\EngagementResponseResource;
+use AidingApp\Engagement\Models\EngagementResponse;
+use AidingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Engagement\Filament\Resources\EngagementResponseResource;
 
 class ViewEngagementResponse extends ViewRecord
 {
@@ -62,21 +60,19 @@ class ViewEngagementResponse extends ViewRecord
                             ->translateLabel()
                             ->color('primary')
                             ->state(function (EngagementResponse $record): string {
-                                /** @var Student|Prospect $sender */
+                                /** @var Contact $sender */
                                 $sender = $record->sender;
 
                                 return match ($sender::class) {
-                                    Student::class => "{$sender->full} (Student)",
-                                    Prospect::class => "{$sender->full} (Prospect)",
+                                    Contact::class => "{$sender->full} (Contact)",
                                 };
                             })
                             ->url(function (EngagementResponse $record) {
-                                /** @var Student|Prospect $sender */
+                                /** @var Contact $sender */
                                 $sender = $record->sender;
 
                                 return match ($sender::class) {
-                                    Student::class => StudentResource::getUrl('view', ['record' => $sender->sisid]),
-                                    Prospect::class => ProspectResource::getUrl('view', ['record' => $sender->id]),
+                                    Contact::class => ContactResource::getUrl('view', ['record' => $sender->id]),
                                 };
                             }),
                         TextEntry::make('content')

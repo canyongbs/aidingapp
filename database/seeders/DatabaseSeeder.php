@@ -5,8 +5,8 @@
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
-    Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -20,7 +20,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Advising App™ are registered trademarks of
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
       Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
@@ -29,7 +29,7 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
@@ -40,36 +40,30 @@ use App\Models\Tenant;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Notification;
-use AdvisingApp\Form\Database\Seeders\FormSeeder;
-use AdvisingApp\Task\Database\Seeders\TaskSeeder;
-use AdvisingApp\Team\Database\Seeders\TeamSeeder;
-use AdvisingApp\Alert\Database\Seeders\AlertSeeder;
-use AdvisingApp\Assistant\Database\Seeders\PromptSeeder;
-use AdvisingApp\Division\Database\Seeders\DivisionSeeder;
-use AdvisingApp\Prospect\Database\Seeders\ProspectSeeder;
-use AdvisingApp\MeetingCenter\Database\Seeders\EventSeeder;
-use AdvisingApp\Assistant\Database\Seeders\PromptTypeSeeder;
-use AdvisingApp\Interaction\Database\Seeders\InteractionSeeder;
-use AdvisingApp\Prospect\Database\Seeders\ProspectSourceSeeder;
-use AdvisingApp\Prospect\Database\Seeders\ProspectStatusSeeder;
-use AdvisingApp\Consent\Database\Seeders\ConsentAgreementSeeder;
-use AdvisingApp\InventoryManagement\Database\Seeders\AssetSeeder;
-use AdvisingApp\Analytics\Database\Seeders\AnalyticsResourceSeeder;
-use AdvisingApp\Authorization\Console\Commands\SyncRolesAndPermissions;
-use AdvisingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseItemSeeder;
-use AdvisingApp\ServiceManagement\Database\Seeders\ServiceRequestSeeder;
-use AdvisingApp\Analytics\Database\Seeders\AnalyticsResourceSourceSeeder;
-use AdvisingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseStatusSeeder;
-use AdvisingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseQualitySeeder;
-use AdvisingApp\Analytics\Database\Seeders\AnalyticsResourceCategorySeeder;
-use AdvisingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseCategorySeeder;
-use AdvisingApp\ServiceManagement\Database\Seeders\ChangeRequestTypeSeeder;
-use AdvisingApp\ServiceManagement\Database\Seeders\ServiceRequestTypeSeeder;
-use AdvisingApp\ServiceManagement\Database\Seeders\ChangeRequestStatusSeeder;
-use AdvisingApp\Application\Database\Seeders\ApplicationSubmissionStateSeeder;
-use AdvisingApp\ServiceManagement\Database\Seeders\ServiceRequestStatusSeeder;
-use AdvisingApp\ServiceManagement\Database\Seeders\ServiceRequestUpdateSeeder;
-use AdvisingApp\InventoryManagement\Database\Seeders\MaintenanceProviderSeeder;
+use AidingApp\Task\Database\Seeders\TaskSeeder;
+use AidingApp\Team\Database\Seeders\TeamSeeder;
+use AidingApp\Alert\Database\Seeders\AlertSeeder;
+use AidingApp\Contact\Database\Seeders\ContactSeeder;
+use AidingApp\Assistant\Database\Seeders\PromptSeeder;
+use AidingApp\Division\Database\Seeders\DivisionSeeder;
+use AidingApp\Assistant\Database\Seeders\PromptTypeSeeder;
+use AidingApp\Contact\Database\Seeders\ContactSourceSeeder;
+use AidingApp\Contact\Database\Seeders\ContactStatusSeeder;
+use AidingApp\Interaction\Database\Seeders\InteractionSeeder;
+use AidingApp\Consent\Database\Seeders\ConsentAgreementSeeder;
+use AidingApp\InventoryManagement\Database\Seeders\AssetSeeder;
+use AidingApp\Authorization\Console\Commands\SyncRolesAndPermissions;
+use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseItemSeeder;
+use AidingApp\ServiceManagement\Database\Seeders\ServiceRequestSeeder;
+use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseStatusSeeder;
+use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseQualitySeeder;
+use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseCategorySeeder;
+use AidingApp\ServiceManagement\Database\Seeders\ChangeRequestTypeSeeder;
+use AidingApp\ServiceManagement\Database\Seeders\ServiceRequestTypeSeeder;
+use AidingApp\ServiceManagement\Database\Seeders\ChangeRequestStatusSeeder;
+use AidingApp\ServiceManagement\Database\Seeders\ServiceRequestStatusSeeder;
+use AidingApp\ServiceManagement\Database\Seeders\ServiceRequestUpdateSeeder;
+use AidingApp\InventoryManagement\Database\Seeders\MaintenanceProviderSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -89,14 +83,14 @@ class DatabaseSeeder extends Seeder
         );
 
         $this->call([
-            SisDataSeeder::class,
             SuperAdminProfileSeeder::class,
-            UsersTableSeeder::class,
+            SampleSuperAdminUserSeeder::class,
+            InternalAdminUsersSeeder::class,
             DivisionSeeder::class,
             ServiceRequestStatusSeeder::class,
             ServiceRequestTypeSeeder::class,
-            ProspectStatusSeeder::class,
-            ProspectSourceSeeder::class,
+            ContactStatusSeeder::class,
+            ContactSourceSeeder::class,
             KnowledgeBaseCategorySeeder::class,
             KnowledgeBaseQualitySeeder::class,
             KnowledgeBaseStatusSeeder::class,
@@ -106,28 +100,19 @@ class DatabaseSeeder extends Seeder
 
             ServiceRequestSeeder::class,
             ServiceRequestUpdateSeeder::class,
-            ProspectSeeder::class,
+            ContactSeeder::class,
             KnowledgeBaseItemSeeder::class,
             TaskSeeder::class,
-            FormSeeder::class,
             AlertSeeder::class,
             TeamSeeder::class,
-            // EngagementSeeder::class,
-            // EngagementResponseSeeder::class,
-            // DemoEducatableEngagementSeeder::class,
             SuperAdminSeeder::class,
-            TwilioStudentSeeder::class,
-            ApplicationSubmissionStateSeeder::class,
-            EventSeeder::class,
+            TwilioContactSeeder::class,
 
             // InventoryManagement
             ...AssetSeeder::metadataSeeders(),
             AssetSeeder::class,
 
             MaintenanceProviderSeeder::class,
-            AnalyticsResourceSourceSeeder::class,
-            AnalyticsResourceCategorySeeder::class,
-            AnalyticsResourceSeeder::class,
 
             // Change Request
             ChangeRequestTypeSeeder::class,

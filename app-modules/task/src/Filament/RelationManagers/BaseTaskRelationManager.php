@@ -5,8 +5,8 @@
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
-    Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -20,7 +20,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Advising App™ are registered trademarks of
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
       Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
@@ -29,26 +29,26 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Task\Filament\RelationManagers;
+namespace AidingApp\Task\Filament\RelationManagers;
 
 use Filament\Forms\Form;
 use Filament\Tables\Table;
-use AdvisingApp\Task\Models\Task;
+use AidingApp\Task\Models\Task;
 use App\Models\Scopes\HasLicense;
 use Filament\Tables\Filters\Filter;
+use AidingApp\Task\Enums\TaskStatus;
+use AidingApp\Contact\Models\Contact;
 use Filament\Forms\Components\Select;
-use AdvisingApp\Task\Enums\TaskStatus;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Model;
 use App\Filament\Resources\UserResource;
 use Filament\Forms\Components\TextInput;
-use AdvisingApp\Prospect\Models\Prospect;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Tables\Actions\CreateAction;
 use Filament\Tables\Actions\DetachAction;
@@ -57,11 +57,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Tables\Actions\DetachBulkAction;
-use AdvisingApp\StudentDataModel\Models\Student;
 use Filament\Resources\Pages\ManageRelatedRecords;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource;
-use AdvisingApp\StudentDataModel\Filament\Resources\StudentResource;
-use AdvisingApp\Task\Filament\Resources\TaskResource\Components\TaskViewAction;
+use AidingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Task\Filament\Resources\TaskResource\Components\TaskViewAction;
 
 abstract class BaseTaskRelationManager extends ManageRelatedRecords
 {
@@ -115,8 +113,7 @@ abstract class BaseTaskRelationManager extends ManageRelatedRecords
                 TextColumn::make('concern.full')
                     ->label('Related To')
                     ->url(fn (Task $record) => match ($record->concern ? $record->concern::class : null) {
-                        Student::class => StudentResource::getUrl('view', ['record' => $record->concern]),
-                        Prospect::class => ProspectResource::getUrl('view', ['record' => $record->concern]),
+                        Contact::class => ContactResource::getUrl('view', ['record' => $record->concern]),
                         default => null,
                     }),
             ])

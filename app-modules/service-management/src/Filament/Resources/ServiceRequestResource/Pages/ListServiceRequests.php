@@ -5,8 +5,8 @@
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
-    Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -20,7 +20,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Advising App™ are registered trademarks of
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
       Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
@@ -29,15 +29,17 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages;
 
 use Filament\Tables\Table;
 use Filament\Actions\CreateAction;
+use App\Models\Scopes\EducatableSort;
+use App\Models\Scopes\EducatableSearch;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
@@ -46,15 +48,12 @@ use App\Filament\Tables\Columns\IdColumn;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Query\JoinClause;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
-use AdvisingApp\ServiceManagement\Models\ServiceRequest;
-use AdvisingApp\ServiceManagement\Enums\SlaComplianceStatus;
-use AdvisingApp\StudentDataModel\Models\Scopes\EducatableSort;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestPriority;
-use AdvisingApp\StudentDataModel\Models\Scopes\EducatableSearch;
-use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
+use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 
 class ListServiceRequests extends ListRecords
 {
@@ -87,26 +86,6 @@ class ListServiceRequests extends ListRecords
                     ->getStateUsing(fn (ServiceRequest $record) => $record->respondent->{$record->respondent::displayNameKey()})
                     ->searchable(query: fn (Builder $query, $search) => $query->tap(new EducatableSearch(relationship: 'respondent', search: $search)))
                     ->sortable(query: fn (Builder $query, string $direction): Builder => $query->tap(new EducatableSort($direction))),
-                TextColumn::make('respondent.sisid')
-                    ->label('SIS ID')
-                    ->searchable()
-                    ->sortable(query: function (Builder $query, string $direction): Builder {
-                        // Update this if any other relations are added to the ServiceRequest model respondent relationship
-                        return $query->join('students', function (JoinClause $join) {
-                            $join->on('service_requests.respondent_id', '=', 'students.sisid')
-                                ->where('service_requests.respondent_type', '=', 'student');
-                        })->orderBy('sisid', $direction);
-                    }),
-                TextColumn::make('respondent.otherid')
-                    ->label('Other ID')
-                    ->searchable()
-                    ->sortable(query: function (Builder $query, string $direction): Builder {
-                        // Update this if any other relations are added to the ServiceRequest model respondent relationship
-                        return $query->join('students', function (JoinClause $join) {
-                            $join->on('service_requests.respondent_id', '=', 'students.sisid')
-                                ->where('service_requests.respondent_type', '=', 'student');
-                        })->orderBy('otherid', $direction);
-                    }),
                 TextColumn::make('division.name')
                     ->label('Division')
                     ->searchable()

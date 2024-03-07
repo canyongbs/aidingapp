@@ -3,8 +3,8 @@
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
-    Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -18,7 +18,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Advising App™ are registered trademarks of
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
       Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
@@ -27,7 +27,7 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 -->
@@ -46,7 +46,7 @@ defineProps({
     <nav class="flex flex-1 flex-col mt-4">
         <div class="flex justify-center">
             <router-link :to="{ name: 'home' }">
-                <h3 class="text-xl">Help Center</h3>
+                <h3 class="text-xl text-primary-700">Help Center</h3>
             </router-link>
         </div>
 
@@ -55,10 +55,11 @@ defineProps({
                 <div
                     class="bg-gray-100 text-gray-800 group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold items-center"
                 >
-                    <span v-if="category.icon"
-                          v-html="category.icon"
-                          class="text-primary-600 dark:text-primary-400"
-                          aria-hidden="true"
+                    <span
+                        v-if="category.icon"
+                        v-html="category.icon"
+                        class="text-primary-600 dark:text-primary-400"
+                        aria-hidden="true"
                     >
                     </span>
                     <router-link

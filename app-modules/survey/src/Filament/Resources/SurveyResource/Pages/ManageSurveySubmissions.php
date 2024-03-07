@@ -5,8 +5,8 @@
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
-    Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -20,7 +20,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Advising App™ are registered trademarks of
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
       Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
@@ -29,12 +29,12 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Survey\Filament\Resources\SurveyResource\Pages;
+namespace AidingApp\Survey\Filament\Resources\SurveyResource\Pages;
 
 use Filament\Tables\Table;
 use Filament\Tables\Actions\Action;
@@ -47,14 +47,14 @@ use Filament\Tables\Actions\DeleteAction;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Tables\Actions\BulkActionGroup;
+use AidingApp\Survey\Models\SurveySubmission;
 use Filament\Tables\Actions\DeleteBulkAction;
-use AdvisingApp\Survey\Models\SurveySubmission;
-use AdvisingApp\Form\Enums\FormSubmissionStatus;
-use AdvisingApp\Form\Exports\FormSubmissionExport;
+use AidingApp\Form\Enums\FormSubmissionStatus;
+use AidingApp\Form\Exports\FormSubmissionExport;
 use Filament\Resources\Pages\ManageRelatedRecords;
+use AidingApp\Survey\Filament\Resources\SurveyResource;
 use App\Filament\Tables\Filters\OpenSearch\SelectFilter;
-use AdvisingApp\Survey\Filament\Resources\SurveyResource;
-use AdvisingApp\Form\Filament\Tables\Filters\FormSubmissionStatusFilter;
+use AidingApp\Form\Filament\Tables\Filters\FormSubmissionStatusFilter;
 
 class ManageSurveySubmissions extends ManageRelatedRecords
 {
@@ -86,18 +86,12 @@ class ManageSurveySubmissions extends ManageRelatedRecords
                     ->badge()
                     ->formatStateUsing(fn (?string $state): ?string => filled($state) ? ucfirst($state) : null)
                     ->color('success'),
-                // TODO: Add requester column when implemented
-                // TextColumn::make('requester.name'),
-                // TextColumn::make('requested_at')
-                //     ->dateTime()
-                //     ->getStateUsing(fn (SurveySubmission $record): ?CarbonInterface => $record->requester ? $record->created_at : null),
             ])
             ->filters([
                 FormSubmissionStatusFilter::make(),
                 SelectFilter::make('author_type')
                     ->options([
-                        'student' => 'Student',
-                        'prospect' => 'Prospect',
+                        'contact' => 'Contact',
                     ]),
             ])
             ->headerActions([

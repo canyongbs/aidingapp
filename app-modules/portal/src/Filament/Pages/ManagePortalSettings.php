@@ -5,8 +5,8 @@
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
-    Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -20,7 +20,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Advising App™ are registered trademarks of
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
       Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
@@ -29,12 +29,12 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Portal\Filament\Pages;
+namespace AidingApp\Portal\Filament\Pages;
 
 use App\Models\User;
 use App\Enums\Feature;
@@ -42,23 +42,23 @@ use Filament\Forms\Get;
 use Filament\Forms\Form;
 use App\Models\SettingsProperty;
 use Filament\Pages\SettingsPage;
-use AdvisingApp\Form\Enums\Rounding;
+use AidingApp\Form\Enums\Rounding;
 use Illuminate\Support\Facades\Gate;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
+use AidingApp\Portal\Enums\PortalType;
 use Filament\Forms\Components\Actions;
 use Filament\Forms\Components\Section;
-use AdvisingApp\Portal\Enums\PortalType;
 use Filament\Forms\Components\TextInput;
 use App\Filament\Clusters\GlobalSettings;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Infolists\Components\TextEntry;
 use FilamentTiptapEditor\Enums\TiptapOutput;
+use AidingApp\Portal\Settings\PortalSettings;
 use Filament\Forms\Components\Actions\Action;
 use App\Filament\Forms\Components\ColorSelect;
-use AdvisingApp\Portal\Settings\PortalSettings;
 use App\Filament\Forms\Components\TiptapEditor;
-use AdvisingApp\Portal\Actions\GeneratePortalEmbedCode;
+use AidingApp\Portal\Actions\GeneratePortalEmbedCode;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 
 class ManagePortalSettings extends SettingsPage
@@ -106,10 +106,6 @@ class ManagePortalSettings extends SettingsPage
                     ->columns(2),
                 Section::make('CRM Portal')
                     ->schema([
-                        Toggle::make('has_applications')
-                            ->label('Applications'),
-                        Toggle::make('has_message_center')
-                            ->label('Message Center'),
                         Toggle::make('has_user_chat')
                             ->label('Realtime Chat')
                             ->disabled(! Gate::check(Feature::RealtimeChat->getGateName()))
@@ -188,7 +184,7 @@ class ManagePortalSettings extends SettingsPage
                             ->hintIcon(fn (Toggle $component) => $component->isDisabled() ? 'heroicon-m-lock-closed' : null),
                         Actions::make([
                             Action::make('view')
-                                ->url(fn () => route('portals.knowledge-management.show'))
+                                ->url(fn () => route('portal.knowledge-management.show'))
                                 ->icon('heroicon-m-arrow-top-right-on-square')
                                 ->disabled(! Gate::check(Feature::KnowledgeManagement->getGateName()))
                                 ->openUrlInNewTab(),
@@ -222,8 +218,7 @@ class ManagePortalSettings extends SettingsPage
                             ->visible(
                                 fn (Get $get) => $get('knowledge_management_portal_enabled') &&
                             ! is_null($get('knowledge_management_portal_primary_color')) &&
-                            ! is_null($get('knowledge_management_portal_rounding')) &&
-                            ! is_null($get('knowledge_management_portal_authorized_domain'))
+                            ! is_null($get('knowledge_management_portal_rounding'))
                             )
                             ->columnSpanFull(),
                     ])->columns(2),

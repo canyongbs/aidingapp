@@ -5,8 +5,8 @@
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
-    Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -20,7 +20,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Advising App™ are registered trademarks of
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
       Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
@@ -29,17 +29,16 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Survey\Database\Factories;
+namespace AidingApp\Survey\Database\Factories;
 
-use AdvisingApp\Survey\Models\Survey;
-use AdvisingApp\Prospect\Models\Prospect;
-use AdvisingApp\Survey\Models\SurveySubmission;
-use AdvisingApp\StudentDataModel\Models\Student;
+use AidingApp\Survey\Models\Survey;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Survey\Models\SurveySubmission;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
@@ -55,16 +54,14 @@ class SurveySubmissionFactory extends Factory
     {
         return [
             'survey_id' => Survey::factory(),
-            'author_type' => fake()->randomElement([(new Student())->getMorphClass(), (new Prospect())->getMorphClass()]),
+            'author_type' => fake()->randomElement([(new Contact())->getMorphClass()]),
             'author_id' => function (array $attributes) {
                 $authorClass = Relation::getMorphedModel($attributes['author_type']);
 
-                /** @var Student|Prospect $authorModel */
+                /** @var Contact $authorModel */
                 $authorModel = new $authorClass();
 
-                $author = $authorClass === Student::class
-                    ? Student::inRandomOrder()->first() ?? Student::factory()->create()
-                    : $authorModel::factory()->create();
+                $author = $authorModel::factory()->create();
 
                 return $author->getKey();
             },

@@ -5,8 +5,8 @@
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
-    Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -20,7 +20,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Advising App™ are registered trademarks of
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
       Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
@@ -29,31 +29,31 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Authorization\Providers;
+namespace AidingApp\Authorization\Providers;
 
 use Filament\Panel;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
-use AdvisingApp\Authorization\Models\Role;
-use AdvisingApp\Authorization\Models\License;
-use AdvisingApp\Authorization\Models\RoleGroup;
-use AdvisingApp\Authorization\Models\Permission;
-use AdvisingApp\Authorization\AuthorizationPlugin;
+use AidingApp\Authorization\Models\Role;
+use AidingApp\Authorization\Models\License;
+use AidingApp\Authorization\Models\RoleGroup;
+use AidingApp\Authorization\Models\Permission;
+use AidingApp\Authorization\AuthorizationPlugin;
 use App\Registries\RoleBasedAccessControlRegistry;
 use SocialiteProviders\Azure\AzureExtendSocialite;
 use SocialiteProviders\Manager\SocialiteWasCalled;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use SocialiteProviders\Google\GoogleExtendSocialite;
-use AdvisingApp\Authorization\AuthorizationRoleRegistry;
-use AdvisingApp\Authorization\Observers\LicenseObserver;
-use AdvisingApp\Authorization\AuthorizationPermissionRegistry;
-use AdvisingApp\Authorization\Registries\AuthorizationRbacRegistry;
-use AdvisingApp\Authorization\Http\Controllers\Auth\LogoutController;
+use AidingApp\Authorization\AuthorizationRoleRegistry;
+use AidingApp\Authorization\Observers\LicenseObserver;
+use AidingApp\Authorization\AuthorizationPermissionRegistry;
+use AidingApp\Authorization\Registries\AuthorizationRbacRegistry;
+use AidingApp\Authorization\Http\Controllers\Auth\LogoutController;
 use Filament\Http\Controllers\Auth\LogoutController as FilamentLogoutController;
 
 class AuthorizationServiceProvider extends ServiceProvider
@@ -77,7 +77,7 @@ class AuthorizationServiceProvider extends ServiceProvider
         app('config')->set('permission', require base_path('app-modules/authorization/config/permission.php'));
     }
 
-    public function boot(AuthorizationPermissionRegistry $permissionRegistry, AuthorizationRoleRegistry $roleRegistry): void
+    public function boot(): void
     {
         Relation::morphMap([
             'role' => Role::class,

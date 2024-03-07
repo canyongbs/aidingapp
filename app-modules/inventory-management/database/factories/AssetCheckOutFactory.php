@@ -5,8 +5,8 @@
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
-    Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -20,7 +20,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Advising App™ are registered trademarks of
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
       Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
@@ -29,23 +29,22 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InventoryManagement\Database\Factories;
+namespace AidingApp\InventoryManagement\Database\Factories;
 
 use Carbon\Carbon;
 use App\Models\User;
-use AdvisingApp\Prospect\Models\Prospect;
-use AdvisingApp\StudentDataModel\Models\Student;
-use AdvisingApp\InventoryManagement\Models\Asset;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\InventoryManagement\Models\Asset;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AdvisingApp\InventoryManagement\Models\AssetCheckOut>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AidingApp\InventoryManagement\Models\AssetCheckOut>
  */
 class AssetCheckOutFactory extends Factory
 {
@@ -59,18 +58,15 @@ class AssetCheckOutFactory extends Factory
             'checked_out_by_type' => $checkedOutBy->getMorphClass(),
             'checked_out_by_id' => $checkedOutBy->getKey(),
             'checked_out_to_type' => fake()->randomElement([
-                (new Student())->getMorphClass(),
-                (new Prospect())->getMorphClass(),
+                (new Contact())->getMorphClass(),
             ]),
             'checked_out_to_id' => function (array $attributes) {
                 $checkedOutToClass = Relation::getMorphedModel($attributes['checked_out_to_type']);
 
-                /** @var Student|Prospect $senderModel */
+                /** @var Contact $senderModel */
                 $checkedOutToModel = new $checkedOutToClass();
 
-                $checkedOutToModel = $checkedOutToClass === Student::class
-                    ? Student::inRandomOrder()->first() ?? Student::factory()->create()
-                    : $checkedOutToModel::factory()->create();
+                $checkedOutToModel = $checkedOutToModel::factory()->create();
 
                 return $checkedOutToModel->getKey();
             },

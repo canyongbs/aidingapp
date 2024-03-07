@@ -3,8 +3,8 @@
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
-    Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -18,7 +18,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Advising App™ are registered trademarks of
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
       Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
@@ -27,28 +27,26 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 --}}
 @php
-    use AdvisingApp\Authorization\Enums\LicenseType;
-    use AdvisingApp\Prospect\Models\Prospect;
-    use AdvisingApp\StudentDataModel\Models\Student;
+    use AidingApp\Authorization\Enums\LicenseType;
+    use AidingApp\Contact\Models\Contact;
 @endphp
 
 <div
     class="flex flex-col items-start justify-start space-y-4 bg-white p-4 text-sm font-normal text-gray-700 dark:bg-gray-800 dark:text-gray-400"
     x-show="showFilters"
 >
-    @if (auth()->user()->hasLicense([Student::getLicenseType(), Prospect::getLicenseType()]))
+    @if (auth()->user()->hasLicense([Contact::getLicenseType()]))
         <span>Filter Engagements by:</span>
 
         <x-filament::input.wrapper>
             <x-filament::input.select wire:model.live="filterPeopleType">
                 <option value="all">All</option>
-                <option value="students">Students</option>
-                <option value="prospects">Prospects</option>
+                <option value="contacts">Contacts</option>
             </x-filament::input.select>
         </x-filament::input.wrapper>
     @endif
@@ -59,7 +57,7 @@
         <div class="flex w-full flex-col items-center space-y-2">
             <div class="w-full">
                 <input
-                    class="!focus:ring-trout-700 text-advising-app-black-950 dark:text-advising-app-white-50 block w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm dark:border-gray-600 dark:bg-gray-800 dark:focus:ring-bright-sun-300"
+                    class="!focus:ring-trout-700 text-aiding-app-black-950 dark:text-aiding-app-white-50 block w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm dark:border-gray-600 dark:bg-gray-800 dark:focus:ring-bright-sun-300"
                     name="filterStartDate"
                     type="date"
                     wire:model.live="filterStartDate"
@@ -69,7 +67,7 @@
             <span class="mx-4 text-gray-500">to</span>
             <div class="w-full">
                 <input
-                    class="!focus:ring-trout-700 text-advising-app-black-950 dark:text-advising-app-white-50 block w-full rounded-lg border border-gray-300 bg-transparent p-2.5 text-sm dark:border-gray-600 dark:focus:ring-bright-sun-300"
+                    class="!focus:ring-trout-700 text-aiding-app-black-950 dark:text-aiding-app-white-50 block w-full rounded-lg border border-gray-300 bg-transparent p-2.5 text-sm dark:border-gray-600 dark:focus:ring-bright-sun-300"
                     name="filterEndDate"
                     type="date"
                     wire:model.live="filterEndDate"

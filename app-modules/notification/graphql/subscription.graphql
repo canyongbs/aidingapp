@@ -1,5 +1,5 @@
 type UserSubscription
-    @model(class: "AdvisingApp\\Notification\\Models\\Subscription") {
+    @model(class: "AidingApp\\Notification\\Models\\Subscription") {
     "Unique primary key."
     id: UUID!
     "The User related to this subscription."
@@ -13,8 +13,7 @@ type UserSubscription
 }
 
 input UserSubscriptionSubscribablesQuery {
-    student: StudentsQuery
-    prospect: ProspectsQuery
+    contact: ContactsQuery
 }
 
 input SubscriptionsQuery {
@@ -53,7 +52,7 @@ input CreateUserSubscriptionInput {
             apply: [
                 "required"
                 "exists:users,id"
-                "AdvisingApp\\Notification\\Rules\\UniqueSubscriptionRule"
+                "AidingApp\\Notification\\Rules\\UniqueSubscriptionRule"
             ]
         )
 
@@ -62,13 +61,12 @@ input CreateUserSubscriptionInput {
         @rules(
             apply: [
                 "required"
-                "AdvisingApp\\Notification\\Rules\\SubscribableIdExistsRule"
+                "AidingApp\\Notification\\Rules\\SubscribableIdExistsRule"
             ]
         )
 
     "The type of subscribable to subscribe to."
-    subscribable_type: EducatableType!
-        @rules(apply: ["required", "in:student,prospect"])
+    subscribable_type: EducatableType! @rules(apply: ["required", "in:contact"])
 }
 
 type UserSubscriptionMutations {

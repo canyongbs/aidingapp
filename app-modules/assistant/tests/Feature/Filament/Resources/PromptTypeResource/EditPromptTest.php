@@ -5,8 +5,8 @@
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
-    Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -20,7 +20,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Advising App™ are registered trademarks of
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
       Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
@@ -29,7 +29,7 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
@@ -41,15 +41,17 @@ use Filament\Actions\DeleteAction;
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
-use AdvisingApp\Assistant\Models\PromptType;
+use AidingApp\Assistant\Models\PromptType;
 
 use function Pest\Laravel\assertDatabaseHas;
-use function Pest\Laravel\assertModelMissing;
+use function PHPUnit\Framework\assertNotNull;
+
+use AidingApp\Authorization\Enums\LicenseType;
+
 use function Pest\Laravel\assertDatabaseCount;
 
-use AdvisingApp\Authorization\Enums\LicenseType;
-use AdvisingApp\Assistant\Filament\Resources\PromptTypeResource;
-use AdvisingApp\Assistant\Filament\Resources\PromptTypeResource\Pages\EditPromptType;
+use AidingApp\Assistant\Filament\Resources\PromptTypeResource;
+use AidingApp\Assistant\Filament\Resources\PromptTypeResource\Pages\EditPromptType;
 
 /** @var array<LicenseType> $licenses */
 $licenses = [
@@ -141,7 +143,8 @@ it('can delete a record', function () use ($licenses, $roles) {
         ->assertActionEnabled(DeleteAction::class)
         ->callAction(DeleteAction::class);
 
-    assertDatabaseCount(PromptType::class, 0);
+    // TODO: Bring back when we propagate soft deletes
+    //assertDatabaseCount(PromptType::class, 0);
 
-    assertModelMissing($record);
+    assertNotNull($record->refresh()->deleted_at);
 });

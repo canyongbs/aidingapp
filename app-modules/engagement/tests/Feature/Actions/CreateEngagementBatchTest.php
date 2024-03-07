@@ -5,8 +5,8 @@
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
-    Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -20,7 +20,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Advising App™ are registered trademarks of
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
       Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
@@ -29,7 +29,7 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
@@ -37,18 +37,18 @@
 use App\Models\User;
 use Illuminate\Bus\PendingBatch;
 use Illuminate\Support\Facades\Bus;
+use AidingApp\Contact\Models\Contact;
 use Illuminate\Support\Facades\Queue;
+use AidingApp\Engagement\Models\Engagement;
 use Illuminate\Support\Facades\Notification;
-use AdvisingApp\Engagement\Models\Engagement;
-use AdvisingApp\StudentDataModel\Models\Student;
-use AdvisingApp\Engagement\Models\EngagementBatch;
-use AdvisingApp\Engagement\Models\EngagementDeliverable;
-use AdvisingApp\Engagement\Actions\CreateEngagementBatch;
-use AdvisingApp\Engagement\Enums\EngagementDeliveryMethod;
-use AdvisingApp\Engagement\Actions\EngagementSmsChannelDelivery;
-use AdvisingApp\Engagement\Actions\EngagementEmailChannelDelivery;
-use AdvisingApp\Engagement\DataTransferObjects\EngagementBatchCreationData;
-use AdvisingApp\Engagement\Notifications\EngagementBatchFinishedNotification;
+use AidingApp\Engagement\Models\EngagementBatch;
+use AidingApp\Engagement\Models\EngagementDeliverable;
+use AidingApp\Engagement\Actions\CreateEngagementBatch;
+use AidingApp\Engagement\Enums\EngagementDeliveryMethod;
+use AidingApp\Engagement\Actions\EngagementSmsChannelDelivery;
+use AidingApp\Engagement\Actions\EngagementEmailChannelDelivery;
+use AidingApp\Engagement\DataTransferObjects\EngagementBatchCreationData;
+use AidingApp\Engagement\Notifications\EngagementBatchFinishedNotification;
 
 it('will create a new engagement batch', function () {
     Queue::fake([EngagementEmailChannelDelivery::class, EngagementSmsChannelDelivery::class]);
@@ -56,7 +56,7 @@ it('will create a new engagement batch', function () {
 
     CreateEngagementBatch::dispatch(EngagementBatchCreationData::from([
         'user' => User::factory()->create(),
-        'records' => Student::factory()->count(1)->create(),
+        'records' => Contact::factory()->count(1)->create(),
         'subject' => 'Test Subject',
         'body' => ['Test Body'],
         'deliveryMethod' => EngagementDeliveryMethod::Email->value,
@@ -69,11 +69,11 @@ it('will create an engagement for every record provided', function () {
     Queue::fake([EngagementEmailChannelDelivery::class, EngagementSmsChannelDelivery::class]);
     Notification::fake();
 
-    $students = Student::factory()->count(3)->create();
+    $contacts = Contact::factory()->count(3)->create();
 
     CreateEngagementBatch::dispatch(EngagementBatchCreationData::from([
         'user' => User::factory()->create(),
-        'records' => $students,
+        'records' => $contacts,
         'subject' => 'Test Subject',
         'body' => ['Test Body'],
         'deliveryMethod' => EngagementDeliveryMethod::Email->value,
@@ -81,7 +81,7 @@ it('will create an engagement for every record provided', function () {
 
     expect(Engagement::count())->toBe(3);
 
-    $students->each(fn (Student $student) => expect($student->engagements()->count())->toBe(1));
+    $contacts->each(fn (Contact $contact) => expect($contact->engagements()->count())->toBe(1));
 });
 
 it('will associate the engagement with the batch', function () {
@@ -90,7 +90,7 @@ it('will associate the engagement with the batch', function () {
 
     CreateEngagementBatch::dispatch(EngagementBatchCreationData::from([
         'user' => User::factory()->create(),
-        'records' => Student::factory()->count(4)->create(),
+        'records' => Contact::factory()->count(4)->create(),
         'subject' => 'Test Subject',
         'body' => ['Test Body'],
         'deliveryMethod' => EngagementDeliveryMethod::Email->value,
@@ -105,7 +105,7 @@ it('will create deliverables for the created engagements', function () {
 
     CreateEngagementBatch::dispatch(EngagementBatchCreationData::from([
         'user' => User::factory()->create(),
-        'records' => Student::factory()->count(1)->create(),
+        'records' => Contact::factory()->count(1)->create(),
         'subject' => 'Test Subject',
         'body' => ['Test Body'],
         'deliveryMethod' => EngagementDeliveryMethod::Email->value,
@@ -121,7 +121,7 @@ it('will dispatch a batch of jobs for each engagement that needs to be delivered
 
     CreateEngagementBatch::dispatch(EngagementBatchCreationData::from([
         'user' => User::factory()->create(),
-        'records' => Student::factory()->count(5)->create(),
+        'records' => Contact::factory()->count(5)->create(),
         'subject' => 'Test Subject',
         'body' => ['Test Body'],
         'deliveryMethod' => EngagementDeliveryMethod::Email->value,
@@ -145,7 +145,7 @@ it('will dispatch a notification to the user who initiated the batch engagement 
 
     CreateEngagementBatch::dispatch(EngagementBatchCreationData::from([
         'user' => $user,
-        'records' => Student::factory()->count(1)->create(),
+        'records' => Contact::factory()->count(1)->create(),
         'subject' => 'Test Subject',
         'body' => ['Test Body'],
         'deliveryMethod' => EngagementDeliveryMethod::Email->value,

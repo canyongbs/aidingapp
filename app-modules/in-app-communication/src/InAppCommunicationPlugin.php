@@ -5,8 +5,8 @@
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
-    Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -20,7 +20,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Advising App™ are registered trademarks of
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
       Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
@@ -29,19 +29,19 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InAppCommunication;
+namespace AidingApp\InAppCommunication;
 
 use Filament\Panel;
 use Filament\Contracts\Plugin;
 use Filament\View\PanelsRenderHook;
 use Illuminate\Support\Facades\Blade;
-use AdvisingApp\InAppCommunication\Filament\Pages\UserChat;
-use AdvisingApp\InAppCommunication\Livewire\ChatNotifications;
+use AidingApp\InAppCommunication\Filament\Pages\UserChat;
+use AidingApp\InAppCommunication\Livewire\ChatNotifications;
 
 class InAppCommunicationPlugin implements Plugin
 {
@@ -54,12 +54,12 @@ class InAppCommunicationPlugin implements Plugin
     {
         $panel->discoverResources(
             in: __DIR__ . '/Filament/Resources',
-            for: 'AdvisingApp\\InAppCommunication\\Filament\\Resources'
+            for: 'AidingApp\\InAppCommunication\\Filament\\Resources'
         );
 
         $panel->discoverPages(
             in: __DIR__ . '/Filament/Pages',
-            for: 'AdvisingApp\\InAppCommunication\\Filament\\Pages'
+            for: 'AidingApp\\InAppCommunication\\Filament\\Pages'
         );
 
         $panel->livewireComponents([
@@ -68,7 +68,7 @@ class InAppCommunicationPlugin implements Plugin
 
         $panel->renderHook(
             PanelsRenderHook::GLOBAL_SEARCH_AFTER,
-            fn () => (auth()->user() && UserChat::canAccess()) ? Blade::render('@livewire(\\AdvisingApp\\InAppCommunication\\Livewire\\ChatNotifications::class)') : null,
+            fn () => (auth()->user() && UserChat::canAccess()) ? Blade::render('@livewire(\\AidingApp\\InAppCommunication\\Livewire\\ChatNotifications::class)') : null,
         );
     }
 

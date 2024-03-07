@@ -5,8 +5,8 @@
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
-    Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -20,7 +20,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Advising App™ are registered trademarks of
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
       Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
@@ -29,7 +29,7 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
@@ -40,12 +40,12 @@ use Exception;
 use Livewire\Component;
 use Illuminate\Support\Arr;
 use Filament\Actions\Action;
+use AidingApp\Task\Models\Task;
 use Filament\Actions\EditAction;
-use AdvisingApp\Task\Models\Task;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Collection;
+use AidingApp\Task\Enums\TaskStatus;
 use Filament\Forms\Components\Select;
-use AdvisingApp\Task\Enums\TaskStatus;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -53,14 +53,14 @@ use Filament\Notifications\Notification;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Concerns\InteractsWithForms;
+use AidingApp\Task\Filament\Concerns\TaskEditForm;
 use App\Filament\Forms\Components\EducatableSelect;
 use Filament\Actions\Concerns\InteractsWithActions;
-use AdvisingApp\Task\Filament\Concerns\TaskEditForm;
 use Filament\Widgets\Concerns\InteractsWithPageTable;
 use Bvtterfly\ModelStateMachine\Exceptions\InvalidTransition;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
-use AdvisingApp\Task\Filament\Pages\Components\TaskKanbanViewAction;
-use AdvisingApp\Task\Filament\Resources\TaskResource\Pages\ListTasks;
+use AidingApp\Task\Filament\Pages\Components\TaskKanbanViewAction;
+use AidingApp\Task\Filament\Resources\TaskResource\Pages\ListTasks;
 
 class TaskKanban extends Component implements HasForms, HasActions
 {

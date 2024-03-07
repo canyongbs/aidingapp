@@ -5,8 +5,8 @@
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
-    Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -20,7 +20,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Advising App™ are registered trademarks of
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
       Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
@@ -29,12 +29,12 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Task\Filament\Concerns;
+namespace AidingApp\Task\Filament\Concerns;
 
 use Closure;
 use App\Models\User;
@@ -42,9 +42,8 @@ use Filament\Forms\Get;
 use Filament\Forms\Set;
 use App\Models\Authenticatable;
 use App\Models\Scopes\HasLicense;
-use AdvisingApp\Prospect\Models\Prospect;
+use AidingApp\Contact\Models\Contact;
 use Illuminate\Database\Eloquent\Builder;
-use AdvisingApp\StudentDataModel\Models\Student;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
 trait TaskForm
@@ -61,16 +60,14 @@ trait TaskForm
             /** @var Authenticatable $user */
             $user = auth()->user();
 
-            $canAccessStudents = $user->hasLicense(Student::getLicenseType());
-            $canAccessProspects = $user->hasLicense(Prospect::getLicenseType());
+            $canAccessContacts = $user->hasLicense(Contact::getLicenseType());
 
-            if ($canAccessStudents && $canAccessProspects) {
+            if ($canAccessContacts) {
                 return $query;
             }
 
             return match (true) {
-                $canAccessStudents => $query->tap(new HasLicense(Student::getLicenseType())),
-                $canAccessProspects => $query->tap(new HasLicense(Prospect::getLicenseType())),
+                $canAccessContacts => $query->tap(new HasLicense(Contact::getLicenseType())),
                 default => $query,
             };
         };
@@ -94,19 +91,16 @@ trait TaskForm
             /** @var Authenticatable $user */
             $user = auth()->user();
 
-            $canAccessStudents = $user->hasLicense(Student::getLicenseType());
-            $canAccessProspects = $user->hasLicense(Prospect::getLicenseType());
+            $canAccessContacts = $user->hasLicense(Contact::getLicenseType());
 
             $concernType = $get('concern_type');
 
-            if ($canAccessStudents && $canAccessProspects && blank($concernType)) {
+            if ($canAccessContacts && blank($concernType)) {
                 return;
             }
 
             $concernType = match (true) {
-                $canAccessStudents && $canAccessProspects => Relation::getMorphedModel($concernType) ?? $concernType,
-                $canAccessStudents => Student::class,
-                $canAccessProspects => Prospect::class,
+                $canAccessContacts => Contact::class,
             };
 
             $assignedTo = User::find($assignedTo);

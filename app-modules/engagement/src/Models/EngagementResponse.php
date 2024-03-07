@@ -5,8 +5,8 @@
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
-    Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -20,7 +20,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Advising App™ are registered trademarks of
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
       Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
@@ -29,26 +29,26 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Models;
+namespace AidingApp\Engagement\Models;
 
 use App\Models\BaseModel;
 use Illuminate\Support\Collection;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Timeline\Models\Timeline;
 use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Contracts\Auditable;
-use AdvisingApp\Prospect\Models\Prospect;
-use AdvisingApp\Timeline\Models\Timeline;
-use AdvisingApp\StudentDataModel\Models\Student;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
-use AdvisingApp\Timeline\Models\Contracts\ProvidesATimeline;
-use AdvisingApp\Timeline\Timelines\EngagementResponseTimeline;
-use AdvisingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
+use AidingApp\Timeline\Timelines\EngagementResponseTimeline;
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 
 /**
  * @mixin IdeHelperEngagementResponse
@@ -56,6 +56,7 @@ use AdvisingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 class EngagementResponse extends BaseModel implements Auditable, ProvidesATimeline
 {
     use AuditableTrait;
+    use SoftDeletes;
 
     protected $fillable = [
         'sender_id',
@@ -92,13 +93,8 @@ class EngagementResponse extends BaseModel implements Auditable, ProvidesATimeli
         );
     }
 
-    public function scopeSentByStudent(Builder $query): void
+    public function scopeSentByContact(Builder $query): void
     {
-        $query->where('sender_type', resolve(Student::class)->getMorphClass());
-    }
-
-    public function scopeSentByProspect(Builder $query): void
-    {
-        $query->where('sender_type', resolve(Prospect::class)->getMorphClass());
+        $query->where('sender_type', resolve(Contact::class)->getMorphClass());
     }
 }

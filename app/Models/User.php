@@ -5,8 +5,8 @@
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
-    Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -20,7 +20,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Advising App™ are registered trademarks of
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
       Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
@@ -29,7 +29,7 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
@@ -39,60 +39,55 @@ namespace App\Models;
 use Filament\Panel;
 use DateTimeInterface;
 use Illuminate\Support\Arr;
-use AdvisingApp\Task\Models\Task;
-use AdvisingApp\Team\Models\Team;
+use AidingApp\Task\Models\Task;
+use AidingApp\Team\Models\Team;
 use Spatie\MediaLibrary\HasMedia;
 use App\Support\HasAdvancedFilter;
 use Illuminate\Support\Collection;
-use AdvisingApp\Team\Models\TeamUser;
+use AidingApp\Team\Models\TeamUser;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\CareTeam\Models\CareTeam;
+use AidingApp\Authorization\Models\Role;
 use App\Filament\Resources\UserResource;
 use Filament\Models\Contracts\HasAvatar;
 use Illuminate\Notifications\Notifiable;
 use OwenIt\Auditing\Contracts\Auditable;
-use AdvisingApp\CareTeam\Models\CareTeam;
-use AdvisingApp\Prospect\Models\Prospect;
-use AdvisingApp\Authorization\Models\Role;
 use Lab404\Impersonate\Models\Impersonate;
+use AidingApp\Authorization\Models\License;
 use Filament\Models\Contracts\FilamentUser;
 use Spatie\MediaLibrary\InteractsWithMedia;
-use AdvisingApp\Authorization\Models\License;
+use AidingApp\Assistant\Models\AssistantChat;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use AdvisingApp\MeetingCenter\Models\Calendar;
-use AdvisingApp\Assistant\Models\AssistantChat;
-use AdvisingApp\Authorization\Enums\LicenseType;
-use AdvisingApp\StudentDataModel\Models\Student;
+use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\Notification\Models\Subscription;
 use Staudenmeir\EloquentHasManyDeep\HasManyDeep;
-use AdvisingApp\Notification\Models\Subscription;
-use Illuminate\Database\Eloquent\Relations\HasOne;
-use AdvisingApp\CaseloadManagement\Models\Caseload;
-use AdvisingApp\Consent\Models\Concerns\CanConsent;
-use AdvisingApp\MeetingCenter\Models\CalendarEvent;
+use AidingApp\Consent\Models\Concerns\CanConsent;
+use AidingApp\Assistant\Models\AssistantChatFolder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use AdvisingApp\Assistant\Models\AssistantChatFolder;
+use AidingApp\ServiceManagement\Models\ChangeRequest;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Staudenmeir\EloquentHasManyDeep\HasRelationships;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
-use AdvisingApp\ServiceManagement\Models\ChangeRequest;
+use AidingApp\Assistant\Models\AssistantChatMessageLog;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
-use AdvisingApp\Assistant\Models\AssistantChatMessageLog;
+use AidingApp\ServiceManagement\Models\ChangeRequestType;
 use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use AdvisingApp\ServiceManagement\Models\ChangeRequestType;
-use AdvisingApp\InAppCommunication\Models\TwilioConversation;
-use AdvisingApp\Engagement\Models\Concerns\HasManyEngagements;
-use AdvisingApp\Timeline\Models\Contracts\HasFilamentResource;
-use AdvisingApp\Authorization\Models\Pivots\RoleGroupUserPivot;
-use AdvisingApp\ServiceManagement\Models\ChangeRequestResponse;
-use AdvisingApp\Authorization\Models\Concerns\DefinesPermissions;
-use AdvisingApp\InAppCommunication\Models\TwilioConversationUser;
-use AdvisingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AdvisingApp\Notification\Models\Contracts\NotifiableInterface;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestAssignment;
-use AdvisingApp\Engagement\Models\Concerns\HasManyEngagementBatches;
-use AdvisingApp\IntegrationAI\Models\Concerns\ProvidesDynamicContext;
-use AdvisingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
+use AidingApp\InAppCommunication\Models\TwilioConversation;
+use AidingApp\Engagement\Models\Concerns\HasManyEngagements;
+use AidingApp\Timeline\Models\Contracts\HasFilamentResource;
+use AidingApp\Authorization\Models\Pivots\RoleGroupUserPivot;
+use AidingApp\ServiceManagement\Models\ChangeRequestResponse;
+use AidingApp\Authorization\Models\Concerns\DefinesPermissions;
+use AidingApp\InAppCommunication\Models\TwilioConversationUser;
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Notification\Models\Contracts\NotifiableInterface;
+use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
+use AidingApp\Engagement\Models\Concerns\HasManyEngagementBatches;
+use AidingApp\IntegrationAI\Models\Concerns\ProvidesDynamicContext;
+use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 
 /**
  * @mixin IdeHelperUser
@@ -128,7 +123,6 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
         'email_verified_at' => 'datetime',
         'has_enabled_public_profile' => 'boolean',
         'office_hours_are_enabled' => 'boolean',
-        'appointments_are_restricted_to_existing_students' => 'boolean',
         'office_hours' => 'array',
         'out_of_office_is_enabled' => 'boolean',
         'out_of_office_starts_at' => 'datetime',
@@ -159,7 +153,6 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
         'has_enabled_public_profile',
         'public_profile_slug',
         'office_hours_are_enabled',
-        'appointments_are_restricted_to_existing_students',
         'office_hours',
         'out_of_office_is_enabled',
         'out_of_office_starts_at',
@@ -216,11 +209,6 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
             ->using(TwilioConversationUser::class);
     }
 
-    public function caseloads(): HasMany
-    {
-        return $this->hasMany(Caseload::class);
-    }
-
     public function licenses(): HasMany
     {
         return $this->hasMany(License::class, 'user_id');
@@ -231,10 +219,10 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
         return $this->hasMany(Subscription::class);
     }
 
-    public function prospectSubscriptions(): MorphToMany
+    public function contactSubscriptions(): MorphToMany
     {
         return $this->morphedByMany(
-            related: Prospect::class,
+            related: Contact::class,
             name: 'subscribable',
             table: 'subscriptions'
         )
@@ -243,44 +231,15 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
             ->withTimestamps();
     }
 
-    public function studentSubscriptions(): MorphToMany
+    public function contactAlerts(): HasManyDeep
+    {
+        return $this->hasManyDeepFromRelations($this->contactSubscriptions(), (new Contact())->alerts());
+    }
+
+    public function contactCareTeams(): MorphToMany
     {
         return $this->morphedByMany(
-            related: Student::class,
-            name: 'subscribable',
-            table: 'subscriptions'
-        )
-            ->using(Subscription::class)
-            ->withPivot('id')
-            ->withTimestamps();
-    }
-
-    public function studentAlerts(): HasManyDeep
-    {
-        return $this->hasManyDeepFromRelations($this->studentSubscriptions(), (new Student())->alerts());
-    }
-
-    public function prospectAlerts(): HasManyDeep
-    {
-        return $this->hasManyDeepFromRelations($this->prospectSubscriptions(), (new Prospect())->alerts());
-    }
-
-    public function prospectCareTeams(): MorphToMany
-    {
-        return $this->morphedByMany(
-            related: Prospect::class,
-            name: 'educatable',
-            table: 'care_teams'
-        )
-            ->using(CareTeam::class)
-            ->withPivot('id')
-            ->withTimestamps();
-    }
-
-    public function studentCareTeams(): MorphToMany
-    {
-        return $this->morphedByMany(
-            related: Student::class,
+            related: Contact::class,
             name: 'educatable',
             table: 'care_teams'
         )
@@ -366,11 +325,6 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
         return $this->hasMany(AssistantChatFolder::class);
     }
 
-    public function events(): HasMany
-    {
-        return $this->hasMany(CalendarEvent::class);
-    }
-
     public function teams(): BelongsToMany
     {
         return $this
@@ -379,11 +333,6 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
             //TODO: remove this if we support multiple teams
             ->limit(1)
             ->withTimestamps();
-    }
-
-    public function calendar(): HasOne
-    {
-        return $this->hasOne(Calendar::class);
     }
 
     public function assistantChatMessageLogs(): HasMany

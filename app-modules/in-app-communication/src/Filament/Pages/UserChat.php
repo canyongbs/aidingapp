@@ -5,8 +5,8 @@
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
-    Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -20,7 +20,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Advising App™ are registered trademarks of
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
       Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
@@ -29,12 +29,12 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\InAppCommunication\Filament\Pages;
+namespace AidingApp\InAppCommunication\Filament\Pages;
 
 use Exception;
 use App\Models\User;
@@ -60,24 +60,24 @@ use Illuminate\Database\Eloquent\Builder;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Components\CheckboxList;
 use Illuminate\Database\Eloquent\Collection;
+use AidingApp\Authorization\Enums\LicenseType;
 use Filament\Forms\Concerns\InteractsWithForms;
-use AdvisingApp\Authorization\Enums\LicenseType;
 use Filament\Actions\Concerns\InteractsWithActions;
+use AidingApp\InAppCommunication\Enums\ConversationType;
+use AidingApp\IntegrationTwilio\Actions\GetTwilioApiKey;
+use AidingApp\IntegrationTwilio\Settings\TwilioSettings;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use AdvisingApp\InAppCommunication\Enums\ConversationType;
-use AdvisingApp\IntegrationTwilio\Actions\GetTwilioApiKey;
-use AdvisingApp\IntegrationTwilio\Settings\TwilioSettings;
-use AdvisingApp\InAppCommunication\Models\TwilioConversation;
-use AdvisingApp\InAppCommunication\Actions\AddUserToConversation;
-use AdvisingApp\InAppCommunication\Actions\TogglePinConversation;
-use AdvisingApp\InAppCommunication\Events\ConversationMessageSent;
-use AdvisingApp\InAppCommunication\Actions\CreateTwilioConversation;
-use AdvisingApp\InAppCommunication\Actions\DeleteTwilioConversation;
-use AdvisingApp\InAppCommunication\Actions\RemoveUserFromConversation;
-use AdvisingApp\InAppCommunication\Actions\PromoteUserToChannelManager;
-use AdvisingApp\InAppCommunication\Jobs\NotifyConversationParticipants;
-use AdvisingApp\InAppCommunication\Actions\DemoteUserFromChannelManager;
-use AdvisingApp\InAppCommunication\Enums\ConversationNotificationPreference;
+use AidingApp\InAppCommunication\Models\TwilioConversation;
+use AidingApp\InAppCommunication\Actions\AddUserToConversation;
+use AidingApp\InAppCommunication\Actions\TogglePinConversation;
+use AidingApp\InAppCommunication\Events\ConversationMessageSent;
+use AidingApp\InAppCommunication\Actions\CreateTwilioConversation;
+use AidingApp\InAppCommunication\Actions\DeleteTwilioConversation;
+use AidingApp\InAppCommunication\Actions\RemoveUserFromConversation;
+use AidingApp\InAppCommunication\Actions\PromoteUserToChannelManager;
+use AidingApp\InAppCommunication\Jobs\NotifyConversationParticipants;
+use AidingApp\InAppCommunication\Actions\DemoteUserFromChannelManager;
+use AidingApp\InAppCommunication\Enums\ConversationNotificationPreference;
 
 /**
  * @property Collection $conversations
@@ -107,7 +107,7 @@ class UserChat extends Page implements HasForms, HasActions
         /** @var User $user */
         $user = auth()->user();
 
-        if (! $user->hasAnyLicense([LicenseType::RetentionCrm, LicenseType::RecruitmentCrm])) {
+        if (! $user->hasAnyLicense([LicenseType::RecruitmentCrm])) {
             return false;
         }
 

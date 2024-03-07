@@ -5,8 +5,8 @@
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
-    Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -20,7 +20,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Advising App™ are registered trademarks of
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
       Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
@@ -29,16 +29,16 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Portal\Actions;
+namespace AidingApp\Portal\Actions;
 
 use Exception;
 use Illuminate\Support\Facades\URL;
-use AdvisingApp\Portal\Enums\PortalType;
+use AidingApp\Portal\Enums\PortalType;
 
 class GeneratePortalEmbedCode
 {
@@ -46,9 +46,11 @@ class GeneratePortalEmbedCode
     {
         return match ($portal) {
             PortalType::KnowledgeManagement => (function () {
-                $scriptUrl = url('js/portals/knowledge-management/advising-app-knowledge-management-portal.js?');
+                $scriptUrl = url('js/portals/knowledge-management/aiding-app-knowledge-management-portal.js?');
 
-                $portalAccessUrl = route('portals.knowledge-management.show');
+                $portalAccessUrl = route('portal.knowledge-management.show');
+
+                $userAuthenticationUrl = route('api.user.auth-check');
 
                 $portalDefinitionUrl = URL::to(
                     URL::signedRoute(
@@ -64,12 +66,12 @@ class GeneratePortalEmbedCode
                     )
                 );
 
-                $appUrl = parse_url(config('app.url'))['host'];
+                $appUrl = config('app.url');
 
                 $apiUrl = route('portal.knowledge-management.define');
 
                 return <<<EOD
-                <knowledge-management-portal-embed url="{$portalDefinitionUrl}" access-url={$portalAccessUrl} search-url="{$portalSearchUrl}" app-url="{$appUrl}" api-url="{$apiUrl}"></knowledge-management-portal-embed>
+                <knowledge-management-portal-embed url="{$portalDefinitionUrl}" user-authentication-url={$userAuthenticationUrl} access-url={$portalAccessUrl} search-url="{$portalSearchUrl}" app-url="{$appUrl}" api-url="{$apiUrl}"></knowledge-management-portal-embed>
                 <script src="{$scriptUrl}"></script>
                 EOD;
             })(),

@@ -5,8 +5,8 @@
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
-    Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -20,7 +20,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Advising App™ are registered trademarks of
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
       Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
@@ -29,33 +29,33 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Survey\Filament\Resources\SurveyResource\Pages\Concerns;
+namespace AidingApp\Survey\Filament\Resources\SurveyResource\Pages\Concerns;
 
 use Filament\Forms\Get;
+use AidingApp\Form\Enums\Rounding;
+use AidingApp\Form\Rules\IsDomain;
+use AidingApp\Survey\Models\Survey;
 use Filament\Forms\Components\Grid;
-use AdvisingApp\Form\Enums\Rounding;
-use AdvisingApp\Form\Rules\IsDomain;
-use AdvisingApp\Survey\Models\Survey;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Section;
 use FilamentTiptapEditor\TiptapEditor;
+use AidingApp\Survey\Models\SurveyStep;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Textarea;
+use AidingApp\Survey\Models\SurveyField;
 use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\TextInput;
-use AdvisingApp\Survey\Models\SurveyStep;
-use AdvisingApp\Survey\Models\SurveyField;
 use FilamentTiptapEditor\Enums\TiptapOutput;
 use App\Filament\Forms\Components\ColorSelect;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
-use AdvisingApp\Survey\Filament\Blocks\SurveyFieldBlockRegistry;
-use AdvisingApp\IntegrationGoogleRecaptcha\Settings\GoogleRecaptchaSettings;
+use AidingApp\Survey\Filament\Blocks\SurveyFieldBlockRegistry;
+use AidingApp\IntegrationGoogleRecaptcha\Settings\GoogleRecaptchaSettings;
 
 trait HasSharedFormConfiguration
 {
@@ -94,7 +94,7 @@ trait HasSharedFormConfiguration
                 ->columnSpanFull(),
             Toggle::make('is_authenticated')
                 ->label('Requires authentication')
-                ->helperText('If enabled, only students and prospects can submit this survey, and they must verify their email address first.'),
+                ->helperText('If enabled, only contacts can submit this survey, and they must verify their email address first.'),
             Toggle::make('is_wizard')
                 ->label('Multi-step survey')
                 ->live()

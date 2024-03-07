@@ -1,4 +1,4 @@
-# AdvisingAPP API
+# AidingAPP API
 
 ## Generating local helper files
 
@@ -16,4 +16,4 @@ You can generate the documentation by running the following command:
 composer generate-api-docs
 ```
 
-Once you've generated the documentation, it can be viewed at [{yourtenant}.advisingapp.local/api-docs](http://test.advisingapp.local/api-docs)
+Once you've generated the documentation, it can be viewed at [{yourtenant}.aidingapp.local/api-docs](http://test.aidingapp.local/api-docs)

@@ -5,8 +5,8 @@
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
-    Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -20,7 +20,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Advising App™ are registered trademarks of
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
       Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
@@ -29,7 +29,7 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
@@ -44,11 +44,10 @@ use App\Settings\LicenseSettings;
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
-use AdvisingApp\Prospect\Models\Prospect;
-use AdvisingApp\StudentDataModel\Models\Student;
-use AdvisingApp\ServiceManagement\Models\ServiceRequest;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestUpdate;
-use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource;
 
 test('The correct details are displayed on the ListServiceRequestUpdates page', function () {
     $serviceRequestUpdates = ServiceRequestUpdate::factory()
@@ -77,16 +76,6 @@ test('The correct details are displayed on the ListServiceRequestUpdates page', 
                 $serviceRequestUpdate
             )
             ->assertTableColumnStateSet(
-                'serviceRequest.respondent.sisid',
-                $serviceRequestUpdate->serviceRequest->respondent->sisid,
-                $serviceRequestUpdate
-            )
-            ->assertTableColumnStateSet(
-                'serviceRequest.respondent.otherid',
-                $serviceRequestUpdate->serviceRequest->respondent->otherid,
-                $serviceRequestUpdate
-            )
-            ->assertTableColumnStateSet(
                 'serviceRequest.service_request_number',
                 $serviceRequestUpdate->serviceRequest->service_request_number,
                 $serviceRequestUpdate
@@ -109,7 +98,7 @@ test('The correct details are displayed on the ListServiceRequestUpdates page', 
 // Permission Tests
 
 test('ListServiceRequestUpdates is gated with proper access control', function () {
-    $user = User::factory()->licensed([Student::getLicenseType(), Prospect::getLicenseType()])->create();
+    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
 
     actingAs($user)
         ->get(
@@ -131,7 +120,7 @@ test('ListServiceRequestUpdates is gated with proper feature access control', fu
 
     $settings->save();
 
-    $user = User::factory()->licensed([Student::getLicenseType(), Prospect::getLicenseType()])->create();
+    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
 
     $user->givePermissionTo('service_request_update.view-any');
 

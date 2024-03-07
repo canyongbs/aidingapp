@@ -5,8 +5,8 @@
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
-    Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -20,7 +20,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Advising App™ are registered trademarks of
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
       Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
@@ -29,12 +29,12 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Report\Filament\Resources\ReportResource\Pages;
+namespace AidingApp\Report\Filament\Resources\ReportResource\Pages;
 
 use App\Models\User;
 use Filament\Forms\Set;
@@ -42,20 +42,19 @@ use Filament\Tables\Table;
 use Illuminate\Support\Arr;
 use Filament\Actions\ExportAction;
 use Filament\Forms\Components\View;
+use AidingApp\Contact\Models\Contact;
 use Filament\Forms\Components\Select;
+use AidingApp\Report\Enums\ReportModel;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Forms\Components\TextInput;
-use AdvisingApp\Prospect\Models\Prospect;
-use AdvisingApp\Report\Enums\ReportModel;
 use Filament\Actions\Exports\ExportColumn;
 use Filament\Forms\Components\Wizard\Step;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Forms\Components\CheckboxList;
-use AdvisingApp\StudentDataModel\Models\Student;
 use Filament\Tables\Concerns\InteractsWithTable;
-use AdvisingApp\Report\Filament\Resources\ReportResource;
+use AidingApp\Report\Filament\Resources\ReportResource;
 
 class CreateReport extends CreateRecord implements HasTable
 {
@@ -144,8 +143,7 @@ class CreateReport extends CreateRecord implements HasTable
     protected function getReportModels(): array
     {
         return [
-            ...(auth()->user()->hasLicense(Student::getLicenseType()) ? [ReportModel::Student] : []),
-            ...(auth()->user()->hasLicense(Prospect::getLicenseType()) ? [ReportModel::Prospect] : []),
+            ...(auth()->user()->hasLicense(Contact::getLicenseType()) ? [ReportModel::Contact] : []),
             ...(auth()->user()->can('viewAny', User::class) ? [ReportModel::User] : []),
         ];
     }

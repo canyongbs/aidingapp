@@ -1,5 +1,5 @@
 type AssistantChatFolder
-    @model(class: "AdvisingApp\\Assistant\\Models\\AssistantChatFolder") {
+    @model(class: "AidingApp\\Assistant\\Models\\AssistantChatFolder") {
     id: UUID!
 
     name: String!
@@ -57,7 +57,7 @@ input CreateAssistantChatFolderInput {
                 "required"
                 "string"
                 "max:255"
-                "AdvisingApp\\Assistant\\Rules\\UniqueAssistantChatFolderRule"
+                "AidingApp\\Assistant\\Rules\\UniqueAssistantChatFolderRule"
             ]
         )
 
@@ -73,7 +73,7 @@ input UpdateAssistantChatFolderInput {
                 "nullable"
                 "string"
                 "max:255"
-                "AdvisingApp\\Assistant\\Rules\\UniqueAssistantChatFolderRule"
+                "AidingApp\\Assistant\\Rules\\UniqueAssistantChatFolderRule"
             ]
         )
 }

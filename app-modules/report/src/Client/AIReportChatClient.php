@@ -5,8 +5,8 @@
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
-    Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -20,7 +20,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Advising App™ are registered trademarks of
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
       Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
@@ -29,41 +29,37 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Report\Client;
+namespace AidingApp\Report\Client;
 
 use Closure;
 use Throwable;
 use Illuminate\Support\Arr;
-use AdvisingApp\Task\Models\Task;
+use AidingApp\Task\Models\Task;
+use AidingApp\Alert\Models\Alert;
 use Illuminate\Support\Facades\DB;
-use AdvisingApp\Alert\Models\Alert;
+use AidingApp\Contact\Models\Contact;
 use Illuminate\Support\Facades\Schema;
-use AdvisingApp\CareTeam\Models\CareTeam;
-use AdvisingApp\Prospect\Models\Prospect;
-use AdvisingApp\Interaction\Models\Interaction;
-use AdvisingApp\Prospect\Models\ProspectSource;
-use AdvisingApp\Prospect\Models\ProspectStatus;
-use AdvisingApp\StudentDataModel\Models\Program;
-use AdvisingApp\StudentDataModel\Models\Student;
-use AdvisingApp\IntegrationAI\Client\AzureOpenAI;
-use AdvisingApp\Notification\Models\Subscription;
+use AidingApp\CareTeam\Models\CareTeam;
+use AidingApp\Contact\Models\ContactSource;
+use AidingApp\Contact\Models\ContactStatus;
+use AidingApp\Interaction\Models\Interaction;
+use AidingApp\IntegrationAI\Client\AzureOpenAI;
+use AidingApp\Notification\Models\Subscription;
+use AidingApp\Interaction\Models\InteractionType;
 use Illuminate\Auth\Access\AuthorizationException;
-use AdvisingApp\Interaction\Models\InteractionType;
-use AdvisingApp\StudentDataModel\Models\Enrollment;
-use AdvisingApp\StudentDataModel\Models\Performance;
-use AdvisingApp\Interaction\Models\InteractionDriver;
-use AdvisingApp\Interaction\Models\InteractionStatus;
-use AdvisingApp\Interaction\Models\InteractionOutcome;
-use AdvisingApp\Interaction\Models\InteractionCampaign;
-use AdvisingApp\Interaction\Models\InteractionRelation;
-use AdvisingApp\Report\Settings\ReportAssistantSettings;
-use AdvisingApp\Assistant\Services\AIInterface\Enums\AIChatMessageFrom;
-use AdvisingApp\Assistant\Services\AIInterface\DataTransferObjects\Chat;
+use AidingApp\Interaction\Models\InteractionDriver;
+use AidingApp\Interaction\Models\InteractionStatus;
+use AidingApp\Interaction\Models\InteractionOutcome;
+use AidingApp\Interaction\Models\InteractionCampaign;
+use AidingApp\Interaction\Models\InteractionRelation;
+use AidingApp\Report\Settings\ReportAssistantSettings;
+use AidingApp\Assistant\Services\AIInterface\Enums\AIChatMessageFrom;
+use AidingApp\Assistant\Services\AIInterface\DataTransferObjects\Chat;
 
 class AIReportChatClient extends AzureOpenAI
 {
@@ -161,8 +157,7 @@ class AIReportChatClient extends AzureOpenAI
             Alert::class,
             CareTeam::class,
             Interaction::class, InteractionCampaign::class, InteractionDriver::class, InteractionOutcome::class, InteractionRelation::class, InteractionStatus::class, InteractionType::class,
-            Prospect::class, ProspectSource::class, ProspectStatus::class,
-            Student::class, Enrollment::class, Performance::class, Program::class,
+            Contact::class, ContactSource::class, ContactStatus::class,
             Subscription::class,
             Task::class,
         ])

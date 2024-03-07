@@ -1,4 +1,4 @@
-type Alert @model(class: "AdvisingApp\\Alert\\Models\\Alert") {
+type Alert @model(class: "AidingApp\\Alert\\Models\\Alert") {
     "Unique primary key."
     id: UUID!
 
@@ -28,8 +28,7 @@ type Alert @model(class: "AdvisingApp\\Alert\\Models\\Alert") {
 }
 
 input AlertConcernsQuery {
-    student: StudentsQuery
-    prospect: ProspectsQuery
+    contact: ContactsQuery
 }
 
 input AlertsQuery {
@@ -68,15 +67,11 @@ input CreateAlertInput {
     "The Concern related to the alert."
     concern_id: EducatableId!
         @rules(
-            apply: [
-                "required"
-                "AdvisingApp\\Alert\\Rules\\ConcernIdExistsRule"
-            ]
+            apply: ["required", "AidingApp\\Alert\\Rules\\ConcernIdExistsRule"]
         )
 
     "The type of Concern related to the alert."
-    concern_type: EducatableType!
-        @rules(apply: ["required", "in:student,prospect"])
+    concern_type: EducatableType! @rules(apply: ["required", "in:contact"])
 
     "The description of the alert."
     description: String! @rules(apply: ["required", "string"])

@@ -3,8 +3,8 @@
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
-    Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -18,7 +18,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Advising App™ are registered trademarks of
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
       Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
@@ -27,15 +27,14 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 --}}
 @php
-    use AdvisingApp\Assistant\Filament\Pages\PersonalAssistant;
-    use AdvisingApp\Authorization\Enums\LicenseType;
-    use AdvisingApp\Prospect\Filament\Pages\RecruitmentCrmDashboard;
-    use AdvisingApp\StudentDataModel\Filament\Pages\RetentionCrmDashboard;
+    use AidingApp\Assistant\Filament\Pages\PersonalAssistant;
+    use AidingApp\Authorization\Enums\LicenseType;
+    use AidingApp\Contact\Filament\Pages\RecruitmentCrmDashboard;
 @endphp
 
 <x-filament-widgets::widget>
@@ -66,36 +65,6 @@
 
                 <div class="text-center font-medium text-gray-700 dark:text-gray-300">
                     Recruitment CRM
-                </div>
-            </div>
-        </x-filament::section>
-
-        @php
-            $hasFeature = auth()
-                ->user()
-                ->hasLicense(LicenseType::RetentionCrm);
-        @endphp
-        <x-filament::section @class([
-            'opacity-50 pointer-events-none' => !$hasFeature,
-        ])>
-            <div class="flex flex-col gap-3">
-                <div class="text-center text-lg font-bold">
-                    {{ $hasFeature ? 'Available' : 'Unavailable' }}
-                </div>
-
-                <div class="flex items-center justify-center">
-                    <x-filament::button
-                        :href="$hasFeature ? RetentionCrmDashboard::getUrl() : null"
-                        size="xl"
-                        tag="a"
-                        color="gray"
-                    >
-                        Start now
-                    </x-filament::button>
-                </div>
-
-                <div class="text-center font-medium text-gray-700 dark:text-gray-300">
-                    Student Success Suite
                 </div>
             </div>
         </x-filament::section>

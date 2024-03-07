@@ -5,8 +5,8 @@
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
-    Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -20,7 +20,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Advising App™ are registered trademarks of
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
       Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
@@ -29,32 +29,27 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Report\Enums;
+namespace AidingApp\Report\Enums;
 
 use App\Models\User;
 use Filament\Tables\Table;
 use App\Models\Authenticatable;
 use App\Filament\Tables\UsersTable;
+use AidingApp\Contact\Models\Contact;
 use Filament\Support\Contracts\HasLabel;
-use AdvisingApp\Prospect\Models\Prospect;
 use Illuminate\Database\Eloquent\Builder;
-use AdvisingApp\StudentDataModel\Models\Student;
-use AdvisingApp\Report\Filament\Exports\UserExporter;
-use AdvisingApp\Prospect\Filament\Tables\ProspectsTable;
-use AdvisingApp\Report\Filament\Exports\StudentExporter;
-use AdvisingApp\Report\Filament\Exports\ProspectExporter;
-use AdvisingApp\StudentDataModel\Filament\Tables\StudentsTable;
+use AidingApp\Report\Filament\Exports\UserExporter;
+use AidingApp\Contact\Filament\Tables\ContactsTable;
+use AidingApp\Report\Filament\Exports\ContactExporter;
 
 enum ReportModel: string implements HasLabel
 {
-    case Prospect = 'prospect';
-
-    case Student = 'student';
+    case Contact = 'contact';
 
     case User = 'user';
 
@@ -65,14 +60,13 @@ enum ReportModel: string implements HasLabel
 
     public static function default(): static
     {
-        return static::Student;
+        return static::Contact;
     }
 
     public function query(): Builder
     {
         return match ($this) {
-            static::Student => Student::query(),
-            static::Prospect => Prospect::query(),
+            static::Contact => Contact::query(),
             static::User => User::query(),
         };
     }
@@ -80,8 +74,7 @@ enum ReportModel: string implements HasLabel
     public function table(Table $table): Table
     {
         return $table->tap(app(match ($this) {
-            static::Student => StudentsTable::class,
-            static::Prospect => ProspectsTable::class,
+            static::Contact => ContactsTable::class,
             static::User => UsersTable::class,
         }));
     }
@@ -89,8 +82,7 @@ enum ReportModel: string implements HasLabel
     public function class(): string
     {
         return match ($this) {
-            static::Student => Student::class,
-            static::Prospect => Prospect::class,
+            static::Contact => Contact::class,
             static::User => User::class,
         };
     }
@@ -98,8 +90,7 @@ enum ReportModel: string implements HasLabel
     public function exporter(): string
     {
         return match ($this) {
-            static::Student => StudentExporter::class,
-            static::Prospect => ProspectExporter::class,
+            static::Contact => ContactExporter::class,
             static::User => UserExporter::class,
         };
     }
@@ -107,7 +98,7 @@ enum ReportModel: string implements HasLabel
     public function canBeAccessed(Authenticatable $user): bool
     {
         return match ($this) {
-            static::Student, static::Prospect => $user->hasLicense($this->class()::getLicenseType()),
+            static::Contact => $user->hasLicense($this->class()::getLicenseType()),
             static::User => $user->can('viewAny', User::class),
         };
     }

@@ -5,8 +5,8 @@
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
-    Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -20,7 +20,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Advising App™ are registered trademarks of
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
       Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
@@ -29,12 +29,12 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Notification\Notifications\Channels;
+namespace AidingApp\Notification\Notifications\Channels;
 
 use Exception;
 use App\Settings\LicenseSettings;
@@ -42,15 +42,15 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Notifications\Notification;
 use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Notifications\Channels\MailChannel;
-use AdvisingApp\Engagement\Models\EngagementDeliverable;
-use AdvisingApp\Notification\Models\OutboundDeliverable;
-use AdvisingApp\Notification\Notifications\BaseNotification;
-use AdvisingApp\Notification\Notifications\EmailNotification;
-use AdvisingApp\Notification\Enums\NotificationDeliveryStatus;
-use AdvisingApp\Notification\Exceptions\NotificationQuotaExceeded;
-use AdvisingApp\Notification\Models\Contracts\NotifiableInterface;
-use AdvisingApp\Notification\DataTransferObjects\EmailChannelResultData;
-use AdvisingApp\Notification\DataTransferObjects\NotificationResultData;
+use AidingApp\Engagement\Models\EngagementDeliverable;
+use AidingApp\Notification\Models\OutboundDeliverable;
+use AidingApp\Notification\Notifications\BaseNotification;
+use AidingApp\Notification\Notifications\EmailNotification;
+use AidingApp\Notification\Enums\NotificationDeliveryStatus;
+use AidingApp\Notification\Exceptions\NotificationQuotaExceeded;
+use AidingApp\Notification\Models\Contracts\NotifiableInterface;
+use AidingApp\Notification\DataTransferObjects\EmailChannelResultData;
+use AidingApp\Notification\DataTransferObjects\NotificationResultData;
 
 class EmailChannel extends MailChannel
 {

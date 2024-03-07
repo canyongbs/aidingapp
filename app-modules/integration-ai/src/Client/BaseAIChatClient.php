@@ -5,8 +5,8 @@
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
-    Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -20,7 +20,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Advising App™ are registered trademarks of
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
       Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
@@ -29,29 +29,29 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\IntegrationAI\Client;
+namespace AidingApp\IntegrationAI\Client;
 
 use Closure;
 use OpenAI\Client;
 use Illuminate\Support\Arr;
 use OpenAI\Testing\ClientFake;
 use OpenAI\Responses\StreamResponse;
+use AidingApp\IntegrationAI\Settings\AISettings;
 use OpenAI\Responses\Chat\CreateStreamedResponse;
-use AdvisingApp\IntegrationAI\Settings\AISettings;
-use AdvisingApp\IntegrationAI\Events\AIPromptInitiated;
-use AdvisingApp\IntegrationAI\DataTransferObjects\AIPrompt;
-use AdvisingApp\IntegrationAI\Client\Contracts\AIChatClient;
-use AdvisingApp\IntegrationAI\Client\Concerns\InitializesClient;
-use AdvisingApp\IntegrationAI\Exceptions\ContentFilterException;
-use AdvisingApp\IntegrationAI\DataTransferObjects\DynamicContext;
-use AdvisingApp\IntegrationAI\Exceptions\TokensExceededException;
-use AdvisingApp\Assistant\Services\AIInterface\DataTransferObjects\Chat;
-use AdvisingApp\Assistant\Services\AIInterface\DataTransferObjects\ChatMessage;
+use AidingApp\IntegrationAI\Events\AIPromptInitiated;
+use AidingApp\IntegrationAI\DataTransferObjects\AIPrompt;
+use AidingApp\IntegrationAI\Client\Contracts\AIChatClient;
+use AidingApp\IntegrationAI\Client\Concerns\InitializesClient;
+use AidingApp\IntegrationAI\Exceptions\ContentFilterException;
+use AidingApp\IntegrationAI\DataTransferObjects\DynamicContext;
+use AidingApp\IntegrationAI\Exceptions\TokensExceededException;
+use AidingApp\Assistant\Services\AIInterface\DataTransferObjects\Chat;
+use AidingApp\Assistant\Services\AIInterface\DataTransferObjects\ChatMessage;
 
 abstract class BaseAIChatClient implements AIChatClient
 {

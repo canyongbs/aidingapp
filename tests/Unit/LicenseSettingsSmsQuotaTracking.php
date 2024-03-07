@@ -5,8 +5,8 @@
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
-    Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -20,7 +20,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Advising App™ are registered trademarks of
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
       Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
@@ -29,7 +29,7 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
@@ -39,19 +39,19 @@ use Tests\Unit\ClientMock;
 use Twilio\Rest\Api\V2010;
 use Twilio\Rest\MessagingBase;
 use App\Settings\LicenseSettings;
-use AdvisingApp\Prospect\Models\Prospect;
+use AidingApp\Contact\Models\Contact;
 
 use function Pest\Laravel\assertDatabaseCount;
 
 use Twilio\Rest\Api\V2010\Account\MessageList;
 use Twilio\Rest\Api\V2010\Account\MessageInstance;
-use AdvisingApp\Notification\Models\OutboundDeliverable;
-use AdvisingApp\IntegrationTwilio\Settings\TwilioSettings;
-use AdvisingApp\Notification\Enums\NotificationDeliveryStatus;
-use AdvisingApp\Notification\Exceptions\NotificationQuotaExceeded;
+use AidingApp\Notification\Models\OutboundDeliverable;
+use AidingApp\IntegrationTwilio\Settings\TwilioSettings;
+use AidingApp\Notification\Enums\NotificationDeliveryStatus;
+use AidingApp\Notification\Exceptions\NotificationQuotaExceeded;
 
 it('An sms is allowed to be sent if there is available quota and it\'s quota usage is tracked', function () {
-    $notifiable = Prospect::factory()->create();
+    $notifiable = Contact::factory()->create();
 
     $notification = new Tests\Unit\TestSmsNotification();
 
@@ -99,7 +99,7 @@ it('An sms is allowed to be sent if there is available quota and it\'s quota usa
 });
 
 it('An sms is prevented from being sent if there is no available quota', function () {
-    $notifiable = Prospect::factory()->create();
+    $notifiable = Contact::factory()->create();
 
     $notification = new Tests\Unit\TestSmsNotification();
 

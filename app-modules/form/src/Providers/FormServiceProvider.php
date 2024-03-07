@@ -5,8 +5,8 @@
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
-    Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -20,7 +20,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Advising App™ are registered trademarks of
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
       Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
@@ -29,28 +29,16 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Form\Providers;
+namespace AidingApp\Form\Providers;
 
 use Filament\Panel;
-use AdvisingApp\Form\FormPlugin;
-use AdvisingApp\Form\Models\Form;
-use Illuminate\Support\Facades\Event;
-use AdvisingApp\Form\Models\FormField;
+use AidingApp\Form\FormPlugin;
 use Illuminate\Support\ServiceProvider;
-use AdvisingApp\Form\Models\FormSubmission;
-use AdvisingApp\Form\Observers\FormObserver;
-use AdvisingApp\Form\Registries\FormRbacRegistry;
-use AdvisingApp\Form\Events\FormSubmissionCreated;
-use App\Registries\RoleBasedAccessControlRegistry;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use AdvisingApp\Form\Observers\FormSubmissionObserver;
-use AdvisingApp\Form\Listeners\NotifySubscribersOfFormSubmission;
-use AdvisingApp\Form\Listeners\SendFormSubmissionAutoReplyEmailToSubmitter;
 
 class FormServiceProvider extends ServiceProvider
 {
@@ -59,36 +47,5 @@ class FormServiceProvider extends ServiceProvider
         Panel::configureUsing(fn (Panel $panel) => ($panel->getId() !== 'admin') || $panel->plugin(new FormPlugin()));
     }
 
-    public function boot()
-    {
-        Relation::morphMap([
-            'form' => Form::class,
-            'form_field' => FormField::class,
-            'form_submission' => FormSubmission::class,
-        ]);
-
-        $this->registerObservers();
-        $this->registerEvents();
-
-        RoleBasedAccessControlRegistry::register(FormRbacRegistry::class);
-    }
-
-    public function registerObservers(): void
-    {
-        FormSubmission::observe(FormSubmissionObserver::class);
-        Form::observe(FormObserver::class);
-    }
-
-    public function registerEvents(): void
-    {
-        Event::listen(
-            events: FormSubmissionCreated::class,
-            listener: NotifySubscribersOfFormSubmission::class,
-        );
-
-        Event::listen(
-            events: FormSubmissionCreated::class,
-            listener: SendFormSubmissionAutoReplyEmailToSubmitter::class,
-        );
-    }
+    public function boot(): void {}
 }

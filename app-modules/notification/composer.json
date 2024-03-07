@@ -1,5 +1,5 @@
 {
-    "name": "canyon-gbs/advising-app-notification",
+    "name": "canyon-gbs/aiding-app-notification",
     "description": "",
     "type": "library",
     "version": "1.0",
@@ -9,17 +9,17 @@
     },
     "autoload": {
         "psr-4": {
-            "AdvisingApp\\Notification\\": "src/",
-            "AdvisingApp\\Notification\\Tests\\": "tests/",
-            "AdvisingApp\\Notification\\Database\\Factories\\": "database/factories/",
-            "AdvisingApp\\Notification\\Database\\Seeders\\": "database/seeders/"
+            "AidingApp\\Notification\\": "src/",
+            "AidingApp\\Notification\\Tests\\": "tests/",
+            "AidingApp\\Notification\\Database\\Factories\\": "database/factories/",
+            "AidingApp\\Notification\\Database\\Seeders\\": "database/seeders/"
         }
     },
     "minimum-stability": "stable",
     "extra": {
         "laravel": {
             "providers": [
-                "AdvisingApp\\Notification\\Providers\\NotificationServiceProvider"
+                "AidingApp\\Notification\\Providers\\NotificationServiceProvider"
             ]
         }
     }

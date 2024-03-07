@@ -1,22 +1,20 @@
 #TODO: This can be basically any model that supports auditing
 union Auditable =
-    | Student
-    | Prospect
+    | Contact
     | User
     | SystemUser
     | ConsentAgreement
     | UserConsentAgreement
 
 input AuditableablesQuery {
-    student: StudentsQuery
-    prospect: ProspectsQuery
+    contact: ContactsQuery
     user: UsersQuery
     system_user: SystemUsersQuery
     consent_agreement: ConsentAgreementsQuery
     user_consent_agreement: UserConsentAgreementsQuery
 }
 
-type Audit @model(class: "AdvisingApp\\Audit\\Models\\Audit") {
+type Audit @model(class: "AidingApp\\Audit\\Models\\Audit") {
     "Unique primary key."
     id: UUID!
 

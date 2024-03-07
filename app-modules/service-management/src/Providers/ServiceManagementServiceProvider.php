@@ -5,8 +5,8 @@
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
-    Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -20,7 +20,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Advising App™ are registered trademarks of
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
       Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
@@ -29,45 +29,45 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Providers;
+namespace AidingApp\ServiceManagement\Providers;
 
 use Filament\Panel;
 use App\Concerns\ImplementsGraphQL;
 use Illuminate\Support\ServiceProvider;
-use AdvisingApp\ServiceManagement\Models\Sla;
+use AidingApp\ServiceManagement\Models\Sla;
 use App\Registries\RoleBasedAccessControlRegistry;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use AdvisingApp\ServiceManagement\Models\ChangeRequest;
-use AdvisingApp\ServiceManagement\Models\ServiceRequest;
-use AdvisingApp\ServiceManagement\ServiceManagementPlugin;
-use AdvisingApp\ServiceManagement\Models\ChangeRequestType;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestForm;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestType;
-use AdvisingApp\ServiceManagement\Models\ChangeRequestStatus;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestStatus;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestUpdate;
-use AdvisingApp\ServiceManagement\Models\ChangeRequestResponse;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestHistory;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestFormStep;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestPriority;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestFormField;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestAssignment;
-use AdvisingApp\ServiceManagement\Observers\ChangeRequestObserver;
-use AdvisingApp\ServiceManagement\Observers\ServiceRequestObserver;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestFormSubmission;
-use AdvisingApp\ServiceManagement\Observers\ServiceRequestUpdateObserver;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestFormAuthentication;
-use AdvisingApp\ServiceManagement\Observers\ServiceRequestHistoryObserver;
-use AdvisingApp\ServiceManagement\Registries\ServiceManagementRbacRegistry;
-use AdvisingApp\ServiceManagement\Observers\ServiceRequestAssignmentObserver;
-use AdvisingApp\ServiceManagement\Observers\ServiceRequestFormSubmissionObserver;
-use AdvisingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
-use AdvisingApp\ServiceManagement\Services\ServiceRequestNumber\SqidPlusSixServiceRequestNumberGenerator;
+use AidingApp\ServiceManagement\Models\ChangeRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\ServiceManagementPlugin;
+use AidingApp\ServiceManagement\Models\ChangeRequestType;
+use AidingApp\ServiceManagement\Models\ServiceRequestForm;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\ServiceManagement\Models\ChangeRequestStatus;
+use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use AidingApp\ServiceManagement\Models\ChangeRequestResponse;
+use AidingApp\ServiceManagement\Models\ServiceRequestHistory;
+use AidingApp\ServiceManagement\Models\ServiceRequestFormStep;
+use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
+use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
+use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
+use AidingApp\ServiceManagement\Observers\ChangeRequestObserver;
+use AidingApp\ServiceManagement\Observers\ServiceRequestObserver;
+use AidingApp\ServiceManagement\Models\ServiceRequestFormSubmission;
+use AidingApp\ServiceManagement\Observers\ServiceRequestUpdateObserver;
+use AidingApp\ServiceManagement\Models\ServiceRequestFormAuthentication;
+use AidingApp\ServiceManagement\Observers\ServiceRequestHistoryObserver;
+use AidingApp\ServiceManagement\Registries\ServiceManagementRbacRegistry;
+use AidingApp\ServiceManagement\Observers\ServiceRequestAssignmentObserver;
+use AidingApp\ServiceManagement\Observers\ServiceRequestFormSubmissionObserver;
+use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
+use AidingApp\ServiceManagement\Services\ServiceRequestNumber\SqidPlusSixServiceRequestNumberGenerator;
 
 class ServiceManagementServiceProvider extends ServiceProvider
 {

@@ -1,6 +1,6 @@
 type KnowledgeBaseItem
     @feature(feature: "knowledge-management")
-    @model(class: "AdvisingApp\\KnowledgeBase\\Models\\KnowledgeBaseItem") {
+    @model(class: "AidingApp\\KnowledgeBase\\Models\\KnowledgeBaseItem") {
     id: UUID!
 }
 

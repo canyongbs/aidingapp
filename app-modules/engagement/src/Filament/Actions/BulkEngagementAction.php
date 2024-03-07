@@ -5,8 +5,8 @@
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
-    Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -20,7 +20,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Advising App™ are registered trademarks of
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
       Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
@@ -29,12 +29,12 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Filament\Actions;
+namespace AidingApp\Engagement\Filament\Actions;
 
 use Filament\Forms\Get;
 use Filament\Forms\Set;
@@ -49,12 +49,12 @@ use Illuminate\Database\Query\Expression;
 use Filament\Forms\Components\Wizard\Step;
 use FilamentTiptapEditor\Enums\TiptapOutput;
 use Filament\Forms\Components\Actions\Action;
-use AdvisingApp\Engagement\Models\EmailTemplate;
-use AdvisingApp\Engagement\Actions\CreateEngagementBatch;
-use AdvisingApp\Engagement\Enums\EngagementDeliveryMethod;
-use AdvisingApp\Engagement\DataTransferObjects\EngagementBatchCreationData;
-use AdvisingApp\Engagement\Filament\Actions\Contracts\HasBulkEngagementAction;
-use AdvisingApp\Engagement\Filament\Resources\EngagementResource\Fields\EngagementSmsBodyField;
+use AidingApp\Engagement\Models\EmailTemplate;
+use AidingApp\Engagement\Actions\CreateEngagementBatch;
+use AidingApp\Engagement\Enums\EngagementDeliveryMethod;
+use AidingApp\Engagement\DataTransferObjects\EngagementBatchCreationData;
+use AidingApp\Engagement\Filament\Actions\Contracts\HasBulkEngagementAction;
+use AidingApp\Engagement\Filament\Resources\EngagementResource\Fields\EngagementSmsBodyField;
 
 class BulkEngagementAction
 {
@@ -90,8 +90,8 @@ class BulkEngagementAction
                             ->directory('editor-images/engagements')
                             ->label('Body')
                             ->mergeTags([
-                                'student full name',
-                                'student email',
+                                'contact full name',
+                                'contact email',
                             ])
                             ->showMergeTagsInBlocksPanel(false)
                             ->profile('email')
@@ -147,7 +147,7 @@ class BulkEngagementAction
                                     $component->state($template->content);
                                 }))
                             ->hidden(fn (Get $get): bool => $get('delivery_method') === EngagementDeliveryMethod::Sms->value)
-                            ->helperText('You can insert student information by typing {{ and choosing a merge value to insert.')
+                            ->helperText('You can insert contact information by typing {{ and choosing a merge value to insert.')
                             ->columnSpanFull(),
                         EngagementSmsBodyField::make(context: 'create'),
                     ]),

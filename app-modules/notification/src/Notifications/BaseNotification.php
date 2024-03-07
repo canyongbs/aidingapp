@@ -5,8 +5,8 @@
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
-    Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -20,7 +20,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Advising App™ are registered trademarks of
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
       Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
@@ -29,28 +29,28 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Notification\Notifications;
+namespace AidingApp\Notification\Notifications;
 
 use Exception;
 use Illuminate\Support\Str;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use AdvisingApp\Notification\Models\OutboundDeliverable;
-use AdvisingApp\Notification\Actions\MakeOutboundDeliverable;
-use AdvisingApp\Notification\Notifications\Channels\SmsChannel;
-use AdvisingApp\Notification\Notifications\Channels\EmailChannel;
-use AdvisingApp\Notification\Notifications\Concerns\ChannelTrait;
-use AdvisingApp\Notification\Notifications\Channels\DatabaseChannel;
-use AdvisingApp\Notification\DataTransferObjects\SmsChannelResultData;
-use AdvisingApp\Notification\DataTransferObjects\EmailChannelResultData;
-use AdvisingApp\Notification\DataTransferObjects\NotificationResultData;
-use AdvisingApp\Notification\DataTransferObjects\DatabaseChannelResultData;
+use AidingApp\Notification\Models\OutboundDeliverable;
+use AidingApp\Notification\Actions\MakeOutboundDeliverable;
+use AidingApp\Notification\Notifications\Channels\SmsChannel;
+use AidingApp\Notification\Notifications\Channels\EmailChannel;
+use AidingApp\Notification\Notifications\Concerns\ChannelTrait;
+use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
+use AidingApp\Notification\DataTransferObjects\SmsChannelResultData;
+use AidingApp\Notification\DataTransferObjects\EmailChannelResultData;
+use AidingApp\Notification\DataTransferObjects\NotificationResultData;
+use AidingApp\Notification\DataTransferObjects\DatabaseChannelResultData;
 
 abstract class BaseNotification extends Notification implements ShouldQueue
 {

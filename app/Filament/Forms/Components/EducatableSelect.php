@@ -5,8 +5,8 @@
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
-    Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -20,7 +20,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Advising App™ are registered trademarks of
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
       Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
@@ -29,7 +29,7 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
@@ -38,13 +38,12 @@ namespace App\Filament\Forms\Components;
 
 use Closure;
 use App\Models\Authenticatable;
+use AidingApp\Contact\Models\Contact;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Component;
-use AdvisingApp\Prospect\Models\Prospect;
 use Filament\Forms\Components\MorphToSelect;
 use Filament\Forms\Components\Concerns\HasName;
-use AdvisingApp\StudentDataModel\Models\Student;
 use Filament\Forms\Components\MorphToSelect\Type;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
@@ -63,12 +62,11 @@ class EducatableSelect extends Component
 
     public static function make(string $name): EducatableSelect | MorphToSelect
     {
-        if (auth()->user()->hasLicense([Student::getLicenseType(), Prospect::getLicenseType()])) {
+        if (auth()->user()->hasLicense([Contact::getLicenseType()])) {
             return MorphToSelect::make($name)
                 ->searchable()
                 ->types([
-                    static::getStudentType(),
-                    static::getProspectType(),
+                    static::getContactType(),
                 ]);
         }
 
@@ -78,16 +76,10 @@ class EducatableSelect extends Component
         return $static;
     }
 
-    public static function getStudentType(): Type
+    public static function getContactType(): Type
     {
-        return Type::make(Student::class)
-            ->titleAttribute(Student::displayNameKey());
-    }
-
-    public static function getProspectType(): Type
-    {
-        return Type::make(Prospect::class)
-            ->titleAttribute(Prospect::displayNameKey());
+        return Type::make(Contact::class)
+            ->titleAttribute(Contact::displayNameKey());
     }
 
     public function getChildComponents(): array
@@ -96,8 +88,7 @@ class EducatableSelect extends Component
         $user = auth()->user();
 
         $type = match (true) {
-            $user->hasLicense(Student::getLicenseType()) => static::getStudentType(),
-            $user->hasLicense(Prospect::getLicenseType()) => static::getProspectType(),
+            $user->hasLicense(Contact::getLicenseType()) => static::getContactType(),
             default => null,
         };
 
@@ -150,6 +141,6 @@ class EducatableSelect extends Component
             return false;
         }
 
-        return ! auth()->user()->hasAnyLicense([Student::getLicenseType(), Prospect::getLicenseType()]);
+        return ! auth()->user()->hasAnyLicense([Contact::getLicenseType()]);
     }
 }

@@ -5,8 +5,8 @@
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
-    Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -20,7 +20,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Advising App™ are registered trademarks of
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
       Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
@@ -29,12 +29,12 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Http\Controllers;
+namespace AidingApp\ServiceManagement\Http\Controllers;
 
 use Closure;
 use Illuminate\Support\Str;
@@ -48,15 +48,15 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response;
-use AdvisingApp\Form\Actions\GenerateSubmissibleValidation;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestForm;
-use AdvisingApp\Form\Actions\ResolveSubmissionAuthorFromEmail;
-use AdvisingApp\Form\Notifications\AuthenticateFormNotification;
-use AdvisingApp\Form\Filament\Blocks\EducatableEmailFormFieldBlock;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestFormSubmission;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestFormAuthentication;
-use AdvisingApp\IntegrationGoogleRecaptcha\Settings\GoogleRecaptchaSettings;
-use AdvisingApp\ServiceManagement\Actions\GenerateServiceRequestFormKitSchema;
+use AidingApp\Form\Actions\GenerateSubmissibleValidation;
+use AidingApp\ServiceManagement\Models\ServiceRequestForm;
+use AidingApp\Form\Actions\ResolveSubmissionAuthorFromEmail;
+use AidingApp\Form\Notifications\AuthenticateFormNotification;
+use AidingApp\Form\Filament\Blocks\EducatableEmailFormFieldBlock;
+use AidingApp\ServiceManagement\Models\ServiceRequestFormSubmission;
+use AidingApp\ServiceManagement\Models\ServiceRequestFormAuthentication;
+use AidingApp\IntegrationGoogleRecaptcha\Settings\GoogleRecaptchaSettings;
+use AidingApp\ServiceManagement\Actions\GenerateServiceRequestFormKitSchema;
 
 class ServiceRequestFormWidgetController extends Controller
 {
@@ -101,7 +101,7 @@ class ServiceRequestFormWidgetController extends Controller
 
         if (! $author) {
             throw ValidationException::withMessages([
-                'email' => 'A student with that email address could not be found. Please contact your system administrator.',
+                'email' => 'A contact with that email address could not be found. Please contact your system administrator.',
             ]);
         }
 

@@ -1,5 +1,5 @@
 type InteractionDriver
-    @model(class: "AdvisingApp\\Interaction\\Models\\InteractionDriver") {
+    @model(class: "AidingApp\\Interaction\\Models\\InteractionDriver") {
     "Unique primary key."
     id: UUID!
 

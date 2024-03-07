@@ -5,8 +5,8 @@
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
-    Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -20,7 +20,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Advising App™ are registered trademarks of
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
       Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
@@ -29,56 +29,38 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Database\Seeders;
+namespace AidingApp\Engagement\Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use AdvisingApp\Prospect\Models\Prospect;
-use AdvisingApp\Engagement\Models\Engagement;
-use AdvisingApp\StudentDataModel\Models\Student;
-use AdvisingApp\Engagement\Models\EngagementResponse;
-use AdvisingApp\Engagement\Models\EngagementDeliverable;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Engagement\Models\Engagement;
+use AidingApp\Engagement\Models\EngagementResponse;
+use AidingApp\Engagement\Models\EngagementDeliverable;
 
 class DemoEducatableEngagementSeeder extends Seeder
 {
     public function run(): void
     {
-        $sampleStudentForDemo = Student::factory()->create([
-            'first' => 'Demo',
-            'last' => 'Student',
-            'email' => 'demo@student.com',
-        ]);
-
-        EngagementResponse::factory()
-            ->count(5)
-            ->for($sampleStudentForDemo, 'sender')
-            ->create();
-
-        Engagement::factory()
-            ->count(7)
-            ->has(EngagementDeliverable::factory()->deliverySuccessful()->count(1), 'engagementDeliverable')
-            ->for($sampleStudentForDemo, 'recipient')
-            ->create();
-
-        $sampleProspectForDemo = Prospect::factory()->create([
+        $sampleContactForDemo = Contact::factory()->create([
             'first_name' => 'Demo',
-            'last_name' => 'Prospect',
-            'email' => 'demo@prospect.com',
+            'last_name' => 'Contact',
+            'email' => 'demo@contact.com',
         ]);
 
         EngagementResponse::factory()
             ->count(5)
-            ->for($sampleProspectForDemo, 'sender')
+            ->for($sampleContactForDemo, 'sender')
             ->create();
 
         Engagement::factory()
             ->count(7)
             ->has(EngagementDeliverable::factory()->deliverySuccessful()->count(1), 'engagementDeliverable')
-            ->for($sampleProspectForDemo, 'recipient')
+            ->for($sampleContactForDemo, 'recipient')
             ->create();
     }
 }

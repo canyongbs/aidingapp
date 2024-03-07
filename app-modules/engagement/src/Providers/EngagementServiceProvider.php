@@ -5,8 +5,8 @@
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
-    Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -20,7 +20,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Advising App™ are registered trademarks of
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
       Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
@@ -29,36 +29,36 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Providers;
+namespace AidingApp\Engagement\Providers;
 
 use Filament\Panel;
 use App\Models\Tenant;
 use Illuminate\Support\ServiceProvider;
 use Spatie\Multitenancy\TenantCollection;
+use AidingApp\Engagement\EngagementPlugin;
+use AidingApp\Engagement\Models\Engagement;
 use Illuminate\Console\Scheduling\Schedule;
-use AdvisingApp\Engagement\EngagementPlugin;
-use AdvisingApp\Engagement\Models\Engagement;
-use AdvisingApp\Engagement\Models\SmsTemplate;
-use AdvisingApp\Engagement\Models\EmailTemplate;
-use AdvisingApp\Engagement\Models\EngagementFile;
-use AdvisingApp\Engagement\Models\EngagementBatch;
+use AidingApp\Engagement\Models\SmsTemplate;
+use AidingApp\Engagement\Models\EmailTemplate;
+use AidingApp\Engagement\Models\EngagementFile;
+use AidingApp\Engagement\Models\EngagementBatch;
 use App\Registries\RoleBasedAccessControlRegistry;
+use AidingApp\Engagement\Models\EngagementResponse;
+use AidingApp\Engagement\Actions\DeliverEngagements;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use AdvisingApp\Engagement\Models\EngagementResponse;
-use AdvisingApp\Engagement\Actions\DeliverEngagements;
-use AdvisingApp\Engagement\Models\EngagementDeliverable;
-use AdvisingApp\Engagement\Observers\EngagementObserver;
-use AdvisingApp\Engagement\Models\EngagementFileEntities;
-use AdvisingApp\Engagement\Observers\SmsTemplateObserver;
-use AdvisingApp\Engagement\Observers\EmailTemplateObserver;
-use AdvisingApp\Engagement\Observers\EngagementBatchObserver;
-use AdvisingApp\Engagement\Registries\EngagementRbacRegistry;
-use AdvisingApp\Engagement\Observers\EngagementFileEntitiesObserver;
+use AidingApp\Engagement\Models\EngagementDeliverable;
+use AidingApp\Engagement\Observers\EngagementObserver;
+use AidingApp\Engagement\Models\EngagementFileEntities;
+use AidingApp\Engagement\Observers\SmsTemplateObserver;
+use AidingApp\Engagement\Observers\EmailTemplateObserver;
+use AidingApp\Engagement\Observers\EngagementBatchObserver;
+use AidingApp\Engagement\Registries\EngagementRbacRegistry;
+use AidingApp\Engagement\Observers\EngagementFileEntitiesObserver;
 
 class EngagementServiceProvider extends ServiceProvider
 {

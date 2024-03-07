@@ -1,6 +1,6 @@
 ### Ticket(s) or GitHub Issue
 
-- https://canyongbs.atlassian.net/browse/ADVAPP-
+- https://canyongbs.atlassian.net/browse/AIDAPP-
 
 ### Technical Description
 
@@ -18,4 +18,4 @@
 
 _______________________________________________
 
-#### Before contributing and submitting this PR, make sure you have Read, agree, and are compliant with the [contributing guidelines](https://github.com/canyongbs/advisingapp/blob/main/README.md#contributing).
+#### Before contributing and submitting this PR, make sure you have Read, agree, and are compliant with the [contributing guidelines](https://github.com/canyongbs/aidingapp/blob/main/README.md#contributing).

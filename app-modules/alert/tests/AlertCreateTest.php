@@ -5,8 +5,8 @@
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
-    Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -20,7 +20,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Advising App™ are registered trademarks of
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
       Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
@@ -29,20 +29,20 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
 
 use App\Models\User;
-use AdvisingApp\Alert\Models\Alert;
+use AidingApp\Alert\Models\Alert;
 
 use function Pest\Laravel\actingAs;
 
+use AidingApp\Contact\Models\Contact;
 use Illuminate\Support\Facades\Notification;
-use AdvisingApp\Authorization\Enums\LicenseType;
-use AdvisingApp\StudentDataModel\Models\Student;
-use AdvisingApp\Alert\Notifications\AlertCreatedNotification;
+use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\Alert\Notifications\AlertCreatedNotification;
 
 it('creates a subscription for the user that created the Alert', function () {
     $user = User::factory()->licensed(LicenseType::cases())->create();
@@ -63,20 +63,20 @@ it('dispatches the proper notifications to subscribers on created', function () 
 
     $users = User::factory()->licensed(LicenseType::cases())->count(5)->create();
 
-    /** @var Student $student */
-    $student = Student::factory()->create();
+    /** @var Contact $contact */
+    $contact = Contact::factory()->create();
 
-    $student->subscriptions()->createMany($users->map(fn (User $user) => [
+    $contact->subscriptions()->createMany($users->map(fn (User $user) => [
         'user_id' => $user->id,
     ])->toArray());
 
     Alert::factory()->create([
-        'concern_id' => $student->sisid,
-        'concern_type' => Student::class,
+        'concern_id' => $contact->getKey(),
+        'concern_type' => Contact::class,
     ]);
 
-    $student->refresh();
+    $contact->refresh();
 
     Notification::assertSentTo($users, AlertCreatedNotification::class);
-    Notification::assertSentTimes(AlertCreatedNotification::class, $student->subscriptions()->count());
+    Notification::assertSentTimes(AlertCreatedNotification::class, $contact->subscriptions()->count());
 });

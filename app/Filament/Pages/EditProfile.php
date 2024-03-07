@@ -5,8 +5,8 @@
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
-    Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -20,7 +20,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Advising App™ are registered trademarks of
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
       Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
@@ -29,7 +29,7 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
@@ -50,7 +50,6 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Support\Enums\Alignment;
 use Filament\Support\Exceptions\Halt;
-use Filament\Forms\Components\Actions;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Checkbox;
 use Illuminate\Database\Eloquent\Model;
@@ -62,10 +61,9 @@ use Filament\Forms\Components\TimePicker;
 use Illuminate\Validation\Rules\Password;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\DateTimePicker;
+use AidingApp\Authorization\Enums\LicenseType;
 use Illuminate\Contracts\Auth\Authenticatable;
-use AdvisingApp\Authorization\Enums\LicenseType;
 use Filament\Pages\Concerns\InteractsWithFormActions;
-use AdvisingApp\MeetingCenter\Managers\CalendarManager;
 use Filament\Forms\Components\Actions\Action as FormAction;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Tapp\FilamentTimezoneField\Forms\Components\TimezoneSelect;
@@ -91,57 +89,6 @@ class EditProfile extends Page
         /** @var User $user */
         $user = auth()->user();
 
-        $connectedAccounts = collect([
-            Grid::make()
-                ->schema([
-                    Placeholder::make('calendar')
-                        ->label(function (): string {
-                            /** @var User $user */
-                            $user = auth()->user();
-
-                            return "{$user->calendar->provider_type->getLabel()} Calendar";
-                        })
-                        ->content(function (): ?string {
-                            /** @var User $user */
-                            $user = auth()->user();
-
-                            return $user->calendar?->name;
-                        }),
-                    Actions::make([
-                        FormAction::make('Disconnect')
-                            ->icon('heroicon-m-trash')
-                            ->color('danger')
-                            ->requiresConfirmation()
-                            ->action(function () {
-                                /** @var User $user */
-                                $user = auth()->user();
-
-                                $calendar = $user->calendar;
-
-                                $revoked = resolve(CalendarManager::class)
-                                    ->driver($calendar->provider_type->value)
-                                    ->revokeToken($calendar);
-
-                                if ($revoked) {
-                                    $calendar->delete();
-
-                                    Notification::make()
-                                        ->title("Disconnected {$calendar->provider_type->getLabel()} Calendar")
-                                        ->success()
-                                        ->send();
-                                }
-                            }),
-                    ])->alignRight()
-                        ->verticallyAlignCenter(),
-                ])
-                ->visible(function (): bool {
-                    /** @var User $user */
-                    $user = auth()->user();
-
-                    return filled($user->calendar?->oauth_token);
-                }),
-        ])->filter(fn (Component $component) => $component->isVisible());
-
         return $form
             ->schema([
                 Section::make('Public Profile')
@@ -150,7 +97,7 @@ class EditProfile extends Page
                         Toggle::make('has_enabled_public_profile')
                             ->label('Enable public profile')
                             ->live()
-                            ->lockedWithoutAnyLicenses(user: auth()->user(), licenses: [LicenseType::RetentionCrm, LicenseType::RecruitmentCrm]),
+                            ->lockedWithoutAnyLicenses(user: auth()->user(), licenses: [LicenseType::RecruitmentCrm]),
                         TextInput::make('public_profile_slug')
                             ->label('Url')
                             ->visible(fn (Get $get) => $get('has_enabled_public_profile'))
@@ -194,7 +141,7 @@ class EditProfile extends Page
                         Checkbox::make('is_bio_visible_on_profile')
                             ->label('Show Bio on profile')
                             ->live()
-                            ->lockedWithoutAnyLicenses(user: auth()->user(), licenses: [LicenseType::RetentionCrm, LicenseType::RecruitmentCrm]),
+                            ->lockedWithoutAnyLicenses(user: auth()->user(), licenses: [LicenseType::RecruitmentCrm]),
                         TextInput::make('phone_number')
                             ->label('Contact phone number')
                             ->integer()
@@ -202,14 +149,14 @@ class EditProfile extends Page
                         Checkbox::make('is_phone_number_visible_on_profile')
                             ->label('Show phone number on profile')
                             ->live()
-                            ->lockedWithoutAnyLicenses(user: auth()->user(), licenses: [LicenseType::RetentionCrm, LicenseType::RecruitmentCrm]),
+                            ->lockedWithoutAnyLicenses(user: auth()->user(), licenses: [LicenseType::RecruitmentCrm]),
                         Select::make('pronouns_id')
                             ->relationship('pronouns', 'label')
                             ->hint(fn (Get $get): string => $get('are_pronouns_visible_on_profile') ? 'Visible on profile' : 'Not visible on profile'),
                         Checkbox::make('are_pronouns_visible_on_profile')
                             ->label('Show Pronouns on profile')
                             ->live()
-                            ->lockedWithoutAnyLicenses(user: auth()->user(), licenses: [LicenseType::RetentionCrm, LicenseType::RecruitmentCrm]),
+                            ->lockedWithoutAnyLicenses(user: auth()->user(), licenses: [LicenseType::RecruitmentCrm]),
                         Placeholder::make('teams')
                             ->label(str('Team')->plural($user->teams->count()))
                             ->content($user->teams->pluck('name')->join(', ', ' and '))
@@ -239,7 +186,7 @@ class EditProfile extends Page
                         Checkbox::make('is_email_visible_on_profile')
                             ->label('Show Email on profile')
                             ->live()
-                            ->lockedWithoutAnyLicenses(user: auth()->user(), licenses: [LicenseType::RetentionCrm, LicenseType::RecruitmentCrm]),
+                            ->lockedWithoutAnyLicenses(user: auth()->user(), licenses: [LicenseType::RecruitmentCrm]),
                         $this->getPasswordFormComponent()
                             ->hidden($user->is_external),
                         $this->getPasswordConfirmationFormComponent()
@@ -248,11 +195,6 @@ class EditProfile extends Page
                             ->required()
                             ->selectablePlaceholder(false),
                     ]),
-                Section::make('Connected Accounts')
-                    ->description('Disconnect your external accounts.')
-                    ->aside()
-                    ->schema($connectedAccounts->toArray())
-                    ->visible($connectedAccounts->count()),
                 Section::make('Working Hours')
                     ->aside()
                     ->schema([
@@ -260,7 +202,7 @@ class EditProfile extends Page
                             ->label('Set Working Hours')
                             ->live()
                             ->hint(fn (Get $get): string => $get('are_working_hours_visible_on_profile') ? 'Visible on profile' : 'Not visible on profile')
-                            ->lockedWithoutAnyLicenses(user: auth()->user(), licenses: [LicenseType::RetentionCrm, LicenseType::RecruitmentCrm]),
+                            ->lockedWithoutAnyLicenses(user: auth()->user(), licenses: [LicenseType::RecruitmentCrm]),
                         Checkbox::make('are_working_hours_visible_on_profile')
                             ->label('Show Working Hours on profile')
                             ->visible(fn (Get $get) => $get('working_hours_are_enabled'))
@@ -275,10 +217,7 @@ class EditProfile extends Page
                         Toggle::make('office_hours_are_enabled')
                             ->label('Enable Office Hours')
                             ->live()
-                            ->lockedWithoutAnyLicenses(user: auth()->user(), licenses: [LicenseType::RetentionCrm, LicenseType::RecruitmentCrm]),
-                        Checkbox::make('appointments_are_restricted_to_existing_students')
-                            ->label('Restrict appointments to existing students')
-                            ->visible(fn (Get $get) => $get('office_hours_are_enabled')),
+                            ->lockedWithoutAnyLicenses(user: auth()->user(), licenses: [LicenseType::RecruitmentCrm]),
                         Section::make('Days')
                             ->schema($this->getHoursForDays('office_hours'))
                             ->visible(fn (Get $get) => $get('office_hours_are_enabled')),

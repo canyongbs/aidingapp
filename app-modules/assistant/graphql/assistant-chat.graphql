@@ -1,5 +1,5 @@
 type AssistantChat
-    @model(class: "AdvisingApp\\Assistant\\Models\\AssistantChat") {
+    @model(class: "AidingApp\\Assistant\\Models\\AssistantChat") {
     id: UUID!
 
     name: String!

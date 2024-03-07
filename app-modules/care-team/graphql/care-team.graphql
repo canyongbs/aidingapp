@@ -1,4 +1,4 @@
-type CareTeam @model(class: "AdvisingApp\\CareTeam\\Models\\CareTeam") {
+type CareTeam @model(class: "AidingApp\\CareTeam\\Models\\CareTeam") {
     "Unique primary key."
     id: UUID!
 
@@ -16,8 +16,7 @@ type CareTeam @model(class: "AdvisingApp\\CareTeam\\Models\\CareTeam") {
 }
 
 input CareTeamEducatablesQuery {
-    student: StudentsQuery
-    prospect: ProspectsQuery
+    contact: ContactsQuery
 }
 
 input CareTeamsQuery {
@@ -56,7 +55,7 @@ input CreateCareTeamInput {
             apply: [
                 "required"
                 "exists:users,id"
-                "AdvisingApp\\CareTeam\\Rules\\UniqueCareTeamRule"
+                "AidingApp\\CareTeam\\Rules\\UniqueCareTeamRule"
             ]
         )
 
@@ -65,13 +64,12 @@ input CreateCareTeamInput {
         @rules(
             apply: [
                 "required"
-                "AdvisingApp\\CareTeam\\Rules\\EducatableIdExistsRule"
+                "AidingApp\\CareTeam\\Rules\\EducatableIdExistsRule"
             ]
         )
 
     "The type of Educatable to add to the care team."
-    educatable_type: EducatableType!
-        @rules(apply: ["required", "in:student,prospect"])
+    educatable_type: EducatableType! @rules(apply: ["required", "in:contact"])
 }
 
 type CareTeamMutations {

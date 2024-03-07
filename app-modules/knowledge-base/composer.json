@@ -1,26 +1,26 @@
 {
-  "name": "canyon-gbs/advising-app-knowledge-base",
-  "description": "",
-  "type": "library",
-  "version": "1.0",
-  "license": "proprietary",
-  "require": {
-    "filament/filament": "^3.0"
-  },
-  "autoload": {
-    "psr-4": {
-      "AdvisingApp\\KnowledgeBase\\": "src/",
-      "AdvisingApp\\KnowledgeBase\\Tests\\": "tests/",
-      "AdvisingApp\\KnowledgeBase\\Database\\Factories\\": "database/factories/",
-      "AdvisingApp\\KnowledgeBase\\Database\\Seeders\\": "database/seeders/"
+    "name": "canyon-gbs/aiding-app-knowledge-base",
+    "description": "",
+    "type": "library",
+    "version": "1.0",
+    "license": "proprietary",
+    "require": {
+        "filament/filament": "^3.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "AidingApp\\KnowledgeBase\\": "src/",
+            "AidingApp\\KnowledgeBase\\Tests\\": "tests/",
+            "AidingApp\\KnowledgeBase\\Database\\Factories\\": "database/factories/",
+            "AidingApp\\KnowledgeBase\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "minimum-stability": "stable",
+    "extra": {
+        "laravel": {
+            "providers": [
+                "AidingApp\\KnowledgeBase\\Providers\\KnowledgeBaseServiceProvider"
+            ]
+        }
     }
-  },
-  "minimum-stability": "stable",
-  "extra": {
-    "laravel": {
-      "providers": [
-        "AdvisingApp\\KnowledgeBase\\Providers\\KnowledgeBaseServiceProvider"
-      ]
-    }
-  }
 }

@@ -5,8 +5,8 @@
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
-    Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -20,7 +20,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Advising App™ are registered trademarks of
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
       Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
@@ -29,28 +29,26 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages;
 
 use Carbon\CarbonInterval;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Infolist;
+use AidingApp\Contact\Models\Contact;
 use Filament\Infolists\Components\Group;
 use Filament\Resources\Pages\ViewRecord;
-use AdvisingApp\Prospect\Models\Prospect;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\ViewEntry;
-use AdvisingApp\StudentDataModel\Models\Student;
-use AdvisingApp\ServiceManagement\Models\ServiceRequest;
-use AdvisingApp\ServiceManagement\Enums\SlaComplianceStatus;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource;
-use AdvisingApp\StudentDataModel\Filament\Resources\StudentResource;
-use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 
 class ViewServiceRequest extends ViewRecord
 {
@@ -93,21 +91,19 @@ class ViewServiceRequest extends ViewRecord
                             ->label('Related To')
                             ->color('primary')
                             ->state(function (ServiceRequest $record): string {
-                                /** @var Student|Prospect $respondent */
+                                /** @var Contact $respondent */
                                 $respondent = $record->respondent;
 
                                 return match ($respondent::class) {
-                                    Student::class => "{$respondent->{Student::displayNameKey()}} (Student)",
-                                    Prospect::class => "{$respondent->{Prospect::displayNameKey()}} (Prospect)",
+                                    Contact::class => "{$respondent->{Contact::displayNameKey()}} (Contact)",
                                 };
                             })
                             ->url(function (ServiceRequest $record) {
-                                /** @var Student|Prospect $respondent */
+                                /** @var Contact $respondent */
                                 $respondent = $record->respondent;
 
                                 return match ($respondent::class) {
-                                    Student::class => StudentResource::getUrl('view', ['record' => $respondent->sisid]),
-                                    Prospect::class => ProspectResource::getUrl('view', ['record' => $respondent->id]),
+                                    Contact::class => ContactResource::getUrl('view', ['record' => $respondent->id]),
                                 };
                             }),
                     ])

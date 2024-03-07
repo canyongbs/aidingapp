@@ -5,8 +5,8 @@
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
-    Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -20,7 +20,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Advising App™ are registered trademarks of
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
       Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
@@ -29,36 +29,35 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Models;
+namespace AidingApp\Engagement\Models;
 
 use App\Models\User;
 use App\Models\BaseModel;
 use Illuminate\Support\Collection;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Timeline\Models\Timeline;
 use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Contracts\Auditable;
-use AdvisingApp\Prospect\Models\Prospect;
-use AdvisingApp\Timeline\Models\Timeline;
 use Illuminate\Database\Eloquent\Builder;
-use AdvisingApp\StudentDataModel\Models\Student;
+use App\Models\Scopes\LicensedToEducatable;
+use App\Models\Concerns\BelongsToEducatable;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use AidingApp\Timeline\Timelines\EngagementTimeline;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use AdvisingApp\Timeline\Timelines\EngagementTimeline;
-use AdvisingApp\Engagement\Enums\EngagementDeliveryStatus;
-use AdvisingApp\Notification\Models\Contracts\Subscribable;
-use AdvisingApp\Timeline\Models\Contracts\ProvidesATimeline;
-use AdvisingApp\StudentDataModel\Models\Contracts\Educatable;
-use AdvisingApp\Engagement\Actions\GenerateEmailMarkdownContent;
-use AdvisingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AdvisingApp\StudentDataModel\Models\Scopes\LicensedToEducatable;
-use AdvisingApp\StudentDataModel\Models\Concerns\BelongsToEducatable;
-use AdvisingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
+use AidingApp\Engagement\Enums\EngagementDeliveryStatus;
+use AidingApp\Notification\Models\Contracts\Subscribable;
+use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
+use AidingApp\Engagement\Actions\GenerateEmailMarkdownContent;
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
 
 /**
  * @property-read Educatable $recipient
@@ -69,6 +68,7 @@ class Engagement extends BaseModel implements Auditable, CanTriggerAutoSubscript
 {
     use AuditableTrait;
     use BelongsToEducatable;
+    use SoftDeletes;
 
     protected $fillable = [
         'user_id',
@@ -173,14 +173,9 @@ class Engagement extends BaseModel implements Auditable, CanTriggerAutoSubscript
         $query->whereNull('engagement_batch_id');
     }
 
-    public function scopeSentToStudent(Builder $query): void
+    public function scopeSentToContact(Builder $query): void
     {
-        $query->where('recipient_type', resolve(Student::class)->getMorphClass());
-    }
-
-    public function scopeSentToProspect(Builder $query): void
-    {
-        $query->where('recipient_type', resolve(Prospect::class)->getMorphClass());
+        $query->where('recipient_type', resolve(Contact::class)->getMorphClass());
     }
 
     public function hasBeenDelivered(): bool
@@ -204,8 +199,8 @@ class Engagement extends BaseModel implements Auditable, CanTriggerAutoSubscript
     public function getMergeData(): array
     {
         return [
-            'student full name' => $this->recipient->getAttribute($this->recipient->displayNameKey()),
-            'student email' => $this->recipient->getAttribute($this->recipient->displayEmailKey()),
+            'contact full name' => $this->recipient->getAttribute($this->recipient->displayNameKey()),
+            'contact email' => $this->recipient->getAttribute($this->recipient->displayEmailKey()),
         ];
     }
 

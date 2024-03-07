@@ -5,8 +5,8 @@
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
-    Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -20,7 +20,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Advising App™ are registered trademarks of
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
       Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
@@ -29,46 +29,38 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Task\Models;
+namespace AidingApp\Task\Models;
 
-use Exception;
 use App\Models\User;
 use App\Models\BaseModel;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
-use AdvisingApp\Task\Enums\TaskStatus;
+use AidingApp\Task\Enums\TaskStatus;
+use App\Models\Contracts\Educatable;
+use AidingApp\Contact\Models\Contact;
 use OwenIt\Auditing\Contracts\Auditable;
-use AdvisingApp\Prospect\Models\Prospect;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use AdvisingApp\Campaign\Models\CampaignAction;
-use AdvisingApp\StudentDataModel\Models\Student;
 use Bvtterfly\ModelStateMachine\HasStateMachine;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use AdvisingApp\Notification\Models\Contracts\Subscribable;
-use AdvisingApp\StudentDataModel\Models\Contracts\Educatable;
-use AdvisingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AdvisingApp\StudentDataModel\Models\Scopes\LicensedToEducatable;
-use AdvisingApp\StudentDataModel\Models\Concerns\BelongsToEducatable;
-use AdvisingApp\Campaign\Models\Contracts\ExecutableFromACampaignAction;
-use AdvisingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
+use AidingApp\Notification\Models\Contracts\Subscribable;
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
 
 /**
- * @property-read Student|Prospect $concern
+ * @property-read Contact $concern
  *
  * @mixin IdeHelperTask
  */
-class Task extends BaseModel implements Auditable, CanTriggerAutoSubscription, ExecutableFromACampaignAction
+class Task extends BaseModel implements Auditable, CanTriggerAutoSubscription
 {
-    use BelongsToEducatable;
     use HasFactory;
     use HasUuids;
     use AuditableTrait;
@@ -130,46 +122,5 @@ class Task extends BaseModel implements Auditable, CanTriggerAutoSubscription, E
     {
         $query->where('status', '=', TaskStatus::Pending)
             ->orWhere('status', '=', TaskStatus::InProgress);
-    }
-
-    public static function executeFromCampaignAction(CampaignAction $action): bool|string
-    {
-        try {
-            DB::beginTransaction();
-
-            $action
-                ->campaign
-                ->caseload
-                ->retrieveRecords()
-                ->each(function (Educatable $educatable) use ($action) {
-                    $task = new Task([
-                        'title' => $action->data['title'],
-                        'description' => $action->data['description'],
-                        'due' => $action->data['due'],
-                    ]);
-
-                    $task->assignedTo()->associate($action->data['assigned_to']);
-                    $task->createdBy()->associate($action->data['created_by']);
-                    $task->concern()->associate($educatable);
-                    $task->save();
-                });
-
-            DB::commit();
-
-            return true;
-        } catch (Exception $e) {
-            DB::rollBack();
-
-            return $e->getMessage();
-        }
-
-        // Do we need to be able to relate campaigns/actions to the RESULT of their actions?
-    }
-
-    protected static function booted(): void
-    {
-        static::addGlobalScope('licensed', function (Builder $builder) {
-            $builder->tap(new LicensedToEducatable('concern'));
-        });
     }
 }

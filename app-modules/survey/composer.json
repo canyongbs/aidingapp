@@ -1,5 +1,5 @@
 {
-    "name": "canyon-gbs/advising-app-survey",
+    "name": "canyon-gbs/aiding-app-survey",
     "description": "",
     "type": "library",
     "version": "1.0",
@@ -9,17 +9,17 @@
     },
     "autoload": {
         "psr-4": {
-            "AdvisingApp\\Survey\\": "src/",
-            "AdvisingApp\\Survey\\Tests\\": "tests/",
-            "AdvisingApp\\Survey\\Database\\Factories\\": "database/factories/",
-            "AdvisingApp\\Survey\\Database\\Seeders\\": "database/seeders/"
+            "AidingApp\\Survey\\": "src/",
+            "AidingApp\\Survey\\Tests\\": "tests/",
+            "AidingApp\\Survey\\Database\\Factories\\": "database/factories/",
+            "AidingApp\\Survey\\Database\\Seeders\\": "database/seeders/"
         }
     },
     "minimum-stability": "dev",
     "extra": {
         "laravel": {
             "providers": [
-                "AdvisingApp\\Survey\\Providers\\SurveyServiceProvider"
+                "AidingApp\\Survey\\Providers\\SurveyServiceProvider"
             ]
         }
     }

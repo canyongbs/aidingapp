@@ -5,8 +5,8 @@
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
-    Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -20,7 +20,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Advising App™ are registered trademarks of
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
       Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
@@ -29,57 +29,52 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\ServiceManagement\Models;
+namespace AidingApp\ServiceManagement\Models;
 
-use Exception;
 use App\Models\User;
 use DateTimeInterface;
 use App\Models\BaseModel;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\DB;
+use App\Models\Contracts\Educatable;
+use AidingApp\Contact\Models\Contact;
 use Kirschbaum\PowerJoins\PowerJoins;
+use AidingApp\Division\Models\Division;
 use OwenIt\Auditing\Contracts\Auditable;
-use AdvisingApp\Division\Models\Division;
-use AdvisingApp\Prospect\Models\Prospect;
 use Illuminate\Database\Eloquent\Builder;
+use App\Models\Scopes\LicensedToEducatable;
+use App\Models\Concerns\BelongsToEducatable;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use AdvisingApp\Campaign\Models\CampaignAction;
-use AdvisingApp\StudentDataModel\Models\Student;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Staudenmeir\EloquentHasManyDeep\HasRelationships;
-use AdvisingApp\Notification\Models\OutboundDeliverable;
-use AdvisingApp\Notification\Models\Contracts\Subscribable;
+use AidingApp\Notification\Models\OutboundDeliverable;
+use AidingApp\Notification\Models\Contracts\Subscribable;
+use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
 use Illuminate\Database\UniqueConstraintViolationException;
-use AdvisingApp\ServiceManagement\Enums\SlaComplianceStatus;
-use AdvisingApp\StudentDataModel\Models\Contracts\Educatable;
-use AdvisingApp\StudentDataModel\Models\Contracts\Identifiable;
-use AdvisingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AdvisingApp\StudentDataModel\Models\Scopes\LicensedToEducatable;
-use AdvisingApp\StudentDataModel\Models\Concerns\BelongsToEducatable;
-use AdvisingApp\ServiceManagement\Enums\ServiceRequestUpdateDirection;
-use AdvisingApp\Interaction\Models\Concerns\HasManyMorphedInteractions;
-use AdvisingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
-use AdvisingApp\Campaign\Models\Contracts\ExecutableFromACampaignAction;
-use AdvisingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
-use AdvisingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
-use AdvisingApp\ServiceManagement\Exceptions\ServiceRequestNumberExceededReRollsException;
-use AdvisingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateDirection;
+use AidingApp\Interaction\Models\Concerns\HasManyMorphedInteractions;
+use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
+use AidingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
+use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
+use AidingApp\ServiceManagement\Exceptions\ServiceRequestNumberExceededReRollsException;
+use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
 
 /**
- * @property-read Student|Prospect $respondent
+ * @property-read Contact $respondent
  *
  * @mixin IdeHelperServiceRequest
  */
-class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubscription, Identifiable, ExecutableFromACampaignAction
+class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubscription
 {
     use BelongsToEducatable;
     use SoftDeletes;
@@ -140,11 +135,6 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
         } while ($attempts < 3);
 
         return $save;
-    }
-
-    public function identifier(): string
-    {
-        return $this->id;
     }
 
     public function getSubscribable(): ?Subscribable
@@ -221,38 +211,6 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
             'status_id',
             ServiceRequestStatus::where('classification', SystemServiceRequestClassification::Open)->pluck('id')
         );
-    }
-
-    public static function executeFromCampaignAction(CampaignAction $action): bool|string
-    {
-        try {
-            $action->campaign->caseload->retrieveRecords()->each(function (Educatable $educatable) use ($action) {
-                $request = ServiceRequest::create([
-                    'respondent_type' => $educatable->getMorphClass(),
-                    'respondent_id' => $educatable->getKey(),
-                    'title' => $action->data['title'],
-                    'close_details' => $action->data['close_details'],
-                    'res_details' => $action->data['res_details'],
-                    'division_id' => $action->data['division_id'],
-                    'status_id' => $action->data['status_id'],
-                    'priority_id' => $action->data['priority_id'],
-                    'created_by_id' => $action->campaign->user->id,
-                ]);
-
-                if ($action->data['assigned_to_id']) {
-                    $request->assignments()->create([
-                        'user_id' => $action->data['assigned_to_id'],
-                        'assigned_by_id' => $action->campaign->user->id,
-                        'assigned_at' => now(),
-                        'status' => ServiceRequestAssignmentStatus::Active,
-                    ]);
-                }
-            });
-
-            return true;
-        } catch (Exception $e) {
-            return $e->getMessage();
-        }
     }
 
     public function latestInboundServiceRequestUpdate(): HasOne

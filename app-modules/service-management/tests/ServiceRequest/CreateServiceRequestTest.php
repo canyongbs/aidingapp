@@ -5,8 +5,8 @@
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
-    Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -20,7 +20,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Advising App™ are registered trademarks of
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
       Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
@@ -29,7 +29,7 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
@@ -43,19 +43,19 @@ use App\Settings\LicenseSettings;
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
-use AdvisingApp\Prospect\Models\Prospect;
+use AidingApp\Contact\Models\Contact;
 
 use function PHPUnit\Framework\assertCount;
 use function Pest\Laravel\assertDatabaseHas;
 
-use AdvisingApp\Authorization\Enums\LicenseType;
+use AidingApp\Authorization\Enums\LicenseType;
 
 use function Pest\Laravel\assertDatabaseMissing;
 
-use AdvisingApp\ServiceManagement\Models\ServiceRequest;
-use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
-use AdvisingApp\ServiceManagement\Tests\RequestFactories\CreateServiceRequestRequestFactory;
-use AdvisingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\CreateServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
+use AidingApp\ServiceManagement\Tests\RequestFactories\CreateServiceRequestRequestFactory;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\CreateServiceRequest;
 
 test('A successful action on the CreateServiceRequest page', function () {
     asSuperAdmin()
@@ -69,7 +69,7 @@ test('A successful action on the CreateServiceRequest page', function () {
     livewire(CreateServiceRequest::class)
         ->fillForm($request->toArray())
         ->fillForm([
-            'respondent_id' => Prospect::factory()->create()->getKey(),
+            'respondent_id' => Contact::factory()->create()->getKey(),
         ])
         ->call('create')
         ->assertHasNoFormErrors();
@@ -162,7 +162,7 @@ test('CreateServiceRequest is gated with proper access control', function () {
     livewire(CreateServiceRequest::class)
         ->fillForm($request->toArray())
         ->fillForm([
-            'respondent_id' => Prospect::factory()->create()->getKey(),
+            'respondent_id' => Contact::factory()->create()->getKey(),
         ])
         ->call('create')
         ->assertHasNoFormErrors();
@@ -226,7 +226,7 @@ test('CreateServiceRequest is gated with proper feature access control', functio
     livewire(CreateServiceRequest::class)
         ->fillForm($request->toArray())
         ->fillForm([
-            'respondent_id' => Prospect::factory()->create()->getKey(),
+            'respondent_id' => Contact::factory()->create()->getKey(),
         ])
         ->call('create')
         ->assertHasNoFormErrors();

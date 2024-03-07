@@ -5,8 +5,8 @@
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
-    Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -20,7 +20,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Advising App™ are registered trademarks of
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
       Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
@@ -29,22 +29,20 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
 
 use Illuminate\Http\Request;
+use AidingApp\Contact\Models\Contact;
 
 use function Tests\loadFixtureFromModule;
 use function Pest\Laravel\assertDatabaseHas;
-
-use AdvisingApp\StudentDataModel\Models\Student;
-
 use function Pest\Laravel\assertDatabaseMissing;
 
-use AdvisingApp\IntegrationTwilio\Actions\MessageReceived;
-use AdvisingApp\IntegrationTwilio\DataTransferObjects\TwilioMessageReceivedData;
+use AidingApp\IntegrationTwilio\Actions\MessageReceived;
+use AidingApp\IntegrationTwilio\DataTransferObjects\TwilioMessageReceivedData;
 
 it('will not create an engagement response when it cannot find an associated message sender', function () {
     $request = Request::create('/', 'POST', loadFixtureFromModule('integration-twilio', 'MessageReceived/payload'));
@@ -60,7 +58,7 @@ it('will not create an engagement response when it cannot find an associated mes
 it('will create an engagement response when a message is received', function () {
     $request = Request::create('/', 'POST', loadFixtureFromModule('integration-twilio', 'MessageReceived/payload'));
 
-    $student = Student::factory()->create([
+    $contact = Contact::factory()->create([
         'mobile' => $request->all()['From'],
     ]);
 
@@ -69,8 +67,8 @@ it('will create an engagement response when a message is received', function () 
     $messageReceived->handle();
 
     assertDatabaseHas('engagement_responses', [
-        'sender_id' => $student->getKey(),
-        'sender_type' => (new Student())->getMorphClass(),
+        'sender_id' => $contact->getKey(),
+        'sender_type' => $contact->getMorphClass(),
         'content' => $request->all()['Body'],
     ]);
 });

@@ -5,8 +5,8 @@
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
-    Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -20,7 +20,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Advising App™ are registered trademarks of
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
       Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
@@ -29,34 +29,27 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Engagement\Actions;
+namespace AidingApp\Engagement\Actions;
 
 use Illuminate\Support\Facades\Log;
-use AdvisingApp\Prospect\Models\Prospect;
-use AdvisingApp\StudentDataModel\Models\Student;
-use AdvisingApp\Engagement\Actions\Contracts\EngagementResponseSenderFinder;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Engagement\Actions\Contracts\EngagementResponseSenderFinder;
 
 class FindEngagementResponseSender implements EngagementResponseSenderFinder
 {
-    public function find(string $phoneNumber): Student|Prospect|null
+    public function find(string $phoneNumber): Contact|null
     {
-        // Student currently takes priority, but determine if we potentially want to store this response
-        // For *all* potential matches instead of just a singular result.
-        if (! is_null($student = Student::where('mobile', $phoneNumber)->orWhere('phone', $phoneNumber)->first())) {
-            return $student;
-        }
-
-        if (! is_null($prospect = Prospect::where('mobile', $phoneNumber)->orWhere('phone', $phoneNumber)->first())) {
-            return $prospect;
+        if (! is_null($contact = Contact::where('mobile', $phoneNumber)->orWhere('phone', $phoneNumber)->first())) {
+            return $contact;
         }
 
         // TODO Perhaps send a notification to an admin, but don't need to throw an exception.
-        Log::error("Could not find a Student or Prospect with the given phone number: {$phoneNumber}");
+        Log::error("Could not find a Contact with the given phone number: {$phoneNumber}");
 
         return null;
     }

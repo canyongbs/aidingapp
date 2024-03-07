@@ -5,8 +5,8 @@
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
-    Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -20,7 +20,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Advising App™ are registered trademarks of
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
       Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
@@ -29,42 +29,37 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Alert\Filament\Resources\AlertResource\Pages;
+namespace AidingApp\Alert\Filament\Resources\AlertResource\Pages;
 
 use Filament\Tables\Table;
 use Filament\Infolists\Infolist;
+use AidingApp\Alert\Models\Alert;
 use Filament\Actions\CreateAction;
-use AdvisingApp\Alert\Models\Alert;
 use Filament\Tables\Filters\Filter;
 use Filament\Forms\Components\Group;
+use AidingApp\Contact\Models\Contact;
 use Filament\Forms\Components\Select;
+use AidingApp\Alert\Enums\AlertStatus;
+use App\Models\Scopes\EducatableSearch;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
-use Illuminate\Database\Eloquent\Model;
-use AdvisingApp\Alert\Enums\AlertStatus;
-use AdvisingApp\Prospect\Models\Prospect;
+use AidingApp\Alert\Enums\AlertSeverity;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
-use AdvisingApp\Alert\Enums\AlertSeverity;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
-use AdvisingApp\StudentDataModel\Models\Student;
-use AdvisingApp\CaseloadManagement\Models\Caseload;
 use App\Filament\Forms\Components\EducatableSelect;
-use AdvisingApp\Alert\Filament\Resources\AlertResource;
-use AdvisingApp\StudentDataModel\Models\Scopes\EducatableSearch;
-use AdvisingApp\CaseloadManagement\Actions\TranslateCaseloadFilters;
-use AdvisingApp\Prospect\Filament\Resources\ProspectResource\Pages\ManageProspectAlerts;
-use AdvisingApp\StudentDataModel\Filament\Resources\StudentResource\Pages\ManageStudentAlerts;
+use AidingApp\Alert\Filament\Resources\AlertResource;
+use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactAlerts;
 
 class ListAlerts extends ListRecords
 {
@@ -79,8 +74,7 @@ class ListAlerts extends ListRecords
                     ->label('Related To')
                     ->getStateUsing(fn (Alert $record): ?string => $record->concern?->{$record->concern::displayNameKey()})
                     ->url(fn (Alert $record) => match ($record->concern ? $record->concern::class : null) {
-                        Student::class => ManageStudentAlerts::getUrl(['record' => $record->concern]),
-                        Prospect::class => ManageProspectAlerts::getUrl(['record' => $record->concern]),
+                        Contact::class => ManageContactAlerts::getUrl(['record' => $record->concern]),
                         default => null,
                     }),
                 TextEntry::make('description'),
@@ -99,8 +93,7 @@ class ListAlerts extends ListRecords
                     ->label('Related To')
                     ->getStateUsing(fn (Alert $record): ?string => $record->concern?->{$record->concern::displayNameKey()})
                     ->url(fn (Alert $record) => match ($record->concern ? $record->concern::class : null) {
-                        Student::class => ManageStudentAlerts::getUrl(['record' => $record->concern]),
-                        Prospect::class => ManageProspectAlerts::getUrl(['record' => $record->concern]),
+                        Contact::class => ManageContactAlerts::getUrl(['record' => $record->concern]),
                         default => null,
                     })
                     ->searchable(query: fn (Builder $query, $search) => $query->tap(new EducatableSearch(relationship: 'concern', search: $search)))
@@ -132,24 +125,6 @@ class ListAlerts extends ListRecords
                             callback: fn (Builder $query) => $query->whereRelation('careTeam', 'user_id', auth()->id())
                         )
                     ),
-                SelectFilter::make('my_caseloads')
-                    ->label('My Caseloads')
-                    ->options(
-                        auth()->user()->caseloads()
-                            ->pluck('name', 'id'),
-                    )
-                    ->searchable()
-                    ->optionsLimit(20)
-                    ->query(fn (Builder $query, array $data) => $this->caseloadFilter($query, $data)),
-                SelectFilter::make('all_caseloads')
-                    ->label('All Caseloads')
-                    ->options(
-                        Caseload::all()
-                            ->pluck('name', 'id'),
-                    )
-                    ->searchable()
-                    ->optionsLimit(20)
-                    ->query(fn (Builder $query, array $data) => $this->caseloadFilter($query, $data)),
                 SelectFilter::make('severity')
                     ->options(AlertSeverity::class),
                 SelectFilter::make('status')
@@ -200,24 +175,5 @@ class ListAlerts extends ListRecords
                         ->columns(),
                 ]),
         ];
-    }
-
-    protected function caseloadFilter(Builder $query, array $data): void
-    {
-        if (blank($data['value'])) {
-            return;
-        }
-
-        $caseload = Caseload::find($data['value']);
-
-        /** @var Model $model */
-        $model = resolve($caseload->model->class());
-
-        $query->whereIn(
-            'concern_id',
-            app(TranslateCaseloadFilters::class)
-                ->handle($data['value'])
-                ->pluck($model->getQualifiedKeyName()),
-        );
     }
 }

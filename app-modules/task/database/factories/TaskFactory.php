@@ -5,8 +5,8 @@
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
-    Advising App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -20,7 +20,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Advising App™ are registered trademarks of
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
       Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
@@ -29,18 +29,17 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
 
-namespace AdvisingApp\Task\Database\Factories;
+namespace AidingApp\Task\Database\Factories;
 
 use App\Models\User;
-use AdvisingApp\Task\Models\Task;
-use AdvisingApp\Task\Enums\TaskStatus;
-use AdvisingApp\Prospect\Models\Prospect;
-use AdvisingApp\StudentDataModel\Models\Student;
+use AidingApp\Task\Models\Task;
+use AidingApp\Task\Enums\TaskStatus;
+use AidingApp\Contact\Models\Contact;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -62,19 +61,11 @@ class TaskFactory extends Factory
         ];
     }
 
-    public function concerningStudent(Student $student = null): self
+    public function concerningContact(Contact $contact = null): self
     {
         return $this->state([
-            'concern_id' => $student?->id ?? fn () => Student::inRandomOrder()->first()->sisid ?? Student::factory(),
-            'concern_type' => (new Student())->getMorphClass(),
-        ]);
-    }
-
-    public function concerningProspect(Prospect $prospect = null): self
-    {
-        return $this->state([
-            'concern_id' => $prospect?->id ?? Prospect::factory(),
-            'concern_type' => (new Prospect())->getMorphClass(),
+            'concern_id' => $contact?->id ?? Contact::factory(),
+            'concern_type' => (new Contact())->getMorphClass(),
         ]);
     }
 
