@@ -34,33 +34,53 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\Http\Controllers\KnowledgeManagement;
+namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
+use Closure;
+use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
-use App\Support\MediaEncoding\TiptapMediaEncoder;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
-use AidingApp\Portal\DataTransferObjects\KnowledgeBaseArticleData;
-use AidingApp\Portal\DataTransferObjects\KnowledgeBaseCategoryData;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use AidingApp\Portal\Models\PortalAuthentication;
+use AidingApp\Portal\Exceptions\EducatableIsNotAuthenticatable;
 
-class KnowledgeManagementPortalArticleController extends Controller
+class KnowledgeManagementPortalAuthenticateController extends Controller
 {
-    public function show(KnowledgeBaseCategory $category, KnowledgeBaseItem $article): JsonResponse
+    public function __invoke(Request $request, PortalAuthentication $authentication): JsonResponse
     {
+        if ($authentication->isExpired()) {
+            return response()->json([
+                'is_expired' => true,
+            ]);
+        }
+
+        $request->validate([
+            'code' => ['required', 'integer', 'digits:6', function (string $attribute, int $value, Closure $fail) use ($authentication) {
+                if (Hash::check($value, $authentication->code)) {
+                    return;
+                }
+
+                $fail('The provided code is invalid.');
+            }],
+        ]);
+
+        $educatable = $authentication->educatable;
+
+        match ($educatable->getMorphClass()) {
+            'contact' => Auth::guard('contact')->login($educatable),
+            default => throw new EducatableIsNotAuthenticatable('The educatable type is not supported.'),
+        };
+
+        $token = $educatable->createToken('knowledge-management-portal-access-token');
+
+        if ($request->hasSession()) {
+            $request->session()->regenerate();
+        }
+
         return response()->json([
-            'category' => KnowledgeBaseCategoryData::from([
-                'id' => $category->getKey(),
-                'name' => $category->name,
-                'description' => $category->description,
-            ]),
-            'article' => KnowledgeBaseArticleData::from([
-                'id' => $article->getKey(),
-                'categoryId' => $article->category_id,
-                'name' => $article->title,
-                'lastUpdated' => $article->updated_at->format('M d Y, h:m a'),
-                'content' => tiptap_converter()->asHTML(TiptapMediaEncoder::decode($article->article_details)),
-            ]),
+            'success' => true,
+            'token' => $token->plainTextToken,
         ]);
     }
 }

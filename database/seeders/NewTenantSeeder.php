@@ -55,6 +55,8 @@ use AidingApp\ServiceManagement\Database\Seeders\ChangeRequestStatusSeeder;
 use AidingApp\ServiceManagement\Database\Seeders\ServiceRequestStatusSeeder;
 use AidingApp\InventoryManagement\Database\Seeders\MaintenanceProviderSeeder;
 
+// TODO Create a local tenant seeder that seeds a bit more information
+// Like for contacts, for example
 class NewTenantSeeder extends Seeder
 {
     /**

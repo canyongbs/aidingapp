@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\Http\Controllers\KnowledgeManagement;
+namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use App\Settings\LicenseSettings;
 use Illuminate\Http\JsonResponse;

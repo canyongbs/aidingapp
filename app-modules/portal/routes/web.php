@@ -39,7 +39,7 @@ use AidingApp\Portal\Livewire\RenderKnowledgeManagementPortal;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEnabled;
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEmbeddableAndAuthorized;
-use AidingApp\Portal\Http\Controllers\KnowledgeManagement\KnowledgeManagementPortalAuthenticateController;
+use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalAuthenticateController;
 
 Route::prefix('portals')
     ->name('portal.')
@@ -62,5 +62,9 @@ Route::prefix('portals')
                 ->name('knowledge-management.category.show');
             Route::get('/knowledge-management/categories/{category}/articles/{article}', RenderKnowledgeManagementPortal::class)
                 ->name('knowledge-management.article.show');
+            Route::get('/knowledge-management/service-request/create', RenderKnowledgeManagementPortal::class)
+                ->name('knowledge-management.service-request.show');
+            Route::get('/knowledge-management/service-request/create/{type}', RenderKnowledgeManagementPortal::class)
+                ->name('knowledge-management.service-request-type.show');
         });
     });

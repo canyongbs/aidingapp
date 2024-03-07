@@ -1,5 +1,3 @@
-<?php
-
 /*
 <COPYRIGHT>
 
@@ -33,20 +31,23 @@
 
 </COPYRIGHT>
 */
+import { ref } from 'vue';
+import { defineStore } from 'pinia';
 
-namespace AidingApp\Portal\Http\Requests;
+export const useAuthStore = defineStore('auth', () => {
+    const user = ref(null);
 
-use Illuminate\Foundation\Http\FormRequest;
-
-class KnowledgeManagementPortalAuthenticationRequest extends FormRequest
-{
-    public function rules(): array
-    {
-        ray(request());
-
-        return [
-            'email' => ['required', 'email'],
-            'isSpa' => ['required', 'boolean'],
-        ];
+    async function setUser(userToSet) {
+        user.value = userToSet;
     }
-}
+
+    async function getUser() {
+        return user.value;
+    }
+
+    async function removeUser() {
+        user.value = null;
+    }
+
+    return { user, getUser, setUser, removeUser };
+});

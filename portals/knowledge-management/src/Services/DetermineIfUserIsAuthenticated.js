@@ -33,6 +33,7 @@
 */
 import axios from '@/Globals/Axios.js';
 import { useTokenStore } from '@/Stores/token.js';
+import { useAuthStore } from '@/Stores/auth.js';
 
 async function determineIfUserIsAuthenticated(endpoint) {
     const { getToken } = useTokenStore();
@@ -44,6 +45,12 @@ async function determineIfUserIsAuthenticated(endpoint) {
         })
         .then((response) => {
             const isAuthenticated = response.status === 200;
+
+            // TODO Potentially introduce a store for the user...
+            if (isAuthenticated) {
+                const { setUser } = useAuthStore();
+                setUser(response.data);
+            }
 
             return isAuthenticated;
         })

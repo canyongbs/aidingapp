@@ -38,15 +38,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEnabled;
-use AidingApp\Portal\Http\Controllers\KnowledgeManagement\KnowledgeManagementPortalController;
+use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalController;
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEmbeddableAndAuthorized;
-use AidingApp\Portal\Http\Controllers\KnowledgeManagement\KnowledgeManagementPortalSearchController;
-use AidingApp\Portal\Http\Controllers\KnowledgeManagement\KnowledgeManagementPortalArticleController;
-use AidingApp\Portal\Http\Controllers\KnowledgeManagement\KnowledgeManagementPortalCategoryController;
-use AidingApp\Portal\Http\Controllers\KnowledgeManagement\KnowledgeManagementPortalAuthenticateController;
-use AidingApp\Portal\Http\Controllers\KnowledgeManagement\KnowledgeManagementPortalServiceRequestController;
-use AidingApp\Portal\Http\Controllers\KnowledgeManagement\KnowledgeManagementPortalServiceRequestTypeController;
-use AidingApp\Portal\Http\Controllers\KnowledgeManagement\KnowledgeManagementPortalRequestAuthenticationController;
+use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalSearchController;
+use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalArticleController;
+use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalCategoryController;
+use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalAuthenticateController;
+use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalServiceRequestController;
+use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalServiceRequestTypeController;
+use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalCreateServiceRequestController;
+use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalRequestAuthenticationController;
 
 Route::prefix('api')
     ->middleware([
@@ -79,13 +80,22 @@ Route::prefix('api')
                 Route::post('/search', [KnowledgeManagementPortalSearchController::class, 'get'])
                     ->middleware(['signed:relative'])
                     ->name('search');
+
                 Route::get('/categories/{category}', [KnowledgeManagementPortalCategoryController::class, 'show'])
                     ->name('category.show');
+
                 Route::get('/categories/{category}/articles/{article}', [KnowledgeManagementPortalArticleController::class, 'show'])
                     ->name('article.show');
-                Route::get('/new-request', [KnowledgeManagementPortalServiceRequestController::class, 'show'])
+
+                // TODO This should probably be service request type show or something similar
+                Route::get('/service-request/create', [KnowledgeManagementPortalServiceRequestController::class, 'show'])
                     ->name('service-request.show');
-                Route::get('/new-request/{type}', [KnowledgeManagementPortalServiceRequestTypeController::class, 'show'])
+
+                Route::get('/service-request/create/{type}', [KnowledgeManagementPortalServiceRequestTypeController::class, 'show'])
                     ->name('service-request-type.show');
+
+                // TODO Post route to submit form...
+                Route::post('/service-request/create/{type}', [KnowledgeManagementPortalCreateServiceRequestController::class, 'store'])
+                    ->name('service-request-type.store');
             });
     });

@@ -38,8 +38,8 @@ import { createMemoryHistory, createRouter, createWebHistory } from 'vue-router'
 import Home from '@/Pages/Home.vue';
 import ViewCategory from '@/Pages/ViewCategory.vue';
 import ViewArticle from '@/Pages/ViewArticle.vue';
-import NewRequest from '@/Pages/NewRequest.vue';
-import NewRequestType from '@/Pages/NewRequestType.vue';
+import SelectServiceRequestType from '@/Pages/SelectServiceRequestType.vue';
+import CreateServiceRequest from '@/Pages/CreateServiceRequest.vue';
 import { defaultConfig, plugin } from '@formkit/vue';
 import config from './formkit.config.js';
 import getAppContext from '@/Services/GetAppContext.js';
@@ -75,14 +75,14 @@ customElements.define(
                         component: ViewArticle,
                     },
                     {
-                        path: baseUrl + '/new-request',
-                        name: 'new-request',
-                        component: NewRequest,
+                        path: baseUrl + '/service-request/create',
+                        name: 'create-service-request',
+                        component: SelectServiceRequestType,
                     },
                     {
-                        path: baseUrl + '/new-request/:typeId',
-                        name: 'new-request-type',
-                        component: NewRequestType,
+                        path: baseUrl + '/service-request/create/:typeId',
+                        name: 'create-service-request-from-type',
+                        component: CreateServiceRequest,
                     },
                 ],
             });

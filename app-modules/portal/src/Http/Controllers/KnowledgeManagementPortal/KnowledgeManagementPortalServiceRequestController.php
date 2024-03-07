@@ -1,6 +1,6 @@
 <?php
 
-namespace KnowledgeManagement;
+namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;

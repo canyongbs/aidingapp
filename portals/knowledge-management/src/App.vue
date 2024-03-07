@@ -118,6 +118,8 @@ async function getKnowledgeManagementPortal() {
     await axios
         .get(props.url)
         .then((response) => {
+            console.log('response', response.data);
+
             errorLoading.value = false;
 
             if (response.error) {
@@ -323,13 +325,18 @@ async function authenticate(formData, node) {
                         :categories="categories"
                     ></MobileSidebar>
 
-                <div class="lg:pl-72">
-                    <div class="px-4 sm:px-6 lg:px-8">
-                        <RouterView :search-url="searchUrl"
-                                    :api-url="apiUrl"
-                                    :categories="categories"
-                                    :service-requests="serviceRequests">
-                        </RouterView>
+                    <DesktopSidebar :categories="categories" :api-url="apiUrl"> </DesktopSidebar>
+
+                    <div class="lg:pl-72">
+                        <div class="px-4 sm:px-6 lg:px-8">
+                            <RouterView
+                                :search-url="searchUrl"
+                                :api-url="apiUrl"
+                                :categories="categories"
+                                :service-requests="serviceRequests"
+                            >
+                            </RouterView>
+                        </div>
                     </div>
                 </div>
             </div>
