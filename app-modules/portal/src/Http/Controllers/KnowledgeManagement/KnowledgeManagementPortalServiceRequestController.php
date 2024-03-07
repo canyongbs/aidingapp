@@ -1,10 +1,10 @@
 <?php
 
-namespace AdvisingApp\Portal\Http\Controllers\KnowledgeManagement;
+namespace KnowledgeManagement;
 
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
-use AdvisingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
 
 class KnowledgeManagementPortalServiceRequestController extends Controller
 {

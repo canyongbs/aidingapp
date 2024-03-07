@@ -1,17 +1,15 @@
 <?php
 
-namespace AdvisingApp\Portal\Http\Controllers\KnowledgeManagement;
+namespace AidingApp\Portal\Http\Controllers\KnowledgeManagement;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 
 class KnowledgeManagementPortalServiceRequestTypeController extends Controller
 {
     public function show(): JsonResponse
     {
         return response()->json([
-
         ]);
     }
 }
