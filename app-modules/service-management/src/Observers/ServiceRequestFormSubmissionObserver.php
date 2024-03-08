@@ -43,6 +43,6 @@ class ServiceRequestFormSubmissionObserver
 {
     public function created(ServiceRequestFormSubmission $serviceRequestFormSubmission): void
     {
-        resolve(CreateServiceRequestFromSubmission::class)->handle($serviceRequestFormSubmission);
+        // resolve(CreateServiceRequestFromSubmission::class)->handle($serviceRequestFormSubmission);
     }
 }

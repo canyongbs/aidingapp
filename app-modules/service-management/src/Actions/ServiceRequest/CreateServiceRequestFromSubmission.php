@@ -36,6 +36,8 @@
 
 namespace AidingApp\ServiceManagement\Actions\ServiceRequest;
 
+use Throwable;
+use Illuminate\Support\Facades\DB;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormSubmission;
 
 class CreateServiceRequestFromSubmission
@@ -45,6 +47,7 @@ class CreateServiceRequestFromSubmission
         ray('CreateServiceRequestFromSubmission()', $serviceRequestFormSubmission);
 
         try {
+            ray('before level', DB::transactionLevel());
             $serviceRequestFormSubmission->serviceRequest()->create([
                 'title' => $serviceRequestFormSubmission->submissible->name,
                 'respondent_type' => $serviceRequestFormSubmission->author->getMorphClass(),
@@ -52,7 +55,7 @@ class CreateServiceRequestFromSubmission
                 'priority_id' => $serviceRequestFormSubmission->service_request_priority_id,
             ]);
             ray('here...');
-        } catch (\Exception $e) {
+        } catch (Throwable $e) {
             ray($e);
         }
     }

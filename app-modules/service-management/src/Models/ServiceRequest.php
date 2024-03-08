@@ -95,6 +95,7 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
         'created_by_id',
         'status_updated_at',
         'title',
+        'service_request_form_submission_id',
     ];
 
     protected $casts = [
@@ -111,6 +112,7 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
 
                 $save = parent::save($options);
             } catch (UniqueConstraintViolationException $e) {
+                ray('UniqueConstraintViolationException', $e->getMessage());
                 $attempts++;
                 $save = false;
 
@@ -129,10 +131,13 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
                 continue;
             }
 
+            ray('committing...');
             DB::commit();
 
             break;
         } while ($attempts < 3);
+
+        ray('level', DB::transactionLevel());
 
         return $save;
     }

@@ -90,10 +90,10 @@ class KnowledgeManagementPortalController extends Controller
                         return [
                             'id' => $serviceRequest->getKey(),
                             'title' => $serviceRequest->title,
-                            'status_name' => $serviceRequest->status->name,
-                            'status_color' => $colors[$serviceRequest->status->color->value][600],
+                            'status_name' => $serviceRequest->status?->name,
+                            // 'status_color' => $colors[$serviceRequest->status?->color->value][600],
                             'icon' => $serviceRequest->priority->type->icon ? svg($serviceRequest->priority->type->icon, 'h-6 w-6')->toHtml() : null,
-                            'updated_at' => $serviceRequest->serviceRequestUpdates()->latest('updated_at')->first()->updated_at->format('n-j-y g:i A'),
+                            // 'updated_at' => $serviceRequest->serviceRequestUpdates()?->latest('updated_at')->first()->updated_at->format('n-j-y g:i A'),
                         ];
                     })
                 : [],

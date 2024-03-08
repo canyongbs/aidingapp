@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 use Symfony\Component\HttpFoundation\Response;
 use AidingApp\Form\Actions\GenerateFormKitSchema;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\Form\Actions\GenerateSubmissibleValidation;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\Form\Actions\ResolveSubmissionAuthorFromEmail;
@@ -53,9 +54,8 @@ class CreateServiceRequestController extends Controller
             );
         }
 
-        $submission ??= $serviceRequestForm->submissions()->make();
+        $submission = $serviceRequestForm->submissions()->make();
 
-        // Ahhh - we must be failing because there is no priority set...
         $submission
             ->priority()
             ->associate(
@@ -136,6 +136,16 @@ class CreateServiceRequestController extends Controller
         }
 
         $submission->save();
+
+        ray('database', config('database.connections.tenant'));
+
+        ServiceRequest::create([
+            'service_request_form_submission_id' => $submission->id,
+            'title' => $submission->submissible->name,
+            'respondent_type' => $submission->author->getMorphClass(),
+            'respondent_id' => $submission->author->getKey(),
+            'priority_id' => $submission->service_request_priority_id,
+        ]);
 
         return response()->json(
             [
