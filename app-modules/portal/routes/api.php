@@ -58,8 +58,6 @@ Route::prefix('api')
     ->group(function () {
         Route::middleware(['auth:sanctum'])->group(function () {
             Route::get('/user', function (Request $request) {
-                ray('user', $request->user());
-
                 return $request->user();
             })->name('user.auth-check');
         });

@@ -46,8 +46,6 @@ class ServiceRequestTypesController extends Controller
     {
         return response()->json([
             'types' => ServiceRequestType::query()
-                // TODO We might not ultimately want to restrict this to only types with forms
-                // But it will require some refactoring to support non-form-having service request types
                 ->whereHas('form')
                 ->orderBy('name')
                 ->get()
