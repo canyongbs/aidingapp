@@ -64,7 +64,7 @@ class CreateServiceRequestController extends Controller
         ResolveSubmissionAuthorFromEmail $resolveSubmissionAuthorFromEmail,
         ServiceRequestType $type,
     ): JsonResponse {
-        $contact = auth('contact')->user();
+        $contact = auth('contact')->user() ?? $request->user();
         $serviceRequestForm = $type->form;
 
         if (

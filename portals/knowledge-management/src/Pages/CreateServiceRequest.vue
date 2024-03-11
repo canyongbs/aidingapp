@@ -43,6 +43,7 @@ import { useTokenStore } from '@/Stores/token.js';
 import wizard from '../../../../widgets/service-request-form/src/FormKit/wizard.js';
 import attachRecaptchaScript from '../../../../app-modules/integration-google-recaptcha/resources/js/Services/AttachRecaptchaScript.js';
 import getRecaptchaToken from '../../../../app-modules/integration-google-recaptcha/resources/js/Services/GetRecaptchaToken.js';
+import { consumer } from '@/Services/Consumer.js';
 
 let { steps, visitedSteps, activeStep, setStep, wizardPlugin } = wizard();
 
@@ -102,10 +103,11 @@ const data = reactive({
     submitForm: async (data, node) => {
         node.clearErrors();
 
+        const { post } = consumer();
+
         const { getToken } = useTokenStore();
         let token = await getToken();
 
-        // TODO Validate these fields
         data.description = description.value;
         data.priority = priority.value;
 
@@ -119,10 +121,7 @@ const data = reactive({
         //     data['recaptcha-token'] = recaptchaToken;
         // }
 
-        axios
-            .post(props.apiUrl + '/service-request/create/' + route.params.typeId, data, {
-                headers: { Authorization: `Bearer ${token}` },
-            })
+        post(props.apiUrl + '/service-request/create/' + route.params.typeId, data)
             .then((response) => {
                 submittedSuccess.value = true;
             })
