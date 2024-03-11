@@ -82,18 +82,21 @@ class KnowledgeManagementPortalController extends Controller
                     })
                     ->toArray()
             ),
+
             'service_requests' => $license->data->addons->serviceManagement && $settings->knowledge_management_portal_service_management && auth('contact')->check()
                 ? auth('contact')->user()
                     ->serviceRequests()
+                    ->with('serviceRequestFormSubmission')
                     ->get()
+                    // TODO Use a DTO to standardize the data we want to send to the frontend
                     ->map(function (ServiceRequest $serviceRequest) use ($colors) {
                         return [
                             'id' => $serviceRequest->getKey(),
-                            'title' => $serviceRequest->title,
+                            'title' => $serviceRequest->serviceRequestFormSubmission?->description ?? $serviceRequest->title,
                             'status_name' => $serviceRequest->status?->name,
-                            // 'status_color' => $colors[$serviceRequest->status?->color->value][600],
+                            'status_color' => $serviceRequest->status ? $colors[$serviceRequest->status->color->value][600] : null,
                             'icon' => $serviceRequest->priority->type->icon ? svg($serviceRequest->priority->type->icon, 'h-6 w-6')->toHtml() : null,
-                            // 'updated_at' => $serviceRequest->serviceRequestUpdates()?->latest('updated_at')->first()->updated_at->format('n-j-y g:i A'),
+                            'updated_at' => count($serviceRequest->serviceRequestUpdates) > 0 ? $serviceRequest->serviceRequestUpdates()->latest('updated_at')->first()->updated_at->format('n-j-y g:i A') : $serviceRequest->created_at->format('n-j-y g:i A'),
                         ];
                     })
                 : [],

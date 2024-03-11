@@ -55,8 +55,6 @@ class ServiceRequestObserver
 
     public function created(ServiceRequest $serviceRequest): void
     {
-        ray('created...', $serviceRequest);
-
         $user = auth()->user();
 
         if ($user instanceof User) {
@@ -82,8 +80,6 @@ class ServiceRequestObserver
 
     public function saved(ServiceRequest $serviceRequest): void
     {
-        ray('saved...', $serviceRequest);
-
         CreateServiceRequestHistory::dispatch($serviceRequest, $serviceRequest->getChanges(), $serviceRequest->getOriginal());
 
         if (

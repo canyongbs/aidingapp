@@ -1,12 +1,13 @@
 <script setup>
 import axios from '@/Globals/Axios.js';
 import { defineProps, ref, watch, onMounted } from 'vue';
-import { useRoute, onBeforeRouteUpdate } from 'vue-router';
+import { useRoute } from 'vue-router';
 import Breadcrumbs from '@/Components/Breadcrumbs.vue';
 import Loading from '@/Components/Loading.vue';
 import { Bars3Icon } from '@heroicons/vue/24/outline/index.js';
 import { useAuthStore } from '@/Stores/auth.js';
 import { useTokenStore } from '@/Stores/token.js';
+import { consumer } from '@/Services/Consumer.js';
 
 const route = useRoute();
 
@@ -44,20 +45,12 @@ async function getData() {
         user.value = authUser;
     });
 
-    // TODO Extract a global consumer for the API...
-    const { getToken } = useTokenStore();
-    let token = await getToken();
+    const { get } = consumer();
 
-    // TODO Change the name of the following endpoint - it's not actually creating the service request
-    // It simply provides a list of service request types to choose from
-    await axios
-        .get(props.apiUrl + '/service-request/create', {
-            headers: { Authorization: `Bearer ${token}` },
-        })
-        .then((response) => {
-            types.value = response.data.types;
-            loadingResults.value = false;
-        });
+    get(props.apiUrl + '/service-request-type/select').then((response) => {
+        types.value = response.data.types;
+        loadingResults.value = false;
+    });
 }
 </script>
 

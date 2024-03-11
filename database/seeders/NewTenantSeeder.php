@@ -39,6 +39,7 @@ namespace Database\Seeders;
 use App\Models\Tenant;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Artisan;
+use AidingApp\Contact\Database\Seeders\ContactSeeder;
 use AidingApp\Division\Database\Seeders\DivisionSeeder;
 use AidingApp\Contact\Database\Seeders\ContactSourceSeeder;
 use AidingApp\Contact\Database\Seeders\ContactStatusSeeder;
@@ -55,13 +56,8 @@ use AidingApp\ServiceManagement\Database\Seeders\ChangeRequestStatusSeeder;
 use AidingApp\ServiceManagement\Database\Seeders\ServiceRequestStatusSeeder;
 use AidingApp\InventoryManagement\Database\Seeders\MaintenanceProviderSeeder;
 
-// TODO Create a local tenant seeder that seeds a bit more information
-// Like for contacts, for example
 class NewTenantSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         $currentTenant = Tenant::current();
@@ -87,6 +83,7 @@ class NewTenantSeeder extends Seeder
             ...InteractionSeeder::metadataSeeders(),
             ConsentAgreementSeeder::class,
             PronounsSeeder::class,
+
             // InventoryManagement
             ...AssetSeeder::metadataSeeders(),
             AssetSeeder::class,
@@ -95,6 +92,8 @@ class NewTenantSeeder extends Seeder
             // Change Request
             ChangeRequestTypeSeeder::class,
             ChangeRequestStatusSeeder::class,
+
+            ContactSeeder::class,
         ]);
     }
 }

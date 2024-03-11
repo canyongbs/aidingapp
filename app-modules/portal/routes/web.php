@@ -62,7 +62,7 @@ Route::prefix('portals')
                 ->name('knowledge-management.category.show');
             Route::get('/knowledge-management/categories/{category}/articles/{article}', RenderKnowledgeManagementPortal::class)
                 ->name('knowledge-management.article.show');
-            Route::get('/knowledge-management/service-request/create', RenderKnowledgeManagementPortal::class)
+            Route::get('/knowledge-management/service-request-type/select', RenderKnowledgeManagementPortal::class)
                 ->name('knowledge-management.service-request.show');
             Route::get('/knowledge-management/service-request/create/{type}', RenderKnowledgeManagementPortal::class)
                 ->name('knowledge-management.service-request-type.show');

@@ -1,6 +1,6 @@
 <script setup>
 import { defineProps, ref, watch, onMounted, reactive } from 'vue';
-import { useRoute, onBeforeRouteUpdate } from 'vue-router';
+import { useRoute } from 'vue-router';
 import Breadcrumbs from '@/Components/Breadcrumbs.vue';
 import Loading from '@/Components/Loading.vue';
 import { Bars3Icon } from '@heroicons/vue/24/outline/index.js';
@@ -67,7 +67,6 @@ const data = reactive({
     },
     stringify: (value) => JSON.stringify(value, null, 2),
     submitForm: async (data, node) => {
-        console.log('submitting form', data);
         node.clearErrors();
 
         const { getToken } = useTokenStore();
@@ -92,8 +91,6 @@ const data = reactive({
                 headers: { Authorization: `Bearer ${token}` },
             })
             .then((response) => {
-                console.log('submit response', response.data);
-
                 submittedSuccess.value = true;
             })
             .catch((error) => {
@@ -121,7 +118,6 @@ async function getData() {
         .then((response) => {
             loadingResults.value = false;
 
-            console.log(response.data);
             schema.value = response.data.schema;
             priorities.value = response.data.priorities;
         });

@@ -89,8 +89,8 @@ Route::prefix('api')
                 Route::get('/categories/{category}/articles/{article}', [KnowledgeManagementPortalArticleController::class, 'show'])
                     ->name('article.show');
 
-                Route::get('/service-request/create', [ServiceRequestTypesController::class, 'index'])
-                    ->name('service-request.index');
+                Route::get('/service-request-type/select', [ServiceRequestTypesController::class, 'index'])
+                    ->name('service-request-type.index');
 
                 Route::get('/service-request/create/{type}', [CreateServiceRequestController::class, 'create'])
                     ->name('service-request.create');

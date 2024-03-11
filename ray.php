@@ -67,7 +67,7 @@ return [
     /*
     * When enabled, all queries will automatically be sent to Ray.
     */
-    'send_queries_to_ray' => env('SEND_QUERIES_TO_RAY', true),
+    'send_queries_to_ray' => env('SEND_QUERIES_TO_RAY', false),
 
     /**
      * When enabled, all duplicate queries will automatically be sent to Ray.

@@ -81,6 +81,7 @@ class KnowledgeManagementPortalAuthenticateController extends Controller
         return response()->json([
             'success' => true,
             'token' => $token->plainTextToken,
+            'user' => auth('contact')->user(),
         ]);
     }
 }

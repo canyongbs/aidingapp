@@ -114,9 +114,11 @@ function debounce(func, delay) {
 
         <div class="flex h-full w-full flex-col rounded bg-primary-700 px-12 py-4">
             <div class="text-right">
-                <button class="p-2 font-bold rounded bg-white text-primary-700 dark:text-primary-400">
-                    <router-link :to="{ name: 'create-service-request' }"> New Request </router-link>
-                </button>
+                <router-link :to="{ name: 'create-service-request' }">
+                    <button class="p-2 font-bold rounded bg-white text-primary-700 dark:text-primary-400">
+                        New Request
+                    </button>
+                </router-link>
             </div>
 
             <div class="flex flex-col text-left">

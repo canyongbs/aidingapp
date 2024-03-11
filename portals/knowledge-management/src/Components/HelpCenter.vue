@@ -47,34 +47,23 @@ defineProps({
 </script>
 
 <template>
-    <div class="grid gap-4"
-         :class="[
-            serviceRequests?.length > 0 ? 'lg:grid-cols-2' : 'lg:grid-cols-1',
-        ]"
-    >
+    <div class="grid gap-4" :class="[serviceRequests?.length > 0 ? 'lg:grid-cols-2' : 'lg:grid-cols-1']">
         <div>
             <h3 class="text-xl">Help Center</h3>
-            <div
-                class="mt-4 grid gap-4"
-                :class="[
-                    serviceRequests?.length > 0 ? 'lg:grid-cols-1' : 'lg:grid-cols-2',
-                ]"
-            >
+            <div class="mt-4 grid gap-4" :class="[serviceRequests?.length > 0 ? 'lg:grid-cols-1' : 'lg:grid-cols-2']">
                 <div
                     v-for="category in categories"
                     :key="category.id"
                     class="group relative bg-white p-6 rounded shadow"
                 >
                     <div class="grid">
-                        <div class="flex"
-                             :class="[category.icon ? 'justify-between' : 'justify-end']"
-                        >
-                            <div v-if="category.icon"
-                                 v-html="category.icon"
-                                 class="pointer-events-none text-primary-600 dark:text-primary-400"
-                                 aria-hidden="true"
-                            >
-                            </div>
+                        <div class="flex" :class="[category.icon ? 'justify-between' : 'justify-end']">
+                            <div
+                                v-if="category.icon"
+                                v-html="category.icon"
+                                class="pointer-events-none text-primary-600 dark:text-primary-400"
+                                aria-hidden="true"
+                            ></div>
 
                             <div
                                 class="pointer-events-none text-gray-300 group-hover:text-primary-600 group-hover:dark:text-primary-400"
@@ -105,19 +94,18 @@ defineProps({
         </div>
         <div v-if="serviceRequests?.length > 0">
             <h3 class="text-xl">Service Requests</h3>
-            <div
-                class="mt-4 grid gap-y-4"
-            >
+            <div class="mt-4 grid gap-y-4">
                 <div
                     v-for="serviceRequest in serviceRequests"
                     :key="serviceRequest.id"
                     class="group relative bg-white p-6 rounded shadow"
                 >
                     <div class="flex items-center gap-x-3">
-                        <span v-if="serviceRequest.icon"
-                              v-html="serviceRequest.icon"
-                              class="pointer-events-none text-primary-600 dark:text-primary-400"
-                              aria-hidden="true"
+                        <span
+                            v-if="serviceRequest.icon"
+                            v-html="serviceRequest.icon"
+                            class="pointer-events-none text-primary-600 dark:text-primary-400"
+                            aria-hidden="true"
                         >
                         </span>
                         <div class="grid w-full gap-y-1.5">
@@ -125,15 +113,14 @@ defineProps({
                                 {{ serviceRequest.title }}
                             </h3>
                             <div>
-                                <span class="px-2 py-1 text-sm font-bold text-white rounded"
-                                      :style="'background-color: rgb(' + serviceRequest.status_color + ')'"
+                                <span
+                                    class="px-2 py-1 text-sm font-bold text-white rounded"
+                                    :style="'background-color: rgb(' + serviceRequest.status_color + ')'"
                                 >
                                     {{ serviceRequest.status_name }}
                                 </span>
                             </div>
-                            <p class="text-xs text-gray-500">
-                                Last Updated: {{ serviceRequest.updated_at}}
-                            </p>
+                            <p class="text-xs text-gray-500">Last Updated: {{ serviceRequest.updated_at }}</p>
                         </div>
                     </div>
                 </div>

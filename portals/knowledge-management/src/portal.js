@@ -75,7 +75,7 @@ customElements.define(
                         component: ViewArticle,
                     },
                     {
-                        path: baseUrl + '/service-request/create',
+                        path: baseUrl + '/service-request-type/select',
                         name: 'create-service-request',
                         component: SelectServiceRequestType,
                     },

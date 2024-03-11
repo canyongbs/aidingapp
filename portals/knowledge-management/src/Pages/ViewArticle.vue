@@ -33,7 +33,7 @@
 -->
 <script setup>
 import { defineProps, ref, watch, onMounted } from 'vue';
-import { useRoute, onBeforeRouteUpdate } from 'vue-router';
+import { useRoute } from 'vue-router';
 import Breadcrumbs from '@/Components/Breadcrumbs.vue';
 import Loading from '@/Components/Loading.vue';
 import DOMPurify from 'dompurify';

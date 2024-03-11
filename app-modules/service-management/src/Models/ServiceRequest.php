@@ -40,7 +40,6 @@ use App\Models\User;
 use DateTimeInterface;
 use App\Models\BaseModel;
 use Carbon\CarbonInterface;
-use Illuminate\Support\Facades\DB;
 use App\Models\Contracts\Educatable;
 use AidingApp\Contact\Models\Contact;
 use Kirschbaum\PowerJoins\PowerJoins;
@@ -108,19 +107,14 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
 
         do {
             try {
-                DB::beginTransaction();
-
                 $save = parent::save($options);
             } catch (UniqueConstraintViolationException $e) {
-                ray('UniqueConstraintViolationException', $e->getMessage());
                 $attempts++;
                 $save = false;
 
                 if ($attempts < 3) {
                     $this->service_request_number = app(ServiceRequestNumberGenerator::class)->generate();
                 }
-
-                DB::rollBack();
 
                 if ($attempts >= 3) {
                     throw new ServiceRequestNumberExceededReRollsException(
@@ -131,13 +125,8 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
                 continue;
             }
 
-            ray('committing...');
-            DB::commit();
-
             break;
         } while ($attempts < 3);
-
-        ray('level', DB::transactionLevel());
 
         return $save;
     }

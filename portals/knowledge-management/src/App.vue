@@ -43,6 +43,8 @@ import determineIfUserIsAuthenticated from '@/Services/DetermineIfUserIsAuthenti
 import getAppContext from '@/Services/GetAppContext.js';
 import axios from '@/Globals/Axios.js';
 import { useTokenStore } from '@/Stores/token.js';
+import { useAuthStore } from '@/Stores/auth.js';
+import { useRoute } from 'vue-router';
 
 const errorLoading = ref(false);
 const loading = ref(true);
@@ -65,6 +67,18 @@ onMounted(async () => {
         loading.value = false;
     });
 });
+
+const route = useRoute();
+
+watch(
+    route,
+    function () {
+        getKnowledgeManagementPortal();
+    },
+    {
+        immediate: true,
+    },
+);
 
 const props = defineProps({
     url: {
@@ -182,6 +196,7 @@ async function authenticate(formData, node) {
     node.clearErrors();
 
     const { setToken } = useTokenStore();
+    const { setUser } = useAuthStore();
 
     const { isEmbeddedInAidingApp } = getAppContext(props.accessUrl);
 
@@ -195,6 +210,7 @@ async function authenticate(formData, node) {
                 code: formData.code,
             })
             .then((response) => {
+                console.log('logged in!', response.data);
                 if (response.errors) {
                     node.setErrors([], response.errors);
 
@@ -212,6 +228,7 @@ async function authenticate(formData, node) {
 
                 if (response.data.success === true) {
                     setToken(response.data.token);
+                    setUser(response.data.user);
 
                     userIsAuthenticated.value = true;
                 }
