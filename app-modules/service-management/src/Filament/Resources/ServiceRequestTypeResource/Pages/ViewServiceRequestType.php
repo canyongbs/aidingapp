@@ -37,7 +37,6 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages;
 
 use Filament\Actions\EditAction;
-use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Infolist;
 use Filament\Infolists\Components\Group;
 use Filament\Resources\Pages\ViewRecord;
