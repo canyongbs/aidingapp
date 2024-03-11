@@ -160,7 +160,7 @@ async function getData() {
                 </div>
             </div>
 
-            <main class="grid py-10 gap-4" v-if="submittedSuccess">Thanks for submitting your form</main>
+            <main class="grid py-10 gap-4" v-if="submittedSuccess">Thank you for submitting a new request.</main>
             <main class="grid py-10 gap-4" v-else>
                 <label for="priority" class="block text-sm font-medium text-gray-700">Priority</label>
                 <select

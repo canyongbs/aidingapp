@@ -36,6 +36,7 @@ import { Bars3Icon } from '@heroicons/vue/24/outline';
 import HelpCenter from '../Components/HelpCenter.vue';
 import SearchResults from '../Components/SearchResults.vue';
 import { defineProps, ref, watch } from 'vue';
+import { consumer } from '@/Services/Consumer.js';
 
 const props = defineProps({
     searchUrl: {
@@ -62,6 +63,8 @@ const searchQuery = ref(null);
 const loadingResults = ref(false);
 
 const debounceSearch = debounce((value) => {
+    const { post } = consumer();
+
     if (!value) {
         searchQuery.value = null;
         searchResults.value = null;
@@ -70,18 +73,10 @@ const debounceSearch = debounce((value) => {
 
     loadingResults.value = true;
 
-    fetch(props.searchUrl, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ search: value }),
-    })
-        .then((response) => response.json())
-        .then((json) => {
-            searchResults.value = json;
-            loadingResults.value = false;
-        });
+    post(props.searchUrl, JSON.stringify({ search: value })).then((response) => {
+        searchResults.value = response.data;
+        loadingResults.value = false;
+    });
 }, 500);
 
 watch(searchQuery, (value) => {
