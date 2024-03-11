@@ -32,6 +32,14 @@
 </COPYRIGHT>
 --}}
 <div>
-    <knowledge-management-portal-embed url="http://test.aidingapp.local/api/portal/knowledge-management?signature=b90bfa40b2859b8860addae3afa66b216bb7fa7dfc287b783704b4ee4bdb4428" user-authentication-url=http://test.aidingapp.local/api/user access-url=http://test.aidingapp.local/portals/knowledge-management search-url="http://test.aidingapp.local/api/portal/knowledge-management/search?signature=ff5cb52c0ea3d6be3b0d78641facb0f1cb58e69a913db57be8c7ff9df8463e05" app-url="http://test.aidingapp.local" api-url="http://test.aidingapp.local/api/portal/knowledge-management"></knowledge-management-portal-embed>
-<script src="http://test.aidingapp.local/js/portals/knowledge-management/aiding-app-knowledge-management-portal.js?"></script>
+    <knowledge-management-portal-embed
+        url="http://test.aidingapp.local/api/portal/knowledge-management?signature=b90bfa40b2859b8860addae3afa66b216bb7fa7dfc287b783704b4ee4bdb4428"
+        user-authentication-url=http://test.aidingapp.local/api/user
+        access-url=http://test.aidingapp.local/portals/knowledge-management
+        search-url="http://test.aidingapp.local/api/portal/knowledge-management/search?signature=ff5cb52c0ea3d6be3b0d78641facb0f1cb58e69a913db57be8c7ff9df8463e05"
+        app-url="http://test.aidingapp.local"
+        api-url="http://test.aidingapp.local/api/portal/knowledge-management"
+    ></knowledge-management-portal-embed>
+    <script src="http://test.aidingapp.local/js/portals/knowledge-management/aiding-app-knowledge-management-portal.js?">
+    </script>
 </div>
