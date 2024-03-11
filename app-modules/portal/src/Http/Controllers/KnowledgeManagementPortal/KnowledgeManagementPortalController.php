@@ -45,6 +45,7 @@ use Filament\Support\Colors\ColorManager;
 use AidingApp\Portal\Settings\PortalSettings;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
+use AidingApp\Portal\DataTransferObjects\ServiceRequestData;
 use AidingApp\Portal\DataTransferObjects\KnowledgeBaseCategoryData;
 
 class KnowledgeManagementPortalController extends Controller
@@ -87,17 +88,17 @@ class KnowledgeManagementPortalController extends Controller
                 ? auth('contact')->user()
                     ->serviceRequests()
                     ->with('serviceRequestFormSubmission')
+                    ->orderBy('created_at', 'desc')
                     ->get()
-                    // TODO Use a DTO to standardize the data we want to send to the frontend
                     ->map(function (ServiceRequest $serviceRequest) use ($colors) {
-                        return [
+                        return ServiceRequestData::from([
                             'id' => $serviceRequest->getKey(),
                             'title' => $serviceRequest->serviceRequestFormSubmission?->description ?? $serviceRequest->title,
-                            'status_name' => $serviceRequest->status?->name,
-                            'status_color' => $serviceRequest->status ? $colors[$serviceRequest->status->color->value][600] : null,
+                            'statusName' => $serviceRequest->status?->name,
+                            'statusColor' => $serviceRequest->status ? $colors[$serviceRequest->status->color->value][600] : null,
                             'icon' => $serviceRequest->priority->type->icon ? svg($serviceRequest->priority->type->icon, 'h-6 w-6')->toHtml() : null,
-                            'updated_at' => count($serviceRequest->serviceRequestUpdates) > 0 ? $serviceRequest->serviceRequestUpdates()->latest('updated_at')->first()->updated_at->format('n-j-y g:i A') : $serviceRequest->created_at->format('n-j-y g:i A'),
-                        ];
+                            'updatedAt' => count($serviceRequest->serviceRequestUpdates) > 0 ? $serviceRequest->serviceRequestUpdates()->latest('updated_at')->first()->updated_at->format('n-j-y g:i A') : $serviceRequest->created_at->format('n-j-y g:i A'),
+                        ]);
                     })
                 : [],
         ]);

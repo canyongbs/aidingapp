@@ -132,8 +132,6 @@ async function getKnowledgeManagementPortal() {
     await axios
         .get(props.url)
         .then((response) => {
-            console.log('response', response.data);
-
             errorLoading.value = false;
 
             if (response.error) {
@@ -210,7 +208,6 @@ async function authenticate(formData, node) {
                 code: formData.code,
             })
             .then((response) => {
-                console.log('logged in!', response.data);
                 if (response.errors) {
                     node.setErrors([], response.errors);
 
