@@ -36,17 +36,22 @@
 
 namespace AidingApp\ServiceManagement\Actions\ServiceRequest;
 
+use Throwable;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormSubmission;
 
 class CreateServiceRequestFromSubmission
 {
     public function handle(ServiceRequestFormSubmission $serviceRequestFormSubmission): void
     {
-        $serviceRequestFormSubmission->serviceRequest()->create([
-            'title' => $serviceRequestFormSubmission->submissible->name,
-            'respondent_type' => $serviceRequestFormSubmission->author->getMorphClass(),
-            'respondent_id' => $serviceRequestFormSubmission->author->getKey(),
-            'priority_id' => $serviceRequestFormSubmission->service_request_priority_id,
-        ]);
+        try {
+            $serviceRequestFormSubmission->serviceRequest()->create([
+                'title' => $serviceRequestFormSubmission->submissible->name,
+                'respondent_type' => $serviceRequestFormSubmission->author->getMorphClass(),
+                'respondent_id' => $serviceRequestFormSubmission->author->getKey(),
+                'priority_id' => $serviceRequestFormSubmission->service_request_priority_id,
+            ]);
+        } catch (Throwable $e) {
+            ray('Error: ' . $e->getMessage())->red();
+        }
     }
 }

@@ -40,6 +40,7 @@ use App\Models\User;
 use DateTimeInterface;
 use App\Models\BaseModel;
 use Carbon\CarbonInterface;
+use Illuminate\Support\Facades\DB;
 use App\Models\Contracts\Educatable;
 use AidingApp\Contact\Models\Contact;
 use Kirschbaum\PowerJoins\PowerJoins;
@@ -103,20 +104,31 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
 
     public function save(array $options = [])
     {
+        ray('save()', DB::transactionLevel(), DB::connection()->getName());
+
         $attempts = 0;
+        $save = false;
 
         do {
             try {
-                $save = parent::save($options);
+                ray()->showQueries();
+                $save = DB::transaction(function () use ($options) {
+                    return parent::save($options);
+                });
+
+                ray('save result', $save);
+
+                ray()->stopShowingQueries();
+
+                ray(DB::getQueryLog());
+
+                break;
             } catch (UniqueConstraintViolationException $e) {
                 $attempts++;
-                $save = false;
 
                 if ($attempts < 3) {
                     $this->service_request_number = app(ServiceRequestNumberGenerator::class)->generate();
-                }
-
-                if ($attempts >= 3) {
+                } else {
                     throw new ServiceRequestNumberExceededReRollsException(
                         previous: $e,
                     );
@@ -124,9 +136,7 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
 
                 continue;
             }
-
-            break;
-        } while ($attempts < 3);
+        } while (! $save && $attempts < 3);
 
         return $save;
     }

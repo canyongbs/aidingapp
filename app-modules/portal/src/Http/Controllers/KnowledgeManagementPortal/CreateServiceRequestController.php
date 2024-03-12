@@ -39,6 +39,7 @@ namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 use Symfony\Component\HttpFoundation\Response;
@@ -64,6 +65,8 @@ class CreateServiceRequestController extends Controller
         ResolveSubmissionAuthorFromEmail $resolveSubmissionAuthorFromEmail,
         ServiceRequestType $type,
     ): JsonResponse {
+        DB::enableQueryLog();
+
         $contact = auth('contact')->user() ?? $request->user();
         $serviceRequestForm = $type->form;
 
