@@ -83,7 +83,6 @@ class KnowledgeManagementPortalController extends Controller
                     })
                     ->toArray()
             ),
-
             'service_requests' => $license->data->addons->serviceManagement && $settings->knowledge_management_portal_service_management && auth('contact')->check()
                 ? auth('contact')->user()
                     ->serviceRequests()

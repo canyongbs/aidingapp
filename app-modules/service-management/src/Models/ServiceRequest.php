@@ -41,7 +41,6 @@ use DateTimeInterface;
 use App\Models\BaseModel;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\DB;
-use App\Models\Contracts\Educatable;
 use AidingApp\Contact\Models\Contact;
 use Kirschbaum\PowerJoins\PowerJoins;
 use AidingApp\Division\Models\Division;
@@ -104,23 +103,14 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
 
     public function save(array $options = [])
     {
-        ray('save()', DB::transactionLevel(), DB::connection()->getName());
-
         $attempts = 0;
         $save = false;
 
         do {
             try {
-                ray()->showQueries();
-                $save = DB::transaction(function () use ($options) {
+                DB::transaction(function () use ($options) {
                     return parent::save($options);
                 });
-
-                ray('save result', $save);
-
-                ray()->stopShowingQueries();
-
-                ray(DB::getQueryLog());
 
                 break;
             } catch (UniqueConstraintViolationException $e) {
@@ -146,7 +136,7 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
         return $this->respondent instanceof Subscribable ? $this->respondent : null;
     }
 
-    /** @return MorphTo<Educatable> */
+    /** @return MorphTo<Contact> */
     public function respondent(): MorphTo
     {
         return $this->morphTo(

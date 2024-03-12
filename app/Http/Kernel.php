@@ -106,7 +106,6 @@ class Kernel extends HttpKernel
             NeedsTenant::class,
             // \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',
             SubstituteBindings::class,
-            AuthGates::class,
         ],
 
         'landlord-api' => [
