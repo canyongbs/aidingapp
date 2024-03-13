@@ -82,6 +82,12 @@ class PersonalAssistant extends Page
 
     protected static ?string $navigationGroup = 'Artificial Intelligence';
 
+    protected static ?string $navigationLabel = 'Support Assistant';
+
+    protected static ?string $title = 'Support Assistant';
+
+    protected static ?string $slug = 'support-assistant';
+
     protected static ?int $navigationSort = 30;
 
     public Chat $chat;
