@@ -34,56 +34,33 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\Http\Controllers\KnowledgeManagement;
+namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
-use Illuminate\Support\Str;
-use Illuminate\Http\Request;
-use App\Models\Scopes\SearchBy;
+use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
+use App\Support\MediaEncoding\TiptapMediaEncoder;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\Portal\DataTransferObjects\KnowledgeBaseArticleData;
 use AidingApp\Portal\DataTransferObjects\KnowledgeBaseCategoryData;
-use AidingApp\Portal\DataTransferObjects\KnowledgeManagementSearchData;
 
-class KnowledgeManagementPortalSearchController extends Controller
+class KnowledgeManagementPortalArticleController extends Controller
 {
-    public function get(Request $request): KnowledgeManagementSearchData
+    public function show(KnowledgeBaseCategory $category, KnowledgeBaseItem $article): JsonResponse
     {
-        $itemData = KnowledgeBaseArticleData::collection(
-            KnowledgeBaseItem::query()
-                ->public()
-                ->tap(new SearchBy('title', Str::lower($request->get('search'))))
-                ->get()
-                ->map(function ($item) {
-                    return [
-                        'id' => $item->getKey(),
-                        'categoryId' => $item->category_id,
-                        'name' => $item->title,
-                    ];
-                })
-                ->toArray()
-        );
-
-        $categoryData = KnowledgeBaseCategoryData::collection(
-            KnowledgeBaseCategory::query()
-                ->tap(new SearchBy('name', Str::lower($request->get('search'))))
-                ->get()
-                ->map(function ($category) {
-                    return [
-                        'id' => $category->getKey(),
-                        'name' => $category->name,
-                        'description' => $category->description,
-                    ];
-                })
-                ->toArray()
-        );
-
-        $searchResults = KnowledgeManagementSearchData::from([
-            'articles' => $itemData,
-            'categories' => $categoryData,
+        return response()->json([
+            'category' => KnowledgeBaseCategoryData::from([
+                'id' => $category->getKey(),
+                'name' => $category->name,
+                'description' => $category->description,
+            ]),
+            'article' => KnowledgeBaseArticleData::from([
+                'id' => $article->getKey(),
+                'categoryId' => $article->category_id,
+                'name' => $article->title,
+                'lastUpdated' => $article->updated_at->format('M d Y, h:m a'),
+                'content' => tiptap_converter()->asHTML(TiptapMediaEncoder::decode($article->article_details)),
+            ]),
         ]);
-
-        return $searchResults->wrap('data');
     }
 }

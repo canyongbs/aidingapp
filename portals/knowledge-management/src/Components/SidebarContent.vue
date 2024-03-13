@@ -53,7 +53,7 @@ defineProps({
         <ul role="list" class="flex flex-1 flex-col gap-y-7 mt-4">
             <li v-for="category in categories" :key="category.id">
                 <div
-                    class="bg-gray-100 text-gray-800 group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
+                    class="bg-gray-100 text-gray-800 group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold items-center"
                 >
                     <span
                         v-if="category.icon"

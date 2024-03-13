@@ -44,6 +44,7 @@ use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
 use AidingApp\Division\Models\Division;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Resources\Pages\ManageRelatedRecords;
@@ -98,14 +99,21 @@ class CreateServiceRequest extends CreateRecord
                             ->exists(ServiceRequestPriority::class, 'id')
                             ->visible(fn (Get $get): bool => filled($get('type_id'))),
                     ]),
+                TextInput::make('title')
+                    ->required()
+                    ->string()
+                    ->maxLength(255)
+                    ->columnSpanFull(),
                 Textarea::make('close_details')
                     ->label('Close Details/Description')
                     ->nullable()
-                    ->string(),
+                    ->string()
+                    ->columnSpanFull(),
                 Textarea::make('res_details')
                     ->label('Internal Service Request Details')
                     ->nullable()
-                    ->string(),
+                    ->string()
+                    ->columnSpanFull(),
                 EducatableSelect::make('respondent')
                     ->label('Related To')
                     ->required()

@@ -1,5 +1,3 @@
-<?php
-
 /*
 <COPYRIGHT>
 
@@ -33,34 +31,44 @@
 
 </COPYRIGHT>
 */
+import axios from '@/Globals/Axios.js';
+import { useTokenStore } from '@/Stores/token.js';
 
-namespace AidingApp\Portal\Http\Controllers\KnowledgeManagement;
+export function consumer() {
+    async function get(endpoint, data = null) {
+        const { getToken } = useTokenStore();
 
-use Illuminate\Http\JsonResponse;
-use App\Http\Controllers\Controller;
-use App\Support\MediaEncoding\TiptapMediaEncoder;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
-use AidingApp\Portal\DataTransferObjects\KnowledgeBaseArticleData;
-use AidingApp\Portal\DataTransferObjects\KnowledgeBaseCategoryData;
+        let token = await getToken();
 
-class KnowledgeManagementPortalArticleController extends Controller
-{
-    public function show(KnowledgeBaseCategory $category, KnowledgeBaseItem $article): JsonResponse
-    {
-        return response()->json([
-            'category' => KnowledgeBaseCategoryData::from([
-                'id' => $category->getKey(),
-                'name' => $category->name,
-                'description' => $category->description,
-            ]),
-            'article' => KnowledgeBaseArticleData::from([
-                'id' => $article->getKey(),
-                'categoryId' => $article->category_id,
-                'name' => $article->title,
-                'lastUpdated' => $article->updated_at->format('M d Y, h:m a'),
-                'content' => tiptap_converter()->asHTML(TiptapMediaEncoder::decode($article->article_details)),
-            ]),
-        ]);
+        return await axios
+            .get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+                params: data,
+            })
+            .then((response) => {
+                return response;
+            })
+            .catch((error) => {
+                return Promise.reject(error);
+            });
     }
+
+    async function post(endpoint, data) {
+        const { getToken } = useTokenStore();
+
+        let token = await getToken();
+
+        return await axios
+            .post(endpoint, data, {
+                headers: { Authorization: `Bearer ${token}` },
+            })
+            .then((response) => {
+                return response;
+            })
+            .catch((error) => {
+                return Promise.reject(error);
+            });
+    }
+
+    return { get, post };
 }

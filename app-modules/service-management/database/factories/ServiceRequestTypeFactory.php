@@ -36,6 +36,8 @@
 
 namespace AidingApp\ServiceManagement\Database\Factories;
 
+use Illuminate\Support\Facades\File;
+use BladeUI\Icons\Factory as BladeUIIconsFactory;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 
@@ -47,7 +49,32 @@ class ServiceRequestTypeFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->word,
+            'name' => str(fake()->word())->ucfirst()->toString(),
+            'description' => fake()->optional()->sentences(2, true),
+            'icon' => fake()->optional()->randomElement($this->icons()),
         ];
+    }
+
+    private function icons(): array
+    {
+        return cache()->remember('heroicon-factory-options', now()->addMinutes(5), function (): array {
+            $paths = app(BladeUIIconsFactory::class)->all()['heroicons']['paths'];
+
+            $options = [];
+
+            foreach ($paths as $path) {
+                foreach (File::files($path) as $file) {
+                    $id = $file->getFilenameWithoutExtension();
+
+                    if (! str($id)->startsWith('o-')) {
+                        continue;
+                    }
+
+                    $options[] = "heroicon-{$id}";
+                }
+            }
+
+            return $options;
+        });
     }
 }

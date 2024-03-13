@@ -60,6 +60,8 @@ class ServiceRequestType extends BaseModel implements Auditable
         'has_enabled_feedback_collection',
         'has_enabled_csat',
         'has_enabled_nps',
+        'description',
+        'icon',
     ];
 
     protected $casts = [

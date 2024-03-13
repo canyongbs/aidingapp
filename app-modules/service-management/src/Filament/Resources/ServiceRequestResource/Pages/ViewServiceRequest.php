@@ -71,6 +71,7 @@ class ViewServiceRequest extends ViewRecord
                             ->state(
                                 fn (ServiceRequest $record) => $record->status()->withTrashed()->first()?->name
                             ),
+                        TextEntry::make('title'),
                         TextEntry::make('priority.name')
                             ->label('Priority'),
                         TextEntry::make('priority.type.name')

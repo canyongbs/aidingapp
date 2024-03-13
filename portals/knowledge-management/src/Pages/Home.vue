@@ -36,6 +36,7 @@ import { Bars3Icon } from '@heroicons/vue/24/outline';
 import HelpCenter from '../Components/HelpCenter.vue';
 import SearchResults from '../Components/SearchResults.vue';
 import { defineProps, ref, watch } from 'vue';
+import { consumer } from '@/Services/Consumer.js';
 
 const props = defineProps({
     searchUrl: {
@@ -50,6 +51,10 @@ const props = defineProps({
         type: Object,
         required: true,
     },
+    serviceRequests: {
+        type: Object,
+        required: true,
+    },
 });
 
 const urlParams = new URLSearchParams(window.location.search);
@@ -58,6 +63,8 @@ const searchQuery = ref(null);
 const loadingResults = ref(false);
 
 const debounceSearch = debounce((value) => {
+    const { post } = consumer();
+
     if (!value) {
         searchQuery.value = null;
         searchResults.value = null;
@@ -66,18 +73,10 @@ const debounceSearch = debounce((value) => {
 
     loadingResults.value = true;
 
-    fetch(props.searchUrl, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ search: value }),
-    })
-        .then((response) => response.json())
-        .then((json) => {
-            searchResults.value = json;
-            loadingResults.value = false;
-        });
+    post(props.searchUrl, JSON.stringify({ search: value })).then((response) => {
+        searchResults.value = response.data;
+        loadingResults.value = false;
+    });
 }, 500);
 
 watch(searchQuery, (value) => {
@@ -109,6 +108,14 @@ function debounce(func, delay) {
         </button>
 
         <div class="flex h-full w-full flex-col rounded bg-primary-700 px-12 py-4">
+            <div class="text-right">
+                <router-link :to="{ name: 'create-service-request' }">
+                    <button class="p-2 font-bold rounded bg-white text-primary-700 dark:text-primary-400">
+                        New Request
+                    </button>
+                </router-link>
+            </div>
+
             <div class="flex flex-col text-left">
                 <h3 class="text-3xl text-white">Need help?</h3>
                 <p class="text-white">Search our knowledge base for advice and answers</p>
@@ -136,6 +143,6 @@ function debounce(func, delay) {
             :loadingResults="loadingResults"
         ></SearchResults>
 
-        <HelpCenter v-else :categories="categories"></HelpCenter>
+        <HelpCenter v-else :categories="categories" :service-requests="serviceRequests"></HelpCenter>
     </main>
 </template>

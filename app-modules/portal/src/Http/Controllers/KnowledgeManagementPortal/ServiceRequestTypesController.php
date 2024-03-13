@@ -34,37 +34,29 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\Http\Controllers\KnowledgeManagement;
+namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
-use AidingApp\Portal\DataTransferObjects\KnowledgeBaseArticleData;
-use AidingApp\Portal\DataTransferObjects\KnowledgeBaseCategoryData;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
 
-class KnowledgeManagementPortalCategoryController extends Controller
+class ServiceRequestTypesController extends Controller
 {
-    public function show(KnowledgeBaseCategory $category): JsonResponse
+    public function index(): JsonResponse
     {
         return response()->json([
-            'category' => KnowledgeBaseCategoryData::from([
-                'id' => $category->getKey(),
-                'name' => $category->name,
-                'description' => $category->description,
-            ]),
-            'articles' => KnowledgeBaseArticleData::collection(
-                $category->knowledgeBaseItems()
-                    ->public()
-                    ->get()
-                    ->map(function ($item) {
-                        return [
-                            'id' => $item->getKey(),
-                            'categoryId' => $item->category_id,
-                            'name' => $item->title,
-                        ];
-                    })
-                    ->toArray()
-            ),
+            'types' => ServiceRequestType::query()
+                ->whereHas('form')
+                ->orderBy('name')
+                ->get()
+                ->map(function (ServiceRequestType $type) {
+                    return [
+                        'id' => $type->getKey(),
+                        'name' => $type->name,
+                        'description' => $type->description,
+                        'icon' => $type->icon ? svg($type->icon, 'h-6 w-6')->toHtml() : null,
+                    ];
+                }),
         ]);
     }
 }

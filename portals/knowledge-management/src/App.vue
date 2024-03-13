@@ -43,6 +43,8 @@ import determineIfUserIsAuthenticated from '@/Services/DetermineIfUserIsAuthenti
 import getAppContext from '@/Services/GetAppContext.js';
 import axios from '@/Globals/Axios.js';
 import { useTokenStore } from '@/Stores/token.js';
+import { useAuthStore } from '@/Stores/auth.js';
+import { useRoute } from 'vue-router';
 
 const errorLoading = ref(false);
 const loading = ref(true);
@@ -65,6 +67,18 @@ onMounted(async () => {
         loading.value = false;
     });
 });
+
+const route = useRoute();
+
+watch(
+    route,
+    function () {
+        getKnowledgeManagementPortal();
+    },
+    {
+        immediate: true,
+    },
+);
 
 const props = defineProps({
     url: {
@@ -103,6 +117,7 @@ const hostUrl = `${protocol}//${scriptHostname}`;
 const portalPrimaryColor = ref('');
 const portalRounding = ref('');
 const categories = ref({});
+const serviceRequests = ref({});
 
 const authentication = ref({
     code: null,
@@ -124,6 +139,8 @@ async function getKnowledgeManagementPortal() {
             }
 
             categories.value = response.data.categories;
+
+            serviceRequests.value = response.data.service_requests;
 
             portalPrimaryColor.value = response.data.primary_color;
 
@@ -177,6 +194,7 @@ async function authenticate(formData, node) {
     node.clearErrors();
 
     const { setToken } = useTokenStore();
+    const { setUser } = useAuthStore();
 
     const { isEmbeddedInAidingApp } = getAppContext(props.accessUrl);
 
@@ -207,6 +225,7 @@ async function authenticate(formData, node) {
 
                 if (response.data.success === true) {
                     setToken(response.data.token);
+                    setUser(response.data.user);
 
                     userIsAuthenticated.value = true;
                 }
@@ -320,11 +339,17 @@ async function authenticate(formData, node) {
                         :categories="categories"
                     ></MobileSidebar>
 
-                    <DesktopSidebar :categories="categories"></DesktopSidebar>
+                    <DesktopSidebar :categories="categories" :api-url="apiUrl"> </DesktopSidebar>
 
                     <div class="lg:pl-72">
                         <div class="px-4 sm:px-6 lg:px-8">
-                            <RouterView :search-url="searchUrl" :api-url="apiUrl" :categories="categories"></RouterView>
+                            <RouterView
+                                :search-url="searchUrl"
+                                :api-url="apiUrl"
+                                :categories="categories"
+                                :service-requests="serviceRequests"
+                            >
+                            </RouterView>
                         </div>
                     </div>
                 </div>

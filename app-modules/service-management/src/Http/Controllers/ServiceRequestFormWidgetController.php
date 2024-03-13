@@ -203,7 +203,14 @@ class ServiceRequestFormWidgetController extends Controller
 
         $submission
             ->priority()
-            ->associate($serviceRequestForm->type->priorities()->findOrFail($request->input('priority')));
+            ->associate(
+                $serviceRequestForm
+                    ->type
+                    ->priorities()
+                    ->findOrFail(
+                        $request->input('priority')
+                    )
+            );
 
         if ($authentication) {
             $submission->author()->associate($authentication->author);

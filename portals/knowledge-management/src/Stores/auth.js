@@ -1,5 +1,3 @@
-<?php
-
 /*
 <COPYRIGHT>
 
@@ -33,17 +31,23 @@
 
 </COPYRIGHT>
 */
+import { ref } from 'vue';
+import { defineStore } from 'pinia';
 
-namespace AidingApp\Portal\DataTransferObjects;
+export const useAuthStore = defineStore('auth', () => {
+    const user = ref(null);
 
-use Spatie\LaravelData\Data;
+    async function setUser(userToSet) {
+        user.value = userToSet;
+    }
 
-class KnowledgeBaseCategoryData extends Data
-{
-    public function __construct(
-        public string $id,
-        public string $name,
-        public ?string $description,
-        public ?string $icon,
-    ) {}
-}
+    async function getUser() {
+        return user.value;
+    }
+
+    async function removeUser() {
+        user.value = null;
+    }
+
+    return { user, getUser, setUser, removeUser };
+});

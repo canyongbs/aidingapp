@@ -41,7 +41,6 @@ use DateTimeInterface;
 use App\Models\BaseModel;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\DB;
-use App\Models\Contracts\Educatable;
 use AidingApp\Contact\Models\Contact;
 use Kirschbaum\PowerJoins\PowerJoins;
 use AidingApp\Division\Models\Division;
@@ -94,6 +93,8 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
         'res_details',
         'created_by_id',
         'status_updated_at',
+        'title',
+        'service_request_form_submission_id',
     ];
 
     protected $casts = [
@@ -103,23 +104,21 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
     public function save(array $options = [])
     {
         $attempts = 0;
+        $save = false;
 
         do {
             try {
-                DB::beginTransaction();
+                DB::transaction(function () use ($options) {
+                    return parent::save($options);
+                });
 
-                $save = parent::save($options);
+                break;
             } catch (UniqueConstraintViolationException $e) {
                 $attempts++;
-                $save = false;
 
                 if ($attempts < 3) {
                     $this->service_request_number = app(ServiceRequestNumberGenerator::class)->generate();
-                }
-
-                DB::rollBack();
-
-                if ($attempts >= 3) {
+                } else {
                     throw new ServiceRequestNumberExceededReRollsException(
                         previous: $e,
                     );
@@ -127,11 +126,7 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
 
                 continue;
             }
-
-            DB::commit();
-
-            break;
-        } while ($attempts < 3);
+        } while (! $save && $attempts < 3);
 
         return $save;
     }
@@ -141,7 +136,7 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
         return $this->respondent instanceof Subscribable ? $this->respondent : null;
     }
 
-    /** @return MorphTo<Educatable> */
+    /** @return MorphTo<Contact> */
     public function respondent(): MorphTo
     {
         return $this->morphTo(

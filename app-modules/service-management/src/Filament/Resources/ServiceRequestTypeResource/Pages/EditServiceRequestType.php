@@ -45,8 +45,10 @@ use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Section;
 use Filament\Actions\ForceDeleteAction;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\EditRecord;
+use App\Filament\Forms\Components\IconSelect;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
 
@@ -65,6 +67,7 @@ class EditServiceRequestType extends EditRecord
                             ->label('Name')
                             ->required()
                             ->string(),
+                        IconSelect::make('icon'),
                         Group::make()
                             ->schema([
                                 Toggle::make('has_enabled_feedback_collection')
@@ -77,6 +80,9 @@ class EditServiceRequestType extends EditRecord
                                     ->label('NPS')
                                     ->visible(fn (Get $get) => $get('has_enabled_feedback_collection')),
                             ]),
+                        Textarea::make('description')
+                            ->string()
+                            ->columnSpanFull(),
                     ]),
             ])
             ->disabled(fn (ServiceRequestType $record) => $record->trashed());

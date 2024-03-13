@@ -56,8 +56,9 @@ class ServiceRequestFactory extends Factory
             'respondent_type' => function (array $attributes) {
                 return Contact::find($attributes['respondent_id'])->getMorphClass();
             },
-            'close_details' => $this->faker->sentence(),
-            'res_details' => $this->faker->sentence(),
+            'title' => str(fake()->words(asText: true))->headline()->toString(),
+            'close_details' => fake()->sentence(),
+            'res_details' => fake()->sentence(),
             'division_id' => Division::inRandomOrder()->first()?->id ?? Division::factory(),
             'status_id' => ServiceRequestStatus::inRandomOrder()->first() ?? ServiceRequestStatus::factory(),
             'priority_id' => ServiceRequestPriority::inRandomOrder()->first() ?? ServiceRequestPriority::factory(),

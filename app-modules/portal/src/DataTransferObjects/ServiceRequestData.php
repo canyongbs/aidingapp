@@ -37,13 +37,18 @@
 namespace AidingApp\Portal\DataTransferObjects;
 
 use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Spatie\LaravelData\Attributes\MapOutputName;
 
-class KnowledgeBaseCategoryData extends Data
+#[MapOutputName(SnakeCaseMapper::class)]
+class ServiceRequestData extends Data
 {
     public function __construct(
         public string $id,
-        public string $name,
-        public ?string $description,
+        public string $title,
+        public ?string $statusName,
+        public ?string $statusColor,
         public ?string $icon,
+        public ?string $updatedAt,
     ) {}
 }

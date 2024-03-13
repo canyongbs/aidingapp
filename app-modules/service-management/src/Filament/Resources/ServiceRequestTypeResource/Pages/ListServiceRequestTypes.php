@@ -40,6 +40,7 @@ use Filament\Tables\Table;
 use Filament\Actions\CreateAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Resources\Pages\ListRecords;
@@ -64,6 +65,10 @@ class ListServiceRequestTypes extends ListRecords
                 TextColumn::make('service_requests_count')
                     ->label('# of Service Requests')
                     ->counts('serviceRequests')
+                    ->sortable(),
+                IconColumn::make('icon')
+                    ->icon(fn (string $state): string => $state)
+                    ->tooltip(fn (?string $state): ?string => filled($state) ? str($state)->after('heroicon-o-')->headline()->toString() : null)
                     ->sortable(),
                 TextColumn::make('deleted_at')
                     ->dateTime()

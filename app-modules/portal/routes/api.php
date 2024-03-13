@@ -38,15 +38,18 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEnabled;
-use AidingApp\Portal\Http\Controllers\KnowledgeManagement\KnowledgeManagementPortalController;
+use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\ServiceRequestTypesController;
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEmbeddableAndAuthorized;
-use AidingApp\Portal\Http\Controllers\KnowledgeManagement\KnowledgeManagementPortalSearchController;
-use AidingApp\Portal\Http\Controllers\KnowledgeManagement\KnowledgeManagementPortalArticleController;
-use AidingApp\Portal\Http\Controllers\KnowledgeManagement\KnowledgeManagementPortalCategoryController;
-use AidingApp\Portal\Http\Controllers\KnowledgeManagement\KnowledgeManagementPortalAuthenticateController;
-use AidingApp\Portal\Http\Controllers\KnowledgeManagement\KnowledgeManagementPortalRequestAuthenticationController;
+use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\CreateServiceRequestController;
+use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalController;
+use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalSearchController;
+use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalArticleController;
+use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalCategoryController;
+use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalAuthenticateController;
+use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalRequestAuthenticationController;
 
 Route::prefix('api')
+    ->name('api.')
     ->middleware([
         'api',
         EnsureKnowledgeManagementPortalIsEnabled::class,
@@ -55,8 +58,8 @@ Route::prefix('api')
     ->group(function () {
         Route::middleware(['auth:sanctum'])->group(function () {
             Route::get('/user', function (Request $request) {
-                return $request->user();
-            })->name('api.user.auth-check');
+                return auth('contact')->user() ?? $request->user();
+            })->name('user.auth-check');
         });
 
         Route::prefix('portal/knowledge-management')
@@ -77,9 +80,21 @@ Route::prefix('api')
                 Route::post('/search', [KnowledgeManagementPortalSearchController::class, 'get'])
                     ->middleware(['signed:relative'])
                     ->name('search');
+
                 Route::get('/categories/{category}', [KnowledgeManagementPortalCategoryController::class, 'show'])
                     ->name('category.show');
+
                 Route::get('/categories/{category}/articles/{article}', [KnowledgeManagementPortalArticleController::class, 'show'])
                     ->name('article.show');
+
+                Route::get('/service-request-type/select', [ServiceRequestTypesController::class, 'index'])
+                    ->name('service-request-type.index');
+
+                Route::get('/service-request/create/{type}', [CreateServiceRequestController::class, 'create'])
+                    ->name('service-request.create');
+
+                Route::post('/service-request/create/{type}', [CreateServiceRequestController::class, 'store'])
+                    ->middleware(['auth:sanctum'])
+                    ->name('service-request.store');
             });
     });

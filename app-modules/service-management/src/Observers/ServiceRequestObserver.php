@@ -61,7 +61,7 @@ class ServiceRequestObserver
             TriggeredAutoSubscription::dispatch($user, $serviceRequest);
         }
 
-        if ($serviceRequest->status->classification === SystemServiceRequestClassification::Open) {
+        if ($serviceRequest->status?->classification === SystemServiceRequestClassification::Open) {
             $serviceRequest->respondent->notify(new SendEducatableServiceRequestOpenedNotification($serviceRequest));
         }
     }
@@ -84,7 +84,7 @@ class ServiceRequestObserver
 
         if (
             $serviceRequest->wasChanged('status_id')
-            && $serviceRequest->status->classification === SystemServiceRequestClassification::Closed
+            && $serviceRequest->status?->classification === SystemServiceRequestClassification::Closed
         ) {
             $serviceRequest->respondent->notify(new SendEducatableServiceRequestClosedNotification($serviceRequest));
         }

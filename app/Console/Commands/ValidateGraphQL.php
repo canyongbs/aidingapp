@@ -191,7 +191,7 @@ class ValidateGraphQL extends Command implements PromptsForMissingInput
 
         $type = $types->where('name', $model)->first();
 
-        if ($models->doesntContain($model)) {
+        if ($this->option('model') && $models->isNotEmpty() && $models->doesntContain($model)) {
             return;
         }
 

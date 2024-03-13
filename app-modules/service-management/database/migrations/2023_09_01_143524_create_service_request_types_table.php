@@ -45,6 +45,8 @@ return new class () extends Migration {
             $table->uuid('id')->primary();
 
             $table->string('name');
+            $table->text('description')->nullable();
+            $table->string('icon')->nullable();
             $table->boolean('has_enabled_feedback_collection')->default(false);
             $table->boolean('has_enabled_csat')->default(false);
             $table->boolean('has_enabled_nps')->default(false);

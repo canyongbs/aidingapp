@@ -34,53 +34,37 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\Http\Controllers\KnowledgeManagement;
+namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
-use Closure;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use AidingApp\Portal\Models\PortalAuthentication;
-use AidingApp\Portal\Exceptions\EducatableIsNotAuthenticatable;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
+use AidingApp\Portal\DataTransferObjects\KnowledgeBaseArticleData;
+use AidingApp\Portal\DataTransferObjects\KnowledgeBaseCategoryData;
 
-class KnowledgeManagementPortalAuthenticateController extends Controller
+class KnowledgeManagementPortalCategoryController extends Controller
 {
-    public function __invoke(Request $request, PortalAuthentication $authentication): JsonResponse
+    public function show(KnowledgeBaseCategory $category): JsonResponse
     {
-        if ($authentication->isExpired()) {
-            return response()->json([
-                'is_expired' => true,
-            ]);
-        }
-
-        $request->validate([
-            'code' => ['required', 'integer', 'digits:6', function (string $attribute, int $value, Closure $fail) use ($authentication) {
-                if (Hash::check($value, $authentication->code)) {
-                    return;
-                }
-
-                $fail('The provided code is invalid.');
-            }],
-        ]);
-
-        $educatable = $authentication->educatable;
-
-        match ($educatable->getMorphClass()) {
-            'contact' => Auth::guard('contact')->login($educatable),
-            default => throw new EducatableIsNotAuthenticatable('The educatable type is not supported.'),
-        };
-
-        $token = $educatable->createToken('knowledge-management-portal-access-token');
-
-        if ($request->hasSession()) {
-            $request->session()->regenerate();
-        }
-
         return response()->json([
-            'success' => true,
-            'token' => $token->plainTextToken,
+            'category' => KnowledgeBaseCategoryData::from([
+                'id' => $category->getKey(),
+                'name' => $category->name,
+                'description' => $category->description,
+            ]),
+            'articles' => KnowledgeBaseArticleData::collection(
+                $category->knowledgeBaseItems()
+                    ->public()
+                    ->get()
+                    ->map(function ($item) {
+                        return [
+                            'id' => $item->getKey(),
+                            'categoryId' => $item->category_id,
+                            'name' => $item->title,
+                        ];
+                    })
+                    ->toArray()
+            ),
         ]);
     }
 }

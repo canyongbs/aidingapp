@@ -53,13 +53,9 @@ use AidingApp\ServiceManagement\Database\Seeders\ChangeRequestTypeSeeder;
 use AidingApp\ServiceManagement\Database\Seeders\ServiceRequestTypeSeeder;
 use AidingApp\ServiceManagement\Database\Seeders\ChangeRequestStatusSeeder;
 use AidingApp\ServiceManagement\Database\Seeders\ServiceRequestStatusSeeder;
-use AidingApp\InventoryManagement\Database\Seeders\MaintenanceProviderSeeder;
 
 class NewTenantSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         $currentTenant = Tenant::current();
@@ -85,10 +81,9 @@ class NewTenantSeeder extends Seeder
             ...InteractionSeeder::metadataSeeders(),
             ConsentAgreementSeeder::class,
             PronounsSeeder::class,
+
             // InventoryManagement
             ...AssetSeeder::metadataSeeders(),
-            AssetSeeder::class,
-            MaintenanceProviderSeeder::class,
 
             // Change Request
             ChangeRequestTypeSeeder::class,

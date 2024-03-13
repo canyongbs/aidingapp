@@ -85,7 +85,6 @@ class DatabaseSeeder extends Seeder
         $this->call([
             SuperAdminProfileSeeder::class,
             SampleSuperAdminUserSeeder::class,
-            InternalAdminUsersSeeder::class,
             DivisionSeeder::class,
             ServiceRequestStatusSeeder::class,
             ServiceRequestTypeSeeder::class,
@@ -111,7 +110,6 @@ class DatabaseSeeder extends Seeder
             // InventoryManagement
             ...AssetSeeder::metadataSeeders(),
             AssetSeeder::class,
-
             MaintenanceProviderSeeder::class,
 
             // Change Request
@@ -120,6 +118,8 @@ class DatabaseSeeder extends Seeder
 
             PromptTypeSeeder::class,
             PromptSeeder::class,
+
+            ContactSeeder::class,
         ]);
     }
 }

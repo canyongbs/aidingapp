@@ -42,6 +42,7 @@ use AidingApp\Task\Models\Task;
 use App\Models\Authenticatable;
 use AidingApp\Alert\Models\Alert;
 use App\Models\Scopes\HasLicense;
+use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Collection;
 use App\Models\Contracts\Educatable;
 use AidingApp\CareTeam\Models\CareTeam;
@@ -95,6 +96,7 @@ class Contact extends BaseAuthenticatable implements Auditable, Subscribable, Ed
     use NotifiableViaSms;
     use SoftDeletes;
     use UsesTenantConnection;
+    use HasApiTokens;
 
     protected $fillable = [
         'first_name',
