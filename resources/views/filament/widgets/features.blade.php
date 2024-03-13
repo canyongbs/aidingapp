@@ -34,41 +34,10 @@
 @php
     use AidingApp\Assistant\Filament\Pages\PersonalAssistant;
     use AidingApp\Authorization\Enums\LicenseType;
-    use AidingApp\Contact\Filament\Pages\RecruitmentCrmDashboard;
 @endphp
 
 <x-filament-widgets::widget>
     <div class="grid gap-6 md:grid-cols-3">
-        @php
-            $hasFeature = auth()
-                ->user()
-                ->hasLicense(LicenseType::RecruitmentCrm);
-        @endphp
-        <x-filament::section @class([
-            'opacity-50 pointer-events-none' => !$hasFeature,
-        ])>
-            <div class="flex flex-col gap-3">
-                <div class="text-center text-lg font-bold">
-                    {{ $hasFeature ? 'Available' : 'Unavailable' }}
-                </div>
-
-                <div class="flex items-center justify-center">
-                    <x-filament::button
-                        :href="$hasFeature ? RecruitmentCrmDashboard::getUrl() : null"
-                        size="xl"
-                        tag="a"
-                        color="gray"
-                    >
-                        Start now
-                    </x-filament::button>
-                </div>
-
-                <div class="text-center font-medium text-gray-700 dark:text-gray-300">
-                    Recruitment CRM
-                </div>
-            </div>
-        </x-filament::section>
-
         @php
             $hasFeature = auth()
                 ->user()
