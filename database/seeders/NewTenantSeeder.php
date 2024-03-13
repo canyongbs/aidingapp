@@ -39,7 +39,6 @@ namespace Database\Seeders;
 use App\Models\Tenant;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Artisan;
-use AidingApp\Contact\Database\Seeders\ContactSeeder;
 use AidingApp\Division\Database\Seeders\DivisionSeeder;
 use AidingApp\Contact\Database\Seeders\ContactSourceSeeder;
 use AidingApp\Contact\Database\Seeders\ContactStatusSeeder;
@@ -54,7 +53,6 @@ use AidingApp\ServiceManagement\Database\Seeders\ChangeRequestTypeSeeder;
 use AidingApp\ServiceManagement\Database\Seeders\ServiceRequestTypeSeeder;
 use AidingApp\ServiceManagement\Database\Seeders\ChangeRequestStatusSeeder;
 use AidingApp\ServiceManagement\Database\Seeders\ServiceRequestStatusSeeder;
-use AidingApp\InventoryManagement\Database\Seeders\MaintenanceProviderSeeder;
 
 class NewTenantSeeder extends Seeder
 {
@@ -86,14 +84,10 @@ class NewTenantSeeder extends Seeder
 
             // InventoryManagement
             ...AssetSeeder::metadataSeeders(),
-            AssetSeeder::class,
-            MaintenanceProviderSeeder::class,
 
             // Change Request
             ChangeRequestTypeSeeder::class,
             ChangeRequestStatusSeeder::class,
-
-            ContactSeeder::class,
         ]);
     }
 }

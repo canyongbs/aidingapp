@@ -110,7 +110,6 @@ class DatabaseSeeder extends Seeder
             // InventoryManagement
             ...AssetSeeder::metadataSeeders(),
             AssetSeeder::class,
-
             MaintenanceProviderSeeder::class,
 
             // Change Request
@@ -119,6 +118,8 @@ class DatabaseSeeder extends Seeder
 
             PromptTypeSeeder::class,
             PromptSeeder::class,
+
+            ContactSeeder::class,
         ]);
     }
 }
