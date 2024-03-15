@@ -41,7 +41,6 @@ use Filament\Forms\Get;
 use Filament\Tables\Table;
 use Filament\Actions\CreateAction;
 use Filament\Actions\ImportAction;
-use Filament\Tables\Filters\Filter;
 use Filament\Forms\Components\Radio;
 use AidingApp\Contact\Models\Contact;
 use Filament\Forms\Components\Select;
@@ -65,7 +64,6 @@ use AidingApp\Contact\Imports\ContactImporter;
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Engagement\Filament\Actions\BulkEngagementAction;
 use AidingApp\Notification\Filament\Actions\SubscribeBulkAction;
-use AidingApp\CareTeam\Filament\Actions\ToggleCareTeamBulkAction;
 use AidingApp\Notification\Filament\Actions\SubscribeTableAction;
 use AidingApp\Engagement\Filament\Actions\Contracts\HasBulkEngagementAction;
 use AidingApp\Engagement\Filament\Actions\Concerns\ImplementsHasBulkEngagementAction;
@@ -127,15 +125,6 @@ class ListContacts extends ListRecords implements HasBulkEngagementAction
                     ->relationship('source', 'name')
                     ->multiple()
                     ->preload(),
-                Filter::make('care_team')
-                    ->label('Care Team')
-                    ->query(
-                        function (Builder $query) {
-                            return $query
-                                ->whereRelation('careTeam', 'user_id', '=', auth()->id())
-                                ->get();
-                        }
-                    ),
             ])
             ->actions([
                 ViewAction::make(),
@@ -147,7 +136,6 @@ class ListContacts extends ListRecords implements HasBulkEngagementAction
                     SubscribeBulkAction::make(),
                     BulkEngagementAction::make(context: 'contacts'),
                     DeleteBulkAction::make(),
-                    ToggleCareTeamBulkAction::make(),
                     BulkAction::make('bulk_update')
                         ->icon('heroicon-o-pencil-square')
                         ->form([

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "cd89f11f878f601903614ff35ff0fcd7",
+    "content-hash": "912fc235ef81a4a1cceb0c95de99d066",
     "packages": [
         {
             "name": "amphp/amp",
@@ -1716,41 +1716,6 @@
                     "AidingApp\\Authorization\\Tests\\": "tests/",
                     "AidingApp\\Authorization\\Database\\Factories\\": "database/factories/",
                     "AidingApp\\Authorization\\Database\\Seeders\\": "database/seeders/"
-                }
-            },
-            "license": [
-                "proprietary"
-            ],
-            "transport-options": {
-                "symlink": true,
-                "relative": true
-            }
-        },
-        {
-            "name": "canyon-gbs/aiding-app-care-team",
-            "version": "1.0",
-            "dist": {
-                "type": "path",
-                "url": "app-modules/care-team",
-                "reference": "0fa2a4951e08256573592b6b7676a4f9ae712a52"
-            },
-            "require": {
-                "filament/filament": "^3.0.0"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "AidingApp\\CareTeam\\Providers\\CareTeamServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "AidingApp\\CareTeam\\": "src/",
-                    "AidingApp\\CareTeam\\Tests\\": "tests/",
-                    "AidingApp\\CareTeam\\Database\\Factories\\": "database/factories/",
-                    "AidingApp\\CareTeam\\Database\\Seeders\\": "database/seeders/"
                 }
             },
             "license": [

@@ -44,7 +44,6 @@ use AidingApp\Alert\Models\Alert;
 use Illuminate\Support\Facades\DB;
 use AidingApp\Contact\Models\Contact;
 use Illuminate\Support\Facades\Schema;
-use AidingApp\CareTeam\Models\CareTeam;
 use AidingApp\Contact\Models\ContactSource;
 use AidingApp\Contact\Models\ContactStatus;
 use AidingApp\Interaction\Models\Interaction;
@@ -155,7 +154,6 @@ class AIReportChatClient extends AzureOpenAI
     {
         return collect([
             Alert::class,
-            CareTeam::class,
             Interaction::class, InteractionCampaign::class, InteractionDriver::class, InteractionOutcome::class, InteractionRelation::class, InteractionStatus::class, InteractionType::class,
             Contact::class, ContactSource::class, ContactStatus::class,
             Subscription::class,

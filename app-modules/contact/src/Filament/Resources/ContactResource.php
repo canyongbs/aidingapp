@@ -47,7 +47,6 @@ use AidingApp\Contact\Filament\Resources\ContactResource\Pages\CreateContact;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactFiles;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactTasks;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactAlerts;
-use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactCareTeam;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactEngagement;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ContactServiceManagement;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ContactEngagementTimeline;
@@ -78,7 +77,6 @@ class ContactResource extends Resource
             ManageContactSubscriptions::class,
             ManageContactInteractions::class,
             ContactEngagementTimeline::class,
-            ManageContactCareTeam::class,
             ContactServiceManagement::class,
         ]);
     }
@@ -111,7 +109,6 @@ class ContactResource extends Resource
             'manage-tasks' => ManageContactTasks::route('/{record}/tasks'),
             'view' => ViewContact::route('/{record}'),
             'timeline' => ContactEngagementTimeline::route('/{record}/timeline'),
-            'care-team' => ManageContactCareTeam::route('/{record}/care-team'),
             'service-management' => ContactServiceManagement::route('/{record}/service-management'),
         ];
     }

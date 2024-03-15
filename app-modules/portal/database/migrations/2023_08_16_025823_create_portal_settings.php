@@ -44,7 +44,6 @@ return new class () extends SettingsMigration {
         $this->migrator->add('portal.secondary_color');
 
         $this->migrator->add('portal.has_user_chat', false);
-        $this->migrator->add('portal.has_care_team', false);
         $this->migrator->add('portal.has_performance_alerts', false);
         $this->migrator->add('portal.has_emergency_alerts', false);
         $this->migrator->add('portal.has_service_management', false);

@@ -1,39 +1,5 @@
 <?php
 
-/*
-<COPYRIGHT>
-
-    Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
-
-    Aiding App™ is licensed under the Elastic License 2.0. For more details,
-    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
-
-    Notice:
-
-    - You may not provide the software to third parties as a hosted or managed
-      service, where the service provides users with access to any substantial set of
-      the features or functionality of the software.
-    - You may not move, change, disable, or circumvent the license key functionality
-      in the software, and you may not remove or obscure any functionality in the
-      software that is protected by the license key.
-    - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
-      to applicable law.
-    - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
-      Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
-      vigorously.
-    - The software solution, including services, infrastructure, and code, is offered as a
-      Software as a Service (SaaS) by Canyon GBS LLC.
-    - Use of this software implies agreement to the license terms and conditions as stated
-      in the Elastic License 2.0.
-
-    For more information or inquiries please visit our website at
-    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
-
-</COPYRIGHT>
-*/
-
 // @formatter:off
 // phpcs:ignoreFile
 /**
@@ -440,8 +406,6 @@ namespace App\Models{
  * @property-read int|null $assistant_chats_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
  * @property-read int|null $audits_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\CareTeam\Models\CareTeam> $careTeams
- * @property-read int|null $care_teams_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\ServiceManagement\Models\ChangeRequestResponse> $changeRequestResponses
  * @property-read int|null $change_request_responses_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\ServiceManagement\Models\ChangeRequestType> $changeRequestTypes
@@ -450,8 +414,6 @@ namespace App\Models{
  * @property-read int|null $change_requests_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Consent\Models\ConsentAgreement> $consentAgreements
  * @property-read int|null $consent_agreements_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Contact\Models\Contact> $contactCareTeams
- * @property-read int|null $contact_care_teams_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Contact\Models\Contact> $contactSubscriptions
  * @property-read int|null $contact_subscriptions_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\InAppCommunication\Models\TwilioConversation> $conversations
@@ -993,33 +955,6 @@ namespace AidingApp\Authorization\Models{
 	class IdeHelperRoleGroup {}
 }
 
-namespace AidingApp\CareTeam\Models{
-/**
- * AidingApp\CareTeam\Models\CareTeam
- *
- * @property string $id
- * @property string $user_id
- * @property string $educatable_id
- * @property string $educatable_type
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $educatable
- * @property-read \App\Models\User $user
- * @method static \Illuminate\Database\Eloquent\Builder|CareTeam newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|CareTeam newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|CareTeam query()
- * @method static \Illuminate\Database\Eloquent\Builder|CareTeam whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CareTeam whereEducatableId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CareTeam whereEducatableType($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CareTeam whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CareTeam whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CareTeam whereUserId($value)
- * @mixin \Eloquent
- */
-	#[\AllowDynamicProperties]
-	class IdeHelperCareTeam {}
-}
-
 namespace AidingApp\Consent\Models{
 /**
  * AidingApp\Consent\Models\ConsentAgreement
@@ -1131,8 +1066,6 @@ namespace AidingApp\Contact\Models{
  * @property-read \App\Models\User|null $assignedTo
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
  * @property-read int|null $audits_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $careTeam
- * @property-read int|null $care_team_count
  * @property-read \App\Models\User|null $createdBy
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Engagement\Models\EngagementFile> $engagementFiles
  * @property-read int|null $engagement_files_count
@@ -1158,6 +1091,8 @@ namespace AidingApp\Contact\Models{
  * @property-read int|null $subscriptions_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Task\Models\Task> $tasks
  * @property-read int|null $tasks_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Laravel\Sanctum\PersonalAccessToken> $tokens
+ * @property-read int|null $tokens_count
  * @method static \AidingApp\Contact\Database\Factories\ContactFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder|Contact newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Contact newQuery()
@@ -2708,12 +2643,13 @@ namespace AidingApp\ServiceManagement\Models{
  * @property-read Contact $respondent
  * @property string $id
  * @property string $service_request_number
+ * @property string|null $title
  * @property string $respondent_type
  * @property string $respondent_id
  * @property string|null $close_details
  * @property string|null $res_details
  * @property string|null $service_request_form_submission_id
- * @property string $division_id
+ * @property string|null $division_id
  * @property string|null $status_id
  * @property string|null $priority_id
  * @property string|null $created_by_id
@@ -2729,7 +2665,7 @@ namespace AidingApp\ServiceManagement\Models{
  * @property-read \App\Models\User|null $createdBy
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Notification\Models\OutboundDeliverable> $deliverables
  * @property-read int|null $deliverables_count
- * @property-read \AidingApp\Division\Models\Division $division
+ * @property-read \AidingApp\Division\Models\Division|null $division
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\ServiceManagement\Models\ServiceRequestHistory> $histories
  * @property-read int|null $histories_count
  * @property-read \AidingApp\ServiceManagement\Models\ServiceRequestAssignment|null $initialAssignment
@@ -2763,6 +2699,7 @@ namespace AidingApp\ServiceManagement\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequest whereServiceRequestNumber($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequest whereStatusId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequest whereStatusUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequest whereTitle($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequest whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequest withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequest withoutTrashed()
@@ -2974,6 +2911,7 @@ namespace AidingApp\ServiceManagement\Models{
  * @property string|null $service_request_priority_id
  * @property string|null $author_id
  * @property string|null $author_type
+ * @property string|null $description
  * @property \Carbon\CarbonImmutable|null $submitted_at
  * @property \Carbon\CarbonImmutable|null $canceled_at
  * @property \AidingApp\Form\Enums\FormSubmissionRequestDeliveryMethod|null $request_method
@@ -3002,6 +2940,7 @@ namespace AidingApp\ServiceManagement\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestFormSubmission whereCanceledAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestFormSubmission whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestFormSubmission whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestFormSubmission whereDescription($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestFormSubmission whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestFormSubmission whereRequestMethod($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestFormSubmission whereRequestNote($value)
@@ -3130,6 +3069,8 @@ namespace AidingApp\ServiceManagement\Models{
  *
  * @property string $id
  * @property string $name
+ * @property string|null $description
+ * @property string|null $icon
  * @property bool $has_enabled_feedback_collection
  * @property bool $has_enabled_csat
  * @property bool $has_enabled_nps
@@ -3150,9 +3091,11 @@ namespace AidingApp\ServiceManagement\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType query()
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereDescription($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereHasEnabledCsat($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereHasEnabledFeedbackCollection($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereHasEnabledNps($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereIcon($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereUpdatedAt($value)

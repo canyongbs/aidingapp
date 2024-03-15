@@ -45,7 +45,6 @@ use App\Models\Scopes\HasLicense;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Collection;
 use App\Models\Contracts\Educatable;
-use AidingApp\CareTeam\Models\CareTeam;
 use Illuminate\Notifications\Notifiable;
 use OwenIt\Auditing\Contracts\Auditable;
 use Illuminate\Database\Eloquent\Builder;
@@ -183,19 +182,6 @@ class Contact extends BaseAuthenticatable implements Auditable, Subscribable, Ed
     public function alerts(): MorphMany
     {
         return $this->morphMany(Alert::class, 'concern');
-    }
-
-    public function careTeam(): MorphToMany
-    {
-        return $this->morphToMany(
-            related: User::class,
-            name: 'educatable',
-            table: 'care_teams',
-        )
-            ->using(CareTeam::class)
-            ->withPivot('id')
-            ->withTimestamps()
-            ->tap(new HasLicense($this->getLicenseType()));
     }
 
     public static function displayNameKey(): string
