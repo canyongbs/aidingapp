@@ -50,17 +50,15 @@ class KnowledgeBaseItemResource extends Resource
 {
     protected static ?string $model = KnowledgeBaseItem::class;
 
-    protected static ?string $navigationLabel = 'Knowledge Management';
+    protected static ?int $navigationSort = 70;
+
+    protected static ?string $breadcrumb = 'Knowledge Base';
 
     protected static ?string $modelLabel = 'knowledge base item';
 
-    protected static ?string $breadcrumb = 'Knowledge Management';
-
     protected static ?string $navigationIcon = 'heroicon-o-book-open';
 
-    protected static ?string $navigationGroup = 'Premium Features';
-
-    protected static ?int $navigationSort = 20;
+    protected static ?string $navigationLabel = 'Knowledge Base';
 
     protected static ?string $recordTitleAttribute = 'title';
 

@@ -120,11 +120,6 @@ return [
             'driver' => 'eloquent',
             'model' => Contact::class,
         ],
-
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
     ],
 
     /*
