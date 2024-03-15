@@ -45,7 +45,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use AidingApp\Interaction\Models\Concerns\HasManyInteractions;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 
 /**
@@ -54,7 +53,6 @@ use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 class Division extends BaseModel implements Auditable
 {
     use AuditableTrait;
-    use HasManyInteractions;
     use SoftDeletes;
 
     protected $fillable = [

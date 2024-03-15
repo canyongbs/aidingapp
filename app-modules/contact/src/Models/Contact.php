@@ -73,7 +73,6 @@ use AidingApp\Authorization\Models\Concerns\DefinesPermissions;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Notification\Models\Contracts\NotifiableInterface;
 use AidingApp\Engagement\Models\Concerns\HasManyMorphedEngagements;
-use AidingApp\Interaction\Models\Concerns\HasManyMorphedInteractions;
 use AidingApp\Engagement\Models\Concerns\HasManyMorphedEngagementResponses;
 
 /**
@@ -88,7 +87,6 @@ class Contact extends BaseAuthenticatable implements Auditable, Subscribable, Ed
     use HasFactory;
     use HasManyMorphedEngagementResponses;
     use HasManyMorphedEngagements;
-    use HasManyMorphedInteractions;
     use HasSubscriptions;
     use HasUuids;
     use Notifiable;

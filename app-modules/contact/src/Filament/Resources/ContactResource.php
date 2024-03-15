@@ -50,7 +50,6 @@ use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactAler
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactEngagement;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ContactServiceManagement;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ContactEngagementTimeline;
-use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactInteractions;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactSubscriptions;
 
 class ContactResource extends Resource
@@ -75,7 +74,6 @@ class ContactResource extends Resource
             ManageContactAlerts::class,
             ManageContactTasks::class,
             ManageContactSubscriptions::class,
-            ManageContactInteractions::class,
             ContactEngagementTimeline::class,
             ContactServiceManagement::class,
         ]);
@@ -104,7 +102,6 @@ class ContactResource extends Resource
             'manage-alerts' => ManageContactAlerts::route('/{record}/alerts'),
             'manage-engagement' => ManageContactEngagement::route('/{record}/engagement'),
             'manage-files' => ManageContactFiles::route('/{record}/files'),
-            'manage-interactions' => ManageContactInteractions::route('/{record}/interactions'),
             'manage-subscriptions' => ManageContactSubscriptions::route('/{record}/subscriptions'),
             'manage-tasks' => ManageContactTasks::route('/{record}/tasks'),
             'view' => ViewContact::route('/{record}'),

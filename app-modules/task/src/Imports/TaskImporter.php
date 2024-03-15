@@ -49,7 +49,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Models\Import;
 use Illuminate\Validation\ValidationException;
-use AidingApp\Interaction\Imports\InteractionsImporter;
 
 /**
  * @property ?Task $record
@@ -91,7 +90,7 @@ class TaskImporter extends Importer
             ImportColumn::make('concern')
                 ->label('Related To')
                 ->relationship(
-                    resolveUsing: function (InteractionsImporter $importer, mixed $state): ?Model {
+                    resolveUsing: function (TaskImporter $importer, mixed $state): ?Model {
                         $resolveFromModel = fn (string $model, string $identifier): ?Model => $model::query()
                             ->when(
                                 str($identifier)->isUuid(),
@@ -117,7 +116,7 @@ class TaskImporter extends Importer
                     },
                 )
                 ->requiredMapping()
-                ->rules(function (InteractionsImporter $importer) {
+                ->rules(function (TaskImporter $importer) {
                     if (! $importer->getImport()->user->hasLicense([Contact::getLicenseType()])) {
                         return [];
                     }

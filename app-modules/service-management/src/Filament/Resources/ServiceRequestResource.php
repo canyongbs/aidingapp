@@ -47,7 +47,6 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ServiceRequestTimeline;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ManageServiceRequestUpdate;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ManageServiceRequestAssignment;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ManageServiceRequestInteraction;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ManageServiceRequestFormSubmission;
 
 class ServiceRequestResource extends Resource
@@ -76,7 +75,6 @@ class ServiceRequestResource extends Resource
             EditServiceRequest::class,
             ManageServiceRequestAssignment::class,
             ManageServiceRequestUpdate::class,
-            ManageServiceRequestInteraction::class,
             ServiceRequestTimeline::class,
         ];
 
@@ -93,7 +91,6 @@ class ServiceRequestResource extends Resource
             'index' => ListServiceRequests::route('/'),
             'manage-assignments' => ManageServiceRequestAssignment::route('/{record}/users'),
             'manage-service-request-updates' => ManageServiceRequestUpdate::route('/{record}/updates'),
-            'manage-interactions' => ManageServiceRequestInteraction::route('/{record}/interactions'),
             'manage-service-request-form-submission' => ManageServiceRequestFormSubmission::route('/{record}/form-submission'),
             'create' => CreateServiceRequest::route('/create'),
             'view' => ViewServiceRequest::route('/{record}'),
