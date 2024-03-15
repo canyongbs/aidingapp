@@ -44,7 +44,6 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\DatePicker;
-use App\Filament\Clusters\ServiceManagement;
 use AidingApp\InventoryManagement\Models\Asset;
 use AidingApp\InventoryManagement\Models\AssetType;
 use AidingApp\InventoryManagement\Models\AssetStatus;
@@ -64,11 +63,9 @@ class AssetResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-archive-box';
 
-    protected static ?int $navigationSort = 20;
+    protected static ?int $navigationSort = 50;
 
     protected static ?string $breadcrumb = 'Asset Management';
-
-    protected static ?string $cluster = ServiceManagement::class;
 
     public static function getRecordSubNavigation(Page $page): array
     {

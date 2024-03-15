@@ -74,13 +74,11 @@ use AidingApp\Assistant\Services\AIInterface\DataTransferObjects\ChatMessage;
 /**
  * @property EloquentCollection $chats
  */
-class PersonalAssistant extends Page
+class SupportAssistant extends Page
 {
     protected static ?string $navigationIcon = 'heroicon-o-chat-bubble-left-right';
 
-    protected static string $view = 'assistant::filament.pages.personal-assistant';
-
-    protected static ?string $navigationGroup = 'Artificial Intelligence';
+    protected static string $view = 'assistant::filament.pages.support-assistant';
 
     protected static ?string $navigationLabel = 'Support Assistant';
 
@@ -88,7 +86,7 @@ class PersonalAssistant extends Page
 
     protected static ?string $slug = 'support-assistant';
 
-    protected static ?int $navigationSort = 30;
+    protected static ?int $navigationSort = 60;
 
     public Chat $chat;
 

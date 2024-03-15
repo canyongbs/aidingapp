@@ -38,7 +38,6 @@ namespace AidingApp\ServiceManagement\Filament\Resources;
 
 use Filament\Resources\Resource;
 use Filament\Resources\Pages\Page;
-use App\Filament\Clusters\ServiceManagement;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\EditServiceRequest;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ViewServiceRequest;
@@ -56,9 +55,7 @@ class ServiceRequestResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-briefcase';
 
-    protected static ?int $navigationSort = 10;
-
-    protected static ?string $cluster = ServiceManagement::class;
+    protected static ?int $navigationSort = 30;
 
     public static function shouldShowFormSubmission(Page $page): bool
     {
