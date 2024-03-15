@@ -37,7 +37,6 @@
 namespace AidingApp\ServiceManagement\Filament\Resources;
 
 use Filament\Resources\Resource;
-use App\Filament\Clusters\ServiceManagement;
 use AidingApp\ServiceManagement\Models\ChangeRequest;
 use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestResource\Pages\EditChangeRequest;
 use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestResource\Pages\ViewChangeRequest;
@@ -52,11 +51,9 @@ class ChangeRequestResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-m-arrow-path-rounded-square';
 
-    protected static ?int $navigationSort = 30;
+    protected static ?int $navigationSort = 40;
 
     protected static ?string $breadcrumb = 'Change Management';
-
-    protected static ?string $cluster = ServiceManagement::class;
 
     public static function getPages(): array
     {

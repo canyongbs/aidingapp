@@ -32,7 +32,7 @@
 </COPYRIGHT>
 --}}
 @php
-    use AidingApp\Assistant\Filament\Pages\PersonalAssistant;
+    use AidingApp\Assistant\Filament\Pages\SupportAssistant;
     use AidingApp\Authorization\Enums\LicenseType;
 @endphp
 
@@ -53,7 +53,7 @@
 
                 <div class="flex items-center justify-center">
                     <x-filament::button
-                        :href="$hasFeature ? PersonalAssistant::getUrl() : null"
+                        :href="$hasFeature ? SupportAssistant::getUrl() : null"
                         size="xl"
                         tag="a"
                         color="gray"

@@ -58,8 +58,6 @@ class ContactResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-users';
 
-    protected static ?string $navigationGroup = 'Recruitment CRM';
-
     protected static ?int $navigationSort = 20;
 
     protected static ?string $recordTitleAttribute = 'full_name';

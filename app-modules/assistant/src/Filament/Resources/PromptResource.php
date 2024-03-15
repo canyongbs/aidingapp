@@ -55,6 +55,8 @@ class PromptResource extends Resource
 
     protected static ?int $navigationSort = 10;
 
+    protected static bool $shouldRegisterNavigation = false;
+
     public static function getPages(): array
     {
         return [
