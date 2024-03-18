@@ -46,7 +46,6 @@ use App\Support\HasAdvancedFilter;
 use Illuminate\Support\Collection;
 use AidingApp\Team\Models\TeamUser;
 use AidingApp\Contact\Models\Contact;
-use AidingApp\CareTeam\Models\CareTeam;
 use AidingApp\Authorization\Models\Role;
 use App\Filament\Resources\UserResource;
 use Filament\Models\Contracts\HasAvatar;
@@ -234,23 +233,6 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
     public function contactAlerts(): HasManyDeep
     {
         return $this->hasManyDeepFromRelations($this->contactSubscriptions(), (new Contact())->alerts());
-    }
-
-    public function contactCareTeams(): MorphToMany
-    {
-        return $this->morphedByMany(
-            related: Contact::class,
-            name: 'educatable',
-            table: 'care_teams'
-        )
-            ->using(CareTeam::class)
-            ->withPivot('id')
-            ->withTimestamps();
-    }
-
-    public function careTeams(): HasMany
-    {
-        return $this->hasMany(CareTeam::class);
     }
 
     public function roleGroups(): BelongsToMany

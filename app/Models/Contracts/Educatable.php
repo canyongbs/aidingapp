@@ -36,12 +36,9 @@
 
 namespace App\Models\Contracts;
 
-use Illuminate\Database\Eloquent\Collection;
 use AidingApp\Authorization\Enums\LicenseType;
-use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 /**
- * @property-read Collection $careTeam
  * @property string $email
  */
 interface Educatable
@@ -49,8 +46,6 @@ interface Educatable
     public static function displayNameKey(): string;
 
     public static function displayEmailKey(): string;
-
-    public function careTeam(): MorphToMany;
 
     public static function getLicenseType(): LicenseType;
 }

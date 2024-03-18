@@ -45,7 +45,6 @@ use App\Models\Scopes\HasLicense;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Collection;
 use App\Models\Contracts\Educatable;
-use AidingApp\CareTeam\Models\CareTeam;
 use Illuminate\Notifications\Notifiable;
 use OwenIt\Auditing\Contracts\Auditable;
 use Illuminate\Database\Eloquent\Builder;
@@ -74,7 +73,6 @@ use AidingApp\Authorization\Models\Concerns\DefinesPermissions;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Notification\Models\Contracts\NotifiableInterface;
 use AidingApp\Engagement\Models\Concerns\HasManyMorphedEngagements;
-use AidingApp\Interaction\Models\Concerns\HasManyMorphedInteractions;
 use AidingApp\Engagement\Models\Concerns\HasManyMorphedEngagementResponses;
 
 /**
@@ -89,7 +87,6 @@ class Contact extends BaseAuthenticatable implements Auditable, Subscribable, Ed
     use HasFactory;
     use HasManyMorphedEngagementResponses;
     use HasManyMorphedEngagements;
-    use HasManyMorphedInteractions;
     use HasSubscriptions;
     use HasUuids;
     use Notifiable;
@@ -183,19 +180,6 @@ class Contact extends BaseAuthenticatable implements Auditable, Subscribable, Ed
     public function alerts(): MorphMany
     {
         return $this->morphMany(Alert::class, 'concern');
-    }
-
-    public function careTeam(): MorphToMany
-    {
-        return $this->morphToMany(
-            related: User::class,
-            name: 'educatable',
-            table: 'care_teams',
-        )
-            ->using(CareTeam::class)
-            ->withPivot('id')
-            ->withTimestamps()
-            ->tap(new HasLicense($this->getLicenseType()));
     }
 
     public static function displayNameKey(): string

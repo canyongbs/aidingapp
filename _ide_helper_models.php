@@ -440,8 +440,6 @@ namespace App\Models{
  * @property-read int|null $assistant_chats_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
  * @property-read int|null $audits_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\CareTeam\Models\CareTeam> $careTeams
- * @property-read int|null $care_teams_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\ServiceManagement\Models\ChangeRequestResponse> $changeRequestResponses
  * @property-read int|null $change_request_responses_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\ServiceManagement\Models\ChangeRequestType> $changeRequestTypes
@@ -450,8 +448,6 @@ namespace App\Models{
  * @property-read int|null $change_requests_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Consent\Models\ConsentAgreement> $consentAgreements
  * @property-read int|null $consent_agreements_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Contact\Models\Contact> $contactCareTeams
- * @property-read int|null $contact_care_teams_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Contact\Models\Contact> $contactSubscriptions
  * @property-read int|null $contact_subscriptions_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\InAppCommunication\Models\TwilioConversation> $conversations
@@ -993,33 +989,6 @@ namespace AidingApp\Authorization\Models{
 	class IdeHelperRoleGroup {}
 }
 
-namespace AidingApp\CareTeam\Models{
-/**
- * AidingApp\CareTeam\Models\CareTeam
- *
- * @property string $id
- * @property string $user_id
- * @property string $educatable_id
- * @property string $educatable_type
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $educatable
- * @property-read \App\Models\User $user
- * @method static \Illuminate\Database\Eloquent\Builder|CareTeam newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|CareTeam newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|CareTeam query()
- * @method static \Illuminate\Database\Eloquent\Builder|CareTeam whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CareTeam whereEducatableId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CareTeam whereEducatableType($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CareTeam whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CareTeam whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CareTeam whereUserId($value)
- * @mixin \Eloquent
- */
-	#[\AllowDynamicProperties]
-	class IdeHelperCareTeam {}
-}
-
 namespace AidingApp\Consent\Models{
 /**
  * AidingApp\Consent\Models\ConsentAgreement
@@ -1131,8 +1100,6 @@ namespace AidingApp\Contact\Models{
  * @property-read \App\Models\User|null $assignedTo
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
  * @property-read int|null $audits_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $careTeam
- * @property-read int|null $care_team_count
  * @property-read \App\Models\User|null $createdBy
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Engagement\Models\EngagementFile> $engagementFiles
  * @property-read int|null $engagement_files_count
@@ -1140,8 +1107,6 @@ namespace AidingApp\Contact\Models{
  * @property-read int|null $engagement_responses_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Engagement\Models\Engagement> $engagements
  * @property-read int|null $engagements_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Interaction\Models\Interaction> $interactions
- * @property-read int|null $interactions_count
  * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<int, \Illuminate\Notifications\DatabaseNotification> $notifications
  * @property-read int|null $notifications_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Engagement\Models\EngagementResponse> $orderedEngagementResponses
@@ -1158,6 +1123,8 @@ namespace AidingApp\Contact\Models{
  * @property-read int|null $subscriptions_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Task\Models\Task> $tasks
  * @property-read int|null $tasks_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Laravel\Sanctum\PersonalAccessToken> $tokens
+ * @property-read int|null $tokens_count
  * @method static \AidingApp\Contact\Database\Factories\ContactFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder|Contact newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Contact newQuery()
@@ -1282,8 +1249,6 @@ namespace AidingApp\Division\Models{
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
  * @property-read int|null $audits_count
  * @property-read \App\Models\User|null $createdBy
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Interaction\Models\Interaction> $interactions
- * @property-read int|null $interactions_count
  * @property-read \App\Models\User|null $lastUpdatedBy
  * @property-read \App\Models\NotificationSettingPivot|null $notificationSetting
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Team\Models\Team> $teams
@@ -1677,259 +1642,6 @@ namespace AidingApp\InAppCommunication\Models{
  */
 	#[\AllowDynamicProperties]
 	class IdeHelperTwilioConversationUser {}
-}
-
-namespace AidingApp\Interaction\Models{
-/**
- * AidingApp\Interaction\Models\Interaction
- *
- * @property string $id
- * @property string|null $subject
- * @property string|null $description
- * @property string|null $user_id
- * @property string|null $interactable_id
- * @property string|null $interactable_type
- * @property string|null $interaction_type_id
- * @property string|null $interaction_relation_id
- * @property string|null $interaction_campaign_id
- * @property string|null $interaction_driver_id
- * @property string|null $interaction_status_id
- * @property string|null $interaction_outcome_id
- * @property string|null $division_id
- * @property \Illuminate\Support\Carbon $start_datetime
- * @property \Illuminate\Support\Carbon|null $end_datetime
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
- * @property-read int|null $audits_count
- * @property-read \AidingApp\Interaction\Models\InteractionCampaign|null $campaign
- * @property-read \AidingApp\Division\Models\Division|null $division
- * @property-read \AidingApp\Interaction\Models\InteractionDriver|null $driver
- * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $interactable
- * @property-read \AidingApp\Interaction\Models\InteractionOutcome|null $outcome
- * @property-read \AidingApp\Interaction\Models\InteractionRelation|null $relation
- * @property-read \AidingApp\Interaction\Models\InteractionStatus|null $status
- * @property-read \AidingApp\Interaction\Models\InteractionType|null $type
- * @property-read \App\Models\User|null $user
- * @method static \AidingApp\Interaction\Database\Factories\InteractionFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder|Interaction licensedToEducatable(string $relationship)
- * @method static \Illuminate\Database\Eloquent\Builder|Interaction newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Interaction newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Interaction onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|Interaction query()
- * @method static \Illuminate\Database\Eloquent\Builder|Interaction whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Interaction whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Interaction whereDescription($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Interaction whereDivisionId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Interaction whereEndDatetime($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Interaction whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Interaction whereInteractableId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Interaction whereInteractableType($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Interaction whereInteractionCampaignId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Interaction whereInteractionDriverId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Interaction whereInteractionOutcomeId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Interaction whereInteractionRelationId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Interaction whereInteractionStatusId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Interaction whereInteractionTypeId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Interaction whereStartDatetime($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Interaction whereSubject($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Interaction whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Interaction whereUserId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Interaction withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|Interaction withoutTrashed()
- * @mixin \Eloquent
- */
-	#[\AllowDynamicProperties]
-	class IdeHelperInteraction {}
-}
-
-namespace AidingApp\Interaction\Models{
-/**
- * AidingApp\Interaction\Models\InteractionCampaign
- *
- * @property string $id
- * @property string $name
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
- * @property-read int|null $audits_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Interaction\Models\Interaction> $interactions
- * @property-read int|null $interactions_count
- * @method static \AidingApp\Interaction\Database\Factories\InteractionCampaignFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionCampaign newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionCampaign newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionCampaign onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionCampaign query()
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionCampaign whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionCampaign whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionCampaign whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionCampaign whereName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionCampaign whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionCampaign withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionCampaign withoutTrashed()
- * @mixin \Eloquent
- */
-	#[\AllowDynamicProperties]
-	class IdeHelperInteractionCampaign {}
-}
-
-namespace AidingApp\Interaction\Models{
-/**
- * AidingApp\Interaction\Models\InteractionDriver
- *
- * @property string $id
- * @property string $name
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
- * @property-read int|null $audits_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Interaction\Models\Interaction> $interactions
- * @property-read int|null $interactions_count
- * @method static \AidingApp\Interaction\Database\Factories\InteractionDriverFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionDriver newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionDriver newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionDriver onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionDriver query()
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionDriver whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionDriver whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionDriver whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionDriver whereName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionDriver whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionDriver withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionDriver withoutTrashed()
- * @mixin \Eloquent
- */
-	#[\AllowDynamicProperties]
-	class IdeHelperInteractionDriver {}
-}
-
-namespace AidingApp\Interaction\Models{
-/**
- * AidingApp\Interaction\Models\InteractionOutcome
- *
- * @property string $id
- * @property string $name
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
- * @property-read int|null $audits_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Interaction\Models\Interaction> $interactions
- * @property-read int|null $interactions_count
- * @method static \AidingApp\Interaction\Database\Factories\InteractionOutcomeFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionOutcome newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionOutcome newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionOutcome onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionOutcome query()
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionOutcome whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionOutcome whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionOutcome whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionOutcome whereName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionOutcome whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionOutcome withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionOutcome withoutTrashed()
- * @mixin \Eloquent
- */
-	#[\AllowDynamicProperties]
-	class IdeHelperInteractionOutcome {}
-}
-
-namespace AidingApp\Interaction\Models{
-/**
- * AidingApp\Interaction\Models\InteractionRelation
- *
- * @property string $id
- * @property string $name
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
- * @property-read int|null $audits_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Interaction\Models\Interaction> $interactions
- * @property-read int|null $interactions_count
- * @method static \AidingApp\Interaction\Database\Factories\InteractionRelationFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionRelation newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionRelation newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionRelation onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionRelation query()
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionRelation whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionRelation whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionRelation whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionRelation whereName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionRelation whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionRelation withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionRelation withoutTrashed()
- * @mixin \Eloquent
- */
-	#[\AllowDynamicProperties]
-	class IdeHelperInteractionRelation {}
-}
-
-namespace AidingApp\Interaction\Models{
-/**
- * AidingApp\Interaction\Models\InteractionStatus
- *
- * @property string $id
- * @property string $name
- * @property \AidingApp\Interaction\Enums\InteractionStatusColorOptions $color
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
- * @property-read int|null $audits_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Interaction\Models\Interaction> $interactions
- * @property-read int|null $interactions_count
- * @method static \AidingApp\Interaction\Database\Factories\InteractionStatusFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionStatus newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionStatus newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionStatus onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionStatus query()
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionStatus whereColor($value)
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionStatus whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionStatus whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionStatus whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionStatus whereName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionStatus whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionStatus withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionStatus withoutTrashed()
- * @mixin \Eloquent
- */
-	#[\AllowDynamicProperties]
-	class IdeHelperInteractionStatus {}
-}
-
-namespace AidingApp\Interaction\Models{
-/**
- * AidingApp\Interaction\Models\InteractionType
- *
- * @property string $id
- * @property string $name
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
- * @property-read int|null $audits_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Interaction\Models\Interaction> $interactions
- * @property-read int|null $interactions_count
- * @method static \AidingApp\Interaction\Database\Factories\InteractionTypeFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionType newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionType newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionType onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionType query()
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionType whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionType whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionType whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionType whereName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionType whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionType withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|InteractionType withoutTrashed()
- * @mixin \Eloquent
- */
-	#[\AllowDynamicProperties]
-	class IdeHelperInteractionType {}
 }
 
 namespace AidingApp\InventoryManagement\Models{
@@ -2708,12 +2420,13 @@ namespace AidingApp\ServiceManagement\Models{
  * @property-read Contact $respondent
  * @property string $id
  * @property string $service_request_number
+ * @property string|null $title
  * @property string $respondent_type
  * @property string $respondent_id
  * @property string|null $close_details
  * @property string|null $res_details
  * @property string|null $service_request_form_submission_id
- * @property string $division_id
+ * @property string|null $division_id
  * @property string|null $status_id
  * @property string|null $priority_id
  * @property string|null $created_by_id
@@ -2729,12 +2442,10 @@ namespace AidingApp\ServiceManagement\Models{
  * @property-read \App\Models\User|null $createdBy
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Notification\Models\OutboundDeliverable> $deliverables
  * @property-read int|null $deliverables_count
- * @property-read \AidingApp\Division\Models\Division $division
+ * @property-read \AidingApp\Division\Models\Division|null $division
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\ServiceManagement\Models\ServiceRequestHistory> $histories
  * @property-read int|null $histories_count
  * @property-read \AidingApp\ServiceManagement\Models\ServiceRequestAssignment|null $initialAssignment
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Interaction\Models\Interaction> $interactions
- * @property-read int|null $interactions_count
  * @property-read \AidingApp\ServiceManagement\Models\ServiceRequestUpdate|null $latestInboundServiceRequestUpdate
  * @property-read \AidingApp\ServiceManagement\Models\ServiceRequestUpdate|null $latestOutboundServiceRequestUpdate
  * @property-read \AidingApp\ServiceManagement\Models\ServiceRequestPriority|null $priority
@@ -2763,6 +2474,7 @@ namespace AidingApp\ServiceManagement\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequest whereServiceRequestNumber($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequest whereStatusId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequest whereStatusUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequest whereTitle($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequest whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequest withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequest withoutTrashed()
@@ -2974,6 +2686,7 @@ namespace AidingApp\ServiceManagement\Models{
  * @property string|null $service_request_priority_id
  * @property string|null $author_id
  * @property string|null $author_type
+ * @property string|null $description
  * @property \Carbon\CarbonImmutable|null $submitted_at
  * @property \Carbon\CarbonImmutable|null $canceled_at
  * @property \AidingApp\Form\Enums\FormSubmissionRequestDeliveryMethod|null $request_method
@@ -3002,6 +2715,7 @@ namespace AidingApp\ServiceManagement\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestFormSubmission whereCanceledAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestFormSubmission whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestFormSubmission whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestFormSubmission whereDescription($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestFormSubmission whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestFormSubmission whereRequestMethod($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestFormSubmission whereRequestNote($value)
@@ -3130,6 +2844,8 @@ namespace AidingApp\ServiceManagement\Models{
  *
  * @property string $id
  * @property string $name
+ * @property string|null $description
+ * @property string|null $icon
  * @property bool $has_enabled_feedback_collection
  * @property bool $has_enabled_csat
  * @property bool $has_enabled_nps
@@ -3150,9 +2866,11 @@ namespace AidingApp\ServiceManagement\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType query()
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereDescription($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereHasEnabledCsat($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereHasEnabledFeedbackCollection($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereHasEnabledNps($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereIcon($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereUpdatedAt($value)

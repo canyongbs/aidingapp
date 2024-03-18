@@ -111,8 +111,6 @@ class ManagePortalSettings extends SettingsPage
                             ->disabled(! Gate::check(Feature::RealtimeChat->getGateName()))
                             ->hintIcon(fn (Toggle $component) => $component->isDisabled() ? 'heroicon-m-lock-closed' : null)
                             ->hintIconTooltip('Realtime Chat is not a part of your current subscription.'),
-                        Toggle::make('has_care_team')
-                            ->label('Care Team'),
                         Toggle::make('has_performance_alerts')
                             ->label('Performance Alerts'),
                         Toggle::make('has_emergency_alerts')

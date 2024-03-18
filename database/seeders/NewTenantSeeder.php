@@ -42,7 +42,6 @@ use Illuminate\Support\Facades\Artisan;
 use AidingApp\Division\Database\Seeders\DivisionSeeder;
 use AidingApp\Contact\Database\Seeders\ContactSourceSeeder;
 use AidingApp\Contact\Database\Seeders\ContactStatusSeeder;
-use AidingApp\Interaction\Database\Seeders\InteractionSeeder;
 use AidingApp\Consent\Database\Seeders\ConsentAgreementSeeder;
 use AidingApp\InventoryManagement\Database\Seeders\AssetSeeder;
 use AidingApp\Authorization\Console\Commands\SyncRolesAndPermissions;
@@ -78,7 +77,6 @@ class NewTenantSeeder extends Seeder
             KnowledgeBaseCategorySeeder::class,
             KnowledgeBaseQualitySeeder::class,
             KnowledgeBaseStatusSeeder::class,
-            ...InteractionSeeder::metadataSeeders(),
             ConsentAgreementSeeder::class,
             PronounsSeeder::class,
 

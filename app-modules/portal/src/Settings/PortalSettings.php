@@ -48,8 +48,6 @@ class PortalSettings extends Settings
 
     public bool $has_user_chat = false;
 
-    public bool $has_care_team = false;
-
     public bool $has_performance_alerts = false;
 
     public bool $has_emergency_alerts = false;

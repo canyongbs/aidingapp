@@ -61,7 +61,6 @@ use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
 use Illuminate\Database\UniqueConstraintViolationException;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateDirection;
-use AidingApp\Interaction\Models\Concerns\HasManyMorphedInteractions;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
@@ -79,7 +78,6 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
     use SoftDeletes;
     use PowerJoins;
     use AuditableTrait;
-    use HasManyMorphedInteractions;
     use HasRelationships;
 
     protected $fillable = [
