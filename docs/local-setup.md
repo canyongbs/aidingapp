@@ -4,6 +4,9 @@
 * [Docker](https://docs.docker.com/get-docker/)
 * [Docker Compose](https://docs.docker.com/compose/install/) (It is most likely that the way you installed Docker already came with Docker Compose, so on most systems you probably need not install this)
 * [NVM (Node Version Manager)](https://github.com/nvm-sh/nvm) (Optional, but recommended)
+* Spin CLI
+* [Spin MacOS](https://serversideup.net/open-source/spin/docs/installation/install-macos#install-docker-desktop)
+* [Spin Linux](https://serversideup.net/open-source/spin/docs/installation/install-linux)
 
 ### Pre-Setup
 
@@ -27,39 +30,33 @@ nvm use
 
 Details on how to automatically use the correct version of Node when entering the project directory can be found on the [NVM GitHub page | Deeper Shell Integration](https://github.com/nvm-sh/nvm#deeper-shell-integration)
 
+#### Local hosts file
+
+In order to access the application in a web browser either in local or remote development you will need to place the following in your local `/etc/hosts` (or equivalent) file:
+
+```bash
+127.0.0.1 aidingapp.local
+127.0.0.1 mail.tools.aidingapp.local
+127.0.0.1 redis.tools.aidingapp.local
+127.0.0.1 storage.tools.aidingapp.local
+127.0.0.1 media.tools.aidingapp.local
+127.0.0.1 aidingapp-minio
+127.0.0.1 test.aidingapp.local
+```
+
+> Note: If you want any other tenant domains other than `test.aidingapp.local` you will need to add them to your `etc/hosts` file in the same way as well.
+
 ### Setup
-This application makes use of [Spin](https://serversideup.net/open-source/spin/docs) for local development. Though not a requirement, it is highly recommended reading through the documentation on it.
 
-The `spin` executable is within your vendor folder, so you would have to type the path to it everytime to use it. To make this better, Spin recommends adding the following Bash alias:
-
+#### 1. Set up the `.env` file
+First, create an `.env` file based on `.env.example`
 ```bash
-alias spin='[ -f node_modules/.bin/spin ] && bash node_modules/.bin/spin || bash vendor/bin/spin'
-```
-
-This documentation will assume you have done so. If not you can simply replace `spin` throughout with `./vendor/bin/spin`.
-
-It may also be helpful to add some aliases for quick artisan and composer commands.
-
-```bash
-alias spina='spin exec -it php php artisan'
-alias spinc='spin exec -it php composer'
-```
-
-Make sure to add these after the `spin` alias.
-
-If you choose not to add these aliases, you can execute commands using `exec` like so:
-
-```bash
-spin exec -it php php artisan key:generate
-
-# or
-
-spin exec -it php php composer install
+cp .env.example .env
 ```
 
 ---
 
-After cloning this project, execute the following commands to install php dependencies:
+#### 2. Install Composer Dependencies
 
 ```bash
 docker run --rm \
@@ -69,42 +66,44 @@ docker run --rm \
     laravelsail/php82-composer:latest \
     composer install --ignore-platform-reqs
 ```
-You can install the php dependencies by simple running `composer install` on your host machine which can be quicker. But it can be best to install these making sure that the correct PHP version is being used while doing so.
 
-Then, create a `.env` file based on `.env.example`
-```bash
-cp .env.example .env
-```
+---
 
-Next we need to get Spin to set up the containers and start running:
+#### 3. Start the containers and open a shell into the main PHP container
+
+Run the following command to start the containers:
 
 ```bash
 spin up -d
 ```
 
-Finally, we will set up the application by running the following commands:
+Once the containers are started you can now start a shell into the main PHP container by running the following command:
+
 ```bash
-spina key:generate
-spina migrate:landlord:fresh
-npm install
-npm run build
+spin exec -it advisingapp-app bash
 ```
 
-> #### Note:
-> If you do not have `nvm` installed and set up or you would prefer to run `npm` commands inside the container, you will need to run bash within the container and run the commands from there:
->
-> ```bash
-> spin exec -it php bash
-> ```
->
-> You will then have an interactive bash session within the container that you can run all commands from.
+All following commands will and should be run from within the PHP container.
+
+---
+
+#### 4. Set up the application
+
+We will set up the application by running the following commands:
+```bash
+php artisan migrate:landlord:fresh
+php artisan key:generate
+php artisan queue:restart
+php artisan schedule:interrupt
+npm ci
+npm run build
+```
 
 The above commands will set up the application for the "landlord" database. The landlord database is in charge of holding all information on tenants. Next we will set up a tenant.
 
 ```bash
-spina tenant:create [A Name for the Tenant] [A domain for the tenant]
-spina queue:work --queue=landlord --stop-when-empty
-spina tenants:artisan "db:seed --database=tenant"
+php artisan tenants:create [A Name for the Tenant] [A domain for the tenant]
+php artisan tenants:artisan "db:seed --database=tenant"
 ```
 
 These commands will create a new tenant with the name and domain you supplied and then refresh and seed the tenant's database.
@@ -113,34 +112,31 @@ After this the application should be accessible at the domain you supplied.
 
 Spin can be stopped by running `spin stop` and turning back on by running `spin up -d`
 
+Setup is now complete.
+
+---
+
 ### Customizing container settings and Ports
 
 Within the `.env.example` (and within the `.env` after you copy it) should exist the following variables:
 
 ```dotenv
-FORWARD_DB_PORT=3306
-FORWARD_DB_PORT_TEST=3309
-FORWARD_REDIS_PORT=6379
-FORWARD_MEILISEARCH_PORT=7700
-FORWARD_MAILPIT_PORT=1025
-FORWARD_MAILPIT_DASHBOARD_PORT=8025
-FORWARD_MINIO_PORT=9000
-FORWARD_MINIO_CONSOLE_PORT=8900
+FORWARD_DB_PORT=5434
+FORWARD_REDIS_PORT=63793
 ```
 
 Those variable will allow you to edit particular settings and forwarding ports for your local containers. A great example of this usage is within the database section below.
 
 ### Accessing the Database
-Within the containers, MySQL lives on port 3306. And by default it can be accessed outside of the containers on port 3308 as well.
+Within the containers, Postgres lives on port 5432. And by default it can be accessed outside of the containers on the port set with `FORWARD_DB_PORT`.
 
-If port 3306 is already in use on your system or you prefer to use another port,
-you can set the `FORWARD_DB_PORT` in your `.env` file to whatever available
-port you want.
+If the port set with FORWARD_DB_PORT is already in use on your system or you prefer to use another port,
+you can set the `FORWARD_DB_PORT` in your `.env` file to whatever available port you want.
 
 ### Minio (S3 Compatible Storage)
 Minio is a S3 compatible storage solution that is used for storing files locally.
 
-When first setting up you will need to create a bucket. This can be done by going to `localhost:8900` in your browser and logging in with `aidingapp` as the username and `password` as the password. Once logged in, you can create a bucket.
+When first setting up you will need to create a bucket. This can be done by going to `storage.tools.aidingapp.local` in your browser and logging in with `aidingapp` as the username and `password` as the password. Once logged in, you can create a bucket.
 
 By default, the application is set up in the `.env.example` to reference a bucket named `local`. Create a bucket with this name in Minio. Then change its access policy to "Custom" with the following policy configuration:
 
@@ -165,11 +161,6 @@ By default, the application is set up in the `.env.example` to reference a bucke
         }
     ]
 }
-```
-
-In order to facilitate proper file upload with Livewire you will need to set the following in your local etc/hosts file:
-```
-127.0.0.1 minio
 ```
 
 ### Queue and Scheduler

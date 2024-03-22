@@ -50,3 +50,7 @@ FROM base AS development
 FROM base AS deploy
 
 COPY --chown=$PUID:$PGID . /var/www/html
+
+RUN chown -R "$PUID":"$PGID" /var/www/html \
+    && chgrp "$PGID" /var/www/html/storage/logs \
+    && chmod g+s /var/www/html/storage/logs \
