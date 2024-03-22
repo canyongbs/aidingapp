@@ -1,4 +1,6 @@
-<!--
+<?php
+
+/*
 <COPYRIGHT>
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
@@ -30,27 +32,28 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
--->
-<script setup>
-import SidebarContent from '@/Components/SidebarContent.vue';
-import { defineProps } from 'vue';
+*/
 
-defineProps({
-    categories: {
-        type: Object,
-        default: {},
-    },
-    apiUrl: {
-        type: String,
-        required: true,
-    },
-});
-</script>
+namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
-<template>
-    <div class="hidden lg:fixed h-full lg:z-50 lg:flex lg:w-72 lg:flex-col">
-        <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-white px-6 pb-4">
-            <SidebarContent :categories="categories" :api-url="apiUrl"></SidebarContent>
-        </div>
-    </div>
-</template>
+use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use App\Http\Controllers\Controller;
+
+class KnowledgeManagementPortalLogoutController extends Controller
+{
+    public function __invoke(Request $request): JsonResponse
+    {
+        /** @var Contact $contact */
+        $contact = auth('contact')->user();
+
+        $contact->tokens()->where('name', 'knowledge-management-portal-access-token')->delete();
+
+        auth('contact')->logout();
+
+        return response()->json([
+            'success' => true,
+            'redirect_url' => route('portal.knowledge-management.show'),
+        ]);
+    }
+}
