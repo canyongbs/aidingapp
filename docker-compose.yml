@@ -1,16 +1,11 @@
 version: '3.8'
 services:
-    php:
+    aidingapp-app:
         build:
             context: .
             target: base
             args:
                 USER_ID: ${SPIN_USER_ID:-9999}
                 GROUP_ID: ${SPIN_GROUP_ID:-9999}
-        labels:
-            - dev.orbstack.domains=*.aidingapp.local
         extra_hosts:
             - 'host.docker.internal:host-gateway'
-        ports:
-            - '${APP_PORT:-80}:80'
-            - '${VITE_PORT:-5173}:${VITE_PORT:-5173}'

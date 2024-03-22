@@ -1,6 +1,6 @@
 version: '3.8'
 services:
-  php:
+  aidingapp-app:
     build:
       target: development
     environment:
@@ -8,70 +8,87 @@ services:
       LARAVEL_SCHEDULER_ENABLED: '${LARAVEL_SCHEDULER_ENABLED:-true}'
       LARAVEL_QUEUE_ENABLED: '${LARAVEL_QUEUE_ENABLED:-true}'
       LARAVEL_OCTANE_WATCH: '${LARAVEL_OCTANE_WATCH:-false}'
+      PUID: '${SPIN_USER_ID:-9999}'
+      PGID: '${SPIN_GROUP_ID:-9999}'
     labels:
-      - dev.orbstack.domains=*.aidingapp.local
+      - "traefik.enable=true"
+      - "traefik.http.routers.aidingapp-app.rule=HostRegexp(`aidingapp.local`, `{subdomain:[a-z]+}.aidingapp.local`)"
+      - "traefik.http.routers.aidingapp-app.entrypoints=websecure"
+      - "traefik.http.routers.aidingapp-app.tls=true"
+      - "traefik.http.services.aidingapp-app.loadbalancer.server.port=443"
+      - "traefik.http.services.aidingapp-app.loadbalancer.server.scheme=https"
     extra_hosts:
       - 'host.docker.internal:host-gateway'
-    ports:
-      - '${APP_PORT:-80}:80'
-      - '${APP_HTTPS_PORT:-443}:443'
-      - '${VITE_PORT:-5173}:${VITE_PORT:-5173}'
     volumes:
       - '.:/var/www/html'
     networks:
-      - development
+      - cgbs-development
     depends_on:
-      - redis
-      - minio
-      - mailpit
-      - pgsql
-  redis:
+      - aidingapp-redis
+      - aidingapp-minio
+      - aidingapp-mailpit
+      - aidingapp-pgsql
+
+  aidingapp-redis:
     image: 'redis:alpine'
     ports:
-      - '${FORWARD_REDIS_PORT:-6379}:6379'
+      - '${FORWARD_REDIS_PORT:-63793}:6379'
     volumes:
       - 'aidingapp-redis:/data'
     networks:
-      - development
+      - cgbs-development
     healthcheck:
-      test:
-        - CMD
-        - redis-cli
-        - ping
+      test: ["CMD", "redis-cli", "ping"]
       retries: 3
       timeout: 5s
-  minio:
+
+  aidingapp-minio:
     image: 'minio/minio:RELEASE.2023-07-07T07-13-57Z'
-    ports:
-      - '${FORWARD_MINIO_PORT:-9000}:9000'
-      - '${FORWARD_MINIO_CONSOLE_PORT:-8900}:8900'
     environment:
       MINIO_ROOT_USER: aidingapp
       MINIO_ROOT_PASSWORD: password
     volumes:
       - 'aidingapp-minio:/data/minio'
     networks:
-      - development
+      - cgbs-development
     command: 'minio server /data/minio --console-address ":8900"'
     healthcheck:
-      test:
-        - CMD
-        - curl
-        - '-f'
-        - 'http://localhost:9000/minio/health/live'
+      test: ['CMD', 'curl', '-f', 'http://localhost:9000/minio/health/live']
       retries: 3
       timeout: 5s
-  mailpit:
+    labels:
+      - "traefik.enable=true"
+
+      - "traefik.http.routers.aidingapp-minio-console.rule=Host(`storage.tools.aidingapp.local`)"
+      - "traefik.http.routers.aidingapp-minio-console.entrypoints=websecure"
+      - "traefik.http.routers.aidingapp-minio-console.tls=true"
+      - "traefik.http.routers.aidingapp-minio-console.service=aidingapp-minio-console-service"
+      - "traefik.http.services.aidingapp-minio-console-service.loadbalancer.server.port=8900"
+      - "traefik.http.services.aidingapp-minio-console-service.loadbalancer.server.scheme=http"
+
+      - "traefik.http.routers.aidingapp-minio.rule=Host(`media.tools.aidingapp.local`, `aidingapp-minio`)"
+      - "traefik.http.routers.aidingapp-minio.entrypoints=websecure"
+      - "traefik.http.routers.aidingapp-minio.tls=true"
+      - "traefik.http.routers.aidingapp-minio.service=aidingapp-minio-service"
+      - "traefik.http.services.aidingapp-minio-service.loadbalancer.server.port=9000"
+      - "traefik.http.services.aidingapp-minio-service.loadbalancer.server.scheme=http"
+
+  aidingapp-mailpit:
     image: 'axllent/mailpit:latest'
-    ports:
-      - '${FORWARD_MAILPIT_PORT:-1025}:1025'
-      - '${FORWARD_MAILPIT_DASHBOARD_PORT:-8025}:8025'
     networks:
-      - development
-  pgsql:
+      - cgbs-development
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.aidingapp-mailpit.rule=Host(`mail.tools.aidingapp.local`)"
+      - "traefik.http.routers.aidingapp-mailpit.entrypoints=websecure"
+      - "traefik.http.routers.aidingapp-mailpit.tls=true"
+      - "traefik.http.services.aidingapp-mailpit.loadbalancer.server.port=8025"
+      - "traefik.http.services.aidingapp-mailpit.loadbalancer.server.scheme=http"
+
+  aidingapp-pgsql:
     image: 'postgres:15'
     ports:
-      - '${FORWARD_DB_PORT:-5432}:5432'
+      - '${FORWARD_DB_PORT:-5434}:5432'
     environment:
       PGPASSWORD: '${DB_PASSWORD:-secret}'
       POSTGRES_DB: '${DB_DATABASE}'
@@ -81,20 +98,16 @@ services:
       - 'aidingapp-pgsql:/var/lib/postgresql/data'
       - './docker/pgsql/create-testing-database.sql:/docker-entrypoint-initdb.d/10-create-testing-database.sql'
     networks:
-      - development
+      - cgbs-development
     healthcheck:
-      test:
-        - CMD
-        - pg_isready
-        - '-q'
-        - '-d'
-        - '${DB_DATABASE}'
-        - '-U'
-        - '${DB_USERNAME}'
+      test: ["CMD", "pg_isready", "-q", "-d", "${DB_DATABASE}", "-U", "${DB_USERNAME}"]
       retries: 3
       timeout: 5s
+
 networks:
-  development:
+  cgbs-development:
+    external: true
+
 volumes:
   aidingapp-redis:
     driver: local
