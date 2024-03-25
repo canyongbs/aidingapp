@@ -42,6 +42,7 @@ use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\ServiceRequestTy
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEmbeddableAndAuthorized;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\CreateServiceRequestController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalController;
+use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalLogoutController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalSearchController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalArticleController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalCategoryController;
@@ -76,6 +77,10 @@ Route::prefix('api')
                 Route::post('/authenticate/{authentication}', KnowledgeManagementPortalAuthenticateController::class)
                     ->middleware(['signed:relative', EnsureFrontendRequestsAreStateful::class])
                     ->name('authenticate.embedded');
+
+                Route::post('/logout', KnowledgeManagementPortalLogoutController::class)
+                    ->middleware(['auth:sanctum'])
+                    ->name('logout');
 
                 Route::post('/search', [KnowledgeManagementPortalSearchController::class, 'get'])
                     ->middleware(['signed:relative'])
