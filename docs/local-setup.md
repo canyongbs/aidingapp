@@ -56,7 +56,14 @@ cp .env.example .env
 
 ---
 
-#### 2. Install Composer Dependencies
+#### 2. Install NPM Dependencies
+
+```bash
+npm ci
+npm run build
+```
+
+#### 3. Install Composer Dependencies
 
 ```bash
 docker run --rm \
@@ -69,7 +76,7 @@ docker run --rm \
 
 ---
 
-#### 3. Start the containers and open a shell into the main PHP container
+#### 4. Start the containers and open a shell into the main PHP container
 
 Run the following command to start the containers:
 
@@ -80,14 +87,14 @@ spin up -d
 Once the containers are started you can now start a shell into the main PHP container by running the following command:
 
 ```bash
-spin exec -it advisingapp-app bash
+spin exec -it aidingapp-app bash
 ```
 
 All following commands will and should be run from within the PHP container.
 
 ---
 
-#### 4. Set up the application
+#### 5. Set up the application
 
 We will set up the application by running the following commands:
 ```bash
@@ -95,7 +102,6 @@ php artisan migrate:landlord:fresh
 php artisan key:generate
 php artisan queue:restart
 php artisan schedule:interrupt
-npm ci
 npm run build
 ```
 
