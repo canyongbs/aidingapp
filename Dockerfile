@@ -1,3 +1,4 @@
+FROM ghcr.io/roadrunner-server/roadrunner:2023.3.12 AS roadrunner
 FROM serversideup/php:8.2-fpm-nginx-v2.2.1 AS base
 
 LABEL authors="CanyonGBS"
@@ -36,6 +37,9 @@ COPY ./docker/nginx/site-opts.d /etc/nginx/site-opts.d
 RUN rm /etc/s6-overlay/s6-rc.d/user/contents.d/php-fpm
 RUN rm -rf /etc/s6-overlay/s6-rc.d/php-fpm
 
+COPY --from=roadrunner /usr/bin/rr /var/www/html/rr
+RUN chmod 0755 /var/www/html/rr
+
 RUN apt-get update \
     && apt-get upgrade -y
 
@@ -50,6 +54,12 @@ FROM base AS development
 FROM base AS deploy
 
 COPY --chown=$PUID:$PGID . /var/www/html
+
+RUN npm ci --ignore-scripts \
+    && rm -rf /var/www/html/vendor \
+    && composer install --no-dev --no-interaction --no-progress --no-suggest --optimize-autoloader --no-scripts \
+    && npm run build \
+    && npm ci --ignore-scripts --omit=dev
 
 RUN chown -R "$PUID":"$PGID" /var/www/html \
     && chgrp "$PGID" /var/www/html/storage/logs \
