@@ -8,3 +8,6 @@ docs
 .env.example
 rr
 ./storage/logs/*
+stubs
+tests
+bootstrap/cache/*.php
