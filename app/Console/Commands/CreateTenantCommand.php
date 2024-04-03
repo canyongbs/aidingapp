@@ -54,12 +54,12 @@ class CreateTenantCommand extends Command
 
     protected $description = 'Temporary command to test the tenant creation process.';
 
-    public function handle(): void
+    public function handle(): int
     {
         if (! app()->environment('local')) {
             $this->error('This command can only be run in the local environment.');
 
-            return;
+            return static::FAILURE;
         }
 
         $name = $this->argument('name');
@@ -140,5 +140,7 @@ class CreateTenantCommand extends Command
                 );
             }
         }
+
+        return static::SUCCESS;
     }
 }

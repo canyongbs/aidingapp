@@ -56,6 +56,6 @@ class SetupRoleGroups extends Command
 
         $this->info('Role groups created successfully!');
 
-        return self::SUCCESS;
+        return static::SUCCESS;
     }
 }
