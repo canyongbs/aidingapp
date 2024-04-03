@@ -40,15 +40,15 @@ use App\Models\Tenant;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Artisan;
-use App\Multitenancy\Actions\CreateTenant;
 use App\Multitenancy\DataTransferObjects\TenantConfig;
 use App\Multitenancy\DataTransferObjects\TenantMailConfig;
 use App\Multitenancy\DataTransferObjects\TenantMailersConfig;
 use App\Multitenancy\DataTransferObjects\TenantDatabaseConfig;
+use App\Multitenancy\Actions\CreateTenant as CreateTenantAction;
 use App\Multitenancy\DataTransferObjects\TenantSmtpMailerConfig;
 use App\Multitenancy\DataTransferObjects\TenantS3FilesystemConfig;
 
-class CreateTenantCommand extends Command
+class CreateTenant extends Command
 {
     protected $signature = 'tenants:create {name} {domain} {--m|run-queue}';
 
@@ -73,7 +73,7 @@ class CreateTenantCommand extends Command
 
         Tenant::where('domain', $domain)->delete();
 
-        $tenant = app(CreateTenant::class)(
+        $tenant = app(CreateTenantAction::class)(
             $name,
             $domain,
             new TenantConfig(
