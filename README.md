@@ -18,23 +18,23 @@
 \
 This repository includes the software solution known as __Aiding App™__ created by Canyon GBS™. \
 \
-The software in this repository is offerred as a fully managed and supported, SOC 2 compliant and ISO 27001:2022 certified, SaaS offerring to colleges and universities through Canyon GBS LLC. Additionally, the software is released as open-source under the Elastic License 2.0 (see the [license file](./LICENSE) for more details.)\
+The helpdesk technology featured in this repository is offerred as a fully managed and supported, ISO 27001:2022 certified, SaaS offerring to through Canyon GBS LLC. Additionally, the software is released here as source-available under the Elastic License 2.0 (see the [license file](./LICENSE) for more details.)\
 \
 _Note: This software is developed, under copyright, and trademarked by Canyon GBS LLC ([canyongbs.com](https://canyongbs.com))._
 
-## Key AI + CRM Features
+## Key Features
 
-### Artificial Intelligence
+__Aiding App™__ is a cutting-edge, helpdesk solution designed to streamline and enhance the efficiency of support services. It provides an intuitive, feature-rich platform for managing various aspects of customer support and service delivery.
 
-Our robust personal assistant is designed to support your student service professionals in their day-to-day roles. Some key capabilities the assistant can help with includes:
-
-* Research Tasks
-* Draft Communication
-* Language Translation
-* Content Creation
-* Project Planning
-* Ideation
-* And Much More...
+* Contact Management
+* Service Requests
+* SLA Management
+* Change Management
+* Asset Management
+* AI Powered Support Assistant
+* Knowledge Base
+* Team Chat
+* Task Management
 
 ## Technology
 ### Proudly Built With
@@ -49,7 +49,7 @@ A [PHP](https://php.net) TALL Stack is used to create our software:
 * [Laravel](https://laravel.com/)
 * [Livewire](https://laravel-livewire.com/)
 
-### Dependences for AI + CRM (800+)
+### Dependences
 
 * [GitHub Insights: Dependencies](https://github.com/canyongbs/aidingapp/network/dependencies)
 
@@ -59,29 +59,33 @@ Cloudflare DNS<br>
 Amazon Web Services (AWS):
 * AWS WAF
 * AWS ALB
-* AWS EC2 (Multi-AZ)
+* AWS ECR, ECS and Fargate
 * AWS SQS
-* AWS OpenSearch (Serverless)
-* AWS ElastiCache Redis Instance
-* AWS RDS Aurora PostgreSQL w/ FDW Configuration (Serverless)
-* AWS RDS ElastiCache Redis Instance
+* AWS ElastiCache (Redis) Serverless
+* AWS RDS PostgreSQL Serverless
 * AWS S3
 
 Microsoft Azure
 * Azure Cognitive Services
 
-## Additional Project Details
-### Documentation
+_Note: We recommend that the solution be deployed as serverless technology using Cloudflare, AWS, and Azure._
 
+## Additional Project Details
+### General Project Docs
+
+* [API](./docs/api.md)
+* [Coding Standards](./docs/coding-standards.md)
 * [Inbound-Webhooks](./docs/inbound-webhooks.md)
 * [Local Setup](./docs/local-setup.md)
 * [Roles and Permissions](./docs/roles-and-permissions.md)
 * [Inbound Webhooks](./docs/inbound-webhooks.md)
-* [Integrations: Twilio](./docs/integrations/twilio.md)
-* [Integrations: Azure OpenAI](./docs/integrations/azure_open_ai.md)
 * [Custom Metadata](./docs/custom-metadata.md)
 
-_Note: More documentation coming soon._
+### Integration Docs
+
+* [Azure Cognitive Services](./docs/integrations/azure_open_ai.md)
+* [SES Event Tracking](./docs/integrations/ses_event_tracking.md)
+* [Integrations: Twilio](./docs/integrations/twilio.md)
 
 ## Feature Requests & Issues
 
@@ -126,13 +130,6 @@ This software is developed by Canyon GBS LLC who is the copyright and trademark 
 * [Canyon GBS on the Web](https://canyongbs.com)
 * [Canyon GBS on Twitter](https://twitter.com/canyongbs)
 * [Canyon GBS on LinkedIn](https://linkedin.com/company/canyongbs)
-
-## Acknowledgments
-
-We want to extend a special think you to the Postsecondary Success team at the [Bill & Melinda Gates Foundation](https://www.gatesfoundation.org/our-work/programs/us-program/postsecondary-success).
-\
-\
-The creation and successful release of this ambitious project would not have been possible without their support.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
