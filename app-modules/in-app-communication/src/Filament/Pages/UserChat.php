@@ -98,7 +98,7 @@ class UserChat extends Page implements HasForms, HasActions
 
     protected static string $view = 'in-app-communication::filament.pages.user-chat';
 
-    protected static ?string $title = 'Realtime Chat';
+    protected static ?string $title = 'Chat';
 
     public static function canAccess(): bool
     {

@@ -63,7 +63,7 @@ class AssetResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-archive-box';
 
-    protected static ?int $navigationSort = 50;
+    protected static ?int $navigationSort = 60;
 
     protected static ?string $breadcrumb = 'Asset Management';
 

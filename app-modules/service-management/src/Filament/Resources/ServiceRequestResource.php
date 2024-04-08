@@ -54,7 +54,7 @@ class ServiceRequestResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-briefcase';
 
-    protected static ?int $navigationSort = 30;
+    protected static ?int $navigationSort = 20;
 
     public static function shouldShowFormSubmission(Page $page): bool
     {

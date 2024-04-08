@@ -137,7 +137,7 @@ class ManageLicenseSettings extends SettingsPage
                             Toggle::make('data.addons.knowledgeManagement')
                                 ->label('Knowledge Management'),
                             Toggle::make('data.addons.realtimeChat')
-                                ->label('Realtime Chat'),
+                                ->label('Chat'),
                             Toggle::make('data.addons.mobileApps')
                                 ->label('Mobile Apps'),
                             Toggle::make('data.addons.experimentalReporting')
