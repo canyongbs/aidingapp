@@ -80,11 +80,9 @@ class SupportAssistant extends Page
 
     protected static string $view = 'assistant::filament.pages.support-assistant';
 
-    protected static ?string $navigationLabel = 'Support Assistant';
+    protected static ?string $navigationLabel = 'Assistant';
 
-    protected static ?string $title = 'Support Assistant';
-
-    protected static ?string $slug = 'support-assistant';
+    protected static ?string $title = 'Assistant';
 
     protected static ?int $navigationSort = 90;
 
