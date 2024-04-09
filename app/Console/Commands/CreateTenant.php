@@ -37,6 +37,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Tenant;
+use Laravel\Pennant\Feature;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Artisan;
@@ -139,6 +140,10 @@ class CreateTenant extends Command
                     outputBuffer: $this->output,
                 );
             }
+        }
+
+        if (Feature::active('setup-complete')) {
+            $tenant->update(['setup_complete' => true]);
         }
 
         return static::SUCCESS;

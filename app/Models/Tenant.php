@@ -37,11 +37,14 @@
 namespace App\Models;
 
 use App\Casts\LandlordEncrypted;
+use App\Models\Scopes\SetupIsComplete;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Spatie\Multitenancy\Models\Tenant as SpatieTenant;
 use Spatie\Multitenancy\Models\Concerns\UsesLandlordConnection;
 
+#[ScopedBy(SetupIsComplete::class)]
 /**
  * @mixin IdeHelperTenant
  */
@@ -56,10 +59,12 @@ class Tenant extends SpatieTenant
         'domain',
         'key',
         'config',
+        'setup_complete',
     ];
 
     protected $casts = [
         'key' => LandlordEncrypted::class,
         'config' => LandlordEncrypted::class,
+        'setup_complete' => 'boolean',
     ];
 }
