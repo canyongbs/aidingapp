@@ -46,17 +46,17 @@ class KnowledgeBaseCategorySeeder extends Seeder
         KnowledgeBaseCategory::factory()
             ->createMany(
                 [
-                    ['name' => 'Admissions, Records, and Registration (AR&R)'],
-                    ['name' => 'Advising'],
-                    ['name' => 'Clock Hour Programs'],
-                    ['name' => 'Enrollment Services'],
-                    ['name' => 'Financial Aid'],
-                    ['name' => 'International Education'],
-                    ['name' => 'IT Help Desk'],
-                    ['name' => 'Recruitment'],
-                    ['name' => 'Special Populations'],
-                    ['name' => 'Student Business Services'],
-                    ['name' => 'Veterans Services'],
+                    ['name' => 'Admissions, Records, and Registration (AR&R)', 'description' => null, 'icon' => null],
+                    ['name' => 'Advising', 'description' => null, 'icon' => null],
+                    ['name' => 'Clock Hour Programs', 'description' => null, 'icon' => null],
+                    ['name' => 'Enrollment Services', 'description' => null, 'icon' => null],
+                    ['name' => 'Financial Aid', 'description' => null, 'icon' => null],
+                    ['name' => 'International Education', 'description' => null, 'icon' => null],
+                    ['name' => 'IT Help Desk', 'description' => null, 'icon' => null],
+                    ['name' => 'Recruitment', 'description' => null, 'icon' => null],
+                    ['name' => 'Special Populations', 'description' => null, 'icon' => null],
+                    ['name' => 'Student Business Services', 'description' => null, 'icon' => null],
+                    ['name' => 'Veterans Services', 'description' => null, 'icon' => null],
                 ]
             );
     }
