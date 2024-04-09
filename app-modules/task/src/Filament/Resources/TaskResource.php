@@ -46,7 +46,7 @@ class TaskResource extends Resource
 {
     protected static ?string $model = Task::class;
 
-    protected static ?int $navigationSort = 90;
+    protected static ?int $navigationSort = 70;
 
     protected static ?string $breadcrumb = 'Task Management';
 

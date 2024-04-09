@@ -107,10 +107,10 @@ class ManagePortalSettings extends SettingsPage
                 Section::make('CRM Portal')
                     ->schema([
                         Toggle::make('has_user_chat')
-                            ->label('Realtime Chat')
+                            ->label('Chat')
                             ->disabled(! Gate::check(Feature::RealtimeChat->getGateName()))
                             ->hintIcon(fn (Toggle $component) => $component->isDisabled() ? 'heroicon-m-lock-closed' : null)
-                            ->hintIconTooltip('Realtime Chat is not a part of your current subscription.'),
+                            ->hintIconTooltip('Chat is not a part of your current subscription.'),
                         Toggle::make('has_performance_alerts')
                             ->label('Performance Alerts'),
                         Toggle::make('has_emergency_alerts')
