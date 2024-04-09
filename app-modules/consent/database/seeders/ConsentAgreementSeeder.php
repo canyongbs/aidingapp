@@ -49,6 +49,7 @@ class ConsentAgreementSeeder extends Seeder
             ->create([
                 'title' => 'Artificial Intelligence Usage Agreement',
                 'description' => 'Please confirm that you have read the following agreement and consent to the terms and conditions.',
+                'body' => 'This should contain the terms and conditions that users must agree to before using the Support Assistant.',
                 'type' => ConsentAgreementType::AzureOpenAI,
             ]);
     }
