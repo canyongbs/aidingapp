@@ -82,7 +82,7 @@ class EngagementServiceProvider extends ServiceProvider
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule) {
             $schedule->call(function () {
                 Tenant::query()
-                    ->tap(fn () => new SetupIsComplete())
+                    ->tap(new SetupIsComplete())
                     ->cursor()
                     ->each(function (Tenant $tenant) {
                         $tenant->execute(function () {

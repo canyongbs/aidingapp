@@ -55,7 +55,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         Tenant::query()
-            ->tap(fn () => new SetupIsComplete())
+            ->tap(new SetupIsComplete())
             ->cursor()
             ->each(function (Tenant $tenant) use ($schedule) {
                 try {
