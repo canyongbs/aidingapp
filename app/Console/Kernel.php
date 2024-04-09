@@ -40,6 +40,7 @@ use Throwable;
 use App\Models\Tenant;
 use AidingApp\Audit\Models\Audit;
 use Illuminate\Support\Facades\Log;
+use App\Models\Scopes\SetupIsComplete;
 use Illuminate\Console\Scheduling\Schedule;
 use AidingApp\Engagement\Models\EngagementFile;
 use Filament\Actions\Imports\Models\FailedImportRow;
@@ -53,49 +54,52 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        Tenant::cursor()->each(function (Tenant $tenant) use ($schedule) {
-            try {
-                $schedule->command("tenants:artisan \"cache:prune-stale-tags\" --tenant={$tenant->id}")
-                    ->hourly()
-                    ->onOneServer()
-                    ->withoutOverlapping();
+        Tenant::query()
+            ->tap(fn () => new SetupIsComplete())
+            ->cursor()
+            ->each(function (Tenant $tenant) use ($schedule) {
+                try {
+                    $schedule->command("tenants:artisan \"cache:prune-stale-tags\" --tenant={$tenant->id}")
+                        ->hourly()
+                        ->onOneServer()
+                        ->withoutOverlapping();
 
-                $schedule->command("tenants:artisan \"health:check\" --tenant={$tenant->id}")
-                    ->everyMinute()
-                    ->onOneServer()
-                    ->withoutOverlapping();
+                    $schedule->command("tenants:artisan \"health:check\" --tenant={$tenant->id}")
+                        ->everyMinute()
+                        ->onOneServer()
+                        ->withoutOverlapping();
 
-                $schedule->command("tenants:artisan \"health:queue-check-heartbeat\" --tenant={$tenant->id}")
-                    ->everyMinute()
-                    ->onOneServer()
-                    ->withoutOverlapping();
+                    $schedule->command("tenants:artisan \"health:queue-check-heartbeat\" --tenant={$tenant->id}")
+                        ->everyMinute()
+                        ->onOneServer()
+                        ->withoutOverlapping();
 
-                collect([
-                    Audit::class,
-                    AssistantChatMessageLog::class,
-                    EngagementFile::class,
-                    FailedImportRow::class,
-                ])
-                    ->each(
-                        fn ($model) => $schedule->command("tenants:artisan \"model:prune --model={$model}\" --tenant={$tenant->id}")
-                            ->daily()
-                            ->onOneServer()
-                            ->withoutOverlapping()
-                    );
+                    collect([
+                        Audit::class,
+                        AssistantChatMessageLog::class,
+                        EngagementFile::class,
+                        FailedImportRow::class,
+                    ])
+                        ->each(
+                            fn ($model) => $schedule->command("tenants:artisan \"model:prune --model={$model}\" --tenant={$tenant->id}")
+                                ->daily()
+                                ->onOneServer()
+                                ->withoutOverlapping()
+                        );
 
-                $schedule->command("tenants:artisan \"health:schedule-check-heartbeat\" --tenant={$tenant->id}")
-                    ->everyMinute()
-                    ->onOneServer()
-                    ->withoutOverlapping();
-            } catch (Throwable $th) {
-                Log::error('Error scheduling tenant commands.', [
-                    'tenant' => $tenant->id,
-                    'exception' => $th,
-                ]);
+                    $schedule->command("tenants:artisan \"health:schedule-check-heartbeat\" --tenant={$tenant->id}")
+                        ->everyMinute()
+                        ->onOneServer()
+                        ->withoutOverlapping();
+                } catch (Throwable $th) {
+                    Log::error('Error scheduling tenant commands.', [
+                        'tenant' => $tenant->id,
+                        'exception' => $th,
+                    ]);
 
-                report($th);
-            }
-        });
+                    report($th);
+                }
+            });
     }
 
     /**

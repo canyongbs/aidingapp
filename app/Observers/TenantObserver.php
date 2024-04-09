@@ -39,6 +39,7 @@ namespace App\Observers;
 use Throwable;
 use App\Models\Tenant;
 use Illuminate\Bus\Batch;
+use Laravel\Pennant\Feature;
 use App\Jobs\SeedTenantDatabase;
 use App\Jobs\MigrateTenantDatabase;
 use Illuminate\Support\Facades\Bus;
@@ -60,6 +61,10 @@ class TenantObserver
         )
             ->onQueue(config('queue.landlord_queue'))
             ->then(function (Batch $batch) use ($tenant) {
+                if (Feature::active('setup-complete')) {
+                    $tenant->update(['setup_complete' => true]);
+                }
+
                 Event::dispatch(new NewTenantSetupComplete($tenant));
             })
             ->catch(function (Batch $batch, Throwable $e) use ($tenant) {

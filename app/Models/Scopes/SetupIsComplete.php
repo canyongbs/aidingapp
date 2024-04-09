@@ -37,18 +37,16 @@
 namespace App\Models\Scopes;
 
 use Laravel\Pennant\Feature;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Scope;
 use Illuminate\Database\Eloquent\Builder;
 
-class SetupIsComplete implements Scope
+class SetupIsComplete
 {
-    public function apply(Builder $builder, Model $model): void
+    public function __invoke(Builder $query): void
     {
         if (Feature::inactive('setup-complete')) {
             return;
         }
 
-        $builder->where('setup_complete', true);
+        $query->where('setup_complete', true);
     }
 }
