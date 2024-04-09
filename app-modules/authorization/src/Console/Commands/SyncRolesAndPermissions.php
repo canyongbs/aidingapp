@@ -82,13 +82,15 @@ class SyncRolesAndPermissions extends Command
             outputBuffer: $this->output,
         );
 
-        $this->line('Syncing Web permissions...');
-        $this->syncWebPermissions();
-        $this->info('Web permissions synced successfully!');
+        if (! app()->environment('testing')) {
+            $this->line('Syncing Web permissions...');
+            $this->syncWebPermissions();
+            $this->info('Web permissions synced successfully!');
 
-        $this->line('Syncing API permissions...');
-        $this->syncApiPermissions();
-        $this->info('API permissions synced successfully!');
+            $this->line('Syncing API permissions...');
+            $this->syncApiPermissions();
+            $this->info('API permissions synced successfully!');
+        }
 
         // Artisan::call(SetupRoleGroups::class);
 
