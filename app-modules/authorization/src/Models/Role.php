@@ -44,8 +44,6 @@ use Spatie\Permission\Models\Role as SpatieRole;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use AidingApp\Authorization\Models\Concerns\HasRoleGroups;
-use AidingApp\Authorization\Models\Pivots\RoleGroupRolePivot;
 use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 use AidingApp\Authorization\Models\Concerns\DefinesPermissions;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
@@ -57,18 +55,9 @@ class Role extends SpatieRole implements Auditable
 {
     use HasFactory;
     use DefinesPermissions;
-    use HasRoleGroups {
-        HasRoleGroups::roleGroups as traitRoleGroups;
-    }
     use HasUuids;
     use AuditableTrait;
     use UsesTenantConnection;
-
-    public function roleGroups(): BelongsToMany
-    {
-        return $this->traitRoleGroups()
-            ->using(RoleGroupRolePivot::class);
-    }
 
     public function users(): BelongsToMany
     {

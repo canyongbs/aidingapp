@@ -48,7 +48,6 @@
 use App\Models\User;
 use Illuminate\Support\Collection;
 use AidingApp\Authorization\Models\Role;
-use AidingApp\Authorization\Models\RoleGroup;
 use AidingApp\Authorization\Enums\LicenseType;
 
 uses(Tests\TestCase::class)->in('../tests', '../app-modules/*/tests');
@@ -80,8 +79,11 @@ uses(Tests\TestCase::class)->in('../tests', '../app-modules/*/tests');
 */
 
 /**
- * @var array<string> | string | null $permissions
- * @var array<LicenseType> | LicenseType | null $licenses
+ * @param LicenseType|array|null $licenses
+ * @param array|string|null $roles
+ * @param string $guard
+ *
+ * @return User
  */
 function user(LicenseType | array | null $licenses = null, array | null | string $roles = null, string $guard = 'web'): User
 {
@@ -89,16 +91,12 @@ function user(LicenseType | array | null $licenses = null, array | null | string
 
     collect($roles)
         ->whenNotEmpty(function (Collection $collection) use ($guard, $user) {
-            $roleGroup = RoleGroup::factory()->create();
-
-            $roleGroup->users()->attach($user);
-
             $roles = Role::query()
                 ->whereIn('name', $collection)
                 ->where('guard_name', $guard)
                 ->get();
 
-            $roleGroup->roles()->sync($roles);
+            $user->roles()->sync($roles);
         });
 
     collect($licenses)
