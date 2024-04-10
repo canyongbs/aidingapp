@@ -41,6 +41,8 @@ use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use App\Filament\Tables\Columns\IdColumn;
+use Filament\Tables\Actions\AttachAction;
+use Illuminate\Database\Eloquent\Builder;
 use Filament\Resources\RelationManagers\RelationManager;
 
 class RolesRelationManager extends RelationManager
@@ -71,6 +73,10 @@ class RolesRelationManager extends RelationManager
                 TextColumn::make('guard_name'),
             ])
             ->headerActions([
+                AttachAction::make()
+                    ->recordSelectOptionsQuery(fn (Builder $query) => $query->where('guard_name', 'web'))
+                    ->multiple()
+                    ->preloadRecordSelect(),
             ])
             ->actions([
             ])
