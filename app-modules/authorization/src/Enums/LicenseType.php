@@ -49,8 +49,8 @@ enum LicenseType: string implements HasLabel
     public function getLabel(): ?string
     {
         return match ($this) {
-            LicenseType::ConversationalAi => 'Conversational AI',
-            LicenseType::RecruitmentCrm => 'Recruitment CRM',
+            LicenseType::ConversationalAi => 'Support Assistant',
+            LicenseType::RecruitmentCrm => 'Helpdesk',
         };
     }
 
