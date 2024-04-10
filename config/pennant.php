@@ -34,43 +34,42 @@
 </COPYRIGHT>
 */
 
-namespace App\Observers;
+return [
+    /*
+    |--------------------------------------------------------------------------
+    | Default Pennant Store
+    |--------------------------------------------------------------------------
+    |
+    | Here you will specify the default store that Pennant should use when
+    | storing and resolving feature flag values. Pennant ships with the
+    | ability to store flag values in an in-memory array or database.
+    |
+    | Supported: "array", "database"
+    |
+    */
 
-use Throwable;
-use App\Models\Tenant;
-use Illuminate\Bus\Batch;
-use Laravel\Pennant\Feature;
-use App\Jobs\SeedTenantDatabase;
-use App\Jobs\MigrateTenantDatabase;
-use Illuminate\Support\Facades\Bus;
-use Illuminate\Support\Facades\Event;
-use App\Multitenancy\Events\NewTenantSetupFailure;
-use App\Multitenancy\Events\NewTenantSetupComplete;
+    'default' => env('PENNANT_STORE', 'database'),
 
-class TenantObserver
-{
-    public function created(Tenant $tenant): void
-    {
-        Bus::batch(
-            [
-                [
-                    new MigrateTenantDatabase($tenant),
-                    new SeedTenantDatabase($tenant),
-                ],
-            ]
-        )
-            ->onQueue(config('queue.landlord_queue'))
-            ->then(function (Batch $batch) use ($tenant) {
-                if (Feature::active('setup-complete')) {
-                    $tenant->update(['setup_complete' => true]);
-                }
+    /*
+    |--------------------------------------------------------------------------
+    | Pennant Stores
+    |--------------------------------------------------------------------------
+    |
+    | Here you may configure each of the stores that should be available to
+    | Pennant. These stores shall be used to store resolved feature flag
+    | values - you may configure as many as your application requires.
+    |
+    */
 
-                Event::dispatch(new NewTenantSetupComplete($tenant));
-            })
-            ->catch(function (Batch $batch, Throwable $e) use ($tenant) {
-                Event::dispatch(new NewTenantSetupFailure($tenant, $e));
-            })
-            ->allowFailures()
-            ->dispatch();
-    }
-}
+    'stores' => [
+        'array' => [
+            'driver' => 'array',
+        ],
+
+        'database' => [
+            'driver' => 'database',
+            'connection' => null,
+            'table' => 'features',
+        ],
+    ],
+];

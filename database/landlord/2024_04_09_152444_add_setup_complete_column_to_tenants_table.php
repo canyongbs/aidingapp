@@ -34,43 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace App\Observers;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
-use Throwable;
-use App\Models\Tenant;
-use Illuminate\Bus\Batch;
-use Laravel\Pennant\Feature;
-use App\Jobs\SeedTenantDatabase;
-use App\Jobs\MigrateTenantDatabase;
-use Illuminate\Support\Facades\Bus;
-use Illuminate\Support\Facades\Event;
-use App\Multitenancy\Events\NewTenantSetupFailure;
-use App\Multitenancy\Events\NewTenantSetupComplete;
-
-class TenantObserver
-{
-    public function created(Tenant $tenant): void
+return new class () extends Migration {
+    public function up(): void
     {
-        Bus::batch(
-            [
-                [
-                    new MigrateTenantDatabase($tenant),
-                    new SeedTenantDatabase($tenant),
-                ],
-            ]
-        )
-            ->onQueue(config('queue.landlord_queue'))
-            ->then(function (Batch $batch) use ($tenant) {
-                if (Feature::active('setup-complete')) {
-                    $tenant->update(['setup_complete' => true]);
-                }
-
-                Event::dispatch(new NewTenantSetupComplete($tenant));
-            })
-            ->catch(function (Batch $batch, Throwable $e) use ($tenant) {
-                Event::dispatch(new NewTenantSetupFailure($tenant, $e));
-            })
-            ->allowFailures()
-            ->dispatch();
+        Schema::table('tenants', function (Blueprint $table) {
+            $table->boolean('setup_complete')->default(false);
+        });
     }
-}
+
+    public function down(): void
+    {
+        Schema::table('tenants', function (Blueprint $table) {
+            $table->dropColumn('setup_complete');
+        });
+    }
+};
