@@ -70,7 +70,7 @@ class ViewContact extends ViewRecord
                             ->translateLabel(),
                         TextEntry::make('preferred')
                             ->label('Preferred Name')
-                            ->translateLabel()
+                            ->translateLabel(),
                     ])
                     ->columns(2),
                 Section::make('Contact Information')
