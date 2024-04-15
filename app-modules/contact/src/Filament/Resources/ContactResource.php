@@ -79,7 +79,7 @@ class ContactResource extends Resource
 
     public static function getGloballySearchableAttributes(): array
     {
-        return ['full_name', 'email', 'email_2', 'mobile', 'phone'];
+        return ['full_name', 'email', 'mobile', 'phone'];
     }
 
     public static function getGlobalSearchResultDetails(Model $record): array
