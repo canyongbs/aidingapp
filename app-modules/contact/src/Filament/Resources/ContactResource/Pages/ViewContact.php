@@ -70,22 +70,13 @@ class ViewContact extends ViewRecord
                             ->translateLabel(),
                         TextEntry::make('preferred')
                             ->label('Preferred Name')
-                            ->translateLabel(),
-                        TextEntry::make('birthdate')
-                            ->label('Birthdate')
-                            ->translateLabel(),
-                        TextEntry::make('hsgrad')
-                            ->label('High School Graduation Year')
-                            ->translateLabel(),
+                            ->translateLabel()
                     ])
                     ->columns(2),
                 Section::make('Contact Information')
                     ->schema([
                         TextEntry::make('email')
                             ->label('Email')
-                            ->translateLabel(),
-                        TextEntry::make('email_2')
-                            ->label('Email 2')
                             ->translateLabel(),
                         TextEntry::make('mobile')
                             ->label('Mobile')
