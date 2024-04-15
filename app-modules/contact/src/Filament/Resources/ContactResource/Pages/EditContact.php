@@ -95,7 +95,7 @@ class EditContact extends EditRecord
                             ->displayFormat('Y-m-d')
                             ->maxDate(now()),
                         TextInput::make('hsgrad')
-                            ->label('High School Graduation Date')
+                            ->label('High School Graduation Year')
                             ->nullable()
                             ->numeric()
                             ->minValue(1920)
