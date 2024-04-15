@@ -37,6 +37,8 @@
 namespace AidingApp\Contact\Filament\Resources\ContactResource\Pages;
 
 use App\Models\User;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
 use Filament\Forms\Form;
 use Filament\Actions\ViewAction;
 use App\Models\Scopes\HasLicense;
@@ -63,6 +65,22 @@ class EditContact extends EditRecord
 
     public function form(Form $form): Form
     {
+        $generateFullName = function (Get $get, Set $set) {
+            $firstName = trim($get('first_name'));
+
+            if (blank($firstName)) {
+                return;
+            }
+
+            $lastName = trim($get('last_name'));
+
+            if (blank($lastName)) {
+                return;
+            }
+
+            $set(Contact::displayNameKey(), "{$firstName} {$lastName}");
+        };
+
         return $form
             ->schema([
                 Section::make('Demographics')
@@ -71,45 +89,34 @@ class EditContact extends EditRecord
                             ->label('First Name')
                             ->required()
                             ->string()
+                            ->live(onBlur : true)
+                            ->afterStateUpdated($generateFullName)
                             ->maxLength(255),
                         TextInput::make('last_name')
                             ->label('Last Name')
                             ->required()
                             ->string()
+                            ->live(onBlur : true)
+                            ->afterStateUpdated($generateFullName)
                             ->maxLength(255),
                         TextInput::make(Contact::displayNameKey())
                             ->label('Full Name')
                             ->required()
                             ->string()
+                            ->disabled()
+                            ->dehydrated()
                             ->maxLength(255),
                         TextInput::make('preferred')
                             ->label('Preferred Name')
                             ->string()
                             ->maxLength(255),
-                        // TODO: Display this based on system configurable data format
-                        DatePicker::make('birthdate')
-                            ->label('Birthdate')
-                            ->native(false)
-                            ->closeOnDateSelection()
-                            ->format('Y-m-d')
-                            ->displayFormat('Y-m-d')
-                            ->maxDate(now()),
-                        TextInput::make('hsgrad')
-                            ->label('High School Graduation Year')
-                            ->nullable()
-                            ->numeric()
-                            ->minValue(1920)
-                            ->maxValue(now()->addYears(25)->year),
+                       
                     ])
                     ->columns(2),
                 Section::make('Contact Information')
                     ->schema([
                         TextInput::make('email')
                             ->label('Primary Email')
-                            ->email()
-                            ->maxLength(255),
-                        TextInput::make('email_2')
-                            ->label('Other Email')
                             ->email()
                             ->maxLength(255),
                         TextInput::make('mobile')
