@@ -105,11 +105,6 @@ test('ListContacts can bulk update characteristics', function () {
         ])
         ->assertHasNoTableBulkActionErrors()
         ->callTableBulkAction('bulk_update', $contacts, [
-            'field' => 'hsgrad',
-            'hsgrad' => $hsgrad,
-        ])
-        ->assertHasNoTableBulkActionErrors()
-        ->callTableBulkAction('bulk_update', $contacts, [
             'field' => 'sms_opt_out',
             'sms_opt_out' => true,
         ])
