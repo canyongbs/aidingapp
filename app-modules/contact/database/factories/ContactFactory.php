@@ -62,7 +62,6 @@ class ContactFactory extends Factory
             'preferred' => fake()->firstName(),
             'description' => fake()->paragraph(),
             'email' => fake()->unique()->email(),
-            'email_2' => fake()->email(),
             'mobile' => fake()->phoneNumber(),
             'sms_opt_out' => fake()->boolean(),
             'email_bounce' => fake()->boolean(),
@@ -73,8 +72,6 @@ class ContactFactory extends Factory
             'city' => fake()->city(),
             'state' => fake()->stateAbbr(),
             'postal' => str(fake()->postcode())->before('-')->toString(),
-            'birthdate' => fake()->date(),
-            'hsgrad' => fake()->year(),
             'assigned_to_id' => User::factory(),
             'created_by_id' => User::factory(),
         ];
