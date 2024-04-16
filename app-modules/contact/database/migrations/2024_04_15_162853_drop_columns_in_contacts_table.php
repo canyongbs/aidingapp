@@ -50,6 +50,10 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        Schema::table('contacts', function (Blueprint $table) {});
+        Schema::table('contacts', function (Blueprint $table) {
+            $table->date('birthdate')->nullable();
+            $table->string('hsgrad')->nullable();
+            $table->string('email_2')->nullable();
+        });
     }
 };
