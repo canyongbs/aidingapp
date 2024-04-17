@@ -45,19 +45,7 @@ class ServiceRequestTypeSeeder extends Seeder
     {
         ServiceRequestType::factory()
             ->createMany(
-                [
-                    ['name' => 'Admissions', 'description' => null, 'icon' => null],
-                    ['name' => 'Advising', 'description' => null, 'icon' => null],
-                    ['name' => 'ESL', 'description' => null, 'icon' => null],
-                    ['name' => 'Financial', 'description' => null, 'icon' => null],
-                    ['name' => 'Health', 'description' => null, 'icon' => null],
-                    ['name' => 'Holds', 'description' => null, 'icon' => null],
-                    ['name' => 'International', 'description' => null, 'icon' => null],
-                    ['name' => 'Other Support', 'description' => null, 'icon' => null],
-                    ['name' => 'Recruitment', 'description' => null, 'icon' => null],
-                    ['name' => 'Technology', 'description' => null, 'icon' => null],
-                    ['name' => 'Tutoring', 'description' => null, 'icon' => null],
-                    ['name' => 'Veterans', 'description' => null, 'icon' => null],
+                [ 
                     ['name' => 'Password Reset', 'description' => 'Users often forget their passwords or need them reset for security reasons.', 'icon' => null],
                     ['name' => 'Software Installation/Upgrades', 'description' => 'Requests for installing new software or updating existing ones.', 'icon' => null],
                     ['name' => 'Hardware Setup/Configuration', 'description' => 'Assistance with setting up new hardware devices such as computers, printers, or network equipment.', 'icon' => null],
