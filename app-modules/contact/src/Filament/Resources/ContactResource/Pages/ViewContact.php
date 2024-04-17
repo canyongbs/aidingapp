@@ -75,7 +75,7 @@ class ViewContact extends ViewRecord
                             ->label('Birthdate')
                             ->translateLabel(),
                         TextEntry::make('hsgrad')
-                            ->label('High School Grad')
+                            ->label('High School Graduation Year')
                             ->translateLabel(),
                     ])
                     ->columns(2),

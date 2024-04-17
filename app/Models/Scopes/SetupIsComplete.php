@@ -34,53 +34,19 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Authorization\Enums;
+namespace App\Models\Scopes;
 
-use App\Settings\LicenseSettings;
-use Filament\Support\Contracts\HasLabel;
-use AidingApp\Authorization\Models\License;
+use Laravel\Pennant\Feature;
+use Illuminate\Database\Eloquent\Builder;
 
-enum LicenseType: string implements HasLabel
+class SetupIsComplete
 {
-    case ConversationalAi = 'conversational_ai';
-
-    case RecruitmentCrm = 'recruitment_crm';
-
-    public function getLabel(): ?string
+    public function __invoke(Builder $query): void
     {
-        return match ($this) {
-            LicenseType::ConversationalAi => 'Support Assistant',
-            LicenseType::RecruitmentCrm => 'Helpdesk',
-        };
-    }
+        if (Feature::inactive('setup-complete')) {
+            return;
+        }
 
-    public function hasAvailableLicenses(): bool
-    {
-        return $this->getAvailableSeats() > 0;
-    }
-
-    public function isLicensable(): bool
-    {
-        return $this->getSeats() > 0;
-    }
-
-    public function getSeats(): int
-    {
-        $licenseSettings = app(LicenseSettings::class);
-
-        return match ($this) {
-            LicenseType::ConversationalAi => $licenseSettings->data->limits->conversationalAiSeats,
-            LicenseType::RecruitmentCrm => $licenseSettings->data->limits->recruitmentCrmSeats,
-        };
-    }
-
-    public function getSeatsInUse(): int
-    {
-        return License::query()->where('type', $this)->count();
-    }
-
-    public function getAvailableSeats(): int
-    {
-        return max($this->getSeats() - $this->getSeatsInUse(), 0);
+        $query->where('setup_complete', true);
     }
 }

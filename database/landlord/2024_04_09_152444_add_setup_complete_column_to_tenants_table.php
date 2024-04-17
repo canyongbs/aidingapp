@@ -34,53 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Authorization\Enums;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
-use App\Settings\LicenseSettings;
-use Filament\Support\Contracts\HasLabel;
-use AidingApp\Authorization\Models\License;
-
-enum LicenseType: string implements HasLabel
-{
-    case ConversationalAi = 'conversational_ai';
-
-    case RecruitmentCrm = 'recruitment_crm';
-
-    public function getLabel(): ?string
+return new class () extends Migration {
+    public function up(): void
     {
-        return match ($this) {
-            LicenseType::ConversationalAi => 'Support Assistant',
-            LicenseType::RecruitmentCrm => 'Helpdesk',
-        };
+        Schema::table('tenants', function (Blueprint $table) {
+            $table->boolean('setup_complete')->default(false);
+        });
     }
 
-    public function hasAvailableLicenses(): bool
+    public function down(): void
     {
-        return $this->getAvailableSeats() > 0;
+        Schema::table('tenants', function (Blueprint $table) {
+            $table->dropColumn('setup_complete');
+        });
     }
-
-    public function isLicensable(): bool
-    {
-        return $this->getSeats() > 0;
-    }
-
-    public function getSeats(): int
-    {
-        $licenseSettings = app(LicenseSettings::class);
-
-        return match ($this) {
-            LicenseType::ConversationalAi => $licenseSettings->data->limits->conversationalAiSeats,
-            LicenseType::RecruitmentCrm => $licenseSettings->data->limits->recruitmentCrmSeats,
-        };
-    }
-
-    public function getSeatsInUse(): int
-    {
-        return License::query()->where('type', $this)->count();
-    }
-
-    public function getAvailableSeats(): int
-    {
-        return max($this->getSeats() - $this->getSeatsInUse(), 0);
-    }
-}
+};

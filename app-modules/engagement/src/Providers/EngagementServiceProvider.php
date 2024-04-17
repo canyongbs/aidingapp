@@ -38,8 +38,8 @@ namespace AidingApp\Engagement\Providers;
 
 use Filament\Panel;
 use App\Models\Tenant;
+use App\Models\Scopes\SetupIsComplete;
 use Illuminate\Support\ServiceProvider;
-use Spatie\Multitenancy\TenantCollection;
 use AidingApp\Engagement\EngagementPlugin;
 use AidingApp\Engagement\Models\Engagement;
 use Illuminate\Console\Scheduling\Schedule;
@@ -81,14 +81,14 @@ class EngagementServiceProvider extends ServiceProvider
 
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule) {
             $schedule->call(function () {
-                /** @var TenantCollection $tenants */
-                $tenants = Tenant::cursor();
-
-                $tenants->each(function (Tenant $tenant) {
-                    $tenant->execute(function () {
-                        dispatch(new DeliverEngagements());
+                Tenant::query()
+                    ->tap(new SetupIsComplete())
+                    ->cursor()
+                    ->each(function (Tenant $tenant) {
+                        $tenant->execute(function () {
+                            dispatch(new DeliverEngagements());
+                        });
                     });
-                });
             })
                 ->everyMinute()
                 ->name('DeliverEngagements')

@@ -36,7 +36,6 @@
 
 namespace AidingApp\Division\Database\Factories;
 
-use App\Models\User;
 use AidingApp\Division\Models\Division;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -57,13 +56,5 @@ class DivisionFactory extends Factory
             'header' => fake()->words(asText: true),
             'footer' => fake()->words(asText: true),
         ];
-    }
-
-    public function configure(): DivisionFactory|Factory
-    {
-        return $this->afterMaking(function (Division $division) {
-            $division->createdBy()->associate(fake()->randomElement([User::inRandomOrder()->first(), null]));
-            $division->lastUpdatedBy()->associate(fake()->randomElement([User::inRandomOrder()->first(), null]));
-        });
     }
 }

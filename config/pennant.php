@@ -34,53 +34,42 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Authorization\Enums;
+return [
+    /*
+    |--------------------------------------------------------------------------
+    | Default Pennant Store
+    |--------------------------------------------------------------------------
+    |
+    | Here you will specify the default store that Pennant should use when
+    | storing and resolving feature flag values. Pennant ships with the
+    | ability to store flag values in an in-memory array or database.
+    |
+    | Supported: "array", "database"
+    |
+    */
 
-use App\Settings\LicenseSettings;
-use Filament\Support\Contracts\HasLabel;
-use AidingApp\Authorization\Models\License;
+    'default' => env('PENNANT_STORE', 'database'),
 
-enum LicenseType: string implements HasLabel
-{
-    case ConversationalAi = 'conversational_ai';
+    /*
+    |--------------------------------------------------------------------------
+    | Pennant Stores
+    |--------------------------------------------------------------------------
+    |
+    | Here you may configure each of the stores that should be available to
+    | Pennant. These stores shall be used to store resolved feature flag
+    | values - you may configure as many as your application requires.
+    |
+    */
 
-    case RecruitmentCrm = 'recruitment_crm';
+    'stores' => [
+        'array' => [
+            'driver' => 'array',
+        ],
 
-    public function getLabel(): ?string
-    {
-        return match ($this) {
-            LicenseType::ConversationalAi => 'Support Assistant',
-            LicenseType::RecruitmentCrm => 'Helpdesk',
-        };
-    }
-
-    public function hasAvailableLicenses(): bool
-    {
-        return $this->getAvailableSeats() > 0;
-    }
-
-    public function isLicensable(): bool
-    {
-        return $this->getSeats() > 0;
-    }
-
-    public function getSeats(): int
-    {
-        $licenseSettings = app(LicenseSettings::class);
-
-        return match ($this) {
-            LicenseType::ConversationalAi => $licenseSettings->data->limits->conversationalAiSeats,
-            LicenseType::RecruitmentCrm => $licenseSettings->data->limits->recruitmentCrmSeats,
-        };
-    }
-
-    public function getSeatsInUse(): int
-    {
-        return License::query()->where('type', $this)->count();
-    }
-
-    public function getAvailableSeats(): int
-    {
-        return max($this->getSeats() - $this->getSeatsInUse(), 0);
-    }
-}
+        'database' => [
+            'driver' => 'database',
+            'connection' => null,
+            'table' => 'features',
+        ],
+    ],
+];
