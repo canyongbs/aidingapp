@@ -39,17 +39,7 @@ namespace App\Providers;
 use OwenIt\Auditing\Events\Auditing;
 use Illuminate\Auth\Events\Registered;
 use AidingApp\Audit\Listeners\AuditingListener;
-use AidingApp\Authorization\Events\RoleRemovedFromUser;
-use AidingApp\Authorization\Events\RoleAttachedToRoleGroup;
-use AidingApp\Authorization\Events\UserAttachedToRoleGroup;
-use AidingApp\Authorization\Events\RoleRemovedFromRoleGroup;
-use AidingApp\Authorization\Events\UserRemovedFromRoleGroup;
-use AidingApp\Authorization\Listeners\HandleRoleRemovedFromUser;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
-use AidingApp\Authorization\Listeners\HandleRoleAttachedToRoleGroup;
-use AidingApp\Authorization\Listeners\HandleUserAttachedToRoleGroup;
-use AidingApp\Authorization\Listeners\HandleRoleRemovedFromRoleGroup;
-use AidingApp\Authorization\Listeners\HandleUserRemovedFromRoleGroup;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
 class EventServiceProvider extends ServiceProvider
@@ -62,22 +52,6 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         Registered::class => [
             SendEmailVerificationNotification::class,
-        ],
-        // TODO Extract these into the authorization module
-        UserAttachedToRoleGroup::class => [
-            HandleUserAttachedToRoleGroup::class,
-        ],
-        RoleAttachedToRoleGroup::class => [
-            HandleRoleAttachedToRoleGroup::class,
-        ],
-        UserRemovedFromRoleGroup::class => [
-            HandleUserRemovedFromRoleGroup::class,
-        ],
-        RoleRemovedFromRoleGroup::class => [
-            HandleRoleRemovedFromRoleGroup::class,
-        ],
-        RoleRemovedFromUser::class => [
-            HandleRoleRemovedFromUser::class,
         ],
         // TODO: Move this to the auditing Module somehow
         Auditing::class => [
