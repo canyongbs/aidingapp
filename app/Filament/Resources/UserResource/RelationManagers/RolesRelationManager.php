@@ -42,7 +42,10 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Tables\Actions\AttachAction;
+use Filament\Tables\Actions\DetachAction;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Tables\Actions\DetachBulkAction;
 use Filament\Resources\RelationManagers\RelationManager;
 
 class RolesRelationManager extends RelationManager
@@ -79,8 +82,12 @@ class RolesRelationManager extends RelationManager
                     ->preloadRecordSelect(),
             ])
             ->actions([
+                DetachAction::make(),
             ])
             ->bulkActions([
+                BulkActionGroup::make([
+                    DetachBulkAction::make(),
+                ]),
             ]);
     }
 }
