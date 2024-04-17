@@ -46,17 +46,6 @@ class KnowledgeBaseCategorySeeder extends Seeder
         KnowledgeBaseCategory::factory()
             ->createMany(
                 [
-                    ['name' => 'Admissions, Records, and Registration (AR&R)', 'description' => null, 'icon' => null],
-                    ['name' => 'Advising', 'description' => null, 'icon' => null],
-                    ['name' => 'Clock Hour Programs', 'description' => null, 'icon' => null],
-                    ['name' => 'Enrollment Services', 'description' => null, 'icon' => null],
-                    ['name' => 'Financial Aid', 'description' => null, 'icon' => null],
-                    ['name' => 'International Education', 'description' => null, 'icon' => null],
-                    ['name' => 'IT Help Desk', 'description' => null, 'icon' => null],
-                    ['name' => 'Recruitment', 'description' => null, 'icon' => null],
-                    ['name' => 'Special Populations', 'description' => null, 'icon' => null],
-                    ['name' => 'Student Business Services', 'description' => null, 'icon' => null],
-                    ['name' => 'Veterans Services', 'description' => null, 'icon' => null],
                     ['name' => 'Password Management', 'description' => 'Information and procedures related to password policies, password reset processes, and best practices for creating strong passwords.', 'icon' => null],
                     ['name' => 'Software Installation/Configuration', 'description' => 'Guides and documentation for installing, configuring, and updating various software applications used within the organization.', 'icon' => null],
                     ['name' => 'Hardware Setup/Configuration', 'description' => 'Resources and instructions for setting up and configuring hardware devices such as computers, printers, scanners, and networking equipment.', 'icon' => null],
