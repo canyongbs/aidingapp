@@ -77,7 +77,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use AidingApp\InAppCommunication\Models\TwilioConversation;
 use AidingApp\Engagement\Models\Concerns\HasManyEngagements;
 use AidingApp\Timeline\Models\Contracts\HasFilamentResource;
-use AidingApp\Authorization\Models\Pivots\RoleGroupUserPivot;
 use AidingApp\ServiceManagement\Models\ChangeRequestResponse;
 use AidingApp\Authorization\Models\Concerns\DefinesPermissions;
 use AidingApp\InAppCommunication\Models\TwilioConversationUser;
@@ -235,12 +234,6 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
         return $this->hasManyDeepFromRelations($this->contactSubscriptions(), (new Contact())->alerts());
     }
 
-    public function roleGroups(): BelongsToMany
-    {
-        return $this->traitRoleGroups()
-            ->using(RoleGroupUserPivot::class);
-    }
-
     public function permissionsFromRoles(): HasManyDeep
     {
         return $this->hasManyDeepFromRelations($this->roles(), (new Role())->permissions());
@@ -312,7 +305,6 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
         return $this
             ->belongsToMany(Team::class, 'team_user', 'user_id', 'team_id')
             ->using(TeamUser::class)
-            //TODO: remove this if we support multiple teams
             ->limit(1)
             ->withTimestamps();
     }

@@ -34,14 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Authorization\Listeners;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
-use AidingApp\Authorization\Actions\AddNewRoleToExistingUsersInRoleGroup;
-
-class HandleRoleAttachedToRoleGroup
-{
-    public function handle(object $event): void
+return new class () extends Migration {
+    public function up(): void
     {
-        resolve(AddNewRoleToExistingUsersInRoleGroup::class)->handle($event->pivot);
+        Schema::table('roles', function (Blueprint $table) {
+            $table->text('description')->nullable();
+        });
     }
-}
+
+    public function down(): void
+    {
+        Schema::table('roles', function (Blueprint $table) {
+            $table->dropColumn('description');
+        });
+    }
+};

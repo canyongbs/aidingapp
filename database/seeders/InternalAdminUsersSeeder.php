@@ -40,26 +40,15 @@ use App\Models\User;
 use Illuminate\Support\Str;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-use AidingApp\Authorization\Models\RoleGroup;
-use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\Authorization\Models\Role;
 
 class InternalAdminUsersSeeder extends Seeder
 {
     public function run(): void
     {
-        $superAdminRoleGroup = RoleGroup::where('name', 'Super Administrator')->firstOrFail();
+        $superAdminRole = Role::where('name', 'authorization.super_admin')->firstOrFail();
 
-        if (app()->environment('local')) {
-            $superAdmin = User::factory()->licensed(LicenseType::cases())->create([
-                'name' => 'Super Admin',
-                'email' => config('local_development.super_admin.email'),
-                'password' => Hash::make('password'),
-            ]);
-
-            $superAdmin->roleGroups()->sync($superAdminRoleGroup);
-        }
-
-        collect(config('internal-users.emails'))->each(function ($email) use ($superAdminRoleGroup) {
+        collect(config('internal-users.emails'))->each(function ($email) use ($superAdminRole) {
             $user = User::where('email', $email)->first();
 
             if (is_null($user)) {
@@ -71,7 +60,7 @@ class InternalAdminUsersSeeder extends Seeder
                 ]);
             }
 
-            $user->roleGroups()->sync($superAdminRoleGroup);
+            $user->roles()->sync($superAdminRole);
         });
     }
 }

@@ -5,7 +5,7 @@
     "version": "1.0",
     "license": "proprietary",
     "require": {
-        "filament/filament": "^3.0",
+        "filament/filament": "^3.2",
         "canyon-gbs/aiding-app-engagement": "*",
         "canyon-gbs/aiding-app-webhook": "*"
     },

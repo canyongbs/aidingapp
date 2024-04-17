@@ -39,23 +39,23 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-use AidingApp\Authorization\Models\RoleGroup;
+use AidingApp\Authorization\Models\Role;
 use AidingApp\Authorization\Enums\LicenseType;
 
 class SampleSuperAdminUserSeeder extends Seeder
 {
     public function run(): void
     {
-        $superAdminRoleGroup = RoleGroup::where('name', 'Super Administrator')->firstOrFail();
-
         if (app()->environment('local')) {
+            $superAdminRole = Role::where('name', 'authorization.super_admin')->firstOrFail();
+
             $superAdmin = User::factory()->licensed(LicenseType::cases())->create([
                 'name' => 'Super Admin',
                 'email' => config('local_development.super_admin.email'),
                 'password' => Hash::make('password'),
             ]);
 
-            $superAdmin->roleGroups()->sync($superAdminRoleGroup);
+            $superAdmin->roles()->sync($superAdminRole);
         }
     }
 }
