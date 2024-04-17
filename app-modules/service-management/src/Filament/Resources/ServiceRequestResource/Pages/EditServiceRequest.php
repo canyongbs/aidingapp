@@ -118,15 +118,15 @@ class EditServiceRequest extends EditRecord
                     ->maxLength(255)
                     ->columnSpanFull(),
                 Textarea::make('close_details')
-                    ->label('Close Details/Description')
+                    ->label('Description')
                     ->nullable()
                     ->string()
-                    ->columnSpanFull(),
+                    ->columnSpan(1),
                 Textarea::make('res_details')
-                    ->label('Internal Service Request Details')
+                    ->label('Internal Details')
                     ->nullable()
                     ->string()
-                    ->columnSpanFull(),
+                    ->columnSpan(1),
                 EducatableSelect::make('respondent')
                     ->label('Related To')
                     ->required(),

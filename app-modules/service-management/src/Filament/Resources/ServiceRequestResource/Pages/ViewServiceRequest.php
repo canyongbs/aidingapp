@@ -80,13 +80,11 @@ class ViewServiceRequest extends ViewRecord
                             )
                             ->label('Type'),
                         TextEntry::make('close_details')
-                            ->label('Close Details/Description')
-
-                            ->columnSpanFull(),
+                            ->label('Description')
+                            ->columnSpan(1),
                         TextEntry::make('res_details')
-                            ->label('Internal Service Request Details')
-
-                            ->columnSpanFull(),
+                            ->label('Internal Details')
+                            ->columnSpan(1),
                         TextEntry::make('respondent')
                             ->label('Related To')
                             ->color('primary')
