@@ -45,7 +45,7 @@ class ServiceRequestTypeSeeder extends Seeder
     {
         ServiceRequestType::factory()
             ->createMany(
-                [ 
+                [
                     ['name' => 'Password Reset', 'description' => 'Users often forget their passwords or need them reset for security reasons.', 'icon' => null],
                     ['name' => 'Software Installation/Upgrades', 'description' => 'Requests for installing new software or updating existing ones.', 'icon' => null],
                     ['name' => 'Hardware Setup/Configuration', 'description' => 'Assistance with setting up new hardware devices such as computers, printers, or network equipment.', 'icon' => null],
