@@ -68,7 +68,7 @@ class CreateServiceRequest extends CreateRecord
                     ->label('Division')
                     ->required()
                     ->exists((new Division())->getTable(), 'id')
-                    ->default(auth()->user()->teams()->count() ? auth()->user()->teams[0]?->division?->id : ''),
+                    ->default(auth()->user()->teams()->count() ? auth()->user()?->teams()->first()?->division?->id : ''),
                 Select::make('status_id')
                     ->relationship('status', 'name')
                     ->label('Status')
