@@ -68,9 +68,9 @@ test('The correct details are displayed on the ViewServiceRequest page', functio
                 $serviceRequest->priority->name,
                 'Type',
                 $serviceRequest->priority->type->name,
-                'Close Details/Description',
+                'Description',
                 $serviceRequest->close_details,
-                'Internal Service Request Details',
+                'Internal Details',
                 $serviceRequest->res_details,
             ]
         );
