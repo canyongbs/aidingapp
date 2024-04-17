@@ -37,14 +37,16 @@
 namespace AidingApp\Contact\Filament\Resources\ContactResource\Pages;
 
 use App\Models\User;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
 use Filament\Forms\Form;
 use App\Models\Scopes\HasLicense;
 use Filament\Forms\Components\Radio;
 use AidingApp\Contact\Models\Contact;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\DatePicker;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Resources\Pages\CreateRecord;
 use AidingApp\Contact\Models\ContactSource;
@@ -57,95 +59,119 @@ class CreateContact extends CreateRecord
 
     public function form(Form $form): Form
     {
+        $generateFullName = function (Get $get, Set $set) {
+            $firstName = trim($get('first_name'));
+
+            if (blank($firstName)) {
+                return;
+            }
+
+            $lastName = trim($get('last_name'));
+
+            if (blank($lastName)) {
+                return;
+            }
+
+            $set(Contact::displayNameKey(), "{$firstName} {$lastName}");
+        };
+
         return $form
             ->schema([
-                Select::make('status_id')
-                    ->label('Status')
-                    ->required()
-                    ->relationship('status', 'name')
-                    ->exists(
-                        table: (new ContactStatus())->getTable(),
-                        column: (new ContactStatus())->getKeyName()
-                    ),
-                Select::make('source_id')
-                    ->label('Source')
-                    ->required()
-                    ->relationship('source', 'name')
-                    ->exists(
-                        table: (new ContactSource())->getTable(),
-                        column: (new ContactSource())->getKeyName()
-                    ),
-                TextInput::make('first_name')
-                    ->label('First Name')
-                    ->required()
-                    ->string(),
-                TextInput::make('last_name')
-                    ->label('Last Name')
-                    ->required()
-                    ->string(),
-                TextInput::make(Contact::displayNameKey())
-                    ->label('Full Name')
-                    ->required()
-                    ->string(),
-                TextInput::make('preferred')
-                    ->label('Preferred Name')
-                    ->string(),
-                Textarea::make('description')
-                    ->label('Description')
-                    ->string(),
-                TextInput::make('email')
-                    ->label('Primary Email')
-                    ->email(),
-                TextInput::make('email_2')
-                    ->label('Other Email')
-                    ->email(),
-                TextInput::make('mobile')
-                    ->label('Mobile')
-                    ->string(),
-                Radio::make('sms_opt_out')
-                    ->label('SMS Opt Out')
-                    ->default(false)
-                    ->boolean(),
-                Radio::make('email_bounce')
-                    ->label('Email Bounce')
-                    ->default(false)
-                    ->boolean(),
-                TextInput::make('phone')
-                    ->label('Other Phone')
-                    ->string(),
-                TextInput::make('address')
-                    ->label('Address')
-                    ->string(),
-                TextInput::make('address_2')
-                    ->label('Address 2')
-                    ->string(),
+                Section::make('Demographics')->schema([
+                    TextInput::make('first_name')
+                        ->label('First Name')
+                        ->required()
+                        ->live(onBlur: true)
+                        ->afterStateUpdated($generateFullName)
+                        ->string(),
+
+                    TextInput::make('last_name')
+                        ->label('Last Name')
+                        ->required()
+                        ->live(onBlur: true)
+                        ->afterStateUpdated($generateFullName)
+                        ->string(),
+
+                    TextInput::make(Contact::displayNameKey())
+                        ->label('Full Name')
+                        ->required()
+                        ->disabled()
+                        ->dehydrated()
+                        ->string(),
+                    TextInput::make('preferred')
+                        ->label('Preferred Name')
+                        ->string(),
+                ])->columns(2),
+
+                Section::make('Contact Information')->schema([
+                    TextInput::make('email')
+                        ->label('Primary Email')
+                        ->email(),
+                    TextInput::make('mobile')
+                        ->label('Mobile')
+                        ->string(),
+                    TextInput::make('phone')
+                        ->label('Other Phone')
+                        ->string(),
+                    TextInput::make('address')
+                        ->label('Address')
+                        ->string(),
+                    TextInput::make('address_2')
+                        ->label('Address 2')
+                        ->string(),
+                ])->columns(2),
+
+                Section::make('Classification')->schema([
+                    Select::make('status_id')
+                        ->label('Status')
+                        ->required()
+                        ->relationship('status', 'name')
+                        ->exists(
+                            table: (new ContactStatus())->getTable(),
+                            column: (new ContactStatus())->getKeyName()
+                        ),
+                    Select::make('source_id')
+                        ->label('Source')
+                        ->required()
+                        ->relationship('source', 'name')
+                        ->exists(
+                            table: (new ContactSource())->getTable(),
+                            column: (new ContactSource())->getKeyName()
+                        ),
+
+                    Textarea::make('description')
+                        ->label('Description')
+                        ->string()->columnSpanFull(),
+                ])->columns(2),
+
+                Section::make('Engagement Restrictions')->schema([
+                    Radio::make('sms_opt_out')
+                        ->label('SMS Opt Out')
+                        ->default(false)
+                        ->boolean(),
+                    Radio::make('email_bounce')
+                        ->label('Email Bounce')
+                        ->default(false)
+                        ->boolean(),
+                ])->columns(2),
+
+                Section::make('Record Details')->schema([
+                    Select::make('assigned_to_id')
+                        ->label('Assigned To')
+                        ->relationship(
+                            'assignedTo',
+                            'name',
+                            fn (Builder $query) => $query->tap(new HasLicense(Contact::getLicenseType())),
+                        )
+                        ->searchable()
+                        ->nullable()
+                        ->exists(
+                            table: (new User())->getTable(),
+                            column: (new User())->getKeyName()
+                        ),
+                ]),
+
                 // TODO: Display this based on system configurable data format
-                DatePicker::make('birthdate')
-                    ->label('Birthdate')
-                    ->native(false)
-                    ->closeOnDateSelection()
-                    ->format('Y-m-d')
-                    ->displayFormat('Y-m-d')
-                    ->maxDate(now()),
-                TextInput::make('hsgrad')
-                    ->label('High School Graduation Date')
-                    ->nullable()
-                    ->numeric()
-                    ->minValue(1920)
-                    ->maxValue(now()->addYears(25)->year),
-                Select::make('assigned_to_id')
-                    ->label('Assigned To')
-                    ->relationship(
-                        'assignedTo',
-                        'name',
-                        fn (Builder $query) => $query->tap(new HasLicense(Contact::getLicenseType())),
-                    )
-                    ->searchable()
-                    ->nullable()
-                    ->exists(
-                        table: (new User())->getTable(),
-                        column: (new User())->getKeyName()
-                    ),
             ]);
     }
 }

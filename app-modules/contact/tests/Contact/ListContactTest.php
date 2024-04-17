@@ -87,7 +87,6 @@ test('ListContacts can bulk update characteristics', function () {
     $status = ContactStatus::factory()->create();
 
     $description = 'abc123';
-    $hsgrad = '2000';
 
     $component
         ->callTableBulkAction('bulk_update', $contacts, [
@@ -103,11 +102,6 @@ test('ListContacts can bulk update characteristics', function () {
         ->callTableBulkAction('bulk_update', $contacts, [
             'field' => 'email_bounce',
             'email_bounce' => true,
-        ])
-        ->assertHasNoTableBulkActionErrors()
-        ->callTableBulkAction('bulk_update', $contacts, [
-            'field' => 'hsgrad',
-            'hsgrad' => $hsgrad,
         ])
         ->assertHasNoTableBulkActionErrors()
         ->callTableBulkAction('bulk_update', $contacts, [
@@ -133,7 +127,6 @@ test('ListContacts can bulk update characteristics', function () {
                 ->assigned_to_id->toBe($user->id)
                 ->description->toBe($description)
                 ->email_bounce->toBeTrue()
-                ->hsgrad->toBe($hsgrad)
                 ->sms_opt_out->toBeTrue()
                 ->source_id->toBe($source->id)
                 ->status_id->toBe($status->id)

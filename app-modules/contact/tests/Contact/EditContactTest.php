@@ -95,15 +95,12 @@ test('EditContact is gated with proper access control', function () {
         ->and($contact->fresh()->preferred)->toEqual($request->get('preferred'))
         ->and($contact->fresh()->description)->toEqual($request->get('description'))
         ->and($contact->fresh()->email)->toEqual($request->get('email'))
-        ->and($contact->fresh()->email_2)->toEqual($request->get('email_2'))
         ->and($contact->fresh()->mobile)->toEqual($request->get('mobile'))
         ->and($contact->fresh()->sms_opt_out)->toEqual($request->get('sms_opt_out'))
         ->and($contact->fresh()->email_bounce)->toEqual($request->get('email_bounce'))
         ->and($contact->fresh()->phone)->toEqual($request->get('phone'))
         ->and($contact->fresh()->address)->toEqual($request->get('address'))
         ->and($contact->fresh()->address_2)->toEqual($request->get('address_2'))
-        ->and($contact->fresh()->birthdate->toDateString())->toEqual($request->get('birthdate'))
-        ->and($contact->fresh()->hsgrad)->toEqual($request->get('hsgrad'))
         ->and($contact->fresh()->assigned_to_id)->toEqual($request->get('assigned_to_id'))
         ->and($contact->fresh()->created_by_id)->toEqual($request->get('created_by_id'));
 });

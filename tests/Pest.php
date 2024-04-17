@@ -85,7 +85,7 @@ uses(Tests\TestCase::class)->in('../tests', '../app-modules/*/tests');
  *
  * @return User
  */
-function user(LicenseType | array | null $licenses = null, array | null | string $roles = null, string $guard = 'web'): User
+function user(LicenseType | array | null $licenses = null, array | null | string $roles = null, array | null | string $permissions = null, string $guard = 'web'): User
 {
     $user = User::factory()->create();
 
@@ -98,6 +98,9 @@ function user(LicenseType | array | null $licenses = null, array | null | string
 
             $user->roles()->sync($roles);
         });
+
+    collect($permissions)
+        ->each(fn ($permission) => $user->givePermissionTo($permission));
 
     collect($licenses)
         ->each(fn (LicenseType $licenseType) => $user->grantLicense($licenseType))

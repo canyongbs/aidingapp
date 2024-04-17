@@ -34,55 +34,42 @@
 </COPYRIGHT>
 */
 
-namespace App\Exceptions;
+return [
+    /*
+    |--------------------------------------------------------------------------
+    | Default Pennant Store
+    |--------------------------------------------------------------------------
+    |
+    | Here you will specify the default store that Pennant should use when
+    | storing and resolving feature flag values. Pennant ships with the
+    | ability to store flag values in an in-memory array or database.
+    |
+    | Supported: "array", "database"
+    |
+    */
 
-use Throwable;
-use Sentry\Laravel\Integration;
-use Illuminate\Auth\AuthenticationException;
-use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+    'default' => env('PENNANT_STORE', 'database'),
 
-class Handler extends ExceptionHandler
-{
-    /**
-     * A list of exception types with their corresponding custom log levels.
-     *
-     * @var array<class-string<Throwable>, \Psr\Log\LogLevel::*>
-     */
-    protected $levels = [
-    ];
+    /*
+    |--------------------------------------------------------------------------
+    | Pennant Stores
+    |--------------------------------------------------------------------------
+    |
+    | Here you may configure each of the stores that should be available to
+    | Pennant. These stores shall be used to store resolved feature flag
+    | values - you may configure as many as your application requires.
+    |
+    */
 
-    /**
-     * A list of the exception types that are not reported.
-     *
-     * @var array<int, class-string<Throwable>>
-     */
-    protected $dontReport = [];
+    'stores' => [
+        'array' => [
+            'driver' => 'array',
+        ],
 
-    /**
-     * A list of the inputs that are never flashed to the session on validation exceptions.
-     *
-     * @var array<int, string>
-     */
-    protected $dontFlash = [
-        'current_password',
-        'password',
-        'password_confirmation',
-    ];
-
-    /**
-     * Register the exception handling callbacks for the application.
-     */
-    public function register(): void
-    {
-        $this->reportable(function (Throwable $e) {
-            Integration::captureUnhandledException($e);
-        });
-    }
-
-    protected function unauthenticated($request, AuthenticationException $exception)
-    {
-        return $this->shouldReturnJson($request, $exception)
-            ? response()->json(['message' => $exception->getMessage()], 401)
-            : redirect()->guest($exception->redirectTo() ?? url('/'));
-    }
-}
+        'database' => [
+            'driver' => 'database',
+            'connection' => null,
+            'table' => 'features',
+        ],
+    ],
+];
