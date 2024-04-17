@@ -34,37 +34,26 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Tests\Contact\RequestFactories;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
-use App\Models\User;
-use AidingApp\Contact\Models\ContactSource;
-use AidingApp\Contact\Models\ContactStatus;
-use Worksome\RequestFactories\RequestFactory;
-
-class CreateContactRequestFactory extends RequestFactory
-{
-    public function definition(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        $firstName = $this->faker->firstName();
-        $lastName = $this->faker->lastName();
-
-        return [
-            'status_id' => ContactStatus::inRandomOrder()->first() ?? ContactStatus::factory()->create()->id,
-            'source_id' => ContactSource::inRandomOrder()->first() ?? ContactSource::factory()->create()->id,
-            'first_name' => $firstName,
-            'last_name' => $lastName,
-            'full_name' => "{$firstName} {$lastName}",
-            'preferred' => $this->faker->firstName(),
-            'description' => $this->faker->paragraph(),
-            'email' => $this->faker->email(),
-            'mobile' => $this->faker->phoneNumber(),
-            'sms_opt_out' => $this->faker->boolean(),
-            'email_bounce' => $this->faker->boolean(),
-            'phone' => $this->faker->phoneNumber(),
-            'address' => $this->faker->address(),
-            'address_2' => $this->faker->address(),
-            'assigned_to_id' => User::factory()->create()->id,
-            'created_by_id' => User::factory()->create()->id,
-        ];
+        if (Schema::hasTable('contacts')) {
+            Schema::table('contacts', function (Blueprint $table) {
+                $table->dropColumn(['birthdate', 'hsgrad', 'email_2']);
+            });
+        }
     }
-}
+
+    public function down(): void
+    {
+        Schema::table('contacts', function (Blueprint $table) {
+            $table->date('birthdate')->nullable();
+            $table->string('hsgrad')->nullable();
+            $table->string('email_2')->nullable();
+        });
+    }
+};
