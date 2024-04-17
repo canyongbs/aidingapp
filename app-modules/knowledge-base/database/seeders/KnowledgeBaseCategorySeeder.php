@@ -57,6 +57,16 @@ class KnowledgeBaseCategorySeeder extends Seeder
                     ['name' => 'Special Populations', 'description' => null, 'icon' => null],
                     ['name' => 'Student Business Services', 'description' => null, 'icon' => null],
                     ['name' => 'Veterans Services', 'description' => null, 'icon' => null],
+                    ['name' => 'Password Management', 'description' => 'Information and procedures related to password policies, password reset processes, and best practices for creating strong passwords.', 'icon' => null],
+                    ['name' => 'Software Installation/Configuration', 'description' => 'Guides and documentation for installing, configuring, and updating various software applications used within the organization.', 'icon' => null],
+                    ['name' => 'Hardware Setup/Configuration', 'description' => 'Resources and instructions for setting up and configuring hardware devices such as computers, printers, scanners, and networking equipment.', 'icon' => null],
+                    ['name' => 'Network Troubleshooting', 'description' => 'Articles and troubleshooting guides for diagnosing and resolving common network connectivity issues, including Wi-Fi, Ethernet, and VPN problems.', 'icon' => null],
+                    ['name' => 'Email Setup/Configuration', 'description' => 'Documentation for setting up email accounts, configuring email clients, and troubleshooting common email issues such as sending/receiving problems or spam filtering.', 'icon' => null],
+                    ['name' => 'Access Control/Permissions', 'description' => 'Information on managing access permissions to files, folders, databases, and applications, including user roles and privileges.', 'icon' => null],
+                    ['name' => 'Data Backup and Recovery', 'description' => 'Guides for implementing data backup procedures, selecting backup solutions, and recovering data from backups in case of data loss or corruption.', 'icon' => null],
+                    ['name' => 'Cybersecurity Best Practices', 'description' => 'Articles on cybersecurity best practices, including tips for protecting against viruses, malware, phishing attacks, and other security threats.', 'icon' => null],
+                    ['name' => 'Hardware Maintenance/Repair', 'description' => 'Documentation for performing routine hardware maintenance tasks, troubleshooting hardware problems, and replacing faulty components.', 'icon' => null],
+                    ['name' => 'Training and User Guides', 'description' => 'Resources for providing IT training to users, including user manuals, video tutorials, and FAQs for common IT tasks and software applications.', 'icon' => null],
                 ]
             );
     }
