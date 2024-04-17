@@ -67,7 +67,8 @@ class CreateServiceRequest extends CreateRecord
                     ->relationship('division', 'name')
                     ->label('Division')
                     ->required()
-                    ->exists((new Division())->getTable(), 'id'),
+                    ->exists((new Division())->getTable(), 'id')
+                    ->default(auth()->user()->teams()->count() ? auth()->user()->teams[0]?->division?->id : ''),
                 Select::make('status_id')
                     ->relationship('status', 'name')
                     ->label('Status')
@@ -105,15 +106,15 @@ class CreateServiceRequest extends CreateRecord
                     ->maxLength(255)
                     ->columnSpanFull(),
                 Textarea::make('close_details')
-                    ->label('Close Details/Description')
+                    ->label('Description')
                     ->nullable()
                     ->string()
-                    ->columnSpanFull(),
+                    ->columnSpan(1),
                 Textarea::make('res_details')
-                    ->label('Internal Service Request Details')
+                    ->label('Internal Details')
                     ->nullable()
                     ->string()
-                    ->columnSpanFull(),
+                    ->columnSpan(1),
                 EducatableSelect::make('respondent')
                     ->label('Related To')
                     ->required()
