@@ -59,15 +59,15 @@ class ServiceRequestTypeSeeder extends Seeder
                     ['name' => 'Tutoring', 'description' => null, 'icon' => null],
                     ['name' => 'Veterans', 'description' => null, 'icon' => null],
                     ['name' => 'Password Reset', 'description' => 'Users often forget their passwords or need them reset for security reasons.', 'icon' => null],
-                    ['name' => 'Software Installation/Upgrades', 'description' => 'Requests for installing new software or updating existing ones.', 'icon' => null ],
+                    ['name' => 'Software Installation/Upgrades', 'description' => 'Requests for installing new software or updating existing ones.', 'icon' => null],
                     ['name' => 'Hardware Setup/Configuration', 'description' => 'Assistance with setting up new hardware devices such as computers, printers, or network equipment.', 'icon' => null],
-                    ['name' => 'Network Connectivity Issues','description' => 'Help with troubleshooting and resolving issues related to network connectivity, such as Wi-Fi problems or Ethernet connection issues.','icon' => null],
-                    ['name' => 'Email Configuration/Issues','description' => 'Assistance with setting up email accounts, configuring email clients, or troubleshooting email-related problems.','icon' => null],
-                    ['name' => 'Access Permissions/Security Requests','description' => 'Requests for granting or revoking access permissions to files, folders, or applications, as well as security-related inquiries.','icon' => null],
-                    ['name' => 'Data Backup/Recovery','description' => 'Requests for assistance with data backup procedures or recovering lost or corrupted data.','icon' => null],
-                    ['name' => 'Virus/Malware Removal','description' => 'Assistance with identifying and removing viruses, malware, or other security threats from computers or networks.','icon' => null],
-                    ['name' => 'Hardware Repair/Replacement','description' => 'Requests for repairing or replacing faulty hardware components such as hard drives, RAM, or motherboards.','icon' => null],
-                    ['name' => 'Training/Instruction','description' => 'Requests for IT training or guidance on using specific software applications or IT systems effectively.','icon' => null]
+                    ['name' => 'Network Connectivity Issues', 'description' => 'Help with troubleshooting and resolving issues related to network connectivity, such as Wi-Fi problems or Ethernet connection issues.', 'icon' => null],
+                    ['name' => 'Email Configuration/Issues', 'description' => 'Assistance with setting up email accounts, configuring email clients, or troubleshooting email-related problems.', 'icon' => null],
+                    ['name' => 'Access Permissions/Security Requests', 'description' => 'Requests for granting or revoking access permissions to files, folders, or applications, as well as security-related inquiries.', 'icon' => null],
+                    ['name' => 'Data Backup/Recovery', 'description' => 'Requests for assistance with data backup procedures or recovering lost or corrupted data.', 'icon' => null],
+                    ['name' => 'Virus/Malware Removal', 'description' => 'Assistance with identifying and removing viruses, malware, or other security threats from computers or networks.', 'icon' => null],
+                    ['name' => 'Hardware Repair/Replacement', 'description' => 'Requests for repairing or replacing faulty hardware components such as hard drives, RAM, or motherboards.', 'icon' => null],
+                    ['name' => 'Training/Instruction', 'description' => 'Requests for IT training or guidance on using specific software applications or IT systems effectively.', 'icon' => null],
                 ]
             )
             ->each(function (ServiceRequestType $type) {
