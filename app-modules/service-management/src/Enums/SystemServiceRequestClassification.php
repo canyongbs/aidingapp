@@ -46,6 +46,8 @@ enum SystemServiceRequestClassification: string implements HasLabel
 
     case Closed = 'closed';
 
+    case Waiting = 'waiting';
+
     case Custom = 'custom';
 
     public function getLabel(): ?string
