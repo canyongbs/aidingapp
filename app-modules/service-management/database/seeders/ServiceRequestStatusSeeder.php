@@ -59,18 +59,9 @@ class ServiceRequestStatusSeeder extends Seeder
                         'color' => ColumnColorOptions::Info,
                     ],
                     [
-                        'classification' => SystemServiceRequestClassification::Custom,
-                        'name' => 'Pending College',
+                        'classification' => SystemServiceRequestClassification::Waiting,
+                        'name' => 'Pending for Customer',
                         'color' => ColumnColorOptions::Warning,
-                    ],
-                    [
-                        'classification' => SystemServiceRequestClassification::Custom,
-                        'name' => 'Pending District',
-                        'color' => ColumnColorOptions::Danger],
-                    [
-                        'classification' => SystemServiceRequestClassification::Custom,
-                        'name' => 'Pending Student',
-                        'color' => ColumnColorOptions::Gray,
                     ],
                     [
                         'classification' => SystemServiceRequestClassification::Closed,
