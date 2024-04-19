@@ -41,7 +41,11 @@ use App\Filament\Widgets\Features;
 use App\Filament\Widgets\Notifications;
 use App\Filament\Widgets\WelcomeWidget;
 use Filament\Pages\Dashboard as BasePage;
+use App\Filament\Widgets\ServiceRequestWidget;
+use App\Filament\Widgets\ServiceRequestLineChart;
+use App\Filament\Widgets\ServiceRequestDonutChart;
 use AidingApp\Authorization\Filament\Widgets\UnlicensedNotice;
+use App\Filament\Widgets\ListServiceRequestTableWidgets;
 
 class Dashboard extends BasePage
 {
@@ -66,16 +70,20 @@ class Dashboard extends BasePage
 
         return [
             ...$widgets,
-            Features::class,
-            Notifications::class,
+            ServiceRequestWidget::class,
+            ServiceRequestLineChart::class,
+            ServiceRequestDonutChart::class,
+            ListServiceRequestTableWidgets::class
+            // Features::class,
+            // Notifications::class,
         ];
     }
 
     public function getColumns(): int | string | array
     {
         return [
-            'sm' => 1,
-            'md' => 2,
+            'sm' => 2,
+            'md' => 4,
             'lg' => 4,
         ];
     }
