@@ -50,6 +50,8 @@ enum SystemServiceRequestClassification: string implements HasLabel
 
     case Custom = 'custom';
 
+    case Waiting = 'waiting';
+
     public function getLabel(): ?string
     {
         return match ($this) {
