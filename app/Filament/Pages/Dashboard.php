@@ -44,8 +44,8 @@ use Filament\Pages\Dashboard as BasePage;
 use App\Filament\Widgets\ServiceRequestWidget;
 use App\Filament\Widgets\ServiceRequestLineChart;
 use App\Filament\Widgets\ServiceRequestDonutChart;
-use AidingApp\Authorization\Filament\Widgets\UnlicensedNotice;
 use App\Filament\Widgets\ListServiceRequestTableWidgets;
+use AidingApp\Authorization\Filament\Widgets\UnlicensedNotice;
 
 class Dashboard extends BasePage
 {
@@ -73,7 +73,7 @@ class Dashboard extends BasePage
             ServiceRequestWidget::class,
             ServiceRequestLineChart::class,
             ServiceRequestDonutChart::class,
-            ListServiceRequestTableWidgets::class
+            ListServiceRequestTableWidgets::class,
             // Features::class,
             // Notifications::class,
         ];
