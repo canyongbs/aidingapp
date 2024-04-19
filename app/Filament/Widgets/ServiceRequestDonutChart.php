@@ -75,8 +75,9 @@ class ServiceRequestDonutChart extends ChartWidget
     {
         $serviceRequestByStatus = ServiceRequestStatus::withCount(['serviceRequests'])->get(['id', 'name']);
 
-        $serviceRequestByStatus = $serviceRequestByStatus->map(function($item){
-            $item['bg_color'] = \Arr::get($this->getColorForStatus(), $item->color->value); 
+        $serviceRequestByStatus = $serviceRequestByStatus->map(function ($item) {
+            $item['bg_color'] = \Arr::get($this->getColorForStatus(), $item->color->value);
+
             return $item;
         });
 

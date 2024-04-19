@@ -36,23 +36,22 @@
 
 namespace App\Filament\Widgets;
 
-use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
-use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
-use App\Filament\Tables\Columns\IdColumn;
-use App\Models\Scopes\EducatableSearch;
+use Filament\Tables\Table;
+use Filament\Tables\Actions\Action;
 use App\Models\Scopes\EducatableSort;
-use Filament\Tables;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DeleteBulkAction;
+use App\Models\Scopes\EducatableSearch;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use App\Filament\Tables\Columns\IdColumn;
 use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Table;
-use Filament\Widgets\TableWidget as BaseWidget;
 use Illuminate\Database\Eloquent\Builder;
-use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Tables\Actions\DeleteBulkAction;
+use Filament\Widgets\TableWidget as BaseWidget;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
+use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 
 class ListServiceRequestTableWidgets extends BaseWidget
 {
@@ -101,7 +100,7 @@ class ListServiceRequestTableWidgets extends BaseWidget
                     ->label('SLA Resolution')
                     ->state(fn (ServiceRequest $record): ?SlaComplianceStatus => $record->getResolutionSlaComplianceStatus())
                     ->tooltip(fn (ServiceRequest $record): ?string => $record->getResolutionSlaComplianceStatus()?->getLabel()),
-                TextColumn::make('created_at')->date('Y-m-d')
+                TextColumn::make('created_at')->date('Y-m-d'),
             ])
             ->filters([
                 SelectFilter::make('priority')
