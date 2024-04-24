@@ -37,11 +37,12 @@
 namespace App\Filament\Widgets;
 
 use Filament\Widgets\ChartWidget;
+use Filament\Support\Colors\Color;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 
 class ServiceRequestDonutChart extends ChartWidget
 {
-    protected static ?string $heading = 'Service Requests Status';
+    protected static ?string $heading = 'Service Requests by Status';
 
     protected static ?string $maxHeight = '300px';
 
@@ -75,13 +76,11 @@ class ServiceRequestDonutChart extends ChartWidget
     {
         $serviceRequestByStatus = ServiceRequestStatus::withCount(['serviceRequests'])->get(['id', 'name']);
 
-        $serviceRequestByStatus = $serviceRequestByStatus->map(function ($item) {
-            $item['bg_color'] = \Arr::get($this->getColorForStatus(), $item->color->value);
+        $serviceRequestByStatus = $serviceRequestByStatus->map(function (ServiceRequestStatus $status) {
+            $status['bg_color'] = $this->getColorForStatus($status->color->value);
 
-            return $item;
+            return $status;
         });
-
-        \Log::debug($serviceRequestByStatus);
 
         return [
             'labels' => $serviceRequestByStatus->pluck('name'),
@@ -101,15 +100,20 @@ class ServiceRequestDonutChart extends ChartWidget
         return 'doughnut';
     }
 
-    protected function getColorForStatus(): array
+    protected function getColorForStatus($color)
     {
-        return [
-            'primary' => 'rgb(254,195,33)',
-            'success' => 'rgb(74,222,128)',
-            'info' => 'rgb(96, 165, 250)',
-            'warning' => 'rgb(251,191,36)',
-            'danger' => 'rgb(248,113,113)',
-            'gray' => 'rgb(161,161,170)',
-        ];
+        return match ($color) {
+            'primary' => $this->getRgbString(Color::Indigo[500]),
+            'success' => $this->getRgbString(Color::Emerald[500]),
+            'info' => $this->getRgbString(Color::Blue[500]),
+            'warning' => $this->getRgbString(Color::Orange[500]),
+            'danger' => $this->getRgbString(Color::Red[500]),
+            'gray' => $this->getRgbString(Color::Gray[500]),
+        };
+    }
+
+    protected function getRgbString($color): string
+    {
+        return "rgb({$color})";
     }
 }

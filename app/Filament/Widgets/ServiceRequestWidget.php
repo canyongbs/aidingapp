@@ -39,6 +39,7 @@ namespace App\Filament\Widgets;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
+use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 
 class ServiceRequestWidget extends BaseWidget
 {
@@ -53,7 +54,7 @@ class ServiceRequestWidget extends BaseWidget
     {
         return [
             Stat::make('Open Service Requests', ServiceRequest::whereHas('status', function ($query) {
-                return $query->where('name', 'New');
+                return $query->where('classification', SystemServiceRequestClassification::Open->value);
             })->count()),
             Stat::make('Unassigned Service Requests', ServiceRequest::doesntHave('assignments')->count()),
         ];

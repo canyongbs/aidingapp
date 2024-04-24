@@ -52,6 +52,21 @@ class ServiceRequestLineChart extends ChartWidget
         'lg' => 3,
     ];
 
+    protected function getOptions(): array
+    {
+        return [
+            'scales' => [
+                'y' => [
+                    'beginAtZero' => true,
+                    'ticks' => [
+                        'stepSize' => 0,
+                        'beginAtZero' => true,
+                    ],
+                ],
+            ],
+        ];
+    }
+
     protected function getData(): array
     {
         $totalCreatedPerDay = ServiceRequest::query()
@@ -63,25 +78,25 @@ class ServiceRequestLineChart extends ChartWidget
             ->orderBy('date')
             ->pluck('total', 'date');
 
-        $runningTotal = 0;
-        $runningTotalPerDay = [];
+        $serviceRequestTotal = 0;
+        $serviceRequestTotalPerDay = [];
 
         foreach (range(29, 0) as $daysAgo) {
             $date = Carbon::now()->subDays($daysAgo)->toDateString();
 
-            $runningTotal += $totalCreatedPerDay[$date] ?? 0;
+            $serviceRequestTotal += $totalCreatedPerDay[$date] ?? 0;
 
-            $runningTotalPerDay[$date] = $runningTotal;
+            $serviceRequestTotalPerDay[$date] = $serviceRequestTotal;
         }
 
         return [
             'datasets' => [
                 [
                     'label' => 'Service requests',
-                    'data' => array_values($runningTotalPerDay),
+                    'data' => array_values($serviceRequestTotalPerDay),
                 ],
             ],
-            'labels' => array_keys($runningTotalPerDay),
+            'labels' => array_keys($serviceRequestTotalPerDay),
         ];
     }
 
