@@ -34,53 +34,29 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Pages;
+namespace App\Filament\Widgets;
 
-use App\Models\User;
-use App\Filament\Widgets\WelcomeWidget;
-use Filament\Pages\Dashboard as BasePage;
-use App\Filament\Widgets\ServiceRequestWidget;
-use App\Filament\Widgets\ServiceRequestLineChart;
-use App\Filament\Widgets\ServiceRequestDonutChart;
-use App\Filament\Widgets\ListServiceRequestTableWidgets;
-use AidingApp\Authorization\Filament\Widgets\UnlicensedNotice;
+use Filament\Widgets\StatsOverviewWidget\Stat;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use Filament\Widgets\StatsOverviewWidget as BaseWidget;
+use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 
-class Dashboard extends BasePage
+class ServiceRequestWidget extends BaseWidget
 {
-    protected static ?string $navigationLabel = 'Home';
+    protected int | string | array $columnSpan = 'full';
 
-    protected ?string $heading = 'Home';
-
-    public function getWidgets(): array
+    public function getColumns(): int
     {
-        /** @var User $user */
-        $user = auth()->user();
-
-        $widgets = [
-            WelcomeWidget::class,
-        ];
-
-        if (UnlicensedNotice::canView()) {
-            $widgets[] = UnlicensedNotice::class;
-
-            return $widgets;
-        }
-
-        return [
-            ...$widgets,
-            ServiceRequestWidget::class,
-            ServiceRequestLineChart::class,
-            ServiceRequestDonutChart::class,
-            ListServiceRequestTableWidgets::class,
-        ];
+        return 2;
     }
 
-    public function getColumns(): int | string | array
+    protected function getStats(): array
     {
         return [
-            'sm' => 2,
-            'md' => 4,
-            'lg' => 4,
+            Stat::make('Open Service Requests', ServiceRequest::whereHas('status', function ($query) {
+                return $query->where('classification', SystemServiceRequestClassification::Open->value);
+            })->count()),
+            Stat::make('Unassigned Service Requests', ServiceRequest::doesntHave('assignments')->count()),
         ];
     }
 }
