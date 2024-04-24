@@ -37,8 +37,6 @@
 namespace App\Filament\Pages;
 
 use App\Models\User;
-use App\Filament\Widgets\Features;
-use App\Filament\Widgets\Notifications;
 use App\Filament\Widgets\WelcomeWidget;
 use Filament\Pages\Dashboard as BasePage;
 use App\Filament\Widgets\ServiceRequestWidget;
@@ -74,8 +72,6 @@ class Dashboard extends BasePage
             ServiceRequestLineChart::class,
             ServiceRequestDonutChart::class,
             ListServiceRequestTableWidgets::class,
-            // Features::class,
-            // Notifications::class,
         ];
     }
 
