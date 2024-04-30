@@ -37,8 +37,8 @@ import { useRoute } from 'vue-router';
 import Breadcrumbs from '@/Components/Breadcrumbs.vue';
 import AppLoading from '@/Components/AppLoading.vue';
 import { consumer } from '@/Services/Consumer.js';
-import { Bars3Icon } from "@heroicons/vue/24/outline/index.js";
-import { ChevronRightIcon, XMarkIcon } from "@heroicons/vue/20/solid/index.js";
+import { Bars3Icon } from '@heroicons/vue/24/outline/index.js';
+import { ChevronRightIcon, XMarkIcon } from '@heroicons/vue/20/solid/index.js';
 
 const route = useRoute();
 
@@ -81,76 +81,71 @@ function getData() {
     const { get } = consumer();
 
     get(props.apiUrl + '/categories/' + route.params.categoryId).then((response) => {
-      category.value = response.data.category;
-      articles.value = response.data.articles;
-      loadingResults.value = false;
+        category.value = response.data.category;
+        articles.value = response.data.articles;
+        loadingResults.value = false;
     });
 }
 </script>
 
 <template>
-  <div
-    class="sticky top-0 z-40 flex flex-col items-center bg-gray-50"
-  >
-    <button class="w-full p-3 lg:hidden" type="button" @click="$emit('sidebarOpened')">
-      <span class="sr-only">Open sidebar</span>
+    <div class="sticky top-0 z-40 flex flex-col items-center bg-gray-50">
+        <button class="w-full p-3 lg:hidden" type="button" @click="$emit('sidebarOpened')">
+            <span class="sr-only">Open sidebar</span>
 
-      <Bars3Icon class="h-6 w-6 text-gray-900"></Bars3Icon>
-    </button>
+            <Bars3Icon class="h-6 w-6 text-gray-900"></Bars3Icon>
+        </button>
 
-    <div class="w-full px-6">
-      <div class="max-w-screen-xl flex flex-col gap-y-6 mx-auto py-8">
-        <div v-if="loadingResults">
-          <AppLoading />
-        </div>
-        <div v-else>
-          <main class="flex flex-col gap-8">
-            <Breadcrumbs
-              currentCrumb="Categories"
-            ></Breadcrumbs>
+        <div class="w-full px-6">
+            <div class="max-w-screen-xl flex flex-col gap-y-6 mx-auto py-8">
+                <div v-if="loadingResults">
+                    <AppLoading />
+                </div>
+                <div v-else>
+                    <main class="flex flex-col gap-8">
+                        <Breadcrumbs currentCrumb="Categories"></Breadcrumbs>
 
-            <div class="flex flex-col gap-6">
-              <h2 class="text-2xl font-bold text-primary-950">
-                {{ category.name }}
-              </h2>
+                        <div class="flex flex-col gap-6">
+                            <h2 class="text-2xl font-bold text-primary-950">
+                                {{ category.name }}
+                            </h2>
 
-              <div class="flex flex-col divide-y ring-1 ring-black/5 shadow-sm px-3 pt-3 pb-1 rounded bg-white">
-                <h3 class="text-lg font-semibold text-gray-800 px-3 pt-1 pb-3">Articles</h3>
+                            <div
+                                class="flex flex-col divide-y ring-1 ring-black/5 shadow-sm px-3 pt-3 pb-1 rounded bg-white"
+                            >
+                                <h3 class="text-lg font-semibold text-gray-800 px-3 pt-1 pb-3">Articles</h3>
 
-                <div v-if="articles.length > 0">
-                  <ul role="list" class="divide-y">
-                    <li
-                      v-for="article in articles"
-                      :key="article.id"
-                    >
-                      <router-link
-                        :to="{
+                                <div v-if="articles.length > 0">
+                                    <ul role="list" class="divide-y">
+                                        <li v-for="article in articles" :key="article.id">
+                                            <router-link
+                                                :to="{
                                                     name: 'view-article',
                                                     params: { categoryId: article.categoryId, articleId: article.id },
                                                 }"
-                        class="group p-3 flex items-start text-sm font-medium text-gray-700"
-                      >
-                        <h4>
-                          {{ article.name }}
-                        </h4>
+                                                class="group p-3 flex items-start text-sm font-medium text-gray-700"
+                                            >
+                                                <h4>
+                                                    {{ article.name }}
+                                                </h4>
 
-                        <ChevronRightIcon class="opacity-0 h-5 w-5 text-primary-600 transition-all group-hover:translate-x-2 group-hover:opacity-100" />
-                      </router-link>
-                    </li>
-                  </ul>
-                </div>
-                <div v-else class="p-3 flex items-start gap-2">
-                  <XMarkIcon class="h-5 w-5 text-gray-400" />
+                                                <ChevronRightIcon
+                                                    class="opacity-0 h-5 w-5 text-primary-600 transition-all group-hover:translate-x-2 group-hover:opacity-100"
+                                                />
+                                            </router-link>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div v-else class="p-3 flex items-start gap-2">
+                                    <XMarkIcon class="h-5 w-5 text-gray-400" />
 
-                  <p class="text-gray-600 text-sm font-medium">
-                    No articles found in this category.
-                  </p>
+                                    <p class="text-gray-600 text-sm font-medium">No articles found in this category.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
                 </div>
-              </div>
             </div>
-          </main>
         </div>
-      </div>
     </div>
-  </div>
 </template>

@@ -41,7 +41,7 @@ import axios from '@/Globals/Axios.js';
 import { useTokenStore } from '@/Stores/token.js';
 import wizard from '../../../../widgets/service-request-form/src/FormKit/wizard.js';
 import { consumer } from '@/Services/Consumer.js';
-import AppLoading from "@/Components/AppLoading.vue";
+import AppLoading from '@/Components/AppLoading.vue';
 
 let { steps, visitedSteps, activeStep, setStep, wizardPlugin } = wizard();
 
@@ -160,38 +160,38 @@ async function getData() {
             <AppLoading />
         </div>
         <div v-else>
-            <div
-              class="sticky top-0 z-40 flex flex-col items-center bg-gray-50"
-            >
-              <button class="w-full p-3 lg:hidden" type="button" v-on:click="showMobileMenu = !showMobileMenu">
-                <span class="sr-only">Open sidebar</span>
+            <div class="sticky top-0 z-40 flex flex-col items-center bg-gray-50">
+                <button class="w-full p-3 lg:hidden" type="button" v-on:click="showMobileMenu = !showMobileMenu">
+                    <span class="sr-only">Open sidebar</span>
 
-                <Bars3Icon class="h-6 w-6 text-gray-900"></Bars3Icon>
-              </button>
+                    <Bars3Icon class="h-6 w-6 text-gray-900"></Bars3Icon>
+                </button>
 
-              <div class="bg-gradient-to-br from-primary-500 to-primary-800 w-full px-6">
-                <div class="max-w-screen-xl flex flex-col gap-y-6 mx-auto py-8">
-                  <div class="text-right" v-if="submittedSuccess">
-                    <button class="p-2 font-bold rounded bg-white text-primary-700 dark:text-primary-400">
-                      <router-link :to="{ name: 'create-service-request' }"> Submit Another Request </router-link>
-                    </button>
-                  </div>
-                  <div class="flex flex-col text-left">
-                    <h3 class="text-3xl text-white">Help Center</h3>
-                    <p class="text-white">Welcome {{ user.first_name }}!</p>
-                    <p class="text-white">Please fill out the following information to submit your request.</p>
-                  </div>
+                <div class="bg-gradient-to-br from-primary-500 to-primary-800 w-full px-6">
+                    <div class="max-w-screen-xl flex flex-col gap-y-6 mx-auto py-8">
+                        <div class="text-right" v-if="submittedSuccess">
+                            <button class="p-2 font-bold rounded bg-white text-primary-700 dark:text-primary-400">
+                                <router-link :to="{ name: 'create-service-request' }">
+                                    Submit Another Request
+                                </router-link>
+                            </button>
+                        </div>
+                        <div class="flex flex-col text-left">
+                            <h3 class="text-3xl text-white">Help Center</h3>
+                            <p class="text-white">Welcome {{ user.first_name }}!</p>
+                            <p class="text-white">Please fill out the following information to submit your request.</p>
+                        </div>
+                    </div>
                 </div>
-              </div>
             </div>
 
             <Breadcrumbs
-              class="px-6 py-8"
-              currentCrumb="Submit Form"
-              :breadcrumbs="[
-                      { name: 'Help Center', route: 'home' },
-                      { name: 'New Request', route: 'create-service-request' },
-                  ]"
+                class="px-6 py-8"
+                currentCrumb="Submit Form"
+                :breadcrumbs="[
+                    { name: 'Help Center', route: 'home' },
+                    { name: 'New Request', route: 'create-service-request' },
+                ]"
             ></Breadcrumbs>
 
             <main class="grid px-6 gap-4" v-if="submittedSuccess">Thank you for submitting a new request.</main>

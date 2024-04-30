@@ -97,9 +97,7 @@ function debounce(func, delay) {
 </script>
 
 <template>
-    <div
-        class="sticky top-0 z-40 flex flex-col items-center bg-gray-50"
-    >
+    <div class="sticky top-0 z-40 flex flex-col items-center bg-gray-50">
         <button class="w-full p-3 lg:hidden" type="button" v-on:click="showMobileMenu = !showMobileMenu">
             <span class="sr-only">Open sidebar</span>
 
@@ -107,51 +105,51 @@ function debounce(func, delay) {
         </button>
 
         <div class="bg-gradient-to-br from-primary-500 to-primary-800 w-full px-6">
-          <div class="max-w-screen-xl flex flex-col gap-y-6 mx-auto py-8">
-            <div class="text-right">
-              <router-link :to="{ name: 'create-service-request' }">
-                <button class="p-2 font-bold rounded bg-white text-primary-700 dark:text-primary-400">
-                  New Request
-                </button>
-              </router-link>
-            </div>
-
-            <div class="flex flex-col gap-y-1 text-left">
-              <h3 class="text-3xl font-semibold text-white">Need help?</h3>
-              <p class="text-primary-100">Search our knowledge base for advice and answers</p>
-            </div>
-
-            <form action="#" method="GET">
-              <label for="search" class="sr-only">Search</label>
-
-              <div class="relative rounded">
-                <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-                  <MagnifyingGlassIcon class="h-5 w-5 text-gray-400" aria-hidden="true" />
+            <div class="max-w-screen-xl flex flex-col gap-y-6 mx-auto py-8">
+                <div class="text-right">
+                    <router-link :to="{ name: 'create-service-request' }">
+                        <button class="p-2 font-bold rounded bg-white text-primary-700 dark:text-primary-400">
+                            New Request
+                        </button>
+                    </router-link>
                 </div>
 
-                <input
-                  type="search"
-                  v-model="searchQuery"
-                  id="search"
-                  placeholder="Search for articles and categories"
-                  class="block w-full rounded border-0 py-3 pl-12 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-2-- sm:text-sm sm:leading-6"
-                />
-              </div>
-            </form>
-          </div>
+                <div class="flex flex-col gap-y-1 text-left">
+                    <h3 class="text-3xl font-semibold text-white">Need help?</h3>
+                    <p class="text-primary-100">Search our knowledge base for advice and answers</p>
+                </div>
+
+                <form action="#" method="GET">
+                    <label for="search" class="sr-only">Search</label>
+
+                    <div class="relative rounded">
+                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+                            <MagnifyingGlassIcon class="h-5 w-5 text-gray-400" aria-hidden="true" />
+                        </div>
+
+                        <input
+                            type="search"
+                            v-model="searchQuery"
+                            id="search"
+                            placeholder="Search for articles and categories"
+                            class="block w-full rounded border-0 py-3 pl-12 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-2-- sm:text-sm sm:leading-6"
+                        />
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
     <main class="px-6">
-      <div class="max-w-screen-xl flex flex-col gap-y-6 mx-auto py-8">
-        <SearchResults
-          v-if="searchQuery"
-          :searchQuery="searchQuery"
-          :searchResults="searchResults"
-          :loadingResults="loadingResults"
-        ></SearchResults>
+        <div class="max-w-screen-xl flex flex-col gap-y-6 mx-auto py-8">
+            <SearchResults
+                v-if="searchQuery"
+                :searchQuery="searchQuery"
+                :searchResults="searchResults"
+                :loadingResults="loadingResults"
+            ></SearchResults>
 
-        <HelpCenter v-else :categories="categories" :service-requests="serviceRequests"></HelpCenter>
-      </div>
+            <HelpCenter v-else :categories="categories" :service-requests="serviceRequests"></HelpCenter>
+        </div>
     </main>
 </template>

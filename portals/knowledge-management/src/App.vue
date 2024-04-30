@@ -294,42 +294,44 @@ async function authenticate(formData, node) {
 
         <div v-else>
             <div
-              v-if="userIsAuthenticated === false"
-              class="bg-gradient flex flex-col items-center justify-center min-h-screen"
+                v-if="userIsAuthenticated === false"
+                class="bg-gradient flex flex-col items-center justify-center min-h-screen"
             >
-              <div class="max-w-md w-full bg-white rounded ring-1 ring-black/5 shadow-sm px-8 pt-6 pb-4 flex flex-col gap-6 mx-4">
-                <h1 class="text-primary-950 text-center text-2xl font-semibold">Log in to Helper Center</h1>
-
-                <FormKit
-                  type="form"
-                  @submit="authenticate"
-                  v-model="authentication"
-                  :submit-label="authentication.isRequested ? 'Sign in' : 'Send login code'"
+                <div
+                    class="max-w-md w-full bg-white rounded ring-1 ring-black/5 shadow-sm px-8 pt-6 pb-4 flex flex-col gap-6 mx-4"
                 >
-                  <FormKit
-                    type="email"
-                    label="Email address"
-                    name="email"
-                    validation="required|email"
-                    validation-visibility="submit"
-                    :disabled="authentication.isRequested"
-                  />
+                    <h1 class="text-primary-950 text-center text-2xl font-semibold">Log in to Helper Center</h1>
 
-                  <p v-if="authentication.requestedMessage" class="text-gray-700 font-medium text-xs my-3">
-                    {{ authentication.requestedMessage }}
-                  </p>
+                    <FormKit
+                        type="form"
+                        @submit="authenticate"
+                        v-model="authentication"
+                        :submit-label="authentication.isRequested ? 'Sign in' : 'Send login code'"
+                    >
+                        <FormKit
+                            type="email"
+                            label="Email address"
+                            name="email"
+                            validation="required|email"
+                            validation-visibility="submit"
+                            :disabled="authentication.isRequested"
+                        />
 
-                  <FormKit
-                    type="otp"
-                    digits="6"
-                    label="Enter the code here"
-                    name="code"
-                    validation="required"
-                    validation-visibility="submit"
-                    v-if="authentication.isRequested"
-                  />
-                </FormKit>
-              </div>
+                        <p v-if="authentication.requestedMessage" class="text-gray-700 font-medium text-xs my-3">
+                            {{ authentication.requestedMessage }}
+                        </p>
+
+                        <FormKit
+                            type="otp"
+                            digits="6"
+                            label="Enter the code here"
+                            name="code"
+                            validation="required"
+                            validation-visibility="submit"
+                            v-if="authentication.isRequested"
+                        />
+                    </FormKit>
+                </div>
             </div>
             <div v-else>
                 <div v-if="errorLoading" class="text-center">
@@ -347,13 +349,13 @@ async function authenticate(formData, node) {
                     <DesktopSidebar :categories="categories" :api-url="apiUrl"> </DesktopSidebar>
 
                     <div class="lg:pl-72">
-                      <RouterView
-                        :search-url="searchUrl"
-                        :api-url="apiUrl"
-                        :categories="categories"
-                        :service-requests="serviceRequests"
-                      >
-                      </RouterView>
+                        <RouterView
+                            :search-url="searchUrl"
+                            :api-url="apiUrl"
+                            :categories="categories"
+                            :service-requests="serviceRequests"
+                        >
+                        </RouterView>
                     </div>
                 </div>
             </div>
@@ -363,11 +365,7 @@ async function authenticate(formData, node) {
 
 <style scoped>
 .bg-gradient {
-  @apply relative bg-no-repeat;
-  background-image: radial-gradient(
-    circle at top,
-    theme('colors.primary.200'),
-    theme('colors.white') 50%
-  );
+    @apply relative bg-no-repeat;
+    background-image: radial-gradient(circle at top, theme('colors.primary.200'), theme('colors.white') 50%);
 }
 </style>

@@ -38,7 +38,7 @@ import Breadcrumbs from '@/Components/Breadcrumbs.vue';
 import AppLoading from '@/Components/AppLoading.vue';
 import DOMPurify from 'dompurify';
 import { consumer } from '@/Services/Consumer.js';
-import { Bars3Icon } from "@heroicons/vue/24/outline/index.js";
+import { Bars3Icon } from '@heroicons/vue/24/outline/index.js';
 
 const route = useRoute();
 
@@ -81,50 +81,48 @@ function getData() {
     const { get } = consumer();
 
     get(props.apiUrl + '/categories/' + route.params.categoryId + '/articles/' + route.params.articleId).then(
-      (response) => {
-        category.value = response.data.category;
-        article.value = response.data.article;
-        loading.value = false;
-      },
+        (response) => {
+            category.value = response.data.category;
+            article.value = response.data.article;
+            loading.value = false;
+        },
     );
 }
 </script>
 
 <template>
-  <div
-    class="sticky top-0 z-40 flex flex-col items-center bg-gray-50"
-  >
-    <button class="w-full p-3 lg:hidden" type="button" @click="$emit('sidebarOpened')">
-      <span class="sr-only">Open sidebar</span>
+    <div class="sticky top-0 z-40 flex flex-col items-center bg-gray-50">
+        <button class="w-full p-3 lg:hidden" type="button" @click="$emit('sidebarOpened')">
+            <span class="sr-only">Open sidebar</span>
 
-      <Bars3Icon class="h-6 w-6 text-gray-900"></Bars3Icon>
-    </button>
+            <Bars3Icon class="h-6 w-6 text-gray-900"></Bars3Icon>
+        </button>
 
-    <div class="w-full px-6">
-      <div class="max-w-screen-xl flex flex-col gap-y-6 mx-auto py-8">
-        <div v-if="loading">
-          <AppLoading />
-        </div>
-        <div v-else>
-          <main class="flex flex-col gap-8">
-            <Breadcrumbs
-              :breadcrumbs="[
+        <div class="w-full px-6">
+            <div class="max-w-screen-xl flex flex-col gap-y-6 mx-auto py-8">
+                <div v-if="loading">
+                    <AppLoading />
+                </div>
+                <div v-else>
+                    <main class="flex flex-col gap-8">
+                        <Breadcrumbs
+                            :breadcrumbs="[
                                 { name: category.name, route: 'view-category', params: { categoryId: category.id } },
                             ]"
-              currentCrumb="Articles"
-            ></Breadcrumbs>
+                            currentCrumb="Articles"
+                        ></Breadcrumbs>
 
-            <div class="flex flex-col gap-3">
-              <div class="prose max-w-none">
-                <h1>{{ article.name }}</h1>
-                <div v-html="DOMPurify.sanitize(article.content)"></div>
-              </div>
+                        <div class="flex flex-col gap-3">
+                            <div class="prose max-w-none">
+                                <h1>{{ article.name }}</h1>
+                                <div v-html="DOMPurify.sanitize(article.content)"></div>
+                            </div>
 
-              <span class="text-xs text-gray-500">Last updated: {{ article.lastUpdated }}</span>
+                            <span class="text-xs text-gray-500">Last updated: {{ article.lastUpdated }}</span>
+                        </div>
+                    </main>
+                </div>
             </div>
-          </main>
         </div>
-      </div>
     </div>
-  </div>
 </template>

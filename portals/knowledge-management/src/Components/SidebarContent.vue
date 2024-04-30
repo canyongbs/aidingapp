@@ -53,12 +53,12 @@ const { removeToken } = useTokenStore();
 const logout = () => {
     const { post } = consumer();
     post(props.apiUrl + '/logout').then((response) => {
-      if (! response.data.success) {
-        return
-      }
+        if (!response.data.success) {
+            return;
+        }
 
-      removeToken();
-      window.location.href = response.data.redirect_url;
+        removeToken();
+        window.location.href = response.data.redirect_url;
     });
 };
 </script>
@@ -67,9 +67,9 @@ const logout = () => {
     <nav>
         <div class="flex flex-col gap-1 px-6 py-4 border-b">
             <router-link :to="{ name: 'home' }">
-              <h3 class="text-2xl text-primary-800 font-semibold">
-                <span class="mr-1">🛟</span> <span>Help Center</span>
-              </h3>
+                <h3 class="text-2xl text-primary-800 font-semibold">
+                    <span class="mr-1">🛟</span> <span>Help Center</span>
+                </h3>
             </router-link>
 
             <button
@@ -81,25 +81,25 @@ const logout = () => {
             </button>
         </div>
 
-      <ul role="list" class="my-2 flex flex-col gap-y-1">
-        <li v-for="category in categories" :key="category.id">
-          <router-link
-            :to="{ name: 'view-category', params: { categoryId: category.id } }"
-            active-class="text-primary-950 bg-gray-100"
-            class="w-full text-gray-700 group flex items-start gap-x-3 px-6 py-2 text-sm font-medium transition hover:bg-gray-100 hover:text-primary-950"
-          >
+        <ul role="list" class="my-2 flex flex-col gap-y-1">
+            <li v-for="category in categories" :key="category.id">
+                <router-link
+                    :to="{ name: 'view-category', params: { categoryId: category.id } }"
+                    active-class="text-primary-950 bg-gray-100"
+                    class="w-full text-gray-700 group flex items-start gap-x-3 px-6 py-2 text-sm font-medium transition hover:bg-gray-100 hover:text-primary-950"
+                >
                     <span
-                      v-if="category.icon"
-                      v-html="category.icon"
-                      class="text-primary-700"
-                      aria-hidden="true"
+                        v-if="category.icon"
+                        v-html="category.icon"
+                        class="text-primary-700"
+                        aria-hidden="true"
                     ></span>
 
-            <span class="mt-0.5">
+                    <span class="mt-0.5">
                         {{ category.name }}
                     </span>
-          </router-link>
-        </li>
-      </ul>
+                </router-link>
+            </li>
+        </ul>
     </nav>
 </template>

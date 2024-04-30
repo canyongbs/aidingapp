@@ -35,10 +35,10 @@
 import { defineProps, ref, watch, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import Breadcrumbs from '@/Components/Breadcrumbs.vue';
-import { Bars3Icon, MagnifyingGlassIcon } from "@heroicons/vue/24/outline/index.js";
+import { Bars3Icon, MagnifyingGlassIcon } from '@heroicons/vue/24/outline/index.js';
 import { useAuthStore } from '@/Stores/auth.js';
 import { consumer } from '@/Services/Consumer.js';
-import AppLoading from "@/Components/AppLoading.vue";
+import AppLoading from '@/Components/AppLoading.vue';
 
 const route = useRoute();
 
@@ -88,39 +88,36 @@ async function getData() {
 <template>
     <div>
         <div v-if="loadingResults">
-          <AppLoading />
+            <AppLoading />
         </div>
         <div v-else>
-            <div
-              class="sticky top-0 z-40 flex flex-col items-center bg-gray-50"
-            >
-              <button class="w-full p-3 lg:hidden" type="button" v-on:click="showMobileMenu = !showMobileMenu">
-                <span class="sr-only">Open sidebar</span>
+            <div class="sticky top-0 z-40 flex flex-col items-center bg-gray-50">
+                <button class="w-full p-3 lg:hidden" type="button" v-on:click="showMobileMenu = !showMobileMenu">
+                    <span class="sr-only">Open sidebar</span>
 
-                <Bars3Icon class="h-6 w-6 text-gray-900"></Bars3Icon>
-              </button>
+                    <Bars3Icon class="h-6 w-6 text-gray-900"></Bars3Icon>
+                </button>
 
-              <div class="bg-gradient-to-br from-primary-500 to-primary-800 w-full px-6">
-                <div class="max-w-screen-xl flex flex-col gap-y-6 mx-auto py-8">
-                  <div class="flex flex-col gap-y-1 text-left">
-                    <h3 class="text-3xl text-white">Help Center</h3>
-                    <p class="text-white">Welcome {{ user.first_name }}!</p>
-                    <p class="text-white">
-                      We understand that you need some help, we're on it! Please complete the form below.
-                    </p>
-                  </div>
+                <div class="bg-gradient-to-br from-primary-500 to-primary-800 w-full px-6">
+                    <div class="max-w-screen-xl flex flex-col gap-y-6 mx-auto py-8">
+                        <div class="flex flex-col gap-y-1 text-left">
+                            <h3 class="text-3xl text-white">Help Center</h3>
+                            <p class="text-white">Welcome {{ user.first_name }}!</p>
+                            <p class="text-white">
+                                We understand that you need some help, we're on it! Please complete the form below.
+                            </p>
+                        </div>
+                    </div>
                 </div>
-              </div>
             </div>
 
             <Breadcrumbs
-              class="px-6 py-8"
-              currentCrumb="New Request"
-              :breadcrumbs="[{ name: 'Help Center', route: 'home' }]"
+                class="px-6 py-8"
+                currentCrumb="New Request"
+                :breadcrumbs="[{ name: 'Help Center', route: 'home' }]"
             ></Breadcrumbs>
 
-
-          <main class="px-6">
+            <main class="px-6">
                 <h3 class="text-xl">Select Category</h3>
 
                 <div class="mt-4 grid gap-y-4">
