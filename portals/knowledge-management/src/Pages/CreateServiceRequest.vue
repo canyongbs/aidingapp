@@ -160,38 +160,42 @@ async function getData() {
             <AppLoading />
         </div>
         <div v-else>
-            <Breadcrumbs
-                currentCrumb="Submit Form"
-                :breadcrumbs="[
-                    { name: 'Help Center', route: 'home' },
-                    { name: 'New Request', route: 'create-service-request' },
-                ]"
-            ></Breadcrumbs>
-
             <div
-                class="sticky top-0 z-40 flex flex-col items-center border-b border-gray-100 bg-white px-4 py-4 shadow-sm sm:px-6 lg:px-8"
+              class="sticky top-0 z-40 flex flex-col items-center bg-gray-50"
             >
-                <button class="w-full p-2.5 lg:hidden" type="button" v-on:click="showMobileMenu = !showMobileMenu">
-                    <span class="sr-only">Open sidebar</span>
-                    <Bars3Icon class="h-6 w-6 text-gray-900"></Bars3Icon>
-                </button>
+              <button class="w-full p-3 lg:hidden" type="button" v-on:click="showMobileMenu = !showMobileMenu">
+                <span class="sr-only">Open sidebar</span>
 
-                <div class="flex h-full w-full flex-col rounded bg-primary-700 px-12 py-4">
-                    <div class="text-right" v-if="submittedSuccess">
-                        <button class="p-2 font-bold rounded bg-white text-primary-700 dark:text-primary-400">
-                            <router-link :to="{ name: 'create-service-request' }"> Submit Another Request </router-link>
-                        </button>
-                    </div>
-                    <div class="flex flex-col text-left">
-                        <h3 class="text-3xl text-white">Help Center</h3>
-                        <p class="text-white">Welcome {{ user.first_name }}!</p>
-                        <p class="text-white">Please fill out the following information to submit your request.</p>
-                    </div>
+                <Bars3Icon class="h-6 w-6 text-gray-900"></Bars3Icon>
+              </button>
+
+              <div class="bg-gradient-to-br from-primary-500 to-primary-800 w-full px-6">
+                <div class="max-w-screen-xl flex flex-col gap-y-6 mx-auto py-8">
+                  <div class="text-right" v-if="submittedSuccess">
+                    <button class="p-2 font-bold rounded bg-white text-primary-700 dark:text-primary-400">
+                      <router-link :to="{ name: 'create-service-request' }"> Submit Another Request </router-link>
+                    </button>
+                  </div>
+                  <div class="flex flex-col text-left">
+                    <h3 class="text-3xl text-white">Help Center</h3>
+                    <p class="text-white">Welcome {{ user.first_name }}!</p>
+                    <p class="text-white">Please fill out the following information to submit your request.</p>
+                  </div>
                 </div>
+              </div>
             </div>
 
-            <main class="grid py-10 gap-4" v-if="submittedSuccess">Thank you for submitting a new request.</main>
-            <main class="grid py-10 gap-4" v-else>
+            <Breadcrumbs
+              class="px-6 py-8"
+              currentCrumb="Submit Form"
+              :breadcrumbs="[
+                      { name: 'Help Center', route: 'home' },
+                      { name: 'New Request', route: 'create-service-request' },
+                  ]"
+            ></Breadcrumbs>
+
+            <main class="grid px-6 gap-4" v-if="submittedSuccess">Thank you for submitting a new request.</main>
+            <main class="grid px-6 gap-4" v-else>
                 <label for="priority" class="block text-sm font-medium text-gray-700">Priority</label>
                 <select
                     id="priority"
