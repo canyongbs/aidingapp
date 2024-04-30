@@ -34,7 +34,7 @@
 <script setup>
 import { defineProps } from 'vue';
 
-const props = defineProps({
+defineProps({
     categories: {
         type: Object,
         required: true,
@@ -44,8 +44,6 @@ const props = defineProps({
         required: true,
     },
 });
-
-console.log(props.serviceRequests);
 </script>
 
 <template>
