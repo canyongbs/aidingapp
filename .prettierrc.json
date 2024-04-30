@@ -21,7 +21,8 @@
                 "singleQuote": true,
                 "wrapAttributes": "force-expand-multiline",
                 "sortTailwindcssClasses": true,
-                "sortHtmlAttributes": "code-guide"
+                "sortHtmlAttributes": "code-guide",
+                "vueIndentScriptAndStyle": true
             }
         },
         {

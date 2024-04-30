@@ -32,18 +32,18 @@
 </COPYRIGHT>
 -->
 <script setup>
-import { defineProps } from 'vue';
+    import { defineProps } from 'vue';
 
-defineProps({
-    categories: {
-        type: Object,
-        required: true,
-    },
-    serviceRequests: {
-        type: Object,
-        required: true,
-    },
-});
+    defineProps({
+        categories: {
+            type: Object,
+            required: true,
+        },
+        serviceRequests: {
+            type: Object,
+            required: true,
+        },
+    });
 </script>
 
 <template>

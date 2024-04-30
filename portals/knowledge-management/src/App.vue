@@ -32,177 +32,212 @@
 </COPYRIGHT>
 -->
 <script setup>
-import { defineProps, onMounted, ref, watch } from 'vue';
-import AppLoading from '@/Components/AppLoading.vue';
-import MobileSidebar from '@/Components/MobileSidebar.vue';
-import DesktopSidebar from '@/Components/DesktopSidebar.vue';
-import determineIfUserIsAuthenticated from '@/Services/DetermineIfUserIsAuthenticated.js';
-import getAppContext from '@/Services/GetAppContext.js';
-import axios from '@/Globals/Axios.js';
-import { useTokenStore } from '@/Stores/token.js';
-import { useAuthStore } from '@/Stores/auth.js';
-import { useRoute } from 'vue-router';
+    import { defineProps, onMounted, ref, watch } from 'vue';
+    import AppLoading from '@/Components/AppLoading.vue';
+    import MobileSidebar from '@/Components/MobileSidebar.vue';
+    import DesktopSidebar from '@/Components/DesktopSidebar.vue';
+    import determineIfUserIsAuthenticated from '@/Services/DetermineIfUserIsAuthenticated.js';
+    import getAppContext from '@/Services/GetAppContext.js';
+    import axios from '@/Globals/Axios.js';
+    import { useTokenStore } from '@/Stores/token.js';
+    import { useAuthStore } from '@/Stores/auth.js';
+    import { useRoute } from 'vue-router';
 
-const errorLoading = ref(false);
-const loading = ref(true);
-const showMobileMenu = ref(false);
+    const errorLoading = ref(false);
+    const loading = ref(true);
+    const showMobileMenu = ref(false);
 
-const userIsAuthenticated = ref(false);
+    const userIsAuthenticated = ref(false);
 
-onMounted(async () => {
-    const { isEmbeddedInAidingApp } = getAppContext(props.accessUrl);
+    onMounted(async () => {
+        const { isEmbeddedInAidingApp } = getAppContext(props.accessUrl);
 
-    if (isEmbeddedInAidingApp) {
-        await axios.get(props.appUrl + '/sanctum/csrf-cookie');
-    }
+        if (isEmbeddedInAidingApp) {
+            await axios.get(props.appUrl + '/sanctum/csrf-cookie');
+        }
 
-    await determineIfUserIsAuthenticated(props.userAuthenticationUrl).then((response) => {
-        userIsAuthenticated.value = response;
-    });
-
-    await getKnowledgeManagementPortal().then(() => {
-        loading.value = false;
-    });
-});
-
-const route = useRoute();
-
-watch(
-    route,
-    function () {
-        getKnowledgeManagementPortal();
-    },
-    {
-        immediate: true,
-    },
-);
-
-const props = defineProps({
-    url: {
-        type: String,
-        required: true,
-    },
-    searchUrl: {
-        type: String,
-        required: true,
-    },
-    apiUrl: {
-        type: String,
-        required: true,
-    },
-    accessUrl: {
-        type: String,
-        required: true,
-    },
-    userAuthenticationUrl: {
-        type: String,
-        required: true,
-    },
-    appUrl: {
-        type: String,
-        required: true,
-    },
-});
-
-const scriptUrl = new URL(document.currentScript.getAttribute('src'));
-const protocol = scriptUrl.protocol;
-const scriptHostname = scriptUrl.hostname;
-const scriptQuery = Object.fromEntries(scriptUrl.searchParams);
-
-const hostUrl = `${protocol}//${scriptHostname}`;
-
-const portalPrimaryColor = ref('');
-const portalRounding = ref('');
-const categories = ref({});
-const serviceRequests = ref({});
-
-const authentication = ref({
-    code: null,
-    email: null,
-    isRequested: false,
-    requestedMessage: null,
-    requestUrl: null,
-    url: null,
-});
-
-async function getKnowledgeManagementPortal() {
-    await axios
-        .get(props.url)
-        .then((response) => {
-            errorLoading.value = false;
-
-            if (response.error) {
-                throw new Error(response.error);
-            }
-
-            categories.value = response.data.categories;
-
-            serviceRequests.value = response.data.service_requests;
-
-            portalPrimaryColor.value = response.data.primary_color;
-
-            authentication.value.requestUrl = response.data.authentication_url ?? null;
-
-            portalRounding.value = {
-                none: {
-                    sm: '0px',
-                    default: '0px',
-                    md: '0px',
-                    lg: '0px',
-                    full: '0px',
-                },
-                sm: {
-                    sm: '0.125rem',
-                    default: '0.25rem',
-                    md: '0.375rem',
-                    lg: '0.5rem',
-                    full: '9999px',
-                },
-                md: {
-                    sm: '0.25rem',
-                    default: '0.375rem',
-                    md: '0.5rem',
-                    lg: '0.75rem',
-                    full: '9999px',
-                },
-                lg: {
-                    sm: '0.375rem',
-                    default: '0.5rem',
-                    md: '0.75rem',
-                    lg: '1rem',
-                    full: '9999px',
-                },
-                full: {
-                    sm: '9999px',
-                    default: '9999px',
-                    md: '9999px',
-                    lg: '9999px',
-                    full: '9999px',
-                },
-            }[response.data.rounding ?? 'md'];
-        })
-        .catch((error) => {
-            errorLoading.value = true;
-            console.error(`Help Center Embed ${error}`);
+        await determineIfUserIsAuthenticated(props.userAuthenticationUrl).then((response) => {
+            userIsAuthenticated.value = response;
         });
-}
 
-async function authenticate(formData, node) {
-    node.clearErrors();
+        await getKnowledgeManagementPortal().then(() => {
+            loading.value = false;
+        });
+    });
 
-    const { setToken } = useTokenStore();
-    const { setUser } = useAuthStore();
+    const route = useRoute();
 
-    const { isEmbeddedInAidingApp } = getAppContext(props.accessUrl);
+    watch(
+        route,
+        function () {
+            getKnowledgeManagementPortal();
+        },
+        {
+            immediate: true,
+        },
+    );
 
-    if (isEmbeddedInAidingApp) {
-        await axios.get(props.appUrl + '/sanctum/csrf-cookie');
+    const props = defineProps({
+        url: {
+            type: String,
+            required: true,
+        },
+        searchUrl: {
+            type: String,
+            required: true,
+        },
+        apiUrl: {
+            type: String,
+            required: true,
+        },
+        accessUrl: {
+            type: String,
+            required: true,
+        },
+        userAuthenticationUrl: {
+            type: String,
+            required: true,
+        },
+        appUrl: {
+            type: String,
+            required: true,
+        },
+    });
+
+    const scriptUrl = new URL(document.currentScript.getAttribute('src'));
+    const protocol = scriptUrl.protocol;
+    const scriptHostname = scriptUrl.hostname;
+    const scriptQuery = Object.fromEntries(scriptUrl.searchParams);
+
+    const hostUrl = `${protocol}//${scriptHostname}`;
+
+    const portalPrimaryColor = ref('');
+    const portalRounding = ref('');
+    const categories = ref({});
+    const serviceRequests = ref({});
+
+    const authentication = ref({
+        code: null,
+        email: null,
+        isRequested: false,
+        requestedMessage: null,
+        requestUrl: null,
+        url: null,
+    });
+
+    async function getKnowledgeManagementPortal() {
+        await axios
+            .get(props.url)
+            .then((response) => {
+                errorLoading.value = false;
+
+                if (response.error) {
+                    throw new Error(response.error);
+                }
+
+                categories.value = response.data.categories;
+
+                serviceRequests.value = response.data.service_requests;
+
+                portalPrimaryColor.value = response.data.primary_color;
+
+                authentication.value.requestUrl = response.data.authentication_url ?? null;
+
+                portalRounding.value = {
+                    none: {
+                        sm: '0px',
+                        default: '0px',
+                        md: '0px',
+                        lg: '0px',
+                        full: '0px',
+                    },
+                    sm: {
+                        sm: '0.125rem',
+                        default: '0.25rem',
+                        md: '0.375rem',
+                        lg: '0.5rem',
+                        full: '9999px',
+                    },
+                    md: {
+                        sm: '0.25rem',
+                        default: '0.375rem',
+                        md: '0.5rem',
+                        lg: '0.75rem',
+                        full: '9999px',
+                    },
+                    lg: {
+                        sm: '0.375rem',
+                        default: '0.5rem',
+                        md: '0.75rem',
+                        lg: '1rem',
+                        full: '9999px',
+                    },
+                    full: {
+                        sm: '9999px',
+                        default: '9999px',
+                        md: '9999px',
+                        lg: '9999px',
+                        full: '9999px',
+                    },
+                }[response.data.rounding ?? 'md'];
+            })
+            .catch((error) => {
+                errorLoading.value = true;
+                console.error(`Help Center Embed ${error}`);
+            });
     }
 
-    if (authentication.value.isRequested) {
+    async function authenticate(formData, node) {
+        node.clearErrors();
+
+        const { setToken } = useTokenStore();
+        const { setUser } = useAuthStore();
+
+        const { isEmbeddedInAidingApp } = getAppContext(props.accessUrl);
+
+        if (isEmbeddedInAidingApp) {
+            await axios.get(props.appUrl + '/sanctum/csrf-cookie');
+        }
+
+        if (authentication.value.isRequested) {
+            axios
+                .post(authentication.value.url, {
+                    code: formData.code,
+                })
+                .then((response) => {
+                    if (response.errors) {
+                        node.setErrors([], response.errors);
+
+                        return;
+                    }
+
+                    if (response.data.is_expired) {
+                        node.setErrors(['The authentication code expires after 24 hours. Please authenticate again.']);
+
+                        authentication.value.isRequested = false;
+                        authentication.value.requestedMessage = null;
+
+                        return;
+                    }
+
+                    if (response.data.success === true) {
+                        setToken(response.data.token);
+                        setUser(response.data.user);
+
+                        userIsAuthenticated.value = true;
+                    }
+                })
+                .catch((error) => {
+                    node.setErrors([error]);
+                });
+
+            return;
+        }
+
         axios
-            .post(authentication.value.url, {
-                code: formData.code,
+            .post(authentication.value.requestUrl, {
+                email: formData.email,
+                isSpa: isEmbeddedInAidingApp,
             })
             .then((response) => {
                 if (response.errors) {
@@ -211,55 +246,20 @@ async function authenticate(formData, node) {
                     return;
                 }
 
-                if (response.data.is_expired) {
-                    node.setErrors(['The authentication code expires after 24 hours. Please authenticate again.']);
-
-                    authentication.value.isRequested = false;
-                    authentication.value.requestedMessage = null;
+                if (!response.data.authentication_url) {
+                    node.setErrors([response.data.message]);
 
                     return;
                 }
 
-                if (response.data.success === true) {
-                    setToken(response.data.token);
-                    setUser(response.data.user);
-
-                    userIsAuthenticated.value = true;
-                }
+                authentication.value.isRequested = true;
+                authentication.value.requestedMessage = response.data.message;
+                authentication.value.url = response.data.authentication_url;
             })
             .catch((error) => {
                 node.setErrors([error]);
             });
-
-        return;
     }
-
-    axios
-        .post(authentication.value.requestUrl, {
-            email: formData.email,
-            isSpa: isEmbeddedInAidingApp,
-        })
-        .then((response) => {
-            if (response.errors) {
-                node.setErrors([], response.errors);
-
-                return;
-            }
-
-            if (!response.data.authentication_url) {
-                node.setErrors([response.data.message]);
-
-                return;
-            }
-
-            authentication.value.isRequested = true;
-            authentication.value.requestedMessage = response.data.message;
-            authentication.value.url = response.data.authentication_url;
-        })
-        .catch((error) => {
-            node.setErrors([error]);
-        });
-}
 </script>
 
 <template>
@@ -364,8 +364,8 @@ async function authenticate(formData, node) {
 </template>
 
 <style scoped>
-.bg-gradient {
-    @apply relative bg-no-repeat;
-    background-image: radial-gradient(circle at top, theme('colors.primary.200'), theme('colors.white') 50%);
-}
+    .bg-gradient {
+        @apply relative bg-no-repeat;
+        background-image: radial-gradient(circle at top, theme('colors.primary.200'), theme('colors.white') 50%);
+    }
 </style>

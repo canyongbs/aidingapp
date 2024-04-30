@@ -32,57 +32,57 @@
 </COPYRIGHT>
 -->
 <script setup>
-import { defineProps, ref, watch, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
-import Breadcrumbs from '@/Components/Breadcrumbs.vue';
-import { Bars3Icon, MagnifyingGlassIcon } from '@heroicons/vue/24/outline/index.js';
-import { useAuthStore } from '@/Stores/auth.js';
-import { consumer } from '@/Services/Consumer.js';
-import AppLoading from '@/Components/AppLoading.vue';
+    import { defineProps, ref, watch, onMounted } from 'vue';
+    import { useRoute } from 'vue-router';
+    import Breadcrumbs from '@/Components/Breadcrumbs.vue';
+    import { Bars3Icon, MagnifyingGlassIcon } from '@heroicons/vue/24/outline/index.js';
+    import { useAuthStore } from '@/Stores/auth.js';
+    import { consumer } from '@/Services/Consumer.js';
+    import AppLoading from '@/Components/AppLoading.vue';
 
-const route = useRoute();
+    const route = useRoute();
 
-const props = defineProps({
-    apiUrl: {
-        type: String,
-        required: true,
-    },
-});
+    const props = defineProps({
+        apiUrl: {
+            type: String,
+            required: true,
+        },
+    });
 
-const loadingResults = ref(true);
-const types = ref(null);
-const user = ref(null);
+    const loadingResults = ref(true);
+    const types = ref(null);
+    const user = ref(null);
 
-watch(
-    route,
-    function (newRouteValue) {
+    watch(
+        route,
+        function (newRouteValue) {
+            getData();
+        },
+        {
+            immediate: true,
+        },
+    );
+
+    onMounted(function () {
         getData();
-    },
-    {
-        immediate: true,
-    },
-);
-
-onMounted(function () {
-    getData();
-});
-
-async function getData() {
-    loadingResults.value = true;
-
-    const { getUser } = useAuthStore();
-
-    await getUser().then((authUser) => {
-        user.value = authUser;
     });
 
-    const { get } = consumer();
+    async function getData() {
+        loadingResults.value = true;
 
-    get(props.apiUrl + '/service-request-type/select').then((response) => {
-        types.value = response.data.types;
-        loadingResults.value = false;
-    });
-}
+        const { getUser } = useAuthStore();
+
+        await getUser().then((authUser) => {
+            user.value = authUser;
+        });
+
+        const { get } = consumer();
+
+        get(props.apiUrl + '/service-request-type/select').then((response) => {
+            types.value = response.data.types;
+            loadingResults.value = false;
+        });
+    }
 </script>
 
 <template>

@@ -32,35 +32,35 @@
 </COPYRIGHT>
 -->
 <script setup>
-import { defineProps } from 'vue';
-import axios from '@/Globals/Axios.js';
-import { consumer } from '@/Services/Consumer.js';
-import { useTokenStore } from '@/Stores/token.js';
+    import { defineProps } from 'vue';
+    import axios from '@/Globals/Axios.js';
+    import { consumer } from '@/Services/Consumer.js';
+    import { useTokenStore } from '@/Stores/token.js';
 
-const props = defineProps({
-    categories: {
-        type: Object,
-        default: {},
-    },
-    apiUrl: {
-        type: String,
-        required: true,
-    },
-});
-
-const { removeToken } = useTokenStore();
-
-const logout = () => {
-    const { post } = consumer();
-    post(props.apiUrl + '/logout').then((response) => {
-        if (!response.data.success) {
-            return;
-        }
-
-        removeToken();
-        window.location.href = response.data.redirect_url;
+    const props = defineProps({
+        categories: {
+            type: Object,
+            default: {},
+        },
+        apiUrl: {
+            type: String,
+            required: true,
+        },
     });
-};
+
+    const { removeToken } = useTokenStore();
+
+    const logout = () => {
+        const { post } = consumer();
+        post(props.apiUrl + '/logout').then((response) => {
+            if (!response.data.success) {
+                return;
+            }
+
+            removeToken();
+            window.location.href = response.data.redirect_url;
+        });
+    };
 </script>
 
 <template>

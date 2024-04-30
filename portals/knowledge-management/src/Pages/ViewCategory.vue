@@ -32,60 +32,60 @@
 </COPYRIGHT>
 -->
 <script setup>
-import { defineProps, ref, watch, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
-import Breadcrumbs from '@/Components/Breadcrumbs.vue';
-import AppLoading from '@/Components/AppLoading.vue';
-import { consumer } from '@/Services/Consumer.js';
-import { Bars3Icon } from '@heroicons/vue/24/outline/index.js';
-import { ChevronRightIcon, XMarkIcon } from '@heroicons/vue/20/solid/index.js';
+    import { defineProps, ref, watch, onMounted } from 'vue';
+    import { useRoute } from 'vue-router';
+    import Breadcrumbs from '@/Components/Breadcrumbs.vue';
+    import AppLoading from '@/Components/AppLoading.vue';
+    import { consumer } from '@/Services/Consumer.js';
+    import { Bars3Icon } from '@heroicons/vue/24/outline/index.js';
+    import { ChevronRightIcon, XMarkIcon } from '@heroicons/vue/20/solid/index.js';
 
-const route = useRoute();
+    const route = useRoute();
 
-const props = defineProps({
-    searchUrl: {
-        type: String,
-        required: true,
-    },
-    apiUrl: {
-        type: String,
-        required: true,
-    },
-    categories: {
-        type: Object,
-        required: true,
-    },
-});
-
-const loadingResults = ref(true);
-const category = ref(null);
-const articles = ref(null);
-
-watch(
-    route,
-    function (newRouteValue) {
-        getData();
-    },
-    {
-        immediate: true,
-    },
-);
-
-onMounted(function () {
-    getData();
-});
-
-function getData() {
-    loadingResults.value = true;
-
-    const { get } = consumer();
-
-    get(props.apiUrl + '/categories/' + route.params.categoryId).then((response) => {
-        category.value = response.data.category;
-        articles.value = response.data.articles;
-        loadingResults.value = false;
+    const props = defineProps({
+        searchUrl: {
+            type: String,
+            required: true,
+        },
+        apiUrl: {
+            type: String,
+            required: true,
+        },
+        categories: {
+            type: Object,
+            required: true,
+        },
     });
-}
+
+    const loadingResults = ref(true);
+    const category = ref(null);
+    const articles = ref(null);
+
+    watch(
+        route,
+        function (newRouteValue) {
+            getData();
+        },
+        {
+            immediate: true,
+        },
+    );
+
+    onMounted(function () {
+        getData();
+    });
+
+    function getData() {
+        loadingResults.value = true;
+
+        const { get } = consumer();
+
+        get(props.apiUrl + '/categories/' + route.params.categoryId).then((response) => {
+            category.value = response.data.category;
+            articles.value = response.data.articles;
+            loadingResults.value = false;
+        });
+    }
 </script>
 
 <template>
