@@ -119,6 +119,6 @@ class AssetStatusPolicy
 
     protected function requiredFeatures(): array
     {
-        return [Feature::ServiceManagement];
+        return [Feature::AssetManagement];
     }
 }

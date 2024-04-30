@@ -51,6 +51,7 @@ class LicenseAddonsData extends Data
         public bool $realtimeChat,
         public bool $mobileApps,
         public bool $changeManagement = false,
+        public bool $assetManagement = false,
         public bool $experimentalReporting = false,
     ) {}
 }
