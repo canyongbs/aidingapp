@@ -35,7 +35,7 @@
 import { defineProps, ref, watch, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import Breadcrumbs from '@/Components/Breadcrumbs.vue';
-import { Bars3Icon } from '@heroicons/vue/24/outline/index.js';
+import { Bars3Icon, MagnifyingGlassIcon } from "@heroicons/vue/24/outline/index.js";
 import { useAuthStore } from '@/Stores/auth.js';
 import { consumer } from '@/Services/Consumer.js';
 import AppLoading from "@/Components/AppLoading.vue";
@@ -91,31 +91,36 @@ async function getData() {
           <AppLoading />
         </div>
         <div v-else>
-            <Breadcrumbs
-                currentCrumb="New Request"
-                :breadcrumbs="[{ name: 'Help Center', route: 'home' }]"
-            ></Breadcrumbs>
-
             <div
-                class="sticky top-0 z-40 flex flex-col items-center border-b border-gray-100 bg-white px-4 py-4 shadow-sm sm:px-6 lg:px-8"
+              class="sticky top-0 z-40 flex flex-col items-center bg-gray-50"
             >
-                <button class="w-full p-2.5 lg:hidden" type="button" v-on:click="showMobileMenu = !showMobileMenu">
-                    <span class="sr-only">Open sidebar</span>
-                    <Bars3Icon class="h-6 w-6 text-gray-900"></Bars3Icon>
-                </button>
+              <button class="w-full p-3 lg:hidden" type="button" v-on:click="showMobileMenu = !showMobileMenu">
+                <span class="sr-only">Open sidebar</span>
 
-                <div class="flex h-full w-full flex-col rounded bg-primary-700 px-12 py-4">
-                    <div class="flex flex-col text-left">
-                        <h3 class="text-3xl text-white">Help Center</h3>
-                        <p class="text-white">Welcome {{ user.first_name }}!</p>
-                        <p class="text-white">
-                            We understand that you need some help, we're on it! Please complete the form below.
-                        </p>
-                    </div>
+                <Bars3Icon class="h-6 w-6 text-gray-900"></Bars3Icon>
+              </button>
+
+              <div class="bg-gradient-to-br from-primary-500 to-primary-800 w-full px-6">
+                <div class="max-w-screen-xl flex flex-col gap-y-6 mx-auto py-8">
+                  <div class="flex flex-col gap-y-1 text-left">
+                    <h3 class="text-3xl text-white">Help Center</h3>
+                    <p class="text-white">Welcome {{ user.first_name }}!</p>
+                    <p class="text-white">
+                      We understand that you need some help, we're on it! Please complete the form below.
+                    </p>
+                  </div>
                 </div>
+              </div>
             </div>
 
-            <main class="py-10">
+            <Breadcrumbs
+              class="px-6 py-8"
+              currentCrumb="New Request"
+              :breadcrumbs="[{ name: 'Help Center', route: 'home' }]"
+            ></Breadcrumbs>
+
+
+          <main class="px-6">
                 <h3 class="text-xl">Select Category</h3>
 
                 <div class="mt-4 grid gap-y-4">
