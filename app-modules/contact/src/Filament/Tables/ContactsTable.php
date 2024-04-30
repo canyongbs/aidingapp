@@ -103,9 +103,6 @@ class ContactsTable
                         TextConstraint::make('email')
                             ->label('Email Address')
                             ->icon('heroicon-m-envelope'),
-                        TextConstraint::make('email_2')
-                            ->label('Email Address 2')
-                            ->icon('heroicon-m-envelope'),
                         TextConstraint::make('mobile')
                             ->icon('heroicon-m-phone'),
                         TextConstraint::make('phone')
@@ -119,9 +116,6 @@ class ContactsTable
                             ->icon('heroicon-m-chat-bubble-bottom-center'),
                         BooleanConstraint::make('email_bounce')
                             ->icon('heroicon-m-arrow-uturn-left'),
-                        TextConstraint::make('hsgrad')
-                            ->label('HS Grad')
-                            ->icon('heroicon-m-academic-cap'),
                         RelationshipConstraint::make('status')
                             ->icon('heroicon-m-flag')
                             ->selectable(

@@ -33,12 +33,9 @@
 -->
 <script setup>
 import { defineProps, onMounted, ref, watch } from 'vue';
-import attachRecaptchaScript from '../../../app-modules/integration-google-recaptcha/resources/js/Services/AttachRecaptchaScript.js';
-import getRecaptchaToken from '../../../app-modules/integration-google-recaptcha/resources/js/Services/GetRecaptchaToken.js';
 import AppLoading from '@/Components/AppLoading.vue';
 import MobileSidebar from '@/Components/MobileSidebar.vue';
 import DesktopSidebar from '@/Components/DesktopSidebar.vue';
-import Breadcrumbs from '@/Components/Breadcrumbs.vue';
 import determineIfUserIsAuthenticated from '@/Services/DetermineIfUserIsAuthenticated.js';
 import getAppContext from '@/Services/GetAppContext.js';
 import axios from '@/Globals/Axios.js';
@@ -267,7 +264,7 @@ async function authenticate(formData, node) {
 
 <template>
     <div
-        class="font-sans"
+        class="font-sans bg-gray-50 min-h-screen"
         :style="{
             '--primary-50': portalPrimaryColor[50],
             '--primary-100': portalPrimaryColor[100],
@@ -279,6 +276,7 @@ async function authenticate(formData, node) {
             '--primary-700': portalPrimaryColor[700],
             '--primary-800': portalPrimaryColor[800],
             '--primary-900': portalPrimaryColor[900],
+            '--primary-950': portalPrimaryColor[950],
             '--rounding-sm': portalRounding.sm,
             '--rounding': portalRounding.default,
             '--rounding-md': portalRounding.md,
@@ -295,7 +293,7 @@ async function authenticate(formData, node) {
         </div>
 
         <div v-else>
-            <div v-if="userIsAuthenticated === false" class="flex flex-col items-center justify-center min-h-screen">
+            <div v-if="userIsAuthenticated === false" class="bg-gradient flex flex-col items-center justify-center min-h-screen">
                 <h1 class="text-black text-3xl font-bold">Please log in to the Knowledge Management Portal</h1>
 
                 <div class="mt-4 flex flex-col">

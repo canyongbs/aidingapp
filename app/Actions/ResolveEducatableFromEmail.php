@@ -49,7 +49,6 @@ class ResolveEducatableFromEmail
         /** @var Contact $contact */
         $contact = Contact::query()
             ->where('email', $email)
-            ->orWhere('email_2', $email)
             ->first();
 
         if ($contact) {
