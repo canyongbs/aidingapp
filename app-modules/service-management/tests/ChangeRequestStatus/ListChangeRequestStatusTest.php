@@ -41,5 +41,6 @@ use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestStatusResource;
 testResourceRequiresPermissionForAccess(
     resource: ChangeRequestStatusResource::class,
     permissions: 'change_request_status.view-any',
-    method: 'index'
+    method: 'index',
+    featureProperty : 'changeManagement'
 );

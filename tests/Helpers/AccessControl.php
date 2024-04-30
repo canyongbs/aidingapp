@@ -38,20 +38,34 @@ namespace Tests\Helpers;
 
 use App\Models\User;
 use Illuminate\Support\Arr;
+use App\Settings\LicenseSettings;
 
 use function Pest\Laravel\actingAs;
 
 use AidingApp\Authorization\Enums\LicenseType;
 
-function testResourceRequiresPermissionForAccess(string $resource, string|array $permissions, string $method)
+function testResourceRequiresPermissionForAccess(string $resource, string|array $permissions, string $method, $featureProperty = null)
 {
-    test("{$resource} {$method} is gated with proper access control", function () use ($permissions, $resource, $method) {
+    test("{$resource} {$method} is gated with proper access control", function () use ($permissions, $resource, $method, $featureProperty) {
+        if (! is_null($featureProperty)) {
+            $settings = app(LicenseSettings::class);
+
+            $settings->data->addons->$featureProperty = false;
+
+            $settings->save();
+        }
+
         $user = User::factory()->licensed(LicenseType::cases())->create();
 
         actingAs($user)
             ->get(
                 $resource::getUrl($method)
             )->assertForbidden();
+
+        if (! is_null($featureProperty)) {
+            $settings->data->addons->$featureProperty = true;
+            $settings->save();
+        }
 
         collect(Arr::wrap($permissions))->each(fn ($permission) => $user->givePermissionTo($permission));
 

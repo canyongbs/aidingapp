@@ -41,5 +41,6 @@ use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypeResource;
 testResourceRequiresPermissionForAccess(
     resource: ChangeRequestTypeResource::class,
     permissions: 'change_request_type.view-any',
-    method: 'index'
+    method: 'index',
+    featureProperty : 'changeManagement'
 );
