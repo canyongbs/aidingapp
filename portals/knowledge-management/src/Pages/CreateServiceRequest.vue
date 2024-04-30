@@ -35,15 +35,13 @@
 import { defineProps, ref, watch, onMounted, reactive } from 'vue';
 import { useRoute } from 'vue-router';
 import Breadcrumbs from '@/Components/Breadcrumbs.vue';
-import Loading from '@/Components/Loading.vue';
 import { Bars3Icon } from '@heroicons/vue/24/outline/index.js';
 import { useAuthStore } from '@/Stores/auth.js';
 import axios from '@/Globals/Axios.js';
 import { useTokenStore } from '@/Stores/token.js';
 import wizard from '../../../../widgets/service-request-form/src/FormKit/wizard.js';
-import attachRecaptchaScript from '../../../../app-modules/integration-google-recaptcha/resources/js/Services/AttachRecaptchaScript.js';
-import getRecaptchaToken from '../../../../app-modules/integration-google-recaptcha/resources/js/Services/GetRecaptchaToken.js';
 import { consumer } from '@/Services/Consumer.js';
+import AppLoading from "@/Components/AppLoading.vue";
 
 let { steps, visitedSteps, activeStep, setStep, wizardPlugin } = wizard();
 
@@ -159,7 +157,7 @@ async function getData() {
 <template>
     <div>
         <div v-if="loadingResults">
-            <Loading />
+            <AppLoading />
         </div>
         <div v-else>
             <Breadcrumbs

@@ -32,15 +32,13 @@
 </COPYRIGHT>
 -->
 <script setup>
-import axios from '@/Globals/Axios.js';
 import { defineProps, ref, watch, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import Breadcrumbs from '@/Components/Breadcrumbs.vue';
-import Loading from '@/Components/Loading.vue';
 import { Bars3Icon } from '@heroicons/vue/24/outline/index.js';
 import { useAuthStore } from '@/Stores/auth.js';
-import { useTokenStore } from '@/Stores/token.js';
 import { consumer } from '@/Services/Consumer.js';
+import AppLoading from "@/Components/AppLoading.vue";
 
 const route = useRoute();
 
@@ -90,7 +88,7 @@ async function getData() {
 <template>
     <div>
         <div v-if="loadingResults">
-            <Loading />
+          <AppLoading />
         </div>
         <div v-else>
             <Breadcrumbs
