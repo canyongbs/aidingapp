@@ -49,7 +49,6 @@ defineProps({
 <template>
     <div class="grid gap-4" :class="[serviceRequests?.length > 0 ? 'lg:grid-cols-2' : 'lg:grid-cols-1']">
         <div>
-            <h3 class="text-xl">Help Center</h3>
             <div class="mt-4 grid gap-4" :class="[serviceRequests?.length > 0 ? 'lg:grid-cols-1' : 'lg:grid-cols-2']">
                 <div
                     v-for="category in categories"
