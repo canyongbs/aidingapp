@@ -183,7 +183,7 @@ async function getKnowledgeManagementPortal() {
         })
         .catch((error) => {
             errorLoading.value = true;
-            console.error(`Knowledge Management Portal Embed ${error}`);
+            console.error(`Help Center Embed ${error}`);
         });
 }
 
@@ -293,40 +293,47 @@ async function authenticate(formData, node) {
         </div>
 
         <div v-else>
-            <div v-if="userIsAuthenticated === false" class="bg-gradient flex flex-col items-center justify-center min-h-screen">
-                <h1 class="text-black text-3xl font-bold">Please log in to the Knowledge Management Portal</h1>
+            <div
+              v-if="userIsAuthenticated === false"
+              class="bg-gradient flex flex-col items-center justify-center min-h-screen"
+            >
+              <div class="max-w-md w-full bg-white rounded ring-1 ring-black/5 shadow-sm px-8 pt-6 pb-4 flex flex-col gap-6 mx-4">
+                <h1 class="text-primary-950 text-center text-2xl font-semibold">Log in to Helper Center</h1>
 
-                <div class="mt-4 flex flex-col">
-                    <FormKit type="form" @submit="authenticate" v-model="authentication">
-                        <FormKit
-                            type="email"
-                            label="Enter your email address to receive a login code."
-                            name="email"
-                            validation="required|email"
-                            validation-visibility="submit"
-                            :disabled="authentication.isRequested"
-                        />
+                <FormKit
+                  type="form"
+                  @submit="authenticate"
+                  v-model="authentication"
+                  :submit-label="authentication.isRequested ? 'Sign in' : 'Send login code'"
+                >
+                  <FormKit
+                    type="email"
+                    label="Email address"
+                    name="email"
+                    validation="required|email"
+                    validation-visibility="submit"
+                    :disabled="authentication.isRequested"
+                  />
 
-                        <p v-if="authentication.requestedMessage" class="text-sm">
-                            {{ authentication.requestedMessage }}
-                        </p>
+                  <p v-if="authentication.requestedMessage" class="text-gray-700 font-medium text-xs my-3">
+                    {{ authentication.requestedMessage }}
+                  </p>
 
-                        <FormKit
-                            type="otp"
-                            digits="6"
-                            label="Authentication code"
-                            name="code"
-                            help="We’ve sent a code to your email address."
-                            validation="required"
-                            validation-visibility="submit"
-                            v-if="authentication.isRequested"
-                        />
-                    </FormKit>
-                </div>
+                  <FormKit
+                    type="otp"
+                    digits="6"
+                    label="Enter the code here"
+                    name="code"
+                    validation="required"
+                    validation-visibility="submit"
+                    v-if="authentication.isRequested"
+                  />
+                </FormKit>
+              </div>
             </div>
             <div v-else>
                 <div v-if="errorLoading" class="text-center">
-                    <h1 class="text-3xl font-bold text-red-500">Error Loading Portal</h1>
+                    <h1 class="text-3xl font-bold text-red-500">Error Loading the Help Center</h1>
                     <p class="text-lg text-red-500">Please try again later</p>
                 </div>
 
@@ -340,18 +347,27 @@ async function authenticate(formData, node) {
                     <DesktopSidebar :categories="categories" :api-url="apiUrl"> </DesktopSidebar>
 
                     <div class="lg:pl-72">
-                        <div class="px-4 sm:px-6 lg:px-8">
-                            <RouterView
-                                :search-url="searchUrl"
-                                :api-url="apiUrl"
-                                :categories="categories"
-                                :service-requests="serviceRequests"
-                            >
-                            </RouterView>
-                        </div>
+                      <RouterView
+                        :search-url="searchUrl"
+                        :api-url="apiUrl"
+                        :categories="categories"
+                        :service-requests="serviceRequests"
+                      >
+                      </RouterView>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </template>
+
+<style scoped>
+.bg-gradient {
+  @apply relative bg-no-repeat;
+  background-image: radial-gradient(
+    circle at top,
+    theme('colors.primary.200'),
+    theme('colors.white') 50%
+  );
+}
+</style>
