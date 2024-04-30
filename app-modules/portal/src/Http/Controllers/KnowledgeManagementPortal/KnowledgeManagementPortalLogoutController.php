@@ -39,6 +39,7 @@ namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
+use AidingApp\Contact\Models\Contact;
 
 class KnowledgeManagementPortalLogoutController extends Controller
 {
@@ -46,6 +47,12 @@ class KnowledgeManagementPortalLogoutController extends Controller
     {
         /** @var Contact $contact */
         $contact = auth('contact')->user();
+
+        if (! $contact) {
+            return response()->json([
+                'success' => false,
+            ]);
+        }
 
         $contact->tokens()->where('name', 'knowledge-management-portal-access-token')->delete();
 
