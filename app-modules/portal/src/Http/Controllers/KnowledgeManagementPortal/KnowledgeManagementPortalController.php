@@ -36,29 +36,17 @@
 
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
-use App\Settings\LicenseSettings;
 use Illuminate\Http\JsonResponse;
 use Filament\Support\Colors\Color;
 use Illuminate\Support\Facades\URL;
 use App\Http\Controllers\Controller;
-use Filament\Support\Colors\ColorManager;
 use AidingApp\Portal\Settings\PortalSettings;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
-use AidingApp\Portal\DataTransferObjects\ServiceRequestData;
-use AidingApp\Portal\DataTransferObjects\KnowledgeBaseCategoryData;
 
 class KnowledgeManagementPortalController extends Controller
 {
     public function show(): JsonResponse
     {
         $settings = resolve(PortalSettings::class);
-        $license = resolve(LicenseSettings::class);
-
-        $colors = [
-            ...app(ColorManager::class)->getColors(),
-            ...Color::all(),
-        ];
 
         return response()->json([
             'primary_color' => Color::all()[$settings->knowledge_management_portal_primary_color ?? 'blue'],
@@ -71,37 +59,6 @@ class KnowledgeManagementPortalController extends Controller
                     absolute: false,
                 )
             ),
-            'categories' => KnowledgeBaseCategoryData::collection(
-                KnowledgeBaseCategory::query()
-                    ->orderBy('name')
-                    ->get()
-                    ->map(function (KnowledgeBaseCategory $category) {
-                        return [
-                            'id' => $category->getKey(),
-                            'name' => $category->name,
-                            'description' => $category->description,
-                            'icon' => $category->icon ? svg($category->icon, 'h-6 w-6')->toHtml() : null,
-                        ];
-                    })
-                    ->toArray()
-            ),
-            'service_requests' => $license->data->addons->serviceManagement && $settings->knowledge_management_portal_service_management && auth('contact')->check()
-                ? auth('contact')->user()
-                    ->serviceRequests()
-                    ->with('serviceRequestFormSubmission')
-                    ->orderBy('created_at', 'desc')
-                    ->get()
-                    ->map(function (ServiceRequest $serviceRequest) use ($colors) {
-                        return ServiceRequestData::from([
-                            'id' => $serviceRequest->getKey(),
-                            'title' => $serviceRequest->serviceRequestFormSubmission?->description ?? $serviceRequest->title,
-                            'statusName' => $serviceRequest->status?->name,
-                            'statusColor' => $serviceRequest->status ? $colors[$serviceRequest->status->color->value][600] : null,
-                            'icon' => $serviceRequest->priority->type->icon ? svg($serviceRequest->priority->type->icon, 'h-6 w-6')->toHtml() : null,
-                            'updatedAt' => count($serviceRequest->serviceRequestUpdates) > 0 ? $serviceRequest->serviceRequestUpdates()->latest('updated_at')->first()->updated_at->format('n-j-y g:i A') : $serviceRequest->created_at->format('n-j-y g:i A'),
-                        ]);
-                    })
-                : [],
         ]);
     }
 }

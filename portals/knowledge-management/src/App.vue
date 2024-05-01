@@ -43,6 +43,7 @@
     import { useAuthStore } from './Stores/auth.js';
     import { useRoute } from 'vue-router';
     import { useFeatureStore } from './Stores/feature.js';
+    import { consumer } from './Services/Consumer.js';
 
     const props = defineProps({
         url: {
@@ -112,7 +113,13 @@
             userIsAuthenticated.value = response;
         });
 
-        await getKnowledgeManagementPortal().then(() => {
+        await getKnowledgeManagementPortal().then(async () => {
+            const { requiresAuthentication } = useAuthStore();
+
+            if (userIsAuthenticated.value || !requiresAuthentication) {
+                await getData();
+                return;
+            }
             loading.value = false;
         });
     });
@@ -140,8 +147,6 @@
                 const { setRequiresAuthentication } = useAuthStore();
 
                 const { setHasServiceManagement } = useFeatureStore();
-
-                categories.value = response.data.categories;
 
                 serviceRequests.value = response.data.service_requests;
 
@@ -201,6 +206,53 @@
             });
     }
 
+    async function getData() {
+        await Promise.all([getKnowledgeManagementPortalCategories(), getServiceRequests()])
+            .then((responses) => {
+                errorLoading.value = false;
+
+                if (responses[0].error) {
+                    throw new Error(responses[0].error);
+                }
+                categories.value = responses[0];
+
+                if (responses[1].error) {
+                    throw new Error(responses[1].error);
+                }
+                serviceRequests.value = responses[1];
+
+                loading.value = false;
+            })
+            .catch((error) => {
+                errorLoading.value = true;
+                console.error(`Knowledge Management Portal Embed ${error}`);
+            });
+    }
+
+    async function getKnowledgeManagementPortalCategories() {
+        const { get } = consumer();
+
+        return get(`${props.apiUrl}/categories`).then((response) => {
+            if (response.error) {
+                throw new Error(response.error);
+            }
+
+            return response.data;
+        });
+    }
+
+    async function getServiceRequests() {
+        const { get } = consumer();
+
+        return get(`${props.apiUrl}/service-requests`).then((response) => {
+            if (response.error) {
+                throw new Error(response.error);
+            }
+
+            return response.data;
+        });
+    }
+
     async function authenticate(formData, node) {
         node.clearErrors();
 
@@ -239,6 +291,8 @@
                         setUser(response.data.user);
 
                         userIsAuthenticated.value = true;
+
+                        getData();
                     }
                 })
                 .catch((error) => {
