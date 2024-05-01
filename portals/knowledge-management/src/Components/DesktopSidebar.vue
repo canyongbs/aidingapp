@@ -32,24 +32,24 @@
 </COPYRIGHT>
 -->
 <script setup>
-import SidebarContent from '@/Components/SidebarContent.vue';
-import { defineProps } from 'vue';
+    import SidebarContent from '@/Components/SidebarContent.vue';
+    import { defineProps } from 'vue';
 
-defineProps({
-    categories: {
-        type: Object,
-        default: {},
-    },
-    apiUrl: {
-        type: String,
-        required: true,
-    },
-});
+    defineProps({
+        categories: {
+            type: Object,
+            default: {},
+        },
+        apiUrl: {
+            type: String,
+            required: true,
+        },
+    });
 </script>
 
 <template>
     <div class="hidden lg:fixed h-full lg:z-50 lg:flex lg:w-72 lg:flex-col">
-        <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-white px-6 pb-4">
+        <div class="flex flex-col grow overflow-y-auto bg-white ring-1 ring-black/5 mr-px shadow-sm">
             <SidebarContent :categories="categories" :api-url="apiUrl"></SidebarContent>
         </div>
     </div>

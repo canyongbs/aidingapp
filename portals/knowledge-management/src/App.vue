@@ -32,180 +32,212 @@
 </COPYRIGHT>
 -->
 <script setup>
-import { defineProps, onMounted, ref, watch } from 'vue';
-import attachRecaptchaScript from '../../../app-modules/integration-google-recaptcha/resources/js/Services/AttachRecaptchaScript.js';
-import getRecaptchaToken from '../../../app-modules/integration-google-recaptcha/resources/js/Services/GetRecaptchaToken.js';
-import AppLoading from '@/Components/AppLoading.vue';
-import MobileSidebar from '@/Components/MobileSidebar.vue';
-import DesktopSidebar from '@/Components/DesktopSidebar.vue';
-import Breadcrumbs from '@/Components/Breadcrumbs.vue';
-import determineIfUserIsAuthenticated from '@/Services/DetermineIfUserIsAuthenticated.js';
-import getAppContext from '@/Services/GetAppContext.js';
-import axios from '@/Globals/Axios.js';
-import { useTokenStore } from '@/Stores/token.js';
-import { useAuthStore } from '@/Stores/auth.js';
-import { useRoute } from 'vue-router';
+    import { defineProps, onMounted, ref, watch } from 'vue';
+    import AppLoading from '@/Components/AppLoading.vue';
+    import MobileSidebar from '@/Components/MobileSidebar.vue';
+    import DesktopSidebar from '@/Components/DesktopSidebar.vue';
+    import determineIfUserIsAuthenticated from '@/Services/DetermineIfUserIsAuthenticated.js';
+    import getAppContext from '@/Services/GetAppContext.js';
+    import axios from '@/Globals/Axios.js';
+    import { useTokenStore } from '@/Stores/token.js';
+    import { useAuthStore } from '@/Stores/auth.js';
+    import { useRoute } from 'vue-router';
 
-const errorLoading = ref(false);
-const loading = ref(true);
-const showMobileMenu = ref(false);
+    const errorLoading = ref(false);
+    const loading = ref(true);
+    const showMobileMenu = ref(false);
 
-const userIsAuthenticated = ref(false);
+    const userIsAuthenticated = ref(false);
 
-onMounted(async () => {
-    const { isEmbeddedInAidingApp } = getAppContext(props.accessUrl);
+    onMounted(async () => {
+        const { isEmbeddedInAidingApp } = getAppContext(props.accessUrl);
 
-    if (isEmbeddedInAidingApp) {
-        await axios.get(props.appUrl + '/sanctum/csrf-cookie');
-    }
+        if (isEmbeddedInAidingApp) {
+            await axios.get(props.appUrl + '/sanctum/csrf-cookie');
+        }
 
-    await determineIfUserIsAuthenticated(props.userAuthenticationUrl).then((response) => {
-        userIsAuthenticated.value = response;
-    });
-
-    await getKnowledgeManagementPortal().then(() => {
-        loading.value = false;
-    });
-});
-
-const route = useRoute();
-
-watch(
-    route,
-    function () {
-        getKnowledgeManagementPortal();
-    },
-    {
-        immediate: true,
-    },
-);
-
-const props = defineProps({
-    url: {
-        type: String,
-        required: true,
-    },
-    searchUrl: {
-        type: String,
-        required: true,
-    },
-    apiUrl: {
-        type: String,
-        required: true,
-    },
-    accessUrl: {
-        type: String,
-        required: true,
-    },
-    userAuthenticationUrl: {
-        type: String,
-        required: true,
-    },
-    appUrl: {
-        type: String,
-        required: true,
-    },
-});
-
-const scriptUrl = new URL(document.currentScript.getAttribute('src'));
-const protocol = scriptUrl.protocol;
-const scriptHostname = scriptUrl.hostname;
-const scriptQuery = Object.fromEntries(scriptUrl.searchParams);
-
-const hostUrl = `${protocol}//${scriptHostname}`;
-
-const portalPrimaryColor = ref('');
-const portalRounding = ref('');
-const categories = ref({});
-const serviceRequests = ref({});
-
-const authentication = ref({
-    code: null,
-    email: null,
-    isRequested: false,
-    requestedMessage: null,
-    requestUrl: null,
-    url: null,
-});
-
-async function getKnowledgeManagementPortal() {
-    await axios
-        .get(props.url)
-        .then((response) => {
-            errorLoading.value = false;
-
-            if (response.error) {
-                throw new Error(response.error);
-            }
-
-            categories.value = response.data.categories;
-
-            serviceRequests.value = response.data.service_requests;
-
-            portalPrimaryColor.value = response.data.primary_color;
-
-            authentication.value.requestUrl = response.data.authentication_url ?? null;
-
-            portalRounding.value = {
-                none: {
-                    sm: '0px',
-                    default: '0px',
-                    md: '0px',
-                    lg: '0px',
-                    full: '0px',
-                },
-                sm: {
-                    sm: '0.125rem',
-                    default: '0.25rem',
-                    md: '0.375rem',
-                    lg: '0.5rem',
-                    full: '9999px',
-                },
-                md: {
-                    sm: '0.25rem',
-                    default: '0.375rem',
-                    md: '0.5rem',
-                    lg: '0.75rem',
-                    full: '9999px',
-                },
-                lg: {
-                    sm: '0.375rem',
-                    default: '0.5rem',
-                    md: '0.75rem',
-                    lg: '1rem',
-                    full: '9999px',
-                },
-                full: {
-                    sm: '9999px',
-                    default: '9999px',
-                    md: '9999px',
-                    lg: '9999px',
-                    full: '9999px',
-                },
-            }[response.data.rounding ?? 'md'];
-        })
-        .catch((error) => {
-            errorLoading.value = true;
-            console.error(`Knowledge Management Portal Embed ${error}`);
+        await determineIfUserIsAuthenticated(props.userAuthenticationUrl).then((response) => {
+            userIsAuthenticated.value = response;
         });
-}
 
-async function authenticate(formData, node) {
-    node.clearErrors();
+        await getKnowledgeManagementPortal().then(() => {
+            loading.value = false;
+        });
+    });
 
-    const { setToken } = useTokenStore();
-    const { setUser } = useAuthStore();
+    const route = useRoute();
 
-    const { isEmbeddedInAidingApp } = getAppContext(props.accessUrl);
+    watch(
+        route,
+        function () {
+            getKnowledgeManagementPortal();
+        },
+        {
+            immediate: true,
+        },
+    );
 
-    if (isEmbeddedInAidingApp) {
-        await axios.get(props.appUrl + '/sanctum/csrf-cookie');
+    const props = defineProps({
+        url: {
+            type: String,
+            required: true,
+        },
+        searchUrl: {
+            type: String,
+            required: true,
+        },
+        apiUrl: {
+            type: String,
+            required: true,
+        },
+        accessUrl: {
+            type: String,
+            required: true,
+        },
+        userAuthenticationUrl: {
+            type: String,
+            required: true,
+        },
+        appUrl: {
+            type: String,
+            required: true,
+        },
+    });
+
+    const scriptUrl = new URL(document.currentScript.getAttribute('src'));
+    const protocol = scriptUrl.protocol;
+    const scriptHostname = scriptUrl.hostname;
+    const scriptQuery = Object.fromEntries(scriptUrl.searchParams);
+
+    const hostUrl = `${protocol}//${scriptHostname}`;
+
+    const portalPrimaryColor = ref('');
+    const portalRounding = ref('');
+    const categories = ref({});
+    const serviceRequests = ref({});
+
+    const authentication = ref({
+        code: null,
+        email: null,
+        isRequested: false,
+        requestedMessage: null,
+        requestUrl: null,
+        url: null,
+    });
+
+    async function getKnowledgeManagementPortal() {
+        await axios
+            .get(props.url)
+            .then((response) => {
+                errorLoading.value = false;
+
+                if (response.error) {
+                    throw new Error(response.error);
+                }
+
+                categories.value = response.data.categories;
+
+                serviceRequests.value = response.data.service_requests;
+
+                portalPrimaryColor.value = response.data.primary_color;
+
+                authentication.value.requestUrl = response.data.authentication_url ?? null;
+
+                portalRounding.value = {
+                    none: {
+                        sm: '0px',
+                        default: '0px',
+                        md: '0px',
+                        lg: '0px',
+                        full: '0px',
+                    },
+                    sm: {
+                        sm: '0.125rem',
+                        default: '0.25rem',
+                        md: '0.375rem',
+                        lg: '0.5rem',
+                        full: '9999px',
+                    },
+                    md: {
+                        sm: '0.25rem',
+                        default: '0.375rem',
+                        md: '0.5rem',
+                        lg: '0.75rem',
+                        full: '9999px',
+                    },
+                    lg: {
+                        sm: '0.375rem',
+                        default: '0.5rem',
+                        md: '0.75rem',
+                        lg: '1rem',
+                        full: '9999px',
+                    },
+                    full: {
+                        sm: '9999px',
+                        default: '9999px',
+                        md: '9999px',
+                        lg: '9999px',
+                        full: '9999px',
+                    },
+                }[response.data.rounding ?? 'md'];
+            })
+            .catch((error) => {
+                errorLoading.value = true;
+                console.error(`Help Center Embed ${error}`);
+            });
     }
 
-    if (authentication.value.isRequested) {
+    async function authenticate(formData, node) {
+        node.clearErrors();
+
+        const { setToken } = useTokenStore();
+        const { setUser } = useAuthStore();
+
+        const { isEmbeddedInAidingApp } = getAppContext(props.accessUrl);
+
+        if (isEmbeddedInAidingApp) {
+            await axios.get(props.appUrl + '/sanctum/csrf-cookie');
+        }
+
+        if (authentication.value.isRequested) {
+            axios
+                .post(authentication.value.url, {
+                    code: formData.code,
+                })
+                .then((response) => {
+                    if (response.errors) {
+                        node.setErrors([], response.errors);
+
+                        return;
+                    }
+
+                    if (response.data.is_expired) {
+                        node.setErrors(['The authentication code expires after 24 hours. Please authenticate again.']);
+
+                        authentication.value.isRequested = false;
+                        authentication.value.requestedMessage = null;
+
+                        return;
+                    }
+
+                    if (response.data.success === true) {
+                        setToken(response.data.token);
+                        setUser(response.data.user);
+
+                        userIsAuthenticated.value = true;
+                    }
+                })
+                .catch((error) => {
+                    node.setErrors([error]);
+                });
+
+            return;
+        }
+
         axios
-            .post(authentication.value.url, {
-                code: formData.code,
+            .post(authentication.value.requestUrl, {
+                email: formData.email,
+                isSpa: isEmbeddedInAidingApp,
             })
             .then((response) => {
                 if (response.errors) {
@@ -214,60 +246,25 @@ async function authenticate(formData, node) {
                     return;
                 }
 
-                if (response.data.is_expired) {
-                    node.setErrors(['The authentication code expires after 24 hours. Please authenticate again.']);
-
-                    authentication.value.isRequested = false;
-                    authentication.value.requestedMessage = null;
+                if (!response.data.authentication_url) {
+                    node.setErrors([response.data.message]);
 
                     return;
                 }
 
-                if (response.data.success === true) {
-                    setToken(response.data.token);
-                    setUser(response.data.user);
-
-                    userIsAuthenticated.value = true;
-                }
+                authentication.value.isRequested = true;
+                authentication.value.requestedMessage = response.data.message;
+                authentication.value.url = response.data.authentication_url;
             })
             .catch((error) => {
                 node.setErrors([error]);
             });
-
-        return;
     }
-
-    axios
-        .post(authentication.value.requestUrl, {
-            email: formData.email,
-            isSpa: isEmbeddedInAidingApp,
-        })
-        .then((response) => {
-            if (response.errors) {
-                node.setErrors([], response.errors);
-
-                return;
-            }
-
-            if (!response.data.authentication_url) {
-                node.setErrors([response.data.message]);
-
-                return;
-            }
-
-            authentication.value.isRequested = true;
-            authentication.value.requestedMessage = response.data.message;
-            authentication.value.url = response.data.authentication_url;
-        })
-        .catch((error) => {
-            node.setErrors([error]);
-        });
-}
 </script>
 
 <template>
     <div
-        class="font-sans"
+        class="font-sans bg-gray-50 min-h-screen"
         :style="{
             '--primary-50': portalPrimaryColor[50],
             '--primary-100': portalPrimaryColor[100],
@@ -279,6 +276,7 @@ async function authenticate(formData, node) {
             '--primary-700': portalPrimaryColor[700],
             '--primary-800': portalPrimaryColor[800],
             '--primary-900': portalPrimaryColor[900],
+            '--primary-950': portalPrimaryColor[950],
             '--rounding-sm': portalRounding.sm,
             '--rounding': portalRounding.default,
             '--rounding-md': portalRounding.md,
@@ -295,30 +293,39 @@ async function authenticate(formData, node) {
         </div>
 
         <div v-else>
-            <div v-if="userIsAuthenticated === false" class="flex flex-col items-center justify-center min-h-screen">
-                <h1 class="text-black text-3xl font-bold">Please log in to the Knowledge Management Portal</h1>
+            <div
+                v-if="userIsAuthenticated === false"
+                class="bg-gradient flex flex-col items-center justify-center min-h-screen"
+            >
+                <div
+                    class="max-w-md w-full bg-white rounded ring-1 ring-black/5 shadow-sm px-8 pt-6 pb-4 flex flex-col gap-6 mx-4"
+                >
+                    <h1 class="text-primary-950 text-center text-2xl font-semibold">Log in to Helper Center</h1>
 
-                <div class="mt-4 flex flex-col">
-                    <FormKit type="form" @submit="authenticate" v-model="authentication">
+                    <FormKit
+                        type="form"
+                        @submit="authenticate"
+                        v-model="authentication"
+                        :submit-label="authentication.isRequested ? 'Sign in' : 'Send login code'"
+                    >
                         <FormKit
                             type="email"
-                            label="Enter your email address to receive a login code."
+                            label="Email address"
                             name="email"
                             validation="required|email"
                             validation-visibility="submit"
                             :disabled="authentication.isRequested"
                         />
 
-                        <p v-if="authentication.requestedMessage" class="text-sm">
+                        <p v-if="authentication.requestedMessage" class="text-gray-700 font-medium text-xs my-3">
                             {{ authentication.requestedMessage }}
                         </p>
 
                         <FormKit
                             type="otp"
                             digits="6"
-                            label="Authentication code"
+                            label="Enter the code here"
                             name="code"
-                            help="We’ve sent a code to your email address."
                             validation="required"
                             validation-visibility="submit"
                             v-if="authentication.isRequested"
@@ -328,7 +335,7 @@ async function authenticate(formData, node) {
             </div>
             <div v-else>
                 <div v-if="errorLoading" class="text-center">
-                    <h1 class="text-3xl font-bold text-red-500">Error Loading Portal</h1>
+                    <h1 class="text-3xl font-bold text-red-500">Error Loading the Help Center</h1>
                     <p class="text-lg text-red-500">Please try again later</p>
                 </div>
 
@@ -342,18 +349,23 @@ async function authenticate(formData, node) {
                     <DesktopSidebar :categories="categories" :api-url="apiUrl"> </DesktopSidebar>
 
                     <div class="lg:pl-72">
-                        <div class="px-4 sm:px-6 lg:px-8">
-                            <RouterView
-                                :search-url="searchUrl"
-                                :api-url="apiUrl"
-                                :categories="categories"
-                                :service-requests="serviceRequests"
-                            >
-                            </RouterView>
-                        </div>
+                        <RouterView
+                            :search-url="searchUrl"
+                            :api-url="apiUrl"
+                            :categories="categories"
+                            :service-requests="serviceRequests"
+                        >
+                        </RouterView>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </template>
+
+<style scoped>
+    .bg-gradient {
+        @apply relative bg-no-repeat;
+        background-image: radial-gradient(circle at top, theme('colors.primary.200'), theme('colors.white') 50%);
+    }
+</style>

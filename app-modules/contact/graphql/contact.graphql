@@ -29,9 +29,6 @@ type Contact @model(class: "AidingApp\\Contact\\Models\\Contact") {
     "The email of the contact."
     email: Email
 
-    "The email 2 of the contact."
-    email_2: Email
-
     "The mobile number of the contact."
     mobile: String
 
@@ -61,12 +58,6 @@ type Contact @model(class: "AidingApp\\Contact\\Models\\Contact") {
 
     "The postal code of the contact."
     postal: String
-
-    "The birthdate of the contact."
-    birthdate: Date
-
-    "The High School graduation year of the contact."
-    hsgrad: String
 
     "The created date of the contact."
     created_at: DateTime
@@ -120,9 +111,6 @@ input ContactsQuery {
     "The email of the contact."
     email: Email
 
-    "The email 2 of the contact."
-    email_2: Email
-
     "The mobile number of the contact."
     mobile: String
 
@@ -152,12 +140,6 @@ input ContactsQuery {
 
     "The postal code of the contact."
     postal: String
-
-    "The birthdate of the contact."
-    birthdate: Date
-
-    "The High School graduation year of the contact."
-    hsgrad: String
 
     "The created date of the contact."
     created_at: DateTime
@@ -220,9 +202,6 @@ input CreateContactInput {
     "The email of the contact."
     email: Email @rules(apply: ["string", "email", "max:255"])
 
-    "The email 2 of the contact."
-    email_2: Email @rules(apply: ["string", "email", "max:255"])
-
     "The mobile number of the contact."
     mobile: String @rules(apply: ["string", "max:255"])
 
@@ -252,12 +231,6 @@ input CreateContactInput {
 
     "The postal code of the contact."
     postal: String @rules(apply: ["string", "max:255"])
-
-    "The birthdate of the contact."
-    birthdate: Date @rules(apply: ["date_format:Y-m-d"])
-
-    "The High School graduation year of the contact."
-    hsgrad: Year @rules(apply: ["integer", "date_format:Y"])
 
     "The user that created the contact."
     created_by_id: UUID @rules(apply: ["exists:users,id"])
@@ -291,9 +264,6 @@ input UpdateContactInput {
     "The email of the contact."
     email: Email @rules(apply: ["string", "email", "max:255"])
 
-    "The email 2 of the contact."
-    email_2: Email @rules(apply: ["string", "email", "max:255"])
-
     "The mobile number of the contact."
     mobile: String @rules(apply: ["string", "max:255"])
 
@@ -323,12 +293,6 @@ input UpdateContactInput {
 
     "The postal code of the contact."
     postal: String @rules(apply: ["string", "max:255"])
-
-    "The birthdate of the contact."
-    birthdate: Date @rules(apply: ["date_format:Y-m-d"])
-
-    "The High School graduation year of the contact."
-    hsgrad: Year @rules(apply: ["integer", "date_format:Y"])
 
     "The user that created the contact."
     created_by_id: UUID @rules(apply: ["exists:users,id"])

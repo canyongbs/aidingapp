@@ -32,58 +32,58 @@
 </COPYRIGHT>
 -->
 <script setup>
-import {onMounted, ref, watch} from 'vue';
-import { RadioGroup, RadioGroupLabel, RadioGroupOption } from '@headlessui/vue';
+    import { onMounted, ref, watch } from 'vue';
+    import { RadioGroup, RadioGroupLabel, RadioGroupOption } from '@headlessui/vue';
 
-const props = defineProps({
-    context: Object,
-});
+    const props = defineProps({
+        context: Object,
+    });
 
-onMounted(() => {
-    const fonts = document.createElement('link');
-    fonts.type = 'text/css';
-    fonts.rel = 'stylesheet';
-    fonts.href = 'https://fonts.googleapis.com/css2?family=Satisfy&display=swap';
+    onMounted(() => {
+        const fonts = document.createElement('link');
+        fonts.type = 'text/css';
+        fonts.rel = 'stylesheet';
+        fonts.href = 'https://fonts.googleapis.com/css2?family=Satisfy&display=swap';
 
-    document.head.appendChild(fonts);
-});
+        document.head.appendChild(fonts);
+    });
 
-const mode = ref('draw');
+    const mode = ref('draw');
 
-const drawingPad = ref(null);
+    const drawingPad = ref(null);
 
-const undoDrawing = () => {
-    drawingPad.value.undoSignature();
-};
+    const undoDrawing = () => {
+        drawingPad.value.undoSignature();
+    };
 
-const clearDrawing = () => {
-    drawingPad.value.clearSignature();
-};
+    const clearDrawing = () => {
+        drawingPad.value.clearSignature();
+    };
 
-const saveDrawing = () => {
-    const { data } = drawingPad.value.saveSignature();
+    const saveDrawing = () => {
+        const { data } = drawingPad.value.saveSignature();
 
-    props.context.node.input(data);
-};
+        props.context.node.input(data);
+    };
 
-const resizeCanvas = () => {
-    drawingPad.value.resizeCanvas();
-};
+    const resizeCanvas = () => {
+        drawingPad.value.resizeCanvas();
+    };
 
-const text = ref('');
+    const text = ref('');
 
-watch(text, () => {
-    const canvas = document.createElement('canvas');
-    canvas.height = 100;
-    canvas.width = 350;
+    watch(text, () => {
+        const canvas = document.createElement('canvas');
+        canvas.height = 100;
+        canvas.width = 350;
 
-    const canvasContext = canvas.getContext('2d');
+        const canvasContext = canvas.getContext('2d');
 
-    canvasContext.font = '30px Satisfy';
-    canvasContext.fillText(text.value, 10, 50);
+        canvasContext.font = '30px Satisfy';
+        canvasContext.fillText(text.value, 10, 50);
 
-    props.context.node.input(canvas.toDataURL());
-});
+        props.context.node.input(canvas.toDataURL());
+    });
 </script>
 
 <template>
@@ -93,13 +93,29 @@ watch(text, () => {
 
             <div class="flex items-center flex-wrap gap-2">
                 <RadioGroupOption as="template" value="draw" v-slot="{ active, checked }">
-                    <div :class="[active ? 'ring-2 ring-primary-600 ring-offset-2' : '', checked ? 'bg-primary-600 text-white hover:bg-primary-500' : 'ring-1 ring-inset ring-gray-300 bg-white text-gray-900 hover:bg-gray-50', 'flex items-center justify-center rounded py-1 px-2 text-sm font-medium cursor-pointer focus:outline-none']">
+                    <div
+                        :class="[
+                            active ? 'ring-2 ring-primary-600 ring-offset-2' : '',
+                            checked
+                                ? 'bg-primary-600 text-white hover:bg-primary-500'
+                                : 'ring-1 ring-inset ring-gray-300 bg-white text-gray-900 hover:bg-gray-50',
+                            'flex items-center justify-center rounded py-1 px-2 text-sm font-medium cursor-pointer focus:outline-none',
+                        ]"
+                    >
                         <RadioGroupLabel as="span">Draw it</RadioGroupLabel>
                     </div>
                 </RadioGroupOption>
 
                 <RadioGroupOption as="template" value="type" v-slot="{ active, checked }">
-                    <div :class="[active ? 'ring-2 ring-primary-600 ring-offset-2' : '', checked ? 'bg-primary-600 text-white hover:bg-primary-500' : 'ring-1 ring-inset ring-gray-300 bg-white text-gray-900 hover:bg-gray-50', 'flex items-center justify-center rounded py-1 px-2 text-sm font-medium cursor-pointer focus:outline-none']">
+                    <div
+                        :class="[
+                            active ? 'ring-2 ring-primary-600 ring-offset-2' : '',
+                            checked
+                                ? 'bg-primary-600 text-white hover:bg-primary-500'
+                                : 'ring-1 ring-inset ring-gray-300 bg-white text-gray-900 hover:bg-gray-50',
+                            'flex items-center justify-center rounded py-1 px-2 text-sm font-medium cursor-pointer focus:outline-none',
+                        ]"
+                    >
                         <RadioGroupLabel as="span">Type it</RadioGroupLabel>
                     </div>
                 </RadioGroupOption>
@@ -116,11 +132,19 @@ watch(text, () => {
             />
 
             <div class="flex items-center gap-1">
-                <button @click="undoDrawing" type="button" class="inline-flex items-center border border-gray-400 text-xs font-normal py-1 px-2 rounded focus-visible:outline-2 focus-visible:outline-blue-600 focus-visible:outline-offset-2">
+                <button
+                    @click="undoDrawing"
+                    type="button"
+                    class="inline-flex items-center border border-gray-400 text-xs font-normal py-1 px-2 rounded focus-visible:outline-2 focus-visible:outline-blue-600 focus-visible:outline-offset-2"
+                >
                     Undo
                 </button>
 
-                <button @click="clearDrawing" type="button" class="inline-flex items-center border border-gray-400 text-xs font-normal py-1 px-2 rounded focus-visible:outline-2 focus-visible:outline-blue-600 focus-visible:outline-offset-2">
+                <button
+                    @click="clearDrawing"
+                    type="button"
+                    class="inline-flex items-center border border-gray-400 text-xs font-normal py-1 px-2 rounded focus-visible:outline-2 focus-visible:outline-blue-600 focus-visible:outline-offset-2"
+                >
                     Clear
                 </button>
             </div>

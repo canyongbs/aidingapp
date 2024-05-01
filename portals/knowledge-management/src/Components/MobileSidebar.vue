@@ -32,19 +32,19 @@
 </COPYRIGHT>
 -->
 <script setup>
-import SidebarContent from '@/Components/SidebarContent.vue';
-import { defineProps } from 'vue';
+    import SidebarContent from '@/Components/SidebarContent.vue';
+    import { defineProps } from 'vue';
 
-defineProps({
-    categories: {
-        type: Object,
-        default: {},
-    },
-    apiUrl: {
-        type: String,
-        required: true,
-    },
-});
+    defineProps({
+        categories: {
+            type: Object,
+            default: {},
+        },
+        apiUrl: {
+            type: String,
+            required: true,
+        },
+    });
 </script>
 
 <template>
@@ -68,7 +68,7 @@ defineProps({
                     </button>
                 </div>
 
-                <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-white px-6 pb-4">
+                <div class="flex grow flex-col overflow-y-auto bg-white">
                     <SidebarContent :categories="categories" :api-url="apiUrl"></SidebarContent>
                 </div>
             </div>

@@ -100,9 +100,6 @@ class ContactImporter extends Importer
                 ->rules(['required', 'email'])
                 ->requiredMapping()
                 ->example('johnsmith@gmail.com'),
-            ImportColumn::make('email_2')
-                ->rules(['email'])
-                ->example('johnsmith@hotmail.com'),
             ImportColumn::make('mobile')
                 ->example('+1 (555) 555-5555'),
             ImportColumn::make('sms_opt_out')
@@ -120,32 +117,19 @@ class ContactImporter extends Importer
                 ->example('123 Main St.'),
             ImportColumn::make('address_2')
                 ->example('Apt. 1'),
-            ImportColumn::make('birthdate')
-                ->rules(['date'])
-                ->example('1990-01-01'),
-            ImportColumn::make('hsgrad')
-                ->example('2009'),
         ];
     }
 
     public function resolveRecord(): ?Model
     {
         $email = $this->data['email'];
-        $email2 = $this->data['email_2'] ?? null;
-
-        $emails = [
-            $email,
-            ...filled($email2) ? [$email2] : [],
-        ];
 
         $contact = Contact::query()
-            ->whereIn('email', $emails)
-            ->orWhereIn('email_2', $emails)
+            ->where('email', $email)
             ->first();
 
         return $contact ?? new Contact([
             'email' => $email,
-            'email_2' => $email2,
         ]);
     }
 

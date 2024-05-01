@@ -49,7 +49,6 @@ use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Resources\Pages\ListRecords;
@@ -144,7 +143,6 @@ class ListContacts extends ListRecords implements HasBulkEngagementAction
                                     'assigned_to_id' => 'Assigned To',
                                     'description' => 'Description',
                                     'email_bounce' => 'Email Bounce',
-                                    'hsgrad' => 'High School Graduation Date',
                                     'sms_opt_out' => 'SMS Opt Out',
                                     'source_id' => 'Source',
                                     'status_id' => 'Status',
@@ -170,13 +168,6 @@ class ListContacts extends ListRecords implements HasBulkEngagementAction
                                 ->boolean()
                                 ->required()
                                 ->visible(fn (Get $get) => $get('field') === 'email_bounce'),
-                            TextInput::make('hsgrad')
-                                ->label('High School Graduation Date')
-                                ->numeric()
-                                ->minValue(1920)
-                                ->maxValue(now()->addYears(25)->year)
-                                ->required()
-                                ->visible(fn (Get $get) => $get('field') === 'hsgrad'),
                             Radio::make('sms_opt_out')
                                 ->label('SMS Opt Out')
                                 ->boolean()

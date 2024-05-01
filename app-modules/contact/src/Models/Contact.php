@@ -102,7 +102,6 @@ class Contact extends BaseAuthenticatable implements Auditable, Subscribable, Ed
         'preferred',
         'description',
         'email',
-        'email_2',
         'mobile',
         'sms_opt_out',
         'email_bounce',
@@ -115,8 +114,6 @@ class Contact extends BaseAuthenticatable implements Auditable, Subscribable, Ed
         'city',
         'state',
         'postal',
-        'birthdate',
-        'hsgrad',
         'assigned_to_id',
         'created_by_id',
     ];
@@ -124,7 +121,6 @@ class Contact extends BaseAuthenticatable implements Auditable, Subscribable, Ed
     protected $casts = [
         'sms_opt_out' => 'boolean',
         'email_bounce' => 'boolean',
-        'birthdate' => 'date',
     ];
 
     public function assignedTo(): BelongsTo
