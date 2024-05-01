@@ -44,13 +44,13 @@ use function Pest\Laravel\actingAs;
 
 use AidingApp\Authorization\Enums\LicenseType;
 
-function testResourceRequiresPermissionForAccess(string $resource, string|array $permissions, string $method, $featureProperty = null)
+function testResourceRequiresPermissionForAccess(string $resource, string|array $permissions, string $method, $feature = null)
 {
-    test("{$resource} {$method} is gated with proper access control", function () use ($permissions, $resource, $method, $featureProperty) {
-        if (! is_null($featureProperty)) {
+    test("{$resource} {$method} is gated with proper access control", function () use ($permissions, $resource, $method, $feature) {
+        if (! is_null($feature)) {
             $settings = app(LicenseSettings::class);
 
-            $settings->data->addons->$featureProperty = false;
+            $settings->data->addons->$feature = false;
 
             $settings->save();
         }
@@ -62,8 +62,8 @@ function testResourceRequiresPermissionForAccess(string $resource, string|array 
                 $resource::getUrl($method)
             )->assertForbidden();
 
-        if (! is_null($featureProperty)) {
-            $settings->data->addons->$featureProperty = true;
+        if (! is_null($feature)) {
+            $settings->data->addons->$feature = true;
             $settings->save();
         }
 

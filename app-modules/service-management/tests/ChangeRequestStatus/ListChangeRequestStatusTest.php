@@ -42,5 +42,5 @@ testResourceRequiresPermissionForAccess(
     resource: ChangeRequestStatusResource::class,
     permissions: 'change_request_status.view-any',
     method: 'index',
-    featureProperty: 'changeManagement'
+    feature: 'changeManagement'
 );
