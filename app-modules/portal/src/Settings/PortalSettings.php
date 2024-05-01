@@ -77,6 +77,8 @@ class PortalSettings extends Settings
 
     public bool $knowledge_management_portal_service_management = false;
 
+    public bool $knowledge_management_portal_requires_authentication = false;
+
     public ?string $knowledge_management_portal_primary_color = null;
 
     public ?string $knowledge_management_portal_rounding = null;

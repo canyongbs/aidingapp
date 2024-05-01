@@ -50,7 +50,7 @@ use App\Multitenancy\DataTransferObjects\TenantS3FilesystemConfig;
 
 class CreateTenant extends Command
 {
-    protected $signature = 'tenants:create {name} {domain} {--m|run-queue}';
+    protected $signature = 'tenants:create {name} {domain} {--m|run-queue} {--a|admin}';
 
     protected $description = 'Temporary command to test the tenant creation process.';
 
@@ -125,6 +125,8 @@ class CreateTenant extends Command
             )
         );
 
+        $database = config('multitenancy.tenant_database_connection_name');
+
         if ($this->option('run-queue') || $this->confirm('Run the queue to migrate tenant databases?')) {
             $queue = config('queue.landlord_queue');
 
@@ -132,13 +134,13 @@ class CreateTenant extends Command
                 command: "queue:work --queue={$queue} --stop-when-empty",
                 outputBuffer: $this->output,
             );
+        }
 
-            if ($this->confirm('Would you like to seed sample super admin?')) {
-                Artisan::call(
-                    command: "tenants:artisan \"db:seed --database=tenant --class=SampleSuperAdminUserSeeder\" --tenant={$tenant->id}",
-                    outputBuffer: $this->output,
-                );
-            }
+        if ($this->option('admin') || $this->confirm('Would you like to seed sample super admin?')) {
+            Artisan::call(
+                command: "tenants:artisan \"db:seed --database={$database} --class=SampleSuperAdminUserSeeder\" --tenant={$tenant->id}",
+                outputBuffer: $this->output,
+            );
         }
 
         return static::SUCCESS;

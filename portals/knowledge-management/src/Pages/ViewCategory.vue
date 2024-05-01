@@ -34,9 +34,9 @@
 <script setup>
     import { defineProps, ref, watch, onMounted } from 'vue';
     import { useRoute } from 'vue-router';
-    import Breadcrumbs from '@/Components/Breadcrumbs.vue';
-    import AppLoading from '@/Components/AppLoading.vue';
-    import { consumer } from '@/Services/Consumer.js';
+    import Breadcrumbs from '../Components/Breadcrumbs.vue';
+    import AppLoading from '../Components/AppLoading.vue';
+    import { consumer } from '../Services/Consumer.js';
     import { Bars3Icon } from '@heroicons/vue/24/outline/index.js';
     import { ChevronRightIcon, XMarkIcon } from '@heroicons/vue/20/solid/index.js';
 

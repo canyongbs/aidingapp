@@ -1,3 +1,5 @@
+<?php
+
 /*
 <COPYRIGHT>
 
@@ -31,15 +33,15 @@
 
 </COPYRIGHT>
 */
-import { createInput } from '@formkit/vue';
-import OneTimePassword from './OneTimePassword.vue';
-import Signature from './Signature.vue';
 
-export default {
-    otp: createInput(OneTimePassword, {
-        props: ['digits'],
-    }),
-    signature: createInput(Signature, {
-        props: [],
-    }),
+use Spatie\LaravelSettings\Migrations\SettingsBlueprint;
+use Spatie\LaravelSettings\Migrations\SettingsMigration;
+
+return new class () extends SettingsMigration {
+    public function up(): void
+    {
+        $this->migrator->inGroup('portal', function (SettingsBlueprint $blueprint): void {
+            $blueprint->add('knowledge_management_portal_requires_authentication', false);
+        });
+    }
 };

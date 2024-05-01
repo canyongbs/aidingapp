@@ -33,9 +33,10 @@
 -->
 <script setup>
     import { defineProps } from 'vue';
-    import axios from '@/Globals/Axios.js';
-    import { consumer } from '@/Services/Consumer.js';
-    import { useTokenStore } from '@/Stores/token.js';
+    import { consumer } from '../Services/Consumer.js';
+    import { useTokenStore } from '../Stores/token.js';
+    import { useAuthStore } from '../Stores/auth.js';
+    import { useFeatureStore } from '../Stores/feature.js';
 
     const props = defineProps({
         categories: {
@@ -49,6 +50,8 @@
     });
 
     const { removeToken } = useTokenStore();
+    const { user, requiresAuthentication } = useAuthStore();
+    const { hasServiceManagement } = useFeatureStore();
 
     const logout = () => {
         const { post } = consumer();
@@ -71,14 +74,24 @@
                     <span class="mr-1">🛟</span> <span>Help Center</span>
                 </h3>
             </router-link>
-
-            <button
-                @click="logout"
-                type="button"
-                class="text-gray-700 hover:text-primary-700 text-sm font-medium hover:underline focus:underline"
-            >
-                Sign out
-            </button>
+            <div v-if="requiresAuthentication || hasServiceManagement" class="flex justify-center">
+                <button
+                    v-if="user"
+                    @click="logout"
+                    type="button"
+                    class="text-gray-700 hover:text-primary-700 text-sm font-medium hover:underline focus:underline"
+                >
+                    Sign out
+                </button>
+                <button
+                    v-else
+                    @click="$emit('showLogin')"
+                    type="button"
+                    class="text-gray-700 hover:text-primary-700 text-sm font-medium hover:underline focus:underline"
+                >
+                    Sign in
+                </button>
+            </div>
         </div>
 
         <ul role="list" class="my-2 flex flex-col gap-y-1">

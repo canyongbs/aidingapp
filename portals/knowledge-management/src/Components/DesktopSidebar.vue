@@ -32,7 +32,7 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import SidebarContent from '@/Components/SidebarContent.vue';
+    import SidebarContent from './SidebarContent.vue';
     import { defineProps } from 'vue';
 
     defineProps({
@@ -50,7 +50,11 @@
 <template>
     <div class="hidden lg:fixed h-full lg:z-50 lg:flex lg:w-72 lg:flex-col">
         <div class="flex flex-col grow overflow-y-auto bg-white ring-1 ring-black/5 mr-px shadow-sm">
-            <SidebarContent :categories="categories" :api-url="apiUrl"></SidebarContent>
+            <SidebarContent
+                @show-login="$emit('showLogin')"
+                :categories="categories"
+                :api-url="apiUrl"
+            ></SidebarContent>
         </div>
     </div>
 </template>

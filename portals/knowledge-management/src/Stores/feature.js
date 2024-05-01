@@ -31,15 +31,23 @@
 
 </COPYRIGHT>
 */
-import { createInput } from '@formkit/vue';
-import OneTimePassword from './OneTimePassword.vue';
-import Signature from './Signature.vue';
+import { ref } from 'vue';
+import { defineStore } from 'pinia';
 
-export default {
-    otp: createInput(OneTimePassword, {
-        props: ['digits'],
-    }),
-    signature: createInput(Signature, {
-        props: [],
-    }),
-};
+export const useFeatureStore = defineStore('feature', () => {
+    const hasServiceManagement = ref(false);
+
+    async function setHasServiceManagement(value) {
+        hasServiceManagement.value = value;
+    }
+
+    async function getHasServiceManagement() {
+        return hasServiceManagement.value;
+    }
+
+    return {
+        hasServiceManagement,
+        getHasServiceManagement,
+        setHasServiceManagement,
+    };
+});
