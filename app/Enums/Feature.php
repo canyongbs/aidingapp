@@ -54,6 +54,8 @@ enum Feature: string
 
     case MobileApps = 'mobile-apps';
 
+    case ChangeManagement = 'change-management';
+
     case ExperimentalReporting = 'experimental-reporting';
 
     public function generateGate(): void

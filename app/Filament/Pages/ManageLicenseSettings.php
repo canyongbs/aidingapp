@@ -140,6 +140,8 @@ class ManageLicenseSettings extends SettingsPage
                                 ->label('Chat'),
                             Toggle::make('data.addons.mobileApps')
                                 ->label('Mobile Apps'),
+                            Toggle::make('data.addons.changeManagement')
+                                ->label('Change Management'),
                             Toggle::make('data.addons.experimentalReporting')
                                 ->label('Experimental Reporting')
                                 ->disabled(fn (LicenseSettings $settings): bool => $settings->data->limits->conversationalAiSeats < 1)
