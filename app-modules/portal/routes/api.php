@@ -38,6 +38,7 @@ use Illuminate\Support\Facades\Route;
 use Symfony\Component\HttpFoundation\Response;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEnabled;
+use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\GetServiceRequestsController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\ServiceRequestTypesController;
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEmbeddableAndAuthorized;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\CreateServiceRequestController;
@@ -84,6 +85,9 @@ Route::prefix('api')
                     ->middleware(['signed:relative'])
                     ->name('search');
 
+                Route::get('/categories', [KnowledgeManagementPortalCategoryController::class, 'index'])
+                    ->name('category.index');
+
                 Route::get('/categories/{category}', [KnowledgeManagementPortalCategoryController::class, 'show'])
                     ->name('category.show');
 
@@ -92,6 +96,9 @@ Route::prefix('api')
 
                 Route::get('/service-request-type/select', [ServiceRequestTypesController::class, 'index'])
                     ->name('service-request-type.index');
+
+                Route::get('/service-requests', GetServiceRequestsController::class)
+                    ->name('service-request.index');
 
                 Route::get('/service-request/create/{type}', [CreateServiceRequestController::class, 'create'])
                     ->name('service-request.create');
