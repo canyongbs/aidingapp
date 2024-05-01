@@ -35,6 +35,7 @@
 */
 
 use Illuminate\Support\Facades\Route;
+use Symfony\Component\HttpFoundation\Response;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEnabled;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\ServiceRequestTypesController;
@@ -57,7 +58,7 @@ Route::prefix('api')
     ])
     ->group(function () {
         Route::middleware(['auth:sanctum'])->group(function () {
-            Route::get('/user', fn () => auth('contact')->user())
+            Route::get('/user', fn () => auth('contact')->user() ?? response()->json(status: Response::HTTP_UNAUTHORIZED))
                 ->name('user.auth-check');
         });
 
