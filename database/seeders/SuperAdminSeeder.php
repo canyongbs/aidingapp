@@ -59,7 +59,7 @@ class SuperAdminSeeder extends Seeder
             ->limit(25)
             ->get()
             ->each(function (Contact $contact) use ($user) {
-                $user->subscriptions()->create([
+                $user->subscriptions()->firstOrCreate([
                     'subscribable_id' => $contact->id,
                     'subscribable_type' => resolve(Contact::class)->getMorphClass(),
                 ]);

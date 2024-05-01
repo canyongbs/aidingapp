@@ -31,9 +31,9 @@
 
 </COPYRIGHT>
 */
-import axios from '@/Globals/Axios.js';
-import { useTokenStore } from '@/Stores/token.js';
-import { useAuthStore } from '@/Stores/auth.js';
+import axios from '../Globals/Axios.js';
+import { useTokenStore } from '../Stores/token.js';
+import { useAuthStore } from '../Stores/auth.js';
 
 async function determineIfUserIsAuthenticated(endpoint) {
     const { getToken } = useTokenStore();

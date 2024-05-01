@@ -49,5 +49,23 @@ export const useAuthStore = defineStore('auth', () => {
         user.value = null;
     }
 
-    return { user, getUser, setUser, removeUser };
+    const requiresAuthentication = ref(false);
+
+    async function getRequiresAuthentication() {
+        return requiresAuthentication.value;
+    }
+
+    async function setRequiresAuthentication(value) {
+        requiresAuthentication.value = value;
+    }
+
+    return {
+        user,
+        getUser,
+        setUser,
+        removeUser,
+        requiresAuthentication,
+        getRequiresAuthentication,
+        setRequiresAuthentication,
+    };
 });

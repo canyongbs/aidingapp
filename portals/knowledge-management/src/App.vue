@@ -33,49 +33,16 @@
 -->
 <script setup>
     import { defineProps, onMounted, ref, watch } from 'vue';
-    import AppLoading from '@/Components/AppLoading.vue';
-    import MobileSidebar from '@/Components/MobileSidebar.vue';
-    import DesktopSidebar from '@/Components/DesktopSidebar.vue';
-    import determineIfUserIsAuthenticated from '@/Services/DetermineIfUserIsAuthenticated.js';
-    import getAppContext from '@/Services/GetAppContext.js';
-    import axios from '@/Globals/Axios.js';
-    import { useTokenStore } from '@/Stores/token.js';
-    import { useAuthStore } from '@/Stores/auth.js';
+    import AppLoading from './Components/AppLoading.vue';
+    import MobileSidebar from './Components/MobileSidebar.vue';
+    import DesktopSidebar from './Components/DesktopSidebar.vue';
+    import determineIfUserIsAuthenticated from './Services/DetermineIfUserIsAuthenticated.js';
+    import getAppContext from './Services/GetAppContext.js';
+    import axios from './Globals/Axios.js';
+    import { useTokenStore } from './Stores/token.js';
+    import { useAuthStore } from './Stores/auth.js';
     import { useRoute } from 'vue-router';
-
-    const errorLoading = ref(false);
-    const loading = ref(true);
-    const showMobileMenu = ref(false);
-
-    const userIsAuthenticated = ref(false);
-
-    onMounted(async () => {
-        const { isEmbeddedInAidingApp } = getAppContext(props.accessUrl);
-
-        if (isEmbeddedInAidingApp) {
-            await axios.get(props.appUrl + '/sanctum/csrf-cookie');
-        }
-
-        await determineIfUserIsAuthenticated(props.userAuthenticationUrl).then((response) => {
-            userIsAuthenticated.value = response;
-        });
-
-        await getKnowledgeManagementPortal().then(() => {
-            loading.value = false;
-        });
-    });
-
-    const route = useRoute();
-
-    watch(
-        route,
-        function () {
-            getKnowledgeManagementPortal();
-        },
-        {
-            immediate: true,
-        },
-    );
+    import { useFeatureStore } from './Stores/feature.js';
 
     const props = defineProps({
         url: {
@@ -104,12 +71,13 @@
         },
     });
 
-    const scriptUrl = new URL(document.currentScript.getAttribute('src'));
-    const protocol = scriptUrl.protocol;
-    const scriptHostname = scriptUrl.hostname;
-    const scriptQuery = Object.fromEntries(scriptUrl.searchParams);
-
-    const hostUrl = `${protocol}//${scriptHostname}`;
+    const errorLoading = ref(false);
+    const loading = ref(true);
+    const showMobileMenu = ref(false);
+    const userIsAuthenticated = ref(false);
+    const requiresAuthentication = ref(false);
+    const hasServiceManagement = ref(false);
+    const showLogin = ref(false);
 
     const portalPrimaryColor = ref('');
     const portalRounding = ref('');
@@ -125,6 +93,40 @@
         url: null,
     });
 
+    const scriptUrl = new URL(document.currentScript.getAttribute('src'));
+    const protocol = scriptUrl.protocol;
+    const scriptHostname = scriptUrl.hostname;
+
+    const hostUrl = `${protocol}//${scriptHostname}`;
+
+    const route = useRoute();
+
+    onMounted(async () => {
+        const { isEmbeddedInAidingApp } = getAppContext(props.accessUrl);
+
+        if (isEmbeddedInAidingApp) {
+            await axios.get(props.appUrl + '/sanctum/csrf-cookie');
+        }
+
+        await determineIfUserIsAuthenticated(props.userAuthenticationUrl).then((response) => {
+            userIsAuthenticated.value = response;
+        });
+
+        await getKnowledgeManagementPortal().then(() => {
+            loading.value = false;
+        });
+    });
+
+    watch(
+        route,
+        function () {
+            getKnowledgeManagementPortal();
+        },
+        {
+            immediate: true,
+        },
+    );
+
     async function getKnowledgeManagementPortal() {
         await axios
             .get(props.url)
@@ -135,11 +137,23 @@
                     throw new Error(response.error);
                 }
 
+                const { setRequiresAuthentication } = useAuthStore();
+
+                const { setHasServiceManagement } = useFeatureStore();
+
                 categories.value = response.data.categories;
 
                 serviceRequests.value = response.data.service_requests;
 
                 portalPrimaryColor.value = response.data.primary_color;
+
+                setRequiresAuthentication(response.data.requires_authentication).then(() => {
+                    requiresAuthentication.value = response.data.requires_authentication;
+                });
+
+                setHasServiceManagement(response.data.service_management_enabled).then(() => {
+                    hasServiceManagement.value = response.data.service_management_enabled;
+                });
 
                 authentication.value.requestUrl = response.data.authentication_url ?? null;
 
@@ -294,7 +308,7 @@
 
         <div v-else>
             <div
-                v-if="userIsAuthenticated === false"
+                v-if="!userIsAuthenticated && (requiresAuthentication || showLogin)"
                 class="bg-gradient flex flex-col items-center justify-center min-h-screen"
             >
                 <div
@@ -302,12 +316,7 @@
                 >
                     <h1 class="text-primary-950 text-center text-2xl font-semibold">Log in to Helper Center</h1>
 
-                    <FormKit
-                        type="form"
-                        @submit="authenticate"
-                        v-model="authentication"
-                        :submit-label="authentication.isRequested ? 'Sign in' : 'Send login code'"
-                    >
+                    <FormKit type="form" @submit="authenticate" v-model="authentication" :actions="false">
                         <FormKit
                             type="email"
                             label="Email address"
@@ -330,6 +339,19 @@
                             validation-visibility="submit"
                             v-if="authentication.isRequested"
                         />
+
+                        <div class="flex justify-between">
+                            <FormKit
+                                type="submit"
+                                :label="authentication.isRequested ? 'Sign in' : 'Send login code'"
+                            />
+                            <FormKit
+                                v-if="!requiresAuthentication"
+                                type="button"
+                                label="Cancel"
+                                @click="showLogin = false"
+                            />
+                        </div>
                     </FormKit>
                 </div>
             </div>
@@ -342,11 +364,15 @@
                 <div v-else>
                     <MobileSidebar
                         v-if="showMobileMenu"
+                        @show-login="showLogin = true"
                         @sidebar-closed="showMobileMenu = !showMobileMenu"
                         :categories="categories"
-                    ></MobileSidebar>
+                        :api-url="apiUrl"
+                    >
+                    </MobileSidebar>
 
-                    <DesktopSidebar :categories="categories" :api-url="apiUrl"> </DesktopSidebar>
+                    <DesktopSidebar @show-login="showLogin = true" :categories="categories" :api-url="apiUrl">
+                    </DesktopSidebar>
 
                     <div class="lg:pl-72">
                         <RouterView

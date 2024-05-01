@@ -34,11 +34,11 @@
 <script setup>
     import { defineProps, ref, watch, onMounted } from 'vue';
     import { useRoute } from 'vue-router';
-    import Breadcrumbs from '@/Components/Breadcrumbs.vue';
-    import { Bars3Icon, MagnifyingGlassIcon } from '@heroicons/vue/24/outline/index.js';
-    import { useAuthStore } from '@/Stores/auth.js';
-    import { consumer } from '@/Services/Consumer.js';
-    import AppLoading from '@/Components/AppLoading.vue';
+    import Breadcrumbs from '../Components/Breadcrumbs.vue';
+    import { Bars3Icon } from '@heroicons/vue/24/outline/index.js';
+    import { useAuthStore } from '../Stores/auth.js';
+    import { consumer } from '../Services/Consumer.js';
+    import AppLoading from '../Components/AppLoading.vue';
 
     const route = useRoute();
 

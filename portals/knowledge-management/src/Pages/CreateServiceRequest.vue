@@ -34,14 +34,14 @@
 <script setup>
     import { defineProps, ref, watch, onMounted, reactive } from 'vue';
     import { useRoute } from 'vue-router';
-    import Breadcrumbs from '@/Components/Breadcrumbs.vue';
+    import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import { Bars3Icon } from '@heroicons/vue/24/outline/index.js';
-    import { useAuthStore } from '@/Stores/auth.js';
-    import axios from '@/Globals/Axios.js';
-    import { useTokenStore } from '@/Stores/token.js';
+    import { useAuthStore } from '../Stores/auth.js';
+    import axios from '../Globals/Axios.js';
+    import { useTokenStore } from '../Stores/token.js';
     import wizard from '../../../../widgets/service-request-form/src/FormKit/wizard.js';
-    import { consumer } from '@/Services/Consumer.js';
-    import AppLoading from '@/Components/AppLoading.vue';
+    import { consumer } from '../Services/Consumer.js';
+    import AppLoading from '../Components/AppLoading.vue';
 
     let { steps, visitedSteps, activeStep, setStep, wizardPlugin } = wizard();
 

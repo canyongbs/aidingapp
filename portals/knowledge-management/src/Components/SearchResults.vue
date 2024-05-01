@@ -33,7 +33,7 @@
 -->
 <script setup>
     import { defineProps } from 'vue';
-    import SearchLoading from '@/Components/SearchLoading.vue';
+    import SearchLoading from './SearchLoading.vue';
     import { ChevronRightIcon, XMarkIcon } from '@heroicons/vue/20/solid';
 
     defineProps({

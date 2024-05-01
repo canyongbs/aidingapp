@@ -36,7 +36,9 @@
     import HelpCenter from '../Components/HelpCenter.vue';
     import SearchResults from '../Components/SearchResults.vue';
     import { defineProps, ref, watch } from 'vue';
-    import { consumer } from '@/Services/Consumer.js';
+    import { consumer } from '../Services/Consumer.js';
+    import { useAuthStore } from '../Stores/auth.js';
+    import { useFeatureStore } from '../Stores/feature.js';
 
     const props = defineProps({
         searchUrl: {
@@ -59,6 +61,7 @@
 
     const searchQuery = ref(null);
     const loadingResults = ref(false);
+    const searchResults = ref(null);
 
     const debounceSearch = debounce((value) => {
         const { post } = consumer();
@@ -77,11 +80,12 @@
         });
     }, 500);
 
+    const { user } = useAuthStore();
+    const { hasServiceManagement } = useFeatureStore();
+
     watch(searchQuery, (value) => {
         debounceSearch(value);
     });
-
-    const searchResults = ref(null);
 
     function debounce(func, delay) {
         let timerId;
@@ -106,7 +110,7 @@
 
         <div class="bg-gradient-to-br from-primary-500 to-primary-800 w-full px-6">
             <div class="max-w-screen-xl flex flex-col gap-y-6 mx-auto py-8">
-                <div class="text-right">
+                <div class="text-right" v-if="hasServiceManagement && user">
                     <router-link :to="{ name: 'create-service-request' }">
                         <button class="p-2 font-bold rounded bg-white text-primary-700 dark:text-primary-400">
                             New Request

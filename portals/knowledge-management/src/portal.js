@@ -32,17 +32,17 @@
 </COPYRIGHT>
 */
 import { createApp, defineCustomElement, getCurrentInstance, h } from 'vue';
-import '@/portal.css';
+import './portal.css';
 import App from './App.vue';
 import { createMemoryHistory, createRouter, createWebHistory } from 'vue-router';
-import Home from '@/Pages/Home.vue';
-import ViewCategory from '@/Pages/ViewCategory.vue';
-import ViewArticle from '@/Pages/ViewArticle.vue';
-import SelectServiceRequestType from '@/Pages/SelectServiceRequestType.vue';
-import CreateServiceRequest from '@/Pages/CreateServiceRequest.vue';
+import Home from './Pages/Home.vue';
+import ViewCategory from './Pages/ViewCategory.vue';
+import ViewArticle from './Pages/ViewArticle.vue';
+import SelectServiceRequestType from './Pages/SelectServiceRequestType.vue';
+import CreateServiceRequest from './Pages/CreateServiceRequest.vue';
 import { defaultConfig, plugin } from '@formkit/vue';
 import config from './formkit.config.js';
-import getAppContext from '@/Services/GetAppContext.js';
+import getAppContext from './Services/GetAppContext.js';
 import { createPinia } from 'pinia';
 
 customElements.define(

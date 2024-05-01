@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEnabled;
@@ -58,9 +57,8 @@ Route::prefix('api')
     ])
     ->group(function () {
         Route::middleware(['auth:sanctum'])->group(function () {
-            Route::get('/user', function (Request $request) {
-                return auth('contact')->user() ?? $request->user();
-            })->name('user.auth-check');
+            Route::get('/user', fn () => auth('contact')->user())
+                ->name('user.auth-check');
         });
 
         Route::prefix('portal/knowledge-management')
@@ -79,7 +77,6 @@ Route::prefix('api')
                     ->name('authenticate.embedded');
 
                 Route::post('/logout', KnowledgeManagementPortalLogoutController::class)
-                    ->middleware(['auth:sanctum'])
                     ->name('logout');
 
                 Route::post('/search', [KnowledgeManagementPortalSearchController::class, 'get'])
