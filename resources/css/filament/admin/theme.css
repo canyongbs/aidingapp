@@ -61,7 +61,8 @@
     @apply bg-trout-50 dark:bg-gray-950;
 }
 
-.fi-sidebar-nav > ul {
+.fi-sidebar-nav > ul,
+li[data-group-label=""] > ul {
     @apply gap-y-4;
 }
 
@@ -139,4 +140,20 @@
             @apply grid-cols-5;
         }
     }
+}
+
+.fi-sidebar-group-label {
+    @apply text-gray-700 dark:text-gray-200 !important;
+}
+
+.fi-sidebar-item-label {
+    @apply text-gray-500 dark:text-gray-400 !important;
+}
+
+li[data-group-label=""] > ul > .fi-sidebar-item > .fi-sidebar-item-button > .fi-sidebar-item-label {
+    @apply text-gray-700 dark:text-gray-200 !important;
+}
+
+.fi-sidebar-item.fi-active .fi-sidebar-item-label {
+    @apply text-gray-700 dark:text-gray-200 !important;
 }
