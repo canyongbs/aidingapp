@@ -62,7 +62,7 @@
 }
 
 .fi-sidebar-nav > ul,
-li[data-group-label=""] > ul {
+li[data-group-label=''] > ul {
     @apply gap-y-4;
 }
 
@@ -150,7 +150,7 @@ li[data-group-label=""] > ul {
     @apply text-gray-500 dark:text-gray-400 !important;
 }
 
-li[data-group-label=""] > ul > .fi-sidebar-item > .fi-sidebar-item-button > .fi-sidebar-item-label {
+li[data-group-label=''] > ul > .fi-sidebar-item > .fi-sidebar-item-button > .fi-sidebar-item-label {
     @apply text-gray-700 dark:text-gray-200 !important;
 }
 
