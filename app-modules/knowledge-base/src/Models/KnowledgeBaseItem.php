@@ -36,6 +36,7 @@
 
 namespace AidingApp\KnowledgeBase\Models;
 
+use App\Models\Concerns\HasTags;
 use DateTimeInterface;
 use App\Models\BaseModel;
 use Spatie\MediaLibrary\HasMedia;
@@ -57,6 +58,7 @@ class KnowledgeBaseItem extends BaseModel implements Auditable, HasMedia
     use HasUuids;
     use InteractsWithMedia;
     use SoftDeletes;
+    use HasTags;
 
     protected $table = 'knowledge_base_articles';
 

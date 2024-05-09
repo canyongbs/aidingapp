@@ -41,6 +41,9 @@ use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Section;
 use AidingApp\Division\Models\Division;
 use Filament\Forms\Components\Textarea;
+use Illuminate\Database\Eloquent\Builder;
+use Filament\Forms\Components\CheckboxList;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
@@ -61,6 +64,14 @@ class EditKnowledgeBaseItemMetadata
                         ->label('Notes')
                         ->columnSpanFull()
                         ->extraInputAttributes(['style' => 'min-height: 12rem;']),
+                    Select::make('tags')
+                        ->relationship('tags', 'name', function (Builder $query) {
+                            $query->where('type', KnowledgeBaseItem::getTagType());
+                        })
+                        ->searchable()
+                        ->preload()
+                        ->multiple()
+                        ->columnSpanFull(),
                 ]),
             Section::make()
                 ->schema([
