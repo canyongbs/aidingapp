@@ -36,12 +36,14 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages;
 
+use App\Enums\Feature;
 use Filament\Forms\Get;
 use Filament\Forms\Form;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\RestoreAction;
 use Filament\Forms\Components\Group;
+use Illuminate\Support\Facades\Gate;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Section;
 use Filament\Actions\ForceDeleteAction;
@@ -79,7 +81,8 @@ class EditServiceRequestType extends EditRecord
                                 Toggle::make('has_enabled_nps')
                                     ->label('NPS')
                                     ->visible(fn (Get $get) => $get('has_enabled_feedback_collection')),
-                            ]),
+                            ])
+                            ->visible(fn (Get $get): bool => Gate::check(Feature::FeedbackManagement->getGateName())),
                         Textarea::make('description')
                             ->string()
                             ->columnSpanFull(),
