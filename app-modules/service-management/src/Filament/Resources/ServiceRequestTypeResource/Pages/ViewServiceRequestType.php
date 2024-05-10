@@ -36,8 +36,11 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages;
 
+use App\Enums\Feature;
+use Filament\Forms\Get;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Infolist;
+use Illuminate\Support\Facades\Gate;
 use Filament\Infolists\Components\Group;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Infolists\Components\Section;
@@ -84,7 +87,8 @@ class ViewServiceRequestType extends ViewRecord
                                     ->state('NPS')
                                     ->badge()
                                     ->color(fn (ServiceRequestType $record) => $record->has_enabled_nps ? 'success' : 'gray'),
-                            ]),
+                            ])
+                            ->visible(fn (Get $get): bool => Gate::check(Feature::FeedbackManagement->getGateName())),
                         TextEntry::make('description')
                             ->label('Description')
                             ->columnSpanFull(),

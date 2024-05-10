@@ -58,6 +58,8 @@ enum Feature: string
 
     case AssetManagement = 'asset-management';
 
+    case FeedbackManagement = 'feedback-management';
+
     case ExperimentalReporting = 'experimental-reporting';
 
     public function generateGate(): void
