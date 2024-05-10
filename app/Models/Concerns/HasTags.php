@@ -9,12 +9,12 @@ trait HasTags
 {
     public static function getTagType(): string
     {
-        return (new static())->getMorphClass();
+        return (new self())->getMorphClass();
     }
 
     public static function getTagLabel(): string
     {
-        return str((new static())->getMorphClass())->classBasename()->headline();
+        return str((new self())->getMorphClass())->classBasename()->headline();
     }
 
     public function tags(): MorphToMany

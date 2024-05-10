@@ -42,7 +42,6 @@ use Filament\Forms\Components\Section;
 use AidingApp\Division\Models\Division;
 use Filament\Forms\Components\Textarea;
 use Illuminate\Database\Eloquent\Builder;
-use Filament\Forms\Components\CheckboxList;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;

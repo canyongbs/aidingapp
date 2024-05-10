@@ -39,6 +39,7 @@
     import { consumer } from '../Services/Consumer.js';
     import { Bars3Icon } from '@heroicons/vue/24/outline/index.js';
     import { ChevronRightIcon, XMarkIcon } from '@heroicons/vue/20/solid/index.js';
+    import Tags from '../Components/Tags.vue';
 
     const route = useRoute();
 
@@ -123,15 +124,16 @@
                                                     name: 'view-article',
                                                     params: { categoryId: article.categoryId, articleId: article.id },
                                                 }"
-                                                class="group p-3 flex items-start text-sm font-medium text-gray-700"
+                                                class="group p-3 grid space-y-2 text-sm font-medium text-gray-700"
                                             >
-                                                <h4>
-                                                    {{ article.name }}
-                                                </h4>
+                                                <Tags :tags="article.tags" />
 
-                                                <ChevronRightIcon
-                                                    class="opacity-0 h-5 w-5 text-primary-600 transition-all group-hover:translate-x-2 group-hover:opacity-100"
-                                                />
+                                                <div class="flex">
+                                                    <span> {{ article.name }} </span>
+                                                    <ChevronRightIcon
+                                                        class="opacity-0 h-5 w-5 text-primary-600 transition-all group-hover:translate-x-2 group-hover:opacity-100"
+                                                    />
+                                                </div>
                                             </router-link>
                                         </li>
                                     </ul>

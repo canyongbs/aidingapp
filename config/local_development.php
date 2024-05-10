@@ -38,4 +38,7 @@ return [
     'super_admin' => [
         'email' => 'sampleadmin@aiding.app',
     ],
+    'internal_users' => [
+        'emails' => env('DEMO_INTERNAL_USER_EMAILS') ? explode(',', env('DEMO_INTERNAL_USER_EMAILS')) : null,
+    ],
 ];

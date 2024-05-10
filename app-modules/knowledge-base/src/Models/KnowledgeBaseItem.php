@@ -36,9 +36,9 @@
 
 namespace AidingApp\KnowledgeBase\Models;
 
-use App\Models\Concerns\HasTags;
 use DateTimeInterface;
 use App\Models\BaseModel;
+use App\Models\Concerns\HasTags;
 use Spatie\MediaLibrary\HasMedia;
 use AidingApp\Division\Models\Division;
 use OwenIt\Auditing\Contracts\Auditable;

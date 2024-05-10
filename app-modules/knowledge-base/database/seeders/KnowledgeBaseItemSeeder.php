@@ -36,6 +36,7 @@
 
 namespace AidingApp\KnowledgeBase\Database\Seeders;
 
+use App\Models\Tag;
 use Illuminate\Database\Seeder;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 
@@ -43,8 +44,15 @@ class KnowledgeBaseItemSeeder extends Seeder
 {
     public function run(): void
     {
+        $tags = Tag::query()->class(KnowledgeBaseItem::class)->get() ??
+            Tag::factory()->count(20)->forClass(KnowledgeBaseItem::class)->create();
+
         KnowledgeBaseItem::factory()
             ->count(25)
-            ->create();
+            ->create()
+            ->each(function (KnowledgeBaseItem $article) use ($tags) {
+                collect(fake()->randomElements($tags, rand(0, 5)))
+                    ->each(fn (Tag $tag) => $article->tags()->attach($tag));
+            });
     }
 }

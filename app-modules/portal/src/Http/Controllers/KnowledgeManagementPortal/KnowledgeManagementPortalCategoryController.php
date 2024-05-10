@@ -74,6 +74,7 @@ class KnowledgeManagementPortalCategoryController extends Controller
             ]),
             'articles' => KnowledgeBaseArticleData::collection(
                 $category->knowledgeBaseItems()
+                    ->with('tags')
                     ->public()
                     ->get()
                     ->map(function ($item) {
@@ -81,6 +82,14 @@ class KnowledgeManagementPortalCategoryController extends Controller
                             'id' => $item->getKey(),
                             'categoryId' => $item->category_id,
                             'name' => $item->title,
+                            'tags' => $item->tags()
+                                ->orderBy('name')
+                                ->get()
+                                ->select([
+                                    'id',
+                                    'name',
+                                ])
+                                ->toArray(),
                         ];
                     })
                     ->toArray()

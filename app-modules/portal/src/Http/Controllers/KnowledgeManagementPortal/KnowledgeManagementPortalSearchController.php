@@ -53,13 +53,22 @@ class KnowledgeManagementPortalSearchController extends Controller
         $itemData = KnowledgeBaseArticleData::collection(
             KnowledgeBaseItem::query()
                 ->public()
-                ->tap(new SearchBy('title', Str::lower($request->get('search'))))
+                ->tap(new SearchBy('title', Str::lower(json_decode($request->get('search')))))
+                ->with('tags')
                 ->get()
-                ->map(function ($item) {
+                ->map(function ($article) {
                     return [
-                        'id' => $item->getKey(),
-                        'categoryId' => $item->category_id,
-                        'name' => $item->title,
+                        'id' => $article->getKey(),
+                        'categoryId' => $article->category_id,
+                        'name' => $article->title,
+                        'tags' => $article->tags()
+                            ->orderBy('name')
+                            ->get()
+                            ->select([
+                                'id',
+                                'name',
+                            ])
+                            ->toArray(),
                     ];
                 })
                 ->toArray()

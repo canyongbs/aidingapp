@@ -74,7 +74,7 @@
 
         loadingResults.value = true;
 
-        post(props.searchUrl, JSON.stringify({ search: value })).then((response) => {
+        post(props.searchUrl, { search: JSON.stringify(value) }).then((response) => {
             searchResults.value = response.data;
             loadingResults.value = false;
         });

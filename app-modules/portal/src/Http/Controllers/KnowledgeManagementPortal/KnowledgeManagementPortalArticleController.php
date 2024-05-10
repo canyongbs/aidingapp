@@ -60,6 +60,14 @@ class KnowledgeManagementPortalArticleController extends Controller
                 'name' => $article->title,
                 'lastUpdated' => $article->updated_at->format('M d Y, h:m a'),
                 'content' => tiptap_converter()->asHTML(TiptapMediaEncoder::decode($article->article_details)),
+                'tags' => $article->tags()
+                    ->orderBy('name')
+                    ->get()
+                    ->select([
+                        'id',
+                        'name',
+                    ])
+                    ->toArray(),
             ]),
         ]);
     }
