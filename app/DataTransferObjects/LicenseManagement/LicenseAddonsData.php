@@ -52,6 +52,7 @@ class LicenseAddonsData extends Data
         public bool $mobileApps,
         public bool $changeManagement = false,
         public bool $assetManagement = false,
+        public bool $feedbackManagement = false,
         public bool $experimentalReporting = false,
     ) {}
 }
