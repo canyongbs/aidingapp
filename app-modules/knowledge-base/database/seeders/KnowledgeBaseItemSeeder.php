@@ -44,8 +44,15 @@ class KnowledgeBaseItemSeeder extends Seeder
 {
     public function run(): void
     {
-        $tags = Tag::query()->class(KnowledgeBaseItem::class)->get() ??
-            Tag::factory()->count(20)->forClass(KnowledgeBaseItem::class)->create();
+        $tags = Tag::query()
+            ->class(KnowledgeBaseItem::class)
+            ->get()
+            ->whenEmpty(
+                fn () => Tag::factory()
+                    ->count(20)
+                    ->forClass(KnowledgeBaseItem::class)
+                    ->create()
+            );
 
         KnowledgeBaseItem::factory()
             ->count(25)
