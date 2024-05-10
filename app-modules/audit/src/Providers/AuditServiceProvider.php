@@ -42,8 +42,8 @@ use AidingApp\Audit\Models\Audit;
 use App\Concerns\ImplementsGraphQL;
 use Illuminate\Support\ServiceProvider;
 use AidingApp\Audit\Registries\AuditRbacRegistry;
-use App\Registries\RoleBasedAccessControlRegistry;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use AidingApp\Authorization\AuthorizationRoleRegistry;
 
 class AuditServiceProvider extends ServiceProvider
 {
@@ -62,7 +62,7 @@ class AuditServiceProvider extends ServiceProvider
             'audit' => Audit::class,
         ]);
 
-        RoleBasedAccessControlRegistry::register(AuditRbacRegistry::class);
+        AuthorizationRoleRegistry::register(AuditRbacRegistry::class);
 
         $this->discoverSchema(__DIR__ . '/../../graphql/audit.graphql');
     }

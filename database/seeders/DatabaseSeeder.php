@@ -38,7 +38,6 @@ namespace Database\Seeders;
 
 use App\Models\Tenant;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Notification;
 use AidingApp\Task\Database\Seeders\TaskSeeder;
 use AidingApp\Team\Database\Seeders\TeamSeeder;
@@ -51,7 +50,6 @@ use AidingApp\Contact\Database\Seeders\ContactSourceSeeder;
 use AidingApp\Contact\Database\Seeders\ContactStatusSeeder;
 use AidingApp\Consent\Database\Seeders\ConsentAgreementSeeder;
 use AidingApp\InventoryManagement\Database\Seeders\AssetSeeder;
-use AidingApp\Authorization\Console\Commands\SyncRolesAndPermissions;
 use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseItemSeeder;
 use AidingApp\ServiceManagement\Database\Seeders\ServiceRequestSeeder;
 use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseStatusSeeder;
@@ -72,14 +70,6 @@ class DatabaseSeeder extends Seeder
         Notification::fake();
 
         $currentTenant = Tenant::current();
-
-        Artisan::call(
-            command: SyncRolesAndPermissions::class,
-            parameters: [
-                '--tenant' => $currentTenant->id,
-            ],
-            outputBuffer: $this->command->getOutput(),
-        );
 
         $this->call([
             SampleSuperAdminUserSeeder::class,

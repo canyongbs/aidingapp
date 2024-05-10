@@ -43,7 +43,6 @@ use AidingApp\Authorization\Models\Role;
 use AidingApp\Authorization\Models\License;
 use AidingApp\Authorization\Models\Permission;
 use AidingApp\Authorization\AuthorizationPlugin;
-use App\Registries\RoleBasedAccessControlRegistry;
 use SocialiteProviders\Azure\AzureExtendSocialite;
 use SocialiteProviders\Manager\SocialiteWasCalled;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -96,7 +95,7 @@ class AuthorizationServiceProvider extends ServiceProvider
             listener: GoogleExtendSocialite::class . '@handle'
         );
 
-        RoleBasedAccessControlRegistry::register(AuthorizationRbacRegistry::class);
+        AuthorizationRoleRegistry::register(AuthorizationRbacRegistry::class);
     }
 
     public function registerObservers(): void

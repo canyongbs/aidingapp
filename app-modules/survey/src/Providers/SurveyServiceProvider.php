@@ -44,9 +44,9 @@ use Illuminate\Support\ServiceProvider;
 use AidingApp\Survey\Models\SurveyField;
 use AidingApp\Survey\Models\SurveySubmission;
 use AidingApp\Survey\Models\SurveyAuthentication;
-use App\Registries\RoleBasedAccessControlRegistry;
 use AidingApp\Survey\Registries\SurveyRbacRegistry;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use AidingApp\Authorization\AuthorizationRoleRegistry;
 
 class SurveyServiceProvider extends ServiceProvider
 {
@@ -65,6 +65,6 @@ class SurveyServiceProvider extends ServiceProvider
             'survey' => Survey::class,
         ]);
 
-        RoleBasedAccessControlRegistry::register(SurveyRbacRegistry::class);
+        AuthorizationRoleRegistry::register(SurveyRbacRegistry::class);
     }
 }

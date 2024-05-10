@@ -40,7 +40,7 @@ use Filament\Panel;
 use Illuminate\Support\ServiceProvider;
 use AidingApp\IntegrationAI\Client\AzureOpenAI;
 use AidingApp\IntegrationAI\IntegrationAIPlugin;
-use App\Registries\RoleBasedAccessControlRegistry;
+use AidingApp\Authorization\AuthorizationRoleRegistry;
 use AidingApp\IntegrationAI\Client\Contracts\AIChatClient;
 use AidingApp\IntegrationAI\Registries\IntegrationAIRbacRegistry;
 use AidingApp\IntegrationAI\Client\Playground\AzureOpenAI as PlaygroundAzureOpenAI;
@@ -62,6 +62,6 @@ class IntegrationAIServiceProvider extends ServiceProvider
 
     public function boot()
     {
-        RoleBasedAccessControlRegistry::register(IntegrationAIRbacRegistry::class);
+        AuthorizationRoleRegistry::register(IntegrationAIRbacRegistry::class);
     }
 }
