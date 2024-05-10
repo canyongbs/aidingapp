@@ -59,7 +59,7 @@
         },
     });
 
-    const searchQuery = ref(null);
+    const searchQuery = ref('');
     const loadingResults = ref(false);
     const searchResults = ref(null);
 
