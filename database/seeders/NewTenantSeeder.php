@@ -38,7 +38,9 @@ namespace Database\Seeders;
 
 use App\Models\Tenant;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Artisan;
 use AidingApp\Division\Database\Seeders\DivisionSeeder;
+use AidingApp\Authorization\Console\Commands\SetupRoles;
 use AidingApp\Contact\Database\Seeders\ContactSourceSeeder;
 use AidingApp\Contact\Database\Seeders\ContactStatusSeeder;
 use AidingApp\Consent\Database\Seeders\ConsentAgreementSeeder;
@@ -56,6 +58,14 @@ class NewTenantSeeder extends Seeder
     public function run(): void
     {
         $currentTenant = Tenant::current();
+
+        Artisan::call(
+            command: SetupRoles::class,
+            parameters: [
+                         '--tenant' => $currentTenant->id,
+                     ],
+            outputBuffer: $this->command->getOutput(),
+        );
 
         $this->call([
             DivisionSeeder::class,

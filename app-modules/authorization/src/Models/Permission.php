@@ -37,14 +37,12 @@
 namespace AidingApp\Authorization\Models;
 
 use App\Models\SystemUser;
-use Illuminate\Support\Collection;
 use OwenIt\Auditing\Contracts\Auditable;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Spatie\Permission\Models\Permission as SpatiePermission;
 use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
-use AidingApp\Authorization\Models\Concerns\DefinesPermissions;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 
 /**
@@ -53,20 +51,9 @@ use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 class Permission extends SpatiePermission implements Auditable
 {
     use HasFactory;
-    use DefinesPermissions;
     use HasUuids;
     use AuditableTrait;
     use UsesTenantConnection;
-
-    public function getWebPermissions(): Collection
-    {
-        return collect(['view-any', '*.view']);
-    }
-
-    public function getApiPermissions(): Collection
-    {
-        return collect([]);
-    }
 
     public function systemUsers()
     {

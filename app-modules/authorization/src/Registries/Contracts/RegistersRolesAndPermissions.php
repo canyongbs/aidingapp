@@ -34,18 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Authorization\Tests;
+namespace AidingApp\Authorization\Registries\Contracts;
 
-use Illuminate\Support\Facades\DB;
-
-class Helpers
+interface RegistersRolesAndPermissions
 {
-    public function truncateTables(): void
-    {
-        DB::table('roles')->truncate();
-        DB::table('model_has_roles')->truncate();
-        DB::table('permissions')->truncate();
-        DB::table('role_has_permissions')->truncate();
-        DB::table('model_has_permissions')->truncate();
-    }
+    public function __invoke(): void;
 }

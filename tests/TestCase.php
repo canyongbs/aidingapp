@@ -41,6 +41,7 @@ use Illuminate\Support\Str;
 use Tests\Concerns\LoadsFixtures;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Process\Process;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Contracts\Console\Kernel;
 use Symfony\Component\Finder\SplFileInfo;
 use App\Multitenancy\Actions\CreateTenant;
@@ -52,6 +53,7 @@ use Illuminate\Foundation\Testing\RefreshDatabaseState;
 use Spatie\Multitenancy\Concerns\UsesMultitenancyConfig;
 use App\Multitenancy\DataTransferObjects\TenantMailConfig;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use AidingApp\Authorization\Console\Commands\SetupRoles;
 use App\Multitenancy\DataTransferObjects\TenantMailersConfig;
 use App\Multitenancy\DataTransferObjects\TenantDatabaseConfig;
 use Illuminate\Foundation\Testing\DatabaseTransactionsManager;
@@ -105,6 +107,13 @@ abstract class TestCase extends BaseTestCase
                 ...$this->migrateFreshUsing(),
             ]);
         });
+
+        Artisan::call(
+            command: SetupRoles::class,
+            parameters: [
+                         '--tenant' => $tenant->id,
+                     ],
+        );
 
         Tenant::forgetCurrent();
     }
