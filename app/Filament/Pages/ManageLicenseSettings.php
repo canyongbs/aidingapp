@@ -124,7 +124,7 @@ class ManageLicenseSettings extends SettingsPage
                                 ->required(),
                         ]
                     ),
-                Section::make('Addons')
+                Section::make('Enabled Features')
                     ->columns()
                     ->schema(
                         [
