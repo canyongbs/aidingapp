@@ -44,23 +44,23 @@ beforeEach(function () {
 
 $createPermissions = function (array $permissions) {
     $permissionGroupId = PermissionGroup::create([
-                                                     'name' => 'Test',
-                                                 ])->id;
+        'name' => 'Test',
+    ])->id;
 
     $ids = [];
 
     Permission::insert(array_map(
-                           function (string $permissionName) use (&$ids, $permissionGroupId): array {
-                               return [
-                                   'id' => $ids[] = (string) Str::orderedUuid(),
-                                   'name' => $permissionName,
-                                   'group_id' => $permissionGroupId,
-                                   'guard_name' => 'web',
-                                   'created_at' => now(),
-                               ];
-                           },
-                           $permissions,
-                       ));
+        function (string $permissionName) use (&$ids, $permissionGroupId): array {
+            return [
+                'id' => $ids[] = (string) Str::orderedUuid(),
+                'name' => $permissionName,
+                'group_id' => $permissionGroupId,
+                'guard_name' => 'web',
+                'created_at' => now(),
+            ];
+        },
+        $permissions,
+    ));
 
     return [
         Permission::query()

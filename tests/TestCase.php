@@ -50,10 +50,10 @@ use Illuminate\Support\Facades\ParallelTesting;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Multitenancy\DataTransferObjects\TenantConfig;
 use Illuminate\Foundation\Testing\RefreshDatabaseState;
+use AidingApp\Authorization\Console\Commands\SetupRoles;
 use Spatie\Multitenancy\Concerns\UsesMultitenancyConfig;
 use App\Multitenancy\DataTransferObjects\TenantMailConfig;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
-use AidingApp\Authorization\Console\Commands\SetupRoles;
 use App\Multitenancy\DataTransferObjects\TenantMailersConfig;
 use App\Multitenancy\DataTransferObjects\TenantDatabaseConfig;
 use Illuminate\Foundation\Testing\DatabaseTransactionsManager;
@@ -111,8 +111,8 @@ abstract class TestCase extends BaseTestCase
         Artisan::call(
             command: SetupRoles::class,
             parameters: [
-                         '--tenant' => $tenant->id,
-                     ],
+                '--tenant' => $tenant->id,
+            ],
         );
 
         Tenant::forgetCurrent();

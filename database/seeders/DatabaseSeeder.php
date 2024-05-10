@@ -46,8 +46,8 @@ use AidingApp\Alert\Database\Seeders\AlertSeeder;
 use AidingApp\Contact\Database\Seeders\ContactSeeder;
 use AidingApp\Assistant\Database\Seeders\PromptSeeder;
 use AidingApp\Division\Database\Seeders\DivisionSeeder;
-use AidingApp\Assistant\Database\Seeders\PromptTypeSeeder;
 use AidingApp\Authorization\Console\Commands\SetupRoles;
+use AidingApp\Assistant\Database\Seeders\PromptTypeSeeder;
 use AidingApp\Contact\Database\Seeders\ContactSourceSeeder;
 use AidingApp\Contact\Database\Seeders\ContactStatusSeeder;
 use AidingApp\Consent\Database\Seeders\ConsentAgreementSeeder;
@@ -76,8 +76,8 @@ class DatabaseSeeder extends Seeder
         Artisan::call(
             command: SetupRoles::class,
             parameters: [
-                         '--tenant' => $currentTenant->id,
-                     ],
+                '--tenant' => $currentTenant->id,
+            ],
             outputBuffer: $this->command->getOutput(),
         );
 

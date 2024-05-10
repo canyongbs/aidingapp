@@ -62,8 +62,8 @@ class NewTenantSeeder extends Seeder
         Artisan::call(
             command: SetupRoles::class,
             parameters: [
-                         '--tenant' => $currentTenant->id,
-                     ],
+                '--tenant' => $currentTenant->id,
+            ],
             outputBuffer: $this->command->getOutput(),
         );
 
