@@ -172,6 +172,7 @@
                                 v-for="tag in tags"
                                 :key="tag.id"
                                 :value="tag.name"
+                                class="cursor-pointer"
                                 :class="{ 'bg-primary-600 text-white': selectedTags.includes(tag.id) }"
                                 @click="toggleTag(tag.id)"
                             />
