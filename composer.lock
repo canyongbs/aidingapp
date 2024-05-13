@@ -1589,10 +1589,10 @@
             "dist": {
                 "type": "path",
                 "url": "app-modules/alert",
-                "reference": "3caa0c46e7f2bc2514b296688f0586a440aaa2d3"
+                "reference": "3e8b54a0f6e3181c10c13e5a3e0f2b94f8854da0"
             },
             "require": {
-                "filament/filament": "^3.0"
+                "filament/filament": "^3.2"
             },
             "type": "library",
             "extra": {
@@ -1624,10 +1624,10 @@
             "dist": {
                 "type": "path",
                 "url": "app-modules/assistant",
-                "reference": "899ea698232d99f229d29964b4571f3c43b2dcc7"
+                "reference": "f2e823662b69234a0770043e99332039539d77c7"
             },
             "require": {
-                "filament/filament": "^3.0.0"
+                "filament/filament": "^3.2"
             },
             "type": "library",
             "extra": {
@@ -1659,11 +1659,11 @@
             "dist": {
                 "type": "path",
                 "url": "app-modules/audit",
-                "reference": "6aaa3a8d20a6668d186135105f5b08b79d88b0b5"
+                "reference": "aa92b8e8e4e4b518d75de517455b5bffefa59edf"
             },
             "require": {
-                "filament/filament": "^3.0",
-                "filament/spatie-laravel-settings-plugin": "^3.0",
+                "filament/filament": "^3.2",
+                "filament/spatie-laravel-settings-plugin": "^3.2",
                 "owen-it/laravel-auditing": "^13.6",
                 "spatie/laravel-settings": "^3.2"
             },
@@ -1697,10 +1697,10 @@
             "dist": {
                 "type": "path",
                 "url": "app-modules/authorization",
-                "reference": "3234955f085955575f14062a90463320ab78f27c"
+                "reference": "77024c14554b8264ac07aabe54985e6512cb91b3"
             },
             "require": {
-                "filament/filament": "^3.0",
+                "filament/filament": "^3.2",
                 "spatie/laravel-permission": "^5.10"
             },
             "type": "library",
@@ -1733,10 +1733,10 @@
             "dist": {
                 "type": "path",
                 "url": "app-modules/consent",
-                "reference": "675e89fb18d93bce22df33b2babb605b0c2be3e9"
+                "reference": "75da9290f0d67a8dcb0e422e3d2d7aa2109d9b56"
             },
             "require": {
-                "filament/filament": "^3.0.0"
+                "filament/filament": "^3.2"
             },
             "type": "library",
             "extra": {
@@ -1768,10 +1768,10 @@
             "dist": {
                 "type": "path",
                 "url": "app-modules/contact",
-                "reference": "0b8fbcd8595fc2d91e512904bc3644b0ba8b37b3"
+                "reference": "3387fae3a854c84cab2a20cce2aea57337ffb1fc"
             },
             "require": {
-                "filament/filament": "^3.0"
+                "filament/filament": "^3.2"
             },
             "type": "library",
             "extra": {
@@ -1803,10 +1803,10 @@
             "dist": {
                 "type": "path",
                 "url": "app-modules/division",
-                "reference": "33359f764f4c90a890bcb4a8f125ff6aef6025d4"
+                "reference": "90d96e7bbb1d7cee46d02e0e6d4724620ac1ef46"
             },
             "require": {
-                "filament/filament": "^3.0.0"
+                "filament/filament": "^3.2"
             },
             "type": "library",
             "extra": {
@@ -1838,10 +1838,10 @@
             "dist": {
                 "type": "path",
                 "url": "app-modules/engagement",
-                "reference": "191513d5c9ed592d5aa35f83eecae510e6ccdd83"
+                "reference": "5b8b447c508b2c9276428f87e61268747cf1c020"
             },
             "require": {
-                "filament/filament": "^3.0",
+                "filament/filament": "^3.2",
                 "spatie/laravel-data": "^3.7"
             },
             "type": "library",
@@ -1874,10 +1874,10 @@
             "dist": {
                 "type": "path",
                 "url": "app-modules/form",
-                "reference": "b36360f881bd9a7f47df22c155531534fddb4b84"
+                "reference": "74b881b14eb24b7435b08c5be4624f2a691207c6"
             },
             "require": {
-                "filament/filament": "^3.0.0"
+                "filament/filament": "^3.2"
             },
             "type": "library",
             "extra": {
@@ -1909,10 +1909,10 @@
             "dist": {
                 "type": "path",
                 "url": "app-modules/in-app-communication",
-                "reference": "fcaf6eb86c58647d11d126181ecbd7852d29a618"
+                "reference": "50f7dd2f2acf9903d2c7d06e007a4f35dcec772a"
             },
             "require": {
-                "filament/filament": "^3.0.0"
+                "filament/filament": "^3.2"
             },
             "type": "library",
             "extra": {
@@ -1944,10 +1944,10 @@
             "dist": {
                 "type": "path",
                 "url": "app-modules/integration-ai",
-                "reference": "d795f28fc27f13922e3073aced265dd51fd88fb7"
+                "reference": "8f7d29192e4813ec682a7ecf8e50d7b7025cec8c"
             },
             "require": {
-                "filament/filament": "^3.0.0",
+                "filament/filament": "^3.2",
                 "openai-php/client": "^0.8.4",
                 "spatie/laravel-settings": "^3.2"
             },
@@ -1981,10 +1981,10 @@
             "dist": {
                 "type": "path",
                 "url": "app-modules/integration-aws-ses-event-handling",
-                "reference": "5b3f741347fd283973cb10c6f727b545a8e30867"
+                "reference": "984f4afcb47a0d436d05880774a0b84ce07bea84"
             },
             "require": {
-                "filament/filament": "^3.0.0"
+                "filament/filament": "^3.2"
             },
             "type": "library",
             "extra": {
@@ -2016,10 +2016,10 @@
             "dist": {
                 "type": "path",
                 "url": "app-modules/integration-google-analytics",
-                "reference": "7ccd9b898bd2372f8cef1f4721c7f61755e38c06"
+                "reference": "46f6003e7de6ac36d2dadb725d38eb6dcee2f6c0"
             },
             "require": {
-                "filament/filament": "^3.0.0"
+                "filament/filament": "^3.2"
             },
             "type": "library",
             "extra": {
@@ -2051,10 +2051,10 @@
             "dist": {
                 "type": "path",
                 "url": "app-modules/integration-google-recaptcha",
-                "reference": "9f17ecc6ba1b927c28a43c3b1fdb63fc068b05b2"
+                "reference": "289d16850455e48237f213274230dcac41c92566"
             },
             "require": {
-                "filament/filament": "^3.0.0"
+                "filament/filament": "^3.2"
             },
             "type": "library",
             "extra": {
@@ -2086,10 +2086,10 @@
             "dist": {
                 "type": "path",
                 "url": "app-modules/integration-microsoft-clarity",
-                "reference": "5f2b11e56f347cf2e88386c4fbef675b92629f9f"
+                "reference": "3b26df8e62f18e2251f4ec16aa2e864dee2fceca"
             },
             "require": {
-                "filament/filament": "^3.0.0"
+                "filament/filament": "^3.2"
             },
             "type": "library",
             "extra": {
@@ -2121,12 +2121,12 @@
             "dist": {
                 "type": "path",
                 "url": "app-modules/integration-twilio",
-                "reference": "8cac652d99653ae638ed3fd302dfc967cd6fc90b"
+                "reference": "ba50c3494700ded3345ddf9cb32b236270ee9cc3"
             },
             "require": {
                 "canyon-gbs/aiding-app-engagement": "*",
                 "canyon-gbs/aiding-app-webhook": "*",
-                "filament/filament": "^3.0"
+                "filament/filament": "^3.2"
             },
             "type": "library",
             "extra": {
@@ -2158,10 +2158,10 @@
             "dist": {
                 "type": "path",
                 "url": "app-modules/inventory-management",
-                "reference": "2b5f54564cdd821464d7452acda6406179827ac7"
+                "reference": "391a3caa3cce2b962d00793db9198d5fc4c4f6b7"
             },
             "require": {
-                "filament/filament": "^3.0.0"
+                "filament/filament": "^3.2"
             },
             "type": "library",
             "extra": {
@@ -2193,10 +2193,10 @@
             "dist": {
                 "type": "path",
                 "url": "app-modules/knowledge-base",
-                "reference": "7ac6e7f39447c2ed2c1ab7be5750d0415509d194"
+                "reference": "e35ebdce6260ee4fe8d989a83627e7a0da312c75"
             },
             "require": {
-                "filament/filament": "^3.0"
+                "filament/filament": "^3.2"
             },
             "type": "library",
             "extra": {
@@ -2228,10 +2228,10 @@
             "dist": {
                 "type": "path",
                 "url": "app-modules/notification",
-                "reference": "ae9b82be697379c03a3437631c4518c815acdf29"
+                "reference": "c6d2bc53a5271c3b2e55550bc5e0f584c0b9242d"
             },
             "require": {
-                "filament/filament": "^3.0"
+                "filament/filament": "^3.2"
             },
             "type": "library",
             "extra": {
@@ -2263,10 +2263,10 @@
             "dist": {
                 "type": "path",
                 "url": "app-modules/portal",
-                "reference": "7aabf09e08558685afab5e9ae6fb1d2326253141"
+                "reference": "6999c43fcb148bd8635318ace010ca31d2b2f56e"
             },
             "require": {
-                "filament/filament": "^3.0.0"
+                "filament/filament": "^3.2"
             },
             "type": "library",
             "extra": {
@@ -2298,10 +2298,10 @@
             "dist": {
                 "type": "path",
                 "url": "app-modules/report",
-                "reference": "9a92b7e1a1febca3c323812ca367ae55ff468e49"
+                "reference": "508836882a359af675296fd074d31120dd2f9e90"
             },
             "require": {
-                "filament/filament": "^3.0.0"
+                "filament/filament": "^3.2"
             },
             "type": "library",
             "extra": {
@@ -2333,10 +2333,10 @@
             "dist": {
                 "type": "path",
                 "url": "app-modules/service-management",
-                "reference": "de1781efca694713357f7d5bce8fd95310370ac9"
+                "reference": "aa6e8c00e34e855b9f4c5f2a9127134ff608ec4f"
             },
             "require": {
-                "filament/filament": "^3.0"
+                "filament/filament": "^3.2"
             },
             "type": "library",
             "extra": {
@@ -2368,10 +2368,10 @@
             "dist": {
                 "type": "path",
                 "url": "app-modules/survey",
-                "reference": "f9b265501749772c1e90ccba67f566a8796d425f"
+                "reference": "9c443a99fb471bd1dc3980b9368c0fd1e993c2a9"
             },
             "require": {
-                "filament/filament": "^3.0.0"
+                "filament/filament": "^3.2"
             },
             "type": "library",
             "extra": {
@@ -2403,10 +2403,10 @@
             "dist": {
                 "type": "path",
                 "url": "app-modules/task",
-                "reference": "a0ab0a302a2ccac240568dbba7fae22549d028eb"
+                "reference": "f053cb3df8c8b5efa0850b1eedb91d7c5857b543"
             },
             "require": {
-                "filament/filament": "^3.0"
+                "filament/filament": "^3.2"
             },
             "type": "library",
             "extra": {
@@ -2438,10 +2438,10 @@
             "dist": {
                 "type": "path",
                 "url": "app-modules/team",
-                "reference": "bc1ad9b5ffbe1763e46d1a593629f24fb491e4d8"
+                "reference": "c463d81321dfc6555903961ea00bf1170d5b0435"
             },
             "require": {
-                "filament/filament": "^3.0.0"
+                "filament/filament": "^3.2"
             },
             "type": "library",
             "extra": {
@@ -2473,11 +2473,11 @@
             "dist": {
                 "type": "path",
                 "url": "app-modules/theme",
-                "reference": "59e80c28f1adee08847bd130449cef7c378dda88"
+                "reference": "8baac6231c2af4ac347ad0183a096ee70d6d621b"
             },
             "require": {
-                "filament/filament": "^3.0",
-                "filament/spatie-laravel-settings-plugin": "^3.0",
+                "filament/filament": "^3.2",
+                "filament/spatie-laravel-settings-plugin": "^3.2",
                 "spatie/laravel-settings": "^3.2"
             },
             "type": "library",
@@ -2510,10 +2510,10 @@
             "dist": {
                 "type": "path",
                 "url": "app-modules/timeline",
-                "reference": "56d390a1616607b247d9b385aaa3d6e63ebe6413"
+                "reference": "0c05b446b1724e85791e8f9894f6695bcc5289a3"
             },
             "require": {
-                "filament/filament": "^3.0.0"
+                "filament/filament": "^3.2"
             },
             "type": "library",
             "extra": {
@@ -2545,10 +2545,10 @@
             "dist": {
                 "type": "path",
                 "url": "app-modules/webhook",
-                "reference": "736615f2b96806fa6e081ad0cc2caa9ab59067ae"
+                "reference": "3e68f6d51d6437a4f15c9247086728069aec214d"
             },
             "require": {
-                "filament/filament": "^3.0"
+                "filament/filament": "^3.2"
             },
             "type": "library",
             "extra": {
@@ -13217,16 +13217,16 @@
         },
         {
             "name": "spatie/image-optimizer",
-            "version": "1.7.2",
+            "version": "1.7.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/spatie/image-optimizer.git",
-                "reference": "62f7463483d1bd975f6f06025d89d42a29608fe1"
+                "reference": "ed39c7bfce7a2ecf676174a2d4286ab3a1c4f4f7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/spatie/image-optimizer/zipball/62f7463483d1bd975f6f06025d89d42a29608fe1",
-                "reference": "62f7463483d1bd975f6f06025d89d42a29608fe1",
+                "url": "https://api.github.com/repos/spatie/image-optimizer/zipball/ed39c7bfce7a2ecf676174a2d4286ab3a1c4f4f7",
+                "reference": "ed39c7bfce7a2ecf676174a2d4286ab3a1c4f4f7",
                 "shasum": ""
             },
             "require": {
@@ -13266,9 +13266,9 @@
             ],
             "support": {
                 "issues": "https://github.com/spatie/image-optimizer/issues",
-                "source": "https://github.com/spatie/image-optimizer/tree/1.7.2"
+                "source": "https://github.com/spatie/image-optimizer/tree/1.7.4"
             },
-            "time": "2023-11-03T10:08:02+00:00"
+            "time": "2024-05-06T09:12:30+00:00"
         },
         {
             "name": "spatie/invade",
@@ -17158,16 +17158,16 @@
         },
         {
             "name": "symfony/process",
-            "version": "v6.4.4",
+            "version": "v6.4.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/process.git",
-                "reference": "710e27879e9be3395de2b98da3f52a946039f297"
+                "reference": "cdb1c81c145fd5aa9b0038bab694035020943381"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/process/zipball/710e27879e9be3395de2b98da3f52a946039f297",
-                "reference": "710e27879e9be3395de2b98da3f52a946039f297",
+                "url": "https://api.github.com/repos/symfony/process/zipball/cdb1c81c145fd5aa9b0038bab694035020943381",
+                "reference": "cdb1c81c145fd5aa9b0038bab694035020943381",
                 "shasum": ""
             },
             "require": {
@@ -17199,7 +17199,7 @@
             "description": "Executes commands in sub-processes",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/process/tree/v6.4.4"
+                "source": "https://github.com/symfony/process/tree/v6.4.7"
             },
             "funding": [
                 {
@@ -17215,7 +17215,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-02-20T12:31:00+00:00"
+            "time": "2024-04-18T09:22:46+00:00"
         },
         {
             "name": "symfony/property-access",
