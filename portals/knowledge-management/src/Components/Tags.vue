@@ -15,5 +15,3 @@
         <Badge v-for="tag in tags" :key="tag.id" :value="tag.name" />
     </div>
 </template>
-
-<style scoped></style>

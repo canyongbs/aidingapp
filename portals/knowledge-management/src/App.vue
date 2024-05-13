@@ -84,6 +84,7 @@
     const portalRounding = ref('');
     const categories = ref({});
     const serviceRequests = ref({});
+    const tags = ref({});
 
     const authentication = ref({
         code: null,
@@ -207,26 +208,34 @@
     }
 
     async function getData() {
-        await Promise.all([getKnowledgeManagementPortalCategories(), getServiceRequests()])
-            .then((responses) => {
-                errorLoading.value = false;
+        await Promise.all([
+            getKnowledgeManagementPortalCategories(),
+            getTags(),
+            getServiceRequests(),
+        ]).then((responses) => {
+            errorLoading.value = false;
 
-                if (responses[0].error) {
-                    throw new Error(responses[0].error);
-                }
-                categories.value = responses[0];
+            if (responses[0].error) {
+                throw new Error(responses[0].error);
+            }
+            categories.value = responses[0];
 
-                if (responses[1].error) {
-                    throw new Error(responses[1].error);
-                }
-                serviceRequests.value = responses[1];
+            if (responses[1].error) {
+                throw new Error(responses[1].error);
+            }
+            tags.value = responses[1];
 
-                loading.value = false;
-            })
-            .catch((error) => {
-                errorLoading.value = true;
-                console.error(`Knowledge Management Portal Embed ${error}`);
-            });
+            if (responses[2].error) {
+                throw new Error(responses[2].error);
+            }
+            serviceRequests.value = responses[2];
+
+            loading.value = false;
+        })
+        .catch((error) => {
+            errorLoading.value = true;
+            console.error(`Knowledge Management Portal Embed ${error}`);
+        });
     }
 
     async function getKnowledgeManagementPortalCategories() {
@@ -245,6 +254,18 @@
         const { get } = consumer();
 
         return get(`${props.apiUrl}/service-requests`).then((response) => {
+            if (response.error) {
+                throw new Error(response.error);
+            }
+
+            return response.data;
+        });
+    }
+
+    async function getTags() {
+        const { get } = consumer();
+
+        return get(`${props.apiUrl}/tags`).then((response) => {
             if (response.error) {
                 throw new Error(response.error);
             }
@@ -434,6 +455,7 @@
                             :api-url="apiUrl"
                             :categories="categories"
                             :service-requests="serviceRequests"
+                            :tags="tags"
                         >
                         </RouterView>
                     </div>
