@@ -38,6 +38,8 @@ namespace AidingApp\KnowledgeBase\Database\Seeders;
 
 use App\Models\Tag;
 use Illuminate\Database\Seeder;
+use AidingApp\Form\Enums\Rounding;
+use AidingApp\Portal\Settings\PortalSettings;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 
 class KnowledgeBaseItemSeeder extends Seeder
@@ -61,5 +63,11 @@ class KnowledgeBaseItemSeeder extends Seeder
                 collect(fake()->randomElements($tags, rand(0, 5)))
                     ->each(fn (Tag $tag) => $article->tags()->attach($tag));
             });
+
+        $settings = app(PortalSettings::class);
+        $settings->knowledge_management_portal_enabled = true;
+        $settings->knowledge_management_portal_primary_color = 'emerald';
+        $settings->knowledge_management_portal_rounding = Rounding::Large->value;
+        $settings->save();
     }
 }
