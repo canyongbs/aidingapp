@@ -37,6 +37,7 @@
 namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource\Pages;
 
 use Filament\Tables\Table;
+use Laravel\Pennant\Feature;
 use Filament\Actions\CreateAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
@@ -83,7 +84,8 @@ class ListKnowledgeBaseItems extends ListRecords
                     ->translateLabel()
                     ->sortable(),
                 TextColumn::make('tags.name')
-                    ->badge(),
+                    ->badge()
+                    ->visible(fn (): bool => Feature::active('tags')),
             ])
             ->filters([
                 SelectFilter::make('quality')

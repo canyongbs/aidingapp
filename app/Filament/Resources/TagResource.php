@@ -37,6 +37,7 @@
 namespace App\Filament\Resources;
 
 use App\Models\Tag;
+use Laravel\Pennant\Feature;
 use Filament\Resources\Resource;
 use App\Filament\Resources\TagResource\Pages\EditTag;
 use App\Filament\Resources\TagResource\Pages\ListTags;
@@ -47,6 +48,15 @@ class TagResource extends Resource
     protected static ?string $model = Tag::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        if (Feature::inactive('tags')) {
+            return false;
+        }
+
+        return parent::shouldRegisterNavigation();
+    }
 
     public static function getPages(): array
     {

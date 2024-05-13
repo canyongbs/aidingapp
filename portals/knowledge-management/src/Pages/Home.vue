@@ -156,11 +156,13 @@
                                 v-model="searchQuery"
                                 id="search"
                                 placeholder="Search for articles and categories"
-                                class="block w-full rounded rounded-b-none border-0 pl-12 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-2-- sm:text-sm sm:leading-6"
+                                class="block w-full rounded border-0 pl-12 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-2-- sm:text-sm sm:leading-6"
+                                :class="{'rounded-b-none': tags.length > 0}"
                             />
                         </div>
                     </div>
                     <details
+                        v-if="tags.length > 0"
                         class="rounded rounded-t-none bg-white py-3 pl-4 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-2-- sm:text-sm sm:leading-6"
                     >
                         <summary v-if="selectedTags.length > 0">Tags ({{ selectedTags.length }} selected)</summary>

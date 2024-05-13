@@ -37,6 +37,7 @@
 namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource\Pages;
 
 use Filament\Forms\Form;
+use Laravel\Pennant\Feature;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Section;
@@ -80,7 +81,8 @@ class CreateKnowledgeBaseItem extends CreateRecord
                             ->searchable()
                             ->preload()
                             ->multiple()
-                            ->columnSpanFull(),
+                            ->columnSpanFull()
+                            ->visible(fn (): bool => Feature::active('tags')),
                     ]),
                 Section::make()
                     ->schema([
