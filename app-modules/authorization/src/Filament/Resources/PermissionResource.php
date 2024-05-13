@@ -77,9 +77,9 @@ class PermissionResource extends Resource
         return $table
             ->columns([
                 IdColumn::make(),
-                  TextColumn::make('group.name')
-                      ->sortable()
-                      ->visible(Feature::active('permission-groups')),
+                TextColumn::make('group.name')
+                    ->sortable()
+                    ->visible(Feature::active('permission-groups')),
                 TextColumn::make('name')
                     ->searchable(),
                 TextColumn::make('guard_name')
