@@ -82,6 +82,8 @@ class ListKnowledgeBaseItems extends ListRecords
                     ->label('Category')
                     ->translateLabel()
                     ->sortable(),
+                TextColumn::make('tags.name')
+                    ->badge(),
             ])
             ->filters([
                 SelectFilter::make('quality')

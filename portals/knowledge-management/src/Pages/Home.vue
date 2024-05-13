@@ -39,6 +39,7 @@
     import { consumer } from '../Services/Consumer.js';
     import { useAuthStore } from '../Stores/auth.js';
     import { useFeatureStore } from '../Stores/feature.js';
+    import Badge from '../Components/Badge.vue';
 
     const props = defineProps({
         searchUrl: {
@@ -164,14 +165,15 @@
                     >
                         <summary v-if="selectedTags.length > 0">Tags ({{ selectedTags.length }} selected)</summary>
                         <summary v-else>Tags</summary>
-                        <fieldset>
-                            <ul>
-                                <li v-for="tag in tags" :key="tag.id">
-                                    <input type="checkbox" :value="tag.id" @click="toggleTag(tag.id)" />
-                                    <label class="pl-4">{{ tag.name }}</label>
-                                </li>
-                            </ul>
-                        </fieldset>
+                        <div class="flex flex-wrap gap-2">
+                            <Badge
+                                v-for="tag in tags"
+                                :key="tag.id"
+                                :value="tag.name"
+                                :class="{ 'bg-primary-600 text-white': selectedTags.includes(tag.id) }"
+                                @click="toggleTag(tag.id)"
+                            />
+                        </div>
                     </details>
                 </form>
             </div>
