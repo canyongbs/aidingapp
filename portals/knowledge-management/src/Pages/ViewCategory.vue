@@ -40,7 +40,7 @@
     import { Bars3Icon } from '@heroicons/vue/24/outline/index.js';
     import { ChevronRightIcon, XMarkIcon } from '@heroicons/vue/20/solid/index.js';
     import Tags from '../Components/Tags.vue';
-    import Article from "../Components/Article.vue";
+    import Article from '../Components/Article.vue';
 
     const route = useRoute();
 

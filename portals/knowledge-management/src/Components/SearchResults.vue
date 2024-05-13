@@ -36,7 +36,7 @@
     import SearchLoading from './SearchLoading.vue';
     import { ChevronRightIcon, XMarkIcon } from '@heroicons/vue/20/solid';
     import Tags from './Tags.vue';
-    import Article from "./Article.vue";
+    import Article from './Article.vue';
 
     defineProps({
         searchQuery: {

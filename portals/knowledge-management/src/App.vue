@@ -208,34 +208,31 @@
     }
 
     async function getData() {
-        await Promise.all([
-            getKnowledgeManagementPortalCategories(),
-            getTags(),
-            getServiceRequests(),
-        ]).then((responses) => {
-            errorLoading.value = false;
+        await Promise.all([getKnowledgeManagementPortalCategories(), getTags(), getServiceRequests()])
+            .then((responses) => {
+                errorLoading.value = false;
 
-            if (responses[0].error) {
-                throw new Error(responses[0].error);
-            }
-            categories.value = responses[0];
+                if (responses[0].error) {
+                    throw new Error(responses[0].error);
+                }
+                categories.value = responses[0];
 
-            if (responses[1].error) {
-                throw new Error(responses[1].error);
-            }
-            tags.value = responses[1];
+                if (responses[1].error) {
+                    throw new Error(responses[1].error);
+                }
+                tags.value = responses[1];
 
-            if (responses[2].error) {
-                throw new Error(responses[2].error);
-            }
-            serviceRequests.value = responses[2];
+                if (responses[2].error) {
+                    throw new Error(responses[2].error);
+                }
+                serviceRequests.value = responses[2];
 
-            loading.value = false;
-        })
-        .catch((error) => {
-            errorLoading.value = true;
-            console.error(`Knowledge Management Portal Embed ${error}`);
-        });
+                loading.value = false;
+            })
+            .catch((error) => {
+                errorLoading.value = true;
+                console.error(`Knowledge Management Portal Embed ${error}`);
+            });
     }
 
     async function getKnowledgeManagementPortalCategories() {
