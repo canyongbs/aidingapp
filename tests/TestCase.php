@@ -39,6 +39,7 @@ namespace Tests;
 use App\Models\Tenant;
 use Illuminate\Support\Str;
 use Tests\Concerns\LoadsFixtures;
+use Illuminate\Support\Facades\DB;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Process\Process;
 use Illuminate\Support\Facades\Artisan;
@@ -69,6 +70,8 @@ abstract class TestCase extends BaseTestCase
     use LoadsFixtures;
     use UsesMultitenancyConfig;
 
+    public static $migratedTenant = false;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -88,10 +91,16 @@ abstract class TestCase extends BaseTestCase
             ...$this->migrateFreshUsing(),
         ]);
 
+        $tenantDatabase = ParallelTesting::token() ? 'testing_tenant_test_' . ParallelTesting::token() : 'testing_tenant';
+
+        DB::statement("DROP DATABASE IF EXISTS {$tenantDatabase}");
+
+        DB::statement("CREATE DATABASE {$tenantDatabase}");
+
         $this->createTenant(
             name: 'Test Tenant',
             domain: 'test.aidingapp.local',
-            database: ParallelTesting::token() ? 'testing_tenant_test_' . ParallelTesting::token() : 'testing_tenant',
+            database: $tenantDatabase,
         );
     }
 
@@ -116,6 +125,8 @@ abstract class TestCase extends BaseTestCase
         );
 
         Tenant::forgetCurrent();
+
+        self::$migratedTenant = true;
     }
 
     public function beginDatabaseTransactionOnConnection(string $name)
@@ -145,6 +156,8 @@ abstract class TestCase extends BaseTestCase
 
     public function createTenant(string $name, string $domain, string $database): Tenant
     {
+        self::$migratedTenant = true;
+
         return app(CreateTenant::class)(
             $name,
             $domain,
@@ -216,21 +229,23 @@ abstract class TestCase extends BaseTestCase
                 $this->storeMigrationChecksum('landlord', $currentLandlordChecksum);
             }
 
-            $cachedTenantChecksum = $this->getCachedMigrationChecksum('tenant');
-            $currentTenantChecksum = $this->calculateMigrationChecksum(
-                [
-                    database_path('migrations'),
-                    database_path('settings'),
-                    base_path('app-modules/*/database/migrations'),
-                    base_path('app-modules/*/config/**'),
-                    base_path('app-modules/*/src/Models'),
-                ]
-            );
+            if (! self::$migratedTenant) {
+                $cachedTenantChecksum = $this->getCachedMigrationChecksum('tenant');
+                $currentTenantChecksum = $this->calculateMigrationChecksum(
+                    [
+                        database_path('migrations'),
+                        database_path('settings'),
+                        base_path('app-modules/*/database/migrations'),
+                        base_path('app-modules/*/config/**'),
+                        base_path('app-modules/*/src/Models'),
+                    ]
+                );
 
-            if ($cachedTenantChecksum !== $currentTenantChecksum) {
-                $this->createTenantTestingEnvironment();
+                if ($cachedTenantChecksum !== $currentTenantChecksum) {
+                    $this->createTenantTestingEnvironment();
 
-                $this->storeMigrationChecksum('tenant', $currentTenantChecksum);
+                    $this->storeMigrationChecksum('tenant', $currentTenantChecksum);
+                }
             }
 
             $this->app[Kernel::class]->setArtisan(null);
