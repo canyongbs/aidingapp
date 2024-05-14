@@ -34,11 +34,12 @@
 </COPYRIGHT>
 */
 
+use Illuminate\Support\Facades\Route;
+use App\Multitenancy\Http\Middleware\CheckOlympusKey;
 use App\Http\Controllers\SetAzureSsoSettingController;
-use App\Multitenancy\Http\Middleware\CheckLandlordApiKey;
 
 Route::group(['prefix' => 'v1', 'as' => 'api.', 'middleware' => ['auth:sanctum']], function () {});
 
-Route::middleware([CheckLandlordApiKey::class])
+Route::middleware([CheckOlympusKey::class])
     ->post('azure-sso/update', SetAzureSsoSettingController::class)
     ->name('azure-sso.update');

@@ -5,8 +5,8 @@
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
-    Aiding App™ is licensed under the Elastic License 2.0. For more details,
-    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
+    Advising App™ is licensed under the Elastic License 2.0. For more details,
+    see https://github.com/canyongbs/advisingapp/blob/main/LICENSE.
 
     Notice:
 
@@ -20,7 +20,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
+      same in return. Canyon GBS™ and Advising App™ are registered trademarks of
       Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
@@ -29,24 +29,48 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
+    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Tenants\SyncTenantController;
-use App\Http\Controllers\Tenants\CreateTenantController;
-use App\Http\Controllers\Tenants\DeleteTenantController;
+namespace App\Console\Commands;
 
-Route::post('tenants', CreateTenantController::class)
-    ->name('tenants.create');
+use Illuminate\Console\Command;
+use App\Settings\OlympusSettings;
+use Illuminate\Support\Facades\Http;
 
-Route::delete('tenants/{tenant}', DeleteTenantController::class)
-    ->name('tenants.delete');
+class ConnectOlympus extends Command
+{
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = 'olympus:connect {url}';
 
-Route::post('tenants/{tenant}/sync', SyncTenantController::class)
-    ->name('tenants.sync');
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'Connect the app to communicate with Olympus.';
 
-Route::post('test', fn () => true)
-    ->name('test');
+    /**
+     * Execute the console command.
+     */
+    public function handle(): int
+    {
+        $response = Http::post($this->argument('url'), [
+            'url' => config('app.landlord_url'),
+        ])->throw();
+
+        $olympusSettings = app(OlympusSettings::class);
+        $olympusSettings->fill($response->json('olympus'));
+        $olympusSettings->save();
+
+        $this->info('The app has been connected to Olympus.');
+
+        return static::SUCCESS;
+    }
+}
