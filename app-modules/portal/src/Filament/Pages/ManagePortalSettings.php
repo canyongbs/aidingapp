@@ -136,11 +136,6 @@ class ManagePortalSettings extends SettingsPage
                             ->disabled(! Gate::check(Feature::OnlineForms->getGateName()))
                             ->hintIcon(fn (Toggle $component) => $component->isDisabled() ? 'heroicon-m-lock-closed' : null)
                             ->hintIconTooltip('Forms are not a part of your current subscription.'),
-                        Toggle::make('has_surveys')
-                            ->label('Surveys')
-                            ->disabled(! Gate::check(Feature::OnlineSurveys->getGateName()))
-                            ->hintIcon(fn (Toggle $component) => $component->isDisabled() ? 'heroicon-m-lock-closed' : null)
-                            ->hintIconTooltip('Surveys are not a part of your current subscription.'),
                     ])
                     ->columns(3),
                 Section::make('Knowledge Portal')

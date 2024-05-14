@@ -37,7 +37,6 @@
 namespace AidingApp\Form\Actions;
 
 use Exception;
-use AidingApp\Survey\Models\Survey;
 use Illuminate\Support\Facades\URL;
 use AidingApp\Form\Models\Submissible;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
@@ -47,21 +46,6 @@ class GenerateSubmissibleEmbedCode
     public function handle(Submissible $submissible): string
     {
         return match ($submissible::class) {
-            Survey::class => (function () use ($submissible) {
-                $scriptUrl = url('js/widgets/survey/aiding-app-survey-widget.js?');
-                $surveyDefinitionUrl = URL::to(
-                    URL::signedRoute(
-                        name: 'surveys.define',
-                        parameters: ['survey' => $submissible],
-                        absolute: false,
-                    )
-                );
-
-                return <<<EOD
-                <survey-embed url="{$surveyDefinitionUrl}"></survey-embed>
-                <script src="{$scriptUrl}"></script>
-                EOD;
-            })(),
             ServiceRequestForm::class => (function () use ($submissible) {
                 /** @var ServiceRequestForm $submissible */
                 $scriptUrl = url('js/widgets/service-request-form/aiding-app-service-request-form-widget.js?');

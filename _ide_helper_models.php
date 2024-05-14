@@ -1,39 +1,5 @@
 <?php
 
-/*
-<COPYRIGHT>
-
-    Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
-
-    Aiding App™ is licensed under the Elastic License 2.0. For more details,
-    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
-
-    Notice:
-
-    - You may not provide the software to third parties as a hosted or managed
-      service, where the service provides users with access to any substantial set of
-      the features or functionality of the software.
-    - You may not move, change, disable, or circumvent the license key functionality
-      in the software, and you may not remove or obscure any functionality in the
-      software that is protected by the license key.
-    - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
-      to applicable law.
-    - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
-      Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
-      vigorously.
-    - The software solution, including services, infrastructure, and code, is offered as a
-      Software as a Service (SaaS) by Canyon GBS LLC.
-    - Use of this software implies agreement to the license terms and conditions as stated
-      in the Elastic License 2.0.
-
-    For more information or inquiries please visit our website at
-    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
-
-</COPYRIGHT>
-*/
-
 // @formatter:off
 // phpcs:ignoreFile
 /**
@@ -329,14 +295,10 @@ namespace App\Models{
  * @property-read int|null $audits_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Authorization\Models\Permission> $permissions
  * @property-read int|null $permissions_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Authorization\Models\RoleGroup> $roleGroups
- * @property-read int|null $role_groups_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Authorization\Models\Role> $roles
  * @property-read int|null $roles_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Laravel\Sanctum\PersonalAccessToken> $tokens
  * @property-read int|null $tokens_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Authorization\Models\RoleGroup> $traitRoleGroups
- * @property-read int|null $trait_role_groups_count
  * @method static \Illuminate\Database\Eloquent\Builder|SystemUser newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|SystemUser newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|SystemUser onlyTrashed()
@@ -368,6 +330,7 @@ namespace App\Models{
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property bool $setup_complete
  * @method static \Spatie\Multitenancy\TenantCollection<int, static> all($columns = ['*'])
  * @method static \Spatie\Multitenancy\TenantCollection<int, static> get($columns = ['*'])
  * @method static \Illuminate\Database\Eloquent\Builder|Tenant newModelQuery()
@@ -381,6 +344,7 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|Tenant whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Tenant whereKey($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Tenant whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Tenant whereSetupComplete($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Tenant whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Tenant withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder|Tenant withoutTrashed()
@@ -466,8 +430,6 @@ namespace App\Models{
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Authorization\Models\Permission> $permissions
  * @property-read int|null $permissions_count
  * @property-read \App\Models\Pronouns|null $pronouns
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Authorization\Models\RoleGroup> $roleGroups
- * @property-read int|null $role_groups_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Authorization\Models\Role> $roles
  * @property-read int|null $roles_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\ServiceManagement\Models\ServiceRequestAssignment> $serviceRequestAssignments
@@ -476,8 +438,6 @@ namespace App\Models{
  * @property-read int|null $subscriptions_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Team\Models\Team> $teams
  * @property-read int|null $teams_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Authorization\Models\RoleGroup> $traitRoleGroups
- * @property-read int|null $trait_role_groups_count
  * @property-read \Illuminate\Database\Eloquent\Collection|\AidingApp\Alert\Models\Alert[] $contactAlerts
  * @property-read int|null $contact_alerts_count
  * @property-read \Illuminate\Database\Eloquent\Collection|\AidingApp\Authorization\Models\Permission[] $permissionsFromRoles
@@ -884,32 +844,6 @@ namespace AidingApp\Authorization\Models{
 	class IdeHelperPermission {}
 }
 
-namespace AidingApp\Authorization\Models\Pivots{
-/**
- * AidingApp\Authorization\Models\Pivots\RoleGroupRolePivot
- *
- * @method static \Illuminate\Database\Eloquent\Builder|RoleGroupRolePivot newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|RoleGroupRolePivot newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|RoleGroupRolePivot query()
- * @mixin \Eloquent
- */
-	#[\AllowDynamicProperties]
-	class IdeHelperRoleGroupRolePivot {}
-}
-
-namespace AidingApp\Authorization\Models\Pivots{
-/**
- * AidingApp\Authorization\Models\Pivots\RoleGroupUserPivot
- *
- * @method static \Illuminate\Database\Eloquent\Builder|RoleGroupUserPivot newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|RoleGroupUserPivot newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|RoleGroupUserPivot query()
- * @mixin \Eloquent
- */
-	#[\AllowDynamicProperties]
-	class IdeHelperRoleGroupUserPivot {}
-}
-
 namespace AidingApp\Authorization\Models{
 /**
  * AidingApp\Authorization\Models\Role
@@ -919,14 +853,11 @@ namespace AidingApp\Authorization\Models{
  * @property string $guard_name
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property string|null $description
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
  * @property-read int|null $audits_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Authorization\Models\Permission> $permissions
  * @property-read int|null $permissions_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Authorization\Models\RoleGroup> $roleGroups
- * @property-read int|null $role_groups_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Authorization\Models\RoleGroup> $traitRoleGroups
- * @property-read int|null $trait_role_groups_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $users
  * @property-read int|null $users_count
  * @method static \Illuminate\Database\Eloquent\Builder|Role api()
@@ -938,6 +869,7 @@ namespace AidingApp\Authorization\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|Role superAdmin()
  * @method static \Illuminate\Database\Eloquent\Builder|Role web()
  * @method static \Illuminate\Database\Eloquent\Builder|Role whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Role whereDescription($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Role whereGuardName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Role whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Role whereName($value)
@@ -946,47 +878,6 @@ namespace AidingApp\Authorization\Models{
  */
 	#[\AllowDynamicProperties]
 	class IdeHelperRole {}
-}
-
-namespace AidingApp\Authorization\Models{
-/**
- * AidingApp\Authorization\Models\RoleGroup
- *
- * @property string $id
- * @property string $name
- * @property string $guard_name
- * @property string|null $slug
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
- * @property-read int|null $audits_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Authorization\Models\Role> $roles
- * @property-read int|null $roles_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\SystemUser> $systemUsers
- * @property-read int|null $system_users_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $users
- * @property-read int|null $users_count
- * @property-read \Illuminate\Database\Eloquent\Collection|\AidingApp\Authorization\Models\Permission[] $permissions
- * @property-read int|null $permissions_count
- * @method static \AidingApp\Authorization\Database\Factories\RoleGroupFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder|RoleGroup newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|RoleGroup newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|RoleGroup onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|RoleGroup query()
- * @method static \Illuminate\Database\Eloquent\Builder|RoleGroup whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|RoleGroup whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|RoleGroup whereGuardName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|RoleGroup whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|RoleGroup whereName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|RoleGroup whereSlug($value)
- * @method static \Illuminate\Database\Eloquent\Builder|RoleGroup whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|RoleGroup withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|RoleGroup withoutTrashed()
- * @mixin \Eloquent
- */
-	#[\AllowDynamicProperties]
-	class IdeHelperRoleGroup {}
 }
 
 namespace AidingApp\Consent\Models{
@@ -1073,7 +964,6 @@ namespace AidingApp\Contact\Models{
  * @property string|null $preferred
  * @property string|null $description
  * @property string|null $email
- * @property string|null $email_2
  * @property string|null $mobile
  * @property bool $sms_opt_out
  * @property bool $email_bounce
@@ -1084,8 +974,6 @@ namespace AidingApp\Contact\Models{
  * @property string|null $city
  * @property string|null $state
  * @property string|null $postal
- * @property \Illuminate\Support\Carbon|null $birthdate
- * @property string|null $hsgrad
  * @property string|null $assigned_to_id
  * @property string|null $created_by_id
  * @property \Illuminate\Support\Carbon|null $created_at
@@ -1134,18 +1022,15 @@ namespace AidingApp\Contact\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|Contact whereAddress2($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Contact whereAddress3($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Contact whereAssignedToId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Contact whereBirthdate($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Contact whereCity($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Contact whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Contact whereCreatedById($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Contact whereDeletedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Contact whereDescription($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Contact whereEmail($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Contact whereEmail2($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Contact whereEmailBounce($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Contact whereFirstName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Contact whereFullName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Contact whereHsgrad($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Contact whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Contact whereLastName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Contact whereMobile($value)
@@ -2954,206 +2839,6 @@ namespace AidingApp\ServiceManagement\Models{
  */
 	#[\AllowDynamicProperties]
 	class IdeHelperSla {}
-}
-
-namespace AidingApp\Survey\Models{
-/**
- * AidingApp\Survey\Models\Survey
- *
- * @property string $id
- * @property-read string $name
- * @property string|null $description
- * @property-read bool $embed_enabled
- * @property-read array|null $allowed_domains
- * @property string|null $primary_color
- * @property \AidingApp\Form\Enums\Rounding|null $rounding
- * @property bool $is_authenticated
- * @property-read bool $is_wizard
- * @property bool $recaptcha_enabled
- * @property-read array|null $content
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property string|null $deleted_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Survey\Models\SurveyField> $fields
- * @property-read int|null $fields_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Survey\Models\SurveyStep> $steps
- * @property-read int|null $steps_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Survey\Models\SurveySubmission> $submissions
- * @property-read int|null $submissions_count
- * @method static \AidingApp\Survey\Database\Factories\SurveyFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder|Survey newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Survey newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Survey query()
- * @method static \Illuminate\Database\Eloquent\Builder|Survey whereAllowedDomains($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Survey whereContent($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Survey whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Survey whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Survey whereDescription($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Survey whereEmbedEnabled($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Survey whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Survey whereIsAuthenticated($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Survey whereIsWizard($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Survey whereName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Survey wherePrimaryColor($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Survey whereRecaptchaEnabled($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Survey whereRounding($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Survey whereUpdatedAt($value)
- * @mixin \Eloquent
- */
-	#[\AllowDynamicProperties]
-	class IdeHelperSurvey {}
-}
-
-namespace AidingApp\Survey\Models{
-/**
- * AidingApp\Survey\Models\SurveyAuthentication
- *
- * @property string $id
- * @property string|null $author_id
- * @property string|null $author_type
- * @property string|null $code
- * @property string $survey_id
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $author
- * @property-read \AidingApp\Survey\Models\Survey $submissible
- * @method static \Illuminate\Database\Eloquent\Builder|SurveyAuthentication newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|SurveyAuthentication newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|SurveyAuthentication query()
- * @method static \Illuminate\Database\Eloquent\Builder|SurveyAuthentication whereAuthorId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|SurveyAuthentication whereAuthorType($value)
- * @method static \Illuminate\Database\Eloquent\Builder|SurveyAuthentication whereCode($value)
- * @method static \Illuminate\Database\Eloquent\Builder|SurveyAuthentication whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|SurveyAuthentication whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|SurveyAuthentication whereSurveyId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|SurveyAuthentication whereUpdatedAt($value)
- * @mixin \Eloquent
- */
-	#[\AllowDynamicProperties]
-	class IdeHelperSurveyAuthentication {}
-}
-
-namespace AidingApp\Survey\Models{
-/**
- * AidingApp\Survey\Models\SurveyField
- *
- * @property string $id
- * @property-read string $label
- * @property-read string $type
- * @property-read bool $is_required
- * @property-read array $config
- * @property string $survey_id
- * @property string|null $step_id
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \AidingApp\Survey\Models\SurveyStep|null $step
- * @property-read \AidingApp\Survey\Models\Survey $submissible
- * @method static \AidingApp\Survey\Database\Factories\SurveyFieldFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder|SurveyField newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|SurveyField newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|SurveyField onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|SurveyField query()
- * @method static \Illuminate\Database\Eloquent\Builder|SurveyField whereConfig($value)
- * @method static \Illuminate\Database\Eloquent\Builder|SurveyField whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|SurveyField whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|SurveyField whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|SurveyField whereIsRequired($value)
- * @method static \Illuminate\Database\Eloquent\Builder|SurveyField whereLabel($value)
- * @method static \Illuminate\Database\Eloquent\Builder|SurveyField whereStepId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|SurveyField whereSurveyId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|SurveyField whereType($value)
- * @method static \Illuminate\Database\Eloquent\Builder|SurveyField whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|SurveyField withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|SurveyField withoutTrashed()
- * @mixin \Eloquent
- */
-	#[\AllowDynamicProperties]
-	class IdeHelperSurveyField {}
-}
-
-namespace AidingApp\Survey\Models{
-/**
- * AidingApp\Survey\Models\SurveyStep
- *
- * @property string $id
- * @property-read string $label
- * @property-read array|null $content
- * @property string $survey_id
- * @property int $sort
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Survey\Models\SurveyField> $fields
- * @property-read int|null $fields_count
- * @property-read \AidingApp\Survey\Models\Survey $submissible
- * @method static \Illuminate\Database\Eloquent\Builder|SurveyStep newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|SurveyStep newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|SurveyStep onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|SurveyStep query()
- * @method static \Illuminate\Database\Eloquent\Builder|SurveyStep whereContent($value)
- * @method static \Illuminate\Database\Eloquent\Builder|SurveyStep whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|SurveyStep whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|SurveyStep whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|SurveyStep whereLabel($value)
- * @method static \Illuminate\Database\Eloquent\Builder|SurveyStep whereSort($value)
- * @method static \Illuminate\Database\Eloquent\Builder|SurveyStep whereSurveyId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|SurveyStep whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|SurveyStep withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|SurveyStep withoutTrashed()
- * @mixin \Eloquent
- */
-	#[\AllowDynamicProperties]
-	class IdeHelperSurveyStep {}
-}
-
-namespace AidingApp\Survey\Models{
-/**
- * AidingApp\Survey\Models\SurveySubmission
- *
- * @property Contact|null $author
- * @property string $id
- * @property string $survey_id
- * @property string|null $author_id
- * @property string|null $author_type
- * @property \Carbon\CarbonImmutable|null $submitted_at
- * @property \Carbon\CarbonImmutable|null $canceled_at
- * @property \AidingApp\Form\Enums\FormSubmissionRequestDeliveryMethod|null $request_method
- * @property string|null $request_note
- * @property string|null $requester_id
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property string|null $deleted_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Survey\Models\SurveyField> $fields
- * @property-read int|null $fields_count
- * @property-read \App\Models\User|null $requester
- * @property-read \AidingApp\Survey\Models\Survey $submissible
- * @method static \Illuminate\Database\Eloquent\Builder|SurveySubmission canceled()
- * @method static \AidingApp\Survey\Database\Factories\SurveySubmissionFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder|Submission licensedToEducatable(string $relationship)
- * @method static \Illuminate\Database\Eloquent\Builder|SurveySubmission newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|SurveySubmission newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|SurveySubmission notCanceled()
- * @method static \Illuminate\Database\Eloquent\Builder|SurveySubmission notSubmitted()
- * @method static \Illuminate\Database\Eloquent\Builder|SurveySubmission query()
- * @method static \Illuminate\Database\Eloquent\Builder|SurveySubmission requested()
- * @method static \Illuminate\Database\Eloquent\Builder|SurveySubmission submitted()
- * @method static \Illuminate\Database\Eloquent\Builder|SurveySubmission whereAuthorId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|SurveySubmission whereAuthorType($value)
- * @method static \Illuminate\Database\Eloquent\Builder|SurveySubmission whereCanceledAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|SurveySubmission whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|SurveySubmission whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|SurveySubmission whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|SurveySubmission whereRequestMethod($value)
- * @method static \Illuminate\Database\Eloquent\Builder|SurveySubmission whereRequestNote($value)
- * @method static \Illuminate\Database\Eloquent\Builder|SurveySubmission whereRequesterId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|SurveySubmission whereSubmittedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|SurveySubmission whereSurveyId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|SurveySubmission whereUpdatedAt($value)
- * @mixin \Eloquent
- */
-	#[\AllowDynamicProperties]
-	class IdeHelperSurveySubmission {}
 }
 
 namespace AidingApp\Task\Models{

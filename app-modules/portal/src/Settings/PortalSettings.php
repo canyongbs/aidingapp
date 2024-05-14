@@ -64,8 +64,6 @@ class PortalSettings extends Settings
 
     public bool $has_forms = false;
 
-    public bool $has_surveys = false;
-
     public ?string $footer_color = null;
 
     public ?string $footer_copyright_statement;
