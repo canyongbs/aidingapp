@@ -34,14 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace App\Models\Scopes;
+use Laravel\Pennant\Feature;
+use Illuminate\Database\Migrations\Migration;
 
-use Illuminate\Database\Eloquent\Builder;
-
-class SetupIsComplete
-{
-    public function __invoke(Builder $query): void
+return new class () extends Migration {
+    public function up(): void
     {
-        $query->where('setup_complete', true);
+        Feature::purge('setup-complete');
     }
-}
+
+    public function down(): void
+    {
+        Feature::activate('setup-complete');
+    }
+};
