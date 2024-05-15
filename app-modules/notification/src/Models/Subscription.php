@@ -46,7 +46,6 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphPivot;
-use AidingApp\Authorization\Models\Concerns\DefinesPermissions;
 
 /**
  * @mixin IdeHelperSubscription
@@ -55,7 +54,6 @@ class Subscription extends MorphPivot
 {
     use BelongsToEducatable;
     use HasFactory;
-    use DefinesPermissions;
     use HasUuids;
 
     public $timestamps = true;

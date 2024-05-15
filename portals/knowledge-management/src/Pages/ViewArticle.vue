@@ -39,6 +39,7 @@
     import { consumer } from '../Services/Consumer.js';
     import { Bars3Icon } from '@heroicons/vue/24/outline/index.js';
     import DOMPurify from 'dompurify';
+    import Tags from '../Components/Tags.vue';
 
     const route = useRoute();
 
@@ -112,13 +113,16 @@
                             currentCrumb="Articles"
                         ></Breadcrumbs>
 
-                        <div class="flex flex-col gap-3">
-                            <div class="prose max-w-none">
-                                <h1>{{ article.name }}</h1>
-                                <div v-html="DOMPurify.sanitize(article.content)"></div>
-                            </div>
+                        <div class="grid space-y-2">
+                            <Tags :tags="article.tags" />
+                            <div class="flex flex-col gap-3">
+                                <div class="prose max-w-none">
+                                    <h1>{{ article.name }}</h1>
+                                    <div v-html="DOMPurify.sanitize(article.content)"></div>
+                                </div>
 
-                            <span class="text-xs text-gray-500">Last updated: {{ article.lastUpdated }}</span>
+                                <span class="text-xs text-gray-500">Last updated: {{ article.lastUpdated }}</span>
+                            </div>
                         </div>
                     </main>
                 </div>

@@ -45,6 +45,7 @@ class KnowledgeBaseArticleData extends Data
         public ?string $categoryId,
         public string $name,
         public ?string $lastUpdated,
-        public ?string $content
+        public ?string $content,
+        public ?array $tags,
     ) {}
 }

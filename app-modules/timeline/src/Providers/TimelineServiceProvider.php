@@ -41,9 +41,9 @@ use Illuminate\Support\Facades\Event;
 use AidingApp\Timeline\TimelinePlugin;
 use AidingApp\Timeline\Models\Timeline;
 use Illuminate\Support\ServiceProvider;
-use App\Registries\RoleBasedAccessControlRegistry;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use AidingApp\Timeline\Listeners\AddRecordToTimeline;
+use AidingApp\Authorization\AuthorizationRoleRegistry;
 use AidingApp\Timeline\Registries\TimelineRbacRegistry;
 use AidingApp\Timeline\Events\TimelineableRecordCreated;
 use AidingApp\Timeline\Events\TimelineableRecordDeleted;
@@ -64,7 +64,7 @@ class TimelineServiceProvider extends ServiceProvider
 
         $this->registerEvents();
 
-        RoleBasedAccessControlRegistry::register(TimelineRbacRegistry::class);
+        AuthorizationRoleRegistry::register(TimelineRbacRegistry::class);
     }
 
     protected function registerEvents(): void

@@ -39,17 +39,19 @@ namespace Tests;
 use App\Models\Tenant;
 use Illuminate\Support\Str;
 use Tests\Concerns\LoadsFixtures;
+use Illuminate\Support\Facades\DB;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Process\Process;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Contracts\Console\Kernel;
 use Symfony\Component\Finder\SplFileInfo;
 use App\Multitenancy\Actions\CreateTenant;
 use Spatie\Permission\PermissionRegistrar;
 use Illuminate\Support\Facades\ParallelTesting;
-use App\Registries\RoleBasedAccessControlRegistry;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Multitenancy\DataTransferObjects\TenantConfig;
 use Illuminate\Foundation\Testing\RefreshDatabaseState;
+use AidingApp\Authorization\Console\Commands\SetupRoles;
 use Spatie\Multitenancy\Concerns\UsesMultitenancyConfig;
 use App\Multitenancy\DataTransferObjects\TenantMailConfig;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
@@ -58,7 +60,6 @@ use App\Multitenancy\DataTransferObjects\TenantDatabaseConfig;
 use Illuminate\Foundation\Testing\DatabaseTransactionsManager;
 use App\Multitenancy\DataTransferObjects\TenantSmtpMailerConfig;
 use App\Multitenancy\DataTransferObjects\TenantS3FilesystemConfig;
-use AidingApp\Authorization\Console\Commands\SyncRolesAndPermissions;
 use Illuminate\Foundation\Testing\Traits\CanConfigureMigrationCommands;
 
 abstract class TestCase extends BaseTestCase
@@ -80,13 +81,6 @@ abstract class TestCase extends BaseTestCase
         $this->beginDatabaseTransactionOnConnection($this->tenantDatabaseConnectionName());
     }
 
-    protected function tearDown(): void
-    {
-        parent::tearDown();
-
-        RoleBasedAccessControlRegistry::clearRegistry();
-    }
-
     public function createLandlordTestingEnvironment(): void
     {
         $this->artisan('migrate:fresh', [
@@ -95,10 +89,16 @@ abstract class TestCase extends BaseTestCase
             ...$this->migrateFreshUsing(),
         ]);
 
+        $tenantDatabase = ParallelTesting::token() ? 'testing_tenant_test_' . ParallelTesting::token() : 'testing_tenant';
+
+        DB::statement("DROP DATABASE IF EXISTS {$tenantDatabase}");
+
+        DB::statement("CREATE DATABASE {$tenantDatabase}");
+
         $this->createTenant(
             name: 'Test Tenant',
             domain: 'test.aidingapp.local',
-            database: ParallelTesting::token() ? 'testing_tenant_test_' . ParallelTesting::token() : 'testing_tenant',
+            database: $tenantDatabase,
         );
     }
 
@@ -113,14 +113,14 @@ abstract class TestCase extends BaseTestCase
                 '--database' => $this->tenantDatabaseConnectionName(),
                 ...$this->migrateFreshUsing(),
             ]);
-
-            $this->artisan(
-                command: SyncRolesAndPermissions::class,
-                parameters: [
-                    '--tenant' => Tenant::current()->id,
-                ],
-            );
         });
+
+        Artisan::call(
+            command: SetupRoles::class,
+            parameters: [
+                '--tenant' => $tenant->id,
+            ],
+        );
 
         Tenant::forgetCurrent();
     }
@@ -153,9 +153,9 @@ abstract class TestCase extends BaseTestCase
     public function createTenant(string $name, string $domain, string $database): Tenant
     {
         return app(CreateTenant::class)(
-            $name,
-            $domain,
-            new TenantConfig(
+            name: $name,
+            domain: $domain,
+            config: new TenantConfig(
                 database: new TenantDatabaseConfig(
                     host: config('database.connections.landlord.host'),
                     port: config('database.connections.landlord.port'),
@@ -201,44 +201,17 @@ abstract class TestCase extends BaseTestCase
                     fromAddress: config('mail.from.address'),
                     fromName: config('mail.from.name')
                 ),
-            )
+            ),
+            seedTenantDatabase: false,
         );
     }
 
     protected function refreshTestDatabase()
     {
         if (! RefreshDatabaseState::$migrated) {
-            $cachedLandlordChecksum = $this->getCachedMigrationChecksum('landlord');
-            $currentLandlordChecksum = $this->calculateMigrationChecksum(
-                [
-                    database_path('landlord'),
-                ]
-            );
+            $this->createLandlordTestingEnvironment();
 
-            if ($cachedLandlordChecksum !== $currentLandlordChecksum) {
-                $this->createLandlordTestingEnvironment();
-
-                $this->app[Kernel::class]->setArtisan(null);
-
-                $this->storeMigrationChecksum('landlord', $currentLandlordChecksum);
-            }
-
-            $cachedTenantChecksum = $this->getCachedMigrationChecksum('tenant');
-            $currentTenantChecksum = $this->calculateMigrationChecksum(
-                [
-                    database_path('migrations'),
-                    database_path('settings'),
-                    base_path('app-modules/*/database/migrations'),
-                    base_path('app-modules/*/config/**'),
-                    base_path('app-modules/*/src/Models'),
-                ]
-            );
-
-            if ($cachedTenantChecksum !== $currentTenantChecksum) {
-                $this->createTenantTestingEnvironment();
-
-                $this->storeMigrationChecksum('tenant', $currentTenantChecksum);
-            }
+            $this->createTenantTestingEnvironment();
 
             $this->app[Kernel::class]->setArtisan(null);
 

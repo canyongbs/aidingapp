@@ -50,7 +50,7 @@ use App\Multitenancy\DataTransferObjects\TenantS3FilesystemConfig;
 
 class CreateTenant extends Command
 {
-    protected $signature = 'tenants:create {name} {domain} {--m|run-queue} {--a|admin}';
+    protected $signature = 'tenants:create {name} {domain} {--m|run-queue} {--a|admin} {--l|local} {--y|yes}';
 
     protected $description = 'Temporary command to test the tenant creation process.';
 
@@ -125,9 +125,13 @@ class CreateTenant extends Command
             )
         );
 
+        if ($this->option('no-interaction')) {
+            return static::SUCCESS;
+        }
+
         $database = config('multitenancy.tenant_database_connection_name');
 
-        if ($this->option('run-queue') || $this->confirm('Run the queue to migrate tenant databases?')) {
+        if ($this->option('yes') || $this->option('run-queue') || $this->confirm('Run the queue to migrate tenant databases?')) {
             $queue = config('queue.landlord_queue');
 
             Artisan::call(
@@ -136,9 +140,16 @@ class CreateTenant extends Command
             );
         }
 
-        if ($this->option('admin') || $this->confirm('Would you like to seed sample super admin?')) {
+        if ($this->option('yes') || $this->option('admin') || $this->confirm('Would you like to seed sample super admin?')) {
             Artisan::call(
                 command: "tenants:artisan \"db:seed --database={$database} --class=SampleSuperAdminUserSeeder\" --tenant={$tenant->id}",
+                outputBuffer: $this->output,
+            );
+        }
+
+        if ($this->option('yes') || $this->option('local') || $this->confirm('Would you like to seed local development data?')) {
+            Artisan::call(
+                command: "tenants:artisan \"db:seed --database={$database} --class=LocalDevelopmentSeeder\" --tenant={$tenant->id}",
                 outputBuffer: $this->output,
             );
         }

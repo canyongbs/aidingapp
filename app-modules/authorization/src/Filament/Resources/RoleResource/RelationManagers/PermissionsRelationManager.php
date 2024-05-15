@@ -37,6 +37,7 @@
 namespace AidingApp\Authorization\Filament\Resources\RoleResource\RelationManagers;
 
 use Filament\Tables\Table;
+use Laravel\Pennant\Feature;
 use Filament\Facades\Filament;
 use Filament\Tables\Columns\TextColumn;
 use AidingApp\Authorization\Models\Role;
@@ -44,6 +45,7 @@ use Filament\Resources\Pages\ViewRecord;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Tables\Actions\AttachAction;
 use Filament\Tables\Actions\DetachAction;
+use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DetachBulkAction;
@@ -75,8 +77,21 @@ class PermissionsRelationManager extends RelationManager
         return $table
             ->columns([
                 IdColumn::make(),
+                TextColumn::make('group.name')
+                    ->sortable()
+                    ->visible(Feature::active('permission-groups')),
                 TextColumn::make('name'),
             ])
+            ->filters(
+                [
+                    SelectFilter::make('group')
+                        ->relationship('group', 'name')
+                        ->searchable()
+                        ->preload()
+                        ->visible(Feature::active('permission-groups'))
+                        ->multiple(),
+                ]
+            )
             ->headerActions([
                 AttachAction::make()
                     ->recordSelectOptionsQuery(function (Builder $query) {

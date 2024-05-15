@@ -38,9 +38,11 @@ namespace AidingApp\Task\Observers;
 
 use Exception;
 use App\Models\User;
+use Laravel\Pennant\Feature;
 use AidingApp\Task\Models\Task;
 use Illuminate\Support\Facades\DB;
 use AidingApp\Authorization\Models\Permission;
+use AidingApp\Authorization\Models\PermissionGroup;
 use AidingApp\Notification\Events\TriggeredAutoSubscription;
 use AidingApp\Task\Notifications\TaskAssignedToUserNotification;
 
@@ -67,6 +69,11 @@ class TaskObserver
     {
         Permission::create([
             'name' => "task.{$task->id}.update",
+            ...(Feature::active('permission-groups') ? [
+                'group_id' => PermissionGroup::query()
+                    ->where('name', 'Task')
+                    ->value('id'),
+            ] : []),
             'guard_name' => 'web',
         ]);
     }

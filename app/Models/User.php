@@ -43,7 +43,6 @@ use AidingApp\Task\Models\Task;
 use AidingApp\Team\Models\Team;
 use Spatie\MediaLibrary\HasMedia;
 use App\Support\HasAdvancedFilter;
-use Illuminate\Support\Collection;
 use AidingApp\Team\Models\TeamUser;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Authorization\Models\Role;
@@ -78,7 +77,6 @@ use AidingApp\InAppCommunication\Models\TwilioConversation;
 use AidingApp\Engagement\Models\Concerns\HasManyEngagements;
 use AidingApp\Timeline\Models\Contracts\HasFilamentResource;
 use AidingApp\ServiceManagement\Models\ChangeRequestResponse;
-use AidingApp\Authorization\Models\Concerns\DefinesPermissions;
 use AidingApp\InAppCommunication\Models\TwilioConversationUser;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Notification\Models\Contracts\NotifiableInterface;
@@ -92,7 +90,6 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
  */
 class User extends Authenticatable implements HasLocalePreference, FilamentUser, Auditable, HasMedia, HasAvatar, NotifiableInterface, HasFilamentResource, ProvidesDynamicContext
 {
-    use DefinesPermissions;
     use HasFactory;
     use HasAdvancedFilter;
     use Notifiable;
@@ -416,11 +413,6 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
     public function revokeLicense(LicenseType $type): bool
     {
         return (bool) $this->licenses()->where('type', $type)->delete();
-    }
-
-    public function getApiPermissions(): Collection
-    {
-        return collect(['view-email', ...$this->apiPermissions()]);
     }
 
     public function getDynamicContext(): string

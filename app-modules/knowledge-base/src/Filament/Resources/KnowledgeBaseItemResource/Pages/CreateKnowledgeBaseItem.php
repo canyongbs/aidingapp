@@ -37,13 +37,17 @@
 namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource\Pages;
 
 use Filament\Forms\Form;
+use Laravel\Pennant\Feature;
+use App\Models\Scopes\TagsForClass;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Section;
 use AidingApp\Division\Models\Division;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Illuminate\Database\Eloquent\Builder;
 use Filament\Resources\Pages\CreateRecord;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
@@ -71,6 +75,17 @@ class CreateKnowledgeBaseItem extends CreateRecord
                         Textarea::make('notes')
                             ->label('Notes')
                             ->string(),
+                        Select::make('tags')
+                            ->relationship(
+                                'tags',
+                                'name',
+                                fn (Builder $query) => $query->tap(new TagsForClass(new KnowledgeBaseItem()))
+                            )
+                            ->searchable()
+                            ->preload()
+                            ->multiple()
+                            ->columnSpanFull()
+                            ->visible(fn (): bool => Feature::active('tags')),
                     ]),
                 Section::make()
                     ->schema([

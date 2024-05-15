@@ -40,7 +40,7 @@ use Filament\Panel;
 use AidingApp\Theme\ThemePlugin;
 use Illuminate\Support\ServiceProvider;
 use AidingApp\Theme\Registries\ThemeRbacRegistry;
-use App\Registries\RoleBasedAccessControlRegistry;
+use AidingApp\Authorization\AuthorizationRoleRegistry;
 
 class ThemeServiceProvider extends ServiceProvider
 {
@@ -51,6 +51,6 @@ class ThemeServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        RoleBasedAccessControlRegistry::register(ThemeRbacRegistry::class);
+        AuthorizationRoleRegistry::register(ThemeRbacRegistry::class);
     }
 }

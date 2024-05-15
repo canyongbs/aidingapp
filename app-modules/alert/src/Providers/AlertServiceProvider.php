@@ -47,8 +47,8 @@ use AidingApp\Alert\Enums\AlertSeverity;
 use AidingApp\Alert\Events\AlertCreated;
 use AidingApp\Alert\Observers\AlertObserver;
 use AidingApp\Alert\Registries\AlertRbacRegistry;
-use App\Registries\RoleBasedAccessControlRegistry;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use AidingApp\Authorization\AuthorizationRoleRegistry;
 use AidingApp\Alert\Listeners\NotifySubscribersOfAlertCreated;
 
 class AlertServiceProvider extends ServiceProvider
@@ -72,7 +72,7 @@ class AlertServiceProvider extends ServiceProvider
 
         $this->registerGraphQL();
 
-        RoleBasedAccessControlRegistry::register(AlertRbacRegistry::class);
+        AuthorizationRoleRegistry::register(AlertRbacRegistry::class);
     }
 
     protected function registerObservers(): void
