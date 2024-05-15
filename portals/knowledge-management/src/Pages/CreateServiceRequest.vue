@@ -55,11 +55,9 @@
     });
 
     const loadingResults = ref(true);
-    const description = ref('');
     const user = ref(null);
     const schema = ref([]);
     const priorities = ref(null);
-    const priority = ref(null);
     const submittedSuccess = ref(false);
 
     watch(
@@ -98,36 +96,31 @@
             return steps[stepName].valid && steps[stepName].errorCount === 0;
         },
         stringify: (value) => JSON.stringify(value, null, 2),
-        submitForm: async (data, node) => {
-            node.clearErrors();
-
-            const { post } = consumer();
-
-            const { getToken } = useTokenStore();
-            let token = await getToken();
-
-            data.description = description.value;
-            data.priority = priority.value;
-
-            // let recaptchaToken = null;
-
-            // if (formRecaptchaEnabled.value === true) {
-            //     recaptchaToken = await getRecaptchaToken(formRecaptchaKey.value);
-            // }
-
-            // if (recaptchaToken !== null) {
-            //     data['recaptcha-token'] = recaptchaToken;
-            // }
-
-            post(props.apiUrl + '/service-request/create/' + route.params.typeId, data)
-                .then((response) => {
-                    submittedSuccess.value = true;
-                })
-                .catch((error) => {
-                    node.setErrors([error]);
-                });
-        },
     });
+
+    async function submit(data, node) {
+        node.clearErrors();
+
+        // let recaptchaToken = null;
+
+        // if (formRecaptchaEnabled.value === true) {
+        //     recaptchaToken = await getRecaptchaToken(formRecaptchaKey.value);
+        // }
+
+        // if (recaptchaToken !== null) {
+        //     data['recaptcha-token'] = recaptchaToken;
+        // }
+
+        const { post } = consumer();
+
+        post(props.apiUrl + '/service-request/create/' + route.params.typeId, data)
+            .then((response) => {
+                submittedSuccess.value = true;
+            })
+            .catch((error) => {
+                node.setErrors([error]);
+            });
+    }
 
     async function getData() {
         loadingResults.value = true;
@@ -138,19 +131,17 @@
             user.value = authUser;
         });
 
-        const { getToken } = useTokenStore();
-        let token = await getToken();
+        const { get } = consumer();
 
-        axios
-            .get(props.apiUrl + '/service-request/create/' + route.params.typeId, {
-                headers: { Authorization: `Bearer ${token}` },
-            })
-            .then((response) => {
-                loadingResults.value = false;
+        get(props.apiUrl + '/service-request/create/' + route.params.typeId).then((response) => {
+            loadingResults.value = false;
 
-                schema.value = response.data.schema;
-                priorities.value = response.data.priorities;
-            });
+            response.data.schema.children = response.data.schema.children
+                ?.filter((element) => element.$formkit !== 'submit') ?? [];
+            
+            schema.value = response.data.schema;
+            priorities.value = response.data.priorities;
+        });
     }
 </script>
 
@@ -196,29 +187,36 @@
 
             <main class="grid px-6 gap-4" v-if="submittedSuccess">Thank you for submitting a new request.</main>
             <main class="grid px-6 gap-4" v-else>
-                <label for="priority" class="block text-sm font-medium text-gray-700">Priority</label>
-                <select
-                    id="priority"
-                    v-model="priority"
-                    class="w-full rounded border-gray-300 shadow focus:border-primary-600 focus:ring focus:ring-primary-400 focus:ring-opacity-50"
-                    required
+                <FormKit
+                    type="form"
+                    @submit="submit"
+                    :actions="false"
+                    :data="data"
                 >
-                    <option default disabled value="Select a priority">Select a priority</option>
-                    <option :value="p.id" v-for="p in priorities" :key="p.id">{{ p.name }}</option>
-                </select>
+                    <FormKit
+                        type="select"
+                        name="priority"
+                        label="Priority"
+                        placeholder="Select a priority"
+                        validation="required"
+                        :options="priorities"
+                    />
 
-                <label for="description" class="block text-sm font-medium text-gray-700">Describe your issue</label>
-                <textarea
-                    id="description"
-                    class="w-full rounded border-gray-300 shadow focus:border-primary-600 focus:ring focus:ring-primary-400 focus:ring-opacity-50"
-                    rows="6"
-                    placeholder="Please describe your issue here"
-                    v-model="description"
-                    required
-                ></textarea>
+                    <FormKit
+                        type="textarea"
+                        name="description"
+                        label="Describe your issue"
+                        placeholder="Please describe your issue here"
+                        validation="required"
+                        rows="6"
+                    />
 
-                <h3 class="text-xl">Additional Form Information</h3>
-                <FormKitSchema :schema="schema" :data="data" />
+                    <h3 v-if="schema.children?.length > 0" class="text-xl my-2">Additional Form Information</h3>
+
+                    <FormKitSchema name="extra" :schema="schema" />
+
+                    <FormKit type="submit" />
+                </FormKit>
             </main>
         </div>
     </div>
