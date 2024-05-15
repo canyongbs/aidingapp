@@ -37,6 +37,7 @@
 namespace App\Filament\Resources\TagResource\Pages;
 
 use Filament\Tables\Table;
+use App\Models\Contracts\HasTags;
 use Filament\Actions\CreateAction;
 use App\Filament\Resources\TagResource;
 use Filament\Tables\Actions\EditAction;
@@ -57,7 +58,15 @@ class ListTags extends ListRecords
                 TextColumn::make('name'),
                 TextColumn::make('type')
                     ->formatStateUsing(
-                        fn ($state): string => Relation::getMorphedModel($state)::getTagLabel()
+                        function (?string $state): ?string {
+                            if (blank($state)) {
+                                return null;
+                            }
+
+                            $model = Relation::getMorphedModel($state);
+
+                            return $model && is_subclass_of($model, HasTags::class) ? $model::getTagLabel() : $state;
+                        }
                     ),
             ])
             ->actions([

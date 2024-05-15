@@ -40,6 +40,7 @@ use Laravel\Pennant\Feature;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use Illuminate\Database\Eloquent\Builder;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\Portal\DataTransferObjects\KnowledgeBaseArticleData;
 use AidingApp\Portal\DataTransferObjects\KnowledgeBaseCategoryData;
@@ -79,18 +80,18 @@ class KnowledgeManagementPortalCategoryController extends Controller
                     ->when(Feature::active('tags'), fn (Builder $query) => $query->with('tags'))
                     ->public()
                     ->get()
-                    ->map(function ($item) {
+                    ->map(function (KnowledgeBaseItem $item) {
                         return [
                             'id' => $item->getKey(),
                             'categoryId' => $item->category_id,
                             'name' => $item->title,
                             'tags' => Feature::active('tags') ? $item->tags()
                                 ->orderBy('name')
-                                ->get()
                                 ->select([
                                     'id',
                                     'name',
                                 ])
+                                ->get()
                                 ->toArray() : [],
                         ];
                     })

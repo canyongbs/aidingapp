@@ -37,6 +37,7 @@
 namespace Database\Factories;
 
 use App\Models\Tag;
+use App\Models\Contracts\HasTags;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -54,13 +55,10 @@ class TagFactory extends Factory
         ];
     }
 
-    /**
-     * @param class-string $type
-     */
-    public function forClass(string $type): TagFactory
+    public function forClass(HasTags $class): TagFactory
     {
         return $this->state(fn (array $attributes) => [
-            'type' => app($type)::getTagType(),
+            'type' => $class::getTagType(),
         ]);
     }
 }

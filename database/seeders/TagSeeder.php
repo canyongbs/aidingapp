@@ -46,7 +46,7 @@ class TagSeeder extends Seeder
     {
         Tag::factory()
             ->count(20)
-            ->forClass(KnowledgeBaseItem::class)
+            ->forClass(new KnowledgeBaseItem())
             ->create();
     }
 }

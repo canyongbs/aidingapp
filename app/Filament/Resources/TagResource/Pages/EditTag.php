@@ -57,6 +57,7 @@ class EditTag extends EditRecord
             ->schema([
                 Section::make()
                     ->schema([
+                        //change this if we want non-class types
                         Select::make('type')
                             ->options([
                                 KnowledgeBaseItem::getTagType() => KnowledgeBaseItem::getTagLabel(),

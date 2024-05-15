@@ -39,6 +39,7 @@ namespace AidingApp\KnowledgeBase\Database\Seeders;
 use App\Models\Tag;
 use Illuminate\Database\Seeder;
 use AidingApp\Form\Enums\Rounding;
+use App\Models\Scopes\TagsForClass;
 use AidingApp\Portal\Settings\PortalSettings;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 
@@ -47,12 +48,12 @@ class KnowledgeBaseItemSeeder extends Seeder
     public function run(): void
     {
         $tags = Tag::query()
-            ->class(KnowledgeBaseItem::class)
+            ->tap(new TagsForClass(new KnowledgeBaseItem()))
             ->get()
             ->whenEmpty(
                 fn () => Tag::factory()
                     ->count(20)
-                    ->forClass(KnowledgeBaseItem::class)
+                    ->forClass(new KnowledgeBaseItem())
                     ->create()
             );
 

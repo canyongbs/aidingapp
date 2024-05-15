@@ -38,6 +38,7 @@ namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource\P
 
 use Filament\Forms\Form;
 use Laravel\Pennant\Feature;
+use App\Models\Scopes\TagsForClass;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Section;
@@ -75,9 +76,11 @@ class CreateKnowledgeBaseItem extends CreateRecord
                             ->label('Notes')
                             ->string(),
                         Select::make('tags')
-                            ->relationship('tags', 'name', function (Builder $query) {
-                                $query->where('type', KnowledgeBaseItem::getTagType());
-                            })
+                            ->relationship(
+                                'tags',
+                                'name',
+                                fn (Builder $query) => $query->tap(new TagsForClass(new KnowledgeBaseItem()))
+                            )
                             ->searchable()
                             ->preload()
                             ->multiple()

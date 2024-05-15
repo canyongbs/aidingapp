@@ -37,6 +37,7 @@
 namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource\Pages;
 
 use Laravel\Pennant\Feature;
+use App\Models\Scopes\TagsForClass;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Section;
@@ -65,9 +66,11 @@ class EditKnowledgeBaseItemMetadata
                         ->columnSpanFull()
                         ->extraInputAttributes(['style' => 'min-height: 12rem;']),
                     Select::make('tags')
-                        ->relationship('tags', 'name', function (Builder $query) {
-                            $query->where('type', KnowledgeBaseItem::getTagType());
-                        })
+                        ->relationship(
+                            'tags',
+                            'name',
+                            fn (Builder $query) => $query->tap(new TagsForClass(new KnowledgeBaseItem()))
+                        )
                         ->searchable()
                         ->preload()
                         ->multiple()

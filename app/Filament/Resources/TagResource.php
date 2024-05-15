@@ -38,6 +38,7 @@ namespace App\Filament\Resources;
 
 use App\Models\Tag;
 use Filament\Resources\Resource;
+use App\Filament\Clusters\KnowledgeManagement;
 use App\Filament\Resources\TagResource\Pages\EditTag;
 use App\Filament\Resources\TagResource\Pages\ListTags;
 use App\Filament\Resources\TagResource\Pages\CreateTag;
@@ -46,7 +47,11 @@ class TagResource extends Resource
 {
     protected static ?string $model = Tag::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-tag';
+
+    protected static ?string $cluster = KnowledgeManagement::class;
+
+    protected static ?int $navigationSort = 40;
 
     public static function getPages(): array
     {

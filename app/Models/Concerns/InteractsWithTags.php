@@ -39,7 +39,7 @@ namespace App\Models\Concerns;
 use App\Models\Tag;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
-trait HasTags
+trait InteractsWithTags
 {
     public static function getTagType(): string
     {

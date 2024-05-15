@@ -78,11 +78,11 @@ class KnowledgeManagementPortalSearchController extends Controller
                         'name' => $article->title,
                         'tags' => Feature::active('tags') ? $article->tags()
                             ->orderBy('name')
-                            ->get()
                             ->select([
                                 'id',
                                 'name',
                             ])
+                            ->get()
                             ->toArray() : [],
                     ];
                 })

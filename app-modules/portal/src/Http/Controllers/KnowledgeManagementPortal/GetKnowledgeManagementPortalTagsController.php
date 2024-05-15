@@ -40,6 +40,7 @@ use App\Models\Tag;
 use Illuminate\Http\Request;
 use Laravel\Pennant\Feature;
 use Illuminate\Http\JsonResponse;
+use App\Models\Scopes\TagsForClass;
 use App\Http\Controllers\Controller;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 
@@ -49,13 +50,13 @@ class GetKnowledgeManagementPortalTagsController extends Controller
     {
         return response()->json(
             Feature::active('tags') ? Tag::query()
-                ->class(KnowledgeBaseItem::class)
+                ->tap(new TagsForClass(new KnowledgeBaseItem()))
                 ->orderBy('name')
-                ->get()
                 ->select([
                     'id',
                     'name',
                 ])
+                ->get()
                 ->toArray() : [],
         );
     }

@@ -63,11 +63,11 @@ class KnowledgeManagementPortalArticleController extends Controller
                 'content' => tiptap_converter()->asHTML(TiptapMediaEncoder::decode($article->article_details)),
                 'tags' => Feature::active('tags') ? $article->tags()
                     ->orderBy('name')
-                    ->get()
                     ->select([
                         'id',
                         'name',
                     ])
+                    ->get()
                     ->toArray() : [],
             ]),
         ]);
