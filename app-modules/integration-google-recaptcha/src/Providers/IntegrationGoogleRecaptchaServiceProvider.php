@@ -38,7 +38,7 @@ namespace AidingApp\IntegrationGoogleRecaptcha\Providers;
 
 use Filament\Panel;
 use Illuminate\Support\ServiceProvider;
-use App\Registries\RoleBasedAccessControlRegistry;
+use AidingApp\Authorization\AuthorizationRoleRegistry;
 use AidingApp\IntegrationGoogleRecaptcha\IntegrationGoogleRecaptchaPlugin;
 use AidingApp\IntegrationGoogleRecaptcha\Registries\IntegrationGoogleRecaptchaRbacRegistry;
 
@@ -51,6 +51,6 @@ class IntegrationGoogleRecaptchaServiceProvider extends ServiceProvider
 
     public function boot()
     {
-        RoleBasedAccessControlRegistry::register(IntegrationGoogleRecaptchaRbacRegistry::class);
+        AuthorizationRoleRegistry::register(IntegrationGoogleRecaptchaRbacRegistry::class);
     }
 }

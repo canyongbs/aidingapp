@@ -36,9 +36,20 @@
 
 namespace App\Multitenancy\Actions;
 
+use Throwable;
 use App\Models\Tenant;
+use App\Jobs\CreateTenantUser;
+use App\Jobs\SeedTenantDatabase;
+use App\Jobs\MigrateTenantDatabase;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Encryption\Encrypter;
+use App\Jobs\UpdateTenantLicenseData;
+use Illuminate\Support\Facades\Event;
+use App\Jobs\DispatchTenantSetupCompleteEvent;
+use App\Multitenancy\Events\NewTenantSetupFailure;
+use App\Multitenancy\DataTransferObjects\TenantUser;
 use App\Multitenancy\DataTransferObjects\TenantConfig;
+use App\DataTransferObjects\LicenseManagement\LicenseData;
 
 class CreateTenant
 {
@@ -46,8 +57,11 @@ class CreateTenant
         string $name,
         string $domain,
         TenantConfig $config,
+        ?TenantUser $user = null,
+        ?LicenseData $licenseData = null,
+        bool $seedTenantDatabase = true
     ): ?Tenant {
-        return Tenant::query()
+        $tenant = Tenant::query()
             ->create(
                 [
                     'name' => $name,
@@ -56,6 +70,24 @@ class CreateTenant
                     'config' => $config,
                 ]
             );
+
+        Bus::batch([
+            [
+                new MigrateTenantDatabase($tenant),
+                ...($seedTenantDatabase ? [new SeedTenantDatabase($tenant)] : []),
+                ...($licenseData ? [new UpdateTenantLicenseData($tenant, $licenseData)] : []),
+                ...($user ? [new CreateTenantUser($tenant, $user)] : []),
+                new DispatchTenantSetupCompleteEvent($tenant),
+            ],
+        ])
+            ->name("deploy-tenant-{$tenant->getKey()}-{$domain}")
+            ->onQueue(config('queue.landlord_queue'))
+            ->catch(function (Throwable $exception) use ($tenant) {
+                Event::dispatch(new NewTenantSetupFailure($tenant, $exception));
+            })
+            ->dispatch();
+
+        return $tenant;
     }
 
     protected function generateTenantKey(): string

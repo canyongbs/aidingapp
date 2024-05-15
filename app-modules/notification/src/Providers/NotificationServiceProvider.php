@@ -40,9 +40,9 @@ use App\Concerns\ImplementsGraphQL;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use AidingApp\Notification\Models\Subscription;
-use App\Registries\RoleBasedAccessControlRegistry;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Notifications\Events\NotificationSent;
+use AidingApp\Authorization\AuthorizationRoleRegistry;
 use AidingApp\Notification\Events\SubscriptionCreated;
 use AidingApp\Notification\Events\SubscriptionDeleted;
 use AidingApp\Notification\Models\OutboundDeliverable;
@@ -75,7 +75,7 @@ class NotificationServiceProvider extends ServiceProvider
 
         $this->discoverSchema(__DIR__ . '/../../graphql/subscription.graphql');
 
-        RoleBasedAccessControlRegistry::register(NotificationRbacRegistry::class);
+        AuthorizationRoleRegistry::register(NotificationRbacRegistry::class);
     }
 
     protected function registerObservers(): void

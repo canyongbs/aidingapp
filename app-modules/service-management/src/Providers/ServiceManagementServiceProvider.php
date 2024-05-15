@@ -40,9 +40,9 @@ use Filament\Panel;
 use App\Concerns\ImplementsGraphQL;
 use Illuminate\Support\ServiceProvider;
 use AidingApp\ServiceManagement\Models\Sla;
-use App\Registries\RoleBasedAccessControlRegistry;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use AidingApp\ServiceManagement\Models\ChangeRequest;
+use AidingApp\Authorization\AuthorizationRoleRegistry;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\ServiceManagementPlugin;
 use AidingApp\ServiceManagement\Models\ChangeRequestType;
@@ -106,7 +106,7 @@ class ServiceManagementServiceProvider extends ServiceProvider
 
         $this->discoverSchema(__DIR__ . '/../../graphql/service-management.graphql');
 
-        RoleBasedAccessControlRegistry::register(ServiceManagementRbacRegistry::class);
+        AuthorizationRoleRegistry::register(ServiceManagementRbacRegistry::class);
     }
 
     protected function registerObservers(): void

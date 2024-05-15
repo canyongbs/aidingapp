@@ -44,9 +44,9 @@ use Illuminate\Support\ServiceProvider;
 use AidingApp\Contact\Models\ContactSource;
 use AidingApp\Contact\Models\ContactStatus;
 use AidingApp\Contact\Observers\ContactObserver;
-use App\Registries\RoleBasedAccessControlRegistry;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use AidingApp\Contact\Registries\ContactRbacRegistry;
+use AidingApp\Authorization\AuthorizationRoleRegistry;
 use AidingApp\Contact\Enums\ContactStatusColorOptions;
 use AidingApp\Contact\Enums\SystemContactClassification;
 
@@ -73,6 +73,6 @@ class ContactServiceProvider extends ServiceProvider
         $this->registerEnum(ContactStatusColorOptions::class);
         $this->registerEnum(SystemContactClassification::class);
 
-        RoleBasedAccessControlRegistry::register(ContactRbacRegistry::class);
+        AuthorizationRoleRegistry::register(ContactRbacRegistry::class);
     }
 }
