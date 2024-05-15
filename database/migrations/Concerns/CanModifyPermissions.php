@@ -86,4 +86,15 @@ trait CanModifyPermissions
                 ];
             }, array_keys($names), array_values($names)));
     }
+
+    /**
+     * @param array<int, string> $names Just the names of the permissions to delete. The group is not needed.
+     */
+    public function deletePermissions(array $names, string|array $guardName): void
+    {
+        DB::table('permissions')
+            ->whereIn('name', $names)
+            ->whereIn('guard_name', collect($guardName))
+            ->delete();
+    }
 }
