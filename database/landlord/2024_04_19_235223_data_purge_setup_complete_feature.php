@@ -34,25 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace App\DataTransferObjects\LicenseManagement;
+use Laravel\Pennant\Feature;
+use Illuminate\Database\Migrations\Migration;
 
-use Spatie\LaravelData\Data;
-use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+return new class () extends Migration {
+    public function up(): void
+    {
+        Feature::purge('setup-complete');
+    }
 
-#[MapInputName(SnakeCaseMapper::class)]
-class LicenseAddonsData extends Data
-{
-    public function __construct(
-        public bool $onlineForms,
-        public bool $onlineSurveys,
-        public bool $serviceManagement,
-        public bool $knowledgeManagement,
-        public bool $realtimeChat,
-        public bool $mobileApps,
-        public bool $changeManagement = false,
-        public bool $assetManagement = false,
-        public bool $feedbackManagement = false,
-        public bool $experimentalReporting = false,
-    ) {}
-}
+    public function down(): void
+    {
+        Feature::activate('setup-complete');
+    }
+};

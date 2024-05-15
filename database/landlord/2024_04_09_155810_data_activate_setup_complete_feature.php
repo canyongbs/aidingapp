@@ -34,6 +34,7 @@
 </COPYRIGHT>
 */
 
+use Laravel\Pennant\Feature;
 use Illuminate\Database\Migrations\Migration;
 
 return new class () extends Migration {
