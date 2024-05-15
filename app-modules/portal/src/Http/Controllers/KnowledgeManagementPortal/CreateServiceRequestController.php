@@ -36,11 +36,13 @@
 
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
+use App\Enums\Feature;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
 use Symfony\Component\HttpFoundation\Response;
 use AidingApp\Form\Actions\GenerateFormKitSchema;
@@ -56,7 +58,7 @@ class CreateServiceRequestController extends Controller
     public function create(GenerateFormKitSchema $generateSchema, ServiceRequestType $type): JsonResponse
     {
         return response()->json([
-            'schema' => $type->form ? $generateSchema($type->form) : [],
+            'schema' => $type->form && Gate::check(Feature::OnlineForms->getGateName()) ? $generateSchema($type->form) : [],
             'priorities' => $type->priorities()->orderBy('order', 'desc')->pluck('name', 'id'),
         ]);
     }
