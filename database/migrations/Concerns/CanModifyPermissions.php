@@ -44,7 +44,7 @@ trait CanModifyPermissions
     /**
      * @param array<string, string> $names The keys of the array should be the permission names and the values should be the name of the group they belong to.
      */
-    public function createPermissions(array $names, string $guardName): void
+    public function createPermissions(array $names, string|array $guardName): void
     {
         $groups = DB::table('permission_groups')
             ->pluck('id', 'name')
@@ -75,15 +75,29 @@ trait CanModifyPermissions
             ...$newGroups,
         ];
 
+        collect($guardName)
+            ->each(function (string $guardName) use ($names, $groups): void {
+                DB::table('permissions')
+                    ->insert(array_map(function (string $name, string $groupName) use ($groups, $guardName): array {
+                        return [
+                            'id' => (string) Str::orderedUuid(),
+                            'group_id' => $groups[$groupName],
+                            'guard_name' => $guardName,
+                            'name' => $name,
+                            'created_at' => now(),
+                        ];
+                    }, array_keys($names), array_values($names)));
+            });
+    }
+
+    /**
+     * @param array<int, string> $names Just the names of the permissions to delete. The group is not needed.
+     */
+    public function deletePermissions(array $names, string|array $guardName): void
+    {
         DB::table('permissions')
-            ->insert(array_map(function (string $name, string $groupName) use ($groups, $guardName): array {
-                return [
-                    'id' => (string) Str::orderedUuid(),
-                    'group_id' => $groups[$groupName],
-                    'guard_name' => $guardName,
-                    'name' => $name,
-                    'created_at' => now(),
-                ];
-            }, array_keys($names), array_values($names)));
+            ->whereIn('name', $names)
+            ->whereIn('guard_name', collect($guardName))
+            ->delete();
     }
 }
