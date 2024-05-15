@@ -34,6 +34,8 @@
 </COPYRIGHT>
 */
 
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
 return new class () extends Migration {
@@ -45,5 +47,94 @@ return new class () extends Migration {
         Schema::dropIfExists('survey_fields');
         Schema::dropIfExists('survey_steps');
         Schema::dropIfExists('surveys');
+    }
+
+    public function down(): void
+    {
+        Schema::create('surveys', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+
+            $table->string('name')->unique();
+            $table->text('description')->nullable();
+            $table->boolean('embed_enabled')->default(false);
+            $table->json('allowed_domains')->nullable();
+            $table->string('primary_color')->nullable();
+            $table->string('rounding')->nullable();
+            $table->boolean('is_authenticated')->default(false);
+            $table->boolean('is_wizard')->default(false);
+            $table->boolean('recaptcha_enabled')->default(false);
+            $table->json('content')->nullable();
+
+            $table->timestamps();
+            $table->softDeletes();
+        });
+
+        Schema::create('survey_steps', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+
+            $table->text('label');
+            $table->json('content')->nullable();
+            $table->foreignUuid('survey_id')->constrained('surveys')->cascadeOnDelete();
+            $table->integer('sort');
+
+            $table->timestamps();
+            $table->softDeletes();
+        });
+
+        Schema::create('survey_fields', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+
+            $table->text('label');
+            $table->text('type');
+            $table->boolean('is_required');
+            $table->json('config');
+
+            $table->foreignUuid('survey_id')->constrained('surveys')->cascadeOnDelete();
+            $table->foreignUuid('step_id')->nullable()->constrained('survey_steps')->cascadeOnDelete();
+
+            $table->timestamps();
+            $table->softDeletes();
+        });
+
+        Schema::create('survey_authentications', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+
+            $table->string('author_id')->nullable();
+            $table->string('author_type')->nullable();
+            $table->string('code')->nullable();
+            $table->foreignUuid('survey_id')->constrained('surveys')->cascadeOnDelete();
+
+            $table->timestamps();
+
+            $table->index(['author_type', 'author_id']);
+        });
+
+        Schema::create('survey_submissions', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+
+            $table->foreignUuid('survey_id')->constrained('surveys')->cascadeOnDelete();
+            $table->string('author_id')->nullable();
+            $table->string('author_type')->nullable();
+            $table->timestamp('submitted_at')->nullable();
+            $table->timestamp('canceled_at')->nullable();
+            $table->string('request_method')->nullable();
+            $table->text('request_note')->nullable();
+            $table->foreignUuid('requester_id')->nullable()->constrained('users')->nullOnDelete();
+
+            $table->timestamps();
+            $table->softDeletes();
+
+            $table->index(['author_type', 'author_id']);
+        });
+
+        Schema::create('survey_field_submission', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+
+            $table->longText('response');
+            $table->foreignUuid('field_id')->constrained('survey_fields')->cascadeOnDelete();
+            $table->foreignUuid('submission_id')->constrained('survey_submissions')->cascadeOnDelete();
+
+            $table->timestamps();
+        });
     }
 };
