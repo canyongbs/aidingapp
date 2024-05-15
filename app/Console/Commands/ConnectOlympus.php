@@ -34,19 +34,43 @@
 </COPYRIGHT>
 */
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Tenants\SyncTenantController;
-use App\Http\Controllers\Tenants\CreateTenantController;
-use App\Http\Controllers\Tenants\DeleteTenantController;
+namespace App\Console\Commands;
 
-Route::post('tenants', CreateTenantController::class)
-    ->name('tenants.create');
+use Illuminate\Console\Command;
+use App\Settings\OlympusSettings;
+use Illuminate\Support\Facades\Http;
 
-Route::delete('tenants/{tenant}', DeleteTenantController::class)
-    ->name('tenants.delete');
+class ConnectOlympus extends Command
+{
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = 'olympus:connect {url}';
 
-Route::post('tenants/{tenant}/sync', SyncTenantController::class)
-    ->name('tenants.sync');
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'Connect the app to communicate with Olympus.';
 
-Route::post('test', fn () => true)
-    ->name('test');
+    /**
+     * Execute the console command.
+     */
+    public function handle(): int
+    {
+        $response = Http::post($this->argument('url'), [
+            'url' => config('app.landlord_url'),
+        ])->throw();
+
+        $olympusSettings = app(OlympusSettings::class);
+        $olympusSettings->fill($response->json('olympus'));
+        $olympusSettings->save();
+
+        $this->info('The app has been connected to Olympus.');
+
+        return static::SUCCESS;
+    }
+}

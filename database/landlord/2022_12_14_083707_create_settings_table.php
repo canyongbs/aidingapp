@@ -34,19 +34,24 @@
 </COPYRIGHT>
 */
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Tenants\SyncTenantController;
-use App\Http\Controllers\Tenants\CreateTenantController;
-use App\Http\Controllers\Tenants\DeleteTenantController;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
-Route::post('tenants', CreateTenantController::class)
-    ->name('tenants.create');
+return new class () extends Migration {
+    public function up(): void
+    {
+        Schema::create('settings', function (Blueprint $table): void {
+            $table->uuid('id')->primary();
 
-Route::delete('tenants/{tenant}', DeleteTenantController::class)
-    ->name('tenants.delete');
+            $table->string('group');
+            $table->string('name');
+            $table->boolean('locked')->default(false);
+            $table->json('payload');
 
-Route::post('tenants/{tenant}/sync', SyncTenantController::class)
-    ->name('tenants.sync');
+            $table->timestamps();
 
-Route::post('test', fn () => true)
-    ->name('test');
+            $table->unique(['group', 'name']);
+        });
+    }
+};

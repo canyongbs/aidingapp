@@ -34,27 +34,15 @@
 </COPYRIGHT>
 */
 
-namespace App\Multitenancy\Http\Middleware;
+namespace App\Models;
 
-use Closure;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Spatie\LaravelSettings\Models\SettingsProperty as BaseSettingsProperty;
 
-class CheckLandlordApiKey
+/**
+ * @mixin IdeHelperLandlordSettingsProperty
+ */
+class LandlordSettingsProperty extends BaseSettingsProperty
 {
-    public function handle(Request $request, Closure $next): Response
-    {
-        if (! Hash::check($request->bearerToken(), base64_decode(config('app.landlord_api_key')))) {
-            if ($request->expectsJson()) {
-                return response()->json([
-                    'message' => 'Invalid API key',
-                ], Response::HTTP_FORBIDDEN);
-            }
-
-            abort(Response::HTTP_FORBIDDEN, 'Invalid API key');
-        }
-
-        return $next($request);
-    }
+    use HasUuids;
 }

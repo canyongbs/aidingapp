@@ -34,19 +34,32 @@
 </COPYRIGHT>
 */
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Tenants\SyncTenantController;
-use App\Http\Controllers\Tenants\CreateTenantController;
-use App\Http\Controllers\Tenants\DeleteTenantController;
+namespace App\Http\Requests\Tenants;
 
-Route::post('tenants', CreateTenantController::class)
-    ->name('tenants.create');
+use Illuminate\Foundation\Http\FormRequest;
 
-Route::delete('tenants/{tenant}', DeleteTenantController::class)
-    ->name('tenants.delete');
-
-Route::post('tenants/{tenant}/sync', SyncTenantController::class)
-    ->name('tenants.sync');
-
-Route::post('test', fn () => true)
-    ->name('test');
+class SyncTenantRequest extends FormRequest
+{
+    public function rules(): array
+    {
+        return [
+            'limits' => ['required', 'array'],
+            'limits.conversationalAiSeats' => ['required', 'integer', 'min:0'],
+            'limits.recruitmentCrmSeats' => ['required', 'integer', 'min:0'],
+            'limits.emails' => ['required', 'integer', 'min:0'],
+            'limits.sms' => ['required', 'integer', 'min:0'],
+            'limits.resetDate' => ['required', 'string', 'date_format:m-d'],
+            'addons' => ['required', 'array'],
+            'addons.onlineForms' => ['required', 'boolean'],
+            'addons.onlineSurveys' => ['required', 'boolean'],
+            'addons.serviceManagement' => ['required', 'boolean'],
+            'addons.knowledgeManagement' => ['required', 'boolean'],
+            'addons.realtimeChat' => ['required', 'boolean'],
+            'addons.mobileApps' => ['required', 'boolean'],
+            'addons.changeManagement' => ['required', 'boolean'],
+            'addons.assetManagement' => ['required', 'boolean'],
+            'addons.feedbackManagement' => ['required', 'boolean'],
+            'addons.experimentalReporting' => ['required', 'boolean'],
+        ];
+    }
+}

@@ -34,19 +34,27 @@
 </COPYRIGHT>
 */
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Tenants\SyncTenantController;
-use App\Http\Controllers\Tenants\CreateTenantController;
-use App\Http\Controllers\Tenants\DeleteTenantController;
+namespace App\Multitenancy\Http\Middleware;
 
-Route::post('tenants', CreateTenantController::class)
-    ->name('tenants.create');
+use Closure;
+use Illuminate\Http\Request;
+use App\Settings\OlympusSettings;
+use Symfony\Component\HttpFoundation\Response;
 
-Route::delete('tenants/{tenant}', DeleteTenantController::class)
-    ->name('tenants.delete');
+class CheckOlympusKey
+{
+    public function handle(Request $request, Closure $next): Response
+    {
+        if ($request->bearerToken() !== app(OlympusSettings::class)->key) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Invalid Olympus key',
+                ], Response::HTTP_FORBIDDEN);
+            }
 
-Route::post('tenants/{tenant}/sync', SyncTenantController::class)
-    ->name('tenants.sync');
+            abort(Response::HTTP_FORBIDDEN, 'Invalid Olympus key');
+        }
 
-Route::post('test', fn () => true)
-    ->name('test');
+        return $next($request);
+    }
+}

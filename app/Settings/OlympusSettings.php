@@ -34,19 +34,32 @@
 </COPYRIGHT>
 */
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Tenants\SyncTenantController;
-use App\Http\Controllers\Tenants\CreateTenantController;
-use App\Http\Controllers\Tenants\DeleteTenantController;
+namespace App\Settings;
 
-Route::post('tenants', CreateTenantController::class)
-    ->name('tenants.create');
+use Spatie\LaravelSettings\Settings;
 
-Route::delete('tenants/{tenant}', DeleteTenantController::class)
-    ->name('tenants.delete');
+class OlympusSettings extends Settings
+{
+    public ?string $application_id;
 
-Route::post('tenants/{tenant}/sync', SyncTenantController::class)
-    ->name('tenants.sync');
+    public ?string $key;
 
-Route::post('test', fn () => true)
-    ->name('test');
+    public ?string $url;
+
+    public static function repository(): ?string
+    {
+        return 'landlord_database';
+    }
+
+    public static function group(): string
+    {
+        return 'olympus';
+    }
+
+    public static function encrypted(): array
+    {
+        return [
+            'key',
+        ];
+    }
+}

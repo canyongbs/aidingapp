@@ -34,19 +34,15 @@
 </COPYRIGHT>
 */
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Tenants\SyncTenantController;
-use App\Http\Controllers\Tenants\CreateTenantController;
-use App\Http\Controllers\Tenants\DeleteTenantController;
+use Spatie\LaravelSettings\Migrations\SettingsMigration;
 
-Route::post('tenants', CreateTenantController::class)
-    ->name('tenants.create');
+return new class () extends SettingsMigration {
+    public function up(): void
+    {
+        $this->migrator->repository('landlord_database');
 
-Route::delete('tenants/{tenant}', DeleteTenantController::class)
-    ->name('tenants.delete');
-
-Route::post('tenants/{tenant}/sync', SyncTenantController::class)
-    ->name('tenants.sync');
-
-Route::post('test', fn () => true)
-    ->name('test');
+        $this->migrator->addEncrypted('olympus.application_id');
+        $this->migrator->addEncrypted('olympus.key');
+        $this->migrator->addEncrypted('olympus.url');
+    }
+};
