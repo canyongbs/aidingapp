@@ -136,9 +136,9 @@
         get(props.apiUrl + '/service-request/create/' + route.params.typeId).then((response) => {
             loadingResults.value = false;
 
-            response.data.schema.children = response.data.schema.children
-                ?.filter((element) => element.$formkit !== 'submit') ?? [];
-            
+            response.data.schema.children =
+                response.data.schema.children?.filter((element) => element.$formkit !== 'submit') ?? [];
+
             schema.value = response.data.schema;
             priorities.value = response.data.priorities;
         });
@@ -187,12 +187,7 @@
 
             <main class="grid px-6 gap-4" v-if="submittedSuccess">Thank you for submitting a new request.</main>
             <main class="grid px-6 gap-4" v-else>
-                <FormKit
-                    type="form"
-                    @submit="submit"
-                    :actions="false"
-                    :data="data"
-                >
+                <FormKit type="form" @submit="submit" :actions="false" :data="data">
                     <FormKit
                         type="select"
                         name="priority"
