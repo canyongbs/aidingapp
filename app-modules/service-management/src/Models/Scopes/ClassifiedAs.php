@@ -38,11 +38,12 @@ namespace AidingApp\ServiceManagement\Models\Scopes;
 
 use Illuminate\Database\Eloquent\Builder;
 use AidingApp\ServiceManagement\Enums\SystemChangeRequestClassification;
+use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 
 class ClassifiedAs
 {
     public function __construct(
-        protected SystemChangeRequestClassification $classification,
+        protected SystemChangeRequestClassification|SystemServiceRequestClassification $classification,
     ) {}
 
     public function __invoke(Builder $query): void

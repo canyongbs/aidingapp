@@ -36,14 +36,20 @@
 
 namespace App\Filament\Widgets;
 
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
+use AidingApp\ServiceManagement\Models\Scopes\ClassifiedAs;
+use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 
 class ServiceRequestWidget extends BaseWidget
 {
     protected int | string | array $columnSpan = 'full';
+
+    protected int $daysAgo = 30;
 
     public function getColumns(): int
     {
@@ -52,11 +58,98 @@ class ServiceRequestWidget extends BaseWidget
 
     protected function getStats(): array
     {
+        $intervalStart = now()->subDays($this->daysAgo);
+
+        [$currentOpenServiceRequests, $openServiceRequestsPercentageChange, $openServiceRequestsIcon, $openServiceRequestsColor] = $this->calculateOpenServiceRequestStats($intervalStart);
+
+        $currentUnassignedServiceRequests = ServiceRequest::doesntHave('assignments')->count();
+
         return [
-            Stat::make('Open Service Requests', ServiceRequest::whereHas('status', function ($query) {
-                return $query->where('classification', SystemServiceRequestClassification::Open->value);
-            })->count()),
-            Stat::make('Unassigned Service Requests', ServiceRequest::doesntHave('assignments')->count()),
+            Stat::make('Open Service Requests', $currentOpenServiceRequests)
+                ->description($openServiceRequestsPercentageChange)
+                ->descriptionIcon($openServiceRequestsIcon)
+                ->color($openServiceRequestsColor),
+            Stat::make('Unassigned Service Requests', $currentUnassignedServiceRequests),
+        ];
+    }
+
+    private function calculateOpenServiceRequestStats(Carbon $intervalStart): array
+    {
+        $openStatusIds = ServiceRequestStatus::tap(new ClassifiedAs(SystemServiceRequestClassification::Open))->pluck('id');
+
+        $currentOpenServiceRequests = ServiceRequest::whereIn('status_id', $openStatusIds)->count();
+
+        $serviceRequestsCreatedBeforeIntervalStart = ServiceRequest::query()
+            ->with(['histories' => function ($query) use ($intervalStart) {
+                $query->whereBetween('created_at', [$intervalStart, now()])
+                    ->whereRaw("original_values->>'status_id' IS NOT NULL")  // Checks if status_id was actually changed
+                    ->orderBy('created_at', 'asc')
+                    ->limit(1);
+            }])
+            ->where('created_at', '<=', $intervalStart)->get();
+
+        $openServiceRequestsAtIntervalCount = Cache::remember('open_service_requests_at_interval_count', 60 * 60, function () use ($serviceRequestsCreatedBeforeIntervalStart, $openStatusIds) {
+            return $serviceRequestsCreatedBeforeIntervalStart->filter(function (ServiceRequest $serviceRequest) use ($openStatusIds) {
+                // If the service request is open, and doesn't have any history, it was open at interval date
+                if ($openStatusIds->contains($serviceRequest->status_id) && $serviceRequest->histories->isEmpty()) {
+                    return true;
+                }
+
+                // If the service request is not open, and doesn't have any history, it was not open at interval date
+                if ($openStatusIds->doesntContain($serviceRequest->status_id) && $serviceRequest->histories->isEmpty()) {
+                    return false;
+                }
+
+                // If the service requests history has a status_id that is in the open status ids, it was open at interval date
+                if ($history = $serviceRequest->histories->first()) {
+                    $originalStatusId = $history->original_values['status_id'] ?? null;
+
+                    return $openStatusIds->contains($originalStatusId);
+                }
+
+                return false;
+            })->count();
+        });
+
+        $percentageChange = $this->getPercentageChange($openServiceRequestsAtIntervalCount, $currentOpenServiceRequests);
+
+        [$percentageChange, $icon, $color] = $this->getFormattedPercentageChangeDetails($percentageChange);
+
+        return [
+            $currentOpenServiceRequests,
+            $percentageChange,
+            $icon,
+            $color,
+        ];
+    }
+
+    private function getPercentageChange($oldValue, $newValue): int
+    {
+        return $oldValue > 0
+                        ? (($newValue - $oldValue) / $oldValue) * 100
+                        : ($newValue > 0 ? 100 : 0);
+    }
+
+    private function getFormattedPercentageChangeDetails(int $percentageChange): array
+    {
+        if ($percentageChange > 0) {
+            $percentageChange = number_format($percentageChange) . '% increase';
+            $icon = 'heroicon-m-arrow-trending-up';
+            $color = 'success';
+        } elseif ($percentageChange < 0) {
+            $percentageChange = number_format($percentageChange) . '% decrease';
+            $icon = 'heroicon-m-arrow-trending-down';
+            $color = 'danger';
+        } else {
+            $percentageChange = 'No change';
+            $icon = null;
+            $color = null;
+        }
+
+        return [
+            $percentageChange,
+            $icon,
+            $color,
         ];
     }
 }
