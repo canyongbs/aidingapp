@@ -34,37 +34,31 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Report\Providers;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
-use Filament\Panel;
-use AidingApp\Report\ReportPlugin;
-use AidingApp\Report\Models\Report;
-use Illuminate\Support\ServiceProvider;
-use AidingApp\Report\Observers\ReportObserver;
-use AidingApp\Report\Registries\ReportRbacRegistry;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use AidingApp\Authorization\AuthorizationRoleRegistry;
-
-class ReportServiceProvider extends ServiceProvider
-{
-    public function register()
+return new class () extends Migration {
+    public function up(): void
     {
-        Panel::configureUsing(fn (Panel $panel) => ($panel->getId() !== 'admin') || $panel->plugin(new ReportPlugin()));
+        Schema::dropIfExists('reports');
     }
 
-    public function boot()
+    public function down(): void
     {
-        Relation::morphMap([
-            'report' => Report::class,
-        ]);
+        Schema::create('reports', function (Blueprint $table) {
+            $table->uuid('id')->primary();
 
-        $this->registerObservers();
+            $table->string('name');
+            $table->text('description')->nullable();
+            $table->json('filters')->nullable();
+            $table->json('columns');
+            $table->string('model');
 
-        AuthorizationRoleRegistry::register(ReportRbacRegistry::class);
+            $table->foreignUuid('user_id')->constrained('users');
+
+            $table->timestamps();
+            $table->softDeletes();
+        });
     }
-
-    protected function registerObservers(): void
-    {
-        Report::observe(ReportObserver::class);
-    }
-}
+};

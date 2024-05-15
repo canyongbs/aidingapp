@@ -2142,41 +2142,6 @@ namespace AidingApp\Portal\Models{
 	class IdeHelperPortalAuthentication {}
 }
 
-namespace AidingApp\Report\Models{
-/**
- * AidingApp\Report\Models\Report
- *
- * @property string $id
- * @property string $name
- * @property string|null $description
- * @property array|null $filters
- * @property array $columns
- * @property \AidingApp\Report\Enums\ReportModel $model
- * @property string $user_id
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property string|null $deleted_at
- * @property-read \App\Models\User $user
- * @method static \AidingApp\Report\Database\Factories\ReportFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder|Report newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Report newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Report query()
- * @method static \Illuminate\Database\Eloquent\Builder|Report whereColumns($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Report whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Report whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Report whereDescription($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Report whereFilters($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Report whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Report whereModel($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Report whereName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Report whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Report whereUserId($value)
- * @mixin \Eloquent
- */
-	#[\AllowDynamicProperties]
-	class IdeHelperReport {}
-}
-
 namespace AidingApp\ServiceManagement\Models{
 /**
  * AidingApp\ServiceManagement\Models\ChangeRequest
