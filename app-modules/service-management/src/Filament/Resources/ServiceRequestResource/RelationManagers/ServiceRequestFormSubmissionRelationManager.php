@@ -58,7 +58,11 @@ class ServiceRequestFormSubmissionRelationManager extends RelationManager
                     ->dateTime(),
                 TextColumn::make('author.email')
                     ->label('Submitted By')
-                    ->url(fn (ServiceRequestFormSubmission $record) => resolve($record->author::filamentResource())->getUrl('view', ['record' => $record->author]))
+                    ->url(
+                        fn (ServiceRequestFormSubmission $record) => $record->author
+                        ? resolve($record->author::filamentResource())->getUrl('view', ['record' => $record->author])
+                        : null
+                    )
                     ->color('primary'),
                 TextColumn::make('author_type')
                     ->label('Submitted By Type')

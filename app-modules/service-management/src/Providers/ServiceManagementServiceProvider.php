@@ -65,7 +65,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestFormAuthentication;
 use AidingApp\ServiceManagement\Observers\ServiceRequestHistoryObserver;
 use AidingApp\ServiceManagement\Registries\ServiceManagementRbacRegistry;
 use AidingApp\ServiceManagement\Observers\ServiceRequestAssignmentObserver;
-use AidingApp\ServiceManagement\Observers\ServiceRequestFormSubmissionObserver;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\SqidPlusSixServiceRequestNumberGenerator;
 
@@ -114,7 +113,6 @@ class ServiceManagementServiceProvider extends ServiceProvider
         ChangeRequest::observe(ChangeRequestObserver::class);
         ServiceRequest::observe(ServiceRequestObserver::class);
         ServiceRequestAssignment::observe(ServiceRequestAssignmentObserver::class);
-        ServiceRequestFormSubmission::observe(ServiceRequestFormSubmissionObserver::class);
         ServiceRequestHistory::observe(ServiceRequestHistoryObserver::class);
         ServiceRequestUpdate::observe(ServiceRequestUpdateObserver::class);
     }

@@ -121,6 +121,9 @@ class ServiceRequestFormPolicy implements PerformsChecksBeforeAuthorization
 
     protected function requiredFeatures(): array
     {
-        return [Feature::ServiceManagement];
+        return [
+            Feature::ServiceManagement,
+            Feature::OnlineForms,
+        ];
     }
 }

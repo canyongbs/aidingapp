@@ -46,7 +46,6 @@ class ServiceRequestTypesController extends Controller
     {
         return response()->json([
             'types' => ServiceRequestType::query()
-                ->whereHas('form')
                 ->orderBy('name')
                 ->get()
                 ->map(function (ServiceRequestType $type) {

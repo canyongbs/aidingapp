@@ -36,25 +36,31 @@
 
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
+use App\Enums\Feature;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
 use Symfony\Component\HttpFoundation\Response;
 use AidingApp\Form\Actions\GenerateFormKitSchema;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\Form\Actions\GenerateSubmissibleValidation;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\Form\Actions\ResolveSubmissionAuthorFromEmail;
 use AidingApp\Form\Filament\Blocks\EducatableEmailFormFieldBlock;
+use AidingApp\ServiceManagement\Models\ServiceRequestFormSubmission;
 
 class CreateServiceRequestController extends Controller
 {
     public function create(GenerateFormKitSchema $generateSchema, ServiceRequestType $type): JsonResponse
     {
         return response()->json([
-            'schema' => $generateSchema($type->form),
-            'priorities' => $type->priorities()->orderBy('order', 'desc')->get()->pluck('name', 'id')->map(fn ($name, $id) => ['id' => $id, 'name' => $name]),
+            'schema' => $type->form && Gate::check(Feature::OnlineForms->getGateName()) ? $generateSchema($type->form) : [],
+            'priorities' => $type->priorities()->orderBy('order', 'desc')->pluck('name', 'id'),
         ]);
     }
 
@@ -64,117 +70,143 @@ class CreateServiceRequestController extends Controller
         ResolveSubmissionAuthorFromEmail $resolveSubmissionAuthorFromEmail,
         ServiceRequestType $type,
     ): JsonResponse {
-        $contact = auth('contact')->user() ?? $request->user();
+        $contact = auth('contact')->user();
+
+        abort_if(is_null($contact), Response::HTTP_UNAUTHORIZED);
 
         $serviceRequestForm = $type->form;
 
-        if (
-            is_null($contact)
-        ) {
-            abort(Response::HTTP_UNAUTHORIZED);
-        }
-
-        $validator = Validator::make(
-            $request->all(),
-            $generateValidation($serviceRequestForm)
-        );
+        $validator = Validator::make($request->all(), [
+            'priority' => ['required', 'exists:service_request_priorities,id'],
+            'description' => ['required', 'string', 'max:65535'],
+            ...$serviceRequestForm
+                ? Arr::prependKeysWith($generateValidation($serviceRequestForm), 'extra.')
+                : [],
+        ]);
 
         if ($validator->fails()) {
-            return response()->json(
-                [
-                    'errors' => (object) $validator->errors(),
-                ],
-                Response::HTTP_UNPROCESSABLE_ENTITY
-            );
+            return response()->json([
+                'errors' => (object) $validator->errors(),
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
-
-        $submission = $serviceRequestForm->submissions()->make();
-
-        $submission
-            ->priority()
-            ->associate(
-                $serviceRequestForm
-                    ->type
-                    ->priorities()
-                    ->findOrFail(
-                        $request->input('priority')
-                    )
-            );
-
-        if ($contact) {
-            $submission->author()->associate($contact);
-        }
-
-        $submission->submitted_at = now();
-
-        $submission->description = $request->input('description');
-
-        $submission->save();
 
         $data = $validator->validated();
 
-        unset($data['recaptcha-token']);
+        $priority = $type->priorities()->findOrFail($data['priority']);
 
-        if ($serviceRequestForm->is_wizard) {
-            foreach ($serviceRequestForm->steps as $step) {
-                $stepFields = $step->fields()->pluck('type', 'id')->all();
+        return DB::transaction(function () use (
+            $resolveSubmissionAuthorFromEmail,
+            $serviceRequestForm,
+            $priority,
+            $contact,
+            $data,
+            $type
+        ) {
+            $serviceRequest = new ServiceRequest([
+                'title' => $type->name,
+                'close_details' => $data['description'],
+            ]);
 
-                foreach ($data[$step->label] as $fieldId => $response) {
-                    $submission->fields()->attach(
+            $serviceRequest->respondent()->associate($contact);
+            $serviceRequest->priority()->associate($priority);
+
+            $serviceRequest->save();
+
+            if (! $serviceRequestForm) {
+                return response()->json([
+                    'message' => 'Service Request Form submitted successfully.',
+                ]);
+            }
+
+            unset(
+                $data['description'],
+                $data['priority'],
+            );
+
+            $submission = $serviceRequestForm->submissions()
+                ->make([
+                    'submitted_at' => now(),
+                ]);
+
+            $submission->priority()->associate($priority);
+
+            $submission->save();
+
+            unset($data['recaptcha-token']);
+
+            $data = data_get($data, 'extra', []);
+
+            if ($serviceRequestForm->is_wizard) {
+                foreach ($serviceRequestForm->steps as $step) {
+                    $fields = $step->fields()->pluck('type', 'id')->all();
+
+                    foreach ($data[$step->label] as $fieldId => $response) {
+                        $this->processSubmissionField(
+                            $submission,
+                            $fieldId,
+                            $response,
+                            $fields,
+                            $resolveSubmissionAuthorFromEmail
+                        );
+                    }
+                }
+            } else {
+                $fields = $serviceRequestForm->fields()->pluck('type', 'id')->all();
+
+                foreach ($data as $fieldId => $response) {
+                    $this->processSubmissionField(
+                        $submission,
                         $fieldId,
-                        ['id' => Str::orderedUuid(), 'response' => $response],
+                        $response,
+                        $fields,
+                        $resolveSubmissionAuthorFromEmail
                     );
-
-                    if ($submission->author) {
-                        continue;
-                    }
-
-                    if ($stepFields[$fieldId] !== EducatableEmailFormFieldBlock::type()) {
-                        continue;
-                    }
-
-                    $author = $resolveSubmissionAuthorFromEmail($response);
-
-                    if (! $author) {
-                        continue;
-                    }
-
-                    $submission->author()->associate($author);
                 }
             }
-        } else {
-            $formFields = $serviceRequestForm->fields()->pluck('type', 'id')->all();
 
-            foreach ($data as $fieldId => $response) {
-                $submission->fields()->attach(
-                    $fieldId,
-                    ['id' => Str::orderedUuid(), 'response' => $response],
-                );
+            $submission->save();
 
-                if ($submission->author) {
-                    continue;
-                }
+            $serviceRequest->title = $serviceRequestForm->name;
+            $serviceRequest->serviceRequestFormSubmission()->associate($submission);
 
-                if ($formFields[$fieldId] !== EducatableEmailFormFieldBlock::type()) {
-                    continue;
-                }
-
-                $author = $resolveSubmissionAuthorFromEmail($response);
-
-                if (! $author) {
-                    continue;
-                }
-
-                $submission->author()->associate($author);
+            if ($submission->author) {
+                $serviceRequest->respondent()->associate($submission->author);
             }
+
+            $serviceRequest->save();
+
+            return response()->json([
+                'message' => 'Service Request Form submitted successfully.',
+            ]);
+        });
+    }
+
+    private function processSubmissionField(
+        ServiceRequestFormSubmission $submission,
+        string $fieldId,
+        mixed $response,
+        array $fields,
+        ResolveSubmissionAuthorFromEmail $resolveSubmissionAuthorFromEmail
+    ) {
+        $submission->fields()->attach($fieldId, [
+            'id' => Str::orderedUuid(),
+            'response' => $response,
+        ]);
+
+        if ($submission->author) {
+            return;
         }
 
-        $submission->save();
+        if ($fields[$fieldId] !== EducatableEmailFormFieldBlock::type()) {
+            return;
+        }
 
-        return response()->json(
-            [
-                'message' => 'Service Request Form submitted successfully.',
-            ]
-        );
+        $author = $resolveSubmissionAuthorFromEmail($response);
+
+        if (! $author) {
+            return;
+        }
+
+        $submission->author()->associate($author);
     }
 }

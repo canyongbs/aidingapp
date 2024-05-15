@@ -129,7 +129,7 @@ class ManageLicenseSettings extends SettingsPage
                     ->schema(
                         [
                             Toggle::make('data.addons.onlineForms')
-                                ->label('Online Forms'),
+                                ->label('Custom Forms'),
                             Toggle::make('data.addons.serviceManagement')
                                 ->label('Service Management'),
                             Toggle::make('data.addons.knowledgeManagement')
