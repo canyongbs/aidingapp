@@ -20,7 +20,7 @@ services:
       PGID: '${SPIN_GROUP_ID:-9999}'
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.aidingapp-app.rule=HostRegexp(`aidingapp.local`, `{subdomain:[a-z]+}.aidingapp.local`)"
+      - "traefik.http.routers.aidingapp-app.rule=HostRegexp(`aidingapp.local`, `{subdomain:[a-z0-9]+}.aidingapp.local`)"
       - "traefik.http.routers.aidingapp-app.entrypoints=websecure"
       - "traefik.http.routers.aidingapp-app.tls=true"
       - "traefik.http.services.aidingapp-app.loadbalancer.server.port=443"
