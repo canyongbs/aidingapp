@@ -38,7 +38,6 @@ namespace AidingApp\Task\Models;
 
 use App\Models\User;
 use App\Models\BaseModel;
-use Illuminate\Support\Collection;
 use AidingApp\Task\Enums\TaskStatus;
 use App\Models\Contracts\Educatable;
 use AidingApp\Contact\Models\Contact;
@@ -79,11 +78,6 @@ class Task extends BaseModel implements Auditable, CanTriggerAutoSubscription
         'status' => TaskStatus::class,
         'due' => 'datetime',
     ];
-
-    public function getWebPermissions(): Collection
-    {
-        return collect(['import', ...$this->webPermissions()]);
-    }
 
     public function getStateMachineFields(): array
     {

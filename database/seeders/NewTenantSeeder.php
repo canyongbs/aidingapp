@@ -40,11 +40,11 @@ use App\Models\Tenant;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Artisan;
 use AidingApp\Division\Database\Seeders\DivisionSeeder;
+use AidingApp\Authorization\Console\Commands\SetupRoles;
 use AidingApp\Contact\Database\Seeders\ContactSourceSeeder;
 use AidingApp\Contact\Database\Seeders\ContactStatusSeeder;
 use AidingApp\Consent\Database\Seeders\ConsentAgreementSeeder;
 use AidingApp\InventoryManagement\Database\Seeders\AssetSeeder;
-use AidingApp\Authorization\Console\Commands\SyncRolesAndPermissions;
 use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseStatusSeeder;
 use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseQualitySeeder;
 use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseCategorySeeder;
@@ -60,7 +60,7 @@ class NewTenantSeeder extends Seeder
         $currentTenant = Tenant::current();
 
         Artisan::call(
-            command: SyncRolesAndPermissions::class,
+            command: SetupRoles::class,
             parameters: [
                 '--tenant' => $currentTenant->id,
             ],

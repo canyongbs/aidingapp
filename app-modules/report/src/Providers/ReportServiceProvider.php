@@ -41,9 +41,9 @@ use AidingApp\Report\ReportPlugin;
 use AidingApp\Report\Models\Report;
 use Illuminate\Support\ServiceProvider;
 use AidingApp\Report\Observers\ReportObserver;
-use App\Registries\RoleBasedAccessControlRegistry;
 use AidingApp\Report\Registries\ReportRbacRegistry;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use AidingApp\Authorization\AuthorizationRoleRegistry;
 
 class ReportServiceProvider extends ServiceProvider
 {
@@ -60,7 +60,7 @@ class ReportServiceProvider extends ServiceProvider
 
         $this->registerObservers();
 
-        RoleBasedAccessControlRegistry::register(ReportRbacRegistry::class);
+        AuthorizationRoleRegistry::register(ReportRbacRegistry::class);
     }
 
     protected function registerObservers(): void

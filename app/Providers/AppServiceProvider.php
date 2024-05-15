@@ -39,7 +39,6 @@ namespace App\Providers;
 use App\Models\Tenant;
 use App\Models\SystemUser;
 use Laravel\Pennant\Feature;
-use App\Observers\TenantObserver;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -75,8 +74,6 @@ class AppServiceProvider extends ServiceProvider
             'system_user' => SystemUser::class,
             'tenant' => Tenant::class,
         ]);
-
-        Tenant::observe(TenantObserver::class);
 
         Feature::resolveScopeUsing(fn ($driver) => null);
 

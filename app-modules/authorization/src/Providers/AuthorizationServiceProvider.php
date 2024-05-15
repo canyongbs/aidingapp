@@ -43,14 +43,12 @@ use AidingApp\Authorization\Models\Role;
 use AidingApp\Authorization\Models\License;
 use AidingApp\Authorization\Models\Permission;
 use AidingApp\Authorization\AuthorizationPlugin;
-use App\Registries\RoleBasedAccessControlRegistry;
 use SocialiteProviders\Azure\AzureExtendSocialite;
 use SocialiteProviders\Manager\SocialiteWasCalled;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use SocialiteProviders\Google\GoogleExtendSocialite;
 use AidingApp\Authorization\AuthorizationRoleRegistry;
 use AidingApp\Authorization\Observers\LicenseObserver;
-use AidingApp\Authorization\AuthorizationPermissionRegistry;
 use AidingApp\Authorization\Registries\AuthorizationRbacRegistry;
 use AidingApp\Authorization\Http\Controllers\Auth\LogoutController;
 use Filament\Http\Controllers\Auth\LogoutController as FilamentLogoutController;
@@ -61,11 +59,7 @@ class AuthorizationServiceProvider extends ServiceProvider
     {
         Panel::configureUsing(fn (Panel $panel) => ($panel->getId() !== 'admin') || $panel->plugin(new AuthorizationPlugin()));
 
-        $this->app->singleton(AuthorizationPermissionRegistry::class, function ($app) {
-            return new AuthorizationPermissionRegistry();
-        });
-
-        $this->app->singleton(AuthorizationRoleRegistry::class, function ($app) {
+        $this->app->scoped(AuthorizationRoleRegistry::class, function ($app) {
             return new AuthorizationRoleRegistry();
         });
 
@@ -96,7 +90,7 @@ class AuthorizationServiceProvider extends ServiceProvider
             listener: GoogleExtendSocialite::class . '@handle'
         );
 
-        RoleBasedAccessControlRegistry::register(AuthorizationRbacRegistry::class);
+        AuthorizationRoleRegistry::register(AuthorizationRbacRegistry::class);
     }
 
     public function registerObservers(): void
