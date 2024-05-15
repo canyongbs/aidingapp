@@ -37,6 +37,7 @@
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use App\Enums\Feature;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -78,7 +79,9 @@ class CreateServiceRequestController extends Controller
         $validator = Validator::make($request->all(), [
             'priority' => ['required', 'exists:service_request_priorities,id'],
             'description' => ['required', 'string', 'max:65535'],
-            ...$serviceRequestForm ? ['extra' => $generateValidation($serviceRequestForm)] : [],
+            ...$serviceRequestForm
+                ? Arr::prependKeysWith($generateValidation($serviceRequestForm), 'extra.')
+                : [],
         ]);
 
         if ($validator->fails()) {
@@ -131,7 +134,7 @@ class CreateServiceRequestController extends Controller
 
             unset($data['recaptcha-token']);
 
-            $data = $data['extra'];
+            $data = data_get($data, 'extra', []);
 
             if ($serviceRequestForm->is_wizard) {
                 foreach ($serviceRequestForm->steps as $step) {
@@ -164,8 +167,12 @@ class CreateServiceRequestController extends Controller
             $submission->save();
 
             $serviceRequest->title = $serviceRequestForm->name;
-            $serviceRequest->respondent()->associate($submission->author);
             $serviceRequest->serviceRequestFormSubmission()->associate($submission);
+
+            if ($submission->author) {
+                $serviceRequest->respondent()->associate($submission->author);
+            }
+
             $serviceRequest->save();
 
             return response()->json([
