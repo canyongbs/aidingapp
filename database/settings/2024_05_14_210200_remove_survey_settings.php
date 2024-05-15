@@ -1,3 +1,5 @@
+<?php
+
 /*
 <COPYRIGHT>
 
@@ -31,17 +33,17 @@
 
 </COPYRIGHT>
 */
-import { createInput } from '@formkit/vue';
-import Slider from './Slider.vue';
-import Rating from './Rating.vue';
-import inputs from '../../../../service-request-form/src/FormKit/Inputs/index';
 
-export default {
-    otp: inputs.otp,
-    slider: createInput(Slider, {
-        props: [],
-    }),
-    rating: createInput(Rating, {
-        props: [],
-    }),
+use Spatie\LaravelSettings\Migrations\SettingsMigration;
+
+return new class () extends SettingsMigration {
+    public function up(): void
+    {
+        $this->migrator->deleteIfExists('portal.has_surveys');
+    }
+
+    public function down(): void
+    {
+        $this->migrator->add('portal.has_surveys', false);
+    }
 };

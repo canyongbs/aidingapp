@@ -36,11 +36,9 @@
 
 namespace AidingApp\Form\Actions;
 
-use AidingApp\Survey\Models\Survey;
 use AidingApp\Form\Models\Submissible;
 use AidingApp\Form\Filament\Blocks\FormFieldBlockRegistry;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
-use AidingApp\Survey\Filament\Blocks\SurveyFieldBlockRegistry;
 
 class ResolveBlockRegistry
 {
@@ -48,7 +46,6 @@ class ResolveBlockRegistry
     {
         return match ($submissible::class) {
             ServiceRequestForm::class => FormFieldBlockRegistry::keyByType(),
-            Survey::class => SurveyFieldBlockRegistry::keyByType(),
         };
     }
 }

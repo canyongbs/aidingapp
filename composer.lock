@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9b2ecc95a3960eee49ec4d4077fd4a1d",
+    "content-hash": "d7c972737fce76e6490092557b434558",
     "packages": [
         {
             "name": "amphp/amp",
@@ -2357,41 +2357,6 @@
                     "AidingApp\\ServiceManagement\\Tests\\": "tests/",
                     "AidingApp\\ServiceManagement\\Database\\Factories\\": "database/factories/",
                     "AidingApp\\ServiceManagement\\Database\\Seeders\\": "database/seeders/"
-                }
-            },
-            "license": [
-                "proprietary"
-            ],
-            "transport-options": {
-                "symlink": true,
-                "relative": true
-            }
-        },
-        {
-            "name": "canyon-gbs/aiding-app-survey",
-            "version": "1.0",
-            "dist": {
-                "type": "path",
-                "url": "app-modules/survey",
-                "reference": "9c443a99fb471bd1dc3980b9368c0fd1e993c2a9"
-            },
-            "require": {
-                "filament/filament": "^3.2"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "AidingApp\\Survey\\Providers\\SurveyServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "AidingApp\\Survey\\": "src/",
-                    "AidingApp\\Survey\\Tests\\": "tests/",
-                    "AidingApp\\Survey\\Database\\Factories\\": "database/factories/",
-                    "AidingApp\\Survey\\Database\\Seeders\\": "database/seeders/"
                 }
             },
             "license": [
