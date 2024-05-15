@@ -39,7 +39,7 @@ use Spatie\LaravelSettings\Migrations\SettingsMigration;
 return new class () extends SettingsMigration {
     public function up(): void
     {
-        $this->migrator->delete('report_assistant.prompt_system_context');
+        $this->migrator->deleteIfExists('report_assistant.prompt_system_context');
     }
 
     public function down(): void
