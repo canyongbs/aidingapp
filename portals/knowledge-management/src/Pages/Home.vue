@@ -39,6 +39,7 @@
     import { consumer } from '../Services/Consumer.js';
     import { useAuthStore } from '../Stores/auth.js';
     import { useFeatureStore } from '../Stores/feature.js';
+    import Badge from '../Components/Badge.vue';
 
     const props = defineProps({
         searchUrl: {
@@ -57,16 +58,21 @@
             type: Object,
             required: true,
         },
+        tags: {
+            type: Object,
+            required: true,
+        },
     });
 
-    const searchQuery = ref(null);
+    const searchQuery = ref('');
     const loadingResults = ref(false);
     const searchResults = ref(null);
+    const selectedTags = ref([]);
 
     const debounceSearch = debounce((value) => {
         const { post } = consumer();
 
-        if (!value) {
+        if (!value && selectedTags.value.length < 1) {
             searchQuery.value = null;
             searchResults.value = null;
             return;
@@ -74,7 +80,10 @@
 
         loadingResults.value = true;
 
-        post(props.searchUrl, JSON.stringify({ search: value })).then((response) => {
+        post(props.searchUrl, {
+            search: JSON.stringify(value),
+            tags: selectedTags.value.join(','),
+        }).then((response) => {
             searchResults.value = response.data;
             loadingResults.value = false;
         });
@@ -87,6 +96,10 @@
         debounceSearch(value);
     });
 
+    watch(selectedTags, () => {
+        debounceSearch(searchQuery.value);
+    });
+
     function debounce(func, delay) {
         let timerId;
         return function (...args) {
@@ -97,6 +110,14 @@
                 func(...args);
             }, delay);
         };
+    }
+
+    function toggleTag(tag) {
+        if (selectedTags.value.includes(tag)) {
+            selectedTags.value = selectedTags.value.filter((t) => t !== tag);
+        } else {
+            selectedTags.value = [...selectedTags.value, tag];
+        }
     }
 </script>
 
@@ -125,20 +146,38 @@
 
                 <form action="#" method="GET">
                     <label for="search" class="sr-only">Search</label>
-
                     <div class="relative rounded">
-                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-                            <MagnifyingGlassIcon class="h-5 w-5 text-gray-400" aria-hidden="true" />
+                        <div>
+                            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 py-3">
+                                <MagnifyingGlassIcon class="h-5 w-5 text-gray-400" aria-hidden="true" />
+                            </div>
+                            <input
+                                type="search"
+                                v-model="searchQuery"
+                                id="search"
+                                placeholder="Search for articles and categories"
+                                class="block w-full rounded border-0 pl-12 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-2-- sm:text-sm sm:leading-6"
+                                :class="{ 'rounded-b-none': tags.length > 0 }"
+                            />
                         </div>
-
-                        <input
-                            type="search"
-                            v-model="searchQuery"
-                            id="search"
-                            placeholder="Search for articles and categories"
-                            class="block w-full rounded border-0 py-3 pl-12 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-2-- sm:text-sm sm:leading-6"
-                        />
                     </div>
+                    <details
+                        v-if="tags.length > 0"
+                        class="rounded rounded-t-none bg-white py-3 pl-4 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-2-- sm:text-sm sm:leading-6"
+                    >
+                        <summary v-if="selectedTags.length > 0">Tags ({{ selectedTags.length }} selected)</summary>
+                        <summary v-else>Tags</summary>
+                        <div class="flex flex-wrap gap-2">
+                            <Badge
+                                v-for="tag in tags"
+                                :key="tag.id"
+                                :value="tag.name"
+                                class="cursor-pointer"
+                                :class="{ 'bg-primary-600 text-white': selectedTags.includes(tag.id) }"
+                                @click="toggleTag(tag.id)"
+                            />
+                        </div>
+                    </details>
                 </form>
             </div>
         </div>
@@ -147,11 +186,12 @@
     <main class="px-6">
         <div class="max-w-screen-xl flex flex-col gap-y-6 mx-auto py-8">
             <SearchResults
-                v-if="searchQuery"
+                v-if="searchQuery || selectedTags.length > 0"
                 :searchQuery="searchQuery"
                 :searchResults="searchResults"
                 :loadingResults="loadingResults"
-            ></SearchResults>
+            >
+            </SearchResults>
 
             <HelpCenter v-else :categories="categories" :service-requests="serviceRequests"></HelpCenter>
         </div>

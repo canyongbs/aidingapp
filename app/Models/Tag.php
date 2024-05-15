@@ -34,18 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\DataTransferObjects;
+namespace App\Models;
 
-use Spatie\LaravelData\Data;
-
-class KnowledgeBaseArticleData extends Data
+class Tag extends BaseModel
 {
-    public function __construct(
-        public string $id,
-        public ?string $categoryId,
-        public string $name,
-        public ?string $lastUpdated,
-        public ?string $content,
-        public ?array $tags,
-    ) {}
+    protected $fillable = [
+        'name',
+        'type',
+    ];
 }

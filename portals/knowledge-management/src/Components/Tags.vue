@@ -1,6 +1,4 @@
-<?php
-
-/*
+<!--
 <COPYRIGHT>
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
@@ -32,20 +30,21 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
+-->
+<script setup>
+    import { defineProps } from 'vue';
+    import Badge from './Badge.vue';
 
-namespace AidingApp\Portal\DataTransferObjects;
+    defineProps({
+        tags: {
+            type: Array,
+            required: true,
+        },
+    });
+</script>
 
-use Spatie\LaravelData\Data;
-
-class KnowledgeBaseArticleData extends Data
-{
-    public function __construct(
-        public string $id,
-        public ?string $categoryId,
-        public string $name,
-        public ?string $lastUpdated,
-        public ?string $content,
-        public ?array $tags,
-    ) {}
-}
+<template>
+    <div class="flex flex-wrap gap-2">
+        <Badge v-for="tag in tags" :key="tag.id" :value="tag.name" />
+    </div>
+</template>

@@ -34,42 +34,25 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
+namespace App\Models\Concerns;
 
-use Laravel\Pennant\Feature;
-use Illuminate\Http\JsonResponse;
-use App\Http\Controllers\Controller;
-use App\Support\MediaEncoding\TiptapMediaEncoder;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
-use AidingApp\Portal\DataTransferObjects\KnowledgeBaseArticleData;
-use AidingApp\Portal\DataTransferObjects\KnowledgeBaseCategoryData;
+use App\Models\Tag;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
-class KnowledgeManagementPortalArticleController extends Controller
+trait InteractsWithTags
 {
-    public function show(KnowledgeBaseCategory $category, KnowledgeBaseItem $article): JsonResponse
+    public static function getTagType(): string
     {
-        return response()->json([
-            'category' => KnowledgeBaseCategoryData::from([
-                'id' => $category->getKey(),
-                'name' => $category->name,
-                'description' => $category->description,
-            ]),
-            'article' => KnowledgeBaseArticleData::from([
-                'id' => $article->getKey(),
-                'categoryId' => $article->category_id,
-                'name' => $article->title,
-                'lastUpdated' => $article->updated_at->format('M d Y, h:m a'),
-                'content' => tiptap_converter()->asHTML(TiptapMediaEncoder::decode($article->article_details)),
-                'tags' => Feature::active('tags') ? $article->tags()
-                    ->orderBy('name')
-                    ->select([
-                        'id',
-                        'name',
-                    ])
-                    ->get()
-                    ->toArray() : [],
-            ]),
-        ]);
+        return (new self())->getMorphClass();
+    }
+
+    public static function getTagLabel(): string
+    {
+        return str((new self())->getMorphClass())->classBasename()->headline();
+    }
+
+    public function tags(): MorphToMany
+    {
+        return $this->morphToMany(Tag::class, 'taggable');
     }
 }

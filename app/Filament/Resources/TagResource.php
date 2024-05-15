@@ -34,42 +34,31 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
+namespace App\Filament\Resources;
 
-use Laravel\Pennant\Feature;
-use Illuminate\Http\JsonResponse;
-use App\Http\Controllers\Controller;
-use App\Support\MediaEncoding\TiptapMediaEncoder;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
-use AidingApp\Portal\DataTransferObjects\KnowledgeBaseArticleData;
-use AidingApp\Portal\DataTransferObjects\KnowledgeBaseCategoryData;
+use App\Models\Tag;
+use Filament\Resources\Resource;
+use App\Filament\Clusters\KnowledgeManagement;
+use App\Filament\Resources\TagResource\Pages\EditTag;
+use App\Filament\Resources\TagResource\Pages\ListTags;
+use App\Filament\Resources\TagResource\Pages\CreateTag;
 
-class KnowledgeManagementPortalArticleController extends Controller
+class TagResource extends Resource
 {
-    public function show(KnowledgeBaseCategory $category, KnowledgeBaseItem $article): JsonResponse
+    protected static ?string $model = Tag::class;
+
+    protected static ?string $navigationIcon = 'heroicon-o-tag';
+
+    protected static ?string $cluster = KnowledgeManagement::class;
+
+    protected static ?int $navigationSort = 40;
+
+    public static function getPages(): array
     {
-        return response()->json([
-            'category' => KnowledgeBaseCategoryData::from([
-                'id' => $category->getKey(),
-                'name' => $category->name,
-                'description' => $category->description,
-            ]),
-            'article' => KnowledgeBaseArticleData::from([
-                'id' => $article->getKey(),
-                'categoryId' => $article->category_id,
-                'name' => $article->title,
-                'lastUpdated' => $article->updated_at->format('M d Y, h:m a'),
-                'content' => tiptap_converter()->asHTML(TiptapMediaEncoder::decode($article->article_details)),
-                'tags' => Feature::active('tags') ? $article->tags()
-                    ->orderBy('name')
-                    ->select([
-                        'id',
-                        'name',
-                    ])
-                    ->get()
-                    ->toArray() : [],
-            ]),
-        ]);
+        return [
+            'index' => ListTags::route('/'),
+            'create' => CreateTag::route('/create'),
+            'edit' => EditTag::route('/{record}/edit'),
+        ];
     }
 }

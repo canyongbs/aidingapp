@@ -1,6 +1,4 @@
-<?php
-
-/*
+<!--
 <COPYRIGHT>
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
@@ -32,20 +30,39 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
+-->
+<script setup>
+    import { ChevronRightIcon } from '@heroicons/vue/20/solid/index.js';
+    import Tags from './Tags.vue';
 
-namespace AidingApp\Portal\DataTransferObjects;
+    defineProps({
+        article: {
+            type: Object,
+            required: true,
+        },
+    });
+</script>
 
-use Spatie\LaravelData\Data;
+<template>
+    <router-link
+        :to="{
+            name: 'view-article',
+            params: {
+                categoryId: article.categoryId,
+                articleId: article.id,
+            },
+        }"
+        class="group p-3 grid space-y-2 text-sm font-medium text-gray-700"
+    >
+        <Tags :tags="article.tags" />
 
-class KnowledgeBaseArticleData extends Data
-{
-    public function __construct(
-        public string $id,
-        public ?string $categoryId,
-        public string $name,
-        public ?string $lastUpdated,
-        public ?string $content,
-        public ?array $tags,
-    ) {}
-}
+        <div class="flex">
+            <span> {{ article.name }} </span>
+            <ChevronRightIcon
+                class="opacity-0 h-5 w-5 text-primary-600 transition-all group-hover:translate-x-2 group-hover:opacity-100"
+            />
+        </div>
+    </router-link>
+</template>
+
+<style scoped></style>

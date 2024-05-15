@@ -36,6 +36,7 @@
 
 namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource\Pages;
 
+use Laravel\Pennant\Feature;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Infolist;
 use Filament\Actions\DeleteAction;
@@ -71,6 +72,9 @@ class ViewKnowledgeBaseItem extends ViewRecord
                         TextEntry::make('public')
                             ->label('Public')
                             ->formatStateUsing(fn (bool $state): string => $state ? 'Yes' : 'No'),
+                        TextEntry::make('tags.name')
+                            ->badge()
+                            ->visible(fn (): bool => Feature::active('tags')),
                     ]),
                 Section::make()
                     ->schema([

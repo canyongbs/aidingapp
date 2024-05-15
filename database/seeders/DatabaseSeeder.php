@@ -83,6 +83,7 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             SampleSuperAdminUserSeeder::class,
+            LocalDevelopmentSeeder::class,
             DivisionSeeder::class,
             ServiceRequestStatusSeeder::class,
             ServiceRequestTypeSeeder::class,

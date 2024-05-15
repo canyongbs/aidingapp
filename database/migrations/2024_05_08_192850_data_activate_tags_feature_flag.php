@@ -34,42 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
-
 use Laravel\Pennant\Feature;
-use Illuminate\Http\JsonResponse;
-use App\Http\Controllers\Controller;
-use App\Support\MediaEncoding\TiptapMediaEncoder;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
-use AidingApp\Portal\DataTransferObjects\KnowledgeBaseArticleData;
-use AidingApp\Portal\DataTransferObjects\KnowledgeBaseCategoryData;
+use Illuminate\Database\Migrations\Migration;
 
-class KnowledgeManagementPortalArticleController extends Controller
-{
-    public function show(KnowledgeBaseCategory $category, KnowledgeBaseItem $article): JsonResponse
+return new class () extends Migration {
+    public function up(): void
     {
-        return response()->json([
-            'category' => KnowledgeBaseCategoryData::from([
-                'id' => $category->getKey(),
-                'name' => $category->name,
-                'description' => $category->description,
-            ]),
-            'article' => KnowledgeBaseArticleData::from([
-                'id' => $article->getKey(),
-                'categoryId' => $article->category_id,
-                'name' => $article->title,
-                'lastUpdated' => $article->updated_at->format('M d Y, h:m a'),
-                'content' => tiptap_converter()->asHTML(TiptapMediaEncoder::decode($article->article_details)),
-                'tags' => Feature::active('tags') ? $article->tags()
-                    ->orderBy('name')
-                    ->select([
-                        'id',
-                        'name',
-                    ])
-                    ->get()
-                    ->toArray() : [],
-            ]),
-        ]);
+        Feature::activate('tags');
     }
-}
+
+    public function down(): void
+    {
+        Feature::deactivate('tags');
+    }
+};

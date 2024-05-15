@@ -34,42 +34,44 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
+namespace Database\Seeders;
 
-use Laravel\Pennant\Feature;
-use Illuminate\Http\JsonResponse;
-use App\Http\Controllers\Controller;
-use App\Support\MediaEncoding\TiptapMediaEncoder;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
-use AidingApp\Portal\DataTransferObjects\KnowledgeBaseArticleData;
-use AidingApp\Portal\DataTransferObjects\KnowledgeBaseCategoryData;
+use App\Models\User;
+use Illuminate\Support\Str;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
+use AidingApp\Authorization\Models\Role;
 
-class KnowledgeManagementPortalArticleController extends Controller
+class LocalDevelopmentSeeder extends Seeder
 {
-    public function show(KnowledgeBaseCategory $category, KnowledgeBaseItem $article): JsonResponse
+    public function run(): void
     {
-        return response()->json([
-            'category' => KnowledgeBaseCategoryData::from([
-                'id' => $category->getKey(),
-                'name' => $category->name,
-                'description' => $category->description,
-            ]),
-            'article' => KnowledgeBaseArticleData::from([
-                'id' => $article->getKey(),
-                'categoryId' => $article->category_id,
-                'name' => $article->title,
-                'lastUpdated' => $article->updated_at->format('M d Y, h:m a'),
-                'content' => tiptap_converter()->asHTML(TiptapMediaEncoder::decode($article->article_details)),
-                'tags' => Feature::active('tags') ? $article->tags()
-                    ->orderBy('name')
-                    ->select([
-                        'id',
-                        'name',
-                    ])
-                    ->get()
-                    ->toArray() : [],
-            ]),
-        ]);
+        if (app()->isLocal()) {
+            $this->internalAdminUsers();
+        }
+    }
+
+    private function internalAdminUsers(): void
+    {
+        $superAdminRole = Role::where('name', 'authorization.super_admin')->first();
+
+        if (! $superAdminRole) {
+            return;
+        }
+
+        collect(config('local_development.internal_users.emails'))->each(function ($email) use ($superAdminRole) {
+            $user = User::where('email', $email)->first();
+
+            if (is_null($user)) {
+                $user = User::factory()->create([
+                    'name' => Str::title(Str::replace('.', ' ', Str::before($email, '@'))),
+                    'email' => $email,
+                    'password' => Hash::make('password'),
+                    'is_external' => true,
+                ]);
+            }
+
+            $user->roles()->sync($superAdminRole);
+        });
     }
 }

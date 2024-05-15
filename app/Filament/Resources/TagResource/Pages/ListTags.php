@@ -34,42 +34,55 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
+namespace App\Filament\Resources\TagResource\Pages;
 
-use Laravel\Pennant\Feature;
-use Illuminate\Http\JsonResponse;
-use App\Http\Controllers\Controller;
-use App\Support\MediaEncoding\TiptapMediaEncoder;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
-use AidingApp\Portal\DataTransferObjects\KnowledgeBaseArticleData;
-use AidingApp\Portal\DataTransferObjects\KnowledgeBaseCategoryData;
+use Filament\Tables\Table;
+use App\Models\Contracts\HasTags;
+use Filament\Actions\CreateAction;
+use App\Filament\Resources\TagResource;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Resources\Pages\ListRecords;
+use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Tables\Actions\DeleteBulkAction;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
-class KnowledgeManagementPortalArticleController extends Controller
+class ListTags extends ListRecords
 {
-    public function show(KnowledgeBaseCategory $category, KnowledgeBaseItem $article): JsonResponse
+    protected static string $resource = TagResource::class;
+
+    public function table(Table $table): Table
     {
-        return response()->json([
-            'category' => KnowledgeBaseCategoryData::from([
-                'id' => $category->getKey(),
-                'name' => $category->name,
-                'description' => $category->description,
-            ]),
-            'article' => KnowledgeBaseArticleData::from([
-                'id' => $article->getKey(),
-                'categoryId' => $article->category_id,
-                'name' => $article->title,
-                'lastUpdated' => $article->updated_at->format('M d Y, h:m a'),
-                'content' => tiptap_converter()->asHTML(TiptapMediaEncoder::decode($article->article_details)),
-                'tags' => Feature::active('tags') ? $article->tags()
-                    ->orderBy('name')
-                    ->select([
-                        'id',
-                        'name',
-                    ])
-                    ->get()
-                    ->toArray() : [],
-            ]),
-        ]);
+        return $table
+            ->columns([
+                TextColumn::make('name'),
+                TextColumn::make('type')
+                    ->formatStateUsing(
+                        function (?string $state): ?string {
+                            if (blank($state)) {
+                                return null;
+                            }
+
+                            $model = Relation::getMorphedModel($state);
+
+                            return $model && is_subclass_of($model, HasTags::class) ? $model::getTagLabel() : $state;
+                        }
+                    ),
+            ])
+            ->actions([
+                EditAction::make(),
+            ])
+            ->bulkActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
+            ]);
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            CreateAction::make(),
+        ];
     }
 }

@@ -34,33 +34,46 @@
 </COPYRIGHT>
 */
 
-namespace Database\Seeders;
+namespace App\Filament\Resources\TagResource\Pages;
 
-use App\Models\User;
-use Illuminate\Support\Str;
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
-use AidingApp\Authorization\Models\Role;
+use Filament\Forms\Get;
+use Filament\Forms\Form;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Section;
+use App\Filament\Resources\TagResource;
+use Illuminate\Validation\Rules\Unique;
+use Filament\Forms\Components\TextInput;
+use Filament\Resources\Pages\CreateRecord;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 
-class InternalAdminUsersSeeder extends Seeder
+class CreateTag extends CreateRecord
 {
-    public function run(): void
+    protected static string $resource = TagResource::class;
+
+    public function form(Form $form): Form
     {
-        $superAdminRole = Role::where('name', 'authorization.super_admin')->firstOrFail();
-
-        collect(config('internal-users.emails'))->each(function ($email) use ($superAdminRole) {
-            $user = User::where('email', $email)->first();
-
-            if (is_null($user)) {
-                $user = User::factory()->create([
-                    'name' => Str::title(Str::replace('.', ' ', Str::before($email, '@'))),
-                    'email' => $email,
-                    'password' => Hash::make('password'),
-                    'is_external' => true,
-                ]);
-            }
-
-            $user->roles()->sync($superAdminRole);
-        });
+        return $form
+            ->schema([
+                Section::make()
+                    ->schema([
+                        //change this if we want non-class types
+                        Select::make('type')
+                            ->options([
+                                KnowledgeBaseItem::getTagType() => KnowledgeBaseItem::getTagLabel(),
+                            ])
+                            ->required()
+                            ->string()
+                            ->columnSpanFull()
+                            ->live(),
+                        TextInput::make('name')
+                            ->autocomplete(false)
+                            ->required()
+                            ->string()
+                            ->unique(modifyRuleUsing: function (Unique $rule, Get $get) {
+                                return $rule->where('type', $get('type'));
+                            })
+                            ->columnSpanFull(),
+                    ]),
+            ]);
     }
 }

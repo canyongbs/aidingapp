@@ -34,42 +34,54 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
+namespace App\Filament\Resources\TagResource\Pages;
 
-use Laravel\Pennant\Feature;
-use Illuminate\Http\JsonResponse;
-use App\Http\Controllers\Controller;
-use App\Support\MediaEncoding\TiptapMediaEncoder;
+use Filament\Forms\Get;
+use Filament\Forms\Form;
+use Filament\Actions\DeleteAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Section;
+use App\Filament\Resources\TagResource;
+use Illuminate\Validation\Rules\Unique;
+use Filament\Forms\Components\TextInput;
+use Filament\Resources\Pages\EditRecord;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
-use AidingApp\Portal\DataTransferObjects\KnowledgeBaseArticleData;
-use AidingApp\Portal\DataTransferObjects\KnowledgeBaseCategoryData;
 
-class KnowledgeManagementPortalArticleController extends Controller
+class EditTag extends EditRecord
 {
-    public function show(KnowledgeBaseCategory $category, KnowledgeBaseItem $article): JsonResponse
+    protected static string $resource = TagResource::class;
+
+    public function form(Form $form): Form
     {
-        return response()->json([
-            'category' => KnowledgeBaseCategoryData::from([
-                'id' => $category->getKey(),
-                'name' => $category->name,
-                'description' => $category->description,
-            ]),
-            'article' => KnowledgeBaseArticleData::from([
-                'id' => $article->getKey(),
-                'categoryId' => $article->category_id,
-                'name' => $article->title,
-                'lastUpdated' => $article->updated_at->format('M d Y, h:m a'),
-                'content' => tiptap_converter()->asHTML(TiptapMediaEncoder::decode($article->article_details)),
-                'tags' => Feature::active('tags') ? $article->tags()
-                    ->orderBy('name')
-                    ->select([
-                        'id',
-                        'name',
-                    ])
-                    ->get()
-                    ->toArray() : [],
-            ]),
-        ]);
+        return $form
+            ->schema([
+                Section::make()
+                    ->schema([
+                        //change this if we want non-class types
+                        Select::make('type')
+                            ->options([
+                                KnowledgeBaseItem::getTagType() => KnowledgeBaseItem::getTagLabel(),
+                            ])
+                            ->required()
+                            ->string()
+                            ->columnSpanFull()
+                            ->live(),
+                        TextInput::make('name')
+                            ->autocomplete(false)
+                            ->required()
+                            ->string()
+                            ->unique(ignoreRecord: true, modifyRuleUsing: function (Unique $rule, Get $get) {
+                                return $rule->where('type', $get('type'));
+                            })
+                            ->columnSpanFull(),
+                    ]),
+            ]);
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            DeleteAction::make(),
+        ];
     }
 }

@@ -36,40 +36,28 @@
 
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
+use App\Models\Tag;
+use Illuminate\Http\Request;
 use Laravel\Pennant\Feature;
 use Illuminate\Http\JsonResponse;
+use App\Models\Scopes\TagsForClass;
 use App\Http\Controllers\Controller;
-use App\Support\MediaEncoding\TiptapMediaEncoder;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
-use AidingApp\Portal\DataTransferObjects\KnowledgeBaseArticleData;
-use AidingApp\Portal\DataTransferObjects\KnowledgeBaseCategoryData;
 
-class KnowledgeManagementPortalArticleController extends Controller
+class GetKnowledgeManagementPortalTagsController extends Controller
 {
-    public function show(KnowledgeBaseCategory $category, KnowledgeBaseItem $article): JsonResponse
+    public function __invoke(Request $request): JsonResponse
     {
-        return response()->json([
-            'category' => KnowledgeBaseCategoryData::from([
-                'id' => $category->getKey(),
-                'name' => $category->name,
-                'description' => $category->description,
-            ]),
-            'article' => KnowledgeBaseArticleData::from([
-                'id' => $article->getKey(),
-                'categoryId' => $article->category_id,
-                'name' => $article->title,
-                'lastUpdated' => $article->updated_at->format('M d Y, h:m a'),
-                'content' => tiptap_converter()->asHTML(TiptapMediaEncoder::decode($article->article_details)),
-                'tags' => Feature::active('tags') ? $article->tags()
-                    ->orderBy('name')
-                    ->select([
-                        'id',
-                        'name',
-                    ])
-                    ->get()
-                    ->toArray() : [],
-            ]),
-        ]);
+        return response()->json(
+            Feature::active('tags') ? Tag::query()
+                ->tap(new TagsForClass(new KnowledgeBaseItem()))
+                ->orderBy('name')
+                ->select([
+                    'id',
+                    'name',
+                ])
+                ->get()
+                ->toArray() : [],
+        );
     }
 }

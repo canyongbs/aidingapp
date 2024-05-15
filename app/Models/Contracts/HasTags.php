@@ -34,18 +34,15 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\DataTransferObjects;
+namespace App\Models\Contracts;
 
-use Spatie\LaravelData\Data;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
-class KnowledgeBaseArticleData extends Data
+interface HasTags
 {
-    public function __construct(
-        public string $id,
-        public ?string $categoryId,
-        public string $name,
-        public ?string $lastUpdated,
-        public ?string $content,
-        public ?array $tags,
-    ) {}
+    public static function getTagType(): string;
+
+    public static function getTagLabel(): string;
+
+    public function tags(): MorphToMany;
 }

@@ -1,6 +1,4 @@
-<?php
-
-/*
+<!--
 <COPYRIGHT>
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
@@ -32,20 +30,22 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
+-->
+<script setup>
+    import { defineProps } from 'vue';
 
-namespace AidingApp\Portal\DataTransferObjects;
+    defineProps({
+        value: {
+            type: String,
+            required: true,
+        },
+    });
+</script>
 
-use Spatie\LaravelData\Data;
-
-class KnowledgeBaseArticleData extends Data
-{
-    public function __construct(
-        public string $id,
-        public ?string $categoryId,
-        public string $name,
-        public ?string $lastUpdated,
-        public ?string $content,
-        public ?array $tags,
-    ) {}
-}
+<template>
+    <span
+        class="flex items-center justify-center gap-x-1 rounded ring-1 ring-inset px-2 min-w-[theme(spacing.6)] py-1 bg-gray-100 ring-gray-600/10"
+    >
+        {{ value }}
+    </span>
+</template>
