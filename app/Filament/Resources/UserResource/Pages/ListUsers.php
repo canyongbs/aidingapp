@@ -45,7 +45,7 @@ class ListUsers extends ListRecords
 {
     protected static string $resource = UserResource::class;
 
-    protected ?string $heading = 'Product Users';
+    protected ?string $heading = 'Users';
 
     public function getSubheading(): string | Htmlable | null
     {

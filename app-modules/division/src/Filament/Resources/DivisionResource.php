@@ -38,6 +38,7 @@ namespace AidingApp\Division\Filament\Resources;
 
 use Filament\Resources\Resource;
 use AidingApp\Division\Models\Division;
+use App\Filament\Clusters\UserManagement;
 use AidingApp\Division\Filament\Resources\DivisionResource\Pages\EditDivision;
 use AidingApp\Division\Filament\Resources\DivisionResource\Pages\ViewDivision;
 use AidingApp\Division\Filament\Resources\DivisionResource\Pages\ListDivisions;
@@ -48,11 +49,11 @@ class DivisionResource extends Resource
 {
     protected static ?string $model = Division::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-bars-2';
 
-    protected static ?string $navigationGroup = 'Users and Permissions';
+    protected static ?string $cluster = UserManagement::class;
 
-    protected static ?int $navigationSort = 10;
+    protected static ?int $navigationSort = 60;
 
     public static function getRelations(): array
     {
