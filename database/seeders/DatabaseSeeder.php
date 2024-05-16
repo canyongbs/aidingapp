@@ -46,12 +46,12 @@ use AidingApp\Alert\Database\Seeders\AlertSeeder;
 use AidingApp\Contact\Database\Seeders\ContactSeeder;
 use AidingApp\Assistant\Database\Seeders\PromptSeeder;
 use AidingApp\Division\Database\Seeders\DivisionSeeder;
+use AidingApp\Authorization\Console\Commands\SetupRoles;
 use AidingApp\Assistant\Database\Seeders\PromptTypeSeeder;
 use AidingApp\Contact\Database\Seeders\ContactSourceSeeder;
 use AidingApp\Contact\Database\Seeders\ContactStatusSeeder;
 use AidingApp\Consent\Database\Seeders\ConsentAgreementSeeder;
 use AidingApp\InventoryManagement\Database\Seeders\AssetSeeder;
-use AidingApp\Authorization\Console\Commands\SyncRolesAndPermissions;
 use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseItemSeeder;
 use AidingApp\ServiceManagement\Database\Seeders\ServiceRequestSeeder;
 use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseStatusSeeder;
@@ -74,7 +74,7 @@ class DatabaseSeeder extends Seeder
         $currentTenant = Tenant::current();
 
         Artisan::call(
-            command: SyncRolesAndPermissions::class,
+            command: SetupRoles::class,
             parameters: [
                 '--tenant' => $currentTenant->id,
             ],
@@ -83,6 +83,7 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             SampleSuperAdminUserSeeder::class,
+            LocalDevelopmentSeeder::class,
             DivisionSeeder::class,
             ServiceRequestStatusSeeder::class,
             ServiceRequestTypeSeeder::class,

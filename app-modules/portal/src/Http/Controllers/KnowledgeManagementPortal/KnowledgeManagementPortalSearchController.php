@@ -36,10 +36,12 @@
 
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
-use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Laravel\Pennant\Feature;
 use App\Models\Scopes\SearchBy;
+use Illuminate\Support\Stringable;
 use App\Http\Controllers\Controller;
+use Illuminate\Database\Eloquent\Builder;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\Portal\DataTransferObjects\KnowledgeBaseArticleData;
@@ -50,16 +52,38 @@ class KnowledgeManagementPortalSearchController extends Controller
 {
     public function get(Request $request): KnowledgeManagementSearchData
     {
+        $search = str(json_decode($request->get('search')))
+            ->lower()
+            ->trim();
+
+        $tags = str($request->get('tags'))
+            ->trim()
+            ->when(
+                fn (Stringable $string) => $string->isEmpty(),
+                fn () => collect(),
+                fn (Stringable $string) => $string->explode(',')
+            );
+
         $itemData = KnowledgeBaseArticleData::collection(
             KnowledgeBaseItem::query()
                 ->public()
-                ->tap(new SearchBy('title', Str::lower($request->get('search'))))
+                ->when(Feature::active('tags'), fn (Builder $query) => $query->with('tags'))
+                ->when($search->isNotEmpty(), fn (Builder $query) => $query->tap(new SearchBy('title', $search)))
+                ->when(Feature::active('tags'), fn (Builder $query) => $query->when($tags->isNotEmpty(), fn (Builder $query) => $query->whereHas('tags', fn (Builder $query) => $query->whereIn('id', $tags))))
                 ->get()
-                ->map(function ($item) {
+                ->map(function (KnowledgeBaseItem $article) {
                     return [
-                        'id' => $item->getKey(),
-                        'categoryId' => $item->category_id,
-                        'name' => $item->title,
+                        'id' => $article->getKey(),
+                        'categoryId' => $article->category_id,
+                        'name' => $article->title,
+                        'tags' => Feature::active('tags') ? $article->tags()
+                            ->orderBy('name')
+                            ->select([
+                                'id',
+                                'name',
+                            ])
+                            ->get()
+                            ->toArray() : [],
                     ];
                 })
                 ->toArray()
@@ -67,9 +91,9 @@ class KnowledgeManagementPortalSearchController extends Controller
 
         $categoryData = KnowledgeBaseCategoryData::collection(
             KnowledgeBaseCategory::query()
-                ->tap(new SearchBy('name', Str::lower($request->get('search'))))
+                ->tap(new SearchBy('name', $search))
                 ->get()
-                ->map(function ($category) {
+                ->map(function (KnowledgeBaseCategory $category) {
                     return [
                         'id' => $category->getKey(),
                         'name' => $category->name,

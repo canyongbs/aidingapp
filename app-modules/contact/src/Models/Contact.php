@@ -43,7 +43,6 @@ use App\Models\Authenticatable;
 use AidingApp\Alert\Models\Alert;
 use App\Models\Scopes\HasLicense;
 use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Support\Collection;
 use App\Models\Contracts\Educatable;
 use Illuminate\Notifications\Notifiable;
 use OwenIt\Auditing\Contracts\Auditable;
@@ -69,7 +68,6 @@ use AidingApp\Notification\Models\Concerns\HasSubscriptions;
 use AidingApp\Notification\Models\Concerns\NotifiableViaSms;
 use AidingApp\Timeline\Models\Contracts\HasFilamentResource;
 use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
-use AidingApp\Authorization\Models\Concerns\DefinesPermissions;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Notification\Models\Contracts\NotifiableInterface;
 use AidingApp\Engagement\Models\Concerns\HasManyMorphedEngagements;
@@ -83,7 +81,6 @@ use AidingApp\Engagement\Models\Concerns\HasManyMorphedEngagementResponses;
 class Contact extends BaseAuthenticatable implements Auditable, Subscribable, Educatable, HasFilamentResource, NotifiableInterface
 {
     use AuditableTrait;
-    use DefinesPermissions;
     use HasFactory;
     use HasManyMorphedEngagementResponses;
     use HasManyMorphedEngagements;
@@ -186,11 +183,6 @@ class Contact extends BaseAuthenticatable implements Auditable, Subscribable, Ed
     public static function displayEmailKey(): string
     {
         return 'email';
-    }
-
-    public function getWebPermissions(): Collection
-    {
-        return collect(['import', ...$this->webPermissions()]);
     }
 
     public static function filamentResource(): string

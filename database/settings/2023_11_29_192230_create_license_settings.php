@@ -63,7 +63,6 @@ return new class () extends SettingsMigration {
                 ],
                 'addons' => [
                     'online_forms' => true,
-                    'online_surveys' => true,
                     'service_management' => true,
                     'knowledge_management' => true,
                     'event_management' => true,

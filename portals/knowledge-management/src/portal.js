@@ -100,6 +100,6 @@ customElements.define(
 
             return () => h(App, props);
         },
-        props: ['url', 'userAuthenticationUrl', 'accessUrl', 'searchUrl', 'appUrl', 'apiUrl'],
+        props: ['url', 'userAuthenticationUrl', 'accessUrl', 'searchUrl', 'appUrl', 'apiUrl', 'tags'],
     }),
 );

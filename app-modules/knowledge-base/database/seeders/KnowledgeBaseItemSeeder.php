@@ -36,15 +36,39 @@
 
 namespace AidingApp\KnowledgeBase\Database\Seeders;
 
+use App\Models\Tag;
 use Illuminate\Database\Seeder;
+use AidingApp\Form\Enums\Rounding;
+use App\Models\Scopes\TagsForClass;
+use AidingApp\Portal\Settings\PortalSettings;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 
 class KnowledgeBaseItemSeeder extends Seeder
 {
     public function run(): void
     {
+        $tags = Tag::query()
+            ->tap(new TagsForClass(new KnowledgeBaseItem()))
+            ->get()
+            ->whenEmpty(
+                fn () => Tag::factory()
+                    ->count(20)
+                    ->forClass(new KnowledgeBaseItem())
+                    ->create()
+            );
+
         KnowledgeBaseItem::factory()
             ->count(25)
-            ->create();
+            ->create()
+            ->each(function (KnowledgeBaseItem $article) use ($tags) {
+                collect(fake()->randomElements($tags, rand(0, 5)))
+                    ->each(fn (Tag $tag) => $article->tags()->attach($tag));
+            });
+
+        $settings = app(PortalSettings::class);
+        $settings->knowledge_management_portal_enabled = true;
+        $settings->knowledge_management_portal_primary_color = 'emerald';
+        $settings->knowledge_management_portal_rounding = Rounding::Large->value;
+        $settings->save();
     }
 }

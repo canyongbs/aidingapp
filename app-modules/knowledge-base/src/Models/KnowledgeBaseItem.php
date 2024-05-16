@@ -38,9 +38,11 @@ namespace AidingApp\KnowledgeBase\Models;
 
 use DateTimeInterface;
 use App\Models\BaseModel;
+use App\Models\Contracts\HasTags;
 use Spatie\MediaLibrary\HasMedia;
 use AidingApp\Division\Models\Division;
 use OwenIt\Auditing\Contracts\Auditable;
+use App\Models\Concerns\InteractsWithTags;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -51,12 +53,13 @@ use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 /**
  * @mixin IdeHelperKnowledgeBaseItem
  */
-class KnowledgeBaseItem extends BaseModel implements Auditable, HasMedia
+class KnowledgeBaseItem extends BaseModel implements Auditable, HasMedia, HasTags
 {
     use AuditableTrait;
     use HasUuids;
     use InteractsWithMedia;
     use SoftDeletes;
+    use InteractsWithTags;
 
     protected $table = 'knowledge_base_articles';
 

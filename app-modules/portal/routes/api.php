@@ -45,6 +45,7 @@ use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\CreateServiceReq
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalLogoutController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalSearchController;
+use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\GetKnowledgeManagementPortalTagsController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalArticleController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalCategoryController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalAuthenticateController;
@@ -106,5 +107,8 @@ Route::prefix('api')
                 Route::post('/service-request/create/{type}', [CreateServiceRequestController::class, 'store'])
                     ->middleware(['auth:sanctum'])
                     ->name('service-request.store');
+
+                Route::get('/tags', GetKnowledgeManagementPortalTagsController::class)
+                    ->name('tags.index');
             });
     });

@@ -34,9 +34,19 @@
 </COPYRIGHT>
 */
 
-use App\Multitenancy\Http\Middleware\CheckLandlordApiKey;
-use App\Multitenancy\Http\Controllers\CreateTenantController;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Tenants\SyncTenantController;
+use App\Http\Controllers\Tenants\CreateTenantController;
+use App\Http\Controllers\Tenants\DeleteTenantController;
 
-Route::middleware([CheckLandlordApiKey::class])
-    ->post('tenants/create', CreateTenantController::class)
+Route::post('tenants', CreateTenantController::class)
     ->name('tenants.create');
+
+Route::delete('tenants/{tenant}', DeleteTenantController::class)
+    ->name('tenants.delete');
+
+Route::post('tenants/{tenant}/sync', SyncTenantController::class)
+    ->name('tenants.sync');
+
+Route::post('test', fn () => true)
+    ->name('test');

@@ -37,7 +37,6 @@
 namespace AidingApp\Webhook\Models;
 
 use App\Models\BaseModel;
-use Illuminate\Support\Collection;
 use AidingApp\Webhook\Enums\InboundWebhookSource;
 
 /**
@@ -55,14 +54,4 @@ class InboundWebhook extends BaseModel
     protected $casts = [
         'source' => InboundWebhookSource::class,
     ];
-
-    public function getWebPermissions(): Collection
-    {
-        return collect(['view-any', '*.view']);
-    }
-
-    public function getApiPermissions(): Collection
-    {
-        return collect([]);
-    }
 }

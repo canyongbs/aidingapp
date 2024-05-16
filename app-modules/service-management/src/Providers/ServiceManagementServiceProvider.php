@@ -40,9 +40,9 @@ use Filament\Panel;
 use App\Concerns\ImplementsGraphQL;
 use Illuminate\Support\ServiceProvider;
 use AidingApp\ServiceManagement\Models\Sla;
-use App\Registries\RoleBasedAccessControlRegistry;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use AidingApp\ServiceManagement\Models\ChangeRequest;
+use AidingApp\Authorization\AuthorizationRoleRegistry;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\ServiceManagementPlugin;
 use AidingApp\ServiceManagement\Models\ChangeRequestType;
@@ -65,7 +65,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestFormAuthentication;
 use AidingApp\ServiceManagement\Observers\ServiceRequestHistoryObserver;
 use AidingApp\ServiceManagement\Registries\ServiceManagementRbacRegistry;
 use AidingApp\ServiceManagement\Observers\ServiceRequestAssignmentObserver;
-use AidingApp\ServiceManagement\Observers\ServiceRequestFormSubmissionObserver;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\SqidPlusSixServiceRequestNumberGenerator;
 
@@ -106,7 +105,7 @@ class ServiceManagementServiceProvider extends ServiceProvider
 
         $this->discoverSchema(__DIR__ . '/../../graphql/service-management.graphql');
 
-        RoleBasedAccessControlRegistry::register(ServiceManagementRbacRegistry::class);
+        AuthorizationRoleRegistry::register(ServiceManagementRbacRegistry::class);
     }
 
     protected function registerObservers(): void
@@ -114,7 +113,6 @@ class ServiceManagementServiceProvider extends ServiceProvider
         ChangeRequest::observe(ChangeRequestObserver::class);
         ServiceRequest::observe(ServiceRequestObserver::class);
         ServiceRequestAssignment::observe(ServiceRequestAssignmentObserver::class);
-        ServiceRequestFormSubmission::observe(ServiceRequestFormSubmissionObserver::class);
         ServiceRequestHistory::observe(ServiceRequestHistoryObserver::class);
         ServiceRequestUpdate::observe(ServiceRequestUpdateObserver::class);
     }

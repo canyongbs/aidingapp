@@ -38,9 +38,7 @@
         "canyon-gbs/aiding-app-knowledge-base": "*",
         "canyon-gbs/aiding-app-notification": "*",
         "canyon-gbs/aiding-app-portal": "*",
-        "canyon-gbs/aiding-app-report": "*",
         "canyon-gbs/aiding-app-service-management": "*",
-        "canyon-gbs/aiding-app-survey": "*",
         "canyon-gbs/aiding-app-task": "*",
         "canyon-gbs/aiding-app-team": "*",
         "canyon-gbs/aiding-app-theme": "*",
@@ -119,6 +117,7 @@
         "psr-4": {
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
+            "Database\\Migrations\\Concerns\\": "database/migrations/Concerns/",
             "Database\\Seeders\\": "database/seeders/"
         }
     },

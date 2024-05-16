@@ -37,25 +37,12 @@
 namespace AidingApp\Consent\Registries;
 
 use AidingApp\Authorization\AuthorizationRoleRegistry;
-use App\Registries\Contracts\RegistersRolesAndPermissions;
-use AidingApp\Authorization\AuthorizationPermissionRegistry;
+use AidingApp\Authorization\Registries\Contracts\RegistersRolesAndPermissions;
 
 class ConsentRbacRegistry implements RegistersRolesAndPermissions
 {
-    public function registerRolesAndPermissions(): void
+    public function __invoke(): void
     {
-        $permissionRegistry = app(AuthorizationPermissionRegistry::class);
-
-        $permissionRegistry->registerApiPermissions(
-            module: 'consent',
-            path: 'permissions/api/custom'
-        );
-
-        $permissionRegistry->registerWebPermissions(
-            module: 'consent',
-            path: 'permissions/web/custom'
-        );
-
         $roleRegistry = app(AuthorizationRoleRegistry::class);
 
         $roleRegistry->registerApiRoles(
