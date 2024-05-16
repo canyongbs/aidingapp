@@ -42,14 +42,12 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 
 class ServiceRequestLineChart extends ChartWidget
 {
-    protected static ?string $heading = 'Service Requests in last 30 days';
+    protected static ?string $heading = 'Service Requests (Last 30 Days)';
 
     protected static ?string $maxHeight = '300px';
 
     protected int | string | array $columnSpan = [
         'sm' => 2,
-        'md' => 3,
-        'lg' => 3,
     ];
 
     protected function getOptions(): array

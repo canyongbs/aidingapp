@@ -75,6 +75,11 @@ class ListServiceRequestTableWidgets extends BaseWidget
                 TextColumn::make('service_request_number')
                     ->label('Service Request #')
                     ->searchable()
+                    ->sortable()
+                    ->url(fn (ServiceRequest $record) => ServiceRequestResource::getUrl('view', ['record' => $record]))
+                    ->color('primary'),
+                TextColumn::make('status.name')
+                    ->searchable()
                     ->sortable(),
                 TextColumn::make('title')
                     ->searchable()
@@ -84,10 +89,6 @@ class ListServiceRequestTableWidgets extends BaseWidget
                     ->getStateUsing(fn (ServiceRequest $record) => $record->respondent->{$record->respondent::displayNameKey()})
                     ->searchable(query: fn (Builder $query, $search) => $query->tap(new EducatableSearch(relationship: 'respondent', search: $search)))
                     ->sortable(query: fn (Builder $query, string $direction): Builder => $query->tap(new EducatableSort($direction))),
-                TextColumn::make('division.name')
-                    ->label('Division')
-                    ->searchable()
-                    ->sortable(),
                 TextColumn::make('assignedTo.user.name')
                     ->label('Assigned to')
                     ->searchable()
