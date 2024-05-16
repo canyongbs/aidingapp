@@ -51,6 +51,8 @@ class ServiceRequestWidget extends BaseWidget
 
     protected int $daysAgo = 30;
 
+    protected int $secondsToCache = 172800; // 48 hours
+
     public function getColumns(): int
     {
         return 2;
@@ -62,14 +64,17 @@ class ServiceRequestWidget extends BaseWidget
 
         [$currentOpenServiceRequests, $openServiceRequestsPercentageChange, $openServiceRequestsIcon, $openServiceRequestsColor] = $this->calculateOpenServiceRequestStats($intervalStart);
 
-        $currentUnassignedServiceRequests = ServiceRequest::doesntHave('assignments')->count();
+        [$currentUnassignedServiceRequests, $unassignedServiceRequestsPercentageChange, $unassignedServiceRequestsIcon, $unassignedServiceRequestsColor] = $this->calculateUnassignedServiceRequestStats($intervalStart);
 
         return [
             Stat::make('Open Service Requests', $currentOpenServiceRequests)
                 ->description($openServiceRequestsPercentageChange)
                 ->descriptionIcon($openServiceRequestsIcon)
                 ->color($openServiceRequestsColor),
-            Stat::make('Unassigned Service Requests', $currentUnassignedServiceRequests),
+            Stat::make('Unassigned Service Requests', $currentUnassignedServiceRequests)
+                ->description($unassignedServiceRequestsPercentageChange)
+                ->descriptionIcon($unassignedServiceRequestsIcon)
+                ->color($unassignedServiceRequestsColor),
         ];
     }
 
@@ -88,7 +93,7 @@ class ServiceRequestWidget extends BaseWidget
             }])
             ->where('created_at', '<=', $intervalStart)->get();
 
-        $openServiceRequestsAtIntervalCount = Cache::remember('open_service_requests_at_interval_count', 60 * 60, function () use ($serviceRequestsCreatedBeforeIntervalStart, $openStatusIds) {
+        $openServiceRequestsAtIntervalCount = Cache::remember("open_service_requests_{$intervalStart->year}_{$intervalStart->month}_{$intervalStart->day}", $this->secondsToCache, function () use ($serviceRequestsCreatedBeforeIntervalStart, $openStatusIds) {
             return $serviceRequestsCreatedBeforeIntervalStart->filter(function (ServiceRequest $serviceRequest) use ($openStatusIds) {
                 // If the service request is open, and doesn't have any history, it was open at interval date
                 if ($openStatusIds->contains($serviceRequest->status_id) && $serviceRequest->histories->isEmpty()) {
@@ -123,6 +128,31 @@ class ServiceRequestWidget extends BaseWidget
         ];
     }
 
+    private function calculateUnassignedServiceRequestStats(Carbon $intervalStart): array
+    {
+        $currentUnassignedServiceRequests = ServiceRequest::doesntHave('assignments')->count();
+
+        $unassignedServiceRequestsAtIntervalCount = Cache::remember("unassigned_service_requests_{$intervalStart->year}_{$intervalStart->month}_{$intervalStart->day}", $this->secondsToCache, function () use ($intervalStart) {
+            return ServiceRequest::query()
+                ->whereDoesntHave('assignments', function ($query) use ($intervalStart) {
+                    $query->where('assigned_at', '<=', $intervalStart);
+                })
+                ->where('created_at', '<=', $intervalStart)
+                ->count();
+        });
+
+        $percentageChange = $this->getPercentageChange($unassignedServiceRequestsAtIntervalCount, $currentUnassignedServiceRequests);
+
+        [$percentageChange, $icon, $color] = $this->getFormattedPercentageChangeDetails($percentageChange);
+
+        return [
+            $currentUnassignedServiceRequests,
+            $percentageChange,
+            $icon,
+            $color,
+        ];
+    }
+
     private function getPercentageChange($oldValue, $newValue): int
     {
         return $oldValue > 0
@@ -137,7 +167,7 @@ class ServiceRequestWidget extends BaseWidget
             $icon = 'heroicon-m-arrow-trending-up';
             $color = 'success';
         } elseif ($percentageChange < 0) {
-            $percentageChange = number_format($percentageChange) . '% decrease';
+            $percentageChange = number_format($percentageChange * -1) . '% decrease';
             $icon = 'heroicon-m-arrow-trending-down';
             $color = 'danger';
         } else {
