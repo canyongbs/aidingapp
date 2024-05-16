@@ -101,11 +101,11 @@ class ServiceRequestWidget extends BaseWidget
 
         $percentageChange = $this->getPercentageChange($openServiceRequestsAtIntervalCount, $currentOpenServiceRequests);
 
-        [$percentageChange, $icon, $color] = $this->getFormattedPercentageChangeDetails($percentageChange);
+        [$percentageChangeDisplayValue, $icon, $color] = $this->getFormattedPercentageChangeDetails($percentageChange);
 
         return [
             $currentOpenServiceRequests,
-            $percentageChange,
+            $percentageChangeDisplayValue,
             $icon,
             $color,
         ];
@@ -143,11 +143,11 @@ class ServiceRequestWidget extends BaseWidget
 
         $percentageChange = $this->getPercentageChange($unassignedServiceRequestsAtIntervalCount, $currentUnassignedServiceRequests);
 
-        [$percentageChange, $icon, $color] = $this->getFormattedPercentageChangeDetails($percentageChange);
+        [$percentageChangeDisplayValue, $icon, $color] = $this->getFormattedPercentageChangeDetails($percentageChange);
 
         return [
             $currentUnassignedServiceRequests,
-            $percentageChange,
+            $percentageChangeDisplayValue,
             $icon,
             $color,
         ];
@@ -163,21 +163,21 @@ class ServiceRequestWidget extends BaseWidget
     private function getFormattedPercentageChangeDetails(int $percentageChange): array
     {
         if ($percentageChange > 0) {
-            $percentageChange = number_format($percentageChange) . '% increase';
+            $percentageChangeDisplayValue = number_format($percentageChange) . '% increase';
             $icon = 'heroicon-m-arrow-trending-up';
             $color = 'success';
         } elseif ($percentageChange < 0) {
-            $percentageChange = number_format($percentageChange * -1) . '% decrease';
+            $percentageChangeDisplayValue = number_format($percentageChange * -1) . '% decrease';
             $icon = 'heroicon-m-arrow-trending-down';
             $color = 'danger';
         } else {
-            $percentageChange = 'No change';
+            $percentageChangeDisplayValue = 'No change';
             $icon = null;
             $color = null;
         }
 
         return [
-            $percentageChange,
+            $percentageChangeDisplayValue,
             $icon,
             $color,
         ];
