@@ -37,7 +37,7 @@
 namespace AidingApp\Engagement\Filament\Resources;
 
 use Filament\Resources\Resource;
-use App\Filament\Clusters\GlobalSettings;
+use App\Filament\Clusters\Communication;
 use AidingApp\Engagement\Models\SmsTemplate;
 use AidingApp\Engagement\Filament\Resources\SmsTemplateResource\Pages\EditSmsTemplate;
 use AidingApp\Engagement\Filament\Resources\SmsTemplateResource\Pages\ListSmsTemplates;
@@ -57,7 +57,7 @@ class SmsTemplateResource extends Resource
 
     protected static ?int $navigationSort = 130;
 
-    protected static ?string $cluster = GlobalSettings::class;
+    protected static ?string $cluster = Communication::class;
 
     public static function getPages(): array
     {
