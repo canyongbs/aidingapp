@@ -95,24 +95,7 @@ class ServiceRequestWidget extends BaseWidget
 
         $openServiceRequestsAtIntervalCount = Cache::remember("open_service_requests_{$intervalStart->year}_{$intervalStart->month}_{$intervalStart->day}", $this->secondsToCache, function () use ($serviceRequestsCreatedBeforeIntervalStart, $openStatusIds) {
             return $serviceRequestsCreatedBeforeIntervalStart->filter(function (ServiceRequest $serviceRequest) use ($openStatusIds) {
-                // If the service request is open, and doesn't have any history, it was open at interval date
-                if ($openStatusIds->contains($serviceRequest->status_id) && $serviceRequest->histories->isEmpty()) {
-                    return true;
-                }
-
-                // If the service request is not open, and doesn't have any history, it was not open at interval date
-                if ($openStatusIds->doesntContain($serviceRequest->status_id) && $serviceRequest->histories->isEmpty()) {
-                    return false;
-                }
-
-                // If the service requests first history after the interval was a change from open to something else, it was open at interval date
-                if ($history = $serviceRequest->histories->first()) {
-                    $originalStatusId = $history->original_values['status_id'] ?? null;
-
-                    return $openStatusIds->contains($originalStatusId);
-                }
-
-                return false;
+                return $this->wasOpenAtIntervalStart($serviceRequest, $openStatusIds);
             })->count();
         });
 
@@ -126,6 +109,23 @@ class ServiceRequestWidget extends BaseWidget
             $icon,
             $color,
         ];
+    }
+
+    private function wasOpenAtIntervalStart(ServiceRequest $serviceRequest, $openStatusIds): bool
+    {
+        // If the service request has no history and it is open, it was open at interval date
+        if ($serviceRequest->histories->isEmpty()) {
+            return $openStatusIds->contains($serviceRequest->status_id);
+        }
+
+        // If the service requests first history after the interval was a change from open to something else, it was open at interval date
+        if ($history = $serviceRequest->histories->first()) {
+            $originalStatusId = $history->original_values['status_id'] ?? null;
+
+            return $openStatusIds->contains($originalStatusId);
+        }
+
+        return false;
     }
 
     private function calculateUnassignedServiceRequestStats(Carbon $intervalStart): array
