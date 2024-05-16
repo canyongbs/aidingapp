@@ -51,7 +51,7 @@ class ServiceRequestWidget extends BaseWidget
 
     protected int $daysAgo = 30;
 
-    protected int $secondsToCache = 172800; // 48 hours
+    protected int $secondsToCache = 136800; // 38 hours (longest duration of single "day" across timezones globally)
 
     public function getColumns(): int
     {
@@ -105,7 +105,7 @@ class ServiceRequestWidget extends BaseWidget
                     return false;
                 }
 
-                // If the service requests history has a status_id that is in the open status ids, it was open at interval date
+                // If the service requests first history after the interval was a change from open to something else, it was open at interval date
                 if ($history = $serviceRequest->histories->first()) {
                     $originalStatusId = $history->original_values['status_id'] ?? null;
 
