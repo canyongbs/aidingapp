@@ -40,10 +40,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Contracts\Support\Htmlable;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use App\Filament\Concerns\FiltersManagersFromGroups;
-use Filament\Resources\RelationManagers\RelationGroup;
 use AidingApp\Contact\Filament\Resources\ContactResource;
-use AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers\AssetCheckInRelationManager;
-use AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers\AssetCheckOutRelationManager;
 use AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers\ServiceRequestsRelationManager;
 
 class ContactServiceManagement extends ManageRelatedRecords
@@ -54,15 +51,15 @@ class ContactServiceManagement extends ManageRelatedRecords
 
     protected static string $relationship = 'serviceRequests';
 
-    protected static ?string $navigationLabel = 'Service Management';
+    protected static ?string $navigationLabel = 'Service Requests';
 
-    protected static ?string $breadcrumb = 'Service Management';
+    protected static ?string $breadcrumb = 'Service Requests';
 
     protected static ?string $navigationIcon = 'heroicon-o-briefcase';
 
     public function getTitle(): string | Htmlable
     {
-        return 'Contact Service Management';
+        return 'Service Requests';
     }
 
     public static function canAccess(array $arguments = []): bool
@@ -79,10 +76,6 @@ class ContactServiceManagement extends ManageRelatedRecords
     {
         return collect([
             ServiceRequestsRelationManager::class,
-            RelationGroup::make('Assets', [
-                AssetCheckOutRelationManager::class,
-                AssetCheckInRelationManager::class,
-            ]),
         ])
             ->map(fn ($relationManager) => self::filterRelationManagers($relationManager, $record))
             ->filter()
