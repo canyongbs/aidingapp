@@ -34,37 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Filament\Resources;
+namespace App\Filament\Clusters;
 
-use Filament\Resources\Resource;
-use App\Filament\Clusters\Communication;
-use AidingApp\Engagement\Models\SmsTemplate;
-use AidingApp\Engagement\Filament\Resources\SmsTemplateResource\Pages\EditSmsTemplate;
-use AidingApp\Engagement\Filament\Resources\SmsTemplateResource\Pages\ListSmsTemplates;
-use AidingApp\Engagement\Filament\Resources\SmsTemplateResource\Pages\CreateSmsTemplate;
+use Filament\Clusters\Cluster;
 
-class SmsTemplateResource extends Resource
+class Communication extends Cluster
 {
-    protected static ?string $model = SmsTemplate::class;
+    protected static ?string $navigationIcon = 'heroicon-o-squares-2x2';
 
-    protected static ?string $navigationIcon = 'heroicon-o-device-phone-mobile';
+    protected static ?string $navigationGroup = 'Product Administration';
 
-    protected static ?string $navigationGroup = 'Communication';
+    protected static ?string $navigationLabel = 'Communication Settings';
 
-    protected static ?string $navigationLabel = 'Text Message Templates';
-
-    protected static ?string $modelLabel = 'text message template';
-
-    protected static ?int $navigationSort = 130;
-
-    protected static ?string $cluster = Communication::class;
-
-    public static function getPages(): array
-    {
-        return [
-            'index' => ListSmsTemplates::route('/'),
-            'create' => CreateSmsTemplate::route('/create'),
-            'edit' => EditSmsTemplate::route('/{record}/edit'),
-        ];
-    }
+    protected static ?int $navigationSort = 40;
 }
