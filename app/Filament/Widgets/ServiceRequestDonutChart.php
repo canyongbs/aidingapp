@@ -44,7 +44,7 @@ class ServiceRequestDonutChart extends ChartWidget
 {
     protected static ?string $heading = 'Service Requests (By Status)';
 
-    protected static ?string $maxHeight = '300px';
+    protected static ?string $maxHeight = '250px';
 
     protected int | string | array $columnSpan = [
         'sm' => 2,
