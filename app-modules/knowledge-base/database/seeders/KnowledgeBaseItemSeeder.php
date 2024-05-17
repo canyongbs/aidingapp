@@ -68,7 +68,8 @@ class KnowledgeBaseItemSeeder extends Seeder
         $settings = app(PortalSettings::class);
         $settings->knowledge_management_portal_enabled = true;
         $settings->knowledge_management_portal_primary_color = 'emerald';
-        $settings->knowledge_management_portal_rounding = Rounding::Large->value;
+        $settings->knowledge_management_portal_rounding = Rounding::None->value;
+        $settings->knowledge_management_portal_service_management = true;
         $settings->save();
     }
 }

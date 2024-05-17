@@ -57,7 +57,7 @@
     const loadingResults = ref(true);
     const user = ref(null);
     const schema = ref([]);
-    const priorities = ref(null);
+    // const priorities = ref(null);
     const submittedSuccess = ref(false);
 
     watch(
@@ -96,31 +96,54 @@
             return steps[stepName].valid && steps[stepName].errorCount === 0;
         },
         stringify: (value) => JSON.stringify(value, null, 2),
+        submitForm: async (data, node) => {
+            node.clearErrors();
+
+            // let recaptchaToken = null;
+
+            // if (formRecaptchaEnabled.value === true) {
+            //     recaptchaToken = await getRecaptchaToken(formRecaptchaKey.value);
+            // }
+
+            // if (recaptchaToken !== null) {
+            //     data['recaptcha-token'] = recaptchaToken;
+            // }
+
+            const { post } = consumer();
+
+            post(props.apiUrl + '/service-request/create/' + route.params.typeId, data)
+                .then((response) => {
+                    submittedSuccess.value = true;
+                })
+                .catch((error) => {
+                    node.setErrors([error]);
+                });
+        }
     });
 
-    async function submit(data, node) {
-        node.clearErrors();
-
-        // let recaptchaToken = null;
-
-        // if (formRecaptchaEnabled.value === true) {
-        //     recaptchaToken = await getRecaptchaToken(formRecaptchaKey.value);
-        // }
-
-        // if (recaptchaToken !== null) {
-        //     data['recaptcha-token'] = recaptchaToken;
-        // }
-
-        const { post } = consumer();
-
-        post(props.apiUrl + '/service-request/create/' + route.params.typeId, data)
-            .then((response) => {
-                submittedSuccess.value = true;
-            })
-            .catch((error) => {
-                node.setErrors([error]);
-            });
-    }
+    // async function submit(data, node) {
+    //     node.clearErrors();
+    //
+    //     // let recaptchaToken = null;
+    //
+    //     // if (formRecaptchaEnabled.value === true) {
+    //     //     recaptchaToken = await getRecaptchaToken(formRecaptchaKey.value);
+    //     // }
+    //
+    //     // if (recaptchaToken !== null) {
+    //     //     data['recaptcha-token'] = recaptchaToken;
+    //     // }
+    //
+    //     const { post } = consumer();
+    //
+    //     post(props.apiUrl + '/service-request/create/' + route.params.typeId, data)
+    //         .then((response) => {
+    //             submittedSuccess.value = true;
+    //         })
+    //         .catch((error) => {
+    //             node.setErrors([error]);
+    //         });
+    // }
 
     async function getData() {
         loadingResults.value = true;
@@ -136,11 +159,12 @@
         get(props.apiUrl + '/service-request/create/' + route.params.typeId).then((response) => {
             loadingResults.value = false;
 
-            response.data.schema.children =
-                response.data.schema.children?.filter((element) => element.$formkit !== 'submit') ?? [];
+            // response.data.schema.children =
+            //     response.data.schema.children?.filter((element) => element.$formkit !== 'submit') ?? [];
 
             schema.value = response.data.schema;
-            priorities.value = response.data.priorities;
+            console.log(schema.value);
+            // priorities.value = response.data.priorities;
         });
     }
 </script>
@@ -187,31 +211,32 @@
 
             <main class="grid px-6 gap-4" v-if="submittedSuccess">Thank you for submitting a new request.</main>
             <main class="grid px-6 gap-4" v-else>
-                <FormKit type="form" @submit="submit" :actions="false" :data="data">
-                    <FormKit
-                        type="select"
-                        name="priority"
-                        label="Priority"
-                        placeholder="Select a priority"
-                        validation="required"
-                        :options="priorities"
-                    />
+<!--                <FormKit type="form" @submit="submit" :actions="false" :data="data">-->
+<!--                    <FormKit-->
+<!--                        type="select"-->
+<!--                        name="priority"-->
+<!--                        label="Priority"-->
+<!--                        placeholder="Select a priority"-->
+<!--                        validation="required"-->
+<!--                        :options="priorities"-->
+<!--                    />-->
 
-                    <FormKit
-                        type="textarea"
-                        name="description"
-                        label="Describe your issue"
-                        placeholder="Please describe your issue here"
-                        validation="required"
-                        rows="6"
-                    />
+<!--                    <FormKit-->
+<!--                        type="textarea"-->
+<!--                        name="description"-->
+<!--                        label="Describe your issue"-->
+<!--                        placeholder="Please describe your issue here"-->
+<!--                        validation="required"-->
+<!--                        rows="6"-->
+<!--                    />-->
 
-                    <h3 v-if="schema.children?.length > 0" class="text-xl my-2">Additional Form Information</h3>
+<!--                    <h3 v-if="schema.children?.length > 0" class="text-xl my-2">Additional Form Information</h3>-->
 
-                    <FormKitSchema name="extra" :schema="schema" />
+<!--                    <FormKitSchema name="extra" :schema="schema" />-->
 
-                    <FormKit type="submit" />
-                </FormKit>
+<!--                    <FormKit type="submit" />-->
+<!--                </FormKit>-->
+                <FormKitSchema :schema="schema" :data="data" />
             </main>
         </div>
     </div>

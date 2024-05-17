@@ -163,7 +163,7 @@
                     </div>
                     <details
                         v-if="tags.length > 0"
-                        class="rounded rounded-t-none bg-white py-3 pl-4 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-2-- sm:text-sm sm:leading-6"
+                        class="rounded rounded-t-none bg-white py-3 p-4 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-2-- sm:text-sm sm:leading-6"
                     >
                         <summary v-if="selectedTags.length > 0">Tags ({{ selectedTags.length }} selected)</summary>
                         <summary v-else>Tags</summary>

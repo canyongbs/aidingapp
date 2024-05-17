@@ -67,6 +67,7 @@ class SelectFormFieldBlock extends FormFieldBlock
             'name' => $field->getKey(),
             ...($field->is_required ? ['validation' => 'required'] : []),
             'options' => $field->config['options'],
+            'placeholder' => $field->config['placeholder'],
         ];
     }
 

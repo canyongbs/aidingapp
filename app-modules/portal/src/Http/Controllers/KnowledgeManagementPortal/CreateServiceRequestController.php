@@ -37,7 +37,6 @@
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use App\Enums\Feature;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -49,8 +48,11 @@ use Symfony\Component\HttpFoundation\Response;
 use AidingApp\Form\Actions\GenerateFormKitSchema;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\Form\Actions\GenerateSubmissibleValidation;
+use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\Form\Actions\ResolveSubmissionAuthorFromEmail;
+use AidingApp\ServiceManagement\Models\ServiceRequestFormStep;
+use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use AidingApp\Form\Filament\Blocks\EducatableEmailFormFieldBlock;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormSubmission;
 
@@ -58,9 +60,86 @@ class CreateServiceRequestController extends Controller
 {
     public function create(GenerateFormKitSchema $generateSchema, ServiceRequestType $type): JsonResponse
     {
+        $form = new ServiceRequestForm([
+            'is_wizard' => true,
+        ]);
+
+        $content = collect([
+            [
+                'type' => 'tiptapBlock',
+                'attrs' => [
+                    'id' => 'title',
+                    'type' => 'text_input',
+                    'data' => [
+                        'label' => 'Title',
+                        'isRequired' => true,
+                    ],
+                ],
+            ],
+            [
+                'type' => 'tiptapBlock',
+                'attrs' => [
+                    'id' => 'description',
+                    'type' => 'text_area',
+                    'data' => [
+                        'label' => 'Description',
+                        'isRequired' => true,
+                    ],
+                ],
+            ],
+            [
+                'type' => 'tiptapBlock',
+                'attrs' => [
+                    'id' => 'priority',
+                    'type' => 'select',
+                    'data' => [
+                        'label' => 'Priority',
+                        'isRequired' => true,
+                        'options' => $type
+                            ->priorities()
+                            ->orderByDesc('order')
+                            ->pluck('name', 'id'),
+                        'placeholder' => 'Select a priority',
+                    ],
+                ],
+            ],
+        ]);
+
+        $step = new ServiceRequestFormStep([
+            'label' => 'info',
+            'order' => -1,
+            'content' => [
+                'content' => $content,
+                'type' => 'doc',
+            ],
+        ]);
+
+        $content->each(function ($block) use ($step) {
+            $attributes = collect($block['attrs']);
+
+            $step->fields->push(
+                (new ServiceRequestFormField())
+                    ->forceFill([
+                        'id' => $attributes->pull('id'),
+                        'type' => $attributes->pull('type'),
+                        'label' => $attributes->pull('data.label'),
+                        'is_required' => $attributes->pull('data.isRequired'),
+                        'config' => $attributes->pull('data'),
+                    ])
+            );
+        });
+
+        $form->steps->push($step);
+
+        // $generateSchema($form);
+
+        // $generateSchema($type->form);
+        // ray(data_get($generateSchema($form), 'children.1.children.0.children.0'));
+
         return response()->json([
-            'schema' => $type->form && Gate::check(Feature::OnlineForms->getGateName()) ? $generateSchema($type->form) : [],
-            'priorities' => $type->priorities()->orderBy('order', 'desc')->pluck('name', 'id'),
+            // 'schema' => $type->form && Gate::check(Feature::OnlineForms->getGateName()) ? $generateSchema($type->form) : [],
+            'schema' => $generateSchema($form),
+            // 'priorities' => $type->priorities()->orderByDesc('order')->pluck('name', 'id'),
         ]);
     }
 
@@ -76,12 +155,81 @@ class CreateServiceRequestController extends Controller
 
         $serviceRequestForm = $type->form;
 
+        ray($request->all(), $type, $serviceRequestForm);
+
+        $form = new ServiceRequestForm([
+            'is_wizard' => true,
+        ]);
+
+        $content = collect([
+            [
+                'type' => 'tiptapBlock',
+                'attrs' => [
+                    'id' => 'title',
+                    'type' => 'text_input',
+                    'data' => [
+                        'label' => 'Title',
+                        'isRequired' => true,
+                    ],
+                ],
+            ],
+            [
+                'type' => 'tiptapBlock',
+                'attrs' => [
+                    'id' => 'description',
+                    'type' => 'text_area',
+                    'data' => [
+                        'label' => 'Description',
+                        'isRequired' => true,
+                    ],
+                ],
+            ],
+            [
+                'type' => 'tiptapBlock',
+                'attrs' => [
+                    'id' => 'priority',
+                    'type' => 'select',
+                    'data' => [
+                        'label' => 'Priority',
+                        'isRequired' => true,
+                        'options' => $type
+                            ->priorities()
+                            ->orderByDesc('order')
+                            ->pluck('name', 'id'),
+                        'placeholder' => 'Select a priority',
+                    ],
+                ],
+            ],
+        ]);
+
+        $step = new ServiceRequestFormStep([
+            'label' => 'info',
+            'order' => -1,
+            'content' => [
+                'content' => $content,
+                'type' => 'doc',
+            ],
+        ]);
+
+        $content->each(function ($block) use ($step) {
+            $attributes = collect($block['attrs']);
+            $field = new ServiceRequestFormField([
+                'id' => $attributes->pull('id'),
+                'type' => $attributes->pull('type'),
+                'label' => $attributes->pull('data.label'),
+                'is_required' => $attributes->pull('data.isRequired'),
+                'config' => $attributes->pull('data'),
+            ]);
+
+            $step->fields->push($field);
+        });
+
+        $form->steps->push($step);
+
+        ray($generateValidation($form));
+
         $validator = Validator::make($request->all(), [
-            'priority' => ['required', 'exists:service_request_priorities,id'],
-            'description' => ['required', 'string', 'max:65535'],
-            ...$serviceRequestForm
-                ? Arr::prependKeysWith($generateValidation($serviceRequestForm), 'extra.')
-                : [],
+            ...$generateValidation($form),
         ]);
 
         if ($validator->fails()) {
@@ -91,6 +239,10 @@ class CreateServiceRequestController extends Controller
         }
 
         $data = $validator->validated();
+
+        ray($data);
+
+        abort(500);
 
         $priority = $type->priorities()->findOrFail($data['priority']);
 
@@ -208,5 +360,76 @@ class CreateServiceRequestController extends Controller
         }
 
         $submission->author()->associate($author);
+    }
+
+    private function generateDefaultFields(ServiceRequestType $type): ServiceRequestForm
+    {
+        $form = new ServiceRequestForm([
+            'is_wizard' => true,
+        ]);
+
+        $content = collect([
+            [
+                'type' => 'tiptapBlock',
+                'attrs' => [
+                    'id' => 'title',
+                    'type' => 'text_input',
+                    'data' => [
+                        'label' => 'Title',
+                        'isRequired' => true,
+                    ],
+                ],
+            ],
+            [
+                'type' => 'tiptapBlock',
+                'attrs' => [
+                    'id' => 'description',
+                    'type' => 'text_area',
+                    'data' => [
+                        'label' => 'Description',
+                        'isRequired' => true,
+                    ],
+                ],
+            ],
+            [
+                'type' => 'tiptapBlock',
+                'attrs' => [
+                    'id' => 'priority',
+                    'type' => 'select',
+                    'data' => [
+                        'label' => 'Priority',
+                        'isRequired' => true,
+                        'options' => $type
+                            ->priorities()
+                            ->orderByDesc('order')
+                            ->pluck('name', 'id'),
+                        'placeholder' => 'Select a priority',
+                    ],
+                ],
+            ],
+        ]);
+
+        $step = new ServiceRequestFormStep([
+            'label' => 'info',
+            'order' => -1,
+            'content' => [
+                'content' => $content,
+                'type' => 'doc',
+            ],
+        ]);
+
+        $content->each(function ($block) use ($step) {
+            $attributes = collect($block['attrs']);
+
+            $step->fields->push(new ServiceRequestFormField([
+                'id' => $attributes->pull('id'),
+                'type' => $attributes->pull('type'),
+                'label' => $attributes->pull('data.label'),
+                'is_required' => $attributes->pull('data.isRequired'),
+                'config' => $attributes->pull('data'),
+            ]));
+        });
+
+        return $form;
     }
 }
