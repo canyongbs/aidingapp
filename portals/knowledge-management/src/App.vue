@@ -433,7 +433,7 @@
                     <p class="text-lg text-red-500">Please try again later</p>
                 </div>
 
-                <div v-else>
+                <div v-else class="flex flex-row">
                     <MobileSidebar
                         v-if="showMobileMenu"
                         @show-login="showLogin = true"
@@ -446,8 +446,9 @@
                     <DesktopSidebar @show-login="showLogin = true" :categories="categories" :api-url="apiUrl">
                     </DesktopSidebar>
 
-                    <div class="lg:pl-72">
+                    <div>
                         <RouterView
+                            @sidebar-opened="showMobileMenu = !showMobileMenu"
                             :search-url="searchUrl"
                             :api-url="apiUrl"
                             :categories="categories"
