@@ -136,16 +136,6 @@ class GenerateFormKitSchema
 
     public function wizardContent(array $blocks, Submissible $submissible): array
     {
-        // ray($this->content(
-        //     $blocks,
-        //     $submissible->steps->first()->content['content'] ?? [],
-        //     $submissible->steps->first()->fields->keyBy('id')
-        // ));
-
-        // ray($blocks[$submissible->steps->first()->content['attrs']['type']]::getFormKitSchema('select'));
-
-        ray($submissible->steps->first()->content['content'][2]['attrs']['type']);
-
         return [
             ...$submissible->steps->count() > 1 ? [
                 '$el' => 'ul',

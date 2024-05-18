@@ -38,7 +38,9 @@
         access-url=https://test.aidingapp.local/portals/knowledge-management
         search-url="https://test.aidingapp.local/api/portal/knowledge-management/search?signature=2d658856f97a9609465536f42ba8cf6273415e962d2469a41372f382330e8261"
         app-url="https://test.aidingapp.local"
-        api-url="https://test.aidingapp.local/api/portal/knowledge-management">
+        api-url="https://test.aidingapp.local/api/portal/knowledge-management"
+    >
     </knowledge-management-portal-embed>
-    <script src="https://test.aidingapp.local/js/portals/knowledge-management/aiding-app-knowledge-management-portal.js?"></script>
+    <script src="https://test.aidingapp.local/js/portals/knowledge-management/aiding-app-knowledge-management-portal.js?">
+    </script>
 </div>
