@@ -125,6 +125,8 @@ class SwitchMailTask implements SwitchTenantTask
                 'mail.mailers.smtp.password' => $smtpPassword,
                 'mail.mailers.smtp.timeout' => $smtpTimeout,
                 'mail.mailers.smtp.local_domain' => $smtpLocalDomain,
+                'health.notifications.mail.from.address' => $fromAddress,
+                'health.notifications.mail.from.name' => $fromName,
             ]
         );
 
