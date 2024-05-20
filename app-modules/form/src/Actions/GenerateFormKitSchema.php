@@ -137,12 +137,13 @@ class GenerateFormKitSchema
     public function wizardContent(array $blocks, Submissible $submissible): array
     {
         return [
-            ...$submissible->steps->count() > 1 ? [
+            [
                 '$el' => 'ul',
                 'attrs' => [
                     'class' => 'wizard',
+                    'style' => $submissible->steps->count() < 2 ? 'display: none;' : null,
                 ],
-                'children' => [
+                'children' => $submissible->steps->count() > 1 ? [
                     [
                         '$el' => 'li',
                         'for' => [
@@ -171,8 +172,8 @@ class GenerateFormKitSchema
                             '$stepName',
                         ],
                     ],
-                ],
-            ] : [],
+                ] : [],
+            ],
             [
                 '$el' => 'div',
                 'attrs' => [
@@ -202,12 +203,20 @@ class GenerateFormKitSchema
                             'class' => 'step-nav',
                         ],
                         'children' => [
-                            ...$submissible->steps->count() > 1 ? [
-                                '$formkit' => 'button',
-                                'disabled' => '$activeStep === "' . $submissible->steps->first()->label . '"',
-                                'onClick' => '$setStep(-1)',
-                                'children' => 'Previous Step',
-                            ] : [],
+                            [
+                                '$el' => 'div',
+                                'attrs' => [
+                                    'style' => $submissible->steps->count() < 2 ? 'display: none;' : null,
+                                ],
+                                'children' => [
+                                    [
+                                        '$formkit' => 'button',
+                                        'disabled' => '$activeStep === "' . $submissible->steps->first()->label . '"',
+                                        'onClick' => '$setStep(-1)',
+                                        'children' => 'Previous Step',
+                                    ],
+                                ],
+                            ],
                             [
                                 '$el' => 'div',
                                 'attrs' => [

@@ -58,11 +58,9 @@ class CreateServiceRequestController extends Controller
 {
     public function create(GenerateFormKitSchema $generateSchema, ServiceRequestType $type): JsonResponse
     {
-        ray($generateSchema($type->form), $generateSchema($this->generateForm($type)));
-
         return response()->json([
-            // 'schema' => $generateSchema($this->generateForm($type)),
-            'schema' => $generateSchema($type->form),
+            'schema' => $generateSchema($this->generateForm($type)),
+            // 'schema' => $generateSchema($type->form),
         ]);
     }
 
@@ -90,7 +88,7 @@ class CreateServiceRequestController extends Controller
 
         $data = collect($validator->validated());
 
-        $priority = $type->priorities()->findOrFail($data->pull('main.priority'));
+        $priority = $type->priorities()->findOrFail($data->pull('Main.priority'));
 
         return DB::transaction(function () use (
             $resolveSubmissionAuthorFromEmail,
@@ -100,8 +98,8 @@ class CreateServiceRequestController extends Controller
             $data,
         ) {
             $serviceRequest = new ServiceRequest([
-                'title' => $data->pull('main.title'),
-                'close_details' => $data->pull('main.description'),
+                'title' => $data->pull('Main.title'),
+                'close_details' => $data->pull('Main.description'),
             ]);
 
             $serviceRequest->respondent()->associate($contact);
@@ -118,9 +116,7 @@ class CreateServiceRequestController extends Controller
 
             $data->pull('recaptcha-token');
 
-            $data = $data->filter();
-
-            if ($data->isEmpty()) {
+            if ($data->filter()->isEmpty()) {
                 return response()->json([
                     'message' => 'Service Request Form submitted successfully.',
                 ]);
@@ -129,7 +125,9 @@ class CreateServiceRequestController extends Controller
             $submission->save();
 
             foreach ($form->steps as $step) {
-                $fields = $step->fields()->pluck('type', 'id')->all();
+                $fields = $step->fields
+                    ->pluck('type', 'id')
+                    ->all();
 
                 foreach ($data[$step->label] as $fieldId => $response) {
                     $this->processSubmissionField(
@@ -195,7 +193,7 @@ class CreateServiceRequestController extends Controller
 
         if ($content->isNotEmpty() && $form->steps->isEmpty()) {
             $step = new ServiceRequestFormStep([
-                'label' => 'details',
+                'label' => 'Details',
                 'order' => 0,
                 'content' => [
                     'content' => $form->content['content'],
@@ -265,7 +263,7 @@ class CreateServiceRequestController extends Controller
         ]);
 
         $step = new ServiceRequestFormStep([
-            'label' => 'main',
+            'label' => 'Main',
             'order' => -1,
             'content' => [
                 'content' => $content,

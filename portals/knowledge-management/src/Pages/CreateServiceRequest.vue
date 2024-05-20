@@ -74,50 +74,50 @@
     });
 
     const data = reactive({
-        // steps,
-        // visitedSteps,
-        // activeStep,
-        // plugins: [wizardPlugin],
-        // setStep: (target) => () => {
-        //     setStep(target);
-        // },
-        // setActiveStep: (stepName) => () => {
-        //     data.activeStep = stepName;
-        // },
-        // showStepErrors: (stepName) => {
-        //     return (
-        //         (steps[stepName].errorCount > 0 || steps[stepName].blockingCount > 0) &&
-        //         visitedSteps.value &&
-        //         visitedSteps.value.includes(stepName)
-        //     );
-        // },
-        // stepIsValid: (stepName) => {
-        //     return steps[stepName].valid && steps[stepName].errorCount === 0;
-        // },
-        // stringify: (value) => JSON.stringify(value, null, 2),
-        // submitForm: async (data, node) => {
-        //     node.clearErrors();
-        //
-        //     // let recaptchaToken = null;
-        //
-        //     // if (formRecaptchaEnabled.value === true) {
-        //     //     recaptchaToken = await getRecaptchaToken(formRecaptchaKey.value);
-        //     // }
-        //
-        //     // if (recaptchaToken !== null) {
-        //     //     data['recaptcha-token'] = recaptchaToken;
-        //     // }
-        //
-        //     const { post } = consumer();
-        //
-        //     post(props.apiUrl + '/service-request/create/' + route.params.typeId, data)
-        //         .then((response) => {
-        //             submittedSuccess.value = true;
-        //         })
-        //         .catch((error) => {
-        //             node.setErrors([error]);
-        //         });
-        // }
+        steps,
+        visitedSteps,
+        activeStep,
+        plugins: [wizardPlugin],
+        setStep: (target) => () => {
+            setStep(target);
+        },
+        setActiveStep: (stepName) => () => {
+            data.activeStep = stepName;
+        },
+        showStepErrors: (stepName) => {
+            return (
+                (steps[stepName].errorCount > 0 || steps[stepName].blockingCount > 0) &&
+                visitedSteps.value &&
+                visitedSteps.value.includes(stepName)
+            );
+        },
+        stepIsValid: (stepName) => {
+            return steps[stepName].valid && steps[stepName].errorCount === 0;
+        },
+        stringify: (value) => JSON.stringify(value, null, 2),
+        submitForm: async (data, node) => {
+            node.clearErrors();
+
+            // let recaptchaToken = null;
+
+            // if (formRecaptchaEnabled.value === true) {
+            //     recaptchaToken = await getRecaptchaToken(formRecaptchaKey.value);
+            // }
+
+            // if (recaptchaToken !== null) {
+            //     data['recaptcha-token'] = recaptchaToken;
+            // }
+
+            const { post } = consumer();
+
+            post(props.apiUrl + '/service-request/create/' + route.params.typeId, data)
+                .then((response) => {
+                    submittedSuccess.value = true;
+                })
+                .catch((error) => {
+                    node.setErrors([error]);
+                });
+        },
     });
 
     async function getData() {
@@ -133,7 +133,6 @@
 
         get(props.apiUrl + '/service-request/create/' + route.params.typeId).then((response) => {
             loadingResults.value = false;
-            console.log(response.data.schema);
 
             schema.value = response.data.schema;
         });
