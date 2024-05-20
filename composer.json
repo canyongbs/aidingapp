@@ -56,7 +56,7 @@
         "guzzlehttp/guzzle": "^7.2",
         "internachi/modular": "^2.0",
         "kirschbaum-development/eloquent-power-joins": "^3.5",
-        "laravel/framework": "10.46",
+        "laravel/framework": "^10.48.10",
         "laravel/octane": "^2.3",
         "laravel/pennant": "^1.7",
         "laravel/sanctum": "^3.3",
@@ -91,7 +91,7 @@
         "stechstudio/filament-impersonate": "^3.5",
         "talkroute/message-segment-calculator": "^1.0",
         "tapp/filament-timezone-field": "^3.0",
-        "tpetry/laravel-postgresql-enhanced": "^0.34",
+        "tpetry/laravel-postgresql-enhanced": "^0.38.0",
         "twilio/sdk": "^7.15"
     },
     "require-dev": {
