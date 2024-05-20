@@ -98,7 +98,10 @@ class ListTasks extends ListRecords
                     ->sortable(),
                 TextColumn::make('assignedTo.name')
                     ->label('Assigned To')
-                    ->url(fn (Task $record) => $record->assignedTo ? UserResource::getUrl('view', ['record' => $record->assignedTo]) : null),
+                    ->url(fn (Task $record) => $record->assignedTo ? UserResource::getUrl('view', ['record' => $record->assignedTo]) : null)
+                    ->hidden(function (Table $table) {
+                        return $table->getFilter('my_tasks')->getState()['isActive'];
+                    }),
                 TextColumn::make('concern.display_name')
                     ->label('Related To')
                     ->getStateUsing(fn (Task $record): ?string => $record->concern?->{$record->concern::displayNameKey()})
