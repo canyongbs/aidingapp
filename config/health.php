@@ -96,11 +96,11 @@ return [
         'throttle_notifications_key' => 'health:latestNotificationSentAt:',
 
         'mail' => [
-            'to' => 'your@example.com',
+            'to' => env('HEALTH_CHECK_TO_EMAIL', 'your@example.com'),
 
             'from' => [
-                'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
-                'name' => env('MAIL_FROM_NAME', 'Example'),
+                'address' => env('MAIL_FROM_ADDRESS', 'noreply@aiding.app'),
+                'name' => env('MAIL_FROM_NAME', 'Aiding App™'),
             ],
         ],
 
