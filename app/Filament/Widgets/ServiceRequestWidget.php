@@ -80,12 +80,7 @@ class ServiceRequestWidget extends BaseWidget
 
     private function calculateOpenServiceRequestStats(Carbon $intervalStart): array
     {
-        $openStatusIds = ServiceRequestStatus::tap(new ClassifiedIn([
-            SystemServiceRequestClassification::Open,
-            SystemServiceRequestClassification::InProgress,
-            SystemServiceRequestClassification::Waiting,
-            SystemServiceRequestClassification::Custom,
-        ]))->pluck('id');
+        $openStatusIds = ServiceRequestStatus::tap(new ClassifiedIn(SystemServiceRequestClassification::getUnclosedClassifications()))->pluck('id');
 
         $currentOpenServiceRequests = ServiceRequest::whereIn('status_id', $openStatusIds)->count();
 

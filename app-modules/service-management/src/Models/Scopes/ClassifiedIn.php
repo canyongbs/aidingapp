@@ -40,12 +40,17 @@ use Illuminate\Database\Eloquent\Builder;
 
 class ClassifiedIn
 {
+    /**
+     * Class Constructor.
+     *
+     * @param ClassificationInterface[] $classifications Array of classifications.
+     */
     public function __construct(
-        protected array $classification,
+        protected array $classifications,
     ) {}
 
     public function __invoke(Builder $query): void
     {
-        $query->whereIn('classification', $this->classification);
+        $query->whereIn('classification', $this->classifications);
     }
 }
