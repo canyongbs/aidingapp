@@ -162,7 +162,7 @@ class CreateServiceRequestController extends Controller
         mixed $response,
         array $fields,
         ResolveSubmissionAuthorFromEmail $resolveSubmissionAuthorFromEmail
-    ) {
+    ): void {
         $submission->fields()->attach($fieldId, [
             'id' => Str::orderedUuid(),
             'response' => $response,
@@ -192,7 +192,7 @@ class CreateServiceRequestController extends Controller
         $content = collect(data_get($form, 'content.content', []));
 
         if ($content->isNotEmpty() && $form->steps->isEmpty()) {
-            $form->steps->push($this->addFormStep('Details', 0, $content));
+            $form->steps->push($this->formatStep('Details', 0, $content));
         }
 
         $form->is_wizard = true;
@@ -209,14 +209,12 @@ class CreateServiceRequestController extends Controller
             ]),
         ]);
 
-        ray($content);
-
-        $form->steps->prepend($this->addFormStep('Main', -1, $content));
+        $form->steps->prepend($this->formatStep('Main', -1, $content));
 
         return $form;
     }
 
-    private function addFormStep(string $label, int $order, Collection $content): ServiceRequestFormStep
+    private function formatStep(string $label, int $order, Collection $content): ServiceRequestFormStep
     {
         $step = new ServiceRequestFormStep([
             'label' => $label,
@@ -227,12 +225,12 @@ class CreateServiceRequestController extends Controller
             ],
         ]);
 
-        $content->each(fn ($block) => $this->addFieldToStep($step, $block));
+        $content->each(fn (array $block) => $this->addFieldToStep($step, $block));
 
         return $step;
     }
 
-    private function addFieldToStep(ServiceRequestFormStep $step, array $block)
+    private function addFieldToStep(ServiceRequestFormStep $step, array $block): void
     {
         $attributes = collect($block['attrs']);
 
