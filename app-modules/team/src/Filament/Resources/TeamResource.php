@@ -38,6 +38,7 @@ namespace AidingApp\Team\Filament\Resources;
 
 use AidingApp\Team\Models\Team;
 use Filament\Resources\Resource;
+use App\Filament\Clusters\UserManagement;
 use AidingApp\Team\Filament\Resources\TeamResource\Pages\EditTeam;
 use AidingApp\Team\Filament\Resources\TeamResource\Pages\ViewTeam;
 use AidingApp\Team\Filament\Resources\TeamResource\Pages\ListTeams;
@@ -48,9 +49,9 @@ class TeamResource extends Resource
 {
     protected static ?string $model = Team::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-user-group';
 
-    protected static ?string $navigationGroup = 'Users and Permissions';
+    protected static ?string $cluster = UserManagement::class;
 
     protected static ?int $navigationSort = 20;
 

@@ -44,6 +44,7 @@ use AidingApp\Contact\Filament\Resources\ContactResource\Pages\EditContact;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ViewContact;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ListContacts;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\CreateContact;
+use AidingApp\Contact\Filament\Resources\ContactResource\Pages\AssetManagement;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactFiles;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactTasks;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactAlerts;
@@ -67,13 +68,14 @@ class ContactResource extends Resource
         return $page->generateNavigationItems([
             ViewContact::class,
             EditContact::class,
-            ManageContactEngagement::class,
+            ContactServiceManagement::class,
+            AssetManagement::class,
             ManageContactFiles::class,
+            ManageContactEngagement::class,
             ManageContactAlerts::class,
             ManageContactTasks::class,
             ManageContactSubscriptions::class,
             ContactEngagementTimeline::class,
-            ContactServiceManagement::class,
         ]);
     }
 
@@ -105,6 +107,7 @@ class ContactResource extends Resource
             'view' => ViewContact::route('/{record}'),
             'timeline' => ContactEngagementTimeline::route('/{record}/timeline'),
             'service-management' => ContactServiceManagement::route('/{record}/service-management'),
+            'asset-management' => AssetManagement::route('/{record}/asset-management'),
         ];
     }
 }

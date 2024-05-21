@@ -34,48 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Authorization\Filament\Resources;
+namespace App\Filament\Clusters;
 
-use Filament\Resources\Resource;
-use AidingApp\Authorization\Models\Role;
-use App\Filament\Clusters\UserManagement;
-use Illuminate\Database\Eloquent\Builder;
-use AidingApp\Authorization\Filament\Resources\RoleResource\Pages\EditRole;
-use AidingApp\Authorization\Filament\Resources\RoleResource\Pages\ViewRole;
-use AidingApp\Authorization\Filament\Resources\RoleResource\Pages\ListRoles;
-use AidingApp\Authorization\Filament\Resources\RoleResource\Pages\CreateRole;
-use AidingApp\Authorization\Filament\Resources\RoleResource\RelationManagers\PermissionsRelationManager;
+use Filament\Clusters\Cluster;
 
-class RoleResource extends Resource
+class UserManagement extends Cluster
 {
-    protected static ?string $model = Role::class;
+    protected static ?string $navigationIcon = 'heroicon-o-squares-2x2';
 
-    protected static ?string $navigationIcon = 'heroicon-o-shield-check';
+    protected static ?string $navigationGroup = 'Product Administration';
 
-    protected static ?string $cluster = UserManagement::class;
+    protected static ?string $navigationLabel = 'User Management';
 
-    protected static ?int $navigationSort = 30;
-
-    public static function getRelations(): array
-    {
-        return [
-            PermissionsRelationManager::class,
-        ];
-    }
-
-    public static function getPages(): array
-    {
-        return [
-            'index' => ListRoles::route('/'),
-            'create' => CreateRole::route('/create'),
-            'view' => ViewRole::route('/{record}'),
-            'edit' => EditRole::route('/{record}/edit'),
-        ];
-    }
-
-    public static function getEloquentQuery(): Builder
-    {
-        return parent::getEloquentQuery()
-            ->withoutGlobalScopes([]);
-    }
+    protected static ?int $navigationSort = 1;
 }

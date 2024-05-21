@@ -37,7 +37,7 @@
 namespace AidingApp\Engagement\Filament\Resources;
 
 use Filament\Resources\Resource;
-use App\Filament\Clusters\GlobalSettings;
+use App\Filament\Clusters\Communication;
 use AidingApp\Engagement\Models\EmailTemplate;
 use AidingApp\Engagement\Filament\Resources\EmailTemplateResource\Pages\EditEmailTemplate;
 use AidingApp\Engagement\Filament\Resources\EmailTemplateResource\Pages\ListEmailTemplates;
@@ -53,7 +53,7 @@ class EmailTemplateResource extends Resource
 
     protected static ?int $navigationSort = 120;
 
-    protected static ?string $cluster = GlobalSettings::class;
+    protected static ?string $cluster = Communication::class;
 
     public static function getPages(): array
     {

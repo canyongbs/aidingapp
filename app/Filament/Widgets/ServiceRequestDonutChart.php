@@ -42,14 +42,12 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 
 class ServiceRequestDonutChart extends ChartWidget
 {
-    protected static ?string $heading = 'Service Requests by Status';
+    protected static ?string $heading = 'Service Requests (By Status)';
 
     protected static ?string $maxHeight = '300px';
 
     protected int | string | array $columnSpan = [
         'sm' => 2,
-        'md' => 1,
-        'lg' => 1,
     ];
 
     protected function getOptions(): array

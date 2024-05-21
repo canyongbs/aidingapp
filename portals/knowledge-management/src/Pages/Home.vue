@@ -122,8 +122,8 @@
 </script>
 
 <template>
-    <div class="sticky top-0 z-40 flex flex-col items-center bg-gray-50">
-        <button class="w-full p-3 lg:hidden" type="button" v-on:click="showMobileMenu = !showMobileMenu">
+    <div class="top-0 z-40 flex flex-col items-center bg-gray-50">
+        <button class="w-full p-3 lg:hidden" type="button" @click="$emit('sidebarOpened')">
             <span class="sr-only">Open sidebar</span>
 
             <Bars3Icon class="h-6 w-6 text-gray-900"></Bars3Icon>

@@ -38,7 +38,7 @@ namespace App\Filament\Resources;
 
 use Filament\Resources\Resource;
 use App\Models\NotificationSetting;
-use App\Filament\Clusters\GlobalSettings;
+use App\Filament\Clusters\Communication;
 use App\Filament\Resources\NotificationSettingResource\Pages\EditNotificationSetting;
 use App\Filament\Resources\NotificationSettingResource\Pages\ListNotificationSettings;
 use App\Filament\Resources\NotificationSettingResource\Pages\CreateNotificationSetting;
@@ -53,7 +53,7 @@ class NotificationSettingResource extends Resource
 
     protected static ?int $navigationSort = 110;
 
-    protected static ?string $cluster = GlobalSettings::class;
+    protected static ?string $cluster = Communication::class;
 
     public static function getRelations(): array
     {

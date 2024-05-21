@@ -1,4 +1,6 @@
-{{--
+<?php
+
+/*
 <COPYRIGHT>
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
@@ -30,17 +32,19 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
---}}
-<div>
-    <knowledge-management-portal-embed
-        url="https://test.aidingapp.local/api/portal/knowledge-management?signature=794cbb63c901e4de45838b76bc63a12c8a65c2a68aed0b552c7012d43be5cef0"
-        user-authentication-url=https://test.aidingapp.local/api/user
-        access-url=https://test.aidingapp.local/portals/knowledge-management
-        search-url="https://test.aidingapp.local/api/portal/knowledge-management/search?signature=2d658856f97a9609465536f42ba8cf6273415e962d2469a41372f382330e8261"
-        app-url="https://test.aidingapp.local"
-        api-url="https://test.aidingapp.local/api/portal/knowledge-management"
-    >
-    </knowledge-management-portal-embed>
-    <script src="https://test.aidingapp.local/js/portals/knowledge-management/aiding-app-knowledge-management-portal.js?">
-    </script>
-</div>
+*/
+
+namespace App\Filament\Clusters;
+
+use Filament\Clusters\Cluster;
+
+class Communication extends Cluster
+{
+    protected static ?string $navigationIcon = 'heroicon-o-squares-2x2';
+
+    protected static ?string $navigationGroup = 'Product Administration';
+
+    protected static ?string $navigationLabel = 'Communication Settings';
+
+    protected static ?int $navigationSort = 40;
+}
