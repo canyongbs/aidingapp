@@ -40,7 +40,6 @@ use App\Models\User;
 use App\Enums\Feature;
 use Filament\Forms\Get;
 use Filament\Forms\Form;
-use App\Models\SettingsProperty;
 use Filament\Pages\SettingsPage;
 use AidingApp\Form\Enums\Rounding;
 use Illuminate\Support\Facades\Gate;
@@ -59,7 +58,6 @@ use Filament\Forms\Components\Actions\Action;
 use App\Filament\Forms\Components\ColorSelect;
 use App\Filament\Forms\Components\TiptapEditor;
 use AidingApp\Portal\Actions\GeneratePortalEmbedCode;
-use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 
 class ManagePortalSettings extends SettingsPage
 {
@@ -87,57 +85,6 @@ class ManagePortalSettings extends SettingsPage
     {
         return $form
             ->schema([
-                Section::make('Branding')
-                    ->schema([
-                        SpatieMediaLibraryFileUpload::make('logo')
-                            ->disk('s3')
-                            ->collection('logo')
-                            ->visibility('private')
-                            ->image()
-                            ->model(
-                                SettingsProperty::getInstance('portal.logo'),
-                            )
-                            ->columnSpanFull(),
-                        ColorPicker::make('primary_color')
-                            ->hexColor(),
-                        ColorPicker::make('secondary_color')
-                            ->hexColor(),
-                    ])
-                    ->columns(2),
-                Section::make('CRM Portal')
-                    ->schema([
-                        Toggle::make('has_user_chat')
-                            ->label('Chat')
-                            ->disabled(! Gate::check(Feature::RealtimeChat->getGateName()))
-                            ->hintIcon(fn (Toggle $component) => $component->isDisabled() ? 'heroicon-m-lock-closed' : null)
-                            ->hintIconTooltip('Chat is not a part of your current subscription.'),
-                        Toggle::make('has_performance_alerts')
-                            ->label('Performance Alerts'),
-                        Toggle::make('has_emergency_alerts')
-                            ->label('Emergency Alerts'),
-                        Toggle::make('has_service_management')
-                            ->label('Service Management')
-                            ->disabled(! Gate::check(Feature::ServiceManagement->getGateName()))
-                            ->hintIcon(fn (Toggle $component) => $component->isDisabled() ? 'heroicon-m-lock-closed' : null)
-                            ->hintIconTooltip('Service Management is not a part of your current subscription.'),
-                        Toggle::make('has_notifications')
-                            ->label('Portal Notifications'),
-                        Toggle::make('has_knowledge_base')
-                            ->label('Knowledge Management')
-                            ->disabled(! Gate::check(Feature::KnowledgeManagement->getGateName()))
-                            ->hintIcon(fn (Toggle $component) => $component->isDisabled() ? 'heroicon-m-lock-closed' : null)
-                            ->hintIconTooltip('Knowledge Management is not a part of your current subscription.'),
-                        Toggle::make('has_tasks')
-                            ->label('Tasks'),
-                        Toggle::make('has_files_and_documents')
-                            ->label('Files and Documents'),
-                        Toggle::make('has_forms')
-                            ->label('Forms')
-                            ->disabled(! Gate::check(Feature::OnlineForms->getGateName()))
-                            ->hintIcon(fn (Toggle $component) => $component->isDisabled() ? 'heroicon-m-lock-closed' : null)
-                            ->hintIconTooltip('Forms are not a part of your current subscription.'),
-                    ])
-                    ->columns(3),
                 Section::make('Knowledge Portal')
                     ->schema([
                         Toggle::make('knowledge_management_portal_enabled')
