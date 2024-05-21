@@ -39,6 +39,7 @@ namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
@@ -60,7 +61,6 @@ class CreateServiceRequestController extends Controller
     {
         return response()->json([
             'schema' => $generateSchema($this->generateForm($type)),
-            // 'schema' => $generateSchema($type->form),
         ]);
     }
 
@@ -192,102 +192,75 @@ class CreateServiceRequestController extends Controller
         $content = collect(data_get($form, 'content.content', []));
 
         if ($content->isNotEmpty() && $form->steps->isEmpty()) {
-            $step = new ServiceRequestFormStep([
-                'label' => 'Details',
-                'order' => 0,
-                'content' => [
-                    'content' => $form->content['content'],
-                    'type' => 'doc',
-                ],
-            ]);
-
-            $content->each(function ($block) use ($step) {
-                $attributes = collect($block['attrs']);
-
-                $step->fields->push(
-                    (new ServiceRequestFormField())
-                        ->forceFill([
-                            'id' => $attributes->pull('id'),
-                            'type' => $attributes->pull('type'),
-                            'label' => $attributes->pull('data.label'),
-                            'is_required' => $attributes->pull('data.isRequired'),
-                            'config' => $attributes->pull('data'),
-                        ])
-                );
-            });
-
-            $form->steps->push($step);
+            $form->steps->push($this->addFormStep('Details', 0, $content));
         }
 
         $form->is_wizard = true;
 
         $content = collect([
-            [
-                'type' => 'tiptapBlock',
-                'attrs' => [
-                    'id' => 'title',
-                    'type' => 'text_input',
-                    'data' => [
-                        'label' => 'Title',
-                        'isRequired' => true,
-                    ],
-                ],
-            ],
-            [
-                'type' => 'tiptapBlock',
-                'attrs' => [
-                    'id' => 'description',
-                    'type' => 'text_area',
-                    'data' => [
-                        'label' => 'Description',
-                        'isRequired' => true,
-                    ],
-                ],
-            ],
-            [
-                'type' => 'tiptapBlock',
-                'attrs' => [
-                    'id' => 'priority',
-                    'type' => 'select',
-                    'data' => [
-                        'label' => 'Priority',
-                        'isRequired' => true,
-                        'options' => $type
-                            ->priorities()
-                            ->orderByDesc('order')
-                            ->pluck('name', 'id'),
-                        'placeholder' => 'Select a priority',
-                    ],
-                ],
-            ],
+            $this->formatBlock('Title', 'text_input'),
+            $this->formatBlock('Description', 'text_area'),
+            $this->formatBlock('Priority', 'select', [
+                'options' => $type
+                    ->priorities()
+                    ->orderByDesc('order')
+                    ->pluck('name', 'id'),
+                'placeholder' => 'Select a priority',
+            ]),
         ]);
 
+        ray($content);
+
+        $form->steps->prepend($this->addFormStep('Main', -1, $content));
+
+        return $form;
+    }
+
+    private function addFormStep(string $label, int $order, Collection $content): ServiceRequestFormStep
+    {
         $step = new ServiceRequestFormStep([
-            'label' => 'Main',
-            'order' => -1,
+            'label' => $label,
+            'order' => $order,
             'content' => [
                 'content' => $content,
                 'type' => 'doc',
             ],
         ]);
 
-        $content->each(function ($block) use ($step) {
-            $attributes = collect($block['attrs']);
+        $content->each(fn ($block) => $this->addFieldToStep($step, $block));
 
-            $step->fields->push(
-                (new ServiceRequestFormField())
-                    ->forceFill([
-                        'id' => $attributes->pull('id'),
-                        'type' => $attributes->pull('type'),
-                        'label' => $attributes->pull('data.label'),
-                        'is_required' => $attributes->pull('data.isRequired'),
-                        'config' => $attributes->pull('data'),
-                    ])
-            );
-        });
+        return $step;
+    }
 
-        $form->steps->prepend($step);
+    private function addFieldToStep(ServiceRequestFormStep $step, array $block)
+    {
+        $attributes = collect($block['attrs']);
 
-        return $form;
+        $step->fields->push(
+            (new ServiceRequestFormField())
+                ->forceFill([
+                    'id' => $attributes->pull('id'),
+                    'type' => $attributes->pull('type'),
+                    'label' => $attributes->pull('data.label'),
+                    'is_required' => $attributes->pull('data.isRequired'),
+                    'config' => $attributes->pull('data'),
+                ])
+        );
+    }
+
+    private function formatBlock(string $label, string $type, array $data = []): array
+    {
+        return [
+            'type' => 'tiptapBlock',
+            'attrs' => [
+                'id' => str($label)->slug()->toString(),
+                'type' => $type,
+                'data' => [
+                    'label' => $label,
+                    'isRequired' => true,
+                    ...$data,
+                ],
+            ],
+        ];
     }
 }
