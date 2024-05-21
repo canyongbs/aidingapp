@@ -36,10 +36,10 @@
 
 namespace AidingApp\ServiceManagement\Enums;
 
-use AidingApp\ServiceManagement\Models\Concerns\ClassificationInterface;
 use Filament\Support\Contracts\HasLabel;
 use Bvtterfly\ModelStateMachine\Attributes\InitialState;
 use Bvtterfly\ModelStateMachine\Attributes\AllowTransitionTo;
+use AidingApp\ServiceManagement\Models\Concerns\ClassificationInterface;
 
 enum SystemChangeRequestClassification: string implements HasLabel, ClassificationInterface
 {
