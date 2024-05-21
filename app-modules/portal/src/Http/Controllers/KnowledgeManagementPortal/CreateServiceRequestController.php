@@ -129,7 +129,7 @@ class CreateServiceRequestController extends Controller
                     ->pluck('type', 'id')
                     ->all();
 
-                foreach ($data[$step->label] as $fieldId => $response) {
+                foreach ($data[$step->label] ?? [] as $fieldId => $response) {
                     $this->processSubmissionField(
                         $submission,
                         $fieldId,
