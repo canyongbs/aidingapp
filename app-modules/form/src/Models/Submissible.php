@@ -51,6 +51,7 @@ use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
  * @property bool $embed_enabled
  * @property bool $is_wizard
  * @property ?array $allowed_domains
+ * @property bool $recaptcha_enabled
  * @property-read Collection<int, SubmissibleStep> $steps
  * @property-read Collection<int, SubmissibleField> $fields
  */

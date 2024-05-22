@@ -37,6 +37,7 @@
 namespace AidingApp\Form\Filament\Blocks;
 
 use Filament\Forms\Components\KeyValue;
+use Filament\Forms\Components\TextInput;
 use AidingApp\Form\Models\SubmissibleField;
 
 class SelectFormFieldBlock extends FormFieldBlock
@@ -53,9 +54,12 @@ class SelectFormFieldBlock extends FormFieldBlock
     public function fields(): array
     {
         return [
+            TextInput::make('placeholder')
+                ->string(),
             KeyValue::make('options')
                 ->keyLabel('Value')
-                ->valueLabel('Label'),
+                ->valueLabel('Label')
+                ->required(),
         ];
     }
 
@@ -66,6 +70,7 @@ class SelectFormFieldBlock extends FormFieldBlock
             'label' => $field->label,
             'name' => $field->getKey(),
             ...($field->is_required ? ['validation' => 'required'] : []),
+            'placeholder' => $field->config['placeholder'] ?? null,
             'options' => $field->config['options'],
         ];
     }

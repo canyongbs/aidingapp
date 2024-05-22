@@ -71,6 +71,10 @@ class GenerateSubmissibleValidation
                     $rules->push('required');
                 }
 
+                if (is_null($field->type)) {
+                    return [];
+                }
+
                 return [
                     $field->getKey() => $rules
                         ->merge($blocks[$field->type]::getValidationRules($field))

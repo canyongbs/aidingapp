@@ -36,21 +36,22 @@
 
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
-use App\Enums\Feature;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
 use Symfony\Component\HttpFoundation\Response;
 use AidingApp\Form\Actions\GenerateFormKitSchema;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\Form\Actions\GenerateSubmissibleValidation;
+use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\Form\Actions\ResolveSubmissionAuthorFromEmail;
+use AidingApp\ServiceManagement\Models\ServiceRequestFormStep;
+use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use AidingApp\Form\Filament\Blocks\EducatableEmailFormFieldBlock;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormSubmission;
 
@@ -59,8 +60,7 @@ class CreateServiceRequestController extends Controller
     public function create(GenerateFormKitSchema $generateSchema, ServiceRequestType $type): JsonResponse
     {
         return response()->json([
-            'schema' => $type->form && Gate::check(Feature::OnlineForms->getGateName()) ? $generateSchema($type->form) : [],
-            'priorities' => $type->priorities()->orderBy('order', 'desc')->pluck('name', 'id'),
+            'schema' => $generateSchema($this->generateForm($type)),
         ]);
     }
 
@@ -74,14 +74,10 @@ class CreateServiceRequestController extends Controller
 
         abort_if(is_null($contact), Response::HTTP_UNAUTHORIZED);
 
-        $serviceRequestForm = $type->form;
+        $form = $this->generateForm($type);
 
         $validator = Validator::make($request->all(), [
-            'priority' => ['required', 'exists:service_request_priorities,id'],
-            'description' => ['required', 'string', 'max:65535'],
-            ...$serviceRequestForm
-                ? Arr::prependKeysWith($generateValidation($serviceRequestForm), 'extra.')
-                : [],
+            ...$generateValidation($form),
         ]);
 
         if ($validator->fails()) {
@@ -90,21 +86,20 @@ class CreateServiceRequestController extends Controller
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        $data = $validator->validated();
+        $data = collect($validator->validated());
 
-        $priority = $type->priorities()->findOrFail($data['priority']);
+        $priority = $type->priorities()->findOrFail($data->pull('Main.priority'));
 
         return DB::transaction(function () use (
             $resolveSubmissionAuthorFromEmail,
-            $serviceRequestForm,
+            $form,
             $priority,
             $contact,
             $data,
-            $type
         ) {
             $serviceRequest = new ServiceRequest([
-                'title' => $type->name,
-                'close_details' => $data['description'],
+                'title' => $data->pull('Main.title'),
+                'close_details' => $data->pull('Main.description'),
             ]);
 
             $serviceRequest->respondent()->associate($contact);
@@ -112,48 +107,29 @@ class CreateServiceRequestController extends Controller
 
             $serviceRequest->save();
 
-            if (! $serviceRequestForm) {
-                return response()->json([
-                    'message' => 'Service Request Form submitted successfully.',
-                ]);
-            }
-
-            unset(
-                $data['description'],
-                $data['priority'],
-            );
-
-            $submission = $serviceRequestForm->submissions()
+            $submission = $form->submissions()
                 ->make([
                     'submitted_at' => now(),
                 ]);
 
             $submission->priority()->associate($priority);
 
+            $data->pull('recaptcha-token');
+
+            if ($data->filter()->isEmpty()) {
+                return response()->json([
+                    'message' => 'Service Request Form submitted successfully.',
+                ]);
+            }
+
             $submission->save();
 
-            unset($data['recaptcha-token']);
+            foreach ($form->steps as $step) {
+                $fields = $step->fields
+                    ->pluck('type', 'id')
+                    ->all();
 
-            $data = data_get($data, 'extra', []);
-
-            if ($serviceRequestForm->is_wizard) {
-                foreach ($serviceRequestForm->steps as $step) {
-                    $fields = $step->fields()->pluck('type', 'id')->all();
-
-                    foreach ($data[$step->label] as $fieldId => $response) {
-                        $this->processSubmissionField(
-                            $submission,
-                            $fieldId,
-                            $response,
-                            $fields,
-                            $resolveSubmissionAuthorFromEmail
-                        );
-                    }
-                }
-            } else {
-                $fields = $serviceRequestForm->fields()->pluck('type', 'id')->all();
-
-                foreach ($data as $fieldId => $response) {
+                foreach ($data[$step->label] ?? [] as $fieldId => $response) {
                     $this->processSubmissionField(
                         $submission,
                         $fieldId,
@@ -166,7 +142,6 @@ class CreateServiceRequestController extends Controller
 
             $submission->save();
 
-            $serviceRequest->title = $serviceRequestForm->name;
             $serviceRequest->serviceRequestFormSubmission()->associate($submission);
 
             if ($submission->author) {
@@ -187,7 +162,7 @@ class CreateServiceRequestController extends Controller
         mixed $response,
         array $fields,
         ResolveSubmissionAuthorFromEmail $resolveSubmissionAuthorFromEmail
-    ) {
+    ): void {
         $submission->fields()->attach($fieldId, [
             'id' => Str::orderedUuid(),
             'response' => $response,
@@ -208,5 +183,82 @@ class CreateServiceRequestController extends Controller
         }
 
         $submission->author()->associate($author);
+    }
+
+    private function generateForm(ServiceRequestType $type): ServiceRequestForm
+    {
+        $form = $type->form ?? new ServiceRequestForm();
+
+        $content = collect(data_get($form, 'content.content', []));
+
+        if ($content->isNotEmpty() && $form->steps->isEmpty()) {
+            $form->steps->push($this->formatStep('Details', 0, $content));
+        }
+
+        $form->is_wizard = true;
+
+        $content = collect([
+            $this->formatBlock('Title', 'text_input'),
+            $this->formatBlock('Description', 'text_area'),
+            $this->formatBlock('Priority', 'select', [
+                'options' => $type
+                    ->priorities()
+                    ->orderByDesc('order')
+                    ->pluck('name', 'id'),
+                'placeholder' => 'Select a priority',
+            ]),
+        ]);
+
+        $form->steps->prepend($this->formatStep('Main', -1, $content));
+
+        return $form;
+    }
+
+    private function formatStep(string $label, int $order, Collection $content): ServiceRequestFormStep
+    {
+        $step = new ServiceRequestFormStep([
+            'label' => $label,
+            'order' => $order,
+            'content' => [
+                'content' => $content,
+                'type' => 'doc',
+            ],
+        ]);
+
+        $content->each(fn (array $block) => $this->addFieldToStep($step, $block));
+
+        return $step;
+    }
+
+    private function addFieldToStep(ServiceRequestFormStep $step, array $block): void
+    {
+        $attributes = collect($block['attrs']);
+
+        $step->fields->push(
+            (new ServiceRequestFormField())
+                ->forceFill([
+                    'id' => $attributes->pull('id'),
+                    'type' => $attributes->pull('type'),
+                    'label' => $attributes->pull('data.label'),
+                    'is_required' => $attributes->pull('data.isRequired'),
+                    'config' => $attributes->pull('data'),
+                ])
+        );
+    }
+
+    private function formatBlock(string $label, string $type, array $data = []): array
+    {
+        return [
+            'type' => 'tiptapBlock',
+            'attrs' => [
+                'id' => str($label)->slug()->toString(),
+                'type' => $type,
+                'data' => [
+                    'label' => $label,
+                    'isRequired' => true,
+                    ...$data,
+                ],
+            ],
+        ];
     }
 }
