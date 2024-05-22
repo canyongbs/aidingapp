@@ -34,33 +34,23 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\Settings;
+use Spatie\LaravelSettings\Migrations\SettingsMigration;
 
-use Spatie\LaravelSettings\Settings;
-
-class PortalSettings extends Settings
-{
-    public ?string $footer_color = null;
-
-    public ?string $footer_copyright_statement;
-
-    /**
-    * Knowledge Base Portal
-    */
-    public bool $knowledge_management_portal_enabled = false;
-
-    public bool $knowledge_management_portal_service_management = false;
-
-    public bool $knowledge_management_portal_requires_authentication = false;
-
-    public ?string $knowledge_management_portal_primary_color = null;
-
-    public ?string $knowledge_management_portal_rounding = null;
-
-    public ?string $knowledge_management_portal_authorized_domain = null;
-
-    public static function group(): string
+return new class () extends SettingsMigration {
+    public function up(): void
     {
-        return 'portal';
+        $this->migrator->delete('portal.logo');
+        $this->migrator->delete('portal.primary_color');
+        $this->migrator->delete('portal.secondary_color');
+
+        $this->migrator->delete('portal.has_user_chat');
+        $this->migrator->delete('portal.has_performance_alerts');
+        $this->migrator->delete('portal.has_emergency_alerts');
+        $this->migrator->delete('portal.has_service_management');
+        $this->migrator->delete('portal.has_notifications');
+        $this->migrator->delete('portal.has_knowledge_base');
+        $this->migrator->delete('portal.has_tasks');
+        $this->migrator->delete('portal.has_files_and_documents');
+        $this->migrator->delete('portal.has_forms');
     }
-}
+};
