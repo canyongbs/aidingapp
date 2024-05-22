@@ -120,7 +120,7 @@
             <main class="px-6">
                 <h3 class="text-xl">Select Category</h3>
 
-                <div class="mt-4 grid gap-y-4">
+                <div class="my-4 grid gap-y-4">
                     <div v-for="type in types" :key="type.id" class="group relative bg-white p-6 rounded shadow">
                         <div class="flex items-center gap-x-3">
                             <span
