@@ -100,7 +100,7 @@ class ListTasks extends ListRecords
                     ->label('Assigned To')
                     ->url(fn (Task $record) => $record->assignedTo ? UserResource::getUrl('view', ['record' => $record->assignedTo]) : null)
                     ->hidden(function (Table $table) {
-                        return $table->getFilter('my_tasks')->getState()['isActive'];
+                        return $table->getFilter('my_tasks')->getState()['isActive'] ?? false;
                     }),
                 TextColumn::make('concern.display_name')
                     ->label('Related To')
@@ -120,7 +120,7 @@ class ListTasks extends ListRecords
                     ->form([
                         Checkbox::make('isActive')
                             ->label('My Tasks')
-                            ->afterStateUpdated(fn (Set $set) => $set('../my_teams_tasks.isActive', false))
+                            ->afterStateUpdated(fn (Set $set, $state) => $state ? $set('../my_teams_tasks.isActive', false) : null)
                             ->default(true),
                     ]),
                 Filter::make('my_teams_tasks')
@@ -138,8 +138,8 @@ class ListTasks extends ListRecords
                     ->form([
                         Checkbox::make('isActive')
                             ->label("My Team's Tasks")
-                            ->afterStateUpdated(function (Set $set) {
-                                return $set('../my_tasks.isActive', false);
+                            ->afterStateUpdated(function (Set $set, $state) {
+                                return $state ? $set('../my_tasks.isActive', false) : null;
                             }),
                     ]),
                 SelectFilter::make('assignedTo')
