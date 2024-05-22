@@ -40,6 +40,7 @@ use App\Models\User;
 use DateTimeInterface;
 use App\Models\BaseModel;
 use Carbon\CarbonInterface;
+use Spatie\MediaLibrary\HasMedia;
 use Illuminate\Support\Facades\DB;
 use AidingApp\Contact\Models\Contact;
 use Kirschbaum\PowerJoins\PowerJoins;
@@ -47,6 +48,7 @@ use AidingApp\Division\Models\Division;
 use OwenIt\Auditing\Contracts\Auditable;
 use Illuminate\Database\Eloquent\Builder;
 use App\Models\Scopes\LicensedToEducatable;
+use Spatie\MediaLibrary\InteractsWithMedia;
 use App\Models\Concerns\BelongsToEducatable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -72,13 +74,14 @@ use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceR
  *
  * @mixin IdeHelperServiceRequest
  */
-class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubscription
+class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubscription, HasMedia
 {
     use BelongsToEducatable;
     use SoftDeletes;
     use PowerJoins;
     use AuditableTrait;
     use HasRelationships;
+    use InteractsWithMedia;
 
     protected $fillable = [
         'respondent_type',
@@ -98,6 +101,11 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
     protected $casts = [
         'status_updated_at' => 'immutable_datetime',
     ];
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('uploads');
+    }
 
     public function save(array $options = [])
     {

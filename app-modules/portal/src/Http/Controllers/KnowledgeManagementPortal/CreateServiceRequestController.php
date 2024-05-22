@@ -46,9 +46,13 @@ use Illuminate\Support\Facades\Validator;
 use Symfony\Component\HttpFoundation\Response;
 use AidingApp\Form\Actions\GenerateFormKitSchema;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\Form\Filament\Blocks\SelectFormFieldBlock;
+use AidingApp\Form\Filament\Blocks\UploadFormFieldBlock;
 use AidingApp\Form\Actions\GenerateSubmissibleValidation;
+use AidingApp\Form\Filament\Blocks\TextAreaFormFieldBlock;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\Form\Filament\Blocks\TextInputFormFieldBlock;
 use AidingApp\Form\Actions\ResolveSubmissionAuthorFromEmail;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormStep;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
@@ -75,6 +79,10 @@ class CreateServiceRequestController extends Controller
         abort_if(is_null($contact), Response::HTTP_UNAUTHORIZED);
 
         $form = $this->generateForm($type);
+
+        ray($request, $request->all());
+
+        dd('stop');
 
         $validator = Validator::make($request->all(), [
             ...$generateValidation($form),
@@ -198,14 +206,20 @@ class CreateServiceRequestController extends Controller
         $form->is_wizard = true;
 
         $content = collect([
-            $this->formatBlock('Title', 'text_input'),
-            $this->formatBlock('Description', 'text_area'),
-            $this->formatBlock('Priority', 'select', [
+            $this->formatBlock('Title', TextInputFormFieldBlock::type()),
+            $this->formatBlock('Description', TextAreaFormFieldBlock::type()),
+            $this->formatBlock('Priority', SelectFormFieldBlock::type(), data: [
                 'options' => $type
                     ->priorities()
                     ->orderByDesc('order')
                     ->pluck('name', 'id'),
                 'placeholder' => 'Select a priority',
+            ]),
+            $this->formatBlock('Upload File', UploadFormFieldBlock::type(), false, [
+                'multiple' => true,
+                'limit' => 5,
+                'accept' => '.pdf,.doc,.docx,.xml,.md,.csv,.png',
+                'size' => 5,
             ]),
         ]);
 
@@ -246,7 +260,7 @@ class CreateServiceRequestController extends Controller
         );
     }
 
-    private function formatBlock(string $label, string $type, array $data = []): array
+    private function formatBlock(string $label, string $type, bool $required = true, array $data = []): array
     {
         return [
             'type' => 'tiptapBlock',
@@ -255,7 +269,7 @@ class CreateServiceRequestController extends Controller
                 'type' => $type,
                 'data' => [
                     'label' => $label,
-                    'isRequired' => true,
+                    'isRequired' => $required,
                     ...$data,
                 ],
             ],

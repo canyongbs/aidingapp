@@ -446,7 +446,7 @@
                     <DesktopSidebar @show-login="showLogin = true" :categories="categories" :api-url="apiUrl">
                     </DesktopSidebar>
 
-                    <div>
+                    <div class="w-full">
                         <RouterView
                             @sidebar-opened="showMobileMenu = !showMobileMenu"
                             :search-url="searchUrl"

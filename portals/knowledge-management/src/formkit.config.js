@@ -35,6 +35,8 @@ import { generateClasses } from '@formkit/themes';
 import { genesisIcons } from '@formkit/icons';
 import theme from '../../../widgets/service-request-form/src/FormKit/theme.js';
 import inputs from '../../../widgets/service-request-form/src/FormKit/Inputs/index.js';
+import size from "../../../widgets/service-request-form/src/FormKit/Rules/size.js";
+
 
 export default {
     icons: {
@@ -44,4 +46,16 @@ export default {
     config: {
         classes: generateClasses(theme),
     },
+    rules: {
+        size,
+    },
+    // messages: {
+    //     en: {
+    //         validation: {
+    //             size({ name, args, node }) {
+    //                 return `a<br><br>b\n\nc\n\nd`;
+    //             }
+    //         }
+    //     }
+    // }
 };

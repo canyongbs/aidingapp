@@ -37,7 +37,6 @@
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import { Bars3Icon } from '@heroicons/vue/24/outline/index.js';
     import { useAuthStore } from '../Stores/auth.js';
-    import axios from '../Globals/Axios.js';
     import { useTokenStore } from '../Stores/token.js';
     import wizard from '../../../../widgets/service-request-form/src/FormKit/wizard.js';
     import { consumer } from '../Services/Consumer.js';
@@ -73,11 +72,28 @@
         getData();
     });
 
+    // function size(node, size) {
+    //     size = size * 1024 * 1024;
+    //
+    //     node.value.forEach((value) => {
+    //         if (value.file.size > size) {
+    //             return false;
+    //         }
+    //     });
+    //
+    //     return false;
+    // }
+
     const data = reactive({
         steps,
         visitedSteps,
         activeStep,
-        plugins: [wizardPlugin],
+        plugins: [
+            wizardPlugin,
+        ],
+        // validationRules: {
+        //     size,
+        // },
         setStep: (target) => () => {
             setStep(target);
         },
@@ -108,9 +124,24 @@
             //     data['recaptcha-token'] = recaptchaToken;
             // }
 
+            const body = new FormData();
+
+            for(const key in data) {
+                if (data[key] instanceof FileList) {
+                    console.log(data[key]);
+                    for (let i = 0; i < data[key].length; i++) {
+                        body.append(key, data[key][i]);
+                    }
+                } else {
+                    body.append(key, data[key]);
+                }
+            }
+
+            console.log(data, body.entries());
+
             const { post } = consumer();
 
-            post(props.apiUrl + '/service-request/create/' + route.params.typeId, data)
+            post(props.apiUrl + '/service-request/create/' + route.params.typeId, body)
                 .then((response) => {
                     submittedSuccess.value = true;
                 })

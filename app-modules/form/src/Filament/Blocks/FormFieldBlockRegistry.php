@@ -57,6 +57,7 @@ class FormFieldBlockRegistry
             NumberFormFieldBlock::class,
             PhoneFormFieldBlock::class,
             UrlFormFieldBlock::class,
+            UploadFormFieldBlock::class,
         ];
     }
 
