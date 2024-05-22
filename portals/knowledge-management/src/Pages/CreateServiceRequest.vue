@@ -41,16 +41,18 @@
     import wizard from '../../../../widgets/service-request-form/src/FormKit/wizard.js';
     import { consumer } from '../Services/Consumer.js';
     import AppLoading from '../Components/AppLoading.vue';
-    import upload from '../../../../widgets/service-request-form/src/FormKit/upload.js';
 
 
     let { steps, visitedSteps, activeStep, setStep, wizardPlugin } = wizard();
-    let { uploadPlugin } = upload();
 
     const route = useRoute();
 
     const props = defineProps({
         apiUrl: {
+            type: String,
+            required: true,
+        },
+        serviceRequestUploadUrl: {
             type: String,
             required: true,
         },
@@ -93,11 +95,7 @@
         activeStep,
         plugins: [
             wizardPlugin,
-            // uploadPlugin,
         ],
-        // validationRules: {
-        //     size,
-        // },
         setStep: (target) => () => {
             setStep(target);
         },
@@ -219,7 +217,7 @@
 
             <main class="grid px-6 gap-4" v-if="submittedSuccess">Thank you for submitting a new request.</main>
             <main class="grid px-6 gap-4" v-else>
-                <FormKitSchema :schema="schema" :data="data" />
+                <FormKitSchema :schema="schema" :data="data" :upload-url="serviceRequestUploadUrl"/>
             </main>
         </div>
     </div>

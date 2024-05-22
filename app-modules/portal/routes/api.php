@@ -34,6 +34,7 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\GetServiceRequestUploadUrl;
 use Illuminate\Support\Facades\Route;
 use Symfony\Component\HttpFoundation\Response;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
@@ -107,6 +108,10 @@ Route::prefix('api')
                 Route::post('/service-request/create/{type}', [CreateServiceRequestController::class, 'store'])
                     ->middleware(['auth:sanctum'])
                     ->name('service-request.store');
+
+                Route::get('/service-request/request-upload-url', GetServiceRequestUploadUrl::class)
+                    ->middleware(['auth:sanctum'])
+                    ->name('service-request.request-upload-url');
 
                 Route::get('/tags', GetKnowledgeManagementPortalTagsController::class)
                     ->name('tags.index');
