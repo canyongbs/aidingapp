@@ -433,7 +433,7 @@
                     <p class="text-lg text-red-500">Please try again later</p>
                 </div>
 
-                <div v-else class="flex flex-row">
+                <div v-else class="flex flex-row min-h-screen">
                     <MobileSidebar
                         v-if="showMobileMenu"
                         @show-login="showLogin = true"
