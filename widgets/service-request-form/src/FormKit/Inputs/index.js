@@ -34,6 +34,7 @@
 import { createInput } from '@formkit/vue';
 import OneTimePassword from './OneTimePassword.vue';
 import Signature from './Signature.vue';
+import Upload from "./Upload.vue";
 
 export default {
     otp: createInput(OneTimePassword, {
@@ -41,5 +42,8 @@ export default {
     }),
     signature: createInput(Signature, {
         props: [],
+    }),
+    upload: createInput(Upload, {
+        props: ['accept', 'limit', 'multiple', 'size'],
     }),
 };

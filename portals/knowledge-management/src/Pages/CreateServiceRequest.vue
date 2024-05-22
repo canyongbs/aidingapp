@@ -41,8 +41,11 @@
     import wizard from '../../../../widgets/service-request-form/src/FormKit/wizard.js';
     import { consumer } from '../Services/Consumer.js';
     import AppLoading from '../Components/AppLoading.vue';
+    import upload from '../../../../widgets/service-request-form/src/FormKit/upload.js';
+
 
     let { steps, visitedSteps, activeStep, setStep, wizardPlugin } = wizard();
+    let { uploadPlugin } = upload();
 
     const route = useRoute();
 
@@ -90,6 +93,7 @@
         activeStep,
         plugins: [
             wizardPlugin,
+            // uploadPlugin,
         ],
         // validationRules: {
         //     size,
@@ -114,6 +118,8 @@
         submitForm: async (data, node) => {
             node.clearErrors();
 
+            console.log(data, node);
+
             // let recaptchaToken = null;
 
             // if (formRecaptchaEnabled.value === true) {
@@ -124,30 +130,30 @@
             //     data['recaptcha-token'] = recaptchaToken;
             // }
 
-            const body = new FormData();
+            // const body = new FormData();
+            //
+            // for(const key in data) {
+            //     if (data[key] instanceof FileList) {
+            //         console.log(data[key]);
+            //         for (let i = 0; i < data[key].length; i++) {
+            //             body.append(key, data[key][i]);
+            //         }
+            //     } else {
+            //         body.append(key, data[key]);
+            //     }
+            // }
+            //
+            // console.log(data, body.entries());
 
-            for(const key in data) {
-                if (data[key] instanceof FileList) {
-                    console.log(data[key]);
-                    for (let i = 0; i < data[key].length; i++) {
-                        body.append(key, data[key][i]);
-                    }
-                } else {
-                    body.append(key, data[key]);
-                }
-            }
-
-            console.log(data, body.entries());
-
-            const { post } = consumer();
-
-            post(props.apiUrl + '/service-request/create/' + route.params.typeId, body)
-                .then((response) => {
-                    submittedSuccess.value = true;
-                })
-                .catch((error) => {
-                    node.setErrors([error]);
-                });
+            // const { post } = consumer();
+            //
+            // post(props.apiUrl + '/service-request/create/' + route.params.typeId, data)
+            //     .then((response) => {
+            //         submittedSuccess.value = true;
+            //     })
+            //     .catch((error) => {
+            //         node.setErrors([error]);
+            //     });
         },
     });
 

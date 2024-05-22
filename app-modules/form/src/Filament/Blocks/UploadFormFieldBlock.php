@@ -40,19 +40,22 @@ class UploadFormFieldBlock extends FormFieldBlock
     public static function getFormKitSchema(SubmissibleField $field): array
     {
         return [
-            '$formkit' => 'file',
+            '$formkit' => 'upload',
             // 'validationRules' => '$validationRules',
             'label' => $field->label,
             'name' => $field->getKey(),
+            ...($field->is_required ? ['validation' => 'required'] : []),
             'multiple' => $field->config['multiple'] ?? false,
-            'accept' => $field->config['accept'] ?? [],
-            ...[
-                'validation' => [
-                    $field->is_required ? ['required'] : [],
-                    $field->config['limit'] ? ['max', $field->config['limit']] : [],
-                    $field->config['size'] ? ['size', $field->config['size']] : [],
-                ],
-            ],
+            'accept' => $field->config['accept'] ?? '',
+            'limit' => $field->config['limit'] ?? null,
+            'size' => $field->config['size'] ?? null,
+            // ...[
+            //     'validation' => [
+            //         $field->is_required ? ['required'] : [],
+            //         // $field->config['limit'] ? ['max', $field->config['limit']] : [],
+            //         // $field->config['size'] ? ['size', $field->config['size']] : [],
+            //     ],
+            // ],
         ];
     }
 
