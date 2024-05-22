@@ -44,7 +44,7 @@ class ServiceRequestLineChart extends ChartWidget
 {
     protected static ?string $heading = 'Service Requests (Last 30 Days)';
 
-    protected static ?string $maxHeight = '300px';
+    protected static ?string $maxHeight = '250px';
 
     protected int | string | array $columnSpan = [
         'sm' => 2,

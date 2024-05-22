@@ -34,43 +34,6 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Enums;
+namespace AidingApp\ServiceManagement\Models\Concerns;
 
-use Filament\Support\Contracts\HasLabel;
-use AidingApp\ServiceManagement\Models\Concerns\ClassificationInterface;
-
-enum SystemServiceRequestClassification: string implements HasLabel, ClassificationInterface
-{
-    case Open = 'open';
-
-    case InProgress = 'in_progress';
-
-    case Closed = 'closed';
-
-    case Waiting = 'waiting';
-
-    case Custom = 'custom';
-
-    public function getLabel(): ?string
-    {
-        return match ($this) {
-            SystemServiceRequestClassification::InProgress => 'In Progress',
-            default => $this->name,
-        };
-    }
-
-    /**
-     * Get unclosed classifications.
-     *
-     * @return self[]
-     */
-    public static function getUnclosedClassifications(): array
-    {
-        return [
-            self::Open,
-            self::InProgress,
-            self::Waiting,
-            self::Custom,
-        ];
-    }
-}
+interface ClassificationInterface {}
