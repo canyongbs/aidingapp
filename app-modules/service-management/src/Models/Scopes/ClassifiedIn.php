@@ -34,43 +34,23 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Enums;
+namespace AidingApp\ServiceManagement\Models\Scopes;
 
-use Filament\Support\Contracts\HasLabel;
-use AidingApp\ServiceManagement\Models\Concerns\ClassificationInterface;
+use Illuminate\Database\Eloquent\Builder;
 
-enum SystemServiceRequestClassification: string implements HasLabel, ClassificationInterface
+class ClassifiedIn
 {
-    case Open = 'open';
-
-    case InProgress = 'in_progress';
-
-    case Closed = 'closed';
-
-    case Waiting = 'waiting';
-
-    case Custom = 'custom';
-
-    public function getLabel(): ?string
-    {
-        return match ($this) {
-            SystemServiceRequestClassification::InProgress => 'In Progress',
-            default => $this->name,
-        };
-    }
-
     /**
-     * Get unclosed classifications.
+     * Class Constructor.
      *
-     * @return self[]
+     * @param ClassificationInterface[] $classifications Array of classifications.
      */
-    public static function getUnclosedClassifications(): array
+    public function __construct(
+        protected array $classifications,
+    ) {}
+
+    public function __invoke(Builder $query): void
     {
-        return [
-            self::Open,
-            self::InProgress,
-            self::Waiting,
-            self::Custom,
-        ];
+        $query->whereIn('classification', $this->classifications);
     }
 }

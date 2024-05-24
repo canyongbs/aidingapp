@@ -34,43 +34,23 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Enums;
+use Spatie\LaravelSettings\Migrations\SettingsMigration;
 
-use Filament\Support\Contracts\HasLabel;
-use AidingApp\ServiceManagement\Models\Concerns\ClassificationInterface;
-
-enum SystemServiceRequestClassification: string implements HasLabel, ClassificationInterface
-{
-    case Open = 'open';
-
-    case InProgress = 'in_progress';
-
-    case Closed = 'closed';
-
-    case Waiting = 'waiting';
-
-    case Custom = 'custom';
-
-    public function getLabel(): ?string
+return new class () extends SettingsMigration {
+    public function up(): void
     {
-        return match ($this) {
-            SystemServiceRequestClassification::InProgress => 'In Progress',
-            default => $this->name,
-        };
-    }
+        $this->migrator->delete('portal.logo');
+        $this->migrator->delete('portal.primary_color');
+        $this->migrator->delete('portal.secondary_color');
 
-    /**
-     * Get unclosed classifications.
-     *
-     * @return self[]
-     */
-    public static function getUnclosedClassifications(): array
-    {
-        return [
-            self::Open,
-            self::InProgress,
-            self::Waiting,
-            self::Custom,
-        ];
+        $this->migrator->delete('portal.has_user_chat');
+        $this->migrator->delete('portal.has_performance_alerts');
+        $this->migrator->delete('portal.has_emergency_alerts');
+        $this->migrator->delete('portal.has_service_management');
+        $this->migrator->delete('portal.has_notifications');
+        $this->migrator->delete('portal.has_knowledge_base');
+        $this->migrator->delete('portal.has_tasks');
+        $this->migrator->delete('portal.has_files_and_documents');
+        $this->migrator->delete('portal.has_forms');
     }
-}
+};
