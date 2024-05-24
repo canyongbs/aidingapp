@@ -12,6 +12,9 @@ class UploadFormFieldBlock extends FormFieldBlock
 {
     public ?string $icon = 'heroicon-m-document-arrow-up';
 
+    //Don't use in filament
+    public static bool $internal = true;
+
     public static function type(): string
     {
         return 'upload';
@@ -20,20 +23,20 @@ class UploadFormFieldBlock extends FormFieldBlock
     public function fields(): array
     {
         return [
-            Checkbox::make('multiple')
-                ->live(),
-            TextInput::make('limit')
-                ->integer()
-                ->minValue(2)
-                ->default(2)
-                ->visible(fn (Get $get) => $get('multiple')),
-            TagsInput::make('accept')
-                ->label('Accepted File Types')
-                ->placeholder('e.g. .pdf, .docx, .jpg'),
-            TextInput::make('size')
-                ->label('Maximum File Size')
-                ->integer()
-                ->suffix('MB'),
+            // Checkbox::make('multiple')
+            //     ->live(),
+            // TextInput::make('limit')
+            //     ->integer()
+            //     ->minValue(2)
+            //     ->default(2)
+            //     ->visible(fn (Get $get) => $get('multiple')),
+            // TagsInput::make('accept')
+            //     ->label('Accepted File Types')
+            //     ->placeholder('e.g. .pdf, .docx, .jpg'),
+            // TextInput::make('size')
+            //     ->label('Maximum File Size')
+            //     ->integer()
+            //     ->suffix('MB'),
         ];
     }
 
@@ -41,7 +44,6 @@ class UploadFormFieldBlock extends FormFieldBlock
     {
         return [
             '$formkit' => 'upload',
-            // 'validationRules' => '$validationRules',
             'label' => $field->label,
             'name' => $field->getKey(),
             ...($field->is_required ? ['validation' => 'required'] : []),
@@ -50,13 +52,6 @@ class UploadFormFieldBlock extends FormFieldBlock
             'limit' => $field->config['limit'] ?? null,
             'size' => $field->config['size'] ?? null,
             'uploadUrl' => route('api.portal.knowledge-management.service-request.request-upload-url'),
-            // ...[
-            //     'validation' => [
-            //         $field->is_required ? ['required'] : [],
-            //         // $field->config['limit'] ? ['max', $field->config['limit']] : [],
-            //         // $field->config['size'] ? ['size', $field->config['size']] : [],
-            //     ],
-            // ],
         ];
     }
 

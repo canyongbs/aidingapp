@@ -81,8 +81,6 @@ class CreateServiceRequestController extends Controller
 
         $form = $this->generateForm($type);
 
-        ray($request, $request->all());
-
         $validator = Validator::make($request->all(), [
             ...$generateValidation($form),
         ]);
@@ -227,9 +225,9 @@ class CreateServiceRequestController extends Controller
             ]),
             $this->formatBlock('Upload File', UploadFormFieldBlock::type(), false, [
                 'multiple' => true,
-                'limit' => UploadsMediaCollection::$maxNumberOfFiles,
-                'accept' => UploadsMediaCollection::$mimes,
-                'size' => UploadsMediaCollection::$maxFileSizeInMB,
+                'limit' => UploadsMediaCollection::getMaxNumberOfFiles(),
+                'accept' => UploadsMediaCollection::getExtensions(),
+                'size' => UploadsMediaCollection::getMaxFileSizeInMB(),
                 'uploadUrl' => route('api.portal.knowledge-management.service-request.request-upload-url'),
             ]),
         ]);

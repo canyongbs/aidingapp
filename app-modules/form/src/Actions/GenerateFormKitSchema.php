@@ -257,7 +257,7 @@ class GenerateFormKitSchema
 
     protected function generateContent(Submissible $submissible): array
     {
-        $blocks = app(ResolveBlockRegistry::class)($submissible);
+        $blocks = app(ResolveBlockRegistry::class)($submissible, true);
 
         if ($submissible->is_wizard) {
             $submissible->loadMissing([

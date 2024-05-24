@@ -36,7 +36,6 @@ import { genesisIcons } from '@formkit/icons';
 import theme from '../../../widgets/service-request-form/src/FormKit/theme.js';
 import inputs from '../../../widgets/service-request-form/src/FormKit/Inputs/index.js';
 
-
 export default {
     icons: {
         ...genesisIcons,

@@ -34,7 +34,7 @@
 import { createInput } from '@formkit/vue';
 import OneTimePassword from './OneTimePassword.vue';
 import Signature from './Signature.vue';
-import Upload from "./Upload.vue";
+import Upload from './Upload.vue';
 
 export default {
     otp: createInput(OneTimePassword, {

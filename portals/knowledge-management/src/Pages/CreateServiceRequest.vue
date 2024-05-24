@@ -37,11 +37,9 @@
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import { Bars3Icon } from '@heroicons/vue/24/outline/index.js';
     import { useAuthStore } from '../Stores/auth.js';
-    import { useTokenStore } from '../Stores/token.js';
     import wizard from '../../../../widgets/service-request-form/src/FormKit/wizard.js';
     import { consumer } from '../Services/Consumer.js';
     import AppLoading from '../Components/AppLoading.vue';
-
 
     let { steps, visitedSteps, activeStep, setStep, wizardPlugin } = wizard();
 
@@ -73,25 +71,11 @@
         getData();
     });
 
-    // function size(node, size) {
-    //     size = size * 1024 * 1024;
-    //
-    //     node.value.forEach((value) => {
-    //         if (value.file.size > size) {
-    //             return false;
-    //         }
-    //     });
-    //
-    //     return false;
-    // }
-
     const data = reactive({
         steps,
         visitedSteps,
         activeStep,
-        plugins: [
-            wizardPlugin,
-        ],
+        plugins: [wizardPlugin],
         setStep: (target) => () => {
             setStep(target);
         },
@@ -111,8 +95,6 @@
         stringify: (value) => JSON.stringify(value, null, 2),
         submitForm: async (data, node) => {
             node.clearErrors();
-
-            console.log(data, node);
 
             // let recaptchaToken = null;
 
@@ -198,7 +180,7 @@
 
             <main class="grid px-6 gap-4" v-if="submittedSuccess">Thank you for submitting a new request.</main>
             <main class="grid px-6 gap-4" v-else>
-                <FormKitSchema :schema="schema" :data="data"/>
+                <FormKitSchema :schema="schema" :data="data" />
             </main>
         </div>
     </div>

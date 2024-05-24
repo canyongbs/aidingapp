@@ -43,6 +43,7 @@ use Filament\Forms\Form;
 use Illuminate\Support\Collection;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Section;
 use AidingApp\Division\Models\Division;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -51,9 +52,11 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Forms\Components\EducatableSelect;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
+use AidingApp\ServiceManagement\Models\MediaCollections\UploadsMediaCollection;
 
 class EditServiceRequest extends EditRecord
 {
@@ -66,70 +69,84 @@ class EditServiceRequest extends EditRecord
 
         return $form
             ->schema([
-                Select::make('division_id')
-                    ->relationship('division', 'name')
-                    ->label('Division')
-                    ->required()
-                    ->exists((new Division())->getTable(), 'id'),
-                Select::make('status_id')
-                    ->relationship('status', 'name')
-                    ->label('Status')
-                    ->options(fn (ServiceRequest $record) => ServiceRequestStatus::withTrashed()
-                        ->whereKey($record->status_id)
-                        ->orWhereNull('deleted_at')
-                        ->orderBy('classification')
-                        ->orderBy('name')
-                        ->get(['id', 'name', 'classification'])
-                        ->groupBy(fn (ServiceRequestStatus $status) => $status->classification->getlabel())
-                        ->map(fn (Collection $group) => $group->pluck('name', 'id')))
-                    ->required()
-                    ->exists((new ServiceRequestStatus())->getTable(), 'id')
-                    ->disableOptionWhen(fn (string $value) => $disabledStatuses->contains($value)),
-                Grid::make()
+                Section::make()
                     ->schema([
-                        Select::make('type_id')
-                            ->options(
-                                fn (ServiceRequest $record) => ServiceRequestType::withTrashed()
-                                    ->whereKey($record->priority?->type_id)
-                                    ->orWhereNull('deleted_at')
-                                    ->orderBy('name')
-                                    ->pluck('name', 'id')
-                            )
-                            ->afterStateUpdated(fn (Set $set) => $set('priority_id', null))
-                            ->label('Type')
+                        Select::make('division_id')
+                            ->relationship('division', 'name')
+                            ->label('Division')
                             ->required()
-                            ->live()
-                            ->exists(ServiceRequestType::class, 'id')
-                            ->disableOptionWhen(fn (string $value) => $disabledTypes->contains($value)),
-                        Select::make('priority_id')
-                            ->relationship(
-                                name: 'priority',
-                                titleAttribute: 'name',
-                                modifyQueryUsing: fn (Get $get, Builder $query, $record) => $query->where('type_id', $get('type_id'))->orderBy('order'),
-                            )
-                            ->label('Priority')
+                            ->exists((new Division())->getTable(), 'id'),
+                        Select::make('status_id')
+                            ->relationship('status', 'name')
+                            ->label('Status')
+                            ->options(fn (ServiceRequest $record) => ServiceRequestStatus::withTrashed()
+                                ->whereKey($record->status_id)
+                                ->orWhereNull('deleted_at')
+                                ->orderBy('classification')
+                                ->orderBy('name')
+                                ->get(['id', 'name', 'classification'])
+                                ->groupBy(fn (ServiceRequestStatus $status) => $status->classification->getlabel())
+                                ->map(fn (Collection $group) => $group->pluck('name', 'id')))
                             ->required()
-                            ->exists(ServiceRequestPriority::class, 'id')
-                            ->visible(fn (Get $get): bool => filled($get('type_id'))),
+                            ->exists((new ServiceRequestStatus())->getTable(), 'id')
+                            ->disableOptionWhen(fn (string $value) => $disabledStatuses->contains($value)),
+                        Grid::make()
+                            ->schema([
+                                Select::make('type_id')
+                                    ->options(
+                                        fn (ServiceRequest $record) => ServiceRequestType::withTrashed()
+                                            ->whereKey($record->priority?->type_id)
+                                            ->orWhereNull('deleted_at')
+                                            ->orderBy('name')
+                                            ->pluck('name', 'id')
+                                    )
+                                    ->afterStateUpdated(fn (Set $set) => $set('priority_id', null))
+                                    ->label('Type')
+                                    ->required()
+                                    ->live()
+                                    ->exists(ServiceRequestType::class, 'id')
+                                    ->disableOptionWhen(fn (string $value) => $disabledTypes->contains($value)),
+                                Select::make('priority_id')
+                                    ->relationship(
+                                        name: 'priority',
+                                        titleAttribute: 'name',
+                                        modifyQueryUsing: fn (Get $get, Builder $query, $record) => $query->where('type_id', $get('type_id'))->orderBy('order'),
+                                    )
+                                    ->label('Priority')
+                                    ->required()
+                                    ->exists(ServiceRequestPriority::class, 'id')
+                                    ->visible(fn (Get $get): bool => filled($get('type_id'))),
+                            ]),
+                        TextInput::make('title')
+                            ->required()
+                            ->string()
+                            ->maxLength(255)
+                            ->columnSpanFull(),
+                        Textarea::make('close_details')
+                            ->label('Description')
+                            ->nullable()
+                            ->string()
+                            ->columnSpan(1),
+                        Textarea::make('res_details')
+                            ->label('Internal Details')
+                            ->nullable()
+                            ->string()
+                            ->columnSpan(1),
+                        EducatableSelect::make('respondent')
+                            ->label('Related To')
+                            ->required(),
                     ]),
-                TextInput::make('title')
-                    ->required()
-                    ->string()
-                    ->maxLength(255)
-                    ->columnSpanFull(),
-                Textarea::make('close_details')
-                    ->label('Description')
-                    ->nullable()
-                    ->string()
-                    ->columnSpan(1),
-                Textarea::make('res_details')
-                    ->label('Internal Details')
-                    ->nullable()
-                    ->string()
-                    ->columnSpan(1),
-                EducatableSelect::make('respondent')
-                    ->label('Related To')
-                    ->required(),
+                Section::make('Uploads')
+                    ->schema([
+                        SpatieMediaLibraryFileUpload::make(UploadsMediaCollection::getName())
+                            ->collection(UploadsMediaCollection::getName())
+                            ->multiple()
+                            ->visibility('private')
+                            ->maxFiles(UploadsMediaCollection::getMaxNumberOfFiles())
+                            ->maxSize(UploadsMediaCollection::getMaxFileSizeInMB() * 1024)
+                            ->acceptedFileTypes(UploadsMediaCollection::getMimes())
+                            ->downloadable(),
+                    ]),
             ]);
     }
 

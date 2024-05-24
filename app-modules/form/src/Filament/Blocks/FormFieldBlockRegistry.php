@@ -36,14 +36,17 @@
 
 namespace AidingApp\Form\Filament\Blocks;
 
+use Illuminate\Support\Collection;
+
 class FormFieldBlockRegistry
 {
     /**
      * @return array<class-string<FormFieldBlock>>
      */
-    public static function get(): array
+    public static function get(bool $internal = false): array
     {
-        return [
+        /** @var FormFieldBlock $block */
+        return collect([
             EducatableEmailFormFieldBlock::class,
             TextInputFormFieldBlock::class,
             TextAreaFormFieldBlock::class,
@@ -58,16 +61,19 @@ class FormFieldBlockRegistry
             PhoneFormFieldBlock::class,
             UrlFormFieldBlock::class,
             UploadFormFieldBlock::class,
-        ];
+        ])->when(
+            ! $internal,
+            fn (Collection $blocks) => $blocks->filter(fn (string $block) => ! $block::$internal)
+        )->toArray();
     }
 
     /**
      * @return array<string, class-string<FormFieldBlock>>
      */
-    public static function keyByType(): array
+    public static function keyByType(bool $internal = false): array
     {
         /** @var FormFieldBlock $block */
-        return collect(static::get())
+        return collect(static::get($internal))
             ->mapWithKeys(fn (string $block): array => [$block::type() => $block])
             ->all();
     }
