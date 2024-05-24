@@ -52,10 +52,6 @@
             type: String,
             required: true,
         },
-        serviceRequestUploadUrl: {
-            type: String,
-            required: true,
-        },
     });
 
     const loadingResults = ref(true);
@@ -128,30 +124,15 @@
             //     data['recaptcha-token'] = recaptchaToken;
             // }
 
-            // const body = new FormData();
-            //
-            // for(const key in data) {
-            //     if (data[key] instanceof FileList) {
-            //         console.log(data[key]);
-            //         for (let i = 0; i < data[key].length; i++) {
-            //             body.append(key, data[key][i]);
-            //         }
-            //     } else {
-            //         body.append(key, data[key]);
-            //     }
-            // }
-            //
-            // console.log(data, body.entries());
+            const { post } = consumer();
 
-            // const { post } = consumer();
-            //
-            // post(props.apiUrl + '/service-request/create/' + route.params.typeId, data)
-            //     .then((response) => {
-            //         submittedSuccess.value = true;
-            //     })
-            //     .catch((error) => {
-            //         node.setErrors([error]);
-            //     });
+            post(props.apiUrl + '/service-request/create/' + route.params.typeId, data)
+                .then((response) => {
+                    submittedSuccess.value = true;
+                })
+                .catch((error) => {
+                    node.setErrors([error]);
+                });
         },
     });
 
@@ -217,7 +198,7 @@
 
             <main class="grid px-6 gap-4" v-if="submittedSuccess">Thank you for submitting a new request.</main>
             <main class="grid px-6 gap-4" v-else>
-                <FormKitSchema :schema="schema" :data="data" :upload-url="serviceRequestUploadUrl"/>
+                <FormKitSchema :schema="schema" :data="data"/>
             </main>
         </div>
     </div>

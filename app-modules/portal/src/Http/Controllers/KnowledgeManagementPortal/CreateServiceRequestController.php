@@ -58,6 +58,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestFormStep;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use AidingApp\Form\Filament\Blocks\EducatableEmailFormFieldBlock;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormSubmission;
+use AidingApp\ServiceManagement\Models\MediaCollections\UploadsMediaCollection;
 
 class CreateServiceRequestController extends Controller
 {
@@ -81,8 +82,6 @@ class CreateServiceRequestController extends Controller
         $form = $this->generateForm($type);
 
         ray($request, $request->all());
-
-        dd('stop');
 
         $validator = Validator::make($request->all(), [
             ...$generateValidation($form),
@@ -114,6 +113,17 @@ class CreateServiceRequestController extends Controller
             $serviceRequest->priority()->associate($priority);
 
             $serviceRequest->save();
+
+            $files = collect($data->pull('Main.upload-file', []));
+
+            $files->each(function ($file) use ($serviceRequest) {
+                $serviceRequest
+                    ->addMediaFromDisk($file['path'])
+                    ->withCustomProperties([
+                        'originalFileName' => $file['originalFileName'],
+                    ])
+                    ->toMediaCollection('uploads');
+            });
 
             $submission = $form->submissions()
                 ->make([
@@ -217,9 +227,10 @@ class CreateServiceRequestController extends Controller
             ]),
             $this->formatBlock('Upload File', UploadFormFieldBlock::type(), false, [
                 'multiple' => true,
-                'limit' => 5,
-                'accept' => '.pdf,.doc,.docx,.xml,.md,.csv,.png',
-                'size' => 5,
+                'limit' => UploadsMediaCollection::$maxNumberOfFiles,
+                'accept' => UploadsMediaCollection::$mimes,
+                'size' => UploadsMediaCollection::$maxFileSizeInMB,
+                'uploadUrl' => route('api.portal.knowledge-management.service-request.request-upload-url'),
             ]),
         ]);
 

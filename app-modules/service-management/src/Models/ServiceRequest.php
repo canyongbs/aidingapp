@@ -66,6 +66,7 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateDirection;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
+use AidingApp\ServiceManagement\Models\MediaCollections\UploadsMediaCollection;
 use AidingApp\ServiceManagement\Exceptions\ServiceRequestNumberExceededReRollsException;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
 
@@ -104,7 +105,7 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
 
     public function registerMediaCollections(): void
     {
-        $this->addMediaCollection('uploads');
+        $this->mediaCollections[] = UploadsMediaCollection::asMediaCollection();
     }
 
     public function save(array $options = [])

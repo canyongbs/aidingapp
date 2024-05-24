@@ -49,6 +49,7 @@ class UploadFormFieldBlock extends FormFieldBlock
             'accept' => $field->config['accept'] ?? '',
             'limit' => $field->config['limit'] ?? null,
             'size' => $field->config['size'] ?? null,
+            'uploadUrl' => route('api.portal.knowledge-management.service-request.request-upload-url'),
             // ...[
             //     'validation' => [
             //         $field->is_required ? ['required'] : [],
@@ -61,6 +62,9 @@ class UploadFormFieldBlock extends FormFieldBlock
 
     public static function getValidationRules(SubmissibleField $field): array
     {
-        return [];
+        return [
+            'original_file_name' => ['required', 'string'],
+            'path' => ['required', 'string'],
+        ];
     }
 }

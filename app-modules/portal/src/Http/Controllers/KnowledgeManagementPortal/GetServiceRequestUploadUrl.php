@@ -16,9 +16,14 @@ class GetServiceRequestUploadUrl extends Controller
             'filename' => ['required', 'string'],
         ]);
 
+        $filename = sprintf('%s.%s', Str::uuid(), str($validated['filename'])->afterLast('.'));
+        $path = "service-requests-tmp/{$filename}";
+
         return response()->json([
-            'url' => Storage::temporaryUploadUrl(
-                sprintf('%s.%s', Str::uuid(), str($validated['filename'])->afterLast('.')),
+            'filename' => $filename,
+            'path' => $path,
+            ...Storage::temporaryUploadUrl(
+                $path,
                 now()->addMinute(),
             ),
         ]);

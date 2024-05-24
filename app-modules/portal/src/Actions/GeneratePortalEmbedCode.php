@@ -70,10 +70,8 @@ class GeneratePortalEmbedCode
 
                 $apiUrl = route('api.portal.knowledge-management.define');
 
-                $serviceRequestUploadUrl = route('api.portal.knowledge-management.service-request.request-upload-url');
-
                 return <<<EOD
-                <knowledge-management-portal-embed url="{$portalDefinitionUrl}" user-authentication-url={$userAuthenticationUrl} access-url={$portalAccessUrl} search-url="{$portalSearchUrl}" app-url="{$appUrl}" api-url="{$apiUrl}" service-request-upload-url="{$serviceRequestUploadUrl}"></knowledge-management-portal-embed>
+                <knowledge-management-portal-embed url="{$portalDefinitionUrl}" user-authentication-url={$userAuthenticationUrl} access-url={$portalAccessUrl} search-url="{$portalSearchUrl}" app-url="{$appUrl}" api-url="{$apiUrl}"></knowledge-management-portal-embed>
                 <script src="{$scriptUrl}"></script>
                 EOD;
             })(),

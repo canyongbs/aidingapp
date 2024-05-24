@@ -45,10 +45,15 @@ use Filament\Resources\Pages\ViewRecord;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\ViewEntry;
+use Filament\Infolists\Components\ImageEntry;
+use Filament\Infolists\Components\Actions\Action;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
+use Filament\Infolists\Components\SpatieMediaLibraryImageEntry;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
+use AidingApp\ServiceManagement\Models\MediaCollections\UploadsMediaCollection;
 
 class ViewServiceRequest extends ViewRecord
 {
@@ -106,6 +111,32 @@ class ViewServiceRequest extends ViewRecord
                             }),
                     ])
                     ->columns(2),
+                Section::make('Uploads')
+                    ->schema(
+                        fn (ServiceRequest $request) => $request
+                            ->getMedia(UploadsMediaCollection::$name)
+                            ->map(
+                                fn (Media $media) => ImageEntry::make(UploadsMediaCollection::$name)
+                                    ->hiddenLabel()
+                                    ->visibility('private')
+                                    ->getStateUsing(fn () => $media->getPathRelativeToRoot())
+                                    ->size(40)
+                            )
+                            ->toArray()
+                    ),
+                // Section::make('Uploads')
+                //     ->schema([
+                //         SpatieMediaLibraryImageEntry::make(UploadsMediaCollection::$name)
+                //             ->hiddenLabel()
+                //             ->collection(UploadsMediaCollection::$name)
+                //             ->visibility('private')
+                //             ->size(60)
+                //             ->hintActions([
+                //                 Action::make('abc')
+                //                     ->label('Download')
+                //                     ->url(fn (ServiceRequest $record) => $record->getFirstMedia(UploadsMediaCollection::$name)?->getUrl()),
+                //             ]),
+                //     ]),
                 Section::make('SLA Management')
                     ->visible(fn (ServiceRequest $record): bool => $record->priority?->sla !== null)
                     ->schema([

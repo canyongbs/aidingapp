@@ -70,10 +70,6 @@
             type: String,
             required: true,
         },
-        serviceRequestUploadUrl: {
-            type: String,
-            required: true,
-        },
     });
 
     const errorLoading = ref(false);
@@ -457,7 +453,6 @@
                             :api-url="apiUrl"
                             :categories="categories"
                             :service-requests="serviceRequests"
-                            :service-request-upload-url="serviceRequestUploadUrl"
                             :tags="tags"
                         >
                         </RouterView>
