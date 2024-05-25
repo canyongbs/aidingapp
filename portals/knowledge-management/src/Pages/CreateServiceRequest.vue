@@ -113,7 +113,7 @@
                     submittedSuccess.value = true;
                 })
                 .catch((error) => {
-                    node.setErrors([error]);
+                    node.setErrors(error.response.data.errors);
                 });
         },
     });

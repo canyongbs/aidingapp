@@ -57,9 +57,6 @@ class UploadFormFieldBlock extends FormFieldBlock
 
     public static function getValidationRules(SubmissibleField $field): array
     {
-        return [
-            'original_file_name' => ['required', 'string'],
-            'path' => ['required', 'string'],
-        ];
+        return [];
     }
 }

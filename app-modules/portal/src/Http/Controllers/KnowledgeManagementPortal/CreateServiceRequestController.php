@@ -36,15 +36,18 @@
 
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
+use Throwable;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Bus;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 use Symfony\Component\HttpFoundation\Response;
 use AidingApp\Form\Actions\GenerateFormKitSchema;
+use AidingApp\Portal\Jobs\PersistServiceRequestUpload;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\Form\Filament\Blocks\SelectFormFieldBlock;
 use AidingApp\Form\Filament\Blocks\UploadFormFieldBlock;
@@ -95,81 +98,91 @@ class CreateServiceRequestController extends Controller
 
         $priority = $type->priorities()->findOrFail($data->pull('Main.priority'));
 
-        return DB::transaction(function () use (
-            $resolveSubmissionAuthorFromEmail,
-            $form,
-            $priority,
-            $contact,
-            $data,
-        ) {
-            $serviceRequest = new ServiceRequest([
-                'title' => $data->pull('Main.title'),
-                'close_details' => $data->pull('Main.description'),
+        // DB::beginTransaction();
+        //
+        // try {
+        $serviceRequest = new ServiceRequest([
+            'title' => $data->pull('Main.title'),
+            'close_details' => $data->pull('Main.description'),
+        ]);
+
+        $serviceRequest->respondent()->associate($contact);
+        $serviceRequest->priority()->associate($priority);
+
+        $serviceRequest->save();
+
+        $files = collect($data->pull('Main.upload-file', []));
+
+        Bus::batch([
+            ...$files->map(function ($file) use ($serviceRequest) {
+                return new PersistServiceRequestUpload(
+                    $serviceRequest,
+                    $file['path'],
+                    $file['originalFileName'],
+                    UploadsMediaCollection::getName(),
+                );
+            }),
+        ])
+            ->name("persist-service-request-uploads-{$serviceRequest->getKey()}")
+            ->dispatchAfterResponse();
+
+        $submission = $form->submissions()
+            ->make([
+                'submitted_at' => now(),
             ]);
 
-            $serviceRequest->respondent()->associate($contact);
-            $serviceRequest->priority()->associate($priority);
+        $submission->priority()->associate($priority);
 
-            $serviceRequest->save();
+        $data->pull('recaptcha-token');
 
-            $files = collect($data->pull('Main.upload-file', []));
-
-            $files->each(function ($file) use ($serviceRequest) {
-                $serviceRequest
-                    ->addMediaFromDisk($file['path'])
-                    ->withCustomProperties([
-                        'originalFileName' => $file['originalFileName'],
-                    ])
-                    ->toMediaCollection('uploads');
-            });
-
-            $submission = $form->submissions()
-                ->make([
-                    'submitted_at' => now(),
-                ]);
-
-            $submission->priority()->associate($priority);
-
-            $data->pull('recaptcha-token');
-
-            if ($data->filter()->isEmpty()) {
-                return response()->json([
-                    'message' => 'Service Request Form submitted successfully.',
-                ]);
-            }
-
-            $submission->save();
-
-            foreach ($form->steps as $step) {
-                $fields = $step->fields
-                    ->pluck('type', 'id')
-                    ->all();
-
-                foreach ($data[$step->label] ?? [] as $fieldId => $response) {
-                    $this->processSubmissionField(
-                        $submission,
-                        $fieldId,
-                        $response,
-                        $fields,
-                        $resolveSubmissionAuthorFromEmail
-                    );
-                }
-            }
-
-            $submission->save();
-
-            $serviceRequest->serviceRequestFormSubmission()->associate($submission);
-
-            if ($submission->author) {
-                $serviceRequest->respondent()->associate($submission->author);
-            }
-
-            $serviceRequest->save();
-
+        if ($data->filter()->isEmpty()) {
             return response()->json([
                 'message' => 'Service Request Form submitted successfully.',
             ]);
-        });
+        }
+
+        $submission->save();
+
+        foreach ($form->steps as $step) {
+            $fields = $step->fields
+                ->pluck('type', 'id')
+                ->all();
+
+            foreach ($data[$step->label] ?? [] as $fieldId => $response) {
+                $this->processSubmissionField(
+                    $submission,
+                    $fieldId,
+                    $response,
+                    $fields,
+                    $resolveSubmissionAuthorFromEmail
+                );
+            }
+        }
+
+        $submission->save();
+
+        $serviceRequest->serviceRequestFormSubmission()->associate($submission);
+
+        if ($submission->author) {
+            $serviceRequest->respondent()->associate($submission->author);
+        }
+
+        $serviceRequest->save();
+        // } catch (Throwable $e) {
+        //     DB::rollBack();
+        //
+        //     report($e);
+        //
+        //     return response()->json([
+        //         'errors' => ['An error occurred while submitting the Service Request Form.'],
+        //     ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        // }
+        //
+        // DB::commit();
+
+        return response()->json([
+            'message' => 'Service Request Form submitted successfully.',
+        ]);
     }
 
     private function processSubmissionField(

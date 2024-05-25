@@ -88,7 +88,7 @@ class GenerateSubmissibleValidation
     {
         $rules = collect();
 
-        $blocks = app(ResolveBlockRegistry::class)($submissible);
+        $blocks = app(ResolveBlockRegistry::class)($submissible, true);
 
         foreach ($submissible->steps as $step) {
             $rules = $rules->merge(

@@ -30,8 +30,9 @@
 
             const uploads = [];
 
-            payload.forEach((value, index) => {
+            for (const [index, value] of payload.entries()) {
                 const extension = `.${value.file.name.split('.').pop()}`;
+
                 if (!props.context.accept.includes(extension)) {
                     props.context.node.store.set(
                         createMessage({
@@ -55,7 +56,9 @@
 
                     return;
                 }
+            }
 
+            payload.forEach((value, index) => {
                 uploads.push(processUpload(value.file, index));
             });
 
