@@ -26,7 +26,7 @@
                 return;
             }
 
-            const size = props.context.size * 1024 * 1024;
+            const size = props.context.size * 1000 * 1000;
 
             const uploads = [];
 

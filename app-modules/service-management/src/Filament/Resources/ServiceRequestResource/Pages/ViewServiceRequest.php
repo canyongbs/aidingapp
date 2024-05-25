@@ -51,6 +51,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
+use Filament\Infolists\Components\IconEntry\IconEntrySize;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\MediaCollections\UploadsMediaCollection;
 
@@ -61,6 +62,9 @@ class ViewServiceRequest extends ViewRecord
     public function infolist(Infolist $infolist): Infolist
     {
         $formatSecondsAsInterval = fn (?int $state): ?string => $state ? CarbonInterval::seconds($state)->cascade()->forHumans(short: true) : null;
+
+        /** @var UploadsMediaCollection $uploadsMediaCollection */
+        $uploadsMediaCollection = app(ServiceRequest::class)->getMediaCollection('uploads');
 
         return $infolist
             ->schema([
@@ -113,7 +117,7 @@ class ViewServiceRequest extends ViewRecord
                 Section::make('Uploads')
                     ->schema(
                         fn (ServiceRequest $request) => $request
-                            ->getMedia(UploadsMediaCollection::getName())
+                            ->getMedia($uploadsMediaCollection->getName())
                             ->map(
                                 fn (Media $media) => IconEntry::make($media->getKey())
                                     ->label($media->file_name)
@@ -134,6 +138,7 @@ class ViewServiceRequest extends ViewRecord
                                         'image/png' => 'heroicon-o-photo',
                                         default => 'heroicon-o-paper-clip',
                                     })
+                                    ->size(IconEntrySize::TwoExtraLarge)
                                     ->hintAction(
                                         Action::make('download')
                                             ->label('Download')

@@ -113,13 +113,16 @@ class CreateServiceRequestController extends Controller
 
         $files = collect($data->pull('Main.upload-file', []));
 
+        /** @var UploadsMediaCollection $uploadsMediaCollection */
+        $uploadsMediaCollection = app(ServiceRequest::class)->getMediaCollection('uploads');
+
         Bus::batch([
-            ...$files->map(function ($file) use ($serviceRequest) {
+            ...$files->map(function ($file) use ($uploadsMediaCollection, $serviceRequest) {
                 return new PersistServiceRequestUpload(
                     $serviceRequest,
                     $file['path'],
                     $file['originalFileName'],
-                    UploadsMediaCollection::getName(),
+                    $uploadsMediaCollection->getName(),
                 );
             }),
         ])
@@ -226,6 +229,9 @@ class CreateServiceRequestController extends Controller
 
         $form->is_wizard = true;
 
+        /** @var UploadsMediaCollection $uploadsMediaCollection */
+        $uploadsMediaCollection = app(ServiceRequest::class)->getMediaCollection('uploads');
+
         $content = collect([
             $this->formatBlock('Title', TextInputFormFieldBlock::type()),
             $this->formatBlock('Description', TextAreaFormFieldBlock::type()),
@@ -237,10 +243,10 @@ class CreateServiceRequestController extends Controller
                 'placeholder' => 'Select a priority',
             ]),
             $this->formatBlock('Upload File', UploadFormFieldBlock::type(), false, [
-                'multiple' => true,
-                'limit' => UploadsMediaCollection::getMaxNumberOfFiles(),
-                'accept' => UploadsMediaCollection::getExtensions(),
-                'size' => UploadsMediaCollection::getMaxFileSizeInMB(),
+                'multiple' => $uploadsMediaCollection->getMaxNumberOfFiles() > 1,
+                'limit' => $uploadsMediaCollection->getMaxNumberOfFiles(),
+                'accept' => $uploadsMediaCollection->getExtensions(),
+                'size' => $uploadsMediaCollection->getMaxFileSizeInMB(),
                 'uploadUrl' => route('api.portal.knowledge-management.service-request.request-upload-url'),
             ]),
         ]);

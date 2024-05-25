@@ -105,7 +105,24 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
 
     public function registerMediaCollections(): void
     {
-        $this->mediaCollections[] = UploadsMediaCollection::asMediaCollection();
+        $this->mediaCollections[] = UploadsMediaCollection::create()
+            ->maxFileSizeInMB(20)
+            ->maxNumberOfFiles(5)
+            ->mimes([
+                'application/pdf' => ['pdf'],
+                'application/vnd.ms-excel' => ['xls'],
+                'application/vnd.ms-powerpoint' => ['ppt'],
+                'application/vnd.ms-word' => ['doc'],
+                'application/vnd.openxmlformats-officedocument.presentationml.presentation' => ['pptx'],
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => ['xlsx'],
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => ['docx'],
+                'image/jpeg' => ['jpg', 'jpeg'],
+                'image/pdf' => ['pdf'],
+                'image/png' => ['png'],
+                'text/csv' => ['csv'],
+                'text/markdown' => ['md', 'markdown', 'mkd'],
+                'text/plain' => ['txt', 'text'],
+            ]);
     }
 
     public function save(array $options = [])

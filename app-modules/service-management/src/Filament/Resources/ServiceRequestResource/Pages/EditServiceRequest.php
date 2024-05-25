@@ -67,6 +67,9 @@ class EditServiceRequest extends EditRecord
         $disabledStatuses = ServiceRequestStatus::onlyTrashed()->pluck('id');
         $disabledTypes = ServiceRequestType::onlyTrashed()->pluck('id');
 
+        /** @var UploadsMediaCollection $uploadsMediaCollection */
+        $uploadsMediaCollection = app(ServiceRequest::class)->getMediaCollection('uploads');
+
         return $form
             ->schema([
                 Section::make()
@@ -138,13 +141,14 @@ class EditServiceRequest extends EditRecord
                     ]),
                 Section::make('Uploads')
                     ->schema([
-                        SpatieMediaLibraryFileUpload::make(UploadsMediaCollection::getName())
-                            ->collection(UploadsMediaCollection::getName())
-                            ->multiple()
+                        SpatieMediaLibraryFileUpload::make('uploads')
+                            ->hiddenLabel()
                             ->visibility('private')
-                            ->maxFiles(UploadsMediaCollection::getMaxNumberOfFiles())
-                            ->maxSize(UploadsMediaCollection::getMaxFileSizeInMB() * 1024)
-                            ->acceptedFileTypes(UploadsMediaCollection::getMimes())
+                            ->collection($uploadsMediaCollection->getName())
+                            ->multiple($uploadsMediaCollection->getMaxNumberOfFiles() > 1)
+                            ->when($uploadsMediaCollection->getMaxNumberOfFiles(), fn (SpatieMediaLibraryFileUpload $component) => $component->maxFiles($uploadsMediaCollection->getMaxNumberOfFiles()))
+                            ->when($uploadsMediaCollection->getMaxFileSizeInMB(), fn (SpatieMediaLibraryFileUpload $component) => $component->maxSize($uploadsMediaCollection->getMaxFileSizeInMB() * 1000))
+                            ->acceptedFileTypes($uploadsMediaCollection->getMimes())
                             ->downloadable(),
                     ]),
             ]);

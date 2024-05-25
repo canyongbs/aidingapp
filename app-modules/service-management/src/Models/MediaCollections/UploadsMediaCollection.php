@@ -5,67 +5,99 @@ namespace AidingApp\ServiceManagement\Models\MediaCollections;
 use Spatie\MediaLibrary\MediaCollections\File;
 use Spatie\MediaLibrary\MediaCollections\MediaCollection;
 
-class UploadsMediaCollection
+class UploadsMediaCollection extends MediaCollection
 {
-    private static string $name = 'uploads';
+    protected ?int $maxNumberOfFiles;
 
-    private static int $maxNumberOfFiles = 5;
+    protected ?int $maxFileSizeInMB;
 
-    private static int $maxFileSizeInMB = 20;
+    /**
+     * @var array<string, array<string>>
+     */
+    protected ?array $mimes = [];
 
-    private static array $mimes = [
-        'application/pdf' => ['pdf'],
-        'application/vnd.ms-excel' => ['xls'],
-        'application/vnd.ms-powerpoint' => ['ppt'],
-        'application/vnd.ms-word' => ['doc'],
-        'application/vnd.openxmlformats-officedocument.presentationml.presentation' => ['pptx'],
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => ['xlsx'],
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => ['docx'],
-        'image/jpeg' => ['jpg', 'jpeg'],
-        'image/pdf' => ['pdf'],
-        'image/png' => ['png'],
-        'text/csv' => ['csv'],
-        'text/markdown' => ['md', 'markdown', 'mkd'],
-        'text/plain' => ['txt', 'text'],
-    ];
+    /**
+     * @var array<string, callable>
+     */
+    private array $accepts = [];
 
-    public static function asMediaCollection(): MediaCollection
+    public function __construct(string $name = 'uploads')
     {
-        return MediaCollection::create(static::$name)
-            ->acceptsFile(function (File $file) {
-                return $file->size <= static::$maxFileSizeInMB * 1024 * 1024;
-            })
-            ->onlyKeepLatest(static::$maxNumberOfFiles)
-            ->acceptsMimeTypes(collect(static::$mimes)->keys()->toArray());
+        parent::__construct($name);
     }
 
-    public static function getName(): string
+    public static function create($name = 'uploads'): static
     {
-        return static::$name;
+        return new self($name);
     }
 
-    public static function getMaxNumberOfFiles(): int
+    public function name(string $name): static
     {
-        return static::$maxNumberOfFiles;
+        $this->name = $name;
+
+        return $this;
     }
 
-    public static function getMaxFileSizeInMB(): int
+    public function getName(): string
     {
-        return static::$maxFileSizeInMB;
+        return $this->name;
     }
 
-    public static function getMimes(): array
+    public function maxNumberOfFiles(int $maxNumberOfFiles): static
     {
-        return collect(static::$mimes)
+        $this->maxNumberOfFiles = $maxNumberOfFiles;
+        $this->onlyKeepLatest($maxNumberOfFiles);
+
+        return $this;
+    }
+
+    public function getMaxNumberOfFiles(): ?int
+    {
+        return $this->maxNumberOfFiles;
+    }
+
+    public function maxFileSizeInMB(int $maxFileSizeInMB): static
+    {
+        $this->maxFileSizeInMB = $maxFileSizeInMB;
+
+        $this->accepts['size'] = fn (File $file) => $file->size <= $maxFileSizeInMB * 1000 * 1000;
+
+        $this->acceptsFile(
+            fn (File $file) => collect($this->accepts)
+                ->reduce(fn (bool $carry, callable $rule) => $carry && $rule($file), true)
+        );
+
+        return $this;
+    }
+
+    public function getMaxFileSizeInMB(): ?int
+    {
+        return $this->maxFileSizeInMB;
+    }
+
+    /**
+     * @param $mimes array<string, array<string>>
+     */
+    public function mimes(array $mimes): static
+    {
+        $this->mimes = $mimes;
+        $this->acceptsMimeTypes(collect($mimes)->keys()->toArray());
+
+        return $this;
+    }
+
+    public function getMimes(): array
+    {
+        return collect($this->mimes)
             ->keys()
             ->sort()
             ->values()
             ->toArray();
     }
 
-    public static function getExtensions(): array
+    public function getExtensions(): array
     {
-        return collect(static::$mimes)
+        return collect($this->mimes)
             ->flatten()
             ->unique()
             ->sort()
