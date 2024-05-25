@@ -146,14 +146,7 @@ class EditServiceRequest extends EditRecord
                             ->maxFiles(UploadsMediaCollection::getMaxNumberOfFiles())
                             ->maxSize(UploadsMediaCollection::getMaxFileSizeInMB() * 1024)
                             ->acceptedFileTypes(UploadsMediaCollection::getMimes())
-                            ->downloadable()
-                            ->mediaName(function (SpatieMediaLibraryFileUpload $component, TemporaryUploadedFile $file) {
-                                $component->customProperties([
-                                    'originalFileName' => $file->getClientOriginalName(),
-                                ]);
-
-                                return null;
-                            }),
+                            ->downloadable(),
                     ]),
             ]);
     }

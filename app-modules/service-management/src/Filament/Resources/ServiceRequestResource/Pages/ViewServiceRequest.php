@@ -116,39 +116,32 @@ class ViewServiceRequest extends ViewRecord
                         fn (ServiceRequest $request) => $request
                             ->getMedia(UploadsMediaCollection::getName())
                             ->map(
-                                // fn (Media $media) => ImageEntry::make(UploadsMediaCollection::getName())
-                                //     ->hiddenLabel()
-                                //     ->visibility('private')
-                                //     ->getStateUsing(fn () => $media->getPathRelativeToRoot())
-                                //     ->size(40)
-                                function (Media $media) {
-                                    return IconEntry::make($media->getKey())
-                                        ->label($media->getCustomProperty('originalFileName', $media->file_name))
-                                        ->state($media->mime_type)
-                                        ->icon(fn (string $state): string => match ($media->mime_type) {
-                                            'application/pdf',
-                                            'application/vnd.ms-word',
-                                            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                                            'image/pdf',
-                                            'text/markdown',
-                                            'text/plain' => 'heroicon-o-document-text',
-                                            'application/vnd.ms-excel',
-                                            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                                            'text/csv' => 'heroicon-o-table-cells',
-                                            'application/vnd.ms-powerpoint',
-                                            'application/vnd.openxmlformats-officedocument.presentationml.presentation' => 'heroicon-o-presentation-chart-bar',
-                                            'image/jpeg' => 'heroicon-o-camera',
-                                            'image/png' => 'heroicon-o-photo',
-                                            default => 'heroicon-o-paper-clip',
-                                        })
-                                        ->hintAction(
-                                            Action::make('download')
-                                                ->label('Download')
-                                                ->icon('heroicon-m-arrow-down-tray')
-                                                ->color('primary')
-                                                ->url($media->getTemporaryUrl(now()->addMinute()), true)
-                                        );
-                                }
+                                fn(Media $media) => IconEntry::make($media->getKey())
+                                    ->label($media->file_name)
+                                    ->state($media->mime_type)
+                                    ->icon(fn (string $state): string => match ($media->mime_type) {
+                                        'application/pdf',
+                                        'application/vnd.ms-word',
+                                        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                                        'image/pdf',
+                                        'text/markdown',
+                                        'text/plain' => 'heroicon-o-document-text',
+                                        'application/vnd.ms-excel',
+                                        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                                        'text/csv' => 'heroicon-o-table-cells',
+                                        'application/vnd.ms-powerpoint',
+                                        'application/vnd.openxmlformats-officedocument.presentationml.presentation' => 'heroicon-o-presentation-chart-bar',
+                                        'image/jpeg' => 'heroicon-o-camera',
+                                        'image/png' => 'heroicon-o-photo',
+                                        default => 'heroicon-o-paper-clip',
+                                    })
+                                    ->hintAction(
+                                        Action::make('download')
+                                            ->label('Download')
+                                            ->icon('heroicon-m-arrow-down-tray')
+                                            ->color('primary')
+                                            ->url($media->getTemporaryUrl(now()->addMinute()), true)
+                                    )
                             )
                             ->toArray()
                     ),
