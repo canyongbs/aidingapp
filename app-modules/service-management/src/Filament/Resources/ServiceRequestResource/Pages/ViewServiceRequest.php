@@ -53,7 +53,7 @@ use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
 use Filament\Infolists\Components\IconEntry\IconEntrySize;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
-use AidingApp\ServiceManagement\Models\MediaCollections\UploadsMediaCollection;
+use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 
 class ViewServiceRequest extends ViewRecord
 {
@@ -63,8 +63,7 @@ class ViewServiceRequest extends ViewRecord
     {
         $formatSecondsAsInterval = fn (?int $state): ?string => $state ? CarbonInterval::seconds($state)->cascade()->forHumans(short: true) : null;
 
-        /** @var UploadsMediaCollection $uploadsMediaCollection */
-        $uploadsMediaCollection = app(ServiceRequest::class)->getMediaCollection('uploads');
+        $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)();
 
         return $infolist
             ->schema([
@@ -120,7 +119,7 @@ class ViewServiceRequest extends ViewRecord
                             ->getMedia($uploadsMediaCollection->getName())
                             ->map(
                                 fn (Media $media) => IconEntry::make($media->getKey())
-                                    ->label($media->file_name)
+                                    ->label($media->name)
                                     ->state($media->mime_type)
                                     ->icon(fn (string $state): string => match ($media->mime_type) {
                                         'application/pdf',

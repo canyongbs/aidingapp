@@ -56,7 +56,7 @@ use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
-use AidingApp\ServiceManagement\Models\MediaCollections\UploadsMediaCollection;
+use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 
 class EditServiceRequest extends EditRecord
 {
@@ -67,8 +67,7 @@ class EditServiceRequest extends EditRecord
         $disabledStatuses = ServiceRequestStatus::onlyTrashed()->pluck('id');
         $disabledTypes = ServiceRequestType::onlyTrashed()->pluck('id');
 
-        /** @var UploadsMediaCollection $uploadsMediaCollection */
-        $uploadsMediaCollection = app(ServiceRequest::class)->getMediaCollection('uploads');
+        $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)();
 
         return $form
             ->schema([

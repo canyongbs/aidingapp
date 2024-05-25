@@ -62,13 +62,17 @@ use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use AidingApp\Form\Filament\Blocks\EducatableEmailFormFieldBlock;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormSubmission;
 use AidingApp\ServiceManagement\Models\MediaCollections\UploadsMediaCollection;
+use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 
 class CreateServiceRequestController extends Controller
 {
-    public function create(GenerateFormKitSchema $generateSchema, ServiceRequestType $type): JsonResponse
-    {
+    public function create(
+        GenerateFormKitSchema $generateSchema,
+        ResolveUploadsMediaCollectionForServiceRequest $resolveUploadsMediaCollectionForServiceRequest,
+        ServiceRequestType $type
+    ): JsonResponse {
         return response()->json([
-            'schema' => $generateSchema($this->generateForm($type)),
+            'schema' => $generateSchema($this->generateForm($type, $resolveUploadsMediaCollectionForServiceRequest())),
         ]);
     }
 
@@ -76,13 +80,16 @@ class CreateServiceRequestController extends Controller
         Request $request,
         GenerateSubmissibleValidation $generateValidation,
         ResolveSubmissionAuthorFromEmail $resolveSubmissionAuthorFromEmail,
+        ResolveUploadsMediaCollectionForServiceRequest $resolveUploadsMediaCollectionForServiceRequest,
         ServiceRequestType $type,
     ): JsonResponse {
         $contact = auth('contact')->user();
 
         abort_if(is_null($contact), Response::HTTP_UNAUTHORIZED);
 
-        $form = $this->generateForm($type);
+        $uploadsMediaCollection = $resolveUploadsMediaCollectionForServiceRequest();
+
+        $form = $this->generateForm($type, $uploadsMediaCollection);
 
         $validator = Validator::make($request->all(), [
             ...$generateValidation($form),
@@ -112,9 +119,6 @@ class CreateServiceRequestController extends Controller
         $serviceRequest->save();
 
         $files = collect($data->pull('Main.upload-file', []));
-
-        /** @var UploadsMediaCollection $uploadsMediaCollection */
-        $uploadsMediaCollection = app(ServiceRequest::class)->getMediaCollection('uploads');
 
         Bus::batch([
             ...$files->map(function ($file) use ($uploadsMediaCollection, $serviceRequest) {
@@ -217,7 +221,7 @@ class CreateServiceRequestController extends Controller
         $submission->author()->associate($author);
     }
 
-    private function generateForm(ServiceRequestType $type): ServiceRequestForm
+    private function generateForm(ServiceRequestType $type, UploadsMediaCollection $uploadsMediaCollection): ServiceRequestForm
     {
         $form = $type->form ?? new ServiceRequestForm();
 
@@ -228,9 +232,6 @@ class CreateServiceRequestController extends Controller
         }
 
         $form->is_wizard = true;
-
-        /** @var UploadsMediaCollection $uploadsMediaCollection */
-        $uploadsMediaCollection = app(ServiceRequest::class)->getMediaCollection('uploads');
 
         $content = collect([
             $this->formatBlock('Title', TextInputFormFieldBlock::type()),
