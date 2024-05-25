@@ -37,7 +37,7 @@
 namespace AidingApp\ServiceManagement\Enums;
 
 use Filament\Support\Contracts\HasLabel;
-use AidingApp\ServiceManagement\Models\Concerns\ClassificationInterface;
+use AidingApp\ServiceManagement\Models\Contracts\ClassificationInterface;
 
 enum SystemServiceRequestClassification: string implements HasLabel, ClassificationInterface
 {
@@ -60,9 +60,7 @@ enum SystemServiceRequestClassification: string implements HasLabel, Classificat
     }
 
     /**
-     * Get unclosed classifications.
-     *
-     * @return self[]
+     * @return array<ClassificationInterface>
      */
     public static function getUnclosedClassifications(): array
     {

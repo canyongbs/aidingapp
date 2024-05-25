@@ -39,7 +39,7 @@ class PersistServiceRequestUpload implements ShouldQueue
     {
         $this->serviceRequest
             ->addMediaFromDisk($this->path)
-            ->usingName($this->originalFileName)
+            ->usingName(pathinfo($this->originalFileName, PATHINFO_FILENAME))
             ->toMediaCollection($this->collection);
     }
 }

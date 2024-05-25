@@ -46,7 +46,6 @@ use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\ViewEntry;
-use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\Actions\Action;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -116,7 +115,7 @@ class ViewServiceRequest extends ViewRecord
                         fn (ServiceRequest $request) => $request
                             ->getMedia(UploadsMediaCollection::getName())
                             ->map(
-                                fn(Media $media) => IconEntry::make($media->getKey())
+                                fn (Media $media) => IconEntry::make($media->getKey())
                                     ->label($media->file_name)
                                     ->state($media->mime_type)
                                     ->icon(fn (string $state): string => match ($media->mime_type) {

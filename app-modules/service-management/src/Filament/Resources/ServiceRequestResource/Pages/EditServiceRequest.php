@@ -55,7 +55,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
-use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\MediaCollections\UploadsMediaCollection;
 
