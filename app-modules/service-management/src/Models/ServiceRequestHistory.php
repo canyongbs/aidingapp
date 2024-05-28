@@ -143,7 +143,7 @@ class ServiceRequestHistory extends BaseModel implements ProvidesATimeline
                         }
                     }
                 } else {
-                    $value[$readableKey] = $relationsMap[$key][0]::find($value[$key])->{$relationsMap[$key][1]};
+                    $value[$readableKey] = ! is_null($value[$key]) ? $relationsMap[$key][0]::find($value[$key])->{$relationsMap[$key][1]} : 'NULL';
                 }
             }
 
