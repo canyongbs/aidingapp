@@ -111,7 +111,7 @@ class KnowledgeBaseItemDownloadExternalMedia implements ShouldQueue
 
                     file_put_contents($tempFile, $stream);
 
-                    $tmpFile = new UploadedFile($tempFile, basename($content));
+                    $tmpFile = new UploadedFile($tempFile, basename($tempFile));
 
                     if (! in_array($tmpFile->getMimeType(), config('filament-tiptap-editor.accepted_file_types'))) {
                         throw new KnowledgeBaseExternalMediaValidationException('The file type is not allowed.');
