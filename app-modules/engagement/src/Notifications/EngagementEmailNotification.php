@@ -36,6 +36,7 @@
 
 namespace AidingApp\Engagement\Notifications;
 
+use Throwable;
 use App\Models\Tenant;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use AidingApp\Engagement\Models\EngagementDeliverable;
@@ -65,6 +66,15 @@ class EngagementEmailNotification extends BaseNotification implements EmailNotif
             ->greeting('Hello ' . $this->deliverable->engagement->recipient->display_name . '!')
             ->content($this->deliverable->engagement->getBody())
             ->salutation("Regards, {$this->deliverable->engagement->user->name}");
+    }
+
+    public function failed(?Throwable $exception): void
+    {
+        $this->deliverable->markDeliveryFailed($exception->getMessage());
+
+        if (is_null($this->deliverable->engagement->engagement_batch_id)) {
+            $this->deliverable->engagement->user->notify(new EngagementFailedNotification($this->deliverable->engagement));
+        }
     }
 
     protected function beforeSendHook(object $notifiable, OutboundDeliverable $deliverable, string $channel): void
