@@ -37,21 +37,17 @@
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use Illuminate\Support\Str;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
+use AidingApp\Portal\Http\Requests\GetServiceRequestUploadUrlRequest;
 
 class GetServiceRequestUploadUrl extends Controller
 {
-    public function __invoke(Request $request): JsonResponse
+    public function __invoke(GetServiceRequestUploadUrlRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'filename' => ['required', 'string'],
-        ]);
-
-        $filename = sprintf('%s.%s', Str::uuid(), str($validated['filename'])->afterLast('.'));
-        $path = "service-requests-tmp/{$filename}";
+        $filename = sprintf('%s.%s', Str::uuid(), str($request->validated('filename'))->afterLast('.'));
+        $path = "tmp/{$filename}";
 
         return response()->json([
             'filename' => $filename,

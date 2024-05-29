@@ -36,10 +36,6 @@
 
 namespace AidingApp\Form\Filament\Blocks;
 
-use Filament\Forms\Get;
-use Filament\Forms\Components\Checkbox;
-use Filament\Forms\Components\TagsInput;
-use Filament\Forms\Components\TextInput;
 use AidingApp\Form\Models\SubmissibleField;
 
 class UploadFormFieldBlock extends FormFieldBlock
@@ -56,22 +52,7 @@ class UploadFormFieldBlock extends FormFieldBlock
 
     public function fields(): array
     {
-        return [
-            // Checkbox::make('multiple')
-            //     ->live(),
-            // TextInput::make('limit')
-            //     ->integer()
-            //     ->minValue(2)
-            //     ->default(2)
-            //     ->visible(fn (Get $get) => $get('multiple')),
-            // TagsInput::make('accept')
-            //     ->label('Accepted File Types')
-            //     ->placeholder('e.g. .pdf, .docx, .jpg'),
-            // TextInput::make('size')
-            //     ->label('Maximum File Size')
-            //     ->integer()
-            //     ->suffix('MB'),
-        ];
+        return [];
     }
 
     public static function getFormKitSchema(SubmissibleField $field): array
