@@ -37,13 +37,12 @@
 namespace AidingApp\ServiceManagement\Models\Scopes;
 
 use Illuminate\Database\Eloquent\Builder;
+use AidingApp\ServiceManagement\Models\Contracts\ClassificationInterface;
 
 class ClassifiedIn
 {
     /**
-     * Class Constructor.
-     *
-     * @param ClassificationInterface[] $classifications Array of classifications.
+     * @param array<ClassificationInterface> $classifications
      */
     public function __construct(
         protected array $classifications,

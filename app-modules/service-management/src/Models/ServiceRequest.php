@@ -40,6 +40,7 @@ use App\Models\User;
 use DateTimeInterface;
 use App\Models\BaseModel;
 use Carbon\CarbonInterface;
+use Spatie\MediaLibrary\HasMedia;
 use Illuminate\Support\Facades\DB;
 use AidingApp\Contact\Models\Contact;
 use Kirschbaum\PowerJoins\PowerJoins;
@@ -47,6 +48,7 @@ use AidingApp\Division\Models\Division;
 use OwenIt\Auditing\Contracts\Auditable;
 use Illuminate\Database\Eloquent\Builder;
 use App\Models\Scopes\LicensedToEducatable;
+use Spatie\MediaLibrary\InteractsWithMedia;
 use App\Models\Concerns\BelongsToEducatable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -64,6 +66,7 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateDirection;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
+use AidingApp\ServiceManagement\Models\MediaCollections\UploadsMediaCollection;
 use AidingApp\ServiceManagement\Exceptions\ServiceRequestNumberExceededReRollsException;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
 
@@ -72,13 +75,14 @@ use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceR
  *
  * @mixin IdeHelperServiceRequest
  */
-class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubscription
+class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubscription, HasMedia
 {
     use BelongsToEducatable;
     use SoftDeletes;
     use PowerJoins;
     use AuditableTrait;
     use HasRelationships;
+    use InteractsWithMedia;
 
     protected $fillable = [
         'respondent_type',
@@ -98,6 +102,28 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
     protected $casts = [
         'status_updated_at' => 'immutable_datetime',
     ];
+
+    public function registerMediaCollections(): void
+    {
+        $this->mediaCollections[] = UploadsMediaCollection::create()
+            ->maxFileSizeInMB(20)
+            ->maxNumberOfFiles(5)
+            ->mimes([
+                'application/pdf' => ['pdf'],
+                'application/vnd.ms-excel' => ['xls'],
+                'application/vnd.ms-powerpoint' => ['ppt'],
+                'application/vnd.ms-word' => ['doc'],
+                'application/vnd.openxmlformats-officedocument.presentationml.presentation' => ['pptx'],
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => ['xlsx'],
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => ['docx'],
+                'image/jpeg' => ['jpg', 'jpeg'],
+                'image/pdf' => ['pdf'],
+                'image/png' => ['png'],
+                'text/csv' => ['csv'],
+                'text/markdown' => ['md', 'markdown', 'mkd'],
+                'text/plain' => ['txt', 'text'],
+            ]);
+    }
 
     public function save(array $options = [])
     {

@@ -49,6 +49,8 @@ abstract class FormFieldBlock extends TiptapBlock
 
     public ?string $icon = 'heroicon-m-cube';
 
+    public static bool $internal = false;
+
     public function getFormSchema(): array
     {
         return [

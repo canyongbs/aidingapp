@@ -34,41 +34,46 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Enums;
+namespace AidingApp\Portal\Jobs;
 
-use Filament\Support\Contracts\HasLabel;
-use AidingApp\ServiceManagement\Models\Contracts\ClassificationInterface;
+use Illuminate\Bus\Batchable;
+use Illuminate\Bus\Queueable;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 
-enum SystemServiceRequestClassification: string implements HasLabel, ClassificationInterface
+class PersistServiceRequestUpload implements ShouldQueue
 {
-    case Open = 'open';
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
+    use Batchable;
 
-    case InProgress = 'in_progress';
+    public $deleteWhenMissingModels = true;
 
-    case Closed = 'closed';
+    public function __construct(
+        protected ServiceRequest $serviceRequest,
+        protected string $path,
+        protected string $originalFileName,
+        protected string $collection,
+    ) {}
 
-    case Waiting = 'waiting';
-
-    case Custom = 'custom';
-
-    public function getLabel(): ?string
-    {
-        return match ($this) {
-            SystemServiceRequestClassification::InProgress => 'In Progress',
-            default => $this->name,
-        };
-    }
-
-    /**
-     * @return array<ClassificationInterface>
-     */
-    public static function getUnclosedClassifications(): array
+    public function middleware(): array
     {
         return [
-            self::Open,
-            self::InProgress,
-            self::Waiting,
-            self::Custom,
+            new SkipIfBatchCancelled(),
         ];
+    }
+
+    public function handle(): void
+    {
+        $this->serviceRequest
+            ->addMediaFromDisk($this->path)
+            ->usingName(pathinfo($this->originalFileName, PATHINFO_FILENAME))
+            ->toMediaCollection($this->collection);
     }
 }

@@ -34,41 +34,44 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Enums;
+namespace AidingApp\Form\Filament\Blocks;
 
-use Filament\Support\Contracts\HasLabel;
-use AidingApp\ServiceManagement\Models\Contracts\ClassificationInterface;
+use AidingApp\Form\Models\SubmissibleField;
 
-enum SystemServiceRequestClassification: string implements HasLabel, ClassificationInterface
+class UploadFormFieldBlock extends FormFieldBlock
 {
-    case Open = 'open';
+    public ?string $icon = 'heroicon-m-document-arrow-up';
 
-    case InProgress = 'in_progress';
+    //Don't use in filament
+    public static bool $internal = true;
 
-    case Closed = 'closed';
-
-    case Waiting = 'waiting';
-
-    case Custom = 'custom';
-
-    public function getLabel(): ?string
+    public static function type(): string
     {
-        return match ($this) {
-            SystemServiceRequestClassification::InProgress => 'In Progress',
-            default => $this->name,
-        };
+        return 'upload';
     }
 
-    /**
-     * @return array<ClassificationInterface>
-     */
-    public static function getUnclosedClassifications(): array
+    public function fields(): array
+    {
+        return [];
+    }
+
+    public static function getFormKitSchema(SubmissibleField $field): array
     {
         return [
-            self::Open,
-            self::InProgress,
-            self::Waiting,
-            self::Custom,
+            '$formkit' => 'upload',
+            'label' => $field->label,
+            'name' => $field->getKey(),
+            ...($field->is_required ? ['validation' => 'required'] : []),
+            'multiple' => $field->config['multiple'] ?? false,
+            'accept' => $field->config['accept'] ?? '',
+            'limit' => $field->config['limit'] ?? null,
+            'size' => $field->config['size'] ?? null,
+            'uploadUrl' => route('api.portal.knowledge-management.service-request.request-upload-url'),
         ];
+    }
+
+    public static function getValidationRules(SubmissibleField $field): array
+    {
+        return [];
     }
 }

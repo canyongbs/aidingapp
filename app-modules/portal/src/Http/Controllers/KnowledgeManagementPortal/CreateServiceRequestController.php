@@ -36,31 +36,43 @@
 
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
+use Throwable;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Bus;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 use Symfony\Component\HttpFoundation\Response;
 use AidingApp\Form\Actions\GenerateFormKitSchema;
+use AidingApp\Portal\Jobs\PersistServiceRequestUpload;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\Form\Filament\Blocks\SelectFormFieldBlock;
+use AidingApp\Form\Filament\Blocks\UploadFormFieldBlock;
 use AidingApp\Form\Actions\GenerateSubmissibleValidation;
+use AidingApp\Form\Filament\Blocks\TextAreaFormFieldBlock;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\Form\Filament\Blocks\TextInputFormFieldBlock;
 use AidingApp\Form\Actions\ResolveSubmissionAuthorFromEmail;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormStep;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use AidingApp\Form\Filament\Blocks\EducatableEmailFormFieldBlock;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormSubmission;
+use AidingApp\ServiceManagement\Models\MediaCollections\UploadsMediaCollection;
+use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 
 class CreateServiceRequestController extends Controller
 {
-    public function create(GenerateFormKitSchema $generateSchema, ServiceRequestType $type): JsonResponse
-    {
+    public function create(
+        GenerateFormKitSchema $generateSchema,
+        ResolveUploadsMediaCollectionForServiceRequest $resolveUploadsMediaCollectionForServiceRequest,
+        ServiceRequestType $type
+    ): JsonResponse {
         return response()->json([
-            'schema' => $generateSchema($this->generateForm($type)),
+            'schema' => $generateSchema($this->generateForm($type, $resolveUploadsMediaCollectionForServiceRequest())),
         ]);
     }
 
@@ -68,13 +80,16 @@ class CreateServiceRequestController extends Controller
         Request $request,
         GenerateSubmissibleValidation $generateValidation,
         ResolveSubmissionAuthorFromEmail $resolveSubmissionAuthorFromEmail,
+        ResolveUploadsMediaCollectionForServiceRequest $resolveUploadsMediaCollectionForServiceRequest,
         ServiceRequestType $type,
     ): JsonResponse {
         $contact = auth('contact')->user();
 
         abort_if(is_null($contact), Response::HTTP_UNAUTHORIZED);
 
-        $form = $this->generateForm($type);
+        $uploadsMediaCollection = $resolveUploadsMediaCollectionForServiceRequest();
+
+        $form = $this->generateForm($type, $uploadsMediaCollection);
 
         $validator = Validator::make($request->all(), [
             ...$generateValidation($form),
@@ -90,13 +105,9 @@ class CreateServiceRequestController extends Controller
 
         $priority = $type->priorities()->findOrFail($data->pull('Main.priority'));
 
-        return DB::transaction(function () use (
-            $resolveSubmissionAuthorFromEmail,
-            $form,
-            $priority,
-            $contact,
-            $data,
-        ) {
+        DB::beginTransaction();
+
+        try {
             $serviceRequest = new ServiceRequest([
                 'title' => $data->pull('Main.title'),
                 'close_details' => $data->pull('Main.description'),
@@ -106,6 +117,21 @@ class CreateServiceRequestController extends Controller
             $serviceRequest->priority()->associate($priority);
 
             $serviceRequest->save();
+
+            $files = collect($data->pull('Main.upload-file', []));
+
+            Bus::batch([
+                ...$files->map(function ($file) use ($uploadsMediaCollection, $serviceRequest) {
+                    return new PersistServiceRequestUpload(
+                        $serviceRequest,
+                        $file['path'],
+                        $file['originalFileName'],
+                        $uploadsMediaCollection->getName(),
+                    );
+                }),
+            ])
+                ->name("persist-service-request-uploads-{$serviceRequest->getKey()}")
+                ->dispatchAfterResponse();
 
             $submission = $form->submissions()
                 ->make([
@@ -117,6 +143,8 @@ class CreateServiceRequestController extends Controller
             $data->pull('recaptcha-token');
 
             if ($data->filter()->isEmpty()) {
+                DB::commit();
+
                 return response()->json([
                     'message' => 'Service Request Form submitted successfully.',
                 ]);
@@ -150,10 +178,20 @@ class CreateServiceRequestController extends Controller
 
             $serviceRequest->save();
 
+            DB::commit();
+        } catch (Throwable $e) {
+            DB::rollBack();
+
+            report($e);
+
             return response()->json([
-                'message' => 'Service Request Form submitted successfully.',
-            ]);
-        });
+                'errors' => ['An error occurred while submitting the Service Request Form.'],
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+        return response()->json([
+            'message' => 'Service Request Form submitted successfully.',
+        ]);
     }
 
     private function processSubmissionField(
@@ -185,7 +223,7 @@ class CreateServiceRequestController extends Controller
         $submission->author()->associate($author);
     }
 
-    private function generateForm(ServiceRequestType $type): ServiceRequestForm
+    private function generateForm(ServiceRequestType $type, UploadsMediaCollection $uploadsMediaCollection): ServiceRequestForm
     {
         $form = $type->form ?? new ServiceRequestForm();
 
@@ -198,14 +236,21 @@ class CreateServiceRequestController extends Controller
         $form->is_wizard = true;
 
         $content = collect([
-            $this->formatBlock('Title', 'text_input'),
-            $this->formatBlock('Description', 'text_area'),
-            $this->formatBlock('Priority', 'select', [
+            $this->formatBlock('Title', TextInputFormFieldBlock::type()),
+            $this->formatBlock('Description', TextAreaFormFieldBlock::type()),
+            $this->formatBlock('Priority', SelectFormFieldBlock::type(), data: [
                 'options' => $type
                     ->priorities()
                     ->orderByDesc('order')
                     ->pluck('name', 'id'),
                 'placeholder' => 'Select a priority',
+            ]),
+            $this->formatBlock('Upload File', UploadFormFieldBlock::type(), false, [
+                'multiple' => $uploadsMediaCollection->getMaxNumberOfFiles() > 1,
+                'limit' => $uploadsMediaCollection->getMaxNumberOfFiles(),
+                'accept' => $uploadsMediaCollection->getExtensions(),
+                'size' => $uploadsMediaCollection->getMaxFileSizeInMB(),
+                'uploadUrl' => route('api.portal.knowledge-management.service-request.request-upload-url'),
             ]),
         ]);
 
@@ -246,7 +291,7 @@ class CreateServiceRequestController extends Controller
         );
     }
 
-    private function formatBlock(string $label, string $type, array $data = []): array
+    private function formatBlock(string $label, string $type, bool $required = true, array $data = []): array
     {
         return [
             'type' => 'tiptapBlock',
@@ -255,7 +300,7 @@ class CreateServiceRequestController extends Controller
                 'type' => $type,
                 'data' => [
                     'label' => $label,
-                    'isRequired' => true,
+                    'isRequired' => $required,
                     ...$data,
                 ],
             ],

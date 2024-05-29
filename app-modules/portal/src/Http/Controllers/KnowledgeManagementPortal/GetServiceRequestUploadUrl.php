@@ -34,41 +34,28 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Enums;
+namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
-use Filament\Support\Contracts\HasLabel;
-use AidingApp\ServiceManagement\Models\Contracts\ClassificationInterface;
+use Illuminate\Support\Str;
+use Illuminate\Http\JsonResponse;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Storage;
+use AidingApp\Portal\Http\Requests\GetServiceRequestUploadUrlRequest;
 
-enum SystemServiceRequestClassification: string implements HasLabel, ClassificationInterface
+class GetServiceRequestUploadUrl extends Controller
 {
-    case Open = 'open';
-
-    case InProgress = 'in_progress';
-
-    case Closed = 'closed';
-
-    case Waiting = 'waiting';
-
-    case Custom = 'custom';
-
-    public function getLabel(): ?string
+    public function __invoke(GetServiceRequestUploadUrlRequest $request): JsonResponse
     {
-        return match ($this) {
-            SystemServiceRequestClassification::InProgress => 'In Progress',
-            default => $this->name,
-        };
-    }
+        $filename = sprintf('%s.%s', Str::uuid(), str($request->validated('filename'))->afterLast('.'));
+        $path = "tmp/{$filename}";
 
-    /**
-     * @return array<ClassificationInterface>
-     */
-    public static function getUnclosedClassifications(): array
-    {
-        return [
-            self::Open,
-            self::InProgress,
-            self::Waiting,
-            self::Custom,
-        ];
+        return response()->json([
+            'filename' => $filename,
+            'path' => $path,
+            ...Storage::temporaryUploadUrl(
+                $path,
+                now()->addMinute(),
+            ),
+        ]);
     }
 }

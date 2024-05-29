@@ -34,41 +34,20 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Enums;
+namespace AidingApp\Portal\Http\Requests;
 
-use Filament\Support\Contracts\HasLabel;
-use AidingApp\ServiceManagement\Models\Contracts\ClassificationInterface;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\ValidationRule;
 
-enum SystemServiceRequestClassification: string implements HasLabel, ClassificationInterface
+class GetServiceRequestUploadUrlRequest extends FormRequest
 {
-    case Open = 'open';
-
-    case InProgress = 'in_progress';
-
-    case Closed = 'closed';
-
-    case Waiting = 'waiting';
-
-    case Custom = 'custom';
-
-    public function getLabel(): ?string
-    {
-        return match ($this) {
-            SystemServiceRequestClassification::InProgress => 'In Progress',
-            default => $this->name,
-        };
-    }
-
     /**
-     * @return array<ClassificationInterface>
+     * @return array<string, ValidationRule|array>
      */
-    public static function getUnclosedClassifications(): array
+    public function rules(): array
     {
         return [
-            self::Open,
-            self::InProgress,
-            self::Waiting,
-            self::Custom,
+            'filename' => ['required', 'string'],
         ];
     }
 }

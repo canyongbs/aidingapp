@@ -34,6 +34,6 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Models\Concerns;
+namespace AidingApp\ServiceManagement\Models\Contracts;
 
 interface ClassificationInterface {}

@@ -43,12 +43,17 @@ use AidingApp\Contact\Models\Contact;
 use Filament\Infolists\Components\Group;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Infolists\Components\Section;
+use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\ViewEntry;
+use Filament\Infolists\Components\Actions\Action;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
+use Filament\Infolists\Components\IconEntry\IconEntrySize;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
+use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 
 class ViewServiceRequest extends ViewRecord
 {
@@ -57,6 +62,8 @@ class ViewServiceRequest extends ViewRecord
     public function infolist(Infolist $infolist): Infolist
     {
         $formatSecondsAsInterval = fn (?int $state): ?string => $state ? CarbonInterval::seconds($state)->cascade()->forHumans(short: true) : null;
+
+        $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)();
 
         return $infolist
             ->schema([
@@ -106,6 +113,41 @@ class ViewServiceRequest extends ViewRecord
                             }),
                     ])
                     ->columns(2),
+                Section::make('Uploads')
+                    ->schema(
+                        fn (ServiceRequest $request) => $request
+                            ->getMedia($uploadsMediaCollection->getName())
+                            ->map(
+                                fn (Media $media) => IconEntry::make($media->getKey())
+                                    ->label($media->name)
+                                    ->state($media->mime_type)
+                                    ->icon(fn (string $state): string => match ($media->mime_type) {
+                                        'application/pdf',
+                                        'application/vnd.ms-word',
+                                        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                                        'image/pdf',
+                                        'text/markdown',
+                                        'text/plain' => 'heroicon-o-document-text',
+                                        'application/vnd.ms-excel',
+                                        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                                        'text/csv' => 'heroicon-o-table-cells',
+                                        'application/vnd.ms-powerpoint',
+                                        'application/vnd.openxmlformats-officedocument.presentationml.presentation' => 'heroicon-o-presentation-chart-bar',
+                                        'image/jpeg' => 'heroicon-o-camera',
+                                        'image/png' => 'heroicon-o-photo',
+                                        default => 'heroicon-o-paper-clip',
+                                    })
+                                    ->size(IconEntrySize::TwoExtraLarge)
+                                    ->hintAction(
+                                        Action::make('download')
+                                            ->label('Download')
+                                            ->icon('heroicon-m-arrow-down-tray')
+                                            ->color('primary')
+                                            ->url($media->getTemporaryUrl(now()->addMinute()), true)
+                                    )
+                            )
+                            ->toArray()
+                    ),
                 Section::make('SLA Management')
                     ->visible(fn (ServiceRequest $record): bool => $record->priority?->sla !== null)
                     ->schema([
