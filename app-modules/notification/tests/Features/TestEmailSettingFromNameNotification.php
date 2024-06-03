@@ -34,51 +34,29 @@
 </COPYRIGHT>
 */
 
-namespace App\Models;
+namespace AidingApp\Notification\Tests\Features;
 
-use Spatie\MediaLibrary\HasMedia;
-use AidingApp\Division\Models\Division;
-use Spatie\MediaLibrary\InteractsWithMedia;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use App\Models\NotificationSetting;
+use AidingApp\Notification\Notifications\BaseNotification;
+use AidingApp\Notification\Notifications\EmailNotification;
+use AidingApp\Notification\Notifications\Messages\MailMessage;
+use AidingApp\Notification\Notifications\Concerns\EmailChannelTrait;
 
-/**
- * @mixin IdeHelperNotificationSetting
- */
-class NotificationSetting extends BaseModel implements HasMedia
+class TestEmailSettingFromNameNotification extends BaseNotification implements EmailNotification
 {
-    use InteractsWithMedia;
-    use SoftDeletes;
+    use EmailChannelTrait;
 
-    protected $fillable = [
-        'from_name',
-        'name',
-        'primary_color',
-        'related_to_id',
-        'related_to_type',
-    ];
+    public function __construct(
+        public NotificationSetting $setting,
+    ) {}
 
-    public function registerMediaCollections(): void
+    public function toEmail(object $notifiable): MailMessage
     {
-        $this->addMediaCollection('logo')
-            ->singleFile();
-    }
-
-    public function settings(): HasMany
-    {
-        return $this->hasMany(NotificationSettingPivot::class);
-    }
-
-    public function divisions(): MorphToMany
-    {
-        return $this->morphedByMany(
-            related: Division::class,
-            name: 'related_to',
-            table: 'notification_settings_pivot'
-        )
-            ->using(NotificationSettingPivot::class)
-            ->withPivot('id')
-            ->withTimestamps();
+        return MailMessage::make()
+            ->settings($this->setting)
+            ->subject('Test Subject')
+            ->greeting('Test Greeting')
+            ->content('This is a test email')
+            ->salutation('Test Salutation');
     }
 }

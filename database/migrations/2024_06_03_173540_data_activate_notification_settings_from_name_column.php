@@ -34,51 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace App\Models;
+use Laravel\Pennant\Feature;
+use Illuminate\Database\Migrations\Migration;
 
-use Spatie\MediaLibrary\HasMedia;
-use AidingApp\Division\Models\Division;
-use Spatie\MediaLibrary\InteractsWithMedia;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\MorphToMany;
-
-/**
- * @mixin IdeHelperNotificationSetting
- */
-class NotificationSetting extends BaseModel implements HasMedia
-{
-    use InteractsWithMedia;
-    use SoftDeletes;
-
-    protected $fillable = [
-        'from_name',
-        'name',
-        'primary_color',
-        'related_to_id',
-        'related_to_type',
-    ];
-
-    public function registerMediaCollections(): void
+return new class () extends Migration {
+    public function up(): void
     {
-        $this->addMediaCollection('logo')
-            ->singleFile();
+        Feature::activate('notification-settings-from-name');
     }
 
-    public function settings(): HasMany
+    public function down(): void
     {
-        return $this->hasMany(NotificationSettingPivot::class);
+        Feature::deactivate('notification-settings-from-name');
     }
-
-    public function divisions(): MorphToMany
-    {
-        return $this->morphedByMany(
-            related: Division::class,
-            name: 'related_to',
-            table: 'notification_settings_pivot'
-        )
-            ->using(NotificationSettingPivot::class)
-            ->withPivot('id')
-            ->withTimestamps();
-    }
-}
+};

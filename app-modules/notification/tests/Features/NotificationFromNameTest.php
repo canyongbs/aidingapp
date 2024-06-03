@@ -34,51 +34,30 @@
 </COPYRIGHT>
 */
 
-namespace App\Models;
+use App\Models\User;
+use App\Models\NotificationSetting;
+use Illuminate\Support\Facades\Notification;
+use AidingApp\Notification\Tests\Features\TestEmailSettingFromNameNotification;
 
-use Spatie\MediaLibrary\HasMedia;
-use AidingApp\Division\Models\Division;
-use Spatie\MediaLibrary\InteractsWithMedia;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\MorphToMany;
+it('sets the mail from name based on settings fromName if set', function () {
+    Notification::fake();
 
-/**
- * @mixin IdeHelperNotificationSetting
- */
-class NotificationSetting extends BaseModel implements HasMedia
-{
-    use InteractsWithMedia;
-    use SoftDeletes;
+    $user = User::factory()->create();
 
-    protected $fillable = [
-        'from_name',
-        'name',
-        'primary_color',
-        'related_to_id',
-        'related_to_type',
-    ];
+    $notificationSetting = new NotificationSetting();
 
-    public function registerMediaCollections(): void
-    {
-        $this->addMediaCollection('logo')
-            ->singleFile();
-    }
+    $notificationSetting->from_name = fake()->name();
 
-    public function settings(): HasMany
-    {
-        return $this->hasMany(NotificationSettingPivot::class);
-    }
+    $notification = new TestEmailSettingFromNameNotification($notificationSetting);
 
-    public function divisions(): MorphToMany
-    {
-        return $this->morphedByMany(
-            related: Division::class,
-            name: 'related_to',
-            table: 'notification_settings_pivot'
-        )
-            ->using(NotificationSettingPivot::class)
-            ->withPivot('id')
-            ->withTimestamps();
-    }
-}
+    $user->notify($notification);
+
+    Notification::assertSentTo(
+        $user,
+        function (TestEmailSettingFromNameNotification $notification, array $channels) use ($notificationSetting, $user) {
+            $mailMessage = $notification->toMail($user);
+
+            return $mailMessage->from[1] === $notificationSetting->from_name;
+        }
+    );
+});

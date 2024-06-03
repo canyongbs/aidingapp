@@ -34,51 +34,39 @@
 </COPYRIGHT>
 */
 
-namespace App\Models;
+namespace App\Filament\Resources\NotificationSettingResource\Forms;
 
-use Spatie\MediaLibrary\HasMedia;
-use AidingApp\Division\Models\Division;
-use Spatie\MediaLibrary\InteractsWithMedia;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Filament\Forms\Form;
+use Laravel\Pennant\Feature;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use App\Filament\Forms\Components\ColorSelect;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 
-/**
- * @mixin IdeHelperNotificationSetting
- */
-class NotificationSetting extends BaseModel implements HasMedia
+class NotificationSettingForm
 {
-    use InteractsWithMedia;
-    use SoftDeletes;
-
-    protected $fillable = [
-        'from_name',
-        'name',
-        'primary_color',
-        'related_to_id',
-        'related_to_type',
-    ];
-
-    public function registerMediaCollections(): void
+    public function form(Form $form): Form
     {
-        $this->addMediaCollection('logo')
-            ->singleFile();
-    }
-
-    public function settings(): HasMany
-    {
-        return $this->hasMany(NotificationSettingPivot::class);
-    }
-
-    public function divisions(): MorphToMany
-    {
-        return $this->morphedByMany(
-            related: Division::class,
-            name: 'related_to',
-            table: 'notification_settings_pivot'
-        )
-            ->using(NotificationSettingPivot::class)
-            ->withPivot('id')
-            ->withTimestamps();
+        return $form
+            ->columns(1)
+            ->schema([
+                TextInput::make('name')
+                    ->string()
+                    ->required()
+                    ->autocomplete(false),
+                TextInput::make('from_name')
+                    ->string()
+                    ->maxLength(150)
+                    ->autocomplete(false)
+                    ->visible(Feature::active('notification-settings-from-name')),
+                Textarea::make('description')
+                    ->string(),
+                ColorSelect::make('primary_color'),
+                SpatieMediaLibraryFileUpload::make('logo')
+                    ->disk('s3')
+                    ->collection('logo')
+                    ->visibility('private')
+                    ->image(),
+            ]);
     }
 }
