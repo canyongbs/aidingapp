@@ -31,7 +31,7 @@
 
 </COPYRIGHT>
 --}}
-<div class="js-cookie-consent cookie-consent fixed bottom-0 inset-x-0 pb-2">
+<div class="js-cookie-consent cookie-consent z-50 fixed bottom-0 inset-x-0 pb-2">
     <div class="max-w-7xl mx-auto px-6">
         <div class="p-2 rounded-lg bg-primary-100 ring-1 ring-black/5 shadow-sm">
             <div class="flex items-center justify-between flex-wrap">
