@@ -36,6 +36,7 @@
     import AppLoading from './Components/AppLoading.vue';
     import MobileSidebar from './Components/MobileSidebar.vue';
     import DesktopSidebar from './Components/DesktopSidebar.vue';
+    import Header from './Components/Header.vue';
     import determineIfUserIsAuthenticated from './Services/DetermineIfUserIsAuthenticated.js';
     import getAppContext from './Services/GetAppContext.js';
     import axios from './Globals/Axios.js';
@@ -432,11 +433,12 @@
                 </div>
             </div>
             <div v-else>
+                <Header/>
                 <div v-if="errorLoading" class="text-center">
                     <h1 class="text-3xl font-bold text-red-500">Error Loading the Help Center</h1>
                     <p class="text-lg text-red-500">Please try again later</p>
                 </div>
-
+                
                 <div v-else class="flex flex-row min-h-screen">
                     <MobileSidebar
                         v-if="showMobileMenu"
@@ -446,7 +448,7 @@
                         :api-url="apiUrl"
                     >
                     </MobileSidebar>
-
+                    
                     <DesktopSidebar @show-login="showLogin = true" :categories="categories" :api-url="apiUrl">
                     </DesktopSidebar>
 

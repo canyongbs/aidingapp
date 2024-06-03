@@ -1,6 +1,4 @@
-<?php
-
-/*
+<!--
 <COPYRIGHT>
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
@@ -32,35 +30,17 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
+-->
 
-namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
-use Illuminate\Http\JsonResponse;
-use Filament\Support\Colors\Color;
-use Illuminate\Support\Facades\URL;
-use App\Http\Controllers\Controller;
-use AidingApp\Portal\Enums\PortalLayout;
-use AidingApp\Portal\Settings\PortalSettings;
-
-class KnowledgeManagementPortalController extends Controller
-{
-    public function show(): JsonResponse
-    {
-        $settings = resolve(PortalSettings::class);
-        // dd($settings);
-        return response()->json([
-            'layout' => $settings->knowledge_management_portal_layout ?? PortalLayout::Full,
-            'primary_color' => Color::all()[$settings->knowledge_management_portal_primary_color ?? 'blue'],
-            'rounding' => $settings->knowledge_management_portal_rounding,
-            'requires_authentication' => $settings->knowledge_management_portal_requires_authentication,
-            'service_management_enabled' => $settings->knowledge_management_portal_service_management,
-            'authentication_url' => URL::to(
-                URL::signedRoute(
-                    name: 'api.portal.knowledge-management.request-authentication',
-                    absolute: false,
-                )
-            ),
-        ]);
-    }
-}
+<template>
+    <div class="header">
+        <div>
+            <span class="mr-1">🛟</span>
+            <button
+                type="button"
+                class="text-primary-700 text-sm font-medium float-right"
+            >Sign in</button>
+        </div>
+    </div>
+</template>
