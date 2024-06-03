@@ -34,16 +34,17 @@
 </COPYRIGHT>
 */
 
-use Spatie\LaravelSettings\Migrations\SettingsMigration;
+use Laravel\Pennant\Feature;
+use Illuminate\Database\Migrations\Migration;
 
-return new class () extends SettingsMigration {
+return new class () extends Migration {
     public function up(): void
     {
-        $this->migrator->add('portal.knowledge_management_portal_layout', null);
+        Feature::activate('portal-configuration-options');
     }
 
     public function down(): void
     {
-        $this->migrator->delete('portal.knowledge_management_portal_layout');
+        Feature::deactivate('portal-configuration-options');
     }
 };
