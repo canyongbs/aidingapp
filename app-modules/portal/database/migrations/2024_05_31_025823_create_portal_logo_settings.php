@@ -34,37 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\Settings;
+use Spatie\LaravelSettings\Migrations\SettingsMigration;
 
-use Spatie\LaravelSettings\Settings;
-
-class PortalSettings extends Settings
-{
-    public null $logo = null;
-
-    public ?string $footer_color = null;
-
-    public ?string $footer_copyright_statement;
-
-    /**
-    * Knowledge Base Portal
-    */
-    public bool $knowledge_management_portal_enabled = false;
-
-    public bool $knowledge_management_portal_service_management = false;
-
-    public bool $knowledge_management_portal_requires_authentication = false;
-
-    public ?string $knowledge_management_portal_primary_color = null;
-
-    public ?string $knowledge_management_portal_rounding = null;
-
-    public ?string $knowledge_management_portal_authorized_domain = null;
-
-    public ?string $knowledge_management_portal_layout = null;
-
-    public static function group(): string
+return new class () extends SettingsMigration {
+    public function up(): void
     {
-        return 'portal';
+        $this->migrator->add('portal.logo');
     }
-}
+
+    public function down(): void
+    {
+        $this->migrator->delete('portal.logo');
+    }
+};
