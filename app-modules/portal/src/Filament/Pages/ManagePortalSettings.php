@@ -48,14 +48,17 @@ use Filament\Forms\Components\Toggle;
 use AidingApp\Portal\Enums\PortalType;
 use Filament\Forms\Components\Actions;
 use Filament\Forms\Components\Section;
+use AidingApp\Portal\Enums\PortalLayout;
 use Filament\Forms\Components\TextInput;
 use App\Filament\Clusters\GlobalSettings;
 use Filament\Forms\Components\ColorPicker;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Infolists\Components\TextEntry;
 use FilamentTiptapEditor\Enums\TiptapOutput;
 use AidingApp\Portal\Settings\PortalSettings;
 use Filament\Forms\Components\Actions\Action;
 use App\Filament\Forms\Components\ColorSelect;
+use Laravel\Pennant\Feature as PennantFeature;
 use App\Filament\Forms\Components\TiptapEditor;
 use AidingApp\Portal\Actions\GeneratePortalEmbedCode;
 
@@ -93,6 +96,15 @@ class ManagePortalSettings extends SettingsPage
                             ->hintIcon(fn (Toggle $component) => $component->isDisabled() ? 'heroicon-m-lock-closed' : null)
                             ->hintIconTooltip('Knowledge Management is not a part of your current subscription.')
                             ->live()
+                            ->columnSpanFull(),
+                        ToggleButtons::make('knowledge_management_portal_layout')
+                            ->options(PortalLayout::class)
+                            ->enum(PortalLayout::class)
+                            ->visible(fn (Get $get) => PennantFeature::active('portal-configuration-options') & $get('knowledge_management_portal_enabled'))
+                            ->disabled(! Gate::check(Feature::KnowledgeManagement->getGateName()))
+                            ->hintIcon(fn (ToggleButtons $component) => $component->isDisabled() ? 'heroicon-m-lock-closed' : null)
+                            ->hintIconTooltip('Knowledge Management is not a part of your current subscription.')
+                            ->inline()
                             ->columnSpanFull(),
                         ColorSelect::make('knowledge_management_portal_primary_color')
                             ->label('Primary Color')

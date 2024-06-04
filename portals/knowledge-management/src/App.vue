@@ -80,6 +80,7 @@
     const hasServiceManagement = ref(false);
     const showLogin = ref(false);
 
+    const portalLayout = ref('');
     const portalPrimaryColor = ref('');
     const portalRounding = ref('');
     const categories = ref({});
@@ -152,6 +153,8 @@
                 serviceRequests.value = response.data.service_requests;
 
                 portalPrimaryColor.value = response.data.primary_color;
+
+                portalLayout.value = response.data.layout;
 
                 setRequiresAuthentication(response.data.requires_authentication).then(() => {
                     requiresAuthentication.value = response.data.requires_authentication;
@@ -351,6 +354,7 @@
 <template>
     <div
         class="font-sans bg-gray-50 min-h-screen"
+        :class="{ 'mx-0 md:mx-10 lg:mx-24': portalLayout === 'fixed' }"
         :style="{
             '--primary-50': portalPrimaryColor[50],
             '--primary-100': portalPrimaryColor[100],

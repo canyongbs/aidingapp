@@ -59,6 +59,8 @@ class PortalSettings extends Settings
 
     public ?string $knowledge_management_portal_authorized_domain = null;
 
+    public ?string $knowledge_management_portal_layout = null;
+
     public static function group(): string
     {
         return 'portal';

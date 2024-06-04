@@ -34,33 +34,21 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
+namespace AidingApp\Portal\Enums;
 
-use Illuminate\Http\JsonResponse;
-use Filament\Support\Colors\Color;
-use Illuminate\Support\Facades\URL;
-use App\Http\Controllers\Controller;
-use AidingApp\Portal\Enums\PortalLayout;
-use AidingApp\Portal\Settings\PortalSettings;
+use Filament\Support\Contracts\HasLabel;
 
-class KnowledgeManagementPortalController extends Controller
+enum PortalLayout: string implements HasLabel
 {
-    public function show(): JsonResponse
-    {
-        $settings = resolve(PortalSettings::class);
+    case Full = 'full';
 
-        return response()->json([
-            'layout' => $settings->knowledge_management_portal_layout ?? PortalLayout::Full,
-            'primary_color' => Color::all()[$settings->knowledge_management_portal_primary_color ?? 'blue'],
-            'rounding' => $settings->knowledge_management_portal_rounding,
-            'requires_authentication' => $settings->knowledge_management_portal_requires_authentication,
-            'service_management_enabled' => $settings->knowledge_management_portal_service_management,
-            'authentication_url' => URL::to(
-                URL::signedRoute(
-                    name: 'api.portal.knowledge-management.request-authentication',
-                    absolute: false,
-                )
-            ),
-        ]);
+    case Fixed = 'fixed';
+
+    public function getLabel(): ?string
+    {
+        return match ($this) {
+            PortalLayout::Full => 'Full-Width',
+            PortalLayout::Fixed => 'Fixed-Width (Boxed Layout)',
+        };
     }
 }
