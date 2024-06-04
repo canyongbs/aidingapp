@@ -34,25 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Timeline\Listeners;
+namespace App\Overrides\Filament\Actions\Imports\Jobs;
 
-use AidingApp\Timeline\Models\Timeline;
-use AidingApp\Timeline\Events\TimelineableRecordCreated;
+use Carbon\CarbonInterface;
+use Filament\Actions\Imports\Jobs\ImportCsv;
 
-class AddRecordToTimeline
+class ImportCsvOverride extends ImportCsv
 {
-    public function handle(TimelineableRecordCreated $event): void
+    public int $tries = 2;
+
+    public function retryUntil(): ?CarbonInterface
     {
-        $entity = $event->entity;
+        return null;
+    }
 
-        cache()->forget("timeline.synced.{$entity->getMorphClass()}.{$entity->getKey()}");
-
-        Timeline::firstOrCreate([
-            'entity_type' => $entity->getMorphClass(),
-            'entity_id' => $entity->getKey(),
-            'timelineable_type' => $event->timelineableModel->getMorphClass(),
-            'timelineable_id' => $event->timelineableModel->getKey(),
-            'record_sortable_date' => $event->timelineableModel->timeline()->sortableBy(),
-        ]);
+    public function getJobQueue(): ?string
+    {
+        return config('queue.import_export_queue');
     }
 }

@@ -34,16 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace App\Jobs\Middleware;
+namespace App\Overrides\Filament\Actions\Imports\Jobs;
 
-class SkipIfNotLocal
+use Carbon\CarbonInterface;
+use Filament\Actions\Exports\Jobs\PrepareCsvExport;
+
+class PrepareCsvExportOverride extends PrepareCsvExport
 {
-    public function handle($job, $next): void
-    {
-        if (! app()->environment('local', 'testing')) {
-            return;
-        }
+    public int $tries = 2;
 
-        $next($job);
+    public function retryUntil(): ?CarbonInterface
+    {
+        return null;
+    }
+
+    public function getJobQueue(): ?string
+    {
+        return config('queue.import_export_queue');
     }
 }

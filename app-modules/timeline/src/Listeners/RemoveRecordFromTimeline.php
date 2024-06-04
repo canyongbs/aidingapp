@@ -37,14 +37,12 @@
 namespace AidingApp\Timeline\Listeners;
 
 use AidingApp\Timeline\Models\Timeline;
-use Illuminate\Database\Eloquent\Model;
 use AidingApp\Timeline\Events\TimelineableRecordDeleted;
 
 class RemoveRecordFromTimeline
 {
     public function handle(TimelineableRecordDeleted $event): void
     {
-        /** @var Model $entity */
         $entity = $event->entity;
 
         cache()->forget("timeline.synced.{$entity->getMorphClass()}.{$entity->getKey()}");
