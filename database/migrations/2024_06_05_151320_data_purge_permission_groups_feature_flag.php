@@ -34,59 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Resources\UserResource\RelationManagers;
+use Laravel\Pennant\Feature;
+use Illuminate\Database\Migrations\Migration;
 
-use Filament\Forms\Form;
-use Filament\Tables\Table;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Forms\Components\TextInput;
-use App\Filament\Tables\Columns\IdColumn;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Resources\RelationManagers\RelationManager;
-
-class PermissionsRelationManager extends RelationManager
-{
-    protected static string $relationship = 'permissionsFromRoles';
-
-    protected static ?string $recordTitleAttribute = 'name';
-
-    public function form(Form $form): Form
+return new class () extends Migration {
+    public function up(): void
     {
-        return $form
-            ->schema([
-                TextInput::make('name')
-                    ->required()
-                    ->maxLength(255),
-                TextInput::make('guard_name')
-                    ->required()
-                    ->maxLength(255),
-            ]);
+        Feature::purge('permission-groups');
     }
 
-    public function table(Table $table): Table
+    public function down(): void
     {
-        return $table
-            ->columns([
-                IdColumn::make(),
-                TextColumn::make('group.name')
-                    ->sortable(),
-                TextColumn::make('name'),
-                TextColumn::make('guard_name'),
-            ])
-            ->filters(
-                [
-                    SelectFilter::make('group')
-                        ->relationship('group', 'name')
-                        ->searchable()
-                        ->preload()
-                        ->multiple(),
-                ]
-            )
-            ->headerActions([
-            ])
-            ->actions([
-            ])
-            ->bulkActions([
-            ]);
+        Feature::activate('permission-groups');
     }
-}
+};
