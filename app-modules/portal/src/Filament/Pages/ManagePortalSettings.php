@@ -188,7 +188,6 @@ class ManagePortalSettings extends SettingsPage
                     Section::make('Header')
                     ->schema([
                         SpatieMediaLibraryFileUpload::make('logo')
-                            ->disk('s3')
                             ->collection('logo')
                             ->visibility('private')
                             ->image()
