@@ -32,67 +32,65 @@
 </COPYRIGHT>
 -->
 <script setup>
-import { defineProps } from 'vue';
-import { consumer } from '../Services/Consumer.js';
-import { useAuthStore } from '../Stores/auth.js';
-import { useFeatureStore } from '../Stores/feature.js';
-import { useTokenStore } from '../Stores/token.js';
+    import { defineProps } from 'vue';
+    import { consumer } from '../Services/Consumer.js';
+    import { useAuthStore } from '../Stores/auth.js';
+    import { useFeatureStore } from '../Stores/feature.js';
+    import { useTokenStore } from '../Stores/token.js';
 
-const { user, requiresAuthentication } = useAuthStore();
-const { hasServiceManagement } = useFeatureStore();
-const { removeToken } = useTokenStore();
+    const { user, requiresAuthentication } = useAuthStore();
+    const { hasServiceManagement } = useFeatureStore();
+    const { removeToken } = useTokenStore();
 
-const props = defineProps({
-    apiUrl: {
-        type: String,
-        required: true,
-    },
-    headerLogo: {
-        type: String,
-        required: true
-    },
-    appName: {
-        type: String,
-        required: true
-    },
-});
-
-const logout = () => {
-
-    const { post } = consumer();
-    
-    post(props.apiUrl + '/logout').then((response) => {
-        if (!response.data.success) {
-            return;
-        }
-
-        removeToken();
-        window.location.href = response.data.redirect_url;
+    const props = defineProps({
+        apiUrl: {
+            type: String,
+            required: true,
+        },
+        headerLogo: {
+            type: String,
+            required: true,
+        },
+        appName: {
+            type: String,
+            required: true,
+        },
     });
-};
+
+    const logout = () => {
+        const { post } = consumer();
+
+        post(props.apiUrl + '/logout').then((response) => {
+            if (!response.data.success) {
+                return;
+            }
+
+            removeToken();
+            window.location.href = response.data.redirect_url;
+        });
+    };
 </script>
 
 <template>
     <div class="header">
-      <div v-if="requiresAuthentication || hasServiceManagement" class="columns-2 mb-1">
-        <img :src="headerLogo" :alt="appName" class="h-12 m-3">
-          <button
-              v-if="user"
-              @click="logout"
-              type="button"
-              class="text-primary-700 text-sm font-medium float-right border-2 m-3 p-2 outline-primary-700"
-          >
-              Sign out
-          </button>
-          <button
-              v-else
-              @click="$emit('showLogin')"
-              type="button"
-              class="text-primary-700 text-sm font-medium float-right border-2 m-3 p-2 outline-primary-700"
-          >
-              Sign in
-          </button>
-      </div>
+        <div v-if="requiresAuthentication || hasServiceManagement" class="columns-2 mb-1">
+            <img :src="headerLogo" :alt="appName" class="h-12 m-3" />
+            <button
+                v-if="user"
+                @click="logout"
+                type="button"
+                class="text-primary-700 text-sm font-medium float-right border-2 m-3 p-2 outline-primary-700"
+            >
+                Sign out
+            </button>
+            <button
+                v-else
+                @click="$emit('showLogin')"
+                type="button"
+                class="text-primary-700 text-sm font-medium float-right border-2 m-3 p-2 outline-primary-700"
+            >
+                Sign in
+            </button>
+        </div>
     </div>
 </template>
-

@@ -159,9 +159,9 @@
 
                 portalLayout.value = response.data.layout;
 
-                headerLogo.value = response.data.header_logo
+                headerLogo.value = response.data.header_logo;
 
-                appName.value = response.data.app_name
+                appName.value = response.data.app_name;
 
                 setRequiresAuthentication(response.data.requires_authentication).then(() => {
                     requiresAuthentication.value = response.data.requires_authentication;
@@ -439,17 +439,13 @@
                 </div>
             </div>
             <div v-else>
-                <Header 
-                    :api-url="apiUrl"
-                    @show-login="showLogin = true"
-                    :header-logo="headerLogo"
-                    :app-name="appName">
+                <Header :api-url="apiUrl" @show-login="showLogin = true" :header-logo="headerLogo" :app-name="appName">
                 </Header>
                 <div v-if="errorLoading" class="text-center">
                     <h1 class="text-3xl font-bold text-red-500">Error Loading the Help Center</h1>
                     <p class="text-lg text-red-500">Please try again later</p>
                 </div>
-                
+
                 <div v-else class="flex flex-row min-h-screen">
                     <MobileSidebar
                         v-if="showMobileMenu"
@@ -459,7 +455,7 @@
                         :api-url="apiUrl"
                     >
                     </MobileSidebar>
-                    
+
                     <DesktopSidebar @show-login="showLogin = true" :categories="categories" :api-url="apiUrl">
                     </DesktopSidebar>
 
