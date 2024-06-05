@@ -42,15 +42,23 @@ use Illuminate\Support\Facades\URL;
 use App\Http\Controllers\Controller;
 use AidingApp\Portal\Enums\PortalLayout;
 use AidingApp\Portal\Settings\PortalSettings;
+use App\Models\SettingsProperty;
 
 class KnowledgeManagementPortalController extends Controller
 {
     public function show(): JsonResponse
     {
         $settings = resolve(PortalSettings::class);
-        // dd($settings);
+        $settingsProperty = SettingsProperty::getInstance('portal.logo');
+        $logo = $settingsProperty->getFirstMedia('logo');
+
         return response()->json([
             'layout' => $settings->knowledge_management_portal_layout ?? PortalLayout::Full,
+            'header_logo' => $logo ?$logo->getTemporaryUrl(
+                expiration: now()->addMinutes(5),
+                conversionName: 'logo-height-250px',
+            ) : null,
+            'app_name' => config('app.name') ,
             'primary_color' => Color::all()[$settings->knowledge_management_portal_primary_color ?? 'blue'],
             'rounding' => $settings->knowledge_management_portal_rounding,
             'requires_authentication' => $settings->knowledge_management_portal_requires_authentication,

@@ -86,7 +86,9 @@
     const portalRounding = ref('');
     const categories = ref({});
     const serviceRequests = ref({});
+    const headerLogo = ref({});
     const tags = ref({});
+    const appName = ref({});
 
     const authentication = ref({
         code: null,
@@ -156,6 +158,10 @@
                 portalPrimaryColor.value = response.data.primary_color;
 
                 portalLayout.value = response.data.layout;
+
+                headerLogo.value = response.data.header_logo
+
+                appName.value = response.data.app_name
 
                 setRequiresAuthentication(response.data.requires_authentication).then(() => {
                     requiresAuthentication.value = response.data.requires_authentication;
@@ -433,7 +439,12 @@
                 </div>
             </div>
             <div v-else>
-                <Header/>
+                <Header 
+                    :api-url="apiUrl"
+                    @show-login="showLogin = true"
+                    :header-logo="headerLogo"
+                    :app-name="appName">
+                </Header>
                 <div v-if="errorLoading" class="text-center">
                     <h1 class="text-3xl font-bold text-red-500">Error Loading the Help Center</h1>
                     <p class="text-lg text-red-500">Please try again later</p>
