@@ -42,7 +42,17 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Mail\Events\MessageSending;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use AidingApp\Authorization\AuthorizationRoleRegistry;
+use AidingApp\IntegrationAwsSesEventHandling\Events\SesBounceEvent;
+use AidingApp\IntegrationAwsSesEventHandling\Events\SesRejectEvent;
+use AidingApp\IntegrationAwsSesEventHandling\Events\SesDeliveryEvent;
+use AidingApp\IntegrationAwsSesEventHandling\Events\SesDeliveryDelayEvent;
+use AidingApp\IntegrationAwsSesEventHandling\Listeners\HandleSesBounceEvent;
+use AidingApp\IntegrationAwsSesEventHandling\Listeners\HandleSesRejectEvent;
+use AidingApp\IntegrationAwsSesEventHandling\Events\SesRenderingFailureEvent;
+use AidingApp\IntegrationAwsSesEventHandling\Listeners\HandleSesDeliveryEvent;
 use AidingApp\IntegrationAwsSesEventHandling\IntegrationAwsSesEventHandlingPlugin;
+use AidingApp\IntegrationAwsSesEventHandling\Listeners\HandleSesDeliveryDelayEvent;
+use AidingApp\IntegrationAwsSesEventHandling\Listeners\HandleSesRenderingFailureEvent;
 use AidingApp\IntegrationAwsSesEventHandling\Listeners\EnsureSesConfigurationSetHeadersArePresent;
 use AidingApp\IntegrationAwsSesEventHandling\Registries\IntegrationAwsSesEventHandlingRbacRegistry;
 
@@ -67,6 +77,31 @@ class IntegrationAwsSesEventHandlingServiceProvider extends ServiceProvider
         Event::listen(
             MessageSending::class,
             EnsureSesConfigurationSetHeadersArePresent::class
+        );
+
+        Event::listen(
+            SesBounceEvent::class,
+            HandleSesBounceEvent::class
+        );
+
+        Event::listen(
+            SesDeliveryEvent::class,
+            HandleSesDeliveryEvent::class
+        );
+
+        Event::listen(
+            SesDeliveryDelayEvent::class,
+            HandleSesDeliveryDelayEvent::class
+        );
+
+        Event::listen(
+            SesRejectEvent::class,
+            HandleSesRejectEvent::class
+        );
+
+        Event::listen(
+            SesRenderingFailureEvent::class,
+            HandleSesRenderingFailureEvent::class
         );
     }
 }

@@ -39,7 +39,10 @@ namespace AidingApp\Engagement\Drivers;
 use AidingApp\Engagement\Models\EngagementDeliverable;
 use AidingApp\Engagement\Actions\QueuedEngagementDelivery;
 use AidingApp\Engagement\Actions\EngagementEmailChannelDelivery;
-use AidingApp\Notification\DataTransferObjects\UpdateDeliveryStatusData;
+use AidingApp\Engagement\Drivers\Contracts\EngagementDeliverableDriver;
+use AidingApp\Notification\DataTransferObjects\UpdateSmsDeliveryStatusData;
+use AidingApp\Notification\DataTransferObjects\UpdateEmailDeliveryStatusData;
+use AidingApp\IntegrationAwsSesEventHandling\DataTransferObjects\SesEventData;
 
 class EngagementEmailDriver implements EngagementDeliverableDriver
 {
@@ -47,7 +50,21 @@ class EngagementEmailDriver implements EngagementDeliverableDriver
         protected EngagementDeliverable $deliverable
     ) {}
 
-    public function updateDeliveryStatus(UpdateDeliveryStatusData $data): void {}
+    public function updateDeliveryStatus(UpdateEmailDeliveryStatusData|UpdateSmsDeliveryStatusData $data): void
+    {
+        /** @var SesEventData $updateData */
+        $updateData = $data->data;
+
+        $this->deliverable->update([
+            'external_status' => $updateData->eventType,
+        ]);
+
+        match ($this->deliverable->external_status) {
+            'Delivery' => $this->deliverable->markDeliverySuccessful(),
+            'Bounce', 'DeliveryDelay', 'Reject', 'RenderingFailure' => $this->deliverable->markDeliveryFailed($updateData->errorMessageFromType() ?? null),
+            default => null,
+        };
+    }
 
     public function jobForDelivery(): QueuedEngagementDelivery
     {

@@ -36,6 +36,8 @@
 
 namespace AidingApp\Notification\Actions;
 
+use AidingApp\IntegrationAwsSesEventHandling\DataTransferObjects\SesEventData;
+use AidingApp\Notification\DataTransferObjects\UpdateEmailDeliveryStatusData;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
@@ -43,10 +45,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use AidingApp\Notification\Models\OutboundDeliverable;
-use AidingApp\Notification\DataTransferObjects\UpdateDeliveryStatusData;
-use AidingApp\IntegrationTwilio\DataTransferObjects\TwilioStatusCallbackData;
 
-class UpdateOutboundDeliverableStatus implements ShouldQueue
+class UpdateOutboundDeliverableEmailStatus implements ShouldQueue
 {
     use Dispatchable;
     use InteractsWithQueue;
@@ -55,12 +55,12 @@ class UpdateOutboundDeliverableStatus implements ShouldQueue
 
     public function __construct(
         public OutboundDeliverable $deliverable,
-        public TwilioStatusCallbackData $data
+        public SesEventData $data
     ) {}
 
     public function handle(): void
     {
-        $data = UpdateDeliveryStatusData::from([
+        $data = UpdateEmailDeliveryStatusData::from([
             'data' => $this->data,
         ]);
 
