@@ -38,7 +38,6 @@ namespace AidingApp\Portal\Filament\Pages;
 
 use App\Models\User;
 use App\Enums\Feature;
-use Laravel\Pennant\Feature as PennantFeature;
 use Filament\Forms\Get;
 use Filament\Forms\Form;
 use Filament\Pages\SettingsPage;
