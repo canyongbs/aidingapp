@@ -38,7 +38,6 @@ namespace AidingApp\Authorization\Filament\Resources;
 
 use Filament\Forms\Form;
 use Filament\Tables\Table;
-use Laravel\Pennant\Feature;
 use Filament\Resources\Resource;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
@@ -79,8 +78,7 @@ class PermissionResource extends Resource
             ->columns([
                 IdColumn::make(),
                 TextColumn::make('group.name')
-                    ->sortable()
-                    ->visible(Feature::active('permission-groups')),
+                    ->sortable(),
                 TextColumn::make('name')
                     ->searchable(),
                 TextColumn::make('guard_name')
