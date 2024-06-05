@@ -36,8 +36,6 @@
 
 namespace AidingApp\Notification\Actions;
 
-use AidingApp\IntegrationAwsSesEventHandling\DataTransferObjects\SesEventData;
-use AidingApp\Notification\DataTransferObjects\UpdateEmailDeliveryStatusData;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
@@ -45,6 +43,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use AidingApp\Notification\Models\OutboundDeliverable;
+use AidingApp\Notification\DataTransferObjects\UpdateEmailDeliveryStatusData;
+use AidingApp\IntegrationAwsSesEventHandling\DataTransferObjects\SesEventData;
 
 class UpdateOutboundDeliverableEmailStatus implements ShouldQueue
 {
