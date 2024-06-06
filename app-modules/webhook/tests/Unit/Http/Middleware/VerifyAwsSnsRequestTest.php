@@ -52,7 +52,7 @@ it('will abort the request if the request cannot be verified to have originated 
     $request = Request::create(
         uri: url('/'),
         method: 'POST',
-        content: json_encode(loadFixtureFromModule('webhook', 'sns-notification')),
+        content: json_encode(loadFixtureFromModule('webhook', 'SnsNotification')),
     );
 
     $request->headers->add(
@@ -84,7 +84,7 @@ it('will process the request if the request can be verified to have originated f
     $request = Request::create(
         uri: url('/'),
         method: 'POST',
-        content: json_encode(loadFixtureFromModule('webhook', 'sns-notification')),
+        content: json_encode(loadFixtureFromModule('webhook', 'SnsNotification')),
     );
 
     $request->headers->add(

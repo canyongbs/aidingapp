@@ -34,16 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Drivers;
+namespace AidingApp\Notification\DataTransferObjects;
 
-use AidingApp\Engagement\Actions\QueuedEngagementDelivery;
-use AidingApp\Notification\DataTransferObjects\UpdateDeliveryStatusData;
+use Spatie\LaravelData\Data;
+use AidingApp\IntegrationTwilio\DataTransferObjects\TwilioStatusCallbackData;
 
-interface EngagementDeliverableDriver
+class UpdateSmsDeliveryStatusData extends Data
 {
-    public function updateDeliveryStatus(UpdateDeliveryStatusData $data): void;
-
-    public function jobForDelivery(): QueuedEngagementDelivery;
-
-    public function deliver(): void;
+    public function __construct(
+        public TwilioStatusCallbackData $data
+    ) {}
 }

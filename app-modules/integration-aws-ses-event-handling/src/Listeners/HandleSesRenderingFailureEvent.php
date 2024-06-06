@@ -34,11 +34,6 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Notification\Drivers;
+namespace AidingApp\IntegrationAwsSesEventHandling\Listeners;
 
-use AidingApp\Notification\DataTransferObjects\UpdateDeliveryStatusData;
-
-interface OutboundDeliverableDriver
-{
-    public function updateDeliveryStatus(UpdateDeliveryStatusData $data): void;
-}
+class HandleSesRenderingFailureEvent extends HandleSesEvent {}

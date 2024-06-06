@@ -34,45 +34,28 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Drivers;
+namespace AidingApp\IntegrationAwsSesEventHandling\Listeners;
 
-use AidingApp\Engagement\Models\EngagementDeliverable;
-use AidingApp\Engagement\Actions\QueuedEngagementDelivery;
-use AidingApp\Engagement\Actions\EngagementSmsChannelDelivery;
-use AidingApp\Engagement\Drivers\Contracts\EngagementDeliverableDriver;
-use AidingApp\Notification\DataTransferObjects\UpdateSmsDeliveryStatusData;
-use AidingApp\IntegrationTwilio\DataTransferObjects\TwilioStatusCallbackData;
-use AidingApp\Notification\DataTransferObjects\UpdateEmailDeliveryStatusData;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use AidingApp\Notification\Models\OutboundDeliverable;
+use AidingApp\IntegrationAwsSesEventHandling\Events\SesEvent;
+use AidingApp\Notification\Actions\UpdateOutboundDeliverableEmailStatus;
+use AidingApp\Notification\Events\CouldNotFindOutboundDeliverableFromExternalReference;
 
-class EngagementSmsDriver implements EngagementDeliverableDriver
+abstract class HandleSesEvent implements ShouldQueue
 {
-    public function __construct(
-        protected EngagementDeliverable $deliverable
-    ) {}
-
-    public function updateDeliveryStatus(UpdateEmailDeliveryStatusData|UpdateSmsDeliveryStatusData $data): void
+    public function handle(SesEvent $event): void
     {
-        /** @var TwilioStatusCallbackData $updateData */
-        $updateData = $data->data;
+        $outboundDeliverable = OutboundDeliverable::query()
+            ->where('id', data_get($event->data->mail->tags, 'outbound_deliverable_id'))
+            ->first();
 
-        $this->deliverable->update([
-            'external_status' => $updateData->messageStatus ?? null,
-        ]);
+        if (is_null($outboundDeliverable)) {
+            CouldNotFindOutboundDeliverableFromExternalReference::dispatch($event->data);
 
-        match ($this->deliverable->external_status) {
-            'delivered' => $this->deliverable->markDeliverySuccessful(),
-            'undelivered', 'failed' => $this->deliverable->markDeliveryFailed($updateData->errorMessage ?? null),
-            default => null,
-        };
-    }
+            return;
+        }
 
-    public function jobForDelivery(): QueuedEngagementDelivery
-    {
-        return new EngagementSmsChannelDelivery($this->deliverable);
-    }
-
-    public function deliver(): void
-    {
-        EngagementSmsChannelDelivery::dispatch($this->deliverable);
+        UpdateOutboundDeliverableEmailStatus::dispatch($outboundDeliverable, $event->data);
     }
 }

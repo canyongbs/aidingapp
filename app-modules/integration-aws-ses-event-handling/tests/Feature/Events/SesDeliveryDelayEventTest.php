@@ -34,51 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Notification\Actions;
+use function Tests\Helpers\Events\testEventIsBeingListenedTo;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\Middleware\WithoutOverlapping;
-use AidingApp\Notification\Models\OutboundDeliverable;
-use AidingApp\Notification\DataTransferObjects\UpdateDeliveryStatusData;
-use AidingApp\IntegrationTwilio\DataTransferObjects\TwilioStatusCallbackData;
+use AidingApp\IntegrationAwsSesEventHandling\Events\SesDeliveryDelayEvent;
+use AidingApp\IntegrationAwsSesEventHandling\Listeners\HandleSesDeliveryDelayEvent;
 
-class UpdateOutboundDeliverableStatus implements ShouldQueue
-{
-    use Dispatchable;
-    use InteractsWithQueue;
-    use Queueable;
-    use SerializesModels;
-
-    public function __construct(
-        public OutboundDeliverable $deliverable,
-        public TwilioStatusCallbackData $data
-    ) {}
-
-    public function handle(): void
-    {
-        $data = UpdateDeliveryStatusData::from([
-            'data' => $this->data,
-        ]);
-
-        $this->deliverable->driver()->updateDeliveryStatus($data);
-
-        if ($this->deliverable->related) {
-            if (method_exists($this->deliverable->related, 'driver')) {
-                $this->deliverable->related->driver()->updateDeliveryStatus($data);
-            }
-        }
-    }
-
-    public function middleware(): array
-    {
-        return [
-            (new WithoutOverlapping($this->deliverable->id))
-                ->releaseAfter(30)
-                ->expireAfter(300),
-        ];
-    }
-}
+testEventIsBeingListenedTo(
+    event: SesDeliveryDelayEvent::class,
+    listener: HandleSesDeliveryDelayEvent::class
+);

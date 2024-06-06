@@ -34,45 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Drivers;
+namespace AidingApp\Notification\DataTransferObjects;
 
-use AidingApp\Engagement\Models\EngagementDeliverable;
-use AidingApp\Engagement\Actions\QueuedEngagementDelivery;
-use AidingApp\Engagement\Actions\EngagementSmsChannelDelivery;
-use AidingApp\Engagement\Drivers\Contracts\EngagementDeliverableDriver;
-use AidingApp\Notification\DataTransferObjects\UpdateSmsDeliveryStatusData;
-use AidingApp\IntegrationTwilio\DataTransferObjects\TwilioStatusCallbackData;
-use AidingApp\Notification\DataTransferObjects\UpdateEmailDeliveryStatusData;
+use Spatie\LaravelData\Data;
+use AidingApp\IntegrationAwsSesEventHandling\DataTransferObjects\SesEventData;
 
-class EngagementSmsDriver implements EngagementDeliverableDriver
+class UpdateEmailDeliveryStatusData extends Data
 {
     public function __construct(
-        protected EngagementDeliverable $deliverable
+        public SesEventData $data
     ) {}
-
-    public function updateDeliveryStatus(UpdateEmailDeliveryStatusData|UpdateSmsDeliveryStatusData $data): void
-    {
-        /** @var TwilioStatusCallbackData $updateData */
-        $updateData = $data->data;
-
-        $this->deliverable->update([
-            'external_status' => $updateData->messageStatus ?? null,
-        ]);
-
-        match ($this->deliverable->external_status) {
-            'delivered' => $this->deliverable->markDeliverySuccessful(),
-            'undelivered', 'failed' => $this->deliverable->markDeliveryFailed($updateData->errorMessage ?? null),
-            default => null,
-        };
-    }
-
-    public function jobForDelivery(): QueuedEngagementDelivery
-    {
-        return new EngagementSmsChannelDelivery($this->deliverable);
-    }
-
-    public function deliver(): void
-    {
-        EngagementSmsChannelDelivery::dispatch($this->deliverable);
-    }
 }

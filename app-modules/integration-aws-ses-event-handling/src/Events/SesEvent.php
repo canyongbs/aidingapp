@@ -34,14 +34,20 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Notification\DataTransferObjects;
+namespace AidingApp\IntegrationAwsSesEventHandling\Events;
 
-use Spatie\LaravelData\Data;
-use AidingApp\IntegrationTwilio\DataTransferObjects\TwilioStatusCallbackData;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Broadcasting\InteractsWithSockets;
+use AidingApp\IntegrationAwsSesEventHandling\DataTransferObjects\SesEventData;
 
-class UpdateDeliveryStatusData extends Data
+abstract class SesEvent
 {
+    use Dispatchable;
+    use InteractsWithSockets;
+    use SerializesModels;
+
     public function __construct(
-        public TwilioStatusCallbackData $data
+        public SesEventData $data,
     ) {}
 }

@@ -34,45 +34,51 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Drivers;
+namespace AidingApp\Notification\Actions;
 
-use AidingApp\Engagement\Models\EngagementDeliverable;
-use AidingApp\Engagement\Actions\QueuedEngagementDelivery;
-use AidingApp\Engagement\Actions\EngagementSmsChannelDelivery;
-use AidingApp\Engagement\Drivers\Contracts\EngagementDeliverableDriver;
+use Illuminate\Bus\Queueable;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\Middleware\WithoutOverlapping;
+use AidingApp\Notification\Models\OutboundDeliverable;
 use AidingApp\Notification\DataTransferObjects\UpdateSmsDeliveryStatusData;
 use AidingApp\IntegrationTwilio\DataTransferObjects\TwilioStatusCallbackData;
-use AidingApp\Notification\DataTransferObjects\UpdateEmailDeliveryStatusData;
 
-class EngagementSmsDriver implements EngagementDeliverableDriver
+class UpdateOutboundDeliverableSmsStatus implements ShouldQueue
 {
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
+
     public function __construct(
-        protected EngagementDeliverable $deliverable
+        public OutboundDeliverable $deliverable,
+        public TwilioStatusCallbackData $data
     ) {}
 
-    public function updateDeliveryStatus(UpdateEmailDeliveryStatusData|UpdateSmsDeliveryStatusData $data): void
+    public function handle(): void
     {
-        /** @var TwilioStatusCallbackData $updateData */
-        $updateData = $data->data;
-
-        $this->deliverable->update([
-            'external_status' => $updateData->messageStatus ?? null,
+        $data = UpdateSmsDeliveryStatusData::from([
+            'data' => $this->data,
         ]);
 
-        match ($this->deliverable->external_status) {
-            'delivered' => $this->deliverable->markDeliverySuccessful(),
-            'undelivered', 'failed' => $this->deliverable->markDeliveryFailed($updateData->errorMessage ?? null),
-            default => null,
-        };
+        $this->deliverable->driver()->updateDeliveryStatus($data);
+
+        if ($this->deliverable->related) {
+            if (method_exists($this->deliverable->related, 'driver')) {
+                $this->deliverable->related->driver()->updateDeliveryStatus($data);
+            }
+        }
     }
 
-    public function jobForDelivery(): QueuedEngagementDelivery
+    public function middleware(): array
     {
-        return new EngagementSmsChannelDelivery($this->deliverable);
-    }
-
-    public function deliver(): void
-    {
-        EngagementSmsChannelDelivery::dispatch($this->deliverable);
+        return [
+            (new WithoutOverlapping($this->deliverable->id))
+                ->releaseAfter(30)
+                ->expireAfter(300),
+        ];
     }
 }

@@ -34,45 +34,18 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Drivers;
+namespace Tests\Helpers\Events;
 
-use AidingApp\Engagement\Models\EngagementDeliverable;
-use AidingApp\Engagement\Actions\QueuedEngagementDelivery;
-use AidingApp\Engagement\Actions\EngagementSmsChannelDelivery;
-use AidingApp\Engagement\Drivers\Contracts\EngagementDeliverableDriver;
-use AidingApp\Notification\DataTransferObjects\UpdateSmsDeliveryStatusData;
-use AidingApp\IntegrationTwilio\DataTransferObjects\TwilioStatusCallbackData;
-use AidingApp\Notification\DataTransferObjects\UpdateEmailDeliveryStatusData;
+use Illuminate\Support\Facades\Event;
 
-class EngagementSmsDriver implements EngagementDeliverableDriver
+function testEventIsBeingListenedTo(string $event, string $listener)
 {
-    public function __construct(
-        protected EngagementDeliverable $deliverable
-    ) {}
+    test("{$event} is being listened to by {$listener}", function () use ($event, $listener) {
+        Event::fake();
 
-    public function updateDeliveryStatus(UpdateEmailDeliveryStatusData|UpdateSmsDeliveryStatusData $data): void
-    {
-        /** @var TwilioStatusCallbackData $updateData */
-        $updateData = $data->data;
-
-        $this->deliverable->update([
-            'external_status' => $updateData->messageStatus ?? null,
-        ]);
-
-        match ($this->deliverable->external_status) {
-            'delivered' => $this->deliverable->markDeliverySuccessful(),
-            'undelivered', 'failed' => $this->deliverable->markDeliveryFailed($updateData->errorMessage ?? null),
-            default => null,
-        };
-    }
-
-    public function jobForDelivery(): QueuedEngagementDelivery
-    {
-        return new EngagementSmsChannelDelivery($this->deliverable);
-    }
-
-    public function deliver(): void
-    {
-        EngagementSmsChannelDelivery::dispatch($this->deliverable);
-    }
+        Event::assertListening(
+            $event,
+            $listener
+        );
+    });
 }
