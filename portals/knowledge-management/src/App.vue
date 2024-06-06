@@ -86,9 +86,9 @@
     const portalRounding = ref('');
     const categories = ref({});
     const serviceRequests = ref({});
-    const headerLogo = ref({});
+    const headerLogo = ref('');
     const tags = ref({});
-    const appName = ref({});
+    const appName = ref('');
 
     const authentication = ref({
         code: null,

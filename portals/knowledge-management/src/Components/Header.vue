@@ -73,24 +73,26 @@
 
 <template>
     <div class="header">
-        <div v-if="requiresAuthentication || hasServiceManagement" class="columns-2 mb-1">
+        <div class="columns-2 mb-1">
             <img :src="headerLogo" :alt="appName" class="h-12 m-3" />
-            <button
-                v-if="user"
-                @click="logout"
-                type="button"
-                class="text-primary-700 text-sm font-medium float-right border-2 m-3 p-2 outline-primary-700"
-            >
-                Sign out
-            </button>
-            <button
-                v-else
-                @click="$emit('showLogin')"
-                type="button"
-                class="text-primary-700 text-sm font-medium float-right border-2 m-3 p-2 outline-primary-700"
-            >
-                Sign in
-            </button>
+            <span v-if="requiresAuthentication || hasServiceManagement">
+                <button
+                    v-if="user"
+                    @click="logout"
+                    type="button"
+                    class="text-primary-700 text-sm font-medium float-right border-2 m-3 p-2 outline-primary-700"
+                >
+                    Sign out
+                </button>
+                <button
+                    v-else
+                    @click="$emit('showLogin')"
+                    type="button"
+                    class="text-primary-700 text-sm font-medium float-right border-2 m-3 p-2 outline-primary-700"
+                >
+                    Sign in
+                </button>
+            </span>
         </div>
     </div>
 </template>
