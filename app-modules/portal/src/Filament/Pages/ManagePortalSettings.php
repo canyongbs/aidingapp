@@ -40,6 +40,7 @@ use App\Models\User;
 use App\Enums\Feature;
 use Filament\Forms\Get;
 use Filament\Forms\Form;
+use App\Models\SettingsProperty;
 use Filament\Pages\SettingsPage;
 use AidingApp\Form\Enums\Rounding;
 use Illuminate\Support\Facades\Gate;
@@ -61,6 +62,7 @@ use App\Filament\Forms\Components\ColorSelect;
 use Laravel\Pennant\Feature as PennantFeature;
 use App\Filament\Forms\Components\TiptapEditor;
 use AidingApp\Portal\Actions\GeneratePortalEmbedCode;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 
 class ManagePortalSettings extends SettingsPage
 {
@@ -182,7 +184,18 @@ class ManagePortalSettings extends SettingsPage
                             )
                             ->columnSpanFull(),
                     ])->columns(2),
-
+                Section::make('Header')
+                    ->schema([
+                        SpatieMediaLibraryFileUpload::make('logo')
+                            ->collection('logo')
+                            ->visibility('private')
+                            ->image()
+                            ->model(
+                                SettingsProperty::getInstance('portal.logo'),
+                            )
+                            ->columnSpanFull()
+                            ->visible(PennantFeature::active('portal-logo')),
+                    ]),
                 Section::make('Footer')
                     ->schema([
                         ColorPicker::make('footer_color')
