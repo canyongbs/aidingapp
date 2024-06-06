@@ -33,48 +33,66 @@
 -->
 <script setup>
     import { defineProps } from 'vue';
+    import { consumer } from '../Services/Consumer.js';
+    import { useAuthStore } from '../Stores/auth.js';
+    import { useFeatureStore } from '../Stores/feature.js';
+    import { useTokenStore } from '../Stores/token.js';
+
+    const { user, requiresAuthentication } = useAuthStore();
+    const { hasServiceManagement } = useFeatureStore();
+    const { removeToken } = useTokenStore();
 
     const props = defineProps({
-        categories: {
-            type: Object,
-            default: {},
-        },
         apiUrl: {
             type: String,
             required: true,
         },
+        headerLogo: {
+            type: String,
+            required: true,
+        },
+        appName: {
+            type: String,
+            required: true,
+        },
     });
+
+    const logout = () => {
+        const { post } = consumer();
+
+        post(props.apiUrl + '/logout').then((response) => {
+            if (!response.data.success) {
+                return;
+            }
+
+            removeToken();
+            window.location.href = response.data.redirect_url;
+        });
+    };
 </script>
 
 <template>
-    <nav>
-        <div class="flex flex-col gap-1 px-6 py-4 border-b">
-            <router-link :to="{ name: 'home' }">
-                <h3 class="text-2xl text-primary-800 font-semibold">
-                    <span class="mr-1">🛟</span> <span>Help Center</span>
-                </h3>
-            </router-link>
-        </div>
-
-        <ul role="list" class="my-2 flex flex-col gap-y-1">
-            <li v-for="category in categories" :key="category.id">
-                <router-link
-                    :to="{ name: 'view-category', params: { categoryId: category.id } }"
-                    active-class="text-primary-950 bg-gray-100"
-                    class="w-full text-gray-700 group flex items-start gap-x-3 px-6 py-2 text-sm font-medium transition hover:bg-gray-100 hover:text-primary-950"
+    <div class="header">
+        <div class="columns-2 mb-1">
+            <img :src="headerLogo" :alt="appName" class="h-12 m-3" />
+            <span v-if="requiresAuthentication || hasServiceManagement">
+                <button
+                    v-if="user"
+                    @click="logout"
+                    type="button"
+                    class="text-primary-700 text-sm font-medium float-right border-2 m-3 p-2 outline-primary-700"
                 >
-                    <span
-                        v-if="category.icon"
-                        v-html="category.icon"
-                        class="text-primary-700"
-                        aria-hidden="true"
-                    ></span>
-
-                    <span class="mt-0.5">
-                        {{ category.name }}
-                    </span>
-                </router-link>
-            </li>
-        </ul>
-    </nav>
+                    Sign out
+                </button>
+                <button
+                    v-else
+                    @click="$emit('showLogin')"
+                    type="button"
+                    class="text-primary-700 text-sm font-medium float-right border-2 m-3 p-2 outline-primary-700"
+                >
+                    Sign in
+                </button>
+            </span>
+        </div>
+    </div>
 </template>
