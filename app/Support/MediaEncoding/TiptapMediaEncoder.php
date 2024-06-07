@@ -87,6 +87,20 @@ class TiptapMediaEncoder
         if (isset($content['type']) && $content['type'] === 'image') {
             $content['attrs']['src'] = $processFunction($content['attrs']['src'], $disk);
 
+            if (isset($content['marks'])) {
+                foreach($content['marks'] as $key => $mark) {
+                    if (isset($mark['attrs']['href'])) {
+                        $content['marks'][$key]['attrs']['href'] = $processFunction($content['marks'][$key]['attrs']['href'], $disk);
+                    }
+                }
+            }
+
+            return $content;
+        }
+
+        if (isset($content['type']) && $content['type'] === 'link') {
+            $content['attrs']['href'] = $processFunction($content['attrs']['href'], $disk);
+
             return $content;
         }
 
