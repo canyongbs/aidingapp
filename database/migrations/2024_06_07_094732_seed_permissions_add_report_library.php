@@ -51,7 +51,8 @@ return new class () extends Migration {
         'api',
     ];
 
-    public function up(): void {
+    public function up(): void
+    {
         collect($this->guards)
             ->each(function (string $guard) {
                 $permissions = Arr::except($this->permissions, keys: DB::table('permissions')
@@ -63,7 +64,8 @@ return new class () extends Migration {
             });
     }
 
-    public function down(): void {
+    public function down(): void
+    {
         $this->deletePermissions(array_keys($this->permissions), $this->guards);
     }
 };
