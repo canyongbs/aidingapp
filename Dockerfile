@@ -59,9 +59,12 @@ FROM base AS development
 
 # Fix permission issues in development by setting the "www-data"
 # user to the same user and group that is running docker.
-#ARG USER_ID
-#ARG GROUP_ID
-#RUN docker-php-serversideup-set-id www-data ${USER_ID} ${GROUP_ID}
+ARG USER_ID
+ARG GROUP_ID
+
+COPY ./docker/docker-php-serversideup-set-id /docker-php-serversideup-set-id
+RUN chmod +x /docker-php-serversideup-set-id
+RUN /docker-php-serversideup-set-id webuser www-data $USER_ID:$GROUP_ID
 
 FROM base AS deploy
 

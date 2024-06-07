@@ -5,6 +5,8 @@ services:
       target: development
       args:
         TOTAL_QUEUE_WORKERS: '${TOTAL_QUEUE_WORKERS:-3}'
+        USER_ID: ${SPIN_USER_ID}
+        GROUP_ID: ${SPIN_GROUP_ID}
     environment:
       SSL_MODE: "mixed"
       LANDLORD_MIGRATE: '${LANDLORD_MIGRATE:-true}'
