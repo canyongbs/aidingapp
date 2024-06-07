@@ -88,7 +88,7 @@ class TiptapMediaEncoder
             $content['attrs']['src'] = $processFunction($content['attrs']['src'], $disk);
 
             if (isset($content['marks'])) {
-                foreach($content['marks'] as $key => $mark) {
+                foreach ($content['marks'] as $key => $mark) {
                     if (isset($mark['attrs']['href'])) {
                         $content['marks'][$key]['attrs']['href'] = $processFunction($content['marks'][$key]['attrs']['href'], $disk);
                     }
