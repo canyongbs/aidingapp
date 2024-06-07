@@ -34,37 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Resources\NotificationSettingResource\Forms;
+use Laravel\Pennant\Feature;
+use Illuminate\Database\Migrations\Migration;
 
-use Filament\Forms\Form;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
-use App\Filament\Forms\Components\ColorSelect;
-use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
-
-class NotificationSettingForm
-{
-    public function form(Form $form): Form
+return new class () extends Migration {
+    public function up(): void
     {
-        return $form
-            ->columns(1)
-            ->schema([
-                TextInput::make('name')
-                    ->string()
-                    ->required()
-                    ->autocomplete(false),
-                TextInput::make('from_name')
-                    ->string()
-                    ->maxLength(150)
-                    ->autocomplete(false),
-                Textarea::make('description')
-                    ->string(),
-                ColorSelect::make('primary_color'),
-                SpatieMediaLibraryFileUpload::make('logo')
-                    ->disk('s3')
-                    ->collection('logo')
-                    ->visibility('private')
-                    ->image(),
-            ]);
+        Feature::purge('notification-settings-from-name');
     }
-}
+
+    public function down(): void
+    {
+        Feature::activate('notification-settings-from-name');
+    }
+};
