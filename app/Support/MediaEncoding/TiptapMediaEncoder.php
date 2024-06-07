@@ -134,7 +134,20 @@ class TiptapMediaEncoder
 
         $defaultDirectory = config('filament-tiptap-editor.directory');
 
-        if (! Storage::disk($disk)->exists(ltrim($path, config('filesystems.disks.s3.root'))) && Str::isUrl($content)) {
+        $root = preg_quote(config('filesystems.disks.s3.root'), '/');
+
+        $regexMatch = preg_match(
+            pattern: "/\/?{$root}\/?(.+)/",
+            subject: $path,
+            matches: $matches,
+            flags: PREG_OFFSET_CAPTURE,
+            offset: 0
+        );
+
+        if (
+            $regexMatch === 1
+            && ! Storage::disk($disk)->exists($matches[1][0])
+            && Str::isUrl($content)) {
             return $content;
         }
 
