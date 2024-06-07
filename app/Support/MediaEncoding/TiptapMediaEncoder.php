@@ -147,7 +147,8 @@ class TiptapMediaEncoder
         if (
             $regexMatch === 1
             && ! Storage::disk($disk)->exists($matches[1][0])
-            && Str::isUrl($content)) {
+            && Str::isUrl($content)
+        ) {
             return $content;
         }
 
