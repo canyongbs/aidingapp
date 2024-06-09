@@ -41,14 +41,20 @@ use App\Concerns\ImplementsGraphQL;
 use AidingApp\Contact\ContactPlugin;
 use AidingApp\Contact\Models\Contact;
 use Illuminate\Support\ServiceProvider;
+use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Models\ContactSource;
 use AidingApp\Contact\Models\ContactStatus;
+use AidingApp\Contact\Models\OrganizationType;
 use AidingApp\Contact\Observers\ContactObserver;
+use AidingApp\Contact\Models\OrganizationIndustry;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use AidingApp\Contact\Registries\ContactRbacRegistry;
 use AidingApp\Authorization\AuthorizationRoleRegistry;
 use AidingApp\Contact\Enums\ContactStatusColorOptions;
 use AidingApp\Contact\Enums\SystemContactClassification;
+use AidingApp\Contact\Observers\OrganizationTypeObserver;
+use AidingApp\Contact\Observers\OrganizationIndustryObserver;
+use Illuminate\Support\Facades\Log;
 
 class ContactServiceProvider extends ServiceProvider
 {
@@ -65,9 +71,11 @@ class ContactServiceProvider extends ServiceProvider
             'contact' => Contact::class,
             'contact_source' => ContactSource::class,
             'contact_status' => ContactStatus::class,
+            'organization' => Organization::class,
         ]);
-
         Contact::observe(ContactObserver::class);
+        OrganizationType::observe(OrganizationTypeObserver::class);
+        OrganizationIndustry::observe(OrganizationIndustryObserver::class);
 
         $this->discoverSchema(__DIR__ . '/../../graphql/*');
         $this->registerEnum(ContactStatusColorOptions::class);

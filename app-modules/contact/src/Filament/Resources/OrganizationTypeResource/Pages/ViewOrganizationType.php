@@ -34,29 +34,43 @@
 </COPYRIGHT>
 */
 
-namespace App\Providers;
+namespace AidingApp\Contact\Filament\Resources\OrganizationTypeResource\Pages;
 
-use ReflectionClass;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\ServiceProvider;
-use App\Actions\Finders\ApplicationModels;
-use Illuminate\Database\Eloquent\Relations\Relation;
+use Filament\Actions\EditAction;
+use Filament\Infolists\Infolist;
+use Filament\Resources\Pages\ViewRecord;
+use Filament\Infolists\Components\Section;
+use Filament\Infolists\Components\IconEntry;
+use Filament\Infolists\Components\TextEntry;
+use AidingApp\Contact\Filament\Resources\OrganizationTypeResource;
 
-class MorphServiceProvider extends ServiceProvider
+class ViewOrganizationType extends ViewRecord
 {
-    public function register(): void {}
+    protected static string $resource = OrganizationTypeResource::class;
 
-    public function boot(): void
+    public function infolist(Infolist $infolist): Infolist
     {
-        Relation::enforceMorphMap(
-            resolve(ApplicationModels::class)->all()->mapWithKeys(function ($modelClass) {
-                $reflection = new ReflectionClass($modelClass);
+        return $infolist
+            ->schema([
+                Section::make()
+                    ->schema([
+                        TextEntry::make('name')
+                            ->label('Name')
+                            ->translateLabel(),
+                        IconEntry::make('is_default')
+                            ->label('Default')
+                            ->trueIcon('heroicon-o-check-circle')
+                            ->falseIcon('heroicon-o-x-circle')
+                            ->boolean(),
+                    ])
+                    ->columns(),
+            ]);
+    }
 
-                return [
-                    Str::snake($reflection->getShortName()) => $reflection->getName(),
-                ];
-            })->toArray()
-        );
+    protected function getHeaderActions(): array
+    {
+        return [
+            EditAction::make(),
+        ];
     }
 }
