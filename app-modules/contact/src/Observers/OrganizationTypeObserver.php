@@ -36,8 +36,8 @@
 
 namespace AidingApp\Contact\Observers;
 
-use AidingApp\Contact\Models\OrganizationType;
 use App\Models\User;
+use AidingApp\Contact\Models\OrganizationType;
 
 class OrganizationTypeObserver
 {
@@ -51,13 +51,11 @@ class OrganizationTypeObserver
         if ($user instanceof User && ! $organizationType->createdBy) {
             $organizationType->createdBy()->associate($user);
         }
-        
+
         if ($organizationType->is_default) {
             OrganizationType::query()
                 ->where('is_default', true)
                 ->update(['is_default' => false]);
         }
     }
-
-  
 }

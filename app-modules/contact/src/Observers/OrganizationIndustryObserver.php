@@ -36,8 +36,8 @@
 
 namespace AidingApp\Contact\Observers;
 
-use AidingApp\Contact\Models\OrganizationIndustry;
 use App\Models\User;
+use AidingApp\Contact\Models\OrganizationIndustry;
 
 class OrganizationIndustryObserver
 {

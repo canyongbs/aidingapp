@@ -36,18 +36,13 @@
 
 namespace AidingApp\Contact\Filament\Resources;
 
-use AidingApp\Contact\Filament\Resources\OrganizationIndustryResource\Pages;
-use AidingApp\Contact\Filament\Resources\OrganizationIndustryResource\Pages\CreateOrganizationIndustry;
-use AidingApp\Contact\Filament\Resources\OrganizationIndustryResource\Pages\EditOrganizationIndustry;
-use AidingApp\Contact\Filament\Resources\OrganizationIndustryResource\Pages\ListOrganizationIndustries;
-use AidingApp\Contact\Filament\Resources\OrganizationIndustryResource\Pages\ViewOrganizationIndustry;
-use AidingApp\Contact\Models\OrganizationIndustry;
-use App\Filament\Clusters\ContactManagement;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Table;
-use Laravel\Pennant\Feature;
+use App\Filament\Clusters\ContactManagement;
+use AidingApp\Contact\Models\OrganizationIndustry;
+use AidingApp\Contact\Filament\Resources\OrganizationIndustryResource\Pages\EditOrganizationIndustry;
+use AidingApp\Contact\Filament\Resources\OrganizationIndustryResource\Pages\ViewOrganizationIndustry;
+use AidingApp\Contact\Filament\Resources\OrganizationIndustryResource\Pages\CreateOrganizationIndustry;
+use AidingApp\Contact\Filament\Resources\OrganizationIndustryResource\Pages\ListOrganizationIndustries;
 
 class OrganizationIndustryResource extends Resource
 {

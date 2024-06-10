@@ -38,6 +38,7 @@ namespace AidingApp\Contact\Filament\Resources\OrganizationIndustryResource\Page
 
 use Filament\Tables\Table;
 use Filament\Actions\CreateAction;
+use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -46,7 +47,6 @@ use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
 use AidingApp\Contact\Filament\Resources\OrganizationIndustryResource;
-use Filament\Tables\Actions\EditAction;
 
 class ListOrganizationIndustries extends ListRecords
 {

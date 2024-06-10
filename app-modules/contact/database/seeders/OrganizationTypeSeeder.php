@@ -36,8 +36,8 @@
 
 namespace AidingApp\Contact\Database\Seeders;
 
-use AidingApp\Contact\Models\OrganizationType;
 use Illuminate\Database\Seeder;
+use AidingApp\Contact\Models\OrganizationType;
 
 class OrganizationTypeSeeder extends Seeder
 {

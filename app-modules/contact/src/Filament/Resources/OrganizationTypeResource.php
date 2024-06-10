@@ -43,7 +43,6 @@ use AidingApp\Contact\Filament\Resources\OrganizationTypeResource\Pages\EditOrga
 use AidingApp\Contact\Filament\Resources\OrganizationTypeResource\Pages\ViewOrganizationType;
 use AidingApp\Contact\Filament\Resources\OrganizationTypeResource\Pages\ListOrganizationTypes;
 use AidingApp\Contact\Filament\Resources\OrganizationTypeResource\Pages\CreateOrganizationType;
-use Laravel\Pennant\Feature;
 
 class OrganizationTypeResource extends Resource
 {
@@ -62,6 +61,7 @@ class OrganizationTypeResource extends Resource
         return [
         ];
     }
+
     public static function getPages(): array
     {
         return [

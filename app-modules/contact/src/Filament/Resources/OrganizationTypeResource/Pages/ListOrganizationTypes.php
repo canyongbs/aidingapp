@@ -36,18 +36,17 @@
 
 namespace AidingApp\Contact\Filament\Resources\OrganizationTypeResource\Pages;
 
-
 use Filament\Tables\Table;
+use Filament\Actions\CreateAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
 use AidingApp\Contact\Filament\Resources\OrganizationTypeResource;
-use Filament\Actions\CreateAction;
-use Filament\Tables\Columns\IconColumn;
 
 class ListOrganizationTypes extends ListRecords
 {

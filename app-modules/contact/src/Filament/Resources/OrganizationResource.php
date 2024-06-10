@@ -36,7 +36,6 @@
 
 namespace AidingApp\Contact\Filament\Resources;
 
-use Laravel\Pennant\Feature;
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Builder;
 use AidingApp\Contact\Models\Organization;

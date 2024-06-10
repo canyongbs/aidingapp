@@ -38,7 +38,6 @@ namespace App\Providers;
 
 use ReflectionClass;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 use App\Actions\Finders\ApplicationModels;
 use Illuminate\Database\Eloquent\Relations\Relation;

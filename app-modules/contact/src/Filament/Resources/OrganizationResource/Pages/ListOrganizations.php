@@ -64,7 +64,7 @@ class ListOrganizations extends ListRecords
                     ->label('Website')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('industry.name') 
+                TextColumn::make('industry.name')
                     ->label('Industry')
                     ->searchable()
                     ->sortable(),

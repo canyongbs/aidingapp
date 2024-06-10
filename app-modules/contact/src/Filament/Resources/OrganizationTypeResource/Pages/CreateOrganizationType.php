@@ -43,7 +43,6 @@ use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\CreateRecord;
 use AidingApp\Contact\Models\OrganizationType;
 use AidingApp\Contact\Filament\Resources\OrganizationTypeResource;
-use Laravel\Pennant\Feature;
 
 class CreateOrganizationType extends CreateRecord
 {
@@ -89,7 +88,6 @@ class CreateOrganizationType extends CreateRecord
                             })
                             ->hintColor('danger')
                             ->columnStart(1),
-                           
                     ]),
             ]);
     }

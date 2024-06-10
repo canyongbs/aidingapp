@@ -53,7 +53,7 @@ class OrganizationIndustryPolicy
     public function view(Authenticatable $authenticatable, OrganizationIndustry $organizationIndustry): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['organization_industry.*.view', "organization_industry.{ $organizationIndustry->id}.view"],
+            abilities: ['organization_industry.*.view', "organization_industry.{ {$organizationIndustry->id}}.view"],
             denyResponse: 'You do not have permission to view this organization industry.'
         );
     }
@@ -69,7 +69,7 @@ class OrganizationIndustryPolicy
     public function update(Authenticatable $authenticatable, OrganizationIndustry $organizationIndustry): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['organization_industry.*.update', "organization_industry.{ $organizationIndustry->id}.update"],
+            abilities: ['organization_industry.*.update', "organization_industry.{ {$organizationIndustry->id}}.update"],
             denyResponse: 'You do not have permission to update this organization industry.'
         );
     }
@@ -77,7 +77,7 @@ class OrganizationIndustryPolicy
     public function delete(Authenticatable $authenticatable, OrganizationIndustry $organizationIndustry): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['organization_industry.*.delete', "organization_industry.{ $organizationIndustry->id}.delete"],
+            abilities: ['organization_industry.*.delete', "organization_industry.{ {$organizationIndustry->id}}.delete"],
             denyResponse: 'You do not have permission to delete this organization industry.'
         );
     }
@@ -85,7 +85,7 @@ class OrganizationIndustryPolicy
     public function restore(Authenticatable $authenticatable, OrganizationIndustry $organizationIndustry): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['organization_industry.*.restore', "organization_industry.{ $organizationIndustry->id}.restore"],
+            abilities: ['organization_industry.*.restore', "organization_industry.{ {$organizationIndustry->id}}.restore"],
             denyResponse: 'You do not have permission to restore this organization industry.'
         );
     }
@@ -93,7 +93,7 @@ class OrganizationIndustryPolicy
     public function forceDelete(Authenticatable $authenticatable, OrganizationIndustry $organizationIndustry): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['organization_industry.*.force-delete', "organization_industry.{ $organizationIndustry->id}.force-delete"],
+            abilities: ['organization_industry.*.force-delete', "organization_industry.{ {$organizationIndustry->id}}.force-delete"],
             denyResponse: 'You do not have permission to force delete this organization industry.'
         );
     }
