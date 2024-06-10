@@ -20,12 +20,6 @@ class OrganizationResource extends Resource
 
     protected static ?int $navigationSort = 21;
 
-    public static function canAccess(): bool
-    {
-        //return Feature::active('organization');
-        return true;
-    }
-
     public static function getPages(): array
     {
         return [

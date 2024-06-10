@@ -30,6 +30,7 @@ class ViewOrganization extends ViewRecord
                             ->label('Organization Phone Number')
                             ->translateLabel(),
                         SpatieMediaLibraryImageEntry::make('logo')
+                            ->visibility('private')
                             ->label('Organization Logo')
                             ->collection('organization_logo'),
                     ])

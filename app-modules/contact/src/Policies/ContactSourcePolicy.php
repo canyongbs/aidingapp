@@ -43,7 +43,7 @@ use AidingApp\Contact\Models\ContactSource;
 
 class ContactSourcePolicy
 {
-    public function before(Authenticatable $authenticatable): ?Response
+   public function before(Authenticatable $authenticatable): ?Response
     {
         if (! $authenticatable->hasLicense(Contact::getLicenseType())) {
             return Response::deny('You are not licensed for the Recruitment CRM.');

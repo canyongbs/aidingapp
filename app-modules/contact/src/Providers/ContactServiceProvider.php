@@ -54,7 +54,6 @@ use AidingApp\Contact\Enums\ContactStatusColorOptions;
 use AidingApp\Contact\Enums\SystemContactClassification;
 use AidingApp\Contact\Observers\OrganizationTypeObserver;
 use AidingApp\Contact\Observers\OrganizationIndustryObserver;
-use Illuminate\Support\Facades\Log;
 
 class ContactServiceProvider extends ServiceProvider
 {

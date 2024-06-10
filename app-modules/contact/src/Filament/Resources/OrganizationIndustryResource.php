@@ -27,11 +27,6 @@ class OrganizationIndustryResource extends Resource
 
     protected static ?string $cluster = ContactManagement::class;
 
-    public static function canAccess(): bool
-    {
-       return Feature::active('organization-industry');
-    }
-
     public static function getPages(): array
     {
         return [

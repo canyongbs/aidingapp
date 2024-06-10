@@ -28,11 +28,6 @@ class OrganizationTypeResource extends Resource
         return [
         ];
     }
-
-    public static function canAccess(): bool
-    {
-       return Feature::active('organization-type');
-    }
     public static function getPages(): array
     {
         return [

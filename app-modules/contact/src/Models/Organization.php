@@ -2,19 +2,17 @@
 
 namespace AidingApp\Contact\Models;
 
-use App\Models\BaseModel;
 use App\Models\User;
 use DateTimeInterface;
+use App\Models\BaseModel;
 use Spatie\MediaLibrary\HasMedia;
-use Illuminate\Support\Facades\Log;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 
-class Organization extends Model implements HasMedia
+class Organization extends BaseModel implements HasMedia
 {
     use HasFactory;
     use HasUuids;
