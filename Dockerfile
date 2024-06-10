@@ -63,12 +63,6 @@ FROM base AS development
 #ARG GROUP_ID
 #RUN docker-php-serversideup-set-id www-data ${USER_ID} ${GROUP_ID}
 
-RUN chown -R "$PUID":"$PGID" /var/www/html \
-    && if [[ -d /var/www/html/storage/logs ]] ; then \
-    chgrp "$PGID" /var/www/html/storage/logs \
-    && chmod g+s /var/www/html/storage/logs \
-    ; fi
-
 FROM base AS deploy
 
 COPY --chown=$PUID:$PGID . /var/www/html
@@ -81,4 +75,4 @@ RUN npm ci --ignore-scripts \
 
 RUN chown -R "$PUID":"$PGID" /var/www/html \
     && chgrp "$PGID" /var/www/html/storage/logs \
-    && chmod g+s /var/www/html/storage/logs \
+    && chmod g+s /var/www/html/storage/logs
