@@ -68,13 +68,13 @@ class ManagePortalSettings extends SettingsPage
 {
     protected static ?string $navigationIcon = 'heroicon-o-cog-6-tooth';
 
-    protected static ?string $navigationLabel = 'Portals';
+    protected static ?string $navigationLabel = 'Client Portal';
 
     protected static ?int $navigationSort = 60;
 
     protected static string $settings = PortalSettings::class;
 
-    protected static ?string $title = 'Portals';
+    protected static ?string $title = 'Client Portal';
 
     protected static ?string $cluster = GlobalSettings::class;
 
@@ -90,7 +90,7 @@ class ManagePortalSettings extends SettingsPage
     {
         return $form
             ->schema([
-                Section::make('Knowledge Portal')
+                Section::make('Client Portal')
                     ->schema([
                         Toggle::make('knowledge_management_portal_enabled')
                             ->label('Knowledge Management')
