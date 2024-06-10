@@ -34,8 +34,6 @@
 <script setup>
     import { defineProps, onMounted, ref, watch } from 'vue';
     import AppLoading from './Components/AppLoading.vue';
-    import MobileSidebar from './Components/MobileSidebar.vue';
-    import DesktopSidebar from './Components/DesktopSidebar.vue';
     import Header from './Components/Header.vue';
     import determineIfUserIsAuthenticated from './Services/DetermineIfUserIsAuthenticated.js';
     import getAppContext from './Services/GetAppContext.js';
@@ -75,7 +73,6 @@
 
     const errorLoading = ref(false);
     const loading = ref(true);
-    const showMobileMenu = ref(false);
     const userIsAuthenticated = ref(false);
     const requiresAuthentication = ref(false);
     const hasServiceManagement = ref(false);
@@ -447,21 +444,8 @@
                 </div>
 
                 <div v-else class="flex flex-row min-h-screen">
-                    <MobileSidebar
-                        v-if="showMobileMenu"
-                        @show-login="showLogin = true"
-                        @sidebar-closed="showMobileMenu = !showMobileMenu"
-                        :categories="categories"
-                        :api-url="apiUrl"
-                    >
-                    </MobileSidebar>
-
-                    <DesktopSidebar @show-login="showLogin = true" :categories="categories" :api-url="apiUrl">
-                    </DesktopSidebar>
-
                     <div class="w-full">
                         <RouterView
-                            @sidebar-opened="showMobileMenu = !showMobileMenu"
                             :search-url="searchUrl"
                             :api-url="apiUrl"
                             :categories="categories"

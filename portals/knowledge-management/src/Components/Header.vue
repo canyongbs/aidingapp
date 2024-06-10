@@ -74,7 +74,9 @@
 <template>
     <div class="header">
         <div class="columns-2 mb-1">
-            <img :src="headerLogo" :alt="appName" class="h-12 m-3" />
+            <router-link :to="{ name: 'home' }">
+                <img :src="headerLogo" :alt="appName" class="h-12 m-3" />
+            </router-link>
             <span v-if="requiresAuthentication || hasServiceManagement">
                 <button
                     v-if="user"
