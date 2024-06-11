@@ -92,6 +92,33 @@ class ManageAmazonSesSettings extends SettingsPage
                             ->string()
                             ->maxLength(150)
                             ->required(),
+                            Section::make()
+                            ->heading('SMTP Settings')
+                            ->schema([
+                                TextInput::make('smtp_host')
+                                    ->label('Host')
+                                    ->nullable(),
+                                TextInput::make('smtp_port')
+                                    ->label('Port')
+                                    ->integer()
+                                    ->required(),
+                                TextInput::make('smtp_encryption')
+                                    ->label('Encryption')
+                                    ->nullable(),
+                                TextInput::make('smtp_username')
+                                    ->label('Username')
+                                    ->nullable(),
+                                TextInput::make('smtp_password')
+                                    ->label('Password')
+                                    ->nullable(),
+                                TextInput::make('smtp_timeout')
+                                    ->label('Timeout')
+                                    ->integer()
+                                    ->nullable(),
+                                TextInput::make('smtp_local_domain')
+                                    ->label('Local Domain')
+                                    ->nullable(),
+                            ]),
                     ]),
             ]);
     }
@@ -115,9 +142,26 @@ class ManageAmazonSesSettings extends SettingsPage
             $this->saveTenantData(
                 emailFrom: $data['fromAddress'],
                 emailName: $data['fromName'],
+                host: $data['smtp_host'],
+                port: $data['smtp_port'],
+                encryption: $data['smtp_encryption'],
+                username: $data['smtp_username'],
+                password: $data['smtp_password'],
+                timeout: $data['smtp_timeout'],
+                localDomain: $data['smtp_local_domain'],
             );
 
-            unset($data['fromAddress'], $data['fromName']);
+            unset(
+                $data['fromAddress'],
+                $data['fromName'],
+                $data['smtp_host'],
+                $data['smtp_port'],
+                $data['smtp_encryption'],
+                $data['smtp_username'],
+                $data['smtp_password'],
+                $data['smtp_timeout'],
+                $data['smtp_local_domain'],
+            );
 
             $settings = app(static::getSettings());
 
@@ -171,6 +215,13 @@ class ManageAmazonSesSettings extends SettingsPage
                 ...$settings->toArray(),
                 'fromAddress' => $config->mail->fromAddress,
                 'fromName' => $config->mail->fromName,
+                'smtp_host' => $config->mail->mailers->smtp->host,
+                'smtp_port' => $config->mail->mailers->smtp->port,
+                'smtp_encryption' => $config->mail->mailers->smtp->encryption,
+                'smtp_username' => $config->mail->mailers->smtp->username,
+                'smtp_password' => $config->mail->mailers->smtp->password,
+                'smtp_timeout' => $config->mail->mailers->smtp->timeout,
+                'smtp_local_domain' => $config->mail->mailers->smtp->localDomain,
             ]
         );
 
@@ -179,7 +230,17 @@ class ManageAmazonSesSettings extends SettingsPage
         $this->callHook('afterFill');
     }
 
-    protected function saveTenantData(string $emailFrom, string $emailName): void
+    protected function saveTenantData(
+        string $emailFrom,
+        string $emailName,
+        ?string $host,
+        int $port,
+        ?string $encryption,
+        ?string $username,
+        ?string $password,
+        ?int $timeout,
+        ?string $localDomain,
+    ): void
     {
         /** @var Tenant $tenant */
         $tenant = Tenant::current();
@@ -189,6 +250,13 @@ class ManageAmazonSesSettings extends SettingsPage
 
         $config->mail->fromAddress = $emailFrom;
         $config->mail->fromName = $emailName;
+        $config->mail->mailers->smtp->host = $host;
+        $config->mail->mailers->smtp->port = $port;
+        $config->mail->mailers->smtp->encryption = $encryption;
+        $config->mail->mailers->smtp->username = $username;
+        $config->mail->mailers->smtp->password = $password;
+        $config->mail->mailers->smtp->timeout = $timeout;
+        $config->mail->mailers->smtp->localDomain = $localDomain;
 
         $tenant->config = $config;
 
