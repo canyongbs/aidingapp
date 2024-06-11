@@ -41,6 +41,7 @@ use Illuminate\Http\JsonResponse;
 use Filament\Support\Colors\Color;
 use Illuminate\Support\Facades\URL;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Vite;
 use AidingApp\Portal\Enums\PortalLayout;
 use AidingApp\Portal\Settings\PortalSettings;
 
@@ -69,7 +70,7 @@ class KnowledgeManagementPortalController extends Controller
                     absolute: false,
                 )
             ),
-            'footer' => view('filament.footer')->render(),
+            'footer_logo' => Vite::asset('resources/images/canyon-logo-light.png'),
         ]);
     }
 }

@@ -87,7 +87,7 @@
     const headerLogo = ref('');
     const tags = ref({});
     const appName = ref('');
-    const footerContent = ref('');
+    const footerLogo = ref('');
 
     const authentication = ref({
         code: null,
@@ -162,7 +162,7 @@
 
                 appName.value = response.data.app_name;
 
-                footerContent.value = response.data.footer;
+                footerLogo.value = response.data.footer_logo;
 
                 setRequiresAuthentication(response.data.requires_authentication).then(() => {
                     requiresAuthentication.value = response.data.requires_authentication;
@@ -460,7 +460,7 @@
                     </div>
                 </div>
 
-                <Footer :content="footerContent"></Footer>
+                <Footer :logo="footerLogo"></Footer>
             </div>
         </div>
     </div>
