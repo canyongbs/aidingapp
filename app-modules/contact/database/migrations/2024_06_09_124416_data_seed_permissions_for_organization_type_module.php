@@ -43,13 +43,13 @@ return new class () extends Migration {
     use CanModifyPermissions;
 
     private array $permissions = [
-        'organization_type.view-any' => 'OrganizationType',
-        'organization_type.create' => 'OrganizationType',
-        'organization_type.*.view' => 'OrganizationType',
-        'organization_type.*.update' => 'OrganizationType',
-        'organization_type.*.delete' => 'OrganizationType',
-        'organization_type.*.restore' => 'OrganizationType',
-        'organization_type.*.force-delete' => 'OrganizationType',
+        'organization_type.view-any' => 'Organization Type',
+        'organization_type.create' => 'Organization Type',
+        'organization_type.*.view' => 'Organization Type',
+        'organization_type.*.update' => 'Organization Type',
+        'organization_type.*.delete' => 'Organization Type',
+        'organization_type.*.restore' => 'Organization Type',
+        'organization_type.*.force-delete' => 'Organization Type',
     ];
 
     private array $guards = [

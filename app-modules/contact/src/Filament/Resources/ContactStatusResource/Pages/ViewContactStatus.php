@@ -40,6 +40,7 @@ use Filament\Actions\EditAction;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Infolists\Components\Section;
+use AidingApp\Contact\Models\ContactStatus;
 use Filament\Infolists\Components\TextEntry;
 use AidingApp\Contact\Filament\Resources\ContactStatusResource;
 
@@ -59,6 +60,11 @@ class ViewContactStatus extends ViewRecord
                         TextEntry::make('classification')
                             ->label('Classification')
                             ->translateLabel(),
+                        TextEntry::make('color')
+                            ->label('Color')
+                            ->translateLabel()
+                            ->badge()
+                            ->color(fn (ContactStatus $contactStatus) => $contactStatus->color->value),
                     ])
                     ->columns(),
             ]);

@@ -50,7 +50,7 @@ class OrganizationTypePolicy
             return Response::deny('You are not licensed for the Recruitment CRM.');
         }
 
-        if (Feature::deactivate('organization-type')) {
+        if (Feature::inactive('organization')) {
             return Response::deny('This feature is not active currently.');
         }
 

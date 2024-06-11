@@ -54,15 +54,12 @@ class ViewOrganization extends ViewRecord
             ->schema([
                 Section::make('Primary Info')
                     ->schema([
-                        TextEntry::make('name')
-                            ->label('Organization Name')
-                            ->translateLabel(),
+                        TextEntry::make('createdBy.name')
+                            ->label('Organization Name'),
                         TextEntry::make('email')
-                            ->label('Organization Email')
-                            ->translateLabel(),
+                            ->label('Organization Email'),
                         TextEntry::make('phone_number')
-                            ->label('Organization Phone Number')
-                            ->translateLabel(),
+                            ->label('Organization Phone Number'),
                         SpatieMediaLibraryImageEntry::make('logo')
                             ->visibility('private')
                             ->label('Organization Logo')
@@ -72,52 +69,39 @@ class ViewOrganization extends ViewRecord
                 Section::make('Additional Info')
                     ->schema([
                         TextEntry::make('website')
-                            ->label('Website')
-                            ->translateLabel(),
+                            ->label('Website'),
                         TextEntry::make('industry.name')
-                            ->label('Industry')
-                            ->translateLabel(),
+                            ->label('Industry'),
                         TextEntry::make('type.name')
-                            ->label('Type')
-                            ->translateLabel(),
+                            ->label('Type'),
                         TextEntry::make('description')
-                            ->label('Description')
-                            ->translateLabel(),
+                            ->label('Description'),
                         TextEntry::make('number_of_employees')
-                            ->label('Number Of Employees')
-                            ->translateLabel(),
+                            ->label('Number Of Employees'),
                     ])
                     ->columns(),
                 Section::make('Address Info')
                     ->schema([
                         TextEntry::make('address')
-                            ->label('Address')
-                            ->translateLabel(),
+                            ->label('Address'),
                         TextEntry::make('city')
-                            ->label('City')
-                            ->translateLabel(),
+                            ->label('City'),
                         TextEntry::make('state')
-                            ->label('State')
-                            ->translateLabel(),
+                            ->label('State'),
                         TextEntry::make('postalcode')
-                            ->label('Postal Code')
-                            ->translateLabel(),
+                            ->label('Postal Code'),
                         TextEntry::make('country')
-                            ->label('Country')
-                            ->translateLabel(),
+                            ->label('Country'),
                     ])
                     ->columns(),
                 Section::make('Social Media Info')
                     ->schema([
                         TextEntry::make('linkedin_url')
-                            ->label('LinkedIn URL')
-                            ->translateLabel(),
+                            ->label('LinkedIn URL'),
                         TextEntry::make('facebook_url')
-                            ->label('Facebook URL')
-                            ->translateLabel(),
+                            ->label('Facebook URL'),
                         TextEntry::make('twitter_url')
-                            ->label('Twitter URL')
-                            ->translateLabel(),
+                            ->label('Twitter URL'),
                     ])
                     ->columns(),
             ]);

@@ -55,12 +55,9 @@ class ViewOrganizationType extends ViewRecord
                 Section::make()
                     ->schema([
                         TextEntry::make('name')
-                            ->label('Name')
-                            ->translateLabel(),
+                            ->label('Name'),
                         IconEntry::make('is_default')
                             ->label('Default')
-                            ->trueIcon('heroicon-o-check-circle')
-                            ->falseIcon('heroicon-o-x-circle')
                             ->boolean(),
                     ])
                     ->columns(),

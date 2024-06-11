@@ -65,26 +65,19 @@ class EditOrganization extends EditRecord
                         TextInput::make('name')
                             ->label('Organization Name')
                             ->autofocus()
-                            ->translateLabel()
                             ->maxLength(255)
                             ->required()
-                            ->string()
-                            ->placeholder('Organization Name'),
+                            ->string(),
                         TextInput::make('email')
                             ->label('Organization Email')
-                            ->translateLabel()
                             ->maxLength(255)
-                            ->email()
-                            ->placeholder('Organization Email'),
+                            ->email(),
                         TextInput::make('phone_number')
                             ->label('Organization Phone Number')
-                            ->translateLabel()
                             ->maxLength(255)
-                            ->string()
-                            ->placeholder('Organization Phone Number'),
+                            ->string(),
                         SpatieMediaLibraryFileUpload::make('logo')
                             ->label('Organization Logo')
-                            ->disk('s3')
                             ->collection('organization_logo')
                             ->image(),
                     ]),
@@ -93,91 +86,66 @@ class EditOrganization extends EditRecord
                     ->schema([
                         TextInput::make('website')
                             ->label('Website')
-                            ->translateLabel()
                             ->maxLength(255)
-                            ->activeUrl()
-                            ->placeholder('Website'),
+                            ->activeUrl(),
                         Select::make('industry_id')
                             ->label('Industry')
                             ->relationship('industry', 'name')
                             ->default(fn () => OrganizationIndustry::query()
                                 ->where('is_default', true)
-                                ->first() ? OrganizationIndustry::query()
-                                ->where('is_default', true)
-                                ->first()
-                                ?->getKey() : ''),
+                                ->first()?->getKey()),
                         Select::make('type_id')
                             ->label('Type')
                             ->relationship('type', 'name')
                             ->default(fn () => OrganizationType::query()
                                 ->where('is_default', true)
-                                ->first() ? OrganizationType::query()
-                                ->where('is_default', true)
-                                ->first()
-                                ?->getKey() : ''),
+                                ->first()?->getKey()),
                         Textarea::make('description')
                             ->label('Description')
                             ->string(),
                         TextInput::make('number_of_employees')
                             ->label('Number of Employees')
-                            ->translateLabel()
-                            ->numeric()
-                            ->placeholder('Number Of Employees'),
+                            ->integer()
+                            ->minValue(0),
                     ]),
                 Section::make('Address Info')
                     ->columns()
                     ->schema([
                         TextInput::make('address')
                             ->label('Address')
-                            ->translateLabel()
-                            ->string()
-                            ->placeholder('Address'),
+                            ->string(),
                         TextInput::make('city')
                             ->label('City')
-                            ->translateLabel()
                             ->maxLength(255)
-                            ->string()
-                            ->placeholder('City'),
+                            ->string(),
                         TextInput::make('state')
                             ->label('State')
-                            ->translateLabel()
                             ->maxLength(255)
-                            ->string()
-                            ->placeholder('State'),
+                            ->string(),
                         TextInput::make('postalcode')
                             ->label('Postal Code')
-                            ->translateLabel()
                             ->maxLength(255)
-                            ->string()
-                            ->placeholder('Postal Code'),
+                            ->string(),
                         TextInput::make('country')
                             ->label('Country')
-                            ->translateLabel()
                             ->maxLength(255)
-                            ->string()
-                            ->placeholder('Country'),
+                            ->string(),
                     ]),
                 Section::make('Social Media Info')
                     ->columns()
                     ->schema([
                         TextInput::make('linkedin_url')
                             ->label('LinkedIn URL')
-                            ->translateLabel()
                             ->maxLength(255)
-                            ->activeUrl()
-                            ->placeholder('LinkedIn URL'),
+                            ->activeUrl(),
                         TextInput::make('facebook_url')
                             ->label('Facebook URL')
-                            ->translateLabel()
                             ->maxLength(255)
-                            ->activeUrl()
-                            ->placeholder('Facebook URL'),
+                            ->activeUrl(),
                         TextInput::make('twitter_url')
                             ->label('Twitter URL')
-                            ->translateLabel()
                             ->maxLength(255)
-                            ->activeUrl()
-                            ->placeholder('Twitter URL'),
+                            ->activeUrl(),
                     ]),
             ]);
     }

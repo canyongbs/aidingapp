@@ -37,7 +37,6 @@
 namespace AidingApp\Contact\Models;
 
 use App\Models\User;
-use DateTimeInterface;
 use App\Models\BaseModel;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -77,7 +76,6 @@ class Organization extends BaseModel implements HasMedia
     {
         $this
             ->addMediaCollection('organization_logo')
-            ->useDisk('s3')
             ->singleFile()
             ->acceptsMimeTypes([
                 'image/png',
@@ -101,10 +99,5 @@ class Organization extends BaseModel implements HasMedia
     public function type(): BelongsTo
     {
         return $this->belongsTo(OrganizationType::class);
-    }
-
-    protected function serializeDate(DateTimeInterface $date): string
-    {
-        return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
     }
 }

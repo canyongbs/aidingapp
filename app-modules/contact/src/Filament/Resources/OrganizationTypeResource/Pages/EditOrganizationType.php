@@ -59,11 +59,9 @@ class EditOrganizationType extends EditRecord
                         TextInput::make('name')
                             ->label('Name')
                             ->autofocus()
-                            ->translateLabel()
                             ->maxLength(255)
                             ->required()
-                            ->string()
-                            ->placeholder('Organization Type Name'),
+                            ->string(),
 
                         Toggle::make('is_default')
                             ->label('Default')

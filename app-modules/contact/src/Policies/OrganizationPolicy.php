@@ -36,11 +36,11 @@
 
 namespace AidingApp\Contact\Policies;
 
+use Laravel\Pennant\Feature;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
-use Laravel\Pennant\Feature as PennantFeature;
 
 class OrganizationPolicy
 {
@@ -50,7 +50,7 @@ class OrganizationPolicy
             return Response::deny('You are not licensed for the Recruitment CRM.');
         }
 
-        if (PennantFeature::deactivate('organization')) {
+        if (Feature::inactive('organization')) {
             return Response::deny('This feature is not active currently.');
         }
 

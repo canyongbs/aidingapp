@@ -50,7 +50,7 @@ class OrganizationIndustryPolicy
             return Response::deny('You are not licensed for the Recruitment CRM.');
         }
 
-        if (Feature::deactivate('organization-industry')) {
+        if (Feature::inactive('organization')) {
             return Response::deny('This feature is not active currently.');
         }
 

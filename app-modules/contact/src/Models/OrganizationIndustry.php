@@ -37,7 +37,6 @@
 namespace AidingApp\Contact\Models;
 
 use App\Models\User;
-use DateTimeInterface;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -64,10 +63,5 @@ class OrganizationIndustry extends Model
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class);
-    }
-
-    protected function serializeDate(DateTimeInterface $date): string
-    {
-        return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
     }
 }

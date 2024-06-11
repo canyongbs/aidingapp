@@ -36,22 +36,24 @@
 
 namespace AidingApp\Contact\Observers;
 
-use App\Models\User;
 use AidingApp\Contact\Models\OrganizationType;
 
 class OrganizationTypeObserver
 {
     /**
+       * Handle the OrganizationType "creating" event.
+       */
+    public function creating(OrganizationType $organizationType): void
+    {
+        $user = auth()->user();
+        $organizationType->createdBy()->associate($user);
+    }
+
+    /**
      * Handle the OrganizationType "saving" event.
      */
     public function saving(OrganizationType $organizationType): void
     {
-        $user = auth()->user();
-
-        if ($user instanceof User && ! $organizationType->createdBy) {
-            $organizationType->createdBy()->associate($user);
-        }
-
         if ($organizationType->is_default) {
             OrganizationType::query()
                 ->where('is_default', true)

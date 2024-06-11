@@ -45,7 +45,7 @@ return new class () extends Migration {
             $table->uuid('id')->primary();
             $table->string('name');
             $table->boolean('is_default')->default(false);
-            $table->foreignUuid('created_by_id')->nullable()->references('id')->on('users');
+            $table->foreignUuid('created_by_id')->nullable()->constrained('users');
             $table->timestamps();
             $table->softDeletes();
         });

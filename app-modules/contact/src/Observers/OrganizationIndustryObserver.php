@@ -36,22 +36,24 @@
 
 namespace AidingApp\Contact\Observers;
 
-use App\Models\User;
 use AidingApp\Contact\Models\OrganizationIndustry;
 
 class OrganizationIndustryObserver
 {
     /**
+     * Handle the OrganizationIndustry "creating" event.
+     */
+    public function creating(OrganizationIndustry $organizationIndustry): void
+    {
+        $user = auth()->user();
+        $organizationIndustry->createdBy()->associate($user);
+    }
+
+    /**
      * Handle the OrganizationIndustry "saving" event.
      */
     public function saving(OrganizationIndustry $organizationIndustry): void
     {
-        $user = auth()->user();
-
-        if ($user instanceof User && ! $organizationIndustry->createdBy) {
-            $organizationIndustry->createdBy()->associate($user);
-        }
-
         if ($organizationIndustry->is_default) {
             OrganizationIndustry::query()
                 ->where('is_default', true)

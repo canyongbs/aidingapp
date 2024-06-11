@@ -58,11 +58,9 @@ class CreateOrganizationIndustry extends CreateRecord
                         TextInput::make('name')
                             ->label('Name')
                             ->autofocus()
-                            ->translateLabel()
                             ->maxLength(255)
                             ->required()
-                            ->string()
-                            ->placeholder('Organization Industry Name'),
+                            ->string(),
 
                         Toggle::make('is_default')
                             ->label('Default')

@@ -48,8 +48,8 @@ return new class () extends Migration {
             $table->text('phone_number')->nullable();
             $table->string('logo')->nullable();
             $table->string('website')->nullable();
-            $table->foreignUuid('industry_id')->nullable()->references('id')->on('organization_industries');
-            $table->foreignUuid('type_id')->nullable()->references('id')->on('organization_types');
+            $table->foreignUuid('industry_id')->nullable()->constrained('organization_industries');
+            $table->foreignUuid('type_id')->nullable()->constrained('organization_types');
             $table->longText('description')->nullable();
             $table->integer('number_of_employees')->nullable();
             $table->string('address')->nullable();
@@ -60,7 +60,7 @@ return new class () extends Migration {
             $table->string('linkedin_url')->nullable();
             $table->string('facebook_url')->nullable();
             $table->string('twitter_url')->nullable();
-            $table->foreignUuid('created_by_id')->nullable()->references('id')->on('users');
+            $table->foreignUuid('created_by_id')->nullable()->constrained('users');
             $table->timestamps();
             $table->softDeletes();
         });
