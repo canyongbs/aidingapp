@@ -54,6 +54,7 @@ use AidingApp\Contact\Enums\ContactStatusColorOptions;
 use AidingApp\Contact\Enums\SystemContactClassification;
 use AidingApp\Contact\Observers\OrganizationTypeObserver;
 use AidingApp\Contact\Observers\OrganizationIndustryObserver;
+use AidingApp\Contact\Observers\OrganizationObserver;
 
 class ContactServiceProvider extends ServiceProvider
 {
@@ -75,6 +76,7 @@ class ContactServiceProvider extends ServiceProvider
         Contact::observe(ContactObserver::class);
         OrganizationType::observe(OrganizationTypeObserver::class);
         OrganizationIndustry::observe(OrganizationIndustryObserver::class);
+        Organization::observe(OrganizationObserver::class);
 
         $this->discoverSchema(__DIR__ . '/../../graphql/*');
         $this->registerEnum(ContactStatusColorOptions::class);
