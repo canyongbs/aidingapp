@@ -35,6 +35,7 @@
     import { defineProps, onMounted, ref, watch } from 'vue';
     import AppLoading from './Components/AppLoading.vue';
     import Header from './Components/Header.vue';
+    import Footer from './Components/Footer.vue';
     import determineIfUserIsAuthenticated from './Services/DetermineIfUserIsAuthenticated.js';
     import getAppContext from './Services/GetAppContext.js';
     import axios from './Globals/Axios.js';
@@ -86,6 +87,7 @@
     const headerLogo = ref('');
     const tags = ref({});
     const appName = ref('');
+    const footerContent = ref('');
 
     const authentication = ref({
         code: null,
@@ -159,6 +161,8 @@
                 headerLogo.value = response.data.header_logo;
 
                 appName.value = response.data.app_name;
+
+                footerContent.value = response.data.footer;
 
                 setRequiresAuthentication(response.data.requires_authentication).then(() => {
                     requiresAuthentication.value = response.data.requires_authentication;
@@ -435,7 +439,7 @@
                     </FormKit>
                 </div>
             </div>
-            <div v-else>
+            <div v-else class="min-h-screen">
                 <Header :api-url="apiUrl" @show-login="showLogin = true" :header-logo="headerLogo" :app-name="appName">
                 </Header>
                 <div v-if="errorLoading" class="text-center">
@@ -443,7 +447,7 @@
                     <p class="text-lg text-red-500">Please try again later</p>
                 </div>
 
-                <div v-else class="flex flex-row min-h-screen">
+                <div v-else class="flex flex-row">
                     <div class="w-full">
                         <RouterView
                             :search-url="searchUrl"
@@ -455,6 +459,8 @@
                         </RouterView>
                     </div>
                 </div>
+
+                <Footer :content="footerContent"></Footer>
             </div>
         </div>
     </div>

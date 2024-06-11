@@ -44,3 +44,14 @@
 li[data-message-type="success"] {
     color:green;
 }
+
+/*If we properly support dark mode in the future remove this.*/
+@media (prefers-color-scheme: dark) {
+    .dark\:block {
+        @apply !hidden;
+    }
+
+    .dark\:hidden {
+        @apply !block;
+    }
+}
