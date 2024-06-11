@@ -52,15 +52,12 @@ use Filament\Forms\Components\Section;
 use AidingApp\Portal\Enums\PortalLayout;
 use Filament\Forms\Components\TextInput;
 use App\Filament\Clusters\GlobalSettings;
-use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Infolists\Components\TextEntry;
-use FilamentTiptapEditor\Enums\TiptapOutput;
 use AidingApp\Portal\Settings\PortalSettings;
 use Filament\Forms\Components\Actions\Action;
 use App\Filament\Forms\Components\ColorSelect;
 use Laravel\Pennant\Feature as PennantFeature;
-use App\Filament\Forms\Components\TiptapEditor;
 use AidingApp\Portal\Actions\GeneratePortalEmbedCode;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 
@@ -196,18 +193,6 @@ class ManagePortalSettings extends SettingsPage
                             ->columnSpanFull()
                             ->visible(PennantFeature::active('portal-logo')),
                     ]),
-                Section::make('Footer')
-                    ->schema([
-                        ColorPicker::make('footer_color')
-                            ->label('Color')
-                            ->hexColor(),
-                        TiptapEditor::make('footer_copyright_statement')
-                            ->label('Copyright statement')
-                            ->tools(['bold', 'underline', 'italic', 'link'])
-                            ->columnSpanFull()
-                            ->output(TiptapOutput::Json),
-                    ])
-                    ->columns(2),
             ]);
     }
 }
