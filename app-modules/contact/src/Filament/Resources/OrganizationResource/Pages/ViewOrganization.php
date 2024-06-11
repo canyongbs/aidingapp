@@ -54,7 +54,7 @@ class ViewOrganization extends ViewRecord
             ->schema([
                 Section::make('Primary Info')
                     ->schema([
-                        TextEntry::make('createdBy.name')
+                        TextEntry::make('name')
                             ->label('Organization Name'),
                         TextEntry::make('email')
                             ->label('Organization Email'),
