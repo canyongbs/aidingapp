@@ -34,26 +34,23 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase\Observers;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Migrations\Migration;
 
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
-use AidingApp\KnowledgeBase\Jobs\KnowledgeBaseItemDownloadExternalMedia;
-use App\Support\MediaEncoding\Concerns\ImplementsEncodedMediaProcessing;
-
-class KnowledgeBaseItemObserver
-{
-    use ImplementsEncodedMediaProcessing;
-
-    public function saved(KnowledgeBaseItem $knowledgeBaseItem): void
+return new class () extends Migration {
+    public function up(): void
     {
-        if (is_string($knowledgeBaseItem->article_details)) {
-            $knowledgeBaseItem->article_details = json_decode($knowledgeBaseItem->article_details, true);
-        }
-
-        $this->convertPathShortcodesToIdShortcodes($knowledgeBaseItem, ['article_details', 'notes']);
-
-        $this->cleanupMediaItems($knowledgeBaseItem, ['article_details', 'notes']);
-
-        KnowledgeBaseItemDownloadExternalMedia::dispatch($knowledgeBaseItem);
+        DB::table('media')
+            ->where('model_type', 'knowledge_base_item')
+            ->where('collection_name', 'solution')
+            ->update(['collection_name' => 'article_details']);
     }
-}
+
+    public function down(): void
+    {
+        DB::table('media')
+            ->where('model_type', 'knowledge_base_item')
+            ->where('collection_name', 'article_details')
+            ->update(['collection_name' => 'solution']);
+    }
+};
