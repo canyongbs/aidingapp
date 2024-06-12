@@ -41,6 +41,7 @@ use Illuminate\Http\JsonResponse;
 use Filament\Support\Colors\Color;
 use Illuminate\Support\Facades\URL;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Vite;
 use AidingApp\Portal\Enums\PortalLayout;
 use AidingApp\Portal\Settings\PortalSettings;
 
@@ -54,10 +55,10 @@ class KnowledgeManagementPortalController extends Controller
 
         return response()->json([
             'layout' => $settings->knowledge_management_portal_layout ?? PortalLayout::Full,
-            'header_logo' => $logo ? $logo->getTemporaryUrl(
+            'header_logo' => $logo?->getTemporaryUrl(
                 expiration: now()->addMinutes(5),
                 conversionName: 'logo-height-250px',
-            ) : null,
+            ),
             'app_name' => config('app.name'),
             'primary_color' => Color::all()[$settings->knowledge_management_portal_primary_color ?? 'blue'],
             'rounding' => $settings->knowledge_management_portal_rounding,
@@ -69,6 +70,7 @@ class KnowledgeManagementPortalController extends Controller
                     absolute: false,
                 )
             ),
+            'footer_logo' => Vite::asset('resources/images/canyon-logo-light.png'),
         ]);
     }
 }
