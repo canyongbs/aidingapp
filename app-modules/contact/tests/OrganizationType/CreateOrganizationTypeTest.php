@@ -48,9 +48,7 @@ test('Create New Organization Type', function () {
             OrganizationTypeResource::getUrl('create')
         )->assertSuccessful();
 
-    $request = collect(CreateOrganizationTypeRequestFactory::new()->create([
-        'created_by_id' => $user->id,
-    ]));
+    $request = collect(CreateOrganizationTypeRequestFactory::new()->create());
 
     livewire(CreateOrganizationType::class)
         ->fillForm($request->toArray())

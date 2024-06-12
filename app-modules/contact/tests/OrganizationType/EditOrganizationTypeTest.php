@@ -50,9 +50,7 @@ test('Edit Organization Type Record', function () {
 
     actingAs($user);
 
-    $request = collect(EditOrganizationTypeRequestFactory::new()->create([
-        'created_by_id' => $user->id,
-    ]));
+    $request = collect(EditOrganizationTypeRequestFactory::new()->create());
 
     livewire(EditOrganizationType::class, [
         'record' => $organization_type->getRouteKey(),

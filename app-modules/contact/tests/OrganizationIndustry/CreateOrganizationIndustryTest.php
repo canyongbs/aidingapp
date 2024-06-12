@@ -42,9 +42,7 @@ test('Create New Organization Industry', function () {
 
     actingAs($user);
 
-    $request = collect(CreateOrganizationIndustryRequestFactory::new()->create([
-        'created_by_id' => $user->id,
-    ]));
+    $request = collect(CreateOrganizationIndustryRequestFactory::new()->create());
 
     livewire(CreateOrganizationIndustry::class)
         ->fillForm($request->toArray())

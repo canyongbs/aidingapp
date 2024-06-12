@@ -40,9 +40,7 @@ test('Create New Organization', function () {
     $user->givePermissionTo('organization.view-any');
     $user->givePermissionTo('organization.create');
 
-    $request = collect(CreateOrganizationRequestFactory::new()->create([
-        'created_by_id' => $user->id,
-    ]));
+    $request = collect(CreateOrganizationRequestFactory::new()->create());
 
     actingAs($user);
 

@@ -50,9 +50,7 @@ test('Edit Organization Industry Record', function () {
 
     actingAs($user);
 
-    $request = collect(EditOrganizationIndustryRequestFactory::new()->create([
-        'created_by_id' => $user->id,
-    ]));
+    $request = collect(EditOrganizationIndustryRequestFactory::new()->create());
 
     livewire(EditOrganizationIndustry::class, [
         'record' => $organization_industry->getRouteKey(),
