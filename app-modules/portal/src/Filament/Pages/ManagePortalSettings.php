@@ -99,7 +99,7 @@ class ManagePortalSettings extends SettingsPage
                         ToggleButtons::make('knowledge_management_portal_layout')
                             ->options(PortalLayout::class)
                             ->enum(PortalLayout::class)
-                            ->visible(fn (Get $get) => PennantFeature::active('portal-configuration-options') & $get('knowledge_management_portal_enabled'))
+                            ->visible(fn (Get $get) => $get('knowledge_management_portal_enabled'))
                             ->disabled(! Gate::check(Feature::KnowledgeManagement->getGateName()))
                             ->hintIcon(fn (ToggleButtons $component) => $component->isDisabled() ? 'heroicon-m-lock-closed' : null)
                             ->hintIconTooltip('Knowledge Management is not a part of your current subscription.')
