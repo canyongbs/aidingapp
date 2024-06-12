@@ -77,7 +77,7 @@ class OrganizationIndustryPolicy
     {
         return $authenticatable->canOrElse(
             abilities: 'organization_industry.create',
-            denyResponse: 'You do not have permission to create organization industry.'
+            denyResponse: 'You do not have permission to create organization industries.'
         );
     }
 
