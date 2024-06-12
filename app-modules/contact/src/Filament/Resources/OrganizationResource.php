@@ -37,9 +37,7 @@
 namespace AidingApp\Contact\Filament\Resources;
 
 use Filament\Resources\Resource;
-use Illuminate\Database\Eloquent\Builder;
 use AidingApp\Contact\Models\Organization;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\EditOrganization;
 use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\ViewOrganization;
 use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\ListOrganizations;
@@ -61,13 +59,5 @@ class OrganizationResource extends Resource
             'view' => ViewOrganization::route('/{record}'),
             'edit' => EditOrganization::route('/{record}/edit'),
         ];
-    }
-
-    public static function getEloquentQuery(): Builder
-    {
-        return parent::getEloquentQuery()
-            ->withoutGlobalScopes([
-                SoftDeletingScope::class,
-            ]);
     }
 }

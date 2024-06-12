@@ -30,25 +30,4 @@ test('View Organization is gated with proper access control', function () {
             ])
         )->assertSuccessful();
 });
-test('View Organization table action gated with proper access control', function () {
-    $user = User::factory()->licensed(Contact::getLicenseType())->create();
 
-    $organization = Organization::factory()->create();
-
-    actingAs($user)
-        ->get(
-            OrganizationResource::getUrl('view', [
-                'record' => $organization,
-            ])
-        )->assertForbidden();
-
-    $user->givePermissionTo('organization.view-any');
-    $user->givePermissionTo('organization.*.view');
-
-    actingAs($user)
-        ->get(
-            OrganizationResource::getUrl('view', [
-                'record' => $organization,
-            ])
-        )->assertSuccessful();
-});

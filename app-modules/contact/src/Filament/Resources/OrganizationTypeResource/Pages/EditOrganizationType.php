@@ -36,14 +36,15 @@
 
 namespace AidingApp\Contact\Filament\Resources\OrganizationTypeResource\Pages;
 
-use Filament\Actions;
 use Filament\Forms\Form;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\EditRecord;
 use AidingApp\Contact\Models\OrganizationType;
 use AidingApp\Contact\Filament\Resources\OrganizationTypeResource;
+use Filament\Actions\DeleteAction;
 
 class EditOrganizationType extends EditRecord
 {
@@ -94,8 +95,8 @@ class EditOrganizationType extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\ViewAction::make(),
-            Actions\DeleteAction::make(),
+            ViewAction::make(),
+            DeleteAction::make(),
         ];
     }
 }

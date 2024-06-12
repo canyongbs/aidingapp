@@ -15,7 +15,7 @@ use AidingApp\Contact\Filament\Resources\OrganizationIndustryResource;
 use AidingApp\Contact\Filament\Resources\OrganizationIndustryResource\Pages\CreateOrganizationIndustry;
 use AidingApp\Contact\Tests\OrganizationIndustry\RequestFactories\CreateOrganizationIndustryRequestFactory;
 
-test('Create OrganizationIndustry is gated with proper access control', function () {
+test('Create Organization Industry is gated with proper access control', function () {
     $user = User::factory()->licensed(Contact::getLicenseType())->create();
 
     actingAs($user)
@@ -33,6 +33,14 @@ test('Create OrganizationIndustry is gated with proper access control', function
         ->get(
             OrganizationIndustryResource::getUrl('create')
         )->assertSuccessful();
+});
+test('Create New Organization Industry', function () {
+    $user = User::factory()->licensed(Contact::getLicenseType())->create();
+
+    $user->givePermissionTo('organization_industry.view-any');
+    $user->givePermissionTo('organization_industry.create');
+
+    actingAs($user);
 
     $request = collect(CreateOrganizationIndustryRequestFactory::new()->create([
         'created_by_id' => $user->id,

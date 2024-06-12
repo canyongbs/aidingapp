@@ -37,6 +37,7 @@
 namespace AidingApp\Contact\Observers;
 
 use AidingApp\Contact\Models\OrganizationIndustry;
+use App\Models\User;
 
 class OrganizationIndustryObserver
 {
@@ -46,7 +47,7 @@ class OrganizationIndustryObserver
     public function creating(OrganizationIndustry $organizationIndustry): void
     {
         $user = auth()->user();
-        $organizationIndustry->createdBy()->associate($user);
+        ($user instanceof User) ? $organizationIndustry->createdBy()->associate($user) : '';
     }
 
     /**

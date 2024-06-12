@@ -15,7 +15,7 @@ use AidingApp\Contact\Filament\Resources\OrganizationTypeResource;
 use AidingApp\Contact\Filament\Resources\OrganizationTypeResource\Pages\CreateOrganizationType;
 use AidingApp\Contact\Tests\OrganizationType\RequestFactories\CreateOrganizationTypeRequestFactory;
 
-test('Create OrganizationType is gated with proper access control', function () {
+test('Create Organization Type is gated with proper access control', function () {
     $user = User::factory()->licensed(Contact::getLicenseType())->create();
 
     actingAs($user)
@@ -25,6 +25,20 @@ test('Create OrganizationType is gated with proper access control', function () 
 
     livewire(CreateOrganizationType::class)
         ->assertForbidden();
+
+    $user->givePermissionTo('organization_type.view-any');
+    $user->givePermissionTo('organization_type.create');
+
+    actingAs($user)
+        ->get(
+            OrganizationTypeResource::getUrl('create')
+        )->assertSuccessful();
+
+    livewire(CreateOrganizationType::class)
+        ->assertSuccessful();
+});
+test('Create New Organization Type', function () {
+    $user = User::factory()->licensed(Contact::getLicenseType())->create();
 
     $user->givePermissionTo('organization_type.view-any');
     $user->givePermissionTo('organization_type.create');

@@ -36,6 +36,19 @@ test('Edit Organization is gated with proper access control', function () {
                 'record' => $organization,
             ])
         )->assertSuccessful();
+    livewire(EditOrganization::class, [
+        'record' => $organization->getRouteKey(),
+    ])
+        ->assertSuccessful();
+});
+test('Edit Organization Record', function () {
+    $user = User::factory()->licensed(Contact::getLicenseType())->create();
+    $organization = Organization::factory()->create();
+
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.*.update');
+
+    actingAs($user);
 
     $request = collect(EditOrganizationRequestFactory::new()->create([
         'created_by_id' => $user->id,

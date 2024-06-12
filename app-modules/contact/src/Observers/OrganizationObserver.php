@@ -3,6 +3,7 @@
 namespace AidingApp\Contact\Observers;
 
 use AidingApp\Contact\Models\Organization;
+use App\Models\User;
 
 class OrganizationObserver
 {
@@ -13,6 +14,6 @@ class OrganizationObserver
     {
         $user = auth()->user();
 
-        $organization->createdBy()->associate($user);
+        ($user instanceof User) ? $organization->createdBy()->associate($user) : '';
     }
 }

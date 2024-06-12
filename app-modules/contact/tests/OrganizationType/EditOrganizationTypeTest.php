@@ -11,7 +11,7 @@ use AidingApp\Contact\Filament\Resources\OrganizationTypeResource;
 use AidingApp\Contact\Filament\Resources\OrganizationTypeResource\Pages\EditOrganizationType;
 use AidingApp\Contact\Tests\OrganizationType\RequestFactories\EditOrganizationTypeRequestFactory;
 
-test('Edit OrganizationType is gated with proper access control', function () {
+test('Edit Organization Type is gated with proper access control', function () {
     $user = User::factory()->licensed(Contact::getLicenseType())->create();
     $organization_type = OrganizationType::factory()->create();
 
@@ -36,6 +36,19 @@ test('Edit OrganizationType is gated with proper access control', function () {
                 'record' => $organization_type,
             ])
         )->assertSuccessful();
+
+    livewire(EditOrganizationType::class, [
+        'record' => $organization_type->getRouteKey(),
+    ])->assertSuccessful();
+});
+test('Edit Organization Type Record', function () {
+    $user = User::factory()->licensed(Contact::getLicenseType())->create();
+    $organization_type = OrganizationType::factory()->create();
+
+    $user->givePermissionTo('organization_type.view-any');
+    $user->givePermissionTo('organization_type.*.update');
+
+    actingAs($user);
 
     $request = collect(EditOrganizationTypeRequestFactory::new()->create([
         'created_by_id' => $user->id,

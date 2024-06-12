@@ -11,7 +11,7 @@ use AidingApp\Contact\Filament\Resources\OrganizationIndustryResource;
 use AidingApp\Contact\Filament\Resources\OrganizationIndustryResource\Pages\EditOrganizationIndustry;
 use AidingApp\Contact\Tests\OrganizationIndustry\RequestFactories\EditOrganizationIndustryRequestFactory;
 
-test('Edit OrganizationIndustry is gated with proper access control', function () {
+test('Edit Organization Industry is gated with proper access control', function () {
     $user = User::factory()->licensed(Contact::getLicenseType())->create();
     $organization_industry = OrganizationIndustry::factory()->create();
 
@@ -36,6 +36,19 @@ test('Edit OrganizationIndustry is gated with proper access control', function (
                 'record' => $organization_industry,
             ])
         )->assertSuccessful();
+    livewire(EditOrganizationIndustry::class, [
+        'record' => $organization_industry->getRouteKey(),
+    ])
+        ->assertSuccessful();
+});
+test('Edit Organization Industry Record', function () {
+    $user = User::factory()->licensed(Contact::getLicenseType())->create();
+    $organization_industry = OrganizationIndustry::factory()->create();
+
+    $user->givePermissionTo('organization_industry.view-any');
+    $user->givePermissionTo('organization_industry.*.update');
+
+    actingAs($user);
 
     $request = collect(EditOrganizationIndustryRequestFactory::new()->create([
         'created_by_id' => $user->id,

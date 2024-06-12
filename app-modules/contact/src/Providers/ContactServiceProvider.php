@@ -72,6 +72,8 @@ class ContactServiceProvider extends ServiceProvider
             'contact_source' => ContactSource::class,
             'contact_status' => ContactStatus::class,
             'organization' => Organization::class,
+            'organization_industry' => OrganizationIndustry::class,
+            'organization_type' => OrganizationType::class,
         ]);
         Contact::observe(ContactObserver::class);
         OrganizationType::observe(OrganizationTypeObserver::class);

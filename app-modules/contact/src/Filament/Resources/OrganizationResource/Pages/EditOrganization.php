@@ -39,10 +39,8 @@ namespace AidingApp\Contact\Filament\Resources\OrganizationResource\Pages;
 use Filament\Forms\Form;
 use Filament\Actions\ViewAction;
 use Filament\Actions\DeleteAction;
-use Filament\Actions\RestoreAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
-use Filament\Actions\ForceDeleteAction;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\EditRecord;
@@ -155,8 +153,6 @@ class EditOrganization extends EditRecord
         return [
             ViewAction::make(),
             DeleteAction::make(),
-            ForceDeleteAction::make(),
-            RestoreAction::make(),
         ];
     }
 }

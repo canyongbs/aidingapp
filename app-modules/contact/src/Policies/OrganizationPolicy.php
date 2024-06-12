@@ -61,7 +61,7 @@ class OrganizationPolicy
     {
         return $authenticatable->canOrElse(
             abilities: 'organization.view-any',
-            denyResponse: 'You do not have permission to view organization.'
+            denyResponse: 'You do not have permission to view organizations.'
         );
     }
 
@@ -69,7 +69,7 @@ class OrganizationPolicy
     {
         return $authenticatable->canOrElse(
             abilities: ['organization.*.view', "organization.{$organization->id}.view"],
-            denyResponse: 'You do not have permission to view this organization.'
+            denyResponse: 'You do not have permission to view this organizations.'
         );
     }
 

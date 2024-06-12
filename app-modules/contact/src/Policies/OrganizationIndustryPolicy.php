@@ -61,7 +61,7 @@ class OrganizationIndustryPolicy
     {
         return $authenticatable->canOrElse(
             abilities: 'organization_industry.view-any',
-            denyResponse: 'You do not have permission to view organization industry.'
+            denyResponse: 'You do not have permission to view organization industries.'
         );
     }
 
@@ -69,7 +69,7 @@ class OrganizationIndustryPolicy
     {
         return $authenticatable->canOrElse(
             abilities: ['organization_industry.*.view', "organization_industry.{ {$organizationIndustry->id}}.view"],
-            denyResponse: 'You do not have permission to view this organization industry.'
+            denyResponse: 'You do not have permission to view this organization industries.'
         );
     }
 

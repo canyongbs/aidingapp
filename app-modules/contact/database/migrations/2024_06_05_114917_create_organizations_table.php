@@ -46,7 +46,6 @@ return new class () extends Migration {
             $table->string('name');
             $table->string('email')->nullable();
             $table->text('phone_number')->nullable();
-            $table->string('logo')->nullable();
             $table->string('website')->nullable();
             $table->foreignUuid('industry_id')->nullable()->constrained('organization_industries');
             $table->foreignUuid('type_id')->nullable()->constrained('organization_types');

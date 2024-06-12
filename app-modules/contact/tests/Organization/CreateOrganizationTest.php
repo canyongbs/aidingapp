@@ -33,10 +33,18 @@ test('Create Organization is gated with proper access control', function () {
         ->get(
             OrganizationResource::getUrl('create')
         )->assertSuccessful();
+});
+test('Create New Organization', function () {
+    $user = User::factory()->licensed(Contact::getLicenseType())->create();
+
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.create');
 
     $request = collect(CreateOrganizationRequestFactory::new()->create([
         'created_by_id' => $user->id,
     ]));
+
+    actingAs($user);
 
     livewire(CreateOrganization::class)
         ->fillForm($request->toArray())

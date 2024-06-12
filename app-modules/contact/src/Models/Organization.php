@@ -39,18 +39,21 @@ namespace AidingApp\Contact\Models;
 use App\Models\User;
 use App\Models\BaseModel;
 use Spatie\MediaLibrary\HasMedia;
+use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 
-class Organization extends BaseModel implements HasMedia
+class Organization extends BaseModel implements HasMedia, Auditable
 {
     use HasFactory;
     use HasUuids;
     use SoftDeletes;
     use InteractsWithMedia;
+    use AuditableTrait;
 
     protected $fillable = [
         'name',
@@ -86,11 +89,6 @@ class Organization extends BaseModel implements HasMedia
             ]);
     }
 
-    public function createdBy(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
-    }
-
     public function industry(): BelongsTo
     {
         return $this->belongsTo(OrganizationIndustry::class);
@@ -99,5 +97,10 @@ class Organization extends BaseModel implements HasMedia
     public function type(): BelongsTo
     {
         return $this->belongsTo(OrganizationType::class);
+    }
+
+    public function createdBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 }
