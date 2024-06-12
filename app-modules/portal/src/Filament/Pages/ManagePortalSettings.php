@@ -40,6 +40,7 @@ use App\Models\User;
 use App\Enums\Feature;
 use Filament\Forms\Get;
 use Filament\Forms\Form;
+use App\Models\SettingsProperty;
 use Filament\Pages\SettingsPage;
 use AidingApp\Form\Enums\Rounding;
 use Illuminate\Support\Facades\Gate;
@@ -51,27 +52,26 @@ use Filament\Forms\Components\Section;
 use AidingApp\Portal\Enums\PortalLayout;
 use Filament\Forms\Components\TextInput;
 use App\Filament\Clusters\GlobalSettings;
-use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Infolists\Components\TextEntry;
-use FilamentTiptapEditor\Enums\TiptapOutput;
 use AidingApp\Portal\Settings\PortalSettings;
 use Filament\Forms\Components\Actions\Action;
 use App\Filament\Forms\Components\ColorSelect;
-use App\Filament\Forms\Components\TiptapEditor;
+use Laravel\Pennant\Feature as PennantFeature;
 use AidingApp\Portal\Actions\GeneratePortalEmbedCode;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 
 class ManagePortalSettings extends SettingsPage
 {
     protected static ?string $navigationIcon = 'heroicon-o-cog-6-tooth';
 
-    protected static ?string $navigationLabel = 'Portals';
+    protected static ?string $navigationLabel = 'Client Portal';
 
     protected static ?int $navigationSort = 60;
 
     protected static string $settings = PortalSettings::class;
 
-    protected static ?string $title = 'Portals';
+    protected static ?string $title = 'Client Portal';
 
     protected static ?string $cluster = GlobalSettings::class;
 
@@ -87,7 +87,7 @@ class ManagePortalSettings extends SettingsPage
     {
         return $form
             ->schema([
-                Section::make('Knowledge Portal')
+                Section::make('Client Portal')
                     ->schema([
                         Toggle::make('knowledge_management_portal_enabled')
                             ->label('Knowledge Management')
@@ -181,19 +181,18 @@ class ManagePortalSettings extends SettingsPage
                             )
                             ->columnSpanFull(),
                     ])->columns(2),
-
-                Section::make('Footer')
+                Section::make('Header')
                     ->schema([
-                        ColorPicker::make('footer_color')
-                            ->label('Color')
-                            ->hexColor(),
-                        TiptapEditor::make('footer_copyright_statement')
-                            ->label('Copyright statement')
-                            ->tools(['bold', 'underline', 'italic', 'link'])
+                        SpatieMediaLibraryFileUpload::make('logo')
+                            ->collection('logo')
+                            ->visibility('private')
+                            ->image()
+                            ->model(
+                                SettingsProperty::getInstance('portal.logo'),
+                            )
                             ->columnSpanFull()
-                            ->output(TiptapOutput::Json),
-                    ])
-                    ->columns(2),
+                            ->visible(PennantFeature::active('portal-logo')),
+                    ]),
             ]);
     }
 }

@@ -58,6 +58,13 @@ class MailMessage extends BaseMailMessage
 
     public function settings(?NotificationSetting $setting): static
     {
+        if (! empty($setting->from_name)) {
+            $this->from(
+                address: config('mail.from.address'),
+                name: $setting->from_name,
+            );
+        }
+
         $this->viewData = [
             $this->viewData,
             'settings' => $setting,

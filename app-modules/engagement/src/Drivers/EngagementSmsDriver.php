@@ -39,8 +39,10 @@ namespace AidingApp\Engagement\Drivers;
 use AidingApp\Engagement\Models\EngagementDeliverable;
 use AidingApp\Engagement\Actions\QueuedEngagementDelivery;
 use AidingApp\Engagement\Actions\EngagementSmsChannelDelivery;
-use AidingApp\Notification\DataTransferObjects\UpdateDeliveryStatusData;
+use AidingApp\Engagement\Drivers\Contracts\EngagementDeliverableDriver;
+use AidingApp\Notification\DataTransferObjects\UpdateSmsDeliveryStatusData;
 use AidingApp\IntegrationTwilio\DataTransferObjects\TwilioStatusCallbackData;
+use AidingApp\Notification\DataTransferObjects\UpdateEmailDeliveryStatusData;
 
 class EngagementSmsDriver implements EngagementDeliverableDriver
 {
@@ -48,7 +50,7 @@ class EngagementSmsDriver implements EngagementDeliverableDriver
         protected EngagementDeliverable $deliverable
     ) {}
 
-    public function updateDeliveryStatus(UpdateDeliveryStatusData $data): void
+    public function updateDeliveryStatus(UpdateEmailDeliveryStatusData|UpdateSmsDeliveryStatusData $data): void
     {
         /** @var TwilioStatusCallbackData $updateData */
         $updateData = $data->data;

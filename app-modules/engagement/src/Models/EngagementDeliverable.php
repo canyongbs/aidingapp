@@ -44,8 +44,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use AidingApp\Engagement\Drivers\EngagementEmailDriver;
 use AidingApp\Engagement\Enums\EngagementDeliveryMethod;
 use AidingApp\Engagement\Enums\EngagementDeliveryStatus;
-use AidingApp\Engagement\Drivers\EngagementDeliverableDriver;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Engagement\Drivers\Contracts\EngagementDeliverableDriver;
 
 /**
  * @mixin IdeHelperEngagementDeliverable

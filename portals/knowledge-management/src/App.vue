@@ -34,8 +34,7 @@
 <script setup>
     import { defineProps, onMounted, ref, watch } from 'vue';
     import AppLoading from './Components/AppLoading.vue';
-    import MobileSidebar from './Components/MobileSidebar.vue';
-    import DesktopSidebar from './Components/DesktopSidebar.vue';
+    import Header from './Components/Header.vue';
     import determineIfUserIsAuthenticated from './Services/DetermineIfUserIsAuthenticated.js';
     import getAppContext from './Services/GetAppContext.js';
     import axios from './Globals/Axios.js';
@@ -74,7 +73,6 @@
 
     const errorLoading = ref(false);
     const loading = ref(true);
-    const showMobileMenu = ref(false);
     const userIsAuthenticated = ref(false);
     const requiresAuthentication = ref(false);
     const hasServiceManagement = ref(false);
@@ -85,7 +83,9 @@
     const portalRounding = ref('');
     const categories = ref({});
     const serviceRequests = ref({});
+    const headerLogo = ref('');
     const tags = ref({});
+    const appName = ref('');
 
     const authentication = ref({
         code: null,
@@ -155,6 +155,10 @@
                 portalPrimaryColor.value = response.data.primary_color;
 
                 portalLayout.value = response.data.layout;
+
+                headerLogo.value = response.data.header_logo;
+
+                appName.value = response.data.app_name;
 
                 setRequiresAuthentication(response.data.requires_authentication).then(() => {
                     requiresAuthentication.value = response.data.requires_authentication;
@@ -432,27 +436,16 @@
                 </div>
             </div>
             <div v-else>
+                <Header :api-url="apiUrl" @show-login="showLogin = true" :header-logo="headerLogo" :app-name="appName">
+                </Header>
                 <div v-if="errorLoading" class="text-center">
                     <h1 class="text-3xl font-bold text-red-500">Error Loading the Help Center</h1>
                     <p class="text-lg text-red-500">Please try again later</p>
                 </div>
 
                 <div v-else class="flex flex-row min-h-screen">
-                    <MobileSidebar
-                        v-if="showMobileMenu"
-                        @show-login="showLogin = true"
-                        @sidebar-closed="showMobileMenu = !showMobileMenu"
-                        :categories="categories"
-                        :api-url="apiUrl"
-                    >
-                    </MobileSidebar>
-
-                    <DesktopSidebar @show-login="showLogin = true" :categories="categories" :api-url="apiUrl">
-                    </DesktopSidebar>
-
                     <div class="w-full">
                         <RouterView
-                            @sidebar-opened="showMobileMenu = !showMobileMenu"
                             :search-url="searchUrl"
                             :api-url="apiUrl"
                             :categories="categories"

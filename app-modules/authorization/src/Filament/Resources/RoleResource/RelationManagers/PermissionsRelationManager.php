@@ -37,7 +37,6 @@
 namespace AidingApp\Authorization\Filament\Resources\RoleResource\RelationManagers;
 
 use Filament\Tables\Table;
-use Laravel\Pennant\Feature;
 use Filament\Facades\Filament;
 use Filament\Tables\Columns\TextColumn;
 use AidingApp\Authorization\Models\Role;
@@ -78,8 +77,7 @@ class PermissionsRelationManager extends RelationManager
             ->columns([
                 IdColumn::make(),
                 TextColumn::make('group.name')
-                    ->sortable()
-                    ->visible(Feature::active('permission-groups')),
+                    ->sortable(),
                 TextColumn::make('name'),
             ])
             ->filters(
@@ -88,7 +86,6 @@ class PermissionsRelationManager extends RelationManager
                         ->relationship('group', 'name')
                         ->searchable()
                         ->preload()
-                        ->visible(Feature::active('permission-groups'))
                         ->multiple(),
                 ]
             )

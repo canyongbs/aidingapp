@@ -41,8 +41,12 @@ use App\Models\SystemUser;
 use Laravel\Pennant\Feature;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
+use Filament\Actions\Imports\Jobs\ImportCsv;
+use Filament\Actions\Exports\Jobs\PrepareCsvExport;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use OpenSearch\Migrations\Filesystem\MigrationStorage;
+use App\Overrides\Filament\Actions\Imports\Jobs\ImportCsvOverride;
+use App\Overrides\Filament\Actions\Imports\Jobs\PrepareCsvExportOverride;
 use LastDragon_ru\LaraASP\GraphQL\SearchBy\Types\Condition as GraphQLSearchByTypesCondition;
 use LastDragon_ru\LaraASP\GraphQL\SearchBy\Definitions\SearchByDirective as GraphQLSearchByDirectiveAlias;
 use App\Overrides\LastDragon_ru\LaraASP\GraphQL\SearchBy\Types\Condition as GraphQLSearchByTypesConditionOverride;
@@ -59,6 +63,8 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->bind(GraphQLSearchByTypesCondition::class, GraphQLSearchByTypesConditionOverride::class);
         $this->app->bind(GraphQLSearchByDirectiveAlias::class, GraphQLSearchByDirectiveOverride::class);
+        $this->app->bind(ImportCsv::class, ImportCsvOverride::class);
+        $this->app->bind(PrepareCsvExport::class, PrepareCsvExportOverride::class);
     }
 
     /**

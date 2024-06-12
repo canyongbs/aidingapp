@@ -52,10 +52,11 @@ class NotificationSetting extends BaseModel implements HasMedia
     use SoftDeletes;
 
     protected $fillable = [
+        'from_name',
         'name',
         'primary_color',
-        'related_to_type',
         'related_to_id',
+        'related_to_type',
     ];
 
     public function registerMediaCollections(): void

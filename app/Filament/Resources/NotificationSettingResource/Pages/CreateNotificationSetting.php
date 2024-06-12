@@ -37,12 +37,9 @@
 namespace App\Filament\Resources\NotificationSettingResource\Pages;
 
 use Filament\Forms\Form;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\CreateRecord;
-use App\Filament\Forms\Components\ColorSelect;
 use App\Filament\Resources\NotificationSettingResource;
-use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+use App\Filament\Resources\NotificationSettingResource\Forms\NotificationSettingForm;
 
 class CreateNotificationSetting extends CreateRecord
 {
@@ -50,21 +47,6 @@ class CreateNotificationSetting extends CreateRecord
 
     public function form(Form $form): Form
     {
-        return $form
-            ->columns(1)
-            ->schema([
-                TextInput::make('name')
-                    ->string()
-                    ->required()
-                    ->autocomplete(false),
-                Textarea::make('description')
-                    ->string(),
-                ColorSelect::make('primary_color'),
-                SpatieMediaLibraryFileUpload::make('logo')
-                    ->disk('s3')
-                    ->collection('logo')
-                    ->visibility('private')
-                    ->image(),
-            ]);
+        return resolve(NotificationSettingForm::class)->form($form);
     }
 }

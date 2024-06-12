@@ -37,8 +37,10 @@
 namespace AidingApp\Notification\Drivers;
 
 use AidingApp\Notification\Models\OutboundDeliverable;
-use AidingApp\Notification\DataTransferObjects\UpdateDeliveryStatusData;
+use AidingApp\Notification\Drivers\Contracts\OutboundDeliverableDriver;
+use AidingApp\Notification\DataTransferObjects\UpdateSmsDeliveryStatusData;
 use AidingApp\IntegrationTwilio\DataTransferObjects\TwilioStatusCallbackData;
+use AidingApp\Notification\DataTransferObjects\UpdateEmailDeliveryStatusData;
 
 class SmsDriver implements OutboundDeliverableDriver
 {
@@ -46,7 +48,7 @@ class SmsDriver implements OutboundDeliverableDriver
         protected OutboundDeliverable $deliverable
     ) {}
 
-    public function updateDeliveryStatus(UpdateDeliveryStatusData $data): void
+    public function updateDeliveryStatus(UpdateEmailDeliveryStatusData|UpdateSmsDeliveryStatusData $data): void
     {
         /** @var TwilioStatusCallbackData $updateData */
         $updateData = $data->data;

@@ -40,9 +40,7 @@ use Spatie\LaravelSettings\Settings;
 
 class PortalSettings extends Settings
 {
-    public ?string $footer_color = null;
-
-    public ?string $footer_copyright_statement;
+    public null $logo = null;
 
     /**
     * Knowledge Base Portal
