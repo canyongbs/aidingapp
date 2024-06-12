@@ -50,9 +50,9 @@ class KnowledgeBaseItemObserver
             $knowledgeBaseItem->article_details = json_decode($knowledgeBaseItem->article_details, true);
         }
 
-        $this->convertPathShortcodesToIdShortcodes($knowledgeBaseItem, ['solution', 'notes']);
+        $this->convertPathShortcodesToIdShortcodes($knowledgeBaseItem, ['article_details', 'notes']);
 
-        $this->cleanupMediaItems($knowledgeBaseItem, ['solution', 'notes']);
+        $this->cleanupMediaItems($knowledgeBaseItem, ['article_details', 'notes']);
 
         KnowledgeBaseItemDownloadExternalMedia::dispatch($knowledgeBaseItem);
     }

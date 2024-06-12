@@ -100,8 +100,7 @@ class KnowledgeBaseItem extends BaseModel implements Auditable, HasMedia, HasTag
 
     public function registerMediaCollections(): void
     {
-        $this->addMediaCollection('solution');
-        $this->addMediaCollection('notes');
+        $this->addMediaCollection('article_details');
     }
 
     public function scopePublic($query)
