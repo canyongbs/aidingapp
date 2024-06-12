@@ -92,7 +92,7 @@ class ManageAmazonSesSettings extends SettingsPage
                             ->string()
                             ->maxLength(150)
                             ->required(),
-                            Section::make()
+                        Section::make()
                             ->heading('SMTP Settings')
                             ->schema([
                                 TextInput::make('smtp_host')
@@ -240,8 +240,7 @@ class ManageAmazonSesSettings extends SettingsPage
         ?string $password,
         ?int $timeout,
         ?string $localDomain,
-    ): void
-    {
+    ): void {
         /** @var Tenant $tenant */
         $tenant = Tenant::current();
 
