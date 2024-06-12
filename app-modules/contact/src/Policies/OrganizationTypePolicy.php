@@ -77,7 +77,7 @@ class OrganizationTypePolicy
     {
         return $authenticatable->canOrElse(
             abilities: 'organization_type.create',
-            denyResponse: 'You do not have permission to create organization type.'
+            denyResponse: 'You do not have permission to create organization types.'
         );
     }
 
