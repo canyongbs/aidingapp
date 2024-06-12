@@ -34,46 +34,35 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Filament\Resources\ContactStatusResource\Pages;
+namespace AidingApp\Contact\Filament\Resources;
 
-use Filament\Actions\EditAction;
-use Filament\Infolists\Infolist;
-use Filament\Resources\Pages\ViewRecord;
-use Filament\Infolists\Components\Section;
-use AidingApp\Contact\Models\ContactStatus;
-use Filament\Infolists\Components\TextEntry;
-use AidingApp\Contact\Filament\Resources\ContactStatusResource;
+use Filament\Resources\Resource;
+use App\Filament\Clusters\ContactManagement;
+use AidingApp\Contact\Models\OrganizationType;
+use AidingApp\Contact\Filament\Resources\OrganizationTypeResource\Pages\EditOrganizationType;
+use AidingApp\Contact\Filament\Resources\OrganizationTypeResource\Pages\ViewOrganizationType;
+use AidingApp\Contact\Filament\Resources\OrganizationTypeResource\Pages\ListOrganizationTypes;
+use AidingApp\Contact\Filament\Resources\OrganizationTypeResource\Pages\CreateOrganizationType;
 
-class ViewContactStatus extends ViewRecord
+class OrganizationTypeResource extends Resource
 {
-    protected static string $resource = ContactStatusResource::class;
+    protected static ?string $model = OrganizationType::class;
 
-    public function infolist(Infolist $infolist): Infolist
-    {
-        return $infolist
-            ->schema([
-                Section::make()
-                    ->schema([
-                        TextEntry::make('name')
-                            ->label('Name')
-                            ->translateLabel(),
-                        TextEntry::make('classification')
-                            ->label('Classification')
-                            ->translateLabel(),
-                        TextEntry::make('color')
-                            ->label('Color')
-                            ->translateLabel()
-                            ->badge()
-                            ->color(fn (ContactStatus $contactStatus) => $contactStatus->color->value),
-                    ])
-                    ->columns(),
-            ]);
-    }
+    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected function getHeaderActions(): array
+    protected static ?string $navigationLabel = 'Org Types';
+
+    protected static ?int $navigationSort = 3;
+
+    protected static ?string $cluster = ContactManagement::class;
+
+    public static function getPages(): array
     {
         return [
-            EditAction::make(),
+            'index' => ListOrganizationTypes::route('/'),
+            'create' => CreateOrganizationType::route('/create'),
+            'view' => ViewOrganizationType::route('/{record}'),
+            'edit' => EditOrganizationType::route('/{record}/edit'),
         ];
     }
 }

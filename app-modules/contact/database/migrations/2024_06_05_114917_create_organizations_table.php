@@ -34,46 +34,38 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Filament\Resources\ContactStatusResource\Pages;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
-use Filament\Actions\EditAction;
-use Filament\Infolists\Infolist;
-use Filament\Resources\Pages\ViewRecord;
-use Filament\Infolists\Components\Section;
-use AidingApp\Contact\Models\ContactStatus;
-use Filament\Infolists\Components\TextEntry;
-use AidingApp\Contact\Filament\Resources\ContactStatusResource;
-
-class ViewContactStatus extends ViewRecord
-{
-    protected static string $resource = ContactStatusResource::class;
-
-    public function infolist(Infolist $infolist): Infolist
+return new class () extends Migration {
+    public function up(): void
     {
-        return $infolist
-            ->schema([
-                Section::make()
-                    ->schema([
-                        TextEntry::make('name')
-                            ->label('Name')
-                            ->translateLabel(),
-                        TextEntry::make('classification')
-                            ->label('Classification')
-                            ->translateLabel(),
-                        TextEntry::make('color')
-                            ->label('Color')
-                            ->translateLabel()
-                            ->badge()
-                            ->color(fn (ContactStatus $contactStatus) => $contactStatus->color->value),
-                    ])
-                    ->columns(),
-            ]);
+        Schema::create('organizations', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->string('name');
+            $table->string('email')->nullable();
+            $table->text('phone_number')->nullable();
+            $table->string('website')->nullable();
+            $table->foreignUuid('industry_id')->nullable()->constrained('organization_industries');
+            $table->foreignUuid('type_id')->nullable()->constrained('organization_types');
+            $table->longText('description')->nullable();
+            $table->integer('number_of_employees')->nullable();
+            $table->string('address')->nullable();
+            $table->string('city')->nullable();
+            $table->string('state')->nullable();
+            $table->string('postalcode')->nullable();
+            $table->string('country')->nullable();
+            $table->string('linkedin_url')->nullable();
+            $table->string('facebook_url')->nullable();
+            $table->string('twitter_url')->nullable();
+            $table->timestamps();
+            $table->softDeletes();
+        });
     }
 
-    protected function getHeaderActions(): array
+    public function down(): void
     {
-        return [
-            EditAction::make(),
-        ];
+        Schema::dropIfExists('organizations');
     }
-}
+};

@@ -34,46 +34,44 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Filament\Resources\ContactStatusResource\Pages;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Migrations\Migration;
+use Database\Migrations\Concerns\CanModifyPermissions;
 
-use Filament\Actions\EditAction;
-use Filament\Infolists\Infolist;
-use Filament\Resources\Pages\ViewRecord;
-use Filament\Infolists\Components\Section;
-use AidingApp\Contact\Models\ContactStatus;
-use Filament\Infolists\Components\TextEntry;
-use AidingApp\Contact\Filament\Resources\ContactStatusResource;
+return new class () extends Migration {
+    use CanModifyPermissions;
 
-class ViewContactStatus extends ViewRecord
-{
-    protected static string $resource = ContactStatusResource::class;
+    private array $permissions = [
+        'organization_industry.view-any' => 'Organization Industry',
+        'organization_industry.create' => 'Organization Industry',
+        'organization_industry.*.view' => 'Organization Industry',
+        'organization_industry.*.update' => 'Organization Industry',
+        'organization_industry.*.delete' => 'Organization Industry',
+        'organization_industry.*.restore' => 'Organization Industry',
+        'organization_industry.*.force-delete' => 'Organization Industry',
+    ];
 
-    public function infolist(Infolist $infolist): Infolist
+    private array $guards = [
+        'web',
+        'api',
+    ];
+
+    public function up(): void
     {
-        return $infolist
-            ->schema([
-                Section::make()
-                    ->schema([
-                        TextEntry::make('name')
-                            ->label('Name')
-                            ->translateLabel(),
-                        TextEntry::make('classification')
-                            ->label('Classification')
-                            ->translateLabel(),
-                        TextEntry::make('color')
-                            ->label('Color')
-                            ->translateLabel()
-                            ->badge()
-                            ->color(fn (ContactStatus $contactStatus) => $contactStatus->color->value),
-                    ])
-                    ->columns(),
-            ]);
+        collect($this->guards)
+            ->each(function (string $guard) {
+                $permissions = Arr::except($this->permissions, keys: DB::table('permissions')
+                    ->where('guard_name', $guard)
+                    ->pluck('name')
+                    ->all());
+
+                $this->createPermissions($permissions, $guard);
+            });
     }
 
-    protected function getHeaderActions(): array
+    public function down(): void
     {
-        return [
-            EditAction::make(),
-        ];
+        $this->deletePermissions(array_keys($this->permissions), $this->guards);
     }
-}
+};

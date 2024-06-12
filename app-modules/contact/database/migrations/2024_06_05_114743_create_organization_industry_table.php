@@ -34,46 +34,24 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Filament\Resources\ContactStatusResource\Pages;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
-use Filament\Actions\EditAction;
-use Filament\Infolists\Infolist;
-use Filament\Resources\Pages\ViewRecord;
-use Filament\Infolists\Components\Section;
-use AidingApp\Contact\Models\ContactStatus;
-use Filament\Infolists\Components\TextEntry;
-use AidingApp\Contact\Filament\Resources\ContactStatusResource;
-
-class ViewContactStatus extends ViewRecord
-{
-    protected static string $resource = ContactStatusResource::class;
-
-    public function infolist(Infolist $infolist): Infolist
+return new class () extends Migration {
+    public function up(): void
     {
-        return $infolist
-            ->schema([
-                Section::make()
-                    ->schema([
-                        TextEntry::make('name')
-                            ->label('Name')
-                            ->translateLabel(),
-                        TextEntry::make('classification')
-                            ->label('Classification')
-                            ->translateLabel(),
-                        TextEntry::make('color')
-                            ->label('Color')
-                            ->translateLabel()
-                            ->badge()
-                            ->color(fn (ContactStatus $contactStatus) => $contactStatus->color->value),
-                    ])
-                    ->columns(),
-            ]);
+        Schema::create('organization_industries', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->string('name');
+            $table->boolean('is_default')->default(false);
+            $table->timestamps();
+            $table->softDeletes();
+        });
     }
 
-    protected function getHeaderActions(): array
+    public function down(): void
     {
-        return [
-            EditAction::make(),
-        ];
+        Schema::dropIfExists('organization_industries');
     }
-}
+};

@@ -34,46 +34,26 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Filament\Resources\ContactStatusResource\Pages;
+namespace AidingApp\Contact\Database\Seeders;
 
-use Filament\Actions\EditAction;
-use Filament\Infolists\Infolist;
-use Filament\Resources\Pages\ViewRecord;
-use Filament\Infolists\Components\Section;
-use AidingApp\Contact\Models\ContactStatus;
-use Filament\Infolists\Components\TextEntry;
-use AidingApp\Contact\Filament\Resources\ContactStatusResource;
+use Illuminate\Database\Seeder;
+use AidingApp\Contact\Models\OrganizationType;
 
-class ViewContactStatus extends ViewRecord
+class OrganizationTypeSeeder extends Seeder
 {
-    protected static string $resource = ContactStatusResource::class;
-
-    public function infolist(Infolist $infolist): Infolist
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
     {
-        return $infolist
-            ->schema([
-                Section::make()
-                    ->schema([
-                        TextEntry::make('name')
-                            ->label('Name')
-                            ->translateLabel(),
-                        TextEntry::make('classification')
-                            ->label('Classification')
-                            ->translateLabel(),
-                        TextEntry::make('color')
-                            ->label('Color')
-                            ->translateLabel()
-                            ->badge()
-                            ->color(fn (ContactStatus $contactStatus) => $contactStatus->color->value),
-                    ])
-                    ->columns(),
-            ]);
-    }
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            EditAction::make(),
-        ];
+        OrganizationType::factory()
+            ->createMany(
+                [
+                    ['name' => 'Company'],
+                    ['name' => 'Non-Profit'],
+                    ['name' => 'Education'],
+                    ['name' => 'Government'],
+                ]
+            );
     }
 }

@@ -34,46 +34,33 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Filament\Resources\ContactStatusResource\Pages;
+namespace AidingApp\Contact\Tests\Organization\RequestFactories;
 
-use Filament\Actions\EditAction;
-use Filament\Infolists\Infolist;
-use Filament\Resources\Pages\ViewRecord;
-use Filament\Infolists\Components\Section;
-use AidingApp\Contact\Models\ContactStatus;
-use Filament\Infolists\Components\TextEntry;
-use AidingApp\Contact\Filament\Resources\ContactStatusResource;
+use Worksome\RequestFactories\RequestFactory;
+use AidingApp\Contact\Models\OrganizationType;
+use AidingApp\Contact\Models\OrganizationIndustry;
 
-class ViewContactStatus extends ViewRecord
+class EditOrganizationRequestFactory extends RequestFactory
 {
-    protected static string $resource = ContactStatusResource::class;
-
-    public function infolist(Infolist $infolist): Infolist
-    {
-        return $infolist
-            ->schema([
-                Section::make()
-                    ->schema([
-                        TextEntry::make('name')
-                            ->label('Name')
-                            ->translateLabel(),
-                        TextEntry::make('classification')
-                            ->label('Classification')
-                            ->translateLabel(),
-                        TextEntry::make('color')
-                            ->label('Color')
-                            ->translateLabel()
-                            ->badge()
-                            ->color(fn (ContactStatus $contactStatus) => $contactStatus->color->value),
-                    ])
-                    ->columns(),
-            ]);
-    }
-
-    protected function getHeaderActions(): array
+    public function definition(): array
     {
         return [
-            EditAction::make(),
+            'name' => fake()->company(),
+            'email' => fake()->companyEmail(),
+            'phone_number' => fake()->phoneNumber(),
+            'website' => fake()->imageUrl(640, 480, 'business', true, 'Faker'),
+            'industry_id' => OrganizationIndustry::factory()->create()->id,
+            'type_id' => OrganizationType::factory()->create()->id,
+            'description' => fake()->text(),
+            'number_of_employees' => fake()->randomNumber(),
+            'address' => fake()->address(),
+            'city' => fake()->city(),
+            'state' => fake()->state(),
+            'postalcode' => fake()->postcode(),
+            'country' => fake()->country(),
+            'linkedin_url' => fake()->imageUrl(640, 480, 'business', true, 'Faker'),
+            'facebook_url' => fake()->imageUrl(640, 480, 'business', true, 'Faker'),
+            'twitter_url' => fake()->imageUrl(640, 480, 'business', true, 'Faker'),
         ];
     }
 }

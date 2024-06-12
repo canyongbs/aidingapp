@@ -51,7 +51,9 @@ use AidingApp\Assistant\Database\Seeders\PromptTypeSeeder;
 use AidingApp\Contact\Database\Seeders\ContactSourceSeeder;
 use AidingApp\Contact\Database\Seeders\ContactStatusSeeder;
 use AidingApp\Consent\Database\Seeders\ConsentAgreementSeeder;
+use AidingApp\Contact\Database\Seeders\OrganizationTypeSeeder;
 use AidingApp\InventoryManagement\Database\Seeders\AssetSeeder;
+use AidingApp\Contact\Database\Seeders\OrganizationIndustrySeeder;
 use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseItemSeeder;
 use AidingApp\ServiceManagement\Database\Seeders\ServiceRequestSeeder;
 use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseStatusSeeder;
@@ -118,6 +120,8 @@ class DatabaseSeeder extends Seeder
             PromptSeeder::class,
 
             ContactSeeder::class,
+            OrganizationTypeSeeder::class,
+            OrganizationIndustrySeeder::class,
         ]);
     }
 }

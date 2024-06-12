@@ -34,46 +34,30 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Filament\Resources\ContactStatusResource\Pages;
+namespace AidingApp\Contact\Filament\Resources;
 
-use Filament\Actions\EditAction;
-use Filament\Infolists\Infolist;
-use Filament\Resources\Pages\ViewRecord;
-use Filament\Infolists\Components\Section;
-use AidingApp\Contact\Models\ContactStatus;
-use Filament\Infolists\Components\TextEntry;
-use AidingApp\Contact\Filament\Resources\ContactStatusResource;
+use Filament\Resources\Resource;
+use AidingApp\Contact\Models\Organization;
+use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\EditOrganization;
+use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\ViewOrganization;
+use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\ListOrganizations;
+use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\CreateOrganization;
 
-class ViewContactStatus extends ViewRecord
+class OrganizationResource extends Resource
 {
-    protected static string $resource = ContactStatusResource::class;
+    protected static ?string $model = Organization::class;
 
-    public function infolist(Infolist $infolist): Infolist
-    {
-        return $infolist
-            ->schema([
-                Section::make()
-                    ->schema([
-                        TextEntry::make('name')
-                            ->label('Name')
-                            ->translateLabel(),
-                        TextEntry::make('classification')
-                            ->label('Classification')
-                            ->translateLabel(),
-                        TextEntry::make('color')
-                            ->label('Color')
-                            ->translateLabel()
-                            ->badge()
-                            ->color(fn (ContactStatus $contactStatus) => $contactStatus->color->value),
-                    ])
-                    ->columns(),
-            ]);
-    }
+    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected function getHeaderActions(): array
+    protected static ?int $navigationSort = 21;
+
+    public static function getPages(): array
     {
         return [
-            EditAction::make(),
+            'index' => ListOrganizations::route('/'),
+            'create' => CreateOrganization::route('/create'),
+            'view' => ViewOrganization::route('/{record}'),
+            'edit' => EditOrganization::route('/{record}/edit'),
         ];
     }
 }

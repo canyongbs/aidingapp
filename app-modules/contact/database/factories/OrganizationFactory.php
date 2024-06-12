@@ -34,46 +34,41 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Filament\Resources\ContactStatusResource\Pages;
+namespace AidingApp\Contact\Database\Factories;
 
-use Filament\Actions\EditAction;
-use Filament\Infolists\Infolist;
-use Filament\Resources\Pages\ViewRecord;
-use Filament\Infolists\Components\Section;
-use AidingApp\Contact\Models\ContactStatus;
-use Filament\Infolists\Components\TextEntry;
-use AidingApp\Contact\Filament\Resources\ContactStatusResource;
+use AidingApp\Contact\Models\OrganizationType;
+use AidingApp\Contact\Models\OrganizationIndustry;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-class ViewContactStatus extends ViewRecord
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AidingApp\Contact\Models\Organization>
+ */
+class OrganizationFactory extends Factory
 {
-    protected static string $resource = ContactStatusResource::class;
-
-    public function infolist(Infolist $infolist): Infolist
-    {
-        return $infolist
-            ->schema([
-                Section::make()
-                    ->schema([
-                        TextEntry::make('name')
-                            ->label('Name')
-                            ->translateLabel(),
-                        TextEntry::make('classification')
-                            ->label('Classification')
-                            ->translateLabel(),
-                        TextEntry::make('color')
-                            ->label('Color')
-                            ->translateLabel()
-                            ->badge()
-                            ->color(fn (ContactStatus $contactStatus) => $contactStatus->color->value),
-                    ])
-                    ->columns(),
-            ]);
-    }
-
-    protected function getHeaderActions(): array
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition(): array
     {
         return [
-            EditAction::make(),
+            'name' => fake()->company(),
+            'email' => fake()->companyEmail(),
+            'phone_number' => fake()->phoneNumber(),
+            'website' => fake()->url(),
+            'industry_id' => OrganizationIndustry::factory(),
+            'type_id' => OrganizationType::factory(),
+            'description' => fake()->text(),
+            'number_of_employees' => fake()->randomNumber(),
+            'address' => fake()->address(),
+            'city' => fake()->city(),
+            'state' => fake()->state(),
+            'postalcode' => fake()->postcode(),
+            'country' => fake()->country(),
+            'linkedin_url' => fake()->url(),
+            'facebook_url' => fake()->url(),
+            'twitter_url' => fake()->url(),
         ];
     }
 }

@@ -34,46 +34,53 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Filament\Resources\ContactStatusResource\Pages;
+namespace AidingApp\Contact\Filament\Resources\OrganizationIndustryResource\Pages;
 
-use Filament\Actions\EditAction;
-use Filament\Infolists\Infolist;
-use Filament\Resources\Pages\ViewRecord;
-use Filament\Infolists\Components\Section;
-use AidingApp\Contact\Models\ContactStatus;
-use Filament\Infolists\Components\TextEntry;
-use AidingApp\Contact\Filament\Resources\ContactStatusResource;
+use Filament\Tables\Table;
+use Filament\Actions\CreateAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use App\Filament\Tables\Columns\IdColumn;
+use Filament\Resources\Pages\ListRecords;
+use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Tables\Actions\DeleteBulkAction;
+use AidingApp\Contact\Filament\Resources\OrganizationIndustryResource;
 
-class ViewContactStatus extends ViewRecord
+class ListOrganizationIndustries extends ListRecords
 {
-    protected static string $resource = ContactStatusResource::class;
+    protected static string $resource = OrganizationIndustryResource::class;
 
-    public function infolist(Infolist $infolist): Infolist
+    public function table(Table $table): Table
     {
-        return $infolist
-            ->schema([
-                Section::make()
-                    ->schema([
-                        TextEntry::make('name')
-                            ->label('Name')
-                            ->translateLabel(),
-                        TextEntry::make('classification')
-                            ->label('Classification')
-                            ->translateLabel(),
-                        TextEntry::make('color')
-                            ->label('Color')
-                            ->translateLabel()
-                            ->badge()
-                            ->color(fn (ContactStatus $contactStatus) => $contactStatus->color->value),
-                    ])
-                    ->columns(),
+        return $table
+            ->columns([
+                IdColumn::make(),
+                TextColumn::make('name')
+                    ->label('Name')
+                    ->searchable()
+                    ->sortable(),
+                IconColumn::make('is_default')
+                    ->label('Default')
+                    ->boolean(),
+            ])
+
+            ->actions([
+                ViewAction::make(),
+                EditAction::make(),
+            ])
+            ->bulkActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
             ]);
     }
 
     protected function getHeaderActions(): array
     {
         return [
-            EditAction::make(),
+            CreateAction::make(),
         ];
     }
 }

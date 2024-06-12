@@ -34,19 +34,19 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Filament\Resources\ContactStatusResource\Pages;
+namespace AidingApp\Contact\Filament\Resources\OrganizationTypeResource\Pages;
 
 use Filament\Actions\EditAction;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Infolists\Components\Section;
-use AidingApp\Contact\Models\ContactStatus;
+use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
-use AidingApp\Contact\Filament\Resources\ContactStatusResource;
+use AidingApp\Contact\Filament\Resources\OrganizationTypeResource;
 
-class ViewContactStatus extends ViewRecord
+class ViewOrganizationType extends ViewRecord
 {
-    protected static string $resource = ContactStatusResource::class;
+    protected static string $resource = OrganizationTypeResource::class;
 
     public function infolist(Infolist $infolist): Infolist
     {
@@ -55,16 +55,10 @@ class ViewContactStatus extends ViewRecord
                 Section::make()
                     ->schema([
                         TextEntry::make('name')
-                            ->label('Name')
-                            ->translateLabel(),
-                        TextEntry::make('classification')
-                            ->label('Classification')
-                            ->translateLabel(),
-                        TextEntry::make('color')
-                            ->label('Color')
-                            ->translateLabel()
-                            ->badge()
-                            ->color(fn (ContactStatus $contactStatus) => $contactStatus->color->value),
+                            ->label('Name'),
+                        IconEntry::make('is_default')
+                            ->label('Default')
+                            ->boolean(),
                     ])
                     ->columns(),
             ]);

@@ -34,46 +34,33 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Filament\Resources\ContactStatusResource\Pages;
+use App\Models\User;
 
-use Filament\Actions\EditAction;
-use Filament\Infolists\Infolist;
-use Filament\Resources\Pages\ViewRecord;
-use Filament\Infolists\Components\Section;
-use AidingApp\Contact\Models\ContactStatus;
-use Filament\Infolists\Components\TextEntry;
-use AidingApp\Contact\Filament\Resources\ContactStatusResource;
+use function Pest\Laravel\actingAs;
 
-class ViewContactStatus extends ViewRecord
-{
-    protected static string $resource = ContactStatusResource::class;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\OrganizationType;
+use AidingApp\Contact\Filament\Resources\OrganizationTypeResource;
 
-    public function infolist(Infolist $infolist): Infolist
-    {
-        return $infolist
-            ->schema([
-                Section::make()
-                    ->schema([
-                        TextEntry::make('name')
-                            ->label('Name')
-                            ->translateLabel(),
-                        TextEntry::make('classification')
-                            ->label('Classification')
-                            ->translateLabel(),
-                        TextEntry::make('color')
-                            ->label('Color')
-                            ->translateLabel()
-                            ->badge()
-                            ->color(fn (ContactStatus $contactStatus) => $contactStatus->color->value),
-                    ])
-                    ->columns(),
-            ]);
-    }
+test('View OrganizationType is gated with proper access control', function () {
+    $user = User::factory()->licensed(Contact::getLicenseType())->create();
 
-    protected function getHeaderActions(): array
-    {
-        return [
-            EditAction::make(),
-        ];
-    }
-}
+    $organization_type = OrganizationType::factory()->create();
+
+    actingAs($user)
+        ->get(
+            OrganizationTypeResource::getUrl('view', [
+                'record' => $organization_type,
+            ])
+        )->assertForbidden();
+
+    $user->givePermissionTo('organization_type.view-any');
+    $user->givePermissionTo('organization_type.*.view');
+
+    actingAs($user)
+        ->get(
+            OrganizationTypeResource::getUrl('view', [
+                'record' => $organization_type,
+            ])
+        )->assertSuccessful();
+});

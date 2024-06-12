@@ -34,46 +34,66 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Filament\Resources\ContactStatusResource\Pages;
+namespace AidingApp\Contact\Models;
 
-use Filament\Actions\EditAction;
-use Filament\Infolists\Infolist;
-use Filament\Resources\Pages\ViewRecord;
-use Filament\Infolists\Components\Section;
-use AidingApp\Contact\Models\ContactStatus;
-use Filament\Infolists\Components\TextEntry;
-use AidingApp\Contact\Filament\Resources\ContactStatusResource;
+use App\Models\BaseModel;
+use Spatie\MediaLibrary\HasMedia;
+use OwenIt\Auditing\Contracts\Auditable;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 
-class ViewContactStatus extends ViewRecord
+class Organization extends BaseModel implements HasMedia, Auditable
 {
-    protected static string $resource = ContactStatusResource::class;
+    use HasFactory;
+    use HasUuids;
+    use SoftDeletes;
+    use InteractsWithMedia;
+    use AuditableTrait;
 
-    public function infolist(Infolist $infolist): Infolist
+    protected $fillable = [
+        'name',
+        'email',
+        'phone_number',
+        'website',
+        'industry_id',
+        'type_id',
+        'description',
+        'number_of_employees',
+        'address',
+        'city',
+        'state',
+        'postalcode',
+        'country',
+        'linkedin_url',
+        'facebook_url',
+        'twitter_url',
+    ];
+
+    public function registerMediaCollections(): void
     {
-        return $infolist
-            ->schema([
-                Section::make()
-                    ->schema([
-                        TextEntry::make('name')
-                            ->label('Name')
-                            ->translateLabel(),
-                        TextEntry::make('classification')
-                            ->label('Classification')
-                            ->translateLabel(),
-                        TextEntry::make('color')
-                            ->label('Color')
-                            ->translateLabel()
-                            ->badge()
-                            ->color(fn (ContactStatus $contactStatus) => $contactStatus->color->value),
-                    ])
-                    ->columns(),
+        $this
+            ->addMediaCollection('organization_logo')
+            ->singleFile()
+            ->acceptsMimeTypes([
+                'image/png',
+                'image/jpeg',
+                'image/gif',
+                'image/webp',
+                'image/jpg',
             ]);
     }
 
-    protected function getHeaderActions(): array
+    public function industry(): BelongsTo
     {
-        return [
-            EditAction::make(),
-        ];
+        return $this->belongsTo(OrganizationIndustry::class);
+    }
+
+    public function type(): BelongsTo
+    {
+        return $this->belongsTo(OrganizationType::class);
     }
 }
