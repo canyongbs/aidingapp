@@ -59,7 +59,6 @@ return new class () extends Migration {
             $table->string('linkedin_url')->nullable();
             $table->string('facebook_url')->nullable();
             $table->string('twitter_url')->nullable();
-            $table->foreignUuid('created_by_id')->nullable()->constrained('users');
             $table->timestamps();
             $table->softDeletes();
         });

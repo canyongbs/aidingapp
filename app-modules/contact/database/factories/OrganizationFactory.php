@@ -36,7 +36,6 @@ class OrganizationFactory extends Factory
             'linkedin_url' => fake()->url(),
             'facebook_url' => fake()->url(),
             'twitter_url' => fake()->url(),
-            'created_by_id' => User::factory(),
         ];
     }
 }

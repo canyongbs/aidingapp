@@ -36,7 +36,6 @@
 
 namespace AidingApp\Contact\Models;
 
-use App\Models\User;
 use App\Models\BaseModel;
 use Spatie\MediaLibrary\HasMedia;
 use OwenIt\Auditing\Contracts\Auditable;
@@ -72,7 +71,6 @@ class Organization extends BaseModel implements HasMedia, Auditable
         'linkedin_url',
         'facebook_url',
         'twitter_url',
-        'created_by_id',
     ];
 
     public function registerMediaCollections(): void
@@ -97,10 +95,5 @@ class Organization extends BaseModel implements HasMedia, Auditable
     public function type(): BelongsTo
     {
         return $this->belongsTo(OrganizationType::class);
-    }
-
-    public function createdBy(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
     }
 }

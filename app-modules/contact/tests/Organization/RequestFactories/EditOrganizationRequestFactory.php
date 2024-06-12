@@ -36,7 +36,6 @@
 
 namespace AidingApp\Contact\Tests\Organization\RequestFactories;
 
-use App\Models\User;
 use Worksome\RequestFactories\RequestFactory;
 use AidingApp\Contact\Models\OrganizationType;
 use AidingApp\Contact\Models\OrganizationIndustry;
@@ -62,7 +61,6 @@ class EditOrganizationRequestFactory extends RequestFactory
             'linkedin_url' => fake()->imageUrl(640, 480, 'business', true, 'Faker'),
             'facebook_url' => fake()->imageUrl(640, 480, 'business', true, 'Faker'),
             'twitter_url' => fake()->imageUrl(640, 480, 'business', true, 'Faker'),
-            'created_by_id' => User::factory()->create()->id,
         ];
     }
 }

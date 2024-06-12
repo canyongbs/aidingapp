@@ -43,8 +43,6 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class OrganizationIndustry extends Model implements Auditable
 {
@@ -61,9 +59,5 @@ class OrganizationIndustry extends Model implements Auditable
     public function organizations(): HasMany
     {
         return $this->hasMany(Organization::class, 'industry_id');
-    }
-    public function createdBy(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
     }
 }
