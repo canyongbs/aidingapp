@@ -6,7 +6,7 @@
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
     Aiding App™ is licensed under the Elastic License 2.0. For more details,
-    see https://github.com/canyongbs/aidingapp/blob/main/LICENSE.
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -29,7 +29,7 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
