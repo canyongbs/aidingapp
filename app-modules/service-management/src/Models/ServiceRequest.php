@@ -218,6 +218,11 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
         return $this->hasMany(ServiceRequestHistory::class);
     }
 
+    public function feedback(): HasMany
+    {
+        return $this->hasMany(ServiceRequestFeedback::class, 'service_id');
+    }
+
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class);

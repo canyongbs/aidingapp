@@ -37,11 +37,13 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages;
 
 use Filament\Actions;
+use App\Enums\Feature;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Forms\Form;
 use Illuminate\Support\Collection;
 use Filament\Forms\Components\Grid;
+use Illuminate\Support\Facades\Gate;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
 use AidingApp\Division\Models\Division;
@@ -54,9 +56,11 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use AidingApp\ServiceManagement\Models\ServiceRequestFeedback;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
+use AidingApp\ServiceManagement\Notifications\SendClosedServiceFeedbackNotification;
 
 class EditServiceRequest extends EditRecord
 {
@@ -165,5 +169,18 @@ class EditServiceRequest extends EditRecord
         $data['type_id'] = $this->getRecord()->priority->type_id;
 
         return $data;
+    }
+
+    protected function afterSave(): void
+    {
+        if (Gate::check(Feature::FeedbackManagement->getGateName()) && $this->getRecord()?->priority?->type?->has_enabled_feedback_collection && $this->getRecord()?->status?->name == 'Closed') {
+            //On close status of service request checking feedback collection type
+            $has_enabled_csat = $this->getRecord()?->priority?->type?->has_enabled_csat;
+            $has_enabled_nps = $this->getRecord()?->priority?->type?->has_enabled_nps;
+
+            $contact = $this->getRecord()->respondent;
+
+            $contact->notify(new SendClosedServiceFeedbackNotification($this->getRecord()));
+        }
     }
 }
