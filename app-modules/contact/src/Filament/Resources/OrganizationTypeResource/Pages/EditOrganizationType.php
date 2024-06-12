@@ -38,13 +38,13 @@ namespace AidingApp\Contact\Filament\Resources\OrganizationTypeResource\Pages;
 
 use Filament\Forms\Form;
 use Filament\Actions\ViewAction;
+use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\EditRecord;
 use AidingApp\Contact\Models\OrganizationType;
 use AidingApp\Contact\Filament\Resources\OrganizationTypeResource;
-use Filament\Actions\DeleteAction;
 
 class EditOrganizationType extends EditRecord
 {

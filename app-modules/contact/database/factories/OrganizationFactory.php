@@ -36,7 +36,6 @@
 
 namespace AidingApp\Contact\Database\Factories;
 
-use App\Models\User;
 use AidingApp\Contact\Models\OrganizationType;
 use AidingApp\Contact\Models\OrganizationIndustry;
 use Illuminate\Database\Eloquent\Factories\Factory;

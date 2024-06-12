@@ -64,4 +64,3 @@ test('View Organization is gated with proper access control', function () {
             ])
         )->assertSuccessful();
 });
-
