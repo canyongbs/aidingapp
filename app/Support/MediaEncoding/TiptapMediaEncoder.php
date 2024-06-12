@@ -181,11 +181,11 @@ class TiptapMediaEncoder
                 )->first();
 
             if (! is_null($media)) {
-                $state = "{{media|id:{$id};}}";
+                $path = "{{media|id:{$id};}}";
             }
         }
 
-        return $state;
+        return $path;
     }
 
     public static function decodeContent(string $state): string
