@@ -37,9 +37,14 @@
 namespace App\Providers;
 
 use App\Models\Tenant;
+use Sentry\State\Scope;
 use App\Models\SystemUser;
 use Laravel\Pennant\Feature;
+
+use function Sentry\configureScope;
+
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\ServiceProvider;
 use Filament\Actions\Imports\Jobs\ImportCsv;
 use Filament\Actions\Exports\Jobs\PrepareCsvExport;
@@ -87,5 +92,11 @@ class AppServiceProvider extends ServiceProvider
             URL::forceScheme('https');
             $this->app['request']->server->set('HTTPS', true);
         }
+
+        Queue::looping(function () {
+            configureScope(function (Scope $scope): void {
+                $scope->removeUser();
+            });
+        });
     }
 }
