@@ -37,7 +37,7 @@ return new class () extends Migration {
     {
         $organization_types = DB::table('organization_types')->count();
 
-        if ($organization_types <= 0) {
+        if ($organization_types <= 0 && ! app()->runningUnitTests()) {
             DB::table('organization_types')->insert($this->organization_types_data);
         }
     }
@@ -46,7 +46,7 @@ return new class () extends Migration {
     {
         $organization_types = DB::table('organization_types')->count();
 
-        if ($organization_types > 0) {
+        if ($organization_types > 0  && ! app()->runningUnitTests()) {
             foreach ($this->organization_types_data as $record) {
                 DB::table('organization_types')
                     ->where('name', $record['name'])
