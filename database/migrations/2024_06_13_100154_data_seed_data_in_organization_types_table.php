@@ -34,33 +34,58 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Tests\Organization\RequestFactories;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Migrations\Migration;
 
-use Worksome\RequestFactories\RequestFactory;
-use AidingApp\Contact\Models\OrganizationType;
-use AidingApp\Contact\Models\OrganizationIndustry;
+return new class () extends Migration {
+    private array $organization_types_data;
 
-class EditOrganizationRequestFactory extends RequestFactory
-{
-    public function definition(): array
+    public function __construct()
     {
-        return [
-            'name' => fake()->company(),
-            'email' => fake()->companyEmail(),
-            'phone_number' => fake()->phoneNumber(),
-            'website' => fake()->url(),
-            'industry_id' => OrganizationIndustry::factory()->create()->id,
-            'type_id' => OrganizationType::factory()->create()->id,
-            'description' => fake()->text(),
-            'number_of_employees' => fake()->randomNumber(),
-            'address' => fake()->address(),
-            'city' => fake()->city(),
-            'state' => fake()->state(),
-            'postalcode' => fake()->postcode(),
-            'country' => fake()->country(),
-            'linkedin_url' => fake()->url(),
-            'facebook_url' => fake()->url(),
-            'twitter_url' => fake()->url(),
+        $this->organization_types_data = [
+            [
+                'id' => (string) Str::orderedUuid(),
+                'name' => 'Company',
+                'created_at' => now(),
+            ],
+            [
+                'id' => (string) Str::orderedUuid(),
+                'name' => 'Non-Profit',
+                'created_at' => now(),
+            ],
+            [
+                'id' => (string) Str::orderedUuid(),
+                'name' => 'Education',
+                'created_at' => now(),
+            ],
+            [
+                'id' => (string) Str::orderedUuid(),
+                'name' => 'Government',
+                'created_at' => now(),
+            ],
         ];
     }
-}
+
+    public function up(): void
+    {
+        $organization_types = DB::table('organization_types')->count();
+
+        if ($organization_types <= 0 && ! app()->runningUnitTests()) {
+            DB::table('organization_types')->insert($this->organization_types_data);
+        }
+    }
+
+    public function down(): void
+    {
+        $organization_types = DB::table('organization_types')->count();
+
+        if ($organization_types > 0 && ! app()->runningUnitTests()) {
+            foreach ($this->organization_types_data as $record) {
+                DB::table('organization_types')
+                    ->where('name', $record['name'])
+                    ->delete();
+            }
+        }
+    }
+};

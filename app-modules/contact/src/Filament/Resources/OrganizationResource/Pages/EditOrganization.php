@@ -85,7 +85,7 @@ class EditOrganization extends EditRecord
                         TextInput::make('website')
                             ->label('Website')
                             ->maxLength(255)
-                            ->activeUrl(),
+                            ->url(),
                         Select::make('industry_id')
                             ->label('Industry')
                             ->relationship('industry', 'name')
@@ -135,15 +135,15 @@ class EditOrganization extends EditRecord
                         TextInput::make('linkedin_url')
                             ->label('LinkedIn URL')
                             ->maxLength(255)
-                            ->activeUrl(),
+                            ->url(),
                         TextInput::make('facebook_url')
                             ->label('Facebook URL')
                             ->maxLength(255)
-                            ->activeUrl(),
+                            ->url(),
                         TextInput::make('twitter_url')
                             ->label('Twitter URL')
                             ->maxLength(255)
-                            ->activeUrl(),
+                            ->url(),
                     ]),
             ]);
     }
