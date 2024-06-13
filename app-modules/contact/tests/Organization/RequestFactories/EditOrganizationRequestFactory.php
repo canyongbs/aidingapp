@@ -48,7 +48,7 @@ class EditOrganizationRequestFactory extends RequestFactory
             'name' => fake()->company(),
             'email' => fake()->companyEmail(),
             'phone_number' => fake()->phoneNumber(),
-            'website' => fake()->imageUrl(640, 480, 'business', true, 'Faker'),
+            'website' => fake()->url(),
             'industry_id' => OrganizationIndustry::factory()->create()->id,
             'type_id' => OrganizationType::factory()->create()->id,
             'description' => fake()->text(),
@@ -58,9 +58,9 @@ class EditOrganizationRequestFactory extends RequestFactory
             'state' => fake()->state(),
             'postalcode' => fake()->postcode(),
             'country' => fake()->country(),
-            'linkedin_url' => fake()->imageUrl(640, 480, 'business', true, 'Faker'),
-            'facebook_url' => fake()->imageUrl(640, 480, 'business', true, 'Faker'),
-            'twitter_url' => fake()->imageUrl(640, 480, 'business', true, 'Faker'),
+            'linkedin_url' => fake()->url(),
+            'facebook_url' => fake()->url(),
+            'twitter_url' => fake()->url(),
         ];
     }
 }

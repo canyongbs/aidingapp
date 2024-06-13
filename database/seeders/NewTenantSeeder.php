@@ -43,7 +43,9 @@ use AidingApp\Division\Database\Seeders\DivisionSeeder;
 use AidingApp\Contact\Database\Seeders\ContactSourceSeeder;
 use AidingApp\Contact\Database\Seeders\ContactStatusSeeder;
 use AidingApp\Consent\Database\Seeders\ConsentAgreementSeeder;
+use AidingApp\Contact\Database\Seeders\OrganizationTypeSeeder;
 use AidingApp\InventoryManagement\Database\Seeders\AssetSeeder;
+use AidingApp\Contact\Database\Seeders\OrganizationIndustrySeeder;
 use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseStatusSeeder;
 use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseQualitySeeder;
 use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseCategorySeeder;
@@ -81,6 +83,10 @@ class NewTenantSeeder extends Seeder
             // Change Request
             ChangeRequestTypeSeeder::class,
             ChangeRequestStatusSeeder::class,
+
+            //Organization Seeder
+            OrganizationTypeSeeder::class,
+            OrganizationIndustrySeeder::class,
         ]);
     }
 }
