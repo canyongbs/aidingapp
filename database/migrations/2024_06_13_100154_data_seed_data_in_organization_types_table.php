@@ -80,7 +80,7 @@ return new class () extends Migration {
     {
         $organization_types = DB::table('organization_types')->count();
 
-        if ($organization_types > 0  && ! app()->runningUnitTests()) {
+        if ($organization_types > 0 && ! app()->runningUnitTests()) {
             foreach ($this->organization_types_data as $record) {
                 DB::table('organization_types')
                     ->where('name', $record['name'])
