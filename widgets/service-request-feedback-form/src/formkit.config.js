@@ -1,5 +1,3 @@
-<?php
-
 /*
 <COPYRIGHT>
 
@@ -33,19 +31,17 @@
 
 </COPYRIGHT>
 */
+import { generateClasses } from '@formkit/themes';
+import { genesisIcons } from '@formkit/icons';
+import theme from './FormKit/theme.js';
+import inputs from './FormKit/Inputs/index.js';
 
-use Illuminate\Support\Facades\Route;
-use AidingApp\ServiceManagement\Livewire\RenderServiceRequestForm;
-use AidingApp\ServiceManagement\Livewire\RenderServiceRequestFeedbackForm;
-
-Route::middleware('web')
-    ->prefix('service-request-forms')
-    ->name('service-request-forms.')
-    ->group(function () {
-        Route::get('/{serviceRequestForm}/respond', RenderServiceRequestForm::class)
-            ->name('show');
-    });
-
-Route::get('/service-request/feedback/{serviceid}', RenderServiceRequestFeedbackForm::class)
-    ->middleware('web')
-    ->name('feedback.service.request');
+export default {
+    icons: {
+        ...genesisIcons,
+    },
+    inputs,
+    config: {
+        classes: generateClasses(theme),
+    },
+};

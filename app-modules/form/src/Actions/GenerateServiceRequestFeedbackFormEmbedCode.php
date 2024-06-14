@@ -34,18 +34,28 @@
 </COPYRIGHT>
 */
 
-use Illuminate\Support\Facades\Route;
-use AidingApp\ServiceManagement\Livewire\RenderServiceRequestForm;
-use AidingApp\ServiceManagement\Livewire\RenderServiceRequestFeedbackForm;
+namespace AidingApp\Form\Actions;
 
-Route::middleware('web')
-    ->prefix('service-request-forms')
-    ->name('service-request-forms.')
-    ->group(function () {
-        Route::get('/{serviceRequestForm}/respond', RenderServiceRequestForm::class)
-            ->name('show');
-    });
+use Exception;
+use Illuminate\Support\Facades\URL;
+use AidingApp\Form\Models\Submissible;
+use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 
-Route::get('/service-request/feedback/{serviceid}', RenderServiceRequestFeedbackForm::class)
-    ->middleware('web')
-    ->name('feedback.service.request');
+class GenerateServiceRequestFeedbackFormEmbedCode
+{
+    public function handle(): string
+    {
+      $scriptUrl = url('js/widgets/service-request-feedback-form/aiding-app-service-request-feedback-form-widget.js?');
+      $formDefinitionUrl = URL::to(
+          URL::signedRoute(
+              name: 'service-requests.feedback.define',
+              absolute: false,
+          )
+      );
+
+      return <<<EOD
+      <service-request-feedback-form-embed url="{$formDefinitionUrl}"></service-request-feedback-form-embed>
+      <script src="{$scriptUrl}"></script>
+      EOD;
+    }
+}

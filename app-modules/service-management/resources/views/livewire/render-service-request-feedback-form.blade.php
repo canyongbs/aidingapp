@@ -1,6 +1,4 @@
-<?php
-
-/*
+{{--
 <COPYRIGHT>
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
@@ -32,20 +30,13 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
+--}}
+@php
+    use AidingApp\Form\Actions\GenerateServiceRequestFeedbackFormEmbedCode;
+@endphp
 
-use Illuminate\Support\Facades\Route;
-use AidingApp\ServiceManagement\Livewire\RenderServiceRequestForm;
-use AidingApp\ServiceManagement\Livewire\RenderServiceRequestFeedbackForm;
-
-Route::middleware('web')
-    ->prefix('service-request-forms')
-    ->name('service-request-forms.')
-    ->group(function () {
-        Route::get('/{serviceRequestForm}/respond', RenderServiceRequestForm::class)
-            ->name('show');
-    });
-
-Route::get('/service-request/feedback/{serviceid}', RenderServiceRequestFeedbackForm::class)
-    ->middleware('web')
-    ->name('feedback.service.request');
+<div class="flex items-center justify-center px-4 py-16">
+    <div class="w-full max-w-4xl">
+        {!! resolve(GenerateServiceRequestFeedbackFormEmbedCode::class)->handle() !!}
+    </div>
+</div>

@@ -1,5 +1,3 @@
-<?php
-
 /*
 <COPYRIGHT>
 
@@ -33,19 +31,29 @@
 
 </COPYRIGHT>
 */
+import { createApp, defineCustomElement, getCurrentInstance, h } from 'vue';
+import './widget.css';
+import App from './App.vue';
+import { defaultConfig, plugin } from '@formkit/vue';
+import config from './formkit.config.js';
 
-use Illuminate\Support\Facades\Route;
-use AidingApp\ServiceManagement\Livewire\RenderServiceRequestForm;
-use AidingApp\ServiceManagement\Livewire\RenderServiceRequestFeedbackForm;
+customElements.define(
+    'service-request-feedback-form-embed',
+    defineCustomElement({
+        setup(props) {
+            const app = createApp();
 
-Route::middleware('web')
-    ->prefix('service-request-forms')
-    ->name('service-request-forms.')
-    ->group(function () {
-        Route::get('/{serviceRequestForm}/respond', RenderServiceRequestForm::class)
-            ->name('show');
-    });
+            // install plugins
+            app.use(plugin, defaultConfig(config));
 
-Route::get('/service-request/feedback/{serviceid}', RenderServiceRequestFeedbackForm::class)
-    ->middleware('web')
-    ->name('feedback.service.request');
+            app.config.devtools = true;
+
+            const inst = getCurrentInstance();
+            Object.assign(inst.appContext, app._context);
+            Object.assign(inst.provides, app._context.provides);
+
+            return () => h(App, props);
+        },
+        props: ['url'],
+    }),
+);

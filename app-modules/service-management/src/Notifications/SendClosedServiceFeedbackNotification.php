@@ -68,7 +68,7 @@ class SendClosedServiceFeedbackNotification extends BaseNotification implements 
             ->subject("Feedback survey for {$this->serviceRequest->service_request_number}")
             ->greeting("Hi {$name},")
             ->line('To help us serve you better in the future, we’d love to hear about your experience with our support team.')
-            ->action('Rate Service', '#')
+            ->action('Rate Service', route('feedback.service.request', $this->serviceRequest->id))
             ->line('We appreciate your time and we value your feedback!')
             ->salutation('Thank you.');
     }

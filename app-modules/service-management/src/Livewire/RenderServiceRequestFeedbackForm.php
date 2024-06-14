@@ -34,18 +34,27 @@
 </COPYRIGHT>
 */
 
-use Illuminate\Support\Facades\Route;
-use AidingApp\ServiceManagement\Livewire\RenderServiceRequestForm;
-use AidingApp\ServiceManagement\Livewire\RenderServiceRequestFeedbackForm;
+namespace AidingApp\ServiceManagement\Livewire;
 
-Route::middleware('web')
-    ->prefix('service-request-forms')
-    ->name('service-request-forms.')
-    ->group(function () {
-        Route::get('/{serviceRequestForm}/respond', RenderServiceRequestForm::class)
-            ->name('show');
-    });
+use Livewire\Component;
+use Illuminate\Contracts\View\View;
+use Filament\Forms\Contracts\HasForms;
+use Filament\Forms\Concerns\InteractsWithForms;
+use AidingApp\ServiceManagement\Models\ServiceRequestFeedback;
 
-Route::get('/service-request/feedback/{serviceid}', RenderServiceRequestFeedbackForm::class)
-    ->middleware('web')
-    ->name('feedback.service.request');
+class RenderServiceRequestFeedbackForm extends Component implements HasForms
+{
+    use InteractsWithForms;
+
+    public bool $show = true;
+
+    public ServiceRequestFeedback $serviceRequestFeedback;
+
+    public ?array $data = [];
+
+    public function render(): View
+    {
+        return view('service-management::livewire.render-service-request-feedback-form')
+            ->title(__('Service request feedback for :serviceid'));
+    }
+}
