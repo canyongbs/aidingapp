@@ -85,6 +85,7 @@
     const categories = ref({});
     const serviceRequests = ref({});
     const headerLogo = ref('');
+    const favicon = ref('');
     const tags = ref({});
     const appName = ref('');
     const footerLogo = ref('');
@@ -137,6 +138,17 @@
             immediate: true,
         },
     );
+    watch(favicon, async (newFavicon, oldFavicon) => {
+        if (newFavicon != oldFavicon) {
+            var link = document.querySelector("link[rel='icon']");
+            if (!link) {
+                link = document.createElement('link');
+                link.rel = 'icon';
+                document.getElementsByTagName('head')[0].appendChild(link);
+            }
+            link.href = favicon.value;
+        }
+    });
 
     async function getKnowledgeManagementPortal() {
         await axios
@@ -159,6 +171,8 @@
                 portalLayout.value = response.data.layout;
 
                 headerLogo.value = response.data.header_logo;
+
+                favicon.value = response.data.favicon;
 
                 appName.value = response.data.app_name;
 

@@ -68,5 +68,19 @@ class SettingsProperty extends BaseSettingsProperty implements HasMedia
             ->performOnCollections('logo', 'dark_logo')
             ->height(250)
             ->keepOriginalImageFormat();
+
+        $this->addMediaConversion('portal_favicon')
+            ->format('png')
+            ->performOnCollections('portal_favicon')
+            ->height(512)
+            ->width(512)
+            ->acceptsMimeTypes([
+              'image/png',
+              'image/jpeg',
+              'image/ico',
+              'image/webp',
+              'image/jpg',
+              'image/svg',
+            ]);
     }
 }

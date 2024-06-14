@@ -42,6 +42,8 @@ class PortalSettings extends Settings
 {
     public null $logo = null;
 
+    public null $favicon = null;
+
     /**
     * Knowledge Base Portal
     */
