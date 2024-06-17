@@ -78,8 +78,8 @@
                 <router-link :to="{ name: 'home' }">
                     <img :src="headerLogo" :alt="appName" class="max-h-20 m-3 max-w-64" />
                 </router-link>
-            </div>  
-            <div  v-if="requiresAuthentication || hasServiceManagement">
+            </div>
+            <div v-if="requiresAuthentication || hasServiceManagement">
                 <button
                     v-if="user"
                     @click="logout"
@@ -96,7 +96,7 @@
                 >
                     Sign in
                 </button>
-            </div>  
+            </div>
         </div>
     </div>
 </template>
