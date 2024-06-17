@@ -72,12 +72,14 @@
 </script>
 
 <template>
-    <div class="header bg-white">
-        <div class="columns-2 mb-1">
-            <router-link :to="{ name: 'home' }">
-                <img :src="headerLogo" :alt="appName" class="h-12 m-3" />
-            </router-link>
-            <span v-if="requiresAuthentication || hasServiceManagement" class="rounded">
+    <div class="header item-center">
+        <div class="flex">
+            <div class="flex-auto">
+                <router-link :to="{ name: 'home' }">
+                    <img :src="headerLogo" :alt="appName" class="max-h-20 m-3 max-w-64" />
+                </router-link>
+            </div>  
+            <div  v-if="requiresAuthentication || hasServiceManagement">
                 <button
                     v-if="user"
                     @click="logout"
@@ -94,7 +96,7 @@
                 >
                     Sign in
                 </button>
-            </span>
+            </div>  
         </div>
     </div>
 </template>
