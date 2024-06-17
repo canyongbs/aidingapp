@@ -69,18 +69,21 @@ class SettingsProperty extends BaseSettingsProperty implements HasMedia
             ->height(250)
             ->keepOriginalImageFormat();
 
+        $this->addMediaCollection('portal_favicon')
+            ->singleFile()
+            ->acceptsMimeTypes([
+                'image/png',
+                'image/jpeg',
+                'image/ico',
+                'image/webp',
+                'image/jpg',
+                'image/svg',
+            ]);
+
         $this->addMediaConversion('portal_favicon')
             ->format('png')
             ->performOnCollections('portal_favicon')
             ->height(512)
-            ->width(512)
-            ->acceptsMimeTypes([
-              'image/png',
-              'image/jpeg',
-              'image/ico',
-              'image/webp',
-              'image/jpg',
-              'image/svg',
-            ]);
+            ->width(512);
     }
 }
