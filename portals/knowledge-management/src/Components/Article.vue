@@ -54,7 +54,6 @@
         }"
         class="group p-3 grid space-y-2 text-sm font-medium text-gray-700"
     >
-        <Tags :tags="article.tags" />
 
         <div class="flex">
             <span> {{ article.name }} </span>
@@ -62,6 +61,7 @@
                 class="opacity-0 h-5 w-5 text-primary-600 transition-all group-hover:translate-x-2 group-hover:opacity-100"
             />
         </div>
+        <Tags :tags="article.tags" class="text-xs font-medium me-2 py-0.5 rounded"/>
     </router-link>
 </template>
 
