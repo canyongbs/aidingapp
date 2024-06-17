@@ -37,7 +37,7 @@
 @endphp
 
 <div class="flex items-center justify-center">
-    <div class="w-full max-w-6xl">
+    <div class="w-full max-w-full">
         {!! resolve(GeneratePortalEmbedCode::class)->handle(PortalType::KnowledgeManagement) !!}
     </div>
 </div>
