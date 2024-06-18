@@ -61,7 +61,7 @@
                 class="opacity-0 h-5 w-5 text-primary-600 transition-all group-hover:translate-x-2 group-hover:opacity-100"
             />
         </div>
-        <Tags :tags="article.tags" class="text-xs font-medium me-2 py-0.5 rounded"/>
+        <Tags :tags="article.tags" />
     </router-link>
 </template>
 

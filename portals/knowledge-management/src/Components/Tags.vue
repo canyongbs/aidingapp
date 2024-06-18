@@ -44,7 +44,7 @@
 </script>
 
 <template>
-    <div class="flex flex-wrap gap-2">
+    <div class="flex flex-wrap gap-2 text-xs font-medium me-2 py-0.5 rounded">
         <Badge v-for="tag in tags" :key="tag.id" :value="tag.name" />
     </div>
 </template>

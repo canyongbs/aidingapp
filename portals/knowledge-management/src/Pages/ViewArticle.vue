@@ -111,7 +111,7 @@
                             <div class="flex flex-col gap-3">
                                 <div class="prose max-w-none">
                                     <h1>{{ article.name }}</h1>
-                                    <Tags :tags="article.tags" class="text-xs font-medium me-2 py-0.5 rounded"/>
+                                    <Tags :tags="article.tags" />
                                     <div v-html="DOMPurify.sanitize(article.content)"></div>
                                 </div>
 
