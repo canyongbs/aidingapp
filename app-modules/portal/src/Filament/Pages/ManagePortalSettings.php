@@ -140,6 +140,21 @@ class ManagePortalSettings extends SettingsPage
                             ->disabled(! Gate::check(Feature::ServiceManagement->getGateName()))
                             ->hintIcon(fn (Toggle $component) => $component->isDisabled() ? 'heroicon-m-lock-closed' : null)
                             ->columnSpanFull(),
+                        SpatieMediaLibraryFileUpload::make('favicon')
+                            ->collection('portal_favicon')
+                            ->visibility('private')
+                            ->acceptedFileTypes([
+                                'image/png',
+                                'image/jpeg',
+                                'image/ico',
+                                'image/webp',
+                                'image/jpg',
+                                'image/svg',
+                            ])
+                            ->model(
+                                SettingsProperty::getInstance('portal.favicon'),
+                            )
+                            ->columnSpanFull(),
                         Actions::make([
                             Action::make('view')
                                 ->url(fn () => route('portal.knowledge-management.show'))
