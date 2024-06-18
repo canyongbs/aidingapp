@@ -72,17 +72,17 @@
 </script>
 
 <template>
-    <div class="header">
+    <div class="header bg-white">
         <div class="columns-2 mb-1">
             <router-link :to="{ name: 'home' }">
                 <img :src="headerLogo" :alt="appName" class="h-12 m-3" />
             </router-link>
-            <span v-if="requiresAuthentication || hasServiceManagement">
+            <span v-if="requiresAuthentication || hasServiceManagement" class="rounded">
                 <button
                     v-if="user"
                     @click="logout"
                     type="button"
-                    class="text-primary-700 text-sm font-medium float-right border-2 m-3 p-2 outline-primary-700"
+                    class="bg-gradient-to-br from-primary-500 to-primary-800 text-white text-sm font-medium float-right m-3 p-2"
                 >
                     Sign out
                 </button>
@@ -90,7 +90,7 @@
                     v-else
                     @click="$emit('showLogin')"
                     type="button"
-                    class="text-primary-700 text-sm font-medium float-right border-2 m-3 p-2 outline-primary-700"
+                    class="bg-gradient-to-br from-primary-500 to-primary-800 text-white text-sm font-medium float-right m-3 p-2"
                 >
                     Sign in
                 </button>
