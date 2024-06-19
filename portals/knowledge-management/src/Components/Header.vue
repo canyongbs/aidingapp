@@ -96,7 +96,7 @@
                 >
                     Sign in
                 </button>
-            </span>
+            </div>
         </div>
     </div>
 </template>
