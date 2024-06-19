@@ -108,10 +108,10 @@
                         ></Breadcrumbs>
 
                         <div class="grid space-y-2">
-                            <Tags :tags="article.tags" />
                             <div class="flex flex-col gap-3">
                                 <div class="prose max-w-none">
                                     <h1>{{ article.name }}</h1>
+                                    <Tags :tags="article.tags" />
                                     <div v-html="DOMPurify.sanitize(article.content)"></div>
                                 </div>
 

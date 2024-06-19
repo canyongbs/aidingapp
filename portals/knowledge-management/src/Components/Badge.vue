@@ -44,7 +44,7 @@
 
 <template>
     <span
-        class="flex items-center justify-center gap-x-1 rounded ring-1 ring-inset px-2 min-w-[theme(spacing.6)] py-1 bg-gray-100 ring-gray-600/10"
+        class="flex items-center justify-center gap-x-1 rounded ring-1 ring-inset px-2 min-w-[theme(spacing.6)] bg-gray-100 ring-gray-600/10 text-xs font-medium py-0.5"
     >
         {{ value }}
     </span>
