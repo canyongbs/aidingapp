@@ -54,7 +54,6 @@
         }"
         class="group p-3 grid space-y-2 text-sm font-medium text-gray-700"
     >
-
         <div class="flex">
             <span> {{ article.name }} </span>
             <ChevronRightIcon
