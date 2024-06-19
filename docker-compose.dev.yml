@@ -25,6 +25,7 @@ services:
       OUTBOUND_COMMUNICATION_QUEUE: '${OUTBOUND_COMMUNICATION_QUEUE:-outbound-communication}'
       AUDIT_QUEUE_QUEUE: '${AUDIT_QUEUE_QUEUE:-audit}'
       IMPORT_EXPORT_QUEUE: '${IMPORT_EXPORT_QUEUE:-import-export}'
+      BUILD_ASSETS: '${BUILD_ASSETS:-false}'
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.aidingapp-app.rule=HostRegexp(`aidingapp.local`, `{subdomain:[a-z0-9]+}.aidingapp.local`)"
