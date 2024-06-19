@@ -35,8 +35,8 @@
     use AidingApp\Form\Actions\GenerateServiceRequestFeedbackFormEmbedCode;
 @endphp
 
-<div class="flex items-center justify-center px-4 py-16">
+<div class="flex items-center justify-center">
     <div class="w-full max-w-4xl">
-        {!! resolve(GenerateServiceRequestFeedbackFormEmbedCode::class)->handle() !!}
+        {!! resolve(GenerateServiceRequestFeedbackFormEmbedCode::class)->handle($this->serviceRequest) !!}
     </div>
 </div>

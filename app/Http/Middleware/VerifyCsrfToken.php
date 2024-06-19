@@ -48,6 +48,7 @@ class VerifyCsrfToken extends Middleware
     protected $except = [
         '/api/forms/*',
         '/api/service-request-forms/*',
+        '/api/service-requests/*',
         '/graphql/*',
     ];
 }

@@ -3,11 +3,11 @@
 namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Contact\Models\Contact;
-use Illuminate\Database\Eloquent\Model;
+use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class ServiceRequestFeedback extends Model
+class ServiceRequestFeedback extends BaseModel
 {
     use HasFactory;
 

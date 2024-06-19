@@ -37,33 +37,34 @@
 namespace AidingApp\ServiceManagement\Http\Controllers;
 
 use Closure;
-use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use App\Models\SettingsProperty;
 use Illuminate\Http\JsonResponse;
 use Filament\Support\Colors\Color;
 use Illuminate\Support\Facades\URL;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Vite;
+use AidingApp\Portal\Enums\PortalType;
 use Illuminate\Support\Facades\Validator;
+use AidingApp\Theme\Settings\ThemeSettings;
+use App\Actions\ResolveEducatableFromEmail;
 use Illuminate\Support\Facades\Notification;
+use AidingApp\Portal\Settings\PortalSettings;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response;
-use AidingApp\Form\Actions\GenerateSubmissibleValidation;
-use AidingApp\ServiceManagement\Models\ServiceRequestForm;
-use AidingApp\Form\Actions\ResolveSubmissionAuthorFromEmail;
-use AidingApp\Form\Notifications\AuthenticateFormNotification;
-use AidingApp\Form\Filament\Blocks\EducatableEmailFormFieldBlock;
-use AidingApp\ServiceManagement\Models\ServiceRequestFormSubmission;
-use AidingApp\ServiceManagement\Models\ServiceRequestFormAuthentication;
-use AidingApp\IntegrationGoogleRecaptcha\Settings\GoogleRecaptchaSettings;
-use AidingApp\Portal\Settings\PortalSettings;
-use AidingApp\ServiceManagement\Actions\GenerateServiceRequestFormKitSchema;
+use AidingApp\Portal\Models\PortalAuthentication;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\Portal\Notifications\AuthenticatePortalNotification;
 
 class ServiceRequestFeedbackFormWidgetController extends Controller
 {
-    public function view(Request $request,ServiceRequest $serviceRequest): JsonResponse
+    public function view(Request $request, ServiceRequest $serviceRequest): JsonResponse
     {
+        $settingsProperty = SettingsProperty::getInstance('theme.is_logo_active');
+        $logo = $settingsProperty->getFirstMedia('logo');
+
         return response()->json(
             [
                 'is_authenticated' => (bool) $request->user(),
@@ -80,25 +81,33 @@ class ServiceRequestFeedbackFormWidgetController extends Controller
                         absolute: false
                     ),
                 ]),
+                'header_logo' => $logo?->getTemporaryUrl(
+                    expiration: now()->addMinutes(5),
+                    conversionName: 'logo-height-250px',
+                ),
+                'app_name' => config('app.name'),
+                'has_enabled_csat' => $serviceRequest?->priority?->type?->has_enabled_csat,
+                'has_enabled_nps' => $serviceRequest?->priority?->type?->has_enabled_nps,
                 // 'recaptcha_enabled' => $serviceRequestForm->recaptcha_enabled,
                 // ...($serviceRequestForm->recaptcha_enabled ? [
                 //     'recaptcha_site_key' => app(GoogleRecaptchaSettings::class)->site_key,
                 // ] : []),
+                'footer_logo' => Vite::asset('resources/images/canyon-logo-light.png'),
                 'primary_color' => Color::all()[app(PortalSettings::class)->knowledge_management_portal_primary_color ?? 'blue'],
                 'rounding' => app(PortalSettings::class)->knowledge_management_portal_rounding,
             ],
         );
     }
 
-    public function requestAuthentication(Request $request, ResolveSubmissionAuthorFromEmail $resolveSubmissionAuthorFromEmail, ServiceRequestForm $serviceRequestForm): JsonResponse
+    public function requestAuthentication(Request $request, ResolveEducatableFromEmail $resolveEducatableFromEmail, ServiceRequest $serviceRequest): JsonResponse
     {
         $data = $request->validate([
             'email' => ['required', 'email'],
         ]);
 
-        $author = $resolveSubmissionAuthorFromEmail($data['email']);
+        $educatable = $resolveEducatableFromEmail($data['email']);
 
-        if (! $author) {
+        if (! $educatable) {
             throw ValidationException::withMessages([
                 'email' => 'A contact with that email address could not be found. Please contact your system administrator.',
             ]);
@@ -106,22 +115,22 @@ class ServiceRequestFeedbackFormWidgetController extends Controller
 
         $code = random_int(100000, 999999);
 
-        $authentication = new ServiceRequestFormAuthentication();
-        $authentication->author()->associate($author);
-        $authentication->submissible()->associate($serviceRequestForm);
+        $authentication = new PortalAuthentication();
+        $authentication->educatable()->associate($educatable);
+        $authentication->portal_type = PortalType::KnowledgeManagement;
         $authentication->code = Hash::make($code);
         $authentication->save();
 
         Notification::route('mail', [
-            $data['email'] => $author->getAttributeValue($author::displayNameKey()),
-        ])->notify(new AuthenticateFormNotification($authentication, $code));
+            $data['email'] => $educatable->getAttributeValue($educatable::displayNameKey()),
+        ])->notify(new AuthenticatePortalNotification($authentication, $code));
 
         return response()->json([
             'message' => "We've sent an authentication code to {$data['email']}.",
             'authentication_url' => URL::signedRoute(
-                name: 'service-request-forms.authenticate',
+                name: 'service-requests.feedback.authenticate',
                 parameters: [
-                    'serviceRequestForm' => $serviceRequestForm,
+                    'serviceRequest' => $serviceRequest,
                     'authentication' => $authentication,
                 ],
                 absolute: false
@@ -129,7 +138,7 @@ class ServiceRequestFeedbackFormWidgetController extends Controller
         ]);
     }
 
-    public function authenticate(Request $request, ServiceRequestForm $serviceRequestForm, ServiceRequestFormAuthentication $authentication): JsonResponse
+    public function authenticate(Request $request, ServiceRequest $serviceRequest, PortalAuthentication $authentication): JsonResponse
     {
         if ($authentication->isExpired()) {
             return response()->json([
@@ -149,10 +158,10 @@ class ServiceRequestFeedbackFormWidgetController extends Controller
 
         return response()->json([
             'submission_url' => URL::signedRoute(
-                name: 'service-request-forms.submit',
+                name: 'service-requests.feedback.submit',
                 parameters: [
                     'authentication' => $authentication,
-                    'serviceRequestForm' => $authentication->submissible,
+                    'serviceRequest' => $serviceRequest,
                 ],
                 absolute: false
             ),
@@ -161,26 +170,26 @@ class ServiceRequestFeedbackFormWidgetController extends Controller
 
     public function store(
         Request $request,
-        GenerateSubmissibleValidation $generateValidation,
-        ResolveSubmissionAuthorFromEmail $resolveSubmissionAuthorFromEmail,
-        ServiceRequestForm $serviceRequestForm,
+        ServiceRequest $serviceRequest,
     ): JsonResponse {
         $authentication = $request->query('authentication');
 
-        if (filled($authentication)) {
-            $authentication = ServiceRequestFormAuthentication::findOrFail($authentication);
+        if ($authentication) {
+            $authentication = PortalAuthentication::findOrFail($authentication);
         }
 
         if (
-            $serviceRequestForm->is_authenticated &&
-            ($authentication?->isExpired() ?? true)
+            $authentication?->isExpired() ?? true
         ) {
             abort(Response::HTTP_UNAUTHORIZED);
         }
 
         $validator = Validator::make(
             $request->all(),
-            $generateValidation($serviceRequestForm)
+            [
+                'csat' => ['between:1,5', Rule::requiredIf($serviceRequest?->priority?->type?->has_enabled_csat)],
+                'nps' => ['between:1,5', Rule::requiredIf($serviceRequest?->priority?->type?->has_enabled_nps)],
+            ]
         );
 
         if ($validator->fails()) {
@@ -192,98 +201,20 @@ class ServiceRequestFeedbackFormWidgetController extends Controller
             );
         }
 
-        /** @var ?ServiceRequestFormSubmission $submission */
-        $submission = $authentication ? $serviceRequestForm->submissions()
-            ->requested()
-            ->whereMorphedTo('author', $authentication->author)
-            ->first() : null;
-
-        $submission ??= $serviceRequestForm->submissions()->make();
-
-        $submission
-            ->priority()
-            ->associate(
-                $serviceRequestForm
-                    ->type
-                    ->priorities()
-                    ->findOrFail(
-                        $request->input('priority')
-                    )
-            );
-
-        if ($authentication) {
-            $submission->author()->associate($authentication->author);
-
-            $authentication->delete();
-        }
-
-        $submission->submitted_at = now();
-
-        $submission->save();
-
         $data = $validator->validated();
 
-        unset($data['recaptcha-token']);
+        $feedback = $serviceRequest->feedback()->make([
+            'csat_answer' => $data['csat'] ?? null,
+            'nps_answer' => $data['nps'] ?? null,
+        ]);
 
-        if ($serviceRequestForm->is_wizard) {
-            foreach ($serviceRequestForm->steps as $step) {
-                $stepFields = $step->fields()->pluck('type', 'id')->all();
+        $feedback->contact()->associate($authentication->educatable);
 
-                foreach ($data[$step->label] as $fieldId => $response) {
-                    $submission->fields()->attach(
-                        $fieldId,
-                        ['id' => Str::orderedUuid(), 'response' => $response],
-                    );
-
-                    if ($submission->author) {
-                        continue;
-                    }
-
-                    if ($stepFields[$fieldId] !== EducatableEmailFormFieldBlock::type()) {
-                        continue;
-                    }
-
-                    $author = $resolveSubmissionAuthorFromEmail($response);
-
-                    if (! $author) {
-                        continue;
-                    }
-
-                    $submission->author()->associate($author);
-                }
-            }
-        } else {
-            $formFields = $serviceRequestForm->fields()->pluck('type', 'id')->all();
-
-            foreach ($data as $fieldId => $response) {
-                $submission->fields()->attach(
-                    $fieldId,
-                    ['id' => Str::orderedUuid(), 'response' => $response],
-                );
-
-                if ($submission->author) {
-                    continue;
-                }
-
-                if ($formFields[$fieldId] !== EducatableEmailFormFieldBlock::type()) {
-                    continue;
-                }
-
-                $author = $resolveSubmissionAuthorFromEmail($response);
-
-                if (! $author) {
-                    continue;
-                }
-
-                $submission->author()->associate($author);
-            }
-        }
-
-        $submission->save();
+        $feedback->save();
 
         return response()->json(
             [
-                'message' => 'Service Request Form submitted successfully.',
+                'message' => 'Service Request feedback submitted successfully.',
             ]
         );
     }

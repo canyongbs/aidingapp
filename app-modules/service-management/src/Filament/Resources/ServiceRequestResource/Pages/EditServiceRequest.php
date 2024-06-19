@@ -175,8 +175,7 @@ class EditServiceRequest extends EditRecord
     {
         if (Gate::check(Feature::FeedbackManagement->getGateName()) && $this->getRecord()?->priority?->type?->has_enabled_feedback_collection && $this->getRecord()?->status?->name == 'Closed') {
             //On close status of service request checking feedback collection type
-            $has_enabled_csat = $this->getRecord()?->priority?->type?->has_enabled_csat;
-            $has_enabled_nps = $this->getRecord()?->priority?->type?->has_enabled_nps;
+            
 
             $contact = $this->getRecord()->respondent;
 

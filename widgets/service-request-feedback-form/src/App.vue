@@ -36,7 +36,9 @@
     import wizard from './FormKit/wizard.js';
     import attachRecaptchaScript from '../../../app-modules/integration-google-recaptcha/resources/js/Services/AttachRecaptchaScript.js';
     import getRecaptchaToken from '../../../app-modules/integration-google-recaptcha/resources/js/Services/GetRecaptchaToken.js';
-
+    import { FormKit } from '@formkit/vue';
+    import AppLoading from '../src/Components/AppLoading.vue';
+    import Footer from './Components/Footer.vue';
     onMounted(async () => {
         await getForm().then(function () {
             if (formRecaptchaEnabled.value === true) {
@@ -44,6 +46,42 @@
             }
         });
     });
+
+    const submitForm = async (data, node) => {
+        node.clearErrors();
+
+        let recaptchaToken = null;
+
+        if (formRecaptchaEnabled.value === true) {
+            recaptchaToken = await getRecaptchaToken(formRecaptchaKey.value);
+        }
+
+        if (recaptchaToken !== null) {
+            data['recaptcha-token'] = recaptchaToken;
+        }
+
+        fetch(formSubmissionUrl.value, {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        })
+            .then((response) => response.json())
+            .then((json) => {
+                if (json.errors) {
+                    node.setErrors([], json.errors);
+
+                    return;
+                }
+
+                submittedSuccess.value = true;
+            })
+            .catch((error) => {
+                node.setErrors([error]);
+            });
+    };
 
     let { steps, visitedSteps, activeStep, setStep, wizardPlugin } = wizard();
 
@@ -113,21 +151,21 @@
     const scriptUrl = new URL(document.currentScript.getAttribute('src'));
     const protocol = scriptUrl.protocol;
     const scriptHostname = scriptUrl.hostname;
-    const scriptQuery = Object.fromEntries(scriptUrl.searchParams);
 
     const hostUrl = `${protocol}//${scriptHostname}`;
-
+    const errorLoading = ref(false);
     const display = ref(false);
-    const formName = ref('');
     const formIsAuthenticated = ref(false);
-    const formDescription = ref('');
     const formSubmissionUrl = ref('');
     const formPrimaryColor = ref('');
     const formRounding = ref('');
     const formRecaptchaEnabled = ref(false);
     const formRecaptchaKey = ref(null);
-    const schema = ref([]);
-
+    const hasEnabledCsat = ref(false);
+    const hasEnabledNps = ref(false);
+    const headerLogo = ref('');
+    const footerLogo = ref('');
+    const appName = ref('');
     const authentication = ref({
         code: null,
         email: null,
@@ -145,14 +183,15 @@
                     throw new Error(json.error);
                 }
 
-                formName.value = json.name;
-                formDescription.value = json.description;
-                schema.value = json.schema;
                 formIsAuthenticated.value = json.is_authenticated ?? false;
                 formSubmissionUrl.value = json.submission_url ?? null;
                 formPrimaryColor.value = json.primary_color;
                 authentication.value.requestUrl = json.authentication_url ?? null;
-
+                hasEnabledCsat.value = json.has_enabled_csat;
+                hasEnabledNps.value = json.has_enabled_nps;
+                headerLogo.value = json.header_logo;
+                footerLogo.value = json.footer_logo;
+                appName.value = json.appName;
                 formRecaptchaEnabled.value = json.recaptcha_enabled ?? false;
                 formRecaptchaKey.value = json.recaptcha_site_key ?? null;
 
@@ -197,7 +236,8 @@
                 display.value = true;
             })
             .catch((error) => {
-                console.error(`Aiding App Embed Service Request Form ${error}`);
+                console.log(error);
+                errorLoading.value = true;
             });
     }
 
@@ -302,56 +342,92 @@
         }"
         class="font-sans"
     >
-        <div class="prose max-w-none" v-if="display && !submittedSuccess">
-            <link rel="stylesheet" v-bind:href="hostUrl + '/js/widgets/service-request-form/style.css'" />
-
-            <h1>
-                {{ formName }}
-            </h1>
-
-            <p>
-                {{ formDescription }}
-            </p>
-
-            <div v-if="!formSubmissionUrl">
-                <FormKit type="form" @submit="authenticate" v-model="authentication">
-                    <FormKit
-                        type="email"
-                        label="Your email address"
-                        name="email"
-                        validation="required|email"
-                        validation-visibility="submit"
-                        :disabled="authentication.isRequested"
-                    />
-
-                    <p v-if="authentication.requestedMessage" class="text-sm">
-                        {{ authentication.requestedMessage }}
-                    </p>
-
-                    <FormKit
-                        type="otp"
-                        digits="6"
-                        label="Authentication code"
-                        name="code"
-                        help="We’ve sent a code to your email address."
-                        validation="required"
-                        validation-visibility="submit"
-                        v-if="authentication.isRequested"
-                    />
-                </FormKit>
-            </div>
-
-            <div v-if="formSubmissionUrl" class="space-y-6">
-                <p v-if="formIsAuthenticated" class="text-sm">
-                    Signed in as <strong>{{ authentication.email }}</strong>
-                </p>
-
-                <FormKitSchema :schema="schema" :data="data" />
-            </div>
+        <div>
+            <link rel="stylesheet" v-bind:href="hostUrl + '/js/widgets/service-request-feedback-form/style.css'" />
         </div>
 
-        <div v-if="submittedSuccess">
-            <h1 class="text-2xl font-bold mb-2 text-center">Thank you, your submission has been received.</h1>
+        <div v-if="!display">
+            <AppLoading />
+        </div>
+
+        <div v-else>
+            <div
+                class="bg-gradient flex flex-col items-center justify-center min-h-screen"
+                v-if="display && !submittedSuccess"
+            >
+                <div
+                    v-if="!formSubmissionUrl"
+                    class="max-w-md w-full bg-white rounded ring-1 ring-black/5 shadow-sm px-8 pt-6 pb-4 flex flex-col gap-6 mx-4 mt-4"
+                >
+                    <h1 class="text-primary-950 text-center text-2xl font-semibold">Login to submit the survey</h1>
+
+                    <FormKit type="form" @submit="authenticate" v-model="authentication">
+                        <FormKit
+                            type="email"
+                            label="Your email address"
+                            name="email"
+                            validation="required|email"
+                            validation-visibility="submit"
+                            :disabled="authentication.isRequested"
+                        />
+
+                        <p v-if="authentication.requestedMessage" class="text-sm">
+                            {{ authentication.requestedMessage }}
+                        </p>
+
+                        <FormKit
+                            type="otp"
+                            digits="6"
+                            label="Authentication code"
+                            name="code"
+                            help="We’ve sent a code to your email address."
+                            validation="required"
+                            validation-visibility="submit"
+                            v-if="authentication.isRequested"
+                        />
+                    </FormKit>
+                </div>
+
+                <div v-if="formSubmissionUrl" class="flex flex-col items-center justify-center min-h-screen">
+                    <img :src="headerLogo" :alt="appName" class="h-12 m-3" />
+                    <div v-if="errorLoading" class="text-center">
+                        <h1 class="text-3xl font-bold text-red-500">Error Loading the feedback form</h1>
+                        <p class="text-lg text-red-500">Please try again later</p>
+                    </div>
+
+                    <div v-else class="flex flex-row">
+                        <div class="w-full">
+                            <FormKit type="form" @submit="submitForm">
+                                <FormKit
+                                    validation="required"
+                                    type="rating"
+                                    v-if="hasEnabledCsat"
+                                    name="csat"
+                                    label="How did we do?"
+                                ></FormKit>
+                                <FormKit
+                                    validation="required"
+                                    type="rating"
+                                    v-if="hasEnabledNps"
+                                    name="nps"
+                                    label="How likely are you to recommend our service to a friend or colleague?"
+                                ></FormKit>
+                            </FormKit>
+                        </div>
+                    </div>
+
+                    <Footer :logo="footerLogo"></Footer>
+                </div>
+            </div>
+            <div v-if="display && submittedSuccess">
+                <h1 class="text-2xl font-bold mb-2 text-center">Thank you, your feedback has been received.</h1>
+            </div>
         </div>
     </div>
 </template>
+<style scoped>
+    .bg-gradient {
+        @apply relative bg-no-repeat;
+        background-image: radial-gradient(circle at top, theme('colors.primary.200'), theme('colors.white') 50%);
+    }
+</style>

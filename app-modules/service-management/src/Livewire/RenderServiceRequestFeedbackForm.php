@@ -40,7 +40,7 @@ use Livewire\Component;
 use Illuminate\Contracts\View\View;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Concerns\InteractsWithForms;
-use AidingApp\ServiceManagement\Models\ServiceRequestFeedback;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 
 class RenderServiceRequestFeedbackForm extends Component implements HasForms
 {
@@ -48,9 +48,14 @@ class RenderServiceRequestFeedbackForm extends Component implements HasForms
 
     public bool $show = true;
 
-    public ServiceRequestFeedback $serviceRequestFeedback;
+    public ServiceRequest $serviceRequest;
 
     public ?array $data = [];
+
+    // public function mount()
+    // {
+    //     dd(request());
+    // }
 
     public function render(): View
     {

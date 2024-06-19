@@ -36,3 +36,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.formkit-inner {
+  @apply max-w-full;
+}
+
+li[data-message-type="success"] {
+  color:green;
+}

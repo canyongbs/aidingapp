@@ -36,13 +36,13 @@
 
 use Illuminate\Support\Facades\Route;
 use AidingApp\Form\Http\Middleware\EnsureSubmissibleIsEmbeddableAndAuthorized;
-use AidingApp\ServiceManagement\Http\Controllers\ServiceRequestFeedbackFormWidgetController;
 use AidingApp\ServiceManagement\Http\Controllers\ServiceRequestFormWidgetController;
 use AidingApp\ServiceManagement\Http\Middleware\EnsureServiceManagementFeatureIsActive;
+use AidingApp\ServiceManagement\Http\Controllers\ServiceRequestFeedbackFormWidgetController;
 
 Route::prefix('api')
     ->middleware([
-        'api'
+        'api',
     ])
     ->group(function () {
         Route::prefix('service-request-forms')
@@ -67,7 +67,7 @@ Route::prefix('api')
             });
 
         Route::prefix('service-requests/{serviceRequest}/feedback')
-            ->name('service-requests.feedback')
+            ->name('service-requests.feedback.')
             // ->middleware([
             //     EnsureServiceManagementFeatureIsActive::class,
             // ])

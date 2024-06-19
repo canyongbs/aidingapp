@@ -46,6 +46,6 @@ Route::middleware('web')
             ->name('show');
     });
 
-Route::get('/service-request/feedback/{serviceid}', RenderServiceRequestFeedbackForm::class)
+Route::get('/service-requests/{serviceRequest}/feedback/', RenderServiceRequestFeedbackForm::class)
     ->middleware('web')
     ->name('feedback.service.request');
