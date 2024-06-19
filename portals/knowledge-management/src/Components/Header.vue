@@ -72,7 +72,7 @@
 </script>
 
 <template>
-    <div class="header item-center">
+    <div class="header item-center bg-white">
         <div class="flex">
             <div class="flex-auto">
                 <router-link :to="{ name: 'home' }">
@@ -84,7 +84,7 @@
                     v-if="user"
                     @click="logout"
                     type="button"
-                    class="text-primary-700 text-sm font-medium float-right border-2 m-3 p-2 outline-primary-700"
+                    class="bg-gradient-to-br from-primary-500 to-primary-800 text-white text-sm font-medium float-right m-3 p-2 rounded"
                 >
                     Sign out
                 </button>
@@ -92,7 +92,7 @@
                     v-else
                     @click="$emit('showLogin')"
                     type="button"
-                    class="text-primary-700 text-sm font-medium float-right border-2 m-3 p-2 outline-primary-700"
+                    class="bg-gradient-to-br from-primary-500 to-primary-800 text-white text-sm font-medium float-right m-3 p-2 rounded"
                 >
                     Sign in
                 </button>
