@@ -196,6 +196,7 @@ class ListKnowledgeBaseItems extends ListRecords
                     })
                     ->excludeAttributes(['views_count', 'upvotes_count', 'my_upvotes_count'])
                     ->successNotificationTitle('Article replicated successfully!'),
+
             ])
             ->bulkActions([
                 BulkActionGroup::make([
@@ -209,7 +210,7 @@ class ListKnowledgeBaseItems extends ListRecords
     {
         return [
             CreateAction::make()
-                ->disabled(fn (): bool => ! auth()->user()->can('knowledge_base_item.create'))
+                ->disabled(fn (): bool => !auth()->user()->can('knowledge_base_item.create'))
                 ->label('New Article')
                 ->modalHeading('New Article')
                 ->createAnother(false)
