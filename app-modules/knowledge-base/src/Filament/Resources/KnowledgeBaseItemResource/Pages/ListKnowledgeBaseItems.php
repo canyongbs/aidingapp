@@ -48,6 +48,19 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
+use Filament\Tables\Actions\ReplicateAction;
+use App\Models\Scopes\TagsForClass;
+use Illuminate\Database\Eloquent\Builder;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\Section;
+use AidingApp\Division\Models\Division;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource;
 
 class ListKnowledgeBaseItems extends ListRecords
@@ -104,6 +117,86 @@ class ListKnowledgeBaseItems extends ListRecords
             ])
             ->actions([
                 EditAction::make(),
+                ReplicateAction::make()
+                    ->label('Replicate')
+                    ->form([
+                        Section::make()
+                            ->schema([
+                                TextInput::make('title')
+                                    ->label('Article Title')
+                                    ->required()
+                                    ->string(),
+                                Toggle::make('public')
+                                    ->label('Public')
+                                    ->default(false)
+                                    ->onColor('success')
+                                    ->offColor('gray'),
+                                Textarea::make('notes')
+                                    ->label('Notes')
+                                    ->string(),
+                                Select::make('tags')
+                                    ->relationship(
+                                        'tags',
+                                        'name',
+                                        fn (Builder $query) => $query->tap(new TagsForClass(new KnowledgeBaseItem()))
+                                    )
+                                    ->searchable()
+                                    ->preload()
+                                    ->multiple()
+                                    ->columnSpanFull()
+                                    ->visible(fn (): bool => Feature::active('tags')),
+                            ]),
+                        Section::make()
+                            ->schema([
+                                Select::make('quality_id')
+                                    ->label('Quality')
+                                    ->relationship('quality', 'name')
+                                    ->searchable()
+                                    ->preload()
+                                    ->exists((new KnowledgeBaseQuality())->getTable(), (new KnowledgeBaseQuality())->getKeyName()),
+                                Select::make('status_id')
+                                    ->label('Status')
+                                    ->relationship('status', 'name')
+                                    ->searchable()
+                                    ->preload()
+                                    ->exists((new KnowledgeBaseStatus())->getTable(), (new KnowledgeBaseStatus())->getKeyName()),
+                                Select::make('category_id')
+                                    ->label('Category')
+                                    ->relationship('category', 'name')
+                                    ->searchable()
+                                    ->preload()
+                                    ->exists((new KnowledgeBaseCategory())->getTable(), (new KnowledgeBaseCategory())->getKeyName()),
+                                Select::make('division')
+                                    ->label('Division')
+                                    ->multiple()
+                                    ->relationship('division', 'name')
+                                    ->searchable(['name', 'code'])
+                                    ->preload()
+                                    ->exists((new Division())->getTable(), (new Division())->getKeyName()),
+                            ]),
+                    ])
+                    ->before(function (array $data, Model $record) {
+                        $record->title = $data['title'];
+                        $record->public = $data['public'];
+                        $record->notes = $data['notes'];
+                    })
+                    ->after(function (Model $replica, Model $record): void {
+                        $record->load('division');
+
+                        foreach ($record->division as $divison) {
+                            $replica->division()->attach($divison->id);
+                        }
+
+                        foreach ($record->tags as $tag) {
+                            $replica->tags()->attach($tag->id, [
+                                // Include any pivot data if necessary
+                                'taggable_type' => $tag->pivot->taggable_type,
+                            ]);
+                        }
+                    })
+                    ->excludeAttributes(['views_count', 'upvotes_count', 'my_upvotes_count'])
+                    ->successNotificationTitle('Article replicated successfully!'),
+
             ])
             ->bulkActions([
                 BulkActionGroup::make([
@@ -117,7 +210,7 @@ class ListKnowledgeBaseItems extends ListRecords
     {
         return [
             CreateAction::make()
-                ->disabled(fn (): bool => ! auth()->user()->can('knowledge_base_item.create'))
+                ->disabled(fn (): bool => !auth()->user()->can('knowledge_base_item.create'))
                 ->label('Create Knowledge Base Article')
                 ->createAnother(false)
                 ->successRedirectUrl(fn (Model $record): string => KnowledgeBaseItemResource::getUrl('edit', ['record' => $record])),
