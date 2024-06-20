@@ -196,6 +196,7 @@ class ListKnowledgeBaseItems extends ListRecords
                     })
                     ->excludeAttributes(['views_count', 'upvotes_count', 'my_upvotes_count'])
                     ->successNotificationTitle('Article replicated successfully!'),
+
             ])
             ->bulkActions([
                 BulkActionGroup::make([
