@@ -39,12 +39,12 @@
     import { FormKit } from '@formkit/vue';
     import AppLoading from '../src/Components/AppLoading.vue';
     import Footer from './Components/Footer.vue';
-    import getAppContext from "../../../portals/knowledge-management/src/Services/GetAppContext.js";
-    import axios from "../../../portals/knowledge-management/src/Globals/Axios.js";
-    import determineIfUserIsAuthenticated from "../../../portals/knowledge-management/src/Services/DetermineIfUserIsAuthenticated.js";
-    import { useAuthStore } from "../../../portals/knowledge-management/src/Stores/auth.js";
-    import { useFeatureStore } from "../../../portals/knowledge-management/src/Stores/feature.js";
-    import { useTokenStore } from "../../../portals/knowledge-management/src/Stores/token.js";
+    import getAppContext from '../../../portals/knowledge-management/src/Services/GetAppContext.js';
+    import axios from '../../../portals/knowledge-management/src/Globals/Axios.js';
+    import determineIfUserIsAuthenticated from '../../../portals/knowledge-management/src/Services/DetermineIfUserIsAuthenticated.js';
+    import { useAuthStore } from '../../../portals/knowledge-management/src/Stores/auth.js';
+    import { useFeatureStore } from '../../../portals/knowledge-management/src/Stores/feature.js';
+    import { useTokenStore } from '../../../portals/knowledge-management/src/Stores/token.js';
 
     const props = defineProps({
         url: {
@@ -336,10 +336,7 @@
         </div>
 
         <div v-else>
-            <div
-                v-if="!submittedSuccess"
-                class="flex flex-col items-center justify-center min-h-screen"
-            >
+            <div v-if="!submittedSuccess" class="flex flex-col items-center justify-center min-h-screen">
                 <div
                     v-if="requiresAuthentication && !userIsAuthenticated"
                     class="max-w-md w-full bg-white rounded ring-1 ring-black/5 shadow-sm px-8 pt-6 pb-4 flex flex-col gap-6 mx-4 mt-4"
@@ -411,6 +408,4 @@
     </div>
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>

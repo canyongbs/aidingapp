@@ -56,11 +56,10 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use AidingApp\ServiceManagement\Models\ServiceRequestFeedback;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
-use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Notifications\SendClosedServiceFeedbackNotification;
+use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 
 class EditServiceRequest extends EditRecord
 {
@@ -175,7 +174,6 @@ class EditServiceRequest extends EditRecord
     {
         if (Gate::check(Feature::FeedbackManagement->getGateName()) && $this->getRecord()?->priority?->type?->has_enabled_feedback_collection && $this->getRecord()?->status?->name == 'Closed') {
             //On close status of service request checking feedback collection type
-            
 
             $contact = $this->getRecord()->respondent;
 
