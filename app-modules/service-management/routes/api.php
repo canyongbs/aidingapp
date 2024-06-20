@@ -73,16 +73,9 @@ Route::prefix('api')
             // ])
             ->group(function () {
                 Route::get('/', [ServiceRequestFeedbackFormWidgetController::class, 'view'])
-                    ->middleware(['signed:relative'])
                     ->name('define');
-                Route::post('/authenticate/request', [ServiceRequestFeedbackFormWidgetController::class, 'requestAuthentication'])
-                    ->middleware(['signed:relative'])
-                    ->name('request-authentication');
-                Route::post('/authenticate/{authentication}', [ServiceRequestFeedbackFormWidgetController::class, 'authenticate'])
-                    ->middleware(['signed:relative'])
-                    ->name('authenticate');
                 Route::post('/submit', [ServiceRequestFeedbackFormWidgetController::class, 'store'])
-                    ->middleware(['signed:relative'])
+                    ->middleware(['auth:sanctum'])
                     ->name('submit');
             });
     });

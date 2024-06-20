@@ -36,12 +36,16 @@ import './widget.css';
 import App from './App.vue';
 import { defaultConfig, plugin } from '@formkit/vue';
 import config from './formkit.config.js';
+import { createPinia } from "pinia";
 
 customElements.define(
     'service-request-feedback-form-embed',
     defineCustomElement({
         setup(props) {
             const app = createApp();
+            const pinia = createPinia();
+
+            app.use(pinia);
 
             // install plugins
             app.use(plugin, defaultConfig(config));
@@ -54,6 +58,6 @@ customElements.define(
 
             return () => h(App, props);
         },
-        props: ['url'],
+        props: ['url', 'userAuthenticationUrl', 'accessUrl', 'appUrl', 'apiUrl'],
     }),
 );

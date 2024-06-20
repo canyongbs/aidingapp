@@ -44,6 +44,7 @@ class GenerateServiceRequestFeedbackFormEmbedCode
     public function handle(ServiceRequest $serviceRequest): string
     {
         $scriptUrl = url('js/widgets/service-request-feedback-form/aiding-app-service-request-feedback-form-widget.js?');
+
         $formDefinitionUrl = URL::to(
             URL::signedRoute(
                 name: 'service-requests.feedback.define',
@@ -52,9 +53,17 @@ class GenerateServiceRequestFeedbackFormEmbedCode
             )
         );
 
+        $portalAccessUrl = route('portal.knowledge-management.show');
+
+        $userAuthenticationUrl = route('api.user.auth-check');
+
+        $appUrl = config('app.url');
+
+        $apiUrl = route('api.portal.knowledge-management.define');
+
         return <<<EOD
-      <service-request-feedback-form-embed url="{$formDefinitionUrl}"></service-request-feedback-form-embed>
-      <script src="{$scriptUrl}"></script>
-      EOD;
+        <service-request-feedback-form-embed url="{$formDefinitionUrl}" user-authentication-url={$userAuthenticationUrl} access-url={$portalAccessUrl} app-url="{$appUrl}" api-url="{$apiUrl}"></service-request-feedback-form-embed>
+        <script src="{$scriptUrl}"></script>
+        EOD;
     }
 }

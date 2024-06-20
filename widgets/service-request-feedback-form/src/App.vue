@@ -39,11 +39,83 @@
     import { FormKit } from '@formkit/vue';
     import AppLoading from '../src/Components/AppLoading.vue';
     import Footer from './Components/Footer.vue';
+    import getAppContext from "../../../portals/knowledge-management/src/Services/GetAppContext.js";
+    import axios from "../../../portals/knowledge-management/src/Globals/Axios.js";
+    import determineIfUserIsAuthenticated from "../../../portals/knowledge-management/src/Services/DetermineIfUserIsAuthenticated.js";
+    import { useAuthStore } from "../../../portals/knowledge-management/src/Stores/auth.js";
+    import { useFeatureStore } from "../../../portals/knowledge-management/src/Stores/feature.js";
+    import { useTokenStore } from "../../../portals/knowledge-management/src/Stores/token.js";
+
+    const props = defineProps({
+        url: {
+            type: String,
+            required: true,
+        },
+        apiUrl: {
+            type: String,
+            required: true,
+        },
+        accessUrl: {
+            type: String,
+            required: true,
+        },
+        userAuthenticationUrl: {
+            type: String,
+            required: true,
+        },
+        appUrl: {
+            type: String,
+            required: true,
+        },
+    });
+
+    const submittedSuccess = ref(false);
+
+    const scriptUrl = new URL(document.currentScript.getAttribute('src'));
+    const protocol = scriptUrl.protocol;
+    const scriptHostname = scriptUrl.hostname;
+
+    const errorLoading = ref(false);
+    const loading = ref(true);
+    const userIsAuthenticated = ref(false);
+    const requiresAuthentication = ref(false);
+    const hasServiceManagement = ref(false);
+    const showLogin = ref(false);
+
+    const hostUrl = `${protocol}//${scriptHostname}`;
+    const formIsAuthenticated = ref(false);
+    const formSubmissionUrl = ref('');
+    const formPrimaryColor = ref('');
+    const formRounding = ref('');
+    const formRecaptchaEnabled = ref(false);
+    const formRecaptchaKey = ref(null);
+    const hasEnabledCsat = ref(false);
+    const hasEnabledNps = ref(false);
+    const headerLogo = ref('');
+    const footerLogo = ref('');
+    const appName = ref('');
+    const authentication = ref({
+        code: null,
+        email: null,
+        isRequested: false,
+        requestedMessage: null,
+        requestUrl: null,
+        url: null,
+    });
+
     onMounted(async () => {
-        await getForm().then(function () {
-            if (formRecaptchaEnabled.value === true) {
-                attachRecaptchaScript(formRecaptchaKey.value);
-            }
+        const { isEmbeddedInAidingApp } = getAppContext(props.accessUrl);
+
+        if (isEmbeddedInAidingApp) {
+            await axios.get(props.appUrl + '/sanctum/csrf-cookie');
+        }
+
+        await determineIfUserIsAuthenticated(props.userAuthenticationUrl).then((response) => {
+            userIsAuthenticated.value = response;
+        });
+
+        await getForm().then(() => {
+            loading.value = false;
         });
     });
 
@@ -83,117 +155,37 @@
             });
     };
 
-    let { steps, visitedSteps, activeStep, setStep, wizardPlugin } = wizard();
-
-    const props = defineProps(['url']);
-
-    const data = reactive({
-        steps,
-        visitedSteps,
-        activeStep,
-        plugins: [wizardPlugin],
-        setStep: (target) => () => {
-            setStep(target);
-        },
-        setActiveStep: (stepName) => () => {
-            data.activeStep = stepName;
-        },
-        showStepErrors: (stepName) => {
-            return (
-                (steps[stepName].errorCount > 0 || steps[stepName].blockingCount > 0) &&
-                visitedSteps.value &&
-                visitedSteps.value.includes(stepName)
-            );
-        },
-        stepIsValid: (stepName) => {
-            return steps[stepName].valid && steps[stepName].errorCount === 0;
-        },
-        stringify: (value) => JSON.stringify(value, null, 2),
-        submitForm: async (data, node) => {
-            node.clearErrors();
-
-            let recaptchaToken = null;
-
-            if (formRecaptchaEnabled.value === true) {
-                recaptchaToken = await getRecaptchaToken(formRecaptchaKey.value);
-            }
-
-            if (recaptchaToken !== null) {
-                data['recaptcha-token'] = recaptchaToken;
-            }
-
-            fetch(formSubmissionUrl.value, {
-                method: 'POST',
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data),
-            })
-                .then((response) => response.json())
-                .then((json) => {
-                    if (json.errors) {
-                        node.setErrors([], json.errors);
-
-                        return;
-                    }
-
-                    submittedSuccess.value = true;
-                })
-                .catch((error) => {
-                    node.setErrors([error]);
-                });
-        },
-    });
-
-    const submittedSuccess = ref(false);
-
-    const scriptUrl = new URL(document.currentScript.getAttribute('src'));
-    const protocol = scriptUrl.protocol;
-    const scriptHostname = scriptUrl.hostname;
-
-    const hostUrl = `${protocol}//${scriptHostname}`;
-    const errorLoading = ref(false);
-    const display = ref(false);
-    const formIsAuthenticated = ref(false);
-    const formSubmissionUrl = ref('');
-    const formPrimaryColor = ref('');
-    const formRounding = ref('');
-    const formRecaptchaEnabled = ref(false);
-    const formRecaptchaKey = ref(null);
-    const hasEnabledCsat = ref(false);
-    const hasEnabledNps = ref(false);
-    const headerLogo = ref('');
-    const footerLogo = ref('');
-    const appName = ref('');
-    const authentication = ref({
-        code: null,
-        email: null,
-        isRequested: false,
-        requestedMessage: null,
-        requestUrl: null,
-        url: null,
-    });
-
     async function getForm() {
-        await fetch(props.url)
-            .then((response) => response.json())
-            .then((json) => {
-                if (json.error) {
-                    throw new Error(json.error);
+        await axios
+            .get(props.url)
+            .then((response) => {
+                errorLoading.value = false;
+
+                if (response.error) {
+                    throw new Error(response.error);
                 }
 
-                formIsAuthenticated.value = json.is_authenticated ?? false;
-                formSubmissionUrl.value = json.submission_url ?? null;
-                formPrimaryColor.value = json.primary_color;
-                authentication.value.requestUrl = json.authentication_url ?? null;
-                hasEnabledCsat.value = json.has_enabled_csat;
-                hasEnabledNps.value = json.has_enabled_nps;
-                headerLogo.value = json.header_logo;
-                footerLogo.value = json.footer_logo;
-                appName.value = json.appName;
-                formRecaptchaEnabled.value = json.recaptcha_enabled ?? false;
-                formRecaptchaKey.value = json.recaptcha_site_key ?? null;
+                const { setRequiresAuthentication } = useAuthStore();
+
+                formPrimaryColor.value = response.data.primary_color;
+
+                headerLogo.value = response.data.header_logo;
+
+                appName.value = response.data.app_name;
+
+                footerLogo.value = response.data.footer_logo;
+
+                hasEnabledCsat.value = response.data.has_enabled_csat;
+
+                hasEnabledNps.value = response.data.has_enabled_nps;
+
+                setRequiresAuthentication(response.data.requires_authentication).then(() => {
+                    requiresAuthentication.value = response.data.requires_authentication;
+                });
+
+                authentication.value.requestUrl = response.data.authentication_url ?? null;
+
+                formSubmissionUrl.value = response.data.submission_url;
 
                 formRounding.value = {
                     none: {
@@ -231,39 +223,39 @@
                         lg: '9999px',
                         full: '9999px',
                     },
-                }[json.rounding ?? 'md'];
-
-                display.value = true;
+                }[response.data.rounding ?? 'md'];
             })
             .catch((error) => {
-                console.log(error);
                 errorLoading.value = true;
+                console.error(`Feedback ${error}`);
             });
     }
 
     async function authenticate(formData, node) {
         node.clearErrors();
 
+        const { setToken } = useTokenStore();
+        const { setUser } = useAuthStore();
+
+        const { isEmbeddedInAidingApp } = getAppContext(props.accessUrl);
+
+        if (isEmbeddedInAidingApp) {
+            await axios.get(props.appUrl + '/sanctum/csrf-cookie');
+        }
+
         if (authentication.value.isRequested) {
-            fetch(authentication.value.url, {
-                method: 'POST',
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
+            axios
+                .post(authentication.value.url, {
                     code: formData.code,
-                }),
-            })
-                .then((response) => response.json())
-                .then((json) => {
-                    if (json.errors) {
-                        node.setErrors([], json.errors);
+                })
+                .then((response) => {
+                    if (response.errors) {
+                        node.setErrors([], response.errors);
 
                         return;
                     }
 
-                    if (json.is_expired) {
+                    if (response.data.is_expired) {
                         node.setErrors(['The authentication code expires after 24 hours. Please authenticate again.']);
 
                         authentication.value.isRequested = false;
@@ -272,13 +264,12 @@
                         return;
                     }
 
-                    if (!json.submission_url) {
-                        node.setErrors([json.message]);
+                    if (response.data.success === true) {
+                        setToken(response.data.token);
+                        setUser(response.data.user);
 
-                        return;
+                        userIsAuthenticated.value = true;
                     }
-
-                    formSubmissionUrl.value = json.submission_url;
                 })
                 .catch((error) => {
                     node.setErrors([error]);
@@ -287,33 +278,27 @@
             return;
         }
 
-        fetch(authentication.value.requestUrl, {
-            method: 'POST',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
+        axios
+            .post(authentication.value.requestUrl, {
                 email: formData.email,
-            }),
-        })
-            .then((response) => response.json())
-            .then((json) => {
-                if (json.errors) {
-                    node.setErrors([], json.errors);
+                isSpa: isEmbeddedInAidingApp,
+            })
+            .then((response) => {
+                if (response.errors) {
+                    node.setErrors([], response.errors);
 
                     return;
                 }
 
-                if (!json.authentication_url) {
-                    node.setErrors([json.message]);
+                if (!response.data.authentication_url) {
+                    node.setErrors([response.data.message]);
 
                     return;
                 }
 
                 authentication.value.isRequested = true;
-                authentication.value.requestedMessage = json.message;
-                authentication.value.url = json.authentication_url;
+                authentication.value.requestedMessage = response.data.message;
+                authentication.value.url = response.data.authentication_url;
             })
             .catch((error) => {
                 node.setErrors([error]);
@@ -346,20 +331,20 @@
             <link rel="stylesheet" v-bind:href="hostUrl + '/js/widgets/service-request-feedback-form/style.css'" />
         </div>
 
-        <div v-if="!display">
+        <div v-if="loading">
             <AppLoading />
         </div>
 
         <div v-else>
             <div
-                class="bg-gradient flex flex-col items-center justify-center min-h-screen"
-                v-if="display && !submittedSuccess"
+                v-if="!submittedSuccess"
+                class="flex flex-col items-center justify-center min-h-screen"
             >
                 <div
-                    v-if="!formSubmissionUrl"
+                    v-if="requiresAuthentication && !userIsAuthenticated"
                     class="max-w-md w-full bg-white rounded ring-1 ring-black/5 shadow-sm px-8 pt-6 pb-4 flex flex-col gap-6 mx-4 mt-4"
                 >
-                    <h1 class="text-primary-950 text-center text-2xl font-semibold">Login to submit the survey</h1>
+                    <h1 class="text-primary-950 text-center text-2xl font-semibold">Login to submit feedback</h1>
 
                     <FormKit type="form" @submit="authenticate" v-model="authentication">
                         <FormKit
@@ -388,7 +373,7 @@
                     </FormKit>
                 </div>
 
-                <div v-if="formSubmissionUrl" class="flex flex-col items-center justify-center min-h-screen">
+                <div v-else class="flex flex-col items-center justify-center min-h-screen">
                     <img :src="headerLogo" :alt="appName" class="h-12 m-3" />
                     <div v-if="errorLoading" class="text-center">
                         <h1 class="text-3xl font-bold text-red-500">Error Loading the feedback form</h1>
@@ -419,15 +404,13 @@
                     <Footer :logo="footerLogo"></Footer>
                 </div>
             </div>
-            <div v-if="display && submittedSuccess">
+            <div v-if="submittedSuccess">
                 <h1 class="text-2xl font-bold mb-2 text-center">Thank you, your feedback has been received.</h1>
             </div>
         </div>
     </div>
 </template>
+
 <style scoped>
-    .bg-gradient {
-        @apply relative bg-no-repeat;
-        background-image: radial-gradient(circle at top, theme('colors.primary.200'), theme('colors.white') 50%);
-    }
+
 </style>
