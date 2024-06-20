@@ -43,8 +43,8 @@ return new class () extends Migration {
     {
         Schema::create('service_request_feedback', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('service_id')->constrained('service_requests')->cascadeOnDelete();
-            $table->foreignUuid('contact_id')->constrained('contacts')->cascadeOnDelete();
+            $table->foreignUuid('service_request_id')->constrained()->cascadeOnDelete();
+            $table->foreignUuid('contact_id')->constrained()->cascadeOnDelete();
             $table->unsignedInteger('csat_answer')->nullable();
             $table->unsignedInteger('nps_answer')->nullable();
             $table->timestamps();

@@ -38,22 +38,27 @@ namespace AidingApp\ServiceManagement\Models;
 
 use App\Models\BaseModel;
 use AidingApp\Contact\Models\Contact;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class ServiceRequestFeedback extends BaseModel
 {
-    use HasFactory;
+    use SoftDeletes;
 
-    protected $guarded = [];
+    protected $fillable = [
+        'csat_answer',
+        'nps_answer',
+        'service_request_id',
+        'contact_id',
+    ];
 
     public function serviceRequest(): BelongsTo
     {
-        return $this->belongsTo(ServiceRequest::class, 'service_id');
+        return $this->belongsTo(ServiceRequest::class);
     }
 
     public function contact(): BelongsTo
     {
-        return $this->belongsTo(Contact::class, 'contact_id');
+        return $this->belongsTo(Contact::class);
     }
 }

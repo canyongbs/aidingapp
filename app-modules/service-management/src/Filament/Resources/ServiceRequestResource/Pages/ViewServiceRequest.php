@@ -112,10 +112,11 @@ class ViewServiceRequest extends ViewRecord
                                 };
                             }),
                     ])
-                    ->columns(2),
+                    ->columns(),
                 Section::make('Uploads')
+                    ->visible(fn (ServiceRequest $record): bool => $record->hasMedia($uploadsMediaCollection->getName()))
                     ->schema(
-                        fn (ServiceRequest $request) => $request
+                        fn (ServiceRequest $record) => $record
                             ->getMedia($uploadsMediaCollection->getName())
                             ->map(
                                 fn (Media $media) => IconEntry::make($media->getKey())
@@ -184,7 +185,18 @@ class ViewServiceRequest extends ViewRecord
                                 ->state(fn (ServiceRequest $record): ?SlaComplianceStatus => $record->getResolutionSlaComplianceStatus()),
                         ]),
                     ])
-                    ->columns(2),
+                    ->columns(),
+                Section::make('Feedback')
+                    ->visible(fn (ServiceRequest $record): bool => $record->latestFeedback()->exists())
+                    ->schema([
+                        TextEntry::make('latestFeedback.csat_answer')
+                            ->label('CSAT')
+                            ->badge(),
+                        TextEntry::make('latestFeedback.nps_answer')
+                            ->label('NPS')
+                            ->badge(),
+                    ])
+                    ->columns(),
                 Section::make('Form Submission Details')
                     ->collapsed()
                     ->visible(fn (ServiceRequest $record): bool => ! is_null($record->serviceRequestFormSubmission))

@@ -60,7 +60,7 @@ class ServiceRequestFeedbackFormWidgetController extends Controller
 
         return response()->json(
             [
-                'requires_authentication' => $portalSettings->knowledge_management_portal_requires_authentication,
+                'requires_authentication' => true,
                 'is_authenticated' => (bool) $request->user(),
                 'authentication_url' => URL::to(
                     URL::signedRoute(
@@ -78,15 +78,12 @@ class ServiceRequestFeedbackFormWidgetController extends Controller
                     conversionName: 'logo-height-250px',
                 ),
                 'app_name' => config('app.name'),
-                'has_enabled_csat' => $serviceRequest?->priority?->type?->has_enabled_csat,
-                'has_enabled_nps' => $serviceRequest?->priority?->type?->has_enabled_nps,
-                // 'recaptcha_enabled' => $serviceRequestForm->recaptcha_enabled,
-                // ...($serviceRequestForm->recaptcha_enabled ? [
-                //     'recaptcha_site_key' => app(GoogleRecaptchaSettings::class)->site_key,
-                // ] : []),
+                'has_enabled_csat' => $serviceRequest->priority?->type?->has_enabled_csat,
+                'has_enabled_nps' => $serviceRequest->priority?->type?->has_enabled_nps,
                 'footer_logo' => Vite::asset('resources/images/canyon-logo-light.png'),
                 'primary_color' => Color::all()[$portalSettings->knowledge_management_portal_primary_color ?? 'blue'],
                 'rounding' => $portalSettings->knowledge_management_portal_rounding,
+                'service_request_title' => $serviceRequest->title,
             ],
         );
     }

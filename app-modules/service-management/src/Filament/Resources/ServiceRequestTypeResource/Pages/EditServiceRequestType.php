@@ -72,6 +72,7 @@ class EditServiceRequestType extends EditRecord
                         IconSelect::make('icon'),
                         Group::make()
                             ->schema([
+                                //TODO: Add rule requiring at least one of the two to be enabled if feedback collection is enabled
                                 Toggle::make('has_enabled_feedback_collection')
                                     ->label('Enable feedback collection')
                                     ->live(),

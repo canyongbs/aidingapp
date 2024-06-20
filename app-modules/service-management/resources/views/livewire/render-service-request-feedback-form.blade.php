@@ -36,7 +36,7 @@
 @endphp
 
 <div class="flex items-center justify-center">
-    <div class="w-full max-w-4xl">
+    <div class="w-full max-w-full">
         {!! resolve(GenerateServiceRequestFeedbackFormEmbedCode::class)->handle($this->serviceRequest) !!}
     </div>
 </div>

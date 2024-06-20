@@ -32,10 +32,7 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { defineProps, ref, reactive, onMounted } from 'vue';
-    import wizard from './FormKit/wizard.js';
-    import attachRecaptchaScript from '../../../app-modules/integration-google-recaptcha/resources/js/Services/AttachRecaptchaScript.js';
-    import getRecaptchaToken from '../../../app-modules/integration-google-recaptcha/resources/js/Services/GetRecaptchaToken.js';
+    import { defineProps, ref, onMounted } from 'vue';
     import { FormKit } from '@formkit/vue';
     import AppLoading from '../src/Components/AppLoading.vue';
     import Footer from './Components/Footer.vue';
@@ -43,7 +40,6 @@
     import axios from '../../../portals/knowledge-management/src/Globals/Axios.js';
     import determineIfUserIsAuthenticated from '../../../portals/knowledge-management/src/Services/DetermineIfUserIsAuthenticated.js';
     import { useAuthStore } from '../../../portals/knowledge-management/src/Stores/auth.js';
-    import { useFeatureStore } from '../../../portals/knowledge-management/src/Stores/feature.js';
     import { useTokenStore } from '../../../portals/knowledge-management/src/Stores/token.js';
 
     const props = defineProps({
@@ -79,21 +75,17 @@
     const loading = ref(true);
     const userIsAuthenticated = ref(false);
     const requiresAuthentication = ref(false);
-    const hasServiceManagement = ref(false);
-    const showLogin = ref(false);
 
     const hostUrl = `${protocol}//${scriptHostname}`;
-    const formIsAuthenticated = ref(false);
     const formSubmissionUrl = ref('');
     const formPrimaryColor = ref('');
     const formRounding = ref('');
-    const formRecaptchaEnabled = ref(false);
-    const formRecaptchaKey = ref(null);
     const hasEnabledCsat = ref(false);
     const hasEnabledNps = ref(false);
     const headerLogo = ref('');
     const footerLogo = ref('');
     const appName = ref('');
+    const serviceRequestTitle = ref('');
     const authentication = ref({
         code: null,
         email: null,
@@ -121,16 +113,6 @@
 
     const submitForm = async (data, node) => {
         node.clearErrors();
-
-        let recaptchaToken = null;
-
-        if (formRecaptchaEnabled.value === true) {
-            recaptchaToken = await getRecaptchaToken(formRecaptchaKey.value);
-        }
-
-        if (recaptchaToken !== null) {
-            data['recaptcha-token'] = recaptchaToken;
-        }
 
         fetch(formSubmissionUrl.value, {
             method: 'POST',
@@ -165,8 +147,6 @@
                     throw new Error(response.error);
                 }
 
-                const { setRequiresAuthentication } = useAuthStore();
-
                 formPrimaryColor.value = response.data.primary_color;
 
                 headerLogo.value = response.data.header_logo;
@@ -179,13 +159,17 @@
 
                 hasEnabledNps.value = response.data.has_enabled_nps;
 
-                setRequiresAuthentication(response.data.requires_authentication).then(() => {
-                    requiresAuthentication.value = response.data.requires_authentication;
-                });
-
                 authentication.value.requestUrl = response.data.authentication_url ?? null;
 
                 formSubmissionUrl.value = response.data.submission_url;
+
+                serviceRequestTitle.value = response.data.service_request_title;
+
+                const { setRequiresAuthentication } = useAuthStore();
+
+                setRequiresAuthentication(response.data.requires_authentication).then(() => {
+                    requiresAuthentication.value = response.data.requires_authentication;
+                });
 
                 formRounding.value = {
                     none: {
@@ -325,7 +309,7 @@
             '--rounding-lg': formRounding.lg,
             '--rounding-full': formRounding.full,
         }"
-        class="font-sans"
+        class="font-sans px-6"
     >
         <div>
             <link rel="stylesheet" v-bind:href="hostUrl + '/js/widgets/service-request-feedback-form/style.css'" />
@@ -336,7 +320,7 @@
         </div>
 
         <div v-else>
-            <div v-if="!submittedSuccess" class="flex flex-col items-center justify-center min-h-screen">
+            <div v-if="!submittedSuccess" class="bg-gradient flex flex-col items-center justify-start min-h-screen">
                 <div
                     v-if="requiresAuthentication && !userIsAuthenticated"
                     class="max-w-md w-full bg-white rounded ring-1 ring-black/5 shadow-sm px-8 pt-6 pb-4 flex flex-col gap-6 mx-4 mt-4"
@@ -370,32 +354,38 @@
                     </FormKit>
                 </div>
 
-                <div v-else class="flex flex-col items-center justify-center min-h-screen">
-                    <img :src="headerLogo" :alt="appName" class="h-12 m-3" />
+                <div v-else class="flex flex-col justify-center min-h-screen">
+                    <img
+                        :src="headerLogo"
+                        :alt="appName"
+                        class="max-h-20 max-w-64 object-scale-down object-left mb-4"
+                    />
                     <div v-if="errorLoading" class="text-center">
                         <h1 class="text-3xl font-bold text-red-500">Error Loading the feedback form</h1>
                         <p class="text-lg text-red-500">Please try again later</p>
                     </div>
-
-                    <div v-else class="flex flex-row">
-                        <div class="w-full">
-                            <FormKit type="form" @submit="submitForm">
-                                <FormKit
-                                    validation="required"
-                                    type="rating"
-                                    v-if="hasEnabledCsat"
-                                    name="csat"
-                                    label="How did we do?"
-                                ></FormKit>
-                                <FormKit
-                                    validation="required"
-                                    type="rating"
-                                    v-if="hasEnabledNps"
-                                    name="nps"
-                                    label="How likely are you to recommend our service to a friend or colleague?"
-                                ></FormKit>
-                            </FormKit>
+                    <div v-else class="flex flex-col w-full">
+                        <div class="mb-4">
+                            Thank you for filling out this brief survey on your service request titled:
+                            {{ serviceRequestTitle }}
                         </div>
+
+                        <FormKit type="form" @submit="submitForm">
+                            <FormKit
+                                validation="required"
+                                type="rating"
+                                v-if="hasEnabledCsat"
+                                name="csat"
+                                label="How did we do?"
+                            ></FormKit>
+                            <FormKit
+                                validation="required"
+                                type="rating"
+                                v-if="hasEnabledNps"
+                                name="nps"
+                                label="How likely are you to recommend our service to a friend or colleague?"
+                            ></FormKit>
+                        </FormKit>
                     </div>
 
                     <Footer :logo="footerLogo"></Footer>
@@ -408,4 +398,9 @@
     </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+    .bg-gradient {
+        @apply relative bg-no-repeat;
+        background-image: radial-gradient(circle at top, theme('colors.primary.200'), theme('colors.white') 50%);
+    }
+</style>

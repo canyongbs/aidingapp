@@ -32,7 +32,7 @@
 </COPYRIGHT>
 */
 import { createInput } from '@formkit/vue';
-import OneTimePassword from './OneTimePassword.vue';
+import OneTimePassword from '../../../../service-request-form/src/FormKit/Inputs/OneTimePassword.vue';
 import Rating from './Rating.vue';
 
 export default {

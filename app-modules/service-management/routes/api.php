@@ -68,9 +68,12 @@ Route::prefix('api')
 
         Route::prefix('service-requests/{serviceRequest}/feedback')
             ->name('service-requests.feedback.')
-            // ->middleware([
-            //     EnsureServiceManagementFeatureIsActive::class,
-            // ])
+            ->middleware([
+                EnsureServiceManagementFeatureIsActive::class,
+                // TODO: Create middleware for FeedbackManagement on
+                // TODO: Create middleware for Service Request Type feedback on
+                // TODO: Handle multiple feedbacks in app.vue
+            ])
             ->group(function () {
                 Route::get('/', [ServiceRequestFeedbackFormWidgetController::class, 'view'])
                     ->name('define');
