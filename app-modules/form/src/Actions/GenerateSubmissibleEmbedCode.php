@@ -48,7 +48,7 @@ class GenerateSubmissibleEmbedCode
         return match ($submissible::class) {
             ServiceRequestForm::class => (function () use ($submissible) {
                 /** @var ServiceRequestForm $submissible */
-                $scriptUrl = url('js/widgets/service-request-form/aiding-app-service-request-form-widget.js?');
+                $scriptUrl = url('js/widgets/service-request-form/aiding-app-service-request-form-widget.js?v=' . app('current-commit'));
                 $formDefinitionUrl = URL::to(
                     URL::signedRoute(
                         name: 'service-request-forms.define',
