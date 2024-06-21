@@ -220,7 +220,7 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
 
     public function feedback(): HasMany
     {
-        return $this->hasMany(ServiceRequestFeedback::class);
+        return $this->hasMany(ServiceRequestFeedback::class, 'service_id');
     }
 
     public function latestFeedback(): HasOne

@@ -42,9 +42,12 @@ use AidingApp\Notification\Events\TriggeredAutoSubscription;
 use AidingApp\ServiceManagement\Actions\CreateServiceRequestHistory;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Exceptions\ServiceRequestNumberUpdateAttemptException;
+use AidingApp\ServiceManagement\Notifications\SendClosedServiceFeedbackNotification;
 use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestClosedNotification;
 use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestOpenedNotification;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
+use App\Enums\Feature;
+use Illuminate\Support\Facades\Gate;
 
 class ServiceRequestObserver
 {
@@ -88,5 +91,11 @@ class ServiceRequestObserver
         ) {
             $serviceRequest->respondent->notify(new SendEducatableServiceRequestClosedNotification($serviceRequest));
         }
+
+        if (Gate::check(Feature::FeedbackManagement->getGateName()) && $serviceRequest?->priority?->type?->has_enabled_feedback_collection && $serviceRequest?->status?->name == 'Closed') {
+          $contact = $serviceRequest->respondent;
+
+          $contact->notify(new SendClosedServiceFeedbackNotification($serviceRequest));
+      }
     }
 }

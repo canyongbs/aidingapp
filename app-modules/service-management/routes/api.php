@@ -35,7 +35,9 @@
 */
 
 use Illuminate\Support\Facades\Route;
+use AidingApp\ServiceManagement\Http\Middleware\FeedbackManagementIsOn;
 use AidingApp\Form\Http\Middleware\EnsureSubmissibleIsEmbeddableAndAuthorized;
+use AidingApp\ServiceManagement\Http\Middleware\ServiceRequestTypeFeedbackIsOn;
 use AidingApp\ServiceManagement\Http\Controllers\ServiceRequestFormWidgetController;
 use AidingApp\ServiceManagement\Http\Middleware\EnsureServiceManagementFeatureIsActive;
 use AidingApp\ServiceManagement\Http\Controllers\ServiceRequestFeedbackFormWidgetController;
@@ -70,9 +72,8 @@ Route::prefix('api')
             ->name('service-requests.feedback.')
             ->middleware([
                 EnsureServiceManagementFeatureIsActive::class,
-                // TODO: Create middleware for FeedbackManagement on
-                // TODO: Create middleware for Service Request Type feedback on
-                // TODO: Handle multiple feedbacks in app.vue
+                FeedbackManagementIsOn::class,
+                ServiceRequestTypeFeedbackIsOn::class,
             ])
             ->group(function () {
                 Route::get('/', [ServiceRequestFeedbackFormWidgetController::class, 'view'])

@@ -169,16 +169,4 @@ class EditServiceRequest extends EditRecord
 
         return $data;
     }
-
-    protected function afterSave(): void
-    {
-        //TODO: Move to observer
-        if (Gate::check(Feature::FeedbackManagement->getGateName()) && $this->getRecord()?->priority?->type?->has_enabled_feedback_collection && $this->getRecord()?->status?->name == 'Closed') {
-            //On close status of service request checking feedback collection type
-
-            $contact = $this->getRecord()->respondent;
-
-            $contact->notify(new SendClosedServiceFeedbackNotification($this->getRecord()));
-        }
-    }
 }

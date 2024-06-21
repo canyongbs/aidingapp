@@ -70,7 +70,7 @@
     const scriptUrl = new URL(document.currentScript.getAttribute('src'));
     const protocol = scriptUrl.protocol;
     const scriptHostname = scriptUrl.hostname;
-
+    const feedbackSubmitted = ref(false);
     const errorLoading = ref(false);
     const loading = ref(true);
     const userIsAuthenticated = ref(false);
@@ -164,6 +164,8 @@
                 formSubmissionUrl.value = response.data.submission_url;
 
                 serviceRequestTitle.value = response.data.service_request_title;
+
+                feedbackSubmitted.value = response.data.feedback_submitted;
 
                 const { setRequiresAuthentication } = useAuthStore();
 
@@ -268,6 +270,7 @@
                 isSpa: isEmbeddedInAidingApp,
             })
             .then((response) => {
+
                 if (response.errors) {
                     node.setErrors([], response.errors);
 
@@ -319,7 +322,7 @@
             <AppLoading />
         </div>
 
-        <div v-else>
+        <div v-else-if="!loading && !feedbackSubmitted">
             <div v-if="!submittedSuccess" class="bg-gradient flex flex-col items-center justify-start min-h-screen">
                 <div
                     v-if="requiresAuthentication && !userIsAuthenticated"
@@ -393,6 +396,18 @@
             </div>
             <div v-if="submittedSuccess">
                 <h1 class="text-2xl font-bold mb-2 text-center">Thank you, your feedback has been received.</h1>
+            </div>
+        </div>
+
+        <div v-else>
+            <div class="bg-gradient flex flex-col items-center justify-start min-h-screen">
+                <div
+                    class="max-w-md w-full bg-white rounded ring-1 ring-black/5 shadow-sm px-8 pt-6 pb-4 flex flex-col gap-6 mx-4 mt-4"
+                >
+                    <h1 class="text-primary-950 text-center text-2xl font-semibold">
+                        Feedback is already submitted for this service request.
+                    </h1>
+                </div>
             </div>
         </div>
     </div>
