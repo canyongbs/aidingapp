@@ -42,7 +42,7 @@ class UsageAuditing extends Cluster
 {
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
-    protected static ?string $navigationGroup = 'Reporting';
+    protected static ?string $navigationGroup = 'Report Center';
 
     protected static ?int $navigationSort = 30;
 }
