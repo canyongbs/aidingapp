@@ -52,13 +52,13 @@ class KnowledgeBaseItemResource extends Resource
 
     protected static ?int $navigationSort = 40;
 
-    protected static ?string $breadcrumb = 'Knowledge Base';
+    protected static ?string $breadcrumb = 'Knowledge Management';
 
-    protected static ?string $modelLabel = 'knowledge base item';
+    protected static ?string $modelLabel = 'knowledge management';
 
     protected static ?string $navigationIcon = 'heroicon-o-book-open';
 
-    protected static ?string $navigationLabel = 'Knowledge Base';
+    protected static ?string $navigationLabel = 'Knowledge Management';
 
     protected static ?string $recordTitleAttribute = 'title';
 
