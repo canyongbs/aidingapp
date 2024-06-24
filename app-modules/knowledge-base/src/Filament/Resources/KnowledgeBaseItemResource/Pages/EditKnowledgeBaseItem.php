@@ -122,12 +122,12 @@ class EditKnowledgeBaseItem extends EditRecord
                 ->color('primary')
                 ->label('Save Article Details'),
             EditAction::make()
-                ->label('Edit Article Metadata')
+                ->label('Edit Article Properties')
                 ->button()
                 ->outlined()
                 ->record($this->record)
                 ->form(resolve(EditKnowledgeBaseItemMetadata::class)->form())
-                ->successNotificationTitle('Article metadata successfully updated'),
+                ->successNotificationTitle('Article properties successfully updated'),
         ];
     }
 }
