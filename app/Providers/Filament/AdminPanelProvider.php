@@ -136,6 +136,22 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->navigationGroups([
                 NavigationGroup::make()
+                    ->label('Clients')
+                    ->icon('heroicon-o-users')
+                    ->collapsed(),
+                NavigationGroup::make()
+                    ->label('Service Management')
+                    ->icon('heroicon-o-wrench-screwdriver')
+                    ->collapsed(),
+                NavigationGroup::make()
+                    ->label('Reporting')
+                    ->icon('heroicon-o-document-chart-bar')
+                    ->collapsed(),
+                NavigationGroup::make()
+                    ->label('Product Administration')
+                    ->icon('heroicon-o-wrench-screwdriver')
+                    ->collapsed(),
+                NavigationGroup::make()
                     ->label('Artificial Intelligence')
                     ->icon('heroicon-o-sparkles')
                     ->collapsed(),
@@ -150,14 +166,6 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make()
                     ->label('Premium Features')
                     ->icon('heroicon-o-rocket-launch')
-                    ->collapsed(),
-                NavigationGroup::make()
-                    ->label('Reporting')
-                    ->icon('heroicon-o-document-chart-bar')
-                    ->collapsed(),
-                NavigationGroup::make()
-                    ->label('Product Administration')
-                    ->icon('heroicon-o-wrench-screwdriver')
                     ->collapsed(),
             ])
             ->sidebarCollapsibleOnDesktop()
