@@ -78,9 +78,19 @@ class EditServiceRequestType extends EditRecord
                                     ->live(),
                                 Toggle::make('has_enabled_csat')
                                     ->label('CSAT')
+                                    ->live()
+                                    ->validationMessages([
+                                        'accepted'=> 'CSAT must be accepted.'
+                                    ])
+                                    ->accepted(fn(Get $get) => !$get('has_enabled_nps') ? true : false)
                                     ->visible(fn (Get $get) => $get('has_enabled_feedback_collection')),
                                 Toggle::make('has_enabled_nps')
                                     ->label('NPS')
+                                    ->live()
+                                    ->validationMessages([
+                                        'accepted'=> 'NPS must be accepted.'
+                                    ])
+                                    ->accepted(fn(Get $get) => !$get('has_enabled_csat') ? true : false)
                                     ->visible(fn (Get $get) => $get('has_enabled_feedback_collection')),
                             ])
                             ->visible(fn (Get $get): bool => Gate::check(Feature::FeedbackManagement->getGateName())),

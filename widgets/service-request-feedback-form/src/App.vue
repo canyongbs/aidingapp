@@ -323,79 +323,81 @@
         </div>
 
         <div v-else-if="!loading && !feedbackSubmitted">
-            <div v-if="!submittedSuccess" class="bg-gradient flex flex-col items-center justify-start min-h-screen">
-                <div
-                    v-if="requiresAuthentication && !userIsAuthenticated"
-                    class="max-w-md w-full bg-white rounded ring-1 ring-black/5 shadow-sm px-8 pt-6 pb-4 flex flex-col gap-6 mx-4 mt-4"
-                >
-                    <h1 class="text-primary-950 text-center text-2xl font-semibold">Login to submit feedback</h1>
-
-                    <FormKit type="form" @submit="authenticate" v-model="authentication">
-                        <FormKit
-                            type="email"
-                            label="Your email address"
-                            name="email"
-                            validation="required|email"
-                            validation-visibility="submit"
-                            :disabled="authentication.isRequested"
-                        />
-
-                        <p v-if="authentication.requestedMessage" class="text-sm">
-                            {{ authentication.requestedMessage }}
-                        </p>
-
-                        <FormKit
-                            type="otp"
-                            digits="6"
-                            label="Authentication code"
-                            name="code"
-                            help="We’ve sent a code to your email address."
-                            validation="required"
-                            validation-visibility="submit"
-                            v-if="authentication.isRequested"
-                        />
-                    </FormKit>
-                </div>
-
-                <div v-else class="flex flex-col justify-center min-h-screen">
-                    <img
-                        :src="headerLogo"
-                        :alt="appName"
-                        class="max-h-20 max-w-64 object-scale-down object-left mb-4"
-                    />
-                    <div v-if="errorLoading" class="text-center">
-                        <h1 class="text-3xl font-bold text-red-500">Error Loading the feedback form</h1>
-                        <p class="text-lg text-red-500">Please try again later</p>
-                    </div>
-                    <div v-else class="flex flex-col w-full">
-                        <div class="mb-4">
-                            Thank you for filling out this brief survey on your service request titled:
-                            {{ serviceRequestTitle }}
-                        </div>
-
-                        <FormKit type="form" @submit="submitForm">
+            <div class="bg-gradient flex flex-col items-center justify-start min-h-screen">
+                <div v-if="!submittedSuccess">
+                    <div
+                        v-if="requiresAuthentication && !userIsAuthenticated"
+                        class="max-w-md w-full bg-white rounded ring-1 ring-black/5 shadow-sm px-8 pt-6 pb-4 flex flex-col gap-6 mx-4 mt-4"
+                    >
+                        <h1 class="text-primary-950 text-center text-2xl font-semibold">Login to submit feedback</h1>
+    
+                        <FormKit type="form" @submit="authenticate" v-model="authentication">
                             <FormKit
-                                validation="required"
-                                type="rating"
-                                v-if="hasEnabledCsat"
-                                name="csat"
-                                label="How did we do?"
-                            ></FormKit>
+                                type="email"
+                                label="Your email address"
+                                name="email"
+                                validation="required|email"
+                                validation-visibility="submit"
+                                :disabled="authentication.isRequested"
+                            />
+    
+                            <p v-if="authentication.requestedMessage" class="text-sm">
+                                {{ authentication.requestedMessage }}
+                            </p>
+    
                             <FormKit
+                                type="otp"
+                                digits="6"
+                                label="Authentication code"
+                                name="code"
+                                help="We’ve sent a code to your email address."
                                 validation="required"
-                                type="rating"
-                                v-if="hasEnabledNps"
-                                name="nps"
-                                label="How likely are you to recommend our service to a friend or colleague?"
-                            ></FormKit>
+                                validation-visibility="submit"
+                                v-if="authentication.isRequested"
+                            />
                         </FormKit>
                     </div>
-
-                    <Footer :logo="footerLogo"></Footer>
+    
+                    <div v-else class="flex flex-col justify-center min-h-screen">
+                        <img
+                            :src="headerLogo"
+                            :alt="appName"
+                            class="max-h-20 max-w-64 object-scale-down object-left mb-4"
+                        />
+                        <div v-if="errorLoading" class="text-center">
+                            <h1 class="text-3xl font-bold text-red-500">Error Loading the feedback form</h1>
+                            <p class="text-lg text-red-500">Please try again later</p>
+                        </div>
+                        <div v-else class="flex flex-col w-full">
+                            <div class="mb-4">
+                                Thank you for filling out this brief survey on your service request titled:
+                                {{ serviceRequestTitle }}
+                            </div>
+    
+                            <FormKit type="form" @submit="submitForm">
+                                <FormKit
+                                    validation="required"
+                                    type="rating"
+                                    v-if="hasEnabledCsat"
+                                    name="csat"
+                                    label="How did we do?"
+                                ></FormKit>
+                                <FormKit
+                                    validation="required"
+                                    type="rating"
+                                    v-if="hasEnabledNps"
+                                    name="nps"
+                                    label="How likely are you to recommend our service to a friend or colleague?"
+                                ></FormKit>
+                            </FormKit>
+                        </div>
+    
+                        <Footer :logo="footerLogo"></Footer>
+                    </div>
                 </div>
-            </div>
-            <div v-if="submittedSuccess">
-                <h1 class="text-2xl font-bold mb-2 text-center">Thank you, your feedback has been received.</h1>
+                <div v-if="submittedSuccess">
+                    <h1 class="text-2xl font-bold mt-6 mb-2 text-center">Thank you, your feedback has been received.</h1>
+                </div>
             </div>
         </div>
 

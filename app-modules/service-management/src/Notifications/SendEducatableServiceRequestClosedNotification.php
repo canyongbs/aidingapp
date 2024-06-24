@@ -45,6 +45,7 @@ use AidingApp\Notification\Notifications\BaseNotification;
 use AidingApp\Notification\Notifications\EmailNotification;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
 use AidingApp\Notification\Notifications\Concerns\EmailChannelTrait;
+use Illuminate\Support\Facades\Log;
 
 class SendEducatableServiceRequestClosedNotification extends BaseNotification implements EmailNotification
 {
@@ -64,6 +65,8 @@ class SendEducatableServiceRequestClosedNotification extends BaseNotification im
         };
 
         $status = $this->serviceRequest->status;
+
+        Log::debug($this->serviceRequest);
 
         return MailMessage::make()
             ->settings($this->resolveNotificationSetting($notifiable))

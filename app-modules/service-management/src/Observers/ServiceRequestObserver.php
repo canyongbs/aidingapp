@@ -48,6 +48,7 @@ use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestOpened
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
 use App\Enums\Feature;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 
 class ServiceRequestObserver
 {
@@ -92,10 +93,8 @@ class ServiceRequestObserver
             $serviceRequest->respondent->notify(new SendEducatableServiceRequestClosedNotification($serviceRequest));
         }
 
-        if (Gate::check(Feature::FeedbackManagement->getGateName()) && $serviceRequest?->priority?->type?->has_enabled_feedback_collection && $serviceRequest?->status?->name == 'Closed') {
-          $contact = $serviceRequest->respondent;
-
-          $contact->notify(new SendClosedServiceFeedbackNotification($serviceRequest));
+        if (Gate::check(Feature::FeedbackManagement->getGateName()) && $serviceRequest?->priority?->type?->has_enabled_feedback_collection && $serviceRequest?->status?->classification == SystemServiceRequestClassification::Closed && !$serviceRequest?->feedback()->count()) {
+          $serviceRequest->respondent->notify(new SendClosedServiceFeedbackNotification($serviceRequest));
       }
     }
 }
