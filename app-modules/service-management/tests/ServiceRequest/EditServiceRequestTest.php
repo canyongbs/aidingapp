@@ -44,16 +44,15 @@ use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 use function Pest\Laravel\assertDatabaseHas;
 
+use Illuminate\Support\Facades\Notification;
 use AidingApp\Authorization\Enums\LicenseType;
-use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
+use AidingApp\ServiceManagement\Notifications\SendClosedServiceFeedbackNotification;
 use AidingApp\ServiceManagement\Tests\RequestFactories\EditServiceRequestRequestFactory;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\EditServiceRequest;
-use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use AidingApp\ServiceManagement\Notifications\SendClosedServiceFeedbackNotification;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Notification;
 
 test('A successful action on the EditServiceRequest page', function () {
     $serviceRequest = ServiceRequest::factory()->create();
@@ -251,7 +250,6 @@ test('EditServiceRequest is gated with proper feature access control', function 
 });
 
 test('send feedback email if service request is closed', function () {
-
     Notification::fake();
 
     $user = User::factory()->licensed(LicenseType::cases())->create();
@@ -282,8 +280,8 @@ test('send feedback email if service request is closed', function () {
 
     $request = collect(EditServiceRequestRequestFactory::new([
         'status_id' => ServiceRequestStatus::factory()->create([
-            'classification' => SystemServiceRequestClassification::Closed
-        ])->id
+            'classification' => SystemServiceRequestClassification::Closed,
+        ])->id,
     ])->create());
 
     livewire(EditServiceRequest::class, [
@@ -311,11 +309,12 @@ test('send feedback email if service request is closed', function () {
     $contact->notify(new SendClosedServiceFeedbackNotification($serviceRequest));
 
     Notification::assertSentTo(
-        $contact, SendClosedServiceFeedbackNotification::class
+        $contact,
+        SendClosedServiceFeedbackNotification::class
     );
 
     Notification::assertNotSentTo(
-        $user, SendClosedServiceFeedbackNotification::class
+        $user,
+        SendClosedServiceFeedbackNotification::class
     );
-
-})->only();
+});
