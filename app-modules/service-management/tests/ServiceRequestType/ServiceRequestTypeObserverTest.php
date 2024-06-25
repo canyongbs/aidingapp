@@ -34,8 +34,8 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 
 it('cascade deletes priorities when a service request type is deleted', function () {
     $serviceRequestType = ServiceRequestType::factory()

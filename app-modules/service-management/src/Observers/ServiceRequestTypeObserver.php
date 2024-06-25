@@ -37,7 +37,6 @@
 namespace AidingApp\ServiceManagement\Observers;
 
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use Illuminate\Support\Facades\Log;
 
 class ServiceRequestTypeObserver
 {
