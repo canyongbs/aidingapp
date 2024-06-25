@@ -57,7 +57,6 @@ class CreateTenantRequest extends FormRequest
             'limits.resetDate' => ['required', 'string', 'date_format:m-d'],
             'addons' => ['required', 'array'],
             'addons.onlineForms' => ['required', 'boolean'],
-            'addons.onlineSurveys' => ['required', 'boolean'],
             'addons.serviceManagement' => ['required', 'boolean'],
             'addons.knowledgeManagement' => ['required', 'boolean'],
             'addons.realtimeChat' => ['required', 'boolean'],
