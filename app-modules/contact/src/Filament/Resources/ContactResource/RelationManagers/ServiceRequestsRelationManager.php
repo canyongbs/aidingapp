@@ -86,7 +86,13 @@ class ServiceRequestsRelationManager extends RelationManager
             ])
             ->filters([
                 SelectFilter::make('priority')
-                    ->relationship('priority', 'name', fn (Builder $query) => $query->with('type'))
+                    ->relationship(
+                        name: 'priority',
+                        titleAttribute: 'name',
+                        modifyQueryUsing: fn (Builder $query) => $query
+                            ->whereHas('type')
+                            ->with('type')
+                    )
                     ->getOptionLabelFromRecordUsing(fn (ServiceRequestPriority $record) => "{$record->type->name} - {$record->name}")
                     ->multiple()
                     ->preload(),
