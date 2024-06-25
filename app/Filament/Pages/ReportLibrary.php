@@ -40,7 +40,7 @@ use Filament\Pages\Page;
 
 class ReportLibrary extends Page
 {
-    protected static ?string $navigationGroup = 'Report Centergi';
+    protected static ?string $navigationGroup = 'Report Center';
 
     protected static ?int $navigationSort = 30;
 
