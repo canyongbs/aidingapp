@@ -119,6 +119,7 @@ class ListKnowledgeBaseItems extends ListRecords
             CreateAction::make()
                 ->disabled(fn (): bool => ! auth()->user()->can('knowledge_base_item.create'))
                 ->label('New Article')
+                ->modalHeading('New Article')
                 ->createAnother(false)
                 ->successRedirectUrl(fn (Model $record): string => KnowledgeBaseItemResource::getUrl('edit', ['record' => $record])),
         ];
