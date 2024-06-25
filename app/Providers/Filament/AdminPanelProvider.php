@@ -152,16 +152,16 @@ class AdminPanelProvider extends PanelProvider
                     ->icon('heroicon-o-document-chart-bar')
                     ->collapsed(),
                 NavigationGroup::make()
-                    ->label('Product Administration')
-                    ->icon('heroicon-o-wrench-screwdriver')
-                    ->collapsed(),
-                NavigationGroup::make()
                     ->label('Engagement Features')
                     ->icon('heroicon-o-signal')
                     ->collapsed(),
                 NavigationGroup::make()
                     ->label('Premium Features')
                     ->icon('heroicon-o-rocket-launch')
+                    ->collapsed(),
+                NavigationGroup::make()
+                    ->label('Product Administration')
+                    ->icon('heroicon-o-wrench-screwdriver')
                     ->collapsed(),
             ])
             ->sidebarCollapsibleOnDesktop()
