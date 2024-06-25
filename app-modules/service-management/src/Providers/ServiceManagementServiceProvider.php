@@ -36,37 +36,38 @@
 
 namespace AidingApp\ServiceManagement\Providers;
 
-use Filament\Panel;
-use App\Concerns\ImplementsGraphQL;
-use Illuminate\Support\ServiceProvider;
-use AidingApp\ServiceManagement\Models\Sla;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use AidingApp\ServiceManagement\Models\ChangeRequest;
 use AidingApp\Authorization\AuthorizationRoleRegistry;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
-use AidingApp\ServiceManagement\ServiceManagementPlugin;
-use AidingApp\ServiceManagement\Models\ChangeRequestType;
-use AidingApp\ServiceManagement\Models\ServiceRequestForm;
-use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\ServiceManagement\Models\ChangeRequestStatus;
-use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use AidingApp\ServiceManagement\Models\ChangeRequest;
 use AidingApp\ServiceManagement\Models\ChangeRequestResponse;
-use AidingApp\ServiceManagement\Models\ServiceRequestHistory;
-use AidingApp\ServiceManagement\Models\ServiceRequestFormStep;
-use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
-use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
+use AidingApp\ServiceManagement\Models\ChangeRequestStatus;
+use AidingApp\ServiceManagement\Models\ChangeRequestType;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
-use AidingApp\ServiceManagement\Observers\ChangeRequestObserver;
-use AidingApp\ServiceManagement\Observers\ServiceRequestObserver;
-use AidingApp\ServiceManagement\Models\ServiceRequestFormSubmission;
-use AidingApp\ServiceManagement\Observers\ServiceRequestUpdateObserver;
+use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormAuthentication;
-use AidingApp\ServiceManagement\Observers\ServiceRequestHistoryObserver;
-use AidingApp\ServiceManagement\Registries\ServiceManagementRbacRegistry;
+use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
+use AidingApp\ServiceManagement\Models\ServiceRequestFormStep;
+use AidingApp\ServiceManagement\Models\ServiceRequestFormSubmission;
+use AidingApp\ServiceManagement\Models\ServiceRequestHistory;
+use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
+use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use AidingApp\ServiceManagement\Models\Sla;
+use AidingApp\ServiceManagement\Observers\ChangeRequestObserver;
 use AidingApp\ServiceManagement\Observers\ServiceRequestAssignmentObserver;
+use AidingApp\ServiceManagement\Observers\ServiceRequestHistoryObserver;
+use AidingApp\ServiceManagement\Observers\ServiceRequestObserver;
+use AidingApp\ServiceManagement\Observers\ServiceRequestTypeObserver;
+use AidingApp\ServiceManagement\Observers\ServiceRequestUpdateObserver;
+use AidingApp\ServiceManagement\Registries\ServiceManagementRbacRegistry;
+use AidingApp\ServiceManagement\ServiceManagementPlugin;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\SqidPlusSixServiceRequestNumberGenerator;
+use App\Concerns\ImplementsGraphQL;
+use Filament\Panel;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\ServiceProvider;
 
 class ServiceManagementServiceProvider extends ServiceProvider
 {
@@ -115,5 +116,6 @@ class ServiceManagementServiceProvider extends ServiceProvider
         ServiceRequestAssignment::observe(ServiceRequestAssignmentObserver::class);
         ServiceRequestHistory::observe(ServiceRequestHistoryObserver::class);
         ServiceRequestUpdate::observe(ServiceRequestUpdateObserver::class);
+        ServiceRequestType::observe(ServiceRequestTypeObserver::class);
     }
 }
