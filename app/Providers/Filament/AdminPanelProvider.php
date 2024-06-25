@@ -156,14 +156,6 @@ class AdminPanelProvider extends PanelProvider
                     ->icon('heroicon-o-wrench-screwdriver')
                     ->collapsed(),
                 NavigationGroup::make()
-                    ->label('Artificial Intelligence')
-                    ->icon('heroicon-o-sparkles')
-                    ->collapsed(),
-                NavigationGroup::make()
-                    ->label('Recruitment CRM')
-                    ->icon('heroicon-o-magnifying-glass')
-                    ->collapsed(),
-                NavigationGroup::make()
                     ->label('Engagement Features')
                     ->icon('heroicon-o-signal')
                     ->collapsed(),
