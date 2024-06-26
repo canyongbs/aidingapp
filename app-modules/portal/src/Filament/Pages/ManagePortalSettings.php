@@ -153,8 +153,15 @@ class ManagePortalSettings extends SettingsPage
                             ])
                             ->model(
                                 SettingsProperty::getInstance('portal.favicon'),
+                            ),
+                        SpatieMediaLibraryFileUpload::make('logo')
+                            ->collection('logo')
+                            ->visibility('private')
+                            ->image()
+                            ->model(
+                                SettingsProperty::getInstance('portal.logo'),
                             )
-                            ->columnSpanFull(),
+                            ->visible(PennantFeature::active('portal-logo')),
                         Actions::make([
                             Action::make('view')
                                 ->url(fn () => route('portal.knowledge-management.show'))
@@ -196,18 +203,6 @@ class ManagePortalSettings extends SettingsPage
                             )
                             ->columnSpanFull(),
                     ])->columns(2),
-                Section::make('Header')
-                    ->schema([
-                        SpatieMediaLibraryFileUpload::make('logo')
-                            ->collection('logo')
-                            ->visibility('private')
-                            ->image()
-                            ->model(
-                                SettingsProperty::getInstance('portal.logo'),
-                            )
-                            ->columnSpanFull()
-                            ->visible(PennantFeature::active('portal-logo')),
-                    ]),
             ]);
     }
 }
