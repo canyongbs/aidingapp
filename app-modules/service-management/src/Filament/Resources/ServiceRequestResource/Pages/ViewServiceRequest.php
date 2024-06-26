@@ -54,6 +54,7 @@ use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
 use Filament\Infolists\Components\IconEntry\IconEntrySize;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
+use Laravel\Pennant\Feature;
 
 class ViewServiceRequest extends ViewRecord
 {
@@ -186,13 +187,14 @@ class ViewServiceRequest extends ViewRecord
                         ]),
                     ])
                     ->columns(),
+
                 Section::make('Feedback')
-                    ->visible(fn (ServiceRequest $record): bool => $record->latestFeedback()->exists())
+                    ->visible(fn (ServiceRequest $record): bool => $record->feedback()->exists() && Feature::active('service-request-feedback'))
                     ->schema([
-                        TextEntry::make('latestFeedback.csat_answer')
+                        TextEntry::make('feedback.csat_answer')
                             ->label('CSAT')
                             ->badge(),
-                        TextEntry::make('latestFeedback.nps_answer')
+                        TextEntry::make('feedback.nps_answer')
                             ->label('NPS')
                             ->badge(),
                     ])

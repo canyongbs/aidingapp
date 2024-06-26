@@ -4,6 +4,7 @@ namespace AidingApp\ServiceManagement\Http\Middleware;
 
 use Closure;
 use App\Enums\Feature;
+use App\Settings\LicenseSettings;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,7 +18,7 @@ class FeedbackManagementIsOn
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (! Gate::check(Feature::FeedbackManagement->getGateName())) {
+        if (!app(LicenseSettings::class)->data->addons->feedbackManagement) {
             return response()->json(['error' => 'Feedback Management is not enabled.'], 403);
         }
 

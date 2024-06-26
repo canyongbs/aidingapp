@@ -270,7 +270,6 @@
                 isSpa: isEmbeddedInAidingApp,
             })
             .then((response) => {
-
                 if (response.errors) {
                     node.setErrors([], response.errors);
 
@@ -330,7 +329,7 @@
                         class="max-w-md w-full bg-white rounded ring-1 ring-black/5 shadow-sm px-8 pt-6 pb-4 flex flex-col gap-6 mx-4 mt-4"
                     >
                         <h1 class="text-primary-950 text-center text-2xl font-semibold">Login to submit feedback</h1>
-    
+
                         <FormKit type="form" @submit="authenticate" v-model="authentication">
                             <FormKit
                                 type="email"
@@ -340,11 +339,11 @@
                                 validation-visibility="submit"
                                 :disabled="authentication.isRequested"
                             />
-    
+
                             <p v-if="authentication.requestedMessage" class="text-sm">
                                 {{ authentication.requestedMessage }}
                             </p>
-    
+
                             <FormKit
                                 type="otp"
                                 digits="6"
@@ -357,7 +356,7 @@
                             />
                         </FormKit>
                     </div>
-    
+
                     <div v-else class="flex flex-col justify-center min-h-screen">
                         <img
                             :src="headerLogo"
@@ -373,7 +372,7 @@
                                 Thank you for filling out this brief survey on your service request titled:
                                 {{ serviceRequestTitle }}
                             </div>
-    
+
                             <FormKit type="form" @submit="submitForm">
                                 <FormKit
                                     validation="required"
@@ -391,12 +390,14 @@
                                 ></FormKit>
                             </FormKit>
                         </div>
-    
+
                         <Footer :logo="footerLogo"></Footer>
                     </div>
                 </div>
                 <div v-if="submittedSuccess">
-                    <h1 class="text-2xl font-bold mt-6 mb-2 text-center">Thank you, your feedback has been received.</h1>
+                    <h1 class="text-2xl font-bold mt-6 mb-2 text-center">
+                        Thank you, your feedback has been received.
+                    </h1>
                 </div>
             </div>
         </div>

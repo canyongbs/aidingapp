@@ -72,7 +72,6 @@ class EditServiceRequestType extends EditRecord
                         IconSelect::make('icon'),
                         Group::make()
                             ->schema([
-                                //TODO: Add rule requiring at least one of the two to be enabled if feedback collection is enabled
                                 Toggle::make('has_enabled_feedback_collection')
                                     ->label('Enable feedback collection')
                                     ->live(),
@@ -80,17 +79,17 @@ class EditServiceRequestType extends EditRecord
                                     ->label('CSAT')
                                     ->live()
                                     ->validationMessages([
-                                        'accepted'=> 'CSAT must be accepted.'
+                                        'accepted' => 'At least one option must be accepted, CSAT or NPS.',
                                     ])
-                                    ->accepted(fn(Get $get) => !$get('has_enabled_nps') ? true : false)
+                                    ->accepted(fn (Get $get) => ! $get('has_enabled_nps') ? true : false)
                                     ->visible(fn (Get $get) => $get('has_enabled_feedback_collection')),
                                 Toggle::make('has_enabled_nps')
                                     ->label('NPS')
                                     ->live()
                                     ->validationMessages([
-                                        'accepted'=> 'NPS must be accepted.'
+                                        'accepted' => 'At least one option must be accepted, CSAT or NPS.',
                                     ])
-                                    ->accepted(fn(Get $get) => !$get('has_enabled_csat') ? true : false)
+                                    ->accepted(fn (Get $get) => ! $get('has_enabled_csat') ? true : false)
                                     ->visible(fn (Get $get) => $get('has_enabled_feedback_collection')),
                             ])
                             ->visible(fn (Get $get): bool => Gate::check(Feature::FeedbackManagement->getGateName())),

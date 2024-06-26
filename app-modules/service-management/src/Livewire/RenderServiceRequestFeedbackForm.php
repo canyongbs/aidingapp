@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Livewire;
 
 use Livewire\Component;
+use Laravel\Pennant\Feature;
 use Illuminate\Contracts\View\View;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -52,14 +53,13 @@ class RenderServiceRequestFeedbackForm extends Component implements HasForms
 
     public ?array $data = [];
 
-    // public function mount()
-    // {
-    //     dd(request());
-    // }
-
     public function render(): View
     {
+        if (!Feature::active('service-request-feedback')) {
+            abort(404);
+        }
+
         return view('service-management::livewire.render-service-request-feedback-form')
-            ->title(__('Service request feedback for #:serviceid',['serviceid' => $this->serviceRequest->id]));
+            ->title(__('Service request feedback for :service_no', ['service_no' => $this->serviceRequest->service_request_number]));
     }
 }

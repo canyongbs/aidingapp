@@ -37,15 +37,12 @@
 namespace AidingApp\ServiceManagement\Notifications;
 
 use App\Models\NotificationSetting;
-use App\Models\Contracts\Educatable;
-use AidingApp\Contact\Models\Contact;
 use AidingApp\Notification\Models\OutboundDeliverable;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\Notification\Notifications\BaseNotification;
 use AidingApp\Notification\Notifications\EmailNotification;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
 use AidingApp\Notification\Notifications\Concerns\EmailChannelTrait;
-use Illuminate\Support\Facades\Log;
 
 class SendEducatableServiceRequestClosedNotification extends BaseNotification implements EmailNotification
 {
@@ -57,16 +54,9 @@ class SendEducatableServiceRequestClosedNotification extends BaseNotification im
 
     public function toEmail(object $notifiable): MailMessage
     {
-        /** @var Educatable $educatable */
-        $educatable = $notifiable;
-
-        $name = match ($notifiable::class) {
-            Contact::class => $educatable->first_name,
-        };
+        $name = $notifiable->first_name;
 
         $status = $this->serviceRequest->status;
-
-        Log::debug($this->serviceRequest);
 
         return MailMessage::make()
             ->settings($this->resolveNotificationSetting($notifiable))

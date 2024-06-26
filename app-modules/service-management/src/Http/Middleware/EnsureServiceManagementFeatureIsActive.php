@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Laravel\Pennant\Feature;
 use App\Settings\LicenseSettings;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -45,7 +46,7 @@ class EnsureServiceManagementFeatureIsActive
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (! app(LicenseSettings::class)->data->addons->serviceManagement) {
+        if (! Feature::active('service-request-feedback') && ! app(LicenseSettings::class)->data->addons->serviceManagement) {
             return response()->json(['error' => 'Service Management is not enabled.'], 403);
         }
 

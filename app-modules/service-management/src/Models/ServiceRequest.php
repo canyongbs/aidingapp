@@ -218,14 +218,9 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
         return $this->hasMany(ServiceRequestHistory::class);
     }
 
-    public function feedback(): HasMany
+    public function feedback(): HasOne
     {
-        return $this->hasMany(ServiceRequestFeedback::class);
-    }
-
-    public function latestFeedback(): HasOne
-    {
-        return $this->feedback()->one()->latestOfMany();
+        return $this->hasOne(ServiceRequestFeedback::class);
     }
 
     public function createdBy(): BelongsTo

@@ -37,18 +37,18 @@
 namespace AidingApp\ServiceManagement\Observers;
 
 use App\Models\User;
+use App\Enums\Feature;
+use Illuminate\Support\Facades\Gate;
+use Laravel\Pennant\Feature as PennantFeature;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\Notification\Events\TriggeredAutoSubscription;
 use AidingApp\ServiceManagement\Actions\CreateServiceRequestHistory;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
-use AidingApp\ServiceManagement\Exceptions\ServiceRequestNumberUpdateAttemptException;
 use AidingApp\ServiceManagement\Notifications\SendClosedServiceFeedbackNotification;
+use AidingApp\ServiceManagement\Exceptions\ServiceRequestNumberUpdateAttemptException;
 use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestClosedNotification;
 use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestOpenedNotification;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
-use App\Enums\Feature;
-use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Log;
 
 class ServiceRequestObserver
 {
@@ -93,8 +93,14 @@ class ServiceRequestObserver
             $serviceRequest->respondent->notify(new SendEducatableServiceRequestClosedNotification($serviceRequest));
         }
 
-        if (Gate::check(Feature::FeedbackManagement->getGateName()) && $serviceRequest?->priority?->type?->has_enabled_feedback_collection && $serviceRequest?->status?->classification == SystemServiceRequestClassification::Closed && !$serviceRequest?->feedback()->count()) {
-          $serviceRequest->respondent->notify(new SendClosedServiceFeedbackNotification($serviceRequest));
-      }
+        if (
+            PennantFeature::active('service-request-feedback') &&
+            Gate::check(Feature::FeedbackManagement->getGateName()) &&
+            $serviceRequest?->priority?->type?->has_enabled_feedback_collection &&
+            $serviceRequest?->status?->classification == SystemServiceRequestClassification::Closed &&
+            ! $serviceRequest?->feedback()->count()
+        ) {
+            $serviceRequest->respondent->notify(new SendClosedServiceFeedbackNotification($serviceRequest));
+        }
     }
 }

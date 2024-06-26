@@ -47,7 +47,9 @@ use function Pest\Laravel\assertDatabaseHas;
 use Illuminate\Support\Facades\Notification;
 use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\Notifications\SendClosedServiceFeedbackNotification;
@@ -252,35 +254,31 @@ test('EditServiceRequest is gated with proper feature access control', function 
 test('send feedback email if service request is closed', function () {
     Notification::fake();
 
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->feedbackManagement = true;
+
+    $settings->save();
+
     $user = User::factory()->licensed(LicenseType::cases())->create();
 
     $serviceRequest = ServiceRequest::factory()->create();
 
-    actingAs($user)
-        ->get(
-            ServiceRequestResource::getUrl('edit', [
-                'record' => $serviceRequest,
-            ])
-        )->assertForbidden();
-
-    livewire(EditServiceRequest::class, [
-        'record' => $serviceRequest->getRouteKey(),
-    ])
-        ->assertForbidden();
-
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.*.update');
 
-    actingAs($user)
-        ->get(
-            ServiceRequestResource::getUrl('edit', [
-                'record' => $serviceRequest,
-            ])
-        )->assertSuccessful();
+    actingAs($user);
 
     $request = collect(EditServiceRequestRequestFactory::new([
         'status_id' => ServiceRequestStatus::factory()->create([
             'classification' => SystemServiceRequestClassification::Closed,
+        ])->id,
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => ServiceRequestType::factory()->create([
+                'has_enabled_feedback_collection' => true,
+                'has_enabled_csat' => true,
+                'has_enabled_nps' => true,
+            ])->id,
         ])->id,
     ])->create());
 
@@ -304,17 +302,13 @@ test('send feedback email if service request is closed', function () {
 
     $serviceRequest->refresh();
 
-    $contact = $serviceRequest->respondent;
-
-    $contact->notify(new SendClosedServiceFeedbackNotification($serviceRequest));
-
     Notification::assertSentTo(
-        $contact,
+        $serviceRequest->respondent,
         SendClosedServiceFeedbackNotification::class
     );
 
     Notification::assertNotSentTo(
-        $user,
+        [$user],
         SendClosedServiceFeedbackNotification::class
     );
 });
