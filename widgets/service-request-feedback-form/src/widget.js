@@ -1,5 +1,3 @@
-<?php
-
 /*
 <COPYRIGHT>
 
@@ -33,22 +31,33 @@
 
 </COPYRIGHT>
 */
+import { createApp, defineCustomElement, getCurrentInstance, h } from 'vue';
+import './widget.css';
+import App from './App.vue';
+import { defaultConfig, plugin } from '@formkit/vue';
+import config from './formkit.config.js';
+import { createPinia } from 'pinia';
 
-namespace App\Http\Middleware;
+customElements.define(
+    'service-request-feedback-form-embed',
+    defineCustomElement({
+        setup(props) {
+            const app = createApp();
+            const pinia = createPinia();
 
-use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken as Middleware;
+            app.use(pinia);
 
-class VerifyCsrfToken extends Middleware
-{
-    /**
-     * The URIs that should be excluded from CSRF verification.
-     *
-     * @var array<int, string>
-     */
-    protected $except = [
-        '/api/forms/*',
-        '/api/service-request-forms/*',
-        '/api/service-requests/*',
-        '/graphql/*',
-    ];
-}
+            // install plugins
+            app.use(plugin, defaultConfig(config));
+
+            app.config.devtools = true;
+
+            const inst = getCurrentInstance();
+            Object.assign(inst.appContext, app._context);
+            Object.assign(inst.provides, app._context.provides);
+
+            return () => h(App, props);
+        },
+        props: ['url', 'userAuthenticationUrl', 'accessUrl', 'appUrl', 'apiUrl'],
+    }),
+);

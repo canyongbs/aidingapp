@@ -34,21 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace App\Http\Middleware;
+use Laravel\Pennant\Feature;
+use Illuminate\Database\Migrations\Migration;
 
-use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken as Middleware;
+return new class () extends Migration {
+    public function up(): void
+    {
+        Feature::activate('service-request-feedback');
+    }
 
-class VerifyCsrfToken extends Middleware
-{
-    /**
-     * The URIs that should be excluded from CSRF verification.
-     *
-     * @var array<int, string>
-     */
-    protected $except = [
-        '/api/forms/*',
-        '/api/service-request-forms/*',
-        '/api/service-requests/*',
-        '/graphql/*',
-    ];
-}
+    public function down(): void
+    {
+        Feature::deactivate('service-request-feedback');
+    }
+};

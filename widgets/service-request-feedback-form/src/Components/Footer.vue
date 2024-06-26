@@ -1,6 +1,4 @@
-<?php
-
-/*
+<!--
 <COPYRIGHT>
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
@@ -32,23 +30,34 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
+-->
+<script setup>
+    import { defineProps } from 'vue';
 
-namespace App\Http\Middleware;
+    const props = defineProps({
+        logo: {
+            type: String,
+            required: true,
+        },
+    });
+</script>
 
-use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken as Middleware;
+<template>
+    <div class="flex w-full flex-col">
+        <div class="mt-4 flex w-full justify-center">
+            <img class="block h-5" :src="logo" alt="Aiding App Logo" />
+        </div>
 
-class VerifyCsrfToken extends Middleware
-{
-    /**
-     * The URIs that should be excluded from CSRF verification.
-     *
-     * @var array<int, string>
-     */
-    protected $except = [
-        '/api/forms/*',
-        '/api/service-request-forms/*',
-        '/api/service-requests/*',
-        '/graphql/*',
-    ];
-}
+        <div class="flex w-full justify-center pb-4 pt-2">
+            <span class="w-11/12 text-center text-xs lg:w-3/4 xl:w-7/12">
+                © 2016-{{ new Date().getFullYear() }} Canyon GBS LLC. All Rights Reserved. Canyon GBS™ and Aiding
+                App™ are trademarks of Canyon GBS LLC. For more information or inquiries, please visit our website at
+                <a class="text-blue-600 underline dark:text-blue-400" href="https://canyongbs.com/"
+                    >https://canyongbs.com/</a
+                >.
+            </span>
+        </div>
+    </div>
+</template>
+
+<style scoped></style>

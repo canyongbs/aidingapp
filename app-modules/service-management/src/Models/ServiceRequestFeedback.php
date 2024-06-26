@@ -34,21 +34,31 @@
 </COPYRIGHT>
 */
 
-namespace App\Http\Middleware;
+namespace AidingApp\ServiceManagement\Models;
 
-use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken as Middleware;
+use App\Models\BaseModel;
+use AidingApp\Contact\Models\Contact;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class VerifyCsrfToken extends Middleware
+class ServiceRequestFeedback extends BaseModel
 {
-    /**
-     * The URIs that should be excluded from CSRF verification.
-     *
-     * @var array<int, string>
-     */
-    protected $except = [
-        '/api/forms/*',
-        '/api/service-request-forms/*',
-        '/api/service-requests/*',
-        '/graphql/*',
+    use SoftDeletes;
+
+    protected $fillable = [
+        'csat_answer',
+        'nps_answer',
+        'service_request_id',
+        'contact_id',
     ];
+
+    public function serviceRequest(): BelongsTo
+    {
+        return $this->belongsTo(ServiceRequest::class);
+    }
+
+    public function contact(): BelongsTo
+    {
+        return $this->belongsTo(Contact::class);
+    }
 }

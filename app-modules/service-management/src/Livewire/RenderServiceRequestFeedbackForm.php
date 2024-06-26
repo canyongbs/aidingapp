@@ -34,21 +34,32 @@
 </COPYRIGHT>
 */
 
-namespace App\Http\Middleware;
+namespace AidingApp\ServiceManagement\Livewire;
 
-use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken as Middleware;
+use Livewire\Component;
+use Laravel\Pennant\Feature;
+use Illuminate\Contracts\View\View;
+use Filament\Forms\Contracts\HasForms;
+use Filament\Forms\Concerns\InteractsWithForms;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 
-class VerifyCsrfToken extends Middleware
+class RenderServiceRequestFeedbackForm extends Component implements HasForms
 {
-    /**
-     * The URIs that should be excluded from CSRF verification.
-     *
-     * @var array<int, string>
-     */
-    protected $except = [
-        '/api/forms/*',
-        '/api/service-request-forms/*',
-        '/api/service-requests/*',
-        '/graphql/*',
-    ];
+    use InteractsWithForms;
+
+    public bool $show = true;
+
+    public ServiceRequest $serviceRequest;
+
+    public ?array $data = [];
+
+    public function render(): View
+    {
+        if (! Feature::active('service-request-feedback')) {
+            abort(404);
+        }
+
+        return view('service-management::livewire.render-service-request-feedback-form')
+            ->title(__('Service request feedback for :service_no', ['service_no' => $this->serviceRequest->service_request_number]));
+    }
 }

@@ -44,9 +44,15 @@ use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 use function Pest\Laravel\assertDatabaseHas;
 
+use Illuminate\Support\Facades\Notification;
 use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
+use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
+use AidingApp\ServiceManagement\Notifications\SendClosedServiceFeedbackNotification;
 use AidingApp\ServiceManagement\Tests\RequestFactories\EditServiceRequestRequestFactory;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\EditServiceRequest;
 
@@ -243,4 +249,66 @@ test('EditServiceRequest is gated with proper feature access control', function 
     expect($serviceRequest->fresh()->only($request->except('division_id')->keys()->toArray()))
         ->toEqual($request->except('division_id')->toArray())
         ->and($serviceRequest->fresh()->division->id)->toEqual($request['division_id']);
+});
+
+test('send feedback email if service request is closed', function () {
+    Notification::fake();
+
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->feedbackManagement = true;
+
+    $settings->save();
+
+    $user = User::factory()->licensed(LicenseType::cases())->create();
+
+    $serviceRequest = ServiceRequest::factory()->create();
+
+    $user->givePermissionTo('service_request.view-any');
+    $user->givePermissionTo('service_request.*.update');
+
+    actingAs($user);
+
+    $request = collect(EditServiceRequestRequestFactory::new([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Closed,
+        ])->id,
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => ServiceRequestType::factory()->create([
+                'has_enabled_feedback_collection' => true,
+                'has_enabled_csat' => true,
+                'has_enabled_nps' => true,
+            ])->id,
+        ])->id,
+    ])->create());
+
+    livewire(EditServiceRequest::class, [
+        'record' => $serviceRequest->getRouteKey(),
+    ])
+        ->fillForm($request->toArray())
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    assertDatabaseHas(
+        ServiceRequest::class,
+        $request->except(
+            [
+                'division_id',
+                'status_id',
+                'priority',
+            ]
+        )->toArray()
+    );
+
+    $serviceRequest->refresh();
+
+    Notification::assertSentTo(
+        $serviceRequest->respondent,
+        SendClosedServiceFeedbackNotification::class
+    );
+
+    Notification::assertNotSentTo(
+        [$user],
+        SendClosedServiceFeedbackNotification::class
+    );
 });

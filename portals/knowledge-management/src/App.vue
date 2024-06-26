@@ -138,6 +138,7 @@
             immediate: true,
         },
     );
+
     watch(favicon, async (newFavicon, oldFavicon) => {
         if (newFavicon != oldFavicon) {
             var link = document.querySelector("link[rel='icon']");

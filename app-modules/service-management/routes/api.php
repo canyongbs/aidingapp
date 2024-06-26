@@ -35,19 +35,24 @@
 */
 
 use Illuminate\Support\Facades\Route;
+use AidingApp\ServiceManagement\Http\Middleware\FeedbackManagementIsOn;
 use AidingApp\Form\Http\Middleware\EnsureSubmissibleIsEmbeddableAndAuthorized;
+use AidingApp\ServiceManagement\Http\Middleware\ServiceRequestTypeFeedbackIsOn;
 use AidingApp\ServiceManagement\Http\Controllers\ServiceRequestFormWidgetController;
 use AidingApp\ServiceManagement\Http\Middleware\EnsureServiceManagementFeatureIsActive;
+use AidingApp\ServiceManagement\Http\Controllers\ServiceRequestFeedbackFormWidgetController;
 
 Route::prefix('api')
     ->middleware([
         'api',
-        EnsureServiceManagementFeatureIsActive::class,
-        EnsureSubmissibleIsEmbeddableAndAuthorized::class . ':serviceRequestForm',
     ])
     ->group(function () {
         Route::prefix('service-request-forms')
             ->name('service-request-forms.')
+            ->middleware([
+                EnsureServiceManagementFeatureIsActive::class,
+                EnsureSubmissibleIsEmbeddableAndAuthorized::class . ':serviceRequestForm',
+            ])
             ->group(function () {
                 Route::get('/{serviceRequestForm}', [ServiceRequestFormWidgetController::class, 'view'])
                     ->middleware(['signed:relative'])
@@ -60,6 +65,20 @@ Route::prefix('api')
                     ->name('authenticate');
                 Route::post('/{serviceRequestForm}/submit', [ServiceRequestFormWidgetController::class, 'store'])
                     ->middleware(['signed:relative'])
+                    ->name('submit');
+            });
+
+        Route::prefix('service-requests/{serviceRequest}/feedback')
+            ->name('service-requests.feedback.')
+            ->middleware([
+                FeedbackManagementIsOn::class,
+                ServiceRequestTypeFeedbackIsOn::class,
+            ])
+            ->group(function () {
+                Route::get('/', [ServiceRequestFeedbackFormWidgetController::class, 'view'])
+                    ->name('define');
+                Route::post('/submit', [ServiceRequestFeedbackFormWidgetController::class, 'store'])
+                    ->middleware(['auth:sanctum'])
                     ->name('submit');
             });
     });

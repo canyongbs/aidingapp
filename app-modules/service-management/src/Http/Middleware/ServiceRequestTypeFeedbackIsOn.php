@@ -34,21 +34,31 @@
 </COPYRIGHT>
 */
 
-namespace App\Http\Middleware;
+namespace AidingApp\ServiceManagement\Http\Middleware;
 
-use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken as Middleware;
+use Closure;
+use Illuminate\Http\Request;
+use Laravel\Pennant\Feature;
+use App\Settings\LicenseSettings;
+use Symfony\Component\HttpFoundation\Response;
 
-class VerifyCsrfToken extends Middleware
+class ServiceRequestTypeFeedbackIsOn
 {
     /**
-     * The URIs that should be excluded from CSRF verification.
+     * Handle an incoming request.
      *
-     * @var array<int, string>
+     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    protected $except = [
-        '/api/forms/*',
-        '/api/service-request-forms/*',
-        '/api/service-requests/*',
-        '/graphql/*',
-    ];
+    public function handle(Request $request, Closure $next): Response
+    {
+        $serviceRequest = $request->route('serviceRequest');
+
+        if (Feature::active('service-request-feedback') && app(LicenseSettings::class)->data->addons->feedbackManagement) {
+            if ($serviceRequest && $serviceRequest?->priority?->type?->has_enabled_feedback_collection) {
+                return $next($request);
+            }
+        }
+
+        return response()->json(['error' => 'Feedback collection is not enabled for this service request.'], 403);
+    }
 }

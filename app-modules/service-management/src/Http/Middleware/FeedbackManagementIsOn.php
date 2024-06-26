@@ -34,21 +34,27 @@
 </COPYRIGHT>
 */
 
-namespace App\Http\Middleware;
+namespace AidingApp\ServiceManagement\Http\Middleware;
 
-use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken as Middleware;
+use Closure;
+use Illuminate\Http\Request;
+use App\Settings\LicenseSettings;
+use Laravel\Pennant\Feature as PennantFeature;
+use Symfony\Component\HttpFoundation\Response;
 
-class VerifyCsrfToken extends Middleware
+class FeedbackManagementIsOn
 {
     /**
-     * The URIs that should be excluded from CSRF verification.
+     * Handle an incoming request.
      *
-     * @var array<int, string>
+     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    protected $except = [
-        '/api/forms/*',
-        '/api/service-request-forms/*',
-        '/api/service-requests/*',
-        '/graphql/*',
-    ];
+    public function handle(Request $request, Closure $next): Response
+    {
+        if (! PennantFeature::active('service-request-feedback') && ! app(LicenseSettings::class)->data->addons->feedbackManagement) {
+            return response()->json(['error' => 'Feedback Management is not enabled.'], 403);
+        }
+
+        return $next($request);
+    }
 }

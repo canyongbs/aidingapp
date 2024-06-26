@@ -34,21 +34,26 @@
 </COPYRIGHT>
 */
 
-namespace App\Http\Middleware;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
-use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken as Middleware;
+return new class () extends Migration {
+    public function up(): void
+    {
+        Schema::create('service_request_feedback', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->foreignUuid('service_request_id')->constrained()->cascadeOnDelete();
+            $table->foreignUuid('contact_id')->constrained()->cascadeOnDelete();
+            $table->unsignedInteger('csat_answer')->nullable();
+            $table->unsignedInteger('nps_answer')->nullable();
+            $table->timestamps();
+            $table->softDeletes();
+        });
+    }
 
-class VerifyCsrfToken extends Middleware
-{
-    /**
-     * The URIs that should be excluded from CSRF verification.
-     *
-     * @var array<int, string>
-     */
-    protected $except = [
-        '/api/forms/*',
-        '/api/service-request-forms/*',
-        '/api/service-requests/*',
-        '/graphql/*',
-    ];
-}
+    public function down(): void
+    {
+        Schema::dropIfExists('service_request_feedback');
+    }
+};

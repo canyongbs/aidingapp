@@ -1,5 +1,3 @@
-<?php
-
 /*
 <COPYRIGHT>
 
@@ -33,22 +31,15 @@
 
 </COPYRIGHT>
 */
+import { createInput } from '@formkit/vue';
+import OneTimePassword from '../../../../service-request-form/src/FormKit/Inputs/OneTimePassword.vue';
+import Rating from './Rating.vue';
 
-namespace App\Http\Middleware;
-
-use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken as Middleware;
-
-class VerifyCsrfToken extends Middleware
-{
-    /**
-     * The URIs that should be excluded from CSRF verification.
-     *
-     * @var array<int, string>
-     */
-    protected $except = [
-        '/api/forms/*',
-        '/api/service-request-forms/*',
-        '/api/service-requests/*',
-        '/graphql/*',
-    ];
-}
+export default {
+    otp: createInput(OneTimePassword, {
+        props: ['digits'],
+    }),
+    rating: createInput(Rating, {
+        props: [],
+    }),
+};

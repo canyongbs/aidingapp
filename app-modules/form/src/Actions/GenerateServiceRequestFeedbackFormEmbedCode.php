@@ -34,21 +34,36 @@
 </COPYRIGHT>
 */
 
-namespace App\Http\Middleware;
+namespace AidingApp\Form\Actions;
 
-use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken as Middleware;
+use Illuminate\Support\Facades\URL;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 
-class VerifyCsrfToken extends Middleware
+class GenerateServiceRequestFeedbackFormEmbedCode
 {
-    /**
-     * The URIs that should be excluded from CSRF verification.
-     *
-     * @var array<int, string>
-     */
-    protected $except = [
-        '/api/forms/*',
-        '/api/service-request-forms/*',
-        '/api/service-requests/*',
-        '/graphql/*',
-    ];
+    public function handle(ServiceRequest $serviceRequest): string
+    {
+        $scriptUrl = url('js/widgets/service-request-feedback-form/aiding-app-service-request-feedback-form-widget.js?');
+
+        $formDefinitionUrl = URL::to(
+            URL::signedRoute(
+                name: 'service-requests.feedback.define',
+                parameters: ['serviceRequest' => $serviceRequest],
+                absolute: false,
+            )
+        );
+
+        $portalAccessUrl = route('portal.knowledge-management.show');
+
+        $userAuthenticationUrl = route('api.user.auth-check');
+
+        $appUrl = config('app.url');
+
+        $apiUrl = route('api.portal.knowledge-management.define');
+
+        return <<<EOD
+        <service-request-feedback-form-embed url="{$formDefinitionUrl}" user-authentication-url={$userAuthenticationUrl} access-url={$portalAccessUrl} app-url="{$appUrl}" api-url="{$apiUrl}"></service-request-feedback-form-embed>
+        <script src="{$scriptUrl}"></script>
+        EOD;
+    }
 }

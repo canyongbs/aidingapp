@@ -37,6 +37,8 @@
 namespace AidingApp\ServiceManagement\Notifications;
 
 use App\Models\NotificationSetting;
+use App\Models\Contracts\Educatable;
+use AidingApp\Contact\Models\Contact;
 use AidingApp\Notification\Models\OutboundDeliverable;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\Notification\Notifications\BaseNotification;
@@ -44,7 +46,7 @@ use AidingApp\Notification\Notifications\EmailNotification;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
 use AidingApp\Notification\Notifications\Concerns\EmailChannelTrait;
 
-class SendEducatableServiceRequestClosedNotification extends BaseNotification implements EmailNotification
+class SendClosedServiceFeedbackNotification extends BaseNotification implements EmailNotification
 {
     use EmailChannelTrait;
 
@@ -54,15 +56,20 @@ class SendEducatableServiceRequestClosedNotification extends BaseNotification im
 
     public function toEmail(object $notifiable): MailMessage
     {
-        $name = $notifiable->first_name;
+        /** @var Educatable $educatable */
+        $educatable = $notifiable;
 
-        $status = $this->serviceRequest->status;
+        $name = match ($notifiable::class) {
+            Contact::class => $educatable->first_name,
+        };
 
         return MailMessage::make()
             ->settings($this->resolveNotificationSetting($notifiable))
-            ->subject("{$this->serviceRequest->service_request_number} - is now {$status->name}")
+            ->subject("Feedback survey for {$this->serviceRequest->service_request_number}")
             ->greeting("Hi {$name},")
-            ->line("Your request {$this->serviceRequest->service_request_number} for service is now {$status->name}.")
+            ->line('To help us serve you better in the future, we’d love to hear about your experience with our support team.')
+            ->action('Rate Service', route('feedback.service.request', $this->serviceRequest->id))
+            ->line('We appreciate your time and we value your feedback!')
             ->salutation('Thank you.');
     }
 
