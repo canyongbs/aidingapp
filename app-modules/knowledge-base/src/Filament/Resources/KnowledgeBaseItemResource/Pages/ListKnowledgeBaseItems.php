@@ -57,11 +57,11 @@ use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\ReplicateAction;
 use Filament\Tables\Actions\DeleteBulkAction;
+use App\Support\MediaEncoding\TiptapMediaEncoder;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
-use App\Support\MediaEncoding\TiptapMediaEncoder;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource;
 
 class ListKnowledgeBaseItems extends ListRecords
@@ -201,7 +201,6 @@ class ListKnowledgeBaseItems extends ListRecords
                     })
                     ->excludeAttributes(['views_count', 'upvotes_count', 'my_upvotes_count'])
                     ->successNotificationTitle('Article replicated successfully!'),
-
             ])
             ->bulkActions([
                 BulkActionGroup::make([
@@ -215,7 +214,7 @@ class ListKnowledgeBaseItems extends ListRecords
     {
         return [
             CreateAction::make()
-                ->disabled(fn (): bool => !auth()->user()->can('knowledge_base_item.create'))
+                ->disabled(fn (): bool => ! auth()->user()->can('knowledge_base_item.create'))
                 ->label('New Article')
                 ->modalHeading('New Article')
                 ->createAnother(false)

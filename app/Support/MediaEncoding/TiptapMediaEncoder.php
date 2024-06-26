@@ -37,11 +37,11 @@
 namespace App\Support\MediaEncoding;
 
 use Illuminate\Support\Str;
+use Spatie\MediaLibrary\HasMedia;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
-use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class TiptapMediaEncoder
@@ -129,7 +129,7 @@ class TiptapMediaEncoder
 
         $path = parse_url($content, PHP_URL_PATH);
 
-        if ($isFromFilesystem && !is_null($path)) {
+        if ($isFromFilesystem && ! is_null($path)) {
             $defaultDirectory = config('filament-tiptap-editor.directory');
 
             $root = preg_quote(config('filesystems.disks.s3.root'), '/');
@@ -181,7 +181,7 @@ class TiptapMediaEncoder
                     ]
                 )->first();
 
-            if (!is_null($media)) {
+            if (! is_null($media)) {
                 $path = "{{media|id:{$id};}}";
             }
         }
@@ -204,7 +204,7 @@ class TiptapMediaEncoder
 
         preg_match_all($regex, $state, $matches, PREG_SET_ORDER);
 
-        if (!empty($matches)) {
+        if (! empty($matches)) {
             foreach ($matches as $match) {
                 $shortcode = $match[0];
                 $mediaId = $match[1];
@@ -212,7 +212,7 @@ class TiptapMediaEncoder
                 /** @var Media $media */
                 $media = Media::query()->find($mediaId);
 
-                if (!$media) {
+                if (! $media) {
                     continue;
                 }
 
@@ -229,7 +229,7 @@ class TiptapMediaEncoder
 
         preg_match_all($regex, $state, $matches, PREG_SET_ORDER);
 
-        if (!empty($matches)) {
+        if (! empty($matches)) {
             foreach ($matches as $match) {
                 $path = $match[1];
                 $disk = $match[2];
@@ -257,7 +257,7 @@ class TiptapMediaEncoder
 
         preg_match_all($regex, json_encode($content, JSON_UNESCAPED_SLASHES), $matches, PREG_SET_ORDER);
 
-        if (!empty($matches)) {
+        if (! empty($matches)) {
             foreach ($matches as $match) {
                 $shortcode = $match[0];
                 $path = $match[1];
@@ -282,7 +282,7 @@ class TiptapMediaEncoder
 
         preg_match_all($regex, json_encode($content, JSON_UNESCAPED_SLASHES), $matches, PREG_SET_ORDER);
 
-        if (!empty($matches)) {
+        if (! empty($matches)) {
             $mediaIds = [];
 
             foreach ($matches as $match) {
@@ -338,7 +338,7 @@ class TiptapMediaEncoder
 
         preg_match_all($regex, $state, $matches, PREG_SET_ORDER);
 
-        if (!empty($matches)) {
+        if (! empty($matches)) {
             foreach ($matches as $match) {
                 $shortcode = $match[0];
                 $mediaId = $match[1];
@@ -346,7 +346,7 @@ class TiptapMediaEncoder
                 /** @var Media $media */
                 $media = Media::query()->find($mediaId);
 
-                if (!$media) {
+                if (! $media) {
                     continue;
                 }
 
