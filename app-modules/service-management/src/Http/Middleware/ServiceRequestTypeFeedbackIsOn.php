@@ -36,10 +36,10 @@
 
 namespace AidingApp\ServiceManagement\Http\Middleware;
 
-use App\Settings\LicenseSettings;
 use Closure;
 use Illuminate\Http\Request;
 use Laravel\Pennant\Feature;
+use App\Settings\LicenseSettings;
 use Symfony\Component\HttpFoundation\Response;
 
 class ServiceRequestTypeFeedbackIsOn

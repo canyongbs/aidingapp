@@ -55,7 +55,7 @@ class RenderServiceRequestFeedbackForm extends Component implements HasForms
 
     public function render(): View
     {
-        if (!Feature::active('service-request-feedback')) {
+        if (! Feature::active('service-request-feedback')) {
             abort(404);
         }
 

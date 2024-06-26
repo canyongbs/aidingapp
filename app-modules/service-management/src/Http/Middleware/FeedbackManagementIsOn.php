@@ -51,9 +51,10 @@ class FeedbackManagementIsOn
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!PennantFeature::active('service-request-feedback') && !app(LicenseSettings::class)->data->addons->feedbackManagement) {
+        if (! PennantFeature::active('service-request-feedback') && ! app(LicenseSettings::class)->data->addons->feedbackManagement) {
             return response()->json(['error' => 'Feedback Management is not enabled.'], 403);
         }
+
         return $next($request);
     }
 }

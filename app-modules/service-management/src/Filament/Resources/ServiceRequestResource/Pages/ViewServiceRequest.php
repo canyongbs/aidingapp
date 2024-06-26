@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages;
 
 use Carbon\CarbonInterval;
+use Laravel\Pennant\Feature;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Infolist;
 use AidingApp\Contact\Models\Contact;
@@ -54,7 +55,6 @@ use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
 use Filament\Infolists\Components\IconEntry\IconEntrySize;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
-use Laravel\Pennant\Feature;
 
 class ViewServiceRequest extends ViewRecord
 {

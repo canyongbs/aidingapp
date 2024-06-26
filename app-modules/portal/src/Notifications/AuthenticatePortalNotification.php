@@ -55,7 +55,7 @@ class AuthenticatePortalNotification extends BaseNotification implements EmailNo
     public function toEmail(object $notifiable): MailMessage
     {
         return MailMessage::make()
-            ->subject(__("Your authentication code for :appname",['appname' => config('app.name')]))
+            ->subject(__('Your authentication code for :appname', ['appname' => config('app.name')]))
             ->line("Your code is: {$this->code}.")
             ->line('You should type this code into the portal to authenticate yourself.')
             ->line('For security reasons, the code will expire in 24 hours, but you can always request another.');
