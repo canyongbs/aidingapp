@@ -2,8 +2,10 @@
 
 namespace AidingApp\ServiceManagement\Http\Middleware;
 
+use App\Settings\LicenseSettings;
 use Closure;
 use Illuminate\Http\Request;
+use Laravel\Pennant\Feature;
 use Symfony\Component\HttpFoundation\Response;
 
 class ServiceRequestTypeFeedbackIsOn
@@ -17,8 +19,10 @@ class ServiceRequestTypeFeedbackIsOn
     {
         $serviceRequest = $request->route('serviceRequest');
 
-        if ($serviceRequest && $serviceRequest?->priority?->type?->has_enabled_feedback_collection) {
-            return $next($request);
+        if (Feature::active('service-request-feedback') && app(LicenseSettings::class)->data->addons->feedbackManagement) {
+            if ($serviceRequest && $serviceRequest?->priority?->type?->has_enabled_feedback_collection) {
+                return $next($request);
+            }
         }
 
         return response()->json(['error' => 'Feedback collection is not enabled for this service request.'], 403);

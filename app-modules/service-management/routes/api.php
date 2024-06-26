@@ -71,9 +71,8 @@ Route::prefix('api')
         Route::prefix('service-requests/{serviceRequest}/feedback')
             ->name('service-requests.feedback.')
             ->middleware([
-                EnsureServiceManagementFeatureIsActive::class,
                 FeedbackManagementIsOn::class,
-                ServiceRequestTypeFeedbackIsOn::class,
+                // ServiceRequestTypeFeedbackIsOn::class,
             ])
             ->group(function () {
                 Route::get('/', [ServiceRequestFeedbackFormWidgetController::class, 'view'])
