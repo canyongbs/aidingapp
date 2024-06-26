@@ -47,9 +47,11 @@ class OrganizationResource extends Resource
 {
     protected static ?string $model = Organization::class;
 
+    protected static ?string $navigationGroup = 'Clients';
+
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static ?int $navigationSort = 21;
+    protected static ?int $navigationSort = 10;
 
     public static function getPages(): array
     {

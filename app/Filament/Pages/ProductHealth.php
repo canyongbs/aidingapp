@@ -56,7 +56,7 @@ class ProductHealth extends HealthCheckResults
 
     public static function getNavigationGroup(): ?string
     {
-        return 'Reporting';
+        return 'Report Center';
     }
 
     public static function getNavigationSort(): ?int

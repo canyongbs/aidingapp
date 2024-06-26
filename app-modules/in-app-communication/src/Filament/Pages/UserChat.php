@@ -92,7 +92,9 @@ class UserChat extends Page implements HasForms, HasActions
 
     public ?TwilioConversation $conversation = null;
 
-    protected static ?int $navigationSort = 80;
+    protected static ?string $navigationGroup = 'Staff Engagement';
+
+    protected static ?int $navigationSort = 10;
 
     protected static ?string $navigationIcon = 'heroicon-o-chat-bubble-oval-left-ellipsis';
 
