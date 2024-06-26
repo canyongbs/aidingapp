@@ -60,6 +60,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use AidingApp\ServiceManagement\Observers\ChangeRequestObserver;
 use AidingApp\ServiceManagement\Observers\ServiceRequestObserver;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormSubmission;
+use AidingApp\ServiceManagement\Observers\ServiceRequestTypeObserver;
 use AidingApp\ServiceManagement\Observers\ServiceRequestUpdateObserver;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormAuthentication;
 use AidingApp\ServiceManagement\Observers\ServiceRequestHistoryObserver;
@@ -115,5 +116,6 @@ class ServiceManagementServiceProvider extends ServiceProvider
         ServiceRequestAssignment::observe(ServiceRequestAssignmentObserver::class);
         ServiceRequestHistory::observe(ServiceRequestHistoryObserver::class);
         ServiceRequestUpdate::observe(ServiceRequestUpdateObserver::class);
+        ServiceRequestType::observe(ServiceRequestTypeObserver::class);
     }
 }
