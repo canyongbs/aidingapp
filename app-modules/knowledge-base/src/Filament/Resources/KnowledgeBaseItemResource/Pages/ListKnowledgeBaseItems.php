@@ -61,6 +61,7 @@ use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
+use App\Support\MediaEncoding\TiptapMediaEncoder;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource;
 
 class ListKnowledgeBaseItems extends ListRecords
@@ -180,7 +181,7 @@ class ListKnowledgeBaseItems extends ListRecords
                         $record->public = $data['public'];
                         $record->notes = $data['notes'];
                     })
-                    ->after(function (Model $replica, Model $record): void {
+                    ->after(function (KnowledgeBaseItem $replica, KnowledgeBaseItem $record): void {
                         $record->load('division');
 
                         foreach ($record->division as $divison) {
@@ -193,6 +194,10 @@ class ListKnowledgeBaseItems extends ListRecords
                                 'taggable_type' => $tag->pivot->taggable_type,
                             ]);
                         }
+
+                        // TODO: Fix when we rename 'solution' to match the change in the column name
+                        $replica->article_details = TiptapMediaEncoder::copyMediaItemsToModel($replica->article_details, $replica, 'solution');
+                        $replica->save();
                     })
                     ->excludeAttributes(['views_count', 'upvotes_count', 'my_upvotes_count'])
                     ->successNotificationTitle('Article replicated successfully!'),

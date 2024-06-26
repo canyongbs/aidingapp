@@ -41,6 +41,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
+use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class TiptapMediaEncoder
@@ -128,7 +129,7 @@ class TiptapMediaEncoder
 
         $path = parse_url($content, PHP_URL_PATH);
 
-        if ($isFromFilesystem && ! is_null($path)) {
+        if ($isFromFilesystem && !is_null($path)) {
             $defaultDirectory = config('filament-tiptap-editor.directory');
 
             $root = preg_quote(config('filesystems.disks.s3.root'), '/');
@@ -180,7 +181,7 @@ class TiptapMediaEncoder
                     ]
                 )->first();
 
-            if (! is_null($media)) {
+            if (!is_null($media)) {
                 $path = "{{media|id:{$id};}}";
             }
         }
@@ -203,7 +204,7 @@ class TiptapMediaEncoder
 
         preg_match_all($regex, $state, $matches, PREG_SET_ORDER);
 
-        if (! empty($matches)) {
+        if (!empty($matches)) {
             foreach ($matches as $match) {
                 $shortcode = $match[0];
                 $mediaId = $match[1];
@@ -211,7 +212,7 @@ class TiptapMediaEncoder
                 /** @var Media $media */
                 $media = Media::query()->find($mediaId);
 
-                if (! $media) {
+                if (!$media) {
                     continue;
                 }
 
@@ -228,7 +229,7 @@ class TiptapMediaEncoder
 
         preg_match_all($regex, $state, $matches, PREG_SET_ORDER);
 
-        if (! empty($matches)) {
+        if (!empty($matches)) {
             foreach ($matches as $match) {
                 $path = $match[1];
                 $disk = $match[2];
@@ -256,7 +257,7 @@ class TiptapMediaEncoder
 
         preg_match_all($regex, json_encode($content, JSON_UNESCAPED_SLASHES), $matches, PREG_SET_ORDER);
 
-        if (! empty($matches)) {
+        if (!empty($matches)) {
             foreach ($matches as $match) {
                 $shortcode = $match[0];
                 $path = $match[1];
@@ -281,7 +282,7 @@ class TiptapMediaEncoder
 
         preg_match_all($regex, json_encode($content, JSON_UNESCAPED_SLASHES), $matches, PREG_SET_ORDER);
 
-        if (! empty($matches)) {
+        if (!empty($matches)) {
             $mediaIds = [];
 
             foreach ($matches as $match) {
@@ -294,5 +295,72 @@ class TiptapMediaEncoder
         }
 
         return collect();
+    }
+
+    public static function copyMediaItemsToModel(array $content, HasMedia $model, string $collection): array
+    {
+        if (isset($content['type']) && $content['type'] === 'image') {
+            $content['attrs']['src'] = self::replicateMediaItem($content['attrs']['src'], $model, $collection);
+
+            if (isset($content['marks'])) {
+                foreach ($content['marks'] as $key => $mark) {
+                    if (isset($mark['attrs']['href'])) {
+                        $content['marks'][$key]['attrs']['href'] = self::replicateMediaItem($content['marks'][$key]['attrs']['href'], $model, $collection);
+                    }
+                }
+            }
+
+            return $content;
+        }
+
+        if (isset($content['type']) && $content['type'] === 'link') {
+            $content['attrs']['href'] = self::replicateMediaItem($content['attrs']['href'], $model, $collection);
+
+            return $content;
+        }
+
+        if (is_array($content)) {
+            $content = collect($content)->map(function ($item) use ($model, $collection) {
+                if (is_array($item)) {
+                    return self::copyMediaItemsToModel($item, $model, $collection);
+                }
+
+                return $item;
+            })->toArray();
+        }
+
+        return $content;
+    }
+
+    public static function replicateMediaItem(string $state, HasMedia $model, string $collection): string
+    {
+        $regex = '/{{media\|id:([^};]*);?}}/';
+
+        preg_match_all($regex, $state, $matches, PREG_SET_ORDER);
+
+        if (!empty($matches)) {
+            foreach ($matches as $match) {
+                $shortcode = $match[0];
+                $mediaId = $match[1];
+
+                /** @var Media $media */
+                $media = Media::query()->find($mediaId);
+
+                if (!$media) {
+                    continue;
+                }
+
+                $replicatedMedia = $media->copy(
+                    model: $model,
+                    collectionName: $collection
+                );
+
+                $replicatedMediaKey = $replicatedMedia->getKey();
+
+                $state = str_replace($shortcode, "{{media|id:{$replicatedMediaKey};}}", $state);
+            }
+        }
+
+        return $state;
     }
 }
