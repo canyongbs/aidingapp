@@ -143,7 +143,7 @@ class ManagePortalSettings extends SettingsPage
                         SpatieMediaLibraryFileUpload::make('favicon')
                             ->collection('portal_favicon')
                             ->visibility('private')
-                            ->visible(Gate::check(Feature::KnowledgeManagement->getGateName()))
+                            ->visible(fn (Get $get) => $get('knowledge_management_portal_enabled'))
                             ->acceptedFileTypes([
                                 'image/png',
                                 'image/jpeg',
@@ -162,7 +162,7 @@ class ManagePortalSettings extends SettingsPage
                             ->model(
                                 SettingsProperty::getInstance('portal.logo'),
                             )
-                            ->visible(Gate::check(Feature::KnowledgeManagement->getGateName()) && PennantFeature::active('portal-logo')),
+                            ->visible(fn (Get $get) => $get('knowledge_management_portal_enabled') && PennantFeature::active('portal-logo')),
                         Actions::make([
                             Action::make('view')
                                 ->url(fn () => route('portal.knowledge-management.show'))
