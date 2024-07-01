@@ -86,6 +86,8 @@ class ServiceRequestObserver
     {
         CreateServiceRequestHistory::dispatch($serviceRequest, $serviceRequest->getChanges(), $serviceRequest->getOriginal());
 
+        $serviceRequest->load('status');
+
         if (
             $serviceRequest->wasChanged('status_id')
             && $serviceRequest->status?->classification === SystemServiceRequestClassification::Closed

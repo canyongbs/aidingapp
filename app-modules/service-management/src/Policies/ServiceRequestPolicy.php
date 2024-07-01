@@ -41,6 +41,7 @@ use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
 use Illuminate\Support\Facades\Gate;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use App\Support\FeatureAccessResponse;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 
@@ -91,6 +92,10 @@ class ServiceRequestPolicy
 
     public function update(Authenticatable $authenticatable, ServiceRequest $serviceRequest): Response
     {
+        if($serviceRequest?->status?->classification === SystemServiceRequestClassification::Closed){
+            return Response::deny('Closed service request cannot be edited.');
+        }
+
         if (! $authenticatable->hasLicense($serviceRequest->respondent->getLicenseType())) {
             return Response::deny('You do not have permission to update this service request.');
         }
