@@ -57,6 +57,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
+use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 
 class EditServiceRequest extends EditRecord
 {
@@ -166,4 +167,9 @@ class EditServiceRequest extends EditRecord
 
         return $data;
     }
+
+    // public static function shouldRegisterNavigation(array $parameters = []): bool
+    // {
+    //     dd($parameters['record']);
+    // }
 }

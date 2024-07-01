@@ -47,7 +47,6 @@ use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\ViewEntry;
-use Filament\Infolists\Components\Actions\Action;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use AidingApp\Contact\Filament\Resources\ContactResource;
@@ -55,6 +54,8 @@ use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
 use Filament\Infolists\Components\IconEntry\IconEntrySize;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
+use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
+use Filament\Actions\Action;
 
 class ViewServiceRequest extends ViewRecord
 {
@@ -215,6 +216,13 @@ class ViewServiceRequest extends ViewRecord
     {
         return [
             EditAction::make(),
+            Action::make('locked_service_request')
+                ->icon('heroicon-o-lock-closed')
+                ->color('gray')
+                ->tooltip("This service request is locked as status is closed.")
+                ->disabled()
+                ->visible(fn(ServiceRequest $record) => fn(ServiceRequest $record) => $record->status?->classification === SystemServiceRequestClassification::Closed ? false : true)
+                ->iconButton(),
         ];
     }
 }
