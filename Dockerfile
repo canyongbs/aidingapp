@@ -40,8 +40,6 @@ ARG TOTAL_QUEUE_WORKERS=3
 
 COPY ./docker/generate-queues.sh /generate-queues.sh
 RUN chmod +x /generate-queues.sh
-RUN /generate-queues.sh
-RUN rm /generate-queues.sh
 
 COPY ./docker/nginx/nginx.conf /etc/nginx/nginx.conf
 COPY ./docker/nginx/site-opts.d /etc/nginx/site-opts.d
@@ -63,6 +61,18 @@ FROM base AS development
 #ARG GROUP_ID
 #RUN docker-php-serversideup-set-id www-data ${USER_ID} ${GROUP_ID}
 
+RUN if [[ -z "$MULTIPLE_DEVELOPMENT_QUEUES" ]] ; then \
+    /generate-queues.sh "default" "\$SQS_QUEUE" \
+    && /generate-queues.sh "landlord" "\$LANDLORD_SQS_QUEUE" \
+    && /generate-queues.sh "outbound-communication" "\$OUTBOUND_COMMUNICATION_QUEUE" \
+    && /generate-queues.sh "audit" "\$AUDIT_QUEUE_QUEUE" \
+    && /generate-queues.sh "import-export" "\$IMPORT_EXPORT_QUEUE" \
+    ; else \
+    /generate-queues.sh "default" "\$SQS_QUEUE" \
+    ; fi
+
+RUN rm /generate-queues.sh
+
 RUN chown -R "$PUID":"$PGID" /var/www/html \
     && if [[ -d /var/www/html/storage/logs ]] ; then \
     chgrp "$PGID" /var/www/html/storage/logs \
@@ -70,6 +80,14 @@ RUN chown -R "$PUID":"$PGID" /var/www/html \
     ; fi
 
 FROM base AS deploy
+
+RUN /generate-queues.sh "default" "\$SQS_QUEUE" \
+&& /generate-queues.sh "landlord" "\$LANDLORD_SQS_QUEUE" \
+&& /generate-queues.sh "outbound-communication" "\$OUTBOUND_COMMUNICATION_QUEUE" \
+&& /generate-queues.sh "audit" "\$AUDIT_QUEUE_QUEUE" \
+&& /generate-queues.sh "import-export" "\$IMPORT_EXPORT_QUEUE" 
+
+RUN rm /generate-queues.sh
 
 COPY --chown=$PUID:$PGID . /var/www/html
 
