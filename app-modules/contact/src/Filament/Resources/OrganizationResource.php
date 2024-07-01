@@ -37,7 +37,9 @@
 namespace AidingApp\Contact\Filament\Resources;
 
 use Filament\Resources\Resource;
+use Filament\Resources\Pages\Page;
 use AidingApp\Contact\Models\Organization;
+use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\ManageContacts;
 use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\EditOrganization;
 use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\ViewOrganization;
 use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\ListOrganizations;
@@ -60,6 +62,16 @@ class OrganizationResource extends Resource
             'create' => CreateOrganization::route('/create'),
             'view' => ViewOrganization::route('/{record}'),
             'edit' => EditOrganization::route('/{record}/edit'),
+            'contacts' => ManageContacts::route('/{record}/contacts'),
         ];
+    }
+
+    public static function getRecordSubNavigation(Page $page): array
+    {
+        return $page->generateNavigationItems([
+            ViewOrganization::class,
+            EditOrganization::class,
+            ManageContacts::class,
+        ]);
     }
 }

@@ -48,6 +48,8 @@ class ViewOrganization extends ViewRecord
 {
     protected static string $resource = OrganizationResource::class;
 
+    protected static ?string $navigationLabel = 'View';
+
     public function infolist(Infolist $infolist): Infolist
     {
         return $infolist
