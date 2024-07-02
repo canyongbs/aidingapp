@@ -34,44 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Filament\Resources;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
-use Filament\Resources\Resource;
-use Filament\Resources\Pages\Page;
-use AidingApp\Contact\Models\Organization;
-use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\ManageContacts;
-use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\EditOrganization;
-use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\ViewOrganization;
-use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\ListOrganizations;
-use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\CreateOrganization;
-
-class OrganizationResource extends Resource
-{
-    protected static ?string $model = Organization::class;
-
-    protected static ?string $navigationGroup = 'Clients';
-
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
-    protected static ?int $navigationSort = 10;
-
-    public static function getPages(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            'index' => ListOrganizations::route('/'),
-            'create' => CreateOrganization::route('/create'),
-            'view' => ViewOrganization::route('/{record}'),
-            'edit' => EditOrganization::route('/{record}/edit'),
-            'contacts' => ManageContacts::route('/{record}/contacts'),
-        ];
+        Schema::table('contacts', function (Blueprint $table) {
+            $table->foreignUuid('organization_id')->nullable()->constrained('organizations')->restrictOnDelete();
+        });
     }
 
-    public static function getRecordSubNavigation(Page $page): array
+    public function down(): void
     {
-        return $page->generateNavigationItems([
-            ViewOrganization::class,
-            EditOrganization::class,
-            ManageContacts::class,
-        ]);
+        Schema::table('contacts', function (Blueprint $table) {
+            $table->dropConstrainedForeignId('organization_id');
+        });
     }
-}
+};

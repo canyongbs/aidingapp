@@ -34,44 +34,39 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Filament\Resources;
+namespace AidingApp\Contact\Filament\Resources\OrganizationResource\RelationManagers;
 
-use Filament\Resources\Resource;
-use Filament\Resources\Pages\Page;
-use AidingApp\Contact\Models\Organization;
-use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\ManageContacts;
-use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\EditOrganization;
-use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\ViewOrganization;
-use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\ListOrganizations;
-use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\CreateOrganization;
+use Filament\Tables\Table;
+use Filament\Tables\Actions\AssociateAction;
+use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Tables\Actions\DissociateAction;
+use Filament\Tables\Actions\DissociateBulkAction;
+use App\Filament\Tables\Columns\OpenSearch\TextColumn;
+use Filament\Resources\RelationManagers\RelationManager;
 
-class OrganizationResource extends Resource
+class ContactsRelationManager extends RelationManager
 {
-    protected static ?string $model = Organization::class;
+    protected static string $relationship = 'contacts';
 
-    protected static ?string $navigationGroup = 'Clients';
-
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
-    protected static ?int $navigationSort = 10;
-
-    public static function getPages(): array
+    public function table(Table $table): Table
     {
-        return [
-            'index' => ListOrganizations::route('/'),
-            'create' => CreateOrganization::route('/create'),
-            'view' => ViewOrganization::route('/{record}'),
-            'edit' => EditOrganization::route('/{record}/edit'),
-            'contacts' => ManageContacts::route('/{record}/contacts'),
-        ];
-    }
-
-    public static function getRecordSubNavigation(Page $page): array
-    {
-        return $page->generateNavigationItems([
-            ViewOrganization::class,
-            EditOrganization::class,
-            ManageContacts::class,
-        ]);
+        return $table
+            ->recordTitleAttribute('full_name')
+            ->columns([
+                TextColumn::make('full_name'),
+                TextColumn::make('email'),
+                TextColumn::make('mobile'),
+            ])
+            ->headerActions([
+                AssociateAction::make(),
+            ])
+            ->actions([
+                DissociateAction::make(),
+            ])
+            ->bulkActions([
+                BulkActionGroup::make([
+                    DissociateBulkAction::make(),
+                ]),
+            ]);
     }
 }
