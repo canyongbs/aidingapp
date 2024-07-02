@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages;
 
+use Carbon\Carbon;
 use Carbon\CarbonInterval;
 use Laravel\Pennant\Feature;
 use Filament\Actions\EditAction;
@@ -112,6 +113,17 @@ class ViewServiceRequest extends ViewRecord
                                     Contact::class => ContactResource::getUrl('view', ['record' => $respondent->id]),
                                 };
                             }),
+                        TextEntry::make('time_to_resolution')
+                            ->label('Time to Resolution')
+                            ->formatStateUsing(function ($state) {
+                                $interval = Carbon::now()->diffAsCarbonInterval(Carbon::now()->addSeconds($state));
+                                $days = $interval->d;
+                                $hours = $interval->h;
+                                $minutes = $interval->i;
+
+                                return "{$days}d {$hours}h {$minutes}m";
+                            })
+                            ->columnSpan(1),
                     ])
                     ->columns(),
                 Section::make('Uploads')

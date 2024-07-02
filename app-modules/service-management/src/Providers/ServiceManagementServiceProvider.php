@@ -38,8 +38,10 @@ namespace AidingApp\ServiceManagement\Providers;
 
 use Filament\Panel;
 use App\Concerns\ImplementsGraphQL;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use AidingApp\ServiceManagement\Models\Sla;
+use AidingApp\ServiceManagement\Events\UpdateTTR;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use AidingApp\ServiceManagement\Models\ChangeRequest;
 use AidingApp\Authorization\AuthorizationRoleRegistry;
@@ -49,6 +51,7 @@ use AidingApp\ServiceManagement\Models\ChangeRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ChangeRequestStatus;
+use AidingApp\ServiceManagement\Listeners\UpdateTTROnClosed;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use AidingApp\ServiceManagement\Models\ChangeRequestResponse;
@@ -104,6 +107,8 @@ class ServiceManagementServiceProvider extends ServiceProvider
 
         $this->registerObservers();
 
+        $this->registerEvents();
+
         $this->discoverSchema(__DIR__ . '/../../graphql/service-management.graphql');
 
         AuthorizationRoleRegistry::register(ServiceManagementRbacRegistry::class);
@@ -117,5 +122,13 @@ class ServiceManagementServiceProvider extends ServiceProvider
         ServiceRequestHistory::observe(ServiceRequestHistoryObserver::class);
         ServiceRequestUpdate::observe(ServiceRequestUpdateObserver::class);
         ServiceRequestType::observe(ServiceRequestTypeObserver::class);
+    }
+
+    protected function registerEvents(): void
+    {
+        Event::listen(
+            UpdateTTR::class,
+            UpdateTTROnClosed::class
+        );
     }
 }

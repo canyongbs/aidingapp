@@ -40,6 +40,7 @@ use App\Models\User;
 use App\Enums\Feature;
 use Illuminate\Support\Facades\Gate;
 use Laravel\Pennant\Feature as PennantFeature;
+use AidingApp\ServiceManagement\Events\UpdateTTR;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\Notification\Events\TriggeredAutoSubscription;
 use AidingApp\ServiceManagement\Actions\CreateServiceRequestHistory;
@@ -79,6 +80,12 @@ class ServiceRequestObserver
     {
         if ($serviceRequest->wasChanged('status_id')) {
             $serviceRequest->status_updated_at = now();
+        }
+
+        if ($serviceRequest->status->classification === SystemServiceRequestClassification::Closed) {
+            if ($serviceRequest->time_to_resolution === null) {
+                UpdateTTR::dispatch($serviceRequest);
+            }
         }
     }
 
