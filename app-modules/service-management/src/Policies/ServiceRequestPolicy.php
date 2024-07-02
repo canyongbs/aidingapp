@@ -44,7 +44,6 @@ use AidingApp\Contact\Models\Contact;
 use App\Support\FeatureAccessResponse;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
-use Illuminate\Support\Facades\Log;
 
 class ServiceRequestPolicy
 {
@@ -98,7 +97,6 @@ class ServiceRequestPolicy
         }
 
         if ($serviceRequest?->status?->classification === SystemServiceRequestClassification::Closed) {
-            
             return Response::deny('Closed service request cannot be edited.');
         }
 

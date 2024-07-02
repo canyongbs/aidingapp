@@ -52,8 +52,8 @@ use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
-use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
+use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 
 class ListServiceRequests extends ListRecords
@@ -118,7 +118,7 @@ class ListServiceRequests extends ListRecords
             ->actions([
                 ViewAction::make(),
                 EditAction::make()
-                    ->visible(fn(ServiceRequest $record) => $record->status?->classification === SystemServiceRequestClassification::Closed ? false : true ),
+                    ->visible(fn (ServiceRequest $record) => $record->status?->classification === SystemServiceRequestClassification::Closed ? false : true),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
