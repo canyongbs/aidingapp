@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages;
 
+use Carbon\Carbon;
 use Carbon\CarbonInterval;
 use Laravel\Pennant\Feature;
 use Filament\Actions\EditAction;
@@ -55,7 +56,6 @@ use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
 use Filament\Infolists\Components\IconEntry\IconEntrySize;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
-use Carbon\Carbon;
 
 class ViewServiceRequest extends ViewRecord
 {
@@ -120,6 +120,7 @@ class ViewServiceRequest extends ViewRecord
                                 $days = $interval->d;
                                 $hours = $interval->h;
                                 $minutes = $interval->i;
+
                                 return "{$days}d {$hours}h {$minutes}m";
                             })
                             ->columnSpan(1),
@@ -212,7 +213,7 @@ class ViewServiceRequest extends ViewRecord
                     ->columns(),
                 Section::make('Form Submission Details')
                     ->collapsed()
-                    ->visible(fn (ServiceRequest $record): bool => !is_null($record->serviceRequestFormSubmission))
+                    ->visible(fn (ServiceRequest $record): bool => ! is_null($record->serviceRequestFormSubmission))
                     ->schema([
                         TextEntry::make('serviceRequestFormSubmission.submitted_at')
                             ->dateTime(),

@@ -36,20 +36,18 @@
 
 namespace AidingApp\ServiceManagement\Events;
 
-use AidingApp\ServiceManagement\Models\ServiceRequest;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
-
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 
 class UpdateTTR
 {
-  use Dispatchable;
-  use InteractsWithSockets;
-  use SerializesModels;
+    use Dispatchable;
+    use InteractsWithSockets;
+    use SerializesModels;
 
-  public function __construct(
-    public ServiceRequest $serviceRequest
-  ) {
-  }
+    public function __construct(
+        public ServiceRequest $serviceRequest
+    ) {}
 }

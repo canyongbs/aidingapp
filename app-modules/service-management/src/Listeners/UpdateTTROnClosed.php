@@ -36,20 +36,20 @@
 
 namespace AidingApp\ServiceManagement\Listeners;
 
-use AidingApp\ServiceManagement\Events\UpdateTTR;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Carbon\Carbon;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use AidingApp\ServiceManagement\Events\UpdateTTR;
 
 class UpdateTTROnClosed implements ShouldQueue
 {
-  public function handle(UpdateTTR $event): void
-  {
-    $createdTime = $event->serviceRequest->created_at;
-    $currentTime = Carbon::now();
+    public function handle(UpdateTTR $event): void
+    {
+        $createdTime = $event->serviceRequest->created_at;
+        $currentTime = Carbon::now();
 
-    // Calculate the difference in seconds
-    $secondsDifference = $createdTime->diffInSeconds($currentTime);
-    $event->serviceRequest->time_to_resolution = $secondsDifference;
-    $event->serviceRequest->save();
-  }
+        // Calculate the difference in seconds
+        $secondsDifference = $createdTime->diffInSeconds($currentTime);
+        $event->serviceRequest->time_to_resolution = $secondsDifference;
+        $event->serviceRequest->save();
+    }
 }
