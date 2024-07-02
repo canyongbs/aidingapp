@@ -33,8 +33,6 @@ class ContactsRelationManager extends RelationManager
                 BulkActionGroup::make([
                     DissociateBulkAction::make(),
                 ]),
-            ])
-            ->emptyStateActions([
             ]);
     }
 }
