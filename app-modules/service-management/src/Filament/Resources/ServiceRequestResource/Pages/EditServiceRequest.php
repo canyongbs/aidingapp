@@ -166,4 +166,9 @@ class EditServiceRequest extends EditRecord
 
         return $data;
     }
+
+    // public static function shouldRegisterNavigation(array $parameters = []): bool
+    // {
+    //     dd($parameters['record']);
+    // }
 }

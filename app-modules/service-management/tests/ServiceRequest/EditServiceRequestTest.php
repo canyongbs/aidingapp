@@ -57,7 +57,11 @@ use AidingApp\ServiceManagement\Tests\RequestFactories\EditServiceRequestRequest
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\EditServiceRequest;
 
 test('A successful action on the EditServiceRequest page', function () {
-    $serviceRequest = ServiceRequest::factory()->create();
+    $serviceRequest = ServiceRequest::factory([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ])->id,
+    ])->create();
 
     asSuperAdmin()
         ->get(
@@ -67,7 +71,11 @@ test('A successful action on the EditServiceRequest page', function () {
         )
         ->assertSuccessful();
 
-    $request = collect(EditServiceRequestRequestFactory::new()->create());
+    $request = collect(EditServiceRequestRequestFactory::new([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::InProgress,
+        ])->id,
+    ])->create());
 
     livewire(EditServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
@@ -98,7 +106,11 @@ test('A successful action on the EditServiceRequest page', function () {
 });
 
 test('EditServiceRequest requires valid data', function ($data, $errors) {
-    $serviceRequest = ServiceRequest::factory()->create();
+    $serviceRequest = ServiceRequest::factory([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ])->id,
+    ])->create();
 
     asSuperAdmin();
 
@@ -146,7 +158,11 @@ test('EditServiceRequest requires valid data', function ($data, $errors) {
 test('EditServiceRequest is gated with proper access control', function () {
     $user = User::factory()->licensed(LicenseType::cases())->create();
 
-    $serviceRequest = ServiceRequest::factory()->create();
+    $serviceRequest = ServiceRequest::factory([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Waiting,
+        ])->id,
+    ])->create();
 
     actingAs($user)
         ->get(
@@ -170,7 +186,11 @@ test('EditServiceRequest is gated with proper access control', function () {
             ])
         )->assertSuccessful();
 
-    $request = collect(EditServiceRequestRequestFactory::new()->create());
+    $request = collect(EditServiceRequestRequestFactory::new([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ])->id,
+    ])->create());
 
     livewire(EditServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
@@ -262,7 +282,11 @@ test('send feedback email if service request is closed', function () {
 
     $user = User::factory()->licensed(LicenseType::cases())->create();
 
-    $serviceRequest = ServiceRequest::factory()->create();
+    $serviceRequest = ServiceRequest::factory([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ])->id,
+    ])->create();
 
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.*.update');
