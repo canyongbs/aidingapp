@@ -37,18 +37,37 @@
 namespace AidingApp\ServiceManagement\Enums;
 
 use Filament\Support\Contracts\HasLabel;
+use Bvtterfly\ModelStateMachine\Attributes\InitialState;
+use Bvtterfly\ModelStateMachine\Attributes\AllowTransitionTo;
 use AidingApp\ServiceManagement\Models\Contracts\ClassificationInterface;
 
 enum SystemServiceRequestClassification: string implements HasLabel, ClassificationInterface
 {
+    #[InitialState]
+    #[AllowTransitionTo(self::InProgress)]
+    #[AllowTransitionTo(self::Closed)]
+    #[AllowTransitionTo(self::Waiting)]
+    #[AllowTransitionTo(self::Custom)]
     case Open = 'open';
 
+    #[AllowTransitionTo(self::Open)]
+    #[AllowTransitionTo(self::Closed)]
+    #[AllowTransitionTo(self::Waiting)]
+    #[AllowTransitionTo(self::Custom)]
     case InProgress = 'in_progress';
 
     case Closed = 'closed';
 
+    #[AllowTransitionTo(self::Open)]
+    #[AllowTransitionTo(self::Closed)]
+    #[AllowTransitionTo(self::InProgress)]
+    #[AllowTransitionTo(self::Custom)]
     case Waiting = 'waiting';
 
+    #[AllowTransitionTo(self::Open)]
+    #[AllowTransitionTo(self::InProgress)]
+    #[AllowTransitionTo(self::Closed)]
+    #[AllowTransitionTo(self::Waiting)]
     case Custom = 'custom';
 
     public function getLabel(): ?string
