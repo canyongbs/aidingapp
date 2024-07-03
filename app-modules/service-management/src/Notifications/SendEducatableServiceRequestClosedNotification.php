@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Notifications;
 
+use Illuminate\Support\Str;
 use App\Models\NotificationSetting;
 use AidingApp\Notification\Models\OutboundDeliverable;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
@@ -43,8 +44,6 @@ use AidingApp\Notification\Notifications\BaseNotification;
 use AidingApp\Notification\Notifications\EmailNotification;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
 use AidingApp\Notification\Notifications\Concerns\EmailChannelTrait;
-use Illuminate\Support\Str;
-
 
 class SendEducatableServiceRequestClosedNotification extends BaseNotification implements EmailNotification
 {
@@ -62,12 +61,12 @@ class SendEducatableServiceRequestClosedNotification extends BaseNotification im
 
         return MailMessage::make()
             ->settings($this->resolveNotificationSetting($notifiable))
-            ->subject(__('[Ticket #:ticketno]: Your Issue Has Been Resolved',['ticketno' => $this->serviceRequest->service_request_number]))
+            ->subject(__('[Ticket #:ticketno]: Your Issue Has Been Resolved', ['ticketno' => $this->serviceRequest->service_request_number]))
             ->greeting("Dear {$name},")
-            ->line(__('We wanted to update you that the issue you reported in Ticket #:ticketNo regarding :shortDescription has been :status.',[
-              'ticketNo' => $this->serviceRequest->service_request_number,
-              'status' => $status->name,
-              'shortDescription' => Str::limit($this->serviceRequest->res_details, 10, '...')
+            ->line(__('We wanted to update you that the issue you reported in Ticket #:ticketNo regarding :shortDescription has been :status.', [
+                'ticketNo' => $this->serviceRequest->service_request_number,
+                'status' => $status->name,
+                'shortDescription' => Str::limit($this->serviceRequest->res_details, 10, '...'),
             ]))
             ->line('If you experience any further issues or have additional questions, please do not hesitate to open a new ticket.')
             ->salutation('Thank you for giving us a chance to help you with your issue.');

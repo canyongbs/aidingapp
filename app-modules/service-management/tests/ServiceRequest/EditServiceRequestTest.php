@@ -60,7 +60,7 @@ test('A successful action on the EditServiceRequest page', function () {
     $serviceRequest = ServiceRequest::factory([
         'status_id' => ServiceRequestStatus::factory()->create([
             'classification' => SystemServiceRequestClassification::Open,
-        ])->id
+        ])->id,
     ])->create();
 
     asSuperAdmin()
@@ -74,7 +74,7 @@ test('A successful action on the EditServiceRequest page', function () {
     $request = collect(EditServiceRequestRequestFactory::new([
         'status_id' => ServiceRequestStatus::factory()->create([
             'classification' => SystemServiceRequestClassification::InProgress,
-        ])->id
+        ])->id,
     ])->create());
 
     livewire(EditServiceRequest::class, [
@@ -106,11 +106,10 @@ test('A successful action on the EditServiceRequest page', function () {
 });
 
 test('EditServiceRequest requires valid data', function ($data, $errors) {
-    
     $serviceRequest = ServiceRequest::factory([
         'status_id' => ServiceRequestStatus::factory()->create([
             'classification' => SystemServiceRequestClassification::Open,
-        ])->id
+        ])->id,
     ])->create();
 
     asSuperAdmin();
@@ -152,7 +151,7 @@ test('EditServiceRequest requires valid data', function ($data, $errors) {
         'close_details is not a string' => [EditServiceRequestRequestFactory::new()->state(['close_details' => 1]), ['close_details' => 'string']],
         'res_details is not a string' => [EditServiceRequestRequestFactory::new()->state(['res_details' => 1]), ['res_details' => 'string']],
     ]
-    );
+);
 
 // Permission Tests
 
@@ -162,7 +161,7 @@ test('EditServiceRequest is gated with proper access control', function () {
     $serviceRequest = ServiceRequest::factory([
         'status_id' => ServiceRequestStatus::factory()->create([
             'classification' => SystemServiceRequestClassification::Waiting,
-        ])->id
+        ])->id,
     ])->create();
 
     actingAs($user)
@@ -190,7 +189,7 @@ test('EditServiceRequest is gated with proper access control', function () {
     $request = collect(EditServiceRequestRequestFactory::new([
         'status_id' => ServiceRequestStatus::factory()->create([
             'classification' => SystemServiceRequestClassification::Open,
-        ])->id
+        ])->id,
     ])->create());
 
     livewire(EditServiceRequest::class, [
@@ -286,7 +285,7 @@ test('send feedback email if service request is closed', function () {
     $serviceRequest = ServiceRequest::factory([
         'status_id' => ServiceRequestStatus::factory()->create([
             'classification' => SystemServiceRequestClassification::Open,
-        ])->id
+        ])->id,
     ])->create();
 
     $user->givePermissionTo('service_request.view-any');

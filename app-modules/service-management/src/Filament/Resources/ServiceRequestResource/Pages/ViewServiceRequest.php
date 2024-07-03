@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages;
 
 use Carbon\CarbonInterval;
+use Filament\Actions\Action;
 use Laravel\Pennant\Feature;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Infolist;
@@ -52,10 +53,9 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
 use Filament\Infolists\Components\IconEntry\IconEntrySize;
+use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
-use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
-use Filament\Actions\Action;
 
 class ViewServiceRequest extends ViewRecord
 {
@@ -219,9 +219,9 @@ class ViewServiceRequest extends ViewRecord
             Action::make('locked_service_request')
                 ->icon('heroicon-o-lock-closed')
                 ->color('gray')
-                ->tooltip("This service request is locked as status is closed.")
+                ->tooltip('This service request is locked as status is closed.')
                 ->disabled()
-                ->visible(fn(ServiceRequest $record) => fn(ServiceRequest $record) => $record->status?->classification === SystemServiceRequestClassification::Closed ? false : true)
+                ->visible(fn (ServiceRequest $record) => fn (ServiceRequest $record) => $record->status?->classification === SystemServiceRequestClassification::Closed ? false : true)
                 ->iconButton(),
         ];
     }
