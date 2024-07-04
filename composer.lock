@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4d21b08ef297ba697874ca356f38e836",
+    "content-hash": "786da39c90665be0efa1bd558409d30b",
     "packages": [
         {
             "name": "amphp/amp",
@@ -463,16 +463,16 @@
         },
         {
             "name": "amphp/pipeline",
-            "version": "v1.2.0",
+            "version": "v1.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/amphp/pipeline.git",
-                "reference": "f1c2ce35d27ae86ead018adb803eccca7421dd9b"
+                "reference": "66c095673aa5b6e689e63b52d19e577459129ab3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/amphp/pipeline/zipball/f1c2ce35d27ae86ead018adb803eccca7421dd9b",
-                "reference": "f1c2ce35d27ae86ead018adb803eccca7421dd9b",
+                "url": "https://api.github.com/repos/amphp/pipeline/zipball/66c095673aa5b6e689e63b52d19e577459129ab3",
+                "reference": "66c095673aa5b6e689e63b52d19e577459129ab3",
                 "shasum": ""
             },
             "require": {
@@ -518,7 +518,7 @@
             ],
             "support": {
                 "issues": "https://github.com/amphp/pipeline/issues",
-                "source": "https://github.com/amphp/pipeline/tree/v1.2.0"
+                "source": "https://github.com/amphp/pipeline/tree/v1.2.1"
             },
             "funding": [
                 {
@@ -526,7 +526,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-03-10T14:48:16+00:00"
+            "time": "2024-07-04T00:56:47+00:00"
         },
         {
             "name": "amphp/process",
@@ -1129,16 +1129,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.315.4",
+            "version": "3.315.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "8d2cf34e22262b983ce3d7e38d11667c5792b93f"
+                "reference": "3e6d619d45d8e1a8681dd58de61ddfe90e8341e6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/8d2cf34e22262b983ce3d7e38d11667c5792b93f",
-                "reference": "8d2cf34e22262b983ce3d7e38d11667c5792b93f",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/3e6d619d45d8e1a8681dd58de61ddfe90e8341e6",
+                "reference": "3e6d619d45d8e1a8681dd58de61ddfe90e8341e6",
                 "shasum": ""
             },
             "require": {
@@ -1218,9 +1218,9 @@
             "support": {
                 "forum": "https://forums.aws.amazon.com/forum.jspa?forumID=80",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.315.4"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.315.5"
             },
-            "time": "2024-07-02T18:09:03+00:00"
+            "time": "2024-07-03T18:12:51+00:00"
         },
         {
             "name": "barryvdh/laravel-debugbar",
@@ -8782,16 +8782,16 @@
         },
         {
             "name": "livewire/livewire",
-            "version": "v3.5.1",
+            "version": "v3.5.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/livewire/livewire.git",
-                "reference": "da044261bb5c5449397f18fda3409f14acf47c0a"
+                "reference": "636725c1f87bc7844dd80277488268db27eec1aa"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/livewire/livewire/zipball/da044261bb5c5449397f18fda3409f14acf47c0a",
-                "reference": "da044261bb5c5449397f18fda3409f14acf47c0a",
+                "url": "https://api.github.com/repos/livewire/livewire/zipball/636725c1f87bc7844dd80277488268db27eec1aa",
+                "reference": "636725c1f87bc7844dd80277488268db27eec1aa",
                 "shasum": ""
             },
             "require": {
@@ -8846,7 +8846,7 @@
             "description": "A front-end framework for Laravel.",
             "support": {
                 "issues": "https://github.com/livewire/livewire/issues",
-                "source": "https://github.com/livewire/livewire/tree/v3.5.1"
+                "source": "https://github.com/livewire/livewire/tree/v3.5.2"
             },
             "funding": [
                 {
@@ -8854,7 +8854,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-06-18T11:10:42+00:00"
+            "time": "2024-07-03T17:22:45+00:00"
         },
         {
             "name": "maatwebsite/excel",
@@ -9941,16 +9941,16 @@
         },
         {
             "name": "nuwave/lighthouse",
-            "version": "v6.39.0",
+            "version": "v6.40.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/nuwave/lighthouse.git",
-                "reference": "29b99f7dae3fe3a65e4a7f7951603da072ad023e"
+                "reference": "d542cbe5974d79f44713877e03bc20a3bf3bcc6a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nuwave/lighthouse/zipball/29b99f7dae3fe3a65e4a7f7951603da072ad023e",
-                "reference": "29b99f7dae3fe3a65e4a7f7951603da072ad023e",
+                "url": "https://api.github.com/repos/nuwave/lighthouse/zipball/d542cbe5974d79f44713877e03bc20a3bf3bcc6a",
+                "reference": "d542cbe5974d79f44713877e03bc20a3bf3bcc6a",
                 "shasum": ""
             },
             "require": {
@@ -10071,7 +10071,7 @@
                     "type": "patreon"
                 }
             ],
-            "time": "2024-07-02T08:10:31+00:00"
+            "time": "2024-07-03T08:49:01+00:00"
         },
         {
             "name": "nyholm/psr7",
@@ -23132,16 +23132,16 @@
         },
         {
             "name": "spatie/laravel-ray",
-            "version": "1.36.3",
+            "version": "1.37.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/spatie/laravel-ray.git",
-                "reference": "9becea4bf279d9bc5e11f89ef36894239d2be60e"
+                "reference": "f57b294a3815be37effa9d13f54f2fbe5a2fff37"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/spatie/laravel-ray/zipball/9becea4bf279d9bc5e11f89ef36894239d2be60e",
-                "reference": "9becea4bf279d9bc5e11f89ef36894239d2be60e",
+                "url": "https://api.github.com/repos/spatie/laravel-ray/zipball/f57b294a3815be37effa9d13f54f2fbe5a2fff37",
+                "reference": "f57b294a3815be37effa9d13f54f2fbe5a2fff37",
                 "shasum": ""
             },
             "require": {
@@ -23203,7 +23203,7 @@
             ],
             "support": {
                 "issues": "https://github.com/spatie/laravel-ray/issues",
-                "source": "https://github.com/spatie/laravel-ray/tree/1.36.3"
+                "source": "https://github.com/spatie/laravel-ray/tree/1.37.0"
             },
             "funding": [
                 {
@@ -23215,7 +23215,7 @@
                     "type": "other"
                 }
             ],
-            "time": "2024-07-02T13:33:54+00:00"
+            "time": "2024-07-03T08:48:44+00:00"
         },
         {
             "name": "spatie/macroable",
