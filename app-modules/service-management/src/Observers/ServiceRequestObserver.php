@@ -50,6 +50,7 @@ use AidingApp\ServiceManagement\Exceptions\ServiceRequestNumberUpdateAttemptExce
 use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestClosedNotification;
 use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestOpenedNotification;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
+use Carbon\Carbon;
 
 class ServiceRequestObserver
 {
@@ -78,13 +79,20 @@ class ServiceRequestObserver
 
     public function saving(ServiceRequest $serviceRequest): void
     {
-        if ($serviceRequest->wasChanged('status_id')) {
+        if ($serviceRequest->isDirty('status_id')) {
             $serviceRequest->status_updated_at = now();
-        }
 
-        if ($serviceRequest->status->classification === SystemServiceRequestClassification::Closed) {
-            if ($serviceRequest->time_to_resolution === null) {
-                UpdateTTR::dispatch($serviceRequest);
+            if (
+                PennantFeature::active('time_to_resolution') &&
+                $serviceRequest->status->classification === SystemServiceRequestClassification::Closed &&
+                $serviceRequest->time_to_resolution === null
+            ) {
+                $createdTime = $serviceRequest->created_at;
+                $currentTime = Carbon::now();
+
+                // Calculate the difference in seconds
+                $secondsDifference = $createdTime->diffInSeconds($currentTime);
+                $serviceRequest->time_to_resolution = $secondsDifference;
             }
         }
     }
@@ -105,7 +113,7 @@ class ServiceRequestObserver
             Gate::check(Feature::FeedbackManagement->getGateName()) &&
             $serviceRequest?->priority?->type?->has_enabled_feedback_collection &&
             $serviceRequest?->status?->classification == SystemServiceRequestClassification::Closed &&
-            ! $serviceRequest?->feedback()->count()
+            !$serviceRequest?->feedback()->count()
         ) {
             $serviceRequest->respondent->notify(new SendClosedServiceFeedbackNotification($serviceRequest));
         }

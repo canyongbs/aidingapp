@@ -74,61 +74,51 @@ use AidingApp\ServiceManagement\Services\ServiceRequestNumber\SqidPlusSixService
 
 class ServiceManagementServiceProvider extends ServiceProvider
 {
-    use ImplementsGraphQL;
+  use ImplementsGraphQL;
 
-    public function register(): void
-    {
-        Panel::configureUsing(fn (Panel $panel) => ($panel->getId() !== 'admin') || $panel->plugin(new ServiceManagementPlugin()));
+  public function register(): void
+  {
+    Panel::configureUsing(fn (Panel $panel) => ($panel->getId() !== 'admin') || $panel->plugin(new ServiceManagementPlugin()));
 
-        $this->app->bind(ServiceRequestNumberGenerator::class, SqidPlusSixServiceRequestNumberGenerator::class);
-    }
+    $this->app->bind(ServiceRequestNumberGenerator::class, SqidPlusSixServiceRequestNumberGenerator::class);
+  }
 
-    public function boot(): void
-    {
-        Relation::morphMap([
-            'change_request_response' => ChangeRequestResponse::class,
-            'change_request_status' => ChangeRequestStatus::class,
-            'change_request_type' => ChangeRequestType::class,
-            'change_request' => ChangeRequest::class,
-            'service_request_assignment' => ServiceRequestAssignment::class,
-            'service_request_form_authentication' => ServiceRequestFormAuthentication::class,
-            'service_request_form_field' => ServiceRequestFormField::class,
-            'service_request_form_step' => ServiceRequestFormStep::class,
-            'service_request_form_submission' => ServiceRequestFormSubmission::class,
-            'service_request_form' => ServiceRequestForm::class,
-            'service_request_history' => ServiceRequestHistory::class,
-            'service_request_priority' => ServiceRequestPriority::class,
-            'service_request_status' => ServiceRequestStatus::class,
-            'service_request_type' => ServiceRequestType::class,
-            'service_request_update' => ServiceRequestUpdate::class,
-            'service_request' => ServiceRequest::class,
-            'sla' => Sla::class,
-        ]);
+  public function boot(): void
+  {
+    Relation::morphMap([
+      'change_request_response' => ChangeRequestResponse::class,
+      'change_request_status' => ChangeRequestStatus::class,
+      'change_request_type' => ChangeRequestType::class,
+      'change_request' => ChangeRequest::class,
+      'service_request_assignment' => ServiceRequestAssignment::class,
+      'service_request_form_authentication' => ServiceRequestFormAuthentication::class,
+      'service_request_form_field' => ServiceRequestFormField::class,
+      'service_request_form_step' => ServiceRequestFormStep::class,
+      'service_request_form_submission' => ServiceRequestFormSubmission::class,
+      'service_request_form' => ServiceRequestForm::class,
+      'service_request_history' => ServiceRequestHistory::class,
+      'service_request_priority' => ServiceRequestPriority::class,
+      'service_request_status' => ServiceRequestStatus::class,
+      'service_request_type' => ServiceRequestType::class,
+      'service_request_update' => ServiceRequestUpdate::class,
+      'service_request' => ServiceRequest::class,
+      'sla' => Sla::class,
+    ]);
 
-        $this->registerObservers();
+    $this->registerObservers();
 
-        $this->registerEvents();
+    $this->discoverSchema(__DIR__ . '/../../graphql/service-management.graphql');
 
-        $this->discoverSchema(__DIR__ . '/../../graphql/service-management.graphql');
+    AuthorizationRoleRegistry::register(ServiceManagementRbacRegistry::class);
+  }
 
-        AuthorizationRoleRegistry::register(ServiceManagementRbacRegistry::class);
-    }
-
-    protected function registerObservers(): void
-    {
-        ChangeRequest::observe(ChangeRequestObserver::class);
-        ServiceRequest::observe(ServiceRequestObserver::class);
-        ServiceRequestAssignment::observe(ServiceRequestAssignmentObserver::class);
-        ServiceRequestHistory::observe(ServiceRequestHistoryObserver::class);
-        ServiceRequestUpdate::observe(ServiceRequestUpdateObserver::class);
-        ServiceRequestType::observe(ServiceRequestTypeObserver::class);
-    }
-
-    protected function registerEvents(): void
-    {
-        Event::listen(
-            UpdateTTR::class,
-            UpdateTTROnClosed::class
-        );
-    }
+  protected function registerObservers(): void
+  {
+    ChangeRequest::observe(ChangeRequestObserver::class);
+    ServiceRequest::observe(ServiceRequestObserver::class);
+    ServiceRequestAssignment::observe(ServiceRequestAssignmentObserver::class);
+    ServiceRequestHistory::observe(ServiceRequestHistoryObserver::class);
+    ServiceRequestUpdate::observe(ServiceRequestUpdateObserver::class);
+    ServiceRequestType::observe(ServiceRequestTypeObserver::class);
+  }
 }
