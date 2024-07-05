@@ -230,6 +230,11 @@ class Contact extends BaseAuthenticatable implements Auditable, Subscribable, Ed
         return LicenseType::RecruitmentCrm;
     }
 
+    public function organizations(): BelongsTo
+    {
+        return $this->belongsTo(Organization::class, 'organization_id', 'id');
+    }
+
     protected static function booted(): void
     {
         static::addGlobalScope('licensed', function (Builder $builder) {

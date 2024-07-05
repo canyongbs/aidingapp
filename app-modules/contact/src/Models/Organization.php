@@ -42,6 +42,7 @@ use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
@@ -95,5 +96,10 @@ class Organization extends BaseModel implements HasMedia, Auditable
     public function type(): BelongsTo
     {
         return $this->belongsTo(OrganizationType::class);
+    }
+
+    public function contacts(): HasMany
+    {
+        return $this->hasMany(Contact::class, 'organization_id');
     }
 }

@@ -53,6 +53,8 @@ class EditOrganization extends EditRecord
 {
     protected static string $resource = OrganizationResource::class;
 
+    protected static ?string $navigationLabel = 'Edit';
+
     public function form(Form $form): Form
     {
         return $form

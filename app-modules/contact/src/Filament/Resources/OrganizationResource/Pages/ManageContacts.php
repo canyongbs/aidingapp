@@ -34,21 +34,28 @@
 </COPYRIGHT>
 */
 
-use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Migrations\Migration;
+namespace AidingApp\Contact\Filament\Resources\OrganizationResource\Pages;
 
-return new class () extends Migration {
-    public function up(): void
-    {
-        DB::table('service_request_types')->whereNotNull('deleted_at')->orderBy('id')->lazy()->each(function (object $serviceRequestType) {
-            DB::table('service_request_priorities')->where('type_id', $serviceRequestType->id)->update(['deleted_at' => now()]);
-        });
-    }
+use Filament\Resources\Pages\ManageRelatedRecords;
+use AidingApp\Contact\Filament\Resources\OrganizationResource;
+use AidingApp\Contact\Filament\Resources\OrganizationResource\RelationManagers\ContactsRelationManager;
 
-    public function down(): void
+class ManageContacts extends ManageRelatedRecords
+{
+    protected static string $resource = OrganizationResource::class;
+
+    protected static string $relationship = 'contacts';
+
+    protected static ?string $navigationLabel = 'Contacts';
+
+    protected static ?string $breadcrumb = 'Contacts';
+
+    protected static ?string $navigationIcon = 'heroicon-o-identification';
+
+    public function getRelationManagers(): array
     {
-        DB::table('service_request_types')->whereNotNull('deleted_at')->orderBy('id')->lazy()->each(function (object $serviceRequestType) {
-            DB::table('service_request_priorities')->where('type_id', $serviceRequestType->id)->update(['deleted_at' => null]);
-        });
+        return [
+            ContactsRelationManager::class,
+        ];
     }
-};
+}
