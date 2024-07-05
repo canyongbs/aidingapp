@@ -45,6 +45,7 @@
         "canyon-gbs/aiding-app-timeline": "*",
         "canyon-gbs/aiding-app-webhook": "*",
         "composer/composer": "^2.7",
+        "defectivecode/laravel-sqs-extended": "^1.0",
         "fakerphp/faker": "^1.23",
         "filament/filament": "^3.2",
         "filament/spatie-laravel-media-library-plugin": "^3.1",

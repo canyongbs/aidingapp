@@ -83,8 +83,26 @@ return [
             'after_commit' => false,
         ],
 
+        /*
+        |--------------------------------------------------------------------------
+        | SQS Disk Queue Configuration
+        |--------------------------------------------------------------------------
+        |
+        | Here you may configure the SQS disk queue driver.  It shares all of the same
+        | configuration options from the built in Laravel SQS queue driver.  The only added
+        | option is `disk_options` which are explained below.
+        |
+        | always_store: Determines if all payloads should be stored on a disk regardless if they are over SQS's 256KB limit.
+        | cleanup:      Determines if the payload files should be removed from the disk once the job is processed. Leaveing the
+        |                 files behind can be useful to replay the queue jobs later for debugging reasons.
+        | disk:         The disk to save SQS payloads to.  This disk should be configured in your Laravel filesystems.php config file.
+        | prefix        The prefix (folder) to store the payloads with.  This is useful if you are sharing a disk with other SQS queues.
+        |                 Using a prefix allows for the queue:clear command to destroy the files separately from other sqs-disk backed queues
+        |                 sharing the same disk.
+        |
+        */
         'sqs' => [
-            'driver' => 'sqs',
+            'driver' => 'sqs-disk',
             'key' => env('AWS_SQS_ACCESS_KEY_ID'),
             'secret' => env('AWS_SQS_SECRET_ACCESS_KEY'),
             'prefix' => env('SQS_PREFIX', 'https://sqs.us-east-1.amazonaws.com/your-account-id'),
@@ -92,6 +110,12 @@ return [
             'suffix' => env('SQS_SUFFIX'),
             'region' => env('AWS_SQS_DEFAULT_REGION', 'us-east-1'),
             'after_commit' => false,
+            'disk_options' => [
+                'always_store' => false,
+                'cleanup' => true,
+                'disk' => env('FILESYSTEM_DISK', 'local'),
+                'prefix' => 'sqs-payloads',
+            ],
         ],
 
         'redis' => [
