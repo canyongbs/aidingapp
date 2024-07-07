@@ -215,7 +215,7 @@ class ViewServiceRequest extends ViewRecord
                     ->columns(),
                 Section::make('Form Submission Details')
                     ->collapsed()
-                    ->visible(fn (ServiceRequest $record): bool => !is_null($record->serviceRequestFormSubmission))
+                    ->visible(fn (ServiceRequest $record): bool => ! is_null($record->serviceRequestFormSubmission))
                     ->schema([
                         TextEntry::make('serviceRequestFormSubmission.submitted_at')
                             ->dateTime(),
