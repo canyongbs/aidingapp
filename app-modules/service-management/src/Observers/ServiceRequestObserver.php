@@ -90,7 +90,7 @@ class ServiceRequestObserver
                 $currentTime = Carbon::now();
 
                 // Calculate the difference in seconds
-                $secondsDifference = $createdTime->diffInSeconds($currentTime);
+                $secondsDifference = $createdTime ? $createdTime->diffInSeconds($currentTime) : null;
                 $serviceRequest->time_to_resolution = $secondsDifference;
             }
         }
@@ -112,7 +112,7 @@ class ServiceRequestObserver
             Gate::check(Feature::FeedbackManagement->getGateName()) &&
             $serviceRequest?->priority?->type?->has_enabled_feedback_collection &&
             $serviceRequest?->status?->classification == SystemServiceRequestClassification::Closed &&
-            ! $serviceRequest?->feedback()->count()
+            !$serviceRequest?->feedback()->count()
         ) {
             $serviceRequest->respondent->notify(new SendClosedServiceFeedbackNotification($serviceRequest));
         }
