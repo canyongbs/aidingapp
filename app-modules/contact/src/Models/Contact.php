@@ -113,7 +113,6 @@ class Contact extends BaseAuthenticatable implements Auditable, Subscribable, Ed
         'postal',
         'assigned_to_id',
         'created_by_id',
-        'organization_id',
     ];
 
     protected $casts = [
