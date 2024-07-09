@@ -87,7 +87,7 @@ spin up -d
 Once the containers are started you can now start a shell into the main PHP container by running the following command:
 
 ```bash
-spin exec -it aidingapp.local bash
+spin exec -it -u webuser aidingapp.local bash
 ```
 
 All following commands will and should be run from within the PHP container.
