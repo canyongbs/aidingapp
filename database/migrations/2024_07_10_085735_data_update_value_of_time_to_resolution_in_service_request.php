@@ -36,8 +36,6 @@
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Migrations\Migration;
-use Laravel\Pennant\Feature as PennantFeature;
-use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 
 return new class () extends Migration {
     public function up(): void
