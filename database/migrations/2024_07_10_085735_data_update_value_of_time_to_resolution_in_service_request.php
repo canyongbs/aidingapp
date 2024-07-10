@@ -34,20 +34,16 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
-use Carbon\Carbon;
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Migrations\Migration;
 use Laravel\Pennant\Feature as PennantFeature;
+use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 
-return new class extends Migration
-{
+return new class () extends Migration {
     public function up(): void
     {
         $serviceRequests = DB::table('service_requests')
-            ->where('status_id',)
+            ->where('status_id')
             ->get();
 
         if ($serviceRequests) {
@@ -71,7 +67,7 @@ return new class extends Migration
     public function down(): void
     {
         $serviceRequests = DB::table('service_requests')
-            ->where('status_id',)
+            ->where('status_id')
             ->get();
 
         foreach ($serviceRequests as $serviceRequest) {

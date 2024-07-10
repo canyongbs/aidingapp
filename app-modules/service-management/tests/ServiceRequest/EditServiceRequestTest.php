@@ -138,7 +138,6 @@ test('check if time to resolution has correct value when status is changed', fun
         ->toEqual($secondsDifference);
 });
 
-
 test('EditServiceRequest requires valid data', function ($data, $errors) {
     $serviceRequest = ServiceRequest::factory([
         'status_id' => ServiceRequestStatus::factory()->create([
