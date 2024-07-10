@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Observers;
 
+use Carbon\Carbon;
 use App\Models\User;
 use App\Enums\Feature;
 use Illuminate\Support\Facades\Gate;
@@ -77,8 +78,21 @@ class ServiceRequestObserver
 
     public function saving(ServiceRequest $serviceRequest): void
     {
-        if ($serviceRequest->wasChanged('status_id')) {
+        if ($serviceRequest->isDirty('status_id')) {
             $serviceRequest->status_updated_at = now();
+
+            if (
+                PennantFeature::active('time_to_resolution') &&
+                $serviceRequest->status->classification === SystemServiceRequestClassification::Closed &&
+                is_null($serviceRequest->time_to_resolution)
+            ) {
+                $createdTime = $serviceRequest->created_at;
+                $currentTime = Carbon::now();
+
+                // Calculate the difference in seconds
+                $secondsDifference = $createdTime ? $createdTime->diffInSeconds($currentTime) : null;
+                $serviceRequest->time_to_resolution = $secondsDifference;
+            }
         }
     }
 

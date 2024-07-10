@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages;
 
+use Carbon\Carbon;
 use Carbon\CarbonInterval;
 use Filament\Actions\Action;
 use Laravel\Pennant\Feature;
@@ -48,11 +49,13 @@ use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\ViewEntry;
+use Laravel\Pennant\Feature as PennantFeature;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
 use Filament\Infolists\Components\IconEntry\IconEntrySize;
+use Filament\Infolists\Components\Actions\Action as InfolistAction;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
@@ -113,6 +116,18 @@ class ViewServiceRequest extends ViewRecord
                                     Contact::class => ContactResource::getUrl('view', ['record' => $respondent->id]),
                                 };
                             }),
+                        TextEntry::make('time_to_resolution')
+                            ->label('Time to Resolution')
+                            ->visible(PennantFeature::active('time_to_resolution'))
+                            ->formatStateUsing(function ($state) {
+                                $interval = Carbon::now()->diffAsCarbonInterval(Carbon::now()->addSeconds($state));
+                                $days = $interval->d;
+                                $hours = $interval->h;
+                                $minutes = $interval->i;
+
+                                return "{$days}d {$hours}h {$minutes}m";
+                            })
+                            ->columnSpan(1),
                     ])
                     ->columns(),
                 Section::make('Uploads')
@@ -142,7 +157,7 @@ class ViewServiceRequest extends ViewRecord
                                     })
                                     ->size(IconEntrySize::TwoExtraLarge)
                                     ->hintAction(
-                                        Action::make('download')
+                                        InfolistAction::make('download')
                                             ->label('Download')
                                             ->icon('heroicon-m-arrow-down-tray')
                                             ->color('primary')
