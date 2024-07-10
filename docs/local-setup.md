@@ -87,7 +87,7 @@ spin up -d
 Once the containers are started you can now start a shell into the main PHP container by running the following command:
 
 ```bash
-spin exec -it aidingapp.local bash
+spin exec -it -u webuser aidingapp.local bash
 ```
 
 All following commands will and should be run from within the PHP container.
@@ -109,7 +109,6 @@ The above commands will set up the application for the "landlord" database. The 
 
 ```bash
 php artisan tenants:create [A Name for the Tenant] [A domain for the tenant]
-php artisan tenants:artisan "db:seed --database=tenant"
 ```
 
 These commands will create a new tenant with the name and domain you supplied and then refresh and seed the tenant's database.

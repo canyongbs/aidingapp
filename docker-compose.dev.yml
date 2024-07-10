@@ -5,8 +5,10 @@ services:
       args:
         TOTAL_QUEUE_WORKERS: '${TOTAL_QUEUE_WORKERS:-1}'
         MULTIPLE_DEVELOPMENT_QUEUES: '${MULTIPLE_DEVELOPMENT_QUEUES:-false}'
+        USER_ID: '${SPIN_USER_ID:-9999}'
+        GROUP_ID: '${SPIN_GROUP_ID:-9999}'
     environment:
-      SSL_MODE: "mixed"
+      SSL_MODE: "full"
       LANDLORD_MIGRATE: '${LANDLORD_MIGRATE:-true}'
       TENANT_MIGRATE: '${TENANT_MIGRATE:-true}'
       LARAVEL_SCHEDULER_ENABLED: '${LARAVEL_SCHEDULER_ENABLED:-true}'
@@ -26,6 +28,7 @@ services:
       AUDIT_QUEUE_QUEUE: '${AUDIT_QUEUE_QUEUE:-audit}'
       IMPORT_EXPORT_QUEUE: '${IMPORT_EXPORT_QUEUE:-import-export}'
       BUILD_ASSETS: '${BUILD_ASSETS:-false}'
+      FIX_PERMISSIONS: '${FIX_PERMISSIONS:-true}'
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.aidingapp-app.rule=HostRegexp(`aidingapp.local`, `{subdomain:[a-z0-9]+}.aidingapp.local`)"
