@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\
 
 use Filament\Tables\Table;
 use Filament\Actions\CreateAction;
+use AidingApp\Contact\Models\Contact;
 use App\Models\Scopes\EducatableSort;
 use App\Models\Scopes\EducatableSearch;
 use Filament\Tables\Actions\EditAction;
@@ -48,6 +49,7 @@ use App\Filament\Tables\Columns\IdColumn;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
+use AidingApp\Contact\Models\Organization;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
@@ -113,6 +115,21 @@ class ListServiceRequests extends ListRecords
                 SelectFilter::make('status')
                     ->relationship('status', 'name')
                     ->multiple()
+                    ->preload(),
+                SelectFilter::make('organizations')
+                    ->options(Organization::pluck('name', 'id')->toArray())
+                    ->modifyQueryUsing(fn (Builder $query, $state): Builder => $query->when(
+                        ! empty($state['value']),
+                        fn (Builder $query) => $query->whereHasMorph(
+                            'respondent',
+                            [Contact::class],
+                            fn (Builder $query): Builder => $query->whereRelation(
+                                'organizations',
+                                (new Organization())->getKeyName(),
+                                $state['value']
+                            )
+                        )
+                    ))
                     ->preload(),
             ])
             ->actions([

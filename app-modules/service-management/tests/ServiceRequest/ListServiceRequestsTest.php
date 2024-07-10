@@ -44,9 +44,11 @@ use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\Organization;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ListServiceRequests;
 
 test('The correct details are displayed on the ListServiceRequests page', function () {
     $serviceRequests = ServiceRequest::factory()
@@ -61,7 +63,7 @@ test('The correct details are displayed on the ListServiceRequests page', functi
 
     asSuperAdmin();
 
-    $component = livewire(ServiceRequestResource\Pages\ListServiceRequests::class);
+    $component = livewire(ListServiceRequests::class);
 
     $component->assertSuccessful()
         ->assertCanSeeTableRecords($serviceRequests)
@@ -136,4 +138,29 @@ test('ListServiceRequests is gated with proper feature access control', function
         ->get(
             ServiceRequestResource::getUrl()
         )->assertSuccessful();
+});
+
+test('can filter service request by organization', function () {
+    asSuperAdmin();
+
+    $organizations = Organization::factory()->count(10)->create();
+
+    $organization = $organizations->first();
+
+    $serviceRequestsInOrganization = ServiceRequest::factory()
+        ->count(3)
+        ->for(Contact::factory()->state(['organization_id' => $organization->id]), 'respondent')
+        ->create();
+
+    $serviceRequestsNotInOrganization = ServiceRequest::factory()
+        ->count(3)
+        ->create();
+
+    livewire(ListServiceRequests::class)
+        ->assertCanSeeTableRecords($serviceRequestsInOrganization->merge($serviceRequestsNotInOrganization))
+        ->filterTable('organizations', $organization->id)
+        ->assertCanSeeTableRecords(
+            $serviceRequestsInOrganization
+        )
+        ->assertCanNotSeeTableRecords($serviceRequestsNotInOrganization);
 });
