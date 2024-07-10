@@ -44,7 +44,6 @@ use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 use AidingApp\Contact\Models\Contact;
-use Illuminate\Database\Eloquent\Builder;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
@@ -144,47 +143,27 @@ test('ListServiceRequests is gated with proper feature access control', function
 test('can filter service request by organization', function () {
     asSuperAdmin();
 
-    $organization = Organization::factory()->create();
+    $organizations = Organization::factory()->count(10)->create();
 
-    $contacts = Contact::factory()
+    $organizationServiceRequests = ServiceRequest::factory()
         ->count(10)
-        ->state(['organization_id' => $organization->id])
+        ->state(function () use ($organizations) {
+            return [
+                'respondent_id' => Contact::factory()
+                    ->state(['organization_id' => $organizations->random()->id])
+                    ->create()
+                    ->id,
+            ];
+        })
         ->create();
 
-    $serviceRequests = ServiceRequest::factory()
-        ->count(10)
-        ->create()
-        ->each(function ($serviceRequest) use ($contacts) {
-            $serviceRequest->respondent()->associate($contacts->random())->save();
-        });
-
-    $organization = $serviceRequests->first()->respondent->organizations;
-
-    $organizationNotInList = Organization::factory()->create();
-
-    $filterdServiceRequests = ServiceRequest::whereHasMorph(
-        'respondent',
-        [Contact::class],
-        fn (Builder $query): Builder => $query->whereRelation(
-            'organizations',
-            (new Organization())->getKeyName(),
-            $organization->id
-        )
-    )->get();
-
-    $unfilterdServiceRequests = ServiceRequest::whereHasMorph(
-        'respondent',
-        [Contact::class],
-        fn (Builder $query): Builder => $query->whereRelation(
-            'organizations',
-            (new Organization())->getKeyName(),
-            $organizationNotInList->id
-        )
-    )->get();
+    $organization = $organizationServiceRequests->first()->respondent->organizations;
 
     livewire(ListServiceRequests::class)
-        ->assertCanSeeTableRecords($serviceRequests)
+        ->assertCanSeeTableRecords($organizationServiceRequests)
         ->filterTable('organizations', $organization->id)
-        ->assertCanSeeTableRecords($filterdServiceRequests)
-        ->assertCanNotSeeTableRecords($unfilterdServiceRequests);
+        ->assertCanSeeTableRecords(
+            $organizationServiceRequests->where('respondent.organizations.id', $organization->id)
+        )
+        ->assertCanNotSeeTableRecords($organizationServiceRequests->where('respondent.organizations.id', '!=', $organization->id));
 });
