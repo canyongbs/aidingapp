@@ -84,7 +84,7 @@ class ServiceRequestObserver
             if (
                 PennantFeature::active('time_to_resolution') &&
                 $serviceRequest->status->classification === SystemServiceRequestClassification::Closed &&
-                $serviceRequest->time_to_resolution === null
+                is_null($serviceRequest->time_to_resolution)
             ) {
                 $createdTime = $serviceRequest->created_at;
                 $currentTime = Carbon::now();
