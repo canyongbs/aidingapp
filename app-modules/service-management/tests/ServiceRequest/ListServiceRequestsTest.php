@@ -145,25 +145,22 @@ test('can filter service request by organization', function () {
 
     $organizations = Organization::factory()->count(10)->create();
 
-    $organizationServiceRequests = ServiceRequest::factory()
-        ->count(10)
-        ->state(function () use ($organizations) {
-            return [
-                'respondent_id' => Contact::factory()
-                    ->state(['organization_id' => $organizations->random()->id])
-                    ->create()
-                    ->id,
-            ];
-        })
+    $organization = $organizations->first();
+
+    $serviceRequestsInOrganization = ServiceRequest::factory()
+        ->count(3)
+        ->for(Contact::factory()->state(['organization_id' => $organization->id]), 'respondent')
         ->create();
 
-    $organization = $organizationServiceRequests->first()->respondent->organizations;
+    $serviceRequestsNotInOrganization = ServiceRequest::factory()
+        ->count(3)
+        ->create();
 
     livewire(ListServiceRequests::class)
-        ->assertCanSeeTableRecords($organizationServiceRequests)
+        ->assertCanSeeTableRecords($serviceRequestsInOrganization->merge($serviceRequestsNotInOrganization))
         ->filterTable('organizations', $organization->id)
         ->assertCanSeeTableRecords(
-            $organizationServiceRequests->where('respondent.organizations.id', $organization->id)
+            $serviceRequestsInOrganization
         )
-        ->assertCanNotSeeTableRecords($organizationServiceRequests->where('respondent.organizations.id', '!=', $organization->id));
+        ->assertCanNotSeeTableRecords($serviceRequestsNotInOrganization);
 });
