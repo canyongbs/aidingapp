@@ -34,6 +34,7 @@
 </COPYRIGHT>
 */
 
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Migrations\Migration;
 
@@ -50,8 +51,8 @@ return new class () extends Migration {
             ->get();
 
         foreach ($serviceRequests as $serviceRequest) {
-            $createdTime = $serviceRequest->created_at;
-            $updatedTime = $serviceRequest->updated_at;
+            $createdTime = Carbon::parse($serviceRequest->created_at);
+            $updatedTime = Carbon::parse($serviceRequest->updated_at);
 
             // Calculate the difference in seconds
             $secondsDifference = ($createdTime && $updatedTime) ? $createdTime->diffInSeconds($updatedTime) : null;
