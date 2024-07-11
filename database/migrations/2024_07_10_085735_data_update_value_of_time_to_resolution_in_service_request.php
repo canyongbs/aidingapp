@@ -36,48 +36,46 @@
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Migrations\Migration;
-use Laravel\Pennant\Feature as PennantFeature;
-use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 
 return new class () extends Migration {
     public function up(): void
     {
+        $closedStatusIds = DB::table('service_request_statuses')
+            ->where('classification', 'closed')
+            ->pluck('id');
+
         $serviceRequests = DB::table('service_requests')
-            ->where('status_id')
+            ->whereIn('status_id', $closedStatusIds->toArray())
+            ->whereNull('time_to_resolution')
             ->get();
 
-        if ($serviceRequests) {
-            foreach ($serviceRequests as $serviceRequest) {
-                if (
-                    PennantFeature::active('time_to_resolution') &&
-                    $serviceRequest->status->classification === SystemServiceRequestClassification::Closed &&
-                    is_null($serviceRequest->time_to_resolution)
-                ) {
-                    $createdTime = $serviceRequest->created_at;
-                    $updatedTime = $serviceRequest->updated_at;
+        foreach ($serviceRequests as $serviceRequest) {
+            $createdTime = $serviceRequest->created_at;
+            $updatedTime = $serviceRequest->updated_at;
 
-                    // Calculate the difference in seconds
-                    $secondsDifference = ($createdTime && $updatedTime) ? $createdTime->diffInSeconds($updatedTime) : null;
-                    $serviceRequest->time_to_resolution = $secondsDifference;
-                }
-            }
+            // Calculate the difference in seconds
+            $secondsDifference = ($createdTime && $updatedTime) ? $createdTime->diffInSeconds($updatedTime) : null;
+
+            DB::table('service_requests')
+                ->where('id', $serviceRequest->id)
+                ->update(['time_to_resolution' => $secondsDifference]);
         }
     }
 
     public function down(): void
     {
+        $closedStatusIds = DB::table('service_request_statuses')
+            ->where('classification', 'closed')
+            ->pluck('id');
+
         $serviceRequests = DB::table('service_requests')
-            ->where('status_id')
+            ->whereIn('status_id', $closedStatusIds->toArray())
             ->get();
 
         foreach ($serviceRequests as $serviceRequest) {
-            if (
-                PennantFeature::active('time_to_resolution') &&
-                $serviceRequest->status->classification === SystemServiceRequestClassification::Closed &&
-                is_null($serviceRequest->time_to_resolution)
-            ) {
-                $serviceRequest->time_to_resolution = null;
-            }
+            DB::table('service_requests')
+                ->where('id', $serviceRequest->id)
+                ->update(['time_to_resolution' => null]);
         }
     }
 };
