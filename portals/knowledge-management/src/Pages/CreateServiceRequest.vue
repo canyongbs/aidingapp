@@ -172,7 +172,7 @@
             >
             </Breadcrumbs>
 
-            <main class="grid px-6 gap-4" v-if="submittedSuccess">Thank you for submitting a new request.</main>
+            <main class="grid px-6 gap-4" v-if="submittedSuccess">Thank you. Your request has been submitted.</main>
             <main class="grid px-6 gap-4" v-else>
                 <FormKitSchema :schema="schema" :data="data" />
             </main>
