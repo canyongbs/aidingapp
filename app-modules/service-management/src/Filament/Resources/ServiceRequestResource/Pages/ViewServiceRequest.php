@@ -234,7 +234,7 @@ class ViewServiceRequest extends ViewRecord
                 ->color('gray')
                 ->tooltip('This service request is locked as status is closed.')
                 ->disabled()
-                ->visible(fn (ServiceRequest $record) => fn (ServiceRequest $record) => $record->status?->classification === SystemServiceRequestClassification::Closed ? false : true)
+                ->visible(fn (ServiceRequest $record) => $record->status?->classification === SystemServiceRequestClassification::Closed ? true : false)
                 ->iconButton(),
         ];
     }
