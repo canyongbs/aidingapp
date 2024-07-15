@@ -34,25 +34,15 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Pages;
+namespace App\Filament\Clusters;
 
-use Filament\Pages\Page;
+use Filament\Clusters\Cluster;
 
-class ReportLibrary extends Page
+class ReportLibrary extends Cluster
 {
+    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+
     protected static ?string $navigationGroup = 'Report Center';
 
-    protected static ?int $navigationSort = 30;
-
-    protected static ?string $navigationLabel = 'Report Library';
-
-    protected static string $view = 'filament.pages.coming-soon';
-
-    public static function canAccess(): bool
-    {
-        /** @var User $user */
-        $user = auth()->user();
-
-        return $user->can('report-library.view-any');
-    }
+    protected static ?int $navigationSort = 40;
 }
