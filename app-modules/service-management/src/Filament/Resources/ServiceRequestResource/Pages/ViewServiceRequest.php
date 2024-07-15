@@ -118,7 +118,6 @@ class ViewServiceRequest extends ViewRecord
                             }),
                         TextEntry::make('time_to_resolution')
                             ->label('Time to Resolution')
-                            ->visible(PennantFeature::active('time_to_resolution'))
                             ->formatStateUsing(function ($state) {
                                 $interval = Carbon::now()->diffAsCarbonInterval(Carbon::now()->addSeconds($state));
                                 $days = $interval->d;

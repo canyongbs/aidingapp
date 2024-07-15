@@ -82,7 +82,6 @@ class ServiceRequestObserver
             $serviceRequest->status_updated_at = now();
 
             if (
-                PennantFeature::active('time_to_resolution') &&
                 $serviceRequest->status->classification === SystemServiceRequestClassification::Closed &&
                 is_null($serviceRequest->time_to_resolution)
             ) {
