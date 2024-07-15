@@ -49,7 +49,6 @@ use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\ViewEntry;
-use Laravel\Pennant\Feature as PennantFeature;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use AidingApp\Contact\Filament\Resources\ContactResource;
