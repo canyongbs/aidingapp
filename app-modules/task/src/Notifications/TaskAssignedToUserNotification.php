@@ -46,7 +46,7 @@ use AidingApp\Notification\Notifications\EmailNotification;
 use AidingApp\Notification\Notifications\DatabaseNotification;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
 use Filament\Notifications\Notification as FilamentNotification;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\EditTask;
+use AidingApp\Task\Filament\Resources\TaskResource\Pages\ListTasks;
 use AidingApp\Notification\Notifications\Concerns\EmailChannelTrait;
 use AidingApp\Notification\Notifications\Concerns\DatabaseChannelTrait;
 
@@ -73,7 +73,7 @@ class TaskAssignedToUserNotification extends BaseNotification implements Databas
 
     public function toDatabase(object $notifiable): array
     {
-        $url = EditTask::getUrl(['record' => $this->task]);
+        $url = ListTasks::getUrl(['tableActionRecord' => $this->task, 'tableAction' => 'view']);
 
         $title = str($this->task->title)->limit();
 

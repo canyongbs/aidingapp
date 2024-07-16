@@ -36,11 +36,12 @@
 
 namespace AidingApp\Task\Filament\Resources\TaskResource\Pages;
 
-use Filament\Actions;
 use Filament\Forms\Form;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 use AidingApp\Task\Filament\Concerns\TaskEditForm;
 use AidingApp\Task\Filament\Resources\TaskResource;
+use AidingApp\Task\Filament\Resources\TaskResource\Components\TaskViewHeaderAction;
 
 class EditTask extends EditRecord
 {
@@ -57,8 +58,9 @@ class EditTask extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\ViewAction::make(),
-            Actions\DeleteAction::make(),
+            TaskViewHeaderAction::make('view')
+                ->modalSubmitAction(false),
+            DeleteAction::make(),
         ];
     }
 }
