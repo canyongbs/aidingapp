@@ -265,7 +265,11 @@ test('EditServiceRequest is gated with proper feature access control', function 
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.*.update');
 
-    $serviceRequest = ServiceRequest::factory()->create();
+    $serviceRequest = ServiceRequest::factory([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Waiting,
+        ])->id,
+    ])->create();
 
     actingAs($user)
         ->get(
