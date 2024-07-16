@@ -48,7 +48,9 @@ use App\Filament\Tables\Columns\IdColumn;
 use Filament\Resources\RelationManagers\RelationManager;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateDirection;
+use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource;
+use Filament\Tables\Actions\Action;
 
 class ServiceRequestUpdatesRelationManager extends RelationManager
 {
@@ -101,7 +103,15 @@ class ServiceRequestUpdatesRelationManager extends RelationManager
             ->filters([
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make(),
+                Tables\Actions\CreateAction::make()
+                    ->visible($this->getOwnerRecord()?->status?->classification == SystemServiceRequestClassification::Closed ? false : true),
+                Action::make('locked_service_request')
+                    ->icon('heroicon-o-lock-closed')
+                    ->color('gray')
+                    ->tooltip('This service request is locked as status is closed.')
+                    ->disabled()
+                    ->visible($this->getOwnerRecord()?->status?->classification == SystemServiceRequestClassification::Closed ? true : false)
+                    ->iconButton(),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make()
