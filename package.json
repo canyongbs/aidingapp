@@ -65,7 +65,7 @@
         "pinia": "^2.1.7",
         "showdown": "^2.1.0",
         "sortablejs": "^1.15.0",
-        "spectaql": "^2.3.0",
+        "spectaql": "^3.0.0",
         "tippy.js": "^6.3.7",
         "vite": "^5.3.1",
         "vue": "^3.3.4",
