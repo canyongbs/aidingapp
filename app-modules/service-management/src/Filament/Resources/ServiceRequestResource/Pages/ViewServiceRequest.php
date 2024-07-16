@@ -49,7 +49,6 @@ use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\ViewEntry;
-use Laravel\Pennant\Feature as PennantFeature;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use AidingApp\Contact\Filament\Resources\ContactResource;
@@ -118,7 +117,6 @@ class ViewServiceRequest extends ViewRecord
                             }),
                         TextEntry::make('time_to_resolution')
                             ->label('Time to Resolution')
-                            ->visible(PennantFeature::active('time_to_resolution'))
                             ->formatStateUsing(function ($state) {
                                 $interval = Carbon::now()->diffAsCarbonInterval(Carbon::now()->addSeconds($state));
                                 $days = $interval->d;
@@ -217,7 +215,7 @@ class ViewServiceRequest extends ViewRecord
                     ->columns(),
                 Section::make('Form Submission Details')
                     ->collapsed()
-                    ->visible(fn (ServiceRequest $record): bool => ! is_null($record->serviceRequestFormSubmission))
+                    ->visible(fn (ServiceRequest $record): bool => !is_null($record->serviceRequestFormSubmission))
                     ->schema([
                         TextEntry::make('serviceRequestFormSubmission.submitted_at')
                             ->dateTime(),

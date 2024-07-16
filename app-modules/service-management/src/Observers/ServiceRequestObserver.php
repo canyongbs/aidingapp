@@ -82,7 +82,6 @@ class ServiceRequestObserver
             $serviceRequest->status_updated_at = now();
 
             if (
-                PennantFeature::active('time_to_resolution') &&
                 $serviceRequest->status->classification === SystemServiceRequestClassification::Closed &&
                 is_null($serviceRequest->time_to_resolution)
             ) {
@@ -112,7 +111,7 @@ class ServiceRequestObserver
             Gate::check(Feature::FeedbackManagement->getGateName()) &&
             $serviceRequest?->priority?->type?->has_enabled_feedback_collection &&
             $serviceRequest?->status?->classification == SystemServiceRequestClassification::Closed &&
-            ! $serviceRequest?->feedback()->count()
+            !$serviceRequest?->feedback()->count()
         ) {
             $serviceRequest->respondent->notify(new SendClosedServiceFeedbackNotification($serviceRequest));
         }
