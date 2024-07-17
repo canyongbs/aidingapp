@@ -58,8 +58,7 @@ class EditTask extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            TaskViewHeaderAction::make('view')
-                ->modalSubmitAction(false),
+            TaskViewHeaderAction::make('view'),
             DeleteAction::make(),
         ];
     }

@@ -65,14 +65,10 @@ class TaskViewHeaderAction extends Action
                 ->action(fn (Task $record) => $record->getStateMachine('status')->transitionTo(TaskStatus::Canceled))
                 ->cancelParentActions()
                 ->hidden(fn (Task $record) => $record->getStateMachine('status')->getStateTransitions()->doesntContain(TaskStatus::Canceled->value) || auth()?->user()?->cannot("task.{$record->id}.update")),
-        ])->infolist($this->taskInfoList());
-    }
-
-    public static function make($name = null): static
-    {
-        return parent::make($name)
+        ])->modalSubmitAction(false)
             ->modalCancelAction(function ($action) {
                 $action->label('Close');
-            });
+            })
+            ->infolist($this->taskInfoList());
     }
 }
