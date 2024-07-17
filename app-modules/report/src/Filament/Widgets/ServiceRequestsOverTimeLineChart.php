@@ -14,8 +14,8 @@ class ServiceRequestsOverTimeLineChart extends ChartReportWidget
 
     protected int | string | array $columnSpan = [
         'sm' => 1,
-        'md' => 4,
-        'lg' => 4,
+        'md' => 2,
+        'lg' => 2,
     ];
 
     protected function getOptions(): array
@@ -36,35 +36,35 @@ class ServiceRequestsOverTimeLineChart extends ChartReportWidget
 
     protected function getData(): array
     {
-        $serviceRequestTotalPerDay = Cache::tags([$this->cacheTag])->remember('service-requests-over-time-line-chart', now()->addHours(24), function (): array {
-            $serviceRequestTotalPerDayData = ServiceRequest::query()
+        $serviceRequestTotalPerMonth = Cache::tags([$this->cacheTag])->remember('service-requests-over-time-line-chart', now()->addHours(24), function (): array {
+            $serviceRequestTotalPerMonthData = ServiceRequest::query()
                 ->toBase()
-                ->selectRaw('DATE(created_at) as date')
+                ->selectRaw('date_trunc(\'month\', created_at) as month')
                 ->selectRaw('COUNT(*) as total')
-                ->where('created_at', '>', now()->subDays(30))
-                ->groupBy('date')
-                ->orderBy('date')
-                ->pluck('total', 'date');
+                ->where('created_at', '>', now()->subYear())
+                ->groupBy('month')
+                ->orderBy('month')
+                ->pluck('total', 'month');
 
-            $serviceRequestTotalPerDayArray = [];
+            $serviceRequestTotalPerMonthArray = [];
 
-            foreach (range(29, 0) as $daysAgo) {
-                $date = Carbon::now()->subDays($daysAgo)->toDateString();
+            foreach (range(11, 0) as $month) {
+                $month = Carbon::now()->subMonths($month);
 
-                $serviceRequestTotalPerDayArray[$date] = $serviceRequestTotalPerDayData[$date] ?? 0;
+                $serviceRequestTotalPerMonthArray[$month->format('M Y')] = $serviceRequestTotalPerMonthData[$month->startOfMonth()->toDateTimeString()] ?? 0;
             }
 
-            return $serviceRequestTotalPerDayArray;
+            return $serviceRequestTotalPerMonthArray;
         });
 
         return [
             'datasets' => [
                 [
                     'label' => 'Service requests',
-                    'data' => array_values($serviceRequestTotalPerDay),
+                    'data' => array_values($serviceRequestTotalPerMonth),
                 ],
             ],
-            'labels' => array_keys($serviceRequestTotalPerDay),
+            'labels' => array_keys($serviceRequestTotalPerMonth),
         ];
     }
 
