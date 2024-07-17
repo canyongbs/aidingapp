@@ -6,9 +6,9 @@ use Carbon\Carbon;
 use Filament\Tables\Table;
 use Livewire\Attributes\On;
 use Filament\Tables\Columns\TextColumn;
-use Illuminate\Database\Eloquent\Builder;
-use AidingApp\Contact\Models\Organization;
 use Filament\Widgets\TableWidget as BaseWidget;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use Filament\Tables\Grouping\Group;
 
 class ServiceRequestsByOrganizationTable extends BaseWidget
 {
@@ -42,23 +42,18 @@ class ServiceRequestsByOrganizationTable extends BaseWidget
         return $table
             ->query(
                 function () {
-                    return Organization::select('organizations.*')
-                        ->selectRaw('COALESCE(SUM(sr.time_to_resolution), 0) / NULLIF(SUM(CASE WHEN sr.id IS NOT NULL THEN 1 END), 0) AS avg_time_to_resolution')
-                        ->leftJoin('contacts AS c', 'organizations.id', '=', 'c.organization_id')
-                        ->leftJoin('service_requests AS sr', 'c.id', '=', 'sr.respondent_id')
-                        ->groupBy('organizations.id')
-                        ->withCount(['contacts as contacts_service_requests_count' => function (Builder $query) {
-                            $query->has('serviceRequests');
-                        }])
-                        ->orderBy('contacts_service_requests_count', 'desc');
+                    return ServiceRequest::whereHas('respondent.organizations')
+                        ->with(['respondent.organizations']);
                 }
             )
             ->columns([
-                TextColumn::make('name')
+                TextColumn::make('respondent.organizations.name')
                     ->label('Organization name'),
-                TextColumn::make('contacts_service_requests_count')
-                    ->label('Number of requests'),
-                TextColumn::make('contacts_service_requests_avg_time_to_resolution')
+                TextColumn::make('title')
+                    ->label('Service request name'),
+                TextColumn::make('priority.type.name')
+                    ->label('Service request type'),
+                TextColumn::make('time_to_resolution')
                     ->formatStateUsing(function ($state) {
                         $interval = Carbon::now()->diffAsCarbonInterval(Carbon::now()->addSeconds($state));
                         $days = $interval->d;
@@ -67,7 +62,12 @@ class ServiceRequestsByOrganizationTable extends BaseWidget
 
                         return "{$days}d {$hours}h {$minutes}m";
                     })
-                    ->label('Average resolution time'),
+                    ->label('Resolution time'),
+            ])
+            ->groups([
+                Group::make('respondent.organizations.name')
+                    ->label('Organization')
+                    ->collapsible(),
             ])
             ->paginated([10]);
     }
