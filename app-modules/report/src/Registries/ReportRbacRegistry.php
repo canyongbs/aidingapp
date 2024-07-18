@@ -46,13 +46,13 @@ class ReportRbacRegistry implements RegistersRolesAndPermissions
         $roleRegistry = app(AuthorizationRoleRegistry::class);
 
         $roleRegistry->registerApiRoles(
-            module: '',
-            path: ''
+            module: 'report',
+            path: 'roles/api'
         );
 
         $roleRegistry->registerWebRoles(
-            module: '',
-            path: ''
+            module: 'report',
+            path: 'roles/web'
         );
     }
 }
