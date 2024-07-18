@@ -9,7 +9,6 @@ use AidingApp\Report\Filament\Widgets\ServiceRequestsStats;
 use AidingApp\Report\Filament\Widgets\RecentServiceRequestsTable;
 use AidingApp\Report\Filament\Widgets\TopServiceRequestTypesTable;
 use AidingApp\Report\Filament\Widgets\ServiceRequestsOverTimeLineChart;
-use AidingApp\Report\Filament\Widgets\ServiceRequestsByOrganizationTable;
 use AidingApp\Report\Filament\Widgets\ServiceRequestStatusDistributionDonutChart;
 
 class ServiceRequests extends Dashboard
@@ -47,7 +46,6 @@ class ServiceRequests extends Dashboard
             ServiceRequestsOverTimeLineChart::make(['cacheTag' => $this->cacheTag]),
             RecentServiceRequestsTable::make(['cacheTag' => $this->cacheTag]),
             TopServiceRequestTypesTable::make(['cacheTag' => $this->cacheTag]),
-            ServiceRequestsByOrganizationTable::make(['cacheTag' => $this->cacheTag]),
         ];
     }
 
