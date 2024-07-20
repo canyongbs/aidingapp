@@ -268,7 +268,7 @@ test('EditServiceRequest is gated with proper feature access control', function 
     $serviceRequest = ServiceRequest::factory([
         'status_id' => ServiceRequestStatus::factory()->create([
             'classification' => SystemServiceRequestClassification::Waiting,
-        ])->id,
+        ])->getKey(),
     ])->create();
 
     actingAs($user)

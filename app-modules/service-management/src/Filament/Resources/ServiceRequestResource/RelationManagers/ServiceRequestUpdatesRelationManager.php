@@ -50,7 +50,11 @@ use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateDirection;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource;
+use Filament\Actions\CreateAction;
+use Filament\Actions\ViewAction;
 use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Tables\Actions\DeleteBulkAction;
 
 class ServiceRequestUpdatesRelationManager extends RelationManager
 {
@@ -103,7 +107,7 @@ class ServiceRequestUpdatesRelationManager extends RelationManager
             ->filters([
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make()
+                CreateAction::make()
                     ->visible($this->getOwnerRecord()?->status?->classification == SystemServiceRequestClassification::Closed ? false : true),
                 Action::make('locked_service_request')
                     ->icon('heroicon-o-lock-closed')
@@ -114,12 +118,12 @@ class ServiceRequestUpdatesRelationManager extends RelationManager
                     ->iconButton(),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make()
+                ViewAction::make()
                     ->url(fn (ServiceRequestUpdate $serviceRequestUpdate) => ServiceRequestUpdateResource::getUrl('view', ['record' => $serviceRequestUpdate])),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }

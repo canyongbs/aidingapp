@@ -62,7 +62,7 @@ test('A successful action on the EditServiceRequestUpdate page', function () {
     $serviceRequest = ServiceRequest::factory([
         'status_id' => ServiceRequestStatus::factory()->create([
             'classification' => SystemServiceRequestClassification::Open,
-        ])->id,
+        ])->getKey(),
     ]);
     
     $serviceRequestUpdate = ServiceRequestUpdate::factory()
@@ -96,7 +96,7 @@ test('EditServiceRequestUpdate requires valid data', function ($data, $errors) {
     $serviceRequest = ServiceRequest::factory([
         'status_id' => ServiceRequestStatus::factory()->create([
             'classification' => SystemServiceRequestClassification::Open,
-        ])->id,
+        ])->getKey(),
     ]);
     
     $serviceRequestUpdate = ServiceRequestUpdate::factory()
@@ -138,7 +138,7 @@ test('EditServiceRequestUpdate is gated with proper access control', function ()
     $serviceRequest = ServiceRequest::factory([
         'status_id' => ServiceRequestStatus::factory()->create([
             'classification' => SystemServiceRequestClassification::Open,
-        ])->id,
+        ])->getKey(),
     ]);
     
     $serviceRequestUpdate = ServiceRequestUpdate::factory()
@@ -197,7 +197,7 @@ test('EditServiceRequestUpdate is gated with proper feature access control', fun
     $serviceRequest = ServiceRequest::factory([
         'status_id' => ServiceRequestStatus::factory()->create([
             'classification' => SystemServiceRequestClassification::Open,
-        ])->id,
+        ])->getKey(),
     ]);
     
     $serviceRequestUpdate = ServiceRequestUpdate::factory()
