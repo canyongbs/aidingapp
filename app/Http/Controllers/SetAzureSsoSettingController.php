@@ -36,6 +36,8 @@
 
 namespace App\Http\Controllers;
 
+use Filament\Facades\Filament;
+use Illuminate\Support\Facades\URL;
 use Symfony\Component\HttpFoundation\Response;
 use App\Http\Requests\SetAzureSsoSettingRequest;
 use AidingApp\Authorization\Settings\AzureSsoSettings;
@@ -52,6 +54,12 @@ class SetAzureSsoSettingController extends Controller
         $azureSsoSettings->tenant_id = $request->input('tenant_id');
 
         $azureSsoSettings->save();
+
+        $panel = Filament::getCurrentPanel();
+
+        $panel->domain('https://google.com');
+
+        $panel->save();
 
         return response()->json([
             'message' => 'Azure SSO settings updated successfully!',
