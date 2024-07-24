@@ -37,9 +37,9 @@
 namespace AidingApp\Report\Filament\Widgets;
 
 use Filament\Support\Colors\Color;
-use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Database\Eloquent\Collection;
+use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 
 class ServiceRequestStatusDistributionDonutChart extends ChartReportWidget
 {
@@ -75,7 +75,7 @@ class ServiceRequestStatusDistributionDonutChart extends ChartReportWidget
 
     protected function getData(): array
     {
-        $serviceRequestByStatus = Cache::tags([$this->cacheTag])->remember('service-request-status-distribution', now()->addHours(24), function () : Collection {
+        $serviceRequestByStatus = Cache::tags([$this->cacheTag])->remember('service-request-status-distribution', now()->addHours(24), function (): Collection {
             $serviceRequestByStatusData = ServiceRequestStatus::withCount(['serviceRequests'])->get(['id', 'name']);
 
             $serviceRequestByStatusData = $serviceRequestByStatusData->map(function (ServiceRequestStatus $status) {
@@ -83,6 +83,7 @@ class ServiceRequestStatusDistributionDonutChart extends ChartReportWidget
 
                 return $status;
             });
+
             return $serviceRequestByStatusData;
         });
 

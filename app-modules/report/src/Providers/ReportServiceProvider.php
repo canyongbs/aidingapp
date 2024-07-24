@@ -37,11 +37,11 @@
 namespace AidingApp\Report\Providers;
 
 use Filament\Panel;
+use AidingApp\Report\ReportPlugin;
 use Illuminate\Support\ServiceProvider;
+use AidingApp\Report\Registries\ReportRbacRegistry;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use AidingApp\Authorization\AuthorizationRoleRegistry;
-use AidingApp\Report\ReportPlugin;
-use AidingApp\Report\Registries\ReportRbacRegistry;
 
 class ReportServiceProvider extends ServiceProvider
 {
