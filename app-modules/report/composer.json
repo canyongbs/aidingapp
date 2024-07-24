@@ -1,0 +1,26 @@
+{
+  "name": "canyon-gbs/report",
+  "description": "",
+  "type": "library",
+  "version": "1.0",
+  "license": "proprietary",
+  "require": {
+    "filament/filament": "^3.0.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "AidingApp\\Report\\": "src/",
+      "AidingApp\\Report\\Tests\\": "tests/",
+      "AidingApp\\Report\\Database\\Factories\\": "database/factories/",
+      "AidingApp\\Report\\Database\\Seeders\\": "database/seeders/"
+    }
+  },
+  "minimum-stability": "dev",
+  "extra": {
+    "laravel": {
+      "providers": [
+        "AidingApp\\Report\\Providers\\ReportServiceProvider"
+      ]
+    }
+  }
+}

@@ -44,6 +44,7 @@
         "canyon-gbs/aiding-app-theme": "*",
         "canyon-gbs/aiding-app-timeline": "*",
         "canyon-gbs/aiding-app-webhook": "*",
+        "canyon-gbs/report": "*",
         "composer/composer": "^2.7",
         "defectivecode/laravel-sqs-extended": "^1.0",
         "fakerphp/faker": "^1.23",

@@ -34,25 +34,29 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Pages;
+namespace AidingApp\Report\Filament\Widgets;
 
-use Filament\Pages\Page;
+use Livewire\Attributes\On;
+use Livewire\Attributes\Locked;
+use Filament\Widgets\StatsOverviewWidget;
 
-class ReportLibrary extends Page
+abstract class StatsOverviewReportWidget extends StatsOverviewWidget
 {
-    protected static ?string $navigationGroup = 'Report Center';
+    #[Locked]
+    public string $cacheTag;
 
-    protected static ?int $navigationSort = 30;
+    protected static ?string $pollingInterval = null;
 
-    protected static ?string $navigationLabel = 'Report Library';
+    protected static bool $isLazy = false;
 
-    protected static string $view = 'filament.pages.coming-soon';
-
-    public static function canAccess(): bool
+    public function mount(string $cacheTag)
     {
-        /** @var User $user */
-        $user = auth()->user();
+        $this->cacheTag = $cacheTag;
+    }
 
-        return $user->can('report-library.view-any');
+    #[On('refresh-widgets')]
+    public function refreshWidget()
+    {
+        $this->dispatch('$refresh');
     }
 }

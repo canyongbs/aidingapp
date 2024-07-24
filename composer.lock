@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "786da39c90665be0efa1bd558409d30b",
+    "content-hash": "31517ba4f2bb50a34df98dc5cb59d64b",
     "packages": [
         {
             "name": "amphp/amp",
@@ -2499,6 +2499,41 @@
                     "AidingApp\\Webhook\\Tests\\": "tests/",
                     "AidingApp\\Webhook\\Database\\Factories\\": "database/factories/",
                     "AidingApp\\Webhook\\Database\\Seeders\\": "database/seeders/"
+                }
+            },
+            "license": [
+                "proprietary"
+            ],
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "canyon-gbs/report",
+            "version": "1.0",
+            "dist": {
+                "type": "path",
+                "url": "app-modules/report",
+                "reference": "05ef091931f9e6c2ae3597519722bbc498feeba0"
+            },
+            "require": {
+                "filament/filament": "^3.0.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "AidingApp\\Report\\Providers\\ReportServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "AidingApp\\Report\\": "src/",
+                    "AidingApp\\Report\\Tests\\": "tests/",
+                    "AidingApp\\Report\\Database\\Factories\\": "database/factories/",
+                    "AidingApp\\Report\\Database\\Seeders\\": "database/seeders/"
                 }
             },
             "license": [
