@@ -119,7 +119,7 @@ class ListKnowledgeBaseItems extends ListRecords
             ->actions([
                 EditAction::make(),
                 ReplicateAction::make()
-                    ->label('Replicate')
+                    ->label('Duplicate')
                     ->form([
                         Section::make()
                             ->schema([
@@ -214,7 +214,7 @@ class ListKnowledgeBaseItems extends ListRecords
     {
         return [
             CreateAction::make()
-                ->disabled(fn (): bool => ! auth()->user()->can('knowledge_base_item.create'))
+                ->disabled(fn (): bool => !auth()->user()->can('knowledge_base_item.create'))
                 ->label('New Article')
                 ->modalHeading('New Article')
                 ->createAnother(false)
