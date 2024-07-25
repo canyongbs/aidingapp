@@ -45,13 +45,9 @@ class ServiceRequestStatusDistributionDonutChart extends ChartReportWidget
 {
     protected static ?string $heading = 'Request Status Distribution';
 
-    protected static ?string $maxHeight = '250px';
+    protected static ?string $maxHeight = '200px';
 
-    protected int | string | array $columnSpan = [
-        'sm' => 1,
-        'md' => 2,
-        'lg' => 2,
-    ];
+    protected int | string | array $columnSpan = 'full';
 
     protected function getOptions(): array
     {
