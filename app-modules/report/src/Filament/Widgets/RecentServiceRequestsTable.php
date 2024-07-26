@@ -97,6 +97,6 @@ class RecentServiceRequestsTable extends BaseWidget
                 TextColumn::make('assignedTo.user.name')
                     ->label('Assigned to'),
             ])
-            ->paginated([10]);
+            ->paginated([5]);
     }
 }

@@ -96,6 +96,6 @@ class TopServiceRequestTypesTable extends BaseWidget
                     })
                     ->label('Average resolution time'),
             ])
-            ->paginated([10]);
+            ->paginated([5]);
     }
 }
