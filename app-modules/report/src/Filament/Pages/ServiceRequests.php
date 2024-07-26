@@ -51,7 +51,7 @@ class ServiceRequests extends Dashboard
 
     protected static ?string $cluster = ReportLibrary::class;
 
-    protected static ?string $navigationGroup = 'Service Requests';
+    protected static ?string $navigationGroup = 'Service Management';
 
     protected static ?string $navigationLabel = 'Service Requests';
 
