@@ -119,7 +119,7 @@ class ListKnowledgeBaseItems extends ListRecords
             ->actions([
                 EditAction::make(),
                 ReplicateAction::make()
-                    ->label('Replicate')
+                    ->label('Duplicate')
                     ->form([
                         Section::make()
                             ->schema([
