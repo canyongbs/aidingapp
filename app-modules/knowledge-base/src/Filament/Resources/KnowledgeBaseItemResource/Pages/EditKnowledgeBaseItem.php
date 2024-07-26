@@ -109,7 +109,7 @@ class EditKnowledgeBaseItem extends EditRecord
     protected function getFormActions(): array
     {
         return [
-            $this->getSubmitFormAction()->label('Save Article Details'),
+            $this->getSubmitFormAction()->label('Save'),
         ];
     }
 
@@ -120,9 +120,9 @@ class EditKnowledgeBaseItem extends EditRecord
                 ->action('save')
                 ->button()
                 ->color('primary')
-                ->label('Save Article Details'),
+                ->label('Save'),
             EditAction::make()
-                ->label('Edit Article Properties')
+                ->label('Article Information')
                 ->button()
                 ->outlined()
                 ->record($this->record)
