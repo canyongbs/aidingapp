@@ -68,7 +68,8 @@ class ViewAsset extends ViewRecord
                         TextEntry::make('purchase_age')
                             ->label('Device Age')
                             ->helperText(fn (Asset $record) => $record->purchase_date->format('M j, Y')),
-                    ]),
+                    ])
+                    ->columns(),
             ]);
     }
 
