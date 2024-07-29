@@ -49,25 +49,24 @@ use function Pest\Laravel\assertDatabaseHas;
 use function PHPUnit\Framework\assertEquals;
 
 use AidingApp\Authorization\Enums\LicenseType;
-use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource;
 use AidingApp\ServiceManagement\Tests\RequestFactories\EditServiceRequestUpdateRequestFactory;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource\Pages\EditServiceRequestUpdate;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
-use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 
 test('A successful action on the EditServiceRequestUpdate page', function () {
-
     $serviceRequest = ServiceRequest::factory([
         'status_id' => ServiceRequestStatus::factory()->create([
             'classification' => SystemServiceRequestClassification::Open,
         ])->getKey(),
     ]);
-    
+
     $serviceRequestUpdate = ServiceRequestUpdate::factory()
-                                ->for($serviceRequest,'serviceRequest')
-                                ->create();
+        ->for($serviceRequest, 'serviceRequest')
+        ->create();
 
     asSuperAdmin()
         ->get(
@@ -98,10 +97,10 @@ test('EditServiceRequestUpdate requires valid data', function ($data, $errors) {
             'classification' => SystemServiceRequestClassification::Open,
         ])->getKey(),
     ]);
-    
+
     $serviceRequestUpdate = ServiceRequestUpdate::factory()
-                                ->for($serviceRequest,'serviceRequest')
-                                ->create();
+        ->for($serviceRequest, 'serviceRequest')
+        ->create();
 
     asSuperAdmin();
 
@@ -140,10 +139,10 @@ test('EditServiceRequestUpdate is gated with proper access control', function ()
             'classification' => SystemServiceRequestClassification::Open,
         ])->getKey(),
     ]);
-    
+
     $serviceRequestUpdate = ServiceRequestUpdate::factory()
-                                ->for($serviceRequest,'serviceRequest')
-                                ->create();
+        ->for($serviceRequest, 'serviceRequest')
+        ->create();
 
     actingAs($user)
         ->get(
@@ -199,10 +198,10 @@ test('EditServiceRequestUpdate is gated with proper feature access control', fun
             'classification' => SystemServiceRequestClassification::Open,
         ])->getKey(),
     ]);
-    
+
     $serviceRequestUpdate = ServiceRequestUpdate::factory()
-                                ->for($serviceRequest,'serviceRequest')
-                                ->create();
+        ->for($serviceRequest, 'serviceRequest')
+        ->create();
 
     actingAs($user)
         ->get(

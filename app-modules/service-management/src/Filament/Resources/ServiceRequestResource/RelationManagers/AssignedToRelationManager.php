@@ -80,7 +80,7 @@ class AssignedToRelationManager extends RelationManager
             ])
             ->paginated(false)
             ->headerActions([
-              Action::make('locked_service_request')
+                Action::make('locked_service_request')
                     ->icon('heroicon-o-lock-closed')
                     ->color('gray')
                     ->tooltip('This service request is locked as status is closed.')
