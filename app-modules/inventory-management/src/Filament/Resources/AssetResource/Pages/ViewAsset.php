@@ -39,6 +39,7 @@ namespace AidingApp\InventoryManagement\Filament\Resources\AssetResource\Pages;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use AidingApp\InventoryManagement\Models\Asset;
 use AidingApp\InventoryManagement\Filament\Resources\AssetResource;
@@ -53,18 +54,22 @@ class ViewAsset extends ViewRecord
     {
         return $infolist
             ->schema([
-                TextEntry::make('serial_number'),
-                TextEntry::make('name'),
-                TextEntry::make('description'),
-                TextEntry::make('type.name')
-                    ->label('Type'),
-                TextEntry::make('location.name')
-                    ->label('Location'),
-                TextEntry::make('status.name')
-                    ->label('Status'),
-                TextEntry::make('purchase_age')
-                    ->label('Device Age')
-                    ->helperText(fn (Asset $record) => $record->purchase_date->format('M j, Y')),
+                Section::make()
+                    ->schema([
+                        TextEntry::make('serial_number'),
+                        TextEntry::make('name'),
+                        TextEntry::make('description'),
+                        TextEntry::make('type.name')
+                            ->label('Type'),
+                        TextEntry::make('location.name')
+                            ->label('Location'),
+                        TextEntry::make('status.name')
+                            ->label('Status'),
+                        TextEntry::make('purchase_age')
+                            ->label('Device Age')
+                            ->helperText(fn (Asset $record) => $record->purchase_date->format('M j, Y')),
+                    ])
+                    ->columns(),
             ]);
     }
 
