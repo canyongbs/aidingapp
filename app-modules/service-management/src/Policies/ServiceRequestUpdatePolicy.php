@@ -43,6 +43,7 @@ use Illuminate\Support\Facades\Gate;
 use AidingApp\Contact\Models\Contact;
 use App\Support\FeatureAccessResponse;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 
 class ServiceRequestUpdatePolicy
 {
@@ -87,6 +88,10 @@ class ServiceRequestUpdatePolicy
 
     public function update(Authenticatable $authenticatable, ServiceRequestUpdate $serviceRequestUpdate): Response
     {
+        if ($serviceRequestUpdate->serviceRequest?->status?->classification === SystemServiceRequestClassification::Closed) {
+            return Response::deny('Closed service request\'s updates cannot be edited.');
+        }
+
         return $authenticatable->canOrElse(
             abilities: ['service_request_update.*.update', "service_request_update.{$serviceRequestUpdate->id}.update"],
             denyResponse: 'You do not have permissions to update this service request update.'

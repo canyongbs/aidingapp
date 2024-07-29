@@ -49,13 +49,24 @@ use function Pest\Laravel\assertDatabaseHas;
 use function PHPUnit\Framework\assertEquals;
 
 use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource;
 use AidingApp\ServiceManagement\Tests\RequestFactories\EditServiceRequestUpdateRequestFactory;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource\Pages\EditServiceRequestUpdate;
 
 test('A successful action on the EditServiceRequestUpdate page', function () {
-    $serviceRequestUpdate = ServiceRequestUpdate::factory()->create();
+    $serviceRequest = ServiceRequest::factory([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ])->getKey(),
+    ]);
+
+    $serviceRequestUpdate = ServiceRequestUpdate::factory()
+        ->for($serviceRequest, 'serviceRequest')
+        ->create();
 
     asSuperAdmin()
         ->get(
@@ -81,7 +92,15 @@ test('A successful action on the EditServiceRequestUpdate page', function () {
 });
 
 test('EditServiceRequestUpdate requires valid data', function ($data, $errors) {
-    $serviceRequestUpdate = ServiceRequestUpdate::factory()->create();
+    $serviceRequest = ServiceRequest::factory([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ])->getKey(),
+    ]);
+
+    $serviceRequestUpdate = ServiceRequestUpdate::factory()
+        ->for($serviceRequest, 'serviceRequest')
+        ->create();
 
     asSuperAdmin();
 
@@ -115,7 +134,15 @@ test('EditServiceRequestUpdate requires valid data', function ($data, $errors) {
 test('EditServiceRequestUpdate is gated with proper access control', function () {
     $user = User::factory()->licensed(LicenseType::cases())->create();
 
-    $serviceRequestUpdate = ServiceRequestUpdate::factory()->create();
+    $serviceRequest = ServiceRequest::factory([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ])->getKey(),
+    ]);
+
+    $serviceRequestUpdate = ServiceRequestUpdate::factory()
+        ->for($serviceRequest, 'serviceRequest')
+        ->create();
 
     actingAs($user)
         ->get(
@@ -166,7 +193,15 @@ test('EditServiceRequestUpdate is gated with proper feature access control', fun
     $user->givePermissionTo('service_request_update.view-any');
     $user->givePermissionTo('service_request_update.*.update');
 
-    $serviceRequestUpdate = ServiceRequestUpdate::factory()->create();
+    $serviceRequest = ServiceRequest::factory([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ])->getKey(),
+    ]);
+
+    $serviceRequestUpdate = ServiceRequestUpdate::factory()
+        ->for($serviceRequest, 'serviceRequest')
+        ->create();
 
     actingAs($user)
         ->get(

@@ -52,6 +52,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use Filament\Resources\RelationManagers\RelationManager;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
+use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 
 class AssignedToRelationManager extends RelationManager
 {
@@ -79,7 +80,15 @@ class AssignedToRelationManager extends RelationManager
             ])
             ->paginated(false)
             ->headerActions([
+                Action::make('locked_service_request')
+                    ->icon('heroicon-o-lock-closed')
+                    ->color('gray')
+                    ->tooltip('This service request is locked as status is closed.')
+                    ->disabled()
+                    ->visible($this->getOwnerRecord()?->status?->classification == SystemServiceRequestClassification::Closed ? true : false)
+                    ->iconButton(),
                 Action::make('reassign-service-request')
+                    ->visible($this->getOwnerRecord()?->status?->classification == SystemServiceRequestClassification::Closed ? false : true)
                     ->label('Reassign Service Request')
                     ->color('gray')
                     ->action(fn (array $data) => $this->getOwnerRecord()->assignments()->create([
