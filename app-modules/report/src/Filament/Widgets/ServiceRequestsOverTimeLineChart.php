@@ -40,17 +40,11 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 
-class ServiceRequestsOverTimeLineChart extends ChartReportWidget
+class ServiceRequestsOverTimeLineChart extends LineChartReportWidget
 {
     protected static ?string $heading = 'Requests Over Time';
 
-    protected static ?string $maxHeight = '250px';
-
-    protected int | string | array $columnSpan = [
-        'sm' => 1,
-        'md' => 2,
-        'lg' => 2,
-    ];
+    protected int | string | array $columnSpan = 'full';
 
     protected function getOptions(): array
     {
@@ -100,10 +94,5 @@ class ServiceRequestsOverTimeLineChart extends ChartReportWidget
             ],
             'labels' => array_keys($serviceRequestTotalPerMonth),
         ];
-    }
-
-    protected function getType(): string
-    {
-        return 'line';
     }
 }
