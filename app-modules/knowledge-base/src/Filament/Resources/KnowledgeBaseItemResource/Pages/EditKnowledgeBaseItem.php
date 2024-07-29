@@ -46,10 +46,13 @@ use Filament\Resources\Pages\EditRecord;
 use Filament\Actions\Action as BaseAction;
 use Filament\Forms\Components\Actions\Action;
 use App\Filament\Forms\Components\TiptapEditor;
+use App\Filament\Pages\Concerns\BreadcrumbCharacterLimit;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource;
 
 class EditKnowledgeBaseItem extends EditRecord
 {
+    use BreadcrumbCharacterLimit;
+
     protected static string $resource = KnowledgeBaseItemResource::class;
 
     public function form(Form $form): Form

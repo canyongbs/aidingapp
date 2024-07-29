@@ -42,7 +42,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource\Pages\EditKnowledgeBaseItem;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource\Pages\ViewKnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource\Pages\ListKnowledgeBaseItems;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource\Pages\CreateKnowledgeBaseItem;
 
@@ -99,7 +98,6 @@ class KnowledgeBaseItemResource extends Resource
     {
         return [
             'index' => ListKnowledgeBaseItems::route('/'),
-            'view' => ViewKnowledgeBaseItem::route('/{record}'),
             'edit' => EditKnowledgeBaseItem::route('/{record}/edit'),
         ];
     }
