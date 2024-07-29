@@ -204,7 +204,6 @@
                 </div>
                 <div v-else>
                     <main class="flex flex-col gap-8">
-                        <Breadcrumbs :currentCrumb="category.name"></Breadcrumbs>
                         <div v-if="searchQuery || selectedTags.length > 0" class="flex flex-col gap-6">
                             <SearchResults
                                 :searchQuery="searchQuery"
@@ -214,29 +213,32 @@
                             </SearchResults>
                         </div>
                         <div v-else class="flex flex-col gap-6">
-                            <h2 class="text-2xl font-bold text-primary-950">
-                                {{ category.name }}
-                            </h2>
+                            <Breadcrumbs :currentCrumb="category.name"></Breadcrumbs>
+                            <div class="flex flex-col gap-6">
+                                <h2 class="text-2xl font-bold text-primary-950">
+                                    {{ category.name }}
+                                </h2>
 
-                            <div>
-                                <div
-                                    class="flex flex-col divide-y ring-1 ring-black/5 shadow-sm px-3 pt-3 pb-1 rounded bg-white"
-                                >
-                                    <h3 class="text-lg font-semibold text-gray-800 px-3 pt-1 pb-3">Articles</h3>
+                                <div>
+                                    <div
+                                        class="flex flex-col divide-y ring-1 ring-black/5 shadow-sm px-3 pt-3 pb-1 rounded bg-white"
+                                    >
+                                        <h3 class="text-lg font-semibold text-gray-800 px-3 pt-1 pb-3">Articles</h3>
 
-                                    <div v-if="articles.length > 0">
-                                        <ul role="list" class="divide-y">
-                                            <li v-for="article in articles" :key="article.id">
-                                                <Article :article="article" />
-                                            </li>
-                                        </ul>
-                                    </div>
-                                    <div v-else class="p-3 flex items-start gap-2">
-                                        <XMarkIcon class="h-5 w-5 text-gray-400" />
+                                        <div v-if="articles.length > 0">
+                                            <ul role="list" class="divide-y">
+                                                <li v-for="article in articles" :key="article.id">
+                                                    <Article :article="article" />
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div v-else class="p-3 flex items-start gap-2">
+                                            <XMarkIcon class="h-5 w-5 text-gray-400" />
 
-                                        <p class="text-gray-600 text-sm font-medium">
-                                            No articles found in this category.
-                                        </p>
+                                            <p class="text-gray-600 text-sm font-medium">
+                                                No articles found in this category.
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
