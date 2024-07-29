@@ -95,9 +95,4 @@ class ServiceRequestsOverTimeLineChart extends LineChartReportWidget
             'labels' => array_keys($serviceRequestTotalPerMonth),
         ];
     }
-
-    protected function getType(): string
-    {
-        return 'line';
-    }
 }
