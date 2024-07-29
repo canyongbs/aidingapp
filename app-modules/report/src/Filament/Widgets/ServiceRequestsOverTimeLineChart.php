@@ -40,11 +40,9 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 
-class ServiceRequestsOverTimeLineChart extends ChartReportWidget
+class ServiceRequestsOverTimeLineChart extends LineChartReportWidget
 {
     protected static ?string $heading = 'Requests Over Time';
-
-    protected static ?string $maxHeight = '200px';
 
     protected int | string | array $columnSpan = 'full';
 
