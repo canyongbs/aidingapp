@@ -40,9 +40,9 @@ use Filament\Clusters\Cluster;
 
 class UsageAuditing extends Cluster
 {
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+  protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
-    protected static ?string $navigationGroup = 'Report Center';
+  protected static ?string $navigationGroup = 'Report Center';
 
-    protected static ?int $navigationSort = 30;
+  protected static ?int $navigationSort = 2;
 }

@@ -40,9 +40,9 @@ use Filament\Clusters\Cluster;
 
 class ReportLibrary extends Cluster
 {
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+  protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
-    protected static ?string $navigationGroup = 'Report Center';
+  protected static ?string $navigationGroup = 'Report Center';
 
-    protected static ?int $navigationSort = 40;
+  protected static ?int $navigationSort = 1;
 }

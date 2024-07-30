@@ -44,47 +44,47 @@ use ShuvroRoy\FilamentSpatieLaravelHealth\Pages\HealthCheckResults;
 
 class ProductHealth extends HealthCheckResults
 {
-    public static function getNavigationLabel(): string
-    {
-        return 'Product Health';
-    }
+  public static function getNavigationLabel(): string
+  {
+    return 'Product Health';
+  }
 
-    public function getHeading(): string | Htmlable
-    {
-        return 'Product Health';
-    }
+  public function getHeading(): string | Htmlable
+  {
+    return 'Product Health';
+  }
 
-    public static function getNavigationGroup(): ?string
-    {
-        return 'Report Center';
-    }
+  public static function getNavigationGroup(): ?string
+  {
+    return 'Report Center';
+  }
 
-    public static function getNavigationSort(): ?int
-    {
-        return 20;
-    }
+  public static function getNavigationSort(): ?int
+  {
+    return 3;
+  }
 
-    public static function getNavigationBadge(): ?string
-    {
-        $count = app(ResultStore::class)
-            ->latestResults()
-            ?->storedCheckResults
-            ->filter(fn ($check) => ! in_array($check->status, [Status::ok()->value, Status::skipped()->value]))
-            ->count();
+  public static function getNavigationBadge(): ?string
+  {
+    $count = app(ResultStore::class)
+      ->latestResults()
+      ?->storedCheckResults
+      ->filter(fn ($check) => !in_array($check->status, [Status::ok()->value, Status::skipped()->value]))
+      ->count();
 
-        return $count > 0 ? $count : null;
-    }
+    return $count > 0 ? $count : null;
+  }
 
-    public static function getNavigationBadgeColor(): string | array | null
-    {
-        return 'danger';
-    }
+  public static function getNavigationBadgeColor(): string | array | null
+  {
+    return 'danger';
+  }
 
-    public static function canAccess(): bool
-    {
-        /** @var User $user */
-        $user = auth()->user();
+  public static function canAccess(): bool
+  {
+    /** @var User $user */
+    $user = auth()->user();
 
-        return $user->can('authorization.view_product_health_dashboard');
-    }
+    return $user->can('authorization.view_product_health_dashboard');
+  }
 }
