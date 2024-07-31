@@ -57,7 +57,6 @@ use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\ReplicateAction;
 use Filament\Tables\Actions\DeleteBulkAction;
-use App\Support\MediaEncoding\TiptapMediaEncoder;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
@@ -195,8 +194,9 @@ class ListKnowledgeBaseItems extends ListRecords
                             ]);
                         }
 
-                        // TODO: Fix when we rename 'solution' to match the change in the column name
-                        $replica->article_details = TiptapMediaEncoder::copyMediaItemsToModel($replica->article_details, $replica, 'solution');
+                        $replica->article_details = tiptap_converter()
+                            ->record($record, 'article_details')
+                            ->copyImagesToNewRecord($replica->article_details, $replica, disk: 's3-public');
                         $replica->save();
                     })
                     ->excludeAttributes(['views_count', 'upvotes_count', 'my_upvotes_count'])

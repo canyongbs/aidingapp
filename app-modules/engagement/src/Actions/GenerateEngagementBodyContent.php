@@ -34,42 +34,20 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Forms\Components;
+namespace AidingApp\Engagement\Actions;
 
-use App\Filament\Actions\MediaAction;
-use App\Support\MediaEncoding\TiptapMediaEncoder;
-use FilamentTiptapEditor\TiptapEditor as BaseTiptapEditor;
+use Illuminate\Support\HtmlString;
+use Illuminate\Database\Eloquent\Model;
 
-class TiptapEditor extends BaseTiptapEditor
+class GenerateEngagementBodyContent
 {
-    protected function setUp(): void
+    public function __invoke(string|array $content, array $mergeData, Model $record, string $recordAttribute): HtmlString
     {
-        $this->mediaAction = MediaAction::class;
+        $content = tiptap_converter()
+            ->mergeTagsMap($mergeData)
+            ->record($record, $recordAttribute)
+            ->asHTML($content);
 
-        parent::setUp();
-
-        $this->afterStateHydrated(function (BaseTiptapEditor $component, string | array | null $state) {
-            if (! $state) {
-                return;
-            }
-
-            $component->state(TiptapMediaEncoder::decode($state));
-        });
-
-        $this->dehydrateStateUsing(function (BaseTiptapEditor $component, string | array | null $state) {
-            $state = TiptapMediaEncoder::encode($component->getDisk(), $state);
-
-            $component->state($state);
-
-            if ($state && $this->expectsJSON()) {
-                return $component->getJSON();
-            }
-
-            if ($state && $this->expectsText()) {
-                return $component->getText();
-            }
-
-            return $state;
-        });
+        return str($content)->sanitizeHtml()->toHtmlString();
     }
 }

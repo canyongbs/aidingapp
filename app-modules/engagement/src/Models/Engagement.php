@@ -38,13 +38,16 @@ namespace AidingApp\Engagement\Models;
 
 use App\Models\User;
 use App\Models\BaseModel;
+use Spatie\MediaLibrary\HasMedia;
 use Illuminate\Support\Collection;
+use Illuminate\Support\HtmlString;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Timeline\Models\Timeline;
 use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Contracts\Auditable;
 use Illuminate\Database\Eloquent\Builder;
 use App\Models\Scopes\LicensedToEducatable;
+use Spatie\MediaLibrary\InteractsWithMedia;
 use App\Models\Concerns\BelongsToEducatable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -55,7 +58,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use AidingApp\Engagement\Enums\EngagementDeliveryStatus;
 use AidingApp\Notification\Models\Contracts\Subscribable;
 use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
-use AidingApp\Engagement\Actions\GenerateEmailMarkdownContent;
+use AidingApp\Engagement\Actions\GenerateEngagementBodyContent;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
 
@@ -64,10 +67,11 @@ use AidingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
  *
  * @mixin IdeHelperEngagement
  */
-class Engagement extends BaseModel implements Auditable, CanTriggerAutoSubscription, ProvidesATimeline
+class Engagement extends BaseModel implements Auditable, CanTriggerAutoSubscription, ProvidesATimeline, HasMedia
 {
     use AuditableTrait;
     use BelongsToEducatable;
+    use InteractsWithMedia;
     use SoftDeletes;
 
     protected $fillable = [
@@ -188,11 +192,13 @@ class Engagement extends BaseModel implements Auditable, CanTriggerAutoSubscript
         return $this->recipient instanceof Subscribable ? $this->recipient : null;
     }
 
-    public function getBody(): string
+    public function getBody(): HtmlString
     {
-        return app(GenerateEmailMarkdownContent::class)(
-            [$this->body],
+        return app(GenerateEngagementBodyContent::class)(
+            $this->body,
             $this->getMergeData(),
+            $this->batch ?? $this,
+            'body',
         );
     }
 

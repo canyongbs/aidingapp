@@ -68,14 +68,22 @@ class CreateEngagementBatch implements ShouldQueue
             'user_id' => $this->data->user->id,
         ]);
 
-        $this->data->records->each(function (Contact $record) use ($engagementBatch) {
+        [$body] = tiptap_converter()->saveImages(
+            $this->data->body,
+            disk: 's3-public',
+            record: $engagementBatch,
+            recordAttribute: 'body',
+            newImages: $this->data->temporaryBodyImages,
+        );
+
+        $this->data->records->each(function (Contact $record) use ($body, $engagementBatch) {
             /** @var Engagement $engagement */
             $engagement = $engagementBatch->engagements()->create([
                 'user_id' => $engagementBatch->user_id,
                 'recipient_id' => $record->getKey(),
                 'recipient_type' => $record->getMorphClass(),
+                'body' => $body,
                 'subject' => $this->data->subject,
-                'body' => $this->data->body,
                 'scheduled' => false,
             ]);
 

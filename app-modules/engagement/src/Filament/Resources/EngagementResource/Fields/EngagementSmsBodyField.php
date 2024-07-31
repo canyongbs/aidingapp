@@ -47,7 +47,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\Expression;
 use AidingApp\Engagement\Models\Engagement;
 use AidingApp\Engagement\Models\SmsTemplate;
-use FilamentTiptapEditor\Enums\TiptapOutput;
 use Filament\Forms\Components\Actions\Action;
 use AidingApp\Engagement\Enums\EngagementDeliveryMethod;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -66,7 +65,6 @@ class EngagementSmsBodyField
             ])
             ->showMergeTagsInBlocksPanel(is_null($form) ? false : ! ($form->getLivewire() instanceof RelationManager))
             ->profile('sms')
-            ->output(TiptapOutput::Json)
             ->required()
             ->hintAction(fn (TiptapEditor $component) => Action::make('loadSmsTemplate')
                 ->form([
@@ -115,7 +113,9 @@ class EngagementSmsBodyField
                         return;
                     }
 
-                    $component->state($template->content);
+                    $component->state(
+                        $component->generateImageUrls($template->content),
+                    );
                 }))
             ->when($context === 'create', function (Field $field) {
                 $field->hidden(fn (Get $get): bool => $get('delivery_method') === EngagementDeliveryMethod::Email->value);
