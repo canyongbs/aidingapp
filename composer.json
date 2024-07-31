@@ -76,7 +76,7 @@
         "nuwave/lighthouse": "^6.42",
         "owen-it/laravel-auditing": "^13.6",
         "saade/filament-fullcalendar": "^3.2",
-        "sentry/sentry-laravel": "^4.7",
+        "sentry/sentry-laravel": "^4.6",
         "shuvroroy/filament-spatie-laravel-health": "^2.1.0",
         "socialiteproviders/google": "^4.1",
         "socialiteproviders/microsoft-azure": "^5.2",
