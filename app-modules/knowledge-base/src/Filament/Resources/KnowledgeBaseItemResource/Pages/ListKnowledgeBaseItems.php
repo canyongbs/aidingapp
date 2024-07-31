@@ -40,6 +40,7 @@ use Filament\Tables\Table;
 use Laravel\Pennant\Feature;
 use Filament\Actions\CreateAction;
 use App\Models\Scopes\TagsForClass;
+use Filament\Tables\Filters\Filter;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Section;
@@ -50,6 +51,7 @@ use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Model;
 use Filament\Forms\Components\TextInput;
 use App\Filament\Tables\Columns\IdColumn;
+use Filament\Forms\Components\DatePicker;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
@@ -79,26 +81,37 @@ class ListKnowledgeBaseItems extends ListRecords
                     ->translateLabel()
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('category.name')
+                    ->label('Category')
+                    ->translateLabel()
+                    ->toggleable()
+                    ->sortable(),
                 TextColumn::make('quality.name')
                     ->label('Quality')
                     ->translateLabel()
+                    ->toggleable()
                     ->sortable(),
                 TextColumn::make('status.name')
                     ->label('Status')
                     ->translateLabel()
+                    ->toggleable()
                     ->sortable(),
                 TextColumn::make('public')
                     ->label('Public')
                     ->translateLabel()
+                    ->toggleable()
                     ->sortable()
                     ->formatStateUsing(fn (bool $state): string => $state ? 'Yes' : 'No'),
-                TextColumn::make('category.name')
-                    ->label('Category')
-                    ->translateLabel()
-                    ->sortable(),
-                TextColumn::make('tags.name')
-                    ->badge()
-                    ->visible(fn (): bool => Feature::active('tags')),
+                TextColumn::make('created_at')
+                    ->label('Created')
+                    ->dateTime('d-m-Y')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('updated_at')
+                    ->label('Last Updated')
+                    ->dateTime('d-m-Y')
+                    ->sortable()
+                    ->toggleable(),
             ])
             ->filters([
                 SelectFilter::make('quality')
@@ -114,6 +127,34 @@ class ListKnowledgeBaseItems extends ListRecords
                     ->multiple()
                     ->preload(),
                 TernaryFilter::make('public'),
+                Filter::make('created_at')
+                    ->label('Created After')
+                    ->form([
+                        DatePicker::make('created_after')
+                            ->native(false)
+                            ->format('d-m-Y'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['created_after'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
+                            );
+                    }),
+                Filter::make('updated_at')
+                    ->label('Updated After')
+                    ->form([
+                        DatePicker::make('updated_after')
+                            ->native(false)
+                            ->format('d-m-Y'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['updated_after'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('updated_at', '>=', $date),
+                            );
+                    }),
             ])
             ->actions([
                 EditAction::make(),
