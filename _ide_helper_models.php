@@ -1,39 +1,5 @@
 <?php
 
-/*
-<COPYRIGHT>
-
-    Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
-
-    Aiding App™ is licensed under the Elastic License 2.0. For more details,
-    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
-
-    Notice:
-
-    - You may not provide the software to third parties as a hosted or managed
-      service, where the service provides users with access to any substantial set of
-      the features or functionality of the software.
-    - You may not move, change, disable, or circumvent the license key functionality
-      in the software, and you may not remove or obscure any functionality in the
-      software that is protected by the license key.
-    - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
-      to applicable law.
-    - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
-      Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
-      vigorously.
-    - The software solution, including services, infrastructure, and code, is offered as a
-      Software as a Service (SaaS) by Canyon GBS LLC.
-    - Use of this software implies agreement to the license terms and conditions as stated
-      in the Elastic License 2.0.
-
-    For more information or inquiries please visit our website at
-    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
-
-</COPYRIGHT>
-*/
-
 // @formatter:off
 // phpcs:ignoreFile
 /**
@@ -197,6 +163,33 @@ namespace App\Models{
 
 namespace App\Models{
 /**
+ * App\Models\LandlordSettingsProperty
+ *
+ * @property string $id
+ * @property string $group
+ * @property string $name
+ * @property bool $locked
+ * @property mixed $payload
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @method static \Illuminate\Database\Eloquent\Builder|LandlordSettingsProperty newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|LandlordSettingsProperty newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|LandlordSettingsProperty query()
+ * @method static \Illuminate\Database\Eloquent\Builder|LandlordSettingsProperty whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|LandlordSettingsProperty whereGroup($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|LandlordSettingsProperty whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|LandlordSettingsProperty whereLocked($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|LandlordSettingsProperty whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|LandlordSettingsProperty wherePayload($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|LandlordSettingsProperty whereUpdatedAt($value)
+ * @mixin \Eloquent
+ */
+	#[\AllowDynamicProperties]
+	class IdeHelperLandlordSettingsProperty {}
+}
+
+namespace App\Models{
+/**
  * App\Models\NotificationSetting
  *
  * @property string $id
@@ -206,6 +199,7 @@ namespace App\Models{
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property string|null $from_name
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Division\Models\Division> $divisions
  * @property-read int|null $divisions_count
  * @property-read \Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection<int, \Spatie\MediaLibrary\MediaCollections\Models\Media> $media
@@ -219,6 +213,7 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|NotificationSetting whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|NotificationSetting whereDeletedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|NotificationSetting whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationSetting whereFromName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|NotificationSetting whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|NotificationSetting whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|NotificationSetting wherePrimaryColor($value)
@@ -350,6 +345,30 @@ namespace App\Models{
  */
 	#[\AllowDynamicProperties]
 	class IdeHelperSystemUser {}
+}
+
+namespace App\Models{
+/**
+ * App\Models\Tag
+ *
+ * @property string $id
+ * @property string $name
+ * @property string|null $type
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @method static \Database\Factories\TagFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|Tag newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Tag newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Tag query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Tag whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Tag whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Tag whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Tag whereType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Tag whereUpdatedAt($value)
+ * @mixin \Eloquent
+ */
+	#[\AllowDynamicProperties]
+	class IdeHelperTag {}
 }
 
 namespace App\Models{
@@ -849,8 +868,10 @@ namespace AidingApp\Authorization\Models{
  * @property string $guard_name
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property string $group_id
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
  * @property-read int|null $audits_count
+ * @property-read \AidingApp\Authorization\Models\PermissionGroup $group
  * @property-read \Illuminate\Database\Eloquent\Collection<int, Permission> $permissions
  * @property-read int|null $permissions_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Authorization\Models\Role> $roles
@@ -868,6 +889,7 @@ namespace AidingApp\Authorization\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|Permission role($roles, $guard = null)
  * @method static \Illuminate\Database\Eloquent\Builder|Permission web()
  * @method static \Illuminate\Database\Eloquent\Builder|Permission whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Permission whereGroupId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Permission whereGuardName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Permission whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Permission whereName($value)
@@ -876,6 +898,34 @@ namespace AidingApp\Authorization\Models{
  */
 	#[\AllowDynamicProperties]
 	class IdeHelperPermission {}
+}
+
+namespace AidingApp\Authorization\Models{
+/**
+ * AidingApp\Authorization\Models\PermissionGroup
+ *
+ * @property string $id
+ * @property string $name
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Authorization\Models\Permission> $permissions
+ * @property-read int|null $permissions_count
+ * @method static \Illuminate\Database\Eloquent\Builder|PermissionGroup newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|PermissionGroup newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|PermissionGroup onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|PermissionGroup query()
+ * @method static \Illuminate\Database\Eloquent\Builder|PermissionGroup whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|PermissionGroup whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|PermissionGroup whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|PermissionGroup whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|PermissionGroup whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|PermissionGroup withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|PermissionGroup withoutTrashed()
+ * @mixin \Eloquent
+ */
+	#[\AllowDynamicProperties]
+	class IdeHelperPermissionGroup {}
 }
 
 namespace AidingApp\Authorization\Models{
@@ -1013,6 +1063,7 @@ namespace AidingApp\Contact\Models{
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property string|null $organization_id
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Alert\Models\Alert> $alerts
  * @property-read int|null $alerts_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\InventoryManagement\Models\AssetCheckIn> $assetCheckIns
@@ -1035,6 +1086,7 @@ namespace AidingApp\Contact\Models{
  * @property-read int|null $ordered_engagement_responses_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Engagement\Models\Engagement> $orderedEngagements
  * @property-read int|null $ordered_engagements_count
+ * @property-read \AidingApp\Contact\Models\Organization|null $organizations
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\ServiceManagement\Models\ServiceRequest> $serviceRequests
  * @property-read int|null $service_requests_count
  * @property-read \AidingApp\Contact\Models\ContactSource $source
@@ -1068,6 +1120,7 @@ namespace AidingApp\Contact\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|Contact whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Contact whereLastName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Contact whereMobile($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Contact whereOrganizationId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Contact wherePhone($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Contact wherePostal($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Contact wherePreferred($value)
@@ -1150,6 +1203,137 @@ namespace AidingApp\Contact\Models{
 	class IdeHelperContactStatus {}
 }
 
+namespace AidingApp\Contact\Models{
+/**
+ * AidingApp\Contact\Models\Organization
+ *
+ * @property string $id
+ * @property string $name
+ * @property string|null $email
+ * @property string|null $phone_number
+ * @property string|null $website
+ * @property string|null $industry_id
+ * @property string|null $type_id
+ * @property string|null $description
+ * @property int|null $number_of_employees
+ * @property string|null $address
+ * @property string|null $city
+ * @property string|null $state
+ * @property string|null $postalcode
+ * @property string|null $country
+ * @property string|null $linkedin_url
+ * @property string|null $facebook_url
+ * @property string|null $twitter_url
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
+ * @property-read int|null $audits_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Contact\Models\Contact> $contacts
+ * @property-read int|null $contacts_count
+ * @property-read \AidingApp\Contact\Models\OrganizationIndustry|null $industry
+ * @property-read \Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection<int, \Spatie\MediaLibrary\MediaCollections\Models\Media> $media
+ * @property-read int|null $media_count
+ * @property-read \AidingApp\Contact\Models\OrganizationType|null $type
+ * @method static \AidingApp\Contact\Database\Factories\OrganizationFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|Organization newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Organization newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Organization onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|Organization query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Organization whereAddress($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Organization whereCity($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Organization whereCountry($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Organization whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Organization whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Organization whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Organization whereEmail($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Organization whereFacebookUrl($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Organization whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Organization whereIndustryId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Organization whereLinkedinUrl($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Organization whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Organization whereNumberOfEmployees($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Organization wherePhoneNumber($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Organization wherePostalcode($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Organization whereState($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Organization whereTwitterUrl($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Organization whereTypeId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Organization whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Organization whereWebsite($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Organization withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|Organization withoutTrashed()
+ * @mixin \Eloquent
+ */
+	#[\AllowDynamicProperties]
+	class IdeHelperOrganization {}
+}
+
+namespace AidingApp\Contact\Models{
+/**
+ * AidingApp\Contact\Models\OrganizationIndustry
+ *
+ * @property string $id
+ * @property string $name
+ * @property bool $is_default
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
+ * @property-read int|null $audits_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Contact\Models\Organization> $organizations
+ * @property-read int|null $organizations_count
+ * @method static \AidingApp\Contact\Database\Factories\OrganizationIndustryFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|OrganizationIndustry newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|OrganizationIndustry newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|OrganizationIndustry onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|OrganizationIndustry query()
+ * @method static \Illuminate\Database\Eloquent\Builder|OrganizationIndustry whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|OrganizationIndustry whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|OrganizationIndustry whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|OrganizationIndustry whereIsDefault($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|OrganizationIndustry whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|OrganizationIndustry whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|OrganizationIndustry withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|OrganizationIndustry withoutTrashed()
+ * @mixin \Eloquent
+ */
+	#[\AllowDynamicProperties]
+	class IdeHelperOrganizationIndustry {}
+}
+
+namespace AidingApp\Contact\Models{
+/**
+ * AidingApp\Contact\Models\OrganizationType
+ *
+ * @property string $id
+ * @property string $name
+ * @property bool $is_default
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
+ * @property-read int|null $audits_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Contact\Models\Organization> $organizations
+ * @property-read int|null $organizations_count
+ * @method static \AidingApp\Contact\Database\Factories\OrganizationTypeFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|OrganizationType newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|OrganizationType newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|OrganizationType onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|OrganizationType query()
+ * @method static \Illuminate\Database\Eloquent\Builder|OrganizationType whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|OrganizationType whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|OrganizationType whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|OrganizationType whereIsDefault($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|OrganizationType whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|OrganizationType whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|OrganizationType withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|OrganizationType withoutTrashed()
+ * @mixin \Eloquent
+ */
+	#[\AllowDynamicProperties]
+	class IdeHelperOrganizationType {}
+}
+
 namespace AidingApp\Division\Models{
 /**
  * AidingApp\Division\Models\Division
@@ -1208,6 +1392,8 @@ namespace AidingApp\Engagement\Models{
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection<int, \Spatie\MediaLibrary\MediaCollections\Models\Media> $media
+ * @property-read int|null $media_count
  * @property-read \App\Models\User|null $user
  * @method static \AidingApp\Engagement\Database\Factories\EmailTemplateFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder|EmailTemplate newModelQuery()
@@ -1254,6 +1440,8 @@ namespace AidingApp\Engagement\Models{
  * @property-read \AidingApp\Engagement\Models\EngagementDeliverable|null $deliverable
  * @property-read \AidingApp\Engagement\Models\EngagementBatch|null $engagementBatch
  * @property-read \AidingApp\Engagement\Models\EngagementDeliverable|null $engagementDeliverable
+ * @property-read \Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection<int, \Spatie\MediaLibrary\MediaCollections\Models\Media> $media
+ * @property-read int|null $media_count
  * @property-read \AidingApp\Timeline\Models\Timeline|null $timelineRecord
  * @property-read \App\Models\User|null $user
  * @method static \AidingApp\Engagement\Database\Factories\EngagementFactory factory($count = null, $state = [])
@@ -1299,6 +1487,8 @@ namespace AidingApp\Engagement\Models{
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Engagement\Models\Engagement> $engagements
  * @property-read int|null $engagements_count
+ * @property-read \Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection<int, \Spatie\MediaLibrary\MediaCollections\Models\Media> $media
+ * @property-read int|null $media_count
  * @property-read \App\Models\User $user
  * @method static \AidingApp\Engagement\Database\Factories\EngagementBatchFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder|EngagementBatch newModelQuery()
@@ -1943,6 +2133,8 @@ namespace AidingApp\KnowledgeBase\Models{
  * @property-read int|null $media_count
  * @property-read \AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality|null $quality
  * @property-read \AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus|null $status
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Tag> $tags
+ * @property-read int|null $tags_count
  * @method static \AidingApp\KnowledgeBase\Database\Factories\KnowledgeBaseItemFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseItem newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseItem newQuery()
@@ -2318,6 +2510,7 @@ namespace AidingApp\ServiceManagement\Models{
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property int|null $time_to_resolution
  * @property-read \AidingApp\ServiceManagement\Models\ServiceRequestAssignment|null $assignedTo
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\ServiceManagement\Models\ServiceRequestAssignment> $assignments
  * @property-read int|null $assignments_count
@@ -2327,11 +2520,14 @@ namespace AidingApp\ServiceManagement\Models{
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Notification\Models\OutboundDeliverable> $deliverables
  * @property-read int|null $deliverables_count
  * @property-read \AidingApp\Division\Models\Division|null $division
+ * @property-read \AidingApp\ServiceManagement\Models\ServiceRequestFeedback|null $feedback
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\ServiceManagement\Models\ServiceRequestHistory> $histories
  * @property-read int|null $histories_count
  * @property-read \AidingApp\ServiceManagement\Models\ServiceRequestAssignment|null $initialAssignment
  * @property-read \AidingApp\ServiceManagement\Models\ServiceRequestUpdate|null $latestInboundServiceRequestUpdate
  * @property-read \AidingApp\ServiceManagement\Models\ServiceRequestUpdate|null $latestOutboundServiceRequestUpdate
+ * @property-read \Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection<int, \Spatie\MediaLibrary\MediaCollections\Models\Media> $media
+ * @property-read int|null $media_count
  * @property-read \AidingApp\ServiceManagement\Models\ServiceRequestPriority|null $priority
  * @property-read \AidingApp\ServiceManagement\Models\ServiceRequestFormSubmission|null $serviceRequestFormSubmission
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\ServiceManagement\Models\ServiceRequestUpdate> $serviceRequestUpdates
@@ -2358,6 +2554,7 @@ namespace AidingApp\ServiceManagement\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequest whereServiceRequestNumber($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequest whereStatusId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequest whereStatusUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequest whereTimeToResolution($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequest whereTitle($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequest whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequest withTrashed()
@@ -2406,6 +2603,40 @@ namespace AidingApp\ServiceManagement\Models{
  */
 	#[\AllowDynamicProperties]
 	class IdeHelperServiceRequestAssignment {}
+}
+
+namespace AidingApp\ServiceManagement\Models{
+/**
+ * AidingApp\ServiceManagement\Models\ServiceRequestFeedback
+ *
+ * @property string $id
+ * @property string $service_request_id
+ * @property string $contact_id
+ * @property int|null $csat_answer
+ * @property int|null $nps_answer
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \AidingApp\Contact\Models\Contact $contact
+ * @property-read \AidingApp\ServiceManagement\Models\ServiceRequest $serviceRequest
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestFeedback newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestFeedback newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestFeedback onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestFeedback query()
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestFeedback whereContactId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestFeedback whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestFeedback whereCsatAnswer($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestFeedback whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestFeedback whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestFeedback whereNpsAnswer($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestFeedback whereServiceRequestId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestFeedback whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestFeedback withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestFeedback withoutTrashed()
+ * @mixin \Eloquent
+ */
+	#[\AllowDynamicProperties]
+	class IdeHelperServiceRequestFeedback {}
 }
 
 namespace AidingApp\ServiceManagement\Models{
@@ -2539,7 +2770,7 @@ namespace AidingApp\ServiceManagement\Models{
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\ServiceManagement\Models\ServiceRequestFormField> $fields
  * @property-read int|null $fields_count
- * @property-read \AidingApp\ServiceManagement\Models\ServiceRequestForm|null $submissible
+ * @property-read \AidingApp\ServiceManagement\Models\ServiceRequestForm $submissible
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestFormStep newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestFormStep newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestFormStep onlyTrashed()
