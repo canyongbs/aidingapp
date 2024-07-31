@@ -38,6 +38,7 @@ namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource\P
 
 use Filament\Forms\Form;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\View;
 use Filament\Forms\Components\Section;
 use Illuminate\Database\Eloquent\Model;
 use Filament\Forms\Components\TextInput;
@@ -87,6 +88,8 @@ class EditKnowledgeBaseItem extends EditRecord
                                     }),
                             ),
                     ]),
+                View::make('knowledge-base::filament.pages.badges')
+                    ->visible(fn (Model $record): bool => ($record->status)?true:false),
                 TiptapEditor::make('article_details')
                     ->label('Article Details')
                     ->columnSpanFull()
