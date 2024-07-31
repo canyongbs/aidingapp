@@ -34,6 +34,6 @@
 
 <div class="flex gap-2">
     <x-filament::badge>
-    {{ $getRecord()?->status?->name ?? '' }} 
+        {{ $getRecord()?->status?->name ?? '' }}
     </x-filament::badge>
 </div>
