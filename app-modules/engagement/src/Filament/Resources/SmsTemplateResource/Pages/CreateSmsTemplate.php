@@ -42,7 +42,6 @@ use FilamentTiptapEditor\TiptapEditor;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\CreateRecord;
-use FilamentTiptapEditor\Enums\TiptapOutput;
 use AidingApp\Engagement\Filament\Resources\SmsTemplateResource;
 
 class CreateSmsTemplate extends CreateRecord
@@ -68,7 +67,6 @@ class CreateSmsTemplate extends CreateRecord
                         'contact email',
                     ])
                     ->profile('sms')
-                    ->output(TiptapOutput::Json)
                     ->columnSpanFull()
                     ->extraInputAttributes(['style' => 'min-height: 12rem;'])
                     ->required(),

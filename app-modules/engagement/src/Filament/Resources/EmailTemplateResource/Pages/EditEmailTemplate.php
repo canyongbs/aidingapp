@@ -38,11 +38,10 @@ namespace AidingApp\Engagement\Filament\Resources\EmailTemplateResource\Pages;
 
 use Filament\Forms\Form;
 use Filament\Actions\DeleteAction;
+use FilamentTiptapEditor\TiptapEditor;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\EditRecord;
-use FilamentTiptapEditor\Enums\TiptapOutput;
-use App\Filament\Forms\Components\TiptapEditor;
 use AidingApp\Engagement\Filament\Resources\EmailTemplateResource;
 
 class EditEmailTemplate extends EditRecord
@@ -62,13 +61,11 @@ class EditEmailTemplate extends EditRecord
                     ->string(),
                 TiptapEditor::make('content')
                     ->disk('s3-public')
-                    ->visibility('public')
                     ->mergeTags([
                         'contact full name',
                         'contact email',
                     ])
                     ->profile('email')
-                    ->output(TiptapOutput::Json)
                     ->columnSpanFull()
                     ->extraInputAttributes(['style' => 'min-height: 12rem;'])
                     ->required(),

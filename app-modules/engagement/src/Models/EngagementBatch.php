@@ -38,15 +38,18 @@ namespace AidingApp\Engagement\Models;
 
 use App\Models\User;
 use App\Models\BaseModel;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use AidingApp\Engagement\Models\Concerns\HasManyEngagements;
 
 /**
  * @mixin IdeHelperEngagementBatch
  */
-class EngagementBatch extends BaseModel
+class EngagementBatch extends BaseModel implements HasMedia
 {
     use HasManyEngagements;
+    use InteractsWithMedia;
 
     protected $fillable = [
         'user_id',

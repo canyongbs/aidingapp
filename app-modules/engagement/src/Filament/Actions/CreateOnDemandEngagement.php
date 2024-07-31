@@ -36,12 +36,14 @@
 
 namespace AidingApp\Engagement\Filament\Actions;
 
+use Closure;
 use Illuminate\Database\Eloquent\Model;
+use AidingApp\Engagement\Models\Engagement;
 use AidingApp\Engagement\Actions\CreateEngagementDeliverable;
 
 class CreateOnDemandEngagement
 {
-    public function __invoke(Model $educatable, array $data): void
+    public function __invoke(Model $educatable, array $data, ?Closure $afterCreation = null): Engagement
     {
         $engagement = $educatable->engagements()->create([
             'subject' => $data['subject'] ?? null,
@@ -49,10 +51,16 @@ class CreateOnDemandEngagement
             'scheduled' => false,
         ]);
 
+        if ($afterCreation) {
+            $afterCreation($engagement);
+        }
+
         $createEngagementDeliverable = resolve(CreateEngagementDeliverable::class);
 
         $createEngagementDeliverable($engagement, $data['delivery_method']);
 
         $engagement->deliverable->driver()->deliver();
+
+        return $engagement;
     }
 }

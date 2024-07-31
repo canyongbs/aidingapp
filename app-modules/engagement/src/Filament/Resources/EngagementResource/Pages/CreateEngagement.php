@@ -48,7 +48,6 @@ use Filament\Forms\Components\TextInput;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\Expression;
 use Filament\Resources\Pages\CreateRecord;
-use FilamentTiptapEditor\Enums\TiptapOutput;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\DateTimePicker;
 use AidingApp\Engagement\Models\EmailTemplate;
@@ -84,8 +83,6 @@ class CreateEngagement extends CreateRecord
                             ->columnSpanFull(),
                         TiptapEditor::make('body')
                             ->disk('s3-public')
-                            ->visibility('public')
-                            ->directory('editor-images/engagements')
                             ->label('Body')
                             ->mergeTags([
                                 'contact full name',
@@ -93,7 +90,6 @@ class CreateEngagement extends CreateRecord
                             ])
                             ->showMergeTagsInBlocksPanel(! ($form->getLivewire() instanceof RelationManager))
                             ->profile('email')
-                            ->output(TiptapOutput::Json)
                             ->required()
                             ->hintAction(fn (TiptapEditor $component) => Action::make('loadEmailTemplate')
                                 ->form([
@@ -142,7 +138,9 @@ class CreateEngagement extends CreateRecord
                                         return;
                                     }
 
-                                    $component->state($template->content);
+                                    $component->state(
+                                        $component->generateImageUrls($template->content),
+                                    );
                                 }))
                             ->hidden(fn (Get $get): bool => $get('delivery_method') === EngagementDeliveryMethod::Sms->value)
                             ->helperText('You can insert contact information by typing {{ and choosing a merge value to insert.')

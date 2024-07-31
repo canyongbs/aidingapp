@@ -46,7 +46,6 @@ use AidingApp\Authorization\AuthorizationRoleRegistry;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
-use AidingApp\KnowledgeBase\Observers\KnowledgeBaseItemObserver;
 use AidingApp\KnowledgeBase\Registries\KnowledgeBaseRbacRegistry;
 
 class KnowledgeBaseServiceProvider extends ServiceProvider
@@ -67,14 +66,8 @@ class KnowledgeBaseServiceProvider extends ServiceProvider
             'knowledge_base_status' => KnowledgeBaseStatus::class,
         ]);
 
-        $this->registerObservers();
         $this->discoverSchema(__DIR__ . '/../../graphql/knowledge-base-item.graphql');
 
         AuthorizationRoleRegistry::register(KnowledgeBaseRbacRegistry::class);
-    }
-
-    public function registerObservers(): void
-    {
-        KnowledgeBaseItem::observe(KnowledgeBaseItemObserver::class);
     }
 }

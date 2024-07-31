@@ -38,11 +38,10 @@ namespace AidingApp\Engagement\Filament\Resources\SmsTemplateResource\Pages;
 
 use Filament\Forms\Form;
 use Filament\Actions\DeleteAction;
+use FilamentTiptapEditor\TiptapEditor;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\EditRecord;
-use FilamentTiptapEditor\Enums\TiptapOutput;
-use App\Filament\Forms\Components\TiptapEditor;
 use AidingApp\Engagement\Filament\Resources\SmsTemplateResource;
 
 class EditSmsTemplate extends EditRecord
@@ -66,7 +65,6 @@ class EditSmsTemplate extends EditRecord
                         'contact email',
                     ])
                     ->profile('sms')
-                    ->output(TiptapOutput::Json)
                     ->columnSpanFull()
                     ->extraInputAttributes(['style' => 'min-height: 12rem;'])
                     ->required(),

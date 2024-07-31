@@ -62,7 +62,6 @@ class ViewEngagementFile extends ViewRecord
                             ->hintIcon('heroicon-m-question-mark-circle', tooltip: 'The file will be deleted automatically after this date. If left blank, the file will be kept indefinitely.'),
                         SpatieMediaLibraryImageEntry::make('file')
                             ->collection('file')
-                            ->visibility('private')
                             ->hintAction(
                                 Action::make('download')
                                     ->label('Download')

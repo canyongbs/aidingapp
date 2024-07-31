@@ -39,7 +39,6 @@ namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 use Laravel\Pennant\Feature;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
-use App\Support\MediaEncoding\TiptapMediaEncoder;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\Portal\DataTransferObjects\KnowledgeBaseArticleData;
@@ -60,7 +59,7 @@ class KnowledgeManagementPortalArticleController extends Controller
                 'categoryId' => $article->category_id,
                 'name' => $article->title,
                 'lastUpdated' => $article->updated_at->format('M d Y, h:m a'),
-                'content' => tiptap_converter()->asHTML(TiptapMediaEncoder::decode($article->article_details)),
+                'content' => tiptap_converter()->record($article, attribute: 'article_details')->asHTML($article->article_details),
                 'tags' => Feature::active('tags') ? $article->tags()
                     ->orderBy('name')
                     ->select([

@@ -42,7 +42,6 @@ use FilamentTiptapEditor\TiptapEditor;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\CreateRecord;
-use FilamentTiptapEditor\Enums\TiptapOutput;
 use AidingApp\Engagement\Filament\Resources\EmailTemplateResource;
 
 class CreateEmailTemplate extends CreateRecord
@@ -62,14 +61,11 @@ class CreateEmailTemplate extends CreateRecord
                     ->string(),
                 TiptapEditor::make('content')
                     ->disk('s3-public')
-                    ->visibility('public')
-                    ->directory('editor-images/email-templates')
                     ->mergeTags([
                         'contact full name',
                         'contact email',
                     ])
                     ->profile('email')
-                    ->output(TiptapOutput::Json)
                     ->columnSpanFull()
                     ->extraInputAttributes(['style' => 'min-height: 12rem;'])
                     ->required(),

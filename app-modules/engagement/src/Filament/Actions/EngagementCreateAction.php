@@ -36,6 +36,7 @@
 
 namespace AidingApp\Engagement\Filament\Actions;
 
+use Filament\Forms\Form;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Forms\Components\Select;
@@ -43,6 +44,7 @@ use Filament\Forms\Components\Textarea;
 use Illuminate\Database\Eloquent\Model;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Wizard\Step;
+use AidingApp\Engagement\Models\Engagement;
 use AidingApp\Engagement\Enums\EngagementDeliveryMethod;
 
 class EngagementCreateAction
@@ -94,10 +96,14 @@ class EngagementCreateAction
                             }),
                     ]),
             ])
-            ->action(function (array $data) use ($educatable) {
+            ->action(function (array $data, Form $form) use ($educatable) {
                 $createOnDemandEngagement = resolve(CreateOnDemandEngagement::class);
 
-                $createOnDemandEngagement($educatable, $data);
+                $createOnDemandEngagement(
+                    $educatable,
+                    $data,
+                    afterCreation: fn (Engagement $engagement) => $form->model($engagement)->saveRelationships(),
+                );
             })
             ->modalSubmitActionLabel('Send')
             ->modalCloseButton(false)
