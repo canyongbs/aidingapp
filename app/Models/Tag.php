@@ -36,6 +36,9 @@
 
 namespace App\Models;
 
+/**
+ * @mixin IdeHelperTag
+ */
 class Tag extends BaseModel
 {
     protected $fillable = [
