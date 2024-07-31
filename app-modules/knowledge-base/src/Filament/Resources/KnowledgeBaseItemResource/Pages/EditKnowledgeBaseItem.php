@@ -89,7 +89,7 @@ class EditKnowledgeBaseItem extends EditRecord
                             ),
                     ]),
                 View::make('knowledge-base::filament.pages.badges')
-                    ->visible(fn (Model $record): bool => ($record->status)?true:false),
+                    ->visible(fn (Model $record): bool => ($record->status) ? true : false),
                 TiptapEditor::make('article_details')
                     ->label('Article Details')
                     ->columnSpanFull()

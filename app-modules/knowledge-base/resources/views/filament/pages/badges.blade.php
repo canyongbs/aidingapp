@@ -34,10 +34,9 @@
 
 <div class="flex flex-col items-start">
     <span>Status:</span>
-    
-    <x-filament::badge class="gap-2">
-        {{ $getRecord()->status ? $getRecord()->status->name : "" }}
-    </x-filament::badge>
-   
-</div>
 
+    <x-filament::badge class="gap-2">
+        {{ $getRecord()->status ? $getRecord()->status->name : '' }}
+    </x-filament::badge>
+
+</div>
