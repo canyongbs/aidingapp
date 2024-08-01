@@ -37,8 +37,7 @@
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Migrations\Migration;
 
-return new class extends Migration
-{
+return new class () extends Migration {
     public function up(): void
     {
         $mediaUuidMap = DB::table('media')
@@ -59,7 +58,7 @@ return new class extends Migration
                 DB::table('knowledge_base_articles')
                     ->where('id', $article->id)
                     ->update([
-                        'article_details' => $newArticleDetails
+                        'article_details' => $newArticleDetails,
                     ]);
             });
     }
