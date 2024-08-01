@@ -39,9 +39,9 @@
     </x-filament::badge>
   @endif
     <x-filament::badge>
-      {{ $getRecord()?->public ?? false ? 'Public' : 'Internal' }}
+      {{ $getRecord()['public'] ?? false ? 'Public' : 'Internal' }}
     </x-filament::badge>
-  @if(!empty($getRecord()->public))
+  @if(!empty($getRecord()['public']))
   <x-filament::badge icon="heroicon-m-clipboard">
     <button type="button" x-data x-on:click="
         window.navigator.clipboard.writeText(@js(route('portal.knowledge-management.show').'/categories/'.$getRecord()->category_id.'/articles/'.$getRecord()->id)).then(() => {
