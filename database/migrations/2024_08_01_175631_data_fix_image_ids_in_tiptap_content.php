@@ -43,8 +43,8 @@ return new class extends Migration
 
     protected function fixTipTapBlock(array $block, array $mediaUuidMap): array
     {
-        foreach (($block['content'] ?? []) as $blockIndex => $block) {
-            $block['content'][$blockIndex] = $this->fixTipTapBlock($block, $mediaUuidMap);
+        foreach (($block['content'] ?? []) as $blockIndex => $nestedBlock) {
+            $block['content'][$blockIndex] = $this->fixTipTapBlock($nestedBlock, $mediaUuidMap);
         }
 
         if ($block['type'] !== 'image') {
