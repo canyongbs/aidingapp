@@ -33,7 +33,30 @@
 --}}
 
 <div class="flex gap-2">
+  @if($getRecord()->status)
     <x-filament::badge>
-        {{ $getRecord()?->status?->name ?? '' }}
+        {{ $getRecord()->status->name }}
     </x-filament::badge>
+  @endif
+    <x-filament::badge>
+        {{ $getRecord()?->public ?'Public':'Internal' }}
+    </x-filament::badge>
+  @if(!empty($getRecord()->public))
+  <x-filament::badge icon="heroicon-m-clipboard">
+    <button type="button" x-data x-on:click="
+        window.navigator.clipboard.writeText(@js(route('portal.knowledge-management.show').'/categories/'.$getRecord()->category_id.'/articles/'.$getRecord()->id)).then(() => {
+            $tooltip('Text copied to clipboard!', {
+                theme: $store.theme,
+                timeout: 2000,
+            })
+        }).catch(err => {
+            console.error('Failed to copy text: ', err);
+        })
+    ">
+        Copy
+    </button>
+</x-filament::badge>
+
+  @endif
 </div>
+
