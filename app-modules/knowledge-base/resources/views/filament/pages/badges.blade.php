@@ -39,7 +39,7 @@
     </x-filament::badge>
   @endif
     <x-filament::badge>
-        {{ $getRecord()?->public ?'Public':'Internal' }}
+      {{ $getRecord()?->public ?? false ? 'Public' : 'Internal' }}
     </x-filament::badge>
   @if(!empty($getRecord()->public))
   <x-filament::badge icon="heroicon-m-clipboard">
