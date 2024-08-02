@@ -14,6 +14,7 @@ services:
       LARAVEL_SCHEDULER_ENABLED: '${LARAVEL_SCHEDULER_ENABLED:-true}'
       LARAVEL_QUEUE_ENABLED: '${LARAVEL_QUEUE_ENABLED:-true}'
       LARAVEL_OCTANE_WATCH: '${LARAVEL_OCTANE_WATCH:-false}'
+      CACHE_MODULES: '${CACHE_MODULES:-false}'
       CACHE_CONFIG: '${CACHE_CONFIG:-false}'
       CACHE_ROUTES: '${CACHE_ROUTES:-false}'
       CACHE_VIEWS: '${CACHE_VIEWS:-false}'
@@ -57,7 +58,7 @@ services:
     networks:
       - cgbs-development
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: [ "CMD", "redis-cli", "ping" ]
       retries: 3
       timeout: 5s
 
@@ -72,7 +73,13 @@ services:
       - cgbs-development
     command: 'minio server /data/minio --console-address ":8900"'
     healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:9000/minio/health/live']
+      test:
+        [
+          'CMD',
+          'curl',
+          '-f',
+          'http://localhost:9000/minio/health/live'
+        ]
       retries: 3
       timeout: 5s
     labels:
@@ -119,7 +126,16 @@ services:
     networks:
       - cgbs-development
     healthcheck:
-      test: ["CMD", "pg_isready", "-q", "-d", "${DB_DATABASE}", "-U", "${DB_USERNAME}"]
+      test:
+        [
+          "CMD",
+          "pg_isready",
+          "-q",
+          "-d",
+          "${DB_DATABASE}",
+          "-U",
+          "${DB_USERNAME}"
+        ]
       retries: 3
       timeout: 5s
 
