@@ -47,6 +47,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 
+/**
+ * @mixin IdeHelperOrganization
+ */
 class Organization extends BaseModel implements HasMedia, Auditable
 {
     use HasFactory;

@@ -41,6 +41,9 @@ use AidingApp\Contact\Models\Contact;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @mixin IdeHelperServiceRequestFeedback
+ */
 class ServiceRequestFeedback extends BaseModel
 {
     use SoftDeletes;
