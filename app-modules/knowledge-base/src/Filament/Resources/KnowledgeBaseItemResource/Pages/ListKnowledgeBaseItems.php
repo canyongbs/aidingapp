@@ -112,6 +112,10 @@ class ListKnowledgeBaseItems extends ListRecords
                     ->dateTime('d-m-Y')
                     ->sortable()
                     ->toggleable(),
+                TextColumn::make('tags.name')
+                    ->badge()
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->visible(fn (): bool => Feature::active('tags')),
             ])
             ->filters([
                 SelectFilter::make('quality')
