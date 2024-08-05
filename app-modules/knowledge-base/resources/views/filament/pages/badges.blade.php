@@ -39,7 +39,10 @@
         </x-filament::badge>
     @endif
     @if (!empty($getRecord()->public) && !empty($getRecord()->category_id))
-        <x-filament::badge icon="heroicon-m-clipboard" icon-position="after">
+        <x-filament::badge
+            icon="heroicon-m-clipboard"
+            icon-position="after"
+        >
             <button
                 type="button"
                 x-data
@@ -54,12 +57,12 @@
         })
     "
             >
-            {{ !empty($getRecord()->public) ? 'Public' : 'Internal' }}
+                {{ !empty($getRecord()->public) ? 'Public' : 'Internal' }}
             </button>
         </x-filament::badge>
     @else
-          <x-filament::badge>
+        <x-filament::badge>
             {{ !empty($getRecord()->public) ? 'Public' : 'Internal' }}
-          </x-filament::badge>
+        </x-filament::badge>
     @endif
 </div>
