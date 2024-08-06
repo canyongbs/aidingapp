@@ -39,7 +39,7 @@ function getAppContext(accessUrl) {
     let baseUrl = '/';
 
     if (isEmbeddedInAidingApp) {
-        baseUrl = '/portals/knowledge-management';
+        baseUrl = '/portals';
     }
 
     return { isEmbeddedInAidingApp, baseUrl };

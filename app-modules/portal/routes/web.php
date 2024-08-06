@@ -48,23 +48,28 @@ Route::prefix('portals')
         EnsureFrontendRequestsAreStateful::class,
     ])
     ->group(function () {
+        Route::get('/knowledge-management/{any?}', function ($any = null) {
+            $url = $any ? '/portals/' . $any : '/portals';
+
+            return redirect($url, 301);
+        })->where('any', '.*');
         Route::middleware([
             EnsureKnowledgeManagementPortalIsEnabled::class,
             EnsureKnowledgeManagementPortalIsEmbeddableAndAuthorized::class,
         ])->group(function () {
-            Route::post('/knowledge-management/authenticate/{authentication}', KnowledgeManagementPortalAuthenticateController::class)
+            Route::post('/authenticate/{authentication}', KnowledgeManagementPortalAuthenticateController::class)
                 ->middleware(['signed:relative', EnsureFrontendRequestsAreStateful::class])
                 ->name('knowledge-management.authenticate');
 
-            Route::get('/knowledge-management', RenderKnowledgeManagementPortal::class)
+            Route::get('/', RenderKnowledgeManagementPortal::class)
                 ->name('knowledge-management.show');
-            Route::get('/knowledge-management/categories/{category}', RenderKnowledgeManagementPortal::class)
+            Route::get('/categories/{category}', RenderKnowledgeManagementPortal::class)
                 ->name('knowledge-management.category.show');
-            Route::get('/knowledge-management/categories/{category}/articles/{article}', RenderKnowledgeManagementPortal::class)
+            Route::get('/categories/{category}/articles/{article}', RenderKnowledgeManagementPortal::class)
                 ->name('knowledge-management.article.show');
-            Route::get('/knowledge-management/service-request-type/select', RenderKnowledgeManagementPortal::class)
+            Route::get('/service-request-type/select', RenderKnowledgeManagementPortal::class)
                 ->name('knowledge-management.service-request.show');
-            Route::get('/knowledge-management/service-request/create/{type}', RenderKnowledgeManagementPortal::class)
+            Route::get('/service-request/create/{type}', RenderKnowledgeManagementPortal::class)
                 ->name('knowledge-management.service-request-type.show');
         });
     });
