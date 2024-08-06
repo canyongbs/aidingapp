@@ -44,13 +44,12 @@ use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 
 use function Tests\Helpers\testResourceRequiresPermissionForAccess;
 
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource\Pages\ListKnowledgeBaseItems;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
-use AidingApp\KnowledgeBase\Tests\KnowledgeBaseItem\RequestFactories\CreateKnowledgeBaseItemRequestFactory;
 
 // TODO: Write ListKnowledgeBaseItems tests
 //test('The correct details are displayed on the ListKnowledgeBaseItems page', function () {});
@@ -155,137 +154,137 @@ test('Filter ListKnowledgeBaseItems with `quality` filter', function () {
 });
 
 test('Filter ListKnowledgeBaseItems with `status` filter', function () {
-  $settings = app(LicenseSettings::class);
+    $settings = app(LicenseSettings::class);
 
-  // When the feature is enabled
-  $settings->data->addons->knowledgeManagement = true;
+    // When the feature is enabled
+    $settings->data->addons->knowledgeManagement = true;
 
-  $settings->save();
+    $settings->save();
 
-  $user = User::factory()->create();
+    $user = User::factory()->create();
 
-  // And the authenticatable has the correct permissions
-  // But they do not have the appropriate license
-  $user->givePermissionTo('knowledge_base_item.view-any');
-  $user->givePermissionTo('knowledge_base_item.create');
+    // And the authenticatable has the correct permissions
+    // But they do not have the appropriate license
+    $user->givePermissionTo('knowledge_base_item.view-any');
+    $user->givePermissionTo('knowledge_base_item.create');
 
-  // They should not be able to access the resource
-  actingAs($user);
+    // They should not be able to access the resource
+    actingAs($user);
 
-  $knowledgeBaseItems = KnowledgeBaseItem::factory(10)->create();
+    $knowledgeBaseItems = KnowledgeBaseItem::factory(10)->create();
 
-  $statusId = $knowledgeBaseItems->first()->status_id;
+    $statusId = $knowledgeBaseItems->first()->status_id;
 
-  $user->grantLicense(LicenseType::RecruitmentCrm);
+    $user->grantLicense(LicenseType::RecruitmentCrm);
 
-  $user->refresh();
+    $user->refresh();
 
-  livewire(ListKnowledgeBaseItems::class)
-      ->assertCanSeeTableRecords($knowledgeBaseItems)
-      ->filterTable('status', $statusId)
-      ->assertCanSeeTableRecords($knowledgeBaseItems->where('status_id', $statusId))
-      ->assertCanNotSeeTableRecords($knowledgeBaseItems->where('status_id', '!=', $statusId));
+    livewire(ListKnowledgeBaseItems::class)
+        ->assertCanSeeTableRecords($knowledgeBaseItems)
+        ->filterTable('status', $statusId)
+        ->assertCanSeeTableRecords($knowledgeBaseItems->where('status_id', $statusId))
+        ->assertCanNotSeeTableRecords($knowledgeBaseItems->where('status_id', '!=', $statusId));
 });
 
 test('Filter ListKnowledgeBaseItems with `category` filter', function () {
-  $settings = app(LicenseSettings::class);
+    $settings = app(LicenseSettings::class);
 
-  // When the feature is enabled
-  $settings->data->addons->knowledgeManagement = true;
+    // When the feature is enabled
+    $settings->data->addons->knowledgeManagement = true;
 
-  $settings->save();
+    $settings->save();
 
-  $user = User::factory()->create();
+    $user = User::factory()->create();
 
-  // And the authenticatable has the correct permissions
-  // But they do not have the appropriate license
-  $user->givePermissionTo('knowledge_base_item.view-any');
-  $user->givePermissionTo('knowledge_base_item.create');
+    // And the authenticatable has the correct permissions
+    // But they do not have the appropriate license
+    $user->givePermissionTo('knowledge_base_item.view-any');
+    $user->givePermissionTo('knowledge_base_item.create');
 
-  // They should not be able to access the resource
-  actingAs($user);
+    // They should not be able to access the resource
+    actingAs($user);
 
-  $knowledgeBaseItems = KnowledgeBaseItem::factory(10)->create();
+    $knowledgeBaseItems = KnowledgeBaseItem::factory(10)->create();
 
-  $categoryId = $knowledgeBaseItems->first()->category_id;
+    $categoryId = $knowledgeBaseItems->first()->category_id;
 
-  $user->grantLicense(LicenseType::RecruitmentCrm);
+    $user->grantLicense(LicenseType::RecruitmentCrm);
 
-  $user->refresh();
+    $user->refresh();
 
-  livewire(ListKnowledgeBaseItems::class)
-      ->assertCanSeeTableRecords($knowledgeBaseItems)
-      ->filterTable('category', $categoryId)
-      ->assertCanSeeTableRecords($knowledgeBaseItems->where('category_id', $categoryId))
-      ->assertCanNotSeeTableRecords($knowledgeBaseItems->where('category_id', '!=', $categoryId));
+    livewire(ListKnowledgeBaseItems::class)
+        ->assertCanSeeTableRecords($knowledgeBaseItems)
+        ->filterTable('category', $categoryId)
+        ->assertCanSeeTableRecords($knowledgeBaseItems->where('category_id', $categoryId))
+        ->assertCanNotSeeTableRecords($knowledgeBaseItems->where('category_id', '!=', $categoryId));
 });
 
 test('Filter ListKnowledgeBaseItems with `public` filter', function () {
-  $settings = app(LicenseSettings::class);
+    $settings = app(LicenseSettings::class);
 
-  // When the feature is enabled
-  $settings->data->addons->knowledgeManagement = true;
+    // When the feature is enabled
+    $settings->data->addons->knowledgeManagement = true;
 
-  $settings->save();
+    $settings->save();
 
-  $user = User::factory()->create();
+    $user = User::factory()->create();
 
-  // And the authenticatable has the correct permissions
-  // But they do not have the appropriate license
-  $user->givePermissionTo('knowledge_base_item.view-any');
-  $user->givePermissionTo('knowledge_base_item.create');
+    // And the authenticatable has the correct permissions
+    // But they do not have the appropriate license
+    $user->givePermissionTo('knowledge_base_item.view-any');
+    $user->givePermissionTo('knowledge_base_item.create');
 
-  // They should not be able to access the resource
-  actingAs($user);
+    // They should not be able to access the resource
+    actingAs($user);
 
-  $knowledgeBaseItems = KnowledgeBaseItem::factory(10)->create();
+    $knowledgeBaseItems = KnowledgeBaseItem::factory(10)->create();
 
-  $public = $knowledgeBaseItems->first()->public;
+    $public = $knowledgeBaseItems->first()->public;
 
-  $user->grantLicense(LicenseType::RecruitmentCrm);
+    $user->grantLicense(LicenseType::RecruitmentCrm);
 
-  $user->refresh();
+    $user->refresh();
 
-  livewire(ListKnowledgeBaseItems::class)
-      ->assertCanSeeTableRecords($knowledgeBaseItems)
-      ->filterTable('public', $public)
-      ->assertCanSeeTableRecords($knowledgeBaseItems->where('public', $public))
-      ->assertCanNotSeeTableRecords($knowledgeBaseItems->where('public', '!=', $public));
+    livewire(ListKnowledgeBaseItems::class)
+        ->assertCanSeeTableRecords($knowledgeBaseItems)
+        ->filterTable('public', $public)
+        ->assertCanSeeTableRecords($knowledgeBaseItems->where('public', $public))
+        ->assertCanNotSeeTableRecords($knowledgeBaseItems->where('public', '!=', $public));
 });
 
 test('Filter ListKnowledgeBaseItems with `created after` filter', function () {
-  $settings = app(LicenseSettings::class);
+    $settings = app(LicenseSettings::class);
 
-  // When the feature is enabled
-  $settings->data->addons->knowledgeManagement = true;
+    // When the feature is enabled
+    $settings->data->addons->knowledgeManagement = true;
 
-  $settings->save();
+    $settings->save();
 
-  $user = User::factory()->create();
+    $user = User::factory()->create();
 
-  // And the authenticatable has the correct permissions
-  // But they do not have the appropriate license
-  $user->givePermissionTo('knowledge_base_item.view-any');
-  $user->givePermissionTo('knowledge_base_item.create');
+    // And the authenticatable has the correct permissions
+    // But they do not have the appropriate license
+    $user->givePermissionTo('knowledge_base_item.view-any');
+    $user->givePermissionTo('knowledge_base_item.create');
 
-  // They should not be able to access the resource
-  actingAs($user);
+    // They should not be able to access the resource
+    actingAs($user);
 
-  $user->grantLicense(LicenseType::RecruitmentCrm);
+    $user->grantLicense(LicenseType::RecruitmentCrm);
 
-  $user->refresh();
+    $user->refresh();
 
-  $knowledgeBaseItemsCreatedBefore = KnowledgeBaseItem::factory()
-                                  ->count(3)
-                                  ->state(['created_at' => now()->subDays(2)])
-                                  ->create();
+    $knowledgeBaseItemsCreatedBefore = KnowledgeBaseItem::factory()
+        ->count(3)
+        ->state(['created_at' => now()->subDays(2)])
+        ->create();
 
-  $knowledgeBaseItemsCreatedAfter = KnowledgeBaseItem::factory()
-                                      ->count(3)
-                                      ->state(['created_at' => now()->addDays(2)])
-                                      ->create();
+    $knowledgeBaseItemsCreatedAfter = KnowledgeBaseItem::factory()
+        ->count(3)
+        ->state(['created_at' => now()->addDays(2)])
+        ->create();
 
-  livewire(ListKnowledgeBaseItems::class)
+    livewire(ListKnowledgeBaseItems::class)
         ->assertCanSeeTableRecords($knowledgeBaseItemsCreatedBefore->merge($knowledgeBaseItemsCreatedAfter))
         ->filterTable('created_at', now()->format('d-m-Y'))
         ->assertCanSeeTableRecords(
