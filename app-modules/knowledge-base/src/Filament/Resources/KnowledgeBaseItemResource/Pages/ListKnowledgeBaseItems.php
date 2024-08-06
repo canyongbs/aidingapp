@@ -83,7 +83,6 @@ class ListKnowledgeBaseItems extends ListRecords
                     ->sortable(),
                 TextColumn::make('category.name')
                     ->label('Category')
-                    ->translateLabel()
                     ->toggleable()
                     ->sortable(),
                 TextColumn::make('quality.name')
@@ -134,14 +133,14 @@ class ListKnowledgeBaseItems extends ListRecords
                 Filter::make('created_at')
                     ->label('Created After')
                     ->form([
-                        DatePicker::make('created_after')
+                        DatePicker::make('created_at')
                             ->native(false)
                             ->format('d-m-Y'),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
                             ->when(
-                                $data['created_after'],
+                                $data['created_at'],
                                 fn (Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
                             );
                     }),
