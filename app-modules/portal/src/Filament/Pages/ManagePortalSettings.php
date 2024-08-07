@@ -165,7 +165,7 @@ class ManagePortalSettings extends SettingsPage
                             ->visible(fn (Get $get) => $get('knowledge_management_portal_enabled') && PennantFeature::active('portal-logo')),
                         Actions::make([
                             Action::make('view')
-                                ->url(fn () => route('portal.knowledge-management.show'))
+                                ->url(fn () => route('portal.show'))
                                 ->icon('heroicon-m-arrow-top-right-on-square')
                                 ->disabled(! Gate::check(Feature::KnowledgeManagement->getGateName()))
                                 ->openUrlInNewTab(),

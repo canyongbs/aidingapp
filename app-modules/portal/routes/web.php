@@ -41,7 +41,13 @@ use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEnabled;
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEmbeddableAndAuthorized;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalAuthenticateController;
 
-Route::prefix('portals')
+Route::get('/portals/knowledge-management/{any?}', function ($any = null) {
+    $url = $any ? '/portal/' . $any : '/portal';
+
+    return redirect($url, 301);
+})->where('any', '.*');
+
+Route::prefix('portal')
     ->name('portal.')
     ->middleware([
         'web',
@@ -52,19 +58,19 @@ Route::prefix('portals')
             EnsureKnowledgeManagementPortalIsEnabled::class,
             EnsureKnowledgeManagementPortalIsEmbeddableAndAuthorized::class,
         ])->group(function () {
-            Route::post('/knowledge-management/authenticate/{authentication}', KnowledgeManagementPortalAuthenticateController::class)
+            Route::post('/authenticate/{authentication}', KnowledgeManagementPortalAuthenticateController::class)
                 ->middleware(['signed:relative', EnsureFrontendRequestsAreStateful::class])
-                ->name('knowledge-management.authenticate');
+                ->name('authenticate');
 
-            Route::get('/knowledge-management', RenderKnowledgeManagementPortal::class)
-                ->name('knowledge-management.show');
-            Route::get('/knowledge-management/categories/{category}', RenderKnowledgeManagementPortal::class)
-                ->name('knowledge-management.category.show');
-            Route::get('/knowledge-management/categories/{category}/articles/{article}', RenderKnowledgeManagementPortal::class)
-                ->name('knowledge-management.article.show');
-            Route::get('/knowledge-management/service-request-type/select', RenderKnowledgeManagementPortal::class)
-                ->name('knowledge-management.service-request.show');
-            Route::get('/knowledge-management/service-request/create/{type}', RenderKnowledgeManagementPortal::class)
-                ->name('knowledge-management.service-request-type.show');
+            Route::get('/', RenderKnowledgeManagementPortal::class)
+                ->name('show');
+            Route::get('/categories/{category}', RenderKnowledgeManagementPortal::class)
+                ->name('category.show');
+            Route::get('/categories/{category}/articles/{article}', RenderKnowledgeManagementPortal::class)
+                ->name('article.show');
+            Route::get('/service-request-type/select', RenderKnowledgeManagementPortal::class)
+                ->name('service-request.show');
+            Route::get('/service-request/create/{type}', RenderKnowledgeManagementPortal::class)
+                ->name('service-request-type.show');
         });
     });

@@ -46,7 +46,7 @@ class EnsureKnowledgeManagementPortalIsEnabled
     public function handle(Request $request, Closure $next): Response
     {
         if (! app(PortalSettings::class)->knowledge_management_portal_enabled) {
-            if ($request->wantsJson() || $request->fullUrlIs('*/api/portal/knowledge-management/*')) {
+            if ($request->wantsJson() || $request->fullUrlIs('*/api/portal/*')) {
                 return response()->json(['error' => 'The Knowledge Management Portal is not enabled.'], Response::HTTP_FORBIDDEN);
             }
 

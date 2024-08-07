@@ -48,27 +48,27 @@ class GeneratePortalEmbedCode
             PortalType::KnowledgeManagement => (function () {
                 $scriptUrl = url('js/portals/knowledge-management/aiding-app-knowledge-management-portal.js?v=' . app('current-commit'));
 
-                $portalAccessUrl = route('portal.knowledge-management.show');
+                $portalAccessUrl = route('portal.show');
 
                 $userAuthenticationUrl = route('api.user.auth-check');
 
                 $portalDefinitionUrl = URL::to(
                     URL::signedRoute(
-                        name: 'api.portal.knowledge-management.define',
+                        name: 'api.portal.define',
                         absolute: false,
                     )
                 );
 
                 $portalSearchUrl = URL::to(
                     URL::signedRoute(
-                        name: 'api.portal.knowledge-management.search',
+                        name: 'api.portal.search',
                         absolute: false,
                     )
                 );
 
                 $appUrl = config('app.url');
 
-                $apiUrl = route('api.portal.knowledge-management.define');
+                $apiUrl = route('api.portal.define');
 
                 return <<<EOD
                 <knowledge-management-portal-embed url="{$portalDefinitionUrl}" user-authentication-url={$userAuthenticationUrl} access-url={$portalAccessUrl} search-url="{$portalSearchUrl}" app-url="{$appUrl}" api-url="{$apiUrl}"></knowledge-management-portal-embed>

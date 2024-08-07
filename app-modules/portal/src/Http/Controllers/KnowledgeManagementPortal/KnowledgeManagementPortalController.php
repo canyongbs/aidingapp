@@ -72,7 +72,7 @@ class KnowledgeManagementPortalController extends Controller
             'service_management_enabled' => $settings->knowledge_management_portal_service_management,
             'authentication_url' => URL::to(
                 URL::signedRoute(
-                    name: 'api.portal.knowledge-management.request-authentication',
+                    name: 'api.portal.request-authentication',
                     absolute: false,
                 )
             ),
