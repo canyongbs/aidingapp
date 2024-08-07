@@ -41,7 +41,7 @@ use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEnabled;
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEmbeddableAndAuthorized;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalAuthenticateController;
 
-Route::prefix('portals')
+Route::prefix('portal')
     ->name('portal.')
     ->middleware([
         'web',
@@ -49,7 +49,7 @@ Route::prefix('portals')
     ])
     ->group(function () {
         Route::get('/knowledge-management/{any?}', function ($any = null) {
-            $url = $any ? '/portals/' . $any : '/portals';
+            $url = $any ? '/portal/' . $any : '/portal';
 
             return redirect($url, 301);
         })->where('any', '.*');
