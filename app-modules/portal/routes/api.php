@@ -65,8 +65,8 @@ Route::prefix('api')
                 ->name('user.auth-check');
         });
 
-        Route::prefix('portal/knowledge-management')
-            ->name('portal.knowledge-management.')
+        Route::prefix('portal')
+            ->name('portal.')
             ->group(function () {
                 Route::get('/', [KnowledgeManagementPortalController::class, 'show'])
                     ->middleware(['signed:relative'])

@@ -53,13 +53,13 @@ class GenerateServiceRequestFeedbackFormEmbedCode
             )
         );
 
-        $portalAccessUrl = route('portal.knowledge-management.show');
+        $portalAccessUrl = route('portal.show');
 
         $userAuthenticationUrl = route('api.user.auth-check');
 
         $appUrl = config('app.url');
 
-        $apiUrl = route('api.portal.knowledge-management.define');
+        $apiUrl = route('api.portal.define');
 
         return <<<EOD
         <service-request-feedback-form-embed url="{$formDefinitionUrl}" user-authentication-url={$userAuthenticationUrl} access-url={$portalAccessUrl} app-url="{$appUrl}" api-url="{$apiUrl}"></service-request-feedback-form-embed>

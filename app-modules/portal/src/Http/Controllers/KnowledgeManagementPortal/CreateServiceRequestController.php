@@ -250,7 +250,7 @@ class CreateServiceRequestController extends Controller
                 'limit' => $uploadsMediaCollection->getMaxNumberOfFiles(),
                 'accept' => $uploadsMediaCollection->getExtensions(),
                 'size' => $uploadsMediaCollection->getMaxFileSizeInMB(),
-                'uploadUrl' => route('api.portal.knowledge-management.service-request.request-upload-url'),
+                'uploadUrl' => route('api.portal.service-request.request-upload-url'),
             ]),
         ]);
 

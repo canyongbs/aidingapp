@@ -60,7 +60,7 @@ class KnowledgeManagementPortalLogoutController extends Controller
 
         return response()->json([
             'success' => true,
-            'redirect_url' => route('portal.knowledge-management.show'),
+            'redirect_url' => route('portal.show'),
         ]);
     }
 }

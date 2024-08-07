@@ -79,7 +79,7 @@ class KnowledgeManagementPortalRequestAuthenticationController extends Controlle
         $authenticationUrl = match ($request->safe()->isSpa) {
             true => URL::to(
                 URL::signedRoute(
-                    name: 'portal.knowledge-management.authenticate',
+                    name: 'portal.authenticate',
                     parameters: [
                         'authentication' => $authentication,
                     ],
@@ -88,7 +88,7 @@ class KnowledgeManagementPortalRequestAuthenticationController extends Controlle
             ),
             default => URL::to(
                 URL::signedRoute(
-                    name: 'api.portal.knowledge-management.authenticate.embedded',
+                    name: 'api.portal.authenticate.embedded',
                     parameters: [
                         'authentication' => $authentication,
                     ],
