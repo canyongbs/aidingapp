@@ -95,7 +95,6 @@ test('ListKnowledgeBaseItems is gated with proper feature access control', funct
 
 test('ListKnowledgeBaseItems is gated with proper license access control', function () {
     $settings = app(LicenseSettings::class);
-
     // When the feature is enabled
     $settings->data->addons->knowledgeManagement = true;
 
