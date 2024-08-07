@@ -45,14 +45,14 @@ use function Pest\Livewire\livewire;
 
 use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 
 use function Tests\Helpers\testResourceRequiresPermissionForAccess;
 
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource\Pages\ListKnowledgeBaseItems;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 
 // TODO: Write ListKnowledgeBaseItems tests
 //test('The correct details are displayed on the ListKnowledgeBaseItems page', function () {});
@@ -139,25 +139,25 @@ test('Filter ListKnowledgeBaseItems with `quality` filter', function () {
     $user->givePermissionTo('knowledge_base_item.create');
 
     $goodQuality = KnowledgeBaseQuality::factory()->state([
-      'name' => 'Good'
+        'name' => 'Good',
     ])->create();
 
     $reviewQuality = KnowledgeBaseQuality::factory()->state([
-      'name' => 'Review Needed'
+        'name' => 'Review Needed',
     ])->create();
 
     $badQuality = KnowledgeBaseQuality::factory()->state([
-      'name' => 'Bad Quality'
+        'name' => 'Bad Quality',
     ])->create();
 
     // They should not be able to access the resource
     actingAs($user);
 
-    $goodQualityKnowledgeBaseItems = KnowledgeBaseItem::factory()->count(3)->for($goodQuality,'quality')->create();
+    $goodQualityKnowledgeBaseItems = KnowledgeBaseItem::factory()->count(3)->for($goodQuality, 'quality')->create();
 
-    $reviewNeededKnowledgeBaseItems = KnowledgeBaseItem::factory()->count(3)->for($reviewQuality,'quality')->create();
+    $reviewNeededKnowledgeBaseItems = KnowledgeBaseItem::factory()->count(3)->for($reviewQuality, 'quality')->create();
 
-    $badQualityKnowledgeBaseItems = KnowledgeBaseItem::factory()->count(3)->for($badQuality,'quality')->create();
+    $badQualityKnowledgeBaseItems = KnowledgeBaseItem::factory()->count(3)->for($badQuality, 'quality')->create();
 
     $user->grantLicense(LicenseType::RecruitmentCrm);
 
@@ -165,10 +165,9 @@ test('Filter ListKnowledgeBaseItems with `quality` filter', function () {
 
     livewire(ListKnowledgeBaseItems::class)
         ->assertCanSeeTableRecords($goodQualityKnowledgeBaseItems->merge($reviewNeededKnowledgeBaseItems)->merge($badQualityKnowledgeBaseItems))
-        ->filterTable('quality', [$goodQuality,$reviewQuality])
+        ->filterTable('quality', [$goodQuality, $reviewQuality])
         ->assertCanSeeTableRecords($goodQualityKnowledgeBaseItems->merge($reviewNeededKnowledgeBaseItems))
         ->assertCanNotSeeTableRecords($badQualityKnowledgeBaseItems);
-
 });
 
 test('Filter ListKnowledgeBaseItems with `status` filter', function () {
@@ -190,22 +189,22 @@ test('Filter ListKnowledgeBaseItems with `status` filter', function () {
     actingAs($user);
 
     $published = KnowledgeBaseStatus::factory()->state([
-      'name' => 'Published'
+        'name' => 'Published',
     ])->create();
 
     $draft = KnowledgeBaseStatus::factory()->state([
-      'name' => 'Draft'
+        'name' => 'Draft',
     ])->create();
 
     $archived = KnowledgeBaseStatus::factory()->state([
-      'name' => 'Archived'
+        'name' => 'Archived',
     ])->create();
 
-    $publishedKnowledgeBaseItems = KnowledgeBaseItem::factory()->count(3)->for($published,'status')->create();
+    $publishedKnowledgeBaseItems = KnowledgeBaseItem::factory()->count(3)->for($published, 'status')->create();
 
-    $draftKnowledgeBaseItems = KnowledgeBaseItem::factory()->count(3)->for($draft,'status')->create();
+    $draftKnowledgeBaseItems = KnowledgeBaseItem::factory()->count(3)->for($draft, 'status')->create();
 
-    $archivedKnowledgeBaseItems = KnowledgeBaseItem::factory()->count(3)->for($archived,'status')->create();
+    $archivedKnowledgeBaseItems = KnowledgeBaseItem::factory()->count(3)->for($archived, 'status')->create();
 
     $user->grantLicense(LicenseType::RecruitmentCrm);
 
@@ -213,7 +212,7 @@ test('Filter ListKnowledgeBaseItems with `status` filter', function () {
 
     livewire(ListKnowledgeBaseItems::class)
         ->assertCanSeeTableRecords($publishedKnowledgeBaseItems->merge($draftKnowledgeBaseItems)->merge($archivedKnowledgeBaseItems))
-        ->filterTable('status', [$published,$draft])
+        ->filterTable('status', [$published, $draft])
         ->assertCanSeeTableRecords($publishedKnowledgeBaseItems->merge($draftKnowledgeBaseItems))
         ->assertCanNotSeeTableRecords($archivedKnowledgeBaseItems);
 });
@@ -237,22 +236,22 @@ test('Filter ListKnowledgeBaseItems with `category` filter', function () {
     actingAs($user);
 
     $softwareCategory = KnowledgeBaseCategory::factory()->state([
-      'name' => 'Software Installation/Configuration'
+        'name' => 'Software Installation/Configuration',
     ])->create();
 
     $passwordManagement = KnowledgeBaseCategory::factory()->state([
-      'name' => 'Password Management'
+        'name' => 'Password Management',
     ])->create();
 
     $networkTroubleshooting = KnowledgeBaseCategory::factory()->state([
-      'name' => 'Network Troubleshooting'
+        'name' => 'Network Troubleshooting',
     ])->create();
 
-    $softwareCategoryKnowledgeBaseItems = KnowledgeBaseItem::factory()->count(3)->for($softwareCategory,'category')->create();
+    $softwareCategoryKnowledgeBaseItems = KnowledgeBaseItem::factory()->count(3)->for($softwareCategory, 'category')->create();
 
-    $passwordManagementKnowledgeBaseItems = KnowledgeBaseItem::factory()->count(3)->for($passwordManagement,'category')->create();
+    $passwordManagementKnowledgeBaseItems = KnowledgeBaseItem::factory()->count(3)->for($passwordManagement, 'category')->create();
 
-    $networkTroubleshootingKnowledgeBaseItems = KnowledgeBaseItem::factory()->count(3)->for($networkTroubleshooting,'category')->create();
+    $networkTroubleshootingKnowledgeBaseItems = KnowledgeBaseItem::factory()->count(3)->for($networkTroubleshooting, 'category')->create();
 
     $user->grantLicense(LicenseType::RecruitmentCrm);
 
@@ -260,17 +259,16 @@ test('Filter ListKnowledgeBaseItems with `category` filter', function () {
 
     livewire(ListKnowledgeBaseItems::class)
         ->assertCanSeeTableRecords(
-          $softwareCategoryKnowledgeBaseItems
-                                  ->merge($passwordManagementKnowledgeBaseItems)
-                                  ->merge($networkTroubleshootingKnowledgeBaseItems)
+            $softwareCategoryKnowledgeBaseItems
+                ->merge($passwordManagementKnowledgeBaseItems)
+                ->merge($networkTroubleshootingKnowledgeBaseItems)
         )
-        ->filterTable('category', [$passwordManagement,$softwareCategory])
+        ->filterTable('category', [$passwordManagement, $softwareCategory])
         ->assertCanSeeTableRecords(
-          $passwordManagementKnowledgeBaseItems
-                  ->merge($softwareCategoryKnowledgeBaseItems)
+            $passwordManagementKnowledgeBaseItems
+                ->merge($softwareCategoryKnowledgeBaseItems)
         )
         ->assertCanNotSeeTableRecords($networkTroubleshootingKnowledgeBaseItems);
-        
 });
 
 test('Filter ListKnowledgeBaseItems with `public` filter', function () {
@@ -350,44 +348,44 @@ test('Filter ListKnowledgeBaseItems with `created after` filter', function () {
 });
 
 test('Filter ListKnowledgeBaseItems with `updated after` filter', function () {
-  $settings = app(LicenseSettings::class);
+    $settings = app(LicenseSettings::class);
 
-  // When the feature is enabled
-  $settings->data->addons->knowledgeManagement = true;
+    // When the feature is enabled
+    $settings->data->addons->knowledgeManagement = true;
 
-  $settings->save();
+    $settings->save();
 
-  $user = User::factory()->create();
+    $user = User::factory()->create();
 
-  // And the authenticatable has the correct permissions
-  // But they do not have the appropriate license
-  $user->givePermissionTo('knowledge_base_item.view-any');
-  $user->givePermissionTo('knowledge_base_item.create');
+    // And the authenticatable has the correct permissions
+    // But they do not have the appropriate license
+    $user->givePermissionTo('knowledge_base_item.view-any');
+    $user->givePermissionTo('knowledge_base_item.create');
 
-  // They should not be able to access the resource
-  actingAs($user);
+    // They should not be able to access the resource
+    actingAs($user);
 
-  $user->grantLicense(LicenseType::RecruitmentCrm);
+    $user->grantLicense(LicenseType::RecruitmentCrm);
 
-  $user->refresh();
+    $user->refresh();
 
-  $knowledgeBaseItemsUpdatedAtBefore = KnowledgeBaseItem::factory()
-      ->count(3)
-      ->state(['updated_at' => now()->subDays(2)])
-      ->create();
+    $knowledgeBaseItemsUpdatedAtBefore = KnowledgeBaseItem::factory()
+        ->count(3)
+        ->state(['updated_at' => now()->subDays(2)])
+        ->create();
 
-  $knowledgeBaseItemsUpdatedAtAfter = KnowledgeBaseItem::factory()
-      ->count(3)
-      ->state(['updated_at' => now()->addDays(2)])
-      ->create();
+    $knowledgeBaseItemsUpdatedAtAfter = KnowledgeBaseItem::factory()
+        ->count(3)
+        ->state(['updated_at' => now()->addDays(2)])
+        ->create();
 
-  livewire(ListKnowledgeBaseItems::class)
-      ->assertCanSeeTableRecords($knowledgeBaseItemsUpdatedAtBefore->merge($knowledgeBaseItemsUpdatedAtAfter))
-      ->filterTable('updated_at', [
-          'updated_after' => now(),
-      ])
-      ->assertCanSeeTableRecords(
-          $knowledgeBaseItemsUpdatedAtAfter
-      )
-      ->assertCanNotSeeTableRecords($knowledgeBaseItemsUpdatedAtBefore);
+    livewire(ListKnowledgeBaseItems::class)
+        ->assertCanSeeTableRecords($knowledgeBaseItemsUpdatedAtBefore->merge($knowledgeBaseItemsUpdatedAtAfter))
+        ->filterTable('updated_at', [
+            'updated_after' => now(),
+        ])
+        ->assertCanSeeTableRecords(
+            $knowledgeBaseItemsUpdatedAtAfter
+        )
+        ->assertCanNotSeeTableRecords($knowledgeBaseItemsUpdatedAtBefore);
 });
