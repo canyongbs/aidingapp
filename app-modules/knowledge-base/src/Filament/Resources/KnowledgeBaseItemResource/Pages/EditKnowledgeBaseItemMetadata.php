@@ -43,6 +43,7 @@ use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Section;
 use AidingApp\Division\Models\Division;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\DatePicker;
 use Illuminate\Database\Eloquent\Builder;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
@@ -77,6 +78,19 @@ class EditKnowledgeBaseItemMetadata
                         ->columnSpanFull()
                         ->visible(fn (): bool => Feature::active('tags')),
                 ]),
+            Section::make()->schema([
+                DatePicker::make('created_at')
+                    ->native(false)
+                    ->displayFormat('d-m-Y h:i')
+                    ->disabled()
+                    ->label('Created'),
+                DatePicker::make('updated_at')
+                    ->native(false)
+                    ->displayFormat('d-m-Y h:i')
+                    ->disabled()
+                    ->label('Last Updated'),
+            ])
+                ->columns(2),
             Section::make()
                 ->schema([
                     Select::make('quality_id')
