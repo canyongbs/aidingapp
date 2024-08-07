@@ -133,14 +133,14 @@ class ListKnowledgeBaseItems extends ListRecords
                 Filter::make('created_at')
                     ->label('Created After')
                     ->form([
-                        DatePicker::make('created_at')
+                        DatePicker::make('created_after')
                             ->native(false)
                             ->format('d-m-Y'),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
                             ->when(
-                                $data['created_at'],
+                                $data['created_after'],
                                 fn (Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
                             );
                     }),
