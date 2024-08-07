@@ -35,19 +35,15 @@
 <div class="flex gap-2">
     @if ($getRecord()->status)
         <x-filament::badge>
-            {{ $getRecord()?->status?->name ?? '' }}
+          {{ $getRecord()->status->name }}
         </x-filament::badge>
     @endif
-    @if (!empty($getRecord()->public) && !empty($getRecord()->category_id))
-        <x-filament::badge
-            icon="heroicon-m-clipboard"
-            icon-position="after"
-        >
-            <button
+    @if ($getRecord()->public && !empty($getRecord()->category_id))
+    <button
                 type="button"
                 x-data
                 x-on:click="
-        window.navigator.clipboard.writeText(@js(route('portal.knowledge-management.show') . '/categories/' . $getRecord()->category_id . '/articles/' . $getRecord()->id)).then(() => {
+        window.navigator.clipboard.writeText(@js(route('portal.knowledge-management.show') . '/categories/' . $getRecord()->category_id . '/articles/' . $getRecord()->getKey())).then(() => {
             $tooltip('Copied!', {
                 theme: $store.theme,
                 timeout: 2000,
@@ -57,12 +53,18 @@
         })
     "
             >
-                {{ !empty($getRecord()->public) ? 'Public' : 'Internal' }}
-            </button>
+        <x-filament::badge
+            icon="heroicon-m-clipboard"
+            icon-position="after"
+        >
+           
+                Public
+           
         </x-filament::badge>
+        </button>
     @else
         <x-filament::badge>
-            {{ !empty($getRecord()->public) ? 'Public' : 'Internal' }}
+            Internal
         </x-filament::badge>
     @endif
 </div>
