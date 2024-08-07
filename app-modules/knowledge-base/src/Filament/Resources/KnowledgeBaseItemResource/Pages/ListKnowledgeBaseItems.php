@@ -78,12 +78,7 @@ class ListKnowledgeBaseItems extends ListRecords
                 IdColumn::make(),
                 TextColumn::make('title')
                     ->label('Title')
-                    ->translateLabel()
                     ->searchable()
-                    ->sortable(),
-                TextColumn::make('category.name')
-                    ->label('Category')
-                    ->toggleable()
                     ->sortable(),
                 TextColumn::make('category.name')
                     ->label('Category')
@@ -91,20 +86,14 @@ class ListKnowledgeBaseItems extends ListRecords
                     ->sortable(),
                 TextColumn::make('quality.name')
                     ->label('Quality')
-                    ->translateLabel()
-                    ->toggleable()
                     ->toggleable()
                     ->sortable(),
                 TextColumn::make('status.name')
                     ->label('Status')
-                    ->translateLabel()
-                    ->toggleable()
                     ->toggleable()
                     ->sortable(),
                 TextColumn::make('public')
                     ->label('Public')
-                    ->translateLabel()
-                    ->toggleable()
                     ->toggleable()
                     ->sortable()
                     ->formatStateUsing(fn (bool $state): string => $state ? 'Yes' : 'No'),
@@ -118,19 +107,8 @@ class ListKnowledgeBaseItems extends ListRecords
                     ->dateTime('d-m-Y')
                     ->sortable()
                     ->toggleable(),
-                TextColumn::make('created_at')
-                    ->label('Created')
-                    ->dateTime('d-m-Y')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->label('Last Updated')
-                    ->dateTime('d-m-Y')
-                    ->sortable()
-                    ->toggleable(),
                 TextColumn::make('tags.name')
                     ->badge()
-                    ->toggleable(isToggledHiddenByDefault: true)
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->visible(fn (): bool => Feature::active('tags')),
             ])
