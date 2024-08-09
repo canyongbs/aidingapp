@@ -1,4 +1,6 @@
-{{--
+<?php
+
+/*
 <COPYRIGHT>
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
@@ -30,41 +32,27 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
---}}
+*/
 
-<div class="flex gap-2">
-    @if ($getRecord()->status)
-        <x-filament::badge>
-            {{ $getRecord()->status->name }}
-        </x-filament::badge>
-    @endif
-    @if ($getRecord()->public && !empty($getRecord()->category_id))
-        <button
-            type="button"
-            x-data
-            x-on:click="
-        window.navigator.clipboard.writeText(@js(route('portal.show') . '/categories/' . $getRecord()->category_id . '/articles/' . $getRecord()->getKey())).then(() => {
-            $tooltip('Copied!', {
-                theme: $store.theme,
-                timeout: 2000,
-            })
-        }).catch(err => {
-            console.error('Failed to copy text: ', err);
-        })
-    "
-        >
-            <x-filament::badge
-                icon="heroicon-m-clipboard"
-                icon-position="after"
-            >
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
-                Public
+return new class () extends Migration {
+    public function up(): void
+    {
+        Schema::dropIfExists('sessions');
+    }
 
-            </x-filament::badge>
-        </button>
-    @else
-        <x-filament::badge>
-            Internal
-        </x-filament::badge>
-    @endif
-</div>
+    public function down(): void
+    {
+        Schema::create('sessions', function (Blueprint $table) {
+            $table->string('id')->primary();
+            $table->foreignUuid('user_id')->nullable()->index();
+            $table->string('ip_address', 45)->nullable();
+            $table->text('user_agent')->nullable();
+            $table->longText('payload');
+            $table->integer('last_activity')->index();
+        });
+    }
+};
