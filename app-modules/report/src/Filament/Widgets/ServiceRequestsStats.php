@@ -155,14 +155,15 @@ class ServiceRequestsStats extends StatsOverviewReportWidget
         $days = $interval->d;
         $hours = $interval->h;
         $minutes = $interval->i;
-        $averageServiceResolutionTime = "{$days}d {$hours}h {$minutes}m";
         $averageServiceResolutionTimeAtIntervalCount = ServiceRequest::query()
             ->where('created_at', '<=', $intervalStart)
             ->avg('time_to_resolution');
 
-        $percentageChange = $this->getPercentageChange($averageServiceResolutionTimeAtIntervalCount, $averageServiceResolutionTime);
+        $percentageChange = $this->getPercentageChange((int) $averageServiceResolutionTimeAtIntervalCount, (int) $averageServiceResolutionTime);
 
         [$percentageChangeDisplayValue, $icon, $color] = $this->getFormattedPercentageChangeDetails($percentageChange);
+
+        $averageServiceResolutionTime = "{$days}d {$hours}h {$minutes}m";
 
         return [
             $averageServiceResolutionTime,
@@ -172,7 +173,7 @@ class ServiceRequestsStats extends StatsOverviewReportWidget
         ];
     }
 
-    private function getPercentageChange($oldValue, $newValue): int
+    private function getPercentageChange(int $oldValue, int $newValue): int
     {
         return $oldValue > 0
                         ? (($newValue - $oldValue) / $oldValue) * 100
