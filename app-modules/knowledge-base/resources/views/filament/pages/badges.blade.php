@@ -43,7 +43,7 @@
             type="button"
             x-data
             x-on:click="
-        window.navigator.clipboard.writeText(@js(route('portal.knowledge-management.show') . '/categories/' . $getRecord()->category_id . '/articles/' . $getRecord()->getKey())).then(() => {
+        window.navigator.clipboard.writeText(@js(route('portal.show') . '/categories/' . $getRecord()->category_id . '/articles/' . $getRecord()->getKey())).then(() => {
             $tooltip('Copied!', {
                 theme: $store.theme,
                 timeout: 2000,
