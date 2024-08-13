@@ -36,12 +36,14 @@
 
 namespace App\Multitenancy\Tasks;
 
-use Illuminate\Support\Facades\DB;
-use Spatie\Multitenancy\Models\Tenant;
+use Illuminate\Bus\BatchRepository;
+use Illuminate\Bus\DatabaseBatchRepository;
 use Illuminate\Database\Eloquent\Model;
-use Spatie\Multitenancy\Tasks\SwitchTenantTask;
+use Illuminate\Support\Facades\DB;
 use Spatie\Multitenancy\Concerns\UsesMultitenancyConfig;
 use Spatie\Multitenancy\Exceptions\InvalidConfiguration;
+use Spatie\Multitenancy\Models\Tenant;
+use Spatie\Multitenancy\Tasks\SwitchTenantTask;
 
 class SwitchTenantDatabasesTask implements SwitchTenantTask
 {
@@ -90,6 +92,9 @@ class SwitchTenantDatabasesTask implements SwitchTenantTask
 
         // Octane will have an old `db` instance in the Model::$resolver.
         Model::setConnectionResolver(app('db'));
+
+        app()->forgetInstance(DatabaseBatchRepository::class);
+        app()->forgetInstance(BatchRepository::class);
     }
 
     public function forgetCurrent(): void
@@ -110,6 +115,9 @@ class SwitchTenantDatabasesTask implements SwitchTenantTask
 
         // Octane will have an old `db` instance in the Model::$resolver.
         Model::setConnectionResolver(app('db'));
+
+        app()->forgetInstance(DatabaseBatchRepository::class);
+        app()->forgetInstance(BatchRepository::class);
     }
 
     public function ensureTenantConnectionIsValid(?string $tenantConnectionName): void
