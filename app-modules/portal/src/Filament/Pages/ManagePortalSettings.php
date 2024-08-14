@@ -36,30 +36,32 @@
 
 namespace AidingApp\Portal\Filament\Pages;
 
-use App\Models\User;
-use App\Enums\Feature;
-use Filament\Forms\Get;
-use Filament\Forms\Form;
-use App\Models\SettingsProperty;
-use Filament\Pages\SettingsPage;
 use AidingApp\Form\Enums\Rounding;
-use Illuminate\Support\Facades\Gate;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Toggle;
-use AidingApp\Portal\Enums\PortalType;
-use Filament\Forms\Components\Actions;
-use Filament\Forms\Components\Section;
-use AidingApp\Portal\Enums\PortalLayout;
-use Filament\Forms\Components\TextInput;
-use App\Filament\Clusters\GlobalSettings;
-use Filament\Forms\Components\ToggleButtons;
-use Filament\Infolists\Components\TextEntry;
-use AidingApp\Portal\Settings\PortalSettings;
-use Filament\Forms\Components\Actions\Action;
-use App\Filament\Forms\Components\ColorSelect;
-use Laravel\Pennant\Feature as PennantFeature;
 use AidingApp\Portal\Actions\GeneratePortalEmbedCode;
+use AidingApp\Portal\Enums\GdprBannerButtonLabel;
+use AidingApp\Portal\Enums\PortalLayout;
+use AidingApp\Portal\Enums\PortalType;
+use AidingApp\Portal\Settings\PortalSettings;
+use App\Enums\Feature;
+use App\Filament\Clusters\GlobalSettings;
+use App\Filament\Forms\Components\ColorSelect;
+use App\Models\SettingsProperty;
+use App\Models\User;
+use Filament\Forms\Components\Actions;
+use Filament\Forms\Components\Actions\Action;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\ToggleButtons;
+use Filament\Forms\Form;
+use Filament\Forms\Get;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Pages\SettingsPage;
+use Illuminate\Support\Facades\Gate;
+use Laravel\Pennant\Feature as PennantFeature;
 
 class ManagePortalSettings extends SettingsPage
 {
@@ -204,6 +206,19 @@ class ManagePortalSettings extends SettingsPage
                             )
                             ->columnSpanFull(),
                     ])->columns(2),
+                Section::make('GDPR Banner Notice')
+                    ->schema([
+                        Textarea::make('gdpr_banner_text')
+                            ->label('GDPR Banner Text')
+                            ->required()
+                            ->columnSpanFull(),
+                        Select::make('gdpr_banner_button_label')
+                            ->options(GdprBannerButtonLabel::class)
+                            ->enum(GdprBannerButtonLabel::class)
+                            ->required()
+                            ->label('GDPR Button Label')
+                    ])
+                    ->visible(fn (Get $get) => $get('knowledge_management_portal_enabled')),
             ]);
     }
 }

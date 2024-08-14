@@ -36,6 +36,7 @@
 
 namespace AidingApp\Portal\Settings;
 
+use AidingApp\Portal\Enums\GdprBannerButtonLabel;
 use Spatie\LaravelSettings\Settings;
 
 class PortalSettings extends Settings
@@ -60,6 +61,10 @@ class PortalSettings extends Settings
     public ?string $knowledge_management_portal_authorized_domain = null;
 
     public ?string $knowledge_management_portal_layout = null;
+
+    public string $gdpr_banner_text;
+
+    public GdprBannerButtonLabel $gdpr_banner_button_label;
 
     public static function group(): string
     {
