@@ -43,6 +43,7 @@ use AidingApp\Portal\Enums\PortalLayout;
 use AidingApp\Portal\Enums\PortalType;
 use AidingApp\Portal\Settings\PortalSettings;
 use App\Enums\Feature;
+use App\Enums\FeatureFlag;
 use App\Filament\Clusters\GlobalSettings;
 use App\Filament\Forms\Components\ColorSelect;
 use App\Models\SettingsProperty;
@@ -218,7 +219,7 @@ class ManagePortalSettings extends SettingsPage
                             ->required()
                             ->label('GDPR Button Label')
                     ])
-                    ->visible(fn (Get $get) => $get('knowledge_management_portal_enabled')),
+                    ->visible(fn (Get $get) => $get('knowledge_management_portal_enabled') && FeatureFlag::GdprBannerCustomization->active()),
             ]);
     }
 }
