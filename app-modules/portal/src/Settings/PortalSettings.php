@@ -36,8 +36,8 @@
 
 namespace AidingApp\Portal\Settings;
 
-use AidingApp\Portal\Enums\GdprBannerButtonLabel;
 use Spatie\LaravelSettings\Settings;
+use AidingApp\Portal\Enums\GdprBannerButtonLabel;
 
 class PortalSettings extends Settings
 {

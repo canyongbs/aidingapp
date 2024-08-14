@@ -36,33 +36,33 @@
 
 namespace AidingApp\Portal\Filament\Pages;
 
-use AidingApp\Form\Enums\Rounding;
-use AidingApp\Portal\Actions\GeneratePortalEmbedCode;
-use AidingApp\Portal\Enums\GdprBannerButtonLabel;
-use AidingApp\Portal\Enums\PortalLayout;
-use AidingApp\Portal\Enums\PortalType;
-use AidingApp\Portal\Settings\PortalSettings;
-use App\Enums\Feature;
-use App\Enums\FeatureFlag;
-use App\Filament\Clusters\GlobalSettings;
-use App\Filament\Forms\Components\ColorSelect;
-use App\Models\SettingsProperty;
 use App\Models\User;
-use Filament\Forms\Components\Actions;
-use Filament\Forms\Components\Actions\Action;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\ToggleButtons;
-use Filament\Forms\Form;
+use App\Enums\Feature;
 use Filament\Forms\Get;
-use Filament\Infolists\Components\TextEntry;
+use Filament\Forms\Form;
+use App\Enums\FeatureFlag;
+use App\Models\SettingsProperty;
 use Filament\Pages\SettingsPage;
+use AidingApp\Form\Enums\Rounding;
 use Illuminate\Support\Facades\Gate;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Toggle;
+use AidingApp\Portal\Enums\PortalType;
+use Filament\Forms\Components\Actions;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Textarea;
+use AidingApp\Portal\Enums\PortalLayout;
+use Filament\Forms\Components\TextInput;
+use App\Filament\Clusters\GlobalSettings;
+use Filament\Forms\Components\ToggleButtons;
+use Filament\Infolists\Components\TextEntry;
+use AidingApp\Portal\Settings\PortalSettings;
+use Filament\Forms\Components\Actions\Action;
+use App\Filament\Forms\Components\ColorSelect;
 use Laravel\Pennant\Feature as PennantFeature;
+use AidingApp\Portal\Enums\GdprBannerButtonLabel;
+use AidingApp\Portal\Actions\GeneratePortalEmbedCode;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 
 class ManagePortalSettings extends SettingsPage
 {
@@ -217,7 +217,7 @@ class ManagePortalSettings extends SettingsPage
                             ->options(GdprBannerButtonLabel::class)
                             ->enum(GdprBannerButtonLabel::class)
                             ->required()
-                            ->label('GDPR Button Label')
+                            ->label('GDPR Button Label'),
                     ])
                     ->visible(fn (Get $get) => $get('knowledge_management_portal_enabled') && FeatureFlag::GdprBannerCustomization->active()),
             ]);
