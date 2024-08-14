@@ -1,4 +1,5 @@
 runas-user
 fix-permissions
-build-assets
 startup-caching
+build-assets
+initial-migration
