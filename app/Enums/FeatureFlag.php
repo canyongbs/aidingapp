@@ -34,40 +34,41 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\Settings;
+namespace App\Enums;
 
-use Spatie\LaravelSettings\Settings;
-use AidingApp\Portal\Enums\GdprBannerButtonLabel;
+use Closure;
+use Laravel\Pennant\Feature;
 
-class PortalSettings extends Settings
+enum FeatureFlag: string
 {
-    public null $logo = null;
+    case GdprBannerCustomization = 'gdpr_banner_customization';
 
-    public null $favicon = null;
-
-    /**
-    * Knowledge Base Portal
-    */
-    public bool $knowledge_management_portal_enabled = false;
-
-    public bool $knowledge_management_portal_service_management = false;
-
-    public bool $knowledge_management_portal_requires_authentication = false;
-
-    public ?string $knowledge_management_portal_primary_color = null;
-
-    public ?string $knowledge_management_portal_rounding = null;
-
-    public ?string $knowledge_management_portal_authorized_domain = null;
-
-    public ?string $knowledge_management_portal_layout = null;
-
-    public string $gdpr_banner_text;
-
-    public GdprBannerButtonLabel $gdpr_banner_button_label;
-
-    public static function group(): string
+    public function definition(): Closure
     {
-        return 'portal';
+        return match ($this) {
+            default => function () {
+                return false;
+            }
+        };
+    }
+
+    public function active(): bool
+    {
+        return Feature::active($this->value);
+    }
+
+    public function activate(): void
+    {
+        Feature::activate($this->value);
+    }
+
+    public function deactivate(): void
+    {
+        Feature::deactivate($this->value);
+    }
+
+    public function purge(): void
+    {
+        Feature::purge($this->value);
     }
 }

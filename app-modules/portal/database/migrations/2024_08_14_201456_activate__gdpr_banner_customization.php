@@ -34,40 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\Settings;
+use App\Enums\FeatureFlag;
+use Illuminate\Database\Migrations\Migration;
 
-use Spatie\LaravelSettings\Settings;
-use AidingApp\Portal\Enums\GdprBannerButtonLabel;
-
-class PortalSettings extends Settings
-{
-    public null $logo = null;
-
-    public null $favicon = null;
-
-    /**
-    * Knowledge Base Portal
-    */
-    public bool $knowledge_management_portal_enabled = false;
-
-    public bool $knowledge_management_portal_service_management = false;
-
-    public bool $knowledge_management_portal_requires_authentication = false;
-
-    public ?string $knowledge_management_portal_primary_color = null;
-
-    public ?string $knowledge_management_portal_rounding = null;
-
-    public ?string $knowledge_management_portal_authorized_domain = null;
-
-    public ?string $knowledge_management_portal_layout = null;
-
-    public string $gdpr_banner_text;
-
-    public GdprBannerButtonLabel $gdpr_banner_button_label;
-
-    public static function group(): string
+return new class () extends Migration {
+    public function up(): void
     {
-        return 'portal';
+        FeatureFlag::GdprBannerCustomization->activate();
     }
-}
+
+    public function down(): void
+    {
+        FeatureFlag::GdprBannerCustomization->deactivate();
+    }
+};

@@ -34,40 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\Settings;
+namespace AidingApp\Portal\Enums;
 
-use Spatie\LaravelSettings\Settings;
-use AidingApp\Portal\Enums\GdprBannerButtonLabel;
+use Filament\Support\Contracts\HasLabel;
 
-class PortalSettings extends Settings
+enum GdprBannerButtonLabel: string implements HasLabel
 {
-    public null $logo = null;
+    case Agree = 'Agree';
 
-    public null $favicon = null;
+    case AllowCookies = 'Allow Cookies';
 
-    /**
-    * Knowledge Base Portal
-    */
-    public bool $knowledge_management_portal_enabled = false;
+    case IUnderstand = 'I Understand';
 
-    public bool $knowledge_management_portal_service_management = false;
+    case Continue = 'Continue';
 
-    public bool $knowledge_management_portal_requires_authentication = false;
-
-    public ?string $knowledge_management_portal_primary_color = null;
-
-    public ?string $knowledge_management_portal_rounding = null;
-
-    public ?string $knowledge_management_portal_authorized_domain = null;
-
-    public ?string $knowledge_management_portal_layout = null;
-
-    public string $gdpr_banner_text;
-
-    public GdprBannerButtonLabel $gdpr_banner_button_label;
-
-    public static function group(): string
+    public function getLabel(): string
     {
-        return 'portal';
+        return $this->value;
     }
 }
