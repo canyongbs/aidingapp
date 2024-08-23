@@ -39,62 +39,62 @@ namespace AidingApp\ServiceManagement\Filament\Resources;
 use Filament\Resources\Resource;
 use Filament\Resources\Pages\Page;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ManageAssignment;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\EditServiceRequest;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ViewServiceRequest;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ListServiceRequests;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\CreateServiceRequest;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ServiceRequestTimeline;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ManageServiceRequestUpdate;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ManageAssignment;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ManageServiceRequestFormSubmission;
 
 class ServiceRequestResource extends Resource
 {
-  protected static ?string $model = ServiceRequest::class;
+    protected static ?string $model = ServiceRequest::class;
 
-  protected static ?string $navigationIcon = 'heroicon-o-briefcase';
+    protected static ?string $navigationIcon = 'heroicon-o-briefcase';
 
-  protected static ?string $navigationGroup = 'Service Management';
+    protected static ?string $navigationGroup = 'Service Management';
 
-  protected static ?int $navigationSort = 10;
+    protected static ?int $navigationSort = 10;
 
-  public static function shouldShowFormSubmission(Page $page): bool
-  {
-    if (! is_null($page->record) && ! is_null($page->record->serviceRequestFormSubmission)) {
-      return true;
+    public static function shouldShowFormSubmission(Page $page): bool
+    {
+        if (! is_null($page->record) && ! is_null($page->record->serviceRequestFormSubmission)) {
+            return true;
+        }
+
+        return false;
     }
 
-    return false;
-  }
+    public static function getRecordSubNavigation(Page $page): array
+    {
+        $navigationItems = [
+            ViewServiceRequest::class,
+            EditServiceRequest::class,
+            ManageAssignment::class,
+            ManageServiceRequestUpdate::class,
+            ServiceRequestTimeline::class,
+        ];
 
-  public static function getRecordSubNavigation(Page $page): array
-  {
-    $navigationItems = [
-      ViewServiceRequest::class,
-      EditServiceRequest::class,
-      ManageAssignment::class,
-      ManageServiceRequestUpdate::class,
-      ServiceRequestTimeline::class,
-    ];
+        if (static::shouldShowFormSubmission($page)) {
+            array_splice($navigationItems, 1, 0, ManageServiceRequestFormSubmission::class);
+        }
 
-    if (static::shouldShowFormSubmission($page)) {
-      array_splice($navigationItems, 1, 0, ManageServiceRequestFormSubmission::class);
+        return $page->generateNavigationItems($navigationItems);
     }
 
-    return $page->generateNavigationItems($navigationItems);
-  }
-
-  public static function getPages(): array
-  {
-    return [
-      'index' => ListServiceRequests::route('/'),
-      'manage-assignments' => ManageAssignment::route('/{record}/users'),
-      'manage-service-request-updates' => ManageServiceRequestUpdate::route('/{record}/updates'),
-      'manage-service-request-form-submission' => ManageServiceRequestFormSubmission::route('/{record}/form-submission'),
-      'create' => CreateServiceRequest::route('/create'),
-      'view' => ViewServiceRequest::route('/{record}'),
-      'edit' => EditServiceRequest::route('/{record}/edit'),
-      'timeline' => ServiceRequestTimeline::route('/{record}/timeline'),
-    ];
-  }
+    public static function getPages(): array
+    {
+        return [
+            'index' => ListServiceRequests::route('/'),
+            'manage-assignments' => ManageAssignment::route('/{record}/users'),
+            'manage-service-request-updates' => ManageServiceRequestUpdate::route('/{record}/updates'),
+            'manage-service-request-form-submission' => ManageServiceRequestFormSubmission::route('/{record}/form-submission'),
+            'create' => CreateServiceRequest::route('/create'),
+            'view' => ViewServiceRequest::route('/{record}'),
+            'edit' => EditServiceRequest::route('/{record}/edit'),
+            'timeline' => ServiceRequestTimeline::route('/{record}/timeline'),
+        ];
+    }
 }
