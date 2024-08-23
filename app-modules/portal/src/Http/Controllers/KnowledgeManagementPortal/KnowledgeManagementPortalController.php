@@ -50,21 +50,21 @@ class KnowledgeManagementPortalController extends Controller
     public function show(): JsonResponse
     {
         $settings = resolve(PortalSettings::class);
-        $settingsProperty = SettingsProperty::getInstance('portal.logo');
-        $logo = $settingsProperty->getFirstMedia('logo');
-        $settingsFaviconProperty = SettingsProperty::getInstance('portal.favicon');
-        $favicon = $settingsFaviconProperty->getFirstMedia('portal_favicon');
+        $logo = $settings->getSettingsPropertyModelClass()::getInstance('portal.logo')
+            ->getFirstMedia('logo');
+        $favicon = $settings->getSettingsPropertyModelClass()::getInstance('portal.favicon')
+            ->getFirstMedia('portal_favicon');
 
         return response()->json([
             'layout' => $settings->knowledge_management_portal_layout ?? PortalLayout::Full,
             'header_logo' => $logo ? $logo->getTemporaryUrl(
-                expiration: now()->addMinutes(5),
-                conversionName: 'logo-height-250px',
-            ) : url(Vite::asset('resources/images/default-logo-light.png')),
+                    expiration: now()->addMinutes(5),
+                    conversionName: 'logo-height-250px',
+                ) : url(Vite::asset('resources/images/default-logo-light.png')),
             'favicon' => $favicon?->getTemporaryUrl(
-                expiration: now()->addMinutes(5),
-                conversionName: 'portal_favicon',
-            ),
+                    expiration: now()->addMinutes(5),
+                    conversionName: 'portal_favicon',
+                ),
             'app_name' => config('app.name'),
             'primary_color' => Color::all()[$settings->knowledge_management_portal_primary_color ?? 'blue'],
             'rounding' => $settings->knowledge_management_portal_rounding,

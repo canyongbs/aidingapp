@@ -102,8 +102,7 @@ class AdminPanelProvider extends PanelProvider
                 }
 
                 $themeSettings = app(ThemeSettings::class);
-                $settingsProperty = SettingsProperty::getInstance('theme.is_favicon_active');
-                $favicon = $settingsProperty->getFirstMedia('favicon');
+                $favicon = $themeSettings::getSettingsPropertyModelClass()::getInstance('theme.is_favicon_active')->getFirstMedia('favicon');
 
                 return $themeSettings->is_favicon_active && $favicon ? $favicon->getTemporaryUrl(now()->addMinutes(5)) : asset('/images/default-favicon.png');
             })

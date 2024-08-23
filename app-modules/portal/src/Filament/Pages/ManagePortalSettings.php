@@ -155,14 +155,14 @@ class ManagePortalSettings extends SettingsPage
                                 'image/svg',
                             ])
                             ->model(
-                                SettingsProperty::getInstance('portal.favicon'),
+                                PortalSettings::getSettingsPropertyModelClass()::getInstance('portal.favicon'),
                             ),
                         SpatieMediaLibraryFileUpload::make('logo')
                             ->collection('logo')
                             ->visibility('private')
                             ->image()
                             ->model(
-                                SettingsProperty::getInstance('portal.logo'),
+                                PortalSettings::getSettingsPropertyModelClass()::getInstance('portal.logo'),
                             )
                             ->visible(fn (Get $get) => $get('knowledge_management_portal_enabled') && PennantFeature::active('portal-logo')),
                         Actions::make([

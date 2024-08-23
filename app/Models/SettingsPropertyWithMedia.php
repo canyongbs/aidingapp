@@ -34,27 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Theme\Settings;
+namespace App\Models;
 
-use AidingApp\Theme\Settings\SettingsProperties\ThemeSettingsProperty;
-use App\Settings\SettingsWithMedia;
-use Spatie\LaravelSettings\Settings;
-use Spatie\LaravelSettings\SettingsRepositories\DatabaseSettingsRepository;
-use Spatie\LaravelSettings\SettingsRepositories\SettingsRepository;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
+use Spatie\LaravelSettings\Models\SettingsProperty as BaseSettingsProperty;
 
-class ThemeSettings extends SettingsWithMedia
+
+abstract class SettingsPropertyWithMedia extends SettingsProperty implements HasMedia
 {
-    public bool $is_logo_active = false;
-
-    public bool $is_favicon_active = false;
-
-    public static function group(): string
-    {
-        return 'theme';
-    }
-
-    public static function getSettingsPropertyModelClass(): string
-    {
-        return ThemeSettingsProperty::class;
-    }
+    use InteractsWithMedia;
 }
