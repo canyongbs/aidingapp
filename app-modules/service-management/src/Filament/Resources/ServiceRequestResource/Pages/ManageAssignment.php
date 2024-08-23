@@ -42,36 +42,36 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\RelationManagers\CreatedByRelationManager;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\RelationManagers\AssignedToRelationManager;
 
-class ManageServiceRequestAssignment extends ManageRelatedRecords
+class ManageAssignment extends ManageRelatedRecords
 {
-    protected static string $resource = ServiceRequestResource::class;
+  protected static string $resource = ServiceRequestResource::class;
 
-    // TODO: Obsolete when there is no table, remove from Filament
-    protected static string $relationship = 'assignedTo';
+  // TODO: Obsolete when there is no table, remove from Filament
+  protected static string $relationship = 'assignedTo';
 
-    protected static ?string $navigationLabel = 'Service Request Assignments';
+  protected static ?string $navigationLabel = 'Assignments';
 
-    protected static ?string $breadcrumb = 'Assignments';
+  protected static ?string $breadcrumb = 'Assignments';
 
-    protected static ?string $navigationIcon = 'heroicon-o-users';
+  protected static ?string $navigationIcon = 'heroicon-o-users';
 
-    public static function canAccess(array $arguments = []): bool
-    {
-        return (bool) count(static::managers($arguments['record'] ?? null));
-    }
+  public static function canAccess(array $arguments = []): bool
+  {
+    return (bool) count(static::managers($arguments['record'] ?? null));
+  }
 
-    public function getRelationManagers(): array
-    {
-        return static::managers($this->getRecord());
-    }
+  public function getRelationManagers(): array
+  {
+    return static::managers($this->getRecord());
+  }
 
-    private static function managers(?Model $record = null): array
-    {
-        return collect([
-            AssignedToRelationManager::class,
-            CreatedByRelationManager::class,
-        ])
-            ->reject(fn ($relationManager) => $record && (! $relationManager::canViewForRecord($record, static::class)))
-            ->toArray();
-    }
+  private static function managers(?Model $record = null): array
+  {
+    return collect([
+      AssignedToRelationManager::class,
+      CreatedByRelationManager::class,
+    ])
+      ->reject(fn($relationManager) => $record && (! $relationManager::canViewForRecord($record, static::class)))
+      ->toArray();
+  }
 }
