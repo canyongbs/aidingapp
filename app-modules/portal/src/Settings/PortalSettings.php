@@ -62,9 +62,9 @@ class PortalSettings extends Settings
 
     public ?string $knowledge_management_portal_layout = null;
 
-    public string $gdpr_banner_text;
+    public string $gdpr_banner_text = "We use cookies to personalize content, to provide social media features, and to analyze our traffic. We also share information about your use of our site with our partners who may combine it with other information that you've provided to them or that they've collected from your use of their services.";
 
-    public GdprBannerButtonLabel $gdpr_banner_button_label;
+    public GdprBannerButtonLabel $gdpr_banner_button_label = GdprBannerButtonLabel::AllowCookies;
 
     public static function group(): string
     {
