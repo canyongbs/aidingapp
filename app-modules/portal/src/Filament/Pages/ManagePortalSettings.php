@@ -219,7 +219,7 @@ class ManagePortalSettings extends SettingsPage
                             ->required()
                             ->label('GDPR Button Label'),
                     ])
-                    ->visible(fn (Get $get) => $get('knowledge_management_portal_enabled') && FeatureFlag::GdprBannerCustomization->active()),
+                    ->visible(fn (Get $get) => $get('knowledge_management_portal_enabled')),
             ]);
     }
 }
