@@ -36,7 +36,6 @@
 
 namespace App\Settings;
 
-use App\Settings\Contracts\HasDefaultSettings;
 use Spatie\LaravelSettings\Settings;
 
 class OlympusSettings extends Settings
