@@ -13,5 +13,5 @@ app(ModuleRegistry::class, [
 ])->modules()->each(function(ModuleConfig $module) {
     arch("All {$module->name} Settings classes should have defaults for all properties")
         ->expect($module->namespace() . 'Settings')
-        ->toHaveAttribute('App\Settings\Contracts\HasDefaultSettings');
+        ->toHaveDefaultsForAllProperties();
 });
