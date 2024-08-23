@@ -46,55 +46,56 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\CreateServiceRequest;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ServiceRequestTimeline;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ManageServiceRequestUpdate;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ManageAssignments;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ManageServiceRequestFormSubmission;
 
 class ServiceRequestResource extends Resource
 {
-    protected static ?string $model = ServiceRequest::class;
+  protected static ?string $model = ServiceRequest::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-briefcase';
+  protected static ?string $navigationIcon = 'heroicon-o-briefcase';
 
-    protected static ?string $navigationGroup = 'Service Management';
+  protected static ?string $navigationGroup = 'Service Management';
 
-    protected static ?int $navigationSort = 10;
+  protected static ?int $navigationSort = 10;
 
-    public static function shouldShowFormSubmission(Page $page): bool
-    {
-        if (! is_null($page->record) && ! is_null($page->record->serviceRequestFormSubmission)) {
-            return true;
-        }
-
-        return false;
+  public static function shouldShowFormSubmission(Page $page): bool
+  {
+    if (! is_null($page->record) && ! is_null($page->record->serviceRequestFormSubmission)) {
+      return true;
     }
 
-    public static function getRecordSubNavigation(Page $page): array
-    {
-        $navigationItems = [
-            ViewServiceRequest::class,
-            EditServiceRequest::class,
-            ManageAssignment::class,
-            ManageServiceRequestUpdate::class,
-            ServiceRequestTimeline::class,
-        ];
+    return false;
+  }
 
-        if (static::shouldShowFormSubmission($page)) {
-            array_splice($navigationItems, 1, 0, ManageServiceRequestFormSubmission::class);
-        }
+  public static function getRecordSubNavigation(Page $page): array
+  {
+    $navigationItems = [
+      ViewServiceRequest::class,
+      EditServiceRequest::class,
+      ManageAssignments::class,
+      ManageServiceRequestUpdate::class,
+      ServiceRequestTimeline::class,
+    ];
 
-        return $page->generateNavigationItems($navigationItems);
+    if (static::shouldShowFormSubmission($page)) {
+      array_splice($navigationItems, 1, 0, ManageServiceRequestFormSubmission::class);
     }
 
-    public static function getPages(): array
-    {
-        return [
-            'index' => ListServiceRequests::route('/'),
-            'manage-assignments' => ManageAssignment::route('/{record}/users'),
-            'manage-service-request-updates' => ManageServiceRequestUpdate::route('/{record}/updates'),
-            'manage-service-request-form-submission' => ManageServiceRequestFormSubmission::route('/{record}/form-submission'),
-            'create' => CreateServiceRequest::route('/create'),
-            'view' => ViewServiceRequest::route('/{record}'),
-            'edit' => EditServiceRequest::route('/{record}/edit'),
-            'timeline' => ServiceRequestTimeline::route('/{record}/timeline'),
-        ];
-    }
+    return $page->generateNavigationItems($navigationItems);
+  }
+
+  public static function getPages(): array
+  {
+    return [
+      'index' => ListServiceRequests::route('/'),
+      'manage-assignments' => ManageAssignments::route('/{record}/users'),
+      'manage-service-request-updates' => ManageServiceRequestUpdate::route('/{record}/updates'),
+      'manage-service-request-form-submission' => ManageServiceRequestFormSubmission::route('/{record}/form-submission'),
+      'create' => CreateServiceRequest::route('/create'),
+      'view' => ViewServiceRequest::route('/{record}'),
+      'edit' => EditServiceRequest::route('/{record}/edit'),
+      'timeline' => ServiceRequestTimeline::route('/{record}/timeline'),
+    ];
+  }
 }

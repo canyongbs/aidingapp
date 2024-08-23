@@ -42,7 +42,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\RelationManagers\CreatedByRelationManager;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\RelationManagers\AssignedToRelationManager;
 
-class ManageAssignment extends ManageRelatedRecords
+class ManageAssignments extends ManageRelatedRecords
 {
     protected static string $resource = ServiceRequestResource::class;
 
