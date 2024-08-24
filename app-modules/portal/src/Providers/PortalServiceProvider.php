@@ -36,13 +36,13 @@
 
 namespace AidingApp\Portal\Providers;
 
-use AidingApp\Authorization\AuthorizationRoleRegistry;
-use AidingApp\Portal\PortalPlugin;
-use AidingApp\Portal\Registries\PortalRbacRegistry;
-use AidingApp\Portal\Settings\SettingsProperties\PortalSettingsProperty;
 use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
+use AidingApp\Portal\PortalPlugin;
 use Illuminate\Support\ServiceProvider;
+use AidingApp\Portal\Registries\PortalRbacRegistry;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use AidingApp\Authorization\AuthorizationRoleRegistry;
+use AidingApp\Portal\Settings\SettingsProperties\PortalSettingsProperty;
 
 class PortalServiceProvider extends ServiceProvider
 {

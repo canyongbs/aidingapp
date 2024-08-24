@@ -36,13 +36,13 @@
 
 namespace AidingApp\Theme\Providers;
 
-use AidingApp\Authorization\AuthorizationRoleRegistry;
-use AidingApp\Theme\Registries\ThemeRbacRegistry;
-use AidingApp\Theme\Settings\SettingsProperties\ThemeSettingsProperty;
-use AidingApp\Theme\ThemePlugin;
 use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
+use AidingApp\Theme\ThemePlugin;
 use Illuminate\Support\ServiceProvider;
+use AidingApp\Theme\Registries\ThemeRbacRegistry;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use AidingApp\Authorization\AuthorizationRoleRegistry;
+use AidingApp\Theme\Settings\SettingsProperties\ThemeSettingsProperty;
 
 class ThemeServiceProvider extends ServiceProvider
 {

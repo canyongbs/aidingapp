@@ -34,14 +34,10 @@
 </COPYRIGHT>
 */
 
-use App\Models\SettingsProperty;
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Migrations\Migration;
 
-return new class extends Migration
-{
+return new class () extends Migration {
     public function up(): void
     {
         $themeLogo = DB::table('settings')->where('group', 'theme')
@@ -87,8 +83,6 @@ return new class extends Migration
                 ->where('model_id', $portalFavicon->id)
                 ->update(['model_type' => 'portal_settings_property']);
         }
-
-
     }
 
     public function down(): void
