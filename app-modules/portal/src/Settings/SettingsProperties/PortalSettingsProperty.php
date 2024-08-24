@@ -28,5 +28,11 @@ class PortalSettingsProperty extends SettingsPropertyWithMedia
                 'image/jpg',
                 'image/svg',
             ]);
+
+        $this->addMediaCollection('logo')
+            ->singleFile()
+            ->acceptsMimeTypes([
+                'image/*'
+            ]);
     }
 }

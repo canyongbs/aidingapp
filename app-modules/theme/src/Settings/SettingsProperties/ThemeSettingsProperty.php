@@ -17,15 +17,16 @@ class ThemeSettingsProperty extends SettingsPropertyWithMedia
 
     public function registerMediaCollections(): void
     {
-        // $this->addMediaCollection('portal_favicon')
-        //     ->singleFile()
-        //     ->acceptsMimeTypes([
-        //         'image/png',
-        //         'image/jpeg',
-        //         'image/ico',
-        //         'image/webp',
-        //         'image/jpg',
-        //         'image/svg',
-        //     ]);
+        $this->addMediaCollection('logo')
+            ->singleFile()
+            ->acceptsMimeTypes([
+                'image/*'
+            ]);
+
+        $this->addMediaCollection('dark_logo')
+            ->singleFile()
+            ->acceptsMimeTypes([
+                'image/*'
+            ]);
     }
 }
