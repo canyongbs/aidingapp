@@ -32,7 +32,11 @@ class PortalSettingsProperty extends SettingsPropertyWithMedia
         $this->addMediaCollection('logo')
             ->singleFile()
             ->acceptsMimeTypes([
-                'image/*'
+                'image/png',
+                'image/jpeg',
+                'image/webp',
+                'image/jpg',
+                'image/svg',
             ]);
     }
 }
