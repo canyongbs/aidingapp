@@ -24,7 +24,7 @@ abstract class SettingsWithMedia extends Settings
         ]);
     }
 
-    public function getSettingsPropertyModel(string $property): SettingsPropertyWithMedia
+    public static function getSettingsPropertyModel(string $property): SettingsPropertyWithMedia
     {
         return static::getSettingsPropertyModelClass()::getInstance($property);
     }

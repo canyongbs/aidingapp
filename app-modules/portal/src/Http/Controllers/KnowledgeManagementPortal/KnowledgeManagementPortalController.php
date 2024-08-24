@@ -49,9 +49,9 @@ class KnowledgeManagementPortalController extends Controller
     public function show(): JsonResponse
     {
         $settings = resolve(PortalSettings::class);
-        $logo = $settings->getSettingsPropertyModelClass()::getInstance('portal.logo')
+        $logo = $settings->getSettingsPropertyModel('portal.logo')
             ->getFirstMedia('logo');
-        $favicon = $settings->getSettingsPropertyModelClass()::getInstance('portal.favicon')
+        $favicon = $settings->getSettingsPropertyModel('portal.favicon')
             ->getFirstMedia('portal_favicon');
 
         return response()->json([

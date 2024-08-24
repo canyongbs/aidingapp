@@ -82,7 +82,7 @@ class ManageBrandConfigurationSettings extends SettingsPage
                             ->visibility('private')
                             ->image()
                             ->model(
-                                ThemeSettings::getSettingsPropertyModelClass()::getInstance('theme.is_favicon_active'),
+                                ThemeSettings::getSettingsPropertyModel('theme.is_favicon_active'),
                             )
                             ->afterStateUpdated(fn (Set $set) => $set('is_favicon_active', true))
                             ->deleteUploadedFileUsing(fn (Set $set) => $set('is_favicon_active', false))
@@ -100,7 +100,7 @@ class ManageBrandConfigurationSettings extends SettingsPage
                             ->visibility('private')
                             ->image()
                             ->model(
-                                ThemeSettings::getSettingsPropertyModelClass()::getInstance('theme.is_logo_active'),
+                                ThemeSettings::getSettingsPropertyModel('theme.is_logo_active'),
                             )
                             ->afterStateUpdated(fn (Set $set) => $set('is_logo_active', true))
                             ->deleteUploadedFileUsing(fn (Set $set) => $set('is_logo_active', false))
@@ -111,7 +111,7 @@ class ManageBrandConfigurationSettings extends SettingsPage
                             ->visibility('private')
                             ->image()
                             ->model(
-                                ThemeSettings::getSettingsPropertyModelClass()::getInstance('theme.is_logo_active'),
+                                ThemeSettings::getSettingsPropertyModel('theme.is_logo_active'),
                             )
                             ->hidden(fn (Get $get): bool => blank($get('logo'))),
                         Toggle::make('is_logo_active')

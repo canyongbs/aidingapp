@@ -54,7 +54,7 @@ class ServiceRequestFeedbackFormWidgetController extends Controller
 {
     public function view(Request $request, ServiceRequest $serviceRequest): JsonResponse
     {
-        $logo = ThemeSettings::getSettingsPropertyModelClass()::getInstance('theme.is_logo_active')->getFirstMedia('logo');
+        $logo = ThemeSettings::getSettingsPropertyModel('theme.is_logo_active')->getFirstMedia('logo');
         $portalSettings = app(PortalSettings::class);
 
         return response()->json(
