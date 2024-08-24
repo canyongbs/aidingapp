@@ -55,7 +55,7 @@ class KnowledgeBaseItemResource extends Resource
 
     protected static ?string $breadcrumb = 'Knowledge Management';
 
-    protected static ?string $modelLabel = 'Knowledge Base Article';
+    protected static ?string $modelLabel = 'knowledge base article';
 
     protected static ?string $navigationIcon = 'heroicon-o-book-open';
 
