@@ -38,11 +38,6 @@ namespace App\Models;
 
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Spatie\MediaLibrary\MediaCollections\Models\Media;
-use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
-use Spatie\LaravelSettings\Models\SettingsProperty as BaseSettingsProperty;
-
 
 abstract class SettingsPropertyWithMedia extends SettingsProperty implements HasMedia
 {

@@ -36,13 +36,9 @@
 
 namespace AidingApp\Portal\Settings;
 
+use App\Settings\SettingsWithMedia;
 use AidingApp\Portal\Enums\GdprBannerButtonLabel;
 use AidingApp\Portal\Settings\SettingsProperties\PortalSettingsProperty;
-use App\Models\SettingsProperty;
-use App\Settings\SettingsWithMedia;
-use Spatie\LaravelSettings\Settings;
-use Spatie\LaravelSettings\SettingsRepositories\DatabaseSettingsRepository;
-use Spatie\LaravelSettings\SettingsRepositories\SettingsRepository;
 
 class PortalSettings extends SettingsWithMedia
 {

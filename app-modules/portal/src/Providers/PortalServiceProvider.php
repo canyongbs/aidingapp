@@ -36,12 +36,13 @@
 
 namespace AidingApp\Portal\Providers;
 
-use Filament\Panel;
-use AidingApp\Portal\PortalPlugin;
-use Illuminate\Support\ServiceProvider;
-use AidingApp\Portal\Registries\PortalRbacRegistry;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use AidingApp\Authorization\AuthorizationRoleRegistry;
+use AidingApp\Portal\PortalPlugin;
+use AidingApp\Portal\Registries\PortalRbacRegistry;
+use AidingApp\Portal\Settings\SettingsProperties\PortalSettingsProperty;
+use Filament\Panel;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\ServiceProvider;
 
 class PortalServiceProvider extends ServiceProvider
 {
@@ -52,7 +53,9 @@ class PortalServiceProvider extends ServiceProvider
 
     public function boot()
     {
-        Relation::morphMap([]);
+        Relation::morphMap([
+            'portal_settings_property' => PortalSettingsProperty::class,
+        ]);
 
         AuthorizationRoleRegistry::register(PortalRbacRegistry::class);
     }

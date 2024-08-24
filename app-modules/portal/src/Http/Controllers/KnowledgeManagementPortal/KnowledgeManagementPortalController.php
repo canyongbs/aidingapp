@@ -36,7 +36,6 @@
 
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
-use App\Models\SettingsProperty;
 use Illuminate\Http\JsonResponse;
 use Filament\Support\Colors\Color;
 use Illuminate\Support\Facades\URL;

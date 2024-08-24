@@ -2,10 +2,7 @@
 
 namespace AidingApp\Theme\Settings\SettingsProperties;
 
-use App\Models\SettingsProperty;
 use App\Models\SettingsPropertyWithMedia;
-use Spatie\MediaLibrary\HasMedia;
-use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class ThemeSettingsProperty extends SettingsPropertyWithMedia

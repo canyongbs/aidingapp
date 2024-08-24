@@ -2,12 +2,10 @@
 
 namespace App\Settings;
 
-use App\Models\SettingsProperty;
-use App\Models\SettingsPropertyWithMedia;
 use Spatie\LaravelSettings\Settings;
-use Spatie\LaravelSettings\SettingsRepositories\DatabaseSettingsRepository;
+use App\Models\SettingsPropertyWithMedia;
 use Spatie\LaravelSettings\SettingsRepositories\SettingsRepository;
-use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\LaravelSettings\SettingsRepositories\DatabaseSettingsRepository;
 
 abstract class SettingsWithMedia extends Settings
 {
@@ -22,7 +20,7 @@ abstract class SettingsWithMedia extends Settings
             ...config('settings.repositories.database'),
             ...[
                 'model' => static::getSettingsPropertyModelClass(),
-            ]
+            ],
         ]);
     }
 

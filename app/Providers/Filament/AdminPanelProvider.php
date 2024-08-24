@@ -39,7 +39,6 @@ namespace App\Providers\Filament;
 use Filament\Panel;
 use App\Models\Tenant;
 use Filament\PanelProvider;
-use App\Models\SettingsProperty;
 use App\Filament\Pages\Dashboard;
 use Filament\Navigation\MenuItem;
 use Filament\Actions\ExportAction;

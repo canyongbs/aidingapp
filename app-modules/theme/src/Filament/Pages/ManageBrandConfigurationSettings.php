@@ -40,7 +40,6 @@ use App\Models\User;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Forms\Form;
-use App\Models\SettingsProperty;
 use Filament\Pages\SettingsPage;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Section;
@@ -112,7 +111,7 @@ class ManageBrandConfigurationSettings extends SettingsPage
                             ->visibility('private')
                             ->image()
                             ->model(
-                                SettingsProperty::getInstance('theme.is_logo_active'),
+                                ThemeSettings::getSettingsPropertyModelClass()::getInstance('theme.is_logo_active'),
                             )
                             ->hidden(fn (Get $get): bool => blank($get('logo'))),
                         Toggle::make('is_logo_active')

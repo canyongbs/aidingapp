@@ -36,7 +36,6 @@
 
 namespace AidingApp\Audit\Settings;
 
-use AidingApp\Audit\Actions\Finders\AuditableModels;
 use Spatie\LaravelSettings\Settings;
 
 class AuditSettings extends Settings

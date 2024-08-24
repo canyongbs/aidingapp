@@ -36,11 +36,8 @@
 
 namespace AidingApp\Theme\Settings;
 
-use AidingApp\Theme\Settings\SettingsProperties\ThemeSettingsProperty;
 use App\Settings\SettingsWithMedia;
-use Spatie\LaravelSettings\Settings;
-use Spatie\LaravelSettings\SettingsRepositories\DatabaseSettingsRepository;
-use Spatie\LaravelSettings\SettingsRepositories\SettingsRepository;
+use AidingApp\Theme\Settings\SettingsProperties\ThemeSettingsProperty;
 
 class ThemeSettings extends SettingsWithMedia
 {

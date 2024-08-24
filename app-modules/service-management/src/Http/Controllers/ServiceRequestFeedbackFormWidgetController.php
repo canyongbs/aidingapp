@@ -38,13 +38,13 @@ namespace AidingApp\ServiceManagement\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-use App\Models\SettingsProperty;
 use Illuminate\Http\JsonResponse;
 use Filament\Support\Colors\Color;
 use Illuminate\Support\Facades\URL;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\Facades\Validator;
+use AidingApp\Theme\Settings\ThemeSettings;
 use AidingApp\Portal\Settings\PortalSettings;
 use Symfony\Component\HttpFoundation\Response;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
@@ -54,8 +54,7 @@ class ServiceRequestFeedbackFormWidgetController extends Controller
 {
     public function view(Request $request, ServiceRequest $serviceRequest): JsonResponse
     {
-        $settingsProperty = SettingsProperty::getInstance('theme.is_logo_active');
-        $logo = $settingsProperty->getFirstMedia('logo');
+        $logo = ThemeSettings::getSettingsPropertyModelClass()::getInstance('theme.is_logo_active')->getFirstMedia('logo');
         $portalSettings = app(PortalSettings::class);
 
         return response()->json(
