@@ -39,13 +39,13 @@ namespace AidingApp\ServiceManagement\Filament\Resources;
 use Filament\Resources\Resource;
 use Filament\Resources\Pages\Page;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ManageAssignments;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\EditServiceRequest;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ViewServiceRequest;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ListServiceRequests;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\CreateServiceRequest;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ServiceRequestTimeline;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ManageServiceRequestUpdate;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ManageServiceRequestAssignment;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ManageServiceRequestFormSubmission;
 
 class ServiceRequestResource extends Resource
@@ -72,7 +72,7 @@ class ServiceRequestResource extends Resource
         $navigationItems = [
             ViewServiceRequest::class,
             EditServiceRequest::class,
-            ManageServiceRequestAssignment::class,
+            ManageAssignments::class,
             ManageServiceRequestUpdate::class,
             ServiceRequestTimeline::class,
         ];
@@ -88,7 +88,7 @@ class ServiceRequestResource extends Resource
     {
         return [
             'index' => ListServiceRequests::route('/'),
-            'manage-assignments' => ManageServiceRequestAssignment::route('/{record}/users'),
+            'manage-assignments' => ManageAssignments::route('/{record}/users'),
             'manage-service-request-updates' => ManageServiceRequestUpdate::route('/{record}/updates'),
             'manage-service-request-form-submission' => ManageServiceRequestFormSubmission::route('/{record}/form-submission'),
             'create' => CreateServiceRequest::route('/create'),

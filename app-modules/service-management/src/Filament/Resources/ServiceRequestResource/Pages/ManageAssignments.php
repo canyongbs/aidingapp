@@ -42,14 +42,14 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\RelationManagers\CreatedByRelationManager;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\RelationManagers\AssignedToRelationManager;
 
-class ManageServiceRequestAssignment extends ManageRelatedRecords
+class ManageAssignments extends ManageRelatedRecords
 {
     protected static string $resource = ServiceRequestResource::class;
 
     // TODO: Obsolete when there is no table, remove from Filament
     protected static string $relationship = 'assignedTo';
 
-    protected static ?string $navigationLabel = 'Service Request Assignments';
+    protected static ?string $navigationLabel = 'Assignments';
 
     protected static ?string $breadcrumb = 'Assignments';
 
