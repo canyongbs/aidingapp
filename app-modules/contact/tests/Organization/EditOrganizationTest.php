@@ -86,10 +86,20 @@ test('Edit Organization Record', function () {
 
     $request = collect(EditOrganizationRequestFactory::new()->create());
 
+    $domains = [
+        [
+            'domain' => 'acme.com',
+        ],
+        [
+            'domain' => 'purdy.com',
+        ],
+    ];
+
     livewire(EditOrganization::class, [
         'record' => $organization->getRouteKey(),
     ])
         ->fillForm($request->toArray())
+        ->set('data.domains', $domains)
         ->call('save')
         ->assertHasNoFormErrors();
 
@@ -109,5 +119,6 @@ test('Edit Organization Record', function () {
         ->and($organization->country)->toEqual($request->get('country'))
         ->and($organization->linkedin_url)->toEqual($request->get('linkedin_url'))
         ->and($organization->facebook_url)->toEqual($request->get('facebook_url'))
-        ->and($organization->twitter_url)->toEqual($request->get('twitter_url'));
+        ->and($organization->twitter_url)->toEqual($request->get('twitter_url'))
+        ->and($organization->domains)->toEqual($domains);
 });

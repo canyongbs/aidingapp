@@ -80,6 +80,14 @@ test('Create New Organization', function () {
 
     livewire(CreateOrganization::class)
         ->fillForm($request->toArray())
+        ->set('data.domains', [
+            [
+                'domain' => 'brakus.com',
+            ],
+            [
+                'domain' => 'purdy.com',
+            ],
+        ])
         ->call('create')
         ->assertHasNoFormErrors();
     assertCount(1, Organization::all());
