@@ -37,13 +37,16 @@
 namespace AidingApp\Contact\Filament\Resources\OrganizationResource\Pages;
 
 use Filament\Forms\Form;
+use Laravel\Pennant\Feature;
 use Filament\Actions\ViewAction;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\EditRecord;
+use AidingApp\Contact\Rules\UniqueDomain;
 use AidingApp\Contact\Models\OrganizationType;
 use AidingApp\Contact\Models\OrganizationIndustry;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
@@ -80,6 +83,23 @@ class EditOrganization extends EditRecord
                             ->label('Organization Logo')
                             ->collection('organization_logo')
                             ->image(),
+                        Repeater::make('domains')
+                            ->schema([
+                                TextInput::make('domain')
+                                    ->label('Domain')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->regex('/^(?!-)([a-zA-Z0-9-]{1,63}\.)+[a-zA-Z]{2,63}$/')
+                                    ->rule(new UniqueDomain($this->record->id))
+                                    ->distinct()
+                                    ->validationMessages([
+                                        'distinct' => 'This :attribute is already in use and may not be used a second time.',
+                                    ]),
+                            ])
+                            ->reorderable(false)
+                            ->columnSpan('full')
+                            ->grid(2)
+                            ->visible(Feature::active('organization_domains')),
                     ]),
                 Section::make('Additional Info')
                     ->columns()
