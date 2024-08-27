@@ -158,7 +158,7 @@
                     <p class="text-primary-100">Search our knowledge base for advice and answers</p>
                 </div>
 
-                <form action="#" method="GET">
+                
                     <label for="search" class="sr-only">Search</label>
                     <div class="relative rounded">
                         <div>
@@ -192,7 +192,7 @@
                             />
                         </div>
                     </details>
-                </form>
+               
             </div>
         </div>
     </div>
