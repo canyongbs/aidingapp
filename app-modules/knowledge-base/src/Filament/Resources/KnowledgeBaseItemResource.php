@@ -55,7 +55,7 @@ class KnowledgeBaseItemResource extends Resource
 
     protected static ?string $breadcrumb = 'Knowledge Management';
 
-    protected static ?string $modelLabel = 'knowledge management';
+    protected static ?string $modelLabel = 'knowledge base article';
 
     protected static ?string $navigationIcon = 'heroicon-o-book-open';
 
@@ -86,7 +86,7 @@ class KnowledgeBaseItemResource extends Resource
 
     public static function getGlobalSearchResultUrl(Model $record): ?string
     {
-        return static::getUrl('view', ['record' => $record]);
+        return static::getUrl('edit', ['record' => $record]);
     }
 
     public static function form(Form $form): Form
