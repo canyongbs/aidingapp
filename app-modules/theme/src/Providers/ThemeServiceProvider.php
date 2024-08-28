@@ -40,7 +40,9 @@ use Filament\Panel;
 use AidingApp\Theme\ThemePlugin;
 use Illuminate\Support\ServiceProvider;
 use AidingApp\Theme\Registries\ThemeRbacRegistry;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use AidingApp\Authorization\AuthorizationRoleRegistry;
+use AidingApp\Theme\Settings\SettingsProperties\ThemeSettingsProperty;
 
 class ThemeServiceProvider extends ServiceProvider
 {
@@ -52,5 +54,9 @@ class ThemeServiceProvider extends ServiceProvider
     public function boot(): void
     {
         AuthorizationRoleRegistry::register(ThemeRbacRegistry::class);
+
+        Relation::morphMap([
+            'theme_settings_property' => ThemeSettingsProperty::class,
+        ]);
     }
 }

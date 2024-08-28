@@ -34,32 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace App\Settings;
+namespace App\Models;
 
-use Spatie\LaravelSettings\Settings;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class OlympusSettings extends Settings
+abstract class SettingsPropertyWithMedia extends SettingsProperty implements HasMedia
 {
-    public ?string $application_id = null;
-
-    public ?string $key = null;
-
-    public ?string $url = null;
-
-    public static function repository(): ?string
-    {
-        return 'landlord_database';
-    }
-
-    public static function group(): string
-    {
-        return 'olympus';
-    }
-
-    public static function encrypted(): array
-    {
-        return [
-            'key',
-        ];
-    }
+    use InteractsWithMedia;
 }

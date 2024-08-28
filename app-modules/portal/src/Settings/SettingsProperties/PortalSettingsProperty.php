@@ -34,32 +34,43 @@
 </COPYRIGHT>
 */
 
-namespace App\Settings;
+namespace AidingApp\Portal\Settings\SettingsProperties;
 
-use Spatie\LaravelSettings\Settings;
+use App\Models\SettingsPropertyWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
-class OlympusSettings extends Settings
+class PortalSettingsProperty extends SettingsPropertyWithMedia
 {
-    public ?string $application_id = null;
-
-    public ?string $key = null;
-
-    public ?string $url = null;
-
-    public static function repository(): ?string
+    public function registerMediaConversions(Media $media = null): void
     {
-        return 'landlord_database';
+        $this->addMediaConversion('portal_favicon')
+            ->format('png')
+            ->performOnCollections('portal_favicon')
+            ->height(512)
+            ->width(512);
     }
 
-    public static function group(): string
+    public function registerMediaCollections(): void
     {
-        return 'olympus';
-    }
+        $this->addMediaCollection('portal_favicon')
+            ->singleFile()
+            ->acceptsMimeTypes([
+                'image/png',
+                'image/jpeg',
+                'image/ico',
+                'image/webp',
+                'image/jpg',
+                'image/svg',
+            ]);
 
-    public static function encrypted(): array
-    {
-        return [
-            'key',
-        ];
+        $this->addMediaCollection('logo')
+            ->singleFile()
+            ->acceptsMimeTypes([
+                'image/png',
+                'image/jpeg',
+                'image/webp',
+                'image/jpg',
+                'image/svg',
+            ]);
     }
 }

@@ -36,16 +36,22 @@
 
 namespace AidingApp\Theme\Settings;
 
-use Spatie\LaravelSettings\Settings;
+use App\Settings\SettingsWithMedia;
+use AidingApp\Theme\Settings\SettingsProperties\ThemeSettingsProperty;
 
-class ThemeSettings extends Settings
+class ThemeSettings extends SettingsWithMedia
 {
-    public bool $is_logo_active;
+    public bool $is_logo_active = false;
 
-    public bool $is_favicon_active;
+    public bool $is_favicon_active = false;
 
     public static function group(): string
     {
         return 'theme';
+    }
+
+    public static function getSettingsPropertyModelClass(): string
+    {
+        return ThemeSettingsProperty::class;
     }
 }

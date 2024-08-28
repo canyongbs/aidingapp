@@ -40,7 +40,6 @@ use App\Models\User;
 use App\Enums\Feature;
 use Filament\Forms\Get;
 use Filament\Forms\Form;
-use App\Models\SettingsProperty;
 use Filament\Pages\SettingsPage;
 use AidingApp\Form\Enums\Rounding;
 use Illuminate\Support\Facades\Gate;
@@ -155,14 +154,14 @@ class ManagePortalSettings extends SettingsPage
                                 'image/svg',
                             ])
                             ->model(
-                                SettingsProperty::getInstance('portal.favicon'),
+                                PortalSettings::getSettingsPropertyModel('portal.favicon'),
                             ),
                         SpatieMediaLibraryFileUpload::make('logo')
                             ->collection('logo')
                             ->visibility('private')
                             ->image()
                             ->model(
-                                SettingsProperty::getInstance('portal.logo'),
+                                PortalSettings::getSettingsPropertyModel('portal.logo'),
                             )
                             ->visible(fn (Get $get) => $get('knowledge_management_portal_enabled') && PennantFeature::active('portal-logo')),
                         Actions::make([

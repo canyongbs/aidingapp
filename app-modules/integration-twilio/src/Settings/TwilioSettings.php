@@ -41,15 +41,15 @@ use AidingApp\IntegrationTwilio\DataTransferObjects\TwilioApiKey;
 
 class TwilioSettings extends Settings
 {
-    public bool $is_enabled;
+    public bool $is_enabled = false;
 
-    public ?TwilioApiKey $api_key;
+    public ?TwilioApiKey $api_key = null;
 
-    public ?string $account_sid;
+    public ?string $account_sid = null;
 
-    public ?string $auth_token;
+    public ?string $auth_token = null;
 
-    public ?string $from_number;
+    public ?string $from_number = null;
 
     public static function group(): string
     {

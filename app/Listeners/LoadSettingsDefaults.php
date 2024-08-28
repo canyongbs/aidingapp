@@ -34,32 +34,21 @@
 </COPYRIGHT>
 */
 
-namespace App\Settings;
+namespace App\Listeners;
 
-use Spatie\LaravelSettings\Settings;
+use ReflectionClass;
+use Spatie\LaravelSettings\Events\LoadingSettings;
 
-class OlympusSettings extends Settings
+class LoadSettingsDefaults
 {
-    public ?string $application_id = null;
-
-    public ?string $key = null;
-
-    public ?string $url = null;
-
-    public static function repository(): ?string
+    public function handle(LoadingSettings $event): void
     {
-        return 'landlord_database';
-    }
+        foreach ((new ReflectionClass($event->settingsClass))->getProperties() as $property) {
+            if ($event->properties->has($property->getName())) {
+                continue;
+            }
 
-    public static function group(): string
-    {
-        return 'olympus';
-    }
-
-    public static function encrypted(): array
-    {
-        return [
-            'key',
-        ];
+            $event->properties->put($property->getName(), $property->getDefaultValue());
+        }
     }
 }

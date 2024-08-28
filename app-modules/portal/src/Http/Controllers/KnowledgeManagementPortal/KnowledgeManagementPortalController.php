@@ -36,7 +36,6 @@
 
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
-use App\Models\SettingsProperty;
 use Illuminate\Http\JsonResponse;
 use Filament\Support\Colors\Color;
 use Illuminate\Support\Facades\URL;
@@ -50,10 +49,10 @@ class KnowledgeManagementPortalController extends Controller
     public function show(): JsonResponse
     {
         $settings = resolve(PortalSettings::class);
-        $settingsProperty = SettingsProperty::getInstance('portal.logo');
-        $logo = $settingsProperty->getFirstMedia('logo');
-        $settingsFaviconProperty = SettingsProperty::getInstance('portal.favicon');
-        $favicon = $settingsFaviconProperty->getFirstMedia('portal_favicon');
+        $logo = $settings->getSettingsPropertyModel('portal.logo')
+            ->getFirstMedia('logo');
+        $favicon = $settings->getSettingsPropertyModel('portal.favicon')
+            ->getFirstMedia('portal_favicon');
 
         return response()->json([
             'layout' => $settings->knowledge_management_portal_layout ?? PortalLayout::Full,

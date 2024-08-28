@@ -37,29 +37,29 @@
 namespace App\Settings;
 
 use Spatie\LaravelSettings\Settings;
+use App\Models\SettingsPropertyWithMedia;
+use Spatie\LaravelSettings\SettingsRepositories\SettingsRepository;
+use Spatie\LaravelSettings\SettingsRepositories\DatabaseSettingsRepository;
 
-class OlympusSettings extends Settings
+abstract class SettingsWithMedia extends Settings
 {
-    public ?string $application_id = null;
+    /**
+     * @return class-string<SettingsPropertyWithMedia>
+     */
+    abstract public static function getSettingsPropertyModelClass(): string;
 
-    public ?string $key = null;
-
-    public ?string $url = null;
-
-    public static function repository(): ?string
+    public function getRepository(): SettingsRepository
     {
-        return 'landlord_database';
+        return new DatabaseSettingsRepository([
+            ...config('settings.repositories.database'),
+            ...[
+                'model' => static::getSettingsPropertyModelClass(),
+            ],
+        ]);
     }
 
-    public static function group(): string
+    public static function getSettingsPropertyModel(string $property): SettingsPropertyWithMedia
     {
-        return 'olympus';
-    }
-
-    public static function encrypted(): array
-    {
-        return [
-            'key',
-        ];
+        return static::getSettingsPropertyModelClass()::getInstance($property);
     }
 }

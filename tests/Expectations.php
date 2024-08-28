@@ -34,32 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace App\Settings;
+use Pest\Arch\Expectations\Targeted;
+use Pest\Arch\Support\FileLineFinder;
+use Pest\Arch\Contracts\ArchExpectation;
+use Pest\Arch\Objects\ObjectDescription;
 
-use Spatie\LaravelSettings\Settings;
-
-class OlympusSettings extends Settings
-{
-    public ?string $application_id = null;
-
-    public ?string $key = null;
-
-    public ?string $url = null;
-
-    public static function repository(): ?string
-    {
-        return 'landlord_database';
-    }
-
-    public static function group(): string
-    {
-        return 'olympus';
-    }
-
-    public static function encrypted(): array
-    {
-        return [
-            'key',
-        ];
-    }
-}
+expect()->extend('toHaveDefaultsForAllProperties', function (): ArchExpectation {
+    return Targeted::make(
+        // @phpstan-ignore-next-line
+        $this,
+        fn (ObjectDescription $object): bool => collect($object->reflectionClass->getProperties())->every(fn ($property) => $property->hasDefaultValue()),
+        'to have default for all properties',
+        FileLineFinder::where(fn (string $line): bool => str_contains($line, 'class')),
+    );
+});

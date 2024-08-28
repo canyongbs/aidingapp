@@ -34,32 +34,41 @@
 </COPYRIGHT>
 */
 
-namespace App\Settings;
+namespace AidingApp\Theme\Settings\SettingsProperties;
 
-use Spatie\LaravelSettings\Settings;
+use App\Models\SettingsPropertyWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
-class OlympusSettings extends Settings
+class ThemeSettingsProperty extends SettingsPropertyWithMedia
 {
-    public ?string $application_id = null;
-
-    public ?string $key = null;
-
-    public ?string $url = null;
-
-    public static function repository(): ?string
+    public function registerMediaConversions(Media $media = null): void
     {
-        return 'landlord_database';
+        $this->addMediaConversion('logo-height-250px')
+            ->performOnCollections('logo', 'dark_logo')
+            ->height(250)
+            ->keepOriginalImageFormat();
     }
 
-    public static function group(): string
+    public function registerMediaCollections(): void
     {
-        return 'olympus';
-    }
+        $this->addMediaCollection('logo')
+            ->singleFile()
+            ->acceptsMimeTypes([
+                'image/png',
+                'image/jpeg',
+                'image/webp',
+                'image/jpg',
+                'image/svg',
+            ]);
 
-    public static function encrypted(): array
-    {
-        return [
-            'key',
-        ];
+        $this->addMediaCollection('dark_logo')
+            ->singleFile()
+            ->acceptsMimeTypes([
+                'image/png',
+                'image/jpeg',
+                'image/webp',
+                'image/jpg',
+                'image/svg',
+            ]);
     }
 }
