@@ -90,7 +90,6 @@ class ServiceRequestUpdatesRelationManager extends RelationManager
                 IdColumn::make(),
                 TextColumn::make('update')
                     ->label('Update')
-                    ->translateLabel()
                     ->words(6),
                 IconColumn::make('internal')
                     ->boolean(),
