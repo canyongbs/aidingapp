@@ -37,7 +37,7 @@
 namespace AidingApp\Contact\Filament\Resources\OrganizationResource\Pages;
 
 use Filament\Forms\Form;
-use Laravel\Pennant\Feature;
+use App\Enums\FeatureFlag;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Repeater;
@@ -49,7 +49,6 @@ use AidingApp\Contact\Models\OrganizationIndustry;
 use AidingApp\Contact\Rules\UniqueOrganizationDomain;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use AidingApp\Contact\Filament\Resources\OrganizationResource;
-use App\Enums\FeatureFlag;
 
 class CreateOrganization extends CreateRecord
 {

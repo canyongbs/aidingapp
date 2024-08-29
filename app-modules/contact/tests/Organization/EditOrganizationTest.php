@@ -90,6 +90,7 @@ test('Edit Organization Record', function () {
     livewire(EditOrganization::class, [
         'record' => $organization->getRouteKey(),
     ])
+        ->set('data.domains', null)
         ->fillForm($request->toArray())
         ->call('save')
         ->assertHasNoFormErrors();
@@ -114,7 +115,7 @@ test('Edit Organization Record', function () {
         ->and($organization->domains)->toEqual($request->get('domains'));
 });
 
-test('validating the domain is required when editing the organization', function () {
+test('validating that domain is required', function () {
     $undoRepeaterFake = Repeater::fake();
 
     $user = User::factory()->licensed(Contact::getLicenseType())->create();
@@ -123,7 +124,10 @@ test('validating the domain is required when editing the organization', function
     $user->givePermissionTo('organization.view-any');
     $user->givePermissionTo('organization.*.update');
 
-    $request = collect(EditOrganizationRequestFactory::new()->state(['domains' => [['domain' => null]]])->create());
+    $request = collect(EditOrganizationRequestFactory::new()->state([
+        'domains' => [
+            ['domain' => null],
+        ]])->create());
 
     actingAs($user);
 
@@ -133,6 +137,77 @@ test('validating the domain is required when editing the organization', function
         ->fillForm($request->toArray())
         ->call('save')
         ->assertHasFormErrors(['domains.0.domain' => 'required']);
+
+    $undoRepeaterFake();
+});
+
+test('validating that distinct domain is allowed', function () {
+    $undoRepeaterFake = Repeater::fake();
+
+    $user = User::factory()->licensed(Contact::getLicenseType())->create();
+
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.*.update');
+
+    $organization = Organization::factory()->create();
+
+    $request = collect(EditOrganizationRequestFactory::new()
+        ->state([
+            'domains' => [
+                ['domain' => 'google.com'],
+                ['domain' => 'google.com'],
+            ],
+        ])->create());
+
+    actingAs($user);
+
+    livewire(EditOrganization::class, [
+        'record' => $organization->getRouteKey(),
+    ])
+        ->fillForm($request->toArray())
+        ->call('save')
+        ->assertHasFormErrors([
+            'domains.0.domain',
+        ]);
+
+    $undoRepeaterFake();
+});
+
+test('if the domain is already in use then not be used second time.', function () {
+    $undoRepeaterFake = Repeater::fake();
+
+    $user = User::factory()->licensed(Contact::getLicenseType())->create();
+
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.*.update');
+
+    $existingOrganization = Organization::factory()
+        ->state([
+            'domains' => [
+                ['domain' => 'hotmail.com'],
+                ['domain' => 'gmail.com'],
+            ],
+        ])->create();
+
+    $organization = Organization::factory()->create();
+
+    $request = collect(EditOrganizationRequestFactory::new()
+        ->state([
+            'domains' => [
+                ['domain' => 'hotmail.com'],
+            ],
+        ])->create());
+
+    actingAs($user);
+
+    livewire(EditOrganization::class, [
+        'record' => $organization->getRouteKey(),
+    ])
+        ->fillForm($request->toArray())
+        ->call('save')
+        ->assertHasFormErrors([
+            'domains.0.domain',
+        ]);
 
     $undoRepeaterFake();
 });

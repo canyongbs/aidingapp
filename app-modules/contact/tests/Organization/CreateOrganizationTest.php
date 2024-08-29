@@ -41,6 +41,7 @@ use function Pest\Livewire\livewire;
 
 use AidingApp\Contact\Models\Contact;
 use Filament\Forms\Components\Repeater;
+use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Filament\Resources\OrganizationResource;
 use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\CreateOrganization;
 use AidingApp\Contact\Tests\Organization\RequestFactories\CreateOrganizationRequestFactory;
@@ -65,7 +66,7 @@ test('Create Organization is gated with proper access control', function () {
         )->assertSuccessful();
 });
 
-test('validating the domain is required when creating the organization', function () {
+test('validating that domain is required', function () {
     $undoRepeaterFake = Repeater::fake();
 
     $user = User::factory()->licensed(Contact::getLicenseType())->create();
@@ -73,19 +74,24 @@ test('validating the domain is required when creating the organization', functio
     $user->givePermissionTo('organization.view-any');
     $user->givePermissionTo('organization.create');
 
-    $request = collect(CreateOrganizationRequestFactory::new()->state(['domains' => [['domain' => null]]])->create());
+    $request = collect(CreateOrganizationRequestFactory::new()->state([
+        'domains' => [
+            ['domain' => null],
+        ]])->create());
 
     actingAs($user);
 
     livewire(CreateOrganization::class)
         ->fillForm($request->toArray())
         ->call('create')
-        ->assertHasFormErrors(['domains.0.domain' => 'required']);
+        ->assertHasFormErrors([
+            'domains.0.domain' => 'required',
+        ]);
 
     $undoRepeaterFake();
 });
 
-test('validating the distinct domain when creating the organization', function () {
+test('validating that distinct domain is allowed', function () {
     $undoRepeaterFake = Repeater::fake();
 
     $user = User::factory()->licensed(Contact::getLicenseType())->create();
@@ -93,14 +99,55 @@ test('validating the distinct domain when creating the organization', function (
     $user->givePermissionTo('organization.view-any');
     $user->givePermissionTo('organization.create');
 
-    $request = collect(CreateOrganizationRequestFactory::new()->state(['domains' => [['domain' => 'google.com'], ['domain' => 'google.com']]])->create());
+    $request = collect(CreateOrganizationRequestFactory::new()->state([
+        'domains' => [
+            ['domain' => 'google.com'],
+            ['domain' => 'google.com'],
+        ]])->create());
 
     actingAs($user);
 
     livewire(CreateOrganization::class)
         ->fillForm($request->toArray())
         ->call('create')
-        ->assertHasFormErrors();
+        ->assertHasFormErrors([
+            'domains.0.domain',
+        ]);
+
+    $undoRepeaterFake();
+});
+
+test('if the domain is already in use then not be used second time.', function () {
+    $undoRepeaterFake = Repeater::fake();
+
+    $user = User::factory()->licensed(Contact::getLicenseType())->create();
+
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.create');
+
+    Organization::factory()
+        ->state([
+            'domains' => [
+                ['domain' => 'google.com'],
+                ['domain' => 'yahoo.com'],
+            ],
+        ])->create();
+
+    $request = collect(CreateOrganizationRequestFactory::new()
+        ->state([
+            'domains' => [
+                ['domain' => 'yahoo.com'],
+            ],
+        ])->create());
+
+    actingAs($user);
+
+    livewire(CreateOrganization::class)
+        ->fillForm($request->toArray())
+        ->call('create')
+        ->assertHasFormErrors([
+            'domains.0.domain',
+        ]);
 
     $undoRepeaterFake();
 });
