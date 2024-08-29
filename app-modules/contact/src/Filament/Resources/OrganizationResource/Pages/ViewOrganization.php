@@ -36,7 +36,7 @@
 
 namespace AidingApp\Contact\Filament\Resources\OrganizationResource\Pages;
 
-use Laravel\Pennant\Feature;
+use App\Enums\FeatureFlag;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
@@ -74,7 +74,7 @@ class ViewOrganization extends ViewRecord
                             ])
                             ->columnSpan('full')
                             ->grid(2)
-                            ->visible(Feature::active('organization_domains')),
+                            ->visible(FeatureFlag::OrganizationDomain->active()),
                     ])
                     ->columns(),
                 Section::make('Additional Info')

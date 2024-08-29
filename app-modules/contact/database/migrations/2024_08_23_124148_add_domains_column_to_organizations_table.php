@@ -8,7 +8,7 @@ return new class () extends Migration {
     public function up(): void
     {
         Schema::table('organizations', function (Blueprint $table) {
-            $table->json('domains')->nullable();
+            $table->jsonb('domains')->nullable();
         });
     }
 

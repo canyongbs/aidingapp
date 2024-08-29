@@ -41,6 +41,9 @@ use Laravel\Pennant\Feature;
 
 enum FeatureFlag: string
 {
+    case GdprBannerCustomization = 'gdpr_banner_customization';
+    case OrganizationDomain = 'organization_domain';
+
     public function definition(): Closure
     {
         return match ($this) {

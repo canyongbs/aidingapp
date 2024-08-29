@@ -1,16 +1,16 @@
 <?php
 
-use Laravel\Pennant\Feature;
+use App\Enums\FeatureFlag;
 use Illuminate\Database\Migrations\Migration;
 
 return new class () extends Migration {
     public function up(): void
     {
-        Feature::activate('organization_domains');
+        FeatureFlag::OrganizationDomain->activate();
     }
 
     public function down(): void
     {
-        Feature::purge('organization_domains');
+        FeatureFlag::OrganizationDomain->deactivate();
     }
 };

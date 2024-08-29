@@ -40,6 +40,7 @@ use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 use AidingApp\Contact\Models\Contact;
+use Filament\Forms\Components\Repeater;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Filament\Resources\OrganizationResource;
 use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\EditOrganization;
@@ -86,20 +87,10 @@ test('Edit Organization Record', function () {
 
     $request = collect(EditOrganizationRequestFactory::new()->create());
 
-    $domains = [
-        [
-            'domain' => 'acme.com',
-        ],
-        [
-            'domain' => 'purdy.com',
-        ],
-    ];
-
     livewire(EditOrganization::class, [
         'record' => $organization->getRouteKey(),
     ])
         ->fillForm($request->toArray())
-        ->set('data.domains', $domains)
         ->call('save')
         ->assertHasNoFormErrors();
 
@@ -120,5 +111,28 @@ test('Edit Organization Record', function () {
         ->and($organization->linkedin_url)->toEqual($request->get('linkedin_url'))
         ->and($organization->facebook_url)->toEqual($request->get('facebook_url'))
         ->and($organization->twitter_url)->toEqual($request->get('twitter_url'))
-        ->and($organization->domains)->toEqual($domains);
+        ->and($organization->domains)->toEqual($request->get('domains'));
+});
+
+test('validating the domain is required when editing the organization', function () {
+    $undoRepeaterFake = Repeater::fake();
+
+    $user = User::factory()->licensed(Contact::getLicenseType())->create();
+    $organization = Organization::factory()->create();
+
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.*.update');
+
+    $request = collect(EditOrganizationRequestFactory::new()->state(['domains' => [['domain' => null]]])->create());
+
+    actingAs($user);
+
+    livewire(EditOrganization::class, [
+        'record' => $organization->getRouteKey(),
+    ])
+        ->fillForm($request->toArray())
+        ->call('save')
+        ->assertHasFormErrors(['domains.0.domain' => 'required']);
+
+    $undoRepeaterFake();
 });

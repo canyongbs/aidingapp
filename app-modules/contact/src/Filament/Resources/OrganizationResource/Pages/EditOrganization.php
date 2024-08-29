@@ -46,11 +46,12 @@ use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\EditRecord;
-use AidingApp\Contact\Rules\UniqueDomain;
 use AidingApp\Contact\Models\OrganizationType;
 use AidingApp\Contact\Models\OrganizationIndustry;
+use AidingApp\Contact\Rules\UniqueOrganizationDomain;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use AidingApp\Contact\Filament\Resources\OrganizationResource;
+use App\Enums\FeatureFlag;
 
 class EditOrganization extends EditRecord
 {
@@ -90,16 +91,17 @@ class EditOrganization extends EditRecord
                                     ->required()
                                     ->maxLength(255)
                                     ->regex('/^(?!-)([a-zA-Z0-9-]{1,63}\.)+[a-zA-Z]{2,63}$/')
-                                    ->rule(new UniqueDomain($this->record->id))
+                                    ->rule(new UniqueOrganizationDomain($this->record->id))
                                     ->distinct()
                                     ->validationMessages([
                                         'distinct' => 'This :attribute is already in use and may not be used a second time.',
                                     ]),
                             ])
+                            ->addActionLabel('Add domains')
                             ->reorderable(false)
                             ->columnSpan('full')
                             ->grid(2)
-                            ->visible(Feature::active('organization_domains')),
+                            ->visible(FeatureFlag::OrganizationDomain->active()),
                     ]),
                 Section::make('Additional Info')
                     ->columns()

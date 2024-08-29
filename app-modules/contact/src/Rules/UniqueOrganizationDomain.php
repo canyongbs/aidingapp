@@ -3,10 +3,11 @@
 namespace AidingApp\Contact\Rules;
 
 use Closure;
+use Illuminate\Database\Eloquent\Builder;
 use AidingApp\Contact\Models\Organization;
 use Illuminate\Contracts\Validation\ValidationRule;
 
-class UniqueDomain implements ValidationRule
+class UniqueOrganizationDomain implements ValidationRule
 {
     protected $ignoreId;
 
@@ -27,15 +28,11 @@ class UniqueDomain implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $query = Organization::whereJsonContains('domains', [['domain' => $value]]);
-
-        if ($this->ignoreId) {
-            $query->where('id', '!=', $this->ignoreId);
-        }
-
-        $domainExists = $query->exists();
-
-        if ($domainExists) {
+        if (
+            Organization::whereJsonContains('domains', [['domain' => $value]])
+                ->when(! empty($this->ignoreId), fn (Builder $query) => $query->where('id', '!=', $this->ignoreId))
+                ->exists()
+        ) {
             $fail($this->message());
         }
     }
