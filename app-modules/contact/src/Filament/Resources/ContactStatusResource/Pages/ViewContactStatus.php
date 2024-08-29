@@ -55,14 +55,11 @@ class ViewContactStatus extends ViewRecord
                 Section::make()
                     ->schema([
                         TextEntry::make('name')
-                            ->label('Name')
-                            ->translateLabel(),
+                            ->label('Name'),
                         TextEntry::make('classification')
-                            ->label('Classification')
-                            ->translateLabel(),
+                            ->label('Classification'),
                         TextEntry::make('color')
                             ->label('Color')
-                            ->translateLabel()
                             ->badge()
                             ->color(fn (ContactStatus $contactStatus) => $contactStatus->color->value),
                     ])

@@ -62,7 +62,6 @@ class EngagementCreateAction
                     ->schema([
                         Select::make('delivery_method')
                             ->label('How would you like to send this engagement?')
-                            ->translateLabel()
                             ->options(EngagementDeliveryMethod::class)
                             ->validationAttribute('Delivery Method')
                             ->required(),
@@ -72,12 +71,10 @@ class EngagementCreateAction
                     ->schema([
                         TextInput::make('subject')
                             ->autofocus()
-                            ->translateLabel()
                             ->required()
                             ->placeholder(__('Subject'))
                             ->hidden(fn (callable $get) => collect($get('delivery_method'))->doesntContain(EngagementDeliveryMethod::Email->value)),
                         Textarea::make('body')
-                            ->translateLabel()
                             ->placeholder(__('Body'))
                             ->required()
                             ->maxLength(function (callable $get) {

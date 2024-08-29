@@ -51,7 +51,6 @@ class CreateContactSource extends CreateRecord
             ->schema([
                 TextInput::make('name')
                     ->label('Name')
-                    ->translateLabel()
                     ->required()
                     ->string(),
             ]);

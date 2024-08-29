@@ -84,17 +84,14 @@ class ListContacts extends ListRecords implements HasBulkEngagementAction
                     ->sortable(),
                 TextColumn::make('email')
                     ->label('Email')
-                    ->translateLabel()
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('mobile')
                     ->label('Mobile')
-                    ->translateLabel()
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('status')
                     ->badge()
-                    ->translateLabel()
                     ->state(function (Contact $record) {
                         return $record->status->name;
                     })
@@ -108,7 +105,6 @@ class ListContacts extends ListRecords implements HasBulkEngagementAction
                     }),
                 TextColumn::make('source.name')
                     ->label('Source')
-                    ->translateLabel()
                     ->sortable(),
                 TextColumn::make('created_at')
                     ->label('Created')
