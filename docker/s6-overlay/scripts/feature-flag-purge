@@ -13,6 +13,7 @@ USERNAME=$(id -nu "$PUID")
 
 {
 s6-setuidgid "$USERNAME" php "$WEBUSER_HOME/artisan" pennant:purge --except-registered \
+&& s6-setuidgid "$USERNAME" php "$WEBUSER_HOME/artisan" tenants:artisan "pennant:purge --except-registered" \
 && echo "Unregistered Feature Flags purged!"
 } || {
 echo "Feature Flag purge failed!"
