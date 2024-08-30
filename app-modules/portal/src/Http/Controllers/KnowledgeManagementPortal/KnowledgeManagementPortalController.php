@@ -43,7 +43,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Vite;
 use AidingApp\Portal\Enums\PortalLayout;
 use AidingApp\Portal\Settings\PortalSettings;
-use Illuminate\Support\Facades\Log;
 
 class KnowledgeManagementPortalController extends Controller
 {
