@@ -43,6 +43,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Vite;
 use AidingApp\Portal\Enums\PortalLayout;
 use AidingApp\Portal\Settings\PortalSettings;
+use Illuminate\Support\Facades\Log;
 
 class KnowledgeManagementPortalController extends Controller
 {
@@ -58,7 +59,6 @@ class KnowledgeManagementPortalController extends Controller
             'layout' => $settings->knowledge_management_portal_layout ?? PortalLayout::Full,
             'header_logo' => $logo ? $logo->getTemporaryUrl(
                 expiration: now()->addMinutes(5),
-                conversionName: 'logo-height-250px',
             ) : url(Vite::asset('resources/images/default-logo-light.png')),
             'favicon' => $favicon?->getTemporaryUrl(
                 expiration: now()->addMinutes(5),
