@@ -181,7 +181,7 @@ class ListKnowledgeBaseItems extends ListRecords
                                     ->searchable()
                                     ->preload()
                                     ->multiple()
-                                    ->columnSpanFull()
+                                    ->columnSpanFull(),
                             ]),
                         Section::make()
                             ->schema([
