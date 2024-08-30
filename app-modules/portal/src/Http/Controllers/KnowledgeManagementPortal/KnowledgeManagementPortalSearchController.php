@@ -37,7 +37,6 @@
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use Illuminate\Http\Request;
-use Laravel\Pennant\Feature;
 use App\Models\Scopes\SearchBy;
 use Illuminate\Support\Stringable;
 use App\Http\Controllers\Controller;
@@ -67,23 +66,23 @@ class KnowledgeManagementPortalSearchController extends Controller
         $itemData = KnowledgeBaseArticleData::collection(
             KnowledgeBaseItem::query()
                 ->public()
-                ->when(Feature::active('tags'), fn (Builder $query) => $query->with('tags'))
+                ->with('tags')
                 ->when($search->isNotEmpty(), fn (Builder $query) => $query->tap(new SearchBy('title', $search)))
-                ->when(Feature::active('tags'), fn (Builder $query) => $query->when($tags->isNotEmpty(), fn (Builder $query) => $query->whereHas('tags', fn (Builder $query) => $query->whereIn('id', $tags))))
+                ->when($tags->isNotEmpty(), fn (Builder $query) => $query->whereHas('tags', fn (Builder $query) => $query->whereIn('id', $tags)))
                 ->get()
                 ->map(function (KnowledgeBaseItem $article) {
                     return [
                         'id' => $article->getKey(),
                         'categoryId' => $article->category_id,
                         'name' => $article->title,
-                        'tags' => Feature::active('tags') ? $article->tags()
+                        'tags' => $article->tags()
                             ->orderBy('name')
                             ->select([
                                 'id',
                                 'name',
                             ])
                             ->get()
-                            ->toArray() : [],
+                            ->toArray(),
                     ];
                 })
                 ->toArray()

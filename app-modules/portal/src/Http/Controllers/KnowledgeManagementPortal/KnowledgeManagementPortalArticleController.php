@@ -36,7 +36,6 @@
 
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
-use Laravel\Pennant\Feature;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
@@ -60,14 +59,14 @@ class KnowledgeManagementPortalArticleController extends Controller
                 'name' => $article->title,
                 'lastUpdated' => $article->updated_at->format('M d Y, h:m a'),
                 'content' => tiptap_converter()->record($article, attribute: 'article_details')->asHTML($article->article_details),
-                'tags' => Feature::active('tags') ? $article->tags()
+                'tags' => $article->tags()
                     ->orderBy('name')
                     ->select([
                         'id',
                         'name',
                     ])
                     ->get()
-                    ->toArray() : [],
+                    ->toArray(),
             ]),
         ]);
     }

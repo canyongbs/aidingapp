@@ -37,17 +37,11 @@
 namespace App\Policies;
 
 use App\Models\Tag;
-use Laravel\Pennant\Feature;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
 
 class TagPolicy
 {
-    public function before(): ?bool
-    {
-        return Feature::inactive('tags') ? false : null;
-    }
-
     public function viewAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(

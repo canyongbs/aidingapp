@@ -38,7 +38,6 @@ namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use App\Models\Tag;
 use Illuminate\Http\Request;
-use Laravel\Pennant\Feature;
 use Illuminate\Http\JsonResponse;
 use App\Models\Scopes\TagsForClass;
 use App\Http\Controllers\Controller;
@@ -49,7 +48,7 @@ class GetKnowledgeManagementPortalTagsController extends Controller
     public function __invoke(Request $request): JsonResponse
     {
         return response()->json(
-            Feature::active('tags') ? Tag::query()
+            Tag::query()
                 ->tap(new TagsForClass(new KnowledgeBaseItem()))
                 ->orderBy('name')
                 ->select([
@@ -57,7 +56,7 @@ class GetKnowledgeManagementPortalTagsController extends Controller
                     'name',
                 ])
                 ->get()
-                ->toArray() : [],
+                ->toArray(),
         );
     }
 }
