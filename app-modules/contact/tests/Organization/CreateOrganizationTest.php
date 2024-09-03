@@ -151,3 +151,39 @@ test('if the domain is already in use then not be used second time.', function (
 
     $undoRepeaterFake();
 });
+
+test('check if the provided domain is invalid', function (string $domain) {
+    $undoRepeaterFake = Repeater::fake();
+
+    $user = User::factory()->licensed(Contact::getLicenseType())->create();
+
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.create');
+
+    $request = collect(CreateOrganizationRequestFactory::new()
+        ->state([
+            'domains' => [
+                ['domain' => $domain],
+            ]])
+        ->create());
+
+    actingAs($user);
+
+    livewire(CreateOrganization::class)
+        ->fillForm($request->toArray())
+        ->call('create')
+        ->assertHasFormErrors([
+            'domains.0.domain' => 'regex',
+        ]);
+
+    $undoRepeaterFake();
+})
+    ->with([
+        'test example.com',
+        '.example.com',
+        'sub*domain.example.com',
+        'subdomain!.example.com',
+        'sub..domain.example.com',
+        'example!.com',
+        'localhost',
+    ]);
