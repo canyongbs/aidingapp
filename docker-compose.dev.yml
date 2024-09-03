@@ -42,7 +42,10 @@ services:
     volumes:
       - '.:/var/www/html'
     networks:
-      - cgbs-development
+      cgbs-development:
+        ipv4_address: 172.16.1.4
+    dns:
+      - 172.16.1.1
     depends_on:
       - aidingapp-redis
       - aidingapp-minio
@@ -73,13 +76,7 @@ services:
       - cgbs-development
     command: 'minio server /data/minio --console-address ":8900"'
     healthcheck:
-      test:
-        [
-          'CMD',
-          'curl',
-          '-f',
-          'http://localhost:9000/minio/health/live'
-        ]
+      test: [ 'CMD', 'curl', '-f', 'http://localhost:9000/minio/health/live' ]
       retries: 3
       timeout: 5s
     labels:
@@ -126,16 +123,7 @@ services:
     networks:
       - cgbs-development
     healthcheck:
-      test:
-        [
-          "CMD",
-          "pg_isready",
-          "-q",
-          "-d",
-          "${DB_DATABASE}",
-          "-U",
-          "${DB_USERNAME}"
-        ]
+      test: [ "CMD", "pg_isready", "-q", "-d", "${DB_DATABASE}", "-U", "${DB_USERNAME}" ]
       retries: 3
       timeout: 5s
 
