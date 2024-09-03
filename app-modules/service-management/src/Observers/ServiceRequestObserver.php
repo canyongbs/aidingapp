@@ -40,7 +40,6 @@ use Carbon\Carbon;
 use App\Models\User;
 use App\Enums\Feature;
 use Illuminate\Support\Facades\Gate;
-use Laravel\Pennant\Feature as PennantFeature;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\Notification\Events\TriggeredAutoSubscription;
 use AidingApp\ServiceManagement\Actions\CreateServiceRequestHistory;
@@ -107,7 +106,6 @@ class ServiceRequestObserver
         }
 
         if (
-            PennantFeature::active('service-request-feedback') &&
             Gate::check(Feature::FeedbackManagement->getGateName()) &&
             $serviceRequest?->priority?->type?->has_enabled_feedback_collection &&
             $serviceRequest?->status?->classification == SystemServiceRequestClassification::Closed &&

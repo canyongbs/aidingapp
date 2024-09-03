@@ -39,7 +39,6 @@ namespace AidingApp\ServiceManagement\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use App\Settings\LicenseSettings;
-use Laravel\Pennant\Feature as PennantFeature;
 use Symfony\Component\HttpFoundation\Response;
 
 class FeedbackManagementIsOn
@@ -51,7 +50,7 @@ class FeedbackManagementIsOn
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (! PennantFeature::active('service-request-feedback') && ! app(LicenseSettings::class)->data->addons->feedbackManagement) {
+        if (! app(LicenseSettings::class)->data->addons->feedbackManagement) {
             return response()->json(['error' => 'Feedback Management is not enabled.'], 403);
         }
 

@@ -39,7 +39,6 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
 use Filament\Actions\Action;
-use Laravel\Pennant\Feature;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Infolist;
 use AidingApp\Contact\Models\Contact;
@@ -203,7 +202,7 @@ class ViewServiceRequest extends ViewRecord
                     ->columns(),
 
                 Section::make('Feedback')
-                    ->visible(fn (ServiceRequest $record): bool => $record->feedback()->exists() && Feature::active('service-request-feedback'))
+                    ->visible(fn (ServiceRequest $record): bool => $record->feedback()->exists())
                     ->schema([
                         TextEntry::make('feedback.csat_answer')
                             ->label('CSAT')

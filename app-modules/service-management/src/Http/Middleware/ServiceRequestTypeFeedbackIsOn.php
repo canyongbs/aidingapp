@@ -38,7 +38,6 @@ namespace AidingApp\ServiceManagement\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Laravel\Pennant\Feature;
 use App\Settings\LicenseSettings;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -53,7 +52,7 @@ class ServiceRequestTypeFeedbackIsOn
     {
         $serviceRequest = $request->route('serviceRequest');
 
-        if (Feature::active('service-request-feedback') && app(LicenseSettings::class)->data->addons->feedbackManagement) {
+        if (app(LicenseSettings::class)->data->addons->feedbackManagement) {
             if ($serviceRequest && $serviceRequest?->priority?->type?->has_enabled_feedback_collection) {
                 return $next($request);
             }

@@ -37,7 +37,6 @@
 namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource\Pages;
 
 use Filament\Tables\Table;
-use Laravel\Pennant\Feature;
 use Filament\Actions\CreateAction;
 use App\Models\Scopes\TagsForClass;
 use Filament\Tables\Filters\Filter;
@@ -109,8 +108,7 @@ class ListKnowledgeBaseItems extends ListRecords
                     ->toggleable(),
                 TextColumn::make('tags.name')
                     ->badge()
-                    ->toggleable(isToggledHiddenByDefault: true)
-                    ->visible(fn (): bool => Feature::active('tags')),
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 SelectFilter::make('quality')
@@ -183,8 +181,7 @@ class ListKnowledgeBaseItems extends ListRecords
                                     ->searchable()
                                     ->preload()
                                     ->multiple()
-                                    ->columnSpanFull()
-                                    ->visible(fn (): bool => Feature::active('tags')),
+                                    ->columnSpanFull(),
                             ]),
                         Section::make()
                             ->schema([

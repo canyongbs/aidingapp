@@ -36,7 +36,6 @@
 
 namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource\Pages;
 
-use Laravel\Pennant\Feature;
 use App\Models\Scopes\TagsForClass;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
@@ -75,8 +74,7 @@ class EditKnowledgeBaseItemMetadata
                         ->searchable()
                         ->preload()
                         ->multiple()
-                        ->columnSpanFull()
-                        ->visible(fn (): bool => Feature::active('tags')),
+                        ->columnSpanFull(),
                 ]),
             Section::make()->schema([
                 DatePicker::make('created_at')

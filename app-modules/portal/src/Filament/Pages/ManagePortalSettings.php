@@ -57,7 +57,6 @@ use Filament\Infolists\Components\TextEntry;
 use AidingApp\Portal\Settings\PortalSettings;
 use Filament\Forms\Components\Actions\Action;
 use App\Filament\Forms\Components\ColorSelect;
-use Laravel\Pennant\Feature as PennantFeature;
 use AidingApp\Portal\Enums\GdprBannerButtonLabel;
 use AidingApp\Portal\Actions\GeneratePortalEmbedCode;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
@@ -163,7 +162,7 @@ class ManagePortalSettings extends SettingsPage
                             ->model(
                                 PortalSettings::getSettingsPropertyModel('portal.logo'),
                             )
-                            ->visible(fn (Get $get) => $get('knowledge_management_portal_enabled') && PennantFeature::active('portal-logo')),
+                            ->visible(fn (Get $get) => $get('knowledge_management_portal_enabled')),
                         Actions::make([
                             Action::make('view')
                                 ->url(fn () => route('portal.show'))
