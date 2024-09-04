@@ -51,6 +51,7 @@ use AidingApp\Contact\Models\OrganizationIndustry;
 use AidingApp\Contact\Rules\UniqueOrganizationDomain;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use AidingApp\Contact\Filament\Resources\OrganizationResource;
+use Filament\Forms\Components\Toggle;
 
 class EditOrganization extends EditRecord
 {
@@ -83,6 +84,9 @@ class EditOrganization extends EditRecord
                             ->label('Organization Logo')
                             ->collection('organization_logo')
                             ->image(),
+                        Toggle::make('is_contact_generation_enabled')
+                            ->label('Automatically generate contact record on login.')
+                            ->visible(FeatureFlag::OrganizationDomain->active()),
                         Repeater::make('domains')
                             ->schema([
                                 TextInput::make('domain')
