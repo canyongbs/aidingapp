@@ -40,6 +40,7 @@ use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 use AidingApp\Contact\Models\Contact;
+use Filament\Forms\Components\Repeater;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Filament\Resources\OrganizationResource;
 use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\EditOrganization;
@@ -89,6 +90,7 @@ test('Edit Organization Record', function () {
     livewire(EditOrganization::class, [
         'record' => $organization->getRouteKey(),
     ])
+        ->set('data.domains', null)
         ->fillForm($request->toArray())
         ->call('save')
         ->assertHasNoFormErrors();
@@ -109,5 +111,143 @@ test('Edit Organization Record', function () {
         ->and($organization->country)->toEqual($request->get('country'))
         ->and($organization->linkedin_url)->toEqual($request->get('linkedin_url'))
         ->and($organization->facebook_url)->toEqual($request->get('facebook_url'))
-        ->and($organization->twitter_url)->toEqual($request->get('twitter_url'));
+        ->and($organization->twitter_url)->toEqual($request->get('twitter_url'))
+        ->and($organization->domains)->toEqual($request->get('domains'));
 });
+
+test('validating that domain is required', function () {
+    $undoRepeaterFake = Repeater::fake();
+
+    $user = User::factory()->licensed(Contact::getLicenseType())->create();
+    $organization = Organization::factory()->create();
+
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.*.update');
+
+    $request = collect(EditOrganizationRequestFactory::new()->state([
+        'domains' => [
+            ['domain' => null],
+        ]])->create());
+
+    actingAs($user);
+
+    livewire(EditOrganization::class, [
+        'record' => $organization->getRouteKey(),
+    ])
+        ->fillForm($request->toArray())
+        ->call('save')
+        ->assertHasFormErrors(['domains.0.domain' => 'required']);
+
+    $undoRepeaterFake();
+});
+
+test('validating that distinct domain is allowed', function () {
+    $undoRepeaterFake = Repeater::fake();
+
+    $user = User::factory()->licensed(Contact::getLicenseType())->create();
+
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.*.update');
+
+    $organization = Organization::factory()->create();
+
+    $request = collect(EditOrganizationRequestFactory::new()
+        ->state([
+            'domains' => [
+                ['domain' => 'google.com'],
+                ['domain' => 'google.com'],
+            ],
+        ])->create());
+
+    actingAs($user);
+
+    livewire(EditOrganization::class, [
+        'record' => $organization->getRouteKey(),
+    ])
+        ->fillForm($request->toArray())
+        ->call('save')
+        ->assertHasFormErrors([
+            'domains.0.domain',
+        ]);
+
+    $undoRepeaterFake();
+});
+
+test('if the domain is already in use then not be used second time.', function () {
+    $undoRepeaterFake = Repeater::fake();
+
+    $user = User::factory()->licensed(Contact::getLicenseType())->create();
+
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.*.update');
+
+    $existingOrganization = Organization::factory()
+        ->state([
+            'domains' => [
+                ['domain' => 'hotmail.com'],
+                ['domain' => 'gmail.com'],
+            ],
+        ])->create();
+
+    $organization = Organization::factory()->create();
+
+    $request = collect(EditOrganizationRequestFactory::new()
+        ->state([
+            'domains' => [
+                ['domain' => 'hotmail.com'],
+            ],
+        ])->create());
+
+    actingAs($user);
+
+    livewire(EditOrganization::class, [
+        'record' => $organization->getRouteKey(),
+    ])
+        ->fillForm($request->toArray())
+        ->call('save')
+        ->assertHasFormErrors([
+            'domains.0.domain',
+        ]);
+
+    $undoRepeaterFake();
+});
+
+test('check if the provided domain is valid', function (string $domain) {
+    $undoRepeaterFake = Repeater::fake();
+
+    $user = User::factory()->licensed(Contact::getLicenseType())->create();
+
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.*.update');
+
+    $organization = Organization::factory()->create();
+
+    $request = collect(EditOrganizationRequestFactory::new()
+        ->state([
+            'domains' => [
+                ['domain' => $domain],
+            ],
+        ])->create());
+
+    actingAs($user);
+
+    livewire(EditOrganization::class, [
+        'record' => $organization->getRouteKey(),
+    ])
+        ->fillForm($request->toArray())
+        ->call('save')
+        ->assertHasFormErrors([
+            'domains.0.domain' => 'regex',
+        ]);
+
+    $undoRepeaterFake();
+})
+    ->with([
+        'test example.com',
+        '.example.com',
+        'sub*domain.example.com',
+        'subdomain!.example.com',
+        'sub..domain.example.com',
+        'example!.com',
+        'localhost',
+    ]);

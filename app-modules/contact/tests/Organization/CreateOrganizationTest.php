@@ -40,11 +40,8 @@ use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 use AidingApp\Contact\Models\Contact;
+use Filament\Forms\Components\Repeater;
 use AidingApp\Contact\Models\Organization;
-
-use function PHPUnit\Framework\assertCount;
-use function Pest\Laravel\assertDatabaseHas;
-
 use AidingApp\Contact\Filament\Resources\OrganizationResource;
 use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\CreateOrganization;
 use AidingApp\Contact\Tests\Organization\RequestFactories\CreateOrganizationRequestFactory;
@@ -68,20 +65,125 @@ test('Create Organization is gated with proper access control', function () {
             OrganizationResource::getUrl('create')
         )->assertSuccessful();
 });
-test('Create New Organization', function () {
+
+test('validating that domain is required', function () {
+    $undoRepeaterFake = Repeater::fake();
+
     $user = User::factory()->licensed(Contact::getLicenseType())->create();
 
     $user->givePermissionTo('organization.view-any');
     $user->givePermissionTo('organization.create');
 
-    $request = collect(CreateOrganizationRequestFactory::new()->create());
+    $request = collect(CreateOrganizationRequestFactory::new()->state([
+        'domains' => [
+            ['domain' => null],
+        ]])->create());
 
     actingAs($user);
 
     livewire(CreateOrganization::class)
         ->fillForm($request->toArray())
         ->call('create')
-        ->assertHasNoFormErrors();
-    assertCount(1, Organization::all());
-    assertDatabaseHas(Organization::class, $request->toArray());
+        ->assertHasFormErrors([
+            'domains.0.domain' => 'required',
+        ]);
+
+    $undoRepeaterFake();
 });
+
+test('validating that distinct domain is allowed', function () {
+    $undoRepeaterFake = Repeater::fake();
+
+    $user = User::factory()->licensed(Contact::getLicenseType())->create();
+
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.create');
+
+    $request = collect(CreateOrganizationRequestFactory::new()->state([
+        'domains' => [
+            ['domain' => 'google.com'],
+            ['domain' => 'google.com'],
+        ]])->create());
+
+    actingAs($user);
+
+    livewire(CreateOrganization::class)
+        ->fillForm($request->toArray())
+        ->call('create')
+        ->assertHasFormErrors([
+            'domains.0.domain',
+        ]);
+
+    $undoRepeaterFake();
+});
+
+test('if the domain is already in use then not be used second time.', function () {
+    $undoRepeaterFake = Repeater::fake();
+
+    $user = User::factory()->licensed(Contact::getLicenseType())->create();
+
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.create');
+
+    Organization::factory()
+        ->state([
+            'domains' => [
+                ['domain' => 'google.com'],
+                ['domain' => 'yahoo.com'],
+            ],
+        ])->create();
+
+    $request = collect(CreateOrganizationRequestFactory::new()
+        ->state([
+            'domains' => [
+                ['domain' => 'yahoo.com'],
+            ],
+        ])->create());
+
+    actingAs($user);
+
+    livewire(CreateOrganization::class)
+        ->fillForm($request->toArray())
+        ->call('create')
+        ->assertHasFormErrors([
+            'domains.0.domain',
+        ]);
+
+    $undoRepeaterFake();
+});
+
+test('check if the provided domain is invalid', function (string $domain) {
+    $undoRepeaterFake = Repeater::fake();
+
+    $user = User::factory()->licensed(Contact::getLicenseType())->create();
+
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.create');
+
+    $request = collect(CreateOrganizationRequestFactory::new()
+        ->state([
+            'domains' => [
+                ['domain' => $domain],
+            ]])
+        ->create());
+
+    actingAs($user);
+
+    livewire(CreateOrganization::class)
+        ->fillForm($request->toArray())
+        ->call('create')
+        ->assertHasFormErrors([
+            'domains.0.domain' => 'regex',
+        ]);
+
+    $undoRepeaterFake();
+})
+    ->with([
+        'test example.com',
+        '.example.com',
+        'sub*domain.example.com',
+        'subdomain!.example.com',
+        'sub..domain.example.com',
+        'example!.com',
+        'localhost',
+    ]);

@@ -75,6 +75,11 @@ class Organization extends BaseModel implements HasMedia, Auditable
         'linkedin_url',
         'facebook_url',
         'twitter_url',
+        'domains',
+    ];
+
+    protected $casts = [
+        'domains' => 'array',
     ];
 
     public function registerMediaCollections(): void

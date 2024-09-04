@@ -34,34 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Tests\Organization\RequestFactories;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
-use Worksome\RequestFactories\RequestFactory;
-use AidingApp\Contact\Models\OrganizationType;
-use AidingApp\Contact\Models\OrganizationIndustry;
-
-class CreateOrganizationRequestFactory extends RequestFactory
-{
-    public function definition(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            'name' => fake()->company(),
-            'email' => fake()->companyEmail(),
-            'domains' => array_map(fn () => ['domain' => fake()->domainName()], range(1, 3)),
-            'phone_number' => fake()->phoneNumber(),
-            'website' => fake()->url(),
-            'industry_id' => OrganizationIndustry::factory(),
-            'type_id' => OrganizationType::factory(),
-            'description' => fake()->text(),
-            'number_of_employees' => fake()->randomNumber(),
-            'address' => fake()->address(),
-            'city' => fake()->city(),
-            'state' => fake()->state(),
-            'postalcode' => fake()->postcode(),
-            'country' => fake()->country(),
-            'linkedin_url' => fake()->url(),
-            'facebook_url' => fake()->url(),
-            'twitter_url' => fake()->url(),
-        ];
+        Schema::table('organizations', function (Blueprint $table) {
+            $table->jsonb('domains')->nullable();
+        });
     }
-}
+
+    public function down(): void
+    {
+        Schema::table('organizations', function (Blueprint $table) {
+            $table->dropColumn('domains');
+        });
+    }
+};

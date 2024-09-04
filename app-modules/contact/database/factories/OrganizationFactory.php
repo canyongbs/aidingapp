@@ -55,6 +55,7 @@ class OrganizationFactory extends Factory
         return [
             'name' => fake()->company(),
             'email' => fake()->companyEmail(),
+            'domains' => array_map(fn () => ['domain' => fake()->domainName()], range(1, 3)),
             'phone_number' => fake()->phoneNumber(),
             'website' => fake()->url(),
             'industry_id' => OrganizationIndustry::factory(),
