@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d12e5d6e92177a8a2f0be97bb48d014f",
+    "content-hash": "daba40c6ed99dba6d0aebfae7bf049df",
     "packages": [
         {
             "name": "amphp/amp",
@@ -1046,16 +1046,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.321.2",
+            "version": "3.321.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "c04f8f30891cee8480c132778cd4cc486467e77a"
+                "reference": "986326efde1d0598ec9fc1b185716550be8ef522"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/c04f8f30891cee8480c132778cd4cc486467e77a",
-                "reference": "c04f8f30891cee8480c132778cd4cc486467e77a",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/986326efde1d0598ec9fc1b185716550be8ef522",
+                "reference": "986326efde1d0598ec9fc1b185716550be8ef522",
                 "shasum": ""
             },
             "require": {
@@ -1138,9 +1138,9 @@
             "support": {
                 "forum": "https://forums.aws.amazon.com/forum.jspa?forumID=80",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.321.2"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.321.4"
             },
-            "time": "2024-08-30T18:14:40+00:00"
+            "time": "2024-09-04T18:09:31+00:00"
         },
         {
             "name": "barryvdh/laravel-debugbar",
@@ -8901,16 +8901,16 @@
         },
         {
             "name": "maatwebsite/excel",
-            "version": "3.1.56",
+            "version": "3.1.57",
             "source": {
                 "type": "git",
                 "url": "https://github.com/SpartnerNL/Laravel-Excel.git",
-                "reference": "0381d0225b42c3f328d90f0dd05ca071fca3953f"
+                "reference": "3571496c00ca1812c25ee19cda50faad216b7909"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/SpartnerNL/Laravel-Excel/zipball/0381d0225b42c3f328d90f0dd05ca071fca3953f",
-                "reference": "0381d0225b42c3f328d90f0dd05ca071fca3953f",
+                "url": "https://api.github.com/repos/SpartnerNL/Laravel-Excel/zipball/3571496c00ca1812c25ee19cda50faad216b7909",
+                "reference": "3571496c00ca1812c25ee19cda50faad216b7909",
                 "shasum": ""
             },
             "require": {
@@ -8918,7 +8918,7 @@
                 "ext-json": "*",
                 "illuminate/support": "5.8.*||^6.0||^7.0||^8.0||^9.0||^10.0||^11.0",
                 "php": "^7.0||^8.0",
-                "phpoffice/phpspreadsheet": "^1.18",
+                "phpoffice/phpspreadsheet": "^1.29.1",
                 "psr/simple-cache": "^1.0||^2.0||^3.0"
             },
             "require-dev": {
@@ -8966,7 +8966,7 @@
             ],
             "support": {
                 "issues": "https://github.com/SpartnerNL/Laravel-Excel/issues",
-                "source": "https://github.com/SpartnerNL/Laravel-Excel/tree/3.1.56"
+                "source": "https://github.com/SpartnerNL/Laravel-Excel/tree/3.1.57"
             },
             "funding": [
                 {
@@ -8978,7 +8978,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-08-19T09:40:43+00:00"
+            "time": "2024-09-04T07:37:43+00:00"
         },
         {
             "name": "maennchen/zipstream-php",
@@ -9519,16 +9519,16 @@
         },
         {
             "name": "mtdowling/jmespath.php",
-            "version": "2.7.0",
+            "version": "2.8.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/jmespath/jmespath.php.git",
-                "reference": "bbb69a935c2cbb0c03d7f481a238027430f6440b"
+                "reference": "a2a865e05d5f420b50cc2f85bb78d565db12a6bc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jmespath/jmespath.php/zipball/bbb69a935c2cbb0c03d7f481a238027430f6440b",
-                "reference": "bbb69a935c2cbb0c03d7f481a238027430f6440b",
+                "url": "https://api.github.com/repos/jmespath/jmespath.php/zipball/a2a865e05d5f420b50cc2f85bb78d565db12a6bc",
+                "reference": "a2a865e05d5f420b50cc2f85bb78d565db12a6bc",
                 "shasum": ""
             },
             "require": {
@@ -9545,7 +9545,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "2.7-dev"
+                    "dev-master": "2.8-dev"
                 }
             },
             "autoload": {
@@ -9579,9 +9579,9 @@
             ],
             "support": {
                 "issues": "https://github.com/jmespath/jmespath.php/issues",
-                "source": "https://github.com/jmespath/jmespath.php/tree/2.7.0"
+                "source": "https://github.com/jmespath/jmespath.php/tree/2.8.0"
             },
-            "time": "2023-08-25T10:54:48+00:00"
+            "time": "2024-09-04T18:46:31+00:00"
         },
         {
             "name": "nesbot/carbon",
@@ -10729,16 +10729,16 @@
         },
         {
             "name": "php-http/multipart-stream-builder",
-            "version": "1.4.0",
+            "version": "1.4.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-http/multipart-stream-builder.git",
-                "reference": "ad3d012c44d6a5a1686fea99cbfa560f0fb80448"
+                "reference": "10086e6de6f53489cca5ecc45b6f468604d3460e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-http/multipart-stream-builder/zipball/ad3d012c44d6a5a1686fea99cbfa560f0fb80448",
-                "reference": "ad3d012c44d6a5a1686fea99cbfa560f0fb80448",
+                "url": "https://api.github.com/repos/php-http/multipart-stream-builder/zipball/10086e6de6f53489cca5ecc45b6f468604d3460e",
+                "reference": "10086e6de6f53489cca5ecc45b6f468604d3460e",
                 "shasum": ""
             },
             "require": {
@@ -10779,9 +10779,9 @@
             ],
             "support": {
                 "issues": "https://github.com/php-http/multipart-stream-builder/issues",
-                "source": "https://github.com/php-http/multipart-stream-builder/tree/1.4.0"
+                "source": "https://github.com/php-http/multipart-stream-builder/tree/1.4.2"
             },
-            "time": "2024-09-01T11:08:55+00:00"
+            "time": "2024-09-04T13:22:54+00:00"
         },
         {
             "name": "phpdocumentor/reflection-common",
@@ -10896,7 +10896,7 @@
         },
         {
             "name": "phpoffice/phpspreadsheet",
-            "version": "dev-security-patch",
+            "version": "1.29.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPOffice/PhpSpreadsheet.git",
@@ -10995,7 +10995,7 @@
             ],
             "support": {
                 "issues": "https://github.com/PHPOffice/PhpSpreadsheet/issues",
-                "source": "https://github.com/PHPOffice/PhpSpreadsheet/tree/security-patch"
+                "source": "https://github.com/PHPOffice/PhpSpreadsheet/tree/1.29.1"
             },
             "time": "2024-09-03T00:55:32+00:00"
         },
@@ -14289,16 +14289,16 @@
         },
         {
             "name": "spiral/core",
-            "version": "3.14.0",
+            "version": "3.14.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/spiral/core.git",
-                "reference": "bc484bb522a5a6d7117d599e79fe29bed5cbb544"
+                "reference": "d1f569e6053344c3051bbed2731467e818b9c78a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/spiral/core/zipball/bc484bb522a5a6d7117d599e79fe29bed5cbb544",
-                "reference": "bc484bb522a5a6d7117d599e79fe29bed5cbb544",
+                "url": "https://api.github.com/repos/spiral/core/zipball/d1f569e6053344c3051bbed2731467e818b9c78a",
+                "reference": "d1f569e6053344c3051bbed2731467e818b9c78a",
                 "shasum": ""
             },
             "require": {
@@ -14316,7 +14316,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "3.14.x-dev"
+                    "dev-master": "3.15.x-dev"
                 }
             },
             "autoload": {
@@ -14358,7 +14358,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-09-02T09:34:50+00:00"
+            "time": "2024-09-03T16:55:22+00:00"
         },
         {
             "name": "spiral/goridge",
@@ -14449,22 +14449,22 @@
         },
         {
             "name": "spiral/logger",
-            "version": "3.14.0",
+            "version": "3.14.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/spiral/logger.git",
-                "reference": "d3b4e6de64a2ab52eb5c8c87df65ac40ed65ab85"
+                "reference": "c832f1038aed009f6cd1f5194ca7a14bb533723a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/spiral/logger/zipball/d3b4e6de64a2ab52eb5c8c87df65ac40ed65ab85",
-                "reference": "d3b4e6de64a2ab52eb5c8c87df65ac40ed65ab85",
+                "url": "https://api.github.com/repos/spiral/logger/zipball/c832f1038aed009f6cd1f5194ca7a14bb533723a",
+                "reference": "c832f1038aed009f6cd1f5194ca7a14bb533723a",
                 "shasum": ""
             },
             "require": {
                 "php": ">=8.1",
                 "psr/log": "1 - 3",
-                "spiral/core": "^3.14"
+                "spiral/core": "^3.14.1"
             },
             "require-dev": {
                 "mockery/mockery": "^1.5",
@@ -14474,7 +14474,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "3.14.x-dev"
+                    "dev-master": "3.15.x-dev"
                 }
             },
             "autoload": {
@@ -14516,7 +14516,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-08-22T09:46:13+00:00"
+            "time": "2024-09-04T10:56:14+00:00"
         },
         {
             "name": "spiral/roadrunner",
@@ -14806,37 +14806,37 @@
         },
         {
             "name": "spiral/tokenizer",
-            "version": "3.14.0",
+            "version": "3.14.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/spiral/tokenizer.git",
-                "reference": "21fc90213017de78e1cc809890d6aad5783b8610"
+                "reference": "0526f2b73725d002278b786ad7b16f27968aef63"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/spiral/tokenizer/zipball/21fc90213017de78e1cc809890d6aad5783b8610",
-                "reference": "21fc90213017de78e1cc809890d6aad5783b8610",
+                "url": "https://api.github.com/repos/spiral/tokenizer/zipball/0526f2b73725d002278b786ad7b16f27968aef63",
+                "reference": "0526f2b73725d002278b786ad7b16f27968aef63",
                 "shasum": ""
             },
             "require": {
                 "ext-tokenizer": "*",
                 "php": ">=8.1",
-                "spiral/core": "^3.14",
-                "spiral/logger": "^3.14",
+                "spiral/core": "^3.14.1",
+                "spiral/logger": "^3.14.1",
                 "symfony/finder": "^5.3.7 || ^6.0 || ^7.0"
             },
             "require-dev": {
                 "mockery/mockery": "^1.6",
                 "phpunit/phpunit": "^10.1",
                 "spiral/attributes": "^2.8|^3.0",
-                "spiral/boot": "^3.14",
-                "spiral/files": "^3.14",
+                "spiral/boot": "^3.14.1",
+                "spiral/files": "^3.14.1",
                 "vimeo/psalm": "^5.9"
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "3.14.x-dev"
+                    "dev-master": "3.15.x-dev"
                 }
             },
             "autoload": {
@@ -14878,7 +14878,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-08-22T09:49:47+00:00"
+            "time": "2024-09-04T10:56:34+00:00"
         },
         {
             "name": "sqids/sqids",
@@ -20861,16 +20861,16 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "1.12.0",
+            "version": "1.12.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "384af967d35b2162f69526c7276acadce534d0e1"
+                "reference": "d8ed7fffa66de1db0d2972267d8ed1d8fa0fe5a2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/384af967d35b2162f69526c7276acadce534d0e1",
-                "reference": "384af967d35b2162f69526c7276acadce534d0e1",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/d8ed7fffa66de1db0d2972267d8ed1d8fa0fe5a2",
+                "reference": "d8ed7fffa66de1db0d2972267d8ed1d8fa0fe5a2",
                 "shasum": ""
             },
             "require": {
@@ -20915,7 +20915,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-08-27T09:18:05+00:00"
+            "time": "2024-09-03T19:55:22+00:00"
         },
         {
             "name": "phpunit/php-code-coverage",
@@ -23948,17 +23948,9 @@
             "time": "2024-04-29T21:42:39+00:00"
         }
     ],
-    "aliases": [
-        {
-            "package": "phpoffice/phpspreadsheet",
-            "version": "dev-security-patch",
-            "alias": "1.29.1",
-            "alias_normalized": "1.29.1.0"
-        }
-    ],
+    "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "phpoffice/phpspreadsheet": 20,
         "serversideup/spin": 10
     },
     "prefer-stable": true,
