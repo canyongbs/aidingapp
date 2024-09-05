@@ -82,7 +82,7 @@ class CreateOrganization extends CreateRecord
                             ->image(),
                         Toggle::make('is_contact_generation_enabled')
                             ->label('Automatically generate contact record on login.')
-                            ->visible(FeatureFlag::OrganizationDomain->active()),
+                            ->visible(FeatureFlag::ContactGenerationEnabled->active()),
                         Repeater::make('domains')
                             ->schema([
                                 TextInput::make('domain')

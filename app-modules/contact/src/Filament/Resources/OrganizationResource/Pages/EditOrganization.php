@@ -41,6 +41,7 @@ use App\Enums\FeatureFlag;
 use Filament\Actions\ViewAction;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Textarea;
@@ -51,7 +52,6 @@ use AidingApp\Contact\Models\OrganizationIndustry;
 use AidingApp\Contact\Rules\UniqueOrganizationDomain;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use AidingApp\Contact\Filament\Resources\OrganizationResource;
-use Filament\Forms\Components\Toggle;
 
 class EditOrganization extends EditRecord
 {
@@ -86,7 +86,7 @@ class EditOrganization extends EditRecord
                             ->image(),
                         Toggle::make('is_contact_generation_enabled')
                             ->label('Automatically generate contact record on login.')
-                            ->visible(FeatureFlag::OrganizationDomain->active()),
+                            ->visible(FeatureFlag::ContactGenerationEnabled->active()),
                         Repeater::make('domains')
                             ->schema([
                                 TextInput::make('domain')
