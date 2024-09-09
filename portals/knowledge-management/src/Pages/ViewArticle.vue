@@ -37,7 +37,7 @@
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import AppLoading from '../Components/AppLoading.vue';
     import { consumer } from '../Services/Consumer.js';
-    import { Bars3Icon,ClockIcon } from '@heroicons/vue/24/outline/index.js';
+    import { Bars3Icon, ClockIcon } from '@heroicons/vue/24/outline/index.js';
     import DOMPurify from 'dompurify';
     import Tags from '../Components/Tags.vue';
 
@@ -111,16 +111,14 @@
                             <div class="flex flex-col gap-3">
                                 <div class="prose max-w-none">
                                     <h1>{{ article.name }}</h1>
-                                     <div class="text-gray-500 flex items-center space-x-1 mb-4">
-                                     <ClockIcon class="h-4 w-4 flex-shrink-0" aria-hidden="true" />
-                                    <span class="text-xs">Last updated: {{ article.lastUpdated }}</span>
+                                    <div class="text-gray-500 flex items-center space-x-1 mb-4">
+                                        <ClockIcon class="h-4 w-4 flex-shrink-0" aria-hidden="true" />
+                                        <span class="text-xs">Last updated: {{ article.lastUpdated }}</span>
                                     </div>
                                     <Tags :tags="article.tags" />
-                                    <hr class="my-4">
+                                    <hr class="my-4" />
                                     <div v-html="DOMPurify.sanitize(article.content)"></div>
                                 </div>
-
-                                
                             </div>
                         </div>
                     </main>
