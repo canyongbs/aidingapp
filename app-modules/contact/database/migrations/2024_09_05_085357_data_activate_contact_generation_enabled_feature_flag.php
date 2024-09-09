@@ -34,42 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace App\Enums;
+use App\Enums\FeatureFlag;
+use Illuminate\Database\Migrations\Migration;
 
-use Closure;
-use Laravel\Pennant\Feature;
-
-enum FeatureFlag: string
-{
-    case OrganizationDomain = 'organization_domain';
-    case ContactGenerationEnabled = 'contact_generation_enabled';
-
-    public function definition(): Closure
+return new class () extends Migration {
+    public function up(): void
     {
-        return match ($this) {
-            default => function () {
-                return false;
-            }
-        };
+        FeatureFlag::ContactGenerationEnabled->activate();
     }
 
-    public function active(): bool
+    public function down(): void
     {
-        return Feature::active($this->value);
+        FeatureFlag::ContactGenerationEnabled->deactivate();
     }
-
-    public function activate(): void
-    {
-        Feature::activate($this->value);
-    }
-
-    public function deactivate(): void
-    {
-        Feature::deactivate($this->value);
-    }
-
-    public function purge(): void
-    {
-        Feature::purge($this->value);
-    }
-}
+};

@@ -76,6 +76,7 @@ class Organization extends BaseModel implements HasMedia, Auditable
         'facebook_url',
         'twitter_url',
         'domains',
+        'is_contact_generation_enabled',
     ];
 
     protected $casts = [
