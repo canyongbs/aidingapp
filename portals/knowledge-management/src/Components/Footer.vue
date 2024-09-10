@@ -43,7 +43,7 @@
 </script>
 
 <template>
-    <div class="flex w-full flex-col">
+    <div class="flex w-full flex-col bg-white">
         <div class="mt-4 flex w-full justify-center">
             <img class="block h-5" :src="logo" alt="Aiding App Logo" />
         </div>
