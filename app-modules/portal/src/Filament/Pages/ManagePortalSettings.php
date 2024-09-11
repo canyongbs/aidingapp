@@ -40,6 +40,7 @@ use App\Models\User;
 use App\Enums\Feature;
 use Filament\Forms\Get;
 use Filament\Forms\Form;
+use App\Enums\FeatureFlag;
 use Filament\Pages\SettingsPage;
 use AidingApp\Form\Enums\Rounding;
 use Illuminate\Support\Facades\Gate;
@@ -48,6 +49,7 @@ use Filament\Forms\Components\Toggle;
 use AidingApp\Portal\Enums\PortalType;
 use Filament\Forms\Components\Actions;
 use Filament\Forms\Components\Section;
+use FilamentTiptapEditor\TiptapEditor;
 use Filament\Forms\Components\Textarea;
 use AidingApp\Portal\Enums\PortalLayout;
 use Filament\Forms\Components\TextInput;
@@ -59,6 +61,7 @@ use Filament\Forms\Components\Actions\Action;
 use App\Filament\Forms\Components\ColorSelect;
 use AidingApp\Portal\Enums\GdprBannerButtonLabel;
 use AidingApp\Portal\Actions\GeneratePortalEmbedCode;
+use AidingApp\Portal\DataTransferObjects\GDPRBannerText;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 
 class ManagePortalSettings extends SettingsPage
@@ -206,9 +209,16 @@ class ManagePortalSettings extends SettingsPage
                     ])->columns(2),
                 Section::make('GDPR Banner Notice')
                     ->schema([
+                        TiptapEditor::make('cookie_gdpr_banner_text.text')
+                            ->label('GDPR Banner Text')
+                            ->required()
+                            ->tools(['link'])
+                            ->visible(FeatureFlag::GDPRNewBannerText->active())
+                            ->columnSpanFull(),
                         Textarea::make('gdpr_banner_text')
                             ->label('GDPR Banner Text')
                             ->required()
+                            ->visible(! FeatureFlag::GDPRNewBannerText->active())
                             ->columnSpanFull(),
                         Select::make('gdpr_banner_button_label')
                             ->options(GdprBannerButtonLabel::class)
@@ -218,5 +228,40 @@ class ManagePortalSettings extends SettingsPage
                     ])
                     ->visible(fn (Get $get) => $get('knowledge_management_portal_enabled')),
             ]);
+    }
+
+    public function save(): void
+    {
+        $this->callHook('beforeValidate');
+
+        $data = $this->form->getState();
+
+        $this->callHook('afterValidate');
+
+        $data = $this->mutateFormDataBeforeSave($data);
+
+        $this->callHook('beforeSave');
+
+        $settings = app(static::getSettings());
+
+        if (FeatureFlag::GDPRNewBannerText->active()) {
+            /** @var GDPRBannerText $config */
+            $config = $settings->cookie_gdpr_banner_text;
+
+            $config->text = json_encode($data['cookie_gdpr_banner_text']['text']);
+
+            $settings->cookie_gdpr_banner_text = $config;
+
+            unset(
+                $data['cookie_gdpr_banner_text']
+            );
+        }
+
+        $settings->fill($data);
+        $settings->save();
+
+        $this->callHook('afterSave');
+
+        $this->getSavedNotification()?->send();
     }
 }
