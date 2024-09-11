@@ -39,6 +39,7 @@ namespace AidingApp\Contact\Filament\Resources\OrganizationResource\Pages;
 use Filament\Forms\Form;
 use App\Enums\FeatureFlag;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Textarea;
@@ -79,6 +80,9 @@ class CreateOrganization extends CreateRecord
                             ->label('Organization Logo')
                             ->collection('organization_logo')
                             ->image(),
+                        Toggle::make('is_contact_generation_enabled')
+                            ->label('Automatically generate contact record on login.')
+                            ->visible(FeatureFlag::ContactGenerationEnabled->active()),
                         Repeater::make('domains')
                             ->schema([
                                 TextInput::make('domain')

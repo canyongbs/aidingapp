@@ -41,6 +41,7 @@ use App\Enums\FeatureFlag;
 use Filament\Actions\ViewAction;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Textarea;
@@ -83,6 +84,9 @@ class EditOrganization extends EditRecord
                             ->label('Organization Logo')
                             ->collection('organization_logo')
                             ->image(),
+                        Toggle::make('is_contact_generation_enabled')
+                            ->label('Automatically generate contact record on login.')
+                            ->visible(FeatureFlag::ContactGenerationEnabled->active()),
                         Repeater::make('domains')
                             ->schema([
                                 TextInput::make('domain')
