@@ -44,7 +44,7 @@
                 <div class="w-0 flex-1 items-center hidden md:inline">
                     <p class="ml-3 text-primary-950 text-sm font-medium cookie-consent__message">
                         @if(FeatureFlag::GDPRNewBannerText->active())
-                            {!! tiptap_converter()->asHtml(app(PortalSettings::class)->cookie_gdpr_banner_text->text) !!}
+                            {!! tiptap_converter()->asHtml(app(PortalSettings::class)->cookie_gdpr_banner_text) !!}
                         @else
 
                             @if(! empty(app(PortalSettings::class)->gdpr_banner_text))

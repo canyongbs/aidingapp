@@ -19,7 +19,21 @@ return new class () extends Migration {
                     ->where('name', 'cookie_gdpr_banner_text')
                     ->update([
                         'payload' => [
-                            'text' => json_decode($oldGDPRBannerText->payload),
+                            'type' => 'doc',
+                            'content' => [
+                                [
+                                    'type' => 'paragraph',
+                                    'attrs' => [
+                                        'textAlign' => 'start',
+                                    ],
+                                    'content' => [
+                                        [
+                                            'type' => 'text',
+                                            'text' => json_decode($oldGDPRBannerText->payload),
+                                        ],
+                                    ],
+                                ],
+                            ],
                         ],
                     ]);
             }
@@ -38,9 +52,23 @@ return new class () extends Migration {
             ->where('group', 'portal')
             ->where('name', 'cookie_gdpr_banner_text')
             ->update([
-                'payload' => json_encode([
-                    'text' => 'We use cookies to personalize content, to provide social media features, and to analyze our traffic. We also share information about your use of our site with our partners who may combine it with other information that you\'ve provided to them or that they\'ve collected from your use of their services.',
-                ]),
+                'payload' => [
+                    'type' => 'doc',
+                    'content' => [
+                        [
+                            'type' => 'paragraph',
+                            'attrs' => [
+                                'textAlign' => 'start',
+                            ],
+                            'content' => [
+                                [
+                                    'type' => 'text',
+                                    'text' => 'We use cookies to personalize content, to provide social media features, and to analyze our traffic. We also share information about your use of our site with our partners who may combine it with other information that you\'ve provided to them or that they\'ve collected from your use of their services.',
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
             ]);
     }
 };

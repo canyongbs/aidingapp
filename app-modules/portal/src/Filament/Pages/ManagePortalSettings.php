@@ -61,7 +61,6 @@ use Filament\Forms\Components\Actions\Action;
 use App\Filament\Forms\Components\ColorSelect;
 use AidingApp\Portal\Enums\GdprBannerButtonLabel;
 use AidingApp\Portal\Actions\GeneratePortalEmbedCode;
-use AidingApp\Portal\DataTransferObjects\GDPRBannerText;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 
 class ManagePortalSettings extends SettingsPage
@@ -209,7 +208,7 @@ class ManagePortalSettings extends SettingsPage
                     ])->columns(2),
                 Section::make('GDPR Banner Notice')
                     ->schema([
-                        TiptapEditor::make('cookie_gdpr_banner_text.text')
+                        TiptapEditor::make('cookie_gdpr_banner_text')
                             ->label('GDPR Banner Text')
                             ->required()
                             ->tools(['link'])
@@ -245,16 +244,7 @@ class ManagePortalSettings extends SettingsPage
         $settings = app(static::getSettings());
 
         if (FeatureFlag::GDPRNewBannerText->active()) {
-            /** @var GDPRBannerText $config */
-            $config = $settings->cookie_gdpr_banner_text;
-
-            $config->text = json_encode($data['cookie_gdpr_banner_text']['text']);
-
-            $settings->cookie_gdpr_banner_text = $config;
-
-            unset(
-                $data['cookie_gdpr_banner_text']
-            );
+            $settings->cookie_gdpr_banner_text = $data['cookie_gdpr_banner_text'];
         }
 
         $settings->fill($data);
