@@ -55,61 +55,62 @@ use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
  */
 class KnowledgeBaseItem extends BaseModel implements Auditable, HasMedia, HasTags
 {
-    use AuditableTrait;
-    use HasUuids;
-    use InteractsWithMedia;
-    use SoftDeletes;
-    use InteractsWithTags;
+  use AuditableTrait;
+  use HasUuids;
+  use InteractsWithMedia;
+  use SoftDeletes;
+  use InteractsWithTags;
 
-    protected $table = 'knowledge_base_articles';
+  protected $table = 'knowledge_base_articles';
 
-    protected $casts = [
-        'public' => 'boolean',
-        'article_details' => 'array',
-    ];
+  protected $casts = [
+    'public' => 'boolean',
+    'article_details' => 'array',
+  ];
 
-    protected $fillable = [
-        'article_details',
-        'category_id',
-        'notes',
-        'public',
-        'quality_id',
-        'status_id',
-        'title',
-    ];
+  protected $fillable = [
+    'article_details',
+    'category_id',
+    'portal_view_count',
+    'notes',
+    'public',
+    'quality_id',
+    'status_id',
+    'title',
+  ];
 
-    public function quality(): BelongsTo
-    {
-        return $this->belongsTo(KnowledgeBaseQuality::class);
-    }
+  public function quality(): BelongsTo
+  {
+    return $this->belongsTo(KnowledgeBaseQuality::class);
+  }
 
-    public function status(): BelongsTo
-    {
-        return $this->belongsTo(KnowledgeBaseStatus::class);
-    }
+  public function status(): BelongsTo
+  {
+    return $this->belongsTo(KnowledgeBaseStatus::class);
+  }
 
-    public function category(): BelongsTo
-    {
-        return $this->belongsTo(KnowledgeBaseCategory::class);
-    }
+  public function category(): BelongsTo
+  {
+    return $this->belongsTo(KnowledgeBaseCategory::class);
+  }
 
-    public function division(): BelongsToMany
-    {
-        return $this->belongsToMany(Division::class);
-    }
+  public function division(): BelongsToMany
+  {
+    return $this->belongsToMany(Division::class);
+  }
 
-    public function registerMediaCollections(): void
-    {
-        $this->addMediaCollection('article_details');
-    }
+  public function registerMediaCollections(): void
+  {
+    $this->addMediaCollection('article_details');
+  }
 
-    public function scopePublic($query)
-    {
-        return $query->where('public', true);
-    }
+  public function scopePublic($query)
+  {
+    return $query->where('public', true);
+  }
 
-    protected function serializeDate(DateTimeInterface $date): string
-    {
-        return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
-    }
+  protected function serializeDate(DateTimeInterface $date): string
+  {
+    return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
+  }
 }

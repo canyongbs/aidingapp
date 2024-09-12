@@ -37,7 +37,7 @@
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import AppLoading from '../Components/AppLoading.vue';
     import { consumer } from '../Services/Consumer.js';
-    import { Bars3Icon, ClockIcon } from '@heroicons/vue/24/outline/index.js';
+    import { Bars3Icon, ClockIcon, EyeIcon } from '@heroicons/vue/24/outline/index.js';
     import DOMPurify from 'dompurify';
     import Tags from '../Components/Tags.vue';
 
@@ -61,6 +61,8 @@
     const loading = ref(true);
     const category = ref(null);
     const article = ref(null);
+    const portalViewCount = ref(0);
+    const portalViewCountFlag = ref(0);
 
     watch(
         route,
@@ -86,6 +88,8 @@
                 category.value = response.data.category;
                 article.value = response.data.article;
                 loading.value = false;
+                portalViewCount.value = response.data.portal_view_count;
+                portalViewCountFlag.value = response.data.portal_view_count_flag
             },
         );
     }
@@ -111,9 +115,15 @@
                             <div class="flex flex-col gap-3">
                                 <div class="prose max-w-none">
                                     <h1>{{ article.name }}</h1>
-                                    <div class="text-gray-500 flex items-center space-x-1 mb-4">
-                                        <ClockIcon class="h-4 w-4 flex-shrink-0" aria-hidden="true" />
-                                        <span class="text-xs">Last updated: {{ article.lastUpdated }}</span>
+                                    <div class="flex mb-4">
+                                        <div v-if="portalViewCountFlag" class="text-gray-500 flex items-center space-x-1 mr-2">
+                                            <EyeIcon class="h-4 w-4 flex-shrink-0" aria-hidden="true" />
+                                            <span class="text-xs">{{portalViewCount}} Views</span>
+                                        </div>
+                                        <div class="text-gray-500 flex items-center space-x-1">                                        
+                                            <ClockIcon class="h-4 w-4 flex-shrink-0" aria-hidden="true" />
+                                            <span class="text-xs">Last updated: {{ article.lastUpdated }}</span>
+                                        </div>
                                     </div>
                                     <Tags :tags="article.tags" />
                                     <hr class="my-4" />

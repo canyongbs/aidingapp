@@ -42,32 +42,40 @@ use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\Portal\DataTransferObjects\KnowledgeBaseArticleData;
 use AidingApp\Portal\DataTransferObjects\KnowledgeBaseCategoryData;
+use Laravel\Pennant\Feature;
 
 class KnowledgeManagementPortalArticleController extends Controller
 {
-    public function show(KnowledgeBaseCategory $category, KnowledgeBaseItem $article): JsonResponse
-    {
-        return response()->json([
-            'category' => KnowledgeBaseCategoryData::from([
-                'id' => $category->getKey(),
-                'name' => $category->name,
-                'description' => $category->description,
-            ]),
-            'article' => KnowledgeBaseArticleData::from([
-                'id' => $article->getKey(),
-                'categoryId' => $article->category_id,
-                'name' => $article->title,
-                'lastUpdated' => $article->updated_at->format('M d Y, h:m a'),
-                'content' => tiptap_converter()->record($article, attribute: 'article_details')->asHTML($article->article_details),
-                'tags' => $article->tags()
-                    ->orderBy('name')
-                    ->select([
-                        'id',
-                        'name',
-                    ])
-                    ->get()
-                    ->toArray(),
-            ]),
-        ]);
+  public function show(KnowledgeBaseCategory $category, KnowledgeBaseItem $article): JsonResponse
+  {
+    $portalViewCountFlag = Feature::active('portal_view_count');
+    if ($portalViewCountFlag) {
+      $article->update(['portal_view_count' => $article->portal_view_count + 1]);
     }
+
+    return response()->json([
+      'category' => KnowledgeBaseCategoryData::from([
+        'id' => $category->getKey(),
+        'name' => $category->name,
+        'description' => $category->description,
+      ]),
+      'article' => KnowledgeBaseArticleData::from([
+        'id' => $article->getKey(),
+        'categoryId' => $article->category_id,
+        'name' => $article->title,
+        'lastUpdated' => $article->updated_at->format('M d Y, h:m a'),
+        'content' => tiptap_converter()->record($article, attribute: 'article_details')->asHTML($article->article_details),
+        'tags' => $article->tags()
+          ->orderBy('name')
+          ->select([
+            'id',
+            'name',
+          ])
+          ->get()
+          ->toArray(),
+      ]),
+      'portal_view_count' => $article->portal_view_count,
+      'portal_view_count_flag' => $portalViewCountFlag
+    ]);
+  }
 }
