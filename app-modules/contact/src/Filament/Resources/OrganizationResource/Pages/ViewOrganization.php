@@ -36,7 +36,6 @@
 
 namespace AidingApp\Contact\Filament\Resources\OrganizationResource\Pages;
 
-use App\Enums\FeatureFlag;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
@@ -73,8 +72,7 @@ class ViewOrganization extends ViewRecord
                                 TextEntry::make('domain'),
                             ])
                             ->columnSpan('full')
-                            ->grid(2)
-                            ->visible(FeatureFlag::OrganizationDomain->active()),
+                            ->grid(2),
                     ])
                     ->columns(),
                 Section::make('Additional Info')

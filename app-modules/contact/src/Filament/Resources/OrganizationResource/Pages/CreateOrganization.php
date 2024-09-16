@@ -37,7 +37,6 @@
 namespace AidingApp\Contact\Filament\Resources\OrganizationResource\Pages;
 
 use Filament\Forms\Form;
-use App\Enums\FeatureFlag;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Section;
@@ -99,8 +98,7 @@ class CreateOrganization extends CreateRecord
                             ->addActionLabel('Add domains')
                             ->reorderable(false)
                             ->columnSpan('full')
-                            ->grid(2)
-                            ->visible(FeatureFlag::OrganizationDomain->active()),
+                            ->grid(2),
                     ]),
                 Section::make('Additional Info')
                     ->columns()

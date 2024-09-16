@@ -37,7 +37,6 @@
 namespace AidingApp\Contact\Filament\Resources\OrganizationResource\Pages;
 
 use Filament\Forms\Form;
-use App\Enums\FeatureFlag;
 use Filament\Actions\ViewAction;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Select;
@@ -102,8 +101,7 @@ class EditOrganization extends EditRecord
                             ->addActionLabel('Add domains')
                             ->reorderable(false)
                             ->columnSpan('full')
-                            ->grid(2)
-                            ->visible(FeatureFlag::OrganizationDomain->active()),
+                            ->grid(2),
                     ]),
                 Section::make('Additional Info')
                     ->columns()
