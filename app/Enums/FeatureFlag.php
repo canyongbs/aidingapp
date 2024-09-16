@@ -42,7 +42,6 @@ use Laravel\Pennant\Feature;
 enum FeatureFlag: string
 {
     case OrganizationDomain = 'organization_domain';
-    case ContactGenerationEnabled = 'contact_generation_enabled';
 
     public function definition(): Closure
     {
