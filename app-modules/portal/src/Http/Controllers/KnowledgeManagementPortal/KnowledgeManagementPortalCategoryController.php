@@ -38,9 +38,7 @@ namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
-use AidingApp\Portal\DataTransferObjects\KnowledgeBaseArticleData;
 use AidingApp\Portal\DataTransferObjects\KnowledgeBaseCategoryData;
 
 class KnowledgeManagementPortalCategoryController extends Controller
@@ -73,28 +71,25 @@ class KnowledgeManagementPortalCategoryController extends Controller
                 'name' => $category->name,
                 'description' => $category->description,
             ]),
-            'articles' => KnowledgeBaseArticleData::collection(
-                $category->knowledgeBaseItems()
-                    ->with('tags')
-                    ->public()
-                    ->get()
-                    ->map(function (KnowledgeBaseItem $item) {
-                        return [
-                            'id' => $item->getKey(),
-                            'categoryId' => $item->category_id,
-                            'name' => $item->title,
-                            'tags' => $item->tags()
-                                ->orderBy('name')
-                                ->select([
-                                    'id',
-                                    'name',
-                                ])
-                                ->get()
-                                ->toArray(),
-                        ];
-                    })
-                    ->toArray()
-            ),
+            'articles' => $category->knowledgeBaseItems()
+                ->with('tags')
+                ->public()
+                ->paginate(10)
+                ->through(function ($category) {
+                    $category->name = $category->title;
+                    $category->categoryId = $category->category_id;
+                    $category->id = $category->getKey();
+                    $category->tags = $category->tags()
+                        ->orderBy('name')
+                        ->select([
+                            'id',
+                            'name',
+                        ])
+                        ->get()
+                        ->toArray();
+
+                    return $category;
+                }),
         ]);
     }
 }
