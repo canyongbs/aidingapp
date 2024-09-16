@@ -85,8 +85,7 @@ class EditOrganization extends EditRecord
                             ->collection('organization_logo')
                             ->image(),
                         Toggle::make('is_contact_generation_enabled')
-                            ->label('Automatically generate contact record on login.')
-                            ->visible(FeatureFlag::ContactGenerationEnabled->active()),
+                            ->label('Automatically generate contact record on login.'),
                         Repeater::make('domains')
                             ->schema([
                                 TextInput::make('domain')
