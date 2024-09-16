@@ -41,8 +41,6 @@ use Laravel\Pennant\Feature;
 
 enum FeatureFlag: string
 {
-    case OrganizationDomain = 'organization_domain';
-
     public function definition(): Closure
     {
         return match ($this) {

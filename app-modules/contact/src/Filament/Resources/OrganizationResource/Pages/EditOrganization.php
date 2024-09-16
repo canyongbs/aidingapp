@@ -102,8 +102,7 @@ class EditOrganization extends EditRecord
                             ->addActionLabel('Add domains')
                             ->reorderable(false)
                             ->columnSpan('full')
-                            ->grid(2)
-                            ->visible(FeatureFlag::OrganizationDomain->active()),
+                            ->grid(2),
                     ]),
                 Section::make('Additional Info')
                     ->columns()
