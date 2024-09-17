@@ -43,17 +43,11 @@
             <div class="flex items-center justify-between flex-wrap">
                 <div class="w-0 flex-1 items-center hidden md:inline">
                     <p class="ml-3 text-primary-950 text-sm font-medium cookie-consent__message">
-                        @if(FeatureFlag::GDPRNewBannerText->active())
-                            {!! tiptap_converter()->asHtml(app(PortalSettings::class)->cookie_gdpr_banner_text) !!}
-                        @else
-
                             @if(! empty(app(PortalSettings::class)->gdpr_banner_text))
-                                {!! str(app(PortalSettings::class)->gdpr_banner_text)->sanitizeHtml() !!}
+                                {!! str(tiptap_converter()->asHtml(app(PortalSettings::class)->gdpr_banner_text))->sanitizeHtml() !!}
                             @else
                                 We use cookies to personalize content, to provide social media features, and to analyze our traffic. We also share information about your use of our site with our partners who may combine it with other information that you've provided to them or that they've collected from your use of their services.
                             @endif
-
-                        @endif
                     </p>
                 </div>
 
