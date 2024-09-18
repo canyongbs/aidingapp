@@ -152,9 +152,15 @@
         return Array.from({ length: end - start + 1 }, (_, i) => i + start);
     };
 
-    onMounted(async function () {
-        await getData();
-    });
+    watch(
+        route,
+        async function (newRouteValue) {
+            await getData();
+        },
+        {
+            immediate: true,
+        },
+    );
 
     async function getData(page = 1) {
         loadingResults.value = true;
