@@ -52,7 +52,7 @@ test('Audit logs are only created if the Model is not set to be excluded from Au
 
     expect($serviceRequest->audits)->toHaveCount(0);
 
-    $auditSettings->audited_models_exclude[] = [];
+    $auditSettings->audited_models_exclude = [];
 
     $auditSettings->save();
 
