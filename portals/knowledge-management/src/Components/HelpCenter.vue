@@ -127,18 +127,22 @@
                         </div>
 
                         <div class="w-full mt-8">
-                            <h3 class="text-base font-semibold leading-6 text-gray-900">
-                                {{ serviceRequest.title }}
-                            </h3>
-                            <div class="mt-2">
-                                <span
-                                    class="px-2 py-1 text-sm font-bold text-white rounded"
-                                    :style="'background-color: rgb(' + serviceRequest.status_color + ')'"
-                                >
-                                    {{ serviceRequest.status_name }}
-                                </span>
-                            </div>
-                            <p class="mt-2 text-xs text-gray-500">Last Updated: {{ serviceRequest.updated_at }}</p>
+                            <router-link
+                                :to="{ name: 'view-service-request', params: { serviceRequestId: serviceRequest.id } }"
+                            >
+                                <h3 class="text-base font-semibold leading-6 text-gray-900">
+                                    {{ serviceRequest.title }}
+                                </h3>
+                                <div class="mt-2">
+                                    <span
+                                        class="px-2 py-1 text-sm font-bold text-white rounded"
+                                        :style="'background-color: rgb(' + serviceRequest.status_color + ')'"
+                                    >
+                                        {{ serviceRequest.status_name }}
+                                    </span>
+                                </div>
+                                <p class="mt-2 text-xs text-gray-500">Last Updated: {{ serviceRequest.updated_at }}</p>
+                            </router-link>
                         </div>
                     </div>
                 </div>

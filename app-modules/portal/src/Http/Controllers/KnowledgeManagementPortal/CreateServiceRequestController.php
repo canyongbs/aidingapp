@@ -57,9 +57,11 @@ use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\Form\Filament\Blocks\TextInputFormFieldBlock;
 use AidingApp\Form\Actions\ResolveSubmissionAuthorFromEmail;
+use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormStep;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use AidingApp\Form\Filament\Blocks\EducatableEmailFormFieldBlock;
+use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateDirection;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormSubmission;
 use AidingApp\ServiceManagement\Models\MediaCollections\UploadsMediaCollection;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
@@ -192,6 +194,23 @@ class CreateServiceRequestController extends Controller
         return response()->json([
             'message' => 'Service Request Form submitted successfully.',
         ]);
+    }
+
+    public function storeServiceRequestUpdate(
+        Request $request,
+    ): JsonResponse {
+        $contact = auth('contact')->user();
+
+        abort_if(is_null($contact), Response::HTTP_UNAUTHORIZED);
+
+        $serviceRequestUpdate = new ServiceRequestUpdate();
+        $serviceRequestUpdate->service_request_id = $request->serviceRequestId;
+        $serviceRequestUpdate->update = $request->description;
+        $serviceRequestUpdate->internal = false;
+        $serviceRequestUpdate->direction = ServiceRequestUpdateDirection::Inbound;
+        $serviceRequestUpdate->save();
+
+        return response()->json($serviceRequestUpdate, 201);
     }
 
     private function processSubmissionField(

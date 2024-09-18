@@ -99,7 +99,7 @@ Route::prefix('api')
                 Route::get('/service-request-type/select', [ServiceRequestTypesController::class, 'index'])
                     ->name('service-request-type.index');
 
-                Route::get('/service-requests', GetServiceRequestsController::class)
+                Route::get('/service-requests', [GetServiceRequestsController::class, 'index'])
                     ->name('service-request.index');
 
                 Route::get('/service-request/create/{type}', [CreateServiceRequestController::class, 'create'])
@@ -115,5 +115,9 @@ Route::prefix('api')
 
                 Route::get('/tags', GetKnowledgeManagementPortalTagsController::class)
                     ->name('tags.index');
+                Route::get('/service-request/{serviceRequest}', [GetServiceRequestsController::class, 'show'])
+                    ->name('service-request.show');
+                Route::post('/service-request-update/store', [CreateServiceRequestController::class, 'storeServiceRequestUpdate'])
+                    ->name('service-request-update.storeServiceRequestUpdate');
             });
     });

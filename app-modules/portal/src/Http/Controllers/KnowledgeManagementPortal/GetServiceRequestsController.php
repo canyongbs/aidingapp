@@ -44,10 +44,13 @@ use Filament\Support\Colors\ColorManager;
 use AidingApp\Portal\Settings\PortalSettings;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\Portal\DataTransferObjects\ServiceRequestData;
+use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use AidingApp\Portal\DataTransferObjects\ServiceRequestDetailsData;
+use AidingApp\Portal\DataTransferObjects\ServiceRequestUpdatesData;
 
 class GetServiceRequestsController extends Controller
 {
-    public function __invoke(): JsonResponse
+    public function index(): JsonResponse
     {
         $license = resolve(LicenseSettings::class);
         $settings = resolve(PortalSettings::class);
@@ -85,5 +88,47 @@ class GetServiceRequestsController extends Controller
                     ->toArray()
             )
         );
+    }
+
+    public function show(ServiceRequest $serviceRequest): JsonResponse
+    {
+        $license = resolve(LicenseSettings::class);
+        $settings = resolve(PortalSettings::class);
+        $contact = auth('contact')->user();
+
+        $enabled = $license->data->addons->serviceManagement
+            && $settings->knowledge_management_portal_service_management
+            && $contact;
+
+        if (! $enabled) {
+            return response()->json();
+        }
+
+        return response()->json([
+            'serviceRequestDetails' => ServiceRequestDetailsData::from([
+                'id' => $serviceRequest->getKey(),
+                'title' => $serviceRequest->title,
+                'description' => $serviceRequest->close_details,
+                'serviceRequestNumber' => $serviceRequest->service_request_number,
+                'statusName' => $serviceRequest->status?->name,
+                'typeName' => $serviceRequest->priority?->type?->name,
+            ]),
+            'serviceRequestUpdates' => ServiceRequestUpdatesData::collection(
+                $serviceRequest
+                    ->serviceRequestUpdates()
+                    ->latest('created_at')
+                    ->get()
+                    ->map(function (ServiceRequestUpdate $serviceRequestUpdate) {
+                        return ServiceRequestUpdatesData::from([
+                            'id' => $serviceRequestUpdate->getKey(),
+                            'update' => $serviceRequestUpdate->update,
+                            'internal' => $serviceRequestUpdate->internal,
+                            'direction' => $serviceRequestUpdate->direction,
+                            'created_at' => $serviceRequestUpdate->created_at->format('m-d-Y g:i A'),
+                        ]);
+                    })
+                    ->toArray()
+            ),
+        ]);
     }
 }
