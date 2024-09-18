@@ -37,7 +37,6 @@
 namespace AidingApp\Contact\Filament\Resources\OrganizationResource\Pages;
 
 use Filament\Forms\Form;
-use App\Enums\FeatureFlag;
 use Filament\Actions\ViewAction;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Select;
@@ -85,8 +84,7 @@ class EditOrganization extends EditRecord
                             ->collection('organization_logo')
                             ->image(),
                         Toggle::make('is_contact_generation_enabled')
-                            ->label('Automatically generate contact record on login.')
-                            ->visible(FeatureFlag::ContactGenerationEnabled->active()),
+                            ->label('Automatically generate contact record on login.'),
                         Repeater::make('domains')
                             ->schema([
                                 TextInput::make('domain')
@@ -103,8 +101,7 @@ class EditOrganization extends EditRecord
                             ->addActionLabel('Add domains')
                             ->reorderable(false)
                             ->columnSpan('full')
-                            ->grid(2)
-                            ->visible(FeatureFlag::OrganizationDomain->active()),
+                            ->grid(2),
                     ]),
                 Section::make('Additional Info')
                     ->columns()
