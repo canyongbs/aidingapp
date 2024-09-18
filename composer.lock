@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "daba40c6ed99dba6d0aebfae7bf049df",
+    "content-hash": "21c5b4d1ec1c744a4946919fbc997327",
     "packages": [
         {
             "name": "amphp/amp",
@@ -2466,16 +2466,16 @@
         },
         {
             "name": "canyongbs/filament-tiptap-editor",
-            "version": "1.0.1",
+            "version": "1.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/canyongbs/filament-tiptap-editor.git",
-                "reference": "9004c64c6f5a83c9d3677c90ad8dee514033eda7"
+                "reference": "9f90ef321e48bc4809eed292b68f4ef6a543e9a6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/canyongbs/filament-tiptap-editor/zipball/9004c64c6f5a83c9d3677c90ad8dee514033eda7",
-                "reference": "9004c64c6f5a83c9d3677c90ad8dee514033eda7",
+                "url": "https://api.github.com/repos/canyongbs/filament-tiptap-editor/zipball/9f90ef321e48bc4809eed292b68f4ef6a543e9a6",
+                "reference": "9f90ef321e48bc4809eed292b68f4ef6a543e9a6",
                 "shasum": ""
             },
             "require": {
@@ -2538,7 +2538,7 @@
             ],
             "support": {
                 "issues": "https://github.com/canyongbs/filament-tiptap-editor/issues",
-                "source": "https://github.com/canyongbs/filament-tiptap-editor/tree/1.0.1"
+                "source": "https://github.com/canyongbs/filament-tiptap-editor/tree/1.0.2"
             },
             "funding": [
                 {
@@ -2546,7 +2546,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-08-01T18:03:59+00:00"
+            "time": "2024-09-10T09:29:05+00:00"
         },
         {
             "name": "carbonphp/carbon-doctrine-types",
