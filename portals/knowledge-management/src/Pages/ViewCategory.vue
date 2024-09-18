@@ -33,7 +33,7 @@
 -->
 <script setup>
     import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline';
-    import { defineProps, ref, watch, onMounted } from 'vue';
+    import { defineProps, ref, watch } from 'vue';
     import { useRoute } from 'vue-router';
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import AppLoading from '../Components/AppLoading.vue';
