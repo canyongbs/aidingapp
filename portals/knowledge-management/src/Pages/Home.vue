@@ -35,11 +35,12 @@
     import { Bars3Icon, MagnifyingGlassIcon } from '@heroicons/vue/24/outline';
     import HelpCenter from '../Components/HelpCenter.vue';
     import SearchResults from '../Components/SearchResults.vue';
-    import { defineProps, ref, watch } from 'vue';
+    import { defineProps, ref, watch, onMounted } from 'vue';
     import { consumer } from '../Services/Consumer.js';
     import { useAuthStore } from '../Stores/auth.js';
     import { useFeatureStore } from '../Stores/feature.js';
     import Badge from '../Components/Badge.vue';
+    import { useRouter, useRoute } from 'vue-router'
 
     const props = defineProps({
         searchUrl: {
@@ -68,6 +69,11 @@
     const loadingResults = ref(false);
     const searchResults = ref(null);
     const selectedTags = ref([]);
+    const route = useRoute();
+
+    onMounted(function () {
+        searchQuery.value = route.query.search || ''
+    });
 
     const debounceSearch = debounce((value) => {
         const { post } = consumer();
@@ -91,6 +97,12 @@
 
     const { user } = useAuthStore();
     const { hasServiceManagement } = useFeatureStore();
+
+    watch(
+        () => route.query.search,
+        (newValue, oldId) => {
+           searchQuery.value = newValue || '';
+    });
 
     watch(searchQuery, (value) => {
         debounceSearch(value);

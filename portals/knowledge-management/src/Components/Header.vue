@@ -32,11 +32,12 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { defineProps } from 'vue';
+    import { defineProps, ref, onMounted } from 'vue';
     import { consumer } from '../Services/Consumer.js';
     import { useAuthStore } from '../Stores/auth.js';
     import { useFeatureStore } from '../Stores/feature.js';
     import { useTokenStore } from '../Stores/token.js';
+    import GlobalSearchBar from './GlobalSearchBar.vue'; 
 
     const { user, requiresAuthentication } = useAuthStore();
     const { hasServiceManagement } = useFeatureStore();
@@ -69,6 +70,7 @@
             window.location.href = response.data.redirect_url;
         });
     };
+
 </script>
 
 <template>
@@ -79,12 +81,13 @@
                     <img :src="headerLogo" :alt="appName" class="max-h-20 m-3 max-w-64" />
                 </router-link>
             </div>
+            <GlobalSearchBar></GlobalSearchBar>
             <div v-if="requiresAuthentication || hasServiceManagement">
                 <button
                     v-if="user"
                     @click="logout"
                     type="button"
-                    class="bg-gradient-to-br from-primary-500 to-primary-800 text-white text-sm font-medium float-right m-3 p-2 rounded"
+                    class="bg-gradient-to-br from-primary-500 to-primary-800 text-white text-sm font-medium m-3 p-2 rounded float-right"
                 >
                     Sign out
                 </button>
@@ -92,11 +95,12 @@
                     v-else
                     @click="$emit('showLogin')"
                     type="button"
-                    class="bg-gradient-to-br from-primary-500 to-primary-800 text-white text-sm font-medium float-right m-3 p-2 rounded"
+                    class="bg-gradient-to-br from-primary-500 to-primary-800 text-white text-sm font-medium m-3 p-2 rounded float-right"
                 >
                     Sign in
                 </button>
-            </div>
+            </div>         
+            
         </div>
     </div>
 </template>
