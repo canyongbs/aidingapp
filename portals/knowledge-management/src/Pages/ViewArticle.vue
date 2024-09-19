@@ -74,10 +74,6 @@
         },
     );
 
-    onMounted(function () {
-        getData();
-    });
-
     function getData() {
         loading.value = true;
 
