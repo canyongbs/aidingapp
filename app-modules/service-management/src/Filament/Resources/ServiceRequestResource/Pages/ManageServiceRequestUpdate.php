@@ -38,11 +38,14 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\
 
 use Illuminate\Database\Eloquent\Model;
 use Filament\Resources\Pages\ManageRelatedRecords;
+use AidingApp\ServiceManagement\Filament\Concerns\ServiceRequestLocked;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\RelationManagers\ServiceRequestUpdatesRelationManager;
 
 class ManageServiceRequestUpdate extends ManageRelatedRecords
 {
+    use ServiceRequestLocked;
+
     protected static string $resource = ServiceRequestResource::class;
 
     // TODO: Obsolete when there is no table, remove from Filament

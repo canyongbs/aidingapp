@@ -38,7 +38,6 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\
 
 use Filament\Forms\Form;
 use Filament\Tables\Table;
-use Filament\Tables\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Textarea;
@@ -107,13 +106,6 @@ class ServiceRequestUpdatesRelationManager extends RelationManager
             ->headerActions([
                 CreateAction::make()
                     ->visible($this->getOwnerRecord()?->status?->classification == SystemServiceRequestClassification::Closed ? false : true),
-                Action::make('locked_service_request')
-                    ->icon('heroicon-o-lock-closed')
-                    ->color('gray')
-                    ->tooltip('This service request is locked as status is closed.')
-                    ->disabled()
-                    ->visible($this->getOwnerRecord()?->status?->classification == SystemServiceRequestClassification::Closed ? true : false)
-                    ->iconButton(),
             ])
             ->actions([
                 ViewAction::make()
