@@ -40,7 +40,8 @@
     import { useAuthStore } from '../Stores/auth.js';
     import { useFeatureStore } from '../Stores/feature.js';
     import Badge from '../Components/Badge.vue';
-    import { useRouter, useRoute } from 'vue-router'
+    import { useRoute } from 'vue-router'
+    import { globalSearchQuery } from '../Stores/globalState.js';
 
     const props = defineProps({
         searchUrl: {
@@ -71,10 +72,6 @@
     const selectedTags = ref([]);
     const route = useRoute();
 
-    onMounted(function () {
-        searchQuery.value = route.query.search || ''
-    });
-
     const debounceSearch = debounce((value) => {
         const { post } = consumer();
 
@@ -93,15 +90,22 @@
             searchResults.value = response.data;
             loadingResults.value = false;
         });
+        globalSearchQuery.value = ''
     }, 500);
 
     const { user } = useAuthStore();
     const { hasServiceManagement } = useFeatureStore();
 
+    onMounted(function () {
+        if(route.query.search !== undefined){
+            searchQuery.value = route.query.search;
+        }
+    });
+    
     watch(
         () => route.query.search,
-        (newValue, oldId) => {
-           searchQuery.value = newValue || '';
+        (newVal, oldVal) => {
+            searchQuery.value = newVal || '';
     });
 
     watch(searchQuery, (value) => {
