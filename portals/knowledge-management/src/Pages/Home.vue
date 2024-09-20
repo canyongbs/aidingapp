@@ -40,7 +40,7 @@
     import { useAuthStore } from '../Stores/auth.js';
     import { useFeatureStore } from '../Stores/feature.js';
     import Badge from '../Components/Badge.vue';
-    import { useRoute } from 'vue-router'
+    import { useRoute } from 'vue-router';
     import { globalSearchQuery } from '../Stores/globalState.js';
 
     const props = defineProps({
@@ -90,23 +90,24 @@
             searchResults.value = response.data;
             loadingResults.value = false;
         });
-        globalSearchQuery.value = ''
+        globalSearchQuery.value = '';
     }, 500);
 
     const { user } = useAuthStore();
     const { hasServiceManagement } = useFeatureStore();
 
     onMounted(function () {
-        if(route.query.search !== undefined){
+        if (route.query.search !== undefined) {
             searchQuery.value = route.query.search;
         }
     });
-    
+
     watch(
         () => route.query.search,
         (newVal, oldVal) => {
             searchQuery.value = newVal || '';
-    });
+        },
+    );
 
     watch(searchQuery, (value) => {
         debounceSearch(value);

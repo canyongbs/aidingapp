@@ -32,23 +32,25 @@
 </COPYRIGHT>
 -->
 <script setup>
-import { useRouter } from 'vue-router'
-import { globalSearchQuery } from '../Stores/globalState.js';
+    import { useRouter } from 'vue-router';
+    import { globalSearchQuery } from '../Stores/globalState.js';
 
-  const router = useRouter();
+    const router = useRouter();
 
-  const onSearch = () => { 
-    router.push({ name: 'home', query: { search: globalSearchQuery.value } })
-  };
+    const onSearch = () => {
+        router.push({ name: 'home', query: { search: globalSearchQuery.value } });
+    };
 </script>
 
 <template>
     <div class="float-right mr-3">
-      <form @submit.prevent="onSearch">
-        <input v-model="globalSearchQuery" type="text" placeholder="search knowledge portal"
-          class="m-3 block w-full rounded border-0 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-2-- sm:text-sm sm:leading-6"
-        />
-      </form>
+        <form @submit.prevent="onSearch">
+            <input
+                v-model="globalSearchQuery"
+                type="text"
+                placeholder="search knowledge portal"
+                class="m-3 block w-full rounded border-0 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-2-- sm:text-sm sm:leading-6"
+            />
+        </form>
     </div>
-  </template>
-  
+</template>

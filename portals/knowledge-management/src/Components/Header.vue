@@ -37,7 +37,7 @@
     import { useAuthStore } from '../Stores/auth.js';
     import { useFeatureStore } from '../Stores/feature.js';
     import { useTokenStore } from '../Stores/token.js';
-    import GlobalSearchBar from './GlobalSearchBar.vue'; 
+    import GlobalSearchBar from './GlobalSearchBar.vue';
 
     const { user, requiresAuthentication } = useAuthStore();
     const { hasServiceManagement } = useFeatureStore();
@@ -70,7 +70,6 @@
             window.location.href = response.data.redirect_url;
         });
     };
-
 </script>
 
 <template>
@@ -99,8 +98,7 @@
                 >
                     Sign in
                 </button>
-            </div>         
-            
+            </div>
         </div>
     </div>
 </template>
