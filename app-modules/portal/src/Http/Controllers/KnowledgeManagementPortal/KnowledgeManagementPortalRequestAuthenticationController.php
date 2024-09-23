@@ -57,6 +57,8 @@ class KnowledgeManagementPortalRequestAuthenticationController extends Controlle
         $educatable = $resolveEducatableFromEmail($email);
 
         if (! $educatable) {
+            // Check to see if they can be created
+
             throw ValidationException::withMessages([
                 'email' => 'A contact with that email address could not be found. Please contact your system administrator.',
             ]);
