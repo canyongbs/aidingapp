@@ -48,7 +48,7 @@ use Filament\Forms\Components\Toggle;
 use AidingApp\Portal\Enums\PortalType;
 use Filament\Forms\Components\Actions;
 use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Textarea;
+use FilamentTiptapEditor\TiptapEditor;
 use AidingApp\Portal\Enums\PortalLayout;
 use Filament\Forms\Components\TextInput;
 use App\Filament\Clusters\GlobalSettings;
@@ -206,9 +206,10 @@ class ManagePortalSettings extends SettingsPage
                     ])->columns(2),
                 Section::make('GDPR Banner Notice')
                     ->schema([
-                        Textarea::make('gdpr_banner_text')
+                        TiptapEditor::make('gdpr_banner_text')
                             ->label('GDPR Banner Text')
                             ->required()
+                            ->tools(['link'])
                             ->columnSpanFull(),
                         Select::make('gdpr_banner_button_label')
                             ->options(GdprBannerButtonLabel::class)
