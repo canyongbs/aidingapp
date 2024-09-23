@@ -353,6 +353,7 @@
             })
             .then((response) => {
                 if (response.errors) {
+                    console.log('then');
                     node.setErrors([], response.errors);
 
                     return;
@@ -369,7 +370,7 @@
                 authentication.value.url = response.data.authentication_url;
             })
             .catch((error) => {
-                node.setErrors([error]);
+                node.setErrors([], error.response.data.errors);
             });
     }
 </script>
