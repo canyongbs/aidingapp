@@ -63,9 +63,11 @@ class AuthenticatePortalNotification extends BaseNotification implements EmailNo
 
     public function identifyRecipient(): array
     {
+        $contact = $this->authentication->educatable;
+
         return [
-            $this->authentication->educatable->getKey(),
-            $this->authentication->educatable->getMorphClass(),
+            ! empty($contact) ? $contact->getKey() : null,
+            ! empty($contact) ? $this->authentication->educatable->getMorphClass() : 'anonymous',
         ];
     }
 }

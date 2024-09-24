@@ -364,13 +364,19 @@
                 authentication.value.url = response.data.authentication_url;
             })
             .catch((error) => {
-                if (error.response.status === 404 && error.response.data.registrationAllowed === true) {
+                const status = error.response.status;
+                const data = error.response.data;
+
+                if (status === 404 && data.registrationAllowed === true) {
                     authentication.value.registrationAllowed = true;
+                    authentication.value.isRequested = true;
+                    authentication.value.requestedMessage = data.message;
+                    authentication.value.url = data.authentication_url;
 
                     return;
                 }
 
-                node.setErrors([], error.response.data.errors);
+                node.setErrors([], data.errors);
             });
     }
 </script>

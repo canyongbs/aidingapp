@@ -36,19 +36,21 @@
 
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
+use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\URL;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Hash;
 use AidingApp\Portal\Enums\PortalType;
-use App\Actions\ResolveEducatableFromEmail;
-use Illuminate\Support\Facades\Notification;
-use Illuminate\Validation\ValidationException;
+use AidingApp\Portal\Http\Requests\KnowledgeManagementPortalAuthenticationRequest;
 use AidingApp\Portal\Models\PortalAuthentication;
 use AidingApp\Portal\Notifications\AuthenticatePortalNotification;
-use AidingApp\Portal\Http\Requests\KnowledgeManagementPortalAuthenticationRequest;
+use App\Actions\ResolveEducatableFromEmail;
+use App\Http\Controllers\Controller;
+use App\Models\Contracts\Educatable;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Validation\ValidationException;
 
 class KnowledgeManagementPortalRequestAuthenticationController extends Controller
 {
@@ -63,22 +65,25 @@ class KnowledgeManagementPortalRequestAuthenticationController extends Controlle
 
             $domain = $matches[1];
 
-            // Check to see if they can be created
             $organization = Organization::query()
                 ->whereRaw(
                     "EXISTS (
                         SELECT 1
                         FROM jsonb_array_elements(domains) AS elem
                         WHERE LOWER(elem->>'domain') = ?
-                    )", 
+                    )",
                     [strtolower($domain)]
                 )
                 ->where('is_contact_generation_enabled', true)
                 ->first();
 
             if ($organization) {
+                $authenticationUrl = $this->createPortalAuthentication($request);
+
                 return response()->json([
                     'registrationAllowed' => true,
+                    'message' => "We've sent an authentication code to {$email}.",
+                    'authentication_url' => $authenticationUrl,
                 ], 404);
             }
 
@@ -87,22 +92,40 @@ class KnowledgeManagementPortalRequestAuthenticationController extends Controlle
             ]);
         }
 
-        $code = app()->isLocal() && collect(config('local_development.contacts.emails'))->contains($email)
-            ? 123456
-            : random_int(100000, 999999);
+        $authenticationUrl = $this->createPortalAuthentication($request, $educatable);
+
+        return response()->json([
+            'message' => "We've sent an authentication code to {$email}.",
+            'authentication_url' => $authenticationUrl,
+        ]);
+    }
+
+    protected function createPortalAuthentication(KnowledgeManagementPortalAuthenticationRequest $request, ?Contact $contact = null): string
+    {
+        $code = random_int(100000, 999999);
 
         $authentication = new PortalAuthentication();
-        $authentication->educatable()->associate($educatable);
         $authentication->portal_type = PortalType::KnowledgeManagement;
         $authentication->code = Hash::make($code);
+
+        if ($contact) {
+            $authentication->educatable()->associate($contact);
+        }
+
         $authentication->save();
 
-        Notification::route('mail', [
-            $email => $educatable->getAttributeValue($educatable::displayNameKey()),
-        ])->notify(new AuthenticatePortalNotification($authentication, $code));
+        Notification::route(
+            'mail',
+            ! is_null($contact) 
+                ? [
+                    $request->safe()->email => $contact->getAttributeValue($contact::displayNameKey()),
+                ]
+                : $request->safe()->email
+        )
+        ->notify(new AuthenticatePortalNotification($authentication, $code));
 
-        $authenticationUrl = match ($request->safe()->isSpa) {
-            true => URL::to(
+        return ($request->safe()->isSpa)
+            ? URL::to(
                 URL::signedRoute(
                     name: 'portal.authenticate',
                     parameters: [
@@ -110,8 +133,8 @@ class KnowledgeManagementPortalRequestAuthenticationController extends Controlle
                     ],
                     absolute: false,
                 )
-            ),
-            default => URL::to(
+            )
+            : URL::to(
                 URL::signedRoute(
                     name: 'api.portal.authenticate.embedded',
                     parameters: [
@@ -119,12 +142,6 @@ class KnowledgeManagementPortalRequestAuthenticationController extends Controlle
                     ],
                     absolute: false,
                 )
-            ),
-        };
-
-        return response()->json([
-            'message' => "We've sent an authentication code to {$email}.",
-            'authentication_url' => $authenticationUrl,
-        ]);
+            );
     }
 }
