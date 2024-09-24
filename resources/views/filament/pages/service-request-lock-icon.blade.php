@@ -3,7 +3,7 @@
     use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 @endphp
 
-@if ($this->getRecord()?->status?->classification == SystemServiceRequestClassification::Closed)
+@if ($this->getRecord()?->status?->classification === SystemServiceRequestClassification::Closed)
     <x-filament::icon-button
         data-identifier="service_request_closed"
         icon="heroicon-m-lock-closed"
