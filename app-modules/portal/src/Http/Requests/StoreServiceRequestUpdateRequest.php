@@ -61,7 +61,7 @@ class StoreServiceRequestUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'description' => 'required'
+            'description' => 'required',
         ];
     }
 }

@@ -112,22 +112,20 @@ class GetServiceRequestsController extends Controller
                 'statusColor' => $serviceRequest->status?->color->value,
                 'typeName' => $serviceRequest->priority?->type?->name,
             ],
-            'serviceRequestUpdates' =>
-                $serviceRequest
-                    ->serviceRequestUpdates()
-                    ->latest('created_at')
-                    ->get()
-                    ->map(function (ServiceRequestUpdate $serviceRequestUpdate) {
-                        return [
-                            'id' => $serviceRequestUpdate->getKey(),
-                            'update' => $serviceRequestUpdate->update,
-                            'internal' => $serviceRequestUpdate->internal,
-                            'direction' => $serviceRequestUpdate->direction,
-                            'created_at' => $serviceRequestUpdate->created_at->format('m-d-Y g:i A'),
-                        ];
-                    })
-                    ->toArray()
-            ,
+            'serviceRequestUpdates' => $serviceRequest
+                ->serviceRequestUpdates()
+                ->latest('created_at')
+                ->get()
+                ->map(function (ServiceRequestUpdate $serviceRequestUpdate) {
+                    return [
+                        'id' => $serviceRequestUpdate->getKey(),
+                        'update' => $serviceRequestUpdate->update,
+                        'internal' => $serviceRequestUpdate->internal,
+                        'direction' => $serviceRequestUpdate->direction,
+                        'created_at' => $serviceRequestUpdate->created_at->format('m-d-Y g:i A'),
+                    ];
+                })
+                ->toArray(),
         ]);
     }
 }
