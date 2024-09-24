@@ -5,6 +5,7 @@ namespace AidingApp\Portal\Http\Requests;
 use Illuminate\Validation\Rule;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Http\FormRequest;
+use AidingApp\Portal\Rules\PortalAuthenticateCodeValidation;
 
 class KnowledgeManagementPortalRegisterRequest extends FormRequest
 {
@@ -18,6 +19,7 @@ class KnowledgeManagementPortalRegisterRequest extends FormRequest
             'mobile' => ['required', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:255'],
             'sms_opt_out' => ['required', 'boolean'],
+            'code' => ['required', 'integer', 'digits:6', new PortalAuthenticateCodeValidation()],
         ];
     }
 }
