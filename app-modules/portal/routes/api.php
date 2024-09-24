@@ -50,6 +50,7 @@ use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\GetKnowledgeMana
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalArticleController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalCategoryController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalAuthenticateController;
+use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalRegisterController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalRequestAuthenticationController;
 
 Route::prefix('api')
@@ -79,6 +80,10 @@ Route::prefix('api')
                 Route::post('/authenticate/{authentication}', KnowledgeManagementPortalAuthenticateController::class)
                     ->middleware(['signed:relative', EnsureFrontendRequestsAreStateful::class])
                     ->name('authenticate.embedded');
+
+                Route::post('/register/{authentication}', KnowledgeManagementPortalRegisterController::class)
+                    ->middleware(['signed:relative', EnsureFrontendRequestsAreStateful::class])
+                    ->name('authenticate.register.embedded');
 
                 Route::post('/logout', KnowledgeManagementPortalLogoutController::class)
                     ->name('logout');

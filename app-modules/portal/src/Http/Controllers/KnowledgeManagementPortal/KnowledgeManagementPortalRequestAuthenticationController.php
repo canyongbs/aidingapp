@@ -124,19 +124,19 @@ class KnowledgeManagementPortalRequestAuthenticationController extends Controlle
         )
         ->notify(new AuthenticatePortalNotification($authentication, $code));
 
-        return ($request->safe()->isSpa)
-            ? URL::to(
-                URL::signedRoute(
-                    name: 'portal.authenticate',
-                    parameters: [
-                        'authentication' => $authentication,
-                    ],
-                    absolute: false,
-                )
+        $route = (! is_null($contact))
+            ? (($request->safe()->isSpa)
+                    ? 'portal.authenticate'
+                    : 'api.portal.authenticate.embedded'
             )
-            : URL::to(
+            : (($request->safe()->isSpa)
+                    ? 'portal.register'
+                    : 'api.portal.register.embedded'
+            );
+
+        return URL::to(
                 URL::signedRoute(
-                    name: 'api.portal.authenticate.embedded',
+                    name: $route,
                     parameters: [
                         'authentication' => $authentication,
                     ],
