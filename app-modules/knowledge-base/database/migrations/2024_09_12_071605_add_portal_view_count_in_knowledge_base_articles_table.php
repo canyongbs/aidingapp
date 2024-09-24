@@ -34,31 +34,22 @@
 </COPYRIGHT>
 */
 
-use function Tests\asSuperAdmin;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
-use AidingApp\Audit\Settings\AuditSettings;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
+return new class () extends Migration {
+    public function up(): void
+    {
+        Schema::table('knowledge_base_articles', function (Blueprint $table) {
+            $table->integer('portal_view_count')->default(0);
+        });
+    }
 
-test('Audit logs are only created if the Model is not set to be excluded from Auditing by audit settings', function () {
-    asSuperAdmin();
-
-    $serviceRequest = ServiceRequest::factory()->make();
-
-    $auditSettings = resolve(AuditSettings::class);
-
-    $auditSettings->audited_models_exclude = [$serviceRequest->getMorphClass()];
-
-    $auditSettings->save();
-
-    expect($serviceRequest->audits)->toHaveCount(0);
-
-    $auditSettings->audited_models_exclude = [];
-
-    $auditSettings->save();
-
-    $serviceRequest->save();
-
-    $serviceRequest->refresh();
-
-    expect($serviceRequest->audits)->toHaveCount(1);
-});
+    public function down(): void
+    {
+        Schema::table('knowledge_base_articles', function (Blueprint $table) {
+            $table->dropColumn('portal_view_count');
+        });
+    }
+};

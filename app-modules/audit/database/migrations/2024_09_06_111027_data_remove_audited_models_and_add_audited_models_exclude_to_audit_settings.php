@@ -34,31 +34,18 @@
 </COPYRIGHT>
 */
 
-use function Tests\asSuperAdmin;
+use Spatie\LaravelSettings\Migrations\SettingsMigration;
+use Spatie\LaravelSettings\Exceptions\SettingAlreadyExists;
 
-use AidingApp\Audit\Settings\AuditSettings;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
+return new class () extends SettingsMigration {
+    public function up(): void
+    {
+        $this->migrator->deleteIfExists('audit.audited_models');
 
-test('Audit logs are only created if the Model is not set to be excluded from Auditing by audit settings', function () {
-    asSuperAdmin();
-
-    $serviceRequest = ServiceRequest::factory()->make();
-
-    $auditSettings = resolve(AuditSettings::class);
-
-    $auditSettings->audited_models_exclude = [$serviceRequest->getMorphClass()];
-
-    $auditSettings->save();
-
-    expect($serviceRequest->audits)->toHaveCount(0);
-
-    $auditSettings->audited_models_exclude = [];
-
-    $auditSettings->save();
-
-    $serviceRequest->save();
-
-    $serviceRequest->refresh();
-
-    expect($serviceRequest->audits)->toHaveCount(1);
-});
+        try {
+            $this->migrator->add('audit.audited_models_exclude', []);
+        } catch (SettingAlreadyExists $exception) {
+            // Ignore
+        }
+    }
+};

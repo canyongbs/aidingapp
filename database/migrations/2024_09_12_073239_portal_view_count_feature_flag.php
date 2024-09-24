@@ -34,31 +34,17 @@
 </COPYRIGHT>
 */
 
-use function Tests\asSuperAdmin;
+use Laravel\Pennant\Feature;
+use Illuminate\Database\Migrations\Migration;
 
-use AidingApp\Audit\Settings\AuditSettings;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
+return new class () extends Migration {
+    public function up(): void
+    {
+        Feature::activate('portal_view_count');
+    }
 
-test('Audit logs are only created if the Model is not set to be excluded from Auditing by audit settings', function () {
-    asSuperAdmin();
-
-    $serviceRequest = ServiceRequest::factory()->make();
-
-    $auditSettings = resolve(AuditSettings::class);
-
-    $auditSettings->audited_models_exclude = [$serviceRequest->getMorphClass()];
-
-    $auditSettings->save();
-
-    expect($serviceRequest->audits)->toHaveCount(0);
-
-    $auditSettings->audited_models_exclude = [];
-
-    $auditSettings->save();
-
-    $serviceRequest->save();
-
-    $serviceRequest->refresh();
-
-    expect($serviceRequest->audits)->toHaveCount(1);
-});
+    public function down(): void
+    {
+        Feature::deactivate('portal_view_count');
+    }
+};

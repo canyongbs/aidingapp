@@ -34,19 +34,20 @@
 
 @php
     use AidingApp\Portal\Settings\PortalSettings;
+    use App\Enums\FeatureFlag;
 @endphp
 
 <div class="js-cookie-consent cookie-consent z-50 fixed bottom-0 inset-x-0 pb-2">
     <div class="max-w-7xl mx-auto px-6">
         <div class="p-2 rounded-lg bg-primary-100 ring-1 ring-black/5 shadow-sm">
             <div class="flex items-center justify-between flex-wrap">
-                <div class="w-0 flex-1 items-center hidden md:inline">
+                <div class="w-0 flex-1 items-center hidden md:inline [&_a]:text-primary-500 hover:[&_a]:underline">
                     <p class="ml-3 text-primary-950 text-sm font-medium cookie-consent__message">
-                        @if(! empty(app(PortalSettings::class)->gdpr_banner_text))
-                            {!! str(app(PortalSettings::class)->gdpr_banner_text)->sanitizeHtml() !!}
-                        @else
-                            We use cookies to personalize content, to provide social media features, and to analyze our traffic. We also share information about your use of our site with our partners who may combine it with other information that you've provided to them or that they've collected from your use of their services.
-                        @endif
+                            @if(! empty(app(PortalSettings::class)->gdpr_banner_text))
+                                {!! str(tiptap_converter()->asHtml(app(PortalSettings::class)->gdpr_banner_text))->sanitizeHtml() !!}
+                            @else
+                                We use cookies to personalize content, to provide social media features, and to analyze our traffic. We also share information about your use of our site with our partners who may combine it with other information that you've provided to them or that they've collected from your use of their services.
+                            @endif
                     </p>
                 </div>
 
