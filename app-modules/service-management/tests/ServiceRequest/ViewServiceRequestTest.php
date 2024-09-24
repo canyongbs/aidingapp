@@ -165,4 +165,4 @@ test('service request lock icon is shown when status classification closed', fun
         ViewServiceRequest::class,
         ManageAssignments::class,
         ManageServiceRequestUpdate::class,
-    ])->only();
+    ]);
