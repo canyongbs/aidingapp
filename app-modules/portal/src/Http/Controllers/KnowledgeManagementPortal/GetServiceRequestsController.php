@@ -45,8 +45,6 @@ use AidingApp\Portal\Settings\PortalSettings;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\Portal\DataTransferObjects\ServiceRequestData;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
-use AidingApp\Portal\DataTransferObjects\ServiceRequestDetailsData;
-use AidingApp\Portal\DataTransferObjects\ServiceRequestUpdatesData;
 
 class GetServiceRequestsController extends Controller
 {
@@ -105,30 +103,31 @@ class GetServiceRequestsController extends Controller
         }
 
         return response()->json([
-            'serviceRequestDetails' => ServiceRequestDetailsData::from([
+            'serviceRequestDetails' => [
                 'id' => $serviceRequest->getKey(),
                 'title' => $serviceRequest->title,
                 'description' => $serviceRequest->close_details,
                 'serviceRequestNumber' => $serviceRequest->service_request_number,
                 'statusName' => $serviceRequest->status?->name,
+                'statusColor' => $serviceRequest->status?->color->value,
                 'typeName' => $serviceRequest->priority?->type?->name,
-            ]),
-            'serviceRequestUpdates' => ServiceRequestUpdatesData::collection(
+            ],
+            'serviceRequestUpdates' =>
                 $serviceRequest
                     ->serviceRequestUpdates()
                     ->latest('created_at')
                     ->get()
                     ->map(function (ServiceRequestUpdate $serviceRequestUpdate) {
-                        return ServiceRequestUpdatesData::from([
+                        return [
                             'id' => $serviceRequestUpdate->getKey(),
                             'update' => $serviceRequestUpdate->update,
                             'internal' => $serviceRequestUpdate->internal,
                             'direction' => $serviceRequestUpdate->direction,
                             'created_at' => $serviceRequestUpdate->created_at->format('m-d-Y g:i A'),
-                        ]);
+                        ];
                     })
                     ->toArray()
-            ),
+            ,
         ]);
     }
 }

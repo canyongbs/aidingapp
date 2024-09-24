@@ -34,21 +34,25 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\DataTransferObjects;
+namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
-use Spatie\LaravelData\Data;
-use Spatie\LaravelData\Mappers\SnakeCaseMapper;
-use Spatie\LaravelData\Attributes\MapOutputName;
+use Illuminate\Http\JsonResponse;
+use App\Http\Controllers\Controller;
+use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use AidingApp\Portal\Http\Requests\StoreServiceRequestUpdateRequest;
+use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateDirection;
 
-#[MapOutputName(SnakeCaseMapper::class)]
-class ServiceRequestDetailsData extends Data
+class StoreServiceRequestUpdateController extends Controller
 {
-    public function __construct(
-        public string $id,
-        public string $title,
-        public string $description,
-        public ?string $statusName,
-        public ?string $typeName,
-        public ?string $serviceRequestNumber,
-    ) {}
+    public function __invoke(StoreServiceRequestUpdateRequest $request): JsonResponse
+    {
+        $serviceRequestUpdate = new ServiceRequestUpdate();
+        $serviceRequestUpdate->service_request_id = $request->serviceRequestId;
+        $serviceRequestUpdate->update = $request->description;
+        $serviceRequestUpdate->internal = false;
+        $serviceRequestUpdate->direction = ServiceRequestUpdateDirection::Inbound;
+        $serviceRequestUpdate->save();
+
+        return response()->json($serviceRequestUpdate, 201);
+    }
 }
