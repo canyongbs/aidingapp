@@ -77,7 +77,7 @@ class KnowledgeManagementPortalRegisterController extends Controller
                 'first_name' => $data['first_name'],
                 'last_name' => $data['last_name'],
                 'full_name' => "{$data['first_name']} {$data['last_name']}",
-                'preferred_name' => $data['preferred_name'] ?? null,
+                'preferred' => $data['preferred'] ?? null,
                 'mobile' => $data['mobile'],
                 'phone' => $data['phone'] ?? null,
                 'sms_opt_out' => $data['sms_opt_out'],

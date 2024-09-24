@@ -321,7 +321,7 @@
                     email: formData.email,
                     first_name: formData.first_name,
                     last_name: formData.last_name,
-                    preferred_name: formData.preferred_name,
+                    preferred: formData.preferred,
                     mobile: formData.mobile,
                     phone: formData.phone,
                     sms_opt_out: formData.sms_opt_out,
@@ -473,7 +473,7 @@
                             <FormKit
                                 type="text"
                                 label="Preferred Name"
-                                name="preferred_name"
+                                name="preferred"
                                 validation="alpha|length:0,255"
                                 validation-visibility="submit"
                             />

@@ -46,7 +46,7 @@ class ContactObserver
     {
         $user = auth()->user();
 
-        if ($user instanceof User && ! $contact->createdBy) {
+        if ($user instanceof User && ! $contact->createdBy && $contact->source?->name !== 'Portal Generated') {
             $contact->createdBy()->associate($user);
         }
     }
