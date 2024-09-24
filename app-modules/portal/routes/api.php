@@ -44,6 +44,7 @@ use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\ServiceRequestTy
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEmbeddableAndAuthorized;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\CreateServiceRequestController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalController;
+use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\StoreServiceRequestUpdateController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalLogoutController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalSearchController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\GetKnowledgeManagementPortalTagsController;
@@ -117,7 +118,7 @@ Route::prefix('api')
                     ->name('tags.index');
                 Route::get('/service-request/{serviceRequest}', [GetServiceRequestsController::class, 'show'])
                     ->name('service-request.show');
-                Route::post('/service-request-update/store', [CreateServiceRequestController::class, 'storeServiceRequestUpdate'])
+                Route::post('/service-request-update/store',StoreServiceRequestUpdateController::class)
                     ->name('service-request-update.storeServiceRequestUpdate');
             });
     });
