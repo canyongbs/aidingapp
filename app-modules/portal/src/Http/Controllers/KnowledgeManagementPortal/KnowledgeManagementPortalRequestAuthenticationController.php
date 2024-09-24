@@ -36,6 +36,7 @@
 
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
+use AidingApp\Contact\Models\Organization;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\URL;
 use App\Http\Controllers\Controller;
@@ -57,7 +58,21 @@ class KnowledgeManagementPortalRequestAuthenticationController extends Controlle
         $educatable = $resolveEducatableFromEmail($email);
 
         if (! $educatable) {
+            preg_match('/@([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})$/', $email, $matches);
+
+            $domain = $matches[1];
+
             // Check to see if they can be created
+            $organization = Organization::query()
+                // ->whereRaw("? = ANY (SELECT LOWER(jsonb_array_elements_text(domains)))", [strtolower($domain)])
+                ->where('is_contact_generation_enabled', true)
+                ->first();
+
+            if ($organization) {
+                return response()->json([
+                    'registrationAllowed' => true,
+                ], 404);
+            }
 
             throw ValidationException::withMessages([
                 'email' => 'A contact with that email address could not be found. Please contact your system administrator.',

@@ -315,6 +315,10 @@
                     code: formData.code,
                 })
                 .then((response) => {
+                    if (response.status === 404 && response.data.registrationAllowed === true) {
+                        console.debug('Registration is allowed');
+                    }
+
                     if (response.errors) {
                         node.setErrors([], response.errors);
 
