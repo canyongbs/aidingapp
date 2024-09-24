@@ -48,6 +48,7 @@ use Illuminate\Validation\ValidationException;
 use AidingApp\Portal\Models\PortalAuthentication;
 use AidingApp\Portal\Notifications\AuthenticatePortalNotification;
 use AidingApp\Portal\Http\Requests\KnowledgeManagementPortalAuthenticationRequest;
+use Illuminate\Support\Facades\Log;
 
 class KnowledgeManagementPortalRequestAuthenticationController extends Controller
 {
@@ -64,7 +65,14 @@ class KnowledgeManagementPortalRequestAuthenticationController extends Controlle
 
             // Check to see if they can be created
             $organization = Organization::query()
-                // ->whereRaw("? = ANY (SELECT LOWER(jsonb_array_elements_text(domains)))", [strtolower($domain)])
+                ->whereRaw(
+                    "EXISTS (
+                        SELECT 1
+                        FROM jsonb_array_elements(domains) AS elem
+                        WHERE LOWER(elem->>'domain') = ?
+                    )", 
+                    [strtolower($domain)]
+                )
                 ->where('is_contact_generation_enabled', true)
                 ->first();
 
