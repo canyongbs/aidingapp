@@ -2,11 +2,11 @@
 
 namespace AidingApp\Portal\Http\Requests;
 
-use AidingApp\Contact\Models\Organization;
-use AidingApp\Portal\Rules\PortalAuthenticateCodeValidation;
-use Illuminate\Database\Query\Builder;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Database\Query\Builder;
+use AidingApp\Contact\Models\Organization;
+use Illuminate\Foundation\Http\FormRequest;
+use AidingApp\Portal\Rules\PortalAuthenticateCodeValidation;
 
 class KnowledgeManagementPortalRegisterRequest extends FormRequest
 {

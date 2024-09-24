@@ -36,18 +36,16 @@
 
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
-use Closure;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
+use AidingApp\Contact\Models\Contact;
 use AidingApp\Portal\Models\PortalAuthentication;
-use AidingApp\Portal\Exceptions\EducatableIsNotAuthenticatable;
+use AidingApp\Portal\Http\Requests\KnowledgeManagementPortalAuthenticateRequest;
 
 class KnowledgeManagementPortalAuthenticateController extends Controller
 {
-    public function __invoke(Request $request, PortalAuthentication $authentication): JsonResponse
+    public function __invoke(KnowledgeManagementPortalAuthenticateRequest $request, PortalAuthentication $authentication): JsonResponse
     {
         if ($authentication->isExpired()) {
             return response()->json([
@@ -55,24 +53,12 @@ class KnowledgeManagementPortalAuthenticateController extends Controller
             ]);
         }
 
-        $request->validate([
-            'code' => ['required', 'integer', 'digits:6', function (string $attribute, int $value, Closure $fail) use ($authentication) {
-                if (Hash::check($value, $authentication->code)) {
-                    return;
-                }
+        /** @var Contact $contact */
+        $contact = $authentication->educatable;
 
-                $fail('The provided code is invalid.');
-            }],
-        ]);
+        Auth::guard('contact')->login($contact);
 
-        $educatable = $authentication->educatable;
-
-        match ($educatable->getMorphClass()) {
-            'contact' => Auth::guard('contact')->login($educatable),
-            default => throw new EducatableIsNotAuthenticatable('The educatable type is not supported.'),
-        };
-
-        $token = $educatable->createToken('knowledge-management-portal-access-token');
+        $token = $contact->createToken('knowledge-management-portal-access-token');
 
         if ($request->hasSession()) {
             $request->session()->regenerate();
