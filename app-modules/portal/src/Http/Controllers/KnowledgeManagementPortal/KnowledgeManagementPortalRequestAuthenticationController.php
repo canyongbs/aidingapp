@@ -36,21 +36,19 @@
 
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\URL;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Hash;
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Contact\Models\Organization;
 use AidingApp\Portal\Enums\PortalType;
-use AidingApp\Portal\Http\Requests\KnowledgeManagementPortalAuthenticationRequest;
+use AidingApp\Contact\Models\Organization;
+use App\Actions\ResolveEducatableFromEmail;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Validation\ValidationException;
 use AidingApp\Portal\Models\PortalAuthentication;
 use AidingApp\Portal\Notifications\AuthenticatePortalNotification;
-use App\Actions\ResolveEducatableFromEmail;
-use App\Http\Controllers\Controller;
-use App\Models\Contracts\Educatable;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Notification;
-use Illuminate\Support\Facades\URL;
-use Illuminate\Validation\ValidationException;
+use AidingApp\Portal\Http\Requests\KnowledgeManagementPortalAuthenticationRequest;
 
 class KnowledgeManagementPortalRequestAuthenticationController extends Controller
 {
@@ -116,32 +114,34 @@ class KnowledgeManagementPortalRequestAuthenticationController extends Controlle
 
         Notification::route(
             'mail',
-            ! is_null($contact) 
+            ! is_null($contact)
                 ? [
                     $request->safe()->email => $contact->getAttributeValue($contact::displayNameKey()),
                 ]
                 : $request->safe()->email
         )
-        ->notify(new AuthenticatePortalNotification($authentication, $code));
+            ->notify(new AuthenticatePortalNotification($authentication, $code));
 
         $route = (! is_null($contact))
-            ? (($request->safe()->isSpa)
+            ? (
+                ($request->safe()->isSpa)
                     ? 'portal.authenticate'
                     : 'api.portal.authenticate.embedded'
             )
-            : (($request->safe()->isSpa)
+            : (
+                ($request->safe()->isSpa)
                     ? 'portal.register'
                     : 'api.portal.register.embedded'
             );
 
         return URL::to(
-                URL::signedRoute(
-                    name: $route,
-                    parameters: [
-                        'authentication' => $authentication,
-                    ],
-                    absolute: false,
-                )
-            );
+            URL::signedRoute(
+                name: $route,
+                parameters: [
+                    'authentication' => $authentication,
+                ],
+                absolute: false,
+            )
+        );
     }
 }

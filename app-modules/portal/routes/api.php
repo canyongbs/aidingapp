@@ -49,8 +49,8 @@ use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagem
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\GetKnowledgeManagementPortalTagsController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalArticleController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalCategoryController;
-use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalAuthenticateController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalRegisterController;
+use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalAuthenticateController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalRequestAuthenticationController;
 
 Route::prefix('api')

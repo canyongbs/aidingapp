@@ -37,25 +37,21 @@
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use Closure;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\ContactSource;
+use AidingApp\Contact\Models\ContactStatus;
 use AidingApp\Portal\Models\PortalAuthentication;
-use AidingApp\Portal\Exceptions\EducatableIsNotAuthenticatable;
-use Illuminate\Support\Facades\Log;
+use AidingApp\Contact\Enums\SystemContactClassification;
+use AidingApp\Portal\Http\Requests\KnowledgeManagementPortalRegisterRequest;
 
 class KnowledgeManagementPortalRegisterController extends Controller
 {
-    public function __invoke(Request $request, PortalAuthentication $authentication): JsonResponse
+    public function __invoke(KnowledgeManagementPortalRegisterRequest $request, PortalAuthentication $authentication): JsonResponse
     {
-        Log::debug('hi');
-
-        return response()->json([
-            'is_expired' => true,
-        ]);
-
         if ($authentication->isExpired()) {
             return response()->json([
                 'is_expired' => true,
@@ -72,14 +68,47 @@ class KnowledgeManagementPortalRegisterController extends Controller
             }],
         ]);
 
-        $educatable = $authentication->educatable;
+        $data = $request->validated();
 
-        match ($educatable->getMorphClass()) {
-            'contact' => Auth::guard('contact')->login($educatable),
-            default => throw new EducatableIsNotAuthenticatable('The educatable type is not supported.'),
-        };
+        /** @var Contact $contact */
+        $contact = Contact::query()
+            ->make([
+                'email' => $data['email'],
+                'first_name' => $data['first_name'],
+                'last_name' => $data['last_name'],
+                'full_name' => "{$data['first_name']} {$data['last_name']}",
+                'preferred_name' => $data['preferred_name'] ?? null,
+                'mobile' => $data['mobile'],
+                'phone' => $data['phone'] ?? null,
+                'sms_opt_out' => $data['sms_opt_out'],
+            ]);
 
-        $token = $educatable->createToken('knowledge-management-portal-access-token');
+        $status = ContactStatus::query()
+            ->where('classification', SystemContactClassification::New)
+            ->first();
+
+        if ($status) {
+            $contact->status()->associate($status);
+        }
+
+        $source = ContactSource::query()
+            ->where('name', 'Portal Generated')
+            ->first();
+
+        if (! $source) {
+            $source = ContactSource::query()
+                ->create([
+                    'name' => 'Portal Generated',
+                ]);
+        }
+
+        $contact->source()->associate($source);
+
+        $contact->save();
+
+        Auth::guard('contact')->login($contact);
+
+        $token = $contact->createToken('knowledge-management-portal-access-token');
 
         if ($request->hasSession()) {
             $request->session()->regenerate();

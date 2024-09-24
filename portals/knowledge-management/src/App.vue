@@ -311,10 +311,25 @@
         }
 
         if (authentication.value.isRequested) {
+            $data = {
+                code: formData.code,
+            };
+
+            if (authentication.value.registrationAllowed) {
+                $data = {
+                    ...$data,
+                    email: formData.email,
+                    first_name: formData.first_name,
+                    last_name: formData.last_name,
+                    preferred_name: formData.preferred_name,
+                    mobile: formData.mobile,
+                    phone: formData.phone,
+                    sms_opt_out: formData.sms_opt_out,
+                };
+            }
+
             axios
-                .post(authentication.value.url, {
-                    code: formData.code,
-                })
+                .post(authentication.value.url, $data)
                 .then((response) => {
                     if (response.errors) {
                         node.setErrors([], response.errors);
@@ -327,6 +342,8 @@
 
                         authentication.value.isRequested = false;
                         authentication.value.requestedMessage = null;
+                        authentication.value.url = null;
+                        authentication.value.registrationAllowed = false;
 
                         return;
                     }
@@ -482,9 +499,12 @@
                             <FormKit
                                 type="select"
                                 label="SMS Opt Out"
-                                name="sms_out_out"
+                                name="sms_opt_out"
                                 :value="0"
-                                :options="[{ value: false, label: 'No' }, { value: true, label: 'Yes' }]"
+                                :options="[
+                                    { value: false, label: 'No' },
+                                    { value: true, label: 'Yes' },
+                                ]"
                                 validation-visibility="submit"
                             />
                         </div>
