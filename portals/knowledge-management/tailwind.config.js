@@ -36,4 +36,9 @@ import preset from './tailwind.config.preset.js';
 export default {
     presets: [preset],
     content: ['./src/**/*.vue', '../../widgets/service-request-form/src/FormKit/theme.js'],
+    safelist: [
+        {
+            pattern: /(bg|ring)-(info|danger|gray|warning|success|primary)-*/,
+        },
+    ],
 };
