@@ -1,4 +1,3 @@
-# Note: This is not currently used by Laravel Octane. Octane configures the running of RR itself. But this is being kept to investigate running RR directly in the future.
 version: '3'
 rpc:
   listen: 'tcp://127.0.0.1:6001'
