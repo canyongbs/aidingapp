@@ -97,6 +97,7 @@
         requestedMessage: null,
         requestUrl: null,
         url: null,
+        registrationAllowed: false,
     });
 
     const scriptUrl = new URL(document.currentScript.getAttribute('src'));
@@ -315,10 +316,6 @@
                     code: formData.code,
                 })
                 .then((response) => {
-                    if (response.status === 404 && response.data.registrationAllowed === true) {
-                        console.debug('Registration is allowed');
-                    }
-
                     if (response.errors) {
                         node.setErrors([], response.errors);
 
@@ -356,13 +353,6 @@
                 isSpa: isEmbeddedInAidingApp,
             })
             .then((response) => {
-                if (response.errors) {
-                    console.log('then');
-                    node.setErrors([], response.errors);
-
-                    return;
-                }
-
                 if (!response.data.authentication_url) {
                     node.setErrors([response.data.message]);
 
@@ -374,6 +364,12 @@
                 authentication.value.url = response.data.authentication_url;
             })
             .catch((error) => {
+                if (error.response.status === 404 && error.response.data.registrationAllowed === true) {
+                    authentication.value.registrationAllowed = true;
+
+                    return;
+                }
+
                 node.setErrors([], error.response.data.errors);
             });
     }
@@ -427,8 +423,65 @@
                             name="email"
                             validation="required|email"
                             validation-visibility="submit"
-                            :disabled="authentication.isRequested"
+                            :disabled="authentication.isRequested || authentication.registrationAllowed"
                         />
+
+                        <div v-if="authentication.registrationAllowed">
+                            <p class="text-gray-700 font-medium text-xs my-3">
+                                You are not registered yet. Please fill in the form below to register.
+                            </p>
+
+                            <FormKit
+                                type="text"
+                                label="First Name*"
+                                name="first_name"
+                                validation="required|alpha|length:0,255"
+                                validation-visibility="submit"
+                            />
+
+                            <FormKit
+                                type="text"
+                                label="Last Name*"
+                                name="last_name"
+                                validation="required|alpha|length:0,255"
+                                validation-visibility="submit"
+                            />
+
+                            <FormKit
+                                type="text"
+                                label="Preferred Name"
+                                name="preferred_name"
+                                validation="alpha|length:0,255"
+                                validation-visibility="submit"
+                            />
+
+                            <FormKit
+                                type="tel"
+                                label="Mobile*"
+                                name="mobile"
+                                placeholder="xxx-xxx-xxxx"
+                                validation="required|length:0,255"
+                                validation-visibility="submit"
+                            />
+
+                            <FormKit
+                                type="tel"
+                                label="Other Phone"
+                                name="phone"
+                                placeholder="xxx-xxx-xxxx"
+                                validation="length:0,255"
+                                validation-visibility="submit"
+                            />
+
+                            <FormKit
+                                type="select"
+                                label="SMS Opt Out"
+                                name="sms_out_out"
+                                :value="0"
+                                :options="[{ value: false, label: 'No' }, { value: true, label: 'Yes' }]"
+                                validation-visibility="submit"
+                            />
+                        </div>
 
                         <p v-if="authentication.requestedMessage" class="text-gray-700 font-medium text-xs my-3">
                             {{ authentication.requestedMessage }}
