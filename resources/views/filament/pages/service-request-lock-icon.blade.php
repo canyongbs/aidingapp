@@ -9,6 +9,6 @@
         icon="heroicon-m-lock-closed"
         color="gray"
         size="lg"
-        tooltip="This service request is locked as status is closed."
+        tooltip="This service request is locked as the status is {{ $this->getRecord()->status->classification }}."
     />
 @endif
