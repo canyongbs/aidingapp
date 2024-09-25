@@ -66,9 +66,16 @@ class AuthenticatePortalNotification extends BaseNotification implements EmailNo
         /** @var ?Contact $contact */
         $contact = $this->authentication->educatable;
 
+        if (! $contact) {
+            return [
+                null,
+                'anonymous',
+            ];
+        }
+
         return [
-            ! empty($contact) ? $contact->getKey() : null,
-            ! empty($contact) ? $this->authentication->educatable->getMorphClass() : 'anonymous',
+            $contact->getKey(),
+            $this->authentication->educatable->getMorphClass(),
         ];
     }
 }
