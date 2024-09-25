@@ -44,6 +44,7 @@
         </x-filament::badge>
         <button
             type="button"
+            class="flex items-center justify-center"
             x-data
             x-on:click="
         window.navigator.clipboard.writeText(@js(route('portal.show') . '/categories/' . $getRecord()->category_id . '/articles/' . $getRecord()->getKey())).then(() => {
@@ -58,10 +59,8 @@
         >
             <x-filament::badge
                 icon="heroicon-m-clipboard"
-                icon-position="after"
-            >
-                Copy
-            </x-filament::badge>
+                class="flex items-center justify-center"
+            ></x-filament::badge>
         </button>
     @else
         <x-filament::badge>
