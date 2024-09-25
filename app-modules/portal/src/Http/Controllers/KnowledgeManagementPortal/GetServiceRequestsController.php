@@ -44,8 +44,8 @@ use Filament\Support\Colors\ColorManager;
 use AidingApp\Portal\Settings\PortalSettings;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\Portal\DataTransferObjects\ServiceRequestData;
-use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateDirection;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateDirection;
 
 class GetServiceRequestsController extends Controller
 {
