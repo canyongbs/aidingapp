@@ -175,7 +175,7 @@
         </div>
     </div>
 
-    <main class="px-6">
+    <main class="px-6 bg-gray-50">
         <div class="max-w-screen-xl flex flex-col gap-y-6 mx-auto py-8">
             <SearchResults
                 v-if="searchQuery || selectedTags.length > 0"
