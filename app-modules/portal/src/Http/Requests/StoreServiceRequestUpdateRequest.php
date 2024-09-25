@@ -51,7 +51,7 @@ class StoreServiceRequestUpdateRequest extends FormRequest
 
         $serviceRequest = ServiceRequest::with('respondent')->find($this->input('serviceRequestId'));
 
-        return ! is_null($contact) && ! empty($serviceRequest) && $serviceRequest->respondent_type == 'contact' && $serviceRequest->respondent->is($contact);
+        return ! is_null($contact) && ! empty($serviceRequest) && $serviceRequest->respondent->is($contact);
     }
 
     /**
