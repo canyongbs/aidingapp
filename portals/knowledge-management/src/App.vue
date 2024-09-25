@@ -405,7 +405,7 @@
             <AppLoading />
         </div>
 
-        <div v-else>
+        <div class="bg-white" v-else>
             <div
                 v-if="!userIsAuthenticated && (requiresAuthentication || showLogin)"
                 class="bg-gradient flex flex-col items-center justify-start min-h-screen"
