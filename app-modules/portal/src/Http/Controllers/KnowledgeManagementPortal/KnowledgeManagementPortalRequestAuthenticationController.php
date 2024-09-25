@@ -40,7 +40,9 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\URL;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
+use AidingApp\Contact\Models\Contact;
 use AidingApp\Portal\Enums\PortalType;
+use AidingApp\Contact\Models\Organization;
 use App\Actions\ResolveEducatableFromEmail;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\ValidationException;
@@ -57,49 +59,89 @@ class KnowledgeManagementPortalRequestAuthenticationController extends Controlle
         $educatable = $resolveEducatableFromEmail($email);
 
         if (! $educatable) {
+            preg_match('/@([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})$/', $email, $matches);
+
+            $domain = $matches[1];
+
+            $organization = Organization::query()
+                ->whereRaw(
+                    "EXISTS (
+                        SELECT 1
+                        FROM jsonb_array_elements(domains) AS elem
+                        WHERE LOWER(elem->>'domain') = ?
+                    )",
+                    [strtolower($domain)]
+                )
+                ->where('is_contact_generation_enabled', true)
+                ->first();
+
+            if ($organization) {
+                $authenticationUrl = $this->createPortalAuthentication($request);
+
+                return response()->json([
+                    'registrationAllowed' => true,
+                    'message' => "We've sent an authentication code to {$email}.",
+                    'authentication_url' => $authenticationUrl,
+                ], 404);
+            }
+
             throw ValidationException::withMessages([
                 'email' => 'A contact with that email address could not be found. Please contact your system administrator.',
             ]);
         }
 
-        $code = app()->isLocal() && collect(config('local_development.contacts.emails'))->contains($email)
-            ? 123456
-            : random_int(100000, 999999);
-
-        $authentication = new PortalAuthentication();
-        $authentication->educatable()->associate($educatable);
-        $authentication->portal_type = PortalType::KnowledgeManagement;
-        $authentication->code = Hash::make($code);
-        $authentication->save();
-
-        Notification::route('mail', [
-            $email => $educatable->getAttributeValue($educatable::displayNameKey()),
-        ])->notify(new AuthenticatePortalNotification($authentication, $code));
-
-        $authenticationUrl = match ($request->safe()->isSpa) {
-            true => URL::to(
-                URL::signedRoute(
-                    name: 'portal.authenticate',
-                    parameters: [
-                        'authentication' => $authentication,
-                    ],
-                    absolute: false,
-                )
-            ),
-            default => URL::to(
-                URL::signedRoute(
-                    name: 'api.portal.authenticate.embedded',
-                    parameters: [
-                        'authentication' => $authentication,
-                    ],
-                    absolute: false,
-                )
-            ),
-        };
+        $authenticationUrl = $this->createPortalAuthentication($request, $educatable);
 
         return response()->json([
             'message' => "We've sent an authentication code to {$email}.",
             'authentication_url' => $authenticationUrl,
         ]);
+    }
+
+    protected function createPortalAuthentication(KnowledgeManagementPortalAuthenticationRequest $request, ?Contact $contact = null): string
+    {
+        $code = random_int(100000, 999999);
+
+        $authentication = new PortalAuthentication();
+        $authentication->portal_type = PortalType::KnowledgeManagement;
+        $authentication->code = Hash::make($code);
+
+        if ($contact) {
+            $authentication->educatable()->associate($contact);
+        }
+
+        $authentication->save();
+
+        Notification::route(
+            'mail',
+            ! is_null($contact)
+                ? [
+                    $request->safe()->email => $contact->getAttributeValue($contact::displayNameKey()),
+                ]
+                : $request->safe()->email
+        )
+            ->notify(new AuthenticatePortalNotification($authentication, $code));
+
+        $route = (! is_null($contact))
+            ? (
+                ($request->safe()->isSpa)
+                    ? 'portal.authenticate'
+                    : 'api.portal.authenticate.embedded'
+            )
+            : (
+                ($request->safe()->isSpa)
+                    ? 'portal.register'
+                    : 'api.portal.register.embedded'
+            );
+
+        return URL::to(
+            URL::signedRoute(
+                name: $route,
+                parameters: [
+                    'authentication' => $authentication,
+                ],
+                absolute: false,
+            )
+        );
     }
 }

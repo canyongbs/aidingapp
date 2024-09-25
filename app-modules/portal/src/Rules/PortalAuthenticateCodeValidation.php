@@ -34,40 +34,32 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
+namespace AidingApp\Portal\Rules;
 
-use Illuminate\Http\JsonResponse;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Portal\Models\PortalAuthentication;
-use AidingApp\Portal\Http\Requests\KnowledgeManagementPortalAuthenticateRequest;
+use Closure;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Translation\PotentiallyTranslatedString;
 
-class KnowledgeManagementPortalAuthenticateController extends Controller
+class PortalAuthenticateCodeValidation implements ValidationRule
 {
-    public function __invoke(KnowledgeManagementPortalAuthenticateRequest $request, PortalAuthentication $authentication): JsonResponse
+    /**
+     * Run the validation rule.
+     *
+     * @param  Closure(string): PotentiallyTranslatedString $fail
+     */
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if ($authentication->isExpired()) {
-            return response()->json([
-                'is_expired' => true,
-            ]);
+        $request = request();
+
+        $authentication = $request->route('authentication');
+
+        if (! $authentication) {
+            $fail('Could not find Authentication.');
         }
 
-        /** @var Contact $contact */
-        $contact = $authentication->educatable;
-
-        Auth::guard('contact')->login($contact);
-
-        $token = $contact->createToken('knowledge-management-portal-access-token');
-
-        if ($request->hasSession()) {
-            $request->session()->regenerate();
+        if (! Hash::check($value, $authentication->code)) {
+            $fail('The provided code is invalid.');
         }
-
-        return response()->json([
-            'success' => true,
-            'token' => $token->plainTextToken,
-            'user' => auth('contact')->user(),
-        ]);
     }
 }

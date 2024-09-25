@@ -34,40 +34,23 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
+namespace AidingApp\Portal\Http\Requests;
 
-use Illuminate\Http\JsonResponse;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Portal\Models\PortalAuthentication;
-use AidingApp\Portal\Http\Requests\KnowledgeManagementPortalAuthenticateRequest;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\ValidationRule;
+use AidingApp\Portal\Rules\PortalAuthenticateCodeValidation;
 
-class KnowledgeManagementPortalAuthenticateController extends Controller
+class KnowledgeManagementPortalAuthenticateRequest extends FormRequest
 {
-    public function __invoke(KnowledgeManagementPortalAuthenticateRequest $request, PortalAuthentication $authentication): JsonResponse
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, ValidationRule|array<mixed>|string>
+     */
+    public function rules(): array
     {
-        if ($authentication->isExpired()) {
-            return response()->json([
-                'is_expired' => true,
-            ]);
-        }
-
-        /** @var Contact $contact */
-        $contact = $authentication->educatable;
-
-        Auth::guard('contact')->login($contact);
-
-        $token = $contact->createToken('knowledge-management-portal-access-token');
-
-        if ($request->hasSession()) {
-            $request->session()->regenerate();
-        }
-
-        return response()->json([
-            'success' => true,
-            'token' => $token->plainTextToken,
-            'user' => auth('contact')->user(),
-        ]);
+        return [
+            'code' => ['required', 'integer', 'digits:6', new PortalAuthenticateCodeValidation()],
+        ];
     }
 }

@@ -39,6 +39,7 @@ use AidingApp\Portal\Livewire\RenderKnowledgeManagementPortal;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEnabled;
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEmbeddableAndAuthorized;
+use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalRegisterController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalAuthenticateController;
 
 Route::get('/portals/knowledge-management/{any?}', function ($any = null) {
@@ -61,6 +62,10 @@ Route::prefix('portal')
             Route::post('/authenticate/{authentication}', KnowledgeManagementPortalAuthenticateController::class)
                 ->middleware(['signed:relative', EnsureFrontendRequestsAreStateful::class])
                 ->name('authenticate');
+
+            Route::post('/register/{authentication}', KnowledgeManagementPortalRegisterController::class)
+                ->middleware(['signed:relative', EnsureFrontendRequestsAreStateful::class])
+                ->name('register');
 
             Route::get('/', RenderKnowledgeManagementPortal::class)
                 ->name('show');

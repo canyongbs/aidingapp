@@ -34,40 +34,48 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
+namespace AidingApp\Portal\Http\Requests;
 
-use Illuminate\Http\JsonResponse;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Portal\Models\PortalAuthentication;
-use AidingApp\Portal\Http\Requests\KnowledgeManagementPortalAuthenticateRequest;
+use Illuminate\Validation\Rule;
+use Illuminate\Database\Query\Builder;
+use AidingApp\Contact\Models\Organization;
+use Illuminate\Foundation\Http\FormRequest;
+use AidingApp\Portal\Rules\PortalAuthenticateCodeValidation;
 
-class KnowledgeManagementPortalAuthenticateController extends Controller
+class KnowledgeManagementPortalRegisterRequest extends FormRequest
 {
-    public function __invoke(KnowledgeManagementPortalAuthenticateRequest $request, PortalAuthentication $authentication): JsonResponse
+    public function authorize(): bool
     {
-        if ($authentication->isExpired()) {
-            return response()->json([
-                'is_expired' => true,
-            ]);
-        }
+        $email = $this->input('email');
 
-        /** @var Contact $contact */
-        $contact = $authentication->educatable;
+        preg_match('/@([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})$/', $email, $matches);
 
-        Auth::guard('contact')->login($contact);
+        $domain = $matches[1];
 
-        $token = $contact->createToken('knowledge-management-portal-access-token');
+        return Organization::query()
+            ->whereRaw(
+                "EXISTS (
+                    SELECT 1
+                    FROM jsonb_array_elements(domains) AS elem
+                    WHERE LOWER(elem->>'domain') = ?
+                )",
+                [strtolower($domain)]
+            )
+            ->where('is_contact_generation_enabled', true)
+            ->exists();
+    }
 
-        if ($request->hasSession()) {
-            $request->session()->regenerate();
-        }
-
-        return response()->json([
-            'success' => true,
-            'token' => $token->plainTextToken,
-            'user' => auth('contact')->user(),
-        ]);
+    public function rules(): array
+    {
+        return [
+            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->where(fn (Builder $query) => $query->whereNotNull('deleted_at'))],
+            'first_name' => ['required', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
+            'preferred' => ['nullable', 'string', 'max:255'],
+            'mobile' => ['required', 'string', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:255'],
+            'sms_opt_out' => ['required', 'boolean'],
+            'code' => ['required', 'integer', 'digits:6', new PortalAuthenticateCodeValidation()],
+        ];
     }
 }
