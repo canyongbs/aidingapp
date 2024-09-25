@@ -39,10 +39,10 @@
         </x-filament::badge>
     @endif
     @if ($getRecord()->public && !empty($getRecord()->category_id))
-    <x-filament::badge>
+        <x-filament::badge>
             Public
-    </x-filament::badge>
-    <button
+        </x-filament::badge>
+        <button
             type="button"
             x-data
             x-on:click="
@@ -56,14 +56,13 @@
         })
     "
         >
-        <x-filament::badge
+            <x-filament::badge
                 icon="heroicon-m-clipboard"
                 icon-position="after"
             >
-            Copy
+                Copy
             </x-filament::badge>
         </button>
-   
     @else
         <x-filament::badge>
             Internal
