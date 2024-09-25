@@ -1,4 +1,4 @@
-FROM ghcr.io/roadrunner-server/roadrunner:2023.3.12 AS roadrunner
+FROM ghcr.io/roadrunner-server/roadrunner:2024.2.1 AS roadrunner
 FROM serversideup/php:8.2-fpm-nginx-v2.2.1 AS base
 
 LABEL authors="CanyonGBS"
@@ -47,8 +47,7 @@ COPY ./docker/nginx/site-opts.d /etc/nginx/site-opts.d
 RUN rm /etc/s6-overlay/s6-rc.d/user/contents.d/php-fpm
 RUN rm -rf /etc/s6-overlay/s6-rc.d/php-fpm
 
-COPY --from=roadrunner /usr/bin/rr /var/www/html/rr
-RUN chmod 0755 /var/www/html/rr
+COPY --from=roadrunner --chown=$PUID:$PGID --chmod=0755 /usr/bin/rr /usr/local/bin/rr
 
 RUN apt-get update \
     && apt-get upgrade -y
@@ -82,10 +81,10 @@ RUN chown -R "$PUID":"$PGID" /var/www/html \
 FROM base AS deploy
 
 RUN /generate-queues.sh "default" "\$SQS_QUEUE" \
-&& /generate-queues.sh "landlord" "\$LANDLORD_SQS_QUEUE" \
-&& /generate-queues.sh "outbound-communication" "\$OUTBOUND_COMMUNICATION_QUEUE" \
-&& /generate-queues.sh "audit" "\$AUDIT_QUEUE_QUEUE" \
-&& /generate-queues.sh "import-export" "\$IMPORT_EXPORT_QUEUE" 
+    && /generate-queues.sh "landlord" "\$LANDLORD_SQS_QUEUE" \
+    && /generate-queues.sh "outbound-communication" "\$OUTBOUND_COMMUNICATION_QUEUE" \
+    && /generate-queues.sh "audit" "\$AUDIT_QUEUE_QUEUE" \
+    && /generate-queues.sh "import-export" "\$IMPORT_EXPORT_QUEUE" 
 
 RUN rm /generate-queues.sh
 
