@@ -32,15 +32,11 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline';
-    import { defineProps, ref, watch, onMounted } from 'vue';
+    import { defineProps, ref, watch } from 'vue';
     import { useRoute } from 'vue-router';
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import AppLoading from '../Components/AppLoading.vue';
     import { consumer } from '../Services/Consumer.js';
-    import { Bars3Icon } from '@heroicons/vue/24/outline/index.js';
-    import { ChevronRightIcon, XMarkIcon } from '@heroicons/vue/20/solid/index.js';
-    import Article from '../Components/Article.vue';
     import Badge from '../Components/Badge.vue';
 
     const route = useRoute();
@@ -58,12 +54,19 @@
             type: Array,
             required: true,
         },
+        directionEnums: {
+            type: Array,
+            required: true,
+        },
     });
 
     const serviceRequest = ref(null);
     const serviceRequestUpdates = ref([]);
+    const directionEnums = ref([]);
     const loadingResults = ref(false);
     const updateMessage = ref('');
+    const validationErrors = ref({});
+    const authorizationError = ref(null);
 
     watch(
         route.params.serviceRequestId,
@@ -83,6 +86,7 @@
         get(props.apiUrl + '/service-request/' + route.params.serviceRequestId).then((response) => {
             serviceRequest.value = response.data.serviceRequestDetails;
             serviceRequestUpdates.value = response.data.serviceRequestUpdates || [];
+            directionEnums.value = response.data.directionEnums || [];
             loadingResults.value = false;
         });
     }
@@ -100,7 +104,15 @@
             getData();
             updateMessage.value = ''; // Clear the textarea
         } catch (error) {
-            console.error('Error creating update:', error);
+            if (error.response && error.response.status === 422) {
+                // 422 Unprocessable Entity, which means validation error
+                validationErrors.value = error.response.data.errors; // Assign validation errors
+            } else if (error.response && error.response.status === 403) {
+                // Handle authorization errors
+                authorizationError.value = 'You are not authorized to perform this action.';
+            } else {
+                console.error('Error creating update:', error);
+            }
         } finally {
             loadingResults.value = false;
         }
@@ -117,8 +129,16 @@
                 <div v-else>
                     <main class="flex flex-col gap-8">
                         <div class="flex flex-col gap-6">
-                            <Breadcrumbs :currentCrumb="serviceRequest.service_request_number"></Breadcrumbs>
+                            <Breadcrumbs :currentCrumb="serviceRequest.serviceRequestNumber"></Breadcrumbs>
                             <div class="flex flex-col gap-6">
+                                <div v-if="authorizationError" class="text-red-500 text-sm">
+                                    {{ authorizationError }}
+                                </div>
+                                <div v-if="validationErrors.serviceRequestId" class="text-red-500 text-sm">
+                                    <p v-for="error in validationErrors.serviceRequestId" :key="error">
+                                        {{ error }}
+                                    </p>
+                                </div>
                                 <h2 class="text-xl font-bold text-primary-950">Service Request Details</h2>
 
                                 <div>
@@ -151,6 +171,7 @@
                                             <h2 class="text-base font-semibold">Status:</h2>
                                             <p class="text-gray-700">
                                                 <Badge
+                                                    v-if="serviceRequest.statusName"
                                                     :value="serviceRequest.statusName"
                                                     :class="`inline-flex px-2 py-1 rounded-full`"
                                                     :color="serviceRequest.statusColor"
@@ -167,7 +188,7 @@
                                     </div>
                                     <!-- Add New Update Form -->
                                     <div
-                                        class="flex flex-col divide-y ring-1 ring-black/5 shadow-sm px-3 pt-3 pb-1 rounded bg-white"
+                                        class="flex flex-col divide-y ring-1 ring-black/5 shadow-sm px-3 pt-3 pb-1 rounded bg-white mb-4"
                                     >
                                         <h2 class="text-xl font-bold mb-4">New Service Request Update</h2>
 
@@ -179,6 +200,11 @@
                                                     placeholder="Enter your update here..."
                                                     required
                                                 ></textarea>
+                                                <div v-if="validationErrors.description" class="text-red-500 text-sm">
+                                                    <p v-for="error in validationErrors.description" :key="error">
+                                                        {{ error }}
+                                                    </p>
+                                                </div>
                                             </div>
                                             <button
                                                 type="submit"
@@ -199,19 +225,25 @@
 
                                             <div
                                                 :class="
-                                                    serviceRequestUpdate.internal
+                                                    serviceRequestUpdate.direction == directionEnums.Inbound
                                                         ? 'mb-4 p-4 bg-gray-50 border border-gray-200 rounded'
                                                         : 'mb-4 p-4 border border-blue-200 rounded bg-gradient-to-br from-primary-500 to-primary-800 text-white'
                                                 "
                                                 v-for="serviceRequestUpdate in serviceRequestUpdates"
                                                 :key="serviceRequestUpdate.id"
                                             >
-                                                <p :class="serviceRequestUpdate.internal ? 'text-gray-700' : ''">
+                                                <p
+                                                    :class="
+                                                        serviceRequestUpdate.direction == directionEnums.Inbound
+                                                            ? 'text-gray-700'
+                                                            : ''
+                                                    "
+                                                >
                                                     {{ serviceRequestUpdate.update }}
                                                 </p>
                                                 <span
                                                     :class="
-                                                        serviceRequestUpdate.internal
+                                                        serviceRequestUpdate.direction == directionEnums.Inbound
                                                             ? 'text-sm text-gray-500'
                                                             : 'text-sm'
                                                     "

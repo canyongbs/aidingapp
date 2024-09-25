@@ -118,7 +118,7 @@ Route::prefix('api')
                     ->name('tags.index');
                 Route::get('/service-request/{serviceRequest}', [GetServiceRequestsController::class, 'show'])
                     ->name('service-request.show');
-                Route::post('/service-request-update/store',StoreServiceRequestUpdateController::class)
+                Route::post('/service-request-update/store', StoreServiceRequestUpdateController::class)
                     ->name('service-request-update.storeServiceRequestUpdate');
             });
     });

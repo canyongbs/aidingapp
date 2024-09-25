@@ -44,20 +44,3 @@
 li[data-message-type='success'] {
     color: green;
 }
-:root {
-    --info-50: 235, 248, 255; /* Light Blue */
-    --info-100: 190, 227, 248;
-    --info-200: 144, 205, 244;
-    --info-300: 99, 179, 237;
-    --info-400: 66, 153, 225;
-    --info-500: 49, 130, 206;
-    --info-600: 43, 108, 176;
-    --info-700: 44, 82, 130;
-    --info-800: 42, 67, 101;
-    --info-900: 26, 54, 93;
-    --info-950: 13, 40, 67;
-
-    --danger-50: 254, 240, 240; /* Example for danger */
-    --danger-100: 253, 217, 217;
-    /* Define other variables... */
-}
