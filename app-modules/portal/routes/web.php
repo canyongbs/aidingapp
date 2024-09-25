@@ -77,5 +77,7 @@ Route::prefix('portal')
                 ->name('service-request.show');
             Route::get('/service-request/create/{type}', RenderKnowledgeManagementPortal::class)
                 ->name('service-request-type.show');
+            Route::get('/service-request/{serviceRequest}', RenderKnowledgeManagementPortal::class)
+                ->name('service-request.show');
         });
     });

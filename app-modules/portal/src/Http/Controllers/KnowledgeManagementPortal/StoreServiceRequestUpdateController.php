@@ -1,3 +1,5 @@
+<?php
+
 /*
 <COPYRIGHT>
 
@@ -31,16 +33,26 @@
 
 </COPYRIGHT>
 */
-@import '../../../widgets/service-request-form/src/FormKit/index.css';
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
-.formkit-inner {
-    @apply max-w-full;
-}
+use Illuminate\Http\JsonResponse;
+use App\Http\Controllers\Controller;
+use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use AidingApp\Portal\Http\Requests\StoreServiceRequestUpdateRequest;
+use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateDirection;
 
-li[data-message-type='success'] {
-    color: green;
+class StoreServiceRequestUpdateController extends Controller
+{
+    public function __invoke(StoreServiceRequestUpdateRequest $request): JsonResponse
+    {
+        $serviceRequestUpdate = new ServiceRequestUpdate();
+        $serviceRequestUpdate->service_request_id = $request->serviceRequestId;
+        $serviceRequestUpdate->update = $request->description;
+        $serviceRequestUpdate->internal = false;
+        $serviceRequestUpdate->direction = ServiceRequestUpdateDirection::Inbound;
+        $serviceRequestUpdate->save();
+
+        return response()->json($serviceRequestUpdate, 201);
+    }
 }

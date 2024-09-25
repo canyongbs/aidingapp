@@ -1,3 +1,5 @@
+<?php
+
 /*
 <COPYRIGHT>
 
@@ -31,16 +33,37 @@
 
 </COPYRIGHT>
 */
-@import '../../../widgets/service-request-form/src/FormKit/index.css';
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+namespace AidingApp\Portal\Http\Requests;
 
-.formkit-inner {
-    @apply max-w-full;
-}
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\ValidationRule;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 
-li[data-message-type='success'] {
-    color: green;
+class StoreServiceRequestUpdateRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     */
+    public function authorize(): bool
+    {
+        $contact = auth('contact')->user();
+
+        $serviceRequest = ServiceRequest::with('respondent')->find($this->input('serviceRequestId'));
+
+        return ! is_null($contact) && ! empty($serviceRequest) && $serviceRequest->respondent->is($contact);
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, ValidationRule|array<mixed>|string>
+     */
+    public function rules(): array
+    {
+        return [
+            'description' => ['required', 'string', 'max:65535'],
+            'serviceRequestId' => ['required', 'exists:service_requests,id'],
+        ];
+    }
 }
