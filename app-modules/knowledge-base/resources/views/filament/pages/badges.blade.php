@@ -43,8 +43,8 @@
             Public
         </x-filament::badge>
         <button
-            type="button"
             class="flex items-center justify-center"
+            type="button"
             x-data
             x-on:click="
         window.navigator.clipboard.writeText(@js(route('portal.show') . '/categories/' . $getRecord()->category_id . '/articles/' . $getRecord()->getKey())).then(() => {
@@ -58,8 +58,8 @@
     "
         >
             <x-filament::badge
-                icon="heroicon-m-clipboard"
                 class="flex items-center justify-center"
+                icon="heroicon-m-clipboard"
             ></x-filament::badge>
         </button>
     @else
