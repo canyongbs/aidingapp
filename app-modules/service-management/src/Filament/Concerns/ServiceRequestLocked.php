@@ -34,45 +34,20 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Concerns;
 
-use Illuminate\Database\Eloquent\Model;
-use Filament\Resources\Pages\ManageRelatedRecords;
-use AidingApp\ServiceManagement\Filament\Concerns\ServiceRequestLocked;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\RelationManagers\ServiceRequestUpdatesRelationManager;
+use Filament\View\PanelsRenderHook;
+use Illuminate\Contracts\View\View;
+use Filament\Support\Facades\FilamentView;
 
-class ManageServiceRequestUpdate extends ManageRelatedRecords
+trait ServiceRequestLocked
 {
-    use ServiceRequestLocked;
-
-    protected static string $resource = ServiceRequestResource::class;
-
-    // TODO: Obsolete when there is no table, remove from Filament
-    protected static string $relationship = 'serviceRequestUpdates';
-
-    protected static ?string $navigationLabel = 'Updates';
-
-    protected static ?string $breadcrumb = 'Updates';
-
-    protected static ?string $navigationIcon = 'heroicon-o-adjustments-vertical';
-
-    public static function canAccess(array $arguments = []): bool
+    public function bootServiceRequestLocked()
     {
-        return (bool) count(static::managers($arguments['record'] ?? null));
-    }
-
-    public function getRelationManagers(): array
-    {
-        return static::managers($this->getRecord());
-    }
-
-    private static function managers(?Model $record = null): array
-    {
-        return collect([
-            ServiceRequestUpdatesRelationManager::class,
-        ])
-            ->reject(fn ($relationManager) => $record && (! $relationManager::canViewForRecord($record, static::class)))
-            ->toArray();
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::PAGE_HEADER_ACTIONS_AFTER,
+            fn (): View => view('filament.pages.service-request-lock-icon'),
+            scopes: static::class,
+        );
     }
 }

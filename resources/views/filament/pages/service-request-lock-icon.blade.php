@@ -1,6 +1,4 @@
-<?php
-
-/*
+{{--
 <COPYRIGHT>
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
@@ -32,47 +30,18 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
+--}}
+@php
+    use AidingApp\ServiceManagement\Models\ServiceRequest;
+    use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
+@endphp
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages;
-
-use Illuminate\Database\Eloquent\Model;
-use Filament\Resources\Pages\ManageRelatedRecords;
-use AidingApp\ServiceManagement\Filament\Concerns\ServiceRequestLocked;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\RelationManagers\ServiceRequestUpdatesRelationManager;
-
-class ManageServiceRequestUpdate extends ManageRelatedRecords
-{
-    use ServiceRequestLocked;
-
-    protected static string $resource = ServiceRequestResource::class;
-
-    // TODO: Obsolete when there is no table, remove from Filament
-    protected static string $relationship = 'serviceRequestUpdates';
-
-    protected static ?string $navigationLabel = 'Updates';
-
-    protected static ?string $breadcrumb = 'Updates';
-
-    protected static ?string $navigationIcon = 'heroicon-o-adjustments-vertical';
-
-    public static function canAccess(array $arguments = []): bool
-    {
-        return (bool) count(static::managers($arguments['record'] ?? null));
-    }
-
-    public function getRelationManagers(): array
-    {
-        return static::managers($this->getRecord());
-    }
-
-    private static function managers(?Model $record = null): array
-    {
-        return collect([
-            ServiceRequestUpdatesRelationManager::class,
-        ])
-            ->reject(fn ($relationManager) => $record && (! $relationManager::canViewForRecord($record, static::class)))
-            ->toArray();
-    }
-}
+@if ($this->getRecord()?->status?->classification === SystemServiceRequestClassification::Closed)
+    <x-filament::icon-button
+        data-identifier="service_request_closed"
+        icon="heroicon-m-lock-closed"
+        color="gray"
+        size="lg"
+        tooltip="This service request is locked as the status is {{ $this->getRecord()->status->classification }}."
+    />
+@endif
