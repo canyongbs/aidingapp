@@ -13,7 +13,7 @@ trait ServiceRequestLocked
         FilamentView::registerRenderHook(
             PanelsRenderHook::PAGE_HEADER_ACTIONS_AFTER,
             fn (): View => view('filament.pages.service-request-lock-icon'),
-            scopes: $this->getRenderHookScopes(),
+            scopes: static::class,
         );
     }
 }
