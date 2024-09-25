@@ -41,10 +41,16 @@ use function Tests\asSuperAdmin;
 use App\Settings\LicenseSettings;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
 
 use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ManageAssignments;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ViewServiceRequest;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ManageServiceRequestUpdate;
 
 test('The correct details are displayed on the ViewServiceRequest page', function () {
     $serviceRequest = ServiceRequest::factory()->create();
@@ -133,3 +139,30 @@ test('ViewServiceRequest is gated with proper feature access control', function 
             ])
         )->assertSuccessful();
 });
+
+test('service request lock icon is shown when status classification closed', function (string $pages) {
+    $user = User::factory()->licensed(LicenseType::cases())->create();
+
+    $user->givePermissionTo('service_request.view-any');
+    $user->givePermissionTo('service_request.*.view');
+    $user->givePermissionTo('service_request_assignment.view-any');
+    $user->givePermissionTo('service_request_update.view-any');
+
+    actingAs($user);
+
+    $serviceRequest = ServiceRequest::factory([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Closed,
+        ])->id,
+    ])->create();
+
+    livewire($pages, [
+        'record' => $serviceRequest->getRouteKey(),
+    ])
+        ->assertSeeHtml('data-identifier="service_request_closed"');
+})
+    ->with([
+        ViewServiceRequest::class,
+        ManageAssignments::class,
+        ManageServiceRequestUpdate::class,
+    ]);

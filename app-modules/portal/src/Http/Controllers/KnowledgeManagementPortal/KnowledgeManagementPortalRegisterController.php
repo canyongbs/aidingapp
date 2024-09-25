@@ -40,12 +40,15 @@ use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\ContactSource;
+use AidingApp\Contact\Models\ContactStatus;
 use AidingApp\Portal\Models\PortalAuthentication;
-use AidingApp\Portal\Http\Requests\KnowledgeManagementPortalAuthenticateRequest;
+use AidingApp\Contact\Enums\SystemContactClassification;
+use AidingApp\Portal\Http\Requests\KnowledgeManagementPortalRegisterRequest;
 
-class KnowledgeManagementPortalAuthenticateController extends Controller
+class KnowledgeManagementPortalRegisterController extends Controller
 {
-    public function __invoke(KnowledgeManagementPortalAuthenticateRequest $request, PortalAuthentication $authentication): JsonResponse
+    public function __invoke(KnowledgeManagementPortalRegisterRequest $request, PortalAuthentication $authentication): JsonResponse
     {
         if ($authentication->isExpired()) {
             return response()->json([
@@ -53,8 +56,43 @@ class KnowledgeManagementPortalAuthenticateController extends Controller
             ]);
         }
 
+        $data = $request->validated();
+
         /** @var Contact $contact */
-        $contact = $authentication->educatable;
+        $contact = Contact::query()
+            ->make([
+                'email' => $data['email'],
+                'first_name' => $data['first_name'],
+                'last_name' => $data['last_name'],
+                'full_name' => "{$data['first_name']} {$data['last_name']}",
+                'preferred' => $data['preferred'] ?? null,
+                'mobile' => $data['mobile'],
+                'phone' => $data['phone'] ?? null,
+                'sms_opt_out' => $data['sms_opt_out'],
+            ]);
+
+        $status = ContactStatus::query()
+            ->where('classification', SystemContactClassification::New)
+            ->first();
+
+        if ($status) {
+            $contact->status()->associate($status);
+        }
+
+        $source = ContactSource::query()
+            ->where('name', 'Portal Generated')
+            ->first();
+
+        if (! $source) {
+            $source = ContactSource::query()
+                ->create([
+                    'name' => 'Portal Generated',
+                ]);
+        }
+
+        $contact->source()->associate($source);
+
+        $contact->save();
 
         Auth::guard('contact')->login($contact);
 

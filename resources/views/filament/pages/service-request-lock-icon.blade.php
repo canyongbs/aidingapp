@@ -1,6 +1,4 @@
-<?php
-
-/*
+{{--
 <COPYRIGHT>
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
@@ -32,42 +30,18 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
+--}}
+@php
+    use AidingApp\ServiceManagement\Models\ServiceRequest;
+    use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
+@endphp
 
-namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
-
-use Illuminate\Http\JsonResponse;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Portal\Models\PortalAuthentication;
-use AidingApp\Portal\Http\Requests\KnowledgeManagementPortalAuthenticateRequest;
-
-class KnowledgeManagementPortalAuthenticateController extends Controller
-{
-    public function __invoke(KnowledgeManagementPortalAuthenticateRequest $request, PortalAuthentication $authentication): JsonResponse
-    {
-        if ($authentication->isExpired()) {
-            return response()->json([
-                'is_expired' => true,
-            ]);
-        }
-
-        /** @var Contact $contact */
-        $contact = $authentication->educatable;
-
-        Auth::guard('contact')->login($contact);
-
-        $token = $contact->createToken('knowledge-management-portal-access-token');
-
-        if ($request->hasSession()) {
-            $request->session()->regenerate();
-        }
-
-        return response()->json([
-            'success' => true,
-            'token' => $token->plainTextToken,
-            'user' => auth('contact')->user(),
-        ]);
-    }
-}
+@if ($this->getRecord()?->status?->classification === SystemServiceRequestClassification::Closed)
+    <x-filament::icon-button
+        data-identifier="service_request_closed"
+        icon="heroicon-m-lock-closed"
+        color="gray"
+        size="lg"
+        tooltip="This service request is locked as the status is {{ $this->getRecord()->status->classification }}."
+    />
+@endif

@@ -34,40 +34,20 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
+namespace AidingApp\ServiceManagement\Filament\Concerns;
 
-use Illuminate\Http\JsonResponse;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Portal\Models\PortalAuthentication;
-use AidingApp\Portal\Http\Requests\KnowledgeManagementPortalAuthenticateRequest;
+use Filament\View\PanelsRenderHook;
+use Illuminate\Contracts\View\View;
+use Filament\Support\Facades\FilamentView;
 
-class KnowledgeManagementPortalAuthenticateController extends Controller
+trait ServiceRequestLocked
 {
-    public function __invoke(KnowledgeManagementPortalAuthenticateRequest $request, PortalAuthentication $authentication): JsonResponse
+    public function bootServiceRequestLocked()
     {
-        if ($authentication->isExpired()) {
-            return response()->json([
-                'is_expired' => true,
-            ]);
-        }
-
-        /** @var Contact $contact */
-        $contact = $authentication->educatable;
-
-        Auth::guard('contact')->login($contact);
-
-        $token = $contact->createToken('knowledge-management-portal-access-token');
-
-        if ($request->hasSession()) {
-            $request->session()->regenerate();
-        }
-
-        return response()->json([
-            'success' => true,
-            'token' => $token->plainTextToken,
-            'user' => auth('contact')->user(),
-        ]);
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::PAGE_HEADER_ACTIONS_AFTER,
+            fn (): View => view('filament.pages.service-request-lock-icon'),
+            scopes: static::class,
+        );
     }
 }
