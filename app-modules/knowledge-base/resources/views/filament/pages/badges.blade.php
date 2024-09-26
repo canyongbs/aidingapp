@@ -42,26 +42,27 @@
         <x-filament::badge>
             Public
         </x-filament::badge>
-        <button
-            type="button"
-            class="flex items-center justify-center"
-            x-data
-            x-on:click="
-        window.navigator.clipboard.writeText(@js(route('portal.show') . '/categories/' . $getRecord()->category_id . '/articles/' . $getRecord()->getKey())).then(() => {
-            $tooltip('Copied!', {
-                theme: $store.theme,
-                timeout: 2000,
-            })
-        }).catch(err => {
-            console.error('Failed to copy text: ', err);
-        })
-    "
-        >
-            <x-filament::badge
+        <x-filament::badge
                 icon="heroicon-m-clipboard"
-                class="flex items-center justify-center"
+                class="flex items-center justify-center cursor-pointer"
+                x-data
+                :x-on:click="'window.navigator.clipboard.writeText(' . \Illuminate\Support\Js::from(route('portal.show') . '/categories/' . $getRecord()->category_id . '/articles/' . $getRecord()->getKey()).').then(() => {
+
+    $tooltip(\'Copied!\', {
+
+        theme: $store.theme,
+
+        timeout: 2000,
+
+    })
+
+}).catch(err => {
+
+    console.error(\'Failed to copy text: \', err);
+
+})'"
             ></x-filament::badge>
-        </button>
+        
     @else
         <x-filament::badge>
             Internal
