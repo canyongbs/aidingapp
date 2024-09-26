@@ -116,5 +116,7 @@ class AppServiceProvider extends ServiceProvider
 
             return null;
         });
+
+        Feature::discover();
     }
 }

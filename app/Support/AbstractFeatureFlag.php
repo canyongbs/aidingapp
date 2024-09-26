@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Features;
+namespace App\Support;
 
 use Laravel\Pennant\Feature;
 
