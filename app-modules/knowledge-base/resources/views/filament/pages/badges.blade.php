@@ -43,10 +43,10 @@
             Public
         </x-filament::badge>
         <x-filament::badge
-                icon="heroicon-m-clipboard"
-                class="flex items-center justify-center cursor-pointer"
-                x-data
-                :x-on:click="'window.navigator.clipboard.writeText(' . \Illuminate\Support\Js::from(route('portal.show') . '/categories/' . $getRecord()->category_id . '/articles/' . $getRecord()->getKey()).').then(() => {
+            class="flex cursor-pointer items-center justify-center"
+            icon="heroicon-m-clipboard"
+            x-data
+            :x-on:click="'window.navigator.clipboard.writeText(' . \Illuminate\Support\Js::from(route('portal.show') . '/categories/' . $getRecord()->category_id . '/articles/' . $getRecord()->getKey()).').then(() => {
 
     $tooltip(\'Copied!\', {
 
@@ -61,8 +61,7 @@
     console.error(\'Failed to copy text: \', err);
 
 })'"
-            ></x-filament::badge>
-        
+        ></x-filament::badge>
     @else
         <x-filament::badge>
             Internal
