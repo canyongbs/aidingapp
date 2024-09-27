@@ -15,7 +15,7 @@
 > If yes, please replace this block with a description of the deployment steps required and apply the `Deployment Steps` label to the PR.
 > If no, please replace this block with "No".
 
-### Are any Feature Flags or Data Migrations that can eventually be removed Added?
+### Are any Feature Flags and/or Data Migrations that can eventually be removed Added?
 
 > Specifically Feature Flags to gate and control logic/flow changes to protect against database schema changes. And Data Migrations to provide some type of data fix that can be removed after they are run
 >
