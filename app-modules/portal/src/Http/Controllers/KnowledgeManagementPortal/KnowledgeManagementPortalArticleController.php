@@ -36,7 +36,6 @@
 
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
-use Laravel\Pennant\Feature;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
@@ -48,11 +47,7 @@ class KnowledgeManagementPortalArticleController extends Controller
 {
     public function show(KnowledgeBaseCategory $category, KnowledgeBaseItem $article): JsonResponse
     {
-        $portalViewCountFlag = Feature::active('portal_view_count');
-
-        if ($portalViewCountFlag) {
-            $article->increment('portal_view_count');
-        }
+        $article->increment('portal_view_count');
 
         return response()->json([
             'category' => KnowledgeBaseCategoryData::from([
@@ -76,7 +71,6 @@ class KnowledgeManagementPortalArticleController extends Controller
                     ->toArray(),
             ]),
             'portal_view_count' => $article->portal_view_count,
-            'portal_view_count_flag' => $portalViewCountFlag,
         ]);
     }
 }

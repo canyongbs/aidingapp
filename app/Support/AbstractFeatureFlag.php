@@ -34,17 +34,29 @@
 </COPYRIGHT>
 */
 
+namespace App\Support;
+
 use Laravel\Pennant\Feature;
-use Illuminate\Database\Migrations\Migration;
 
-return new class () extends Migration {
-    public function up(): void
+abstract class AbstractFeatureFlag
+{
+    public static function active(): bool
     {
-        Feature::activate('portal_view_count');
+        return Feature::active(static::class);
     }
 
-    public function down(): void
+    public static function activate(): void
     {
-        Feature::deactivate('portal_view_count');
+        Feature::activate(static::class);
     }
-};
+
+    public static function deactivate(): void
+    {
+        Feature::deactivate(static::class);
+    }
+
+    public static function purge(): void
+    {
+        Feature::purge(static::class);
+    }
+}
