@@ -118,22 +118,20 @@
         await determineIfUserIsAuthenticated(props.userAuthenticationUrl).then((response) => {
             userIsAuthenticated.value = response;
         });
-
-        await getKnowledgeManagementPortal().then(async () => {
-            const { requiresAuthentication } = useAuthStore();
-
-            if (userIsAuthenticated.value || !requiresAuthentication) {
-                await getData();
-                return;
-            }
-            loading.value = false;
-        });
     });
 
     watch(
         route,
-        function () {
-            getKnowledgeManagementPortal();
+        async () => {
+            await getKnowledgeManagementPortal().then(async () => {
+                const { requiresAuthentication } = useAuthStore();
+
+                if (userIsAuthenticated.value || !requiresAuthentication) {
+                    await getData();
+                    return;
+                }
+                loading.value = false;
+            });
         },
         {
             immediate: true,
@@ -166,7 +164,6 @@
 
                 const { setHasServiceManagement } = useFeatureStore();
 
-                serviceRequests.value = response.data.service_requests;
 
                 portalPrimaryColor.value = response.data.primary_color;
 
