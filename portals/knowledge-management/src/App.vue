@@ -164,7 +164,6 @@
 
                 const { setHasServiceManagement } = useFeatureStore();
 
-
                 portalPrimaryColor.value = response.data.primary_color;
 
                 portalLayout.value = response.data.layout;
