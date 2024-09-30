@@ -32,7 +32,7 @@
 </COPYRIGHT>
 --}}
 
-<div class="flex gap-2 items-center">
+<div class="flex items-center gap-2">
     @if ($getRecord()->status)
         <x-filament::badge>
             {{ $getRecord()->status->name }}
@@ -43,7 +43,7 @@
             Public
         </x-filament::badge>
         <x-filament::icon
-            class="flex cursor-pointer items-center justify-center w-4 h-4"
+            class="flex h-4 w-4 cursor-pointer items-center justify-center"
             icon="heroicon-m-clipboard"
             :x-on:click="'window.navigator.clipboard.writeText(' . \Illuminate\Support\Js::from(route('portal.show') . '/categories/' . $getRecord()->category_id . '/articles/' . $getRecord()->getKey()).').then(() => {
 
@@ -61,9 +61,9 @@
 
             })'"
         ></x-filament::badge>
-    @else
-        <x-filament::badge>
-            Internal
-        </x-filament::badge>
+        @else
+            <x-filament::badge>
+                Internal
+            </x-filament::badge>
     @endif
 </div>
