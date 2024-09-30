@@ -32,7 +32,7 @@
 </COPYRIGHT>
 --}}
 
-<div class="flex gap-2">
+<div class="flex gap-2 items-center">
     @if ($getRecord()->status)
         <x-filament::badge>
             {{ $getRecord()->status->name }}
@@ -42,25 +42,24 @@
         <x-filament::badge>
             Public
         </x-filament::badge>
-        <x-filament::badge
-            class="flex cursor-pointer items-center justify-center"
+        <x-filament::icon
+            class="flex cursor-pointer items-center justify-center w-4 h-4"
             icon="heroicon-m-clipboard"
-            x-data
             :x-on:click="'window.navigator.clipboard.writeText(' . \Illuminate\Support\Js::from(route('portal.show') . '/categories/' . $getRecord()->category_id . '/articles/' . $getRecord()->getKey()).').then(() => {
 
-    $tooltip(\'Copied!\', {
+                $tooltip(\'Copied!\', {
 
-        theme: $store.theme,
+                    theme: $store.theme,
 
-        timeout: 2000,
+                    timeout: 2000,
 
-    })
+                })
 
-}).catch(err => {
+            }).catch(err => {
 
-    console.error(\'Failed to copy text: \', err);
+                console.error(\'Failed to copy text: \', err);
 
-})'"
+            })'"
         ></x-filament::badge>
     @else
         <x-filament::badge>
