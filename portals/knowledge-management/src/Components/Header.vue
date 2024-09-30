@@ -32,7 +32,7 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { defineProps, ref, onMounted } from 'vue';
+    import { defineProps } from 'vue';
     import { consumer } from '../Services/Consumer.js';
     import { useAuthStore } from '../Stores/auth.js';
     import { useFeatureStore } from '../Stores/feature.js';

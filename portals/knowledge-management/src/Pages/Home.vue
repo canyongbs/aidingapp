@@ -71,6 +71,7 @@
     const searchResults = ref(null);
     const selectedTags = ref([]);
     const route = useRoute();
+    const globalSearchInput = ref(null);
 
     const debounceSearch = debounce((value) => {
         const { post } = consumer();
@@ -97,17 +98,16 @@
     const { hasServiceManagement } = useFeatureStore();
 
     onMounted(function () {
-        if (route.query.search !== undefined) {
-            searchQuery.value = route.query.search;
+        if(route.query.search !== undefined){
+            globalSearch(route.query.search);
         }
     });
 
     watch(
         () => route.query.search,
         (newVal, oldVal) => {
-            searchQuery.value = newVal || '';
-        },
-    );
+            globalSearch(newVal);            
+    });
 
     watch(searchQuery, (value) => {
         debounceSearch(value);
@@ -136,6 +136,11 @@
             selectedTags.value = [...selectedTags.value, tag];
         }
     }
+
+    function globalSearch(value) {
+        searchQuery.value =value;
+        globalSearchInput.value.focus();
+    }
 </script>
 
 <template>
@@ -162,6 +167,7 @@
                             <MagnifyingGlassIcon class="h-5 w-5 text-gray-400" aria-hidden="true" />
                         </div>
                         <input
+                            ref="globalSearchInput"
                             type="search"
                             v-model="searchQuery"
                             id="search"
