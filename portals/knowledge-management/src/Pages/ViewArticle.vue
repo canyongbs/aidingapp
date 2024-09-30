@@ -94,7 +94,7 @@
 <template>
     <div class="sticky top-0 z-40 flex flex-col items-center bg-gray-50">
         <div class="w-full px-6">
-            <div class="max-w-screen-xl flex flex-col gap-y-6 mx-auto py-8">
+            <div class="xl:w-10/12 lg:w-11/12 w-full flex flex-col gap-y-6 mx-auto py-8">
                 <div v-if="loading">
                     <AppLoading />
                 </div>
