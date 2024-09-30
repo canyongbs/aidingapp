@@ -98,7 +98,7 @@
     const { hasServiceManagement } = useFeatureStore();
 
     onMounted(function () {
-        if(route.query.search !== undefined){
+        if (route.query.search !== undefined) {
             globalSearch(route.query.search);
         }
     });
@@ -106,8 +106,9 @@
     watch(
         () => route.query.search,
         (newVal, oldVal) => {
-            globalSearch(newVal);            
-    });
+            globalSearch(newVal);
+        },
+    );
 
     watch(searchQuery, (value) => {
         debounceSearch(value);
@@ -138,7 +139,7 @@
     }
 
     function globalSearch(value) {
-        searchQuery.value =value;
+        searchQuery.value = value;
         globalSearchInput.value.focus();
     }
 </script>
