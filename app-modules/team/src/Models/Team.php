@@ -41,6 +41,9 @@ use App\Models\BaseModel;
 use AidingApp\Division\Models\Division;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeAudit;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeManager;
 
 /**
  * @mixin IdeHelperTeam
@@ -57,6 +60,20 @@ class Team extends BaseModel
         return $this
             ->belongsToMany(User::class)
             ->using(TeamUser::class)
+            ->withTimestamps();
+    }
+
+    public function serviceRequestTypes(): BelongsToMany
+    {
+        return $this->belongsToMany(ServiceRequestType::class, 'service_request_type_managers')
+            ->using(ServiceRequestTypeManager::class)
+            ->withTimestamps();
+    }
+
+    public function auditedServiceRequestTypes(): BelongsToMany
+    {
+        return $this->belongsToMany(ServiceRequestType::class, 'service_request_type_audits')
+            ->using(ServiceRequestTypeAudit::class)
             ->withTimestamps();
     }
 
