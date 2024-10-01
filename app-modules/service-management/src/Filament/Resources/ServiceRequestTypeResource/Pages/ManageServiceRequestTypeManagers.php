@@ -41,10 +41,10 @@ use Filament\Tables\Actions\AttachAction;
 use Filament\Tables\Actions\DetachAction;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DetachBulkAction;
+use App\Features\ServiceRequestTypeManagerAuditor;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use App\Filament\Tables\Columns\OpenSearch\TextColumn;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
-use App\Features\ServiceRequestTypeManagerAuditor;
 
 class ManageServiceRequestTypeManagers extends ManageRelatedRecords
 {
