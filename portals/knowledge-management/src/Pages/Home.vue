@@ -35,11 +35,13 @@
     import { Bars3Icon, MagnifyingGlassIcon } from '@heroicons/vue/24/outline';
     import HelpCenter from '../Components/HelpCenter.vue';
     import SearchResults from '../Components/SearchResults.vue';
-    import { defineProps, ref, watch } from 'vue';
+    import { defineProps, ref, watch, onMounted } from 'vue';
     import { consumer } from '../Services/Consumer.js';
     import { useAuthStore } from '../Stores/auth.js';
     import { useFeatureStore } from '../Stores/feature.js';
     import Badge from '../Components/Badge.vue';
+    import { useRoute } from 'vue-router';
+    import { globalSearchQuery } from '../Stores/globalState.js';
 
     const props = defineProps({
         searchUrl: {
@@ -68,6 +70,8 @@
     const loadingResults = ref(false);
     const searchResults = ref(null);
     const selectedTags = ref([]);
+    const route = useRoute();
+    const globalSearchInput = ref(null);
 
     const debounceSearch = debounce((value) => {
         const { post } = consumer();
@@ -87,10 +91,24 @@
             searchResults.value = response.data;
             loadingResults.value = false;
         });
+        globalSearchQuery.value = '';
     }, 500);
 
     const { user } = useAuthStore();
     const { hasServiceManagement } = useFeatureStore();
+
+    onMounted(function () {
+        if (route.query.search !== undefined) {
+            globalSearch(route.query.search);
+        }
+    });
+
+    watch(
+        () => route.query.search,
+        (newVal, oldVal) => {
+            globalSearch(newVal);
+        },
+    );
 
     watch(searchQuery, (value) => {
         debounceSearch(value);
@@ -119,6 +137,11 @@
             selectedTags.value = [...selectedTags.value, tag];
         }
     }
+
+    function globalSearch(value) {
+        searchQuery.value = value;
+        globalSearchInput.value.focus();
+    }
 </script>
 
 <template>
@@ -145,6 +168,7 @@
                             <MagnifyingGlassIcon class="h-5 w-5 text-gray-400" aria-hidden="true" />
                         </div>
                         <input
+                            ref="globalSearchInput"
                             type="search"
                             v-model="searchQuery"
                             id="search"
