@@ -38,10 +38,12 @@
     import { useFeatureStore } from '../Stores/feature.js';
     import { useTokenStore } from '../Stores/token.js';
     import GlobalSearchBar from './GlobalSearchBar.vue';
+    import { useRoute } from 'vue-router';
 
     const { user, requiresAuthentication } = useAuthStore();
     const { hasServiceManagement } = useFeatureStore();
     const { removeToken } = useTokenStore();
+    const route = useRoute();
 
     const props = defineProps({
         apiUrl: {
@@ -80,7 +82,7 @@
                     <img :src="headerLogo" :alt="appName" class="max-h-20 m-3 max-w-64" />
                 </router-link>
             </div>
-            <GlobalSearchBar></GlobalSearchBar>
+            <GlobalSearchBar v-if="route.name === 'view-article'"></GlobalSearchBar>
             <div v-if="requiresAuthentication || hasServiceManagement">
                 <button
                     v-if="user"
