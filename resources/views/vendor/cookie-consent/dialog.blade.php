@@ -34,7 +34,6 @@
 
 @php
     use AidingApp\Portal\Settings\PortalSettings;
-    use App\Enums\FeatureFlag;
 @endphp
 
 <div class="js-cookie-consent cookie-consent z-50 fixed bottom-0 inset-x-0 pb-2">
