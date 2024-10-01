@@ -109,7 +109,7 @@
                         <div class="grid space-y-2">
                             <div class="flex flex-col gap-3">
                                 <div class="prose max-w-none">
-                                    <h1  class="font-semibold">{{ article.name }}</h1>
+                                    <h1 class="font-semibold">{{ article.name }}</h1>
                                     <div class="flex mb-4">
                                         <div class="text-gray-500 flex items-center space-x-1 mr-2">
                                             <EyeIcon class="h-4 w-4 flex-shrink-0" aria-hidden="true" />
