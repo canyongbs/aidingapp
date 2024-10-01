@@ -87,17 +87,17 @@ class ServiceRequestType extends BaseModel implements Auditable
         return $this->hasOne(ServiceRequestForm::class, 'service_request_type_id');
     }
 
-    public function serviceRequestTypeManager(): BelongsToMany
+    public function managers(): BelongsToMany
     {
         return $this->belongsToMany(Team::class, 'service_request_type_managers')
             ->using(ServiceRequestTypeManager::class)
             ->withTimestamps();
     }
 
-    public function auditTeams(): BelongsToMany
+    public function auditors(): BelongsToMany
     {
-        return $this->belongsToMany(Team::class, 'service_request_type_audits')
-            ->using(ServiceRequestTypeAudit::class)
+        return $this->belongsToMany(Team::class, 'service_request_type_auditors')
+            ->using(ServiceRequestTypeAuditor::class)
             ->withTimestamps();
     }
 

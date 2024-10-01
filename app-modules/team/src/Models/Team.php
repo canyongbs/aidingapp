@@ -42,7 +42,7 @@ use AidingApp\Division\Models\Division;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\ServiceManagement\Models\ServiceRequestTypeAudit;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeAuditor;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeManager;
 
 /**
@@ -63,17 +63,17 @@ class Team extends BaseModel
             ->withTimestamps();
     }
 
-    public function serviceRequestTypes(): BelongsToMany
+    public function managableServiceRequestTypes(): BelongsToMany
     {
         return $this->belongsToMany(ServiceRequestType::class, 'service_request_type_managers')
             ->using(ServiceRequestTypeManager::class)
             ->withTimestamps();
     }
 
-    public function auditedServiceRequestTypes(): BelongsToMany
+    public function auditableServiceRequestTypes(): BelongsToMany
     {
-        return $this->belongsToMany(ServiceRequestType::class, 'service_request_type_audits')
-            ->using(ServiceRequestTypeAudit::class)
+        return $this->belongsToMany(ServiceRequestType::class, 'service_request_type_auditors')
+            ->using(ServiceRequestTypeAuditor::class)
             ->withTimestamps();
     }
 

@@ -10,24 +10,31 @@ use Filament\Tables\Actions\DetachBulkAction;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use App\Filament\Tables\Columns\OpenSearch\TextColumn;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
+use App\Features\ServiceRequestTypeManagerAuditor;
 
-class ManageServiceRequestTypeManager extends ManageRelatedRecords
+class ManageServiceRequestTypeManagers extends ManageRelatedRecords
 {
     protected static string $resource = ServiceRequestTypeResource::class;
 
-    protected static string $relationship = 'serviceRequestTypeManager';
+    protected static string $relationship = 'managers';
 
     protected static ?string $navigationIcon = 'heroicon-o-adjustments-horizontal';
 
+    public static function canAccess(array $parameters = []): bool
+    {
+        return ServiceRequestTypeManagerAuditor::active();
+    }
+
     public static function getNavigationLabel(): string
     {
-        return 'Manage';
+        return 'Managers';
     }
 
     public function table(Table $table): Table
     {
         return $table
             ->recordTitleAttribute('name')
+            ->inverseRelationship('managableServiceRequestTypes')
             ->columns([
                 TextColumn::make('name')
                     ->label('Team'),

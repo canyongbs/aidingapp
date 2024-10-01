@@ -42,14 +42,12 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Filament\Clusters\ServiceManagementAdministration;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\ManageAudit;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\EditServiceRequestType;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\ViewServiceRequestType;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\ListServiceRequestTypes;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\CreateServiceRequestType;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\ManageServiceRequestTypeAudit;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\ManageServiceRequestTypeManager;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\ServiceRequestTypeManager;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\ManageServiceRequestTypeAuditors;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\ManageServiceRequestTypeManagers;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\RelationManagers\ServiceRequestPrioritiesRelationManager;
 
 class ServiceRequestTypeResource extends Resource
@@ -82,8 +80,8 @@ class ServiceRequestTypeResource extends Resource
         return $page->generateNavigationItems([
             ViewServiceRequestType::class,
             EditServiceRequestType::class,
-            ManageServiceRequestTypeManager::class,
-            ManageServiceRequestTypeAudit::class,
+            ManageServiceRequestTypeManagers::class,
+            ManageServiceRequestTypeAuditors::class,
         ]);
     }
 
@@ -94,8 +92,8 @@ class ServiceRequestTypeResource extends Resource
             'create' => CreateServiceRequestType::route('/create'),
             'view' => ViewServiceRequestType::route('/{record}'),
             'edit' => EditServiceRequestType::route('/{record}/edit'),
-            'service-request-type-manager' => ManageServiceRequestTypeManager::route('/{record}/manager'),
-            'service-request-type-audits' => ManageServiceRequestTypeAudit::route('/{record}/audits'),
+            'service-request-type-managers' => ManageServiceRequestTypeManagers::route('/{record}/managers'),
+            'service-request-type-auditors' => ManageServiceRequestTypeAuditors::route('/{record}/auditors'),
         ];
     }
 }

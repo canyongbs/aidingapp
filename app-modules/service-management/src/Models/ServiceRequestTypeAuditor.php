@@ -8,12 +8,14 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class ServiceRequestTypeAudit extends Pivot
+class ServiceRequestTypeAuditor extends Pivot
 {
     use HasFactory;
     use HasUuids;
 
-    public function audit(): BelongsTo
+    protected $table = 'service_request_type_auditors';
+
+    public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }

@@ -10,25 +10,31 @@ use Filament\Tables\Actions\DetachBulkAction;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use App\Filament\Tables\Columns\OpenSearch\TextColumn;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
+use App\Features\ServiceRequestTypeManagerAuditor;
 
-class ManageServiceRequestTypeAudit extends ManageRelatedRecords
+class ManageServiceRequestTypeAuditors extends ManageRelatedRecords
 {
     protected static string $resource = ServiceRequestTypeResource::class;
 
-    protected static string $relationship = 'auditTeams';
+    protected static string $relationship = 'auditors';
 
     protected static ?string $navigationIcon = 'heroicon-o-book-open';
 
+    public static function canAccess(array $parameters = []): bool
+    {
+        return ServiceRequestTypeManagerAuditor::active();
+    }
+
     public static function getNavigationLabel(): string
     {
-        return 'Audit';
+        return 'Auditors';
     }
 
     public function table(Table $table): Table
     {
         return $table
             ->recordTitleAttribute('name')
-            ->inverseRelationship('auditedServiceRequestTypes')
+            ->inverseRelationship('auditableServiceRequestTypes')
             ->columns([
                 TextColumn::make('name'),
             ])

@@ -13,6 +13,8 @@ class ServiceRequestTypeManager extends Pivot
     use HasFactory;
     use HasUuids;
 
+    protected $table = 'service_request_type_managers';
+
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
