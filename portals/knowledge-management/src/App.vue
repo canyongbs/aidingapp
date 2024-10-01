@@ -397,7 +397,7 @@
 <template>
     <div
         class="font-sans bg-gray-50 min-h-screen"
-        :class="{ 'mx-auto max-w-4xl': portalLayout === 'fixed' }"
+        :class="{ 'mx-auto max-w-7xl': portalLayout === 'fixed' }"
         :style="{
             '--primary-50': portalPrimaryColor[50],
             '--primary-100': portalPrimaryColor[100],
