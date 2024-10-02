@@ -56,7 +56,7 @@ class ManageServiceRequestTypeAuditors extends ManageRelatedRecords
 
     public static function canAccess(array $parameters = []): bool
     {
-        return ServiceRequestTypeManagerAuditor::active();
+        return parent::canAccess($parameters) && ServiceRequestTypeManagerAuditor::active();
     }
 
     public static function getNavigationLabel(): string
