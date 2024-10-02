@@ -34,51 +34,54 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Team\Models;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages;
 
-use App\Models\User;
-use App\Models\BaseModel;
-use AidingApp\Division\Models\Division;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\ServiceManagement\Models\ServiceRequestTypeAuditor;
-use AidingApp\ServiceManagement\Models\ServiceRequestTypeManager;
+use Filament\Tables\Table;
+use Filament\Tables\Actions\AttachAction;
+use Filament\Tables\Actions\DetachAction;
+use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Tables\Actions\DetachBulkAction;
+use App\Features\ServiceRequestTypeManagerAuditor;
+use Filament\Resources\Pages\ManageRelatedRecords;
+use App\Filament\Tables\Columns\OpenSearch\TextColumn;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
 
-/**
- * @mixin IdeHelperTeam
- */
-class Team extends BaseModel
+class ManageServiceRequestTypeAuditors extends ManageRelatedRecords
 {
-    protected $fillable = [
-        'name',
-        'description',
-    ];
+    protected static string $resource = ServiceRequestTypeResource::class;
 
-    public function users(): BelongsToMany
+    protected static string $relationship = 'auditors';
+
+    protected static ?string $navigationIcon = 'heroicon-o-book-open';
+
+    public static function canAccess(array $parameters = []): bool
     {
-        return $this
-            ->belongsToMany(User::class)
-            ->using(TeamUser::class)
-            ->withTimestamps();
+        return parent::canAccess($parameters) && ServiceRequestTypeManagerAuditor::active();
     }
 
-    public function managableServiceRequestTypes(): BelongsToMany
+    public static function getNavigationLabel(): string
     {
-        return $this->belongsToMany(ServiceRequestType::class, 'service_request_type_managers')
-            ->using(ServiceRequestTypeManager::class)
-            ->withTimestamps();
+        return 'Auditors';
     }
 
-    public function auditableServiceRequestTypes(): BelongsToMany
+    public function table(Table $table): Table
     {
-        return $this->belongsToMany(ServiceRequestType::class, 'service_request_type_auditors')
-            ->using(ServiceRequestTypeAuditor::class)
-            ->withTimestamps();
-    }
-
-    public function division(): BelongsTo
-    {
-        return $this->belongsTo(Division::class);
+        return $table
+            ->recordTitleAttribute('name')
+            ->inverseRelationship('auditableServiceRequestTypes')
+            ->columns([
+                TextColumn::make('name'),
+            ])
+            ->headerActions([
+                AttachAction::make(),
+            ])
+            ->actions([
+                DetachAction::make(),
+            ])
+            ->bulkActions([
+                BulkActionGroup::make([
+                    DetachBulkAction::make(),
+                ]),
+            ]);
     }
 }
