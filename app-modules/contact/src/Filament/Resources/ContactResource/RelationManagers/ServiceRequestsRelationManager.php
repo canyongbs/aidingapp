@@ -108,7 +108,11 @@ class ServiceRequestsRelationManager extends RelationManager
             ])
             ->actions([
                 ViewAction::make(),
-                EditAction::make(),
+                EditAction::make()
+                ->mutateRecordDataUsing(function(array $data,$record){
+                    $data['type_id'] = $record?->priority?->type_id;
+                    return $data;
+                }),
             ])
             ->bulkActions([
             ])
