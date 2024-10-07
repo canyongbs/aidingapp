@@ -42,6 +42,7 @@ use Illuminate\Auth\Access\Response;
 use Illuminate\Support\Facades\Gate;
 use AidingApp\Contact\Models\Contact;
 use App\Support\FeatureAccessResponse;
+use App\Features\ServiceRequestStatusSystemProtection;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 
 class ServiceRequestStatusPolicy
@@ -87,7 +88,7 @@ class ServiceRequestStatusPolicy
 
     public function update(Authenticatable $authenticatable, ServiceRequestStatus $serviceRequestStatus): Response
     {
-        if ($serviceRequestStatus->is_system_protected) {
+        if (ServiceRequestStatusSystemProtection::active() && $serviceRequestStatus->is_system_protected) {
             return Response::deny('You cannot update this service request status because it is system protected.');
         }
 
@@ -99,7 +100,7 @@ class ServiceRequestStatusPolicy
 
     public function delete(Authenticatable $authenticatable, ServiceRequestStatus $serviceRequestStatus): Response
     {
-        if ($serviceRequestStatus->is_system_protected) {
+        if (ServiceRequestStatusSystemProtection::active() && $serviceRequestStatus->is_system_protected) {
             return Response::deny('You cannot delete this service request status because it is system protected.');
         }
 
@@ -119,6 +120,10 @@ class ServiceRequestStatusPolicy
 
     public function forceDelete(Authenticatable $authenticatable, ServiceRequestStatus $serviceRequestStatus): Response
     {
+        if (ServiceRequestStatusSystemProtection::active() && $serviceRequestStatus->is_system_protected) {
+            return Response::deny('You cannot delete this service request status because it is system protected.');
+        }
+
         if ($serviceRequestStatus->serviceRequests()->exists()) {
             return Response::deny('You cannot force delete this service request status because it has associated service requests.');
         }
