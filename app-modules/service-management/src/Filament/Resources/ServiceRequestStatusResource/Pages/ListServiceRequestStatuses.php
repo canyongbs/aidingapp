@@ -94,7 +94,7 @@ class ListServiceRequestStatuses extends ListRecords
 
                             $component->process(static function (Collection $records) use (&$total, &$totalDeleted) {
                                 $total = $records->count();
-                                
+
                                 $records->each(function (Model $record) use (&$totalDeleted) {
                                     try {
                                         $record->delete();
