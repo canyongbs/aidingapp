@@ -93,6 +93,8 @@ class ListServiceRequestStatuses extends ListRecords
                             $totalDeleted = 0;
 
                             $component->process(static function (Collection $records) use (&$total, &$totalDeleted) {
+                                $total = $records->count();
+                                
                                 $records->each(function (Model $record) use (&$totalDeleted) {
                                     try {
                                         $record->delete();
@@ -110,14 +112,22 @@ class ListServiceRequestStatuses extends ListRecords
                                 });
                             });
 
-                            if ($totalDeleted > 0) {
-                                Notification::make()
-                                    ->title('Service Request Statuses Deleted')
-                                    ->body("{$totalDeleted} service request statuses have been deleted.")
-                                    ->success()
-                                    ->send();
+                            $notification = Notification::make()
+                                ->title('Service Request Statuses Deleted')
+                                ->body("{$totalDeleted} of {$total} selected service request statuses have been deleted.");
 
+                            if ($totalDeleted > 0) {
+                                $notification->success();
+                            } else {
+                                $notification->danger();
+                            }
+
+                            $notification->send();
+
+                            if ($totalDeleted > 0) {
                                 $component->dispatchSuccessRedirect();
+                            } else {
+                                $component->dispatchFailureRedirect();
                             }
                         }),
                 ]),
