@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Migrations\Migration;
 
@@ -27,10 +28,12 @@ return new class () extends Migration {
         }
 
         DB::table('service_request_statuses')->insert([
-            'name' => 'New',
+            'id' => Str::orderedUuid(),
             'classification' => 'open',
+            'name' => 'New',
             'color' => 'info',
             'is_system_protected' => true,
+            'created_at' => now(),
         ]);
     }
 
