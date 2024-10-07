@@ -45,14 +45,16 @@ class ServiceRequestStatusSeeder extends Seeder
 {
     public function run(): void
     {
+        ServiceRequestStatus::query()->createOrFirst([
+            'classification' => SystemServiceRequestClassification::Open,
+            'name' => 'New',
+            'color' => ColumnColorOptions::Info,
+            'is_system_protected' => true,
+        ]);
+
         ServiceRequestStatus::factory()
             ->createMany(
                 [
-                    [
-                        'classification' => SystemServiceRequestClassification::Open,
-                        'name' => 'New',
-                        'color' => ColumnColorOptions::Info,
-                    ],
                     [
                         'classification' => SystemServiceRequestClassification::InProgress,
                         'name' => 'In-Progress',
