@@ -219,9 +219,8 @@ test('EditServiceRequestStatus is gated with proper system protection access con
     ])
         ->assertForbidden();
 
-    $serviceRequestStatus->update([
-        'is_system_protected' => false,
-    ]);
+    $serviceRequestStatus = ServiceRequestStatus::factory()
+        ->create();
 
     asSuperAdmin()
         ->get(
