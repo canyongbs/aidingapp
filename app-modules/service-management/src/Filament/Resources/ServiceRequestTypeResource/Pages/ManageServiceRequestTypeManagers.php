@@ -41,7 +41,6 @@ use Filament\Tables\Actions\AttachAction;
 use Filament\Tables\Actions\DetachAction;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DetachBulkAction;
-use App\Features\ServiceRequestTypeManagerAuditor;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use App\Filament\Tables\Columns\OpenSearch\TextColumn;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
@@ -53,11 +52,6 @@ class ManageServiceRequestTypeManagers extends ManageRelatedRecords
     protected static string $relationship = 'managers';
 
     protected static ?string $navigationIcon = 'heroicon-o-adjustments-horizontal';
-
-    public static function canAccess(array $parameters = []): bool
-    {
-        return parent::canAccess($parameters) && ServiceRequestTypeManagerAuditor::active();
-    }
 
     public static function getNavigationLabel(): string
     {
