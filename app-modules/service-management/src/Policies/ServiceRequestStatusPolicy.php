@@ -87,6 +87,10 @@ class ServiceRequestStatusPolicy
 
     public function update(Authenticatable $authenticatable, ServiceRequestStatus $serviceRequestStatus): Response
     {
+        if ($serviceRequestStatus->is_system_protected) {
+            return Response::deny('You cannot update this service request status because it is system protected.');
+        }
+
         return $authenticatable->canOrElse(
             abilities: ['service_request_status.*.update', "service_request_status.{$serviceRequestStatus->id}.update"],
             denyResponse: 'You do not have permissions to update this service request status.'
@@ -95,6 +99,10 @@ class ServiceRequestStatusPolicy
 
     public function delete(Authenticatable $authenticatable, ServiceRequestStatus $serviceRequestStatus): Response
     {
+        if ($serviceRequestStatus->is_system_protected) {
+            return Response::deny('You cannot delete this service request status because it is system protected.');
+        }
+
         return $authenticatable->canOrElse(
             abilities: ['service_request_status.*.delete', "service_request_status.{$serviceRequestStatus->id}.delete"],
             denyResponse: 'You do not have permissions to delete this service request status.'
