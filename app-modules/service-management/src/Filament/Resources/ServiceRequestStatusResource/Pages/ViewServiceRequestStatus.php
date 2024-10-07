@@ -38,8 +38,11 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusRes
 
 use Filament\Actions\EditAction;
 use Filament\Infolists\Infolist;
+use Filament\View\PanelsRenderHook;
+use Illuminate\Contracts\View\View;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Infolists\Components\Section;
+use Filament\Support\Facades\FilamentView;
 use Filament\Infolists\Components\TextEntry;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusResource;
@@ -47,6 +50,15 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusResource;
 class ViewServiceRequestStatus extends ViewRecord
 {
     protected static string $resource = ServiceRequestStatusResource::class;
+
+    public function boot(): void
+    {
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::PAGE_HEADER_ACTIONS_AFTER,
+            fn (): View => view('service-management::filament.pages.service-request-type-lock-icon'),
+            scopes: static::class,
+        );
+    }
 
     public function infolist(Infolist $infolist): Infolist
     {

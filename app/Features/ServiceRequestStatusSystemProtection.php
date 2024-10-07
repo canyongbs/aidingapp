@@ -34,43 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Database\Seeders;
+namespace App\Features;
 
-use Illuminate\Database\Seeder;
-use AidingApp\ServiceManagement\Enums\ColumnColorOptions;
-use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
+use App\Support\AbstractFeatureFlag;
 
-class ServiceRequestStatusSeeder extends Seeder
+class ServiceRequestStatusSystemProtection extends AbstractFeatureFlag
 {
-    public function run(): void
+    public function resolve(mixed $scope): mixed
     {
-        ServiceRequestStatus::query()->createOrFirst([
-            'classification' => SystemServiceRequestClassification::Open,
-            'name' => 'New',
-            'color' => ColumnColorOptions::Info,
-            'is_system_protected' => true,
-        ]);
-
-        ServiceRequestStatus::factory()
-            ->createMany(
-                [
-                    [
-                        'classification' => SystemServiceRequestClassification::InProgress,
-                        'name' => 'In-Progress',
-                        'color' => ColumnColorOptions::Info,
-                    ],
-                    [
-                        'classification' => SystemServiceRequestClassification::Waiting,
-                        'name' => 'Pending for Customer',
-                        'color' => ColumnColorOptions::Warning,
-                    ],
-                    [
-                        'classification' => SystemServiceRequestClassification::Closed,
-                        'name' => 'Closed',
-                        'color' => ColumnColorOptions::Info,
-                    ],
-                ]
-            );
+        return false;
     }
 }

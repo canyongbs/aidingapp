@@ -34,43 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Database\Seeders;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
-use Illuminate\Database\Seeder;
-use AidingApp\ServiceManagement\Enums\ColumnColorOptions;
-use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
-
-class ServiceRequestStatusSeeder extends Seeder
-{
-    public function run(): void
+return new class () extends Migration {
+    public function up(): void
     {
-        ServiceRequestStatus::query()->createOrFirst([
-            'classification' => SystemServiceRequestClassification::Open,
-            'name' => 'New',
-            'color' => ColumnColorOptions::Info,
-            'is_system_protected' => true,
-        ]);
-
-        ServiceRequestStatus::factory()
-            ->createMany(
-                [
-                    [
-                        'classification' => SystemServiceRequestClassification::InProgress,
-                        'name' => 'In-Progress',
-                        'color' => ColumnColorOptions::Info,
-                    ],
-                    [
-                        'classification' => SystemServiceRequestClassification::Waiting,
-                        'name' => 'Pending for Customer',
-                        'color' => ColumnColorOptions::Warning,
-                    ],
-                    [
-                        'classification' => SystemServiceRequestClassification::Closed,
-                        'name' => 'Closed',
-                        'color' => ColumnColorOptions::Info,
-                    ],
-                ]
-            );
+        Schema::table('service_request_statuses', function (Blueprint $table) {
+            $table->boolean('is_system_protected')->default(false);
+        });
     }
-}
+
+    public function down(): void
+    {
+        Schema::table('service_request_statuses', function (Blueprint $table) {
+            $table->dropColumn('is_system_protected');
+        });
+    }
+};

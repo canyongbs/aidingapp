@@ -34,43 +34,28 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Database\Seeders;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use Illuminate\Database\Seeder;
-use AidingApp\ServiceManagement\Enums\ColumnColorOptions;
-use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
-
-class ServiceRequestStatusSeeder extends Seeder
-{
-    public function run(): void
+return new class () extends Migration {
+    public function up(): void
     {
-        ServiceRequestStatus::query()->createOrFirst([
-            'classification' => SystemServiceRequestClassification::Open,
-            'name' => 'New',
-            'color' => ColumnColorOptions::Info,
-            'is_system_protected' => true,
-        ]);
-
-        ServiceRequestStatus::factory()
-            ->createMany(
-                [
-                    [
-                        'classification' => SystemServiceRequestClassification::InProgress,
-                        'name' => 'In-Progress',
-                        'color' => ColumnColorOptions::Info,
-                    ],
-                    [
-                        'classification' => SystemServiceRequestClassification::Waiting,
-                        'name' => 'Pending for Customer',
-                        'color' => ColumnColorOptions::Warning,
-                    ],
-                    [
-                        'classification' => SystemServiceRequestClassification::Closed,
-                        'name' => 'Closed',
-                        'color' => ColumnColorOptions::Info,
-                    ],
-                ]
-            );
+        Schema::table('service_request_statuses', function (Blueprint $table) {
+            $table->trigger(
+                name: 'prevent_modification_of_system_protected_rows',
+                action: 'prevent_modification_of_system_protected_rows()',
+                fire: 'BEFORE UPDATE OR DELETE',
+            )
+                ->forEachRow()
+                ->replace(true);
+        });
     }
-}
+
+    public function down(): void
+    {
+        Schema::table('service_request_statuses', function (Blueprint $table) {
+            $table->dropTriggerIfExists('prevent_modification_of_system_protected_rows');
+        });
+    }
+};

@@ -41,10 +41,12 @@ use function Tests\asSuperAdmin;
 use App\Settings\LicenseSettings;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusResource;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusResource\Pages\ViewServiceRequestStatus;
 
 test('The correct details are displayed on the ViewServiceRequestStatus page', function () {
     $serviceRequestStatus = ServiceRequestStatus::factory()->create();
@@ -122,4 +124,32 @@ test('ViewServiceRequestStatus is gated with proper feature access control', fun
                 'record' => $serviceRequestStatus,
             ])
         )->assertSuccessful();
+});
+
+it('displays the edit action and not the lock when the service request status is not system protected', function () {
+    $serviceRequestStatus = ServiceRequestStatus::factory()->create();
+
+    asSuperAdmin();
+
+    livewire(ViewServiceRequestStatus::class, [
+        'record' => $serviceRequestStatus->getRouteKey(),
+    ])
+        ->assertDontSeeHtml('data-identifier="service_request_type_system_protected"')
+        ->assertActionVisible('edit')
+        ->assertActionEnabled('edit');
+});
+
+it('displays the lock icon rather than the edit action when the service request status is system protected', function () {
+    $serviceRequestStatus = ServiceRequestStatus::factory()->create([
+        'is_system_protected' => true,
+    ]);
+
+    asSuperAdmin();
+
+    livewire(ViewServiceRequestStatus::class, [
+        'record' => $serviceRequestStatus->getRouteKey(),
+    ])
+        ->assertSeeHtml('data-identifier="service_request_type_system_protected"')
+        ->assertActionHidden('edit')
+        ->assertActionDisabled('edit');
 });

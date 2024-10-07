@@ -1,6 +1,4 @@
-<?php
-
-/*
+{{--
 <COPYRIGHT>
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
@@ -32,45 +30,17 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
+--}}
+@php
+    use App\Features\ServiceRequestStatusSystemProtection;
+@endphp
 
-namespace AidingApp\ServiceManagement\Database\Seeders;
-
-use Illuminate\Database\Seeder;
-use AidingApp\ServiceManagement\Enums\ColumnColorOptions;
-use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
-
-class ServiceRequestStatusSeeder extends Seeder
-{
-    public function run(): void
-    {
-        ServiceRequestStatus::query()->createOrFirst([
-            'classification' => SystemServiceRequestClassification::Open,
-            'name' => 'New',
-            'color' => ColumnColorOptions::Info,
-            'is_system_protected' => true,
-        ]);
-
-        ServiceRequestStatus::factory()
-            ->createMany(
-                [
-                    [
-                        'classification' => SystemServiceRequestClassification::InProgress,
-                        'name' => 'In-Progress',
-                        'color' => ColumnColorOptions::Info,
-                    ],
-                    [
-                        'classification' => SystemServiceRequestClassification::Waiting,
-                        'name' => 'Pending for Customer',
-                        'color' => ColumnColorOptions::Warning,
-                    ],
-                    [
-                        'classification' => SystemServiceRequestClassification::Closed,
-                        'name' => 'Closed',
-                        'color' => ColumnColorOptions::Info,
-                    ],
-                ]
-            );
-    }
-}
+@if (ServiceRequestStatusSystemProtection::active() && $this->getRecord()?->is_system_protected)
+    <x-filament::icon-button
+        data-identifier="service_request_type_system_protected"
+        icon="heroicon-m-lock-closed"
+        color="gray"
+        size="lg"
+        tooltip="This record is protected as it is a system status."
+    />
+@endif

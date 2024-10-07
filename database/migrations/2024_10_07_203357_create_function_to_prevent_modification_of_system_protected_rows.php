@@ -34,43 +34,35 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Database\Seeders;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use Illuminate\Database\Seeder;
-use AidingApp\ServiceManagement\Enums\ColumnColorOptions;
-use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
-
-class ServiceRequestStatusSeeder extends Seeder
-{
-    public function run(): void
+return new class () extends Migration {
+    public function up(): void
     {
-        ServiceRequestStatus::query()->createOrFirst([
-            'classification' => SystemServiceRequestClassification::Open,
-            'name' => 'New',
-            'color' => ColumnColorOptions::Info,
-            'is_system_protected' => true,
-        ]);
-
-        ServiceRequestStatus::factory()
-            ->createMany(
-                [
-                    [
-                        'classification' => SystemServiceRequestClassification::InProgress,
-                        'name' => 'In-Progress',
-                        'color' => ColumnColorOptions::Info,
-                    ],
-                    [
-                        'classification' => SystemServiceRequestClassification::Waiting,
-                        'name' => 'Pending for Customer',
-                        'color' => ColumnColorOptions::Warning,
-                    ],
-                    [
-                        'classification' => SystemServiceRequestClassification::Closed,
-                        'name' => 'Closed',
-                        'color' => ColumnColorOptions::Info,
-                    ],
-                ]
-            );
+        Schema::createFunctionOrReplace(
+            name: 'prevent_modification_of_system_protected_rows',
+            parameters: [],
+            return: 'TRIGGER',
+            language: 'plpgsql',
+            body: <<<SQL
+                BEGIN
+                    IF OLD.is_system_protected THEN
+                        RAISE EXCEPTION 'Cannot modify system protected rows';
+                    END IF;
+                    RETURN NEW;
+                END;
+            SQL,
+            options: [
+                'security' => 'invoker',
+                'volatility' => 'immutable',
+                'parallel' => 'safe',
+            ]
+        );
     }
-}
+
+    public function down(): void
+    {
+        Schema::dropFunctionIfExists('prevent_modification_of_system_protected_rows');
+    }
+};

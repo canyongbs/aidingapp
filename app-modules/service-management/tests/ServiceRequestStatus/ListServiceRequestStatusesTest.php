@@ -49,6 +49,8 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusResource;
 
 test('The correct details are displayed on the ListServiceRequestStatuses page', function () {
+    ServiceRequestStatus::query()->truncate();
+
     $serviceRequestStatuses = ServiceRequestStatus::factory()
         ->has(ServiceRequest::factory()->count(fake()->randomNumber(1)), 'serviceRequests')
         ->count(10)

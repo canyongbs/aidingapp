@@ -200,3 +200,43 @@ test('EditServiceRequestStatus is gated with proper feature access control', fun
 
     assertEquals($request['name'], $serviceRequestStatus->fresh()->name);
 });
+
+test('EditServiceRequestStatus is gated with proper system protection access control', function () {
+    /** @var ServiceRequestStatus $serviceRequestStatus */
+    $serviceRequestStatus = ServiceRequestStatus::factory()
+        ->systemProtected()
+        ->create();
+
+    asSuperAdmin()
+        ->get(
+            ServiceRequestStatusResource::getUrl('edit', [
+                'record' => $serviceRequestStatus,
+            ])
+        )->assertForbidden();
+
+    livewire(EditServiceRequestStatus::class, [
+        'record' => $serviceRequestStatus->getRouteKey(),
+    ])
+        ->assertForbidden();
+
+    $serviceRequestStatus = ServiceRequestStatus::factory()
+        ->create();
+
+    asSuperAdmin()
+        ->get(
+            ServiceRequestStatusResource::getUrl('edit', [
+                'record' => $serviceRequestStatus,
+            ])
+        )->assertSuccessful();
+
+    $request = collect(EditServiceRequestStatusRequestFactory::new()->create());
+
+    livewire(EditServiceRequestStatus::class, [
+        'record' => $serviceRequestStatus->getRouteKey(),
+    ])
+        ->fillForm($request->toArray())
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    assertEquals($request['name'], $serviceRequestStatus->fresh()->name);
+});
