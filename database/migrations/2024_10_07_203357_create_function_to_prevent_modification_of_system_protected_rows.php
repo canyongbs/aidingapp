@@ -16,7 +16,7 @@ return new class () extends Migration {
                     IF OLD.is_system_protected THEN
                         RAISE EXCEPTION 'Cannot modify system protected rows';
                     END IF;
-                    RETURN OLD;
+                    RETURN NEW;
                 END;
             SQL,
             options: [
