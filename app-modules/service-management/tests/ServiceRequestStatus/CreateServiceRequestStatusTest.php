@@ -47,8 +47,8 @@ use AidingApp\Contact\Models\Contact;
 use Illuminate\Validation\Rules\Enum;
 
 use function PHPUnit\Framework\assertCount;
-use function PHPUnit\Framework\assertEmpty;
 use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\assertDatabaseMissing;
 
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusResource;
@@ -69,7 +69,7 @@ test('A successful action on the CreateServiceRequestStatus page', function () {
         ->call('create')
         ->assertHasNoFormErrors();
 
-    assertCount(1, ServiceRequestStatus::all());
+    assertCount(2, ServiceRequestStatus::all());
 
     assertDatabaseHas(ServiceRequestStatus::class, $request);
 });
@@ -82,7 +82,7 @@ test('CreateServiceRequestStatus requires valid data', function ($data, $errors)
         ->call('create')
         ->assertHasFormErrors($errors);
 
-    assertEmpty(ServiceRequestStatus::all());
+    assertDatabaseMissing((new ServiceRequestStatus())->getTable(), CreateServiceRequestStatusRequestFactory::new($data)->create());
 })->with(
     [
         'name missing' => [CreateServiceRequestStatusRequestFactory::new()->without('name'), ['name' => 'required']],
@@ -120,7 +120,7 @@ test('CreateServiceRequestStatus is gated with proper access control', function 
         ->call('create')
         ->assertHasNoFormErrors();
 
-    assertCount(1, ServiceRequestStatus::all());
+    assertCount(2, ServiceRequestStatus::all());
 
     assertDatabaseHas(ServiceRequestStatus::class, $request->toArray());
 });
@@ -161,7 +161,7 @@ test('CreateServiceRequestStatus is gated with proper feature access control', f
         ->call('create')
         ->assertHasNoFormErrors();
 
-    assertCount(1, ServiceRequestStatus::all());
+    assertCount(2, ServiceRequestStatus::all());
 
     assertDatabaseHas(ServiceRequestStatus::class, $request->toArray());
 });
