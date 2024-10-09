@@ -1,3 +1,5 @@
+<?php
+
 /*
 <COPYRIGHT>
 
@@ -31,36 +33,20 @@
 
 </COPYRIGHT>
 */
-import axios from '../Globals/Axios.js';
-import { useTokenStore } from '../Stores/token.js';
-import { useAuthStore } from '../Stores/auth.js';
 
-async function determineIfUserIsAuthenticated(endpoint) {
-    const { getToken } = useTokenStore();
-    let token = await getToken();
+namespace AidingApp\Portal\Models;
 
-    return await axios
-        .get(endpoint, {
-            headers: { Authorization: `Bearer ${token}` },
-        })
-        .then((response) => {
-            const isAuthenticated = response.status === 200;
-            if (isAuthenticated) {
-                const { setUser } = useAuthStore();
-                if (sessionStorage.getItem('guest_id')) {
-                    sessionStorage.removeItem('guest_id');
-                }
-                setUser(response.data);
-            } else if (!sessionStorage.getItem('guest_id')) {
-                const { setguestId } = useAuthStore();
-                setguestId(response.data.guest_id);
-            }
+use App\Models\BaseModel;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
-            return isAuthenticated;
-        })
-        .catch((error) => {
-            return false;
-        });
+class PortalGuest extends BaseModel
+{
+    use HasUuids;
+    use SoftDeletes;
+
+    public function user()
+    {
+        return $this->morphOne(KnowledgeBaseArticleVote::class, 'morphable');
+    }
 }
-
-export default determineIfUserIsAuthenticated;

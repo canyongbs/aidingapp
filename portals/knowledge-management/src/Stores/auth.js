@@ -39,6 +39,9 @@ export const useAuthStore = defineStore('auth', () => {
 
     async function setUser(userToSet) {
         user.value = userToSet;
+        if (sessionStorage.getItem('guest_id')) {
+            sessionStorage.removeItem('guest_id');
+        }
     }
 
     async function getUser() {
@@ -58,6 +61,15 @@ export const useAuthStore = defineStore('auth', () => {
     async function setRequiresAuthentication(value) {
         requiresAuthentication.value = value;
     }
+    async function setguestId(guestId) {
+        if (!requiresAuthentication.value && !sessionStorage.getItem('guest_id')) {
+            sessionStorage.setItem('guest_id', guestId);
+        } else if (sessionStorage.getItem('guest_id') && sessionStorage.getItem('guest_id') != guestId) {
+            sessionStorage.setItem('guest_id', guestId);
+        } else if (requiresAuthentication.value && sessionStorage.getItem('guest_id')) {
+            sessionStorage.removeItem('guest_id');
+        }
+    }
 
     return {
         user,
@@ -67,5 +79,6 @@ export const useAuthStore = defineStore('auth', () => {
         requiresAuthentication,
         getRequiresAuthentication,
         setRequiresAuthentication,
+        setguestId,
     };
 });

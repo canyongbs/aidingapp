@@ -1,3 +1,5 @@
+<?php
+
 /*
 <COPYRIGHT>
 
@@ -31,36 +33,18 @@
 
 </COPYRIGHT>
 */
-import axios from '../Globals/Axios.js';
-import { useTokenStore } from '../Stores/token.js';
-import { useAuthStore } from '../Stores/auth.js';
 
-async function determineIfUserIsAuthenticated(endpoint) {
-    const { getToken } = useTokenStore();
-    let token = await getToken();
+use App\Features\ArticleWasHelpful;
+use Illuminate\Database\Migrations\Migration;
 
-    return await axios
-        .get(endpoint, {
-            headers: { Authorization: `Bearer ${token}` },
-        })
-        .then((response) => {
-            const isAuthenticated = response.status === 200;
-            if (isAuthenticated) {
-                const { setUser } = useAuthStore();
-                if (sessionStorage.getItem('guest_id')) {
-                    sessionStorage.removeItem('guest_id');
-                }
-                setUser(response.data);
-            } else if (!sessionStorage.getItem('guest_id')) {
-                const { setguestId } = useAuthStore();
-                setguestId(response.data.guest_id);
-            }
+return new class () extends Migration {
+    public function up(): void
+    {
+        ArticleWasHelpful::activate();
+    }
 
-            return isAuthenticated;
-        })
-        .catch((error) => {
-            return false;
-        });
-}
-
-export default determineIfUserIsAuthenticated;
+    public function down(): void
+    {
+        ArticleWasHelpful::deactivate();
+    }
+};

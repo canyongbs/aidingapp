@@ -1,3 +1,5 @@
+<?php
+
 /*
 <COPYRIGHT>
 
@@ -31,36 +33,15 @@
 
 </COPYRIGHT>
 */
-import axios from '../Globals/Axios.js';
-import { useTokenStore } from '../Stores/token.js';
-import { useAuthStore } from '../Stores/auth.js';
 
-async function determineIfUserIsAuthenticated(endpoint) {
-    const { getToken } = useTokenStore();
-    let token = await getToken();
+namespace App\Features;
 
-    return await axios
-        .get(endpoint, {
-            headers: { Authorization: `Bearer ${token}` },
-        })
-        .then((response) => {
-            const isAuthenticated = response.status === 200;
-            if (isAuthenticated) {
-                const { setUser } = useAuthStore();
-                if (sessionStorage.getItem('guest_id')) {
-                    sessionStorage.removeItem('guest_id');
-                }
-                setUser(response.data);
-            } else if (!sessionStorage.getItem('guest_id')) {
-                const { setguestId } = useAuthStore();
-                setguestId(response.data.guest_id);
-            }
+use App\Support\AbstractFeatureFlag;
 
-            return isAuthenticated;
-        })
-        .catch((error) => {
-            return false;
-        });
+class ArticleWasHelpful extends AbstractFeatureFlag
+{
+    public function resolve(mixed $scope): mixed
+    {
+        return false;
+    }
 }
-
-export default determineIfUserIsAuthenticated;

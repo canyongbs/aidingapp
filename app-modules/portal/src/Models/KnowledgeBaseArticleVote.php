@@ -1,3 +1,5 @@
+<?php
+
 /*
 <COPYRIGHT>
 
@@ -31,36 +33,36 @@
 
 </COPYRIGHT>
 */
-import axios from '../Globals/Axios.js';
-import { useTokenStore } from '../Stores/token.js';
-import { useAuthStore } from '../Stores/auth.js';
 
-async function determineIfUserIsAuthenticated(endpoint) {
-    const { getToken } = useTokenStore();
-    let token = await getToken();
+namespace AidingApp\Portal\Models;
 
-    return await axios
-        .get(endpoint, {
-            headers: { Authorization: `Bearer ${token}` },
-        })
-        .then((response) => {
-            const isAuthenticated = response.status === 200;
-            if (isAuthenticated) {
-                const { setUser } = useAuthStore();
-                if (sessionStorage.getItem('guest_id')) {
-                    sessionStorage.removeItem('guest_id');
-                }
-                setUser(response.data);
-            } else if (!sessionStorage.getItem('guest_id')) {
-                const { setguestId } = useAuthStore();
-                setguestId(response.data.guest_id);
-            }
+use App\Models\BaseModel;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-            return isAuthenticated;
-        })
-        .catch((error) => {
-            return false;
-        });
+class KnowledgeBaseArticleVote extends BaseModel
+{
+    use HasUuids;
+
+    protected $casts = [
+        'is_helpful' => 'boolean',
+    ];
+
+    protected $fillable = [
+        'is_helpful',
+        'user_id',
+        'user_type',
+        'article_id',
+    ];
+
+    public function morphable()
+    {
+        return $this->morphTo();
+    }
+
+    public function knowledgeBaseArticle(): BelongsTo
+    {
+        return $this->belongsTo(KnowledgeBaseItem::class);
+    }
 }
-
-export default determineIfUserIsAuthenticated;
