@@ -40,19 +40,31 @@ use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use AidingApp\Contact\Models\Contact;
+use Illuminate\Support\Facades\Session;
+use AidingApp\Portal\Models\PortalGuest;
 use AidingApp\Portal\Models\PortalAuthentication;
 use AidingApp\Portal\Http\Requests\KnowledgeManagementPortalAuthenticateRequest;
+use App\Features\ArticleWasHelpful;
 
 class KnowledgeManagementPortalAuthenticateController extends Controller
 {
     public function __invoke(KnowledgeManagementPortalAuthenticateRequest $request, PortalAuthentication $authentication): JsonResponse
     {
         if ($authentication->isExpired()) {
+            if (! Session::exists('guest_id') && ArticleWasHelpful::active()) {
+                $portalGuest = PortalGuest::create();
+                Session::put('guest_id', $portalGuest->id);
+            }
+
             return response()->json([
                 'is_expired' => true,
+                'guest_id' => Session::get('guest_id'),
             ]);
         }
 
+        if (Session::exists('guest_id')) {
+            Session::forget('guest_id');
+        }
         /** @var Contact $contact */
         $contact = $authentication->educatable;
 

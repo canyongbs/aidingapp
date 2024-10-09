@@ -72,6 +72,7 @@ use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Notification\Models\Contracts\NotifiableInterface;
 use AidingApp\Engagement\Models\Concerns\HasManyMorphedEngagements;
 use AidingApp\Engagement\Models\Concerns\HasManyMorphedEngagementResponses;
+use AidingApp\Portal\Models\KnowledgeBaseArticleVote;
 
 /**
  * @property string $display_name
@@ -261,5 +262,9 @@ class Contact extends BaseAuthenticatable implements Auditable, Subscribable, Ed
         return Attribute::make(
             get: fn (?string $value, array $attributes) => $attributes[$this->displayNameKey()],
         );
+    }
+    public function user()
+    {
+        return $this->morphOne(KnowledgeBaseArticleVote::class, 'morphable');
     }
 }

@@ -47,5 +47,7 @@ class KnowledgeBaseArticleData extends Data
         public ?string $lastUpdated,
         public ?string $content,
         public ?array $tags,
+        public ?array $articleVote
+
     ) {}
 }

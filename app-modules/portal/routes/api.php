@@ -53,6 +53,7 @@ use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagem
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalRegisterController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalAuthenticateController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalRequestAuthenticationController;
+use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\StoreKnowledgeBaseArticleVoteController;
 
 Route::prefix('api')
     ->name('api.')
@@ -125,5 +126,7 @@ Route::prefix('api')
                     ->name('service-request.show');
                 Route::post('/service-request-update/store', StoreServiceRequestUpdateController::class)
                     ->name('service-request-update.storeServiceRequestUpdate');
+                Route::post('/knowledge_base_article_vote/store', StoreKnowledgeBaseArticleVoteController::class)
+                    ->name('knowledge_base_article_vote.storeKnowledgeBaseArticleVote');
             });
     });

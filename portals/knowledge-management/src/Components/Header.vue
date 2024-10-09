@@ -40,7 +40,7 @@
     import GlobalSearchBar from './GlobalSearchBar.vue';
     import { useRoute } from 'vue-router';
 
-    const { user, requiresAuthentication } = useAuthStore();
+    const { user, requiresAuthentication, setguestId } = useAuthStore();
     const { hasServiceManagement } = useFeatureStore();
     const { removeToken } = useTokenStore();
     const route = useRoute();
@@ -69,6 +69,7 @@
             }
 
             removeToken();
+            setguestId(response.data.guest_id);
             window.location.href = response.data.redirect_url;
         });
     };

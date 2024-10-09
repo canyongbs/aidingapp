@@ -1,3 +1,5 @@
+<?php
+
 /*
 <COPYRIGHT>
 
@@ -31,36 +33,35 @@
 
 </COPYRIGHT>
 */
-import axios from '../Globals/Axios.js';
-import { useTokenStore } from '../Stores/token.js';
-import { useAuthStore } from '../Stores/auth.js';
 
-async function determineIfUserIsAuthenticated(endpoint) {
-    const { getToken } = useTokenStore();
-    let token = await getToken();
+namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
-    return await axios
-        .get(endpoint, {
-            headers: { Authorization: `Bearer ${token}` },
-        })
-        .then((response) => {
-            const isAuthenticated = response.status === 200;
-            if (isAuthenticated) {
-                const { setUser } = useAuthStore();
-                if (sessionStorage.getItem('guest_id')) {
-                    sessionStorage.removeItem('guest_id');
-                }
-                setUser(response.data);
-            } else if (!sessionStorage.getItem('guest_id')) {
-                const { setguestId } = useAuthStore();
-                setguestId(response.data.guest_id);
+use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use App\Http\Controllers\Controller;
+use AidingApp\Portal\Models\KnowledgeBaseArticleVote;
+
+class StoreKnowledgeBaseArticleVoteController extends Controller
+{
+    public function __invoke(Request $request): JsonResponse
+    {
+        $articleVote = [];
+
+        if ($request->article_vote === true || $request->article_vote === false) {
+            $articleVote = KnowledgeBaseArticleVote::where('article_id', $request->articleId)->where('user_id', $request->userId)->first();
+
+            if (empty($articleVote)) {
+                $articleVote = new KnowledgeBaseArticleVote();
             }
+            $articleVote->is_helpful = $request->article_vote;
+            $articleVote->user_id = $request->userId;
+            $articleVote->user_type = $request->userType;
+            $articleVote->article_id = $request->articleId;
+            $articleVote->save();
+        } else {
+            KnowledgeBaseArticleVote::where('article_id', $request->articleId)->where('user_id', $request->userId)->delete();
+        }
 
-            return isAuthenticated;
-        })
-        .catch((error) => {
-            return false;
-        });
+        return response()->json($articleVote, 201);
+    }
 }
-
-export default determineIfUserIsAuthenticated;

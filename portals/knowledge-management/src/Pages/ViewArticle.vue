@@ -37,9 +37,16 @@
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import AppLoading from '../Components/AppLoading.vue';
     import { consumer } from '../Services/Consumer.js';
-    import { Bars3Icon, ClockIcon, EyeIcon } from '@heroicons/vue/24/outline/index.js';
+    import {
+        Bars3Icon,
+        ClockIcon,
+        EyeIcon,
+        HandThumbUpIcon,
+        HandThumbDownIcon,
+    } from '@heroicons/vue/24/outline/index.js';
     import DOMPurify from 'dompurify';
     import Tags from '../Components/Tags.vue';
+    import { useAuthStore } from '../Stores/auth.js';
 
     const route = useRoute();
 
@@ -63,6 +70,9 @@
     const article = ref(null);
     const portalViewCount = ref(0);
     const portalViewCountFlag = ref(false);
+    const feedback = ref(null);
+    const featureFlag = ref(null);
+    const { user, setguestId } = useAuthStore();
 
     watch(
         route,
@@ -81,12 +91,35 @@
 
         get(props.apiUrl + '/categories/' + route.params.categoryId + '/articles/' + route.params.articleId).then(
             (response) => {
+                if (response.data.guest_id) {
+                    setguestId(response.data.guest_id);
+                }
+
                 category.value = response.data.category;
                 article.value = response.data.article;
                 loading.value = false;
                 portalViewCount.value = response.data.portal_view_count;
+                feedback.value = response.data.article.articleVote
+                    ? response.data.article.articleVote.is_helpful
+                    : null;
+                featureFlag.value = response.data.feature_flag;
             },
         );
+    }
+    async function toggleFeedback(type) {
+        if (feedback.value === type) {
+            feedback.value = null; // Unselect if the same button is clicked
+        } else {
+            feedback.value = type; // Select the clicked button
+        }
+        const { post } = consumer();
+        const response = await post(props.apiUrl + '/knowledge_base_article_vote/store', {
+            article_vote: feedback.value,
+            articleId: route.params.articleId,
+            userId: user ? user.id : sessionStorage.getItem('guest_id'),
+            userType: user ? 'Contact' : 'PortalGuest',
+        });
+        location.reload();
     }
 </script>
 
@@ -123,6 +156,41 @@
                                     <Tags :tags="article.tags" />
                                     <hr class="my-4" />
                                     <div v-html="DOMPurify.sanitize(article.content)"></div>
+                                    <div class="flex items-center justify-center mt-6 p-4 border rounded-lg" v-if="featureFlag">
+                                        <p class="text-lg font-semibold mr-4">Was this content helpful?</p>
+                                        <div class="flex space-x-2">
+                                            <button
+                                                @click="toggleFeedback(true)"
+                                                :class="[
+                                                    'px-4 py-2 flex items-center justify-center space-x-1.5 rounded-lg border-2 transition duration-200 focus:outline-none',
+                                                    feedback === true
+                                                        ? 'bg-gradient-to-br from-primary-500 to-primary-800 text-white border-primary-300'
+                                                        : 'bg-white text-gray-700 border-gray-300',
+                                                ]"
+                                            >
+                                                <HandThumbUpIcon
+                                                    class="w-5 h-5"
+                                                    :class="feedback === true ? 'text-white' : 'text-gray-600'"
+                                                />
+                                                <span class="text-sm">Yes</span>
+                                            </button>
+                                            <button
+                                                @click="toggleFeedback(false)"
+                                                :class="[
+                                                    'px-4 py-2 flex items-center justify-center space-x-1.5 rounded-lg border-2 transition duration-200 focus:outline-none',
+                                                    feedback === false
+                                                        ? 'bg-gradient-to-br from-primary-500 to-primary-800 text-white border-primary-300'
+                                                        : 'bg-white text-gray-700 border-gray-300',
+                                                ]"
+                                            >
+                                                <HandThumbDownIcon
+                                                    class="w-5 h-5"
+                                                    :class="feedback === false ? 'text-white' : 'text-gray-600'"
+                                                />
+                                                <span class="text-sm">No</span>
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

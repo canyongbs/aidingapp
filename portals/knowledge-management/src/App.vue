@@ -162,6 +162,8 @@
 
                 const { setRequiresAuthentication } = useAuthStore();
 
+                const { setguestId } = useAuthStore();
+
                 const { setHasServiceManagement } = useFeatureStore();
 
                 portalPrimaryColor.value = response.data.primary_color;
@@ -179,6 +181,8 @@
                 setRequiresAuthentication(response.data.requires_authentication).then(() => {
                     requiresAuthentication.value = response.data.requires_authentication;
                 });
+
+                setguestId(response.data.guest_id);
 
                 setHasServiceManagement(response.data.service_management_enabled).then(() => {
                     hasServiceManagement.value = response.data.service_management_enabled;
