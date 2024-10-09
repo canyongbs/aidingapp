@@ -118,7 +118,6 @@
         await determineIfUserIsAuthenticated(props.userAuthenticationUrl).then((response) => {
             userIsAuthenticated.value = response;
         });
-        document.title = 'Help Center';
     });
 
     watch(
