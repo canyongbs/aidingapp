@@ -46,11 +46,11 @@ use App\Models\Concerns\InteractsWithTags;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use AidingApp\Portal\Models\KnowledgeBaseArticleVote;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\Portal\Models\KnowledgeBaseArticleVote;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @mixin IdeHelperKnowledgeBaseItem
@@ -110,12 +110,13 @@ class KnowledgeBaseItem extends BaseModel implements Auditable, HasMedia, HasTag
         return $query->where('public', true);
     }
 
-    protected function serializeDate(DateTimeInterface $date): string
-    {
-        return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
-    }
     public function knowledgeBaseArticleVotes(): HasMany
     {
         return $this->hasMany(KnowledgeBaseArticleVote::class, 'article_id');
+    }
+
+    protected function serializeDate(DateTimeInterface $date): string
+    {
+        return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
     }
 }

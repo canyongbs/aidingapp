@@ -45,6 +45,7 @@ use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEmbeddable
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\CreateServiceRequestController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\StoreServiceRequestUpdateController;
+use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\StoreKnowledgeBaseArticleVoteController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalLogoutController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalSearchController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\GetKnowledgeManagementPortalTagsController;
@@ -53,7 +54,6 @@ use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagem
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalRegisterController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalAuthenticateController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalRequestAuthenticationController;
-use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\StoreKnowledgeBaseArticleVoteController;
 
 Route::prefix('api')
     ->name('api.')

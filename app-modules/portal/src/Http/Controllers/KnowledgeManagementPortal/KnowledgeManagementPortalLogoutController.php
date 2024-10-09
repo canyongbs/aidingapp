@@ -38,11 +38,11 @@ namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use App\Features\ArticleWasHelpful;
 use App\Http\Controllers\Controller;
 use AidingApp\Contact\Models\Contact;
 use Illuminate\Support\Facades\Session;
 use AidingApp\Portal\Models\PortalGuest;
-use App\Features\ArticleWasHelpful;
 
 class KnowledgeManagementPortalLogoutController extends Controller
 {

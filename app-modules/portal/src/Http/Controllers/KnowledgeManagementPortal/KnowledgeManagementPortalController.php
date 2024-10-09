@@ -38,15 +38,15 @@ namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use Illuminate\Http\JsonResponse;
 use Filament\Support\Colors\Color;
+use App\Features\ArticleWasHelpful;
 use Illuminate\Support\Facades\URL;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\Facades\Session;
 use AidingApp\Portal\Enums\PortalLayout;
 use AidingApp\Portal\Models\PortalGuest;
 use AidingApp\Portal\Settings\PortalSettings;
-use App\Features\ArticleWasHelpful;
-use Illuminate\Support\Facades\Auth;
 
 class KnowledgeManagementPortalController extends Controller
 {

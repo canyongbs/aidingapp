@@ -51,7 +51,7 @@ class KnowledgeManagementPortalArticleController extends Controller
 {
     public function show(KnowledgeBaseCategory $category, KnowledgeBaseItem $article): JsonResponse
     {
-        if (! Session::exists('guest_id') && ! Auth::guard('contact')->check() && ArticleWasHelpful::active() ) {
+        if (! Session::exists('guest_id') && ! Auth::guard('contact')->check() && ArticleWasHelpful::active()) {
             $portalGuest = PortalGuest::create();
             Session::put('guest_id', $portalGuest->id);
         }

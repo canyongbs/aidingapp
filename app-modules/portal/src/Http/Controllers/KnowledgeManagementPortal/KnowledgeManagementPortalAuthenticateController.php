@@ -37,6 +37,7 @@
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use Illuminate\Http\JsonResponse;
+use App\Features\ArticleWasHelpful;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use AidingApp\Contact\Models\Contact;
@@ -44,7 +45,6 @@ use Illuminate\Support\Facades\Session;
 use AidingApp\Portal\Models\PortalGuest;
 use AidingApp\Portal\Models\PortalAuthentication;
 use AidingApp\Portal\Http\Requests\KnowledgeManagementPortalAuthenticateRequest;
-use App\Features\ArticleWasHelpful;
 
 class KnowledgeManagementPortalAuthenticateController extends Controller
 {

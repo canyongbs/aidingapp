@@ -53,6 +53,7 @@ use AidingApp\Engagement\Models\EngagementFile;
 use AidingApp\Notification\Models\Subscription;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use AidingApp\Portal\Models\KnowledgeBaseArticleVote;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use AidingApp\InventoryManagement\Models\AssetCheckIn;
@@ -72,7 +73,6 @@ use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Notification\Models\Contracts\NotifiableInterface;
 use AidingApp\Engagement\Models\Concerns\HasManyMorphedEngagements;
 use AidingApp\Engagement\Models\Concerns\HasManyMorphedEngagementResponses;
-use AidingApp\Portal\Models\KnowledgeBaseArticleVote;
 
 /**
  * @property string $display_name
@@ -236,6 +236,11 @@ class Contact extends BaseAuthenticatable implements Auditable, Subscribable, Ed
         return $this->belongsTo(Organization::class, 'organization_id', 'id');
     }
 
+    public function user()
+    {
+        return $this->morphOne(KnowledgeBaseArticleVote::class, 'morphable');
+    }
+
     protected static function booted(): void
     {
         static::addGlobalScope('licensed', function (Builder $builder) {
@@ -262,9 +267,5 @@ class Contact extends BaseAuthenticatable implements Auditable, Subscribable, Ed
         return Attribute::make(
             get: fn (?string $value, array $attributes) => $attributes[$this->displayNameKey()],
         );
-    }
-    public function user()
-    {
-        return $this->morphOne(KnowledgeBaseArticleVote::class, 'morphable');
     }
 }
