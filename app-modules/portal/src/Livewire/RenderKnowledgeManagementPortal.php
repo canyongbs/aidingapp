@@ -44,6 +44,6 @@ class RenderKnowledgeManagementPortal extends Component
     public function render(): View
     {
         return view('portal::livewire.render-knowledge-management-portal')
-            ->title('Knowledge Management Portal');
+            ->title('Help Center');
     }
 }
