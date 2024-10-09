@@ -52,7 +52,13 @@ class ServiceRequestStatusFactory extends Factory
             'classification' => $this->faker->randomElement(SystemServiceRequestClassification::cases()),
             'name' => $this->faker->word,
             'color' => $this->faker->randomElement(ColumnColorOptions::cases()),
+            'is_system_protected' => false,
         ];
+    }
+
+    public function systemProtected(): self
+    {
+        return $this->state(fn (): array => ['is_system_protected' => true]);
     }
 
     public function open(): Factory

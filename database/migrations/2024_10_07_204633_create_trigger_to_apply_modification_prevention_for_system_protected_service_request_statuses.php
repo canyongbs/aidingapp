@@ -34,51 +34,28 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Team\Models;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use App\Models\User;
-use App\Models\BaseModel;
-use AidingApp\Division\Models\Division;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\ServiceManagement\Models\ServiceRequestTypeAuditor;
-use AidingApp\ServiceManagement\Models\ServiceRequestTypeManager;
-
-/**
- * @mixin IdeHelperTeam
- */
-class Team extends BaseModel
-{
-    protected $fillable = [
-        'name',
-        'description',
-    ];
-
-    public function users(): BelongsToMany
+return new class () extends Migration {
+    public function up(): void
     {
-        return $this
-            ->belongsToMany(User::class)
-            ->using(TeamUser::class)
-            ->withTimestamps();
+        Schema::table('service_request_statuses', function (Blueprint $table) {
+            $table->trigger(
+                name: 'prevent_modification_of_system_protected_rows',
+                action: 'prevent_modification_of_system_protected_rows()',
+                fire: 'BEFORE UPDATE OR DELETE',
+            )
+                ->forEachRow()
+                ->replace(true);
+        });
     }
 
-    public function managableServiceRequestTypes(): BelongsToMany
+    public function down(): void
     {
-        return $this->belongsToMany(ServiceRequestType::class, 'service_request_type_managers')
-            ->using(ServiceRequestTypeManager::class)
-            ->withTimestamps();
+        Schema::table('service_request_statuses', function (Blueprint $table) {
+            $table->dropTriggerIfExists('prevent_modification_of_system_protected_rows');
+        });
     }
-
-    public function auditableServiceRequestTypes(): BelongsToMany
-    {
-        return $this->belongsToMany(ServiceRequestType::class, 'service_request_type_auditors')
-            ->using(ServiceRequestTypeAuditor::class)
-            ->withTimestamps();
-    }
-
-    public function division(): BelongsTo
-    {
-        return $this->belongsTo(Division::class);
-    }
-}
+};

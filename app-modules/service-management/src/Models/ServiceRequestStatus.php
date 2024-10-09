@@ -57,11 +57,13 @@ class ServiceRequestStatus extends BaseModel implements Auditable
         'classification',
         'name',
         'color',
+        'is_system_protected',
     ];
 
     protected $casts = [
         'classification' => SystemServiceRequestClassification::class,
         'color' => ColumnColorOptions::class,
+        'is_system_protected' => 'boolean',
     ];
 
     public function serviceRequests(): HasMany

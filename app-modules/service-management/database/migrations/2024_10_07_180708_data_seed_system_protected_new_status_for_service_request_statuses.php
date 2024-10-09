@@ -34,51 +34,50 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Team\Models;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Migrations\Migration;
 
-use App\Models\User;
-use App\Models\BaseModel;
-use AidingApp\Division\Models\Division;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\ServiceManagement\Models\ServiceRequestTypeAuditor;
-use AidingApp\ServiceManagement\Models\ServiceRequestTypeManager;
-
-/**
- * @mixin IdeHelperTeam
- */
-class Team extends BaseModel
-{
-    protected $fillable = [
-        'name',
-        'description',
-    ];
-
-    public function users(): BelongsToMany
+return new class () extends Migration {
+    public function up(): void
     {
-        return $this
-            ->belongsToMany(User::class)
-            ->using(TeamUser::class)
-            ->withTimestamps();
+        $status = DB::table('service_request_statuses')->where([
+            'name' => 'New',
+            'classification' => 'open',
+        ])->first();
+
+        if ($status && $status->is_system_protected) {
+            return;
+        }
+
+        if ($status) {
+            DB::table('service_request_statuses')
+                ->where('name', 'New')
+                ->where('classification', 'open')
+                ->update([
+                    'is_system_protected' => true,
+                ]);
+
+            return;
+        }
+
+        DB::table('service_request_statuses')->insert([
+            'id' => Str::orderedUuid(),
+            'classification' => 'open',
+            'name' => 'New',
+            'color' => 'info',
+            'is_system_protected' => true,
+            'created_at' => now(),
+        ]);
     }
 
-    public function managableServiceRequestTypes(): BelongsToMany
+    public function down(): void
     {
-        return $this->belongsToMany(ServiceRequestType::class, 'service_request_type_managers')
-            ->using(ServiceRequestTypeManager::class)
-            ->withTimestamps();
+        DB::table('service_request_statuses')
+            ->where('name', 'New')
+            ->where('classification', 'open')
+            ->update([
+                'is_system_protected' => false,
+            ]);
     }
-
-    public function auditableServiceRequestTypes(): BelongsToMany
-    {
-        return $this->belongsToMany(ServiceRequestType::class, 'service_request_type_auditors')
-            ->using(ServiceRequestTypeAuditor::class)
-            ->withTimestamps();
-    }
-
-    public function division(): BelongsTo
-    {
-        return $this->belongsTo(Division::class);
-    }
-}
+};

@@ -34,51 +34,45 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Team\Models;
-
 use App\Models\User;
-use App\Models\BaseModel;
-use AidingApp\Division\Models\Division;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use AidingApp\Team\Models\Team;
+
+use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
+
+use AidingApp\Contact\Models\Contact;
+use Filament\Tables\Actions\AttachAction;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\ServiceManagement\Models\ServiceRequestTypeAuditor;
-use AidingApp\ServiceManagement\Models\ServiceRequestTypeManager;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\ManageServiceRequestTypeManagers;
 
-/**
- * @mixin IdeHelperTeam
- */
-class Team extends BaseModel
-{
-    protected $fillable = [
-        'name',
-        'description',
-    ];
+it('can attach team member to service request type', function () {
+    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
 
-    public function users(): BelongsToMany
-    {
-        return $this
-            ->belongsToMany(User::class)
-            ->using(TeamUser::class)
-            ->withTimestamps();
-    }
+    $serviceRequestType = ServiceRequestType::factory()->create();
 
-    public function managableServiceRequestTypes(): BelongsToMany
-    {
-        return $this->belongsToMany(ServiceRequestType::class, 'service_request_type_managers')
-            ->using(ServiceRequestTypeManager::class)
-            ->withTimestamps();
-    }
+    $team = Team::factory()->create();
 
-    public function auditableServiceRequestTypes(): BelongsToMany
-    {
-        return $this->belongsToMany(ServiceRequestType::class, 'service_request_type_auditors')
-            ->using(ServiceRequestTypeAuditor::class)
-            ->withTimestamps();
-    }
+    actingAs($user)
+        ->get(
+            ServiceRequestTypeResource::getUrl('service-request-type-managers', [
+                'record' => $serviceRequestType->getRouteKey(),
+            ])
+        )->assertForbidden();
 
-    public function division(): BelongsTo
-    {
-        return $this->belongsTo(Division::class);
-    }
-}
+    $user->givePermissionTo('service_request_type.view-any');
+    $user->givePermissionTo('team.view-any');
+
+    livewire(ManageServiceRequestTypeManagers::class, [
+        'record' => $serviceRequestType->getRouteKey(),
+    ])
+        ->callTableAction(
+            AttachAction::class,
+            data: ['recordId' => $team->getKey()]
+        )->assertSuccessful();
+
+    expect($serviceRequestType->refresh())
+        ->managers
+        ->pluck('id')
+        ->toContain($team->getKey());
+});

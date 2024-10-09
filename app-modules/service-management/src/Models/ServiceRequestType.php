@@ -38,7 +38,9 @@ namespace AidingApp\ServiceManagement\Models;
 
 use DateTimeInterface;
 use App\Models\BaseModel;
+use AidingApp\Team\Models\Team;
 use OwenIt\Auditing\Contracts\Auditable;
+use AidingApp\Audit\Overrides\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -83,6 +85,20 @@ class ServiceRequestType extends BaseModel implements Auditable
     public function form(): HasOne
     {
         return $this->hasOne(ServiceRequestForm::class, 'service_request_type_id');
+    }
+
+    public function managers(): BelongsToMany
+    {
+        return $this->belongsToMany(Team::class, 'service_request_type_managers')
+            ->using(ServiceRequestTypeManager::class)
+            ->withTimestamps();
+    }
+
+    public function auditors(): BelongsToMany
+    {
+        return $this->belongsToMany(Team::class, 'service_request_type_auditors')
+            ->using(ServiceRequestTypeAuditor::class)
+            ->withTimestamps();
     }
 
     protected function serializeDate(DateTimeInterface $date): string

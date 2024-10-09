@@ -34,51 +34,28 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Team\Models;
+namespace AidingApp\ServiceManagement\Models;
 
-use App\Models\User;
-use App\Models\BaseModel;
-use AidingApp\Division\Models\Division;
+use AidingApp\Team\Models\Team;
+use Illuminate\Database\Eloquent\Relations\Pivot;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\ServiceManagement\Models\ServiceRequestTypeAuditor;
-use AidingApp\ServiceManagement\Models\ServiceRequestTypeManager;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-/**
- * @mixin IdeHelperTeam
- */
-class Team extends BaseModel
+class ServiceRequestTypeAuditor extends Pivot
 {
-    protected $fillable = [
-        'name',
-        'description',
-    ];
+    use HasFactory;
+    use HasUuids;
 
-    public function users(): BelongsToMany
+    protected $table = 'service_request_type_auditors';
+
+    public function team(): BelongsTo
     {
-        return $this
-            ->belongsToMany(User::class)
-            ->using(TeamUser::class)
-            ->withTimestamps();
+        return $this->belongsTo(Team::class);
     }
 
-    public function managableServiceRequestTypes(): BelongsToMany
+    public function serviceRequestType(): BelongsTo
     {
-        return $this->belongsToMany(ServiceRequestType::class, 'service_request_type_managers')
-            ->using(ServiceRequestTypeManager::class)
-            ->withTimestamps();
-    }
-
-    public function auditableServiceRequestTypes(): BelongsToMany
-    {
-        return $this->belongsToMany(ServiceRequestType::class, 'service_request_type_auditors')
-            ->using(ServiceRequestTypeAuditor::class)
-            ->withTimestamps();
-    }
-
-    public function division(): BelongsTo
-    {
-        return $this->belongsTo(Division::class);
+        return $this->belongsTo(ServiceRequestType::class);
     }
 }
