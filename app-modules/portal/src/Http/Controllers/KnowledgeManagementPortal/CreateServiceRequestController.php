@@ -57,6 +57,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\Form\Filament\Blocks\TextInputFormFieldBlock;
 use AidingApp\Form\Actions\ResolveSubmissionAuthorFromEmail;
+use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormStep;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use AidingApp\Form\Filament\Blocks\EducatableEmailFormFieldBlock;
@@ -108,9 +109,12 @@ class CreateServiceRequestController extends Controller
         DB::beginTransaction();
 
         try {
+            $serviceRequestStatus = ServiceRequestStatus::orderBy('id', 'asc')->firstOrFail();
             $serviceRequest = new ServiceRequest([
                 'title' => $data->pull('Main.title'),
                 'close_details' => $data->pull('Main.description'),
+                'status_id' => $serviceRequestStatus ? $serviceRequestStatus->id : null,
+                'status_updated_at' => $serviceRequestStatus ? now() : null,
             ]);
 
             $serviceRequest->respondent()->associate($contact);
