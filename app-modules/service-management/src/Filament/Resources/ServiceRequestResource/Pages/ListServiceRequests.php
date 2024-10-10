@@ -75,13 +75,13 @@ class ListServiceRequests extends ListRecords
                 ],
                 'status',
             ])
-            ->when(!auth()->user()->hasRole('authorization.super_admin'),function($q){
-                return $q->whereHas('priority.type.managers',function($query){
-                    return $query->where('teams.id',auth()->user()->teams()->first()?->getKey());
-                })->orWhereHas('priority.type.auditors',function($query){
-                    return $query->where('teams.id',auth()->user()->teams()->first()?->getKey());
-                });
-            }))
+                ->when(! auth()->user()->hasRole('authorization.super_admin'), function ($q) {
+                    return $q->whereHas('priority.type.managers', function ($query) {
+                        return $query->where('teams.id', auth()->user()->teams()->first()?->getKey());
+                    })->orWhereHas('priority.type.auditors', function ($query) {
+                        return $query->where('teams.id', auth()->user()->teams()->first()?->getKey());
+                    });
+                }))
             ->columns([
                 IdColumn::make(),
                 TextColumn::make('service_request_number')

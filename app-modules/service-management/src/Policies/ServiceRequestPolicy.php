@@ -76,7 +76,7 @@ class ServiceRequestPolicy
             return Response::deny('You do not have permission to view this service request.');
         }
 
-        if(auth()->user()->hasRole('authorization.super_admin')){
+        if (auth()->user()->hasRole('authorization.super_admin')) {
             return $authenticatable->canOrElse(
                 abilities: ['service_request.*.view', "service_request.{$serviceRequest->id}.view"],
                 denyResponse: 'You do not have permission to view this service request.'
@@ -84,11 +84,9 @@ class ServiceRequestPolicy
         }
 
         if ($serviceRequest?->priority?->type?->managers()->exists() || $serviceRequest?->priority?->type?->auditors()->exists()) {
-           
             $team = auth()->user()->teams()->first();
 
             if ($serviceRequest?->priority?->type?->managers->contains('id', $team?->getKey()) || $serviceRequest?->priority?->type?->auditors->contains('id', $team?->getKey())) {
-            
                 return $authenticatable->canOrElse(
                     abilities: ['service_request.*.view', "service_request.{$serviceRequest->id}.view"],
                     denyResponse: 'You do not have permission to view this service request.'

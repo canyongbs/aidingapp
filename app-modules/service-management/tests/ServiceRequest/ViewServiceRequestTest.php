@@ -149,11 +149,11 @@ test('service request lock icon is shown when status classification closed', fun
     ])
         ->assertSeeHtml('data-identifier="service_request_closed"');
 })
-->with([
-    ViewServiceRequest::class,
-    ManageAssignments::class,
-    ManageServiceRequestUpdate::class,
-]);
+    ->with([
+        ViewServiceRequest::class,
+        ManageAssignments::class,
+        ManageServiceRequestUpdate::class,
+    ]);
 
 test('service requests not visible if service request type has no auditors/managers', function () {
     $settings = app(LicenseSettings::class);
