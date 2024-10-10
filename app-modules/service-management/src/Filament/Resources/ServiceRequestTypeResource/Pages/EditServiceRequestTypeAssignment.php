@@ -37,12 +37,13 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages;
 
 use Filament\Forms\Form;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Section;
 use Filament\Resources\Pages\EditRecord;
 use App\Filament\Forms\Components\Heading;
 use App\Filament\Forms\Components\Paragraph;
+use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
-use Filament\Forms\Components\Radio;
 
 class EditServiceRequestTypeAssignment extends EditRecord
 {
@@ -69,11 +70,8 @@ class EditServiceRequestTypeAssignment extends EditRecord
                             ->content('This page is used to configure the assignment methodology for this service request type.'),
                         Radio::make('assignment_type')
                             ->label('Assignment Type')
-                            ->options([
-                                'round_robin' => 'Round Robin',
-                                'least_busy' => 'Least Busy',
-                                'random' => 'Random',
-                            ]),
+                            ->options(ServiceRequestTypeAssignmentTypes::class)
+                            ->enum(ServiceRequestTypeAssignmentTypes::class),
                         Heading::make()
                             ->three()
                             ->content('Assignment Types'),
