@@ -40,7 +40,9 @@ use Filament\Forms\Form;
 use Filament\Forms\Components\Section;
 use Filament\Resources\Pages\EditRecord;
 use App\Filament\Forms\Components\Heading;
+use App\Filament\Forms\Components\Paragraph;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
+use Filament\Forms\Components\Radio;
 
 class EditServiceRequestTypeAssignment extends EditRecord
 {
@@ -61,14 +63,28 @@ class EditServiceRequestTypeAssignment extends EditRecord
                 Section::make()
                     ->columns()
                     ->schema([
-                        Heading::make('Assignments')
+                        Heading::make()
                             ->content('Assignments'),
-                        Heading::make('test')
-                            ->two()
-                            ->content('Test'),
-                        Heading::make('again')
+                        Paragraph::make()
+                            ->content('This page is used to configure the assignment methodology for this service request type.'),
+                        Radio::make('assignment_type')
+                            ->label('Assignment Type')
+                            ->options([
+                                'round_robin' => 'Round Robin',
+                                'least_busy' => 'Least Busy',
+                                'random' => 'Random',
+                            ]),
+                        Heading::make()
                             ->three()
-                            ->content('Again'),
+                            ->content('Assignment Types'),
+                        Paragraph::make()
+                            ->content('None: No assignment is made when this option is selected, allowing service requests to remain unassigned until manual intervention. Ideal for flexible workflows where task assignment is determined later.'),
+                        Paragraph::make()
+                            ->content('Individual: All service requests are assigned to a specific manager. Best suited for cases with a dedicated resource responsible for managing tasks, ensuring consistent oversight and accountability.'),
+                        Paragraph::make()
+                            ->content('Round Robin: Service requests are distributed evenly among request managers in a circular order. This ensures fair ticket allocation but doesn\'t factor in current workloads.'),
+                        Paragraph::make()
+                            ->content('Workload: Assignments are made based on the current workload, with requests directed to the user handling the fewest open tickets. This method balances workloads, improving efficiency and avoiding bottlenecks.'),
                     ]),
             ]);
     }

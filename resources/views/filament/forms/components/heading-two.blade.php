@@ -34,7 +34,6 @@
 <x-dynamic-component
     :component="$getFieldWrapperView()"
     :id="$getId()"
-    :state-path="$getStatePath()"
 >
     <h2
         {{

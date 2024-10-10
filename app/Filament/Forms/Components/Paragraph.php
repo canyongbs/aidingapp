@@ -39,11 +39,11 @@ namespace App\Filament\Forms\Components;
 use Closure;
 use Filament\Forms\Components\Component;
 
-class Heading extends Component
+class Paragraph extends Component
 {
     protected mixed $content = null;
 
-    protected string | Closure | null $defaultView = 'filament.forms.components.heading-one';
+    protected string | Closure | null $defaultView = 'filament.forms.components.paragraph';
 
     protected function setUp(): void
     {
@@ -60,27 +60,6 @@ class Heading extends Component
         $static->configure();
 
         return $static;
-    }
-
-    public function one(): static
-    {
-        $this->view = 'filament.forms.components.heading-one';
-
-        return $this;
-    }
-
-    public function two(): static
-    {
-        $this->view = 'filament.forms.components.heading-two';
-
-        return $this;
-    }
-
-    public function three(): static
-    {
-        $this->view = 'filament.forms.components.heading-three';
-
-        return $this;
     }
 
     public function content(mixed $content): static
