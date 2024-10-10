@@ -34,48 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase\Database\Factories;
+use App\Features\KnowledgeBaseCategorySlug;
+use Illuminate\Database\Migrations\Migration;
 
-use Illuminate\Support\Facades\File;
-use BladeUI\Icons\Factory as BladeUIIconsFactory;
-use Illuminate\Database\Eloquent\Factories\Factory;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
-
-/**
- * @extends Factory<KnowledgeBaseCategory>
- */
-class KnowledgeBaseCategoryFactory extends Factory
-{
-    public function definition(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            'name' => str(fake()->word())->ucfirst()->toString(),
-            'description' => fake()->optional()->sentences(2, true),
-            'icon' => fake()->optional()->randomElement($this->icons()),
-            'slug' => fake()->slug(),
-        ];
+        KnowledgeBaseCategorySlug::activate();
     }
 
-    private function icons(): array
+    public function down(): void
     {
-        return cache()->remember('heroicon-factory-options', now()->addMinutes(5), function (): array {
-            $paths = app(BladeUIIconsFactory::class)->all()['heroicons']['paths'];
-
-            $options = [];
-
-            foreach ($paths as $path) {
-                foreach (File::files($path) as $file) {
-                    $id = $file->getFilenameWithoutExtension();
-
-                    if (! str($id)->startsWith('o-')) {
-                        continue;
-                    }
-
-                    $options[] = "heroicon-{$id}";
-                }
-            }
-
-            return $options;
-        });
+        KnowledgeBaseCategorySlug::deactivate();
     }
-}
+};

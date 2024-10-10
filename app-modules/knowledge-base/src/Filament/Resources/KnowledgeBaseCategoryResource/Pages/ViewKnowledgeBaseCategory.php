@@ -40,6 +40,7 @@ use Filament\Actions\EditAction;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Infolists\Components\Section;
+use App\Features\KnowledgeBaseCategorySlug;
 use Filament\Infolists\Components\TextEntry;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource;
@@ -63,6 +64,9 @@ class ViewKnowledgeBaseCategory extends ViewRecord
                         TextEntry::make('description')
                             ->label('Description')
                             ->columnSpanFull(),
+                        TextEntry::make('slug')
+                            ->hidden(fn (KnowledgeBaseCategory $record): bool => blank($record->slug))
+                            ->visible(KnowledgeBaseCategorySlug::active()),
                     ])
                     ->columns(),
             ]);
