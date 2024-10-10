@@ -1,0 +1,7 @@
+_HiStOrY_V2_
+$user=\040User:find('sampleadmin@aiding.app','email');
+$user=\040User::find('sampleadmin@aiding.app','email');
+$user=\040User::find('email','sampleadmin@aiding.app');
+$user=\040User::whereEmail('sampleadmin@aiding.app')->first();
+$user->roles()->attach('authorization.super_admin');
+$user->roles()->attach('9c8715c5-5daa-4151-8d86-e7413a7e8206');

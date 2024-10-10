@@ -35,6 +35,7 @@
 */
 
 use App\Models\User;
+use AidingApp\Team\Models\Team;
 
 use function Tests\asSuperAdmin;
 
@@ -43,9 +44,12 @@ use App\Settings\LicenseSettings;
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
+use AidingApp\Contact\Models\Contact;
 use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ManageAssignments;
@@ -89,15 +93,7 @@ test('ViewServiceRequest is gated with proper access control', function () {
 
     $serviceRequest = ServiceRequest::factory()->create();
 
-    actingAs($user)
-        ->get(
-            ServiceRequestResource::getUrl('view', [
-                'record' => $serviceRequest,
-            ])
-        )->assertForbidden();
-
-    $user->givePermissionTo('service_request.view-any');
-    $user->givePermissionTo('service_request.*.view');
+    asSuperAdmin($user);
 
     actingAs($user)
         ->get(
@@ -116,12 +112,9 @@ test('ViewServiceRequest is gated with proper feature access control', function 
 
     $user = User::factory()->licensed(LicenseType::cases())->create();
 
-    $user->givePermissionTo('service_request.view-any');
-    $user->givePermissionTo('service_request.*.view');
-
     $serviceRequest = ServiceRequest::factory()->create();
 
-    actingAs($user)
+    asSuperAdmin($user)
         ->get(
             ServiceRequestResource::getUrl('view', [
                 'record' => $serviceRequest,
@@ -143,12 +136,7 @@ test('ViewServiceRequest is gated with proper feature access control', function 
 test('service request lock icon is shown when status classification closed', function (string $pages) {
     $user = User::factory()->licensed(LicenseType::cases())->create();
 
-    $user->givePermissionTo('service_request.view-any');
-    $user->givePermissionTo('service_request.*.view');
-    $user->givePermissionTo('service_request_assignment.view-any');
-    $user->givePermissionTo('service_request_update.view-any');
-
-    actingAs($user);
+    asSuperAdmin($user);
 
     $serviceRequest = ServiceRequest::factory([
         'status_id' => ServiceRequestStatus::factory()->create([
@@ -161,8 +149,106 @@ test('service request lock icon is shown when status classification closed', fun
     ])
         ->assertSeeHtml('data-identifier="service_request_closed"');
 })
-    ->with([
-        ViewServiceRequest::class,
-        ManageAssignments::class,
-        ManageServiceRequestUpdate::class,
-    ]);
+->with([
+    ViewServiceRequest::class,
+    ManageAssignments::class,
+    ManageServiceRequestUpdate::class,
+]);
+
+test('service requests not visible if service request type has no auditors/managers', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->serviceManagement = true;
+
+    $settings->save();
+
+    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
+
+    $user->givePermissionTo('service_request.view-any');
+
+    $user->refresh();
+
+    actingAs($user);
+
+    $serviceRequest = ServiceRequest::factory()
+        ->create();
+
+    livewire(ViewServiceRequest::class, [
+        'record' => $serviceRequest->getRouteKey(),
+    ])
+        ->assertForbidden();
+});
+
+test('view service request page visible if service request type has auditors', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->serviceManagement = true;
+
+    $settings->save();
+
+    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
+
+    $user->givePermissionTo('service_request.view-any');
+    $user->givePermissionTo('service_request.*.view');
+
+    $team = Team::factory()->create();
+
+    $user->teams()->attach($team);
+
+    $user->refresh();
+
+    actingAs($user);
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $serviceRequestType->auditors()->attach($team);
+
+    $serviceRequestsWithManager = ServiceRequest::factory()->state([
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $serviceRequestType->id,
+        ])->id,
+    ])
+        ->create();
+
+    livewire(ViewServiceRequest::class, [
+        'record' => $serviceRequestsWithManager->getRouteKey(),
+    ])
+        ->assertSuccessful();
+});
+
+test('view service request page visible if service request type has managers', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->serviceManagement = true;
+
+    $settings->save();
+
+    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
+
+    $user->givePermissionTo('service_request.view-any');
+    $user->givePermissionTo('service_request.*.view');
+
+    $team = Team::factory()->create();
+
+    $user->teams()->attach($team);
+
+    $user->refresh();
+
+    actingAs($user);
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $serviceRequestType->managers()->attach($team);
+
+    $serviceRequestsWithManager = ServiceRequest::factory()->state([
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $serviceRequestType->id,
+        ])->id,
+    ])
+        ->create();
+
+    livewire(ViewServiceRequest::class, [
+        'record' => $serviceRequestsWithManager->getRouteKey(),
+    ])
+        ->assertSuccessful();
+});
