@@ -36,14 +36,13 @@
 
 namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\Pages;
 
-use App\Features\Slug;
 use Filament\Forms\Form;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\CreateRecord;
+use App\Features\KnowledgeBaseCategorySlug;
 use App\Filament\Forms\Components\IconSelect;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource;
-use App\Features\KnowledgeBaseCategorySlug;
 
 class CreateKnowledgeBaseCategory extends CreateRecord
 {
