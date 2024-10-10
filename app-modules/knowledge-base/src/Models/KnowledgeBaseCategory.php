@@ -57,6 +57,7 @@ class KnowledgeBaseCategory extends BaseModel implements Auditable
         'name',
         'description',
         'icon',
+        'slug',
     ];
 
     public function knowledgeBaseItems(): HasMany

@@ -52,6 +52,7 @@ class KnowledgeBaseCategoryFactory extends Factory
             'name' => str(fake()->word())->ucfirst()->toString(),
             'description' => fake()->optional()->sentences(2, true),
             'icon' => fake()->optional()->randomElement($this->icons()),
+            'slug' => fake()->slug(),
         ];
     }
 

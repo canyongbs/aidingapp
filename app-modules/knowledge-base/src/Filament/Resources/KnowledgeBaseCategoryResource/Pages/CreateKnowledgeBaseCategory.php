@@ -36,12 +36,14 @@
 
 namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\Pages;
 
+use App\Features\Slug;
 use Filament\Forms\Form;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\CreateRecord;
 use App\Filament\Forms\Components\IconSelect;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource;
+use App\Features\KnowledgeBaseCategorySlug;
 
 class CreateKnowledgeBaseCategory extends CreateRecord
 {
@@ -56,6 +58,13 @@ class CreateKnowledgeBaseCategory extends CreateRecord
                     ->required()
                     ->string(),
                 IconSelect::make('icon'),
+                TextInput::make('slug')
+                    ->regex('/^[a-zA-Z0-9]+(-[a-zA-Z0-9]+)*$/')
+                    ->unique()
+                    ->maxLength(255)
+                    ->required()
+                    ->dehydrateStateUsing(fn (string $state): string => strtolower($state))
+                    ->visible(KnowledgeBaseCategorySlug::active()),
                 Textarea::make('description')
                     ->label('Description')
                     ->nullable()
