@@ -1,6 +1,4 @@
-<?php
-
-/*
+{{--
 <COPYRIGHT>
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
@@ -32,80 +30,19 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
-
-namespace App\Filament\Forms\Components;
-
-use Closure;
-use Filament\Actions\Concerns\HasName;
-use Filament\Forms\Components\Component;
-
-class Heading extends Component
-{
-    use HasName;
-
-    protected mixed $content = null;
-
-    protected string | Closure | null $defaultView = 'filament.forms.components.heading-one';
-
-    final public function __construct(string $name)
-    {
-        $this->name($name);
-        $this->statePath($name);
-    }
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->dehydrated(false);
-
-        $this->columnSpanFull();
-    }
-
-    public static function make(string $name): static
-    {
-        $static = app(static::class, ['name' => $name]);
-        $static->configure();
-
-        return $static;
-    }
-
-    public function one(): static
-    {
-        $this->view = 'filament.forms.components.heading-one';
-
-        return $this;
-    }
-
-    public function two(): static
-    {
-        $this->view = 'filament.forms.components.heading-two';
-
-        return $this;
-    }
-
-    public function three(): static
-    {
-        $this->view = 'filament.forms.components.heading-three';
-
-        return $this;
-    }
-
-    public function content(mixed $content): static
-    {
-        $this->content = $content;
-
-        return $this;
-    }
-
-    public function getId(): string
-    {
-        return parent::getId() ?? $this->getStatePath();
-    }
-
-    public function getContent(): mixed
-    {
-        return $this->evaluate($this->content);
-    }
-}
+--}}
+<x-dynamic-component
+    :component="$getFieldWrapperView()"
+    :id="$getId()"
+    :state-path="$getStatePath()"
+>
+    <h2
+        {{
+            $attributes
+                ->merge($getExtraAttributes(), escape: false)
+                ->class(['text-xl font-semibold text-gray-950 dark:text-white sm:text-2xl'])
+        }}
+    >
+        {{ $getContent() }}
+    </h2>
+</x-dynamic-component>
