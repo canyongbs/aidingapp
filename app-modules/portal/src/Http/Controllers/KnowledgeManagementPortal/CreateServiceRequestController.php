@@ -62,6 +62,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestFormStep;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use AidingApp\Form\Filament\Blocks\EducatableEmailFormFieldBlock;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormSubmission;
+use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\MediaCollections\UploadsMediaCollection;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 
@@ -109,12 +110,12 @@ class CreateServiceRequestController extends Controller
         DB::beginTransaction();
 
         try {
-            $serviceRequestStatus = ServiceRequestStatus::orderBy('id', 'asc')->firstOrFail();
+            $serviceRequestStatus = ServiceRequestStatus::where('classification', SystemServiceRequestClassification::Open)->where('name', 'New')->where('is_system_protected', true)->firstOrFail();
             $serviceRequest = new ServiceRequest([
                 'title' => $data->pull('Main.title'),
                 'close_details' => $data->pull('Main.description'),
-                'status_id' => $serviceRequestStatus ? $serviceRequestStatus->id : null,
-                'status_updated_at' => $serviceRequestStatus ? now() : null,
+                'status_id' => $serviceRequestStatus->id,
+                'status_updated_at' => now(),
             ]);
 
             $serviceRequest->respondent()->associate($contact);
