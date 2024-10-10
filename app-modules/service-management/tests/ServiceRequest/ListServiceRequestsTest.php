@@ -35,6 +35,7 @@
 */
 
 use App\Models\User;
+use AidingApp\Team\Models\Team;
 
 use function Tests\asSuperAdmin;
 
@@ -46,6 +47,8 @@ use function Pest\Livewire\livewire;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ListServiceRequests;
@@ -163,4 +166,88 @@ test('can filter service request by organization', function () {
             $serviceRequestsInOrganization
         )
         ->assertCanNotSeeTableRecords($serviceRequestsNotInOrganization);
+});
+
+test('service requests only visible to service request type managers', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->serviceManagement = true;
+
+    $settings->save();
+
+    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
+
+    $user->givePermissionTo('service_request.view-any');
+
+    $team = Team::factory()->create();
+
+    $user->teams()->attach($team);
+
+    $user->refresh();
+
+    actingAs($user);
+
+    $serviceRequests = ServiceRequest::factory()
+        ->count(3)
+        ->create();
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $serviceRequestType->managers()->attach($team);
+
+    $serviceRequestsWithManager = ServiceRequest::factory()->state([
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $serviceRequestType->id,
+        ])->id,
+    ])
+        ->count(10)
+        ->create();
+
+    livewire(ListServiceRequests::class)
+        ->assertCanSeeTableRecords(
+            $serviceRequestsWithManager
+        )
+        ->assertCanNotSeeTableRecords($serviceRequests);
+});
+
+test('service requests only visible to service request type auditors', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->serviceManagement = true;
+
+    $settings->save();
+
+    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
+
+    $user->givePermissionTo('service_request.view-any');
+
+    $team = Team::factory()->create();
+
+    $user->teams()->attach($team);
+
+    $user->refresh();
+
+    actingAs($user);
+
+    $serviceRequests = ServiceRequest::factory()
+        ->count(3)
+        ->create();
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $serviceRequestType->auditors()->attach($team);
+
+    $serviceRequestsWithManager = ServiceRequest::factory()->state([
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $serviceRequestType->id,
+        ])->id,
+    ])
+        ->count(10)
+        ->create();
+
+    livewire(ListServiceRequests::class)
+        ->assertCanSeeTableRecords(
+            $serviceRequestsWithManager
+        )
+        ->assertCanNotSeeTableRecords($serviceRequests);
 });
