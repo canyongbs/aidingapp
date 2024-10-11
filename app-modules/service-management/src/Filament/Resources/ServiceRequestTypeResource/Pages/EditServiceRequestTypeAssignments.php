@@ -36,23 +36,21 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages;
 
-use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
-use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\ServiceManagement\Policies\ServiceRequestTypePolicy;
-use AidingApp\ServiceManagement\Rules\ServiceRequestTypeAssignmentsIndividualUserMustBeAManager;
-use App\Features\ServiceRequestTypeAssignments;
+use Filament\Forms\Get;
+use Filament\Forms\Form;
+use Illuminate\Support\HtmlString;
+use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Section;
+use Filament\Resources\Pages\EditRecord;
 use App\Filament\Forms\Components\Heading;
 use App\Filament\Forms\Components\Paragraph;
-use Filament\Forms\Components\Radio;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Form;
-use Filament\Forms\Get;
-use Filament\Resources\Pages\EditRecord;
+use App\Features\ServiceRequestTypeAssignments;
 use Illuminate\Contracts\Database\Eloquent\Builder;
-use Illuminate\Support\HtmlString;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
+use AidingApp\ServiceManagement\Rules\ServiceRequestTypeAssignmentsIndividualUserMustBeAManager;
 
 class EditServiceRequestTypeAssignments extends EditRecord
 {
@@ -94,7 +92,6 @@ class EditServiceRequestTypeAssignments extends EditRecord
                             ->enum(ServiceRequestTypeAssignmentTypes::class)
                             ->required(),
                         Select::make('assignment_type_individual_id')
-                            // TODO: Need validation for this to ensure it's only available when the assignment type is individual and the user is a manager of the service request type.
                             ->label('Assignment Individual')
                             ->columnSpanFull()
                             ->relationship(

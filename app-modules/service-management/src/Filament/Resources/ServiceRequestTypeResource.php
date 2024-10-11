@@ -96,7 +96,7 @@ class ServiceRequestTypeResource extends Resource
             'edit' => EditServiceRequestType::route('/{record}/edit'),
             'service-request-type-managers' => ManageServiceRequestTypeManagers::route('/{record}/managers'),
             'service-request-type-auditors' => ManageServiceRequestTypeAuditors::route('/{record}/auditors'),
-            'service-request-type-assignment' => EditServiceRequestTypeAssignments::route('/{record}/assignment'),
+            'service-request-type-assignments' => EditServiceRequestTypeAssignments::route('/{record}/assignments'),
         ];
     }
 }

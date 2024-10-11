@@ -36,12 +36,7 @@
     :id="$getId()"
 >
     <h2
-        {{
-            $attributes
-                ->merge($getExtraAttributes(), escape: false)
-                ->class(['text-sm font-semibold text-gray-950 dark:text-white sm:text-base'])
-        }}
-    >
+        {{ $attributes->merge($getExtraAttributes(), escape: false)->class(['text-sm font-semibold text-gray-950 dark:text-white sm:text-base']) }}>
         {{ $getContent() }}
     </h2>
 </x-dynamic-component>
