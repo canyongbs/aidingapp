@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages;
 
 use Filament\Forms\Form;
+use Illuminate\Support\HtmlString;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Section;
 use Filament\Resources\Pages\EditRecord;
@@ -69,7 +70,11 @@ class EditServiceRequestTypeAssignment extends EditRecord
                         Paragraph::make()
                             ->content('This page is used to configure the assignment methodology for this service request type.'),
                         Radio::make('assignment_type')
-                            ->label('Assignment Type')
+                            ->label(
+                                new HtmlString(
+                                    view('service-management::filament.forms.assignment-type-label')->render()
+                                )
+                            )
                             ->options(ServiceRequestTypeAssignmentTypes::class)
                             ->enum(ServiceRequestTypeAssignmentTypes::class),
                         Heading::make()
