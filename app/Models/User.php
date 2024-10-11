@@ -36,54 +36,55 @@
 
 namespace App\Models;
 
-use Filament\Panel;
-use DateTimeInterface;
-use Illuminate\Support\Arr;
+use AidingApp\Assistant\Models\AssistantChat;
+use AidingApp\Assistant\Models\AssistantChatFolder;
+use AidingApp\Assistant\Models\AssistantChatMessageLog;
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\Authorization\Models\License;
+use AidingApp\Authorization\Models\Role;
+use AidingApp\Consent\Models\Concerns\CanConsent;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Engagement\Models\Concerns\HasManyEngagementBatches;
+use AidingApp\Engagement\Models\Concerns\HasManyEngagements;
+use AidingApp\InAppCommunication\Models\TwilioConversation;
+use AidingApp\InAppCommunication\Models\TwilioConversationUser;
+use AidingApp\IntegrationAI\Models\Concerns\ProvidesDynamicContext;
+use AidingApp\Notification\Models\Contracts\NotifiableInterface;
+use AidingApp\Notification\Models\Subscription;
+use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
+use AidingApp\ServiceManagement\Models\ChangeRequest;
+use AidingApp\ServiceManagement\Models\ChangeRequestResponse;
+use AidingApp\ServiceManagement\Models\ChangeRequestType;
+use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\Task\Models\Task;
 use AidingApp\Team\Models\Team;
-use Spatie\MediaLibrary\HasMedia;
-use App\Support\HasAdvancedFilter;
 use AidingApp\Team\Models\TeamUser;
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Authorization\Models\Role;
-use App\Filament\Resources\UserResource;
-use Filament\Models\Contracts\HasAvatar;
-use Illuminate\Notifications\Notifiable;
-use OwenIt\Auditing\Contracts\Auditable;
-use Lab404\Impersonate\Models\Impersonate;
-use AidingApp\Authorization\Models\License;
-use Filament\Models\Contracts\FilamentUser;
-use Spatie\MediaLibrary\InteractsWithMedia;
-use AidingApp\Assistant\Models\AssistantChat;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use AidingApp\Authorization\Enums\LicenseType;
-use AidingApp\Notification\Models\Subscription;
-use Staudenmeir\EloquentHasManyDeep\HasManyDeep;
-use AidingApp\Consent\Models\Concerns\CanConsent;
-use AidingApp\Assistant\Models\AssistantChatFolder;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use AidingApp\ServiceManagement\Models\ChangeRequest;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Staudenmeir\EloquentHasManyDeep\HasRelationships;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Spatie\MediaLibrary\MediaCollections\Models\Media;
-use AidingApp\Assistant\Models\AssistantChatMessageLog;
-use Illuminate\Database\Eloquent\Relations\MorphToMany;
-use AidingApp\ServiceManagement\Models\ChangeRequestType;
-use Illuminate\Contracts\Translation\HasLocalePreference;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use AidingApp\InAppCommunication\Models\TwilioConversation;
-use AidingApp\Engagement\Models\Concerns\HasManyEngagements;
 use AidingApp\Timeline\Models\Contracts\HasFilamentResource;
-use AidingApp\ServiceManagement\Models\ChangeRequestResponse;
-use AidingApp\InAppCommunication\Models\TwilioConversationUser;
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\Notification\Models\Contracts\NotifiableInterface;
-use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
-use AidingApp\Engagement\Models\Concerns\HasManyEngagementBatches;
-use AidingApp\IntegrationAI\Models\Concerns\ProvidesDynamicContext;
-use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
+use App\Filament\Resources\UserResource;
+use App\Support\HasAdvancedFilter;
+use DateTimeInterface;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Models\Contracts\HasAvatar;
+use Filament\Panel;
+use Illuminate\Contracts\Translation\HasLocalePreference;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Arr;
+use Lab404\Impersonate\Models\Impersonate;
+use OwenIt\Auditing\Contracts\Auditable;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Staudenmeir\EloquentHasManyDeep\HasManyDeep;
+use Staudenmeir\EloquentHasManyDeep\HasRelationships;
 
 /**
  * @mixin IdeHelperUser
@@ -304,6 +305,11 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
             ->using(TeamUser::class)
             ->limit(1)
             ->withTimestamps();
+    }
+
+    public function serviceRequestTypeIndividualAssignment(): HasMany
+    {
+        return $this->hasMany(ServiceRequestType::class, 'assignment_type_individual_id', 'id');
     }
 
     public function assistantChatMessageLogs(): HasMany

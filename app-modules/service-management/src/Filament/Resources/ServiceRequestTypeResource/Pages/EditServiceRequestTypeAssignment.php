@@ -36,13 +36,16 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages;
 
+use Filament\Forms\Get;
 use Filament\Forms\Form;
 use Illuminate\Support\HtmlString;
 use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
 use Filament\Resources\Pages\EditRecord;
 use App\Filament\Forms\Components\Heading;
 use App\Filament\Forms\Components\Paragraph;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
 
@@ -70,13 +73,33 @@ class EditServiceRequestTypeAssignment extends EditRecord
                         Paragraph::make()
                             ->content('This page is used to configure the assignment methodology for this service request type.'),
                         Radio::make('assignment_type')
+                            ->live()
+                            ->columnSpanFull()
                             ->label(
                                 new HtmlString(
                                     view('service-management::filament.forms.assignment-type-label')->render()
                                 )
                             )
                             ->options(ServiceRequestTypeAssignmentTypes::class)
-                            ->enum(ServiceRequestTypeAssignmentTypes::class),
+                            ->enum(ServiceRequestTypeAssignmentTypes::class)
+                            ->required(),
+                        Select::make('assignment_type_individual_id')
+                            // TODO: Need validation for this to ensure it's only available when the assignment type is individual and the user is a manager of the service request type.
+                            ->label('Assignment Individual')
+                            ->columnSpanFull()
+                            ->relationship(
+                                name: 'assignmentTypeIndividual',
+                                titleAttribute: 'name',
+                                modifyQueryUsing: fn (Builder $query) => $query->whereRelation(
+                                    'teams.managableServiceRequestTypes',
+                                    'service_request_types.id',
+                                    $this->record->getKey(),
+                                )
+                            )
+                            ->searchable(['name', 'email'])
+                            ->preload()
+                            ->required()
+                            ->visible(fn (Get $get) => $get('assignment_type') === ServiceRequestTypeAssignmentTypes::Individual->value),
                         Heading::make()
                             ->three()
                             ->content('Assignment Types'),

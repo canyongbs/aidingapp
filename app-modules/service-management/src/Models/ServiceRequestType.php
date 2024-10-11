@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Models;
 
+use App\Models\User;
 use DateTimeInterface;
 use App\Models\BaseModel;
 use AidingApp\Team\Models\Team;
@@ -45,6 +46,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 
@@ -64,6 +66,7 @@ class ServiceRequestType extends BaseModel implements Auditable
         'has_enabled_nps',
         'description',
         'icon',
+        'assignment_type',
     ];
 
     protected $casts = [
@@ -99,6 +102,15 @@ class ServiceRequestType extends BaseModel implements Auditable
         return $this->belongsToMany(Team::class, 'service_request_type_auditors')
             ->using(ServiceRequestTypeAuditor::class)
             ->withTimestamps();
+    }
+
+    public function assignmentTypeIndividual(): BelongsTo
+    {
+        return $this->belongsTo(
+            related: User::class,
+            foreignKey: 'assignment_type_individual_id',
+            relation: 'serviceRequestTypeIndividualAssignment',
+        );
     }
 
     protected function serializeDate(DateTimeInterface $date): string
