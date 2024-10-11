@@ -46,9 +46,9 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pa
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\ViewServiceRequestType;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\ListServiceRequestTypes;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\CreateServiceRequestType;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\EditServiceRequestTypeAssignment;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\ManageServiceRequestTypeAuditors;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\ManageServiceRequestTypeManagers;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\EditServiceRequestTypeAssignments;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\RelationManagers\ServiceRequestPrioritiesRelationManager;
 
 class ServiceRequestTypeResource extends Resource
@@ -83,7 +83,7 @@ class ServiceRequestTypeResource extends Resource
             EditServiceRequestType::class,
             ManageServiceRequestTypeManagers::class,
             ManageServiceRequestTypeAuditors::class,
-            EditServiceRequestTypeAssignment::class,
+            EditServiceRequestTypeAssignments::class,
         ]);
     }
 
@@ -96,7 +96,7 @@ class ServiceRequestTypeResource extends Resource
             'edit' => EditServiceRequestType::route('/{record}/edit'),
             'service-request-type-managers' => ManageServiceRequestTypeManagers::route('/{record}/managers'),
             'service-request-type-auditors' => ManageServiceRequestTypeAuditors::route('/{record}/auditors'),
-            'service-request-type-assignment' => EditServiceRequestTypeAssignment::route('/{record}/assignment'),
+            'service-request-type-assignment' => EditServiceRequestTypeAssignments::route('/{record}/assignment'),
         ];
     }
 }

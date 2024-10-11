@@ -50,7 +50,7 @@ use Illuminate\Contracts\Database\Eloquent\Builder;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
 
-class EditServiceRequestTypeAssignment extends EditRecord
+class EditServiceRequestTypeAssignments extends EditRecord
 {
     protected static string $resource = ServiceRequestTypeResource::class;
 
