@@ -215,7 +215,7 @@ test('EditServiceRequestTypeAssignments is gated with proper feature access cont
             ])
         )->assertSuccessful();
 
-    $request = collect(EditServiceRequestTypeAssignmentsRequestFactory::new()->create());
+    $request = collect(EditServiceRequestTypeAssignmentsRequestFactory::new()->withRandomTypeNotIncludingIndividual()->create());
 
     livewire(EditServiceRequestTypeAssignments::class, [
         'record' => $serviceRequestType->getRouteKey(),
