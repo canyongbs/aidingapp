@@ -52,11 +52,8 @@ use function PHPUnit\Framework\assertEquals;
 
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
-use AidingApp\ServiceManagement\Tests\RequestFactories\EditServiceRequestTypeRequestFactory;
 use AidingApp\ServiceManagement\Rules\ServiceRequestTypeAssignmentsIndividualUserMustBeAManager;
 use AidingApp\ServiceManagement\Tests\RequestFactories\EditServiceRequestTypeAssignmentsRequestFactory;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\EditServiceRequestType;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\EditServiceRequestTypeAssignments;
 
 test('A successful action on the EditServiceRequestTypeAssignments page', function () {
@@ -142,19 +139,19 @@ test('EditServiceRequestTypeAssignments requires valid data', function (EditServ
 
 // Permission Tests
 
-test('EditServiceRequestType is gated with proper access control', function () {
+test('EditServiceRequestTypeAssignments is gated with proper access control', function () {
     $user = User::factory()->licensed([Contact::getLicenseType()])->create();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     actingAs($user)
         ->get(
-            ServiceRequestTypeResource::getUrl('edit', [
+            EditServiceRequestTypeAssignments::getUrl([
                 'record' => $serviceRequestType,
             ])
         )->assertForbidden();
 
-    livewire(EditServiceRequestType::class, [
+    livewire(EditServiceRequestTypeAssignments::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->assertForbidden();
@@ -164,24 +161,24 @@ test('EditServiceRequestType is gated with proper access control', function () {
 
     actingAs($user)
         ->get(
-            ServiceRequestTypeResource::getUrl('edit', [
+            EditServiceRequestTypeAssignments::getUrl([
                 'record' => $serviceRequestType,
             ])
         )->assertSuccessful();
 
-    $request = collect(EditServiceRequestTypeRequestFactory::new()->create());
+    $request = collect(EditServiceRequestTypeAssignmentsRequestFactory::new()->withRandomTypeNotIncludingIndividual()->create());
 
-    livewire(EditServiceRequestType::class, [
+    livewire(EditServiceRequestTypeAssignments::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->fillForm($request->toArray())
         ->call('save')
         ->assertHasNoFormErrors();
 
-    assertEquals($request['name'], $serviceRequestType->fresh()->name);
+    assertEquals($request['assignment_type'], $serviceRequestType->fresh()->assignment_type->value);
 });
 
-test('EditServiceRequestType is gated with proper feature access control', function () {
+test('EditServiceRequestTypeAssignments is gated with proper feature access control', function () {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = false;
@@ -197,12 +194,12 @@ test('EditServiceRequestType is gated with proper feature access control', funct
 
     actingAs($user)
         ->get(
-            ServiceRequestTypeResource::getUrl('edit', [
+            EditServiceRequestTypeAssignments::getUrl([
                 'record' => $serviceRequestType,
             ])
         )->assertForbidden();
 
-    livewire(EditServiceRequestType::class, [
+    livewire(EditServiceRequestTypeAssignments::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->assertForbidden();
@@ -213,19 +210,19 @@ test('EditServiceRequestType is gated with proper feature access control', funct
 
     actingAs($user)
         ->get(
-            ServiceRequestTypeResource::getUrl('edit', [
+            EditServiceRequestTypeAssignments::getUrl([
                 'record' => $serviceRequestType,
             ])
         )->assertSuccessful();
 
-    $request = collect(EditServiceRequestTypeRequestFactory::new()->create());
+    $request = collect(EditServiceRequestTypeAssignmentsRequestFactory::new()->create());
 
-    livewire(EditServiceRequestType::class, [
+    livewire(EditServiceRequestTypeAssignments::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->fillForm($request->toArray())
         ->call('save')
         ->assertHasNoFormErrors();
 
-    assertEquals($request['name'], $serviceRequestType->fresh()->name);
+    assertEquals($request['assignment_type'], $serviceRequestType->fresh()->assignment_type->value);
 });
