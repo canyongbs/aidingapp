@@ -49,6 +49,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
 
 /**
  * @mixin IdeHelperServiceRequestType
@@ -73,6 +74,7 @@ class ServiceRequestType extends BaseModel implements Auditable
         'has_enabled_feedback_collection' => 'boolean',
         'has_enabled_csat' => 'boolean',
         'has_enabled_nps' => 'boolean',
+        'assignment_type' => ServiceRequestTypeAssignmentTypes::class,
     ];
 
     public function serviceRequests(): HasManyThrough
