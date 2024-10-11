@@ -45,6 +45,7 @@ use Filament\Forms\Components\Section;
 use Filament\Resources\Pages\EditRecord;
 use App\Filament\Forms\Components\Heading;
 use App\Filament\Forms\Components\Paragraph;
+use App\Features\ServiceRequestTypeAssignments;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
@@ -54,6 +55,11 @@ class EditServiceRequestTypeAssignment extends EditRecord
     protected static string $resource = ServiceRequestTypeResource::class;
 
     protected static ?string $title = 'Assignments';
+
+    public static function canAccess(array $parameters = []): bool
+    {
+        return ServiceRequestTypeAssignments::active() && parent::canAccess($parameters);
+    }
 
     public function getRelationManagers(): array
     {
