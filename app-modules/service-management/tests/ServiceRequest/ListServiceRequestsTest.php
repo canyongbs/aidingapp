@@ -237,7 +237,7 @@ test('service requests only visible to service request type auditors', function 
 
     $serviceRequestType->auditors()->attach($team);
 
-    $serviceRequestsWithAuditors= ServiceRequest::factory()->state([
+    $serviceRequestsWithAuditors = ServiceRequest::factory()->state([
         'priority_id' => ServiceRequestPriority::factory()->create([
             'type_id' => $serviceRequestType->getKey(),
         ])->getKey(),
