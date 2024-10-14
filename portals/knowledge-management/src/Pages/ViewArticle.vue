@@ -112,7 +112,6 @@
             article_vote: feedback.value,
             articleId: route.params.articleId,
         });
-        location.reload();
     }
 </script>
 
