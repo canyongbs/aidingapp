@@ -94,9 +94,7 @@
                 article.value = response.data.article;
                 loading.value = false;
                 portalViewCount.value = response.data.portal_view_count;
-                feedback.value = response.data.article.vote
-                    ? response.data.article.vote.is_helpful
-                    : null;
+                feedback.value = response.data.article.vote ? response.data.article.vote.is_helpful : null;
                 articalWasHelpfulFeatureFlag.value = response.data.article_was_helpful_feature_flag;
             },
         );

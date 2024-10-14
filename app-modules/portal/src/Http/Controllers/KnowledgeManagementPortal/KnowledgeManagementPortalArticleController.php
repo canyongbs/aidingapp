@@ -45,7 +45,6 @@ use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\Portal\DataTransferObjects\KnowledgeBaseArticleData;
 use AidingApp\Portal\DataTransferObjects\KnowledgeBaseCategoryData;
-use Illuminate\Support\Facades\Log;
 
 class KnowledgeManagementPortalArticleController extends Controller
 {
@@ -58,6 +57,7 @@ class KnowledgeManagementPortalArticleController extends Controller
         $article->increment('portal_view_count');
         $voterType = session()->has('guest_id') ? PortalGuest::class : Contact::class;
         $voterId = session()->has('guest_id') ? session('guest_id') : auth('contact')->user()->id;
+
         return response()->json([
             'category' => KnowledgeBaseCategoryData::from([
                 'id' => $category->getKey(),

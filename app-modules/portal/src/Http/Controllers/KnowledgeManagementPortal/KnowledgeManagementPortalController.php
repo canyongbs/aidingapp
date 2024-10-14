@@ -82,7 +82,6 @@ class KnowledgeManagementPortalController extends Controller
                 )
             ),
             'footer_logo' => Vite::asset('resources/images/canyon-logo-light.png'),
-
         ]);
     }
 }
