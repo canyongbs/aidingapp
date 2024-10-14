@@ -34,48 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase\Database\Factories;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
-use Illuminate\Support\Facades\File;
-use BladeUI\Icons\Factory as BladeUIIconsFactory;
-use Illuminate\Database\Eloquent\Factories\Factory;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
-
-/**
- * @extends Factory<KnowledgeBaseCategory>
- */
-class KnowledgeBaseCategoryFactory extends Factory
-{
-    public function definition(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            'name' => str(fake()->word())->ucfirst()->toString(),
-            'description' => fake()->optional()->sentences(2, true),
-            'icon' => fake()->optional()->randomElement($this->icons()),
-            'slug' => fake()->slug(),
-        ];
-    }
-
-    private function icons(): array
-    {
-        return cache()->remember('heroicon-factory-options', now()->addMinutes(5), function (): array {
-            $paths = app(BladeUIIconsFactory::class)->all()['heroicons']['paths'];
-
-            $options = [];
-
-            foreach ($paths as $path) {
-                foreach (File::files($path) as $file) {
-                    $id = $file->getFilenameWithoutExtension();
-
-                    if (! str($id)->startsWith('o-')) {
-                        continue;
-                    }
-
-                    $options[] = "heroicon-{$id}";
-                }
-            }
-
-            return $options;
+        Schema::table('knowledge_base_categories', function (Blueprint $table) {
+            $table->string('slug')->unique()->nullable();
         });
     }
-}
+
+    public function down(): void
+    {
+        Schema::table('knowledge_base_categories', function (Blueprint $table) {
+            $table->dropColumn('slug');
+        });
+    }
+};

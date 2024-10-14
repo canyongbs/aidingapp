@@ -43,7 +43,8 @@ class CreateKnowledgeBaseCategoryRequestFactory extends RequestFactory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->word(),
+            'name' => fake()->word(),
+            'slug' => fake()->slug(),
         ];
     }
 }
