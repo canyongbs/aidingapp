@@ -110,11 +110,15 @@ class CreateServiceRequestController extends Controller
         DB::beginTransaction();
 
         try {
-            $serviceRequestStatus = ServiceRequestStatus::where('classification', SystemServiceRequestClassification::Open)->where('name', 'New')->where('is_system_protected', true)->firstOrFail();
+            $serviceRequestStatus = ServiceRequestStatus::query()
+                ->where('classification', SystemServiceRequestClassification::Open)
+                ->where('name', 'New')
+                ->where('is_system_protected', true)
+                ->firstOrFail();
             $serviceRequest = new ServiceRequest([
                 'title' => $data->pull('Main.title'),
                 'close_details' => $data->pull('Main.description'),
-                'status_id' => $serviceRequestStatus->id,
+                'status_id' => $serviceRequestStatus->getKey(),
                 'status_updated_at' => now(),
             ]);
 
