@@ -36,9 +36,9 @@
 
 namespace AidingApp\Portal\Models;
 
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 
 class PortalGuest extends BaseModel
 {

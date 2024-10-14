@@ -59,7 +59,6 @@ class PortalServiceProvider extends ServiceProvider
             'portal_settings_property' => PortalSettingsProperty::class,
             'knowledgebase_article_vote' => KnowledgeBaseArticleVote::class,
             'portal_guest' => PortalGuest::class,
-            
         ]);
 
         AuthorizationRoleRegistry::register(PortalRbacRegistry::class);
