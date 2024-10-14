@@ -83,7 +83,14 @@ class CreateServiceRequest extends CreateRecord
                 Grid::make()
                     ->schema([
                         Select::make('type_id')
-                            ->options(ServiceRequestType::pluck('name', 'id'))
+                            ->options(ServiceRequestType::when(!auth()->user()->hasRole('authorization.super_admin'),function(Builder $query){
+                                $query->whereHas('managers', function (Builder $query): void {
+                                    $query->where('teams.id', auth()->user()->teams()->first()?->getKey());
+                                })->orWhereHas('auditors', function (Builder $query): void {
+                                    $query->where('teams.id', auth()->user()->teams()->first()?->getKey());
+                                });
+                            })
+                            ->pluck('name', 'id'))
                             ->afterStateUpdated(fn (Set $set) => $set('priority_id', null))
                             ->label('Type')
                             ->required()

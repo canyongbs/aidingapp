@@ -96,6 +96,14 @@ class ServiceRequestPolicy
 
     public function create(Authenticatable $authenticatable): Response
     {
+        if (! auth()->user()->hasRole('authorization.super_admin')) {
+            $team = auth()->user()->teams()->first();
+
+            if (!$team?->managableServiceRequestTypes()->exists() && !$team?->auditableServiceRequestTypes()->exists()) {
+                return Response::deny("You don't have permission to view this service request because you're not an auditor or manager.");
+            }
+        }
+        
         return $authenticatable->canOrElse(
             abilities: 'service_request.create',
             denyResponse: 'You do not have permission to create service requests.'
@@ -112,6 +120,18 @@ class ServiceRequestPolicy
             return Response::deny('Closed service request cannot be edited.');
         }
 
+        if (! auth()->user()->hasRole('authorization.super_admin')) {
+            $team = auth()->user()->teams()->first();
+
+            if (! $serviceRequest?->priority?->type?->managers()->exists() && ! $serviceRequest?->priority?->type?->auditors()->exists()) {
+                return Response::deny("You don't have permission to update this service request because you're not an auditor or manager.");
+            }
+
+            if (! $serviceRequest?->priority?->type?->managers->contains('id', $team?->getKey()) && ! $serviceRequest?->priority?->type?->auditors->contains('id', $team?->getKey())) {
+                return Response::deny("You don't have permission to update this service request because you're not an auditor or manager.");
+            }
+        }
+
         return $authenticatable->canOrElse(
             abilities: ['service_request.*.update', "service_request.{$serviceRequest->id}.update"],
             denyResponse: 'You do not have permission to update this service request.'
@@ -122,6 +142,18 @@ class ServiceRequestPolicy
     {
         if (! $authenticatable->hasLicense($serviceRequest->respondent->getLicenseType())) {
             return Response::deny('You do not have permission to delete this service request.');
+        }
+
+        if (! auth()->user()->hasRole('authorization.super_admin')) {
+            $team = auth()->user()->teams()->first();
+
+            if (! $serviceRequest?->priority?->type?->managers()->exists() && ! $serviceRequest?->priority?->type?->auditors()->exists()) {
+                return Response::deny("You don't have permission to delete this service request because you're not an auditor or manager.");
+            }
+
+            if (! $serviceRequest?->priority?->type?->managers->contains('id', $team?->getKey()) && ! $serviceRequest?->priority?->type?->auditors->contains('id', $team?->getKey())) {
+                return Response::deny("You don't have permission to delete this service request because you're not an auditor or manager.");
+            }
         }
 
         return $authenticatable->canOrElse(
@@ -136,6 +168,18 @@ class ServiceRequestPolicy
             return Response::deny('You do not have permission to restore this service request.');
         }
 
+        if (! auth()->user()->hasRole('authorization.super_admin')) {
+            $team = auth()->user()->teams()->first();
+
+            if (! $serviceRequest?->priority?->type?->managers()->exists() && ! $serviceRequest?->priority?->type?->auditors()->exists()) {
+                return Response::deny("You don't have permission to restore this service request because you're not an auditor or manager.");
+            }
+
+            if (! $serviceRequest?->priority?->type?->managers->contains('id', $team?->getKey()) && ! $serviceRequest?->priority?->type?->auditors->contains('id', $team?->getKey())) {
+                return Response::deny("You don't have permission to restore this service request because you're not an auditor or manager.");
+            }
+        }
+
         return $authenticatable->canOrElse(
             abilities: ['service_request.*.restore', "service_request.{$serviceRequest->id}.restore"],
             denyResponse: 'You do not have permission to restore this service request.'
@@ -146,6 +190,18 @@ class ServiceRequestPolicy
     {
         if (! $authenticatable->hasLicense($serviceRequest->respondent->getLicenseType())) {
             return Response::deny('You do not have permission to permanently delete this service request.');
+        }
+
+        if (! auth()->user()->hasRole('authorization.super_admin')) {
+            $team = auth()->user()->teams()->first();
+
+            if (! $serviceRequest?->priority?->type?->managers()->exists() && ! $serviceRequest?->priority?->type?->auditors()->exists()) {
+                return Response::deny("You don't have permission to permanently delete this service request because you're not an auditor or manager.");
+            }
+
+            if (! $serviceRequest?->priority?->type?->managers->contains('id', $team?->getKey()) && ! $serviceRequest?->priority?->type?->auditors->contains('id', $team?->getKey())) {
+                return Response::deny("You don't have permission to permanently delete service request because you're not an auditor or manager.");
+            }
         }
 
         return $authenticatable->canOrElse(

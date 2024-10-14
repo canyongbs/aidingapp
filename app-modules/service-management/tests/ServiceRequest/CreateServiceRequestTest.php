@@ -56,6 +56,8 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\Tests\RequestFactories\CreateServiceRequestRequestFactory;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\CreateServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\Team\Models\Team;
 
 test('A successful action on the CreateServiceRequest page', function () {
     asSuperAdmin()
@@ -141,13 +143,24 @@ test('CreateServiceRequest requires valid data', function ($data, $errors, $setu
 test('CreateServiceRequest is gated with proper access control', function () {
     $user = User::factory()->licensed(LicenseType::cases())->create();
 
+    $team = Team::factory()->create();
+
+    $user->teams()->attach($team);
+
+    $user->refresh();
+
     actingAs($user)
         ->get(
             ServiceRequestResource::getUrl('create')
         )->assertForbidden();
+        
 
     livewire(CreateServiceRequest::class)
         ->assertForbidden();
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $serviceRequestType->auditors()->attach($team);
 
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.create');
@@ -201,6 +214,12 @@ test('CreateServiceRequest is gated with proper feature access control', functio
 
     $user = User::factory()->licensed(LicenseType::cases())->create();
 
+    $team = Team::factory()->create();
+
+    $user->teams()->attach($team);
+
+    $user->refresh();
+
     actingAs($user)
         ->get(
             ServiceRequestResource::getUrl('create')
@@ -215,6 +234,10 @@ test('CreateServiceRequest is gated with proper feature access control', functio
     $settings->data->addons->serviceManagement = true;
 
     $settings->save();
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $serviceRequestType->auditors()->attach($team);
 
     actingAs($user)
         ->get(
@@ -238,4 +261,42 @@ test('CreateServiceRequest is gated with proper feature access control', functio
     $serviceRequest = ServiceRequest::first();
 
     expect($serviceRequest->division->id)->toEqual($request['division_id']);
+});
+
+test('cannot create service requests if user is not an auditor or manager of the service request type',function(){
+
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->serviceManagement = false;
+
+    $settings->save();
+
+    $user = User::factory()->licensed(LicenseType::cases())->create();
+
+    $team = Team::factory()->create();
+
+    $user->teams()->attach($team);
+
+    $user->refresh();
+
+    actingAs($user)
+        ->get(
+            ServiceRequestResource::getUrl('create')
+        )->assertForbidden();
+
+    $user->givePermissionTo('service_request.view-any');
+    $user->givePermissionTo('service_request.create');
+
+    $settings->data->addons->serviceManagement = true;
+
+    $settings->save();
+
+    livewire(CreateServiceRequest::class)
+        ->assertForbidden();
+
+    actingAs($user)
+        ->get(
+            ServiceRequestResource::getUrl('create')
+        )->assertForbidden();
+
 });

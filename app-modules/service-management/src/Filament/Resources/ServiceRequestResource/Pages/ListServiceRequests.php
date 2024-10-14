@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages;
 
+use AidingApp\Assistant\Models\PromptType;
 use Filament\Tables\Table;
 use Filament\Actions\CreateAction;
 use AidingApp\Contact\Models\Contact;
@@ -57,6 +58,7 @@ use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
+use Filament\Notifications\Notification;
 
 class ListServiceRequests extends ListRecords
 {
@@ -146,7 +148,26 @@ class ListServiceRequests extends ListRecords
             ])
             ->bulkActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->action(function ($records) {
+                            $deletedRecordsCount = ServiceRequest::query()
+                                ->whereKey($records)
+                                ->when(!auth()->user()->hasRole('authorization.super_admin'), function (Builder $q) {
+                                    return $q->whereHas('priority.type.managers', function (Builder $query): void {
+                                        $query->where('teams.id', auth()->user()->teams()->first()?->getKey());
+                                    })->orWhereHas('priority.type.auditors', function (Builder $query): void {
+                                        $query->where('teams.id', auth()->user()->teams()->first()?->getKey());
+                                    });
+                                })
+                                ->delete();
+
+                            Notification::make()
+                                ->title('Deleted ' . $deletedRecordsCount . ' prompt types')
+                                ->body(($deletedRecordsCount < $records->count()) ? ($records->count() - $deletedRecordsCount) . ' service requests were not deleted because you\'re not an auditor or manager of it.' : null)
+                                ->success()
+                                ->send();
+                        })
+                        ->fetchSelectedRecords(false),
                 ]),
             ])
             ->defaultSort('created_at', 'desc')

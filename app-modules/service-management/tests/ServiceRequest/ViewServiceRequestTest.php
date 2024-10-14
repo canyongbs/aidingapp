@@ -167,8 +167,6 @@ test('service requests not authorized if user is not an auditor or manager of th
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.*.view');
 
-    $user->refresh();
-
     actingAs($user);
 
     $serviceRequest = ServiceRequest::factory()
