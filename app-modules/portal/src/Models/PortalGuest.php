@@ -36,17 +36,19 @@
 
 namespace AidingApp\Portal\Models;
 
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class PortalGuest extends BaseModel
 {
-    use HasUuids;
     use SoftDeletes;
 
-    public function user()
+    public function knowledgeBaseArticleVotes()
     {
-        return $this->morphOne(KnowledgeBaseArticleVote::class, 'morphable');
+        return $this->morphedByMany(KnowledgeBaseItem::class, 'voter', 'knowledge_base_article_votes')
+            ->using(KnowledgeBaseArticleVote::class)
+            ->withPivot('is_helpful')
+            ->withTimestamps();
     }
 }

@@ -71,8 +71,7 @@
     const portalViewCount = ref(0);
     const portalViewCountFlag = ref(false);
     const feedback = ref(null);
-    const featureFlag = ref(null);
-    const { user, setguestId } = useAuthStore();
+    const articalWasHelpfulFeatureFlag = ref(null);
 
     watch(
         route,
@@ -91,18 +90,14 @@
 
         get(props.apiUrl + '/categories/' + route.params.categoryId + '/articles/' + route.params.articleId).then(
             (response) => {
-                if (response.data.guest_id) {
-                    setguestId(response.data.guest_id);
-                }
-
                 category.value = response.data.category;
                 article.value = response.data.article;
                 loading.value = false;
                 portalViewCount.value = response.data.portal_view_count;
-                feedback.value = response.data.article.articleVote
-                    ? response.data.article.articleVote.is_helpful
+                feedback.value = response.data.article.vote
+                    ? response.data.article.vote.is_helpful
                     : null;
-                featureFlag.value = response.data.feature_flag;
+                articalWasHelpfulFeatureFlag.value = response.data.article_was_helpful_feature_flag;
             },
         );
     }
@@ -116,8 +111,6 @@
         const response = await post(props.apiUrl + '/knowledge_base_article_vote/store', {
             article_vote: feedback.value,
             articleId: route.params.articleId,
-            userId: user ? user.id : sessionStorage.getItem('guest_id'),
-            userType: user ? 'Contact' : 'PortalGuest',
         });
         location.reload();
     }
@@ -158,7 +151,7 @@
                                     <div v-html="DOMPurify.sanitize(article.content)"></div>
                                     <div
                                         class="flex items-center justify-center mt-6 p-4 border rounded-lg"
-                                        v-if="featureFlag"
+                                        v-if="articalWasHelpfulFeatureFlag"
                                     >
                                         <p class="text-lg font-semibold mr-4">Was this content helpful?</p>
                                         <div class="flex space-x-2">

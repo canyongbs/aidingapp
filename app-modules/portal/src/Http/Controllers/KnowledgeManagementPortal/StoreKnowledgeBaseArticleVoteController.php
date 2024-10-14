@@ -36,32 +36,36 @@
 
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Portal\Models\PortalGuest;
 use AidingApp\Portal\Models\KnowledgeBaseArticleVote;
+use AidingApp\Portal\Http\Requests\StoreKnowledgeBaseArticleVoteRequest;
 
 class StoreKnowledgeBaseArticleVoteController extends Controller
 {
-    public function __invoke(Request $request): JsonResponse
+    public function __invoke(StoreKnowledgeBaseArticleVoteRequest $request): JsonResponse
     {
         $articleVote = [];
+        $voterType = session()->has('guest_id') ? PortalGuest::class : Contact::class;
+        $voterId = session()->has('guest_id') ? session('guest_id') : auth('contact')->user()->id;
 
-        if ($request->article_vote === true || $request->article_vote === false) {
-            $articleVote = KnowledgeBaseArticleVote::where('article_id', $request->articleId)->where('user_id', $request->userId)->first();
+        if (! is_null($request->article_vote)) {
+            $articleVote = KnowledgeBaseArticleVote::where('article_id', $request->articleId)->where('voter_id', $voterId)->first();
 
             if (empty($articleVote)) {
                 $articleVote = new KnowledgeBaseArticleVote();
             }
             $articleVote->is_helpful = $request->article_vote;
-            $articleVote->user_id = $request->userId;
-            $articleVote->user_type = $request->userType;
+            $articleVote->voter_id = $voterId;
+            $articleVote->voter_type = $voterType;
             $articleVote->article_id = $request->articleId;
             $articleVote->save();
         } else {
-            KnowledgeBaseArticleVote::where('article_id', $request->articleId)->where('user_id', $request->userId)->delete();
+            KnowledgeBaseArticleVote::where('article_id', $request->articleId)->where('voter_id', $voterId)->delete();
         }
 
-        return response()->json($articleVote, 201);
+        return response()->json($articleVote, 200);
     }
 }

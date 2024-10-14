@@ -41,9 +41,7 @@ use Filament\Support\Colors\Color;
 use App\Features\ArticleWasHelpful;
 use Illuminate\Support\Facades\URL;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Vite;
-use Illuminate\Support\Facades\Session;
 use AidingApp\Portal\Enums\PortalLayout;
 use AidingApp\Portal\Models\PortalGuest;
 use AidingApp\Portal\Settings\PortalSettings;
@@ -58,9 +56,9 @@ class KnowledgeManagementPortalController extends Controller
         $favicon = $settings->getSettingsPropertyModel('portal.favicon')
             ->getFirstMedia('portal_favicon');
 
-        if (! $settings->knowledge_management_portal_requires_authentication && ! Session::exists('guest_id') && ! Auth::guard('contact')->check() && ArticleWasHelpful::active()) {
+        if (ArticleWasHelpful::active() && ! auth()->guard('contact')->check() && ! session()->has('guest_id')) {
             $portalGuest = PortalGuest::create();
-            Session::put('guest_id', $portalGuest->id);
+            session()->put('guest_id', $portalGuest->getKey());
         }
 
         return response()->json([
@@ -84,7 +82,7 @@ class KnowledgeManagementPortalController extends Controller
                 )
             ),
             'footer_logo' => Vite::asset('resources/images/canyon-logo-light.png'),
-            'guest_id' => Session::get('guest_id'),
+
         ]);
     }
 }

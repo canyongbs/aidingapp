@@ -41,7 +41,6 @@ use Illuminate\Http\JsonResponse;
 use App\Features\ArticleWasHelpful;
 use App\Http\Controllers\Controller;
 use AidingApp\Contact\Models\Contact;
-use Illuminate\Support\Facades\Session;
 use AidingApp\Portal\Models\PortalGuest;
 
 class KnowledgeManagementPortalLogoutController extends Controller
@@ -61,14 +60,14 @@ class KnowledgeManagementPortalLogoutController extends Controller
 
         auth('contact')->logout();
 
-        if (! Session::has('guest_id') && ArticleWasHelpful::active()) {
+        if (ArticleWasHelpful::active() && ! session()->has('guest_id')) {
             $portalGuest = PortalGuest::create();
-            Session::put('guest_id', $portalGuest->id);
+            session()->put('guest_id', $portalGuest->getKey());
         }
 
         return response()->json([
             'success' => true,
-            'guest_id' => Session::get('guest_id'),
+            'guest_id' => session('guest_id'),
             'redirect_url' => route('portal.show'),
         ]);
     }

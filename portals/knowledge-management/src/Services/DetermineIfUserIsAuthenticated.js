@@ -47,13 +47,7 @@ async function determineIfUserIsAuthenticated(endpoint) {
             const isAuthenticated = response.status === 200;
             if (isAuthenticated) {
                 const { setUser } = useAuthStore();
-                if (sessionStorage.getItem('guest_id')) {
-                    sessionStorage.removeItem('guest_id');
-                }
                 setUser(response.data);
-            } else if (!sessionStorage.getItem('guest_id')) {
-                const { setguestId } = useAuthStore();
-                setguestId(response.data.guest_id);
             }
 
             return isAuthenticated;

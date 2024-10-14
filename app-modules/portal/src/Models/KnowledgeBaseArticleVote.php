@@ -36,12 +36,12 @@
 
 namespace AidingApp\Portal\Models;
 
-use App\Models\BaseModel;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class KnowledgeBaseArticleVote extends BaseModel
+class KnowledgeBaseArticleVote extends Pivot
 {
     use HasUuids;
 
@@ -49,14 +49,16 @@ class KnowledgeBaseArticleVote extends BaseModel
         'is_helpful' => 'boolean',
     ];
 
+    protected $table = 'knowledge_base_article_votes';
+
     protected $fillable = [
         'is_helpful',
-        'user_id',
-        'user_type',
+        'voter_id',
+        'voter_type',
         'article_id',
     ];
 
-    public function morphable()
+    public function voter()
     {
         return $this->morphTo();
     }
