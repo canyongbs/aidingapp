@@ -197,10 +197,10 @@ test('service requests only visible to service request type managers', function 
 
     $serviceRequestsWithManager = ServiceRequest::factory()->state([
         'priority_id' => ServiceRequestPriority::factory()->create([
-            'type_id' => $serviceRequestType->id,
-        ])->id,
+            'type_id' => $serviceRequestType->getKey(),
+        ])->getKey(),
     ])
-        ->count(10)
+        ->count(3)
         ->create();
 
     livewire(ListServiceRequests::class)
@@ -237,17 +237,17 @@ test('service requests only visible to service request type auditors', function 
 
     $serviceRequestType->auditors()->attach($team);
 
-    $serviceRequestsWithManager = ServiceRequest::factory()->state([
+    $serviceRequestsWithAuditors= ServiceRequest::factory()->state([
         'priority_id' => ServiceRequestPriority::factory()->create([
-            'type_id' => $serviceRequestType->id,
-        ])->id,
+            'type_id' => $serviceRequestType->getKey(),
+        ])->getKey(),
     ])
-        ->count(10)
+        ->count(3)
         ->create();
 
     livewire(ListServiceRequests::class)
         ->assertCanSeeTableRecords(
-            $serviceRequestsWithManager
+            $serviceRequestsWithAuditors
         )
         ->assertCanNotSeeTableRecords($serviceRequests);
 });

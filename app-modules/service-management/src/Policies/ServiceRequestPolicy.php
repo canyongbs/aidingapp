@@ -76,27 +76,22 @@ class ServiceRequestPolicy
             return Response::deny('You do not have permission to view this service request.');
         }
 
-        if(auth()->user()->hasRole('authorization.super_admin')){
-            return $authenticatable->canOrElse(
-                abilities: ['service_request.*.view', "service_request.{$serviceRequest->id}.view"],
-                denyResponse: 'You do not have permission to view this service request.'
-            );
-        }
-
-        if ($serviceRequest?->priority?->type?->managers()->exists() || $serviceRequest?->priority?->type?->auditors()->exists()) {
-           
+        if (!auth()->user()->hasRole('authorization.super_admin')) {
             $team = auth()->user()->teams()->first();
-
-            if ($serviceRequest?->priority?->type?->managers->contains('id', $team?->getKey()) || $serviceRequest?->priority?->type?->auditors->contains('id', $team?->getKey())) {
-            
-                return $authenticatable->canOrElse(
-                    abilities: ['service_request.*.view', "service_request.{$serviceRequest->id}.view"],
-                    denyResponse: 'You do not have permission to view this service request.'
-                );
+        
+            if (!$serviceRequest?->priority?->type?->managers()->exists() && !$serviceRequest?->priority?->type?->auditors()->exists()) {
+                return Response::deny("You don't have permission to view this service request because you're not an auditor or manager.");
+            }
+        
+            if (!$serviceRequest?->priority?->type?->managers->contains('id', $team?->getKey()) && !$serviceRequest?->priority?->type?->auditors->contains('id', $team?->getKey())) {
+                return Response::deny("You don't have permission to view this service request because you're not an auditor or manager.");
             }
         }
-
-        return Response::deny('You don\'t have permission to view this service request because you\'re not an auditor or manager.');
+        
+        return $authenticatable->canOrElse(
+            abilities: ['service_request.*.view', "service_request.{$serviceRequest->id}.view"],
+            denyResponse: 'You do not have permission to view this service request.'
+        );
     }
 
     public function create(Authenticatable $authenticatable): Response

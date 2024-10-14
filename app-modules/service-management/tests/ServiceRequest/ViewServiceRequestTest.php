@@ -141,7 +141,7 @@ test('service request lock icon is shown when status classification closed', fun
     $serviceRequest = ServiceRequest::factory([
         'status_id' => ServiceRequestStatus::factory()->create([
             'classification' => SystemServiceRequestClassification::Closed,
-        ])->id,
+        ])->getKey(),
     ])->create();
 
     livewire($pages, [
@@ -155,7 +155,7 @@ test('service request lock icon is shown when status classification closed', fun
     ManageServiceRequestUpdate::class,
 ]);
 
-test('service requests not visible if service request type has no auditors/managers', function () {
+test('service requests not authorized if user is not an auditor or manager of the service request type', function () {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -165,6 +165,7 @@ test('service requests not visible if service request type has no auditors/manag
     $user = User::factory()->licensed([Contact::getLicenseType()])->create();
 
     $user->givePermissionTo('service_request.view-any');
+    $user->givePermissionTo('service_request.*.view');
 
     $user->refresh();
 
@@ -179,7 +180,7 @@ test('service requests not visible if service request type has no auditors/manag
         ->assertForbidden();
 });
 
-test('view service request page visible if service request type has auditors', function () {
+test('view service request page visible if the user is an auditor of the service request type', function () {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -203,20 +204,20 @@ test('view service request page visible if service request type has auditors', f
 
     $serviceRequestType->auditors()->attach($team);
 
-    $serviceRequestsWithManager = ServiceRequest::factory()->state([
+    $serviceRequestsWithAuditor = ServiceRequest::factory()->state([
         'priority_id' => ServiceRequestPriority::factory()->create([
-            'type_id' => $serviceRequestType->id,
-        ])->id,
+            'type_id' => $serviceRequestType->getKey(),
+        ])->getKey(),
     ])
         ->create();
 
     livewire(ViewServiceRequest::class, [
-        'record' => $serviceRequestsWithManager->getRouteKey(),
+        'record' => $serviceRequestsWithAuditor->getRouteKey(),
     ])
         ->assertSuccessful();
 });
 
-test('view service request page visible if service request type has managers', function () {
+test('view service request page visible if the user is a manager of the service request type', function () {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -242,8 +243,8 @@ test('view service request page visible if service request type has managers', f
 
     $serviceRequestsWithManager = ServiceRequest::factory()->state([
         'priority_id' => ServiceRequestPriority::factory()->create([
-            'type_id' => $serviceRequestType->id,
-        ])->id,
+            'type_id' => $serviceRequestType->getKey(),
+        ])->getKey(),
     ])
         ->create();
 

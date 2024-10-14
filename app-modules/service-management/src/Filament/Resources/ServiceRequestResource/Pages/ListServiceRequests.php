@@ -75,11 +75,11 @@ class ListServiceRequests extends ListRecords
                 ],
                 'status',
             ])
-            ->when(!auth()->user()->hasRole('authorization.super_admin'),function($q){
-                return $q->whereHas('priority.type.managers',function($query){
-                    return $query->where('teams.id',auth()->user()->teams()->first()?->getKey());
-                })->orWhereHas('priority.type.auditors',function($query){
-                    return $query->where('teams.id',auth()->user()->teams()->first()?->getKey());
+            ->when(!auth()->user()->hasRole('authorization.super_admin'),function(Builder $q){
+                return $q->whereHas('priority.type.managers',function(Builder $query): void{
+                    $query->where('teams.id',auth()->user()->teams()->first()?->getKey());
+                })->orWhereHas('priority.type.auditors',function(Builder $query): void {
+                    $query->where('teams.id',auth()->user()->teams()->first()?->getKey());
                 });
             }))
             ->columns([
