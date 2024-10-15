@@ -44,5 +44,9 @@ class KnowledgeManagement extends Cluster
 
     protected static ?string $navigationGroup = 'Product Administration';
 
+    protected static ?string $navigationLabel = 'Knowledge Base';
+
+    protected static ?string $clusterBreadcrumb = 'Knowledge Base';
+
     protected static ?int $navigationSort = 7;
 }
