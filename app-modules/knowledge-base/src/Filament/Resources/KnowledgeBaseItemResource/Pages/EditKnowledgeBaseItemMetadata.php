@@ -36,7 +36,9 @@
 
 namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource\Pages;
 
+use App\Features\FeaturedArticle;
 use App\Models\Scopes\TagsForClass;
+use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Section;
@@ -48,8 +50,6 @@ use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
-use App\Features\FeaturedArticle;
-use Filament\Forms\Components\Grid;
 
 class EditKnowledgeBaseItemMetadata
 {
@@ -80,7 +80,7 @@ class EditKnowledgeBaseItemMetadata
                         ->relationship(
                             'tags',
                             'name',
-                            fn(Builder $query) => $query->tap(new TagsForClass(new KnowledgeBaseItem()))
+                            fn (Builder $query) => $query->tap(new TagsForClass(new KnowledgeBaseItem()))
                         )
                         ->searchable()
                         ->preload()
