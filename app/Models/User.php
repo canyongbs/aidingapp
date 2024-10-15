@@ -73,6 +73,7 @@ use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use AidingApp\ServiceManagement\Models\ChangeRequestType;
 use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\InAppCommunication\Models\TwilioConversation;
 use AidingApp\Engagement\Models\Concerns\HasManyEngagements;
 use AidingApp\Timeline\Models\Contracts\HasFilamentResource;
@@ -304,6 +305,11 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
             ->using(TeamUser::class)
             ->limit(1)
             ->withTimestamps();
+    }
+
+    public function serviceRequestTypeIndividualAssignment(): HasMany
+    {
+        return $this->hasMany(ServiceRequestType::class, 'assignment_type_individual_id', 'id');
     }
 
     public function assistantChatMessageLogs(): HasMany

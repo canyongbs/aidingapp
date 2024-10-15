@@ -48,6 +48,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pa
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\CreateServiceRequestType;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\ManageServiceRequestTypeAuditors;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\ManageServiceRequestTypeManagers;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\EditServiceRequestTypeAssignments;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\RelationManagers\ServiceRequestPrioritiesRelationManager;
 
 class ServiceRequestTypeResource extends Resource
@@ -82,6 +83,7 @@ class ServiceRequestTypeResource extends Resource
             EditServiceRequestType::class,
             ManageServiceRequestTypeManagers::class,
             ManageServiceRequestTypeAuditors::class,
+            EditServiceRequestTypeAssignments::class,
         ]);
     }
 
@@ -94,6 +96,7 @@ class ServiceRequestTypeResource extends Resource
             'edit' => EditServiceRequestType::route('/{record}/edit'),
             'service-request-type-managers' => ManageServiceRequestTypeManagers::route('/{record}/managers'),
             'service-request-type-auditors' => ManageServiceRequestTypeAuditors::route('/{record}/auditors'),
+            'service-request-type-assignments' => EditServiceRequestTypeAssignments::route('/{record}/assignments'),
         ];
     }
 }

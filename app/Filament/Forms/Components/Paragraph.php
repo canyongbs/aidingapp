@@ -34,31 +34,48 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Models;
+namespace App\Filament\Forms\Components;
 
-use AidingApp\Team\Models\Team;
-use Illuminate\Database\Eloquent\Relations\Pivot;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Closure;
+use Filament\Forms\Components\Component;
 
-/**
- * @mixin IdeHelperServiceRequestTypeAuditor
- */
-class ServiceRequestTypeAuditor extends Pivot
+class Paragraph extends Component
 {
-    use HasFactory;
-    use HasUuids;
+    protected mixed $content = null;
 
-    protected $table = 'service_request_type_auditors';
+    protected string | Closure | null $defaultView = 'filament.forms.components.paragraph';
 
-    public function team(): BelongsTo
+    protected function setUp(): void
     {
-        return $this->belongsTo(Team::class);
+        parent::setUp();
+
+        $this->dehydrated(false);
+
+        $this->columnSpanFull();
     }
 
-    public function serviceRequestType(): BelongsTo
+    public static function make(): static
     {
-        return $this->belongsTo(ServiceRequestType::class);
+        $static = app(static::class);
+        $static->configure();
+
+        return $static;
+    }
+
+    public function content(mixed $content): static
+    {
+        $this->content = $content;
+
+        return $this;
+    }
+
+    public function getId(): string
+    {
+        return parent::getId() ?? $this->getStatePath();
+    }
+
+    public function getContent(): mixed
+    {
+        return $this->evaluate($this->content);
     }
 }

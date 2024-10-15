@@ -34,31 +34,49 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Models;
+namespace AidingApp\ServiceManagement\Tests\RequestFactories;
 
+use App\Models\User;
 use AidingApp\Team\Models\Team;
-use Illuminate\Database\Eloquent\Relations\Pivot;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Worksome\RequestFactories\RequestFactory;
+use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
 
-/**
- * @mixin IdeHelperServiceRequestTypeAuditor
- */
-class ServiceRequestTypeAuditor extends Pivot
+class EditServiceRequestTypeAssignmentsRequestFactory extends RequestFactory
 {
-    use HasFactory;
-    use HasUuids;
-
-    protected $table = 'service_request_type_auditors';
-
-    public function team(): BelongsTo
+    public function definition(): array
     {
-        return $this->belongsTo(Team::class);
+        return [
+            'assignment_type' => fake()->randomElement(ServiceRequestTypeAssignmentTypes::cases())->value,
+        ];
     }
 
-    public function serviceRequestType(): BelongsTo
+    public function withRandomTypeNotIncludingIndividual(): static
     {
-        return $this->belongsTo(ServiceRequestType::class);
+        return $this->state([
+            'assignment_type' => fake()->randomElement(array_filter(ServiceRequestTypeAssignmentTypes::cases(), fn (ServiceRequestTypeAssignmentTypes $type) => $type !== ServiceRequestTypeAssignmentTypes::Individual))->value,
+        ]);
+    }
+
+    public function withIndividualType(): static
+    {
+        return $this->state([
+            'assignment_type' => ServiceRequestTypeAssignmentTypes::Individual->value,
+        ]);
+    }
+
+    public function withIndividualId(?Team $team = null): static
+    {
+        $userFactory = User::factory();
+
+        if ($team) {
+            $userFactory = $userFactory->hasAttached(
+                factory: $team,
+                relationship: 'teams'
+            );
+        }
+
+        return $this->state([
+            'assignment_type_individual_id' => $userFactory,
+        ]);
     }
 }
