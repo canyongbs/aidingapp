@@ -34,31 +34,23 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Models;
+namespace AidingApp\ServiceManagement\Enums;
 
-use AidingApp\Team\Models\Team;
-use Illuminate\Database\Eloquent\Relations\Pivot;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Filament\Support\Contracts\HasLabel;
 
-/**
- * @mixin IdeHelperServiceRequestTypeAuditor
- */
-class ServiceRequestTypeAuditor extends Pivot
+// TODO This might belong in a more generalized space so we can re-use this across modules
+enum ServiceRequestTypeAssignmentTypes: string implements HasLabel
 {
-    use HasFactory;
-    use HasUuids;
+    case None = 'none';
 
-    protected $table = 'service_request_type_auditors';
+    case Individual = 'individual';
 
-    public function team(): BelongsTo
+    case RoundRobin = 'round-robin';
+
+    case Workload = 'workload';
+
+    public function getLabel(): string
     {
-        return $this->belongsTo(Team::class);
-    }
-
-    public function serviceRequestType(): BelongsTo
-    {
-        return $this->belongsTo(ServiceRequestType::class);
+        return str()->headline($this->name);
     }
 }

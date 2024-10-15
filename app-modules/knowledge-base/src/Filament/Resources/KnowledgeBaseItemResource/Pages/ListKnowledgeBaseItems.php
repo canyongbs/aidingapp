@@ -66,7 +66,7 @@ use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource;
 
 class ListKnowledgeBaseItems extends ListRecords
 {
-    protected ?string $heading = 'Knowledge Management';
+    protected ?string $heading = 'Knowledge Base';
 
     protected static string $resource = KnowledgeBaseItemResource::class;
 

@@ -327,8 +327,6 @@ namespace App\Models{
  * @property mixed $payload
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection<int, \Spatie\MediaLibrary\MediaCollections\Models\Media> $media
- * @property-read int|null $media_count
  * @method static \Illuminate\Database\Eloquent\Builder|SettingsProperty newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|SettingsProperty newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|SettingsProperty query()
@@ -521,6 +519,8 @@ namespace App\Models{
  * @property-read int|null $roles_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\ServiceManagement\Models\ServiceRequestAssignment> $serviceRequestAssignments
  * @property-read int|null $service_request_assignments_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\ServiceManagement\Models\ServiceRequestType> $serviceRequestTypeIndividualAssignment
+ * @property-read int|null $service_request_type_individual_assignment_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Notification\Models\Subscription> $subscriptions
  * @property-read int|null $subscriptions_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Team\Models\Team> $teams
@@ -1261,6 +1261,8 @@ namespace AidingApp\Contact\Models{
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property array|null $domains
+ * @property bool $is_contact_generation_enabled
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
  * @property-read int|null $audits_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Contact\Models\Contact> $contacts
@@ -1280,10 +1282,12 @@ namespace AidingApp\Contact\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|Organization whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Organization whereDeletedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Organization whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Organization whereDomains($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Organization whereEmail($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Organization whereFacebookUrl($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Organization whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Organization whereIndustryId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Organization whereIsContactGenerationEnabled($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Organization whereLinkedinUrl($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Organization whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Organization whereNumberOfEmployees($value)
@@ -2158,6 +2162,7 @@ namespace AidingApp\KnowledgeBase\Models{
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property int $portal_view_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
  * @property-read int|null $audits_count
  * @property-read \AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory|null $category
@@ -2181,6 +2186,7 @@ namespace AidingApp\KnowledgeBase\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseItem whereDeletedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseItem whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseItem whereNotes($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseItem wherePortalViewCount($value)
  * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseItem wherePublic($value)
  * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseItem whereQualityId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseItem whereStatusId($value)
@@ -2963,6 +2969,7 @@ namespace AidingApp\ServiceManagement\Models{
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property bool $is_system_protected
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
  * @property-read int|null $audits_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\ServiceManagement\Models\ServiceRequest> $serviceRequests
@@ -2977,6 +2984,7 @@ namespace AidingApp\ServiceManagement\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestStatus whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestStatus whereDeletedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestStatus whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestStatus whereIsSystemProtected($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestStatus whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestStatus whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestStatus withTrashed()
@@ -3001,9 +3009,16 @@ namespace AidingApp\ServiceManagement\Models{
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property \AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes $assignment_type
+ * @property string|null $assignment_type_individual_id
+ * @property-read \App\Models\User|null $assignmentTypeIndividual
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Team\Models\Team> $auditors
+ * @property-read int|null $auditors_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
  * @property-read int|null $audits_count
  * @property-read \AidingApp\ServiceManagement\Models\ServiceRequestForm|null $form
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Team\Models\Team> $managers
+ * @property-read int|null $managers_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\ServiceManagement\Models\ServiceRequestPriority> $priorities
  * @property-read int|null $priorities_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\ServiceManagement\Models\ServiceRequest> $serviceRequests
@@ -3013,6 +3028,8 @@ namespace AidingApp\ServiceManagement\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType onlyTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType query()
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereAssignmentType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereAssignmentTypeIndividualId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereDeletedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereDescription($value)
@@ -3029,6 +3046,58 @@ namespace AidingApp\ServiceManagement\Models{
  */
 	#[\AllowDynamicProperties]
 	class IdeHelperServiceRequestType {}
+}
+
+namespace AidingApp\ServiceManagement\Models{
+/**
+ * AidingApp\ServiceManagement\Models\ServiceRequestTypeAuditor
+ *
+ * @property string $id
+ * @property string $service_request_type_id
+ * @property string $team_id
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \AidingApp\ServiceManagement\Models\ServiceRequestType $serviceRequestType
+ * @property-read \AidingApp\Team\Models\Team $team
+ * @method static \AidingApp\ServiceManagement\Database\Factories\ServiceRequestTypeAuditorFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestTypeAuditor newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestTypeAuditor newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestTypeAuditor query()
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestTypeAuditor whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestTypeAuditor whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestTypeAuditor whereServiceRequestTypeId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestTypeAuditor whereTeamId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestTypeAuditor whereUpdatedAt($value)
+ * @mixin \Eloquent
+ */
+	#[\AllowDynamicProperties]
+	class IdeHelperServiceRequestTypeAuditor {}
+}
+
+namespace AidingApp\ServiceManagement\Models{
+/**
+ * AidingApp\ServiceManagement\Models\ServiceRequestTypeManager
+ *
+ * @property string $id
+ * @property string $service_request_type_id
+ * @property string $team_id
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \AidingApp\ServiceManagement\Models\ServiceRequestType $serviceRequestType
+ * @property-read \AidingApp\Team\Models\Team $team
+ * @method static \AidingApp\ServiceManagement\Database\Factories\ServiceRequestTypeManagerFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestTypeManager newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestTypeManager newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestTypeManager query()
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestTypeManager whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestTypeManager whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestTypeManager whereServiceRequestTypeId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestTypeManager whereTeamId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestTypeManager whereUpdatedAt($value)
+ * @mixin \Eloquent
+ */
+	#[\AllowDynamicProperties]
+	class IdeHelperServiceRequestTypeManager {}
 }
 
 namespace AidingApp\ServiceManagement\Models{
@@ -3164,7 +3233,11 @@ namespace AidingApp\Team\Models{
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property string|null $deleted_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\ServiceManagement\Models\ServiceRequestType> $auditableServiceRequestTypes
+ * @property-read int|null $auditable_service_request_types_count
  * @property-read \AidingApp\Division\Models\Division|null $division
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\ServiceManagement\Models\ServiceRequestType> $managableServiceRequestTypes
+ * @property-read int|null $managable_service_request_types_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $users
  * @property-read int|null $users_count
  * @method static \AidingApp\Team\Database\Factories\TeamFactory factory($count = null, $state = [])

@@ -1,6 +1,4 @@
-<?php
-
-/*
+{{--
 <COPYRIGHT>
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
@@ -32,33 +30,13 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
-
-namespace AidingApp\ServiceManagement\Models;
-
-use AidingApp\Team\Models\Team;
-use Illuminate\Database\Eloquent\Relations\Pivot;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-
-/**
- * @mixin IdeHelperServiceRequestTypeAuditor
- */
-class ServiceRequestTypeAuditor extends Pivot
-{
-    use HasFactory;
-    use HasUuids;
-
-    protected $table = 'service_request_type_auditors';
-
-    public function team(): BelongsTo
-    {
-        return $this->belongsTo(Team::class);
-    }
-
-    public function serviceRequestType(): BelongsTo
-    {
-        return $this->belongsTo(ServiceRequestType::class);
-    }
-}
+--}}
+<x-dynamic-component
+    :component="$getFieldWrapperView()"
+    :id="$getId()"
+>
+    <h1
+        {{ $attributes->merge($getExtraAttributes(), escape: false)->class(['text-2xl font-bold tracking-tight text-gray-950 dark:text-white sm:text-3xl']) }}>
+        {{ $getContent() }}
+    </h1>
+</x-dynamic-component>

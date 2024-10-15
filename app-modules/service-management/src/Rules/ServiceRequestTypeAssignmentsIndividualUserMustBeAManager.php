@@ -34,31 +34,28 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Models;
+namespace AidingApp\ServiceManagement\Rules;
 
-use AidingApp\Team\Models\Team;
-use Illuminate\Database\Eloquent\Relations\Pivot;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Translation\PotentiallyTranslatedString;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
 
-/**
- * @mixin IdeHelperServiceRequestTypeAuditor
- */
-class ServiceRequestTypeAuditor extends Pivot
+class ServiceRequestTypeAssignmentsIndividualUserMustBeAManager implements ValidationRule
 {
-    use HasFactory;
-    use HasUuids;
+    public function __construct(
+        protected ServiceRequestType $serviceRequestType
+    ) {}
 
-    protected $table = 'service_request_type_auditors';
-
-    public function team(): BelongsTo
+    /**
+     * Run the validation rule.
+     *
+     * @param Closure(string): PotentiallyTranslatedString $fail
+     */
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        return $this->belongsTo(Team::class);
-    }
-
-    public function serviceRequestType(): BelongsTo
-    {
-        return $this->belongsTo(ServiceRequestType::class);
+        if ($this->serviceRequestType->managers()->whereRelation('users', 'users.id', $value)->doesntExist()) {
+            $fail('The selected user must be in a team designated as managers of this Service Request Type.');
+        }
     }
 }

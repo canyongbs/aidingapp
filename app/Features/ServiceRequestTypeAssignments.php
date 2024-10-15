@@ -34,31 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Models;
+namespace App\Features;
 
-use AidingApp\Team\Models\Team;
-use Illuminate\Database\Eloquent\Relations\Pivot;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Support\AbstractFeatureFlag;
 
-/**
- * @mixin IdeHelperServiceRequestTypeAuditor
- */
-class ServiceRequestTypeAuditor extends Pivot
+class ServiceRequestTypeAssignments extends AbstractFeatureFlag
 {
-    use HasFactory;
-    use HasUuids;
-
-    protected $table = 'service_request_type_auditors';
-
-    public function team(): BelongsTo
+    public function resolve(mixed $scope): mixed
     {
-        return $this->belongsTo(Team::class);
-    }
-
-    public function serviceRequestType(): BelongsTo
-    {
-        return $this->belongsTo(ServiceRequestType::class);
+        return false;
     }
 }
