@@ -147,7 +147,7 @@
                                     <hr class="my-4" />
                                     <div v-html="DOMPurify.sanitize(article.content)"></div>
                                     <div
-                                        class="flex items-center justify-center mt-6 p-4 border rounded-lg"
+                                        class="flex items-center mt-6 p-4 border rounded-lg"
                                         v-if="articalWasHelpfulFeatureFlag"
                                     >
                                         <p class="text-lg font-semibold mr-4">Was this content helpful?</p>
