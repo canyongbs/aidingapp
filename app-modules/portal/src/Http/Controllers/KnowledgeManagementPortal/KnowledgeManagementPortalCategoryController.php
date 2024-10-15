@@ -40,6 +40,7 @@ use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\Portal\DataTransferObjects\KnowledgeBaseCategoryData;
+use App\Features\FeaturedArticle;
 
 class KnowledgeManagementPortalCategoryController extends Controller
 {
@@ -79,6 +80,8 @@ class KnowledgeManagementPortalCategoryController extends Controller
                     $category->name = $category->title;
                     $category->categoryId = $category->category_id;
                     $category->id = $category->getKey();
+                    
+                    $category->featured = FeaturedArticle::active() ? $category->featured : false;
                     $category->tags = $category->tags()
                         ->orderBy('name')
                         ->select([

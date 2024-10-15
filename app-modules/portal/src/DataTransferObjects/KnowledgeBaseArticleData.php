@@ -40,12 +40,13 @@ use Spatie\LaravelData\Data;
 
 class KnowledgeBaseArticleData extends Data
 {
-    public function __construct(
-        public string $id,
-        public ?string $categoryId,
-        public string $name,
-        public ?string $lastUpdated,
-        public ?string $content,
-        public ?array $tags,
-    ) {}
+  public function __construct(
+    public string $id,
+    public ?string $categoryId,
+    public string $name,
+    public ?string $lastUpdated,
+    public ?string $content,
+    public ?array $tags,
+    public bool $featured,
+  ) {}
 }

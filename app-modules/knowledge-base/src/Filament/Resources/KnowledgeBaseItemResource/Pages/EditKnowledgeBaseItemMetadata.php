@@ -48,6 +48,8 @@ use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
+use App\Features\FeaturedArticle;
+use Filament\Forms\Components\Grid;
 
 class EditKnowledgeBaseItemMetadata
 {
@@ -56,11 +58,20 @@ class EditKnowledgeBaseItemMetadata
         return [
             Section::make()
                 ->schema([
-                    Toggle::make('public')
-                        ->label('Public')
-                        ->default(false)
-                        ->onColor('success')
-                        ->offColor('gray'),
+                    Grid::make(2)
+                        ->schema([
+                            Toggle::make('public')
+                                ->label('Public')
+                                ->default(false)
+                                ->onColor('success')
+                                ->offColor('gray'),
+                            Toggle::make('featured')
+                                ->label('Featured')
+                                ->default(false)
+                                ->onColor('success')
+                                ->offColor('gray')
+                                ->visible(FeaturedArticle::active()),
+                        ]),
                     Textarea::make('notes')
                         ->label('Notes')
                         ->columnSpanFull()
@@ -69,7 +80,7 @@ class EditKnowledgeBaseItemMetadata
                         ->relationship(
                             'tags',
                             'name',
-                            fn (Builder $query) => $query->tap(new TagsForClass(new KnowledgeBaseItem()))
+                            fn(Builder $query) => $query->tap(new TagsForClass(new KnowledgeBaseItem()))
                         )
                         ->searchable()
                         ->preload()

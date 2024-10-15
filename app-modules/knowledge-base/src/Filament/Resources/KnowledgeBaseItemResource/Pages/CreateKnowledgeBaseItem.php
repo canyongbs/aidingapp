@@ -51,6 +51,8 @@ use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource;
+use App\Features\FeaturedArticle;
+use Filament\Forms\Components\Grid;
 
 class CreateKnowledgeBaseItem extends CreateRecord
 {
@@ -66,11 +68,20 @@ class CreateKnowledgeBaseItem extends CreateRecord
                             ->label('Article Title')
                             ->required()
                             ->string(),
-                        Toggle::make('public')
-                            ->label('Public')
-                            ->default(false)
-                            ->onColor('success')
-                            ->offColor('gray'),
+                        Grid::make(2)
+                            ->schema([
+                                Toggle::make('public')
+                                    ->label('Public')
+                                    ->default(false)
+                                    ->onColor('success')
+                                    ->offColor('gray'),
+                                Toggle::make('featured')
+                                    ->label('Featured')
+                                    ->default(false)
+                                    ->onColor('success')
+                                    ->offColor('gray')
+                                    ->visible(FeaturedArticle::active()),
+                            ]),
                         Textarea::make('notes')
                             ->label('Notes')
                             ->string(),
@@ -78,7 +89,7 @@ class CreateKnowledgeBaseItem extends CreateRecord
                             ->relationship(
                                 'tags',
                                 'name',
-                                fn (Builder $query) => $query->tap(new TagsForClass(new KnowledgeBaseItem()))
+                                fn(Builder $query) => $query->tap(new TagsForClass(new KnowledgeBaseItem()))
                             )
                             ->searchable()
                             ->preload()

@@ -33,7 +33,7 @@
 -->
 <script setup>
     import { ChevronRightIcon } from '@heroicons/vue/20/solid/index.js';
-    import Tags from './Tags.vue';
+    import Tags from './Tags.vue';  
 
     defineProps({
         article: {
@@ -60,7 +60,7 @@
                 class="opacity-0 h-5 w-5 text-primary-600 transition-all group-hover:translate-x-2 group-hover:opacity-100"
             />
         </div>
-        <Tags :tags="article.tags" />
+        <Tags :tags="article.tags" :featured="article.featured"/>        
     </router-link>
 </template>
 
