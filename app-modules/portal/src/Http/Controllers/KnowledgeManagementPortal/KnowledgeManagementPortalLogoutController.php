@@ -67,7 +67,6 @@ class KnowledgeManagementPortalLogoutController extends Controller
 
         return response()->json([
             'success' => true,
-            'guest_id' => session('guest_id'),
             'redirect_url' => route('portal.show'),
         ]);
     }

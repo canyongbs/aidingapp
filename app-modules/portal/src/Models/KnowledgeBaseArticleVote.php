@@ -40,10 +40,12 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class KnowledgeBaseArticleVote extends Pivot
 {
     use HasUuids;
+    use HasFactory;
 
     protected $casts = [
         'is_helpful' => 'boolean',
@@ -53,9 +55,6 @@ class KnowledgeBaseArticleVote extends Pivot
 
     protected $fillable = [
         'is_helpful',
-        'voter_id',
-        'voter_type',
-        'article_id',
     ];
 
     public function voter()
@@ -65,6 +64,6 @@ class KnowledgeBaseArticleVote extends Pivot
 
     public function knowledgeBaseArticle(): BelongsTo
     {
-        return $this->belongsTo(KnowledgeBaseItem::class);
+        return $this->belongsTo(KnowledgeBaseItem::class,'article_id');
     }
 }

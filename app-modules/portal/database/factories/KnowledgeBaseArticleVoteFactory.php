@@ -39,9 +39,10 @@ namespace AidingApp\Portal\Database\Factories;
 use AidingApp\Contact\Models\Contact;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use AidingApp\Portal\Models\KnowledgeBaseArticleVote;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AidingApp\Portal\Models\KnowledgeBaseArticleVote>
+ * @extends Factory<KnowledgeBaseArticleVote>
  */
 class KnowledgeBaseArticleVoteFactory extends Factory
 {

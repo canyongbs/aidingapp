@@ -37,6 +37,7 @@
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Portal\Models\PortalGuest;
@@ -50,17 +51,17 @@ class StoreKnowledgeBaseArticleVoteController extends Controller
         $articleVote = [];
         $voterType = session()->has('guest_id') ? PortalGuest::class : Contact::class;
         $voterId = session()->has('guest_id') ? session('guest_id') : auth('contact')->user()->id;
-
-        if (! is_null($request->article_vote)) {
+        if (! is_null($request->articleVote)) {
+            Log::info('here');
             $articleVote = KnowledgeBaseArticleVote::where('article_id', $request->articleId)->where('voter_id', $voterId)->first();
 
             if (empty($articleVote)) {
                 $articleVote = new KnowledgeBaseArticleVote();
+                $articleVote->voter_id = $voterId;
+                $articleVote->voter_type = $voterType;
+                $articleVote->article_id = $request->articleId;
             }
-            $articleVote->is_helpful = $request->article_vote;
-            $articleVote->voter_id = $voterId;
-            $articleVote->voter_type = $voterType;
-            $articleVote->article_id = $request->articleId;
+            $articleVote->is_helpful = $request->articleVote;
             $articleVote->save();
         } else {
             KnowledgeBaseArticleVote::where('article_id', $request->articleId)->where('voter_id', $voterId)->delete();

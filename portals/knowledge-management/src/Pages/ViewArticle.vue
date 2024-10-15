@@ -50,6 +50,10 @@
 
     const route = useRoute();
 
+    const { post } = consumer();
+
+    const { get } = consumer();
+
     const props = defineProps({
         searchUrl: {
             type: String,
@@ -85,9 +89,6 @@
 
     function getData() {
         loading.value = true;
-
-        const { get } = consumer();
-
         get(props.apiUrl + '/categories/' + route.params.categoryId + '/articles/' + route.params.articleId).then(
             (response) => {
                 category.value = response.data.category;
@@ -100,16 +101,20 @@
         );
     }
     async function toggleFeedback(type) {
-        if (feedback.value === type) {
-            feedback.value = null; // Unselect if the same button is clicked
-        } else {
-            feedback.value = type; // Select the clicked button
-        }
-        const { post } = consumer();
-        const response = await post(props.apiUrl + '/knowledge_base_article_vote/store', {
-            article_vote: feedback.value,
+        await post(props.apiUrl + '/knowledge_base_article_vote/store', {
+            articleVote: feedback.value === type ? null : type,
             articleId: route.params.articleId,
-        });
+        })
+            .then((response) => {
+                if (response.status === 200 && ! response.data) {
+                    feedback.value = null; 
+                } else if(response.status === 200) {
+                    feedback.value = response.data.is_helpful;
+                }
+            })
+            .catch((error) => {
+                console.error('Error submitting feedback:', error);
+            });
     }
 </script>
 

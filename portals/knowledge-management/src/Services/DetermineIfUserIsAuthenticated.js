@@ -45,6 +45,7 @@ async function determineIfUserIsAuthenticated(endpoint) {
         })
         .then((response) => {
             const isAuthenticated = response.status === 200;
+
             if (isAuthenticated) {
                 const { setUser } = useAuthStore();
                 setUser(response.data);
