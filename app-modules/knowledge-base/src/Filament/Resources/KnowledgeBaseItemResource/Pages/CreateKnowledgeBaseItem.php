@@ -75,7 +75,7 @@ class CreateKnowledgeBaseItem extends CreateRecord
                                     ->default(false)
                                     ->onColor('success')
                                     ->offColor('gray'),
-                                Toggle::make('featured')
+                                Toggle::make('is_featured')
                                     ->label('Featured')
                                     ->default(false)
                                     ->onColor('success')

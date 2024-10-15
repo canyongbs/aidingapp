@@ -81,7 +81,7 @@ class KnowledgeManagementPortalCategoryController extends Controller
                     $category->categoryId = $category->category_id;
                     $category->id = $category->getKey();
 
-                    $category->featured = FeaturedArticle::active() ? $category->featured : false;
+                    $category->featured = FeaturedArticle::active() ? $category->is_featured : false;
                     $category->tags = $category->tags()
                         ->orderBy('name')
                         ->select([

@@ -42,14 +42,14 @@ return new class () extends Migration {
     public function up(): void
     {
         Schema::table('knowledge_base_articles', function (Blueprint $table) {
-            $table->boolean('featured')->default(false);
+            $table->boolean('is_featured')->default(false);
         });
     }
 
     public function down(): void
     {
         Schema::table('knowledge_base_articles', function (Blueprint $table) {
-            $table->dropColumn('featured');
+            $table->dropColumn('is_featured');
         });
     }
 };
