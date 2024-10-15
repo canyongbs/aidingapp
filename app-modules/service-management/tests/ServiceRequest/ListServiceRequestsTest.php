@@ -47,10 +47,13 @@ use function Pest\Livewire\livewire;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
+use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ContactServiceManagement;
+use AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers\ServiceRequestsRelationManager;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ListServiceRequests;
 
 test('The correct details are displayed on the ListServiceRequests page', function () {
@@ -250,4 +253,48 @@ test('service requests only visible to service request type auditors', function 
             $serviceRequestsWithAuditors
         )
         ->assertCanNotSeeTableRecords($serviceRequests);
+});
+
+test('can list audit member to service request type', function () {
+
+    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
+    $team = Team::factory()->create();
+    $user->teams()->attach($team);
+    $user->refresh();
+
+    $contact = Contact::factory()->create();
+
+    $serviceRequestsWithoutManager = ServiceRequest::factory()
+                                    ->for($contact, 'respondent')
+                                    ->count(3)
+                                    ->create();
+
+    $serviceRequests = ServiceRequest::factory()->state([
+        'priority_id' => ServiceRequestPriority::factory()->for(ServiceRequestType::factory()
+        ->hasAttached($team,[],'managers'),'type'),
+    ])
+    ->for($contact, 'respondent')
+    ->count(3)
+    ->create();
+
+    actingAs($user)
+        ->get(
+            ContactResource::getUrl('service-management', [
+                'record' => $contact->getRouteKey(),
+            ])
+        )->assertForbidden();
+
+    $user->givePermissionTo('service_request.view-any');
+    $user->givePermissionTo('service_request.create');
+    $user->givePermissionTo('team.view-any');
+    $user->givePermissionTo('contact.view-any');
+
+    actingAs($user);
+
+    livewire(ServiceRequestsRelationManager::class, [
+        'ownerRecord' => $contact,
+        'pageClass' => ContactServiceManagement::class,
+    ])
+    ->assertCanSeeTableRecords($serviceRequests)
+    ->assertCanNotSeeTableRecords($serviceRequestsWithoutManager);
 });

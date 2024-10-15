@@ -57,6 +57,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
+use AidingApp\ServiceManagement\Rules\ManagedServiceRequestType;
 
 class EditServiceRequest extends EditRecord
 {
@@ -112,6 +113,7 @@ class EditServiceRequest extends EditRecord
                                     ->afterStateUpdated(fn (Set $set) => $set('priority_id', null))
                                     ->label('Type')
                                     ->required()
+                                    ->rule(new ManagedServiceRequestType())
                                     ->live()
                                     ->exists(ServiceRequestType::class, 'id')
                                     ->disableOptionWhen(fn (string $value) => $disabledTypes->contains($value)),

@@ -54,6 +54,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
+use AidingApp\ServiceManagement\Rules\ManagedServiceRequestType;
 
 class CreateServiceRequest extends CreateRecord
 {
@@ -91,6 +92,7 @@ class CreateServiceRequest extends CreateRecord
                                 });
                             })
                             ->pluck('name', 'id'))
+                            ->rule(new ManagedServiceRequestType())
                             ->afterStateUpdated(fn (Set $set) => $set('priority_id', null))
                             ->label('Type')
                             ->required()
