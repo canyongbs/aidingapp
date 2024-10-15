@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\User;
+use App\Models\SystemUser;
 use AidingApp\Contact\Models\Contact;
 
 /*
@@ -108,12 +110,12 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => App\Models\User::class,
+            'model' => User::class,
         ],
 
         'system-users' => [
             'driver' => 'eloquent',
-            'model' => App\Models\SystemUser::class,
+            'model' => SystemUser::class,
         ],
 
         'contacts' => [

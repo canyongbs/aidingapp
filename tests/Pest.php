@@ -45,12 +45,13 @@
 |
 */
 
+use Tests\TestCase;
 use App\Models\User;
 use Illuminate\Support\Collection;
 use AidingApp\Authorization\Models\Role;
 use AidingApp\Authorization\Enums\LicenseType;
 
-uses(Tests\TestCase::class)->in('../tests', '../app-modules/*/tests');
+uses(TestCase::class)->in('../tests', '../app-modules/*/tests');
 
 /*
 |--------------------------------------------------------------------------

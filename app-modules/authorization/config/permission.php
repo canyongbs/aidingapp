@@ -1,5 +1,8 @@
 <?php
 
+use AidingApp\Authorization\Models\Role;
+use AidingApp\Authorization\Models\Permission;
+
 /*
 <COPYRIGHT>
 
@@ -51,7 +54,7 @@ return [
          * `Spatie\Permission\Contracts\Permission` contract.
          */
 
-        'permission' => AidingApp\Authorization\Models\Permission::class,
+        'permission' => Permission::class,
 
         /*
          * When using the "HasRoles" trait from this package, we need to know which
@@ -62,7 +65,7 @@ return [
          * `Spatie\Permission\Contracts\Role` contract.
          */
 
-        'role' => AidingApp\Authorization\Models\Role::class,
+        'role' => Role::class,
     ],
 
     'table_names' => [
