@@ -106,9 +106,9 @@
             articleId: route.params.articleId,
         })
             .then((response) => {
-                if (response.status === 200 && ! response.data) {
-                    feedback.value = null; 
-                } else if(response.status === 200) {
+                if (response.status === 200 && !response.data) {
+                    feedback.value = null;
+                } else if (response.status === 200) {
                     feedback.value = response.data.is_helpful;
                 }
             })

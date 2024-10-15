@@ -64,6 +64,6 @@ class KnowledgeBaseArticleVote extends Pivot
 
     public function knowledgeBaseArticle(): BelongsTo
     {
-        return $this->belongsTo(KnowledgeBaseItem::class,'article_id');
+        return $this->belongsTo(KnowledgeBaseItem::class, 'article_id');
     }
 }

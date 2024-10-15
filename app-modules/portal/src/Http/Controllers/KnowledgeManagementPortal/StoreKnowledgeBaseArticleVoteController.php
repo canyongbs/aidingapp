@@ -51,6 +51,7 @@ class StoreKnowledgeBaseArticleVoteController extends Controller
         $articleVote = [];
         $voterType = session()->has('guest_id') ? PortalGuest::class : Contact::class;
         $voterId = session()->has('guest_id') ? session('guest_id') : auth('contact')->user()->id;
+
         if (! is_null($request->articleVote)) {
             Log::info('here');
             $articleVote = KnowledgeBaseArticleVote::where('article_id', $request->articleId)->where('voter_id', $voterId)->first();
