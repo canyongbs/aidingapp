@@ -156,6 +156,11 @@ $rules = [
         'import_symbols' => true,
         'leading_backslash_in_global_namespace' => false,
     ],
+    'global_namespace_import' => [
+        'import_classes' => true,
+        'import_constants' => true,
+        'import_functions' => true,
+    ],
     'single_line_empty_body' => true,
 ];
 
