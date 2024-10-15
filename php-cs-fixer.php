@@ -162,6 +162,7 @@ $rules = [
         'import_functions' => true,
     ],
     'single_line_empty_body' => true,
+    'no_useless_nullsafe_operator' => true,
 ];
 
 $finder = Finder::create()
