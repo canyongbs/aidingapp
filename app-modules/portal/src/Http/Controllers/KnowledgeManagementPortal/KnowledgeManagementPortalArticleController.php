@@ -49,7 +49,7 @@ class KnowledgeManagementPortalArticleController extends Controller
     {
         $article->increment('portal_view_count');
 
-        if (! empty($article) && $article->public === true) {
+        if ($article->public === true) {
             return response()->json([
                 'category' => KnowledgeBaseCategoryData::from([
                     'id' => $category->getKey(),
