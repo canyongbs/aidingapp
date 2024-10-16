@@ -56,10 +56,10 @@ use function Pest\Laravel\assertDatabaseMissing;
 
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\Tests\RequestFactories\CreateServiceRequestRequestFactory;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\CreateServiceRequest;
-use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 
 test('A successful action on the CreateServiceRequest page', function () {
     asSuperAdmin()
@@ -176,7 +176,7 @@ test('CreateServiceRequest is gated with proper access control', function () {
     $request = collect(CreateServiceRequestRequestFactory::new()->create([
         'priority_id' => ServiceRequestPriority::factory()->create([
             'type_id' => $serviceRequestTypesWithManager->getKey(),
-        ])->getKey()
+        ])->getKey(),
     ]));
 
     livewire(CreateServiceRequest::class)
@@ -244,7 +244,7 @@ test('CreateServiceRequest is gated with proper feature access control', functio
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    $serviceRequestType->auditors()->attach($team);
+    $serviceRequestType->managers()->attach($team);
 
     actingAs($user)
         ->get(
@@ -254,7 +254,7 @@ test('CreateServiceRequest is gated with proper feature access control', functio
     $request = collect(CreateServiceRequestRequestFactory::new()->create([
         'priority_id' => ServiceRequestPriority::factory()->create([
             'type_id' => $serviceRequestType->getKey(),
-        ])->getKey()
+        ])->getKey(),
     ]));
 
     livewire(CreateServiceRequest::class)
@@ -311,7 +311,6 @@ test('cannot create service requests if user is manager of any service request t
 });
 
 test('displays only service request types managed by the current user', function () {
-
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -332,22 +331,21 @@ test('displays only service request types managed by the current user', function
     actingAs($user);
 
     $serviceRequestTypesWithManagers = ServiceRequestType::factory()
-                                        ->hasAttached($team,[],'managers')
-                                        ->create();
+        ->hasAttached($team, [], 'managers')
+        ->create();
 
     $serviceRequestTypesWithoutManagers = ServiceRequestType::factory()->create();
 
     livewire(CreateServiceRequest::class)
         ->assertFormFieldExists('type_id', function (Select $field) use ($serviceRequestTypesWithManagers, $serviceRequestTypesWithoutManagers): bool {
             $options = $field->getOptions();
-            return in_array($serviceRequestTypesWithManagers->getKey(), array_keys($options)) &&
-                   !in_array($serviceRequestTypesWithoutManagers->getKey(), array_keys($options));
-        });
 
+            return in_array($serviceRequestTypesWithManagers->getKey(), array_keys($options)) &&
+                   ! in_array($serviceRequestTypesWithoutManagers->getKey(), array_keys($options));
+        });
 });
 
-test('create service requests if user is manager of any service request type',function(){
-
+test('create service requests if user is manager of any service request type', function () {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -376,7 +374,7 @@ test('create service requests if user is manager of any service request type',fu
     $request = collect(CreateServiceRequestRequestFactory::new()->create([
         'priority_id' => ServiceRequestPriority::factory()->create([
             'type_id' => $serviceRequestTypesWithManager->getKey(),
-        ])->getKey()
+        ])->getKey(),
     ]));
 
     livewire(CreateServiceRequest::class)
@@ -394,11 +392,9 @@ test('create service requests if user is manager of any service request type',fu
     $serviceRequest = ServiceRequest::first();
 
     expect($serviceRequest->division->id)->toEqual($request['division_id']);
-
 });
 
-test('validate service requests type if user is manager of any service request type',function(){
-
+test('validate service requests type if user is manager of any service request type', function () {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -424,7 +420,7 @@ test('validate service requests type if user is manager of any service request t
 
     $serviceRequestTypesWithManagers = ServiceRequestType::factory()->count(2)->create();
 
-    $serviceRequestTypesWithManagers->each(function($serviceRequest) use($team) {
+    $serviceRequestTypesWithManagers->each(function ($serviceRequest) use ($team) {
         $serviceRequest->managers()->attach($team);
     });
 
@@ -436,9 +432,8 @@ test('validate service requests type if user is manager of any service request t
             'respondent_id' => Contact::factory()->create()->getKey(),
             'priority_id' => ServiceRequestPriority::factory()->create([
                 'type_id' => $serviceRequestTypes->first()->getKey(),
-            ])->getKey()
+            ])->getKey(),
         ])
         ->call('create')
         ->assertHasFormErrors(['type_id']);
-
 });
