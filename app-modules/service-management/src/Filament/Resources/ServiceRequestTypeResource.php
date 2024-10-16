@@ -54,52 +54,52 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Re
 
 class ServiceRequestTypeResource extends Resource
 {
-  protected static ?string $model = ServiceRequestType::class;
+    protected static ?string $model = ServiceRequestType::class;
 
-  protected static ?string $navigationIcon = 'heroicon-m-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-m-rectangle-stack';
 
-  protected static ?int $navigationSort = 10;
+    protected static ?int $navigationSort = 10;
 
-  protected static ?string $cluster = ServiceManagementAdministration::class;
+    protected static ?string $cluster = ServiceManagementAdministration::class;
 
-  public static function getEloquentQuery(): Builder
-  {
-    return parent::getEloquentQuery()
-      ->withoutGlobalScopes([
-        SoftDeletingScope::class,
-      ]);
-  }
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ]);
+    }
 
-  public static function getRelations(): array
-  {
-    return [
-      ServiceRequestPrioritiesRelationManager::class,
-    ];
-  }
+    public static function getRelations(): array
+    {
+        return [
+            ServiceRequestPrioritiesRelationManager::class,
+        ];
+    }
 
-  public static function getRecordSubNavigation(Page $page): array
-  {
-    return $page->generateNavigationItems([
-      ViewServiceRequestType::class,
-      EditServiceRequestType::class,
-      ManageServiceRequestTypeManagers::class,
-      ManageServiceRequestTypeAuditors::class,
-      EditServiceRequestTypeAssignments::class,
-      EditServiceRequestTypeNotifications::class,
-    ]);
-  }
+    public static function getRecordSubNavigation(Page $page): array
+    {
+        return $page->generateNavigationItems([
+            ViewServiceRequestType::class,
+            EditServiceRequestType::class,
+            ManageServiceRequestTypeManagers::class,
+            ManageServiceRequestTypeAuditors::class,
+            EditServiceRequestTypeAssignments::class,
+            EditServiceRequestTypeNotifications::class,
+        ]);
+    }
 
-  public static function getPages(): array
-  {
-    return [
-      'index' => ListServiceRequestTypes::route('/'),
-      'create' => CreateServiceRequestType::route('/create'),
-      'view' => ViewServiceRequestType::route('/{record}'),
-      'edit' => EditServiceRequestType::route('/{record}/edit'),
-      'service-request-type-managers' => ManageServiceRequestTypeManagers::route('/{record}/managers'),
-      'service-request-type-auditors' => ManageServiceRequestTypeAuditors::route('/{record}/auditors'),
-      'service-request-type-assignments' => EditServiceRequestTypeAssignments::route('/{record}/assignments'),
-      'service-request-type-notifications' => EditServiceRequestTypeNotifications::route('/{record}/notifications'),
-    ];
-  }
+    public static function getPages(): array
+    {
+        return [
+            'index' => ListServiceRequestTypes::route('/'),
+            'create' => CreateServiceRequestType::route('/create'),
+            'view' => ViewServiceRequestType::route('/{record}'),
+            'edit' => EditServiceRequestType::route('/{record}/edit'),
+            'service-request-type-managers' => ManageServiceRequestTypeManagers::route('/{record}/managers'),
+            'service-request-type-auditors' => ManageServiceRequestTypeAuditors::route('/{record}/auditors'),
+            'service-request-type-assignments' => EditServiceRequestTypeAssignments::route('/{record}/assignments'),
+            'service-request-type-notifications' => EditServiceRequestTypeNotifications::route('/{record}/notifications'),
+        ];
+    }
 }

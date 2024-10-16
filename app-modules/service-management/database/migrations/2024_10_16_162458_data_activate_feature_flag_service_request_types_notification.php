@@ -34,11 +34,10 @@
 </COPYRIGHT>
 */
 
-use App\Features\ServiceRequestTypeNotifications;
 use Illuminate\Database\Migrations\Migration;
+use App\Features\ServiceRequestTypeNotifications;
 
-return new class extends Migration
-{
+return new class () extends Migration {
     public function up(): void
     {
         ServiceRequestTypeNotifications::activate();

@@ -40,8 +40,8 @@ use App\Support\AbstractFeatureFlag;
 
 class ServiceRequestTypeNotifications extends AbstractFeatureFlag
 {
-  public function resolve(mixed $scope): mixed
-  {
-    return false;
-  }
+    public function resolve(mixed $scope): mixed
+    {
+        return false;
+    }
 }
