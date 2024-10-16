@@ -53,8 +53,8 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ContactServiceManagement;
-use AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers\ServiceRequestsRelationManager;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ListServiceRequests;
+use AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers\ServiceRequestsRelationManager;
 
 test('The correct details are displayed on the ListServiceRequests page', function () {
     $serviceRequests = ServiceRequest::factory()
@@ -256,7 +256,6 @@ test('service requests only visible to service request type auditors', function 
 });
 
 test('can list audit member to service request type', function () {
-
     $user = User::factory()->licensed([Contact::getLicenseType()])->create();
     $team = Team::factory()->create();
     $user->teams()->attach($team);
@@ -265,17 +264,17 @@ test('can list audit member to service request type', function () {
     $contact = Contact::factory()->create();
 
     $serviceRequestsWithoutManager = ServiceRequest::factory()
-                                    ->for($contact, 'respondent')
-                                    ->count(3)
-                                    ->create();
+        ->for($contact, 'respondent')
+        ->count(3)
+        ->create();
 
     $serviceRequests = ServiceRequest::factory()->state([
         'priority_id' => ServiceRequestPriority::factory()->for(ServiceRequestType::factory()
-        ->hasAttached($team,[],'managers'),'type'),
+            ->hasAttached($team, [], 'managers'), 'type'),
     ])
-    ->for($contact, 'respondent')
-    ->count(3)
-    ->create();
+        ->for($contact, 'respondent')
+        ->count(3)
+        ->create();
 
     actingAs($user)
         ->get(
@@ -295,6 +294,6 @@ test('can list audit member to service request type', function () {
         'ownerRecord' => $contact,
         'pageClass' => ContactServiceManagement::class,
     ])
-    ->assertCanSeeTableRecords($serviceRequests)
-    ->assertCanNotSeeTableRecords($serviceRequestsWithoutManager);
+        ->assertCanSeeTableRecords($serviceRequests)
+        ->assertCanNotSeeTableRecords($serviceRequestsWithoutManager);
 });

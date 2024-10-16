@@ -35,6 +35,7 @@
 */
 
 use App\Models\User;
+use AidingApp\Team\Models\Team;
 
 use function Tests\asSuperAdmin;
 
@@ -42,11 +43,13 @@ use App\Settings\LicenseSettings;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
+
+use AidingApp\Contact\Models\Contact;
+
 use function Pest\Laravel\assertDatabaseHas;
 
 use Illuminate\Support\Facades\Notification;
 use AidingApp\Authorization\Enums\LicenseType;
-use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
@@ -56,7 +59,6 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\Notifications\SendClosedServiceFeedbackNotification;
 use AidingApp\ServiceManagement\Tests\RequestFactories\EditServiceRequestRequestFactory;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\EditServiceRequest;
-use AidingApp\Team\Models\Team;
 
 test('A successful action on the EditServiceRequest page', function () {
     $serviceRequest = ServiceRequest::factory([
@@ -437,9 +439,9 @@ test('service requests not authorized if user is not manager of the service requ
 
     $serviceRequest = ServiceRequest::factory()->state([
         'priority_id' => ServiceRequestPriority::factory()->for(ServiceRequestType::factory()
-        ->hasAttached(Team::factory(),[],'managers'),'type'),
+            ->hasAttached(Team::factory(), [], 'managers'), 'type'),
     ])
-    ->create();
+        ->create();
 
     livewire(EditServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
@@ -468,9 +470,9 @@ test('service requests not authorized if user is auditor of the service request 
 
     $serviceRequest = ServiceRequest::factory()->state([
         'priority_id' => ServiceRequestPriority::factory()->for(ServiceRequestType::factory()
-        ->hasAttached(Team::factory(),[],'auditors'),'type'),
+            ->hasAttached(Team::factory(), [], 'auditors'), 'type'),
     ])
-    ->create();
+        ->create();
 
     livewire(EditServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),

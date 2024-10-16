@@ -36,7 +36,6 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages;
 
-use AidingApp\Assistant\Models\PromptType;
 use Filament\Tables\Table;
 use Filament\Actions\CreateAction;
 use AidingApp\Contact\Models\Contact;
@@ -46,6 +45,7 @@ use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Notifications\Notification;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Filters\SelectFilter;
@@ -58,7 +58,6 @@ use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
-use Filament\Notifications\Notification;
 
 class ListServiceRequests extends ListRecords
 {
@@ -77,13 +76,13 @@ class ListServiceRequests extends ListRecords
                 ],
                 'status',
             ])
-            ->when(! auth()->user()->hasRole('authorization.super_admin'), function (Builder $q) {
-                return $q->whereHas('priority.type.managers', function (Builder $query): void {
-                    $query->where('teams.id', auth()->user()->teams()->first()?->getKey());
-                })->orWhereHas('priority.type.auditors', function (Builder $query): void {
-                    $query->where('teams.id', auth()->user()->teams()->first()?->getKey());
-                });
-            }))
+                ->when(! auth()->user()->hasRole('authorization.super_admin'), function (Builder $q) {
+                    return $q->whereHas('priority.type.managers', function (Builder $query): void {
+                        $query->where('teams.id', auth()->user()->teams()->first()?->getKey());
+                    })->orWhereHas('priority.type.auditors', function (Builder $query): void {
+                        $query->where('teams.id', auth()->user()->teams()->first()?->getKey());
+                    });
+                }))
             ->columns([
                 IdColumn::make(),
                 TextColumn::make('service_request_number')
@@ -152,7 +151,7 @@ class ListServiceRequests extends ListRecords
                         ->action(function ($records) {
                             $deletedRecordsCount = ServiceRequest::query()
                                 ->whereKey($records)
-                                ->when(!auth()->user()->hasRole('authorization.super_admin'), function (Builder $q) {
+                                ->when(! auth()->user()->hasRole('authorization.super_admin'), function (Builder $q) {
                                     return $q->whereHas('priority.type.managers', function (Builder $query): void {
                                         $query->where('teams.id', auth()->user()->teams()->first()?->getKey());
                                     })->orWhereHas('priority.type.auditors', function (Builder $query): void {
