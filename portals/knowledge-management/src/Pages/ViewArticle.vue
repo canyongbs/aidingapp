@@ -130,7 +130,7 @@
                                             <span class="text-xs">Last updated: {{ article.lastUpdated }}</span>
                                         </div>
                                     </div>
-                                    <Tags :tags="article.tags" />
+                                    <Tags :tags="article.tags" :featured="article.featured" />
                                     <hr class="my-4" />
                                     <div v-html="DOMPurify.sanitize(article.content)"></div>
                                 </div>

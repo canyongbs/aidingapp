@@ -37,7 +37,9 @@
 namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource\Pages;
 
 use Filament\Forms\Form;
+use App\Features\FeaturedArticle;
 use App\Models\Scopes\TagsForClass;
+use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Section;
@@ -66,11 +68,20 @@ class CreateKnowledgeBaseItem extends CreateRecord
                             ->label('Article Title')
                             ->required()
                             ->string(),
-                        Toggle::make('public')
-                            ->label('Public')
-                            ->default(false)
-                            ->onColor('success')
-                            ->offColor('gray'),
+                        Grid::make(2)
+                            ->schema([
+                                Toggle::make('public')
+                                    ->label('Public')
+                                    ->default(false)
+                                    ->onColor('success')
+                                    ->offColor('gray'),
+                                Toggle::make('is_featured')
+                                    ->label('Featured')
+                                    ->default(false)
+                                    ->onColor('success')
+                                    ->offColor('gray')
+                                    ->visible(FeaturedArticle::active()),
+                            ]),
                         Textarea::make('notes')
                             ->label('Notes')
                             ->string(),
