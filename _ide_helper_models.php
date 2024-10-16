@@ -1,39 +1,5 @@
 <?php
 
-/*
-<COPYRIGHT>
-
-    Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
-
-    Aiding App™ is licensed under the Elastic License 2.0. For more details,
-    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
-
-    Notice:
-
-    - You may not provide the software to third parties as a hosted or managed
-      service, where the service provides users with access to any substantial set of
-      the features or functionality of the software.
-    - You may not move, change, disable, or circumvent the license key functionality
-      in the software, and you may not remove or obscure any functionality in the
-      software that is protected by the license key.
-    - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
-      to applicable law.
-    - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
-      Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
-      vigorously.
-    - The software solution, including services, infrastructure, and code, is offered as a
-      Software as a Service (SaaS) by Canyon GBS LLC.
-    - Use of this software implies agreement to the license terms and conditions as stated
-      in the Elastic License 2.0.
-
-    For more information or inquiries please visit our website at
-    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
-
-</COPYRIGHT>
-*/
-
 // @formatter:off
 // phpcs:ignoreFile
 /**
@@ -2123,6 +2089,7 @@ namespace AidingApp\KnowledgeBase\Models{
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property string|null $slug
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
  * @property-read int|null $audits_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\KnowledgeBase\Models\KnowledgeBaseItem> $knowledgeBaseItems
@@ -2138,6 +2105,7 @@ namespace AidingApp\KnowledgeBase\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseCategory whereIcon($value)
  * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseCategory whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseCategory whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseCategory whereSlug($value)
  * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseCategory whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseCategory withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseCategory withoutTrashed()
@@ -2163,6 +2131,7 @@ namespace AidingApp\KnowledgeBase\Models{
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property int $portal_view_count
+ * @property bool $is_featured
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
  * @property-read int|null $audits_count
  * @property-read \AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory|null $category
@@ -2185,6 +2154,7 @@ namespace AidingApp\KnowledgeBase\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseItem whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseItem whereDeletedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseItem whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseItem whereIsFeatured($value)
  * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseItem whereNotes($value)
  * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseItem wherePortalViewCount($value)
  * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseItem wherePublic($value)
@@ -3011,6 +2981,18 @@ namespace AidingApp\ServiceManagement\Models{
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property \AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes $assignment_type
  * @property string|null $assignment_type_individual_id
+ * @property bool $is_managers_service_request_created_email_enabled
+ * @property bool $is_managers_service_request_created_notification_enabled
+ * @property bool $is_managers_service_request_assigned_email_enabled
+ * @property bool $is_managers_service_request_assigned_notification_enabled
+ * @property bool $is_managers_service_request_resolved_email_enabled
+ * @property bool $is_managers_service_request_resolved_notification_enabled
+ * @property bool $is_auditors_service_request_created_email_enabled
+ * @property bool $is_auditors_service_request_created_notification_enabled
+ * @property bool $is_auditors_service_request_assigned_email_enabled
+ * @property bool $is_auditors_service_request_assigned_notification_enabled
+ * @property bool $is_auditors_service_request_resolved_email_enabled
+ * @property bool $is_auditors_service_request_resolved_notification_enabled
  * @property-read \App\Models\User|null $assignmentTypeIndividual
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Team\Models\Team> $auditors
  * @property-read int|null $auditors_count
@@ -3038,6 +3020,18 @@ namespace AidingApp\ServiceManagement\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereHasEnabledNps($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereIcon($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereIsAuditorsServiceRequestAssignedEmailEnabled($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereIsAuditorsServiceRequestAssignedNotificationEnabled($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereIsAuditorsServiceRequestCreatedEmailEnabled($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereIsAuditorsServiceRequestCreatedNotificationEnabled($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereIsAuditorsServiceRequestResolvedEmailEnabled($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereIsAuditorsServiceRequestResolvedNotificationEnabled($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereIsManagersServiceRequestAssignedEmailEnabled($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereIsManagersServiceRequestAssignedNotificationEnabled($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereIsManagersServiceRequestCreatedEmailEnabled($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereIsManagersServiceRequestCreatedNotificationEnabled($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereIsManagersServiceRequestResolvedEmailEnabled($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereIsManagersServiceRequestResolvedNotificationEnabled($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType withTrashed()
