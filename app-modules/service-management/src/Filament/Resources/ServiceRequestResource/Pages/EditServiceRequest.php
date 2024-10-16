@@ -55,6 +55,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
+use AidingApp\ServiceManagement\Rules\ManagedServiceRequestType;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 
@@ -99,12 +100,18 @@ class EditServiceRequest extends EditRecord
                                         fn (ServiceRequest $record) => ServiceRequestType::withTrashed()
                                             ->whereKey($record->priority?->type_id)
                                             ->orWhereNull('deleted_at')
+                                            ->when(! auth()->user()->hasRole('authorization.super_admin'), function (Builder $query) {
+                                                $query->whereHas('managers', function (Builder $query): void {
+                                                    $query->where('teams.id', auth()->user()->teams()->first()?->getKey());
+                                                });
+                                            })
                                             ->orderBy('name')
                                             ->pluck('name', 'id')
                                     )
                                     ->afterStateUpdated(fn (Set $set) => $set('priority_id', null))
                                     ->label('Type')
                                     ->required()
+                                    ->rule(new ManagedServiceRequestType())
                                     ->live()
                                     ->exists(ServiceRequestType::class, 'id')
                                     ->disableOptionWhen(fn (string $value) => $disabledTypes->contains($value)),

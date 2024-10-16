@@ -34,30 +34,36 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Tests\RequestFactories;
+namespace AidingApp\ServiceManagement\Rules;
 
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Division\Models\Division;
-use Worksome\RequestFactories\RequestFactory;
-use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Translation\PotentiallyTranslatedString;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
 
-class CreateServiceRequestRequestFactory extends RequestFactory
+class ManagedServiceRequestType implements ValidationRule
 {
-    public function definition(): array
+    /**
+     * Run the validation rule.
+     *
+     * @param PotentiallyTranslatedString  $fail
+     */
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        return [
-            'title' => fake()->words(2, true),
-            'division_id' => Division::inRandomOrder()->first()?->id ?? Division::factory()->create()->id,
-            'status_id' => ServiceRequestStatus::factory()->create()->id,
-            'type_id' => function (array $attributes) {
-                return ServiceRequestPriority::find($attributes['priority_id'])->type->getKey();
-            },
-            'priority_id' => ServiceRequestPriority::factory()->create()->getKey(),
-            'respondent_id' => Contact::factory()->create()->getKey(),
-            'respondent_type' => app(Contact::class)->getMorphClass(),
-            'close_details' => fake()->sentence(),
-            'res_details' => fake()->sentence(),
-        ];
+        if (auth()->user()->hasRole('authorization.super_admin')) {
+            return;
+        }
+
+        $team = auth()->user()->teams()->first();
+
+        $isManager = ServiceRequestType::where('id', $value)
+            ->whereHas('managers', function ($query) use ($team) {
+                $query->where('teams.id', $team?->getKey());
+            })
+            ->exists();
+
+        if (! $isManager) {
+            $fail('You are not authorized to select this service request type.');
+        }
     }
 }
