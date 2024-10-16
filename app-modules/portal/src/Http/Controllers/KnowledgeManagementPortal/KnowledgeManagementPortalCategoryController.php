@@ -75,7 +75,7 @@ class KnowledgeManagementPortalCategoryController extends Controller
             'articles' => $category->knowledgeBaseItems()
                 ->with('tags')
                 ->public()
-                ->paginate(10)
+                ->paginate(5)
                 ->through(function ($category) {
                     $category->name = $category->title;
                     $category->categoryId = $category->category_id;
