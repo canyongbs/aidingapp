@@ -79,7 +79,7 @@ class ServiceRequestPolicy
         if (! auth()->user()->hasRole('authorization.super_admin')) {
             $team = auth()->user()->teams()->first();
 
-            if (! $serviceRequest?->priority?->type?->managers->contains('id', $team?->getKey()) && ! $serviceRequest?->priority?->type?->auditors->contains('id', $team?->getKey())) {
+            if (! $serviceRequest?->priority?->type?->managers?->contains('id', $team?->getKey()) && ! $serviceRequest?->priority?->type?->auditors?->contains('id', $team?->getKey())) {
                 return Response::deny("You don't have permission to view this service request because you're not an auditor or manager.");
             }
         }
@@ -96,7 +96,7 @@ class ServiceRequestPolicy
             $team = auth()->user()->teams()->first();
 
             if (! $team?->managableServiceRequestTypes()->exists()) {
-                return Response::deny("You don't have permission to create service requests because you're not an auditor or manager of any service request types.");
+                return Response::deny("You don't have permission to create service requests because you're not a manager of any service request types.");
             }
         }
 
@@ -140,7 +140,7 @@ class ServiceRequestPolicy
             $team = auth()->user()->teams()->first();
 
             if (! $serviceRequest?->priority?->type?->managers?->contains('id', $team?->getKey())) {
-                return Response::deny("You don't have permission to delete this service request because you're not an auditor or manager.");
+                return Response::deny("You don't have permission to delete this service request because you're not a manager of it's type.");
             }
         }
 
@@ -160,7 +160,7 @@ class ServiceRequestPolicy
             $team = auth()->user()->teams()->first();
 
             if (! $serviceRequest?->priority?->type?->managers?->contains('id', $team?->getKey())) {
-                return Response::deny("You don't have permission to restore this service request because you're not an auditor or manager.");
+                return Response::deny("You don't have permission to restore this service request because you're not a manager of it's type.");
             }
         }
 
@@ -180,7 +180,7 @@ class ServiceRequestPolicy
             $team = auth()->user()->teams()->first();
 
             if (! $serviceRequest?->priority?->type?->managers?->contains('id', $team?->getKey())) {
-                return Response::deny("You don't have permission to permanently delete service request because you're not an auditor or manager.");
+                return Response::deny("You don't have permission to permanently delete this service request because you're not a manager of it's type.");
             }
         }
 
