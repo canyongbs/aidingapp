@@ -79,14 +79,23 @@
 
         const { get } = consumer();
 
-        get(props.apiUrl + '/categories/' + route.params.categoryId + '/articles/' + route.params.articleId).then(
-            (response) => {
-                category.value = response.data.category;
-                article.value = response.data.article;
+        get(props.apiUrl + '/categories/' + route.params.categoryId + '/articles/' + route.params.articleId)
+            .then((response) => {
+                if (response.data) {
+                    category.value = response.data.category;
+                    article.value = response.data.article;
+                    portalViewCount.value = response.data.portal_view_count;
+                }
+
                 loading.value = false;
-                portalViewCount.value = response.data.portal_view_count;
-            },
-        );
+            })
+            .catch((error) => {
+                if (error.response && error.response.status === 401) {
+                    loading.value = false;
+                } else {
+                    console.log('An error occurred', error);
+                }
+            });
     }
 </script>
 
@@ -104,11 +113,12 @@
                                 { name: category.name, route: 'view-category', params: { categoryId: category.id } },
                             ]"
                             currentCrumb="Articles"
+                            v-if="article"
                         ></Breadcrumbs>
 
                         <div class="grid space-y-2">
                             <div class="flex flex-col gap-3">
-                                <div class="prose max-w-none">
+                                <div class="prose max-w-none" v-if="article">
                                     <h1 class="font-semibold">{{ article.name }}</h1>
                                     <div class="flex mb-4">
                                         <div class="text-gray-500 flex items-center space-x-1 mr-2">
@@ -123,6 +133,19 @@
                                     <Tags :tags="article.tags" :featured="article.featured" />
                                     <hr class="my-4" />
                                     <div v-html="DOMPurify.sanitize(article.content)"></div>
+                                </div>
+                                <div class="flex items-center justify-center min-h-screen bg-gray-100" v-else>
+                                    <div class="text-center">
+                                        <p class="text-lg font-semibold text-gray-800">
+                                            The link you are attempting to access is invalid.
+                                        </p>
+                                        <router-link
+                                            :to="{ name: 'home' }"
+                                            class="mt-4 inline-block px-4 py-2 text-white bg-gradient-to-br from-primary-500 to-primary-800 m-3 p-2 rounded"
+                                        >
+                                            Return Home
+                                        </router-link>
+                                    </div>
                                 </div>
                             </div>
                         </div>
