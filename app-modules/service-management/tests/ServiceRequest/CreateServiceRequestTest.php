@@ -274,7 +274,7 @@ test('CreateServiceRequest is gated with proper feature access control', functio
     expect($serviceRequest->division->id)->toEqual($request['division_id']);
 });
 
-test('cannot create service requests if user is not an auditor or manager of any service request type', function () {
+test('cannot create service requests if user is manager of any service request type', function () {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = false;
@@ -346,7 +346,7 @@ test('displays only service request types managed by the current user', function
 
 });
 
-test('create service requests if user is an auditor or manager of any service request type',function(){
+test('create service requests if user is manager of any service request type',function(){
 
     $settings = app(LicenseSettings::class);
 
@@ -397,7 +397,7 @@ test('create service requests if user is an auditor or manager of any service re
 
 });
 
-test('validate service requests type if user is not an auditor or manager of any service request type',function(){
+test('validate service requests type if user is manager of any service request type',function(){
 
     $settings = app(LicenseSettings::class);
 

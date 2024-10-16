@@ -415,7 +415,7 @@ test('send feedback email if service request is closed', function () {
     );
 });
 
-test('service requests not authorized if user is not an auditor or manager of the service request type', function () {
+test('service requests not authorized if user is not manager of the service request type', function () {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -427,12 +427,50 @@ test('service requests not authorized if user is not an auditor or manager of th
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.*.update');
 
+    $team = Team::factory()->create();
+
+    $user->teams()->attach($team);
+
     $user->refresh();
 
     actingAs($user);
 
-    $serviceRequest = ServiceRequest::factory()
-        ->create();
+    $serviceRequest = ServiceRequest::factory()->state([
+        'priority_id' => ServiceRequestPriority::factory()->for(ServiceRequestType::factory()
+        ->hasAttached(Team::factory(),[],'managers'),'type'),
+    ])
+    ->create();
+
+    livewire(EditServiceRequest::class, [
+        'record' => $serviceRequest->getRouteKey(),
+    ])->assertForbidden();
+});
+
+test('service requests not authorized if user is auditor of the service request type', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->serviceManagement = true;
+
+    $settings->save();
+
+    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
+
+    $user->givePermissionTo('service_request.view-any');
+    $user->givePermissionTo('service_request.*.update');
+
+    $team = Team::factory()->create();
+
+    $user->teams()->attach($team);
+
+    $user->refresh();
+
+    actingAs($user);
+
+    $serviceRequest = ServiceRequest::factory()->state([
+        'priority_id' => ServiceRequestPriority::factory()->for(ServiceRequestType::factory()
+        ->hasAttached(Team::factory(),[],'auditors'),'type'),
+    ])
+    ->create();
 
     livewire(EditServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
