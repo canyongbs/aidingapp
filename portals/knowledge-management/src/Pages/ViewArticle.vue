@@ -79,8 +79,8 @@
 
         const { get } = consumer();
 
-        get(props.apiUrl + '/categories/' + route.params.categoryId + '/articles/' + route.params.articleId).then(
-            (response) => {
+        get(props.apiUrl + '/categories/' + route.params.categoryId + '/articles/' + route.params.articleId)
+            .then((response) => {
                 if (response.data) {
                     category.value = response.data.category;
                     article.value = response.data.article;
@@ -88,8 +88,14 @@
                 }
 
                 loading.value = false;
-            },
-        );
+            })
+            .catch((error) => {
+                if (error.response && error.response.status === 401) {
+                    loading.value = false;
+                } else {
+                    console.log('An error occurred', error);
+                }
+            });
     }
 </script>
 
