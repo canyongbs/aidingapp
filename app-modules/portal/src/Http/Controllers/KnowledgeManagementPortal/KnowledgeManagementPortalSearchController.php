@@ -83,6 +83,7 @@ class KnowledgeManagementPortalSearchController extends Controller
                             ])
                             ->get()
                             ->toArray(),
+                        'featured' => $article->is_featured,
                     ];
                 })
                 ->toArray()
