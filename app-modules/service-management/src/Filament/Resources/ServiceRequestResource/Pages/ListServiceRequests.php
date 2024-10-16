@@ -151,10 +151,8 @@ class ListServiceRequests extends ListRecords
                         ->action(function ($records) {
                             $deletedRecordsCount = ServiceRequest::query()
                                 ->whereKey($records)
-                                ->when(! auth()->user()->hasRole('authorization.super_admin'), function (Builder $q) {
-                                    return $q->whereHas('priority.type.managers', function (Builder $query): void {
-                                        $query->where('teams.id', auth()->user()->teams()->first()?->getKey());
-                                    })->orWhereHas('priority.type.auditors', function (Builder $query): void {
+                                ->when(! auth()->user()->hasRole('authorization.super_admin'), function (Builder $query) {
+                                    $query->whereHas('priority.type.managers', function (Builder $query): void {
                                         $query->where('teams.id', auth()->user()->teams()->first()?->getKey());
                                     });
                                 })
