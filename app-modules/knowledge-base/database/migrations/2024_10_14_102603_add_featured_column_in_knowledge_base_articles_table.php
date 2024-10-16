@@ -1,4 +1,6 @@
-<!--
+<?php
+
+/*
 <COPYRIGHT>
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
@@ -30,26 +32,24 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
--->
-<script setup>
-    import { defineProps } from 'vue';
-    import Badge from './Badge.vue';
+*/
 
-    defineProps({
-        tags: {
-            type: Array,
-            required: true,
-        },
-        featured: {
-            type: Boolean,
-            default: false,
-        },
-    });
-</script>
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
-<template>
-    <div class="flex flex-wrap gap-2">
-        <Badge v-if="featured" value="Featured" />
-        <Badge v-for="tag in tags" :key="tag.id" :value="tag.name" />
-    </div>
-</template>
+return new class () extends Migration {
+    public function up(): void
+    {
+        Schema::table('knowledge_base_articles', function (Blueprint $table) {
+            $table->boolean('is_featured')->default(false);
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('knowledge_base_articles', function (Blueprint $table) {
+            $table->dropColumn('is_featured');
+        });
+    }
+};
