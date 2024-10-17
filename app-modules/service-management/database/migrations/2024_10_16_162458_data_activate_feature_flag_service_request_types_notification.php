@@ -34,20 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\DataTransferObjects;
+use Illuminate\Database\Migrations\Migration;
+use App\Features\ServiceRequestTypeNotifications;
 
-use Spatie\LaravelData\Data;
+return new class () extends Migration {
+    public function up(): void
+    {
+        ServiceRequestTypeNotifications::activate();
+    }
 
-class KnowledgeBaseArticleData extends Data
-{
-    public function __construct(
-        public string $id,
-        public ?string $categoryId,
-        public string $name,
-        public ?string $lastUpdated,
-        public ?string $content,
-        public ?array $tags,
-        public ?array $vote,
-        public bool $featured,
-    ) {}
-}
+    public function down(): void
+    {
+        ServiceRequestTypeNotifications::deactivate();
+    }
+};

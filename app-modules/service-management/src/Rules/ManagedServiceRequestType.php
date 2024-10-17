@@ -34,20 +34,36 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\DataTransferObjects;
+namespace AidingApp\ServiceManagement\Rules;
 
-use Spatie\LaravelData\Data;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Translation\PotentiallyTranslatedString;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
 
-class KnowledgeBaseArticleData extends Data
+class ManagedServiceRequestType implements ValidationRule
 {
-    public function __construct(
-        public string $id,
-        public ?string $categoryId,
-        public string $name,
-        public ?string $lastUpdated,
-        public ?string $content,
-        public ?array $tags,
-        public ?array $vote,
-        public bool $featured,
-    ) {}
+    /**
+     * Run the validation rule.
+     *
+     * @param PotentiallyTranslatedString  $fail
+     */
+    public function validate(string $attribute, mixed $value, Closure $fail): void
+    {
+        if (auth()->user()->hasRole('authorization.super_admin')) {
+            return;
+        }
+
+        $team = auth()->user()->teams()->first();
+
+        $isManager = ServiceRequestType::where('id', $value)
+            ->whereHas('managers', function ($query) use ($team) {
+                $query->where('teams.id', $team?->getKey());
+            })
+            ->exists();
+
+        if (! $isManager) {
+            $fail('You are not authorized to select this service request type.');
+        }
+    }
 }

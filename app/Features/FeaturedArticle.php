@@ -34,20 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\DataTransferObjects;
+namespace App\Features;
 
-use Spatie\LaravelData\Data;
+use App\Support\AbstractFeatureFlag;
 
-class KnowledgeBaseArticleData extends Data
+class FeaturedArticle extends AbstractFeatureFlag
 {
-    public function __construct(
-        public string $id,
-        public ?string $categoryId,
-        public string $name,
-        public ?string $lastUpdated,
-        public ?string $content,
-        public ?array $tags,
-        public ?array $vote,
-        public bool $featured,
-    ) {}
+    public function resolve(mixed $scope): mixed
+    {
+        return false;
+    }
 }

@@ -46,14 +46,14 @@ class CreateServiceRequestRequestFactory extends RequestFactory
 {
     public function definition(): array
     {
-        $priority = ServiceRequestPriority::factory()->create();
-
         return [
             'title' => fake()->words(2, true),
             'division_id' => Division::inRandomOrder()->first()?->id ?? Division::factory()->create()->id,
             'status_id' => ServiceRequestStatus::factory()->create()->id,
-            'type_id' => $priority->type_id,
-            'priority_id' => $priority->id,
+            'type_id' => function (array $attributes) {
+                return ServiceRequestPriority::find($attributes['priority_id'])->type->getKey();
+            },
+            'priority_id' => ServiceRequestPriority::factory()->create()->getKey(),
             'respondent_id' => Contact::factory()->create()->getKey(),
             'respondent_type' => app(Contact::class)->getMorphClass(),
             'close_details' => fake()->sentence(),

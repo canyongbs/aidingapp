@@ -34,20 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\DataTransferObjects;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
-use Spatie\LaravelData\Data;
+return new class () extends Migration {
+    public function up(): void
+    {
+        Schema::table('knowledge_base_articles', function (Blueprint $table) {
+            $table->boolean('is_featured')->default(false);
+        });
+    }
 
-class KnowledgeBaseArticleData extends Data
-{
-    public function __construct(
-        public string $id,
-        public ?string $categoryId,
-        public string $name,
-        public ?string $lastUpdated,
-        public ?string $content,
-        public ?array $tags,
-        public ?array $vote,
-        public bool $featured,
-    ) {}
-}
+    public function down(): void
+    {
+        Schema::table('knowledge_base_articles', function (Blueprint $table) {
+            $table->dropColumn('is_featured');
+        });
+    }
+};
