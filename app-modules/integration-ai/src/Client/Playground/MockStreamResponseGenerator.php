@@ -37,6 +37,7 @@
 namespace AidingApp\IntegrationAI\Client\Playground;
 
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 
 class MockStreamResponseGenerator
 {
@@ -95,7 +96,7 @@ class MockStreamResponseGenerator
             match ($type) {
                 'sentence' => $contents[] = fake()->sentence,
                 'paragraph' => $contents[] = fake()->paragraph,
-                default => throw new \InvalidArgumentException('Unsupported type for fake content.'),
+                default => throw new InvalidArgumentException('Unsupported type for fake content.'),
             };
         }
 
