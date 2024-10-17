@@ -34,20 +34,23 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\DataTransferObjects;
+namespace AidingApp\Portal\Database\Factories;
 
-use Spatie\LaravelData\Data;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-class KnowledgeBaseArticleData extends Data
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AidingApp\Portal\Models\PortalGuest>
+ */
+class PortalGuestFactory extends Factory
 {
-    public function __construct(
-        public string $id,
-        public ?string $categoryId,
-        public string $name,
-        public ?string $lastUpdated,
-        public ?string $content,
-        public ?array $tags,
-        public ?array $vote,
-        public bool $featured,
-    ) {}
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition(): array
+    {
+        return [
+        ];
+    }
 }

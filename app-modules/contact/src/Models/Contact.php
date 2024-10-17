@@ -53,6 +53,8 @@ use AidingApp\Engagement\Models\EngagementFile;
 use AidingApp\Notification\Models\Subscription;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use AidingApp\Portal\Models\KnowledgeBaseArticleVote;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use AidingApp\InventoryManagement\Models\AssetCheckIn;
@@ -233,6 +235,14 @@ class Contact extends BaseAuthenticatable implements Auditable, Subscribable, Ed
     public function organizations(): BelongsTo
     {
         return $this->belongsTo(Organization::class, 'organization_id', 'id');
+    }
+
+    public function knowledgeBaseArticleVotes()
+    {
+        return $this->morphedByMany(KnowledgeBaseItem::class, 'voter', 'knowledge_base_article_votes')
+            ->using(KnowledgeBaseArticleVote::class)
+            ->withPivot('is_helpful')
+            ->withTimestamps();
     }
 
     protected static function booted(): void

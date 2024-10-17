@@ -34,20 +34,40 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\DataTransferObjects;
+namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
-use Spatie\LaravelData\Data;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Portal\Models\PortalGuest;
+use AidingApp\Portal\Models\KnowledgeBaseArticleVote;
+use AidingApp\Portal\Http\Requests\StoreKnowledgeBaseArticleVoteRequest;
 
-class KnowledgeBaseArticleData extends Data
+class StoreKnowledgeBaseArticleVoteController extends Controller
 {
-    public function __construct(
-        public string $id,
-        public ?string $categoryId,
-        public string $name,
-        public ?string $lastUpdated,
-        public ?string $content,
-        public ?array $tags,
-        public ?array $vote,
-        public bool $featured,
-    ) {}
+    public function __invoke(StoreKnowledgeBaseArticleVoteRequest $request): JsonResponse
+    {
+        $articleVote = [];
+        $voterType = session()->has('guest_id') ? PortalGuest::class : Contact::class;
+        $voterId = session()->has('guest_id') ? session('guest_id') : auth('contact')->user()->id;
+
+        if (! is_null($request->articleVote)) {
+            Log::info('here');
+            $articleVote = KnowledgeBaseArticleVote::where('article_id', $request->articleId)->where('voter_id', $voterId)->first();
+
+            if (empty($articleVote)) {
+                $articleVote = new KnowledgeBaseArticleVote();
+                $articleVote->voter_id = $voterId;
+                $articleVote->voter_type = $voterType;
+                $articleVote->article_id = $request->articleId;
+            }
+            $articleVote->is_helpful = $request->articleVote;
+            $articleVote->save();
+        } else {
+            KnowledgeBaseArticleVote::where('article_id', $request->articleId)->where('voter_id', $voterId)->delete();
+        }
+
+        return response()->json($articleVote, 200);
+    }
 }

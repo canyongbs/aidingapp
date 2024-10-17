@@ -34,20 +34,21 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\DataTransferObjects;
+namespace AidingApp\Portal\Models;
 
-use Spatie\LaravelData\Data;
+use App\Models\BaseModel;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 
-class KnowledgeBaseArticleData extends Data
+class PortalGuest extends BaseModel
 {
-    public function __construct(
-        public string $id,
-        public ?string $categoryId,
-        public string $name,
-        public ?string $lastUpdated,
-        public ?string $content,
-        public ?array $tags,
-        public ?array $vote,
-        public bool $featured,
-    ) {}
+    use SoftDeletes;
+
+    public function knowledgeBaseArticleVotes()
+    {
+        return $this->morphedByMany(KnowledgeBaseItem::class, 'voter', 'knowledge_base_article_votes')
+            ->using(KnowledgeBaseArticleVote::class)
+            ->withPivot('is_helpful')
+            ->withTimestamps();
+    }
 }
