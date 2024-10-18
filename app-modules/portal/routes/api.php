@@ -45,6 +45,7 @@ use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEmbeddable
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\CreateServiceRequestController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\StoreServiceRequestUpdateController;
+use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\StoreKnowledgeBaseArticleVoteController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalLogoutController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalSearchController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\GetKnowledgeManagementPortalTagsController;
@@ -125,5 +126,7 @@ Route::prefix('api')
                     ->name('service-request.show');
                 Route::post('/service-request-update/store', StoreServiceRequestUpdateController::class)
                     ->name('service-request-update.storeServiceRequestUpdate');
+                Route::post('/knowledge_base_article_vote/store', StoreKnowledgeBaseArticleVoteController::class)
+                    ->name('knowledge_base_article_vote.storeKnowledgeBaseArticleVote');
             });
     });

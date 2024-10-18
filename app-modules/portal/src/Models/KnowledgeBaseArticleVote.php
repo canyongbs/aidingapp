@@ -34,20 +34,36 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\DataTransferObjects;
+namespace AidingApp\Portal\Models;
 
-use Spatie\LaravelData\Data;
+use Illuminate\Database\Eloquent\Relations\Pivot;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class KnowledgeBaseArticleData extends Data
+class KnowledgeBaseArticleVote extends Pivot
 {
-    public function __construct(
-        public string $id,
-        public ?string $categoryId,
-        public string $name,
-        public ?string $lastUpdated,
-        public ?string $content,
-        public ?array $tags,
-        public ?array $vote,
-        public bool $featured,
-    ) {}
+    use HasUuids;
+    use HasFactory;
+
+    protected $casts = [
+        'is_helpful' => 'boolean',
+    ];
+
+    protected $table = 'knowledge_base_article_votes';
+
+    protected $fillable = [
+        'is_helpful',
+    ];
+
+    public function voter()
+    {
+        return $this->morphTo();
+    }
+
+    public function knowledgeBaseArticle(): BelongsTo
+    {
+        return $this->belongsTo(KnowledgeBaseItem::class, 'article_id');
+    }
 }
