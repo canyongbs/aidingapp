@@ -44,6 +44,7 @@
     import Article from '../Components/Article.vue';
     import SearchResults from '../Components/SearchResults.vue';
     import Badge from '../Components/Badge.vue';
+    import Pagination from '../Components/Pagination.vue';
 
     const route = useRoute();
 
@@ -80,10 +81,11 @@
     const totalArticles = ref(0);
     const fromArticle = ref(0);
     const toArticle = ref(0);
+    const fromSearch = ref(false);
 
-    const debounceSearch = debounce((value) => {
+    const debounceSearch = debounce((value, page = 1) => {
         const { post } = consumer();
-
+        fromSearch.value = true;
         if (!value && selectedTags.value.length < 1) {
             searchQuery.value = null;
             searchResults.value = null;
@@ -95,11 +97,23 @@
         post(props.searchUrl, {
             search: JSON.stringify(value),
             tags: selectedTags.value.join(','),
+            page: page,
         }).then((response) => {
-            searchResults.value = response.data;
+            searchResults.value = response;
             loadingeSearchResults.value = false;
+            setPagination(response);
         });
     }, 500);
+
+    const setPagination = (response) => {
+        currentPage.value = response.data.articles.current_page;
+        prevPageUrl.value = response.data.articles.prev_page_url;
+        nextPageUrl.value = response.data.articles.next_page_url;
+        lastPage.value = response.data.articles.last_page;
+        totalArticles.value = response.data.articles.total;
+        fromArticle.value = response.data.articles.from;
+        toArticle.value = response.data.articles.to;
+    }
 
     watch(searchQuery, (value) => {
         debounceSearch(value);
@@ -143,15 +157,6 @@
         currentPage.value = page;
         getData(currentPage.value);
     };
-
-    const visiblePages = () => {
-        const range = 2;
-        const start = Math.max(currentPage.value - range, 1);
-        const end = Math.min(currentPage.value + range, lastPage.value);
-
-        return Array.from({ length: end - start + 1 }, (_, i) => i + start);
-    };
-
     watch(
         route,
         async function (newRouteValue) {
@@ -163,6 +168,10 @@
     );
 
     async function getData(page = 1) {
+        if(fromSearch.value) {
+            debounceSearch(searchQuery.value, page);
+            return;
+        }
         loadingResults.value = true;
 
         const { get } = consumer();
@@ -170,13 +179,7 @@
         await get(props.apiUrl + '/categories/' + route.params.categoryId, { page: page }).then((response) => {
             category.value = response.data.category;
             articles.value = response.data.articles.data;
-            currentPage.value = response.data.articles.current_page;
-            prevPageUrl.value = response.data.articles.prev_page_url;
-            nextPageUrl.value = response.data.articles.next_page_url;
-            lastPage.value = response.data.articles.last_page;
-            totalArticles.value = response.data.articles.total;
-            fromArticle.value = response.data.articles.from;
-            toArticle.value = response.data.articles.to;
+            setPagination(response);
             loadingResults.value = false;
         });
     }
@@ -240,6 +243,14 @@
                                 :searchQuery="searchQuery"
                                 :searchResults="searchResults"
                                 :loadingResults="loadingeSearchResults"
+                                :currentPage="currentPage"
+                                :lastPage="lastPage"
+                                :fromArticle="fromArticle"
+                                :toArticle="toArticle"
+                                :totalArticles="totalArticles"
+                                @fetchNextPage="fetchNextPage"
+                                @fetchPreviousPage="fetchPreviousPage"
+                                @fetchPage="fetchPage"
                             >
                             </SearchResults>
                         </div>
@@ -264,122 +275,16 @@
                                                     <Article :article="article" />
                                                 </li>
                                             </ul>
-
-                                            <div
-                                                class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6"
-                                            >
-                                                <div class="flex flex-1 justify-between sm:hidden">
-                                                    <button
-                                                        type="button"
-                                                        class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-                                                        :disabled="currentPage === 1"
-                                                        @click="fetchPreviousPage"
-                                                    >
-                                                        Previous
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-                                                        :disabled="currentPage === lastPage"
-                                                        @click="fetchNextPage"
-                                                    >
-                                                        Next
-                                                    </button>
-                                                </div>
-                                                <div
-                                                    class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between"
-                                                >
-                                                    <div>
-                                                        <p class="text-sm text-gray-700">
-                                                            Showing
-                                                            {{ ' ' }}
-                                                            <span class="font-medium">{{ fromArticle }}</span>
-                                                            {{ ' ' }}
-                                                            to
-                                                            {{ ' ' }}
-                                                            <span class="font-medium">{{ toArticle }}</span>
-                                                            {{ ' ' }}
-                                                            of
-                                                            {{ ' ' }}
-                                                            <span class="font-medium">{{ totalArticles }}</span>
-                                                            {{ ' ' }}
-                                                            results
-                                                        </p>
-                                                    </div>
-                                                    <div>
-                                                        <nav
-                                                            class="isolate inline-flex -space-x-px rounded-md shadow-sm"
-                                                            aria-label="Pagination"
-                                                        >
-                                                            <button
-                                                                type="button"
-                                                                class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
-                                                                :disabled="currentPage === 1"
-                                                                @click="fetchPreviousPage"
-                                                            >
-                                                                <span class="sr-only">Previous</span>
-                                                                <ChevronLeftIcon class="h-5 w-5" aria-hidden="true" />
-                                                            </button>
-
-                                                            <!-- First Page Button -->
-                                                            <button
-                                                                v-if="currentPage > 4"
-                                                                class="relative z-10 inline-flex items-center px-4 py-2 text-sm font-semibold focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                                                                :class="
-                                                                    currentPage === 1
-                                                                        ? 'bg-indigo-600 text-white'
-                                                                        : 'bg-white-500 text-black border border-gray-300'
-                                                                "
-                                                                @click="fetchPage(1)"
-                                                            >
-                                                                1
-                                                            </button>
-                                                            <span v-if="currentPage > 4">...</span>
-
-                                                            <!-- Page Numbers -->
-                                                            <button
-                                                                v-for="page in visiblePages()"
-                                                                :key="page"
-                                                                @click="fetchPage(page)"
-                                                                aria-current="page {{ page }} {{ currentPage }}"
-                                                                class="relative z-10 inline-flex items-center px-4 py-2 text-sm font-semibold focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                                                                :class="
-                                                                    page === currentPage
-                                                                        ? 'bg-indigo-600 text-white'
-                                                                        : 'bg-white-500 text-black border border-gray-300'
-                                                                "
-                                                                :disabled="page === currentPage"
-                                                            >
-                                                                {{ page }}
-                                                            </button>
-
-                                                            <span v-if="currentPage < lastPage - 3">...</span>
-                                                            <button
-                                                                v-if="currentPage < lastPage - 3"
-                                                                class="relative z-10 inline-flex items-center px-4 py-2 text-sm font-semibold focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                                                                :class="
-                                                                    currentPage === lastPage
-                                                                        ? 'bg-indigo-600 text-white'
-                                                                        : 'bg-white-500 text-black border border-gray-300'
-                                                                "
-                                                                @click="fetchPage(lastPage)"
-                                                            >
-                                                                {{ lastPage }}
-                                                            </button>
-
-                                                            <button
-                                                                type="button"
-                                                                class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
-                                                                :disabled="currentPage === lastPage"
-                                                                @click="fetchNextPage"
-                                                            >
-                                                                <span class="sr-only">Next </span>
-                                                                <ChevronRightIcon class="h-5 w-5" aria-hidden="true" />
-                                                            </button>
-                                                        </nav>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                            <Pagination
+                                                :currentPage="currentPage"
+                                                :lastPage="lastPage"
+                                                :fromArticle="fromArticle"
+                                                :toArticle="toArticle"
+                                                :totalArticles="totalArticles"
+                                                @fetchNextPage="fetchNextPage"
+                                                @fetchPreviousPage="fetchPreviousPage"
+                                                @fetchPage="fetchPage"
+                                            />
                                         </div>
                                         <div v-else class="p-3 flex items-start gap-2">
                                             <XMarkIcon class="h-5 w-5 text-gray-400" />

@@ -72,8 +72,15 @@
     const selectedTags = ref([]);
     const route = useRoute();
     const globalSearchInput = ref(null);
+    const currentPage = ref(1);
+    const nextPageUrl = ref(null);
+    const prevPageUrl = ref(null);
+    const lastPage = ref(null);
+    const totalArticles = ref(0);
+    const fromArticle = ref(0);
+    const toArticle = ref(0);
 
-    const debounceSearch = debounce((value) => {
+    const debounceSearch = debounce((value, page = 1) => {
         const { post } = consumer();
 
         if (!value && selectedTags.value.length < 1) {
@@ -87,15 +94,27 @@
         post(props.searchUrl, {
             search: JSON.stringify(value),
             tags: selectedTags.value.join(','),
+            page: page
         }).then((response) => {
-            searchResults.value = response.data;
+            searchResults.value = response;
             loadingResults.value = false;
+            setPagination(response);
         });
         globalSearchQuery.value = '';
     }, 500);
 
     const { user } = useAuthStore();
     const { hasServiceManagement } = useFeatureStore();
+
+    const setPagination = (response) => {
+        currentPage.value = response.data.articles.current_page;
+        prevPageUrl.value = response.data.articles.prev_page_url;
+        nextPageUrl.value = response.data.articles.next_page_url;
+        lastPage.value = response.data.articles.last_page;
+        totalArticles.value = response.data.articles.total;
+        fromArticle.value = response.data.articles.from;
+        toArticle.value = response.data.articles.to;
+    }
 
     onMounted(function () {
         if (route.query.search !== undefined) {
@@ -142,6 +161,21 @@
         searchQuery.value = value;
         globalSearchInput.value.focus();
     }
+
+    const fetchNextPage = () => {
+        currentPage.value = currentPage.value !== lastPage.value ? currentPage.value + 1 : lastPage.value;
+        debounceSearch(searchQuery.value, currentPage.value);
+    };
+
+    const fetchPreviousPage = () => {
+        currentPage.value = currentPage.value !== 1 ? currentPage.value - 1 : 1;
+        debounceSearch(searchQuery.value, currentPage.value);
+    };
+
+    const fetchPage = (page) => {
+        currentPage.value = page;
+        debounceSearch(searchQuery.value, currentPage.value);
+    };
 </script>
 
 <template>
@@ -206,6 +240,14 @@
                 :searchQuery="searchQuery"
                 :searchResults="searchResults"
                 :loadingResults="loadingResults"
+                :currentPage="currentPage"
+                :lastPage="lastPage"
+                :fromArticle="fromArticle"
+                :toArticle="toArticle"
+                :totalArticles="totalArticles"
+                @fetchNextPage="fetchNextPage"
+                @fetchPreviousPage="fetchPreviousPage"
+                @fetchPage="fetchPage"
             >
             </SearchResults>
 
