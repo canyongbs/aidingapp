@@ -37,9 +37,9 @@
     import { ChevronRightIcon, XMarkIcon } from '@heroicons/vue/20/solid';
     import Tags from './Tags.vue';
     import Article from './Article.vue';
-import Pagination from './Pagination.vue';
+    import Pagination from './Pagination.vue';
 
-const emit = defineEmits(['fetchNextPage', 'fetchPreviousPage', 'fetchPage']);
+    const emit = defineEmits(['fetchNextPage', 'fetchPreviousPage', 'fetchPage']);
 
     defineProps({
         searchQuery: {
@@ -75,13 +75,13 @@ const emit = defineEmits(['fetchNextPage', 'fetchPreviousPage', 'fetchPage']);
             required: true,
         },
     });
-    function fetchNextPage () {
+    function fetchNextPage() {
         emit('fetchNextPage');
     }
-    function fetchPreviousPage () {
+    function fetchPreviousPage() {
         emit('fetchPreviousPage');
     }
-    function fetchPage (page) {
+    function fetchPage(page) {
         emit('fetchPage', page);
     }
 </script>

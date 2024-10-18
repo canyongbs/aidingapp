@@ -62,7 +62,7 @@ class KnowledgeManagementPortalSearchController extends Controller
                 fn (Stringable $string) => $string->explode(',')
             );
 
-        $itemData = 
+        $itemData =
             KnowledgeBaseItem::query()
                 ->public()
                 ->with('tags')
@@ -76,7 +76,7 @@ class KnowledgeManagementPortalSearchController extends Controller
                     $article->lastUpdated = $article->updated_at->toString();
                     $article->content = '';
                     $article->tags = $article->tags()
-                    ->orderBy('name')
+                        ->orderBy('name')
                         ->select([
                             'id',
                             'name',
@@ -105,6 +105,7 @@ class KnowledgeManagementPortalSearchController extends Controller
             'articles' => $itemData,
             'categories' => $categoryData,
         ];
+
         return response()->json($searchResults);
     }
 }

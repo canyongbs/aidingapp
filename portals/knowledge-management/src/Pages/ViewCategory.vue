@@ -113,7 +113,7 @@
         totalArticles.value = response.data.articles.total;
         fromArticle.value = response.data.articles.from;
         toArticle.value = response.data.articles.to;
-    }
+    };
 
     watch(searchQuery, (value) => {
         debounceSearch(value);
@@ -168,7 +168,7 @@
     );
 
     async function getData(page = 1) {
-        if(fromSearch.value) {
+        if (fromSearch.value) {
             debounceSearch(searchQuery.value, page);
             return;
         }

@@ -94,7 +94,7 @@
         post(props.searchUrl, {
             search: JSON.stringify(value),
             tags: selectedTags.value.join(','),
-            page: page
+            page: page,
         }).then((response) => {
             searchResults.value = response;
             loadingResults.value = false;
@@ -114,7 +114,7 @@
         totalArticles.value = response.data.articles.total;
         fromArticle.value = response.data.articles.from;
         toArticle.value = response.data.articles.to;
-    }
+    };
 
     onMounted(function () {
         if (route.query.search !== undefined) {
