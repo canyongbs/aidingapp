@@ -2123,6 +2123,7 @@ namespace AidingApp\KnowledgeBase\Models{
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property string|null $slug
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
  * @property-read int|null $audits_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\KnowledgeBase\Models\KnowledgeBaseItem> $knowledgeBaseItems
@@ -2138,6 +2139,7 @@ namespace AidingApp\KnowledgeBase\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseCategory whereIcon($value)
  * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseCategory whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseCategory whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseCategory whereSlug($value)
  * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseCategory whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseCategory withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseCategory withoutTrashed()
@@ -2163,6 +2165,7 @@ namespace AidingApp\KnowledgeBase\Models{
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property int $portal_view_count
+ * @property bool $is_featured
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
  * @property-read int|null $audits_count
  * @property-read \AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory|null $category
@@ -2185,6 +2188,7 @@ namespace AidingApp\KnowledgeBase\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseItem whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseItem whereDeletedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseItem whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseItem whereIsFeatured($value)
  * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseItem whereNotes($value)
  * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseItem wherePortalViewCount($value)
  * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseItem wherePublic($value)
@@ -3011,6 +3015,18 @@ namespace AidingApp\ServiceManagement\Models{
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property \AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes $assignment_type
  * @property string|null $assignment_type_individual_id
+ * @property bool $is_managers_service_request_created_email_enabled
+ * @property bool $is_managers_service_request_created_notification_enabled
+ * @property bool $is_managers_service_request_assigned_email_enabled
+ * @property bool $is_managers_service_request_assigned_notification_enabled
+ * @property bool $is_managers_service_request_resolved_email_enabled
+ * @property bool $is_managers_service_request_resolved_notification_enabled
+ * @property bool $is_auditors_service_request_created_email_enabled
+ * @property bool $is_auditors_service_request_created_notification_enabled
+ * @property bool $is_auditors_service_request_assigned_email_enabled
+ * @property bool $is_auditors_service_request_assigned_notification_enabled
+ * @property bool $is_auditors_service_request_resolved_email_enabled
+ * @property bool $is_auditors_service_request_resolved_notification_enabled
  * @property-read \App\Models\User|null $assignmentTypeIndividual
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Team\Models\Team> $auditors
  * @property-read int|null $auditors_count
@@ -3038,6 +3054,18 @@ namespace AidingApp\ServiceManagement\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereHasEnabledNps($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereIcon($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereIsAuditorsServiceRequestAssignedEmailEnabled($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereIsAuditorsServiceRequestAssignedNotificationEnabled($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereIsAuditorsServiceRequestCreatedEmailEnabled($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereIsAuditorsServiceRequestCreatedNotificationEnabled($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereIsAuditorsServiceRequestResolvedEmailEnabled($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereIsAuditorsServiceRequestResolvedNotificationEnabled($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereIsManagersServiceRequestAssignedEmailEnabled($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereIsManagersServiceRequestAssignedNotificationEnabled($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereIsManagersServiceRequestCreatedEmailEnabled($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereIsManagersServiceRequestCreatedNotificationEnabled($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereIsManagersServiceRequestResolvedEmailEnabled($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereIsManagersServiceRequestResolvedNotificationEnabled($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType withTrashed()

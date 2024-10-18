@@ -34,45 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Rules;
+namespace App\Features;
 
-use Closure;
-use Illuminate\Database\Eloquent\Builder;
-use AidingApp\Contact\Models\Organization;
-use Illuminate\Contracts\Validation\ValidationRule;
+use App\Support\AbstractFeatureFlag;
 
-class UniqueOrganizationDomain implements ValidationRule
+class FeaturedArticle extends AbstractFeatureFlag
 {
-    protected $ignoreId;
-
-    /**
-     * Create a new rule instance.
-     *
-     * @param  int|null  $ignoreId
-     */
-    public function __construct($ignoreId = null)
+    public function resolve(mixed $scope): mixed
     {
-        $this->ignoreId = $ignoreId;
-    }
-
-    /**
-     * Run the validation rule.
-     *
-     * @param  Closure(string): \Illuminate\Translation\PotentiallyTranslatedString  $fail
-     */
-    public function validate(string $attribute, mixed $value, Closure $fail): void
-    {
-        if (
-            Organization::whereJsonContains('domains', [['domain' => $value]])
-                ->when(! empty($this->ignoreId), fn (Builder $query) => $query->where('id', '!=', $this->ignoreId))
-                ->exists()
-        ) {
-            $fail($this->message());
-        }
-    }
-
-    public function message()
-    {
-        return 'This domain is already in use and may not be used a second time.';
+        return false;
     }
 }

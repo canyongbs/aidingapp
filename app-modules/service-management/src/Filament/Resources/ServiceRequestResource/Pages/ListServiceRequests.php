@@ -45,6 +45,7 @@ use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Notifications\Notification;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Filters\SelectFilter;
@@ -146,7 +147,24 @@ class ListServiceRequests extends ListRecords
             ])
             ->bulkActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->action(function ($records) {
+                            $deletedRecordsCount = ServiceRequest::query()
+                                ->whereKey($records)
+                                ->when(! auth()->user()->hasRole('authorization.super_admin'), function (Builder $query) {
+                                    $query->whereHas('priority.type.managers', function (Builder $query): void {
+                                        $query->where('teams.id', auth()->user()->teams()->first()?->getKey());
+                                    });
+                                })
+                                ->delete();
+
+                            Notification::make()
+                                ->title('Deleted ' . $deletedRecordsCount . ' prompt types')
+                                ->body(($deletedRecordsCount < $records->count()) ? ($records->count() - $deletedRecordsCount) . ' service requests were not deleted because you\'re not an auditor or manager of it.' : null)
+                                ->success()
+                                ->send();
+                        })
+                        ->fetchSelectedRecords(false),
                 ]),
             ])
             ->defaultSort('created_at', 'desc')

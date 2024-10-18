@@ -49,6 +49,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pa
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\ManageServiceRequestTypeAuditors;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\ManageServiceRequestTypeManagers;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\EditServiceRequestTypeAssignments;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\EditServiceRequestTypeNotifications;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\RelationManagers\ServiceRequestPrioritiesRelationManager;
 
 class ServiceRequestTypeResource extends Resource
@@ -84,6 +85,7 @@ class ServiceRequestTypeResource extends Resource
             ManageServiceRequestTypeManagers::class,
             ManageServiceRequestTypeAuditors::class,
             EditServiceRequestTypeAssignments::class,
+            EditServiceRequestTypeNotifications::class,
         ]);
     }
 
@@ -97,6 +99,7 @@ class ServiceRequestTypeResource extends Resource
             'service-request-type-managers' => ManageServiceRequestTypeManagers::route('/{record}/managers'),
             'service-request-type-auditors' => ManageServiceRequestTypeAuditors::route('/{record}/auditors'),
             'service-request-type-assignments' => EditServiceRequestTypeAssignments::route('/{record}/assignments'),
+            'service-request-type-notifications' => EditServiceRequestTypeNotifications::route('/{record}/notifications'),
         ];
     }
 }

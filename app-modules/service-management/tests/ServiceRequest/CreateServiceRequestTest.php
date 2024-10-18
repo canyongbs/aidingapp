@@ -35,6 +35,7 @@
 */
 
 use App\Models\User;
+use AidingApp\Team\Models\Team;
 
 use function Tests\asSuperAdmin;
 
@@ -44,6 +45,7 @@ use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 use AidingApp\Contact\Models\Contact;
+use Filament\Forms\Components\Select;
 
 use function PHPUnit\Framework\assertCount;
 use function Pest\Laravel\assertDatabaseHas;
@@ -53,6 +55,8 @@ use AidingApp\Authorization\Enums\LicenseType;
 use function Pest\Laravel\assertDatabaseMissing;
 
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\Tests\RequestFactories\CreateServiceRequestRequestFactory;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\CreateServiceRequest;
@@ -128,7 +132,7 @@ test('CreateServiceRequest requires valid data', function ($data, $errors, $setu
         ],
         'priority_id missing' => [CreateServiceRequestRequestFactory::new()->without('priority_id'), ['priority_id' => 'required']],
         'priority_id does not exist' => [
-            CreateServiceRequestRequestFactory::new()->state(['priority_id' => fake()->uuid()]),
+            CreateServiceRequestRequestFactory::new()->state(['priority_id' => fake()->uuid(), 'type_id' => fake()->uuid()]),
             ['priority_id' => 'exists'],
         ],
         'close_details is not a string' => [CreateServiceRequestRequestFactory::new()->state(['close_details' => 1]), ['close_details' => 'string']],
@@ -152,12 +156,28 @@ test('CreateServiceRequest is gated with proper access control', function () {
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.create');
 
+    $team = Team::factory()->create();
+
+    $user->teams()->attach($team);
+
+    $user->refresh();
+
+    $serviceRequestTypesWithManager = ServiceRequestType::factory()->create();
+
+    $serviceRequestTypesWithManager->managers()->attach($team);
+
+    $serviceRequestTypesWithManager->save();
+
     actingAs($user)
         ->get(
             ServiceRequestResource::getUrl('create')
         )->assertSuccessful();
 
-    $request = collect(CreateServiceRequestRequestFactory::new()->create());
+    $request = collect(CreateServiceRequestRequestFactory::new()->create([
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $serviceRequestTypesWithManager->getKey(),
+        ])->getKey(),
+    ]));
 
     livewire(CreateServiceRequest::class)
         ->fillForm($request->toArray())
@@ -201,6 +221,12 @@ test('CreateServiceRequest is gated with proper feature access control', functio
 
     $user = User::factory()->licensed(LicenseType::cases())->create();
 
+    $team = Team::factory()->create();
+
+    $user->teams()->attach($team);
+
+    $user->refresh();
+
     actingAs($user)
         ->get(
             ServiceRequestResource::getUrl('create')
@@ -216,12 +242,20 @@ test('CreateServiceRequest is gated with proper feature access control', functio
 
     $settings->save();
 
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $serviceRequestType->managers()->attach($team);
+
     actingAs($user)
         ->get(
             ServiceRequestResource::getUrl('create')
         )->assertSuccessful();
 
-    $request = collect(CreateServiceRequestRequestFactory::new()->create());
+    $request = collect(CreateServiceRequestRequestFactory::new()->create([
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $serviceRequestType->getKey(),
+        ])->getKey(),
+    ]));
 
     livewire(CreateServiceRequest::class)
         ->fillForm($request->toArray())
@@ -238,4 +272,168 @@ test('CreateServiceRequest is gated with proper feature access control', functio
     $serviceRequest = ServiceRequest::first();
 
     expect($serviceRequest->division->id)->toEqual($request['division_id']);
+});
+
+test('cannot create service requests if user is manager of any service request type', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->serviceManagement = false;
+
+    $settings->save();
+
+    $user = User::factory()->licensed(LicenseType::cases())->create();
+
+    actingAs($user)
+        ->get(
+            ServiceRequestResource::getUrl('create')
+        )->assertForbidden();
+
+    $user->givePermissionTo('service_request.view-any');
+    $user->givePermissionTo('service_request.create');
+
+    $team = Team::factory()->create();
+
+    $user->teams()->attach($team);
+
+    $user->refresh();
+
+    $settings->data->addons->serviceManagement = true;
+
+    $settings->save();
+
+    livewire(CreateServiceRequest::class)
+        ->assertForbidden();
+
+    actingAs($user)
+        ->get(
+            ServiceRequestResource::getUrl('create')
+        )->assertForbidden();
+});
+
+test('displays only service request types managed by the current user', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->serviceManagement = true;
+
+    $settings->save();
+
+    $user = User::factory()->licensed(LicenseType::cases())->create();
+
+    $team = Team::factory()->create();
+
+    $user->teams()->attach($team);
+
+    $user->refresh();
+
+    $user->givePermissionTo('service_request.view-any');
+    $user->givePermissionTo('service_request.create');
+
+    actingAs($user);
+
+    $serviceRequestTypesWithManagers = ServiceRequestType::factory()
+        ->hasAttached($team, [], 'managers')
+        ->create();
+
+    $serviceRequestTypesWithoutManagers = ServiceRequestType::factory()->create();
+
+    livewire(CreateServiceRequest::class)
+        ->assertFormFieldExists('type_id', function (Select $field) use ($serviceRequestTypesWithManagers, $serviceRequestTypesWithoutManagers): bool {
+            $options = $field->getOptions();
+
+            return in_array($serviceRequestTypesWithManagers->getKey(), array_keys($options)) &&
+                   ! in_array($serviceRequestTypesWithoutManagers->getKey(), array_keys($options));
+        });
+});
+
+test('create service requests if user is manager of any service request type', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->serviceManagement = true;
+
+    $settings->save();
+
+    $user = User::factory()->licensed(LicenseType::cases())->create();
+
+    $team = Team::factory()->create();
+
+    $user->teams()->attach($team);
+
+    $user->refresh();
+
+    $user->givePermissionTo('service_request.view-any');
+    $user->givePermissionTo('service_request.create');
+
+    actingAs($user);
+
+    $serviceRequestTypesWithManager = ServiceRequestType::factory()->create();
+
+    $serviceRequestTypesWithManager->managers()->attach($team);
+
+    $serviceRequestTypesWithManager->save();
+
+    $request = collect(CreateServiceRequestRequestFactory::new()->create([
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $serviceRequestTypesWithManager->getKey(),
+        ])->getKey(),
+    ]));
+
+    livewire(CreateServiceRequest::class)
+        ->fillForm($request->toArray())
+        ->fillForm([
+            'respondent_id' => Contact::factory()->create()->getKey(),
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    assertCount(1, ServiceRequest::all());
+
+    assertDatabaseHas(ServiceRequest::class, $request->except(['division_id', 'respondent_id', 'type_id'])->toArray());
+
+    $serviceRequest = ServiceRequest::first();
+
+    expect($serviceRequest->division->id)->toEqual($request['division_id']);
+});
+
+test('validate service requests type if user is manager of any service request type', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->serviceManagement = true;
+
+    $settings->save();
+
+    $user = User::factory()->licensed(LicenseType::cases())->create();
+
+    $team = Team::factory()->create();
+
+    $user->teams()->attach($team);
+
+    $user->refresh();
+
+    $user->givePermissionTo('service_request.view-any');
+    $user->givePermissionTo('service_request.create');
+
+    actingAs($user);
+
+    $request = collect(CreateServiceRequestRequestFactory::new()->create());
+
+    $serviceRequestTypesWithoutManagers = ServiceRequestType::factory()->count(2)->create();
+
+    $serviceRequestTypesWithManagers = ServiceRequestType::factory()->count(2)->create();
+
+    $serviceRequestTypesWithManagers->each(function ($serviceRequest) use ($team) {
+        $serviceRequest->managers()->attach($team);
+    });
+
+    $serviceRequestTypes = $serviceRequestTypesWithoutManagers->toBase()->merge($serviceRequestTypesWithManagers);
+
+    livewire(CreateServiceRequest::class)
+        ->fillForm($request->toArray())
+        ->fillForm([
+            'respondent_id' => Contact::factory()->create()->getKey(),
+            'priority_id' => ServiceRequestPriority::factory()->create([
+                'type_id' => $serviceRequestTypes->first()->getKey(),
+            ])->getKey(),
+        ])
+        ->call('create')
+        ->assertHasFormErrors(['type_id']);
 });

@@ -36,6 +36,7 @@
 
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
+use App\Features\FeaturedArticle;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
@@ -49,6 +50,10 @@ class KnowledgeManagementPortalArticleController extends Controller
     {
         $article->increment('portal_view_count');
 
+        if (! $article->public) {
+            return response()->json([], 401);
+        }
+
         return response()->json([
             'category' => KnowledgeBaseCategoryData::from([
                 'id' => $category->getKey(),
@@ -60,7 +65,7 @@ class KnowledgeManagementPortalArticleController extends Controller
                 'categoryId' => $article->category_id,
                 'name' => $article->title,
                 'lastUpdated' => $article->updated_at->format('M d Y, h:m a'),
-                'content' => tiptap_converter()->record($article, attribute: 'article_details')->asHTML($article->article_details),
+                'content' => $article->article_details ? tiptap_converter()->record($article, attribute: 'article_details')->asHTML($article->article_details) : '',
                 'tags' => $article->tags()
                     ->orderBy('name')
                     ->select([
@@ -69,6 +74,7 @@ class KnowledgeManagementPortalArticleController extends Controller
                     ])
                     ->get()
                     ->toArray(),
+                'featured' => FeaturedArticle::active() ? $article->is_featured : false,
             ]),
             'portal_view_count' => $article->portal_view_count,
         ]);

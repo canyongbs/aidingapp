@@ -34,45 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Rules;
+use App\Features\FeaturedArticle;
+use Illuminate\Database\Migrations\Migration;
 
-use Closure;
-use Illuminate\Database\Eloquent\Builder;
-use AidingApp\Contact\Models\Organization;
-use Illuminate\Contracts\Validation\ValidationRule;
-
-class UniqueOrganizationDomain implements ValidationRule
-{
-    protected $ignoreId;
-
-    /**
-     * Create a new rule instance.
-     *
-     * @param  int|null  $ignoreId
-     */
-    public function __construct($ignoreId = null)
+return new class () extends Migration {
+    public function up(): void
     {
-        $this->ignoreId = $ignoreId;
+        FeaturedArticle::activate();
     }
 
-    /**
-     * Run the validation rule.
-     *
-     * @param  Closure(string): \Illuminate\Translation\PotentiallyTranslatedString  $fail
-     */
-    public function validate(string $attribute, mixed $value, Closure $fail): void
+    public function down(): void
     {
-        if (
-            Organization::whereJsonContains('domains', [['domain' => $value]])
-                ->when(! empty($this->ignoreId), fn (Builder $query) => $query->where('id', '!=', $this->ignoreId))
-                ->exists()
-        ) {
-            $fail($this->message());
-        }
+        FeaturedArticle::deactivate();
     }
-
-    public function message()
-    {
-        return 'This domain is already in use and may not be used a second time.';
-    }
-}
+};

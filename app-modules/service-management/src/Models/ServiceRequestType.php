@@ -68,6 +68,18 @@ class ServiceRequestType extends BaseModel implements Auditable
         'description',
         'icon',
         'assignment_type',
+        'is_managers_service_request_created_email_enabled',
+        'is_managers_service_request_created_notification_enabled',
+        'is_managers_service_request_assigned_email_enabled',
+        'is_managers_service_request_assigned_notification_enabled',
+        'is_managers_service_request_resolved_email_enabled',
+        'is_managers_service_request_resolved_notification_enabled',
+        'is_auditors_service_request_created_email_enabled',
+        'is_auditors_service_request_created_notification_enabled',
+        'is_auditors_service_request_assigned_email_enabled',
+        'is_auditors_service_request_assigned_notification_enabled',
+        'is_auditors_service_request_resolved_email_enabled',
+        'is_auditors_service_request_resolved_notification_enabled',
     ];
 
     protected $casts = [
@@ -75,6 +87,18 @@ class ServiceRequestType extends BaseModel implements Auditable
         'has_enabled_csat' => 'boolean',
         'has_enabled_nps' => 'boolean',
         'assignment_type' => ServiceRequestTypeAssignmentTypes::class,
+        'is_managers_service_request_created_email_enabled' => 'boolean',
+        'is_managers_service_request_created_notification_enabled' => 'boolean',
+        'is_managers_service_request_assigned_email_enabled' => 'boolean',
+        'is_managers_service_request_assigned_notification_enabled' => 'boolean',
+        'is_managers_service_request_resolved_email_enabled' => 'boolean',
+        'is_managers_service_request_resolved_notification_enabled' => 'boolean',
+        'is_auditors_service_request_created_email_enabled' => 'boolean',
+        'is_auditors_service_request_created_notification_enabled' => 'boolean',
+        'is_auditors_service_request_assigned_email_enabled' => 'boolean',
+        'is_auditors_service_request_assigned_notification_enabled' => 'boolean',
+        'is_auditors_service_request_resolved_email_enabled' => 'boolean',
+        'is_auditors_service_request_resolved_notification_enabled' => 'boolean',
     ];
 
     public function serviceRequests(): HasManyThrough

@@ -64,6 +64,7 @@ class KnowledgeBaseItem extends BaseModel implements Auditable, HasMedia, HasTag
     protected $table = 'knowledge_base_articles';
 
     protected $casts = [
+        'is_featured' => 'boolean',
         'public' => 'boolean',
         'article_details' => 'array',
     ];
@@ -76,6 +77,7 @@ class KnowledgeBaseItem extends BaseModel implements Auditable, HasMedia, HasTag
         'quality_id',
         'status_id',
         'title',
+        'is_featured',
     ];
 
     public function quality(): BelongsTo

@@ -34,6 +34,8 @@
 </COPYRIGHT>
 */
 
+use FilamentTiptapEditor\Actions\LinkAction;
+use FilamentTiptapEditor\Enums\TiptapOutput;
 use FilamentTiptapEditor\Actions\MediaAction;
 
 return [
@@ -84,7 +86,7 @@ return [
     |
     */
     'media_action' => MediaAction::class,
-    'link_action' => FilamentTiptapEditor\Actions\LinkAction::class,
+    'link_action' => LinkAction::class,
 
     /*
     |--------------------------------------------------------------------------
@@ -95,7 +97,7 @@ return [
     |
     | See: https://tiptap.dev/guide/output
     */
-    'output' => FilamentTiptapEditor\Enums\TiptapOutput::Json,
+    'output' => TiptapOutput::Json,
 
     /*
     |--------------------------------------------------------------------------

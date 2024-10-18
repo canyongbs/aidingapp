@@ -34,45 +34,36 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Rules;
+namespace AidingApp\ServiceManagement\Rules;
 
 use Closure;
-use Illuminate\Database\Eloquent\Builder;
-use AidingApp\Contact\Models\Organization;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Translation\PotentiallyTranslatedString;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
 
-class UniqueOrganizationDomain implements ValidationRule
+class ManagedServiceRequestType implements ValidationRule
 {
-    protected $ignoreId;
-
-    /**
-     * Create a new rule instance.
-     *
-     * @param  int|null  $ignoreId
-     */
-    public function __construct($ignoreId = null)
-    {
-        $this->ignoreId = $ignoreId;
-    }
-
     /**
      * Run the validation rule.
      *
-     * @param  Closure(string): \Illuminate\Translation\PotentiallyTranslatedString  $fail
+     * @param PotentiallyTranslatedString  $fail
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if (
-            Organization::whereJsonContains('domains', [['domain' => $value]])
-                ->when(! empty($this->ignoreId), fn (Builder $query) => $query->where('id', '!=', $this->ignoreId))
-                ->exists()
-        ) {
-            $fail($this->message());
+        if (auth()->user()->hasRole('authorization.super_admin')) {
+            return;
         }
-    }
 
-    public function message()
-    {
-        return 'This domain is already in use and may not be used a second time.';
+        $team = auth()->user()->teams()->first();
+
+        $isManager = ServiceRequestType::where('id', $value)
+            ->whereHas('managers', function ($query) use ($team) {
+                $query->where('teams.id', $team?->getKey());
+            })
+            ->exists();
+
+        if (! $isManager) {
+            $fail('You are not authorized to select this service request type.');
+        }
     }
 }

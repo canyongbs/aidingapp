@@ -39,6 +39,7 @@ use Tests\Unit\ClientMock;
 use Twilio\Rest\Api\V2010;
 use Twilio\Rest\MessagingBase;
 use App\Settings\LicenseSettings;
+use Tests\Unit\TestSmsNotification;
 use AidingApp\Contact\Models\Contact;
 
 use function Pest\Laravel\assertDatabaseCount;
@@ -53,7 +54,7 @@ use AidingApp\Notification\Exceptions\NotificationQuotaExceeded;
 it('An sms is allowed to be sent if there is available quota and it\'s quota usage is tracked', function () {
     $notifiable = Contact::factory()->create();
 
-    $notification = new Tests\Unit\TestSmsNotification();
+    $notification = new TestSmsNotification();
 
     $settings = app()->make(TwilioSettings::class);
 
@@ -101,7 +102,7 @@ it('An sms is allowed to be sent if there is available quota and it\'s quota usa
 it('An sms is prevented from being sent if there is no available quota', function () {
     $notifiable = Contact::factory()->create();
 
-    $notification = new Tests\Unit\TestSmsNotification();
+    $notification = new TestSmsNotification();
 
     $settings = app()->make(TwilioSettings::class);
 

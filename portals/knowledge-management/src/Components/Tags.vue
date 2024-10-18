@@ -40,11 +40,16 @@
             type: Array,
             required: true,
         },
+        featured: {
+            type: Boolean,
+            default: false,
+        },
     });
 </script>
 
 <template>
     <div class="flex flex-wrap gap-2">
+        <Badge v-if="featured" value="Featured" />
         <Badge v-for="tag in tags" :key="tag.id" :value="tag.name" />
     </div>
 </template>

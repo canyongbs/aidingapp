@@ -53,6 +53,7 @@ use Filament\Resources\RelationManagers\RelationManager;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
+use AidingApp\ServiceManagement\Rules\ManagedServiceRequestType;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 
 class CreateServiceRequest extends CreateRecord
@@ -83,7 +84,13 @@ class CreateServiceRequest extends CreateRecord
                 Grid::make()
                     ->schema([
                         Select::make('type_id')
-                            ->options(ServiceRequestType::pluck('name', 'id'))
+                            ->options(ServiceRequestType::when(! auth()->user()->hasRole('authorization.super_admin'), function (Builder $query) {
+                                $query->whereHas('managers', function (Builder $query): void {
+                                    $query->where('teams.id', auth()->user()->teams()->first()?->getKey());
+                                });
+                            })
+                                ->pluck('name', 'id'))
+                            ->rule(new ManagedServiceRequestType())
                             ->afterStateUpdated(fn (Set $set) => $set('priority_id', null))
                             ->label('Type')
                             ->required()
