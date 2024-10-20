@@ -45,37 +45,37 @@ use AidingApp\Portal\DataTransferObjects\KnowledgeBaseCategoryData;
 
 class KnowledgeManagementPortalArticleController extends Controller
 {
-  public function show(KnowledgeBaseCategory $category, KnowledgeBaseItem $article): JsonResponse
-  {
-    $article->increment('portal_view_count');
+    public function show(KnowledgeBaseCategory $category, KnowledgeBaseItem $article): JsonResponse
+    {
+        $article->increment('portal_view_count');
 
-    if (! $article->public) {
-      return response()->json([], 401);
+        if (! $article->public) {
+            return response()->json([], 401);
+        }
+
+        return response()->json([
+            'category' => KnowledgeBaseCategoryData::from([
+                'id' => $category->getKey(),
+                'name' => $category->name,
+                'description' => $category->description,
+            ]),
+            'article' => KnowledgeBaseArticleData::from([
+                'id' => $article->getKey(),
+                'categoryId' => $article->category_id,
+                'name' => $article->title,
+                'lastUpdated' => $article->updated_at->format('M d Y, h:m a'),
+                'content' => $article->article_details ? tiptap_converter()->record($article, attribute: 'article_details')->asHTML($article->article_details) : '',
+                'tags' => $article->tags()
+                    ->orderBy('name')
+                    ->select([
+                        'id',
+                        'name',
+                    ])
+                    ->get()
+                    ->toArray(),
+                'featured' => $article->is_featured,
+            ]),
+            'portal_view_count' => $article->portal_view_count,
+        ]);
     }
-
-    return response()->json([
-      'category' => KnowledgeBaseCategoryData::from([
-        'id' => $category->getKey(),
-        'name' => $category->name,
-        'description' => $category->description,
-      ]),
-      'article' => KnowledgeBaseArticleData::from([
-        'id' => $article->getKey(),
-        'categoryId' => $article->category_id,
-        'name' => $article->title,
-        'lastUpdated' => $article->updated_at->format('M d Y, h:m a'),
-        'content' => $article->article_details ? tiptap_converter()->record($article, attribute: 'article_details')->asHTML($article->article_details) : '',
-        'tags' => $article->tags()
-          ->orderBy('name')
-          ->select([
-            'id',
-            'name',
-          ])
-          ->get()
-          ->toArray(),
-        'featured' => $article->is_featured,
-      ]),
-      'portal_view_count' => $article->portal_view_count,
-    ]);
-  }
 }

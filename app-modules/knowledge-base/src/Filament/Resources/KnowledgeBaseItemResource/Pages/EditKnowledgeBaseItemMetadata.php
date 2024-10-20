@@ -78,7 +78,7 @@ class EditKnowledgeBaseItemMetadata
                         ->relationship(
                             'tags',
                             'name',
-                            fn(Builder $query) => $query->tap(new TagsForClass(new KnowledgeBaseItem()))
+                            fn (Builder $query) => $query->tap(new TagsForClass(new KnowledgeBaseItem()))
                         )
                         ->searchable()
                         ->preload()
