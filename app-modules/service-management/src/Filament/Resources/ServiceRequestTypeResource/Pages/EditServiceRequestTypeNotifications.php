@@ -42,7 +42,6 @@ use Filament\Forms\Components\Section;
 use Filament\Resources\Pages\EditRecord;
 use App\Filament\Forms\Components\Heading;
 use App\Filament\Forms\Components\Paragraph;
-use App\Features\ServiceRequestTypeNotifications;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
 
 class EditServiceRequestTypeNotifications extends EditRecord
@@ -53,7 +52,7 @@ class EditServiceRequestTypeNotifications extends EditRecord
 
     public static function canAccess(array $parameters = []): bool
     {
-        return ServiceRequestTypeNotifications::active() && parent::canAccess($parameters);
+        return parent::canAccess($parameters);
     }
 
     public function getRelationManagers(): array
