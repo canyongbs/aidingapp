@@ -36,7 +36,6 @@
 
 namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource\Pages;
 
-use App\Features\FeaturedArticle;
 use App\Models\Scopes\TagsForClass;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
@@ -69,8 +68,7 @@ class EditKnowledgeBaseItemMetadata
                                 ->label('Featured')
                                 ->default(false)
                                 ->onColor('success')
-                                ->offColor('gray')
-                                ->visible(FeaturedArticle::active()),
+                                ->offColor('gray'),
                         ]),
                     Textarea::make('notes')
                         ->label('Notes')
@@ -80,7 +78,7 @@ class EditKnowledgeBaseItemMetadata
                         ->relationship(
                             'tags',
                             'name',
-                            fn (Builder $query) => $query->tap(new TagsForClass(new KnowledgeBaseItem()))
+                            fn(Builder $query) => $query->tap(new TagsForClass(new KnowledgeBaseItem()))
                         )
                         ->searchable()
                         ->preload()
