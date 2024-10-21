@@ -35,13 +35,13 @@
 
     <div class="mt-4 flex w-full justify-center">
         <img
-            class="hidden h-5 dark:block"
-            src="{{ Vite::asset('resources/images/canyon-logo-dark.png') }}"
+            class="hidden h-7 dark:block"
+            src="{{ Vite::asset('resources/svg/CGBS_Logo_FullColor_Dark.svg') }}"
             alt="{{ config('app.name') }}"
         />
         <img
-            class="block h-5 dark:hidden"
-            src="{{ Vite::asset('resources/images/canyon-logo-light.png') }}"
+            class="block h-7 dark:hidden"
+            src="{{ Vite::asset('resources/svg/CGBS_Logo_FullColor_Light.svg') }}"
             alt="{{ config('app.name') }}"
         />
     </div>

@@ -74,7 +74,7 @@ class KnowledgeManagementPortalController extends Controller
                     absolute: false,
                 )
             ),
-            'footer_logo' => Vite::asset('resources/images/canyon-logo-light.png'),
+            'footer_logo' => Vite::asset('resources/svg/CGBS_Logo_FullColor_Light.svg'),
         ]);
     }
 }
