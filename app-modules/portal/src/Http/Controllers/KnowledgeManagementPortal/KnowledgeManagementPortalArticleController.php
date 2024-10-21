@@ -37,7 +37,10 @@
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use Illuminate\Http\JsonResponse;
+use App\Features\ArticleWasHelpful;
 use App\Http\Controllers\Controller;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Portal\Models\PortalGuest;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\Portal\DataTransferObjects\KnowledgeBaseArticleData;
@@ -47,7 +50,13 @@ class KnowledgeManagementPortalArticleController extends Controller
 {
     public function show(KnowledgeBaseCategory $category, KnowledgeBaseItem $article): JsonResponse
     {
+        if (ArticleWasHelpful::active() && ! auth()->guard('contact')->check() && ! session()->has('guest_id')) {
+            $portalGuest = PortalGuest::create();
+            session()->put('guest_id', $portalGuest->getKey());
+        }
         $article->increment('portal_view_count');
+        $voterType = session()->has('guest_id') ? (new PortalGuest())->getMorphClass() : (new Contact())->getMorphClass();
+        $voterId = session()->has('guest_id') ? session('guest_id') : auth('contact')->user()?->getKey();
 
         if (! $article->public) {
             return response()->json([], 401);
@@ -73,9 +82,20 @@ class KnowledgeManagementPortalArticleController extends Controller
                     ])
                     ->get()
                     ->toArray(),
+                'vote' => ArticleWasHelpful::active() ? optional(
+                    $article->votes()
+                        ->where('voter_id', $voterId)
+                        ->where('voter_type', $voterType)
+                        ->select([
+                            'id',
+                            'is_helpful',
+                        ])
+                        ->first()
+                )->toArray() : [],
                 'featured' => $article->is_featured,
             ]),
             'portal_view_count' => $article->portal_view_count,
+            'article_was_helpful_feature_flag' => ArticleWasHelpful::active(),
         ]);
     }
 }

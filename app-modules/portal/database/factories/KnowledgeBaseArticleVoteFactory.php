@@ -34,20 +34,30 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\DataTransferObjects;
+namespace AidingApp\Portal\Database\Factories;
 
-use Spatie\LaravelData\Data;
+use AidingApp\Contact\Models\Contact;
+use Illuminate\Database\Eloquent\Factories\Factory;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use AidingApp\Portal\Models\KnowledgeBaseArticleVote;
 
-class KnowledgeBaseArticleData extends Data
+/**
+ * @extends Factory<KnowledgeBaseArticleVote>
+ */
+class KnowledgeBaseArticleVoteFactory extends Factory
 {
-    public function __construct(
-        public string $id,
-        public ?string $categoryId,
-        public string $name,
-        public ?string $lastUpdated,
-        public ?string $content,
-        public ?array $tags,
-        public ?array $vote,
-        public bool $featured,
-    ) {}
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition(): array
+    {
+        return [
+            'is_helpful' => fake()->boolean(),
+            'voter_id' => Contact::factory(),
+            'voter_type' => (new Contact())->getMorphClass(),
+            'article_id' => KnowledgeBaseItem::factory(),
+        ];
+    }
 }
