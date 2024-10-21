@@ -36,7 +36,6 @@
 
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
-use App\Features\FeaturedArticle;
 use Illuminate\Http\JsonResponse;
 use App\Features\ArticleWasHelpful;
 use App\Http\Controllers\Controller;
@@ -93,7 +92,7 @@ class KnowledgeManagementPortalArticleController extends Controller
                         ])
                         ->first()
                 )->toArray() : [],
-                'featured' => FeaturedArticle::active() ? $article->is_featured : false,
+                'featured' => $article->is_featured,
             ]),
             'portal_view_count' => $article->portal_view_count,
             'article_was_helpful_feature_flag' => ArticleWasHelpful::active(),
