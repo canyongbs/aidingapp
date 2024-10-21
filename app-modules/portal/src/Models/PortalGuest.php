@@ -38,17 +38,14 @@ namespace AidingApp\Portal\Models;
 
 use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class PortalGuest extends BaseModel
 {
     use SoftDeletes;
 
-    public function knowledgeBaseArticleVotes()
+    public function knowledgeBaseArticleVotes(): MorphMany
     {
-        return $this->morphedByMany(KnowledgeBaseItem::class, 'voter', 'knowledge_base_article_votes')
-            ->using(KnowledgeBaseArticleVote::class)
-            ->withPivot('is_helpful')
-            ->withTimestamps();
+        return $this->morphMany(KnowledgeBaseArticleVote::class, 'voter');
     }
 }

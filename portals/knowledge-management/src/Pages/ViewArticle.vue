@@ -50,9 +50,7 @@
 
     const route = useRoute();
 
-    const { post } = consumer();
-
-    const { get } = consumer();
+    const { get, post } = consumer();
 
     const props = defineProps({
         searchUrl: {

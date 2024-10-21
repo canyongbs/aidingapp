@@ -56,8 +56,8 @@ class KnowledgeManagementPortalArticleController extends Controller
             session()->put('guest_id', $portalGuest->getKey());
         }
         $article->increment('portal_view_count');
-        $voterType = session()->has('guest_id') ? PortalGuest::class : Contact::class;
-        $voterId = session()->has('guest_id') ? session('guest_id') : auth('contact')->user()->id;
+        $voterType = session()->has('guest_id') ? (new PortalGuest())->getMorphClass() : (new Contact())->getMorphClass();
+        $voterId = session()->has('guest_id') ? session('guest_id') : auth('contact')->user()?->getKey();
 
         if (! $article->public) {
             return response()->json([], 401);
