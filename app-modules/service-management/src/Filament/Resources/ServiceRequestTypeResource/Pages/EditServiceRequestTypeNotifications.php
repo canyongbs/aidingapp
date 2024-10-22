@@ -50,11 +50,6 @@ class EditServiceRequestTypeNotifications extends EditRecord
 
     protected static ?string $title = 'Notifications';
 
-    public static function canAccess(array $parameters = []): bool
-    {
-        return parent::canAccess($parameters);
-    }
-
     public function getRelationManagers(): array
     {
         // Needed to prevent Filament from loading the relation managers on this page.
