@@ -80,7 +80,7 @@ class ServiceRequestFeedbackFormWidgetController extends Controller
                 'app_name' => config('app.name'),
                 'has_enabled_csat' => $serviceRequest->priority?->type?->has_enabled_csat,
                 'has_enabled_nps' => $serviceRequest->priority?->type?->has_enabled_nps,
-                'footer_logo' => Vite::asset('resources/images/canyon-logo-light.png'),
+                'footer_logo' => Vite::asset('resources/svg/CGBS_Logo_FullColor_Light.svg'),
                 'primary_color' => Color::all()[$portalSettings->knowledge_management_portal_primary_color ?? 'blue'],
                 'rounding' => $portalSettings->knowledge_management_portal_rounding,
                 'service_request_title' => $serviceRequest->title,
