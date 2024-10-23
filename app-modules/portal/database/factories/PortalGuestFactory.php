@@ -36,10 +36,11 @@
 
 namespace AidingApp\Portal\Database\Factories;
 
+use AidingApp\Portal\Models\PortalGuest;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AidingApp\Portal\Models\PortalGuest>
+ * @extends Factory<PortalGuest>
  */
 class PortalGuestFactory extends Factory
 {

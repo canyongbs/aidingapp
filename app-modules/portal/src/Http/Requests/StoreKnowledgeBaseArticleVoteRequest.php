@@ -49,8 +49,8 @@ class StoreKnowledgeBaseArticleVoteRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'articleVote' => ['nullable', 'boolean'],
-            'articleId' => ['required'],
+            'article_vote' => ['nullable', 'boolean'],
+            'article_id' => ['required'],
         ];
     }
 }

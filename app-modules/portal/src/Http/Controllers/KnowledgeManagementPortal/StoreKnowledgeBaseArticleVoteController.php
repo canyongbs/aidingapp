@@ -47,22 +47,24 @@ class StoreKnowledgeBaseArticleVoteController extends Controller
     public function __invoke(StoreKnowledgeBaseArticleVoteRequest $request): JsonResponse
     {
         $articleVote = [];
+        /**
+         * @param PortalGuest|Contact $voter
+         */
         $voter = session()->has('guest_id') ? PortalGuest::find(session('guest_id')) : auth('contact')->user();
-        $voterId = session()->has('guest_id') ? session('guest_id') : auth('contact')->user()?->getKey();
 
-        if (! is_null($request->articleVote)) {
-            $articleVote = KnowledgeBaseArticleVote::where('article_id', $request->articleId)->where('voter_id', $voterId)->first();
+        if (! is_null($request->article_vote)) {
+            $articleVote = $voter->knowledgeBaseArticleVotes()->where('article_id', $request->article_id)->first();
 
             if (empty($articleVote)) {
                 $articleVote = new KnowledgeBaseArticleVote();
                 $articleVote->voter()->associate($voter);
-                $articleVote->article_id = $request->articleId;
+                $articleVote->article_id = $request->article_id;
             }
-            $articleVote->is_helpful = $request->articleVote;
+            $articleVote->is_helpful = $request->article_vote;
             $articleVote->save();
         } else {
             if ($voter) {
-                $voter->knowledgeBaseArticleVotes()->where('article_id', $request->articleId)->delete();
+                $voter->knowledgeBaseArticleVotes()->where('article_id', $request->article_id)->delete();
             }
         }
 

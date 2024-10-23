@@ -110,8 +110,8 @@
     }
     async function toggleFeedback(type) {
         await post(props.apiUrl + '/knowledge_base_article_vote/store', {
-            articleVote: feedback.value === type ? null : type,
-            articleId: route.params.articleId,
+            article_vote: feedback.value === type ? null : type,
+            article_id: route.params.articleId,
         })
             .then((response) => {
                 if (response.status === 200 && !response.data) {
