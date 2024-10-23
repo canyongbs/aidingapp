@@ -40,7 +40,6 @@ use Filament\Forms\Form;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\CreateRecord;
-use App\Features\KnowledgeBaseCategorySlug;
 use App\Filament\Forms\Components\IconSelect;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource;
 
@@ -62,8 +61,7 @@ class CreateKnowledgeBaseCategory extends CreateRecord
                     ->unique()
                     ->maxLength(255)
                     ->required()
-                    ->dehydrateStateUsing(fn (string $state): string => strtolower($state))
-                    ->visible(KnowledgeBaseCategorySlug::active()),
+                    ->dehydrateStateUsing(fn (string $state): string => strtolower($state)),
                 Textarea::make('description')
                     ->label('Description')
                     ->nullable()
