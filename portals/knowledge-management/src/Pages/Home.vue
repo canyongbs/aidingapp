@@ -106,14 +106,14 @@
     const { user } = useAuthStore();
     const { hasServiceManagement } = useFeatureStore();
 
-    const setPagination = (articles) => {
-        currentPage.value = articles.current_page;
-        prevPageUrl.value = articles.prev_page_url;
-        nextPageUrl.value = articles.next_page_url;
-        lastPage.value = articles.last_page;
-        totalArticles.value = articles.total;
-        fromArticle.value = articles.from;
-        toArticle.value = articles.to;
+    const setPagination = (pagination) => {
+        currentPage.value = pagination.current_page;
+        prevPageUrl.value = pagination.prev_page_url;
+        nextPageUrl.value = pagination.next_page_url;
+        lastPage.value = pagination.last_page;
+        totalArticles.value = pagination.total;
+        fromArticle.value = pagination.from;
+        toArticle.value = pagination.to;
     };
 
     onMounted(function () {
