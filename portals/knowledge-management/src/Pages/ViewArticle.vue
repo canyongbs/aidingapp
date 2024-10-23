@@ -37,11 +37,20 @@
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import AppLoading from '../Components/AppLoading.vue';
     import { consumer } from '../Services/Consumer.js';
-    import { Bars3Icon, ClockIcon, EyeIcon } from '@heroicons/vue/24/outline/index.js';
+    import {
+        Bars3Icon,
+        ClockIcon,
+        EyeIcon,
+        HandThumbUpIcon,
+        HandThumbDownIcon,
+    } from '@heroicons/vue/24/outline/index.js';
     import DOMPurify from 'dompurify';
     import Tags from '../Components/Tags.vue';
+    import { useAuthStore } from '../Stores/auth.js';
 
     const route = useRoute();
+
+    const { get, post } = consumer();
 
     const props = defineProps({
         searchUrl: {
@@ -63,6 +72,8 @@
     const article = ref(null);
     const portalViewCount = ref(0);
     const portalViewCountFlag = ref(false);
+    const feedback = ref(null);
+    const articalWasHelpfulFeatureFlag = ref(null);
 
     watch(
         route,
@@ -77,14 +88,14 @@
     function getData() {
         loading.value = true;
 
-        const { get } = consumer();
-
         get(props.apiUrl + '/categories/' + route.params.categoryId + '/articles/' + route.params.articleId)
             .then((response) => {
                 if (response.data) {
                     category.value = response.data.category;
                     article.value = response.data.article;
                     portalViewCount.value = response.data.portal_view_count;
+                    articalWasHelpfulFeatureFlag.value = response.data.article_was_helpful_feature_flag;
+                    feedback.value = response.data.article.vote ? response.data.article.vote.is_helpful : null;
                 }
 
                 loading.value = false;
@@ -95,6 +106,22 @@
                 } else {
                     console.log('An error occurred', error);
                 }
+            });
+    }
+    async function toggleFeedback(type) {
+        await post(props.apiUrl + '/knowledge_base_article_vote/store', {
+            article_vote: feedback.value === type ? null : type,
+            article_id: route.params.articleId,
+        })
+            .then((response) => {
+                if (response.status === 200 && !response.data) {
+                    feedback.value = null;
+                } else if (response.status === 200) {
+                    feedback.value = response.data.is_helpful;
+                }
+            })
+            .catch((error) => {
+                console.error('Error submitting feedback:', error);
             });
     }
 </script>
@@ -133,6 +160,44 @@
                                     <Tags :tags="article.tags" :featured="article.featured" />
                                     <hr class="my-4" />
                                     <div v-html="DOMPurify.sanitize(article.content)"></div>
+                                    <div
+                                        class="flex items-center mt-6 p-4 border rounded-lg"
+                                        v-if="articalWasHelpfulFeatureFlag"
+                                    >
+                                        <p class="text-lg font-semibold mr-4">Was this content helpful?</p>
+                                        <div class="flex space-x-2">
+                                            <button
+                                                @click="toggleFeedback(true)"
+                                                :class="[
+                                                    'px-4 py-2 flex items-center justify-center space-x-1.5 rounded-lg border-2 transition duration-200 focus:outline-none',
+                                                    feedback === true
+                                                        ? 'bg-gradient-to-br from-primary-500 to-primary-800 text-white border-primary-300'
+                                                        : 'bg-white text-gray-700 border-gray-300',
+                                                ]"
+                                            >
+                                                <HandThumbUpIcon
+                                                    class="w-5 h-5"
+                                                    :class="feedback === true ? 'text-white' : 'text-gray-600'"
+                                                />
+                                                <span class="text-sm">Yes</span>
+                                            </button>
+                                            <button
+                                                @click="toggleFeedback(false)"
+                                                :class="[
+                                                    'px-4 py-2 flex items-center justify-center space-x-1.5 rounded-lg border-2 transition duration-200 focus:outline-none',
+                                                    feedback === false
+                                                        ? 'bg-gradient-to-br from-primary-500 to-primary-800 text-white border-primary-300'
+                                                        : 'bg-white text-gray-700 border-gray-300',
+                                                ]"
+                                            >
+                                                <HandThumbDownIcon
+                                                    class="w-5 h-5"
+                                                    :class="feedback === false ? 'text-white' : 'text-gray-600'"
+                                                />
+                                                <span class="text-sm">No</span>
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="flex items-center justify-center min-h-screen bg-gray-100" v-else>
                                     <div class="text-center">
