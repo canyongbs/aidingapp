@@ -31,6 +31,42 @@
 
 </COPYRIGHT>
 -->
+
+<script setup>
+    import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/vue/20/solid';
+    import { defineProps, computed } from 'vue';
+
+    const props = defineProps({
+        currentPage: {
+            type: Number,
+            required: true,
+        },
+        lastPage: {
+            type: Number,
+            required: true,
+        },
+        fromArticle: {
+            type: Number,
+            required: true,
+        },
+        toArticle: {
+            type: Number,
+            required: true,
+        },
+        totalArticles: {
+            type: Number,
+            required: true,
+        },
+    });
+
+    const visiblePages = computed(() => {
+        const range = 2;
+        const start = Math.max(props.currentPage - range, 1);
+        const end = Math.min(props.currentPage + range, props.lastPage);
+        return Array.from({ length: end - start + 1 }, (_, i) => i + start);
+    });
+</script>
+
 <template>
     <div class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
         <div class="flex flex-1 justify-between sm:hidden">
@@ -135,38 +171,3 @@
         </div>
     </div>
 </template>
-
-<script setup>
-    import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/vue/20/solid';
-    import { defineProps, computed } from 'vue';
-
-    const props = defineProps({
-        currentPage: {
-            type: Number,
-            required: true,
-        },
-        lastPage: {
-            type: Number,
-            required: true,
-        },
-        fromArticle: {
-            type: Number,
-            required: true,
-        },
-        toArticle: {
-            type: Number,
-            required: true,
-        },
-        totalArticles: {
-            type: Number,
-            required: true,
-        },
-    });
-
-    const visiblePages = computed(() => {
-        const range = 2;
-        const start = Math.max(props.currentPage - range, 1);
-        const end = Math.min(props.currentPage + range, props.lastPage);
-        return Array.from({ length: end - start + 1 }, (_, i) => i + start);
-    });
-</script>

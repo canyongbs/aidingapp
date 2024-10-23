@@ -96,9 +96,9 @@
             tags: selectedTags.value.join(','),
             page: page,
         }).then((response) => {
-            searchResults.value = response;
+            searchResults.value = response.data;
             loadingResults.value = false;
-            setPagination(response);
+            setPagination(response.data.data.articles.meta);
         });
         globalSearchQuery.value = '';
     }, 500);
@@ -106,14 +106,14 @@
     const { user } = useAuthStore();
     const { hasServiceManagement } = useFeatureStore();
 
-    const setPagination = (response) => {
-        currentPage.value = response.data.articles.current_page;
-        prevPageUrl.value = response.data.articles.prev_page_url;
-        nextPageUrl.value = response.data.articles.next_page_url;
-        lastPage.value = response.data.articles.last_page;
-        totalArticles.value = response.data.articles.total;
-        fromArticle.value = response.data.articles.from;
-        toArticle.value = response.data.articles.to;
+    const setPagination = (articles) => {
+        currentPage.value = articles.current_page;
+        prevPageUrl.value = articles.prev_page_url;
+        nextPageUrl.value = articles.next_page_url;
+        lastPage.value = articles.last_page;
+        totalArticles.value = articles.total;
+        fromArticle.value = articles.from;
+        toArticle.value = articles.to;
     };
 
     onMounted(function () {

@@ -98,7 +98,7 @@
 
         <div class="flex flex-col divide-y ring-1 ring-black/5 shadow-sm px-3 pt-3 pb-1 rounded bg-white">
             <h4 class="text-lg font-semibold text-gray-800 px-3 pt-1 pb-3">
-                Articles ({{ searchResults.data.articles.total }})
+                Articles ({{ totalArticles }})
             </h4>
 
             <div v-if="searchResults.data.articles.data.length > 0">

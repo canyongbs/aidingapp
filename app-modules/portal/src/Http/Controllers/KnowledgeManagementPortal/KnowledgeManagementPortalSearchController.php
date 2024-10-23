@@ -38,17 +38,18 @@ namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use Illuminate\Http\Request;
 use App\Models\Scopes\SearchBy;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Stringable;
 use App\Http\Controllers\Controller;
 use Illuminate\Database\Eloquent\Builder;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
+use AidingApp\Portal\DataTransferObjects\KnowledgeBaseArticleData;
 use AidingApp\Portal\DataTransferObjects\KnowledgeBaseCategoryData;
+use AidingApp\Portal\DataTransferObjects\KnowledgeManagementSearchData;
 
 class KnowledgeManagementPortalSearchController extends Controller
 {
-    public function get(Request $request): JsonResponse
+    public function get(Request $request): KnowledgeManagementSearchData
     {
         $search = str(json_decode($request->get('search')))
             ->lower()
@@ -62,31 +63,30 @@ class KnowledgeManagementPortalSearchController extends Controller
                 fn (Stringable $string) => $string->explode(',')
             );
 
-        $itemData =
+        $itemData = KnowledgeBaseArticleData::collection(
             KnowledgeBaseItem::query()
                 ->public()
                 ->with('tags')
                 ->when($search->isNotEmpty(), fn (Builder $query) => $query->tap(new SearchBy('title', $search)))
                 ->when($tags->isNotEmpty(), fn (Builder $query) => $query->whereHas('tags', fn (Builder $query) => $query->whereIn('id', $tags)))
                 ->paginate(5)
-                ->through(function ($article) {
-                    $article->id = $article->getKey();
-                    $article->categoryId = $article->category_id;
-                    $article->name = $article->title;
-                    $article->lastUpdated = $article->updated_at->toString();
-                    $article->content = '';
-                    $article->tags = $article->tags()
-                        ->orderBy('name')
-                        ->select([
-                            'id',
-                            'name',
-                        ])
-                        ->get()
-                        ->toArray();
-
-                    return $article;
-                });
-
+                ->through(function (KnowledgeBaseItem $article) {
+                    return [
+                        'id' => $article->getKey(),
+                        'categoryId' => $article->category_id,
+                        'name' => $article->title,
+                        'tags' => $article->tags()
+                            ->orderBy('name')
+                            ->select([
+                                'id',
+                                'name',
+                            ])
+                            ->get()
+                            ->toArray(),
+                        'featured' => $article->is_featured,
+                    ];
+                })
+        );
         $categoryData = KnowledgeBaseCategoryData::collection(
             KnowledgeBaseCategory::query()
                 ->tap(new SearchBy('name', $search))
@@ -101,11 +101,11 @@ class KnowledgeManagementPortalSearchController extends Controller
                 ->toArray()
         );
 
-        $searchResults = [
+        $searchResults = KnowledgeManagementSearchData::from([
             'articles' => $itemData,
             'categories' => $categoryData,
-        ];
+        ]);
 
-        return response()->json($searchResults);
+        return $searchResults->wrap('data');
     }
 }

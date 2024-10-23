@@ -99,20 +99,20 @@
             tags: selectedTags.value.join(','),
             page: page,
         }).then((response) => {
-            searchResults.value = response;
+            searchResults.value = response.data;
             loadingeSearchResults.value = false;
-            setPagination(response);
+            setPagination(response.data.data.articles.meta);
         });
     }, 500);
 
-    const setPagination = (response) => {
-        currentPage.value = response.data.articles.current_page;
-        prevPageUrl.value = response.data.articles.prev_page_url;
-        nextPageUrl.value = response.data.articles.next_page_url;
-        lastPage.value = response.data.articles.last_page;
-        totalArticles.value = response.data.articles.total;
-        fromArticle.value = response.data.articles.from;
-        toArticle.value = response.data.articles.to;
+    const setPagination = (articles) => {
+        currentPage.value = articles.current_page;
+        prevPageUrl.value = articles.prev_page_url;
+        nextPageUrl.value = articles.next_page_url;
+        lastPage.value = articles.last_page;
+        totalArticles.value = articles.total;
+        fromArticle.value = articles.from;
+        toArticle.value = articles.to;
     };
 
     watch(searchQuery, (value) => {
@@ -160,6 +160,8 @@
     watch(
         route,
         async function (newRouteValue) {
+            searchQuery.value = '';
+            fromSearch.value = false;
             await getData();
         },
         {
@@ -179,7 +181,7 @@
         await get(props.apiUrl + '/categories/' + route.params.categoryId, { page: page }).then((response) => {
             category.value = response.data.category;
             articles.value = response.data.articles.data;
-            setPagination(response);
+            setPagination(response.data.articles);
             loadingResults.value = false;
         });
     }
