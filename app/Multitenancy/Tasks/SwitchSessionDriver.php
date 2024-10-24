@@ -84,6 +84,7 @@ class SwitchSessionDriver implements SwitchTenantTask
             'session.driver' => $driver,
             'session.connection' => $connection,
             'session.domain' => $domain,
+            'sanctum.stateful' => [$domain],
         ]);
 
         app()->forgetInstance('session');
