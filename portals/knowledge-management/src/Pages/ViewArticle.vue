@@ -74,6 +74,7 @@
     const portalViewCountFlag = ref(false);
     const feedback = ref(null);
     const articalWasHelpfulFeatureFlag = ref(null);
+    const helpfulVotePercentage = ref(0);
 
     watch(
         route,
@@ -96,6 +97,7 @@
                     portalViewCount.value = response.data.portal_view_count;
                     articalWasHelpfulFeatureFlag.value = response.data.article_was_helpful_feature_flag;
                     feedback.value = response.data.article.vote ? response.data.article.vote.is_helpful : null;
+                    helpfulVotePercentage.value = response.data.helpful_vote_percentage;
                 }
 
                 loading.value = false;
@@ -114,11 +116,15 @@
             article_id: route.params.articleId,
         })
             .then((response) => {
-                if (response.status === 200 && !response.data) {
-                    feedback.value = null;
-                } else if (response.status === 200) {
-                    feedback.value = response.data.is_helpful;
+                if (response.status === 200) {
+                    if (response.data.hasOwnProperty('is_helpful') && response.data.is_helpful !== null) {
+                        feedback.value = response.data.is_helpful;
+                    } else {
+                        feedback.value = null;
+                    }
                 }
+
+                helpfulVotePercentage.value = response.data.helpful_vote_percentage;
             })
             .catch((error) => {
                 console.error('Error submitting feedback:', error);
@@ -197,6 +203,9 @@
                                                 <span class="text-sm">No</span>
                                             </button>
                                         </div>
+                                        <p class="text-lg font-semibold ml-4" v-if="helpfulVotePercentage">
+                                            {{ helpfulVotePercentage }}% of visitors found this helpful.
+                                        </p>
                                     </div>
                                 </div>
                                 <div class="flex items-center justify-center min-h-screen bg-gray-100" v-else>
