@@ -38,12 +38,13 @@ namespace AidingApp\Portal\DataTransferObjects;
 
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\DataCollection;
+use Spatie\LaravelData\PaginatedDataCollection;
 use Spatie\LaravelData\Attributes\DataCollectionOf;
 
 class KnowledgeManagementSearchData extends Data
 {
     #[DataCollectionOf(KnowledgeBaseArticleData::class)]
-    public DataCollection $articles;
+    public PaginatedDataCollection $articles;
 
     #[DataCollectionOf(KnowledgeBaseCategoryData::class)]
     public DataCollection $categories;
