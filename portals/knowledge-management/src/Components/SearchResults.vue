@@ -37,6 +37,9 @@
     import { ChevronRightIcon, XMarkIcon } from '@heroicons/vue/20/solid';
     import Tags from './Tags.vue';
     import Article from './Article.vue';
+    import Pagination from './Pagination.vue';
+
+    const emit = defineEmits(['fetchNextPage', 'fetchPreviousPage', 'fetchPage']);
 
     defineProps({
         searchQuery: {
@@ -51,7 +54,36 @@
             type: Boolean,
             required: true,
         },
+        currentPage: {
+            type: Number,
+            required: true,
+        },
+        lastPage: {
+            type: Number,
+            required: true,
+        },
+        fromArticle: {
+            type: Number,
+            required: true,
+        },
+        toArticle: {
+            type: Number,
+            required: true,
+        },
+        totalArticles: {
+            type: Number,
+            required: true,
+        },
     });
+    function fetchNextPage() {
+        emit('fetchNextPage');
+    }
+    function fetchPreviousPage() {
+        emit('fetchPreviousPage');
+    }
+    function fetchPage(page) {
+        emit('fetchPage', page);
+    }
 </script>
 
 <template>
@@ -65,16 +97,24 @@
         </h3>
 
         <div class="flex flex-col divide-y ring-1 ring-black/5 shadow-sm px-3 pt-3 pb-1 rounded bg-white">
-            <h4 class="text-lg font-semibold text-gray-800 px-3 pt-1 pb-3">
-                Articles ({{ searchResults.data.articles.length }})
-            </h4>
+            <h4 class="text-lg font-semibold text-gray-800 px-3 pt-1 pb-3">Articles ({{ totalArticles }})</h4>
 
-            <div v-if="searchResults.data.articles.length > 0">
+            <div v-if="searchResults.data.articles.data.length > 0">
                 <ul role="list" class="divide-y">
-                    <li v-for="article in searchResults.data.articles" :key="article.id">
+                    <li v-for="article in searchResults.data.articles.data" :key="article.id">
                         <Article :article="article" />
                     </li>
                 </ul>
+                <Pagination
+                    :currentPage="currentPage"
+                    :lastPage="lastPage"
+                    :fromArticle="fromArticle"
+                    :toArticle="toArticle"
+                    :totalArticles="totalArticles"
+                    @fetchNextPage="fetchNextPage"
+                    @fetchPreviousPage="fetchPreviousPage"
+                    @fetchPage="fetchPage"
+                />
             </div>
             <div v-else class="p-3 flex items-start gap-2">
                 <XMarkIcon class="h-5 w-5 text-gray-400" />

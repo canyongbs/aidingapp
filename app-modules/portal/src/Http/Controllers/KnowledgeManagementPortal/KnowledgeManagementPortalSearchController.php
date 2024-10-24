@@ -69,8 +69,8 @@ class KnowledgeManagementPortalSearchController extends Controller
                 ->with('tags')
                 ->when($search->isNotEmpty(), fn (Builder $query) => $query->tap(new SearchBy('title', $search)))
                 ->when($tags->isNotEmpty(), fn (Builder $query) => $query->whereHas('tags', fn (Builder $query) => $query->whereIn('id', $tags)))
-                ->get()
-                ->map(function (KnowledgeBaseItem $article) {
+                ->paginate(5)
+                ->through(function (KnowledgeBaseItem $article) {
                     return [
                         'id' => $article->getKey(),
                         'categoryId' => $article->category_id,
@@ -86,9 +86,7 @@ class KnowledgeManagementPortalSearchController extends Controller
                         'featured' => $article->is_featured,
                     ];
                 })
-                ->toArray()
         );
-
         $categoryData = KnowledgeBaseCategoryData::collection(
             KnowledgeBaseCategory::query()
                 ->tap(new SearchBy('name', $search))
