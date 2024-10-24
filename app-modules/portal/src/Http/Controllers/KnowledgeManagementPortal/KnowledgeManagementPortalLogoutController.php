@@ -38,8 +38,10 @@ namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use App\Features\ArticleWasHelpful;
 use App\Http\Controllers\Controller;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Portal\Models\PortalGuest;
 
 class KnowledgeManagementPortalLogoutController extends Controller
 {
@@ -57,6 +59,11 @@ class KnowledgeManagementPortalLogoutController extends Controller
         $contact->tokens()->where('name', 'knowledge-management-portal-access-token')->delete();
 
         auth('contact')->logout();
+
+        if (ArticleWasHelpful::active() && ! session()->has('guest_id')) {
+            $portalGuest = PortalGuest::create();
+            session()->put('guest_id', $portalGuest->getKey());
+        }
 
         return response()->json([
             'success' => true,

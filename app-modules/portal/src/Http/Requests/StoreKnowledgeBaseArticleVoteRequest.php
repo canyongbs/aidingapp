@@ -34,20 +34,23 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\DataTransferObjects;
+namespace AidingApp\Portal\Http\Requests;
 
-use Spatie\LaravelData\Data;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\ValidationRule;
 
-class KnowledgeBaseArticleData extends Data
+class StoreKnowledgeBaseArticleVoteRequest extends FormRequest
 {
-    public function __construct(
-        public string $id,
-        public ?string $categoryId,
-        public string $name,
-        public ?string $lastUpdated,
-        public ?string $content,
-        public ?array $tags,
-        public ?array $vote,
-        public bool $featured,
-    ) {}
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, ValidationRule|array<mixed>|string>
+     */
+    public function rules(): array
+    {
+        return [
+            'article_vote' => ['nullable', 'boolean'],
+            'article_id' => ['required'],
+        ];
+    }
 }

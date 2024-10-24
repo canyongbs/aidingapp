@@ -34,17 +34,14 @@
 </COPYRIGHT>
 */
 
-use Illuminate\Database\Migrations\Migration;
-use App\Features\ServiceRequestTypeAssignments;
+namespace App\Features;
 
-return new class () extends Migration {
-    public function up(): void
-    {
-        ServiceRequestTypeAssignments::activate();
-    }
+use App\Support\AbstractFeatureFlag;
 
-    public function down(): void
+class ArticleWasHelpful extends AbstractFeatureFlag
+{
+    public function resolve(mixed $scope): mixed
     {
-        ServiceRequestTypeAssignments::deactivate();
+        return false;
     }
-};
+}
