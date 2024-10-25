@@ -158,9 +158,7 @@
                                     <Tags :tags="article.tags" :featured="article.featured" />
                                     <hr class="my-4" />
                                     <div v-html="DOMPurify.sanitize(article.content)"></div>
-                                    <div
-                                        class="flex items-center mt-6 p-4 border rounded-lg"
-                                    >
+                                    <div class="flex items-center mt-6 p-4 border rounded-lg">
                                         <p class="text-lg font-semibold mr-4">Was this content helpful?</p>
                                         <div class="flex space-x-2">
                                             <button
