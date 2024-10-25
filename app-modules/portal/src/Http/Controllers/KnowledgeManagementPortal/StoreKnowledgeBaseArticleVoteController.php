@@ -48,9 +48,14 @@ class StoreKnowledgeBaseArticleVoteController extends Controller
     {
         $articleVote = [];
         /**
-         * @param PortalGuest|Contact $voter
+         * @param PortalGuest|Contact|null $voter
          */
-        $voter = session()->has('guest_id') ? PortalGuest::find(session('guest_id')) : auth('contact')->user();
+        $voter = auth('contact')->user() ?? PortalGuest::find(session('guest_id'));
+
+        if (is_null($voter)) {
+            $voter = PortalGuest::create();
+            session()->put('guest_id', $voter->getKey());
+        }
 
         if (! is_null($request->article_vote)) {
             $articleVote = $voter->knowledgeBaseArticleVotes()->where('article_id', $request->article_id)->first();
