@@ -59,7 +59,6 @@
                     ? 'border-b-2 border-primary-600'
                     : 'border-transparent'
             "
-            data-twe-toggle="pill"
             aria-selected="true"
         >
             All Articles
@@ -69,7 +68,6 @@
             @click="updateFilter('featured')"
             class="text-sm font-semibold text-primary-600 px-4 py-3 border-b-2 hover:border-primary-600 cursor-pointer"
             :class="selectedFilter === 'featured' ? 'border-b-2 border-primary-600' : 'border-transparent'"
-            data-twe-toggle="pill"
             aria-selected="true"
         >
             Featured
@@ -79,7 +77,6 @@
             @click="updateFilter('most-viewed')"
             class="text-sm font-semibold text-primary-600 px-4 py-3 border-b-2 hover:border-primary-600 cursor-pointer"
             :class="selectedFilter === 'most-viewed' ? 'border-b-2 border-primary-600' : 'border-transparent'"
-            data-twe-toggle="pill"
             aria-selected="true"
         >
             Most Viewed
