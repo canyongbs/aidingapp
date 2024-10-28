@@ -34,17 +34,17 @@
 </COPYRIGHT>
 */
 
+use App\Features\ArticleWasHelpful;
 use Illuminate\Database\Migrations\Migration;
-use App\Features\ServiceRequestTypeAssignments;
 
 return new class () extends Migration {
     public function up(): void
     {
-        ServiceRequestTypeAssignments::activate();
+        ArticleWasHelpful::activate();
     }
 
     public function down(): void
     {
-        ServiceRequestTypeAssignments::deactivate();
+        ArticleWasHelpful::deactivate();
     }
 };

@@ -75,8 +75,8 @@ class KnowledgeManagementPortalSearchController extends Controller
                 ->when($request->get('filter') === 'most-viewed', function ($q) {
                     $q->orderBy('portal_view_count', 'desc');
                 })
-                ->get()
-                ->map(function (KnowledgeBaseItem $article) {
+                ->paginate(5)
+                ->through(function (KnowledgeBaseItem $article) {
                     return [
                         'id' => $article->getKey(),
                         'categoryId' => $article->category_id,
@@ -92,9 +92,7 @@ class KnowledgeManagementPortalSearchController extends Controller
                         'featured' => $article->is_featured,
                     ];
                 })
-                ->toArray()
         );
-
         $categoryData = KnowledgeBaseCategoryData::collection(
             KnowledgeBaseCategory::query()
                 ->tap(new SearchBy('name', $search))

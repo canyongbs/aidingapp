@@ -34,18 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\DataTransferObjects;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
-use Spatie\LaravelData\Data;
-use Spatie\LaravelData\DataCollection;
-use Spatie\LaravelData\PaginatedDataCollection;
-use Spatie\LaravelData\Attributes\DataCollectionOf;
+return new class () extends Migration {
+    public function up(): void
+    {
+        Schema::create('portal_guests', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->timestamps();
+            $table->softDeletes();
+        });
+    }
 
-class KnowledgeManagementSearchData extends Data
-{
-    #[DataCollectionOf(KnowledgeBaseArticleData::class)]
-    public PaginatedDataCollection $articles;
-
-    #[DataCollectionOf(KnowledgeBaseCategoryData::class)]
-    public DataCollection $categories;
-}
+    public function down(): void
+    {
+        Schema::dropIfExists('portal_guests');
+    }
+};

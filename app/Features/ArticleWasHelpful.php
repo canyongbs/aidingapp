@@ -34,17 +34,14 @@
 </COPYRIGHT>
 */
 
-use Illuminate\Database\Migrations\Migration;
-use App\Features\ServiceRequestTypeNotifications;
+namespace App\Features;
 
-return new class () extends Migration {
-    public function up(): void
-    {
-        ServiceRequestTypeNotifications::activate();
-    }
+use App\Support\AbstractFeatureFlag;
 
-    public function down(): void
+class ArticleWasHelpful extends AbstractFeatureFlag
+{
+    public function resolve(mixed $scope): mixed
     {
-        ServiceRequestTypeNotifications::deactivate();
+        return false;
     }
-};
+}

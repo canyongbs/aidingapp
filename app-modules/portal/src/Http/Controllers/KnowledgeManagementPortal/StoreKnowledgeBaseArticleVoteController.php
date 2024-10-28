@@ -34,14 +34,45 @@
 </COPYRIGHT>
 */
 
-namespace App\Features;
+namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
-use App\Support\AbstractFeatureFlag;
+use Illuminate\Http\JsonResponse;
+use App\Http\Controllers\Controller;
+use AidingApp\Portal\Models\PortalGuest;
+use AidingApp\Portal\Models\KnowledgeBaseArticleVote;
+use AidingApp\Portal\Http\Requests\StoreKnowledgeBaseArticleVoteRequest;
 
-class ServiceRequestTypeAssignments extends AbstractFeatureFlag
+class StoreKnowledgeBaseArticleVoteController extends Controller
 {
-    public function resolve(mixed $scope): mixed
+    public function __invoke(StoreKnowledgeBaseArticleVoteRequest $request): JsonResponse
     {
-        return false;
+        $articleVote = [];
+        /**
+         * @param PortalGuest|Contact|null $voter
+         */
+        $voter = auth('contact')->user() ?? PortalGuest::find(session('guest_id'));
+
+        if (is_null($voter)) {
+            $voter = PortalGuest::create();
+            session()->put('guest_id', $voter->getKey());
+        }
+
+        if (! is_null($request->article_vote)) {
+            $articleVote = $voter->knowledgeBaseArticleVotes()->where('article_id', $request->article_id)->first();
+
+            if (empty($articleVote)) {
+                $articleVote = new KnowledgeBaseArticleVote();
+                $articleVote->voter()->associate($voter);
+                $articleVote->article_id = $request->article_id;
+            }
+            $articleVote->is_helpful = $request->article_vote;
+            $articleVote->save();
+        } else {
+            if ($voter) {
+                $voter->knowledgeBaseArticleVotes()->where('article_id', $request->article_id)->delete();
+            }
+        }
+
+        return response()->json($articleVote, 200);
     }
 }

@@ -34,18 +34,23 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\DataTransferObjects;
+namespace AidingApp\Portal\Http\Requests;
 
-use Spatie\LaravelData\Data;
-use Spatie\LaravelData\DataCollection;
-use Spatie\LaravelData\PaginatedDataCollection;
-use Spatie\LaravelData\Attributes\DataCollectionOf;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\ValidationRule;
 
-class KnowledgeManagementSearchData extends Data
+class StoreKnowledgeBaseArticleVoteRequest extends FormRequest
 {
-    #[DataCollectionOf(KnowledgeBaseArticleData::class)]
-    public PaginatedDataCollection $articles;
-
-    #[DataCollectionOf(KnowledgeBaseCategoryData::class)]
-    public DataCollection $categories;
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, ValidationRule|array<mixed>|string>
+     */
+    public function rules(): array
+    {
+        return [
+            'article_vote' => ['nullable', 'boolean'],
+            'article_id' => ['required'],
+        ];
+    }
 }

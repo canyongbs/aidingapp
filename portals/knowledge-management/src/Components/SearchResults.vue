@@ -38,6 +38,9 @@
     import Tags from './Tags.vue';
     import Article from './Article.vue';
     import FilterComponent from './FilterComponent.vue';
+    import Pagination from './Pagination.vue';
+
+const emit = defineEmits(['fetchNextPage', 'fetchPreviousPage', 'fetchPage', 'change-filter']);
 
     defineProps({
         searchQuery: {
@@ -56,13 +59,41 @@
             type: String,
             default: '',
         },
+        currentPage: {
+            type: Number,
+            required: true,
+        },
+        lastPage: {
+            type: Number,
+            required: true,
+        },
+        fromArticle: {
+            type: Number,
+            required: true,
+        },
+        toArticle: {
+            type: Number,
+            required: true,
+        },
+        totalArticles: {
+            type: Number,
+            required: true,
+        },
     });
-
-    const emit = defineEmits(['change-filter']);
 
     const updateFilter = (value) => {
         emit('change-filter', value);
     };
+
+    function fetchNextPage() {
+        emit('fetchNextPage');
+    }
+    function fetchPreviousPage() {
+        emit('fetchPreviousPage');
+    }
+    function fetchPage(page) {
+        emit('fetchPage', page);
+    }
 </script>
 
 <template>
@@ -77,15 +108,24 @@
 
         <filter-component @change-filter="updateFilter" :selected-filter="selectedFilter"></filter-component>
         <div class="flex flex-col divide-y ring-1 ring-black/5 shadow-sm px-3 pt-3 pb-1 rounded bg-white">
-            <h4 class="text-lg font-semibold text-gray-800 px-3 pt-1 pb-3">
-                Articles ({{ searchResults.data.articles.length }})
-            </h4>
-            <div v-if="searchResults.data.articles.length > 0">
+            <h4 class="text-lg font-semibold text-gray-800 px-3 pt-1 pb-3">Articles ({{ totalArticles }})</h4>
+
+            <div v-if="searchResults.data.articles.data.length > 0">
                 <ul role="list" class="divide-y">
-                    <li v-for="article in searchResults.data.articles" :key="article.id">
+                    <li v-for="article in searchResults.data.articles.data" :key="article.id">
                         <Article :article="article" />
                     </li>
                 </ul>
+                <Pagination
+                    :currentPage="currentPage"
+                    :lastPage="lastPage"
+                    :fromArticle="fromArticle"
+                    :toArticle="toArticle"
+                    :totalArticles="totalArticles"
+                    @fetchNextPage="fetchNextPage"
+                    @fetchPreviousPage="fetchPreviousPage"
+                    @fetchPage="fetchPage"
+                />
             </div>
             <div v-else class="p-3 flex items-start gap-2">
                 <XMarkIcon class="h-5 w-5 text-gray-400" />

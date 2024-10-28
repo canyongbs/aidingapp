@@ -34,18 +34,18 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\DataTransferObjects;
+namespace AidingApp\Portal\Models;
 
-use Spatie\LaravelData\Data;
-use Spatie\LaravelData\DataCollection;
-use Spatie\LaravelData\PaginatedDataCollection;
-use Spatie\LaravelData\Attributes\DataCollectionOf;
+use App\Models\BaseModel;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
-class KnowledgeManagementSearchData extends Data
+class PortalGuest extends BaseModel
 {
-    #[DataCollectionOf(KnowledgeBaseArticleData::class)]
-    public PaginatedDataCollection $articles;
+    use SoftDeletes;
 
-    #[DataCollectionOf(KnowledgeBaseCategoryData::class)]
-    public DataCollection $categories;
+    public function knowledgeBaseArticleVotes(): MorphMany
+    {
+        return $this->morphMany(KnowledgeBaseArticleVote::class, 'voter');
+    }
 }

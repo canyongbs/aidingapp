@@ -34,18 +34,24 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\DataTransferObjects;
+namespace AidingApp\Portal\Database\Factories;
 
-use Spatie\LaravelData\Data;
-use Spatie\LaravelData\DataCollection;
-use Spatie\LaravelData\PaginatedDataCollection;
-use Spatie\LaravelData\Attributes\DataCollectionOf;
+use AidingApp\Portal\Models\PortalGuest;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-class KnowledgeManagementSearchData extends Data
+/**
+ * @extends Factory<PortalGuest>
+ */
+class PortalGuestFactory extends Factory
 {
-    #[DataCollectionOf(KnowledgeBaseArticleData::class)]
-    public PaginatedDataCollection $articles;
-
-    #[DataCollectionOf(KnowledgeBaseCategoryData::class)]
-    public DataCollection $categories;
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition(): array
+    {
+        return [
+        ];
+    }
 }

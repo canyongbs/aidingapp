@@ -73,10 +73,16 @@
     const route = useRoute();
     const globalSearchInput = ref(null);
     const filter = ref('');
+    const currentPage = ref(1);
+    const nextPageUrl = ref(null);
+    const prevPageUrl = ref(null);
+    const lastPage = ref(null);
+    const totalArticles = ref(0);
+    const fromArticle = ref(0);
+    const toArticle = ref(0);
 
-    const debounceSearch = debounce((value) => {
+    const debounceSearch = debounce((value, page = 1) => {
         const { post } = consumer();
-
         if (!value && selectedTags.value.length < 1) {
             searchQuery.value = null;
             searchResults.value = null;
@@ -89,15 +95,27 @@
             search: JSON.stringify(value),
             tags: selectedTags.value.join(','),
             filter: filter.value,
+            page: page,
         }).then((response) => {
             searchResults.value = response.data;
             loadingResults.value = false;
+            setPagination(response.data.data.articles.meta);
         });
         globalSearchQuery.value = '';
     }, 500);
 
     const { user } = useAuthStore();
     const { hasServiceManagement } = useFeatureStore();
+
+    const setPagination = (pagination) => {
+        currentPage.value = pagination.current_page;
+        prevPageUrl.value = pagination.prev_page_url;
+        nextPageUrl.value = pagination.next_page_url;
+        lastPage.value = pagination.last_page;
+        totalArticles.value = pagination.total;
+        fromArticle.value = pagination.from;
+        toArticle.value = pagination.to;
+    };
 
     onMounted(function () {
         if (route.query.search !== undefined) {
@@ -148,6 +166,21 @@
     const changeSearchFilter = (value) => {
         filter.value = value;
         debounceSearch(searchQuery.value);
+    };
+
+    const fetchNextPage = () => {
+        currentPage.value = currentPage.value !== lastPage.value ? currentPage.value + 1 : lastPage.value;
+        debounceSearch(searchQuery.value, currentPage.value);
+    };
+
+    const fetchPreviousPage = () => {
+        currentPage.value = currentPage.value !== 1 ? currentPage.value - 1 : 1;
+        debounceSearch(searchQuery.value, currentPage.value);
+    };
+
+    const fetchPage = (page) => {
+        currentPage.value = page;
+        debounceSearch(searchQuery.value, currentPage.value);
     };
 </script>
 
@@ -215,6 +248,14 @@
                 :loadingResults="loadingResults"
                 @change-filter="changeSearchFilter"
                 :selected-filter="filter"
+                :currentPage="currentPage"
+                :lastPage="lastPage"
+                :fromArticle="fromArticle"
+                :toArticle="toArticle"
+                :totalArticles="totalArticles"
+                @fetchNextPage="fetchNextPage"
+                @fetchPreviousPage="fetchPreviousPage"
+                @fetchPage="fetchPage"
             >
             </SearchResults>
 

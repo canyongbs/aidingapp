@@ -34,18 +34,30 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\DataTransferObjects;
+namespace AidingApp\Portal\Database\Factories;
 
-use Spatie\LaravelData\Data;
-use Spatie\LaravelData\DataCollection;
-use Spatie\LaravelData\PaginatedDataCollection;
-use Spatie\LaravelData\Attributes\DataCollectionOf;
+use AidingApp\Contact\Models\Contact;
+use Illuminate\Database\Eloquent\Factories\Factory;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use AidingApp\Portal\Models\KnowledgeBaseArticleVote;
 
-class KnowledgeManagementSearchData extends Data
+/**
+ * @extends Factory<KnowledgeBaseArticleVote>
+ */
+class KnowledgeBaseArticleVoteFactory extends Factory
 {
-    #[DataCollectionOf(KnowledgeBaseArticleData::class)]
-    public PaginatedDataCollection $articles;
-
-    #[DataCollectionOf(KnowledgeBaseCategoryData::class)]
-    public DataCollection $categories;
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition(): array
+    {
+        return [
+            'is_helpful' => fake()->boolean(),
+            'voter_id' => Contact::factory(),
+            'voter_type' => (new Contact())->getMorphClass(),
+            'article_id' => KnowledgeBaseItem::factory(),
+        ];
+    }
 }

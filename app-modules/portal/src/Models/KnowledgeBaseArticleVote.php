@@ -34,14 +34,36 @@
 </COPYRIGHT>
 */
 
-namespace App\Features;
+namespace AidingApp\Portal\Models;
 
-use App\Support\AbstractFeatureFlag;
+use Illuminate\Database\Eloquent\Relations\Pivot;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class ServiceRequestTypeNotifications extends AbstractFeatureFlag
+class KnowledgeBaseArticleVote extends Pivot
 {
-    public function resolve(mixed $scope): mixed
+    use HasUuids;
+    use HasFactory;
+
+    protected $casts = [
+        'is_helpful' => 'boolean',
+    ];
+
+    protected $table = 'knowledge_base_article_votes';
+
+    protected $fillable = [
+        'is_helpful',
+    ];
+
+    public function voter()
     {
-        return false;
+        return $this->morphTo();
+    }
+
+    public function knowledgeBaseArticle(): BelongsTo
+    {
+        return $this->belongsTo(KnowledgeBaseItem::class, 'article_id');
     }
 }

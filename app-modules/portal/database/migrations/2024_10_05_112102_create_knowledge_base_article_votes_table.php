@@ -34,18 +34,24 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\DataTransferObjects;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
-use Spatie\LaravelData\Data;
-use Spatie\LaravelData\DataCollection;
-use Spatie\LaravelData\PaginatedDataCollection;
-use Spatie\LaravelData\Attributes\DataCollectionOf;
+return new class () extends Migration {
+    public function up(): void
+    {
+        Schema::create('knowledge_base_article_votes', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->boolean('is_helpful');
+            $table->uuidMorphs('voter');
+            $table->foreignUuid('article_id')->constrained('knowledge_base_articles');
+            $table->timestamps();
+        });
+    }
 
-class KnowledgeManagementSearchData extends Data
-{
-    #[DataCollectionOf(KnowledgeBaseArticleData::class)]
-    public PaginatedDataCollection $articles;
-
-    #[DataCollectionOf(KnowledgeBaseCategoryData::class)]
-    public DataCollection $categories;
-}
+    public function down(): void
+    {
+        Schema::dropIfExists('knowledge_base_article_votes');
+    }
+};
