@@ -73,7 +73,6 @@
     const portalViewCount = ref(0);
     const portalViewCountFlag = ref(false);
     const feedback = ref(null);
-    const articalWasHelpfulFeatureFlag = ref(null);
     const helpfulVotePercentage = ref(0);
 
     watch(
@@ -95,7 +94,6 @@
                     category.value = response.data.category;
                     article.value = response.data.article;
                     portalViewCount.value = response.data.portal_view_count;
-                    articalWasHelpfulFeatureFlag.value = response.data.article_was_helpful_feature_flag;
                     feedback.value = response.data.article.vote ? response.data.article.vote.is_helpful : null;
                     helpfulVotePercentage.value = response.data.helpful_vote_percentage;
                 }
@@ -166,10 +164,7 @@
                                     <Tags :tags="article.tags" :featured="article.featured" />
                                     <hr class="my-4" />
                                     <div v-html="DOMPurify.sanitize(article.content)"></div>
-                                    <div
-                                        class="flex items-center mt-6 p-4 border rounded-lg"
-                                        v-if="articalWasHelpfulFeatureFlag"
-                                    >
+                                    <div class="flex items-center mt-6 p-4 border rounded-lg">
                                         <p class="text-lg font-semibold mr-4">Was this content helpful?</p>
                                         <div class="flex space-x-2">
                                             <button

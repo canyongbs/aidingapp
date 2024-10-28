@@ -38,7 +38,6 @@ namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use Illuminate\Http\JsonResponse;
 use Filament\Support\Colors\Color;
-use App\Features\ArticleWasHelpful;
 use Illuminate\Support\Facades\URL;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Vite;
@@ -56,7 +55,7 @@ class KnowledgeManagementPortalController extends Controller
         $favicon = $settings->getSettingsPropertyModel('portal.favicon')
             ->getFirstMedia('portal_favicon');
 
-        if (ArticleWasHelpful::active() && ! auth()->guard('contact')->check() && ! session()->has('guest_id')) {
+        if (! auth()->guard('contact')->check() && ! session()->has('guest_id')) {
             $portalGuest = PortalGuest::create();
             session()->put('guest_id', $portalGuest->getKey());
         }

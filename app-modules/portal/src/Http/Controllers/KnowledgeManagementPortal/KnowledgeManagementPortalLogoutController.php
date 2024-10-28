@@ -38,7 +38,6 @@ namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use App\Features\ArticleWasHelpful;
 use App\Http\Controllers\Controller;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Portal\Models\PortalGuest;
@@ -60,7 +59,7 @@ class KnowledgeManagementPortalLogoutController extends Controller
 
         auth('contact')->logout();
 
-        if (ArticleWasHelpful::active() && ! session()->has('guest_id')) {
+        if (! session()->has('guest_id')) {
             $portalGuest = PortalGuest::create();
             session()->put('guest_id', $portalGuest->getKey());
         }
