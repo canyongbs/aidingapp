@@ -37,6 +37,7 @@
     import { ChevronRightIcon, XMarkIcon } from '@heroicons/vue/20/solid';
     import Tags from './Tags.vue';
     import Article from './Article.vue';
+    import FilterComponent from './FilterComponent.vue';
 
     defineProps({
         searchQuery: {
@@ -51,7 +52,17 @@
             type: Boolean,
             required: true,
         },
+        selectedFilter: {
+            type: String,
+            default: '',
+        },
     });
+
+    const emit = defineEmits(['change-filter']);
+
+    const updateFilter = (value) => {
+        emit('change-filter', value);
+    };
 </script>
 
 <template>
@@ -64,11 +75,11 @@
             Search results: <span class="font-normal">{{ searchQuery }}</span>
         </h3>
 
+        <filter-component @change-filter="updateFilter" :selected-filter="selectedFilter"></filter-component>
         <div class="flex flex-col divide-y ring-1 ring-black/5 shadow-sm px-3 pt-3 pb-1 rounded bg-white">
             <h4 class="text-lg font-semibold text-gray-800 px-3 pt-1 pb-3">
                 Articles ({{ searchResults.data.articles.length }})
             </h4>
-
             <div v-if="searchResults.data.articles.length > 0">
                 <ul role="list" class="divide-y">
                     <li v-for="article in searchResults.data.articles" :key="article.id">

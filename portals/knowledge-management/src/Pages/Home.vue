@@ -72,6 +72,7 @@
     const selectedTags = ref([]);
     const route = useRoute();
     const globalSearchInput = ref(null);
+    const filter = ref('');
 
     const debounceSearch = debounce((value) => {
         const { post } = consumer();
@@ -87,6 +88,7 @@
         post(props.searchUrl, {
             search: JSON.stringify(value),
             tags: selectedTags.value.join(','),
+            filter: filter.value,
         }).then((response) => {
             searchResults.value = response.data;
             loadingResults.value = false;
@@ -142,6 +144,11 @@
         searchQuery.value = value;
         globalSearchInput.value.focus();
     }
+
+    const changeSearchFilter = (value) => {
+        filter.value = value;
+        debounceSearch(searchQuery.value);
+    };
 </script>
 
 <template>
@@ -206,6 +213,8 @@
                 :searchQuery="searchQuery"
                 :searchResults="searchResults"
                 :loadingResults="loadingResults"
+                @change-filter="changeSearchFilter"
+                :selected-filter="filter"
             >
             </SearchResults>
 

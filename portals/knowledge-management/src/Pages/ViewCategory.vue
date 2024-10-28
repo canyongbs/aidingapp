@@ -44,6 +44,7 @@
     import Article from '../Components/Article.vue';
     import SearchResults from '../Components/SearchResults.vue';
     import Badge from '../Components/Badge.vue';
+    import FilterComponent from '../Components/FilterComponent.vue';
 
     const route = useRoute();
 
@@ -80,6 +81,7 @@
     const totalArticles = ref(0);
     const fromArticle = ref(0);
     const toArticle = ref(0);
+    const filter = ref('');
 
     const debounceSearch = debounce((value) => {
         const { post } = consumer();
@@ -95,6 +97,7 @@
         post(props.searchUrl, {
             search: JSON.stringify(value),
             tags: selectedTags.value.join(','),
+            filter: filter.value,
         }).then((response) => {
             searchResults.value = response.data;
             loadingeSearchResults.value = false;
@@ -152,34 +155,46 @@
         return Array.from({ length: end - start + 1 }, (_, i) => i + start);
     };
 
+    const changeFilter = (value) => {
+        filter.value = value;
+        getData(1);
+    };
+
+    const changeSearchFilter = (value) => {
+        filter.value = value;
+        debounceSearch(searchQuery.value);
+    };
+
+    const getData = async (page = 1) => {
+        loadingResults.value = true;
+
+        const { get } = consumer();
+
+        await get(props.apiUrl + '/categories/' + route.params.categoryId, { page, filter: filter.value }).then(
+            (response) => {
+                category.value = response.data.category;
+                articles.value = response.data.articles.data;
+                currentPage.value = response.data.articles.current_page;
+                prevPageUrl.value = response.data.articles.prev_page_url;
+                nextPageUrl.value = response.data.articles.next_page_url;
+                lastPage.value = response.data.articles.last_page;
+                totalArticles.value = response.data.articles.total;
+                fromArticle.value = response.data.articles.from;
+                toArticle.value = response.data.articles.to;
+                loadingResults.value = false;
+            },
+        );
+    };
+
     watch(
         route,
-        async function (newRouteValue) {
-            await getData();
+        function (newRouteValue) {
+            getData();
         },
         {
             immediate: true,
         },
     );
-
-    async function getData(page = 1) {
-        loadingResults.value = true;
-
-        const { get } = consumer();
-
-        await get(props.apiUrl + '/categories/' + route.params.categoryId, { page: page }).then((response) => {
-            category.value = response.data.category;
-            articles.value = response.data.articles.data;
-            currentPage.value = response.data.articles.current_page;
-            prevPageUrl.value = response.data.articles.prev_page_url;
-            nextPageUrl.value = response.data.articles.next_page_url;
-            lastPage.value = response.data.articles.last_page;
-            totalArticles.value = response.data.articles.total;
-            fromArticle.value = response.data.articles.from;
-            toArticle.value = response.data.articles.to;
-            loadingResults.value = false;
-        });
-    }
 </script>
 
 <template>
@@ -240,6 +255,8 @@
                                 :searchQuery="searchQuery"
                                 :searchResults="searchResults"
                                 :loadingResults="loadingeSearchResults"
+                                @change-filter="changeSearchFilter"
+                                :selected-filter="filter"
                             >
                             </SearchResults>
                         </div>
@@ -249,7 +266,10 @@
                                 <h2 class="text-2xl font-bold text-primary-950">
                                     {{ category.name }}
                                 </h2>
-
+                                <filter-component
+                                    @change-filter="changeFilter"
+                                    :selected-filter="filter"
+                                ></filter-component>
                                 <div>
                                     <div
                                         class="flex flex-col divide-y ring-1 ring-black/5 shadow-sm px-3 pt-3 pb-1 rounded bg-white"

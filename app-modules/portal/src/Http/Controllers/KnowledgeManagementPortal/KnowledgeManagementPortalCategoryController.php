@@ -74,6 +74,12 @@ class KnowledgeManagementPortalCategoryController extends Controller
             'articles' => $category->knowledgeBaseItems()
                 ->with('tags')
                 ->public()
+                ->when(request()->get('filter') === 'featured', function ($q) {
+                    $q->where('is_featured', true);
+                })
+                ->when(request()->get('filter') === 'most-viewed', function ($q) {
+                    $q->orderBy('portal_view_count', 'desc');
+                })
                 ->paginate(5)
                 ->through(function ($category) {
                     $category->name = $category->title;
