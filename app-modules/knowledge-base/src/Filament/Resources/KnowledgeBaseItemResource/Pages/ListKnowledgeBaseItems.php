@@ -103,7 +103,7 @@ class ListKnowledgeBaseItems extends ListRecords
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
                     ->label('Last Updated')
-                    ->dateTime('d-m-Y')
+                    ->dateTime('m-d-Y')
                     ->sortable()
                     ->toggleable(),
                 TextColumn::make('tags.name')
