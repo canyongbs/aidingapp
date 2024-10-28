@@ -57,6 +57,15 @@ class KnowledgeManagementPortalArticleController extends Controller
         $voterType = session()->has('guest_id') ? (new PortalGuest())->getMorphClass() : (new Contact())->getMorphClass();
         $voterId = session()->has('guest_id') ? session('guest_id') : auth('contact')->user()?->getKey();
 
+        $totalVotes = $article->votes->count();
+        $helpfulVotes = $article->votes->where('is_helpful', true)->count();
+
+        $helpfulVotePercentage = 0;
+
+        if (ArticleWasHelpful::active() && $totalVotes > 0) {
+            $helpfulVotePercentage = round(($helpfulVotes / $totalVotes) * 100, 0);
+        }
+
         if (! $article->public) {
             return response()->json([], 401);
         }
@@ -94,6 +103,7 @@ class KnowledgeManagementPortalArticleController extends Controller
                 'featured' => $article->is_featured,
             ]),
             'portal_view_count' => $article->portal_view_count,
+            'helpful_vote_percentage' => $helpfulVotePercentage,
         ]);
     }
 }
