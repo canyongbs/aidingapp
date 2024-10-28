@@ -62,7 +62,7 @@ class KnowledgeManagementPortalArticleController extends Controller
 
         $helpfulVotePercentage = 0;
 
-        if (ArticleWasHelpful::active() && $totalVotes > 0) {
+        if ($totalVotes > 0) {
             $helpfulVotePercentage = round(($helpfulVotes / $totalVotes) * 100, 0);
         }
 
