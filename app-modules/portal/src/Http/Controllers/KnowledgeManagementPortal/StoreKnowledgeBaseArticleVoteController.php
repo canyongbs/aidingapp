@@ -39,6 +39,7 @@ namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use AidingApp\Portal\Models\PortalGuest;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\Portal\Models\KnowledgeBaseArticleVote;
 use AidingApp\Portal\Http\Requests\StoreKnowledgeBaseArticleVoteRequest;
 
@@ -72,6 +73,20 @@ class StoreKnowledgeBaseArticleVoteController extends Controller
                 $voter->knowledgeBaseArticleVotes()->where('article_id', $request->article_id)->delete();
             }
         }
+        $helpfulVoteData = KnowledgeBaseItem::withCount([
+            'votes',
+            'votes as helpful_votes_count' => function ($query) {
+                $query->where('is_helpful', true);
+            },
+        ])->find($request->article_id);
+
+        $helpfulVotePercentage = 0;
+
+        if ($helpfulVoteData->votes_count > 0) {
+            $helpfulVotePercentage = round(($helpfulVoteData->helpful_votes_count / $helpfulVoteData->votes_count) * 100, 0);
+        }
+
+        $articleVote['helpful_vote_percentage'] = $helpfulVotePercentage;
 
         return response()->json($articleVote, 200);
     }
