@@ -32,179 +32,181 @@
 </COPYRIGHT>
 -->
 <script setup>
-import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline';
-import { defineProps, ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
-import Breadcrumbs from '../Components/Breadcrumbs.vue';
-import AppLoading from '../Components/AppLoading.vue';
-import { consumer } from '../Services/Consumer.js';
-import { Bars3Icon } from '@heroicons/vue/24/outline/index.js';
-import { ChevronRightIcon, XMarkIcon, ChevronLeftIcon } from '@heroicons/vue/20/solid/index.js';
-import Tags from '../Components/Tags.vue';
-import Article from '../Components/Article.vue';
-import SearchResults from '../Components/SearchResults.vue';
-import Badge from '../Components/Badge.vue';
-import FilterComponent from '../Components/FilterComponent.vue';
-import Pagination from '../Components/Pagination.vue';
+    import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline';
+    import { defineProps, ref, watch } from 'vue';
+    import { useRoute } from 'vue-router';
+    import Breadcrumbs from '../Components/Breadcrumbs.vue';
+    import AppLoading from '../Components/AppLoading.vue';
+    import { consumer } from '../Services/Consumer.js';
+    import { Bars3Icon } from '@heroicons/vue/24/outline/index.js';
+    import { ChevronRightIcon, XMarkIcon, ChevronLeftIcon } from '@heroicons/vue/20/solid/index.js';
+    import Tags from '../Components/Tags.vue';
+    import Article from '../Components/Article.vue';
+    import SearchResults from '../Components/SearchResults.vue';
+    import Badge from '../Components/Badge.vue';
+    import FilterComponent from '../Components/FilterComponent.vue';
+    import Pagination from '../Components/Pagination.vue';
 
-const route = useRoute();
+    const route = useRoute();
 
-const props = defineProps({
-    searchUrl: {
-        type: String,
-        required: true,
-    },
-    apiUrl: {
-        type: String,
-        required: true,
-    },
-    categories: {
-        type: Object,
-        required: true,
-    },
-    tags: {
-        type: Object,
-        required: true,
-    },
-});
-
-const loadingResults = ref(true);
-const loadingeSearchResults = ref(true);
-const category = ref(null);
-const articles = ref(null);
-const searchQuery = ref('');
-const searchResults = ref(null);
-const selectedTags = ref([]);
-const currentPage = ref(1);
-const nextPageUrl = ref(null);
-const prevPageUrl = ref(null);
-const lastPage = ref(null);
-const totalArticles = ref(0);
-const fromArticle = ref(0);
-const toArticle = ref(0);
-const filter = ref('');
-const fromSearch = ref(false);
-
-const debounceSearch = debounce((value, page = 1) => {
-    const { post } = consumer();
-    fromSearch.value = true;
-    if (!value && selectedTags.value.length < 1) {
-        searchQuery.value = null;
-        searchResults.value = null;
-        return;
-    }
-
-    loadingeSearchResults.value = true;
-
-    post(props.searchUrl, {
-        search: JSON.stringify(value),
-        tags: selectedTags.value.join(','),
-        filter: filter.value,
-        page: page,
-    }).then((response) => {
-        searchResults.value = response.data;
-        loadingeSearchResults.value = false;
-        setPagination(response.data.data.articles.meta);
+    const props = defineProps({
+        searchUrl: {
+            type: String,
+            required: true,
+        },
+        apiUrl: {
+            type: String,
+            required: true,
+        },
+        categories: {
+            type: Object,
+            required: true,
+        },
+        tags: {
+            type: Object,
+            required: true,
+        },
     });
-}, 500);
 
-const setPagination = (pagination) => {
-    currentPage.value = pagination.current_page;
-    prevPageUrl.value = pagination.prev_page_url;
-    nextPageUrl.value = pagination.next_page_url;
-    lastPage.value = pagination.last_page;
-    totalArticles.value = pagination.total;
-    fromArticle.value = pagination.from;
-    toArticle.value = pagination.to;
-};
+    const loadingResults = ref(true);
+    const loadingeSearchResults = ref(true);
+    const category = ref(null);
+    const articles = ref(null);
+    const searchQuery = ref('');
+    const searchResults = ref(null);
+    const selectedTags = ref([]);
+    const currentPage = ref(1);
+    const nextPageUrl = ref(null);
+    const prevPageUrl = ref(null);
+    const lastPage = ref(null);
+    const totalArticles = ref(0);
+    const fromArticle = ref(0);
+    const toArticle = ref(0);
+    const filter = ref('');
+    const fromSearch = ref(false);
 
-watch(searchQuery, (value) => {
-    if (value == null) {
-        fromSearch.value = false;
-        getData(1)
-
-        return;
-    }
-    debounceSearch(value);
-});
-
-watch(selectedTags, () => {
-    debounceSearch(searchQuery.value);
-});
-
-function debounce(func, delay) {
-    let timerId;
-    return function (...args) {
-        if (timerId) {
-            clearTimeout(timerId);
+    const debounceSearch = debounce((value, page = 1) => {
+        const { post } = consumer();
+        fromSearch.value = true;
+        if (!value && selectedTags.value.length < 1) {
+            searchQuery.value = null;
+            searchResults.value = null;
+            return;
         }
-        timerId = setTimeout(() => {
-            func(...args);
-        }, delay);
+
+        loadingeSearchResults.value = true;
+
+        post(props.searchUrl, {
+            search: JSON.stringify(value),
+            tags: selectedTags.value.join(','),
+            filter: filter.value,
+            page: page,
+        }).then((response) => {
+            searchResults.value = response.data;
+            loadingeSearchResults.value = false;
+            setPagination(response.data.data.articles.meta);
+        });
+    }, 500);
+
+    const setPagination = (pagination) => {
+        currentPage.value = pagination.current_page;
+        prevPageUrl.value = pagination.prev_page_url;
+        nextPageUrl.value = pagination.next_page_url;
+        lastPage.value = pagination.last_page;
+        totalArticles.value = pagination.total;
+        fromArticle.value = pagination.from;
+        toArticle.value = pagination.to;
     };
-}
 
-function toggleTag(tag) {
-    if (selectedTags.value.includes(tag)) {
-        selectedTags.value = selectedTags.value.filter((t) => t !== tag);
-    } else {
-        selectedTags.value = [...selectedTags.value, tag];
-    }
-}
+    watch(searchQuery, (value) => {
+        if (value == null) {
+            fromSearch.value = false;
+            getData(1);
 
-const fetchNextPage = () => {
-    currentPage.value = currentPage.value !== lastPage.value ? currentPage.value + 1 : lastPage.value;
-    getData(currentPage.value);
-};
-
-const fetchPreviousPage = () => {
-    currentPage.value = currentPage.value !== 1 ? currentPage.value - 1 : 1;
-    getData(currentPage.value);
-};
-
-const fetchPage = (page) => {
-    currentPage.value = page;
-    getData(currentPage.value);
-};
-
-const changeFilter = (value) => {
-    filter.value = value;
-    getData(1);
-};
-
-const changeSearchFilter = (value) => {
-    filter.value = value;
-    debounceSearch(searchQuery.value);
-};
-
-watch(
-    route,
-    async function (newRouteValue) {
-        searchQuery.value = '';
-        fromSearch.value = false;
-        await getData();
-    },
-    {
-        immediate: true,
-    },
-);
-
-async function getData(page = 1) {
-    if (fromSearch.value) {
-        debounceSearch(searchQuery.value, page);
-        return;
-    }
-    loadingResults.value = true;
-
-    const { get } = consumer();
-
-    await get(props.apiUrl + '/categories/' + route.params.categoryId, { page: page, filter: filter.value }).then((response) => {
-        category.value = response.data.category;
-        articles.value = response.data.articles.data;
-        setPagination(response.data.articles);
-        loadingResults.value = false;
+            return;
+        }
+        debounceSearch(value);
     });
-}
+
+    watch(selectedTags, () => {
+        debounceSearch(searchQuery.value);
+    });
+
+    function debounce(func, delay) {
+        let timerId;
+        return function (...args) {
+            if (timerId) {
+                clearTimeout(timerId);
+            }
+            timerId = setTimeout(() => {
+                func(...args);
+            }, delay);
+        };
+    }
+
+    function toggleTag(tag) {
+        if (selectedTags.value.includes(tag)) {
+            selectedTags.value = selectedTags.value.filter((t) => t !== tag);
+        } else {
+            selectedTags.value = [...selectedTags.value, tag];
+        }
+    }
+
+    const fetchNextPage = () => {
+        currentPage.value = currentPage.value !== lastPage.value ? currentPage.value + 1 : lastPage.value;
+        getData(currentPage.value);
+    };
+
+    const fetchPreviousPage = () => {
+        currentPage.value = currentPage.value !== 1 ? currentPage.value - 1 : 1;
+        getData(currentPage.value);
+    };
+
+    const fetchPage = (page) => {
+        currentPage.value = page;
+        getData(currentPage.value);
+    };
+
+    const changeFilter = (value) => {
+        filter.value = value;
+        getData(1);
+    };
+
+    const changeSearchFilter = (value) => {
+        filter.value = value;
+        debounceSearch(searchQuery.value);
+    };
+
+    watch(
+        route,
+        async function (newRouteValue) {
+            searchQuery.value = '';
+            fromSearch.value = false;
+            await getData();
+        },
+        {
+            immediate: true,
+        },
+    );
+
+    async function getData(page = 1) {
+        if (fromSearch.value) {
+            debounceSearch(searchQuery.value, page);
+            return;
+        }
+        loadingResults.value = true;
+
+        const { get } = consumer();
+
+        await get(props.apiUrl + '/categories/' + route.params.categoryId, { page: page, filter: filter.value }).then(
+            (response) => {
+                category.value = response.data.category;
+                articles.value = response.data.articles.data;
+                setPagination(response.data.articles);
+                loadingResults.value = false;
+            },
+        );
+    }
 </script>
 
 <template>
@@ -222,20 +224,31 @@ async function getData(page = 1) {
                         <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 py-3">
                             <MagnifyingGlassIcon class="h-5 w-5 text-gray-400" aria-hidden="true" />
                         </div>
-                        <input type="search" v-model="searchQuery" id="search"
+                        <input
+                            type="search"
+                            v-model="searchQuery"
+                            id="search"
                             placeholder="Search for articles and categories"
                             class="block w-full rounded border-0 pl-12 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-2-- sm:text-sm sm:leading-6"
-                            :class="{ 'rounded-b-none': tags.length > 0 }" />
+                            :class="{ 'rounded-b-none': tags.length > 0 }"
+                        />
                     </div>
                 </div>
-                <details v-if="tags.length > 0"
-                    class="rounded rounded-t-none bg-white py-3 p-4 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-2-- sm:text-sm sm:leading-6">
+                <details
+                    v-if="tags.length > 0"
+                    class="rounded rounded-t-none bg-white py-3 p-4 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-2-- sm:text-sm sm:leading-6"
+                >
                     <summary v-if="selectedTags.length > 0">Tags ({{ selectedTags.length }} selected)</summary>
                     <summary v-else>Tags</summary>
                     <div class="flex flex-wrap gap-2">
-                        <Badge v-for="tag in tags" :key="tag.id" :value="tag.name" class="cursor-pointer"
+                        <Badge
+                            v-for="tag in tags"
+                            :key="tag.id"
+                            :value="tag.name"
+                            class="cursor-pointer"
                             :class="{ 'bg-primary-600 text-white': selectedTags.includes(tag.id) }"
-                            @click="toggleTag(tag.id)" />
+                            @click="toggleTag(tag.id)"
+                        />
                     </div>
                 </details>
             </div>
@@ -250,12 +263,21 @@ async function getData(page = 1) {
                 <div v-else>
                     <main class="flex flex-col gap-8">
                         <div v-if="searchQuery || selectedTags.length > 0" class="flex flex-col gap-6">
-                            <SearchResults :searchQuery="searchQuery" :searchResults="searchResults"
-                                :loadingResults="loadingeSearchResults" @change-filter="changeSearchFilter"
-                                :selected-filter="filter" :currentPage="currentPage" :lastPage="lastPage"
-                                :fromArticle="fromArticle" :toArticle="toArticle" :totalArticles="totalArticles"
-                                @fetchNextPage="fetchNextPage" @fetchPreviousPage="fetchPreviousPage"
-                                @fetchPage="fetchPage">
+                            <SearchResults
+                                :searchQuery="searchQuery"
+                                :searchResults="searchResults"
+                                :loadingResults="loadingeSearchResults"
+                                @change-filter="changeSearchFilter"
+                                :selected-filter="filter"
+                                :currentPage="currentPage"
+                                :lastPage="lastPage"
+                                :fromArticle="fromArticle"
+                                :toArticle="toArticle"
+                                :totalArticles="totalArticles"
+                                @fetchNextPage="fetchNextPage"
+                                @fetchPreviousPage="fetchPreviousPage"
+                                @fetchPage="fetchPage"
+                            >
                             </SearchResults>
                         </div>
                         <div v-else class="flex flex-col gap-6">
@@ -264,11 +286,14 @@ async function getData(page = 1) {
                                 <h2 class="text-2xl font-bold text-primary-950">
                                     {{ category.name }}
                                 </h2>
-                                <filter-component @change-filter="changeFilter"
-                                    :selected-filter="filter"></filter-component>
+                                <filter-component
+                                    @change-filter="changeFilter"
+                                    :selected-filter="filter"
+                                ></filter-component>
                                 <div>
                                     <div
-                                        class="flex flex-col divide-y ring-1 ring-black/5 shadow-sm px-3 pt-3 pb-1 rounded bg-white">
+                                        class="flex flex-col divide-y ring-1 ring-black/5 shadow-sm px-3 pt-3 pb-1 rounded bg-white"
+                                    >
                                         <h3 class="text-lg font-semibold text-gray-800 px-3 pt-1 pb-3">
                                             Articles ({{ totalArticles }})
                                         </h3>
@@ -279,10 +304,16 @@ async function getData(page = 1) {
                                                     <Article :article="article" />
                                                 </li>
                                             </ul>
-                                            <Pagination :currentPage="currentPage" :lastPage="lastPage"
-                                                :fromArticle="fromArticle" :toArticle="toArticle"
-                                                :totalArticles="totalArticles" @fetchNextPage="fetchNextPage"
-                                                @fetchPreviousPage="fetchPreviousPage" @fetchPage="fetchPage" />
+                                            <Pagination
+                                                :currentPage="currentPage"
+                                                :lastPage="lastPage"
+                                                :fromArticle="fromArticle"
+                                                :toArticle="toArticle"
+                                                :totalArticles="totalArticles"
+                                                @fetchNextPage="fetchNextPage"
+                                                @fetchPreviousPage="fetchPreviousPage"
+                                                @fetchPage="fetchPage"
+                                            />
                                         </div>
                                         <div v-else class="p-3 flex items-start gap-2">
                                             <XMarkIcon class="h-5 w-5 text-gray-400" />

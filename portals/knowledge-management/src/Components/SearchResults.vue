@@ -40,7 +40,7 @@
     import FilterComponent from './FilterComponent.vue';
     import Pagination from './Pagination.vue';
 
-const emit = defineEmits(['fetchNextPage', 'fetchPreviousPage', 'fetchPage', 'change-filter']);
+    const emit = defineEmits(['fetchNextPage', 'fetchPreviousPage', 'fetchPage', 'change-filter']);
 
     defineProps({
         searchQuery: {
