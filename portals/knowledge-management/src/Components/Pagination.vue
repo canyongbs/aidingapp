@@ -135,7 +135,7 @@
                         class="relative z-10 inline-flex items-center px-4 py-2 text-sm font-semibold focus:z-20"
                         :class="
                             page === currentPage
-                                ? 'bg-indigo-600 text-white'
+                                ? 'bg-primary-500 text-white'
                                 : 'bg-white-500 text-black border border-gray-300'
                         "
                         :disabled="page === currentPage"
