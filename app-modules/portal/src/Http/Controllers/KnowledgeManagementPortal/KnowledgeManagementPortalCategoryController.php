@@ -38,6 +38,7 @@ namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
+use Illuminate\Database\Eloquent\Builder;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\Portal\DataTransferObjects\KnowledgeBaseCategoryData;
 
@@ -74,6 +75,12 @@ class KnowledgeManagementPortalCategoryController extends Controller
             'articles' => $category->knowledgeBaseItems()
                 ->with('tags')
                 ->public()
+                ->when(request()->get('filter') === 'featured', function (Builder $query) {
+                    $query->where('is_featured', true);
+                })
+                ->when(request()->get('filter') === 'most-viewed', function (Builder $query) {
+                    $query->where('portal_view_count', '>', 0)->orderBy('portal_view_count', 'desc');
+                })
                 ->paginate(5)
                 ->through(function ($category) {
                     $category->name = $category->title;

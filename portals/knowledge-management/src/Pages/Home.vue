@@ -72,6 +72,7 @@
     const selectedTags = ref([]);
     const route = useRoute();
     const globalSearchInput = ref(null);
+    const filter = ref('');
     const currentPage = ref(1);
     const nextPageUrl = ref(null);
     const prevPageUrl = ref(null);
@@ -82,7 +83,6 @@
 
     const debounceSearch = debounce((value, page = 1) => {
         const { post } = consumer();
-
         if (!value && selectedTags.value.length < 1) {
             searchQuery.value = null;
             searchResults.value = null;
@@ -94,6 +94,7 @@
         post(props.searchUrl, {
             search: JSON.stringify(value),
             tags: selectedTags.value.join(','),
+            filter: filter.value,
             page: page,
         }).then((response) => {
             searchResults.value = response.data;
@@ -161,6 +162,11 @@
         searchQuery.value = value;
         globalSearchInput.value.focus();
     }
+
+    const changeSearchFilter = (value) => {
+        filter.value = value;
+        debounceSearch(searchQuery.value);
+    };
 
     const fetchNextPage = () => {
         currentPage.value = currentPage.value !== lastPage.value ? currentPage.value + 1 : lastPage.value;
@@ -240,6 +246,8 @@
                 :searchQuery="searchQuery"
                 :searchResults="searchResults"
                 :loadingResults="loadingResults"
+                @change-filter="changeSearchFilter"
+                :selected-filter="filter"
                 :currentPage="currentPage"
                 :lastPage="lastPage"
                 :fromArticle="fromArticle"

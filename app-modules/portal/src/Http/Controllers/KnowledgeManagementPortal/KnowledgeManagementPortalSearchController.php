@@ -69,6 +69,12 @@ class KnowledgeManagementPortalSearchController extends Controller
                 ->with('tags')
                 ->when($search->isNotEmpty(), fn (Builder $query) => $query->tap(new SearchBy('title', $search)))
                 ->when($tags->isNotEmpty(), fn (Builder $query) => $query->whereHas('tags', fn (Builder $query) => $query->whereIn('id', $tags)))
+                ->when($request->get('filter') === 'featured', function (Builder $query) {
+                    $query->where('is_featured', true);
+                })
+                ->when($request->get('filter') === 'most-viewed', function (Builder $query) {
+                    $query->where('portal_view_count', '>', 0)->orderBy('portal_view_count', 'desc');
+                })
                 ->paginate(5)
                 ->through(function (KnowledgeBaseItem $article) {
                     return [

@@ -44,6 +44,7 @@
     import Article from '../Components/Article.vue';
     import SearchResults from '../Components/SearchResults.vue';
     import Badge from '../Components/Badge.vue';
+    import FilterComponent from '../Components/FilterComponent.vue';
     import Pagination from '../Components/Pagination.vue';
 
     const route = useRoute();
@@ -81,6 +82,7 @@
     const totalArticles = ref(0);
     const fromArticle = ref(0);
     const toArticle = ref(0);
+    const filter = ref('');
     const fromSearch = ref(false);
 
     const debounceSearch = debounce((value, page = 1) => {
@@ -97,6 +99,7 @@
         post(props.searchUrl, {
             search: JSON.stringify(value),
             tags: selectedTags.value.join(','),
+            filter: filter.value,
             page: page,
         }).then((response) => {
             searchResults.value = response.data;
@@ -116,6 +119,12 @@
     };
 
     watch(searchQuery, (value) => {
+        if (value == null) {
+            fromSearch.value = false;
+            getData(1);
+
+            return;
+        }
         debounceSearch(value);
     });
 
@@ -157,6 +166,17 @@
         currentPage.value = page;
         getData(currentPage.value);
     };
+
+    const changeFilter = (value) => {
+        filter.value = value;
+        getData(1);
+    };
+
+    const changeSearchFilter = (value) => {
+        filter.value = value;
+        debounceSearch(searchQuery.value);
+    };
+
     watch(
         route,
         async function (newRouteValue) {
@@ -178,12 +198,14 @@
 
         const { get } = consumer();
 
-        await get(props.apiUrl + '/categories/' + route.params.categoryId, { page: page }).then((response) => {
-            category.value = response.data.category;
-            articles.value = response.data.articles.data;
-            setPagination(response.data.articles);
-            loadingResults.value = false;
-        });
+        await get(props.apiUrl + '/categories/' + route.params.categoryId, { page: page, filter: filter.value }).then(
+            (response) => {
+                category.value = response.data.category;
+                articles.value = response.data.articles.data;
+                setPagination(response.data.articles);
+                loadingResults.value = false;
+            },
+        );
     }
 </script>
 
@@ -245,6 +267,8 @@
                                 :searchQuery="searchQuery"
                                 :searchResults="searchResults"
                                 :loadingResults="loadingeSearchResults"
+                                @change-filter="changeSearchFilter"
+                                :selected-filter="filter"
                                 :currentPage="currentPage"
                                 :lastPage="lastPage"
                                 :fromArticle="fromArticle"
@@ -262,7 +286,10 @@
                                 <h2 class="text-2xl font-bold text-primary-950">
                                     {{ category.name }}
                                 </h2>
-
+                                <filter-component
+                                    @change-filter="changeFilter"
+                                    :selected-filter="filter"
+                                ></filter-component>
                                 <div>
                                     <div
                                         class="flex flex-col divide-y ring-1 ring-black/5 shadow-sm px-3 pt-3 pb-1 rounded bg-white"

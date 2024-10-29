@@ -37,9 +37,10 @@
     import { ChevronRightIcon, XMarkIcon } from '@heroicons/vue/20/solid';
     import Tags from './Tags.vue';
     import Article from './Article.vue';
+    import FilterComponent from './FilterComponent.vue';
     import Pagination from './Pagination.vue';
 
-    const emit = defineEmits(['fetchNextPage', 'fetchPreviousPage', 'fetchPage']);
+    const emit = defineEmits(['fetchNextPage', 'fetchPreviousPage', 'fetchPage', 'change-filter']);
 
     defineProps({
         searchQuery: {
@@ -53,6 +54,10 @@
         loadingResults: {
             type: Boolean,
             required: true,
+        },
+        selectedFilter: {
+            type: String,
+            default: '',
         },
         currentPage: {
             type: Number,
@@ -75,6 +80,11 @@
             required: true,
         },
     });
+
+    const updateFilter = (value) => {
+        emit('change-filter', value);
+    };
+
     function fetchNextPage() {
         emit('fetchNextPage');
     }
@@ -96,6 +106,7 @@
             Search results: <span class="font-normal">{{ searchQuery }}</span>
         </h3>
 
+        <filter-component @change-filter="updateFilter" :selected-filter="selectedFilter"></filter-component>
         <div class="flex flex-col divide-y ring-1 ring-black/5 shadow-sm px-3 pt-3 pb-1 rounded bg-white">
             <h4 class="text-lg font-semibold text-gray-800 px-3 pt-1 pb-3">Articles ({{ totalArticles }})</h4>
 
