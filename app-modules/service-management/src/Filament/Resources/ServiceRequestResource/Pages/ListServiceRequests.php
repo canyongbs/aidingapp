@@ -103,8 +103,10 @@ class ListServiceRequests extends ListRecords
                     ->sortable(),
                 TextColumn::make('assignedTo.user.name')
                     ->label('Assigned to')
+                    ->badge()
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->default('Unassigned'),
                 IconColumn::make('response_sla_compliance')
                     ->label('SLA Response')
                     ->state(fn (ServiceRequest $record): ?SlaComplianceStatus => $record->getResponseSlaComplianceStatus())
