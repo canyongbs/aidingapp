@@ -297,3 +297,26 @@ test('can list audit member to service request type', function () {
         ->assertCanSeeTableRecords($serviceRequests)
         ->assertCanNotSeeTableRecords($serviceRequestsWithoutManager);
 });
+
+it('filters unassigned service requests', function () {
+    $unassignedRequest = ServiceRequest::factory()->create();
+
+    $assignedRequest = ServiceRequest::factory()
+        ->has(
+            factory: ServiceRequestAssignment::factory()
+                ->active(),
+            relationship: 'assignments'
+        )
+        ->create();
+
+    asSuperAdmin();
+
+    livewire(ListServiceRequests::class)
+        ->assertCanSeeTableRecords([
+            $unassignedRequest,
+            $assignedRequest,
+        ])
+        ->filterTable('Unassigned')
+        ->assertCanSeeTableRecords([$unassignedRequest])
+        ->assertCanNotSeeTableRecords([$assignedRequest]);
+});
