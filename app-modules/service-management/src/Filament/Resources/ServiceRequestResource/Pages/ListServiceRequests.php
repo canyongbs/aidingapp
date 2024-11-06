@@ -103,7 +103,7 @@ class ListServiceRequests extends ListRecords
                     ->sortable(),
                 TextColumn::make('assignedTo.user.name')
                     ->label('Assigned to')
-                    ->badge()
+                    ->badge(fn (ServiceRequest $record) => is_null($record->assignedTo))
                     ->searchable()
                     ->sortable()
                     ->default('Unassigned'),
