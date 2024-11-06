@@ -94,25 +94,30 @@ class ListServiceRequests extends ListRecords
                     ->label('Related To')
                     ->getStateUsing(fn (ServiceRequest $record) => $record->respondent->{$record->respondent::displayNameKey()})
                     ->searchable(query: fn (Builder $query, $search) => $query->tap(new EducatableSearch(relationship: 'respondent', search: $search)))
-                    ->sortable(query: fn (Builder $query, string $direction): Builder => $query->tap(new EducatableSort($direction))),
+                    ->sortable(query: fn (Builder $query, string $direction): Builder => $query->tap(new EducatableSort($direction)))
+                    ->toggleable(),
                 TextColumn::make('division.name')
                     ->label('Division')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(),
                 TextColumn::make('assignedTo.user.name')
-                    ->label('Assigned to')
+                    ->label('Assigned To')
                     ->badge(fn (ServiceRequest $record) => is_null($record->assignedTo))
                     ->searchable()
                     ->sortable()
-                    ->default('Unassigned'),
+                    ->default('Unassigned')
+                    ->toggleable(),
                 IconColumn::make('response_sla_compliance')
                     ->label('SLA Response')
                     ->state(fn (ServiceRequest $record): ?SlaComplianceStatus => $record->getResponseSlaComplianceStatus())
-                    ->tooltip(fn (ServiceRequest $record): ?string => $record->getResponseSlaComplianceStatus()?->getLabel()),
+                    ->tooltip(fn (ServiceRequest $record): ?string => $record->getResponseSlaComplianceStatus()?->getLabel())
+                    ->toggleable(),
                 IconColumn::make('resolution_sla_compliance')
                     ->label('SLA Resolution')
                     ->state(fn (ServiceRequest $record): ?SlaComplianceStatus => $record->getResolutionSlaComplianceStatus())
-                    ->tooltip(fn (ServiceRequest $record): ?string => $record->getResolutionSlaComplianceStatus()?->getLabel()),
+                    ->tooltip(fn (ServiceRequest $record): ?string => $record->getResolutionSlaComplianceStatus()?->getLabel())
+                    ->toggleable(),
             ])
             ->filters([
                 SelectFilter::make('priority')
