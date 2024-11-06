@@ -45,14 +45,12 @@ use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 use AidingApp\Contact\Models\Contact;
-use Illuminate\Database\Eloquent\Builder;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
-use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ContactServiceManagement;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ListServiceRequests;
@@ -302,17 +300,23 @@ test('can list audit member to service request type', function () {
 
 it('filters unassigned service requests', function () {
     $unassignedRequest = ServiceRequest::factory()->create();
-    $assignedRequest = ServiceRequest::factory()->create();
-    ServiceRequestAssignment::factory()->create([
-        'service_request_id' => $assignedRequest->getKey(),
-        'status' => ServiceRequestAssignmentStatus::Active,
-    ]);
-    $query = ServiceRequest::query();
-    $filterQuery = $query->whereDoesntHave('assignedTo', function (Builder $query) {
-        $query->where('status', ServiceRequestAssignmentStatus::Active);
-    });
-    $filteredRequests = $filterQuery->get();
-    expect($filteredRequests)
-        ->toHaveCount(1)
-        ->and($filteredRequests->first()->getKey())->toBe($unassignedRequest->getKey());
+
+    $assignedRequest = ServiceRequest::factory()
+        ->has(
+            factory: ServiceRequestAssignment::factory()
+                ->active(),
+            relationship: 'assignments'
+        )
+        ->create();
+
+    asSuperAdmin();
+
+    livewire(ListServiceRequests::class)
+        ->assertCanSeeTableRecords([
+            $unassignedRequest,
+            $assignedRequest,
+        ])
+        ->filterTable('Unassigned')
+        ->assertCanSeeTableRecords([$unassignedRequest])
+        ->assertCanNotSeeTableRecords([$assignedRequest]);
 });
