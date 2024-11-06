@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\
 
 use Filament\Tables\Table;
 use Filament\Actions\CreateAction;
+use Filament\Tables\Filters\Filter;
 use AidingApp\Contact\Models\Contact;
 use App\Models\Scopes\EducatableSort;
 use App\Models\Scopes\EducatableSearch;
@@ -56,6 +57,7 @@ use Filament\Tables\Actions\DeleteBulkAction;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
+use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 
@@ -139,6 +141,12 @@ class ListServiceRequests extends ListRecords
                         )
                     ))
                     ->preload(),
+                Filter::make('Unassigned')
+                    ->query(
+                        fn (Builder $query) => $query->whereDoesntHave('assignedTo', function (Builder $query) {
+                            $query->where('status', ServiceRequestAssignmentStatus::Active);
+                        })
+                    ),
             ])
             ->actions([
                 ViewAction::make(),
