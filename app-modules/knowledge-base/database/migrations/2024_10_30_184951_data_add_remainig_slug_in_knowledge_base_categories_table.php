@@ -43,7 +43,7 @@ use Illuminate\Database\UniqueConstraintViolationException;
 return new class () extends Migration {
     public function up(): void
     {
-        $categories = KnowledgeBaseCategory::whereNull('slug')->get();
+        $categories = KnowledgeBaseCategory::query()->whereNull('slug')->withTrashed()->get();
 
         foreach ($categories as $category) {
             $baseSlug = Str::slug($category->name);
