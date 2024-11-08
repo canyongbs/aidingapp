@@ -31,11 +31,7 @@
 
 </COPYRIGHT>
 --}}
-@php
-    use App\Features\ServiceRequestStatusSystemProtection;
-@endphp
-
-@if (ServiceRequestStatusSystemProtection::active() && $this->getRecord()?->is_system_protected)
+@if ($this->getRecord()?->is_system_protected)
     <x-filament::icon-button
         data-identifier="service_request_type_system_protected"
         icon="heroicon-m-lock-closed"
