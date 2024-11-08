@@ -42,6 +42,7 @@ use Tests\Concerns\LoadsFixtures;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Process\Process;
+use AidingApp\Authorization\Models\Role;
 use Illuminate\Contracts\Console\Kernel;
 use Symfony\Component\Finder\SplFileInfo;
 use App\Multitenancy\Actions\CreateTenant;
@@ -112,6 +113,11 @@ abstract class TestCase extends BaseTestCase
                 ...$this->migrateFreshUsing(),
             ]);
         });
+
+        Role::create([
+            'name' => 'authorization.super_admin',
+            'guard_name' => 'web',
+        ]);
 
         Tenant::forgetCurrent();
     }
