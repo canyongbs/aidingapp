@@ -36,7 +36,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\Tenant;
 use Illuminate\Database\Seeder;
 use AidingApp\Authorization\Models\Role;
 use AidingApp\Division\Database\Seeders\DivisionSeeder;
@@ -58,8 +57,6 @@ class NewTenantSeeder extends Seeder
 {
     public function run(): void
     {
-        $currentTenant = Tenant::current();
-
         Role::create([
             'name' => 'authorization.super_admin',
             'guard_name' => 'web',
