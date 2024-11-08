@@ -42,7 +42,6 @@ use AidingApp\InventoryManagement\Models\Asset;
 use AidingApp\InventoryManagement\Models\AssetType;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use AidingApp\InventoryManagement\Models\AssetStatus;
-use AidingApp\Authorization\AuthorizationRoleRegistry;
 use AidingApp\InventoryManagement\Models\AssetCheckIn;
 use AidingApp\InventoryManagement\Models\AssetCheckOut;
 use AidingApp\InventoryManagement\Models\AssetLocation;
@@ -52,7 +51,6 @@ use AidingApp\InventoryManagement\Models\MaintenanceProvider;
 use AidingApp\InventoryManagement\Observers\AssetCheckInObserver;
 use AidingApp\InventoryManagement\Observers\AssetCheckOutObserver;
 use AidingApp\InventoryManagement\Observers\MaintenanceActivityObserver;
-use AidingApp\InventoryManagement\Registries\InventoryManagementRbacRegistry;
 
 class InventoryManagementServiceProvider extends ServiceProvider
 {
@@ -75,8 +73,6 @@ class InventoryManagementServiceProvider extends ServiceProvider
         ]);
 
         $this->registerObservers();
-
-        AuthorizationRoleRegistry::register(InventoryManagementRbacRegistry::class);
     }
 
     public function registerObservers(): void

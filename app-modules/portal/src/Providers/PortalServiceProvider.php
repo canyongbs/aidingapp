@@ -40,10 +40,8 @@ use Filament\Panel;
 use AidingApp\Portal\PortalPlugin;
 use Illuminate\Support\ServiceProvider;
 use AidingApp\Portal\Models\PortalGuest;
-use AidingApp\Portal\Registries\PortalRbacRegistry;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use AidingApp\Portal\Models\KnowledgeBaseArticleVote;
-use AidingApp\Authorization\AuthorizationRoleRegistry;
 use AidingApp\Portal\Settings\SettingsProperties\PortalSettingsProperty;
 
 class PortalServiceProvider extends ServiceProvider
@@ -60,7 +58,5 @@ class PortalServiceProvider extends ServiceProvider
             'knowledgebase_article_vote' => KnowledgeBaseArticleVote::class,
             'portal_guest' => PortalGuest::class,
         ]);
-
-        AuthorizationRoleRegistry::register(PortalRbacRegistry::class);
     }
 }

@@ -39,9 +39,6 @@ namespace AidingApp\Report\Providers;
 use Filament\Panel;
 use AidingApp\Report\ReportPlugin;
 use Illuminate\Support\ServiceProvider;
-use AidingApp\Report\Registries\ReportRbacRegistry;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use AidingApp\Authorization\AuthorizationRoleRegistry;
 
 class ReportServiceProvider extends ServiceProvider
 {
@@ -50,10 +47,5 @@ class ReportServiceProvider extends ServiceProvider
         Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new ReportPlugin()));
     }
 
-    public function boot()
-    {
-        Relation::morphMap([]);
-
-        AuthorizationRoleRegistry::register(ReportRbacRegistry::class);
-    }
+    public function boot() {}
 }

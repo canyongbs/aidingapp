@@ -42,7 +42,6 @@ use Illuminate\Support\ServiceProvider;
 use AidingApp\Notification\Models\Subscription;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Notifications\Events\NotificationSent;
-use AidingApp\Authorization\AuthorizationRoleRegistry;
 use AidingApp\Notification\Events\SubscriptionCreated;
 use AidingApp\Notification\Events\SubscriptionDeleted;
 use AidingApp\Notification\Models\OutboundDeliverable;
@@ -52,7 +51,6 @@ use AidingApp\Notification\Events\TriggeredAutoSubscription;
 use AidingApp\Notification\Listeners\CreateAutoSubscription;
 use AidingApp\Notification\Listeners\HandleNotificationSent;
 use AidingApp\Notification\Listeners\HandleNotificationFailed;
-use AidingApp\Notification\Registries\NotificationRbacRegistry;
 use AidingApp\Notification\Observers\OutboundDeliverableObserver;
 use AidingApp\Notification\Listeners\NotifyUserOfSubscriptionCreated;
 use AidingApp\Notification\Listeners\NotifyUserOfSubscriptionDeleted;
@@ -74,8 +72,6 @@ class NotificationServiceProvider extends ServiceProvider
         $this->registerEvents();
 
         $this->discoverSchema(__DIR__ . '/../../graphql/subscription.graphql');
-
-        AuthorizationRoleRegistry::register(NotificationRbacRegistry::class);
     }
 
     protected function registerObservers(): void

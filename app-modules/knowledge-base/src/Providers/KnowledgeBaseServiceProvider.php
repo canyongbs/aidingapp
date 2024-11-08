@@ -42,11 +42,9 @@ use Illuminate\Support\ServiceProvider;
 use AidingApp\KnowledgeBase\KnowledgeBasePlugin;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
-use AidingApp\Authorization\AuthorizationRoleRegistry;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
-use AidingApp\KnowledgeBase\Registries\KnowledgeBaseRbacRegistry;
 
 class KnowledgeBaseServiceProvider extends ServiceProvider
 {
@@ -67,7 +65,5 @@ class KnowledgeBaseServiceProvider extends ServiceProvider
         ]);
 
         $this->discoverSchema(__DIR__ . '/../../graphql/knowledge-base-item.graphql');
-
-        AuthorizationRoleRegistry::register(KnowledgeBaseRbacRegistry::class);
     }
 }

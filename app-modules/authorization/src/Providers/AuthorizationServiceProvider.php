@@ -49,7 +49,6 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 use SocialiteProviders\Google\GoogleExtendSocialite;
 use AidingApp\Authorization\AuthorizationRoleRegistry;
 use AidingApp\Authorization\Observers\LicenseObserver;
-use AidingApp\Authorization\Registries\AuthorizationRbacRegistry;
 use AidingApp\Authorization\Http\Controllers\Auth\LogoutController;
 use Filament\Http\Controllers\Auth\LogoutController as FilamentLogoutController;
 
@@ -89,8 +88,6 @@ class AuthorizationServiceProvider extends ServiceProvider
             events: SocialiteWasCalled::class,
             listener: GoogleExtendSocialite::class . '@handle'
         );
-
-        AuthorizationRoleRegistry::register(AuthorizationRbacRegistry::class);
     }
 
     public function registerObservers(): void

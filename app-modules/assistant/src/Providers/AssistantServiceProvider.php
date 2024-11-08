@@ -50,9 +50,7 @@ use AidingApp\Assistant\Models\AssistantChatFolder;
 use AidingApp\Assistant\Models\AssistantChatMessage;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use AidingApp\IntegrationAI\Events\AIPromptInitiated;
-use AidingApp\Authorization\AuthorizationRoleRegistry;
 use AidingApp\Assistant\Models\AssistantChatMessageLog;
-use AidingApp\Assistant\Registries\AssistantRbacRegistry;
 use AidingApp\Assistant\Listeners\LogAssistantChatMessage;
 use AidingApp\Assistant\Services\AIInterface\Enums\AIChatMessageFrom;
 
@@ -78,8 +76,6 @@ class AssistantServiceProvider extends ServiceProvider
 
         $this->registerEvents();
         $this->registerAssets();
-
-        AuthorizationRoleRegistry::register(AssistantRbacRegistry::class);
 
         $this->discoverSchema(__DIR__ . '/../../graphql/*');
         $this->registerEnum(AIChatMessageFrom::class);
