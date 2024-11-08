@@ -57,6 +57,7 @@ use function Pest\Laravel\assertDatabaseMissing;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
+use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\Tests\RequestFactories\CreateServiceRequestRequestFactory;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\CreateServiceRequest;
@@ -436,4 +437,36 @@ test('validate service requests type if user is manager of any service request t
         ])
         ->call('create')
         ->assertHasFormErrors(['type_id']);
+});
+
+test('assignment type individual manager will auto assign to new service requests', function () {
+    $user = User::factory()->licensed(LicenseType::cases())->create();
+
+    $user->givePermissionTo('service_request.view-any');
+    $user->givePermissionTo('service_request.create');
+
+    $team = Team::factory()->create();
+
+    $user->teams()->attach($team);
+
+    $user->refresh();
+
+    $serviceRequestTypesWithManager = ServiceRequestType::factory()
+        ->hasAttached(
+            factory: $team,
+            relationship: 'managers'
+        )
+        ->state([
+            'assignment_type' => ServiceRequestTypeAssignmentTypes::Individual,
+            'assignment_type_individual_id' => $user->getKey(),
+        ])
+        ->create();
+
+    $serviceRequest = ServiceRequest::factory()->create([
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $serviceRequestTypesWithManager->getKey(),
+        ])->getKey(),
+    ]);
+
+    expect($serviceRequest->assignments()->first())->user->id->toBe($user->getKey());
 });
