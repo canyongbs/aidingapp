@@ -89,7 +89,10 @@ class ListServiceRequests extends ListRecords
                 IdColumn::make(),
                 TextColumn::make('service_request_number')
                     ->label('Service Request #')
-                    ->searchable()
+                    ->searchable(
+                        query: fn (Builder $query, $search) => $query->where('service_request_number', 'like', "%{$search}%")
+                            ->orWhere('title', 'like', "%{$search}%")
+                    )
                     ->sortable()
                     ->description(fn (ServiceRequest $record): string => $record->title),
                 TextColumn::make('respondent.display_name')
