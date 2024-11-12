@@ -43,8 +43,6 @@ use AidingApp\Division\Models\Division;
 use Illuminate\Support\ServiceProvider;
 use AidingApp\Division\Observers\DivisionObserver;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use AidingApp\Authorization\AuthorizationRoleRegistry;
-use AidingApp\Division\Registries\DivisionRbacRegistry;
 
 class DivisionServiceProvider extends ServiceProvider
 {
@@ -63,8 +61,6 @@ class DivisionServiceProvider extends ServiceProvider
 
         $this->registerObservers();
         $this->discoverSchema(__DIR__ . '/../../graphql/division.graphql');
-
-        AuthorizationRoleRegistry::register(DivisionRbacRegistry::class);
     }
 
     protected function registerObservers(): void

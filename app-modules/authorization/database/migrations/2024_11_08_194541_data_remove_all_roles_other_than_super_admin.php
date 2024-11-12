@@ -34,29 +34,27 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\Providers;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Migrations\Migration;
 
-use Filament\Panel;
-use AidingApp\Portal\PortalPlugin;
-use Illuminate\Support\ServiceProvider;
-use AidingApp\Portal\Models\PortalGuest;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use AidingApp\Portal\Models\KnowledgeBaseArticleVote;
-use AidingApp\Portal\Settings\SettingsProperties\PortalSettingsProperty;
-
-class PortalServiceProvider extends ServiceProvider
-{
-    public function register()
+return new class () extends Migration {
+    public function up(): void
     {
-        Panel::configureUsing(fn (Panel $panel) => ($panel->getId() !== 'admin') || $panel->plugin(new PortalPlugin()));
+        DB::table('roles')
+            ->where('name', '!=', 'authorization.super_admin')
+            ->orderBy('id')
+            ->chunk(100, function (Collection $roles) {
+                foreach ($roles as $role) {
+                    DB::table('model_has_roles')->where('role_id', $role->id)->delete();
+                    DB::table('role_has_permissions')->where('role_id', $role->id)->delete();
+                    DB::table('roles')->where('id', $role->id)->delete();
+                }
+            });
     }
 
-    public function boot()
+    public function down(): void
     {
-        Relation::morphMap([
-            'portal_settings_property' => PortalSettingsProperty::class,
-            'knowledgebase_article_vote' => KnowledgeBaseArticleVote::class,
-            'portal_guest' => PortalGuest::class,
-        ]);
+        // Cannot be reversed
     }
-}
+};

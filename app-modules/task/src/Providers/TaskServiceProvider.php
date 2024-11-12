@@ -43,9 +43,7 @@ use Filament\Support\Assets\Js;
 use Illuminate\Support\ServiceProvider;
 use AidingApp\Task\Observers\TaskObserver;
 use Filament\Support\Facades\FilamentAsset;
-use AidingApp\Task\Registries\TaskRbacRegistry;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use AidingApp\Authorization\AuthorizationRoleRegistry;
 
 class TaskServiceProvider extends ServiceProvider
 {
@@ -65,8 +63,6 @@ class TaskServiceProvider extends ServiceProvider
         $this->registerObservers();
 
         $this->registerAssets();
-
-        AuthorizationRoleRegistry::register(TaskRbacRegistry::class);
     }
 
     protected function registerObservers(): void

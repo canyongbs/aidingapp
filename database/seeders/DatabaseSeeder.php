@@ -36,9 +36,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\Tenant;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Notification;
 use AidingApp\Task\Database\Seeders\TaskSeeder;
 use AidingApp\Team\Database\Seeders\TeamSeeder;
@@ -46,7 +44,6 @@ use AidingApp\Alert\Database\Seeders\AlertSeeder;
 use AidingApp\Contact\Database\Seeders\ContactSeeder;
 use AidingApp\Assistant\Database\Seeders\PromptSeeder;
 use AidingApp\Division\Database\Seeders\DivisionSeeder;
-use AidingApp\Authorization\Console\Commands\SetupRoles;
 use AidingApp\Assistant\Database\Seeders\PromptTypeSeeder;
 use AidingApp\Contact\Database\Seeders\ContactSourceSeeder;
 use AidingApp\Contact\Database\Seeders\ContactStatusSeeder;
@@ -72,16 +69,6 @@ class DatabaseSeeder extends Seeder
     {
         // Reduce notifications sent during seeding
         Notification::fake();
-
-        $currentTenant = Tenant::current();
-
-        Artisan::call(
-            command: SetupRoles::class,
-            parameters: [
-                '--tenant' => $currentTenant->id,
-            ],
-            outputBuffer: $this->command->getOutput(),
-        );
 
         $this->call([
             SampleSuperAdminUserSeeder::class,

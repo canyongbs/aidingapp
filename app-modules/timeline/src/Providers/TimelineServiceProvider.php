@@ -43,8 +43,6 @@ use AidingApp\Timeline\Models\Timeline;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use AidingApp\Timeline\Listeners\AddRecordToTimeline;
-use AidingApp\Authorization\AuthorizationRoleRegistry;
-use AidingApp\Timeline\Registries\TimelineRbacRegistry;
 use AidingApp\Timeline\Events\TimelineableRecordCreated;
 use AidingApp\Timeline\Events\TimelineableRecordDeleted;
 use AidingApp\Timeline\Listeners\RemoveRecordFromTimeline;
@@ -63,8 +61,6 @@ class TimelineServiceProvider extends ServiceProvider
         ]);
 
         $this->registerEvents();
-
-        AuthorizationRoleRegistry::register(TimelineRbacRegistry::class);
     }
 
     protected function registerEvents(): void

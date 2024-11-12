@@ -50,14 +50,12 @@ use AidingApp\Engagement\Models\EngagementBatch;
 use AidingApp\Engagement\Models\EngagementResponse;
 use AidingApp\Engagement\Actions\DeliverEngagements;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use AidingApp\Authorization\AuthorizationRoleRegistry;
 use AidingApp\Engagement\Models\EngagementDeliverable;
 use AidingApp\Engagement\Observers\EngagementObserver;
 use AidingApp\Engagement\Models\EngagementFileEntities;
 use AidingApp\Engagement\Observers\SmsTemplateObserver;
 use AidingApp\Engagement\Observers\EmailTemplateObserver;
 use AidingApp\Engagement\Observers\EngagementBatchObserver;
-use AidingApp\Engagement\Registries\EngagementRbacRegistry;
 use AidingApp\Engagement\Observers\EngagementFileEntitiesObserver;
 
 class EngagementServiceProvider extends ServiceProvider
@@ -97,8 +95,6 @@ class EngagementServiceProvider extends ServiceProvider
         });
 
         $this->registerObservers();
-
-        AuthorizationRoleRegistry::register(EngagementRbacRegistry::class);
     }
 
     public function registerObservers(): void

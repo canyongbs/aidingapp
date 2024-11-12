@@ -41,10 +41,8 @@ use Filament\Support\Assets\Js;
 use Illuminate\Support\ServiceProvider;
 use Filament\Support\Facades\FilamentAsset;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use AidingApp\Authorization\AuthorizationRoleRegistry;
 use AidingApp\InAppCommunication\InAppCommunicationPlugin;
 use AidingApp\InAppCommunication\Models\TwilioConversation;
-use AidingApp\InAppCommunication\Registries\InAppCommunicationRbacRegistry;
 
 class InAppCommunicationServiceProvider extends ServiceProvider
 {
@@ -62,8 +60,6 @@ class InAppCommunicationServiceProvider extends ServiceProvider
         );
 
         $this->registerAssets();
-
-        AuthorizationRoleRegistry::register(InAppCommunicationRbacRegistry::class);
     }
 
     public function registerAssets(): void
