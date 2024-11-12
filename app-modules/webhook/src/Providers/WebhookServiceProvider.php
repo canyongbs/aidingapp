@@ -42,8 +42,6 @@ use AidingApp\Webhook\WebhookPlugin;
 use Illuminate\Support\ServiceProvider;
 use AidingApp\Webhook\Models\InboundWebhook;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use AidingApp\Webhook\Registries\WebhookRbacRegistry;
-use AidingApp\Authorization\AuthorizationRoleRegistry;
 
 class WebhookServiceProvider extends ServiceProvider
 {
@@ -62,7 +60,5 @@ class WebhookServiceProvider extends ServiceProvider
         Relation::morphMap([
             'inbound_webhook' => InboundWebhook::class,
         ]);
-
-        AuthorizationRoleRegistry::register(WebhookRbacRegistry::class);
     }
 }

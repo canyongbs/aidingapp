@@ -42,7 +42,7 @@ use Tests\Concerns\LoadsFixtures;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Process\Process;
-use Illuminate\Support\Facades\Artisan;
+use AidingApp\Authorization\Models\Role;
 use Illuminate\Contracts\Console\Kernel;
 use Symfony\Component\Finder\SplFileInfo;
 use App\Multitenancy\Actions\CreateTenant;
@@ -51,7 +51,6 @@ use Illuminate\Support\Facades\ParallelTesting;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Multitenancy\DataTransferObjects\TenantConfig;
 use Illuminate\Foundation\Testing\RefreshDatabaseState;
-use AidingApp\Authorization\Console\Commands\SetupRoles;
 use Spatie\Multitenancy\Concerns\UsesMultitenancyConfig;
 use App\Multitenancy\DataTransferObjects\TenantMailConfig;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
@@ -115,12 +114,10 @@ abstract class TestCase extends BaseTestCase
             ]);
         });
 
-        Artisan::call(
-            command: SetupRoles::class,
-            parameters: [
-                '--tenant' => $tenant->id,
-            ],
-        );
+        Role::create([
+            'name' => 'authorization.super_admin',
+            'guard_name' => 'web',
+        ]);
 
         Tenant::forgetCurrent();
     }

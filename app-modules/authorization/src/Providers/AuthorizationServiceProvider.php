@@ -47,9 +47,7 @@ use SocialiteProviders\Azure\AzureExtendSocialite;
 use SocialiteProviders\Manager\SocialiteWasCalled;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use SocialiteProviders\Google\GoogleExtendSocialite;
-use AidingApp\Authorization\AuthorizationRoleRegistry;
 use AidingApp\Authorization\Observers\LicenseObserver;
-use AidingApp\Authorization\Registries\AuthorizationRbacRegistry;
 use AidingApp\Authorization\Http\Controllers\Auth\LogoutController;
 use Filament\Http\Controllers\Auth\LogoutController as FilamentLogoutController;
 
@@ -58,10 +56,6 @@ class AuthorizationServiceProvider extends ServiceProvider
     public function register(): void
     {
         Panel::configureUsing(fn (Panel $panel) => ($panel->getId() !== 'admin') || $panel->plugin(new AuthorizationPlugin()));
-
-        $this->app->scoped(AuthorizationRoleRegistry::class, function ($app) {
-            return new AuthorizationRoleRegistry();
-        });
 
         $this->app->bind(FilamentLogoutController::class, function ($app) {
             return new LogoutController();
@@ -89,8 +83,6 @@ class AuthorizationServiceProvider extends ServiceProvider
             events: SocialiteWasCalled::class,
             listener: GoogleExtendSocialite::class . '@handle'
         );
-
-        AuthorizationRoleRegistry::register(AuthorizationRbacRegistry::class);
     }
 
     public function registerObservers(): void

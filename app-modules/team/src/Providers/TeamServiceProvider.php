@@ -42,9 +42,7 @@ use AidingApp\Team\Models\Team;
 use AidingApp\Team\Models\TeamUser;
 use Illuminate\Support\ServiceProvider;
 use AidingApp\Team\Observers\TeamUserObserver;
-use AidingApp\Team\Registries\TeamRbacRegistry;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use AidingApp\Authorization\AuthorizationRoleRegistry;
 
 class TeamServiceProvider extends ServiceProvider
 {
@@ -60,8 +58,6 @@ class TeamServiceProvider extends ServiceProvider
         ]);
 
         $this->registerObservers();
-
-        AuthorizationRoleRegistry::register(TeamRbacRegistry::class);
     }
 
     protected function registerObservers(): void
