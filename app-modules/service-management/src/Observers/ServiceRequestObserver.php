@@ -77,7 +77,7 @@ class ServiceRequestObserver
             if ($manager) {
                 $serviceRequest->assignments()->create([
                     'user_id' => $manager->getKey(),
-                    'assigned_by_id' => auth()->user()?->id ?? null,
+                    'assigned_by_id' => auth()->user()?->getKey(),
                     'assigned_at' => now(),
                     'status' => ServiceRequestAssignmentStatus::Active,
                 ]);
