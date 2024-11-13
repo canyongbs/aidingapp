@@ -61,26 +61,28 @@ class ServiceRequestObserver
 
     public function created(ServiceRequest $serviceRequest): void
     {
-        $user = auth()->user();
+        if (auth()->check()) {
+            $user = auth()->user();
 
-        if ($user instanceof User) {
-            TriggeredAutoSubscription::dispatch($user, $serviceRequest);
-        }
+            if ($user instanceof User) {
+                TriggeredAutoSubscription::dispatch($user, $serviceRequest);
+            }
 
-        if ($serviceRequest->status?->classification === SystemServiceRequestClassification::Open) {
-            $serviceRequest->respondent->notify(new SendEducatableServiceRequestOpenedNotification($serviceRequest));
-        }
+            if ($serviceRequest->status?->classification === SystemServiceRequestClassification::Open) {
+                $serviceRequest->respondent->notify(new SendEducatableServiceRequestOpenedNotification($serviceRequest));
+            }
 
-        if ($serviceRequest?->priority->type->assignment_type == ServiceRequestTypeAssignmentTypes::Individual) {
-            $manager = $serviceRequest?->priority->type?->assignmentTypeIndividual;
+            if ($serviceRequest?->priority->type->assignment_type == ServiceRequestTypeAssignmentTypes::Individual) {
+                $manager = $serviceRequest?->priority->type?->assignmentTypeIndividual;
 
-            if ($manager) {
-                $serviceRequest->assignments()->create([
-                    'user_id' => $manager->getKey(),
-                    'assigned_by_id' => auth()->user()?->getKey(),
-                    'assigned_at' => now(),
-                    'status' => ServiceRequestAssignmentStatus::Active,
-                ]);
+                if ($manager) {
+                    $serviceRequest->assignments()->create([
+                        'user_id' => $manager->getKey(),
+                        'assigned_by_id' => auth()->user()?->getKey(),
+                        'assigned_at' => now(),
+                        'status' => ServiceRequestAssignmentStatus::Active,
+                    ]);
+                }
             }
         }
     }
