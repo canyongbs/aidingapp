@@ -451,6 +451,8 @@ test('assignment type individual manager will auto assign to new service request
 
     $user->refresh();
 
+    actingAs($user);
+
     $serviceRequestTypesWithManager = ServiceRequestType::factory()
         ->hasAttached(
             factory: $team,

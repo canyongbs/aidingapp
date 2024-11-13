@@ -61,16 +61,10 @@ class ServiceRequestObserver
 
     public function created(ServiceRequest $serviceRequest): void
     {
-        if (auth()->check()) {
-            $user = auth()->user();
+        $user = auth()->user();
 
-            if ($user instanceof User) {
-                TriggeredAutoSubscription::dispatch($user, $serviceRequest);
-            }
-
-            if ($serviceRequest->status?->classification === SystemServiceRequestClassification::Open) {
-                $serviceRequest->respondent->notify(new SendEducatableServiceRequestOpenedNotification($serviceRequest));
-            }
+        if ($user instanceof User) {
+            TriggeredAutoSubscription::dispatch($user, $serviceRequest);
 
             if ($serviceRequest?->priority->type->assignment_type == ServiceRequestTypeAssignmentTypes::Individual) {
                 $manager = $serviceRequest?->priority->type?->assignmentTypeIndividual;
@@ -84,6 +78,10 @@ class ServiceRequestObserver
                     ]);
                 }
             }
+        }
+
+        if ($serviceRequest->status?->classification === SystemServiceRequestClassification::Open) {
+            $serviceRequest->respondent->notify(new SendEducatableServiceRequestOpenedNotification($serviceRequest));
         }
     }
 
