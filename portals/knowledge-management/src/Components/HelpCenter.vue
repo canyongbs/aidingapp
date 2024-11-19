@@ -82,7 +82,7 @@
 
                         <div class="w-full mt-8">
                             <h3 class="text-base font-semibold leading-6 text-gray-900">
-                                <router-link :to="{ name: 'view-category', params: { categoryId: category.slug } }">
+                                <router-link :to="{ name: 'view-category', params: { categorySlug: category.slug } }">
                                     <span class="absolute inset-0" aria-hidden="true" />
                                     {{ category.name }}
                                 </router-link>

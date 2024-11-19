@@ -33,7 +33,7 @@
 -->
 <script setup>
     import { defineProps, ref, watch, onMounted } from 'vue';
-    import { useRoute } from 'vue-router';
+    import { useRoute, useRouter } from 'vue-router';
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import AppLoading from '../Components/AppLoading.vue';
     import { consumer } from '../Services/Consumer.js';
@@ -49,6 +49,7 @@
     import { useAuthStore } from '../Stores/auth.js';
 
     const route = useRoute();
+    const router = useRouter();
 
     const { get, post } = consumer();
 
@@ -71,7 +72,6 @@
     const category = ref(null);
     const article = ref(null);
     const portalViewCount = ref(0);
-    const portalViewCountFlag = ref(false);
     const feedback = ref(null);
     const helpfulVotePercentage = ref(0);
 
@@ -88,9 +88,16 @@
     function getData() {
         loading.value = true;
 
-        get(props.apiUrl + '/categories/' + route.params.categoryId + '/articles/' + route.params.articleId)
+        get(props.apiUrl + '/categories/' + route.params.categorySlug + '/articles/' + route.params.articleId)
             .then((response) => {
                 if (response.data) {
+                    if (response.data.category.slug !== route.params.categorySlug) {
+                        router.replace({ name: 'view-article', params: {
+                            categorySlug: response.data.category.slug,
+                            articleId: route.params.articleId,
+                        } });
+                    }
+
                     category.value = response.data.category;
                     article.value = response.data.article;
                     portalViewCount.value = response.data.portal_view_count;
@@ -141,7 +148,7 @@
                     <main class="flex flex-col gap-8">
                         <Breadcrumbs
                             :breadcrumbs="[
-                                { name: category.name, route: 'view-category', params: { categoryId: category.id } },
+                                { name: category.name, route: 'view-category', params: { categorySlug: category.slug } },
                             ]"
                             currentCrumb="Articles"
                             v-if="article"

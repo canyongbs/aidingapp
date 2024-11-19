@@ -78,7 +78,7 @@ class KnowledgeManagementPortalArticleController extends Controller
             ]),
             'article' => KnowledgeBaseArticleData::from([
                 'id' => $article->getKey(),
-                'categoryId' => $article->category_id,
+                'categorySlug' => $article->category->slug,
                 'name' => $article->title,
                 'lastUpdated' => $article->updated_at->format('M d Y, h:m a'),
                 'content' => $article->article_details ? tiptap_converter()->record($article, attribute: 'article_details')->asHTML($article->article_details) : '',

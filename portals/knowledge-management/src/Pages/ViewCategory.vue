@@ -197,10 +197,10 @@
 
         const { get } = consumer();
 
-        await get(props.apiUrl + '/categories/' + route.params.categoryId, { page: page, filter: filter.value }).then(
+        await get(props.apiUrl + '/categories/' + route.params.categorySlug, { page: page, filter: filter.value }).then(
             (response) => {
-                if (response.data.category.slug !== route.params.categoryId) {
-                    router.replace({ name: 'view-category', params: { categoryId: response.data.category.slug } });
+                if (response.data.category.slug !== route.params.categorySlug) {
+                    router.replace({ name: 'view-category', params: { categorySlug: response.data.category.slug } });
                 }
 
                 category.value = response.data.category;

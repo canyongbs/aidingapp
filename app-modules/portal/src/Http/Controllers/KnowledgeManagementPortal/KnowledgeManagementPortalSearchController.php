@@ -79,7 +79,7 @@ class KnowledgeManagementPortalSearchController extends Controller
                 ->through(function (KnowledgeBaseItem $article) {
                     return [
                         'id' => $article->getKey(),
-                        'categoryId' => $article->category_id,
+                        'categorySlug' => $article->category->slug,
                         'name' => $article->title,
                         'tags' => $article->tags()
                             ->orderBy('name')
