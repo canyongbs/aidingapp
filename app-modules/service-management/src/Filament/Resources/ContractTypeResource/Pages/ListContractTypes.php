@@ -11,6 +11,7 @@ use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
 use AidingApp\ServiceManagement\Filament\Resources\ContractTypeResource;
+use Filament\Tables\Actions\DeleteAction;
 
 class ListContractTypes extends ListRecords
 {
@@ -27,6 +28,7 @@ class ListContractTypes extends ListRecords
             ])
             ->actions([
                 EditAction::make(),
+                DeleteAction::make(),
             ])
             ->bulkActions([
                 BulkActionGroup::make([

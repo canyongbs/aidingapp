@@ -3,6 +3,7 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ContractTypeResource\Pages;
 
 use Filament\Forms\Form;
+use Illuminate\Support\Str;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\TextInput;
@@ -52,6 +53,29 @@ class EditContractType extends EditRecord
         return [
             DeleteAction::make(),
         ];
+    }
+
+     /**
+     * @return array<int|string, string|null>
+     */
+    public function getBreadcrumbs(): array
+    {
+        $resource = static::getResource();
+        /** @var ContractType $record */
+        $record = $this->getRecord();
+
+        /** @var array<string, string> $breadcrumbs */
+        $breadcrumbs = [
+            $resource::getUrl() => $resource::getBreadcrumb(),
+            $resource::getUrl('edit', ['record' => $record]) => Str::limit($record->name, 16),
+            ...(filled($breadcrumb = $this->getBreadcrumb()) ? [$breadcrumb] : []),
+        ];
+
+        if (filled($cluster = static::getCluster())) {
+            return $cluster::unshiftClusterBreadcrumbs($breadcrumbs);
+        }
+
+        return $breadcrumbs;
     }
 
     protected function beforeSave(): void
