@@ -34,7 +34,7 @@
 <script setup>
     import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline';
     import { defineProps, ref, watch } from 'vue';
-    import { useRoute } from 'vue-router';
+    import { useRoute, useRouter } from 'vue-router';
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import AppLoading from '../Components/AppLoading.vue';
     import { consumer } from '../Services/Consumer.js';
@@ -48,6 +48,7 @@
     import Pagination from '../Components/Pagination.vue';
 
     const route = useRoute();
+    const router = useRouter();
 
     const props = defineProps({
         searchUrl: {
@@ -200,6 +201,10 @@
 
         await get(props.apiUrl + '/categories/' + route.params.categoryId, { page: page, filter: filter.value }).then(
             (response) => {
+                if (response.data.category.slug !== route.params.categoryId) {
+                    router.replace({ name: 'view-category', params: { categoryId: response.data.category.slug } });
+                }
+
                 category.value = response.data.category;
                 articles.value = response.data.articles.data;
                 setPagination(response.data.articles);
