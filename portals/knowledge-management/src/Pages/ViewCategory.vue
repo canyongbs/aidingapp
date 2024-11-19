@@ -38,9 +38,7 @@
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import AppLoading from '../Components/AppLoading.vue';
     import { consumer } from '../Services/Consumer.js';
-    import { Bars3Icon } from '@heroicons/vue/24/outline/index.js';
-    import { ChevronRightIcon, XMarkIcon, ChevronLeftIcon } from '@heroicons/vue/20/solid/index.js';
-    import Tags from '../Components/Tags.vue';
+    import { XMarkIcon } from '@heroicons/vue/20/solid/index.js';
     import Article from '../Components/Article.vue';
     import SearchResults from '../Components/SearchResults.vue';
     import Badge from '../Components/Badge.vue';
