@@ -34,8 +34,11 @@
 </COPYRIGHT>
 */
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEnabled;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\GetServiceRequestUploadUrl;
@@ -98,7 +101,14 @@ Route::prefix('api')
                     ->name('category.index');
 
                 Route::get('/categories/{category:slug}', [KnowledgeManagementPortalCategoryController::class, 'show'])
-                    ->name('category.show');
+                    ->name('category.show')
+                    ->missing(function (Request $request) {
+                        throw_if(! str()->isUuid($request->category), ModelNotFoundException::class);
+
+                        $category = KnowledgeBaseCategory::findOrFail($request->category);
+
+                        return redirect()->route('api.portal.category.show', $category->slug);
+                    });
 
                 Route::get('/categories/{category}/articles/{article}', [KnowledgeManagementPortalArticleController::class, 'show'])
                     ->name('article.show');
