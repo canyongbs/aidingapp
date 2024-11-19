@@ -32,13 +32,12 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { defineProps, ref, watch, onMounted } from 'vue';
+    import { defineProps, ref, watch, computed } from 'vue';
     import { useRoute, useRouter } from 'vue-router';
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import AppLoading from '../Components/AppLoading.vue';
     import { consumer } from '../Services/Consumer.js';
     import {
-        Bars3Icon,
         ClockIcon,
         EyeIcon,
         HandThumbUpIcon,
@@ -46,7 +45,8 @@
     } from '@heroicons/vue/24/outline/index.js';
     import DOMPurify from 'dompurify';
     import Tags from '../Components/Tags.vue';
-    import { useAuthStore } from '../Stores/auth.js';
+    import { XMarkIcon } from '@heroicons/vue/20/solid/index.js';
+    import truncate from 'lodash/truncate';
 
     const route = useRoute();
     const router = useRouter();
@@ -74,6 +74,27 @@
     const portalViewCount = ref(0);
     const feedback = ref(null);
     const helpfulVotePercentage = ref(0);
+
+    const breadcrumbs = computed(() => {
+        if (article.value && category.value) {
+            return [
+                { name: category.value.name, route: 'view-category', params: { categorySlug: category.value.slug } },
+            ];
+        }
+
+        return [];
+    });
+
+    const currentCrumb = computed(() => {
+        return article.value
+            ? truncate(
+                article.value.name,
+                {
+                    length: 16,
+                },
+            )
+            : 'Not Found';
+    });
 
     watch(
         route,
@@ -108,7 +129,13 @@
                 loading.value = false;
             })
             .catch((error) => {
-                if (error.response && error.response.status === 401) {
+                if (
+                    error.response
+                    && (
+                        error.response.status === 401
+                        || error.response.status === 404
+                    )
+                ) {
                     loading.value = false;
                 } else {
                     console.log('An error occurred', error);
@@ -147,14 +174,14 @@
                 <div v-else>
                     <main class="flex flex-col gap-8">
                         <Breadcrumbs
-                            :breadcrumbs="[
-                                { name: category.name, route: 'view-category', params: { categorySlug: category.slug } },
-                            ]"
-                            currentCrumb="Articles"
-                            v-if="article"
+                            :breadcrumbs="breadcrumbs"
+                            :currentCrumb="currentCrumb"
                         ></Breadcrumbs>
 
-                        <div class="grid space-y-2">
+                        <div
+                            class="grid space-y-2"
+                            v-if="category && article"
+                        >
                             <div class="flex flex-col gap-3">
                                 <div class="prose max-w-none" v-if="article">
                                     <h1 class="font-semibold">{{ article.name }}</h1>
@@ -224,6 +251,13 @@
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                        <div v-else class="p-3 flex items-start gap-2">
+                            <XMarkIcon class="h-5 w-5 text-gray-400" />
+
+                            <p class="text-gray-600 text-sm font-medium">
+                                No article found.
+                            </p>
                         </div>
                     </main>
                 </div>
