@@ -97,7 +97,7 @@ Route::prefix('api')
                 Route::get('/categories', [KnowledgeManagementPortalCategoryController::class, 'index'])
                     ->name('category.index');
 
-                Route::get('/categories/{category}', [KnowledgeManagementPortalCategoryController::class, 'show'])
+                Route::get('/categories/{category:slug}', [KnowledgeManagementPortalCategoryController::class, 'show'])
                     ->name('category.show');
 
                 Route::get('/categories/{category}/articles/{article}', [KnowledgeManagementPortalArticleController::class, 'show'])

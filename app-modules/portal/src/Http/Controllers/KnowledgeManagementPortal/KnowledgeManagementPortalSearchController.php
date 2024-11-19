@@ -99,7 +99,7 @@ class KnowledgeManagementPortalSearchController extends Controller
                 ->get()
                 ->map(function (KnowledgeBaseCategory $category) {
                     return [
-                        'id' => $category->getKey(),
+                        'slug' => $category->slug,
                         'name' => $category->name,
                         'description' => $category->description,
                     ];

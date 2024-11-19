@@ -72,7 +72,7 @@ class KnowledgeManagementPortalArticleController extends Controller
 
         return response()->json([
             'category' => KnowledgeBaseCategoryData::from([
-                'id' => $category->getKey(),
+                'slug' => $category->slug,
                 'name' => $category->name,
                 'description' => $category->description,
             ]),

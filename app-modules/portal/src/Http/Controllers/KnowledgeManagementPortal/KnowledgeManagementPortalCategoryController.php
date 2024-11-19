@@ -53,7 +53,7 @@ class KnowledgeManagementPortalCategoryController extends Controller
                     ->get()
                     ->map(function (KnowledgeBaseCategory $category) {
                         return [
-                            'id' => $category->getKey(),
+                            'slug' => $category->slug,
                             'name' => $category->name,
                             'description' => $category->description,
                             'icon' => $category->icon ? svg($category->icon, 'h-6 w-6')->toHtml() : null,
@@ -68,7 +68,7 @@ class KnowledgeManagementPortalCategoryController extends Controller
     {
         return response()->json([
             'category' => KnowledgeBaseCategoryData::from([
-                'id' => $category->getKey(),
+                'slug' => $category->slug,
                 'name' => $category->name,
                 'description' => $category->description,
             ]),
