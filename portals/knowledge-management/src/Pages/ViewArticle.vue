@@ -37,12 +37,7 @@
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import AppLoading from '../Components/AppLoading.vue';
     import { consumer } from '../Services/Consumer.js';
-    import {
-        ClockIcon,
-        EyeIcon,
-        HandThumbUpIcon,
-        HandThumbDownIcon,
-    } from '@heroicons/vue/24/outline/index.js';
+    import { ClockIcon, EyeIcon, HandThumbUpIcon, HandThumbDownIcon } from '@heroicons/vue/24/outline/index.js';
     import DOMPurify from 'dompurify';
     import Tags from '../Components/Tags.vue';
     import { XMarkIcon } from '@heroicons/vue/20/solid/index.js';
@@ -87,12 +82,9 @@
 
     const currentCrumb = computed(() => {
         return article.value
-            ? truncate(
-                article.value.name,
-                {
-                    length: 16,
-                },
-            )
+            ? truncate(article.value.name, {
+                  length: 16,
+              })
             : 'Not Found';
     });
 
@@ -113,10 +105,13 @@
             .then((response) => {
                 if (response.data) {
                     if (response.data.category.slug !== route.params.categorySlug) {
-                        router.replace({ name: 'view-article', params: {
-                            categorySlug: response.data.category.slug,
-                            articleId: route.params.articleId,
-                        } });
+                        router.replace({
+                            name: 'view-article',
+                            params: {
+                                categorySlug: response.data.category.slug,
+                                articleId: route.params.articleId,
+                            },
+                        });
                     }
 
                     category.value = response.data.category;
@@ -129,13 +124,7 @@
                 loading.value = false;
             })
             .catch((error) => {
-                if (
-                    error.response
-                    && (
-                        error.response.status === 401
-                        || error.response.status === 404
-                    )
-                ) {
+                if (error.response && (error.response.status === 401 || error.response.status === 404)) {
                     loading.value = false;
                 } else {
                     console.log('An error occurred', error);
@@ -173,15 +162,9 @@
                 </div>
                 <div v-else>
                     <main class="flex flex-col gap-8">
-                        <Breadcrumbs
-                            :breadcrumbs="breadcrumbs"
-                            :currentCrumb="currentCrumb"
-                        ></Breadcrumbs>
+                        <Breadcrumbs :breadcrumbs="breadcrumbs" :currentCrumb="currentCrumb"></Breadcrumbs>
 
-                        <div
-                            class="grid space-y-2"
-                            v-if="category && article"
-                        >
+                        <div class="grid space-y-2" v-if="category && article">
                             <div class="flex flex-col gap-3">
                                 <div class="prose max-w-none" v-if="article">
                                     <h1 class="font-semibold">{{ article.name }}</h1>
@@ -255,9 +238,7 @@
                         <div v-else class="p-3 flex items-start gap-2">
                             <XMarkIcon class="h-5 w-5 text-gray-400" />
 
-                            <p class="text-gray-600 text-sm font-medium">
-                                No article found.
-                            </p>
+                            <p class="text-gray-600 text-sm font-medium">No article found.</p>
                         </div>
                     </main>
                 </div>
