@@ -42,6 +42,9 @@ use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
+/**
+ * @mixin IdeHelperKnowledgeBaseArticleVote
+ */
 class KnowledgeBaseArticleVote extends Pivot
 {
     use HasUuids;
