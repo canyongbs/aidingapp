@@ -34,12 +34,9 @@
 </COPYRIGHT>
 */
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Symfony\Component\HttpFoundation\Response;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
+use AidingApp\Portal\Http\Routing\ArticleShowMissingHandler;
 use AidingApp\Portal\Http\Routing\CategoryShowMissingHandler;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEnabled;
@@ -108,28 +105,7 @@ Route::prefix('api')
 
                 Route::get('/categories/{category:slug}/articles/{article}', [KnowledgeManagementPortalArticleController::class, 'show'])
                     ->name('article.show')
-                    ->missing(function (Request $request) {
-                        throw_if(
-                            ! $request->category instanceof KnowledgeBaseCategory
-                            && ! str()->isUuid($request->category),
-                            ModelNotFoundException::class
-                        );
-
-                        $category = $request->category instanceof KnowledgeBaseCategory ? $request->category : KnowledgeBaseCategory::findOrFail($request->category);
-
-                        throw_if(
-                            ! $request->article instanceof KnowledgeBaseItem
-                            && ! str()->isUuid($request->article),
-                            ModelNotFoundException::class
-                        );
-
-                        $article = $request->article instanceof KnowledgeBaseItem ? $request->article : KnowledgeBaseItem::findOrFail($request->article);
-
-                        return redirect()->route('api.portal.article.show', [
-                            'category' => $category,
-                            'article' => $article,
-                        ]);
-                    });
+                    ->missing(app(ArticleShowMissingHandler::class));
 
                 Route::get('/service-request-type/select', [ServiceRequestTypesController::class, 'index'])
                     ->name('service-request-type.index');
