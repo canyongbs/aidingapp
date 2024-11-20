@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "21c5b4d1ec1c744a4946919fbc997327",
+    "content-hash": "968f0169a4b51c89859b140079509281",
     "packages": [
         {
             "name": "amphp/amp",
@@ -1642,41 +1642,6 @@
                     "AidingApp\\Authorization\\Tests\\": "tests/",
                     "AidingApp\\Authorization\\Database\\Factories\\": "database/factories/",
                     "AidingApp\\Authorization\\Database\\Seeders\\": "database/seeders/"
-                }
-            },
-            "license": [
-                "proprietary"
-            ],
-            "transport-options": {
-                "symlink": true,
-                "relative": true
-            }
-        },
-        {
-            "name": "canyon-gbs/aiding-app-consent",
-            "version": "1.0",
-            "dist": {
-                "type": "path",
-                "url": "app-modules/consent",
-                "reference": "8fc67f80b78a0c08ba68cb00b2affd8cb7abe98b"
-            },
-            "require": {
-                "filament/filament": "^3.2"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "AidingApp\\Consent\\Providers\\ConsentServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "AidingApp\\Consent\\": "src/",
-                    "AidingApp\\Consent\\Tests\\": "tests/",
-                    "AidingApp\\Consent\\Database\\Factories\\": "database/factories/",
-                    "AidingApp\\Consent\\Database\\Seeders\\": "database/seeders/"
                 }
             },
             "license": [

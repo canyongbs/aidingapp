@@ -59,7 +59,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Notification\Models\Subscription;
 use Staudenmeir\EloquentHasManyDeep\HasManyDeep;
-use AidingApp\Consent\Models\Concerns\CanConsent;
 use AidingApp\Assistant\Models\AssistantChatFolder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -100,7 +99,6 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
     use AuditableTrait;
     use HasManyEngagements;
     use HasManyEngagementBatches;
-    use CanConsent;
     use Impersonate;
     use InteractsWithMedia;
 
