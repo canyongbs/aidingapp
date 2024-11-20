@@ -40,6 +40,9 @@ use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
+/**
+ * @mixin IdeHelperPortalGuest
+ */
 class PortalGuest extends BaseModel
 {
     use SoftDeletes;

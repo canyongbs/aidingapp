@@ -34,39 +34,36 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\Models;
+namespace AidingApp\Portal\Http\Routing;
 
-use Illuminate\Database\Eloquent\Relations\Pivot;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Http\Request;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 
-/**
- * @mixin IdeHelperKnowledgeBaseArticleVote
- */
-class KnowledgeBaseArticleVote extends Pivot
+class ArticleShowMissingHandler
 {
-    use HasUuids;
-    use HasFactory;
-
-    protected $casts = [
-        'is_helpful' => 'boolean',
-    ];
-
-    protected $table = 'knowledge_base_article_votes';
-
-    protected $fillable = [
-        'is_helpful',
-    ];
-
-    public function voter()
+    public function __invoke(Request $request)
     {
-        return $this->morphTo();
-    }
+        throw_if(
+            ! $request->category instanceof KnowledgeBaseCategory
+            && ! str()->isUuid($request->category),
+            ModelNotFoundException::class
+        );
 
-    public function knowledgeBaseArticle(): BelongsTo
-    {
-        return $this->belongsTo(KnowledgeBaseItem::class, 'article_id');
+        $category = $request->category instanceof KnowledgeBaseCategory ? $request->category : KnowledgeBaseCategory::findOrFail($request->category);
+
+        throw_if(
+            ! $request->article instanceof KnowledgeBaseItem
+            && ! str()->isUuid($request->article),
+            ModelNotFoundException::class
+        );
+
+        $article = $request->article instanceof KnowledgeBaseItem ? $request->article : KnowledgeBaseItem::findOrFail($request->article);
+
+        return redirect()->route('api.portal.article.show', [
+            'category' => $category,
+            'article' => $article,
+        ]);
     }
 }

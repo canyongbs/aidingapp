@@ -34,13 +34,11 @@
 <script setup>
     import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline';
     import { defineProps, ref, watch } from 'vue';
-    import { useRoute } from 'vue-router';
+    import { useRoute, useRouter } from 'vue-router';
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import AppLoading from '../Components/AppLoading.vue';
     import { consumer } from '../Services/Consumer.js';
-    import { Bars3Icon } from '@heroicons/vue/24/outline/index.js';
-    import { ChevronRightIcon, XMarkIcon, ChevronLeftIcon } from '@heroicons/vue/20/solid/index.js';
-    import Tags from '../Components/Tags.vue';
+    import { XMarkIcon } from '@heroicons/vue/20/solid/index.js';
     import Article from '../Components/Article.vue';
     import SearchResults from '../Components/SearchResults.vue';
     import Badge from '../Components/Badge.vue';
@@ -48,6 +46,7 @@
     import Pagination from '../Components/Pagination.vue';
 
     const route = useRoute();
+    const router = useRouter();
 
     const props = defineProps({
         searchUrl: {
@@ -198,8 +197,12 @@
 
         const { get } = consumer();
 
-        await get(props.apiUrl + '/categories/' + route.params.categoryId, { page: page, filter: filter.value }).then(
+        await get(props.apiUrl + '/categories/' + route.params.categorySlug, { page: page, filter: filter.value }).then(
             (response) => {
+                if (response.data.category.slug !== route.params.categorySlug) {
+                    router.replace({ name: 'view-category', params: { categorySlug: response.data.category.slug } });
+                }
+
                 category.value = response.data.category;
                 articles.value = response.data.articles.data;
                 setPagination(response.data.articles);

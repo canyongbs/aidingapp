@@ -41,7 +41,7 @@ use Spatie\LaravelData\Data;
 class KnowledgeBaseCategoryData extends Data
 {
     public function __construct(
-        public string $id,
+        public string $slug,
         public string $name,
         public ?string $description,
         public ?string $icon,

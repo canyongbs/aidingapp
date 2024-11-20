@@ -56,7 +56,7 @@
             >
                 <div
                     v-for="category in categories"
-                    :key="category.id"
+                    :key="category.slug"
                     class="group relative bg-white p-6 focus-within:bg-gray-50"
                 >
                     <div class="grid">
@@ -82,7 +82,7 @@
 
                         <div class="w-full mt-8">
                             <h3 class="text-base font-semibold leading-6 text-gray-900">
-                                <router-link :to="{ name: 'view-category', params: { categoryId: category.id } }">
+                                <router-link :to="{ name: 'view-category', params: { categorySlug: category.slug } }">
                                     <span class="absolute inset-0" aria-hidden="true" />
                                     {{ category.name }}
                                 </router-link>
