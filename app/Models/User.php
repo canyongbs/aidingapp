@@ -54,12 +54,10 @@ use Lab404\Impersonate\Models\Impersonate;
 use AidingApp\Authorization\Models\License;
 use Filament\Models\Contracts\FilamentUser;
 use Spatie\MediaLibrary\InteractsWithMedia;
-use AidingApp\Assistant\Models\AssistantChat;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Notification\Models\Subscription;
 use Staudenmeir\EloquentHasManyDeep\HasManyDeep;
-use AidingApp\Assistant\Models\AssistantChatFolder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use AidingApp\ServiceManagement\Models\ChangeRequest;
@@ -67,7 +65,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Staudenmeir\EloquentHasManyDeep\HasRelationships;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
-use AidingApp\Assistant\Models\AssistantChatMessageLog;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use AidingApp\ServiceManagement\Models\ChangeRequestType;
 use Illuminate\Contracts\Translation\HasLocalePreference;
@@ -179,11 +176,6 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
         'locale',
     ];
 
-    public function defaultAssistantChatFoldersHaveBeenCreated(): bool
-    {
-        return $this->default_assistant_chat_folders_created;
-    }
-
     public function conversations(): BelongsToMany
     {
         return $this->belongsToMany(TwilioConversation::class, 'twilio_conversation_user', 'user_id', 'conversation_sid')
@@ -286,16 +278,6 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
         return $this->locale;
     }
 
-    public function assistantChats(): HasMany
-    {
-        return $this->hasMany(AssistantChat::class);
-    }
-
-    public function assistantChatFolders(): HasMany
-    {
-        return $this->hasMany(AssistantChatFolder::class);
-    }
-
     public function teams(): BelongsToMany
     {
         return $this
@@ -308,11 +290,6 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
     public function serviceRequestTypeIndividualAssignment(): HasMany
     {
         return $this->hasMany(ServiceRequestType::class, 'assignment_type_individual_id', 'id');
-    }
-
-    public function assistantChatMessageLogs(): HasMany
-    {
-        return $this->hasMany(AssistantChatMessageLog::class);
     }
 
     public function canAccessPanel(Panel $panel): bool

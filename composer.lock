@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "968f0169a4b51c89859b140079509281",
+    "content-hash": "bca448096c78b677d74eadf06318951a",
     "packages": [
         {
             "name": "amphp/amp",
@@ -1533,41 +1533,6 @@
                     "AidingApp\\Alert\\Tests\\": "tests/",
                     "AidingApp\\Alert\\Database\\Factories\\": "database/factories/",
                     "AidingApp\\Alert\\Database\\Seeders\\": "database/seeders/"
-                }
-            },
-            "license": [
-                "proprietary"
-            ],
-            "transport-options": {
-                "symlink": true,
-                "relative": true
-            }
-        },
-        {
-            "name": "canyon-gbs/aiding-app-assistant",
-            "version": "1.0",
-            "dist": {
-                "type": "path",
-                "url": "app-modules/assistant",
-                "reference": "af0aa8323ca58a0d33c37f71e784b4a6c8ccb716"
-            },
-            "require": {
-                "filament/filament": "^3.2"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "AidingApp\\Assistant\\Providers\\AssistantServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "AidingApp\\Assistant\\": "src/",
-                    "AidingApp\\Assistant\\Tests\\": "tests/",
-                    "AidingApp\\Assistant\\Database\\Factories\\": "database/factories/",
-                    "AidingApp\\Assistant\\Database\\Seeders\\": "database/seeders/"
                 }
             },
             "license": [

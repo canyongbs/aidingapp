@@ -18,7 +18,6 @@
         "barryvdh/laravel-debugbar": "^3.9",
         "bvtterfly/model-state-machine": "^0.3.0",
         "canyon-gbs/aiding-app-alert": "*",
-        "canyon-gbs/aiding-app-assistant": "*",
         "canyon-gbs/aiding-app-audit": "*",
         "canyon-gbs/aiding-app-authorization": "*",
         "canyon-gbs/aiding-app-contact": "*",
