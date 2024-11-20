@@ -40,6 +40,7 @@ use Symfony\Component\HttpFoundation\Response;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
+use AidingApp\Portal\Http\Routing\CategoryShowMissingHandler;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEnabled;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\GetServiceRequestUploadUrl;
@@ -103,13 +104,7 @@ Route::prefix('api')
 
                 Route::get('/categories/{category:slug}', [KnowledgeManagementPortalCategoryController::class, 'show'])
                     ->name('category.show')
-                    ->missing(function (Request $request) {
-                        throw_if(! str()->isUuid($request->category), ModelNotFoundException::class);
-
-                        $category = KnowledgeBaseCategory::findOrFail($request->category);
-
-                        return redirect()->route('api.portal.category.show', $category->slug);
-                    });
+                    ->missing(app(CategoryShowMissingHandler::class));
 
                 Route::get('/categories/{category:slug}/articles/{article}', [KnowledgeManagementPortalArticleController::class, 'show'])
                     ->name('article.show')
