@@ -101,11 +101,11 @@ Route::prefix('api')
 
                 Route::get('/categories/{category:slug}', [KnowledgeManagementPortalCategoryController::class, 'show'])
                     ->name('category.show')
-                    ->missing(app(CategoryShowMissingHandler::class));
+                    ->missing((new CategoryShowMissingHandler())(...));
 
                 Route::get('/categories/{category:slug}/articles/{article}', [KnowledgeManagementPortalArticleController::class, 'show'])
                     ->name('article.show')
-                    ->missing(app(ArticleShowMissingHandler::class));
+                    ->missing((new ArticleShowMissingHandler())(...));
 
                 Route::get('/service-request-type/select', [ServiceRequestTypesController::class, 'index'])
                     ->name('service-request-type.index');
