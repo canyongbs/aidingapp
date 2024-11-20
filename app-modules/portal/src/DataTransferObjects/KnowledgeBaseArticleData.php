@@ -42,7 +42,7 @@ class KnowledgeBaseArticleData extends Data
 {
     public function __construct(
         public string $id,
-        public ?string $categoryId,
+        public string $categorySlug,
         public string $name,
         public ?string $lastUpdated,
         public ?string $content,

@@ -1114,6 +1114,8 @@ namespace AidingApp\Contact\Models{
  * @property-read int|null $engagement_responses_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Engagement\Models\Engagement> $engagements
  * @property-read int|null $engagements_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Portal\Models\KnowledgeBaseArticleVote> $knowledgeBaseArticleVotes
+ * @property-read int|null $knowledge_base_article_votes_count
  * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<int, \Illuminate\Notifications\DatabaseNotification> $notifications
  * @property-read int|null $notifications_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Engagement\Models\EngagementResponse> $orderedEngagementResponses
@@ -2123,7 +2125,7 @@ namespace AidingApp\KnowledgeBase\Models{
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property string|null $slug
+ * @property string $slug
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
  * @property-read int|null $audits_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\KnowledgeBase\Models\KnowledgeBaseItem> $knowledgeBaseItems
@@ -2177,6 +2179,8 @@ namespace AidingApp\KnowledgeBase\Models{
  * @property-read \AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus|null $status
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Tag> $tags
  * @property-read int|null $tags_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Portal\Models\KnowledgeBaseArticleVote> $votes
+ * @property-read int|null $votes_count
  * @method static \AidingApp\KnowledgeBase\Database\Factories\KnowledgeBaseItemFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseItem newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseItem newQuery()
@@ -2351,6 +2355,36 @@ namespace AidingApp\Notification\Models{
 
 namespace AidingApp\Portal\Models{
 /**
+ * AidingApp\Portal\Models\KnowledgeBaseArticleVote
+ *
+ * @property string $id
+ * @property bool $is_helpful
+ * @property string $voter_type
+ * @property string $voter_id
+ * @property string $article_id
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \AidingApp\KnowledgeBase\Models\KnowledgeBaseItem $knowledgeBaseArticle
+ * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $voter
+ * @method static \AidingApp\Portal\Database\Factories\KnowledgeBaseArticleVoteFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseArticleVote newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseArticleVote newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseArticleVote query()
+ * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseArticleVote whereArticleId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseArticleVote whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseArticleVote whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseArticleVote whereIsHelpful($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseArticleVote whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseArticleVote whereVoterId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseArticleVote whereVoterType($value)
+ * @mixin \Eloquent
+ */
+	#[\AllowDynamicProperties]
+	class IdeHelperKnowledgeBaseArticleVote {}
+}
+
+namespace AidingApp\Portal\Models{
+/**
  * AidingApp\Portal\Models\PortalAuthentication
  *
  * @property Carbon|null $created_at
@@ -2376,6 +2410,33 @@ namespace AidingApp\Portal\Models{
  */
 	#[\AllowDynamicProperties]
 	class IdeHelperPortalAuthentication {}
+}
+
+namespace AidingApp\Portal\Models{
+/**
+ * AidingApp\Portal\Models\PortalGuest
+ *
+ * @property string $id
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Portal\Models\KnowledgeBaseArticleVote> $knowledgeBaseArticleVotes
+ * @property-read int|null $knowledge_base_article_votes_count
+ * @method static \AidingApp\Portal\Database\Factories\PortalGuestFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|PortalGuest newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|PortalGuest newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|PortalGuest onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|PortalGuest query()
+ * @method static \Illuminate\Database\Eloquent\Builder|PortalGuest whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|PortalGuest whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|PortalGuest whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|PortalGuest whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|PortalGuest withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|PortalGuest withoutTrashed()
+ * @mixin \Eloquent
+ */
+	#[\AllowDynamicProperties]
+	class IdeHelperPortalGuest {}
 }
 
 namespace AidingApp\ServiceManagement\Models{

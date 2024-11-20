@@ -66,12 +66,12 @@ customElements.define(
                         component: Home,
                     },
                     {
-                        path: baseUrl + '/categories/:categoryId',
+                        path: baseUrl + '/categories/:categorySlug',
                         name: 'view-category',
                         component: ViewCategory,
                     },
                     {
-                        path: baseUrl + '/categories/:categoryId/articles/:articleId',
+                        path: baseUrl + '/categories/:categorySlug/articles/:articleId',
                         name: 'view-article',
                         component: ViewArticle,
                     },

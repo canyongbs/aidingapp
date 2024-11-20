@@ -36,6 +36,8 @@
 
 use Illuminate\Support\Facades\Route;
 use Symfony\Component\HttpFoundation\Response;
+use AidingApp\Portal\Http\Routing\ArticleShowMissingHandler;
+use AidingApp\Portal\Http\Routing\CategoryShowMissingHandler;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEnabled;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\GetServiceRequestUploadUrl;
@@ -97,11 +99,13 @@ Route::prefix('api')
                 Route::get('/categories', [KnowledgeManagementPortalCategoryController::class, 'index'])
                     ->name('category.index');
 
-                Route::get('/categories/{category}', [KnowledgeManagementPortalCategoryController::class, 'show'])
-                    ->name('category.show');
+                Route::get('/categories/{category:slug}', [KnowledgeManagementPortalCategoryController::class, 'show'])
+                    ->name('category.show')
+                    ->missing(app(CategoryShowMissingHandler::class));
 
-                Route::get('/categories/{category}/articles/{article}', [KnowledgeManagementPortalArticleController::class, 'show'])
-                    ->name('article.show');
+                Route::get('/categories/{category:slug}/articles/{article}', [KnowledgeManagementPortalArticleController::class, 'show'])
+                    ->name('article.show')
+                    ->missing(app(ArticleShowMissingHandler::class));
 
                 Route::get('/service-request-type/select', [ServiceRequestTypesController::class, 'index'])
                     ->name('service-request-type.index');

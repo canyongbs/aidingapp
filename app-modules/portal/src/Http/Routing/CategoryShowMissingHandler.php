@@ -34,39 +34,20 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\Models;
+namespace AidingApp\Portal\Http\Routing;
 
-use Illuminate\Database\Eloquent\Relations\Pivot;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 
-/**
- * @mixin IdeHelperKnowledgeBaseArticleVote
- */
-class KnowledgeBaseArticleVote extends Pivot
+class CategoryShowMissingHandler
 {
-    use HasUuids;
-    use HasFactory;
-
-    protected $casts = [
-        'is_helpful' => 'boolean',
-    ];
-
-    protected $table = 'knowledge_base_article_votes';
-
-    protected $fillable = [
-        'is_helpful',
-    ];
-
-    public function voter()
+    public function __invoke(Request $request)
     {
-        return $this->morphTo();
-    }
+        throw_if(! str()->isUuid($request->category), ModelNotFoundException::class);
 
-    public function knowledgeBaseArticle(): BelongsTo
-    {
-        return $this->belongsTo(KnowledgeBaseItem::class, 'article_id');
+        $category = KnowledgeBaseCategory::findOrFail($request->category);
+
+        return redirect()->route('api.portal.category.show', $category->slug);
     }
 }

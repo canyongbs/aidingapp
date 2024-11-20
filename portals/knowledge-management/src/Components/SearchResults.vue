@@ -139,9 +139,9 @@
 
             <div v-if="searchResults.data.categories.length > 0">
                 <ul role="list" class="divide-y">
-                    <li v-for="category in searchResults.data.categories" :key="category.id">
+                    <li v-for="category in searchResults.data.categories" :key="category.slug">
                         <router-link
-                            :to="{ name: 'view-category', params: { categoryId: category.id } }"
+                            :to="{ name: 'view-category', params: { categorySlug: category.slug } }"
                             class="group p-3 flex items-start text-sm font-medium text-gray-700"
                         >
                             <h5>
