@@ -25,7 +25,6 @@
         "canyon-gbs/aiding-app-engagement": "*",
         "canyon-gbs/aiding-app-form": "*",
         "canyon-gbs/aiding-app-in-app-communication": "*",
-        "canyon-gbs/aiding-app-integration-ai": "*",
         "canyon-gbs/aiding-app-integration-aws-ses-event-handling": "*",
         "canyon-gbs/aiding-app-integration-google-analytics": "*",
         "canyon-gbs/aiding-app-integration-google-recaptcha": "*",

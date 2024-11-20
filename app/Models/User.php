@@ -79,13 +79,12 @@ use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Notification\Models\Contracts\NotifiableInterface;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use AidingApp\Engagement\Models\Concerns\HasManyEngagementBatches;
-use AidingApp\IntegrationAI\Models\Concerns\ProvidesDynamicContext;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 
 /**
  * @mixin IdeHelperUser
  */
-class User extends Authenticatable implements HasLocalePreference, FilamentUser, Auditable, HasMedia, HasAvatar, NotifiableInterface, HasFilamentResource, ProvidesDynamicContext
+class User extends Authenticatable implements HasLocalePreference, FilamentUser, Auditable, HasMedia, HasAvatar, NotifiableInterface, HasFilamentResource
 {
     use HasFactory;
     use HasAdvancedFilter;
