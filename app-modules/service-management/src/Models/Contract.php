@@ -10,8 +10,9 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use AidingApp\ServiceManagement\Enums\ContractStatus;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use AidingApp\ServiceManagement\Casts\ContractCurrencyValue;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use App\Casts\CurrencyCast;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 /**
  * @mixin IdeHelperContract
@@ -28,7 +29,6 @@ class Contract extends Model implements HasMedia, Auditable
     protected $fillable = [
         'name',
         'description',
-        'contract_type',
         'vendor_name',
         'start_date',
         'end_date',
@@ -36,22 +36,25 @@ class Contract extends Model implements HasMedia, Auditable
     ];
 
     protected $casts = [
-        'contract_value' => ContractCurrencyValue::class,
+        'contract_value' => CurrencyCast::class,
     ];
 
     public function contractType(): BelongsTo
     {
-        return $this->belongsTo(ContractType::class, 'contract_type', 'id');
+        return $this->belongsTo(ContractType::class, 'contract_type_id', 'id');
     }
 
-    public function getStatusAttribute(): ContractStatus
+    protected function status(): Attribute
     {
-        return ContractStatus::getStatus($this->start_date, $this->end_date);
+        return Attribute::make(
+            get: fn () => ContractStatus::getStatus($this->start_date, $this->end_date),
+        );
     }
 
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('contract_files')
+            ->onlyKeepLatest(5)
             ->acceptsMimeTypes([
                 'application/pdf' => ['pdf'],
                 'application/vnd.ms-word' => ['doc'],

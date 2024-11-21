@@ -25,7 +25,6 @@ class ViewContract extends ViewRecord
                     TextEntry::make('name'),
                     TextEntry::make('status'),
                     TextEntry::make('contractType.name')
-                        ->visible(ContractManagement::active())
                         ->label('Contract Type'),
                     TextEntry::make('vendor_name')
                         ->label('Vendor Name'),

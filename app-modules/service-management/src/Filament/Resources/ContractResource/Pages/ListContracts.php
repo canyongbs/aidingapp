@@ -29,7 +29,6 @@ class ListContracts extends ListRecords
             ->columns([
                 TextColumn::make('name'),
                 TextColumn::make('contractType.name')
-                    ->visible(ContractManagement::active())
                     ->label('Contract Type'),
                 TextColumn::make('status')
                     ->label('Contract Status'),
@@ -40,18 +39,20 @@ class ListContracts extends ListRecords
             ])
             ->filters([
                 SelectFilter::make('contract_type')
-                    ->visible(ContractManagement::active())
                     ->relationship('contractType', 'name'),
                 SelectFilter::make('status')
-                    ->options(collect(ContractStatus::cases())->mapWithKeys(fn (ContractStatus $direction) => [$direction->value => \Livewire\str($direction->name)->title()->headline()]))
+                    ->options(collect(ContractStatus::cases())->mapWithKeys(fn (ContractStatus $contractStatus) => [
+                        $contractStatus->value => $contractStatus->getLabel()
+                    ]))
                     ->query(function (Builder $query, $state) {
+
                         $today = now();
 
                         return match ($state['value']) {
                             ContractStatus::Pending->value => $query->where('start_date', '>', $today),
-                            ContractStatus::Pending->value => $query->where('start_date', '<=', $today)
+                            ContractStatus::Active->value => $query->where('start_date', '<=', $today)
                                 ->where('end_date', '>=', $today),
-                            ContractStatus::Pending->value => $query->where('end_date', '<', $today),
+                            ContractStatus::Expired->value => $query->where('end_date', '<', $today),
                             default => $query,
                         };
                     }),

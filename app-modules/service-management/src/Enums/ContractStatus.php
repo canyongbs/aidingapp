@@ -13,7 +13,7 @@ enum ContractStatus: string implements HasLabel
 
     public static function getStatus($startDate, $endDate): self
     {
-        $today = now();
+        $today = now()->format('Y-m-d');
 
         if ($startDate > $today) {
             return self::Pending;

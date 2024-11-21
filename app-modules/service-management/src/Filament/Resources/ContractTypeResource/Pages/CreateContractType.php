@@ -8,6 +8,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\CreateRecord;
 use AidingApp\ServiceManagement\Models\ContractType;
 use AidingApp\ServiceManagement\Filament\Resources\ContractTypeResource;
+use Illuminate\Support\Facades\DB;
 
 class CreateContractType extends CreateRecord
 {
@@ -48,7 +49,7 @@ class CreateContractType extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        $data['order'] = (ContractType::count() + 1);
+        $data['order'] = $data['order'] = DB::table('contract_types')->max('order') + 1;
 
         if ($data['is_default']) {
             ContractType::query()

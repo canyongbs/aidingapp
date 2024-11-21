@@ -26,12 +26,15 @@ class CreateContract extends CreateRecord
         return $form
             ->schema([
                 TextInput::make('name')
+                    ->string()
                     ->required(),
-                Select::make('contract_type')
+                Select::make('contract_type_id')
                     ->required()
-                    ->visible(ContractManagement::active())
                     ->label('Contract Type')
-                    ->relationship('contractType', 'name', fn (Builder $query) => $query->orderBy('order', 'ASC'))
+                    ->relationship(
+                        name : 'contractType', 
+                        titleAttribute: 'name', 
+                        modifyQueryUsing: fn (Builder $query) => $query->orderBy('order', 'ASC'))
                     ->preload()
                     ->default(
                         fn () => ContractType::query()
@@ -39,9 +42,9 @@ class CreateContract extends CreateRecord
                             ->first()
                             ?->getKey()
                     )
-                    ->native(false)
                     ->searchable(),
                 TextInput::make('vendor_name')
+                    ->string()
                     ->label('Vendor Name')
                     ->required(),
                 TextInput::make('contract_value')
@@ -72,7 +75,9 @@ class CreateContract extends CreateRecord
                     ->live(onBlur: true)
                     ->closeOnDateSelection()
                     ->required(),
-                Textarea::make('description'),
+                Textarea::make('description')
+                        ->string()
+                        ->nullable(),
                 SpatieMediaLibraryFileUpload::make('contract_files')
                     ->label('Contract Files')
                     ->disk('s3')

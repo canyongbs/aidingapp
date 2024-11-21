@@ -88,8 +88,8 @@ class AppServiceProvider extends ServiceProvider
         Relation::morphMap([
             'system_user' => SystemUser::class,
             'tenant' => Tenant::class,
-            'contract' => Contract::class,
             'contract_type' => ContractType::class,
+            'contract' => Contract::class,
         ]);
 
         Feature::resolveScopeUsing(fn ($driver) => null);

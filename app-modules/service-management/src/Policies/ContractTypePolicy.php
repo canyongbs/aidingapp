@@ -22,15 +22,15 @@ class ContractTypePolicy
     {
         return $authenticatable->canOrElse(
             abilities: 'product_admin.view-any',
-            denyResponse: 'You do not have permission to view assets.'
+            denyResponse: 'You do not have permission to view contract types.'
         );
     }
 
     public function view(Authenticatable $authenticatable, ContractType $contractType): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['product_admin.*.view', "product_admin.{$contractType->getKey()}.view"],
-            denyResponse: 'You do not have permission to view this asset.'
+            abilities: ["product_admin.{$contractType->getKey()}.view"],
+            denyResponse: 'You do not have permission to view this contract type.'
         );
     }
 
@@ -38,39 +38,39 @@ class ContractTypePolicy
     {
         return $authenticatable->canOrElse(
             abilities: 'product_admin.create',
-            denyResponse: 'You do not have permission to create assets.'
+            denyResponse: 'You do not have permission to create contract types.'
         );
     }
 
     public function update(Authenticatable $authenticatable, ContractType $contractType): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['product_admin.*.update', "product_admin.{$contractType->getKey()}.update"],
-            denyResponse: 'You do not have permission to update this asset.'
+            abilities: ["product_admin.{$contractType->getKey()}.update"],
+            denyResponse: 'You do not have permission to update this contract type.'
         );
     }
 
     public function delete(Authenticatable $authenticatable, ContractType $contractType): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['product_admin.*.delete', "product_admin.{$contractType->getKey()}.delete"],
-            denyResponse: 'You do not have permission to delete this asset.'
+            abilities: ["product_admin.{$contractType->getKey()}.delete"],
+            denyResponse: 'You do not have permission to delete this contract type.'
         );
     }
 
     public function restore(Authenticatable $authenticatable, ContractType $contractType): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['product_admin.*.restore', "product_admin.{$contractType->getKey()}.restore"],
-            denyResponse: 'You do not have permission to restore this asset.'
+            abilities: ["product_admin.{$contractType->getKey()}.restore"],
+            denyResponse: 'You do not have permission to restore this contract type.'
         );
     }
 
     public function forceDelete(Authenticatable $authenticatable, ContractType $contractType): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['product_admin.*.force-delete', "product_admin.{$contractType->getKey()}.force-delete"],
-            denyResponse: 'You do not have permission to permanently delete this asset.'
+            abilities: ["product_admin.{$contractType->getKey()}.force-delete"],
+            denyResponse: 'You do not have permission to permanently delete this contract type.'
         );
     }
 }

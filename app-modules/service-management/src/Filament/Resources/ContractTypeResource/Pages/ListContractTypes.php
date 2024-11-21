@@ -24,8 +24,6 @@ class ListContractTypes extends ListRecords
                 TextColumn::make('name'),
                 IconColumn::make('is_default')->label('Is Default')->boolean(),
             ])
-            ->filters([
-            ])
             ->actions([
                 EditAction::make(),
                 DeleteAction::make(),

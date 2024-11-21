@@ -1,12 +1,12 @@
 <?php
 
-namespace AidingApp\ServiceManagement\Casts;
+namespace App\Casts;
 
 use Cknow\Money\Money;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 
-class ContractCurrencyValue implements CastsAttributes
+class CurrencyCast implements CastsAttributes
 {
     /**
      * Cast the given value.

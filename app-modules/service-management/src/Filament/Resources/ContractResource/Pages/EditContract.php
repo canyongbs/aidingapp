@@ -29,12 +29,15 @@ class EditContract extends EditRecord
         return $form
             ->schema([
                 TextInput::make('name')
+                    ->string()
                     ->required(),
-                Select::make('contract_type')
+                Select::make('contract_type_id')
                     ->required()
-                    ->visible(ContractManagement::active())
                     ->label('Contract Type')
-                    ->relationship('contractType', 'name', fn (Builder $query) => $query->orderBy('order', 'ASC'))
+                    ->relationship(
+                        name : 'contractType', 
+                        titleAttribute: 'name', 
+                        modifyQueryUsing: fn (Builder $query) => $query->orderBy('order', 'ASC'))
                     ->preload()
                     ->default(
                         fn () => ContractType::query()
@@ -42,9 +45,9 @@ class EditContract extends EditRecord
                             ->first()
                             ?->getKey()
                     )
-                    ->native(false)
                     ->searchable(),
                 TextInput::make('vendor_name')
+                    ->string()
                     ->label('Vendor Name')
                     ->required(),
                 TextInput::make('contract_value')
@@ -63,7 +66,6 @@ class EditContract extends EditRecord
                     ->afterStateUpdated(
                         fn (Get $get, Set $set) => $get('start_date') > $get('end_date') ? $set('end_date', '') : ''
                     )
-                    ->minDate(fn ($context) => $context == 'create' ? now()->format('Y-m-d') : '')
                     ->closeOnDateSelection()
                     ->placeholder('Select start date')
                     ->required(),
@@ -76,8 +78,9 @@ class EditContract extends EditRecord
                     ->live(onBlur: true)
                     ->closeOnDateSelection()
                     ->required(),
-                Textarea::make('description'),
-
+                Textarea::make('description')
+                        ->string()
+                        ->nullable(),
                 SpatieMediaLibraryFileUpload::make('contract_files')
                     ->disk('s3')
                     ->label('Contract Files')

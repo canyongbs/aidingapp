@@ -19,16 +19,16 @@ class ContractFactory extends Factory
      */
     public function definition(): array
     {
-        $startDate = fake()->dateTimeBetween('-1 year', '+1 year');
-        $endDate = fake()->dateTimeBetween((clone $startDate)->modify('+1 day'), (clone $startDate)->modify('+1 year'));
-
         return [
             'name' => fake()->sentence(),
             'description' => fake()->paragraph(),
-            'contract_type' => ContractType::factory(),
+            'contract_type_id' => ContractType::factory(),
             'vendor_name' => fake()->name(),
-            'start_date' => $startDate,
-            'end_date' => $endDate,
+            'start_date' => fake()->dateTimeBetween('-1 year', '+1 year'),
+            'end_date' => fn (array $attributes) => fake()->dateTimeBetween(
+                (clone $attributes['start_date'])->modify('+1 day'),
+                (clone $attributes['start_date'])->modify('+1 year')
+            ),
             'contract_value' => Money::parseByDecimal(fake()->randomNumber(), config('money.defaultCurrency')),
         ];
     }

@@ -11,7 +11,7 @@ return new class () extends Migration {
             $table->uuid('id')->primary();
             $table->string('name');
             $table->boolean('is_default');
-            $table->unsignedBigInteger('order');
+            $table->unsignedInteger('order')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

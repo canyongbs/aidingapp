@@ -17,13 +17,7 @@ class ContractPolicy
         if (! $authenticatable->hasAnyLicense([Contact::getLicenseType()])) {
             return Response::deny('You are not licensed for the Recruitment CRM.');
         }
-
-        if (! Gate::check(
-            collect($this->requiredFeatures())->map(fn (Feature $feature) => $feature->getGateName())
-        )) {
-            return FeatureAccessResponse::deny();
-        }
-
+        
         return null;
     }
 
@@ -31,15 +25,15 @@ class ContractPolicy
     {
         return $authenticatable->canOrElse(
             abilities: 'contract.view-any',
-            denyResponse: 'You do not have permission to view assets.'
+            denyResponse: 'You do not have permission to view contracts.'
         );
     }
 
     public function view(Authenticatable $authenticatable, Contract $contract): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['contract.*.view', "contract.{$contract->getKey()}.view"],
-            denyResponse: 'You do not have permission to view this asset.'
+            abilities: ["contract.{$contract->getKey()}.view"],
+            denyResponse: 'You do not have permission to view this contract.'
         );
     }
 
@@ -47,39 +41,39 @@ class ContractPolicy
     {
         return $authenticatable->canOrElse(
             abilities: 'contract.create',
-            denyResponse: 'You do not have permission to create assets.'
+            denyResponse: 'You do not have permission to create contracts.'
         );
     }
 
     public function update(Authenticatable $authenticatable, Contract $contract): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['contract.*.update', "contract.{$contract->getKey()}.update"],
-            denyResponse: 'You do not have permission to update this asset.'
+            abilities: ["contract.{$contract->getKey()}.update"],
+            denyResponse: 'You do not have permission to update this contract.'
         );
     }
 
     public function delete(Authenticatable $authenticatable, Contract $contract): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['contract.*.delete', "contract.{$contract->getKey()}.delete"],
-            denyResponse: 'You do not have permission to delete this asset.'
+            abilities: ["contract.{$contract->getKey()}.delete"],
+            denyResponse: 'You do not have permission to delete this contract.'
         );
     }
 
     public function restore(Authenticatable $authenticatable, Contract $contract): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['contract.*.restore', "contract.{$contract->getKey()}.restore"],
-            denyResponse: 'You do not have permission to restore this asset.'
+            abilities: ["contract.{$contract->getKey()}.restore"],
+            denyResponse: 'You do not have permission to restore this contract.'
         );
     }
 
     public function forceDelete(Authenticatable $authenticatable, Contract $contract): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['contract.*.force-delete', "contract.{$contract->getKey()}.force-delete"],
-            denyResponse: 'You do not have permission to permanently delete this asset.'
+            abilities: ["contract.{$contract->getKey()}.force-delete"],
+            denyResponse: 'You do not have permission to permanently delete this contract.'
         );
     }
 

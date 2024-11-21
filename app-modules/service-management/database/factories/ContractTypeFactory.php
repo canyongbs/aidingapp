@@ -19,8 +19,25 @@ class ContractTypeFactory extends Factory
     {
         return [
             'name' => fake()->word(),
-            'is_default' => fake()->boolean(),
-            'order' => fake()->randomNumber(),
+            'is_default' => false,
+            'order' => null,
         ];
+    }
+
+    public function default(): Factory
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'is_default' => true,
+            ];
+        });
+    }
+
+    public function configure()
+    {
+        return $this->afterCreating(function ($model) {
+            $maxOrder = static::newModel()->max('order') ?? 0;
+            $model->update(['order' => $maxOrder + 1]);
+        });
     }
 }
