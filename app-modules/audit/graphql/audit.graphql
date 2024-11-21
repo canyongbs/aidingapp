@@ -3,15 +3,11 @@ union Auditable =
     | Contact
     | User
     | SystemUser
-    | ConsentAgreement
-    | UserConsentAgreement
 
 input AuditableablesQuery {
     contact: ContactsQuery
     user: UsersQuery
     system_user: SystemUsersQuery
-    consent_agreement: ConsentAgreementsQuery
-    user_consent_agreement: UserConsentAgreementsQuery
 }
 
 type Audit @model(class: "AidingApp\\Audit\\Models\\Audit") {

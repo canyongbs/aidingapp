@@ -1,39 +1,5 @@
 <?php
 
-/*
-<COPYRIGHT>
-
-    Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
-
-    Aiding App™ is licensed under the Elastic License 2.0. For more details,
-    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
-
-    Notice:
-
-    - You may not provide the software to third parties as a hosted or managed
-      service, where the service provides users with access to any substantial set of
-      the features or functionality of the software.
-    - You may not move, change, disable, or circumvent the license key functionality
-      in the software, and you may not remove or obscure any functionality in the
-      software that is protected by the license key.
-    - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
-      to applicable law.
-    - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
-      Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
-      vigorously.
-    - The software solution, including services, infrastructure, and code, is offered as a
-      Software as a Service (SaaS) by Canyon GBS LLC.
-    - Use of this software implies agreement to the license terms and conditions as stated
-      in the Elastic License 2.0.
-
-    For more information or inquiries please visit our website at
-    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
-
-</COPYRIGHT>
-*/
-
 // @formatter:off
 // phpcs:ignoreFile
 /**
@@ -474,19 +440,12 @@ namespace App\Models{
  * @property string|null $job_title
  * @property string|null $pronouns_id
  * @property bool $are_pronouns_visible_on_profile
- * @property bool $default_assistant_chat_folders_created
  * @property \Illuminate\Support\Carbon|null $email_verified_at
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Task\Models\Task> $assignedTasks
  * @property-read int|null $assigned_tasks_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Assistant\Models\AssistantChatFolder> $assistantChatFolders
- * @property-read int|null $assistant_chat_folders_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Assistant\Models\AssistantChatMessageLog> $assistantChatMessageLogs
- * @property-read int|null $assistant_chat_message_logs_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Assistant\Models\AssistantChat> $assistantChats
- * @property-read int|null $assistant_chats_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
  * @property-read int|null $audits_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\ServiceManagement\Models\ChangeRequestResponse> $changeRequestResponses
@@ -495,8 +454,6 @@ namespace App\Models{
  * @property-read int|null $change_request_types_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\ServiceManagement\Models\ChangeRequest> $changeRequests
  * @property-read int|null $change_requests_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Consent\Models\ConsentAgreement> $consentAgreements
- * @property-read int|null $consent_agreements_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Contact\Models\Contact> $contactSubscriptions
  * @property-read int|null $contact_subscriptions_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\InAppCommunication\Models\TwilioConversation> $conversations
@@ -546,7 +503,6 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|User whereAvatarUrl($value)
  * @method static \Illuminate\Database\Eloquent\Builder|User whereBio($value)
  * @method static \Illuminate\Database\Eloquent\Builder|User whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|User whereDefaultAssistantChatFoldersCreated($value)
  * @method static \Illuminate\Database\Eloquent\Builder|User whereDeletedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|User whereEmail($value)
  * @method static \Illuminate\Database\Eloquent\Builder|User whereEmailVerifiedAt($value)
@@ -624,198 +580,6 @@ namespace AidingApp\Alert\Models{
  */
 	#[\AllowDynamicProperties]
 	class IdeHelperAlert {}
-}
-
-namespace AidingApp\Assistant\Models{
-/**
- * AidingApp\Assistant\Models\AssistantChat
- *
- * @property string $id
- * @property string $name
- * @property string $user_id
- * @property string|null $assistant_chat_folder_id
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \AidingApp\Assistant\Models\AssistantChatFolder|null $folder
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Assistant\Models\AssistantChatMessage> $messages
- * @property-read int|null $messages_count
- * @property-read \App\Models\User $user
- * @method static \Illuminate\Database\Eloquent\Builder|AssistantChat newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|AssistantChat newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|AssistantChat onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|AssistantChat query()
- * @method static \Illuminate\Database\Eloquent\Builder|AssistantChat whereAssistantChatFolderId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AssistantChat whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AssistantChat whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AssistantChat whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AssistantChat whereName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AssistantChat whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AssistantChat whereUserId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AssistantChat withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|AssistantChat withoutTrashed()
- * @mixin \Eloquent
- */
-	#[\AllowDynamicProperties]
-	class IdeHelperAssistantChat {}
-}
-
-namespace AidingApp\Assistant\Models{
-/**
- * AidingApp\Assistant\Models\AssistantChatFolder
- *
- * @property string $id
- * @property string $name
- * @property string $user_id
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Assistant\Models\AssistantChat> $chats
- * @property-read int|null $chats_count
- * @property-read \App\Models\User $user
- * @method static \Illuminate\Database\Eloquent\Builder|AssistantChatFolder newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|AssistantChatFolder newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|AssistantChatFolder onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|AssistantChatFolder query()
- * @method static \Illuminate\Database\Eloquent\Builder|AssistantChatFolder whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AssistantChatFolder whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AssistantChatFolder whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AssistantChatFolder whereName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AssistantChatFolder whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AssistantChatFolder whereUserId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AssistantChatFolder withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|AssistantChatFolder withoutTrashed()
- * @mixin \Eloquent
- */
-	#[\AllowDynamicProperties]
-	class IdeHelperAssistantChatFolder {}
-}
-
-namespace AidingApp\Assistant\Models{
-/**
- * AidingApp\Assistant\Models\AssistantChatMessage
- *
- * @property string $id
- * @property string $assistant_chat_id
- * @property \AidingApp\Assistant\Services\AIInterface\Enums\AIChatMessageFrom $from
- * @property string|null $message
- * @property string|null $name
- * @property array|null $function_call
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \AidingApp\Assistant\Models\AssistantChat $chat
- * @method static \Illuminate\Database\Eloquent\Builder|AssistantChatMessage newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|AssistantChatMessage newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|AssistantChatMessage onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|AssistantChatMessage query()
- * @method static \Illuminate\Database\Eloquent\Builder|AssistantChatMessage whereAssistantChatId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AssistantChatMessage whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AssistantChatMessage whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AssistantChatMessage whereFrom($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AssistantChatMessage whereFunctionCall($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AssistantChatMessage whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AssistantChatMessage whereMessage($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AssistantChatMessage whereName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AssistantChatMessage whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AssistantChatMessage withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|AssistantChatMessage withoutTrashed()
- * @mixin \Eloquent
- */
-	#[\AllowDynamicProperties]
-	class IdeHelperAssistantChatMessage {}
-}
-
-namespace AidingApp\Assistant\Models{
-/**
- * AidingApp\Assistant\Models\AssistantChatMessageLog
- *
- * @property string $id
- * @property string $message
- * @property array $metadata
- * @property string $user_id
- * @property array $request
- * @property \Illuminate\Support\Carbon $sent_at
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\User $user
- * @method static \Illuminate\Database\Eloquent\Builder|AssistantChatMessageLog newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|AssistantChatMessageLog newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|AssistantChatMessageLog query()
- * @method static \Illuminate\Database\Eloquent\Builder|AssistantChatMessageLog whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AssistantChatMessageLog whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AssistantChatMessageLog whereMessage($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AssistantChatMessageLog whereMetadata($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AssistantChatMessageLog whereRequest($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AssistantChatMessageLog whereSentAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AssistantChatMessageLog whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AssistantChatMessageLog whereUserId($value)
- * @mixin \Eloquent
- */
-	#[\AllowDynamicProperties]
-	class IdeHelperAssistantChatMessageLog {}
-}
-
-namespace AidingApp\Assistant\Models{
-/**
- * AidingApp\Assistant\Models\Prompt
- *
- * @property string $id
- * @property string $title
- * @property string|null $description
- * @property string $prompt
- * @property string $type_id
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property string|null $deleted_at
- * @property-read \AidingApp\Assistant\Models\PromptType $type
- * @method static \AidingApp\Assistant\Database\Factories\PromptFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder|Prompt newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Prompt newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Prompt query()
- * @method static \Illuminate\Database\Eloquent\Builder|Prompt whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Prompt whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Prompt whereDescription($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Prompt whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Prompt wherePrompt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Prompt whereTitle($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Prompt whereTypeId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Prompt whereUpdatedAt($value)
- * @mixin \Eloquent
- */
-	#[\AllowDynamicProperties]
-	class IdeHelperPrompt {}
-}
-
-namespace AidingApp\Assistant\Models{
-/**
- * AidingApp\Assistant\Models\PromptType
- *
- * @property string $id
- * @property string $title
- * @property string|null $description
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Assistant\Models\Prompt> $prompts
- * @property-read int|null $prompts_count
- * @method static \AidingApp\Assistant\Database\Factories\PromptTypeFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder|PromptType newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|PromptType newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|PromptType onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|PromptType query()
- * @method static \Illuminate\Database\Eloquent\Builder|PromptType whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|PromptType whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|PromptType whereDescription($value)
- * @method static \Illuminate\Database\Eloquent\Builder|PromptType whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|PromptType whereTitle($value)
- * @method static \Illuminate\Database\Eloquent\Builder|PromptType whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|PromptType withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|PromptType withoutTrashed()
- * @mixin \Eloquent
- */
-	#[\AllowDynamicProperties]
-	class IdeHelperPromptType {}
 }
 
 namespace AidingApp\Audit\Models{
@@ -996,76 +760,6 @@ namespace AidingApp\Authorization\Models{
  */
 	#[\AllowDynamicProperties]
 	class IdeHelperRole {}
-}
-
-namespace AidingApp\Consent\Models{
-/**
- * AidingApp\Consent\Models\ConsentAgreement
- *
- * @property string $id
- * @property \AidingApp\Consent\Enums\ConsentAgreementType $type
- * @property string $title
- * @property string $description
- * @property string $body
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property string|null $deleted_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
- * @property-read int|null $audits_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Consent\Models\UserConsentAgreement> $userConsentAgreements
- * @property-read int|null $user_consent_agreements_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $users
- * @property-read int|null $users_count
- * @method static \AidingApp\Consent\Database\Factories\ConsentAgreementFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder|ConsentAgreement newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|ConsentAgreement newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|ConsentAgreement query()
- * @method static \Illuminate\Database\Eloquent\Builder|ConsentAgreement whereBody($value)
- * @method static \Illuminate\Database\Eloquent\Builder|ConsentAgreement whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|ConsentAgreement whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|ConsentAgreement whereDescription($value)
- * @method static \Illuminate\Database\Eloquent\Builder|ConsentAgreement whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|ConsentAgreement whereTitle($value)
- * @method static \Illuminate\Database\Eloquent\Builder|ConsentAgreement whereType($value)
- * @method static \Illuminate\Database\Eloquent\Builder|ConsentAgreement whereUpdatedAt($value)
- * @mixin \Eloquent
- */
-	#[\AllowDynamicProperties]
-	class IdeHelperConsentAgreement {}
-}
-
-namespace AidingApp\Consent\Models{
-/**
- * AidingApp\Consent\Models\UserConsentAgreement
- *
- * @property string $id
- * @property string $user_id
- * @property string $consent_agreement_id
- * @property string $ip_address
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
- * @property-read int|null $audits_count
- * @property-read \AidingApp\Consent\Models\ConsentAgreement $consentAgreement
- * @property-read \App\Models\User $user
- * @method static \Illuminate\Database\Eloquent\Builder|UserConsentAgreement newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|UserConsentAgreement newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|UserConsentAgreement onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|UserConsentAgreement query()
- * @method static \Illuminate\Database\Eloquent\Builder|UserConsentAgreement whereConsentAgreementId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|UserConsentAgreement whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|UserConsentAgreement whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|UserConsentAgreement whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|UserConsentAgreement whereIpAddress($value)
- * @method static \Illuminate\Database\Eloquent\Builder|UserConsentAgreement whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|UserConsentAgreement whereUserId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|UserConsentAgreement withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|UserConsentAgreement withoutTrashed()
- * @mixin \Eloquent
- */
-	#[\AllowDynamicProperties]
-	class IdeHelperUserConsentAgreement {}
 }
 
 namespace AidingApp\Contact\Models{
