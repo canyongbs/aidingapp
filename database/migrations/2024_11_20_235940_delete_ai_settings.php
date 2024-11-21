@@ -37,7 +37,7 @@
 use Spatie\LaravelSettings\Migrations\SettingsMigration;
 
 return new class () extends SettingsMigration {
-    public function down(): void
+    public function up(): void
     {
         $this->migrator->deleteIfExists('ai.prompt_system_context');
 
@@ -46,7 +46,7 @@ return new class () extends SettingsMigration {
         $this->migrator->deleteIfExists('ai.temperature');
     }
 
-    public function up(): void
+    public function down(): void
     {
         $this->migrator->add(
             'ai.prompt_system_context',

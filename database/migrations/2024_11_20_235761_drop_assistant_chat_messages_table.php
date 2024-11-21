@@ -7,7 +7,7 @@ use Illuminate\Database\Migrations\Migration;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::dropIfExists('assistant_chat_folders');
+        Schema::dropIfExists('assistant_chat_messages');
     }
 
     public function down(): void
