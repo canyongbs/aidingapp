@@ -32,10 +32,10 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { onMounted, ref, watch } from 'vue';
     import { createMessage } from '@formkit/core';
-    import { consumer } from '../../../../../portals/knowledge-management/src/Services/Consumer.js';
     import axios from 'axios';
+    import { onMounted, ref } from 'vue';
+    import { consumer } from '../../../../../portals/knowledge-management/src/Services/Consumer.js';
 
     const props = defineProps({
         context: Object,

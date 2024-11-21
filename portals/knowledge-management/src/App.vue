@@ -33,17 +33,17 @@
 -->
 <script setup>
     import { defineProps, onMounted, ref, watch } from 'vue';
+    import { useRoute } from 'vue-router';
     import AppLoading from './Components/AppLoading.vue';
-    import Header from './Components/Header.vue';
     import Footer from './Components/Footer.vue';
+    import Header from './Components/Header.vue';
+    import axios from './Globals/Axios.js';
+    import { consumer } from './Services/Consumer.js';
     import determineIfUserIsAuthenticated from './Services/DetermineIfUserIsAuthenticated.js';
     import getAppContext from './Services/GetAppContext.js';
-    import axios from './Globals/Axios.js';
-    import { useTokenStore } from './Stores/token.js';
     import { useAuthStore } from './Stores/auth.js';
-    import { useRoute } from 'vue-router';
     import { useFeatureStore } from './Stores/feature.js';
-    import { consumer } from './Services/Consumer.js';
+    import { useTokenStore } from './Stores/token.js';
 
     const props = defineProps({
         url: {

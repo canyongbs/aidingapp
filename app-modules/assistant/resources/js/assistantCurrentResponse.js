@@ -31,9 +31,9 @@
 
 </COPYRIGHT>
 */
-import showdown from 'showdown';
-import DOMPurify from 'dompurify';
 import Clipboard from '@ryangjchandler/alpine-clipboard';
+import DOMPurify from 'dompurify';
+import showdown from 'showdown';
 
 document.addEventListener('alpine:init', () => {
     Alpine.plugin(Clipboard);

@@ -32,14 +32,13 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { defineProps, ref, watch, onMounted, reactive } from 'vue';
+    import { defineProps, onMounted, reactive, ref, watch } from 'vue';
     import { useRoute } from 'vue-router';
-    import Breadcrumbs from '../Components/Breadcrumbs.vue';
-    import { Bars3Icon } from '@heroicons/vue/24/outline/index.js';
-    import { useAuthStore } from '../Stores/auth.js';
     import wizard from '../../../../widgets/service-request-form/src/FormKit/wizard.js';
-    import { consumer } from '../Services/Consumer.js';
     import AppLoading from '../Components/AppLoading.vue';
+    import Breadcrumbs from '../Components/Breadcrumbs.vue';
+    import { consumer } from '../Services/Consumer.js';
+    import { useAuthStore } from '../Stores/auth.js';
 
     let { steps, visitedSteps, activeStep, setStep, wizardPlugin } = wizard();
 

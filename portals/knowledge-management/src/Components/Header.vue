@@ -33,12 +33,12 @@
 -->
 <script setup>
     import { defineProps } from 'vue';
+    import { useRoute } from 'vue-router';
     import { consumer } from '../Services/Consumer.js';
     import { useAuthStore } from '../Stores/auth.js';
     import { useFeatureStore } from '../Stores/feature.js';
     import { useTokenStore } from '../Stores/token.js';
     import GlobalSearchBar from './GlobalSearchBar.vue';
-    import { useRoute } from 'vue-router';
 
     const { user, requiresAuthentication } = useAuthStore();
     const { hasServiceManagement } = useFeatureStore();

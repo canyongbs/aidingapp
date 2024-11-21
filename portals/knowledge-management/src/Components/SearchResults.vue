@@ -32,13 +32,12 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { defineProps } from 'vue';
-    import SearchLoading from './SearchLoading.vue';
     import { ChevronRightIcon, XMarkIcon } from '@heroicons/vue/20/solid';
-    import Tags from './Tags.vue';
+    import { defineProps } from 'vue';
     import Article from './Article.vue';
     import FilterComponent from './FilterComponent.vue';
     import Pagination from './Pagination.vue';
+    import SearchLoading from './SearchLoading.vue';
 
     const emit = defineEmits(['fetchNextPage', 'fetchPreviousPage', 'fetchPage', 'change-filter']);
 
