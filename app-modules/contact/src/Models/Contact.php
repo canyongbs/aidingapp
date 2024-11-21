@@ -73,6 +73,8 @@ use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Notification\Models\Contracts\NotifiableInterface;
 use AidingApp\Engagement\Models\Concerns\HasManyMorphedEngagements;
 use AidingApp\Engagement\Models\Concerns\HasManyMorphedEngagementResponses;
+use AidingApp\ServiceManagement\Models\ProductLicense;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property string $display_name
@@ -267,5 +269,9 @@ class Contact extends BaseAuthenticatable implements Auditable, Subscribable, Ed
         return Attribute::make(
             get: fn (?string $value, array $attributes) => $attributes[$this->displayNameKey()],
         );
+    }
+    public function product_licenses(): HasMany
+    {
+        return $this->hasMany(ProductLicense::class, 'assigned_to');
     }
 }
