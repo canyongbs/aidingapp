@@ -1,8 +1,5 @@
 #TODO: This can be basically any model that supports auditing
-union Auditable =
-    | Contact
-    | User
-    | SystemUser
+union Auditable = Contact | User | SystemUser
 
 input AuditableablesQuery {
     contact: ContactsQuery
