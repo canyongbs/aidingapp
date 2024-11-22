@@ -2,12 +2,9 @@
 
 namespace AidingApp\ServiceManagement\Policies;
 
-use App\Enums\Feature;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
-use Illuminate\Support\Facades\Gate;
 use AidingApp\Contact\Models\Contact;
-use App\Support\FeatureAccessResponse;
 use AidingApp\ServiceManagement\Models\Contract;
 
 class ContractPolicy
@@ -17,7 +14,7 @@ class ContractPolicy
         if (! $authenticatable->hasAnyLicense([Contact::getLicenseType()])) {
             return Response::deny('You are not licensed for the Recruitment CRM.');
         }
-        
+
         return null;
     }
 
@@ -75,10 +72,5 @@ class ContractPolicy
             abilities: ["contract.{$contract->getKey()}.force-delete"],
             denyResponse: 'You do not have permission to permanently delete this contract.'
         );
-    }
-
-    protected function requiredFeatures(): array
-    {
-        return [Feature::ServiceManagement];
     }
 }

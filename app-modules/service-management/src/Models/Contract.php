@@ -33,6 +33,7 @@ class Contract extends Model implements HasMedia, Auditable
         'start_date',
         'end_date',
         'contract_value',
+        'contract_type_id'
     ];
 
     protected $casts = [

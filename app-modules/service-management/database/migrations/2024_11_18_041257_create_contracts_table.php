@@ -11,7 +11,7 @@ return new class () extends Migration {
             $table->uuid('id')->primary();
             $table->string('name');
             $table->text('description')->nullable();
-            $table->foreignUuid('contract_type_id')->nullable()->constrained('contract_types');
+            $table->foreignUuid('contract_type_id')->constrained('contract_types');
             $table->string('vendor_name');
             $table->date('start_date');
             $table->date('end_date');

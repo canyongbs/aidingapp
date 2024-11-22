@@ -20,6 +20,7 @@ class EditContractType extends EditRecord
         return $form
             ->schema([
                 TextInput::make('name')
+                    ->string()
                     ->required(),
                 Toggle::make('is_default')
                     ->label('Default')
@@ -48,16 +49,9 @@ class EditContractType extends EditRecord
             ]);
     }
 
-    protected function getHeaderActions(): array
-    {
-        return [
-            DeleteAction::make(),
-        ];
-    }
-
-     /**
-     * @return array<int|string, string|null>
-     */
+    /**
+    * @return array<int|string, string|null>
+    */
     public function getBreadcrumbs(): array
     {
         $resource = static::getResource();
@@ -76,6 +70,13 @@ class EditContractType extends EditRecord
         }
 
         return $breadcrumbs;
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            DeleteAction::make(),
+        ];
     }
 
     protected function beforeSave(): void

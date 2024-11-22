@@ -10,6 +10,8 @@ use AidingApp\ServiceManagement\Models\ContractType;
  */
 class ContractTypeFactory extends Factory
 {
+    private int $maxOrder;
+
     /**
      * Define the model's default state.
      *
@@ -20,7 +22,7 @@ class ContractTypeFactory extends Factory
         return [
             'name' => fake()->word(),
             'is_default' => false,
-            'order' => null,
+            'order' => $this->getNewOrder(),
         ];
     }
 
@@ -33,11 +35,13 @@ class ContractTypeFactory extends Factory
         });
     }
 
-    public function configure()
+    public function getNewOrder(): int
     {
-        return $this->afterCreating(function ($model) {
-            $maxOrder = static::newModel()->max('order') ?? 0;
-            $model->update(['order' => $maxOrder + 1]);
-        });
+        return $this->maxOrder = $this->getMaxOrder() + 1;
+    }
+
+    public function getMaxOrder(): int
+    {
+        return $this->maxOrder ??= ContractType::max('order') ?? 0;
     }
 }

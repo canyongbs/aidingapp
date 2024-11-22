@@ -14,11 +14,14 @@ class CreateContractType extends CreateRecord
 {
     protected static string $resource = ContractTypeResource::class;
 
+    protected ?bool $hasDatabaseTransactions = true;
+
     public function form(Form $form): Form
     {
         return $form
             ->schema([
                 TextInput::make('name')
+                    ->string()
                     ->required(),
                 Toggle::make('is_default')
                     ->label('Default')
@@ -49,7 +52,9 @@ class CreateContractType extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        $data['order'] = $data['order'] = DB::table('contract_types')->max('order') + 1;
+        $data['order'] = DB::table('contract_types')
+                        ->selectRaw('COALESCE((SELECT MAX("order") FROM contract_types), 0) + 1')
+                        ->value(DB::raw('max_order')) ?? 1;
 
         if ($data['is_default']) {
             ContractType::query()
