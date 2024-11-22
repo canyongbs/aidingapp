@@ -65,7 +65,7 @@ class EditProduct extends EditRecord
                     ->label('Description')
                     ->string(),
                 TextInput::make('version')
-                    ->label('version')
+                    ->label('Version')
                     ->maxLength(255),
                 Textarea::make('additional_notes')
                     ->label('Additional Notes')

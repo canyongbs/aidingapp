@@ -40,6 +40,8 @@ use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
+use Filament\Infolists\Infolist;
+use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Textarea;
@@ -50,10 +52,13 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Actions\CreateAction;
 use Filament\Tables\Actions\DeleteAction;
+use Filament\Infolists\Components\Section;
 use App\Filament\Tables\Columns\MaskColumn;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Resources\Pages\ManageRelatedRecords;
+use App\Filament\Infolists\Components\MaskTextEntry;
 use AidingApp\ServiceManagement\Filament\Resources\ProductResource;
 
 class ManageProductLicenses extends ManageRelatedRecords
@@ -76,9 +81,6 @@ class ManageProductLicenses extends ManageRelatedRecords
                     ->label('License')
                     ->string()
                     ->required(),
-                Textarea::make('description')
-                    ->label('Description')
-                    ->string(),
                 Select::make('assigned_to')
                     ->relationship(
                         name: 'contact',
@@ -88,6 +90,10 @@ class ManageProductLicenses extends ManageRelatedRecords
                     ->native(false)
                     ->preload()
                     ->searchable(),
+                Textarea::make('description')
+                    ->label('Description')
+                    ->string()
+                    ->columnSpanFull(),
                 DatePicker::make('start_date')
                     ->label('Start Date')
                     ->displayFormat('d-m-Y')
@@ -98,19 +104,26 @@ class ManageProductLicenses extends ManageRelatedRecords
                     ->afterStateUpdated(
                         fn (Get $get, Set $set) => $get('start_date') > $get('expiration_date') ? $set('expiration_date', '') : ''
                     ),
-                Checkbox::make('license_does_not_expire')
-                    ->label('License Does Not Expire')
-                    ->live(),
-                DatePicker::make('expiration_date')
-                    ->label('Expiration Date')
-                    ->displayFormat('d-m-Y')
-                    ->closeOnDateSelection()
-                    ->required(fn (Get $get) => ! $get('license_does_not_expire'))
-                    ->disabled(fn (Get $get) => $get('license_does_not_expire'))
-                    ->minDate(fn (Get $get) => $get('start_date'))
-                    ->after('start_date')
-                    ->live(onBlur: true)
-                    ->native(false),
+                Group::make([
+                    Checkbox::make('license_does_not_expire')
+                        ->label('License Does Not Expire')
+                        ->live()
+                        ->afterStateHydrated(function (Set $set, $state, $record) {
+                            if ($record && is_null($record->expiration_date)) {
+                                $set('license_does_not_expire', true);
+                            }
+                        }),
+                    DatePicker::make('expiration_date')
+                        ->label('Expiration Date')
+                        ->displayFormat('d-m-Y')
+                        ->closeOnDateSelection()
+                        ->required(fn (Get $get) => ! $get('license_does_not_expire'))
+                        ->disabled(fn (Get $get) => $get('license_does_not_expire'))
+                        ->minDate(fn (Get $get) => $get('start_date'))
+                        ->after('start_date')
+                        ->live(onBlur: true)
+                        ->native(false),
+                ]),
             ]);
     }
 
@@ -146,6 +159,31 @@ class ManageProductLicenses extends ManageRelatedRecords
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
+            ]);
+    }
+
+    public function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                Section::make()
+                    ->columns()
+                    ->schema([
+                        MaskTextEntry::make('license')
+                            ->label('License'),
+                        TextEntry::make('contact.full_name')
+                            ->label('Assigned To'),
+                        TextEntry::make('description')
+                            ->label('Description')
+                            ->columnSpanFull(),
+                        TextEntry::make('start_date')
+                            ->label('Start Date')
+                            ->date('d-m-Y'),
+                        TextEntry::make('expiration_date')
+                            ->label('Expiration Date')
+                            ->date('d-m-Y')
+                            ->placeholder('License Does Not Expire'),
+                    ]),
             ]);
     }
 }

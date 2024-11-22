@@ -1,6 +1,4 @@
-<?php
-
-/*
+{{--
 <COPYRIGHT>
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
@@ -32,42 +30,25 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
-
-namespace AidingApp\ServiceManagement\Filament\Resources\ProductResource\Pages;
-
-use Filament\Forms\Form;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
-use Filament\Resources\Pages\CreateRecord;
-use AidingApp\ServiceManagement\Filament\Resources\ProductResource;
-
-class CreateProduct extends CreateRecord
-{
-    protected static string $resource = ProductResource::class;
-
-    public function form(Form $form): Form
-    {
-        return $form
-            ->schema([
-                TextInput::make('name')
-                    ->label('Product Name')
-                    ->required()
-                    ->string()
-                    ->maxLength(255),
-                TextInput::make('url')
-                    ->label('Product Link')
-                    ->maxLength(255)
-                    ->url(),
-                Textarea::make('description')
-                    ->label('Description')
-                    ->string(),
-                TextInput::make('version')
-                    ->label('Version')
-                    ->maxLength(255),
-                Textarea::make('additional_notes')
-                    ->label('Additional Notes')
-                    ->string(),
-            ]);
-    }
-}
+--}}
+<div
+    class="flex items-center"
+    x-data="{ revealed: false }"
+>
+    <span
+        class="font-mono text-gray-700"
+        x-show="!revealed"
+    >**** **** **** ****</span>
+    <span
+        class="font-mono text-gray-700"
+        x-show="revealed"
+    >{{ $getState() }}</span>
+    <button
+        class="ml-2 text-blue-600 hover:underline"
+        type="button"
+        x-on:click="revealed = !revealed"
+    >
+        <span x-show="!revealed">Reveal</span>
+        <span x-show="revealed">Hide</span>
+    </button>
+</div>
