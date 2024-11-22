@@ -70,7 +70,7 @@ class ListServiceRequests extends ListRecords
     public function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn(Builder $query) => $query->with([
+            ->modifyQueryUsing(fn (Builder $query) => $query->with([
                 'latestInboundServiceRequestUpdate',
                 'latestOutboundServiceRequestUpdate',
                 'priority' => [
@@ -91,12 +91,12 @@ class ListServiceRequests extends ListRecords
                     ->label('Service Request #')
                     ->searchable(['service_request_number', 'title'])
                     ->sortable()
-                    ->description(fn(ServiceRequest $record): string => $record->title),
+                    ->description(fn (ServiceRequest $record): string => $record->title),
                 TextColumn::make('respondent.display_name')
                     ->label('Related To')
-                    ->getStateUsing(fn(ServiceRequest $record) => $record->respondent->{$record->respondent::displayNameKey()})
-                    ->searchable(query: fn(Builder $query, $search) => $query->tap(new EducatableSearch(relationship: 'respondent', search: $search)))
-                    ->sortable(query: fn(Builder $query, string $direction): Builder => $query->tap(new EducatableSort($direction)))
+                    ->getStateUsing(fn (ServiceRequest $record) => $record->respondent->{$record->respondent::displayNameKey()})
+                    ->searchable(query: fn (Builder $query, $search) => $query->tap(new EducatableSearch(relationship: 'respondent', search: $search)))
+                    ->sortable(query: fn (Builder $query, string $direction): Builder => $query->tap(new EducatableSort($direction)))
                     ->toggleable(),
                 TextColumn::make('division.name')
                     ->label('Division')
@@ -105,26 +105,26 @@ class ListServiceRequests extends ListRecords
                     ->toggleable(),
                 TextColumn::make('assignedTo.user.name')
                     ->label('Assigned To')
-                    ->badge(fn(ServiceRequest $record) => is_null($record->assignedTo))
+                    ->badge(fn (ServiceRequest $record) => is_null($record->assignedTo))
                     ->searchable()
                     ->sortable()
                     ->default('Unassigned')
                     ->toggleable(),
                 IconColumn::make('response_sla_compliance')
                     ->label('SLA Response')
-                    ->state(fn(ServiceRequest $record): ?SlaComplianceStatus => $record->getResponseSlaComplianceStatus())
-                    ->tooltip(fn(ServiceRequest $record): ?string => $record->getResponseSlaComplianceStatus()?->getLabel())
+                    ->state(fn (ServiceRequest $record): ?SlaComplianceStatus => $record->getResponseSlaComplianceStatus())
+                    ->tooltip(fn (ServiceRequest $record): ?string => $record->getResponseSlaComplianceStatus()?->getLabel())
                     ->toggleable(),
                 IconColumn::make('resolution_sla_compliance')
                     ->label('SLA Resolution')
-                    ->state(fn(ServiceRequest $record): ?SlaComplianceStatus => $record->getResolutionSlaComplianceStatus())
-                    ->tooltip(fn(ServiceRequest $record): ?string => $record->getResolutionSlaComplianceStatus()?->getLabel())
+                    ->state(fn (ServiceRequest $record): ?SlaComplianceStatus => $record->getResolutionSlaComplianceStatus())
+                    ->tooltip(fn (ServiceRequest $record): ?string => $record->getResolutionSlaComplianceStatus()?->getLabel())
                     ->toggleable(),
             ])
             ->filters([
                 SelectFilter::make('priority')
-                    ->relationship('priority', 'name', fn(Builder $query) => $query->with('type')->whereRelation('type', 'deleted_at'))
-                    ->getOptionLabelFromRecordUsing(fn(ServiceRequestPriority $record) => "{$record->type->name} - {$record->name}")
+                    ->relationship('priority', 'name', fn (Builder $query) => $query->with('type')->whereRelation('type', 'deleted_at'))
+                    ->getOptionLabelFromRecordUsing(fn (ServiceRequestPriority $record) => "{$record->type->name} - {$record->name}")
                     ->multiple()
                     ->preload(),
                 SelectFilter::make('status')
@@ -133,12 +133,12 @@ class ListServiceRequests extends ListRecords
                     ->preload(),
                 SelectFilter::make('organizations')
                     ->options(Organization::pluck('name', 'id')->toArray())
-                    ->modifyQueryUsing(fn(Builder $query, $state): Builder => $query->when(
+                    ->modifyQueryUsing(fn (Builder $query, $state): Builder => $query->when(
                         ! empty($state['value']),
-                        fn(Builder $query) => $query->whereHasMorph(
+                        fn (Builder $query) => $query->whereHasMorph(
                             'respondent',
                             [Contact::class],
-                            fn(Builder $query): Builder => $query->whereRelation(
+                            fn (Builder $query): Builder => $query->whereRelation(
                                 'organizations',
                                 (new Organization())->getKeyName(),
                                 $state['value']
@@ -148,7 +148,7 @@ class ListServiceRequests extends ListRecords
                     ->preload(),
                 Filter::make('Unassigned')
                     ->query(
-                        fn(Builder $query) => $query->whereDoesntHave('assignedTo', function (Builder $query) {
+                        fn (Builder $query) => $query->whereDoesntHave('assignedTo', function (Builder $query) {
                             $query->where('status', ServiceRequestAssignmentStatus::Active);
                         })
                     ),
@@ -156,7 +156,7 @@ class ListServiceRequests extends ListRecords
             ->actions([
                 ViewAction::make(),
                 EditAction::make()
-                    ->visible(fn(ServiceRequest $record) => $record->status?->classification === SystemServiceRequestClassification::Closed ? false : true),
+                    ->visible(fn (ServiceRequest $record) => $record->status?->classification === SystemServiceRequestClassification::Closed ? false : true),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
@@ -188,7 +188,7 @@ class ListServiceRequests extends ListRecords
     {
         return [
             CreateAction::make()
-                ->label('Add Service Request')
+                ->label('Add Service Request'),
         ];
     }
 }

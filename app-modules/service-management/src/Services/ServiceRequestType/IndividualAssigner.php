@@ -36,10 +36,10 @@
 
 namespace AidingApp\ServiceManagement\Services\ServiceRequestType;
 
+use App\Models\User;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\Notification\Events\TriggeredAutoSubscription;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
-use App\Models\User;
 
 class IndividualAssigner implements ServiceRequestTypeAssigner
 {

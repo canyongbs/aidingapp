@@ -36,18 +36,19 @@
 
 namespace AidingApp\ServiceManagement\Actions;
 
-use AidingApp\ServiceManagement\DataTransferObjects\ServiceRequestDataObject;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\DataTransferObjects\ServiceRequestDataObject;
 
 class CreateServiceRequestAction
 {
-  public function execute(ServiceRequestDataObject $serviceRequestDataObject)
-  {
-    $serviceRequest = new ServiceRequest($serviceRequestDataObject->toArray());
-    $assignmentClass = $serviceRequest->priority->type?->assignment_type?->getAssignerClass();
-    dd($assignmentClass);
-    if ($assignmentClass) {
-      $assignmentClass->execute();
+    public function execute(ServiceRequestDataObject $serviceRequestDataObject)
+    {
+        $serviceRequest = new ServiceRequest($serviceRequestDataObject->toArray());
+        $assignmentClass = $serviceRequest->priority->type?->assignment_type?->getAssignerClass();
+        dd($assignmentClass);
+
+        if ($assignmentClass) {
+            $assignmentClass->execute();
+        }
     }
-  }
 }

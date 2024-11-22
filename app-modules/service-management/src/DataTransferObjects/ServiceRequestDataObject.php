@@ -36,41 +36,40 @@
 
 namespace AidingApp\ServiceManagement\DataTransferObjects;
 
-use Spatie\LaravelData\Attributes\Validation\Nullable;
 use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Attributes\Validation\Nullable;
 
 class ServiceRequestDataObject extends Data
 {
+    public function __construct(
+        public ?string $division_id,
+        public ?string $status_id,
+        public ?string $type_id,
+        public ?string $priority_id,
+        public ?string $title,
+        public string|Nullable $close_details,
+        public string|Nullable $res_details,
+        public ?string $respondent_type,
+        public ?string $respondent_id,
+    ) {}
 
-  public function __construct(
-    public ?string $division_id,
-    public ?string $status_id,
-    public ?string $type_id,
-    public ?string $priority_id,
-    public ?string $title,
-    public string|Nullable $close_details,
-    public string|Nullable $res_details,
-    public ?string $respondent_type,
-    public ?string $respondent_id,
-  ) {}
-
-  /**
-   * Convert the DTO to an array.
-   *
-   * @return array
-   */
-  public function toArray(): array
-  {
-    return [
-      'division_id' => $this->division_id,
-      'status_id' => $this->status_id,
-      'type_id' => $this->type_id,
-      'priority_id' => $this->priority_id,
-      'title' => $this->title,
-      'close_details' => $this->close_details,
-      'res_details' => $this->res_details,
-      'respondent_type' => $this->respondent_type,
-      'respondent_id' => $this->respondent_id,
-    ];
-  }
+    /**
+     * Convert the DTO to an array.
+     *
+     * @return array
+     */
+    public function toArray(): array
+    {
+        return [
+            'division_id' => $this->division_id,
+            'status_id' => $this->status_id,
+            'type_id' => $this->type_id,
+            'priority_id' => $this->priority_id,
+            'title' => $this->title,
+            'close_details' => $this->close_details,
+            'res_details' => $this->res_details,
+            'respondent_type' => $this->respondent_type,
+            'respondent_id' => $this->respondent_id,
+        ];
+    }
 }

@@ -36,34 +36,35 @@
 
 namespace AidingApp\ServiceManagement\Enums;
 
+use Filament\Support\Contracts\HasLabel;
 use AidingApp\ServiceManagement\Services\ServiceRequestType\IndividualAssigner;
 use AidingApp\ServiceManagement\Services\ServiceRequestType\RoundRobinAssigner;
 use AidingApp\ServiceManagement\Services\ServiceRequestType\ServiceRequestTypeAssigner;
-use Filament\Support\Contracts\HasLabel;
 
 // TODO This might belong in a more generalized space so we can re-use this across modules
 enum ServiceRequestTypeAssignmentTypes: string implements HasLabel
 {
-  case None = 'none';
+    case None = 'none';
 
-  case Individual = 'individual';
+    case Individual = 'individual';
 
-  case RoundRobin = 'round-robin';
+    case RoundRobin = 'round-robin';
 
-  case Workload = 'workload';
+    case Workload = 'workload';
 
-  public function getLabel(): string
-  {
-    return str()->headline($this->name);
-  }
+    public function getLabel(): string
+    {
+        return str()->headline($this->name);
+    }
 
-  public function getAssignerClass(): ServiceRequestTypeAssigner
-  {
-    dd($this);
-    return match ($this) {
-      self::Individual => app(IndividualAssigner::class),
-      self::RoundRobin => app(RoundRobinAssigner::class),
-      default => null
-    };
-  }
+    public function getAssignerClass(): ServiceRequestTypeAssigner
+    {
+        dd($this);
+
+        return match ($this) {
+            self::Individual => app(IndividualAssigner::class),
+            self::RoundRobin => app(RoundRobinAssigner::class),
+            default => null
+        };
+    }
 }

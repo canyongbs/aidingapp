@@ -36,39 +36,36 @@
 
 namespace AidingApp\ServiceManagement\Services\ServiceRequestType;
 
+use App\Models\User;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\Notification\Events\TriggeredAutoSubscription;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
-use App\Models\User;
 
 class RoundRobinAssigner implements ServiceRequestTypeAssigner
 {
-  public function execute(ServiceRequest $serviceRequest): void
-  {
-    dd($serviceRequest);
-    if ($serviceRequest?->priority->type) {
-      $assignmentType = $serviceRequest?->priority->type;
+    public function execute(ServiceRequest $serviceRequest): void
+    {
+        dd($serviceRequest);
+
+        if ($serviceRequest?->priority->type) {
+            $assignmentType = $serviceRequest?->priority->type;
+        }
+
+        $user = auth()->user();
+
+        if ($user instanceof User) {
+            TriggeredAutoSubscription::dispatch($user, $serviceRequest);
+
+            $manager = $serviceRequest?->priority->type?->assignmentTypeIndividual;
+
+            if ($manager) {
+                $serviceRequest->assignments()->create([
+                    'user_id' => $manager->getKey(),
+                    'assigned_by_id' => $user->getKey(),
+                    'assigned_at' => now(),
+                    'status' => ServiceRequestAssignmentStatus::Active,
+                ]);
+            }
+        }
     }
-
-
-
-
-
-    $user = auth()->user();
-
-    if ($user instanceof User) {
-      TriggeredAutoSubscription::dispatch($user, $serviceRequest);
-
-      $manager = $serviceRequest?->priority->type?->assignmentTypeIndividual;
-
-      if ($manager) {
-        $serviceRequest->assignments()->create([
-          'user_id' => $manager->getKey(),
-          'assigned_by_id' => $user->getKey(),
-          'assigned_at' => now(),
-          'status' => ServiceRequestAssignmentStatus::Active,
-        ]);
-      }
-    }
-  }
 }
