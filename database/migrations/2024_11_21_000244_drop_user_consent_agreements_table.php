@@ -1,4 +1,6 @@
-{{--
+<?php
+
+/*
 <COPYRIGHT>
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
@@ -30,12 +32,29 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
---}}
-@php
-    use AidingApp\Authorization\Enums\LicenseType;
-@endphp
+*/
 
-<x-filament-widgets::widget>
-    <div class="grid gap-6 md:grid-cols-3">
-    </div>
-</x-filament-widgets::widget>
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
+
+return new class () extends Migration {
+    public function up(): void
+    {
+        Schema::dropIfExists('user_consent_agreements');
+    }
+
+    public function down(): void
+    {
+        Schema::create('user_consent_agreements', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+
+            $table->foreignUuid('user_id')->constrained('users');
+            $table->foreignUuid('consent_agreement_id')->constrained('consent_agreements');
+            $table->longText('ip_address');
+
+            $table->timestamps();
+            $table->softDeletes();
+        });
+    }
+};

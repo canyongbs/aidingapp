@@ -1,4 +1,6 @@
-{{--
+<?php
+
+/*
 <COPYRIGHT>
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
@@ -30,12 +32,30 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
---}}
-@php
-    use AidingApp\Authorization\Enums\LicenseType;
-@endphp
+*/
 
-<x-filament-widgets::widget>
-    <div class="grid gap-6 md:grid-cols-3">
-    </div>
-</x-filament-widgets::widget>
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
+
+return new class () extends Migration {
+    public function up(): void
+    {
+        Schema::dropIfExists('assistant_chats');
+    }
+
+    public function down(): void
+    {
+        Schema::create('assistant_chats', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+
+            $table->string('name');
+
+            $table->foreignUuid('user_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignUuid('assistant_chat_folder_id')->nullable()->constrained('assistant_chat_folders')->cascadeOnDelete();
+
+            $table->timestamps();
+            $table->softDeletes();
+        });
+    }
+};

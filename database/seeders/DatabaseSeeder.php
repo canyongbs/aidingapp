@@ -42,12 +42,9 @@ use AidingApp\Task\Database\Seeders\TaskSeeder;
 use AidingApp\Team\Database\Seeders\TeamSeeder;
 use AidingApp\Alert\Database\Seeders\AlertSeeder;
 use AidingApp\Contact\Database\Seeders\ContactSeeder;
-use AidingApp\Assistant\Database\Seeders\PromptSeeder;
 use AidingApp\Division\Database\Seeders\DivisionSeeder;
-use AidingApp\Assistant\Database\Seeders\PromptTypeSeeder;
 use AidingApp\Contact\Database\Seeders\ContactSourceSeeder;
 use AidingApp\Contact\Database\Seeders\ContactStatusSeeder;
-use AidingApp\Consent\Database\Seeders\ConsentAgreementSeeder;
 use AidingApp\Contact\Database\Seeders\OrganizationTypeSeeder;
 use AidingApp\InventoryManagement\Database\Seeders\AssetSeeder;
 use AidingApp\Contact\Database\Seeders\OrganizationIndustrySeeder;
@@ -81,7 +78,6 @@ class DatabaseSeeder extends Seeder
             KnowledgeBaseCategorySeeder::class,
             KnowledgeBaseQualitySeeder::class,
             KnowledgeBaseStatusSeeder::class,
-            ConsentAgreementSeeder::class,
             PronounsSeeder::class,
 
             ServiceRequestSeeder::class,
@@ -102,9 +98,6 @@ class DatabaseSeeder extends Seeder
             // Change Request
             ChangeRequestTypeSeeder::class,
             ChangeRequestStatusSeeder::class,
-
-            PromptTypeSeeder::class,
-            PromptSeeder::class,
 
             ContactSeeder::class,
             OrganizationTypeSeeder::class,

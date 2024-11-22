@@ -1,4 +1,6 @@
-{{--
+<?php
+
+/*
 <COPYRIGHT>
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
@@ -30,12 +32,18 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
---}}
-@php
-    use AidingApp\Authorization\Enums\LicenseType;
-@endphp
+*/
 
-<x-filament-widgets::widget>
-    <div class="grid gap-6 md:grid-cols-3">
-    </div>
-</x-filament-widgets::widget>
+use Spatie\LaravelSettings\Migrations\SettingsMigration;
+
+return new class () extends SettingsMigration {
+    public function up(): void
+    {
+        $this->migrator->deleteIfExists('audit.assistant_chat_message_logs_retention_duration_in_days');
+    }
+
+    public function down(): void
+    {
+        $this->migrator->add('audit.assistant_chat_message_logs_retention_duration_in_days', 30);
+    }
+};

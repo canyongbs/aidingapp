@@ -54,13 +54,10 @@ use Lab404\Impersonate\Models\Impersonate;
 use AidingApp\Authorization\Models\License;
 use Filament\Models\Contracts\FilamentUser;
 use Spatie\MediaLibrary\InteractsWithMedia;
-use AidingApp\Assistant\Models\AssistantChat;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Notification\Models\Subscription;
 use Staudenmeir\EloquentHasManyDeep\HasManyDeep;
-use AidingApp\Consent\Models\Concerns\CanConsent;
-use AidingApp\Assistant\Models\AssistantChatFolder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use AidingApp\ServiceManagement\Models\ChangeRequest;
@@ -68,7 +65,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Staudenmeir\EloquentHasManyDeep\HasRelationships;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
-use AidingApp\Assistant\Models\AssistantChatMessageLog;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use AidingApp\ServiceManagement\Models\ChangeRequestType;
 use Illuminate\Contracts\Translation\HasLocalePreference;
@@ -83,13 +79,12 @@ use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Notification\Models\Contracts\NotifiableInterface;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use AidingApp\Engagement\Models\Concerns\HasManyEngagementBatches;
-use AidingApp\IntegrationAI\Models\Concerns\ProvidesDynamicContext;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 
 /**
  * @mixin IdeHelperUser
  */
-class User extends Authenticatable implements HasLocalePreference, FilamentUser, Auditable, HasMedia, HasAvatar, NotifiableInterface, HasFilamentResource, ProvidesDynamicContext
+class User extends Authenticatable implements HasLocalePreference, FilamentUser, Auditable, HasMedia, HasAvatar, NotifiableInterface, HasFilamentResource
 {
     use HasFactory;
     use HasAdvancedFilter;
@@ -100,7 +95,6 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
     use AuditableTrait;
     use HasManyEngagements;
     use HasManyEngagementBatches;
-    use CanConsent;
     use Impersonate;
     use InteractsWithMedia;
 
@@ -114,7 +108,6 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
         'is_bio_visible_on_profile' => 'boolean',
         'are_pronouns_visible_on_profile' => 'boolean',
         'are_teams_visible_on_profile' => 'boolean',
-        'default_assistant_chat_folders_created' => 'boolean',
         'is_division_visible_on_profile' => 'boolean',
         'email_verified_at' => 'datetime',
         'has_enabled_public_profile' => 'boolean',
@@ -141,7 +134,6 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
         'bio',
         'is_bio_visible_on_profile',
         'are_pronouns_visible_on_profile',
-        'default_assistant_chat_folders_created',
         'avatar_url',
         'are_teams_visible_on_profile',
         'timezone',
@@ -180,11 +172,6 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
         'roles.title',
         'locale',
     ];
-
-    public function defaultAssistantChatFoldersHaveBeenCreated(): bool
-    {
-        return $this->default_assistant_chat_folders_created;
-    }
 
     public function conversations(): BelongsToMany
     {
@@ -288,16 +275,6 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
         return $this->locale;
     }
 
-    public function assistantChats(): HasMany
-    {
-        return $this->hasMany(AssistantChat::class);
-    }
-
-    public function assistantChatFolders(): HasMany
-    {
-        return $this->hasMany(AssistantChatFolder::class);
-    }
-
     public function teams(): BelongsToMany
     {
         return $this
@@ -310,11 +287,6 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
     public function serviceRequestTypeIndividualAssignment(): HasMany
     {
         return $this->hasMany(ServiceRequestType::class, 'assignment_type_individual_id', 'id');
-    }
-
-    public function assistantChatMessageLogs(): HasMany
-    {
-        return $this->hasMany(AssistantChatMessageLog::class);
     }
 
     public function canAccessPanel(Panel $panel): bool

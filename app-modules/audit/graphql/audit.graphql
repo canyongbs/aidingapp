@@ -1,17 +1,10 @@
 #TODO: This can be basically any model that supports auditing
-union Auditable =
-    | Contact
-    | User
-    | SystemUser
-    | ConsentAgreement
-    | UserConsentAgreement
+union Auditable = Contact | User | SystemUser
 
 input AuditableablesQuery {
     contact: ContactsQuery
     user: UsersQuery
     system_user: SystemUsersQuery
-    consent_agreement: ConsentAgreementsQuery
-    user_consent_agreement: UserConsentAgreementsQuery
 }
 
 type Audit @model(class: "AidingApp\\Audit\\Models\\Audit") {
