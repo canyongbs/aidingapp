@@ -34,10 +34,10 @@
 <script setup>
     import { defineProps, ref, watch } from 'vue';
     import { useRoute } from 'vue-router';
-    import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import AppLoading from '../Components/AppLoading.vue';
-    import { consumer } from '../Services/Consumer.js';
     import Badge from '../Components/Badge.vue';
+    import Breadcrumbs from '../Components/Breadcrumbs.vue';
+    import { consumer } from '../Services/Consumer.js';
 
     const route = useRoute();
 

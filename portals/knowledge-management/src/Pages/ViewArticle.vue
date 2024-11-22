@@ -32,16 +32,16 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { defineProps, ref, watch, computed } from 'vue';
-    import { useRoute, useRouter } from 'vue-router';
-    import Breadcrumbs from '../Components/Breadcrumbs.vue';
-    import AppLoading from '../Components/AppLoading.vue';
-    import { consumer } from '../Services/Consumer.js';
-    import { ClockIcon, EyeIcon, HandThumbUpIcon, HandThumbDownIcon } from '@heroicons/vue/24/outline/index.js';
-    import DOMPurify from 'dompurify';
-    import Tags from '../Components/Tags.vue';
     import { XMarkIcon } from '@heroicons/vue/20/solid/index.js';
+    import { ClockIcon, EyeIcon, HandThumbDownIcon, HandThumbUpIcon } from '@heroicons/vue/24/outline/index.js';
+    import DOMPurify from 'dompurify';
     import truncate from 'lodash/truncate';
+    import { computed, defineProps, ref, watch } from 'vue';
+    import { useRoute, useRouter } from 'vue-router';
+    import AppLoading from '../Components/AppLoading.vue';
+    import Breadcrumbs from '../Components/Breadcrumbs.vue';
+    import Tags from '../Components/Tags.vue';
+    import { consumer } from '../Services/Consumer.js';
 
     const route = useRoute();
     const router = useRouter();

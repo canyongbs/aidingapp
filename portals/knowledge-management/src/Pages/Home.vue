@@ -32,15 +32,15 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { Bars3Icon, MagnifyingGlassIcon } from '@heroicons/vue/24/outline';
+    import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline';
+    import { defineProps, onMounted, ref, watch } from 'vue';
+    import { useRoute } from 'vue-router';
+    import Badge from '../Components/Badge.vue';
     import HelpCenter from '../Components/HelpCenter.vue';
     import SearchResults from '../Components/SearchResults.vue';
-    import { defineProps, ref, watch, onMounted } from 'vue';
     import { consumer } from '../Services/Consumer.js';
     import { useAuthStore } from '../Stores/auth.js';
     import { useFeatureStore } from '../Stores/feature.js';
-    import Badge from '../Components/Badge.vue';
-    import { useRoute } from 'vue-router';
     import { globalSearchQuery } from '../Stores/globalState.js';
 
     const props = defineProps({

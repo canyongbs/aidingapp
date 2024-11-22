@@ -31,8 +31,8 @@
 
 </COPYRIGHT>
 */
-import { reactive, toRef, ref, watch } from 'vue';
-import { getNode, createMessage } from '@formkit/core';
+import { createMessage, getNode } from '@formkit/core';
+import { reactive, ref, toRef, watch } from 'vue';
 
 export default function wizard() {
     const activeStep = ref('');

@@ -32,18 +32,18 @@
 </COPYRIGHT>
 -->
 <script setup>
+    import { XMarkIcon } from '@heroicons/vue/20/solid/index.js';
     import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline';
     import { defineProps, ref, watch } from 'vue';
     import { useRoute, useRouter } from 'vue-router';
-    import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import AppLoading from '../Components/AppLoading.vue';
-    import { consumer } from '../Services/Consumer.js';
-    import { XMarkIcon } from '@heroicons/vue/20/solid/index.js';
     import Article from '../Components/Article.vue';
-    import SearchResults from '../Components/SearchResults.vue';
     import Badge from '../Components/Badge.vue';
+    import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import FilterComponent from '../Components/FilterComponent.vue';
     import Pagination from '../Components/Pagination.vue';
+    import SearchResults from '../Components/SearchResults.vue';
+    import { consumer } from '../Services/Consumer.js';
 
     const route = useRoute();
     const router = useRouter();

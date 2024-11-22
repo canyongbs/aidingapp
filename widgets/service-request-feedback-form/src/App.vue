@@ -32,15 +32,15 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { defineProps, ref, onMounted } from 'vue';
     import { FormKit } from '@formkit/vue';
-    import AppLoading from '../src/Components/AppLoading.vue';
-    import Footer from './Components/Footer.vue';
-    import getAppContext from '../../../portals/knowledge-management/src/Services/GetAppContext.js';
+    import { defineProps, onMounted, ref } from 'vue';
     import axios from '../../../portals/knowledge-management/src/Globals/Axios.js';
     import determineIfUserIsAuthenticated from '../../../portals/knowledge-management/src/Services/DetermineIfUserIsAuthenticated.js';
+    import getAppContext from '../../../portals/knowledge-management/src/Services/GetAppContext.js';
     import { useAuthStore } from '../../../portals/knowledge-management/src/Stores/auth.js';
     import { useTokenStore } from '../../../portals/knowledge-management/src/Stores/token.js';
+    import AppLoading from '../src/Components/AppLoading.vue';
+    import Footer from './Components/Footer.vue';
 
     const props = defineProps({
         url: {

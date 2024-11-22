@@ -31,8 +31,8 @@
 
 </COPYRIGHT>
 */
-import { ref } from 'vue';
 import { defineStore } from 'pinia';
+import { ref } from 'vue';
 
 export const useFeatureStore = defineStore('feature', () => {
     const hasServiceManagement = ref(false);

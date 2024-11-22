@@ -34,7 +34,7 @@
 
 <script setup>
     import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/vue/20/solid';
-    import { defineProps, computed } from 'vue';
+    import { computed, defineProps } from 'vue';
 
     const props = defineProps({
         currentPage: {
