@@ -34,36 +34,32 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Enums;
+namespace AidingApp\ServiceManagement\Services\ServiceRequestType;
 
-use AidingApp\ServiceManagement\Services\ServiceRequestType\IndividualAssigner;
-use AidingApp\ServiceManagement\Services\ServiceRequestType\RoundRobinAssigner;
-use AidingApp\ServiceManagement\Services\ServiceRequestType\ServiceRequestTypeAssigner;
-use Filament\Support\Contracts\HasLabel;
+use AidingApp\Notification\Events\TriggeredAutoSubscription;
+use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Models\User;
 
-// TODO This might belong in a more generalized space so we can re-use this across modules
-enum ServiceRequestTypeAssignmentTypes: string implements HasLabel
+class IndividualAssigner implements ServiceRequestTypeAssigner
 {
-  case None = 'none';
+    public function execute(ServiceRequest $serviceRequest): void
+    {
+        $user = auth()->user();
 
-  case Individual = 'individual';
+        if ($user instanceof User) {
+            TriggeredAutoSubscription::dispatch($user, $serviceRequest);
 
-  case RoundRobin = 'round-robin';
+            $manager = $serviceRequest?->priority->type?->assignmentTypeIndividual;
 
-  case Workload = 'workload';
-
-  public function getLabel(): string
-  {
-    return str()->headline($this->name);
-  }
-
-  public function getAssignerClass(): ServiceRequestTypeAssigner
-  {
-    dd($this);
-    return match ($this) {
-      self::Individual => app(IndividualAssigner::class),
-      self::RoundRobin => app(RoundRobinAssigner::class),
-      default => null
-    };
-  }
+            if ($manager) {
+                $serviceRequest->assignments()->create([
+                    'user_id' => $manager->getKey(),
+                    'assigned_by_id' => $user->getKey(),
+                    'assigned_at' => now(),
+                    'status' => ServiceRequestAssignmentStatus::Active,
+                ]);
+            }
+        }
+    }
 }

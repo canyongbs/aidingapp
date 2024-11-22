@@ -43,6 +43,7 @@ use Illuminate\Support\Collection;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
 use AidingApp\Division\Models\Division;
+use AidingApp\ServiceManagement\Actions\CreateServiceRequestAction;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Illuminate\Database\Eloquent\Builder;
@@ -55,6 +56,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Rules\ManagedServiceRequestType;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
+use AidingApp\ServiceManagement\DataTransferObjects\ServiceRequestDataObject;
 
 class CreateServiceRequest extends CreateRecord
 {
@@ -73,12 +75,12 @@ class CreateServiceRequest extends CreateRecord
                 Select::make('status_id')
                     ->relationship('status', 'name')
                     ->label('Status')
-                    ->options(fn () => ServiceRequestStatus::query()
+                    ->options(fn() => ServiceRequestStatus::query()
                         ->orderBy('classification')
                         ->orderBy('name')
                         ->get(['id', 'name', 'classification'])
-                        ->groupBy(fn (ServiceRequestStatus $status) => $status->classification->getlabel())
-                        ->map(fn (Collection $group) => $group->pluck('name', 'id')))
+                        ->groupBy(fn(ServiceRequestStatus $status) => $status->classification->getlabel())
+                        ->map(fn(Collection $group) => $group->pluck('name', 'id')))
                     ->required()
                     ->exists((new ServiceRequestStatus())->getTable(), 'id'),
                 Grid::make()
@@ -91,7 +93,7 @@ class CreateServiceRequest extends CreateRecord
                             })
                                 ->pluck('name', 'id'))
                             ->rule(new ManagedServiceRequestType())
-                            ->afterStateUpdated(fn (Set $set) => $set('priority_id', null))
+                            ->afterStateUpdated(fn(Set $set) => $set('priority_id', null))
                             ->label('Type')
                             ->required()
                             ->live()
@@ -100,12 +102,12 @@ class CreateServiceRequest extends CreateRecord
                             ->relationship(
                                 name: 'priority',
                                 titleAttribute: 'name',
-                                modifyQueryUsing: fn (Get $get, Builder $query) => $query->where('type_id', $get('type_id'))->orderBy('order'),
+                                modifyQueryUsing: fn(Get $get, Builder $query) => $query->where('type_id', $get('type_id'))->orderBy('order'),
                             )
                             ->label('Priority')
                             ->required()
                             ->exists(ServiceRequestPriority::class, 'id')
-                            ->visible(fn (Get $get): bool => filled($get('type_id'))),
+                            ->visible(fn(Get $get): bool => filled($get('type_id'))),
                     ]),
                 TextInput::make('title')
                     ->required()
@@ -127,5 +129,24 @@ class CreateServiceRequest extends CreateRecord
                     ->required()
                     ->hiddenOn([RelationManager::class, ManageRelatedRecords::class]),
             ]);
+    }
+
+    protected function mutateFormDataBeforeCreate(array $data): array
+    {
+        $serviceRequestDataObject = new ServiceRequestDataObject(
+            division_id: $data['division_id'],
+            status_id: $data['status_id'],
+            type_id: $data['type_id'],
+            priority_id: $data['priority_id'],
+            title: $data['title'],
+            close_details: $data['close_details'],
+            res_details: $data['res_details'],
+            respondent_type: $data['respondent_type'],
+            respondent_id: $data['respondent_id'],
+        );
+
+        app(CreateServiceRequestAction::class)->execute($serviceRequestDataObject);
+
+        return $data;
     }
 }

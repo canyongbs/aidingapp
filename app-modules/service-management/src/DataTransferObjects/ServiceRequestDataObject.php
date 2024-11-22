@@ -34,36 +34,43 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Enums;
+namespace AidingApp\ServiceManagement\DataTransferObjects;
 
-use AidingApp\ServiceManagement\Services\ServiceRequestType\IndividualAssigner;
-use AidingApp\ServiceManagement\Services\ServiceRequestType\RoundRobinAssigner;
-use AidingApp\ServiceManagement\Services\ServiceRequestType\ServiceRequestTypeAssigner;
-use Filament\Support\Contracts\HasLabel;
+use Spatie\LaravelData\Attributes\Validation\Nullable;
+use Spatie\LaravelData\Data;
 
-// TODO This might belong in a more generalized space so we can re-use this across modules
-enum ServiceRequestTypeAssignmentTypes: string implements HasLabel
+class ServiceRequestDataObject extends Data
 {
-  case None = 'none';
 
-  case Individual = 'individual';
+  public function __construct(
+    public ?string $division_id,
+    public ?string $status_id,
+    public ?string $type_id,
+    public ?string $priority_id,
+    public ?string $title,
+    public string|Nullable $close_details,
+    public string|Nullable $res_details,
+    public ?string $respondent_type,
+    public ?string $respondent_id,
+  ) {}
 
-  case RoundRobin = 'round-robin';
-
-  case Workload = 'workload';
-
-  public function getLabel(): string
+  /**
+   * Convert the DTO to an array.
+   *
+   * @return array
+   */
+  public function toArray(): array
   {
-    return str()->headline($this->name);
-  }
-
-  public function getAssignerClass(): ServiceRequestTypeAssigner
-  {
-    dd($this);
-    return match ($this) {
-      self::Individual => app(IndividualAssigner::class),
-      self::RoundRobin => app(RoundRobinAssigner::class),
-      default => null
-    };
+    return [
+      'division_id' => $this->division_id,
+      'status_id' => $this->status_id,
+      'type_id' => $this->type_id,
+      'priority_id' => $this->priority_id,
+      'title' => $this->title,
+      'close_details' => $this->close_details,
+      'res_details' => $this->res_details,
+      'respondent_type' => $this->respondent_type,
+      'respondent_id' => $this->respondent_id,
+    ];
   }
 }

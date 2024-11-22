@@ -34,36 +34,41 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Enums;
+namespace AidingApp\ServiceManagement\Services\ServiceRequestType;
 
-use AidingApp\ServiceManagement\Services\ServiceRequestType\IndividualAssigner;
-use AidingApp\ServiceManagement\Services\ServiceRequestType\RoundRobinAssigner;
-use AidingApp\ServiceManagement\Services\ServiceRequestType\ServiceRequestTypeAssigner;
-use Filament\Support\Contracts\HasLabel;
+use AidingApp\Notification\Events\TriggeredAutoSubscription;
+use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Models\User;
 
-// TODO This might belong in a more generalized space so we can re-use this across modules
-enum ServiceRequestTypeAssignmentTypes: string implements HasLabel
+class RoundRobinAssigner implements ServiceRequestTypeAssigner
 {
-  case None = 'none';
-
-  case Individual = 'individual';
-
-  case RoundRobin = 'round-robin';
-
-  case Workload = 'workload';
-
-  public function getLabel(): string
+  public function execute(ServiceRequest $serviceRequest): void
   {
-    return str()->headline($this->name);
-  }
+    dd($serviceRequest);
+    if ($serviceRequest?->priority->type) {
+      $assignmentType = $serviceRequest?->priority->type;
+    }
 
-  public function getAssignerClass(): ServiceRequestTypeAssigner
-  {
-    dd($this);
-    return match ($this) {
-      self::Individual => app(IndividualAssigner::class),
-      self::RoundRobin => app(RoundRobinAssigner::class),
-      default => null
-    };
+
+
+
+
+    $user = auth()->user();
+
+    if ($user instanceof User) {
+      TriggeredAutoSubscription::dispatch($user, $serviceRequest);
+
+      $manager = $serviceRequest?->priority->type?->assignmentTypeIndividual;
+
+      if ($manager) {
+        $serviceRequest->assignments()->create([
+          'user_id' => $manager->getKey(),
+          'assigned_by_id' => $user->getKey(),
+          'assigned_at' => now(),
+          'status' => ServiceRequestAssignmentStatus::Active,
+        ]);
+      }
+    }
   }
 }
