@@ -43,6 +43,7 @@ use AidingApp\ServiceManagement\Models\Sla;
 use AidingApp\ServiceManagement\Models\Product;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use AidingApp\ServiceManagement\Models\ChangeRequest;
+use AidingApp\ServiceManagement\Models\ProductLicense;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\ServiceManagementPlugin;
 use AidingApp\ServiceManagement\Models\ChangeRequestType;
@@ -100,6 +101,7 @@ class ServiceManagementServiceProvider extends ServiceProvider
             'service_request' => ServiceRequest::class,
             'sla' => Sla::class,
             'product' => Product::class,
+            'product_license' => ProductLicense::class,
         ]);
 
         $this->registerObservers();
