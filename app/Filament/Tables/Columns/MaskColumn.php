@@ -36,9 +36,16 @@
 
 namespace App\Filament\Tables\Columns;
 
-use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\Column;
 
-class MaskColumn extends TextColumn
+class MaskColumn extends Column
 {
     protected string $view = 'filament.tables.columns.masked-column';
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->disabledClick();
+    }
 }
