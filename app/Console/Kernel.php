@@ -44,7 +44,6 @@ use App\Models\Scopes\SetupIsComplete;
 use Illuminate\Console\Scheduling\Schedule;
 use AidingApp\Engagement\Models\EngagementFile;
 use Filament\Actions\Imports\Models\FailedImportRow;
-use AidingApp\Assistant\Models\AssistantChatMessageLog;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
 class Kernel extends ConsoleKernel
@@ -76,7 +75,6 @@ class Kernel extends ConsoleKernel
 
                     collect([
                         Audit::class,
-                        AssistantChatMessageLog::class,
                         EngagementFile::class,
                         FailedImportRow::class,
                     ])

@@ -42,8 +42,6 @@ class AuditSettings extends Settings
 {
     public int $retention_duration_in_days = 90;
 
-    public int $assistant_chat_message_logs_retention_duration_in_days = 30;
-
     public array $audited_models_exclude = [];
 
     public static function group(): string

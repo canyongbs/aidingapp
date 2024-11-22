@@ -75,20 +75,14 @@ const defaultOptions = {
             })
         }
     },
-        polyfillNode({
-            polyfills: {
-                crypto: true,
-                fs: true,
-            }
-        })
+    polyfillNode({
+        polyfills: {
+            crypto: true,
+            fs: true,
+        }
+    })
     ],
 }
-
-compile({
-    ...defaultOptions,
-    entryPoints: ['./app-modules/assistant/resources/js/assistantCurrentResponse.js'],
-    outfile: './app-modules/assistant/resources/js/dist/assistantCurrentResponse.js',
-})
 
 compile({
     ...defaultOptions,

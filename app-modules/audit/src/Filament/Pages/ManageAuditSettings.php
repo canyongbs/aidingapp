@@ -95,16 +95,6 @@ class ManageAuditSettings extends SettingsPage
                         icon: 'heroicon-m-question-mark-circle',
                         tooltip: 'Audit trail records older than the retention duration will be deleted.'
                     ),
-                TextInput::make('assistant_chat_message_logs_retention_duration_in_days')
-                    ->label('Assistant retention Duration')
-                    ->integer()
-                    ->minValue(1)
-                    ->step(1)
-                    ->suffix('Day/s')
-                    ->hintIcon(
-                        icon: 'heroicon-m-question-mark-circle',
-                        tooltip: 'Assistant chat message logs older than the retention duration will be deleted.'
-                    ),
             ]);
     }
 }

@@ -1,4 +1,6 @@
-{{--
+<?php
+
+/*
 <COPYRIGHT>
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
@@ -30,12 +32,31 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
---}}
-@php
-    use AidingApp\Authorization\Enums\LicenseType;
-@endphp
+*/
 
-<x-filament-widgets::widget>
-    <div class="grid gap-6 md:grid-cols-3">
-    </div>
-</x-filament-widgets::widget>
+use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
+
+return new class () extends Migration {
+    public function up(): void
+    {
+        Schema::dropIfExists('prompt_types');
+    }
+
+    public function down(): void
+    {
+        Schema::create('prompt_types', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+
+            $table->string('title');
+            $table->longText('description')->nullable();
+
+            $table->timestamps();
+            $table->softDeletes();
+
+            $table->uniqueIndex(['title'])->where(fn (Builder $condition) => $condition->whereNull('deleted_at'));
+        });
+    }
+};
