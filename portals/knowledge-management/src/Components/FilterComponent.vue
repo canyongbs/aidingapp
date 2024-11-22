@@ -32,7 +32,7 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { defineProps, computed, ref, watch, defineEmits } from 'vue';
+    import { defineEmits, defineProps, ref } from 'vue';
 
     const props = defineProps({
         selectedFilter: {
