@@ -47,5 +47,4 @@ class ProductObserver
     {
         $product->created_by_id = auth()->user()?->getKey();
     }
-
 }

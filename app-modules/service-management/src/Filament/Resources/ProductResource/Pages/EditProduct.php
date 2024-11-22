@@ -37,12 +37,12 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ProductResource\Pages;
 
 use Filament\Forms\Form;
+use Filament\Actions\ViewAction;
+use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\EditRecord;
 use AidingApp\ServiceManagement\Filament\Resources\ProductResource;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\ViewAction;
 
 class EditProduct extends EditRecord
 {

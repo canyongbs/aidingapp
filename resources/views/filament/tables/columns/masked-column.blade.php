@@ -31,13 +31,22 @@
 
 </COPYRIGHT>
 --}}
-<div x-data="{ revealed: false }" class="flex items-center">
-    <span x-show="!revealed" class="font-mono text-gray-700">**** **** **** ****</span>
-    <span x-show="revealed" class="font-mono text-gray-700">{{ $getState() }}</span>
-    <button 
-        x-on:click="revealed = !revealed" 
-        type="button" 
+<div
+    class="flex items-center"
+    x-data="{ revealed: false }"
+>
+    <span
+        class="font-mono text-gray-700"
+        x-show="!revealed"
+    >**** **** **** ****</span>
+    <span
+        class="font-mono text-gray-700"
+        x-show="revealed"
+    >{{ $getState() }}</span>
+    <button
         class="ml-2 text-blue-600 hover:underline"
+        type="button"
+        x-on:click="revealed = !revealed"
     >
         <span x-show="!revealed">Reveal</span>
         <span x-show="revealed">Hide</span>

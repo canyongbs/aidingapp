@@ -73,7 +73,7 @@ class ProductResource extends Resource
             'create' => CreateProduct::route('/create'),
             'view' => ViewProduct::route('/{record}'),
             'edit' => EditProduct::route('/{record}/edit'),
-            'product_licences' => ManageProductLicenses::route('/{record}/product_licences')
+            'product_licences' => ManageProductLicenses::route('/{record}/product_licences'),
         ];
     }
 }
