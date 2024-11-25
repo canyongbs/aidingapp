@@ -45,7 +45,6 @@ use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
 use AidingApp\Division\Models\Division;
-use AidingApp\ServiceManagement\Actions\CreateServiceRequestAction;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\EditRecord;
@@ -57,9 +56,10 @@ use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Rules\ManagedServiceRequestType;
+use AidingApp\ServiceManagement\Actions\CreateServiceRequestAction;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
-use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\DataTransferObjects\ServiceRequestDataObject;
+use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 
 class EditServiceRequest extends EditRecord
 {
@@ -172,25 +172,6 @@ class EditServiceRequest extends EditRecord
     protected function mutateFormDataBeforeFill(array $data): array
     {
         $data['type_id'] = $this->getRecord()->priority->type_id;
-
-        return $data;
-    }
-
-    protected function mutateFormDataBeforeSave(array $data): array
-    {
-        $serviceRequestDataObject = new ServiceRequestDataObject(
-            division_id: $data['division_id'],
-            status_id: $data['status_id'],
-            type_id: $data['type_id'],
-            priority_id: $data['priority_id'],
-            title: $data['title'],
-            close_details: $data['close_details'],
-            res_details: $data['res_details'],
-            respondent_type: $data['respondent_type'],
-            respondent_id: $data['respondent_id'],
-        );
-
-        app(CreateServiceRequestAction::class)->execute($serviceRequestDataObject);
 
         return $data;
     }
