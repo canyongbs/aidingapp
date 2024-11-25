@@ -41,14 +41,16 @@ use AidingApp\ServiceManagement\DataTransferObjects\ServiceRequestDataObject;
 
 class CreateServiceRequestAction
 {
-    public function execute(ServiceRequestDataObject $serviceRequestDataObject)
-    {
-        $serviceRequest = new ServiceRequest($serviceRequestDataObject->toArray());
-        $assignmentClass = $serviceRequest->priority->type?->assignment_type?->getAssignerClass();
-        dd($assignmentClass);
+  public function execute(ServiceRequestDataObject $serviceRequestDataObject)
+  {
+    $serviceRequest = new ServiceRequest($serviceRequestDataObject->toArray());
+    $assignmentClass = $serviceRequest->priority->type?->assignment_type?->getAssignerClass();
 
-        if ($assignmentClass) {
-            $assignmentClass->execute();
-        }
+    if ($assignmentClass) {
+      $assignmentClass->execute($serviceRequest);
     }
+
+    $serviceRequest->save();
+    $serviceRequest->priority->type->save();
+  }
 }

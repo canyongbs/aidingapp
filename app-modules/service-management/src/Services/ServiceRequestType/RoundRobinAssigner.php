@@ -36,36 +36,42 @@
 
 namespace AidingApp\ServiceManagement\Services\ServiceRequestType;
 
-use App\Models\User;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
-use AidingApp\Notification\Events\TriggeredAutoSubscription;
-use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\Team\Models\Team;
 
 class RoundRobinAssigner implements ServiceRequestTypeAssigner
 {
-    public function execute(ServiceRequest $serviceRequest): void
-    {
-        dd($serviceRequest);
+  public function execute(ServiceRequest $serviceRequest): void
+  {
+    if ($serviceRequest->priority?->type) {
+      $assignmentType = $serviceRequest->priority->type;
 
-        if ($serviceRequest?->priority->type) {
-            $assignmentType = $serviceRequest?->priority->type;
-        }
-
-        $user = auth()->user();
-
-        if ($user instanceof User) {
-            TriggeredAutoSubscription::dispatch($user, $serviceRequest);
-
-            $manager = $serviceRequest?->priority->type?->assignmentTypeIndividual;
-
-            if ($manager) {
-                $serviceRequest->assignments()->create([
-                    'user_id' => $manager->getKey(),
-                    'assigned_by_id' => $user->getKey(),
-                    'assigned_at' => now(),
-                    'status' => ServiceRequestAssignmentStatus::Active,
-                ]);
-            }
-        }
+      $nextManager = $this->getNextManager($assignmentType, $assignmentType->round_robin_last_assigned_id);
+      $serviceRequest->priority->type->round_robin_last_assigned_id = $nextManager->id;
     }
+  }
+
+  public function getNextManager(ServiceRequestType $serviceRequestType, ?string $currentManagerId = null): ?Team
+  {
+    $managers = $serviceRequestType->managers()->get();
+
+    if ($managers->isEmpty()) {
+      return null;
+    }
+
+    if ($currentManagerId === null) {
+      return $managers->first();
+    }
+
+    $currentIndex = $managers->search(fn($manager) => (string)$manager->id === $currentManagerId);
+
+    if ($currentIndex === false) {
+      return $managers->first();
+    }
+
+    $nextIndex = ($currentIndex + 1) % $managers->count();
+
+    return $managers[$nextIndex];
+  }
 }
