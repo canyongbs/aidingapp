@@ -52,28 +52,19 @@
         <span x-show="revealed">Hide</span>
     </button>
 </div>
-<!-- <div class="blur-lg bg-gray-100 p-6">
+<!-- <div class="bg-gray-100 p-6 blur-lg">
     This text should be noticeably blurred.
 </div>
 <div style="backdrop-filter: blur(12px); background: rgba(255, 255, 255, 0.8); padding: 20px;">
     This text should be blurred.
 </div>
-<div x-data="{ masked: true }" class="flex items-center space-x-2">
+<div class="flex items-center space-x-2" x-data="{ masked: true }">
    
-    <span 
-        x-on:click="masked = !masked" 
-        :class="{ 'blur-md': masked, 'text-gray-500': masked, 'text-black': !masked }" 
-        class="cursor-pointer transition duration-200 ease-in-out overflow-hidden"
-        style="backdrop-filter: blur(4px);"> 
+    <span class="cursor-pointer overflow-hidden transition duration-200 ease-in-out" style="backdrop-filter: blur(4px);" x-on:click="masked = !masked" :class="{ 'blur-md': masked, 'text-gray-500': masked, 'text-black': !masked }">
         {{ $getState() }}
     </span>
 
-    <button 
-        x-show="!masked" 
-        x-on:click="masked = true" 
-        class="text-gray-500 hover:text-gray-700 focus:outline-none">
-        <x-heroicon-s-eye-slash class="w-5 h-5" />
+    <button class="text-gray-500 hover:text-gray-700 focus:outline-none" x-show="!masked" x-on:click="masked = true">
+        <x-heroicon-s-eye-slash class="h-5 w-5"/>
     </button>
 </div> -->
-
-
