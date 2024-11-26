@@ -2,17 +2,20 @@
 
 namespace AidingApp\ContractManagement\Models;
 
-use App\Casts\CurrencyCast;
 use App\Models\BaseModel;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use OwenIt\Auditing\Contracts\Auditable;
+use App\Casts\CurrencyCast;
 use Spatie\MediaLibrary\HasMedia;
+use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\MediaLibrary\InteractsWithMedia;
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\ContractManagement\Enums\ContractStatus;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use AidingApp\ContractManagement\Enums\ContractStatus;
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 
+/**
+ * @mixin IdeHelperContract
+ */
 class Contract extends BaseModel implements HasMedia, Auditable
 {
     use InteractsWithMedia;

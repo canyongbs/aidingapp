@@ -2,10 +2,10 @@
 
 namespace AidingApp\ContractManagement\Database\Factories;
 
-use AidingApp\ContractManagement\Models\Contract;
-use AidingApp\ContractManagement\Models\ContractType;
 use Cknow\Money\Money;
+use AidingApp\ContractManagement\Models\Contract;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use AidingApp\ContractManagement\Models\ContractType;
 
 /**
  * @extends Contract>

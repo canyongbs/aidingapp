@@ -41,10 +41,9 @@ class ListContracts extends ListRecords
                     ->relationship('contractType', 'name'),
                 SelectFilter::make('status')
                     ->options(collect(ContractStatus::cases())->mapWithKeys(fn (ContractStatus $contractStatus) => [
-                        $contractStatus->value => $contractStatus->getLabel()
+                        $contractStatus->value => $contractStatus->getLabel(),
                     ]))
                     ->query(function (Builder $query, $state) {
-
                         $today = now();
 
                         return match ($state['value']) {

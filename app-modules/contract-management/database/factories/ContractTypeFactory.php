@@ -2,8 +2,8 @@
 
 namespace AidingApp\ContractManagement\Database\Factories;
 
-use AidingApp\ContractManagement\Models\ContractType;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use AidingApp\ContractManagement\Models\ContractType;
 
 /**
  * @extends ContractType>
