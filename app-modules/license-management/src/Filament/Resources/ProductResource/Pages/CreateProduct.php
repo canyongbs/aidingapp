@@ -34,11 +34,47 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Infolists\Components;
+namespace AidingApp\LicenseManagement\Filament\Resources\ProductResource\Pages;
 
-use Filament\Infolists\Components\TextEntry;
+use Filament\Forms\Form;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Resources\Pages\CreateRecord;
+use AidingApp\LicenseManagement\Filament\Resources\ProductResource;
 
-class MaskTextEntry extends TextEntry
+class CreateProduct extends CreateRecord
 {
-    protected string $view = 'filament.infolists.components.masked-column';
+    protected static string $resource = ProductResource::class;
+
+    public function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                TextInput::make('name')
+                    ->label('Product Name')
+                    ->required()
+                    ->string()
+                    ->maxLength(255),
+                TextInput::make('url')
+                    ->label('Product Link')
+                    ->maxLength(255)
+                    ->url()
+                    ->nullable(),
+                Textarea::make('description')
+                    ->label('Description')
+                    ->string()
+                    ->nullable()
+                    ->maxLength(65535),
+                TextInput::make('version')
+                    ->label('Version')
+                    ->string()
+                    ->nullable()
+                    ->maxLength(255),
+                Textarea::make('additional_notes')
+                    ->label('Additional Notes')
+                    ->nullable()
+                    ->maxLength(65535)
+                    ->string(),
+            ]);
+    }
 }

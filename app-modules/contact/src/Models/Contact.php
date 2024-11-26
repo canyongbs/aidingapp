@@ -243,7 +243,7 @@ class Contact extends BaseAuthenticatable implements Auditable, Subscribable, Ed
         return $this->morphMany(KnowledgeBaseArticleVote::class, 'voter');
     }
 
-    public function product_licenses(): HasMany
+    public function productLicenses(): HasMany
     {
         return $this->hasMany(ProductLicense::class, 'assigned_to');
     }

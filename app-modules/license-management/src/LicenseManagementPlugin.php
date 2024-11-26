@@ -34,11 +34,25 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Infolists\Components;
+namespace AidingApp\LicenseManagement;
 
-use Filament\Infolists\Components\TextEntry;
+use Filament\Panel;
+use Filament\Contracts\Plugin;
 
-class MaskTextEntry extends TextEntry
+class LicenseManagementPlugin implements Plugin
 {
-    protected string $view = 'filament.infolists.components.masked-column';
+    public function getId(): string
+    {
+        return 'license-management';
+    }
+
+    public function register(Panel $panel): void
+    {
+        $panel->discoverResources(
+            in: __DIR__ . '/Filament/Resources',
+            for: 'AidingApp\\LicenseManagement\\Filament\\Resources'
+        );
+    }
+
+    public function boot(Panel $panel): void {}
 }

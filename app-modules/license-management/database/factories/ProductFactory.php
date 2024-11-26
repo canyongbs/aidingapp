@@ -34,11 +34,29 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Infolists\Components;
+namespace AidingApp\LicenseManagement\Database\Factories;
 
-use Filament\Infolists\Components\TextEntry;
+use AidingApp\LicenseManagement\Models\Product;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-class MaskTextEntry extends TextEntry
+/**
+ * @extends Factory<Product>
+ */
+class ProductFactory extends Factory
 {
-    protected string $view = 'filament.infolists.components.masked-column';
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition(): array
+    {
+        return [
+            'name' => fake()->word(),
+            'url' => fake()->url(),
+            'description' => fake()->paragraph(),
+            'version' => fake()->numerify('#.#.#'),
+            'additional_notes' => fake()->paragraph(),
+        ];
+    }
 }

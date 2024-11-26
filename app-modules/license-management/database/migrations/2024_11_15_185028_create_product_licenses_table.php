@@ -34,11 +34,29 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Infolists\Components;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
-use Filament\Infolists\Components\TextEntry;
+return new class () extends Migration {
+    public function up(): void
+    {
+        Schema::create('product_licenses', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->foreignUuid('product_id')->constrained('products');
+            $table->text('license');
+            $table->text('description')->nullable();
+            $table->foreignUuid('assigned_to')->nullable()->constrained('contacts');
+            $table->date('start_date');
+            $table->date('expiration_date')->nullable();
+            $table->foreignUuid('created_by_id')->nullable()->constrained('users');
+            $table->timestamps();
+            $table->softDeletes();
+        });
+    }
 
-class MaskTextEntry extends TextEntry
-{
-    protected string $view = 'filament.infolists.components.masked-column';
-}
+    public function down(): void
+    {
+        Schema::dropIfExists('product_licenses');
+    }
+};

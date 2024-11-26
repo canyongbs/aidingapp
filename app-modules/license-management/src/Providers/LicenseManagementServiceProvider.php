@@ -34,11 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Infolists\Components;
+namespace AidingApp\LicenseManagement\Providers;
 
-use Filament\Infolists\Components\TextEntry;
+use Filament\Panel;
+use Illuminate\Support\ServiceProvider;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use AidingApp\LicenseManagement\LicenseManagementPlugin;
 
-class MaskTextEntry extends TextEntry
+class LicenseManagementServiceProvider extends ServiceProvider
 {
-    protected string $view = 'filament.infolists.components.masked-column';
+    public function register()
+    {
+        Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new LicenseManagementPlugin()));
+    }
+
+    public function boot()
+    {
+        Relation::morphMap([]);
+    }
 }

@@ -34,11 +34,19 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Infolists\Components;
+namespace AidingApp\LicenseManagement\Observers;
 
-use Filament\Infolists\Components\TextEntry;
+use AidingApp\LicenseManagement\Models\Product;
 
-class MaskTextEntry extends TextEntry
+class ProductObserver
 {
-    protected string $view = 'filament.infolists.components.masked-column';
+    /**
+     * Handle the Product "creating" event.
+     */
+    public function creating(Product $product): void
+    {
+        if (! $product->created_by_id) {
+            $product->created_by_id = auth()->user()?->getKey();
+        }
+    }
 }

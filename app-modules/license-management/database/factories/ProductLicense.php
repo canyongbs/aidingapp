@@ -34,11 +34,34 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Infolists\Components;
+namespace AidingApp\LicenseManagement\Database\Factories;
 
-use Filament\Infolists\Components\TextEntry;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\LicenseManagement\Models\Product;
+use Illuminate\Database\Eloquent\Factories\Factory;
+use AidingApp\LicenseManagement\Models\ProductLicense;
 
-class MaskTextEntry extends TextEntry
+/**
+ * @extends Factory<ProductLicense>
+ */
+class ProductLicenseFactory extends Factory
 {
-    protected string $view = 'filament.infolists.components.masked-column';
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition(): array
+    {
+        return [
+            'license' => fake()->uuid(),
+            'product_id' => Product::factory(),
+            'assigned_to' => Contact::factory(),
+            'start_date' => fake()->dateTimeBetween('-1 year', '+1 year'),
+            'end_date' => fn (array $attributes) => fake()->dateTimeBetween(
+                (clone $attributes['start_date'])->modify('+1 day'),
+                (clone $attributes['start_date'])->modify('+1 year')
+            ),
+        ];
+    }
 }

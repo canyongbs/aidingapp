@@ -34,11 +34,32 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Infolists\Components;
+namespace AidingApp\LicenseManagement\Models;
 
-use Filament\Infolists\Components\TextEntry;
+use App\Models\BaseModel;
+use OwenIt\Auditing\Contracts\Auditable;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use AidingApp\LicenseManagement\Observers\ProductObserver;
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 
-class MaskTextEntry extends TextEntry
+#[ObservedBy(ProductObserver::class)]
+class Product extends BaseModel implements Auditable
 {
-    protected string $view = 'filament.infolists.components.masked-column';
+    use AuditableTrait;
+    use SoftDeletes;
+
+    protected $fillable = [
+        'name',
+        'url',
+        'description',
+        'version',
+        'additional_notes',
+    ];
+
+    public function productLicenses(): HasMany
+    {
+        return $this->hasMany(ProductLicense::class, 'product_id');
+    }
 }
