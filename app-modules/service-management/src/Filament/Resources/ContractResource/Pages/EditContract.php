@@ -8,7 +8,6 @@ use Filament\Forms\Set;
 use Filament\Forms\Form;
 use Illuminate\Support\Str;
 use Filament\Actions\DeleteAction;
-use App\Features\ContractManagement;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -24,8 +23,6 @@ class EditContract extends EditRecord
 {
     protected static string $resource = ContractResource::class;
 
-    protected ?bool $hasDatabaseTransactions = true;
-
     public function form(Form $form): Form
     {
         return $form
@@ -37,9 +34,10 @@ class EditContract extends EditRecord
                     ->required()
                     ->label('Contract Type')
                     ->relationship(
-                        name : 'contractType', 
-                        titleAttribute: 'name', 
-                        modifyQueryUsing: fn (Builder $query) => $query->orderBy('order', 'ASC'))
+                        name : 'contractType',
+                        titleAttribute: 'name',
+                        modifyQueryUsing: fn (Builder $query) => $query->orderBy('order', 'ASC')
+                    )
                     ->preload()
                     ->default(
                         fn () => ContractType::query()
@@ -81,8 +79,8 @@ class EditContract extends EditRecord
                     ->closeOnDateSelection()
                     ->required(),
                 Textarea::make('description')
-                        ->string()
-                        ->nullable(),
+                    ->string()
+                    ->nullable(),
                 SpatieMediaLibraryFileUpload::make('contract_files')
                     ->disk('s3')
                     ->label('Contract Files')

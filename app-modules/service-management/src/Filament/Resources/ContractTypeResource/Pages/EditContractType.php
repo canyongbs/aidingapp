@@ -15,6 +15,8 @@ class EditContractType extends EditRecord
 {
     protected static string $resource = ContractTypeResource::class;
 
+    protected ?bool $hasDatabaseTransactions = true;
+
     public function form(Form $form): Form
     {
         return $form

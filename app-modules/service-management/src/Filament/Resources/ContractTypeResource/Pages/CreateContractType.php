@@ -3,12 +3,12 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ContractTypeResource\Pages;
 
 use Filament\Forms\Form;
+use Illuminate\Support\Facades\DB;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\CreateRecord;
 use AidingApp\ServiceManagement\Models\ContractType;
 use AidingApp\ServiceManagement\Filament\Resources\ContractTypeResource;
-use Illuminate\Support\Facades\DB;
 
 class CreateContractType extends CreateRecord
 {
@@ -52,9 +52,11 @@ class CreateContractType extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        $data['order'] = DB::table('contract_types')
-                        ->selectRaw('COALESCE((SELECT MAX("order") FROM contract_types), 0) + 1')
-                        ->value(DB::raw('max_order')) ?? 1;
+        // $data['order'] = DB::table('contract_types')
+        //                 ->selectRaw('COALESCE((SELECT MAX("order") FROM contract_types), 0) + 1')
+        //                 ->value(DB::raw('max_order')) ?? 1;
+
+        $data['order'] = DB::raw('COALESCE((SELECT MAX("order") FROM contract_types), 0) + 1');
 
         if ($data['is_default']) {
             ContractType::query()

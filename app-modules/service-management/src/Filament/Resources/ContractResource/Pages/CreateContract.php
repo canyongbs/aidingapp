@@ -6,7 +6,6 @@ use Cknow\Money\Money;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Forms\Form;
-use App\Features\ContractManagement;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -32,9 +31,10 @@ class CreateContract extends CreateRecord
                     ->required()
                     ->label('Contract Type')
                     ->relationship(
-                        name : 'contractType', 
-                        titleAttribute: 'name', 
-                        modifyQueryUsing: fn (Builder $query) => $query->orderBy('order', 'ASC'))
+                        name: 'contractType',
+                        titleAttribute: 'name',
+                        modifyQueryUsing: fn (Builder $query) => $query->orderBy('order', 'ASC')
+                    )
                     ->preload()
                     ->default(
                         fn () => ContractType::query()
@@ -76,8 +76,8 @@ class CreateContract extends CreateRecord
                     ->closeOnDateSelection()
                     ->required(),
                 Textarea::make('description')
-                        ->string()
-                        ->nullable(),
+                    ->string()
+                    ->nullable(),
                 SpatieMediaLibraryFileUpload::make('contract_files')
                     ->label('Contract Files')
                     ->disk('s3')

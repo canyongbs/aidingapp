@@ -20,7 +20,7 @@ class ContractTypeResource extends Resource
 
     public static function canAccess(): bool
     {
-        return parent::canAccess() && FeaturesContractManagement::active();
+        return FeaturesContractManagement::active() && parent::canAccess();
     }
 
     public static function getPages(): array

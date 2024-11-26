@@ -2,27 +2,25 @@
 
 namespace AidingApp\ServiceManagement\Models;
 
+use App\Models\BaseModel;
+use App\Casts\CurrencyCast;
 use Spatie\MediaLibrary\HasMedia;
-use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\MediaLibrary\InteractsWithMedia;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use AidingApp\ServiceManagement\Enums\ContractStatus;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use App\Casts\CurrencyCast;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 
 /**
  * @mixin IdeHelperContract
  */
-class Contract extends Model implements HasMedia, Auditable
+class Contract extends BaseModel implements HasMedia, Auditable
 {
-    use HasFactory;
-    use HasUuids;
     use InteractsWithMedia;
     use AuditableTrait;
+    use SoftDeletes;
 
     protected $append = ['status'];
 
@@ -33,7 +31,7 @@ class Contract extends Model implements HasMedia, Auditable
         'start_date',
         'end_date',
         'contract_value',
-        'contract_type_id'
+        'contract_type_id',
     ];
 
     protected $casts = [
@@ -43,13 +41,6 @@ class Contract extends Model implements HasMedia, Auditable
     public function contractType(): BelongsTo
     {
         return $this->belongsTo(ContractType::class, 'contract_type_id', 'id');
-    }
-
-    protected function status(): Attribute
-    {
-        return Attribute::make(
-            get: fn () => ContractStatus::getStatus($this->start_date, $this->end_date),
-        );
     }
 
     public function registerMediaCollections(): void
@@ -62,5 +53,12 @@ class Contract extends Model implements HasMedia, Auditable
                 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => ['docx'],
                 'image/pdf' => ['pdf'],
             ]);
+    }
+
+    protected function status(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => ContractStatus::getStatus($this->start_date, $this->end_date),
+        );
     }
 }

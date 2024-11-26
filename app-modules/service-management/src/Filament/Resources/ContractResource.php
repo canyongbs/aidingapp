@@ -24,7 +24,7 @@ class ContractResource extends Resource
 
     public static function canAccess(): bool
     {
-        return parent::canAccess() && ContractManagement::active();
+        return ContractManagement::active() && parent::canAccess();
     }
 
     public static function getPages(): array
