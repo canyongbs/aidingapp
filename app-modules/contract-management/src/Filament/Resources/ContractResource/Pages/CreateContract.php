@@ -1,25 +1,22 @@
 <?php
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ContractResource\Pages;
+namespace AidingApp\ContractManagement\Filament\Resources\ContractResource\Pages;
 
 use Cknow\Money\Money;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Forms\Form;
-use Illuminate\Support\Str;
-use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Resources\Pages\EditRecord;
 use Filament\Forms\Components\DatePicker;
 use Illuminate\Database\Eloquent\Builder;
-use AidingApp\ServiceManagement\Models\Contract;
-use AidingApp\ServiceManagement\Models\ContractType;
+use Filament\Resources\Pages\CreateRecord;
+use AidingApp\ContractManagement\Models\ContractType;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
-use AidingApp\ServiceManagement\Filament\Resources\ContractResource;
+use AidingApp\ContractManagement\Filament\Resources\ContractResource;
 
-class EditContract extends EditRecord
+class CreateContract extends CreateRecord
 {
     protected static string $resource = ContractResource::class;
 
@@ -34,7 +31,7 @@ class EditContract extends EditRecord
                     ->required()
                     ->label('Contract Type')
                     ->relationship(
-                        name : 'contractType',
+                        name: 'contractType',
                         titleAttribute: 'name',
                         modifyQueryUsing: fn (Builder $query) => $query->orderBy('order', 'ASC')
                     )
@@ -82,8 +79,8 @@ class EditContract extends EditRecord
                     ->string()
                     ->nullable(),
                 SpatieMediaLibraryFileUpload::make('contract_files')
-                    ->disk('s3')
                     ->label('Contract Files')
+                    ->disk('s3')
                     ->acceptedFileTypes([
                         'application/pdf',
                         'application/vnd.ms-word',
@@ -96,46 +93,9 @@ class EditContract extends EditRecord
             ]);
     }
 
-    /**
-     * @return array<int|string, string|null>
-     */
-    public function getBreadcrumbs(): array
-    {
-        $resource = static::getResource();
-        /** @var Contract $record */
-        $record = $this->getRecord();
-
-        /** @var array<string, string> $breadcrumbs */
-        $breadcrumbs = [
-            $resource::getUrl() => $resource::getBreadcrumb(),
-            $resource::getUrl('edit', ['record' => $record]) => Str::limit($record->name, 16),
-            ...(filled($breadcrumb = $this->getBreadcrumb()) ? [$breadcrumb] : []),
-        ];
-
-        if (filled($cluster = static::getCluster())) {
-            return $cluster::unshiftClusterBreadcrumbs($breadcrumbs);
-        }
-
-        return $breadcrumbs;
-    }
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            DeleteAction::make(),
-        ];
-    }
-
-    protected function mutateFormDataBeforeSave(array $data): array
+    protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['contract_value'] = Money::parseByDecimal($data['contract_value'], config('money.defaultCurrency'));
-
-        return $data;
-    }
-
-    protected function mutateFormDataBeforeFill(array $data): array
-    {
-        $data['contract_value'] = $this->getRecord()->contract_value?->formatByDecimal();
 
         return $data;
     }

@@ -36,6 +36,8 @@
 
 namespace App\Providers;
 
+use AidingApp\ContractManagement\Models\Contract;
+use AidingApp\ContractManagement\Models\ContractType;
 use App\Models\Tenant;
 use Sentry\State\Scope;
 use App\Models\SystemUser;
@@ -48,9 +50,7 @@ use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\ServiceProvider;
 use Filament\Actions\Imports\Jobs\ImportCsv;
-use AidingApp\ServiceManagement\Models\Contract;
 use Filament\Actions\Exports\Jobs\PrepareCsvExport;
-use AidingApp\ServiceManagement\Models\ContractType;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use App\Overrides\Laravel\PermissionMigrationCreator;
 use OpenSearch\Migrations\Filesystem\MigrationStorage;

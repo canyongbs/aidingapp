@@ -1,11 +1,11 @@
 <?php
 
-namespace AidingApp\ServiceManagement\Policies;
+namespace AidingApp\ContractManagement\Policies;
 
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
 use AidingApp\Contact\Models\Contact;
-use AidingApp\ServiceManagement\Models\Contract;
+use AidingApp\ContractManagement\Models\Contract;
 
 class ContractPolicy
 {

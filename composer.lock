@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c917f858eab2b8189a76e36e098a7610",
+    "content-hash": "0fe2a4482cff9af55928a574e6708647",
     "packages": [
         {
             "name": "amphp/amp",
@@ -2312,6 +2312,41 @@
                     "AidingApp\\Webhook\\Tests\\": "tests/",
                     "AidingApp\\Webhook\\Database\\Factories\\": "database/factories/",
                     "AidingApp\\Webhook\\Database\\Seeders\\": "database/seeders/"
+                }
+            },
+            "license": [
+                "proprietary"
+            ],
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "canyon-gbs/contract-management",
+            "version": "1.0",
+            "dist": {
+                "type": "path",
+                "url": "app-modules/contract-management",
+                "reference": "27ab21d11df2aa1dc30f04e2a2e1fcb40fad610d"
+            },
+            "require": {
+                "filament/filament": "^3.2"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "AidingApp\\ContractManagement\\Providers\\ContractManagementServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "AidingApp\\ContractManagement\\": "src/",
+                    "AidingApp\\ContractManagement\\Tests\\": "tests/",
+                    "AidingApp\\ContractManagement\\Database\\Factories\\": "database/factories/",
+                    "AidingApp\\ContractManagement\\Database\\Seeders\\": "database/seeders/"
                 }
             },
             "license": [

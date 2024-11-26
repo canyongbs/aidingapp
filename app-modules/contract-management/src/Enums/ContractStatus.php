@@ -1,6 +1,6 @@
 <?php
 
-namespace AidingApp\ServiceManagement\Enums;
+namespace AidingApp\ContractManagement\Enums;
 
 use InvalidArgumentException;
 use Filament\Support\Contracts\HasLabel;
@@ -32,6 +32,6 @@ enum ContractStatus: string implements HasLabel
 
     public function getLabel(): string
     {
-        return ucfirst($this->value);
+        return str($this->value)->headline()->toString();
     }
 }

@@ -1,14 +1,14 @@
 <?php
 
-namespace AidingApp\ServiceManagement\Filament\Resources;
+namespace AidingApp\ContractManagement\Filament\Resources;
 
 use Filament\Resources\Resource;
 use App\Features\ContractManagement;
-use AidingApp\ServiceManagement\Models\Contract;
-use AidingApp\ServiceManagement\Filament\Resources\ContractResource\Pages\EditContract;
-use AidingApp\ServiceManagement\Filament\Resources\ContractResource\Pages\ViewContract;
-use AidingApp\ServiceManagement\Filament\Resources\ContractResource\Pages\ListContracts;
-use AidingApp\ServiceManagement\Filament\Resources\ContractResource\Pages\CreateContract;
+use AidingApp\ContractManagement\Models\Contract;
+use AidingApp\ContractManagement\Filament\Resources\ContractResource\Pages\EditContract;
+use AidingApp\ContractManagement\Filament\Resources\ContractResource\Pages\ViewContract;
+use AidingApp\ContractManagement\Filament\Resources\ContractResource\Pages\ListContracts;
+use AidingApp\ContractManagement\Filament\Resources\ContractResource\Pages\CreateContract;
 
 class ContractResource extends Resource
 {

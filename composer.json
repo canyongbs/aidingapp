@@ -40,6 +40,7 @@
         "canyon-gbs/aiding-app-theme": "*",
         "canyon-gbs/aiding-app-timeline": "*",
         "canyon-gbs/aiding-app-webhook": "*",
+        "canyon-gbs/contract-management": "*",
         "canyon-gbs/report": "*",
         "canyongbs/filament-tiptap-editor": "^1.0.2",
         "cknow/laravel-money": "^8.1",

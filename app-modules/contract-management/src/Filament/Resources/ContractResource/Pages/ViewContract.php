@@ -1,17 +1,16 @@
 <?php
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ContractResource\Pages;
+namespace AidingApp\ContractManagement\Filament\Resources\ContractResource\Pages;
 
 use Illuminate\Support\Str;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Infolist;
 use Filament\Actions\DeleteAction;
-use App\Features\ContractManagement;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
-use AidingApp\ServiceManagement\Models\Contract;
-use AidingApp\ServiceManagement\Filament\Resources\ContractResource;
+use AidingApp\ContractManagement\Models\Contract;
+use AidingApp\ContractManagement\Filament\Resources\ContractResource;
 
 class ViewContract extends ViewRecord
 {

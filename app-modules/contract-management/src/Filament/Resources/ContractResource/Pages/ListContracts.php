@@ -1,11 +1,10 @@
 <?php
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ContractResource\Pages;
+namespace AidingApp\ContractManagement\Filament\Resources\ContractResource\Pages;
 
 use Filament\Tables\Table;
 use Filament\Actions\CreateAction;
 use Filament\Tables\Filters\Filter;
-use App\Features\ContractManagement;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
@@ -16,8 +15,8 @@ use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
-use AidingApp\ServiceManagement\Enums\ContractStatus;
-use AidingApp\ServiceManagement\Filament\Resources\ContractResource;
+use AidingApp\ContractManagement\Enums\ContractStatus;
+use AidingApp\ContractManagement\Filament\Resources\ContractResource;
 
 class ListContracts extends ListRecords
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ContractTypeResource\Pages;
+namespace AidingApp\ContractManagement\Filament\Resources\ContractTypeResource\Pages;
 
 use Filament\Tables\Table;
 use Filament\Actions\CreateAction;
@@ -8,10 +8,10 @@ use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
-use AidingApp\ServiceManagement\Filament\Resources\ContractTypeResource;
-use Filament\Tables\Actions\DeleteAction;
+use AidingApp\ContractManagement\Filament\Resources\ContractTypeResource;
 
 class ListContractTypes extends ListRecords
 {

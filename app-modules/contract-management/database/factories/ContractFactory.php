@@ -1,11 +1,11 @@
 <?php
 
-namespace AidingApp\ServiceManagement\Database\Factories;
+namespace AidingApp\ContractManagement\Database\Factories;
 
+use AidingApp\ContractManagement\Models\Contract;
+use AidingApp\ContractManagement\Models\ContractType;
 use Cknow\Money\Money;
-use AidingApp\ServiceManagement\Models\Contract;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use AidingApp\ServiceManagement\Models\ContractType;
 
 /**
  * @extends Contract>

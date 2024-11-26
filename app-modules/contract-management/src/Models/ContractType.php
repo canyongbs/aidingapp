@@ -1,18 +1,17 @@
 <?php
 
-namespace AidingApp\ServiceManagement\Models;
+namespace AidingApp\ContractManagement\Models;
 
-use App\Models\BaseModel;
-use OwenIt\Auditing\Contracts\Auditable;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use App\Models\BaseModel;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use OwenIt\Auditing\Contracts\Auditable;
 
-/**
- * @mixin IdeHelperContractType
- */
 class ContractType extends BaseModel implements Auditable
 {
     use AuditableTrait;
+    use SoftDeletes;
 
     protected $fillable = ['name', 'is_default', 'order'];
 

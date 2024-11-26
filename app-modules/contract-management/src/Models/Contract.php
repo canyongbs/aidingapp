@@ -1,21 +1,18 @@
 <?php
 
-namespace AidingApp\ServiceManagement\Models;
+namespace AidingApp\ContractManagement\Models;
 
-use App\Models\BaseModel;
 use App\Casts\CurrencyCast;
-use Spatie\MediaLibrary\HasMedia;
-use OwenIt\Auditing\Contracts\Auditable;
-use Spatie\MediaLibrary\InteractsWithMedia;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Casts\Attribute;
-use AidingApp\ServiceManagement\Enums\ContractStatus;
+use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use OwenIt\Auditing\Contracts\Auditable;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\ContractManagement\Enums\ContractStatus;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
-/**
- * @mixin IdeHelperContract
- */
 class Contract extends BaseModel implements HasMedia, Auditable
 {
     use InteractsWithMedia;

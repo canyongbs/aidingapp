@@ -1,6 +1,6 @@
 <?php
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ContractTypeResource\Pages;
+namespace AidingApp\ContractManagement\Filament\Resources\ContractTypeResource\Pages;
 
 use Filament\Forms\Form;
 use Illuminate\Support\Str;
@@ -8,8 +8,8 @@ use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\EditRecord;
-use AidingApp\ServiceManagement\Models\ContractType;
-use AidingApp\ServiceManagement\Filament\Resources\ContractTypeResource;
+use AidingApp\ContractManagement\Models\ContractType;
+use AidingApp\ContractManagement\Filament\Resources\ContractTypeResource;
 
 class EditContractType extends EditRecord
 {
