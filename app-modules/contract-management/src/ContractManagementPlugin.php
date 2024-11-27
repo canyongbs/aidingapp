@@ -34,19 +34,25 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Clusters;
+namespace AidingApp\ContractManagement;
 
-use Filament\Clusters\Cluster;
+use Filament\Panel;
+use Filament\Contracts\Plugin;
 
-class KnowledgeManagement extends Cluster
+class ContractManagementPlugin implements Plugin
 {
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    public function getId(): string
+    {
+        return 'contract-management';
+    }
 
-    protected static ?string $navigationGroup = 'Product Administration';
+    public function register(Panel $panel): void
+    {
+        $panel->discoverResources(
+            in: __DIR__ . '/Filament/Resources',
+            for: 'AidingApp\\ContractManagement\\Filament\\Resources'
+        );
+    }
 
-    protected static ?string $navigationLabel = 'Knowledge Base';
-
-    protected static ?string $clusterBreadcrumb = 'Knowledge Base';
-
-    protected static ?int $navigationSort = 8;
+    public function boot(Panel $panel): void {}
 }

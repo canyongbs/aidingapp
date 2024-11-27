@@ -38,15 +38,11 @@ namespace App\Filament\Clusters;
 
 use Filament\Clusters\Cluster;
 
-class KnowledgeManagement extends Cluster
+class ContractManagement extends Cluster
 {
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    protected static ?string $navigationIcon = 'heroicon-o-squares-2x2';
 
     protected static ?string $navigationGroup = 'Product Administration';
 
-    protected static ?string $navigationLabel = 'Knowledge Base';
-
-    protected static ?string $clusterBreadcrumb = 'Knowledge Base';
-
-    protected static ?int $navigationSort = 8;
+    protected static ?int $navigationSort = 6;
 }

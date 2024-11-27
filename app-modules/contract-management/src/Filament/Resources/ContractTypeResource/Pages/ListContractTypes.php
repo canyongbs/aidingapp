@@ -34,19 +34,47 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Clusters;
+namespace AidingApp\ContractManagement\Filament\Resources\ContractTypeResource\Pages;
 
-use Filament\Clusters\Cluster;
+use Filament\Tables\Table;
+use Filament\Actions\CreateAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Resources\Pages\ListRecords;
+use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Tables\Actions\DeleteBulkAction;
+use AidingApp\ContractManagement\Filament\Resources\ContractTypeResource;
 
-class KnowledgeManagement extends Cluster
+class ListContractTypes extends ListRecords
 {
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    protected static string $resource = ContractTypeResource::class;
 
-    protected static ?string $navigationGroup = 'Product Administration';
+    public function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                TextColumn::make('name'),
+                IconColumn::make('is_default')->label('Is Default')->boolean(),
+            ])
+            ->actions([
+                EditAction::make(),
+                DeleteAction::make(),
+            ])
+            ->bulkActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
+            ])
+            ->defaultSort('order', 'ASC')
+            ->reorderable('order');
+    }
 
-    protected static ?string $navigationLabel = 'Knowledge Base';
-
-    protected static ?string $clusterBreadcrumb = 'Knowledge Base';
-
-    protected static ?int $navigationSort = 8;
+    protected function getHeaderActions(): array
+    {
+        return [
+            CreateAction::make(),
+        ];
+    }
 }

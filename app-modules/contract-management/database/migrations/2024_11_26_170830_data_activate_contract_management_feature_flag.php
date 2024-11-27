@@ -34,19 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Clusters;
+use App\Features\ContractManagement;
+use Illuminate\Database\Migrations\Migration;
 
-use Filament\Clusters\Cluster;
+return new class () extends Migration {
+    public function up(): void
+    {
+        ContractManagement::activate();
+    }
 
-class KnowledgeManagement extends Cluster
-{
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
-
-    protected static ?string $navigationGroup = 'Product Administration';
-
-    protected static ?string $navigationLabel = 'Knowledge Base';
-
-    protected static ?string $clusterBreadcrumb = 'Knowledge Base';
-
-    protected static ?int $navigationSort = 8;
-}
+    public function down(): void
+    {
+        ContractManagement::deactivate();
+    }
+};

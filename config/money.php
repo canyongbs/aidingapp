@@ -34,19 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Clusters;
-
-use Filament\Clusters\Cluster;
-
-class KnowledgeManagement extends Cluster
-{
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
-
-    protected static ?string $navigationGroup = 'Product Administration';
-
-    protected static ?string $navigationLabel = 'Knowledge Base';
-
-    protected static ?string $clusterBreadcrumb = 'Knowledge Base';
-
-    protected static ?int $navigationSort = 8;
-}
+return [
+    /*
+     |--------------------------------------------------------------------------
+     | Laravel money
+     |--------------------------------------------------------------------------
+     */
+    'locale' => config('app.locale', 'en_US'),
+    'defaultCurrency' => config('app.currency', 'USD'),
+    'defaultFormatter' => null,
+    'defaultSerializer' => null,
+    'isoCurrenciesPath' => __DIR__ . '/../vendor/moneyphp/money/resources/currency.php',
+    'currencies' => [
+    ],
+];

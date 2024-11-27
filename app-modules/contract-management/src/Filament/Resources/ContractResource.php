@@ -34,19 +34,40 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Clusters;
+namespace AidingApp\ContractManagement\Filament\Resources;
 
-use Filament\Clusters\Cluster;
+use Filament\Resources\Resource;
+use App\Features\ContractManagement;
+use AidingApp\ContractManagement\Models\Contract;
+use AidingApp\ContractManagement\Filament\Resources\ContractResource\Pages\EditContract;
+use AidingApp\ContractManagement\Filament\Resources\ContractResource\Pages\ViewContract;
+use AidingApp\ContractManagement\Filament\Resources\ContractResource\Pages\ListContracts;
+use AidingApp\ContractManagement\Filament\Resources\ContractResource\Pages\CreateContract;
 
-class KnowledgeManagement extends Cluster
+class ContractResource extends Resource
 {
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    protected static ?string $model = Contract::class;
 
-    protected static ?string $navigationGroup = 'Product Administration';
+    protected static ?string $navigationIcon = 'heroicon-o-document-check';
 
-    protected static ?string $navigationLabel = 'Knowledge Base';
+    protected static ?string $navigationGroup = 'Service Management';
 
-    protected static ?string $clusterBreadcrumb = 'Knowledge Base';
+    protected static ?string $navigationLabel = 'Contract Management';
 
-    protected static ?int $navigationSort = 8;
+    protected static ?int $navigationSort = 40;
+
+    public static function canAccess(): bool
+    {
+        return ContractManagement::active() && parent::canAccess();
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => ListContracts::route('/'),
+            'create' => CreateContract::route('/create'),
+            'view' => ViewContract::route('/{record}'),
+            'edit' => EditContract::route('/{record}/edit'),
+        ];
+    }
 }

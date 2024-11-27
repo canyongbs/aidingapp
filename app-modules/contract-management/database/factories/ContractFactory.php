@@ -34,19 +34,36 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Clusters;
+namespace AidingApp\ContractManagement\Database\Factories;
 
-use Filament\Clusters\Cluster;
+use Cknow\Money\Money;
+use AidingApp\ContractManagement\Models\Contract;
+use Illuminate\Database\Eloquent\Factories\Factory;
+use AidingApp\ContractManagement\Models\ContractType;
 
-class KnowledgeManagement extends Cluster
+/**
+ * @extends Contract>
+ */
+class ContractFactory extends Factory
 {
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
-
-    protected static ?string $navigationGroup = 'Product Administration';
-
-    protected static ?string $navigationLabel = 'Knowledge Base';
-
-    protected static ?string $clusterBreadcrumb = 'Knowledge Base';
-
-    protected static ?int $navigationSort = 8;
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition(): array
+    {
+        return [
+            'name' => fake()->sentence(),
+            'description' => fake()->paragraph(),
+            'contract_type_id' => ContractType::factory(),
+            'vendor_name' => fake()->name(),
+            'start_date' => fake()->dateTimeBetween('-1 year', '+1 year'),
+            'end_date' => fn (array $attributes) => fake()->dateTimeBetween(
+                (clone $attributes['start_date'])->modify('+1 day'),
+                (clone $attributes['start_date'])->modify('+1 year')
+            ),
+            'contract_value' => Money::parseByDecimal(fake()->randomNumber(), config('money.defaultCurrency')),
+        ];
+    }
 }

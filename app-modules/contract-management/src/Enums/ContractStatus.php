@@ -34,19 +34,38 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Clusters;
+namespace AidingApp\ContractManagement\Enums;
 
-use Filament\Clusters\Cluster;
+use InvalidArgumentException;
+use Filament\Support\Contracts\HasLabel;
 
-class KnowledgeManagement extends Cluster
+enum ContractStatus: string implements HasLabel
 {
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    case Pending = 'pending';
+    case Active = 'active';
+    case Expired = 'expired';
 
-    protected static ?string $navigationGroup = 'Product Administration';
+    public static function getStatus($startDate, $endDate): self
+    {
+        $today = now()->format('Y-m-d');
 
-    protected static ?string $navigationLabel = 'Knowledge Base';
+        if ($startDate > $today) {
+            return self::Pending;
+        }
 
-    protected static ?string $clusterBreadcrumb = 'Knowledge Base';
+        if ($startDate <= $today && $endDate >= $today) {
+            return self::Active;
+        }
 
-    protected static ?int $navigationSort = 8;
+        if ($endDate < $today) {
+            return self::Expired;
+        }
+
+        throw new InvalidArgumentException('Invalid date range');
+    }
+
+    public function getLabel(): string
+    {
+        return str($this->value)->headline()->toString();
+    }
 }

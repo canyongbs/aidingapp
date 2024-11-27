@@ -34,19 +34,51 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Clusters;
+namespace App\Casts;
 
-use Filament\Clusters\Cluster;
+use Cknow\Money\Money;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 
-class KnowledgeManagement extends Cluster
+class CurrencyCast implements CastsAttributes
 {
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    /**
+     * Cast the given value.
+     *
+     * @param  array<string, mixed>  $attributes
+     */
+    public function get(Model $model, string $key, mixed $payload, array $attributes): mixed
+    {
+        $payload = json_decode($payload);
 
-    protected static ?string $navigationGroup = 'Product Administration';
+        if (blank($payload)) {
+            return null;
+        }
 
-    protected static ?string $navigationLabel = 'Knowledge Base';
+        $value = $payload->value ?? null;
+        $currency = $payload->currency ?? null;
 
-    protected static ?string $clusterBreadcrumb = 'Knowledge Base';
+        if (blank($value) || blank($currency)) {
+            return null;
+        }
 
-    protected static ?int $navigationSort = 8;
+        return Money::parse($value, $currency);
+    }
+
+    /**
+     * Prepare the given value for storage.
+     *
+     * @param  array<string, mixed>  $attributes
+     */
+    public function set(Model $model, string $key, mixed $payload, array $attributes): mixed
+    {
+        if (blank($payload) || ! ($payload instanceof Money)) {
+            return null;
+        }
+
+        return json_encode([
+            'value' => $payload->getAmount(),
+            'currency' => $payload->getCurrency()->getCode(),
+        ]);
+    }
 }

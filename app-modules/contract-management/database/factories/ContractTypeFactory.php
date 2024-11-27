@@ -34,19 +34,48 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Clusters;
+namespace AidingApp\ContractManagement\Database\Factories;
 
-use Filament\Clusters\Cluster;
+use Illuminate\Database\Eloquent\Factories\Factory;
+use AidingApp\ContractManagement\Models\ContractType;
 
-class KnowledgeManagement extends Cluster
+/**
+ * @extends ContractType>
+ */
+class ContractTypeFactory extends Factory
 {
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    private int $maxOrder;
 
-    protected static ?string $navigationGroup = 'Product Administration';
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition(): array
+    {
+        return [
+            'name' => fake()->word(),
+            'is_default' => false,
+            'order' => $this->getNewOrder(),
+        ];
+    }
 
-    protected static ?string $navigationLabel = 'Knowledge Base';
+    public function default(): Factory
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'is_default' => true,
+            ];
+        });
+    }
 
-    protected static ?string $clusterBreadcrumb = 'Knowledge Base';
+    public function getNewOrder(): int
+    {
+        return $this->maxOrder = $this->getMaxOrder() + 1;
+    }
 
-    protected static ?int $navigationSort = 8;
+    public function getMaxOrder(): int
+    {
+        return $this->maxOrder ??= ContractType::max('order') ?? 0;
+    }
 }

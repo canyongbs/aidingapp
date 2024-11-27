@@ -34,19 +34,25 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Clusters;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
-use Filament\Clusters\Cluster;
+return new class () extends Migration {
+    public function up(): void
+    {
+        Schema::create('contract_types', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->string('name');
+            $table->boolean('is_default');
+            $table->unsignedInteger('order');
+            $table->timestamps();
+            $table->softDeletes();
+        });
+    }
 
-class KnowledgeManagement extends Cluster
-{
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
-
-    protected static ?string $navigationGroup = 'Product Administration';
-
-    protected static ?string $navigationLabel = 'Knowledge Base';
-
-    protected static ?string $clusterBreadcrumb = 'Knowledge Base';
-
-    protected static ?int $navigationSort = 8;
-}
+    public function down(): void
+    {
+        Schema::dropIfExists('contract_types');
+    }
+};

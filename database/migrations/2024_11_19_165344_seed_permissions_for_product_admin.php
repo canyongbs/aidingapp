@@ -34,19 +34,44 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Clusters;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Migrations\Migration;
+use Database\Migrations\Concerns\CanModifyPermissions;
 
-use Filament\Clusters\Cluster;
+return new class () extends Migration {
+    use CanModifyPermissions;
 
-class KnowledgeManagement extends Cluster
-{
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    private array $permissions = [
+        'product_admin.view-any' => 'Product Admin',
+        'product_admin.create' => 'Product Admin',
+        'product_admin.*.view' => 'Product Admin',
+        'product_admin.*.update' => 'Product Admin',
+        'product_admin.*.delete' => 'Product Admin',
+        'product_admin.*.restore' => 'Product Admin',
+        'product_admin.*.force-delete' => 'Product Admin',
+    ];
 
-    protected static ?string $navigationGroup = 'Product Administration';
+    private array $guards = [
+        'web',
+        'api',
+    ];
 
-    protected static ?string $navigationLabel = 'Knowledge Base';
+    public function up(): void
+    {
+        collect($this->guards)
+            ->each(function (string $guard) {
+                $permissions = Arr::except($this->permissions, keys: DB::table('permissions')
+                    ->where('guard_name', $guard)
+                    ->pluck('name')
+                    ->all());
 
-    protected static ?string $clusterBreadcrumb = 'Knowledge Base';
+                $this->createPermissions($permissions, $guard);
+            });
+    }
 
-    protected static ?int $navigationSort = 8;
-}
+    public function down(): void
+    {
+        $this->deletePermissions(array_keys($this->permissions), $this->guards);
+    }
+};
