@@ -58,10 +58,42 @@ class ProductLicenseFactory extends Factory
             'product_id' => Product::factory(),
             'assigned_to' => Contact::factory(),
             'start_date' => fake()->dateTimeBetween('-1 year', '+1 year'),
-            'end_date' => fn (array $attributes) => fake()->dateTimeBetween(
+            'expiration_date' => fn (array $attributes) => fake()->dateTimeBetween(
                 (clone $attributes['start_date'])->modify('+1 day'),
                 (clone $attributes['start_date'])->modify('+1 year')
             ),
         ];
+    }
+
+    public function pending(): static
+    {
+        return $this->state(fn () => [
+            'start_date' => now()->addDays(5),
+            'expiration_date' => now()->addDays(30),
+        ]);
+    }
+
+    public function active(): static
+    {
+        return $this->state(fn () => [
+            'start_date' => now()->subDays(5),
+            'expiration_date' => now()->addDays(10),
+        ]);
+    }
+
+    public function expired(): static
+    {
+        return $this->state(fn () => [
+            'start_date' => now()->subDays(30),
+            'expiration_date' => now()->subDays(10),
+        ]);
+    }
+
+    public function noExpiration(): static
+    {
+        return $this->state(fn () => [
+            'start_date' => now()->subDays(5),
+            'expiration_date' => null,
+        ]);
     }
 }
