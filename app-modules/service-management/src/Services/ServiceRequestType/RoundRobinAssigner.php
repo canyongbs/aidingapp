@@ -36,42 +36,36 @@
 
 namespace AidingApp\ServiceManagement\Services\ServiceRequestType;
 
-use AidingApp\Team\Models\Team;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
-use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 
 class RoundRobinAssigner implements ServiceRequestTypeAssigner
 {
-    public function execute(ServiceRequest $serviceRequest): void
-    {
-        if ($serviceRequest->priority?->type) {
-            $assignmentType = $serviceRequest->priority->type;
+  public function execute(ServiceRequest $serviceRequest): void
+  {
+    if ($serviceRequest->priority?->type) {
+      $serviceRequestType = $serviceRequest->priority->type;
 
-            $nextManager = $this->getNextManager($assignmentType, $assignmentType->round_robin_last_assigned_id);
-            $serviceRequest->priority->type->round_robin_last_assigned_id = $nextManager->id;
-        }
+      $lastAsignee = $serviceRequestType->user;
+      $user = null;
+      if ($lastAsignee) {
+        $user = User::query()->whereRelation('teams.managableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey())
+          ->where('name', '>=', $lastAsignee->name)
+          ->where(fn(Builder $query) => $query
+            ->where('name', '!=', $lastAsignee->name)
+            ->orWhere('users.id', '>', $lastAsignee->id))
+          ->orderBy('name')->orderBy('id')->first();
+      }
+
+      if ($user == null) {
+        $user = User::query()->whereRelation('teams.managableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey())
+          ->orderBy('name')->orderBy('id')->first();
+      }
+
+      if ($user != null) {
+        $serviceRequestType->round_robin_last_assigned_id = $user->getKey();
+      }
     }
-
-    public function getNextManager(ServiceRequestType $serviceRequestType, ?string $currentManagerId = null): ?Team
-    {
-        $managers = $serviceRequestType->managers()->get();
-
-        if ($managers->isEmpty()) {
-            return null;
-        }
-
-        if ($currentManagerId === null) {
-            return $managers->first();
-        }
-
-        $currentIndex = $managers->search(fn ($manager) => (string) $manager->id === $currentManagerId);
-
-        if ($currentIndex === false) {
-            return $managers->first();
-        }
-
-        $nextIndex = ($currentIndex + 1) % $managers->count();
-
-        return $managers[$nextIndex];
-    }
+  }
 }

@@ -45,7 +45,7 @@ return new class () extends Migration {
             $table->foreignUuid('round_robin_last_assigned_id')
                 ->nullable()
                 ->references('id')
-                ->on('service_request_type_managers');
+                ->on('users');
         });
     }
 

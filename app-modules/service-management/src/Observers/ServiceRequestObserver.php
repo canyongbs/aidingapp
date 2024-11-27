@@ -37,14 +37,10 @@
 namespace AidingApp\ServiceManagement\Observers;
 
 use Carbon\Carbon;
-use App\Models\User;
 use App\Enums\Feature;
 use Illuminate\Support\Facades\Gate;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
-use AidingApp\Notification\Events\TriggeredAutoSubscription;
 use AidingApp\ServiceManagement\Actions\CreateServiceRequestHistory;
-use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
-use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Notifications\SendClosedServiceFeedbackNotification;
 use AidingApp\ServiceManagement\Exceptions\ServiceRequestNumberUpdateAttemptException;
@@ -61,25 +57,6 @@ class ServiceRequestObserver
 
     public function created(ServiceRequest $serviceRequest): void
     {
-        $user = auth()->user();
-
-        if ($user instanceof User) {
-            TriggeredAutoSubscription::dispatch($user, $serviceRequest);
-
-            if ($serviceRequest?->priority->type->assignment_type == ServiceRequestTypeAssignmentTypes::Individual) {
-                $manager = $serviceRequest?->priority->type?->assignmentTypeIndividual;
-
-                if ($manager) {
-                    $serviceRequest->assignments()->create([
-                        'user_id' => $manager->getKey(),
-                        'assigned_by_id' => $user->getKey(),
-                        'assigned_at' => now(),
-                        'status' => ServiceRequestAssignmentStatus::Active,
-                    ]);
-                }
-            }
-        }
-
         if ($serviceRequest->status?->classification === SystemServiceRequestClassification::Open) {
             $serviceRequest->respondent->notify(new SendEducatableServiceRequestOpenedNotification($serviceRequest));
         }
