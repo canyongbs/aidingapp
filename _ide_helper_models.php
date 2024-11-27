@@ -1102,6 +1102,86 @@ namespace AidingApp\Contact\Models{
 	class IdeHelperOrganizationType {}
 }
 
+namespace AidingApp\ContractManagement\Models{
+/**
+ * AidingApp\ContractManagement\Models\Contract
+ *
+ * @property string $id
+ * @property string $name
+ * @property string|null $description
+ * @property string $contract_type_id
+ * @property string $vendor_name
+ * @property string $start_date
+ * @property string $end_date
+ * @property mixed|null $contract_value
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
+ * @property-read int|null $audits_count
+ * @property-read \AidingApp\ContractManagement\Models\ContractType $contractType
+ * @property-read \Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection<int, \Spatie\MediaLibrary\MediaCollections\Models\Media> $media
+ * @property-read int|null $media_count
+ * @property-read mixed $status
+ * @method static \AidingApp\ContractManagement\Database\Factories\ContractFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|Contract newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Contract newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Contract onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|Contract query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Contract whereContractTypeId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Contract whereContractValue($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Contract whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Contract whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Contract whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Contract whereEndDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Contract whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Contract whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Contract whereStartDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Contract whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Contract whereVendorName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Contract withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|Contract withoutTrashed()
+ * @mixin \Eloquent
+ */
+	#[\AllowDynamicProperties]
+	class IdeHelperContract {}
+}
+
+namespace AidingApp\ContractManagement\Models{
+/**
+ * AidingApp\ContractManagement\Models\ContractType
+ *
+ * @property string $id
+ * @property string $name
+ * @property bool $is_default
+ * @property int $order
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
+ * @property-read int|null $audits_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\ContractManagement\Models\Contract> $contracts
+ * @property-read int|null $contracts_count
+ * @method static \AidingApp\ContractManagement\Database\Factories\ContractTypeFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|ContractType newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|ContractType newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|ContractType onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|ContractType query()
+ * @method static \Illuminate\Database\Eloquent\Builder|ContractType whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ContractType whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ContractType whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ContractType whereIsDefault($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ContractType whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ContractType whereOrder($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ContractType whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ContractType withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|ContractType withoutTrashed()
+ * @mixin \Eloquent
+ */
+	#[\AllowDynamicProperties]
+	class IdeHelperContractType {}
+}
+
 namespace AidingApp\Division\Models{
 /**
  * AidingApp\Division\Models\Division

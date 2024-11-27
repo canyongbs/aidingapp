@@ -34,19 +34,27 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Clusters;
+namespace AidingApp\ContractManagement\Providers;
 
-use Filament\Clusters\Cluster;
+use Filament\Panel;
+use Illuminate\Support\ServiceProvider;
+use AidingApp\ContractManagement\Models\Contract;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use AidingApp\ContractManagement\Models\ContractType;
+use AidingApp\ContractManagement\ContractManagementPlugin;
 
-class KnowledgeManagement extends Cluster
+class ContractManagementServiceProvider extends ServiceProvider
 {
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    public function register()
+    {
+        Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new ContractManagementPlugin()));
+    }
 
-    protected static ?string $navigationGroup = 'Product Administration';
-
-    protected static ?string $navigationLabel = 'Knowledge Base';
-
-    protected static ?string $clusterBreadcrumb = 'Knowledge Base';
-
-    protected static ?int $navigationSort = 8;
+    public function boot()
+    {
+        Relation::morphMap([
+            'contract_type' => ContractType::class,
+            'contract' => Contract::class,
+        ]);
+    }
 }

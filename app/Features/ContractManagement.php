@@ -34,19 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Clusters;
+namespace App\Features;
 
-use Filament\Clusters\Cluster;
+use App\Support\AbstractFeatureFlag;
 
-class KnowledgeManagement extends Cluster
+class ContractManagement extends AbstractFeatureFlag
 {
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
-
-    protected static ?string $navigationGroup = 'Product Administration';
-
-    protected static ?string $navigationLabel = 'Knowledge Base';
-
-    protected static ?string $clusterBreadcrumb = 'Knowledge Base';
-
-    protected static ?int $navigationSort = 8;
+    public function resolve(mixed $scope): mixed
+    {
+        return false;
+    }
 }

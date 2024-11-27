@@ -34,19 +34,30 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Clusters;
+namespace AidingApp\ContractManagement\Models;
 
-use Filament\Clusters\Cluster;
+use App\Models\BaseModel;
+use OwenIt\Auditing\Contracts\Auditable;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 
-class KnowledgeManagement extends Cluster
+/**
+ * @mixin IdeHelperContractType
+ */
+class ContractType extends BaseModel implements Auditable
 {
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    use AuditableTrait;
+    use SoftDeletes;
 
-    protected static ?string $navigationGroup = 'Product Administration';
+    protected $fillable = ['name', 'is_default', 'order'];
 
-    protected static ?string $navigationLabel = 'Knowledge Base';
+    protected $casts = [
+        'is_default' => 'boolean',
+    ];
 
-    protected static ?string $clusterBreadcrumb = 'Knowledge Base';
-
-    protected static ?int $navigationSort = 8;
+    public function contracts(): HasMany
+    {
+        return $this->hasMany(Contract::class, 'contract_type');
+    }
 }
