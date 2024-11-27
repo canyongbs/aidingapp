@@ -34,29 +34,20 @@
 </COPYRIGHT>
 */
 
-use AidingApp\LicenseManagement\Models\ProductLicense;
-use AidingApp\LicenseManagement\Enums\ProductLicenseStatus;
+namespace AidingApp\LicenseManagement\Enums;
 
-it('returns Pending when the current date is before the start date', function () {
-    $productLicense = ProductLicense::factory()->pending()->create();
+use Filament\Support\Contracts\HasLabel;
 
-    expect($productLicense->status)->toBe(ProductLicenseStatus::Pending);
-});
+enum ProductLicenseStatus: string implements HasLabel
+{
+    case Pending = 'pending';
 
-it('returns Active when the current date is between start and expiration dates', function () {
-    $productLicense = ProductLicense::factory()->active()->create();
+    case Active = 'active';
 
-    expect($productLicense->status)->toBe(ProductLicenseStatus::Active);
-});
+    case Expired = 'expired';
 
-it('returns Expired when the current date is after the expiration date', function () {
-    $productLicense = ProductLicense::factory()->expired()->create();
-
-    expect($productLicense->status)->toBe(ProductLicenseStatus::Expired);
-});
-
-it('returns Active when there is no expiration date and the current date is after the start date', function () {
-    $productLicense = ProductLicense::factory()->noExpiration()->create();
-
-    expect($productLicense->status)->toBe(ProductLicenseStatus::Active);
-});
+    public function getLabel(): ?string
+    {
+        return $this->name;
+    }
+}

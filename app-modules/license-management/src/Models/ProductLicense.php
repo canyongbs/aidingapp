@@ -36,6 +36,7 @@
 
 namespace AidingApp\LicenseManagement\Models;
 
+use Exception;
 use Carbon\Carbon;
 use App\Models\BaseModel;
 use AidingApp\Contact\Models\Contact;
@@ -44,8 +45,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use AidingApp\LicenseManagement\Enums\ProductLicenseStatus;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\LicenseManagement\Observers\ProductLicenseObserver;
+use App\LicenseManagement\Exceptions\FailedToDetermineProductLicenseStatus;
 
 #[ObservedBy(ProductLicenseObserver::class)]
 class ProductLicense extends BaseModel implements Auditable
@@ -87,23 +90,19 @@ class ProductLicense extends BaseModel implements Auditable
     protected function status(): Attribute
     {
         return new Attribute(
-            get: function (mixed $value, array $attributes) {
+            get: function (mixed $value, array $attributes): ProductLicenseStatus {
                 $today = Carbon::today();
 
                 $startDate = $attributes['start_date'];
                 $expirationDate = $attributes['expiration_date'];
 
-                if ($today->lt($startDate)) {
-                    return 'Pending';
-                } elseif ($expirationDate && $today->between($startDate, $expirationDate)) {
-                    return 'Active';
-                } elseif ($expirationDate && $today->gt($expirationDate)) {
-                    return 'Expired';
-                } elseif (! $expirationDate && $today->gte($startDate)) {
-                    return 'Active';
-                }
-
-                return null;
+                return match (true) {
+                    $today->lt($startDate) => ProductLicenseStatus::Pending,
+                    $expirationDate && $today->between($startDate, $expirationDate) => ProductLicenseStatus::Active,
+                    $expirationDate && $today->gt($expirationDate) => ProductLicenseStatus::Expired,
+                    ! $expirationDate && $today->gte($startDate) => ProductLicenseStatus::Active,
+                    default => throw new FailedToDetermineProductLicenseStatus($this),
+                };
             },
         );
     }
