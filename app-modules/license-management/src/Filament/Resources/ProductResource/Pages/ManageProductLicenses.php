@@ -146,6 +146,7 @@ class ManageProductLicenses extends ManageRelatedRecords
                     ->dateTime('m-d-Y'),
                 TextColumn::make('expiration_date')
                     ->label('Expiration Date')
+                    ->placeholder('No Expiration')
                     ->sortable()
                     ->dateTime('m-d-Y'),
                 TextColumn::make('Status')
