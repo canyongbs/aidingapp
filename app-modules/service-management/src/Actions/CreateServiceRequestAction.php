@@ -36,26 +36,26 @@
 
 namespace AidingApp\ServiceManagement\Actions;
 
+use Illuminate\Support\Facades\DB;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\DataTransferObjects\ServiceRequestDataObject;
-use Illuminate\Support\Facades\DB;
 
 class CreateServiceRequestAction
 {
-  public function execute(ServiceRequestDataObject $serviceRequestDataObject)
-  {
-    DB::transaction(
-      function () use ($serviceRequestDataObject) {
-        $serviceRequest = new ServiceRequest($serviceRequestDataObject->toArray());
-        $assignmentClass = $serviceRequest->priority->type?->assignment_type?->getAssignerClass();
+    public function execute(ServiceRequestDataObject $serviceRequestDataObject)
+    {
+        DB::transaction(
+            function () use ($serviceRequestDataObject) {
+                $serviceRequest = new ServiceRequest($serviceRequestDataObject->toArray());
+                $assignmentClass = $serviceRequest->priority->type?->assignment_type?->getAssignerClass();
 
-        if ($assignmentClass) {
-          $assignmentClass->execute($serviceRequest);
-        }
+                if ($assignmentClass) {
+                    $assignmentClass->execute($serviceRequest);
+                }
 
-        $serviceRequest->save();
-        $serviceRequest->priority->type->save();
-      }
-    );
-  }
+                $serviceRequest->save();
+                $serviceRequest->priority->type->save();
+            }
+        );
+    }
 }

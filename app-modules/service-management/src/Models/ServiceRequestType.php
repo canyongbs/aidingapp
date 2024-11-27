@@ -56,97 +56,97 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
  */
 class ServiceRequestType extends BaseModel implements Auditable
 {
-  use SoftDeletes;
-  use HasUuids;
-  use AuditableTrait;
+    use SoftDeletes;
+    use HasUuids;
+    use AuditableTrait;
 
-  protected $fillable = [
-    'name',
-    'has_enabled_feedback_collection',
-    'has_enabled_csat',
-    'has_enabled_nps',
-    'description',
-    'icon',
-    'assignment_type',
-    'is_managers_service_request_created_email_enabled',
-    'is_managers_service_request_created_notification_enabled',
-    'is_managers_service_request_assigned_email_enabled',
-    'is_managers_service_request_assigned_notification_enabled',
-    'is_managers_service_request_resolved_email_enabled',
-    'is_managers_service_request_resolved_notification_enabled',
-    'is_auditors_service_request_created_email_enabled',
-    'is_auditors_service_request_created_notification_enabled',
-    'is_auditors_service_request_assigned_email_enabled',
-    'is_auditors_service_request_assigned_notification_enabled',
-    'is_auditors_service_request_resolved_email_enabled',
-    'is_auditors_service_request_resolved_notification_enabled',
-    'round_robin_last_assigned_id',
-  ];
+    protected $fillable = [
+        'name',
+        'has_enabled_feedback_collection',
+        'has_enabled_csat',
+        'has_enabled_nps',
+        'description',
+        'icon',
+        'assignment_type',
+        'is_managers_service_request_created_email_enabled',
+        'is_managers_service_request_created_notification_enabled',
+        'is_managers_service_request_assigned_email_enabled',
+        'is_managers_service_request_assigned_notification_enabled',
+        'is_managers_service_request_resolved_email_enabled',
+        'is_managers_service_request_resolved_notification_enabled',
+        'is_auditors_service_request_created_email_enabled',
+        'is_auditors_service_request_created_notification_enabled',
+        'is_auditors_service_request_assigned_email_enabled',
+        'is_auditors_service_request_assigned_notification_enabled',
+        'is_auditors_service_request_resolved_email_enabled',
+        'is_auditors_service_request_resolved_notification_enabled',
+        'round_robin_last_assigned_id',
+    ];
 
-  protected $casts = [
-    'has_enabled_feedback_collection' => 'boolean',
-    'has_enabled_csat' => 'boolean',
-    'has_enabled_nps' => 'boolean',
-    'assignment_type' => ServiceRequestTypeAssignmentTypes::class,
-    'is_managers_service_request_created_email_enabled' => 'boolean',
-    'is_managers_service_request_created_notification_enabled' => 'boolean',
-    'is_managers_service_request_assigned_email_enabled' => 'boolean',
-    'is_managers_service_request_assigned_notification_enabled' => 'boolean',
-    'is_managers_service_request_resolved_email_enabled' => 'boolean',
-    'is_managers_service_request_resolved_notification_enabled' => 'boolean',
-    'is_auditors_service_request_created_email_enabled' => 'boolean',
-    'is_auditors_service_request_created_notification_enabled' => 'boolean',
-    'is_auditors_service_request_assigned_email_enabled' => 'boolean',
-    'is_auditors_service_request_assigned_notification_enabled' => 'boolean',
-    'is_auditors_service_request_resolved_email_enabled' => 'boolean',
-    'is_auditors_service_request_resolved_notification_enabled' => 'boolean',
-  ];
+    protected $casts = [
+        'has_enabled_feedback_collection' => 'boolean',
+        'has_enabled_csat' => 'boolean',
+        'has_enabled_nps' => 'boolean',
+        'assignment_type' => ServiceRequestTypeAssignmentTypes::class,
+        'is_managers_service_request_created_email_enabled' => 'boolean',
+        'is_managers_service_request_created_notification_enabled' => 'boolean',
+        'is_managers_service_request_assigned_email_enabled' => 'boolean',
+        'is_managers_service_request_assigned_notification_enabled' => 'boolean',
+        'is_managers_service_request_resolved_email_enabled' => 'boolean',
+        'is_managers_service_request_resolved_notification_enabled' => 'boolean',
+        'is_auditors_service_request_created_email_enabled' => 'boolean',
+        'is_auditors_service_request_created_notification_enabled' => 'boolean',
+        'is_auditors_service_request_assigned_email_enabled' => 'boolean',
+        'is_auditors_service_request_assigned_notification_enabled' => 'boolean',
+        'is_auditors_service_request_resolved_email_enabled' => 'boolean',
+        'is_auditors_service_request_resolved_notification_enabled' => 'boolean',
+    ];
 
-  public function serviceRequests(): HasManyThrough
-  {
-    return $this->through('priorities')->has('serviceRequests');
-  }
+    public function serviceRequests(): HasManyThrough
+    {
+        return $this->through('priorities')->has('serviceRequests');
+    }
 
-  public function priorities(): HasMany
-  {
-    return $this->hasMany(ServiceRequestPriority::class, 'type_id');
-  }
+    public function priorities(): HasMany
+    {
+        return $this->hasMany(ServiceRequestPriority::class, 'type_id');
+    }
 
-  public function form(): HasOne
-  {
-    return $this->hasOne(ServiceRequestForm::class, 'service_request_type_id');
-  }
+    public function form(): HasOne
+    {
+        return $this->hasOne(ServiceRequestForm::class, 'service_request_type_id');
+    }
 
-  public function managers(): BelongsToMany
-  {
-    return $this->belongsToMany(Team::class, 'service_request_type_managers')
-      ->using(ServiceRequestTypeManager::class)
-      ->withTimestamps();
-  }
+    public function managers(): BelongsToMany
+    {
+        return $this->belongsToMany(Team::class, 'service_request_type_managers')
+            ->using(ServiceRequestTypeManager::class)
+            ->withTimestamps();
+    }
 
-  public function auditors(): BelongsToMany
-  {
-    return $this->belongsToMany(Team::class, 'service_request_type_auditors')
-      ->using(ServiceRequestTypeAuditor::class)
-      ->withTimestamps();
-  }
+    public function auditors(): BelongsToMany
+    {
+        return $this->belongsToMany(Team::class, 'service_request_type_auditors')
+            ->using(ServiceRequestTypeAuditor::class)
+            ->withTimestamps();
+    }
 
-  public function assignmentTypeIndividual(): BelongsTo
-  {
-    return $this->belongsTo(
-      related: User::class,
-      foreignKey: 'assignment_type_individual_id',
-      relation: 'serviceRequestTypeIndividualAssignment',
-    );
-  }
+    public function assignmentTypeIndividual(): BelongsTo
+    {
+        return $this->belongsTo(
+            related: User::class,
+            foreignKey: 'assignment_type_individual_id',
+            relation: 'serviceRequestTypeIndividualAssignment',
+        );
+    }
 
-  protected function serializeDate(DateTimeInterface $date): string
-  {
-    return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
-  }
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'round_robin_last_assigned_id', 'id');
+    }
 
-  public function user(): BelongsTo
-  {
-    return $this->belongsTo(User::class, 'round_robin_last_assigned_id', 'id');
-  }
+    protected function serializeDate(DateTimeInterface $date): string
+    {
+        return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
+    }
 }
