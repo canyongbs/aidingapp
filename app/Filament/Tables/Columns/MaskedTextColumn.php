@@ -1,4 +1,6 @@
-{{--
+<?php
+
+/*
 <COPYRIGHT>
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
@@ -30,25 +32,20 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
---}}
-<div
-    class="flex items-center"
-    x-data="{ revealed: false }"
->
-    <span
-        class="font-mono text-gray-700"
-        x-show="!revealed"
-    >**** **** **** ****</span>
-    <span
-        class="font-mono text-gray-700"
-        x-show="revealed"
-    >{{ $getState() }}</span>
-    <button
-        class="ml-2 text-blue-600 hover:underline"
-        type="button"
-        x-on:click="revealed = !revealed"
-    >
-        <span x-show="!revealed">Reveal</span>
-        <span x-show="revealed">Hide</span>
-    </button>
-</div>
+*/
+
+namespace App\Filament\Tables\Columns;
+
+use Filament\Tables\Columns\Column;
+
+class MaskedTextColumn extends Column
+{
+    protected string $view = 'filament.tables.columns.masked-text-column';
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->disabledClick();
+    }
+}

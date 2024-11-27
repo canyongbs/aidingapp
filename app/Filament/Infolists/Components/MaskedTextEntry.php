@@ -38,7 +38,7 @@ namespace App\Filament\Infolists\Components;
 
 use Filament\Infolists\Components\TextEntry;
 
-class MaskTextEntry extends TextEntry
+class MaskedTextEntry extends TextEntry
 {
-    protected string $view = 'filament.infolists.components.masked-column';
+    protected string $view = 'filament.infolists.components.masked-text-entry';
 }

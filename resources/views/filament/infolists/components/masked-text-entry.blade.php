@@ -31,40 +31,30 @@
 
 </COPYRIGHT>
 --}}
-<div
-    class="flex items-center"
-    x-data="{ revealed: false }"
->
-    <span
-        class="font-mono text-gray-700"
-        x-show="!revealed"
-    >**** **** **** ****</span>
-    <span
-        class="font-mono text-gray-700"
-        x-show="revealed"
-    >{{ $getState() }}</span>
-    <button
-        class="ml-2 text-blue-600 hover:underline"
-        type="button"
-        x-on:click="revealed = !revealed"
-    >
-        <span x-show="!revealed">Reveal</span>
-        <span x-show="revealed">Hide</span>
-    </button>
-</div>
-<!-- <div class="bg-gray-100 p-6 blur-lg">
-    This text should be noticeably blurred.
-</div>
-<div style="backdrop-filter: blur(12px); background: rgba(255, 255, 255, 0.8); padding: 20px;">
-    This text should be blurred.
-</div>
-<div class="flex items-center space-x-2" x-data="{ masked: true }">
-   
-    <span class="cursor-pointer overflow-hidden transition duration-200 ease-in-out" style="backdrop-filter: blur(4px);" x-on:click="masked = !masked" :class="{ 'blur-md': masked, 'text-gray-500': masked, 'text-black': !masked }">
-        {{ $getState() }}
-    </span>
 
-    <button class="text-gray-500 hover:text-gray-700 focus:outline-none" x-show="!masked" x-on:click="masked = true">
-        <x-heroicon-s-eye-slash class="h-5 w-5"/>
-    </button>
-</div> -->
+<x-dynamic-component
+    :component="$getEntryWrapperView()"
+    :entry="$entry"
+>
+    <div
+        class="flex items-center gap-1"
+        x-data="{ isRevealed: false }"
+    >
+        <button
+            class="font-mono text-sm font-medium text-gray-950 focus:outline-none dark:text-white"
+            x-on:click="isRevealed = true"
+            x-bind:class="{ 'blur-sm': !isRevealed }"
+        >
+            {{ $getState() }}
+        </button>
+
+        <button
+            class="flex h-7 w-7 items-center justify-center rounded-lg text-gray-400 outline-none transition duration-75 hover:text-gray-500 focus-visible:ring-2 focus-visible:ring-primary-600 dark:text-gray-500 dark:hover:text-gray-400 dark:focus-visible:ring-primary-500"
+            type="button"
+            x-on:click="isRevealed = ! isRevealed"
+            x-bind:class="{ 'blur-sm': !isRevealed }"
+        >
+            @svg('heroicon-c-eye-slash', 'w-4 h-4')
+        </button>
+    </div>
+</x-dynamic-component>

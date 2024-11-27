@@ -1,6 +1,4 @@
-<?php
-
-/*
+{{--
 <COPYRIGHT>
 
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
@@ -32,20 +30,27 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
+--}}
 
-namespace App\Filament\Tables\Columns;
+<div
+    class="flex items-center gap-1 px-3 py-4"
+    x-data="{ isRevealed: false }"
+>
+    <button
+        class="font-mono text-sm font-medium text-gray-950 dark:text-white"
+        type="button"
+        x-on:click="isRevealed = true"
+        x-bind:class="{ 'blur-sm': !isRevealed }"
+    >
+        {{ $getState() }}
+    </button>
 
-use Filament\Tables\Columns\Column;
-
-class MaskColumn extends Column
-{
-    protected string $view = 'filament.tables.columns.masked-column';
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->disabledClick();
-    }
-}
+    <button
+        class="flex h-7 w-7 items-center justify-center rounded-lg text-gray-400 outline-none transition duration-75 hover:text-gray-500 focus-visible:ring-2 focus-visible:ring-primary-600 dark:text-gray-500 dark:hover:text-gray-400 dark:focus-visible:ring-primary-500"
+        type="button"
+        x-on:click="isRevealed = ! isRevealed"
+        x-bind:class="{ 'blur-sm': !isRevealed }"
+    >
+        @svg('heroicon-c-eye-slash', 'w-4 h-4')
+    </button>
+</div>

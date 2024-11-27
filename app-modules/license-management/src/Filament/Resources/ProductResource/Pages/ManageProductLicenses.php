@@ -53,12 +53,12 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Actions\CreateAction;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Infolists\Components\Section;
-use App\Filament\Tables\Columns\MaskColumn;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
+use App\Filament\Tables\Columns\MaskedTextColumn;
 use Filament\Resources\Pages\ManageRelatedRecords;
-use App\Filament\Infolists\Components\MaskTextEntry;
+use App\Filament\Infolists\Components\MaskedTextEntry;
 use AidingApp\LicenseManagement\Filament\Resources\ProductResource;
 
 class ManageProductLicenses extends ManageRelatedRecords
@@ -135,7 +135,7 @@ class ManageProductLicenses extends ManageRelatedRecords
     {
         return $table
             ->columns([
-                MaskColumn::make('license')
+                MaskedTextColumn::make('license')
                     ->label('License')
                     ->sortable(),
                 TextColumn::make('contact.full_name')
@@ -173,7 +173,7 @@ class ManageProductLicenses extends ManageRelatedRecords
                 Section::make()
                     ->columns()
                     ->schema([
-                        MaskTextEntry::make('license')
+                        MaskedTextEntry::make('license')
                             ->label('License'),
                         TextEntry::make('contact.full_name')
                             ->label('Assigned To'),
