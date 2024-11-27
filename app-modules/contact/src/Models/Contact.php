@@ -58,7 +58,7 @@ use AidingApp\Portal\Models\KnowledgeBaseArticleVote;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use AidingApp\InventoryManagement\Models\AssetCheckIn;
-use AidingApp\ServiceManagement\Models\ProductLicense;
+use AidingApp\LicenseManagement\Models\ProductLicense;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use AidingApp\Engagement\Models\EngagementFileEntities;

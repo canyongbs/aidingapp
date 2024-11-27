@@ -38,7 +38,9 @@ namespace AidingApp\LicenseManagement\Providers;
 
 use Filament\Panel;
 use Illuminate\Support\ServiceProvider;
+use AidingApp\LicenseManagement\Models\Product;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use AidingApp\LicenseManagement\Models\ProductLicense;
 use AidingApp\LicenseManagement\LicenseManagementPlugin;
 
 class LicenseManagementServiceProvider extends ServiceProvider
@@ -50,6 +52,9 @@ class LicenseManagementServiceProvider extends ServiceProvider
 
     public function boot()
     {
-        Relation::morphMap([]);
+        Relation::morphMap([
+            'product' => Product::class,
+            'product_license' => ProductLicense::class,
+        ]);
     }
 }
