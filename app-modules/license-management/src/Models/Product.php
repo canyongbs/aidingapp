@@ -34,46 +34,32 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Rules;
+namespace AidingApp\LicenseManagement\Models;
 
-use Closure;
-use Illuminate\Database\Eloquent\Builder;
-use AidingApp\Contact\Models\Organization;
-use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Translation\PotentiallyTranslatedString;
+use App\Models\BaseModel;
+use OwenIt\Auditing\Contracts\Auditable;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use AidingApp\LicenseManagement\Observers\ProductObserver;
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 
-class UniqueOrganizationDomain implements ValidationRule
+#[ObservedBy(ProductObserver::class)]
+class Product extends BaseModel implements Auditable
 {
-    protected $ignoreId;
+    use AuditableTrait;
+    use SoftDeletes;
 
-    /**
-     * Create a new rule instance.
-     *
-     * @param  int|null  $ignoreId
-     */
-    public function __construct($ignoreId = null)
-    {
-        $this->ignoreId = $ignoreId;
-    }
+    protected $fillable = [
+        'name',
+        'url',
+        'description',
+        'version',
+        'additional_notes',
+    ];
 
-    /**
-     * Run the validation rule.
-     *
-     * @param  Closure(string): PotentiallyTranslatedString  $fail
-     */
-    public function validate(string $attribute, mixed $value, Closure $fail): void
+    public function productLicenses(): HasMany
     {
-        if (
-            Organization::whereJsonContains('domains', [['domain' => $value]])
-                ->when(! empty($this->ignoreId), fn (Builder $query) => $query->where('id', '!=', $this->ignoreId))
-                ->exists()
-        ) {
-            $fail($this->message());
-        }
-    }
-
-    public function message()
-    {
-        return 'This domain is already in use and may not be used a second time.';
+        return $this->hasMany(ProductLicense::class, 'product_id');
     }
 }

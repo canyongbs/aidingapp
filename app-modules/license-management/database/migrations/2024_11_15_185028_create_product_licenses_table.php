@@ -34,46 +34,29 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Rules;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
-use Closure;
-use Illuminate\Database\Eloquent\Builder;
-use AidingApp\Contact\Models\Organization;
-use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Translation\PotentiallyTranslatedString;
-
-class UniqueOrganizationDomain implements ValidationRule
-{
-    protected $ignoreId;
-
-    /**
-     * Create a new rule instance.
-     *
-     * @param  int|null  $ignoreId
-     */
-    public function __construct($ignoreId = null)
+return new class () extends Migration {
+    public function up(): void
     {
-        $this->ignoreId = $ignoreId;
+        Schema::create('product_licenses', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->foreignUuid('product_id')->constrained('products');
+            $table->text('license');
+            $table->text('description')->nullable();
+            $table->foreignUuid('assigned_to')->nullable()->constrained('contacts');
+            $table->date('start_date');
+            $table->date('expiration_date')->nullable();
+            $table->foreignUuid('created_by_id')->nullable()->constrained('users');
+            $table->timestamps();
+            $table->softDeletes();
+        });
     }
 
-    /**
-     * Run the validation rule.
-     *
-     * @param  Closure(string): PotentiallyTranslatedString  $fail
-     */
-    public function validate(string $attribute, mixed $value, Closure $fail): void
+    public function down(): void
     {
-        if (
-            Organization::whereJsonContains('domains', [['domain' => $value]])
-                ->when(! empty($this->ignoreId), fn (Builder $query) => $query->where('id', '!=', $this->ignoreId))
-                ->exists()
-        ) {
-            $fail($this->message());
-        }
+        Schema::dropIfExists('product_licenses');
     }
-
-    public function message()
-    {
-        return 'This domain is already in use and may not be used a second time.';
-    }
-}
+};

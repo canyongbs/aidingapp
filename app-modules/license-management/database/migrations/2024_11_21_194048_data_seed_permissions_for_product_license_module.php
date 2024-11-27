@@ -34,46 +34,51 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Rules;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Migrations\Migration;
+use Database\Migrations\Concerns\CanModifyPermissions;
 
-use Closure;
-use Illuminate\Database\Eloquent\Builder;
-use AidingApp\Contact\Models\Organization;
-use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Translation\PotentiallyTranslatedString;
+return new class () extends Migration {
+    use CanModifyPermissions;
 
-class UniqueOrganizationDomain implements ValidationRule
-{
-    protected $ignoreId;
+    private array $permissions = [
+        'product.view-any' => 'Product',
+        'product.create' => 'Product',
+        'product.*.view' => 'Product',
+        'product.*.update' => 'Product',
+        'product.*.delete' => 'Product',
+        'product.*.restore' => 'Product',
+        'product.*.force-delete' => 'Product',
+        'product_license.view-any' => 'Product License',
+        'product_license.create' => 'Product License',
+        'product_license.*.view' => 'Product License',
+        'product_license.*.update' => 'Product License',
+        'product_license.*.delete' => 'Product License',
+        'product_license.*.restore' => 'Product License',
+        'product_license.*.force-delete' => 'Product License',
+    ];
 
-    /**
-     * Create a new rule instance.
-     *
-     * @param  int|null  $ignoreId
-     */
-    public function __construct($ignoreId = null)
+    private array $guards = [
+        'web',
+        'api',
+    ];
+
+    public function up(): void
     {
-        $this->ignoreId = $ignoreId;
+        collect($this->guards)
+            ->each(function (string $guard) {
+                $permissions = Arr::except($this->permissions, keys: DB::table('permissions')
+                    ->where('guard_name', $guard)
+                    ->pluck('name')
+                    ->all());
+
+                $this->createPermissions($permissions, $guard);
+            });
     }
 
-    /**
-     * Run the validation rule.
-     *
-     * @param  Closure(string): PotentiallyTranslatedString  $fail
-     */
-    public function validate(string $attribute, mixed $value, Closure $fail): void
+    public function down(): void
     {
-        if (
-            Organization::whereJsonContains('domains', [['domain' => $value]])
-                ->when(! empty($this->ignoreId), fn (Builder $query) => $query->where('id', '!=', $this->ignoreId))
-                ->exists()
-        ) {
-            $fail($this->message());
-        }
+        $this->deletePermissions(array_keys($this->permissions), $this->guards);
     }
-
-    public function message()
-    {
-        return 'This domain is already in use and may not be used a second time.';
-    }
-}
+};

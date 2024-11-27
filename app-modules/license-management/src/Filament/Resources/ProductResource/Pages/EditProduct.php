@@ -34,36 +34,57 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources;
+namespace AidingApp\LicenseManagement\Filament\Resources\ProductResource\Pages;
 
-use Filament\Resources\Resource;
-use AidingApp\ServiceManagement\Models\ChangeRequest;
-use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestResource\Pages\EditChangeRequest;
-use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestResource\Pages\ViewChangeRequest;
-use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestResource\Pages\ListChangeRequests;
-use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestResource\Pages\CreateChangeRequest;
+use Filament\Forms\Form;
+use Filament\Actions\ViewAction;
+use Filament\Actions\DeleteAction;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Resources\Pages\EditRecord;
+use AidingApp\LicenseManagement\Filament\Resources\ProductResource;
 
-class ChangeRequestResource extends Resource
+class EditProduct extends EditRecord
 {
-    protected static ?string $model = ChangeRequest::class;
+    protected static string $resource = ProductResource::class;
 
-    protected static ?string $navigationLabel = 'Change Management';
+    public function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                TextInput::make('name')
+                    ->label('Product Name')
+                    ->required()
+                    ->string()
+                    ->maxLength(255),
+                TextInput::make('url')
+                    ->label('Product Link')
+                    ->maxLength(255)
+                    ->url()
+                    ->nullable(),
+                Textarea::make('description')
+                    ->label('Description')
+                    ->string()
+                    ->nullable()
+                    ->maxLength(65535),
+                TextInput::make('version')
+                    ->label('Version')
+                    ->string()
+                    ->nullable()
+                    ->maxLength(255),
+                Textarea::make('additional_notes')
+                    ->label('Additional Notes')
+                    ->nullable()
+                    ->maxLength(65535)
+                    ->string(),
+            ]);
+    }
 
-    protected static ?string $navigationIcon = 'heroicon-m-arrow-path-rounded-square';
-
-    protected static ?string $navigationGroup = 'Service Management';
-
-    protected static ?int $navigationSort = 40;
-
-    protected static ?string $breadcrumb = 'Change Management';
-
-    public static function getPages(): array
+    protected function getHeaderActions(): array
     {
         return [
-            'index' => ListChangeRequests::route('/'),
-            'create' => CreateChangeRequest::route('/create'),
-            'view' => ViewChangeRequest::route('/{record}'),
-            'edit' => EditChangeRequest::route('/{record}/edit'),
+            ViewAction::make(),
+            DeleteAction::make(),
         ];
     }
 }

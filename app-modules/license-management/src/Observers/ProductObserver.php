@@ -34,46 +34,19 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Rules;
+namespace AidingApp\LicenseManagement\Observers;
 
-use Closure;
-use Illuminate\Database\Eloquent\Builder;
-use AidingApp\Contact\Models\Organization;
-use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Translation\PotentiallyTranslatedString;
+use AidingApp\LicenseManagement\Models\Product;
 
-class UniqueOrganizationDomain implements ValidationRule
+class ProductObserver
 {
-    protected $ignoreId;
-
     /**
-     * Create a new rule instance.
-     *
-     * @param  int|null  $ignoreId
+     * Handle the Product "creating" event.
      */
-    public function __construct($ignoreId = null)
+    public function creating(Product $product): void
     {
-        $this->ignoreId = $ignoreId;
-    }
-
-    /**
-     * Run the validation rule.
-     *
-     * @param  Closure(string): PotentiallyTranslatedString  $fail
-     */
-    public function validate(string $attribute, mixed $value, Closure $fail): void
-    {
-        if (
-            Organization::whereJsonContains('domains', [['domain' => $value]])
-                ->when(! empty($this->ignoreId), fn (Builder $query) => $query->where('id', '!=', $this->ignoreId))
-                ->exists()
-        ) {
-            $fail($this->message());
+        if (! $product->created_by_id) {
+            $product->created_by_id = auth()->user()?->getKey();
         }
-    }
-
-    public function message()
-    {
-        return 'This domain is already in use and may not be used a second time.';
     }
 }

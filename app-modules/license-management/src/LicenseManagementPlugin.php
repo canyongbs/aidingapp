@@ -34,46 +34,25 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Rules;
+namespace AidingApp\LicenseManagement;
 
-use Closure;
-use Illuminate\Database\Eloquent\Builder;
-use AidingApp\Contact\Models\Organization;
-use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Translation\PotentiallyTranslatedString;
+use Filament\Panel;
+use Filament\Contracts\Plugin;
 
-class UniqueOrganizationDomain implements ValidationRule
+class LicenseManagementPlugin implements Plugin
 {
-    protected $ignoreId;
-
-    /**
-     * Create a new rule instance.
-     *
-     * @param  int|null  $ignoreId
-     */
-    public function __construct($ignoreId = null)
+    public function getId(): string
     {
-        $this->ignoreId = $ignoreId;
+        return 'license-management';
     }
 
-    /**
-     * Run the validation rule.
-     *
-     * @param  Closure(string): PotentiallyTranslatedString  $fail
-     */
-    public function validate(string $attribute, mixed $value, Closure $fail): void
+    public function register(Panel $panel): void
     {
-        if (
-            Organization::whereJsonContains('domains', [['domain' => $value]])
-                ->when(! empty($this->ignoreId), fn (Builder $query) => $query->where('id', '!=', $this->ignoreId))
-                ->exists()
-        ) {
-            $fail($this->message());
-        }
+        $panel->discoverResources(
+            in: __DIR__ . '/Filament/Resources',
+            for: 'AidingApp\\LicenseManagement\\Filament\\Resources'
+        );
     }
 
-    public function message()
-    {
-        return 'This domain is already in use and may not be used a second time.';
-    }
+    public function boot(Panel $panel): void {}
 }
