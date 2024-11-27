@@ -50,13 +50,13 @@ return new class () extends Migration {
         'product.*.delete' => 'Product',
         'product.*.restore' => 'Product',
         'product.*.force-delete' => 'Product',
-        'product-license.view-any' => 'Product License',
-        'product-license.create' => 'Product License',
-        'product-license.*.view' => 'Product License',
-        'product-license.*.update' => 'Product License',
-        'product-license.*.delete' => 'Product License',
-        'product-license.*.restore' => 'Product License',
-        'product-license.*.force-delete' => 'Product License',
+        'product_license.view-any' => 'Product License',
+        'product_license.create' => 'Product License',
+        'product_license.*.view' => 'Product License',
+        'product_license.*.update' => 'Product License',
+        'product_license.*.delete' => 'Product License',
+        'product_license.*.restore' => 'Product License',
+        'product_license.*.force-delete' => 'Product License',
     ];
 
     private array $guards = [
