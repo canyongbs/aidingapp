@@ -34,46 +34,47 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Rules;
+namespace AidingApp\LicenseManagement\Filament\Resources\ProductResource\Pages;
 
-use Closure;
-use Illuminate\Database\Eloquent\Builder;
-use AidingApp\Contact\Models\Organization;
-use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Translation\PotentiallyTranslatedString;
+use Filament\Forms\Form;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Resources\Pages\CreateRecord;
+use AidingApp\LicenseManagement\Filament\Resources\ProductResource;
 
-class UniqueOrganizationDomain implements ValidationRule
+class CreateProduct extends CreateRecord
 {
-    protected $ignoreId;
+    protected static string $resource = ProductResource::class;
 
-    /**
-     * Create a new rule instance.
-     *
-     * @param  int|null  $ignoreId
-     */
-    public function __construct($ignoreId = null)
+    public function form(Form $form): Form
     {
-        $this->ignoreId = $ignoreId;
-    }
-
-    /**
-     * Run the validation rule.
-     *
-     * @param  Closure(string): PotentiallyTranslatedString  $fail
-     */
-    public function validate(string $attribute, mixed $value, Closure $fail): void
-    {
-        if (
-            Organization::whereJsonContains('domains', [['domain' => $value]])
-                ->when(! empty($this->ignoreId), fn (Builder $query) => $query->where('id', '!=', $this->ignoreId))
-                ->exists()
-        ) {
-            $fail($this->message());
-        }
-    }
-
-    public function message()
-    {
-        return 'This domain is already in use and may not be used a second time.';
+        return $form
+            ->schema([
+                TextInput::make('name')
+                    ->label('Product Name')
+                    ->required()
+                    ->string()
+                    ->maxLength(255),
+                TextInput::make('url')
+                    ->label('Product Link')
+                    ->maxLength(255)
+                    ->url()
+                    ->nullable(),
+                Textarea::make('description')
+                    ->label('Description')
+                    ->string()
+                    ->nullable()
+                    ->maxLength(65535),
+                TextInput::make('version')
+                    ->label('Version')
+                    ->string()
+                    ->nullable()
+                    ->maxLength(255),
+                Textarea::make('additional_notes')
+                    ->label('Additional Notes')
+                    ->nullable()
+                    ->maxLength(65535)
+                    ->string(),
+            ]);
     }
 }

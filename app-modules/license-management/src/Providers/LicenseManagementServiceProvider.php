@@ -34,46 +34,27 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Rules;
+namespace AidingApp\LicenseManagement\Providers;
 
-use Closure;
-use Illuminate\Database\Eloquent\Builder;
-use AidingApp\Contact\Models\Organization;
-use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Translation\PotentiallyTranslatedString;
+use Filament\Panel;
+use Illuminate\Support\ServiceProvider;
+use AidingApp\LicenseManagement\Models\Product;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use AidingApp\LicenseManagement\Models\ProductLicense;
+use AidingApp\LicenseManagement\LicenseManagementPlugin;
 
-class UniqueOrganizationDomain implements ValidationRule
+class LicenseManagementServiceProvider extends ServiceProvider
 {
-    protected $ignoreId;
-
-    /**
-     * Create a new rule instance.
-     *
-     * @param  int|null  $ignoreId
-     */
-    public function __construct($ignoreId = null)
+    public function register()
     {
-        $this->ignoreId = $ignoreId;
+        Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new LicenseManagementPlugin()));
     }
 
-    /**
-     * Run the validation rule.
-     *
-     * @param  Closure(string): PotentiallyTranslatedString  $fail
-     */
-    public function validate(string $attribute, mixed $value, Closure $fail): void
+    public function boot()
     {
-        if (
-            Organization::whereJsonContains('domains', [['domain' => $value]])
-                ->when(! empty($this->ignoreId), fn (Builder $query) => $query->where('id', '!=', $this->ignoreId))
-                ->exists()
-        ) {
-            $fail($this->message());
-        }
-    }
-
-    public function message()
-    {
-        return 'This domain is already in use and may not be used a second time.';
+        Relation::morphMap([
+            'product' => Product::class,
+            'product_license' => ProductLicense::class,
+        ]);
     }
 }

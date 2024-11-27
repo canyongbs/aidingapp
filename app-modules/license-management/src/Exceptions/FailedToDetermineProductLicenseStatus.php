@@ -34,46 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Rules;
+namespace App\LicenseManagement\Exceptions;
 
-use Closure;
-use Illuminate\Database\Eloquent\Builder;
-use AidingApp\Contact\Models\Organization;
-use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Translation\PotentiallyTranslatedString;
+use Exception;
+use AidingApp\LicenseManagement\Models\ProductLicense;
 
-class UniqueOrganizationDomain implements ValidationRule
+class FailedToDetermineProductLicenseStatus extends Exception
 {
-    protected $ignoreId;
-
-    /**
-     * Create a new rule instance.
-     *
-     * @param  int|null  $ignoreId
-     */
-    public function __construct($ignoreId = null)
+    public function __construct(ProductLicense $productLicense)
     {
-        $this->ignoreId = $ignoreId;
-    }
-
-    /**
-     * Run the validation rule.
-     *
-     * @param  Closure(string): PotentiallyTranslatedString  $fail
-     */
-    public function validate(string $attribute, mixed $value, Closure $fail): void
-    {
-        if (
-            Organization::whereJsonContains('domains', [['domain' => $value]])
-                ->when(! empty($this->ignoreId), fn (Builder $query) => $query->where('id', '!=', $this->ignoreId))
-                ->exists()
-        ) {
-            $fail($this->message());
-        }
-    }
-
-    public function message()
-    {
-        return 'This domain is already in use and may not be used a second time.';
+        parent::__construct(
+            message: "Failed to determine the status of the product license with ID {$productLicense->getKey()}"
+        );
     }
 }

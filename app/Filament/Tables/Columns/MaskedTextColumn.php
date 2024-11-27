@@ -34,46 +34,18 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Rules;
+namespace App\Filament\Tables\Columns;
 
-use Closure;
-use Illuminate\Database\Eloquent\Builder;
-use AidingApp\Contact\Models\Organization;
-use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Translation\PotentiallyTranslatedString;
+use Filament\Tables\Columns\Column;
 
-class UniqueOrganizationDomain implements ValidationRule
+class MaskedTextColumn extends Column
 {
-    protected $ignoreId;
+    protected string $view = 'filament.tables.columns.masked-text-column';
 
-    /**
-     * Create a new rule instance.
-     *
-     * @param  int|null  $ignoreId
-     */
-    public function __construct($ignoreId = null)
+    protected function setUp(): void
     {
-        $this->ignoreId = $ignoreId;
-    }
+        parent::setUp();
 
-    /**
-     * Run the validation rule.
-     *
-     * @param  Closure(string): PotentiallyTranslatedString  $fail
-     */
-    public function validate(string $attribute, mixed $value, Closure $fail): void
-    {
-        if (
-            Organization::whereJsonContains('domains', [['domain' => $value]])
-                ->when(! empty($this->ignoreId), fn (Builder $query) => $query->where('id', '!=', $this->ignoreId))
-                ->exists()
-        ) {
-            $fail($this->message());
-        }
-    }
-
-    public function message()
-    {
-        return 'This domain is already in use and may not be used a second time.';
+        $this->disabledClick();
     }
 }

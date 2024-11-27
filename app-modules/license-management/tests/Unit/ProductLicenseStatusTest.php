@@ -34,46 +34,29 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Rules;
+use AidingApp\LicenseManagement\Models\ProductLicense;
+use AidingApp\LicenseManagement\Enums\ProductLicenseStatus;
 
-use Closure;
-use Illuminate\Database\Eloquent\Builder;
-use AidingApp\Contact\Models\Organization;
-use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Translation\PotentiallyTranslatedString;
+it('returns Pending when the current date is before the start date', function () {
+    $productLicense = ProductLicense::factory()->pending()->create();
 
-class UniqueOrganizationDomain implements ValidationRule
-{
-    protected $ignoreId;
+    expect($productLicense->status)->toBe(ProductLicenseStatus::Pending);
+});
 
-    /**
-     * Create a new rule instance.
-     *
-     * @param  int|null  $ignoreId
-     */
-    public function __construct($ignoreId = null)
-    {
-        $this->ignoreId = $ignoreId;
-    }
+it('returns Active when the current date is between start and expiration dates', function () {
+    $productLicense = ProductLicense::factory()->active()->create();
 
-    /**
-     * Run the validation rule.
-     *
-     * @param  Closure(string): PotentiallyTranslatedString  $fail
-     */
-    public function validate(string $attribute, mixed $value, Closure $fail): void
-    {
-        if (
-            Organization::whereJsonContains('domains', [['domain' => $value]])
-                ->when(! empty($this->ignoreId), fn (Builder $query) => $query->where('id', '!=', $this->ignoreId))
-                ->exists()
-        ) {
-            $fail($this->message());
-        }
-    }
+    expect($productLicense->status)->toBe(ProductLicenseStatus::Active);
+});
 
-    public function message()
-    {
-        return 'This domain is already in use and may not be used a second time.';
-    }
-}
+it('returns Expired when the current date is after the expiration date', function () {
+    $productLicense = ProductLicense::factory()->expired()->create();
+
+    expect($productLicense->status)->toBe(ProductLicenseStatus::Expired);
+});
+
+it('returns Active when there is no expiration date and the current date is after the start date', function () {
+    $productLicense = ProductLicense::factory()->noExpiration()->create();
+
+    expect($productLicense->status)->toBe(ProductLicenseStatus::Active);
+});

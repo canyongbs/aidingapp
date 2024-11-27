@@ -34,46 +34,20 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Rules;
+namespace AidingApp\LicenseManagement\Enums;
 
-use Closure;
-use Illuminate\Database\Eloquent\Builder;
-use AidingApp\Contact\Models\Organization;
-use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Translation\PotentiallyTranslatedString;
+use Filament\Support\Contracts\HasLabel;
 
-class UniqueOrganizationDomain implements ValidationRule
+enum ProductLicenseStatus: string implements HasLabel
 {
-    protected $ignoreId;
+    case Pending = 'pending';
 
-    /**
-     * Create a new rule instance.
-     *
-     * @param  int|null  $ignoreId
-     */
-    public function __construct($ignoreId = null)
-    {
-        $this->ignoreId = $ignoreId;
-    }
+    case Active = 'active';
 
-    /**
-     * Run the validation rule.
-     *
-     * @param  Closure(string): PotentiallyTranslatedString  $fail
-     */
-    public function validate(string $attribute, mixed $value, Closure $fail): void
-    {
-        if (
-            Organization::whereJsonContains('domains', [['domain' => $value]])
-                ->when(! empty($this->ignoreId), fn (Builder $query) => $query->where('id', '!=', $this->ignoreId))
-                ->exists()
-        ) {
-            $fail($this->message());
-        }
-    }
+    case Expired = 'expired';
 
-    public function message()
+    public function getLabel(): ?string
     {
-        return 'This domain is already in use and may not be used a second time.';
+        return $this->name;
     }
 }

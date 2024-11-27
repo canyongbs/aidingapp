@@ -34,46 +34,29 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Rules;
+namespace AidingApp\LicenseManagement\Database\Factories;
 
-use Closure;
-use Illuminate\Database\Eloquent\Builder;
-use AidingApp\Contact\Models\Organization;
-use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Translation\PotentiallyTranslatedString;
+use AidingApp\LicenseManagement\Models\Product;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-class UniqueOrganizationDomain implements ValidationRule
+/**
+ * @extends Factory<Product>
+ */
+class ProductFactory extends Factory
 {
-    protected $ignoreId;
-
     /**
-     * Create a new rule instance.
+     * Define the model's default state.
      *
-     * @param  int|null  $ignoreId
+     * @return array<string, mixed>
      */
-    public function __construct($ignoreId = null)
+    public function definition(): array
     {
-        $this->ignoreId = $ignoreId;
-    }
-
-    /**
-     * Run the validation rule.
-     *
-     * @param  Closure(string): PotentiallyTranslatedString  $fail
-     */
-    public function validate(string $attribute, mixed $value, Closure $fail): void
-    {
-        if (
-            Organization::whereJsonContains('domains', [['domain' => $value]])
-                ->when(! empty($this->ignoreId), fn (Builder $query) => $query->where('id', '!=', $this->ignoreId))
-                ->exists()
-        ) {
-            $fail($this->message());
-        }
-    }
-
-    public function message()
-    {
-        return 'This domain is already in use and may not be used a second time.';
+        return [
+            'name' => fake()->word(),
+            'url' => fake()->url(),
+            'description' => fake()->paragraph(),
+            'version' => fake()->numerify('#.#.#'),
+            'additional_notes' => fake()->paragraph(),
+        ];
     }
 }

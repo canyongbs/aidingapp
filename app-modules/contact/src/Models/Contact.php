@@ -53,10 +53,12 @@ use AidingApp\Engagement\Models\EngagementFile;
 use AidingApp\Notification\Models\Subscription;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use AidingApp\Portal\Models\KnowledgeBaseArticleVote;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use AidingApp\InventoryManagement\Models\AssetCheckIn;
+use AidingApp\LicenseManagement\Models\ProductLicense;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use AidingApp\Engagement\Models\EngagementFileEntities;
@@ -239,6 +241,11 @@ class Contact extends BaseAuthenticatable implements Auditable, Subscribable, Ed
     public function knowledgeBaseArticleVotes(): MorphMany
     {
         return $this->morphMany(KnowledgeBaseArticleVote::class, 'voter');
+    }
+
+    public function productLicenses(): HasMany
+    {
+        return $this->hasMany(ProductLicense::class, 'assigned_to');
     }
 
     protected static function booted(): void

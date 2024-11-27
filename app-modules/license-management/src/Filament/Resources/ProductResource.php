@@ -34,46 +34,46 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Rules;
+namespace AidingApp\LicenseManagement\Filament\Resources;
 
-use Closure;
-use Illuminate\Database\Eloquent\Builder;
-use AidingApp\Contact\Models\Organization;
-use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Translation\PotentiallyTranslatedString;
+use Filament\Resources\Resource;
+use Filament\Resources\Pages\Page;
+use AidingApp\LicenseManagement\Models\Product;
+use AidingApp\LicenseManagement\Filament\Resources\ProductResource\Pages\EditProduct;
+use AidingApp\LicenseManagement\Filament\Resources\ProductResource\Pages\ViewProduct;
+use AidingApp\LicenseManagement\Filament\Resources\ProductResource\Pages\ListProducts;
+use AidingApp\LicenseManagement\Filament\Resources\ProductResource\Pages\CreateProduct;
+use AidingApp\LicenseManagement\Filament\Resources\ProductResource\Pages\ManageProductLicenses;
 
-class UniqueOrganizationDomain implements ValidationRule
+class ProductResource extends Resource
 {
-    protected $ignoreId;
+    protected static ?string $model = Product::class;
 
-    /**
-     * Create a new rule instance.
-     *
-     * @param  int|null  $ignoreId
-     */
-    public function __construct($ignoreId = null)
+    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+
+    protected static ?string $navigationGroup = 'Service Management';
+
+    protected static ?string $navigationLabel = 'License Management';
+
+    protected static ?int $navigationSort = 31;
+
+    public static function getRecordSubNavigation(Page $page): array
     {
-        $this->ignoreId = $ignoreId;
+        return $page->generateNavigationItems([
+            ViewProduct::class,
+            EditProduct::class,
+            ManageProductLicenses::class,
+        ]);
     }
 
-    /**
-     * Run the validation rule.
-     *
-     * @param  Closure(string): PotentiallyTranslatedString  $fail
-     */
-    public function validate(string $attribute, mixed $value, Closure $fail): void
+    public static function getPages(): array
     {
-        if (
-            Organization::whereJsonContains('domains', [['domain' => $value]])
-                ->when(! empty($this->ignoreId), fn (Builder $query) => $query->where('id', '!=', $this->ignoreId))
-                ->exists()
-        ) {
-            $fail($this->message());
-        }
-    }
-
-    public function message()
-    {
-        return 'This domain is already in use and may not be used a second time.';
+        return [
+            'index' => ListProducts::route('/'),
+            'create' => CreateProduct::route('/create'),
+            'view' => ViewProduct::route('/{record}'),
+            'edit' => EditProduct::route('/{record}/edit'),
+            'product-licences' => ManageProductLicenses::route('/{record}/product-licences'),
+        ];
     }
 }
