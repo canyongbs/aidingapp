@@ -40,6 +40,7 @@ use Closure;
 use Illuminate\Database\Eloquent\Builder;
 use AidingApp\Contact\Models\Organization;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Translation\PotentiallyTranslatedString;
 
 class UniqueOrganizationDomain implements ValidationRule
 {
@@ -58,7 +59,7 @@ class UniqueOrganizationDomain implements ValidationRule
     /**
      * Run the validation rule.
      *
-     * @param  Closure(string): \Illuminate\Translation\PotentiallyTranslatedString  $fail
+     * @param  Closure(string): PotentiallyTranslatedString  $fail
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {

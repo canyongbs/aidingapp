@@ -36,7 +36,6 @@
 
 namespace AidingApp\LicenseManagement\Models;
 
-use Exception;
 use Carbon\Carbon;
 use App\Models\BaseModel;
 use AidingApp\Contact\Models\Contact;
