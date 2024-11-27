@@ -48,10 +48,8 @@ use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\ServiceProvider;
 use Filament\Actions\Imports\Jobs\ImportCsv;
-use AidingApp\ContractManagement\Models\Contract;
 use Filament\Actions\Exports\Jobs\PrepareCsvExport;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use AidingApp\ContractManagement\Models\ContractType;
 use App\Overrides\Laravel\PermissionMigrationCreator;
 use OpenSearch\Migrations\Filesystem\MigrationStorage;
 use App\Overrides\Filament\Actions\Imports\Jobs\ImportCsvOverride;
@@ -88,8 +86,6 @@ class AppServiceProvider extends ServiceProvider
         Relation::morphMap([
             'system_user' => SystemUser::class,
             'tenant' => Tenant::class,
-            'contract_type' => ContractType::class,
-            'contract' => Contract::class,
         ]);
 
         Feature::resolveScopeUsing(fn ($driver) => null);

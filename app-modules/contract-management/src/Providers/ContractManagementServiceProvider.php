@@ -38,7 +38,9 @@ namespace AidingApp\ContractManagement\Providers;
 
 use Filament\Panel;
 use Illuminate\Support\ServiceProvider;
+use AidingApp\ContractManagement\Models\Contract;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use AidingApp\ContractManagement\Models\ContractType;
 use AidingApp\ContractManagement\ContractManagementPlugin;
 
 class ContractManagementServiceProvider extends ServiceProvider
@@ -50,6 +52,9 @@ class ContractManagementServiceProvider extends ServiceProvider
 
     public function boot()
     {
-        Relation::morphMap([]);
+        Relation::morphMap([
+            'contract_type' => ContractType::class,
+            'contract' => Contract::class,
+        ]);
     }
 }
