@@ -43,24 +43,24 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 
 class IndividualAssigner implements ServiceRequestTypeAssigner
 {
-  public function execute(ServiceRequest $serviceRequest): void
-  {
-    $user = auth()->user();
-    $serviceRequest->save();
+    public function execute(ServiceRequest $serviceRequest): void
+    {
+        $user = auth()->user();
+        $serviceRequest->save();
 
-    if ($user instanceof User) {
-      TriggeredAutoSubscription::dispatch($user, $serviceRequest);
+        if ($user instanceof User) {
+            TriggeredAutoSubscription::dispatch($user, $serviceRequest);
 
-      $manager = $serviceRequest?->priority->type?->assignmentTypeIndividual;
+            $manager = $serviceRequest?->priority->type?->assignmentTypeIndividual;
 
-      if ($manager) {
-        $serviceRequest->assignments()->create([
-          'user_id' => $manager->getKey(),
-          'assigned_by_id' => $user->getKey(),
-          'assigned_at' => now(),
-          'status' => ServiceRequestAssignmentStatus::Active,
-        ]);
-      }
+            if ($manager) {
+                $serviceRequest->assignments()->create([
+                    'user_id' => $manager->getKey(),
+                    'assigned_by_id' => $user->getKey(),
+                    'assigned_at' => now(),
+                    'status' => ServiceRequestAssignmentStatus::Active,
+                ]);
+            }
+        }
     }
-  }
 }

@@ -44,6 +44,7 @@ use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
 use AidingApp\Division\Models\Division;
 use Filament\Forms\Components\Textarea;
+use Illuminate\Database\Eloquent\Model;
 use Filament\Forms\Components\TextInput;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Resources\Pages\CreateRecord;
@@ -57,7 +58,6 @@ use AidingApp\ServiceManagement\Rules\ManagedServiceRequestType;
 use AidingApp\ServiceManagement\Actions\CreateServiceRequestAction;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\DataTransferObjects\ServiceRequestDataObject;
-use Illuminate\Database\Eloquent\Model;
 
 class CreateServiceRequest extends CreateRecord
 {
@@ -76,12 +76,12 @@ class CreateServiceRequest extends CreateRecord
                 Select::make('status_id')
                     ->relationship('status', 'name')
                     ->label('Status')
-                    ->options(fn() => ServiceRequestStatus::query()
+                    ->options(fn () => ServiceRequestStatus::query()
                         ->orderBy('classification')
                         ->orderBy('name')
                         ->get(['id', 'name', 'classification'])
-                        ->groupBy(fn(ServiceRequestStatus $status) => $status->classification->getlabel())
-                        ->map(fn(Collection $group) => $group->pluck('name', 'id')))
+                        ->groupBy(fn (ServiceRequestStatus $status) => $status->classification->getlabel())
+                        ->map(fn (Collection $group) => $group->pluck('name', 'id')))
                     ->required()
                     ->exists((new ServiceRequestStatus())->getTable(), 'id'),
                 Grid::make()
@@ -94,7 +94,7 @@ class CreateServiceRequest extends CreateRecord
                             })
                                 ->pluck('name', 'id'))
                             ->rule(new ManagedServiceRequestType())
-                            ->afterStateUpdated(fn(Set $set) => $set('priority_id', null))
+                            ->afterStateUpdated(fn (Set $set) => $set('priority_id', null))
                             ->label('Type')
                             ->required()
                             ->live()
@@ -103,12 +103,12 @@ class CreateServiceRequest extends CreateRecord
                             ->relationship(
                                 name: 'priority',
                                 titleAttribute: 'name',
-                                modifyQueryUsing: fn(Get $get, Builder $query) => $query->where('type_id', $get('type_id'))->orderBy('order'),
+                                modifyQueryUsing: fn (Get $get, Builder $query) => $query->where('type_id', $get('type_id'))->orderBy('order'),
                             )
                             ->label('Priority')
                             ->required()
                             ->exists(ServiceRequestPriority::class, 'id')
-                            ->visible(fn(Get $get): bool => filled($get('type_id'))),
+                            ->visible(fn (Get $get): bool => filled($get('type_id'))),
                     ]),
                 TextInput::make('title')
                     ->required()
