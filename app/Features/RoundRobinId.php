@@ -2,14 +2,10 @@
 
 /*
 <COPYRIGHT>
-
     Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
-
     Aiding App™ is licensed under the Elastic License 2.0. For more details,
     see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
-
     Notice:
-
     - You may not provide the software to third parties as a hosted or managed
       service, where the service provides users with access to any substantial set of
       the features or functionality of the software.
@@ -27,35 +23,19 @@
       Software as a Service (SaaS) by Canyon GBS LLC.
     - Use of this software implies agreement to the license terms and conditions as stated
       in the Elastic License 2.0.
-
     For more information or inquiries please visit our website at
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
-
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Actions;
+namespace App\Features;
 
-use Illuminate\Support\Facades\DB;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
-use AidingApp\ServiceManagement\DataTransferObjects\ServiceRequestDataObject;
+use App\Support\AbstractFeatureFlag;
 
-class CreateServiceRequestAction
+class RoundRobinId extends AbstractFeatureFlag
 {
-  public function execute(ServiceRequestDataObject $serviceRequestDataObject)
-  {
-    return DB::transaction(
-      function () use ($serviceRequestDataObject) {
-        $serviceRequest = new ServiceRequest($serviceRequestDataObject->toArray());
-        $assignmentClass = $serviceRequest->priority->type?->assignment_type?->getAssignerClass();
-
-        if ($assignmentClass) {
-          $assignmentClass->execute($serviceRequest);
-        }
-        $serviceRequest->save();
-
-        return $serviceRequest;
-      }
-    );
-  }
+    public function resolve(mixed $scope): mixed
+    {
+        return false;
+    }
 }
