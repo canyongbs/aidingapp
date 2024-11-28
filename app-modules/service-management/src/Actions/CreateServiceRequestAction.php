@@ -42,20 +42,19 @@ use AidingApp\ServiceManagement\DataTransferObjects\ServiceRequestDataObject;
 
 class CreateServiceRequestAction
 {
-    public function execute(ServiceRequestDataObject $serviceRequestDataObject)
-    {
-        DB::transaction(
-            function () use ($serviceRequestDataObject) {
-                $serviceRequest = new ServiceRequest($serviceRequestDataObject->toArray());
-                $assignmentClass = $serviceRequest->priority->type?->assignment_type?->getAssignerClass();
+  public function execute(ServiceRequestDataObject $serviceRequestDataObject)
+  {
+    return DB::transaction(
+      function () use ($serviceRequestDataObject) {
+        $serviceRequest = new ServiceRequest($serviceRequestDataObject->toArray());
+        $assignmentClass = $serviceRequest->priority->type?->assignment_type?->getAssignerClass();
 
-                if ($assignmentClass) {
-                    $assignmentClass->execute($serviceRequest);
-                }
-
-                $serviceRequest->save();
-                $serviceRequest->priority->type->save();
-            }
-        );
-    }
+        if ($assignmentClass) {
+          $assignmentClass->execute($serviceRequest);
+        }
+        $serviceRequest->save();
+        return $serviceRequest;
+      }
+    );
+  }
 }

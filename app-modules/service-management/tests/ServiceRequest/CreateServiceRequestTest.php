@@ -342,7 +342,7 @@ test('displays only service request types managed by the current user', function
             $options = $field->getOptions();
 
             return in_array($serviceRequestTypesWithManagers->getKey(), array_keys($options)) &&
-                   ! in_array($serviceRequestTypesWithoutManagers->getKey(), array_keys($options));
+                ! in_array($serviceRequestTypesWithoutManagers->getKey(), array_keys($options));
         });
 });
 
@@ -464,11 +464,20 @@ test('assignment type individual manager will auto assign to new service request
         ])
         ->create();
 
-    $serviceRequest = ServiceRequest::factory()->create([
+    $request = collect(CreateServiceRequestRequestFactory::new()->create([
         'priority_id' => ServiceRequestPriority::factory()->create([
             'type_id' => $serviceRequestTypesWithManager->getKey(),
         ])->getKey(),
-    ]);
+    ]));
+
+    livewire(CreateServiceRequest::class)
+        ->fillForm($request->toArray())
+        ->fillForm([
+            'respondent_id' => Contact::factory()->create()->getKey(),
+        ])
+        ->call('create');
+
+    $serviceRequest = ServiceRequest::first();
 
     expect($serviceRequest->assignments()->first())->user->id->toBe($user->getKey());
 });
