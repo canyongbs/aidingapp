@@ -37,38 +37,38 @@
 namespace AidingApp\ServiceManagement\Services\ServiceRequestType;
 
 use App\Models\User;
+use App\Features\RoundRobinId;
 use Illuminate\Database\Eloquent\Builder;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
-use App\Features\RoundRobinId;
 
 class RoundRobinAssigner implements ServiceRequestTypeAssigner
 {
-  public function execute(ServiceRequest $serviceRequest): void
-  {
-    if ($serviceRequest->priority?->type && RoundRobinId::active()) {
-      $serviceRequestType = $serviceRequest->priority->type;
+    public function execute(ServiceRequest $serviceRequest): void
+    {
+        if ($serviceRequest->priority?->type && RoundRobinId::active()) {
+            $serviceRequestType = $serviceRequest->priority->type;
 
-      $lastAsignee = $serviceRequestType->user;
-      $user = null;
+            $lastAsignee = $serviceRequestType->user;
+            $user = null;
 
-      if ($lastAsignee) {
-        $user = User::query()->whereRelation('teams.managableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey())
-          ->where('name', '>=', $lastAsignee->name)
-          ->where(fn(Builder $query) => $query
-            ->where('name', '!=', $lastAsignee->name)
-            ->orWhere('users.id', '>', $lastAsignee->id))
-          ->orderBy('name')->orderBy('id')->first();
-      }
+            if ($lastAsignee) {
+                $user = User::query()->whereRelation('teams.managableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey())
+                    ->where('name', '>=', $lastAsignee->name)
+                    ->where(fn (Builder $query) => $query
+                        ->where('name', '!=', $lastAsignee->name)
+                        ->orWhere('users.id', '>', $lastAsignee->id))
+                    ->orderBy('name')->orderBy('id')->first();
+            }
 
-      if ($user == null) {
-        $user = User::query()->whereRelation('teams.managableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey())
-          ->orderBy('name')->orderBy('id')->first();
-      }
+            if ($user == null) {
+                $user = User::query()->whereRelation('teams.managableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey())
+                    ->orderBy('name')->orderBy('id')->first();
+            }
 
-      if ($user != null) {
-        $serviceRequestType->round_robin_last_assigned_id = $user->getKey();
-        $serviceRequestType->save();
-      }
+            if ($user != null) {
+                $serviceRequestType->round_robin_last_assigned_id = $user->getKey();
+                $serviceRequestType->save();
+            }
+        }
     }
-  }
 }
