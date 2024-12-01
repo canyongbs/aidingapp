@@ -34,28 +34,11 @@
 </COPYRIGHT>
 */
 
-<<<<<<<< HEAD:app-modules/service-management/src/Services/ServiceRequestType/ServiceRequestTypeAssigner.php
 namespace AidingApp\ServiceManagement\Services\ServiceRequestType;
 
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 
 interface ServiceRequestTypeAssigner
 {
-    public function execute(ServiceRequest $serviceRequest): void;
+  public function execute(ServiceRequest $serviceRequest): void;
 }
-========
-use App\Features\ContractManagement;
-use Illuminate\Database\Migrations\Migration;
-
-return new class () extends Migration {
-    public function up(): void
-    {
-        ContractManagement::activate();
-    }
-
-    public function down(): void
-    {
-        ContractManagement::deactivate();
-    }
-};
->>>>>>>> 779bf41037b8d38e66678b6fe2790383c1699b74:app-modules/contract-management/database/migrations/2024_11_26_170830_data_activate_contract_management_feature_flag.php

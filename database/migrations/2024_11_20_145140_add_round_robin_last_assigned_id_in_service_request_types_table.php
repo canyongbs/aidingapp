@@ -38,38 +38,21 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-return new class () extends Migration {
-    public function up(): void
-    {
-<<<<<<<< HEAD:database/migrations/2024_11_20_145140_add_round_robin_last_assigned_id_in_service_request_types_table.php
-        Schema::table('service_request_types', function (Blueprint $table) {
-            $table->foreignUuid('round_robin_last_assigned_id')
-                ->nullable()
-                ->references('id')
-                ->on('users');
-        });
-========
-        Schema::dropIfExists('consent_agreements');
->>>>>>>> 779bf41037b8d38e66678b6fe2790383c1699b74:database/migrations/2024_11_21_000245_drop_consent_agreements_table.php
-    }
+return new class() extends Migration {
+  public function up(): void
+  {
+    Schema::table('service_request_types', function (Blueprint $table) {
+      $table->foreignUuid('round_robin_last_assigned_id')
+        ->nullable()
+        ->references('id')
+        ->on('users');
+    });
+  }
 
-    public function down(): void
-    {
-<<<<<<<< HEAD:database/migrations/2024_11_20_145140_add_round_robin_last_assigned_id_in_service_request_types_table.php
-        Schema::table('service_request_types', function (Blueprint $table) {
-            $table->dropColumn('round_robin_last_assigned_id');
-========
-        Schema::create('consent_agreements', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-
-            $table->string('type');
-            $table->string('title');
-            $table->longText('description');
-            $table->longText('body');
-
-            $table->timestamps();
-            $table->softDeletes();
->>>>>>>> 779bf41037b8d38e66678b6fe2790383c1699b74:database/migrations/2024_11_21_000245_drop_consent_agreements_table.php
-        });
-    }
+  public function down(): void
+  {
+    Schema::table('service_request_types', function (Blueprint $table) {
+      $table->dropColumn('round_robin_last_assigned_id');
+    });
+  }
 };
