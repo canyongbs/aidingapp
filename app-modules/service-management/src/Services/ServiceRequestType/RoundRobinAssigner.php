@@ -34,6 +34,7 @@
 </COPYRIGHT>
 */
 
+<<<<<<<< HEAD:app-modules/service-management/src/Services/ServiceRequestType/RoundRobinAssigner.php
 namespace AidingApp\ServiceManagement\Services\ServiceRequestType;
 
 use App\Models\User;
@@ -72,3 +73,53 @@ class RoundRobinAssigner implements ServiceRequestTypeAssigner
         }
     }
 }
+========
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Migrations\Migration;
+use Database\Migrations\Concerns\CanModifyPermissions;
+
+return new class () extends Migration {
+    use CanModifyPermissions;
+
+    private array $permissions = [
+        'product.view-any' => 'Product',
+        'product.create' => 'Product',
+        'product.*.view' => 'Product',
+        'product.*.update' => 'Product',
+        'product.*.delete' => 'Product',
+        'product.*.restore' => 'Product',
+        'product.*.force-delete' => 'Product',
+        'product_license.view-any' => 'Product License',
+        'product_license.create' => 'Product License',
+        'product_license.*.view' => 'Product License',
+        'product_license.*.update' => 'Product License',
+        'product_license.*.delete' => 'Product License',
+        'product_license.*.restore' => 'Product License',
+        'product_license.*.force-delete' => 'Product License',
+    ];
+
+    private array $guards = [
+        'web',
+        'api',
+    ];
+
+    public function up(): void
+    {
+        collect($this->guards)
+            ->each(function (string $guard) {
+                $permissions = Arr::except($this->permissions, keys: DB::table('permissions')
+                    ->where('guard_name', $guard)
+                    ->pluck('name')
+                    ->all());
+
+                $this->createPermissions($permissions, $guard);
+            });
+    }
+
+    public function down(): void
+    {
+        $this->deletePermissions(array_keys($this->permissions), $this->guards);
+    }
+};
+>>>>>>>> 779bf41037b8d38e66678b6fe2790383c1699b74:app-modules/license-management/database/migrations/2024_11_21_194048_data_seed_permissions_for_product_license_module.php

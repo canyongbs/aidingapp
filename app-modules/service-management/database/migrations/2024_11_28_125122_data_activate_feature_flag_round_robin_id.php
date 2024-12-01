@@ -34,17 +34,29 @@
 </COPYRIGHT>
 */
 
+<<<<<<<< HEAD:app-modules/service-management/database/migrations/2024_11_28_125122_data_activate_feature_flag_round_robin_id.php
 use App\Features\RoundRobinId;
+========
+use App\Features\LicenseManagement;
+>>>>>>>> 779bf41037b8d38e66678b6fe2790383c1699b74:app-modules/license-management/database/migrations/2024_11_21_212345_data_activate_license_management.php
 use Illuminate\Database\Migrations\Migration;
 
 return new class () extends Migration {
     public function up(): void
     {
+<<<<<<<< HEAD:app-modules/service-management/database/migrations/2024_11_28_125122_data_activate_feature_flag_round_robin_id.php
         RoundRobinId::activate();
+========
+        LicenseManagement::activate();
+>>>>>>>> 779bf41037b8d38e66678b6fe2790383c1699b74:app-modules/license-management/database/migrations/2024_11_21_212345_data_activate_license_management.php
     }
 
     public function down(): void
     {
+<<<<<<<< HEAD:app-modules/service-management/database/migrations/2024_11_28_125122_data_activate_feature_flag_round_robin_id.php
         RoundRobinId::deactivate();
+========
+        LicenseManagement::deactivate();
+>>>>>>>> 779bf41037b8d38e66678b6fe2790383c1699b74:app-modules/license-management/database/migrations/2024_11_21_212345_data_activate_license_management.php
     }
 };

@@ -509,7 +509,6 @@ test('check round robin assignment', function () {
     ]));
     $users = User::orderBy('name')->orderBy('id')->get();
 
-    $loop = 0;
     foreach ($users as $user) {
         $user->grantLicense(LicenseType::RecruitmentCrm);
         $user->teams()->attach($team);
