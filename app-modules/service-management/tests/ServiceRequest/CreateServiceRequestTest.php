@@ -46,26 +46,24 @@ use function Pest\Livewire\livewire;
 
 use AidingApp\Contact\Models\Contact;
 use Filament\Forms\Components\Select;
+use AidingApp\Authorization\Models\License;
 
 use function PHPUnit\Framework\assertCount;
 use function Pest\Laravel\assertDatabaseHas;
 
 use AidingApp\Authorization\Enums\LicenseType;
-use AidingApp\Authorization\Models\License;
-use AidingApp\ServiceManagement\Actions\CreateServiceRequestAction;
-use AidingApp\ServiceManagement\DataTransferObjects\ServiceRequestDataObject;
 
 use function Pest\Laravel\assertDatabaseMissing;
 
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
+use AidingApp\ServiceManagement\Actions\CreateServiceRequestAction;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
+use AidingApp\ServiceManagement\DataTransferObjects\ServiceRequestDataObject;
 use AidingApp\ServiceManagement\Tests\RequestFactories\CreateServiceRequestRequestFactory;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\CreateServiceRequest;
-use App\Enums\Feature;
-use Illuminate\Support\Facades\Gate;
 
 test('A successful action on the CreateServiceRequest page', function () {
     asSuperAdmin()
@@ -486,7 +484,6 @@ test('assignment type individual manager will auto assign to new service request
 
     expect($serviceRequest->assignments()->first())->user->id->toBe($user->getKey());
 });
-
 
 test('check round robin assignment', function () {
     User::factory()->licensed(LicenseType::cases())->create();

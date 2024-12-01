@@ -40,5 +40,5 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 
 interface ServiceRequestTypeAssigner
 {
-  public function execute(ServiceRequest $serviceRequest): void;
+    public function execute(ServiceRequest $serviceRequest): void;
 }
