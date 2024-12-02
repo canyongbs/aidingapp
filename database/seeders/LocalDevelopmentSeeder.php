@@ -55,7 +55,7 @@ class LocalDevelopmentSeeder extends Seeder
 
     private function adminUsers(): void
     {
-        $superAdminRole = Role::where('name', 'authorization.super_admin')->first();
+        $superAdminRole = Role::where('name', 'SaaS Global Admin')->first();
 
         if (! $superAdminRole) {
             return;

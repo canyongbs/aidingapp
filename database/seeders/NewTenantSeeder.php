@@ -57,7 +57,7 @@ class NewTenantSeeder extends Seeder
     public function run(): void
     {
         Role::create([
-            'name' => 'authorization.super_admin',
+            'name' => 'SaaS Global Admin',
             'guard_name' => 'web',
         ]);
 

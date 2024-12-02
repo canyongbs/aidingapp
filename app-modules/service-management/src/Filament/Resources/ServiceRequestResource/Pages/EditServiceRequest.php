@@ -100,7 +100,7 @@ class EditServiceRequest extends EditRecord
                                         fn (ServiceRequest $record) => ServiceRequestType::withTrashed()
                                             ->whereKey($record->priority?->type_id)
                                             ->orWhereNull('deleted_at')
-                                            ->when(! auth()->user()->hasRole('authorization.super_admin'), function (Builder $query) {
+                                            ->when(! auth()->user()->hasRole('SaaS Global Admin'), function (Builder $query) {
                                                 $query->whereHas('managers', function (Builder $query): void {
                                                     $query->where('teams.id', auth()->user()->teams()->first()?->getKey());
                                                 });

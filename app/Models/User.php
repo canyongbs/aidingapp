@@ -301,7 +301,7 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
 
     public function canBeImpersonated(): bool
     {
-        return ! $this->hasRole('authorization.super_admin');
+        return ! $this->hasRole('SaaS Global Admin');
     }
 
     public function registerMediaCollections(): void

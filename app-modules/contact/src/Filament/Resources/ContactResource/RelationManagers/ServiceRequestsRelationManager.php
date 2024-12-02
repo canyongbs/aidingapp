@@ -70,7 +70,7 @@ class ServiceRequestsRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('id')
             ->modifyQueryUsing(function ($query) {
-                $query->when(! auth()->user()->hasRole('authorization.super_admin'), function (Builder $q) {
+                $query->when(! auth()->user()->hasRole('SaaS Global Admin'), function (Builder $q) {
                     return $q->whereHas('priority.type.managers', function (Builder $query): void {
                         $query->where('teams.id', auth()->user()->teams()->first()?->getKey());
                     })

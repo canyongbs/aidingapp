@@ -50,7 +50,7 @@ class ManagedServiceRequestType implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if (auth()->user()->hasRole('authorization.super_admin')) {
+        if (auth()->user()->hasRole('SaaS Global Admin')) {
             return;
         }
 
