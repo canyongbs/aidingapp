@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Observers;
 
+use AidingApp\Notification\Events\TriggeredAutoSubscription;
 use Carbon\Carbon;
 use App\Enums\Feature;
 use Illuminate\Support\Facades\Gate;
@@ -47,6 +48,7 @@ use AidingApp\ServiceManagement\Exceptions\ServiceRequestNumberUpdateAttemptExce
 use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestClosedNotification;
 use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestOpenedNotification;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
+use App\Models\User;
 
 class ServiceRequestObserver
 {
@@ -57,6 +59,12 @@ class ServiceRequestObserver
 
     public function created(ServiceRequest $serviceRequest): void
     {
+        $user = auth()->user();
+
+        if ($user instanceof User) {
+            TriggeredAutoSubscription::dispatch($user, $serviceRequest);
+        }
+
         if ($serviceRequest->status?->classification === SystemServiceRequestClassification::Open) {
             $serviceRequest->respondent->notify(new SendEducatableServiceRequestOpenedNotification($serviceRequest));
         }

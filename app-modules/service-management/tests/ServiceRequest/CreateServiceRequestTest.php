@@ -485,11 +485,13 @@ test('assignment type individual manager will auto assign to new service request
     expect($serviceRequest->assignments()->first())->user->id->toBe($user->getKey());
 });
 
-test('check round robin assignment', function () {
-    User::factory()->licensed(LicenseType::cases())->create();
-    $team = Team::factory()->create();
+test('assignment type round robin will auto-assign to new service requests', function () {
+    asSuperAdmin();
+    $factoryUsers = User::factory()->licensed(LicenseType::cases())->count(3)->create();
+    $team = Team::factory()
+        ->hasAttached($factoryUsers, [], 'users')->create();
 
-    $serviceRequestTypesWithManager = ServiceRequestType::factory()
+    $serviceRequestTypeWithManager = ServiceRequestType::factory()
         ->hasAttached(
             factory: $team,
             relationship: 'managers'
@@ -501,59 +503,34 @@ test('check round robin assignment', function () {
 
     $request = collect(CreateServiceRequestRequestFactory::new()->create([
         'priority_id' => ServiceRequestPriority::factory()->create([
-            'type_id' => $serviceRequestTypesWithManager->getKey(),
+            'type_id' => $serviceRequestTypeWithManager->getKey(),
         ])->getKey(),
     ]));
-    $users = User::orderBy('name')->orderBy('id')->get();
+
+    $users = $team->users()->orderBy('name')->orderBy('id')->get();
 
     foreach ($users as $user) {
-        $user->grantLicense(LicenseType::RecruitmentCrm);
-        $user->teams()->attach($team);
-        $user->givePermissionTo('service_request.view-any');
-        $user->givePermissionTo('service_request.create');
-        $user->refresh();
-        actingAs($user);
-
         livewire(CreateServiceRequest::class)
-            ->assertSuccessful()
             ->fillForm($request->toArray())
-            ->call('create');
+            ->fillForm([
+                'respondent_id' => Contact::factory()->create()->getKey(),
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
 
-        $serviceRequestDataObject = new ServiceRequestDataObject(
-            division_id: $request['division_id'],
-            status_id: $request['status_id'],
-            type_id: $request['type_id'],
-            priority_id: $request['priority_id'],
-            title: $request['title'],
-            close_details: $request['close_details'],
-            res_details: $request['res_details'],
-            respondent_type: $request['respondent_type'],
-            respondent_id: $request['respondent_id'],
-        );
-
-        app(CreateServiceRequestAction::class)->execute($serviceRequestDataObject);
         $getServiceRequestType = ServiceRequestType::where('assignment_type', 'round-robin')->first();
-        expect($getServiceRequestType->round_robin_last_assigned_id)->ToBe($user->getKey());
+        expect($getServiceRequestType->assignment_type)->toBe(ServiceRequestTypeAssignmentTypes::RoundRobin);
+        expect($getServiceRequestType->fresh()->last_assigned_id)->ToBe($user->getKey());
     }
 
     livewire(CreateServiceRequest::class)
-        ->assertSuccessful()
         ->fillForm($request->toArray())
-        ->call('create');
+        ->fillForm([
+            'respondent_id' => Contact::factory()->create()->getKey(),
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
 
-    $serviceRequestDataObject = new ServiceRequestDataObject(
-        division_id: $request['division_id'],
-        status_id: $request['status_id'],
-        type_id: $request['type_id'],
-        priority_id: $request['priority_id'],
-        title: $request['title'],
-        close_details: $request['close_details'],
-        res_details: $request['res_details'],
-        respondent_type: $request['respondent_type'],
-        respondent_id: $request['respondent_id'],
-    );
-
-    app(CreateServiceRequestAction::class)->execute($serviceRequestDataObject);
     $getServiceRequestType = ServiceRequestType::where('assignment_type', 'round-robin')->first();
-    expect($getServiceRequestType->round_robin_last_assigned_id)->ToBe(User::orderBy('name')->orderBy('id')->first()->getKey());
+    expect($getServiceRequestType->last_assigned_id)->ToBe($team->users()->orderBy('name')->orderBy('id')->first()->getKey());
 });

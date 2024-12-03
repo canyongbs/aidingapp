@@ -80,7 +80,7 @@ class ServiceRequestType extends BaseModel implements Auditable
         'is_auditors_service_request_assigned_notification_enabled',
         'is_auditors_service_request_resolved_email_enabled',
         'is_auditors_service_request_resolved_notification_enabled',
-        'round_robin_last_assigned_id',
+        'last_assigned_id',
     ];
 
     protected $casts = [
@@ -140,9 +140,9 @@ class ServiceRequestType extends BaseModel implements Auditable
         );
     }
 
-    public function user(): BelongsTo
+    public function lastAssignedUser(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'round_robin_last_assigned_id', 'id');
+        return $this->belongsTo(User::class, 'last_assigned_id', 'id');
     }
 
     protected function serializeDate(DateTimeInterface $date): string
