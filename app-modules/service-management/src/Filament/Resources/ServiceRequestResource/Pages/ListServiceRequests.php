@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages;
 
 use Filament\Tables\Table;
+use App\Models\Authenticatable;
 use Filament\Actions\CreateAction;
 use Filament\Tables\Filters\Filter;
 use AidingApp\Contact\Models\Contact;
@@ -78,7 +79,7 @@ class ListServiceRequests extends ListRecords
                 ],
                 'status',
             ])
-                ->when(! auth()->user()->hasRole('SaaS Global Admin'), function (Builder $q) {
+                ->when(! auth()->user()->hasRole(Authenticatable::SUPER_ADMIN_ROLE), function (Builder $q) {
                     return $q->whereHas('priority.type.managers', function (Builder $query): void {
                         $query->where('teams.id', auth()->user()->teams()->first()?->getKey());
                     })->orWhereHas('priority.type.auditors', function (Builder $query): void {
@@ -164,7 +165,7 @@ class ListServiceRequests extends ListRecords
                         ->action(function ($records) {
                             $deletedRecordsCount = ServiceRequest::query()
                                 ->whereKey($records)
-                                ->when(! auth()->user()->hasRole('SaaS Global Admin'), function (Builder $query) {
+                                ->when(! auth()->user()->hasRole(Authenticatable::SUPER_ADMIN_ROLE), function (Builder $query) {
                                     $query->whereHas('priority.type.managers', function (Builder $query): void {
                                         $query->where('teams.id', auth()->user()->teams()->first()?->getKey());
                                     });

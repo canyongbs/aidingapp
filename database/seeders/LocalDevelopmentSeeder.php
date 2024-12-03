@@ -37,6 +37,7 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use App\Models\Authenticatable;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use AidingApp\Contact\Models\Contact;
@@ -55,7 +56,7 @@ class LocalDevelopmentSeeder extends Seeder
 
     private function adminUsers(): void
     {
-        $superAdminRole = Role::where('name', 'SaaS Global Admin')->first();
+        $superAdminRole = Role::where('name', Authenticatable::SUPER_ADMIN_ROLE)->first();
 
         if (! $superAdminRole) {
             return;

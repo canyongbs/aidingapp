@@ -38,6 +38,7 @@ namespace Tests;
 
 use App\Models\Tenant;
 use Illuminate\Support\Str;
+use App\Models\Authenticatable;
 use Tests\Concerns\LoadsFixtures;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\Finder\Finder;
@@ -115,7 +116,7 @@ abstract class TestCase extends BaseTestCase
         });
 
         Role::create([
-            'name' => 'SaaS Global Admin',
+            'name' => Authenticatable::SUPER_ADMIN_ROLE,
             'guard_name' => 'web',
         ]);
 

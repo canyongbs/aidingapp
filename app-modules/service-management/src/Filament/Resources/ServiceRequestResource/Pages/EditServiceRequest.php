@@ -40,6 +40,7 @@ use Filament\Actions;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Forms\Form;
+use App\Models\Authenticatable;
 use Illuminate\Support\Collection;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
@@ -100,7 +101,7 @@ class EditServiceRequest extends EditRecord
                                         fn (ServiceRequest $record) => ServiceRequestType::withTrashed()
                                             ->whereKey($record->priority?->type_id)
                                             ->orWhereNull('deleted_at')
-                                            ->when(! auth()->user()->hasRole('SaaS Global Admin'), function (Builder $query) {
+                                            ->when(! auth()->user()->hasRole(Authenticatable::SUPER_ADMIN_ROLE), function (Builder $query) {
                                                 $query->whereHas('managers', function (Builder $query): void {
                                                     $query->where('teams.id', auth()->user()->teams()->first()?->getKey());
                                                 });

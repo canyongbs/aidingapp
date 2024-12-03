@@ -36,6 +36,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Authenticatable;
 use Illuminate\Database\Seeder;
 use AidingApp\Authorization\Models\Role;
 use AidingApp\Division\Database\Seeders\DivisionSeeder;
@@ -57,7 +58,7 @@ class NewTenantSeeder extends Seeder
     public function run(): void
     {
         Role::create([
-            'name' => 'SaaS Global Admin',
+            'name' => Authenticatable::SUPER_ADMIN_ROLE,
             'guard_name' => 'web',
         ]);
 
