@@ -50,34 +50,34 @@ use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
  */
 class ServiceRequestPriority extends BaseModel implements Auditable
 {
-  use SoftDeletes;
-  use HasUuids;
-  use AuditableTrait;
+    use SoftDeletes;
+    use HasUuids;
+    use AuditableTrait;
 
-  protected $fillable = [
-    'name',
-    'order',
-    'sla_id',
-    // 'type_id',
-  ];
+    protected $fillable = [
+        'name',
+        'order',
+        'sla_id',
+        // 'type_id',
+    ];
 
-  public function serviceRequests(): HasMany
-  {
-    return $this->hasMany(ServiceRequest::class, 'priority_id');
-  }
+    public function serviceRequests(): HasMany
+    {
+        return $this->hasMany(ServiceRequest::class, 'priority_id');
+    }
 
-  public function type(): BelongsTo
-  {
-    return $this->belongsTo(ServiceRequestType::class, 'type_id');
-  }
+    public function type(): BelongsTo
+    {
+        return $this->belongsTo(ServiceRequestType::class, 'type_id');
+    }
 
-  public function sla(): BelongsTo
-  {
-    return $this->belongsTo(Sla::class);
-  }
+    public function sla(): BelongsTo
+    {
+        return $this->belongsTo(Sla::class);
+    }
 
-  protected function serializeDate(DateTimeInterface $date): string
-  {
-    return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
-  }
+    protected function serializeDate(DateTimeInterface $date): string
+    {
+        return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
+    }
 }

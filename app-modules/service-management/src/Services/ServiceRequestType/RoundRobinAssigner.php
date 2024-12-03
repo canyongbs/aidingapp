@@ -43,32 +43,32 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 
 class RoundRobinAssigner implements ServiceRequestTypeAssigner
 {
-  public function execute(ServiceRequest $serviceRequest): void
-  {
-    $serviceRequestType = $serviceRequest->priority->type;
+    public function execute(ServiceRequest $serviceRequest): void
+    {
+        $serviceRequestType = $serviceRequest->priority->type;
 
-    if (!is_null($serviceRequestType) && RoundRobinId::active()) {
-      $lastAsignee = $serviceRequestType->lastAssignedUser;
-      $user = null;
+        if (! is_null($serviceRequestType) && RoundRobinId::active()) {
+            $lastAsignee = $serviceRequestType->lastAssignedUser;
+            $user = null;
 
-      if ($lastAsignee) {
-        $user = User::query()->whereRelation('teams.managableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey())
-          ->where('name', '>=', $lastAsignee->name)
-          ->where(fn(Builder $query) => $query
-            ->where('name', '!=', $lastAsignee->name)
-            ->orWhere('users.id', '>', $lastAsignee->id))
-          ->orderBy('name')->orderBy('id')->first();
-      }
+            if ($lastAsignee) {
+                $user = User::query()->whereRelation('teams.managableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey())
+                    ->where('name', '>=', $lastAsignee->name)
+                    ->where(fn (Builder $query) => $query
+                        ->where('name', '!=', $lastAsignee->name)
+                        ->orWhere('users.id', '>', $lastAsignee->id))
+                    ->orderBy('name')->orderBy('id')->first();
+            }
 
-      if ($user === null) {
-        $user = User::query()->whereRelation('teams.managableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey())
-          ->orderBy('name')->orderBy('id')->first();
-      }
+            if ($user === null) {
+                $user = User::query()->whereRelation('teams.managableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey())
+                    ->orderBy('name')->orderBy('id')->first();
+            }
 
-      if ($user !== null) {
-        $serviceRequestType->last_assigned_id = $user->getKey();
-        $serviceRequestType->save();
-      }
+            if ($user !== null) {
+                $serviceRequestType->last_assigned_id = $user->getKey();
+                $serviceRequestType->save();
+            }
+        }
     }
-  }
 }

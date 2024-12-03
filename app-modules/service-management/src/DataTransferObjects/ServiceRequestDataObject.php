@@ -36,36 +36,35 @@
 
 namespace AidingApp\ServiceManagement\DataTransferObjects;
 
-use Illuminate\Http\Request;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Optional;
 
 class ServiceRequestDataObject extends Data
 {
-  public function __construct(
-    public string|Optional $division_id,
-    public string|Optional $status_id,
-    public string $type_id,
-    public string|Optional $priority_id,
-    public string|Optional $title,
-    public string|Optional $close_details,
-    public string|Optional $res_details,
-    public string $respondent_type,
-    public string $respondent_id,
-  ) {}
+    public function __construct(
+        public string|Optional $division_id,
+        public string|Optional $status_id,
+        public string $type_id,
+        public string|Optional $priority_id,
+        public string|Optional $title,
+        public string|Optional $close_details,
+        public string|Optional $res_details,
+        public string $respondent_type,
+        public string $respondent_id,
+    ) {}
 
-  public static function fromData(array $data): static
-  {
-    return new self(
-      division_id: $data['division_id'],
-      status_id: $data['status_id'],
-      type_id: $data['type_id'],
-      priority_id: $data['priority_id'],
-      title: $data['title'],
-      close_details: $data['close_details'],
-      res_details: $data['res_details'],
-      respondent_type: $data['respondent_type'],
-      respondent_id: $data['respondent_id'],
-    );
-  }
+    public static function fromData(array $data): static
+    {
+        return new self(
+            division_id: $data['division_id'],
+            status_id: $data['status_id'],
+            type_id: $data['type_id'],
+            priority_id: $data['priority_id'],
+            title: $data['title'],
+            close_details: $data['close_details'],
+            res_details: $data['res_details'],
+            respondent_type: $data['respondent_type'],
+            respondent_id: $data['respondent_id'],
+        );
+    }
 }
