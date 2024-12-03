@@ -38,9 +38,6 @@ use App\Models\User;
 use App\Models\Authenticatable;
 
 use function Tests\asSuperAdmin;
-
-use Spatie\Permission\Models\Role;
-
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
@@ -156,26 +153,6 @@ it('allows user with permission to impersonate', function () {
     expect(auth()->id())->toBe($second->id);
 });
 
-// it('prevents non-SaaS Global Admin users from seeing or selecting the SaaS Global Admin role', function () {
-//     $superAdminRole = Role::findByName(Authenticatable::SUPER_ADMIN_ROLE);
-//     $user = User::factory()->create();
-//     $user->givePermissionTo('user.view-any', 'user.*.view', 'user.*.update', 'user.create');
-//     actingAs($user);
-
-//     $this->get(UserResource::getUrl('index'))->assertSuccessful();
-//     $newUser = User::factory()->create();
-//     livewire(RolesRelationManager::class, [
-//         'ownerRecord' => $newUser,
-//         'pageClass' => EditUser::class,
-//     ])
-//     ->assertFormFieldExists('recordId', 'mountedTableActionForm', function (Select $select) {
-//         $options = $select->getSearchResults(Authenticatable::SUPER_ADMIN_ROLE);
-
-//         return empty($options) ? true : false;
-//     })->assertSuccessful();;
-
-// })->only();
-
 it('Not allows user which has not SaaS Global Admin role to assign SaaS Global Admin role to other user', function () {
     $user = User::factory()->create();
     $user->givePermissionTo(
@@ -211,4 +188,4 @@ it('Not allows user which has not SaaS Global Admin role to assign SaaS Global A
 
             return empty($options) ? true : false;
         })->assertSuccessful();
-})->only();
+});
