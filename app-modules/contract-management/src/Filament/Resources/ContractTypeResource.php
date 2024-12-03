@@ -39,7 +39,6 @@ namespace AidingApp\ContractManagement\Filament\Resources;
 use Filament\Resources\Resource;
 use App\Filament\Clusters\ContractManagement;
 use AidingApp\ContractManagement\Models\ContractType;
-use App\Features\ContractManagement as FeaturesContractManagement;
 use AidingApp\ContractManagement\Filament\Resources\ContractTypeResource\Pages\EditContractType;
 use AidingApp\ContractManagement\Filament\Resources\ContractTypeResource\Pages\ListContractTypes;
 use AidingApp\ContractManagement\Filament\Resources\ContractTypeResource\Pages\CreateContractType;
@@ -54,7 +53,7 @@ class ContractTypeResource extends Resource
 
     public static function canAccess(): bool
     {
-        return FeaturesContractManagement::active() && parent::canAccess();
+        return parent::canAccess();
     }
 
     public static function getPages(): array

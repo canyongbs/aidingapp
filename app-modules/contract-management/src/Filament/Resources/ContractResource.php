@@ -37,7 +37,6 @@
 namespace AidingApp\ContractManagement\Filament\Resources;
 
 use Filament\Resources\Resource;
-use App\Features\ContractManagement;
 use AidingApp\ContractManagement\Models\Contract;
 use AidingApp\ContractManagement\Filament\Resources\ContractResource\Pages\EditContract;
 use AidingApp\ContractManagement\Filament\Resources\ContractResource\Pages\ViewContract;
@@ -58,7 +57,7 @@ class ContractResource extends Resource
 
     public static function canAccess(): bool
     {
-        return ContractManagement::active() && parent::canAccess();
+        return parent::canAccess();
     }
 
     public static function getPages(): array
