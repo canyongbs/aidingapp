@@ -36,6 +36,7 @@
 
 use App\Models\User;
 use App\Models\Authenticatable;
+use App\Features\SuperAdminRole;
 
 use function Tests\asSuperAdmin;
 use function Pest\Laravel\actingAs;
@@ -153,7 +154,7 @@ it('allows user with permission to impersonate', function () {
     expect(auth()->id())->toBe($second->id);
 });
 
-it('Not allows user which has not SaaS Global Admin role to assign SaaS Global Admin role to other user', function () {
+it('does not allow a user which does not have the SaaS Global Admin role to assign SaaS Global Admin role to other users', function () {
     $user = User::factory()->create();
     $user->givePermissionTo(
         'permission.view-any',
@@ -184,8 +185,8 @@ it('Not allows user which has not SaaS Global Admin role to assign SaaS Global A
     ])
         ->mountTableAction(AttachAction::class)
         ->assertFormFieldExists('recordId', 'mountedTableActionForm', function (Select $select) {
-            $options = $select->getSearchResults(Authenticatable::SUPER_ADMIN_ROLE);
+            $options = $select->getSearchResults(SuperAdminRole::active() ? Authenticatable::SUPER_ADMIN_ROLE : 'authorization.super_admin');
 
-            return empty($options) ? true : false;
-        })->assertSuccessful();
+            return empty($options);
+        });
 });

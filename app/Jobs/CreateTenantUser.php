@@ -42,6 +42,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use App\Models\Authenticatable;
+use App\Features\SuperAdminRole;
 use Illuminate\Queue\SerializesModels;
 use AidingApp\Authorization\Models\Role;
 use Illuminate\Queue\InteractsWithQueue;
@@ -84,7 +85,7 @@ class CreateTenantUser implements ShouldQueue, NotTenantAware
                 }
             }
 
-            $user->roles()->sync(Role::where('name', Authenticatable::SUPER_ADMIN_ROLE)->firstOrFail());
+            $user->roles()->sync(Role::where('name', SuperAdminRole::active() ? Authenticatable::SUPER_ADMIN_ROLE : 'authorization.super_admin')->firstOrFail());
         });
     }
 }

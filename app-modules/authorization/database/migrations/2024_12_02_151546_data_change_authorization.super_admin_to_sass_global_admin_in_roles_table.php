@@ -35,17 +35,18 @@
 */
 
 use App\Models\Authenticatable;
+use App\Features\SuperAdminRole;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Migrations\Migration;
 
 return new class () extends Migration {
     public function up(): void
     {
-        DB::table('roles')->where('name', 'authorization.super_admin')->update(['name' => Authenticatable::SUPER_ADMIN_ROLE]);
+        DB::table('roles')->where('name', 'authorization.super_admin')->update(['name' => SuperAdminRole::active() ? Authenticatable::SUPER_ADMIN_ROLE : 'authorization.super_admin']);
     }
 
     public function down(): void
     {
-        DB::table('roles')->where('name', Authenticatable::SUPER_ADMIN_ROLE)->update(['name' => 'authorization.super_admin']);
+        DB::table('roles')->where('name', SuperAdminRole::active() ? Authenticatable::SUPER_ADMIN_ROLE : 'authorization.super_admin')->update(['name' => 'authorization.super_admin']);
     }
 };
