@@ -34,58 +34,19 @@
 </COPYRIGHT>
 */
 
-namespace App\Jobs;
-
-use App\Models\User;
-use App\Models\Tenant;
-use Illuminate\Support\Arr;
-use Illuminate\Bus\Batchable;
-use Illuminate\Bus\Queueable;
 use App\Models\Authenticatable;
 use App\Features\SuperAdminRole;
-use Illuminate\Queue\SerializesModels;
-use AidingApp\Authorization\Models\Role;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
-use Spatie\Multitenancy\Jobs\NotTenantAware;
-use AidingApp\Authorization\Enums\LicenseType;
-use App\Multitenancy\DataTransferObjects\TenantUser;
-use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Migrations\Migration;
 
-class CreateTenantUser implements ShouldQueue, NotTenantAware
-{
-    use Batchable;
-    use Dispatchable;
-    use InteractsWithQueue;
-    use Queueable;
-    use SerializesModels;
-
-    public int $timeout = 1200;
-
-    public function __construct(
-        public Tenant $tenant,
-        public TenantUser $data,
-    ) {}
-
-    public function middleware(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [new SkipIfBatchCancelled()];
+        DB::table('roles')->where('name', 'authorization.super_admin')->update(['name' => SuperAdminRole::active() ? Authenticatable::SUPER_ADMIN_ROLE : 'authorization.super_admin']);
     }
 
-    public function handle(): void
+    public function down(): void
     {
-        $this->tenant->execute(function () {
-            $user = User::create($this->data->toArray());
-
-            foreach (Arr::wrap(LicenseType::cases()) as $licenseType) {
-                /** @var LicenseType $licenseType */
-                if ($licenseType->hasAvailableLicenses()) {
-                    $user->licenses()->create(['type' => $licenseType]);
-                }
-            }
-
-            $user->roles()->sync(Role::where('name', SuperAdminRole::active() ? Authenticatable::SUPER_ADMIN_ROLE : 'authorization.super_admin')->firstOrFail());
-        });
+        DB::table('roles')->where('name', SuperAdminRole::active() ? Authenticatable::SUPER_ADMIN_ROLE : 'authorization.super_admin')->update(['name' => 'authorization.super_admin']);
     }
-}
+};

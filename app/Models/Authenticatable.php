@@ -48,6 +48,8 @@ abstract class Authenticatable extends BaseAuthenticatable
     use CanOrElse;
     use UsesTenantConnection;
 
+    public const SUPER_ADMIN_ROLE = 'SaaS Global Admin';
+
     /**
      * @param LicenseType | string | array<LicenseType | string> | null $type
      */

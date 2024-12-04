@@ -38,6 +38,8 @@ namespace App\Filament\Resources\UserResource\RelationManagers;
 
 use Filament\Forms\Form;
 use Filament\Tables\Table;
+use App\Models\Authenticatable;
+use App\Features\SuperAdminRole;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use App\Filament\Tables\Columns\IdColumn;
@@ -77,7 +79,16 @@ class RolesRelationManager extends RelationManager
             ])
             ->headerActions([
                 AttachAction::make()
-                    ->recordSelectOptionsQuery(fn (Builder $query) => $query->where('guard_name', 'web'))
+                    ->recordSelectOptionsQuery(function (Builder $query) {
+                        $query->where('guard_name', 'web');
+
+                        /** @var User $user */
+                        $user = auth()->user();
+
+                        if (! $user->hasRole(SuperAdminRole::active() ? Authenticatable::SUPER_ADMIN_ROLE : 'authorization.super_admin')) {
+                            $query->where('name', '!=', SuperAdminRole::active() ? Authenticatable::SUPER_ADMIN_ROLE : 'authorization.super_admin');
+                        }
+                    })
                     ->multiple()
                     ->preloadRecordSelect(),
             ])
