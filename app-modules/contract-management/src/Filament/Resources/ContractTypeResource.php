@@ -51,11 +51,6 @@ class ContractTypeResource extends Resource
 
     protected static ?string $cluster = ContractManagement::class;
 
-    public static function canAccess(): bool
-    {
-        return parent::canAccess();
-    }
-
     public static function getPages(): array
     {
         return [

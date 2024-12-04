@@ -55,11 +55,6 @@ class ContractResource extends Resource
 
     protected static ?int $navigationSort = 40;
 
-    public static function canAccess(): bool
-    {
-        return parent::canAccess();
-    }
-
     public static function getPages(): array
     {
         return [
