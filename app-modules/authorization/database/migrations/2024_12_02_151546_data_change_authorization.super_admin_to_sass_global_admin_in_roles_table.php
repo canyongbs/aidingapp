@@ -34,14 +34,19 @@
 </COPYRIGHT>
 */
 
-namespace App\Features;
+use App\Models\Authenticatable;
+use App\Features\SuperAdminRole;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Migrations\Migration;
 
-use App\Support\AbstractFeatureFlag;
-
-class LicenseManagement extends AbstractFeatureFlag
-{
-    public function resolve(mixed $scope): mixed
+return new class () extends Migration {
+    public function up(): void
     {
-        return false;
+        DB::table('roles')->where('name', 'authorization.super_admin')->update(['name' => SuperAdminRole::active() ? Authenticatable::SUPER_ADMIN_ROLE : 'authorization.super_admin']);
     }
-}
+
+    public function down(): void
+    {
+        DB::table('roles')->where('name', SuperAdminRole::active() ? Authenticatable::SUPER_ADMIN_ROLE : 'authorization.super_admin')->update(['name' => 'authorization.super_admin']);
+    }
+};

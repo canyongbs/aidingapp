@@ -37,7 +37,6 @@
 namespace AidingApp\LicenseManagement\Policies;
 
 use App\Models\Authenticatable;
-use App\Features\LicenseManagement;
 use Illuminate\Auth\Access\Response;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\LicenseManagement\Models\Product;
@@ -46,10 +45,6 @@ class ProductPolicy
 {
     public function before(Authenticatable $authenticatable): ?Response
     {
-        if (! LicenseManagement::active()) {
-            return Response::deny('This feature is not active currently.');
-        }
-
         if (! $authenticatable->hasAnyLicense([Contact::getLicenseType()])) {
             return Response::deny('You are not licensed for the Recruitment CRM.');
         }

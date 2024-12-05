@@ -35,13 +35,19 @@
 */
 
 use App\Models\User;
+use App\Models\Authenticatable;
+use App\Features\SuperAdminRole;
 
 use function Tests\asSuperAdmin;
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
+use Filament\Forms\Components\Select;
+use App\Filament\Resources\UserResource;
+use Filament\Tables\Actions\AttachAction;
 use STS\FilamentImpersonate\Pages\Actions\Impersonate;
 use App\Filament\Resources\UserResource\Pages\EditUser;
+use App\Filament\Resources\UserResource\RelationManagers\RolesRelationManager;
 
 it('renders impersonate button for non super admin users when user is super admin', function () {
     asSuperAdmin();
@@ -146,4 +152,41 @@ it('allows user with permission to impersonate', function () {
 
     expect($second->isImpersonated())->toBeTrue();
     expect(auth()->id())->toBe($second->id);
+});
+
+it('does not allow a user which does not have the SaaS Global Admin role to assign SaaS Global Admin role to other users', function () {
+    $user = User::factory()->create();
+    $user->givePermissionTo(
+        'permission.view-any',
+        'permission.*.view',
+        'role.view-any',
+        'role.*.view',
+        'user.view-any',
+        'user.*.view',
+        'user.create',
+        'user.*.update',
+        'user.*.delete',
+        'user.*.restore',
+        'user.*.force-delete',
+    );
+
+    $second = User::factory()->create();
+
+    actingAs($user)
+        ->get(
+            UserResource::getUrl('edit', [
+                'record' => $second,
+            ])
+        )->assertSuccessful();
+
+    livewire(RolesRelationManager::class, [
+        'ownerRecord' => $second,
+        'pageClass' => EditUser::class,
+    ])
+        ->mountTableAction(AttachAction::class)
+        ->assertFormFieldExists('recordId', 'mountedTableActionForm', function (Select $select) {
+            $options = $select->getSearchResults(SuperAdminRole::active() ? Authenticatable::SUPER_ADMIN_ROLE : 'authorization.super_admin');
+
+            return empty($options);
+        });
 });

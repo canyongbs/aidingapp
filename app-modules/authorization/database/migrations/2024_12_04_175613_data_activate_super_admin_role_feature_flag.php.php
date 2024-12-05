@@ -34,23 +34,17 @@
 </COPYRIGHT>
 */
 
-use Illuminate\Support\Facades\DB;
+use App\Features\SuperAdminRole;
 use Illuminate\Database\Migrations\Migration;
 
 return new class () extends Migration {
     public function up(): void
     {
-        DB::table('media')
-            ->where('model_type', 'knowledge_base_item')
-            ->where('collection_name', 'solution')
-            ->update(['collection_name' => 'article_details']);
+        SuperAdminRole::activate();
     }
 
     public function down(): void
     {
-        DB::table('media')
-            ->where('model_type', 'knowledge_base_item')
-            ->where('collection_name', 'article_details')
-            ->update(['collection_name' => 'solution']);
+        SuperAdminRole::deactivate();
     }
 };
