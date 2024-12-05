@@ -48,29 +48,28 @@ class WorkloadAssigner implements ServiceRequestTypeAssigner
     {
         $serviceRequestType = $serviceRequest->priority->type;
 
-    if (! is_null($serviceRequestType)) {
-      $lastAssignee = $serviceRequestType->lastAssignedUser;
-      $user = null;
+        if (! is_null($serviceRequestType)) {
+            $lastAssignee = $serviceRequestType->lastAssignedUser;
+            $user = null;
 
-      if ($lastAssignee) {
+            if ($lastAssignee) {
+                $lowestServiceRequest = User::query()->whereRelation('teams.managableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey())
+                    ->withCount([
+                        'serviceRequests as service_request_count' => function (Builder $query) {
+                            $query->whereRelation('status', 'classification', '!=', SystemServiceRequestClassification::Closed);
+                        },
+                    ])
+                    ->orderBy('service_request_count', 'asc')
+                    ->first()?->service_request_count ?? 0;
 
-        $lowestServiceRequest = User::query()->whereRelation('teams.managableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey())
-          ->withCount([
-            'serviceRequests as service_request_count' => function (Builder $query) {
-              $query->whereRelation('status', 'classification', '!=', SystemServiceRequestClassification::Closed);
-            },
-          ])
-          ->orderBy('service_request_count', 'asc')
-          ->first()?->service_request_count ?? 0;
-
-        $user = User::query()->whereRelation('teams.managableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey())
-          ->whereRaw('(select count(*) from "service_requests" inner join "service_request_assignments" on "service_request_assignments"."service_request_id" = "service_requests"."id" where "users"."id" = "service_request_assignments"."user_id" and exists (select * from "service_request_statuses" where "service_requests"."status_id" = "service_request_statuses"."id" and "classification" != \'' . SystemServiceRequestClassification::Closed->value . '\' and "service_request_statuses"."deleted_at" is null) and "service_requests"."deleted_at" is null and "service_request_assignments"."deleted_at" is null) <= ' . $lowestServiceRequest)
-          ->where('name', '>=', $lastAssignee->name)
-          ->where(fn(Builder $query) => $query
-            ->where('name', '!=', $lastAssignee->name)
-            ->orWhere('users.id', '>', $lastAssignee->id))
-          ->orderBy('name')->orderBy('id')->first();
-      }
+                $user = User::query()->whereRelation('teams.managableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey())
+                    ->whereRaw('(select count(*) from "service_requests" inner join "service_request_assignments" on "service_request_assignments"."service_request_id" = "service_requests"."id" where "users"."id" = "service_request_assignments"."user_id" and exists (select * from "service_request_statuses" where "service_requests"."status_id" = "service_request_statuses"."id" and "classification" != \'' . SystemServiceRequestClassification::Closed->value . '\' and "service_request_statuses"."deleted_at" is null) and "service_requests"."deleted_at" is null and "service_request_assignments"."deleted_at" is null) <= ' . $lowestServiceRequest)
+                    ->where('name', '>=', $lastAssignee->name)
+                    ->where(fn (Builder $query) => $query
+                        ->where('name', '!=', $lastAssignee->name)
+                        ->orWhere('users.id', '>', $lastAssignee->id))
+                    ->orderBy('name')->orderBy('id')->first();
+            }
 
             if ($user === null) {
                 $user = User::query()->whereRelation('teams.managableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey())
