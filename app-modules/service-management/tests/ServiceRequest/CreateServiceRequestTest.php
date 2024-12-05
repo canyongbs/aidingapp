@@ -586,9 +586,9 @@ test('assignment type workload will auto-assign to new service requests', functi
             ->assertHasNoFormErrors();
 
         $latestServiceRequest = ServiceRequest::latest()->first();
-        $getServiceRequestType = ServiceRequestType::where('assignment_type', 'workload')->first();
+        $getServiceRequestType = ServiceRequestType::where('assignment_type', ServiceRequestTypeAssignmentTypes::Workload->value)->first();
         expect($getServiceRequestType->assignment_type)->toBe(ServiceRequestTypeAssignmentTypes::Workload);
-        expect($getServiceRequestType->fresh()->last_assigned_id)->ToBe($user->getKey());
+        expect($getServiceRequestType->last_assigned_id)->ToBe($user->getKey());
         expect($latestServiceRequest->assignedTo->user_id)->ToBe($user->getKey());
     }
 
@@ -601,7 +601,7 @@ test('assignment type workload will auto-assign to new service requests', functi
         ->assertHasNoFormErrors();
 
     $latestServiceRequest = ServiceRequest::latest()->first();
-    $getServiceRequestType = ServiceRequestType::where('assignment_type', 'workload')->first();
+    $getServiceRequestType = ServiceRequestType::where('assignment_type', ServiceRequestTypeAssignmentTypes::Workload->value)->first();
     expect($getServiceRequestType->last_assigned_id)->ToBe($factoryUsers->take(3)->sortBy('id')->sortBy('name')->first()->getKey());
     expect($latestServiceRequest->assignedTo->user_id)->ToBe($factoryUsers->take(3)->sortBy('id')->sortBy('name')->first()->getKey());
 });
