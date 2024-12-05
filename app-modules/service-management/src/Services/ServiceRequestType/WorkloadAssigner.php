@@ -39,6 +39,7 @@ namespace AidingApp\ServiceManagement\Services\ServiceRequestType;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use Illuminate\Contracts\Database\Query\Builder as QueryBuilder;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 
@@ -63,7 +64,21 @@ class WorkloadAssigner implements ServiceRequestTypeAssigner
                     ->first()?->service_request_count ?? 0;
 
                 $user = User::query()->whereRelation('teams.managableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey())
-                    ->whereRaw('(select count(*) from "service_requests" inner join "service_request_assignments" on "service_request_assignments"."service_request_id" = "service_requests"."id" where "users"."id" = "service_request_assignments"."user_id" and exists (select * from "service_request_statuses" where "service_requests"."status_id" = "service_request_statuses"."id" and "classification" != \'' . SystemServiceRequestClassification::Closed->value . '\' and "service_request_statuses"."deleted_at" is null) and "service_requests"."deleted_at" is null and "service_request_assignments"."deleted_at" is null) <= ' . $lowestServiceRequest)
+                    ->where(function (QueryBuilder $query) {
+                        $query->selectRaw('count(*)')
+                            ->from('service_requests')
+                            ->Join('service_request_assignments', 'service_request_assignments.service_request_id', '=', 'service_requests.id')
+                            ->whereColumn('users.id', 'service_request_assignments.user_id')
+                            ->whereExists(function (QueryBuilder $query) {
+                                $query->selectRaw('*')
+                                    ->from('service_request_statuses')
+                                    ->whereColumn('service_requests.status_id', 'service_request_statuses.id')
+                                    ->where('classification', '!=', SystemServiceRequestClassification::Closed)
+                                    ->whereNull('service_request_statuses.deleted_at');
+                            })
+                            ->whereNull('service_requests.deleted_at')
+                            ->whereNull('service_request_assignments.deleted_at');
+                    }, '<=', $lowestServiceRequest)
                     ->where('name', '>=', $lastAssignee->name)
                     ->where(fn (Builder $query) => $query
                         ->where('name', '!=', $lastAssignee->name)
