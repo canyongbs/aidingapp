@@ -69,6 +69,7 @@ use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\MediaCollections\UploadsMediaCollection;
 use AidingApp\ServiceManagement\Exceptions\ServiceRequestNumberExceededReRollsException;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
  * @property-read Contact $respondent
@@ -83,6 +84,7 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
     use AuditableTrait;
     use HasRelationships;
     use InteractsWithMedia;
+    use HasFactory;
 
     protected $fillable = [
         'respondent_type',

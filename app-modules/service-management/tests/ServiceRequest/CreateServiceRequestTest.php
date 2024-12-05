@@ -52,6 +52,7 @@ use function PHPUnit\Framework\assertCount;
 use function Pest\Laravel\assertDatabaseHas;
 
 use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 
 use function Pest\Laravel\assertDatabaseMissing;
 
@@ -536,3 +537,71 @@ test('assignment type round robin will auto-assign to new service requests', fun
     expect($getServiceRequestType->last_assigned_id)->ToBe($team->users()->orderBy('name')->orderBy('id')->first()->getKey());
     expect($latestServiceRequest->assignedTo->user_id)->ToBe($team->users()->orderBy('name')->orderBy('id')->first()->getKey());
 });
+
+test('assignment type workload will auto-assign to new service requests', function () {
+    asSuperAdmin();
+    $factoryUsers = User::factory()->licensed(LicenseType::cases())->count(5)->create();
+    $team = Team::factory()
+        ->hasAttached($factoryUsers, [], 'users')->create();
+
+    $serviceRequestTypeWithManager = ServiceRequestType::factory()
+        ->hasAttached(
+            factory: $team,
+            relationship: 'managers'
+        )
+        ->state([
+            'assignment_type' => ServiceRequestTypeAssignmentTypes::Workload,
+        ])
+        ->create();
+
+    foreach ($factoryUsers->take(-2) as $factoryUser) {
+        $serviceRequest = ServiceRequest::factory()->create();
+        $serviceRequest->assignments()->create([
+            'user_id' => $factoryUser->getKey(),
+            'assigned_at' => now(),
+            'status' => ServiceRequestAssignmentStatus::Active,
+        ]);
+
+        $serviceRequest = ServiceRequest::factory()->create();
+        $serviceRequest->assignments()->create([
+            'user_id' => $factoryUser->getKey(),
+            'assigned_at' => now(),
+            'status' => ServiceRequestAssignmentStatus::Active,
+        ]);
+    }
+
+    $request = collect(CreateServiceRequestRequestFactory::new()->create([
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $serviceRequestTypeWithManager->getKey(),
+        ])->getKey(),
+    ]));
+
+    foreach ($factoryUsers->take(3)->sortBy('id')->sortBy('name') as $user) {
+        livewire(CreateServiceRequest::class)
+            ->fillForm($request->toArray())
+            ->fillForm([
+                'respondent_id' => Contact::factory()->create()->getKey(),
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $latestServiceRequest = ServiceRequest::latest()->first();
+        $getServiceRequestType = ServiceRequestType::where('assignment_type', 'workload')->first();
+        expect($getServiceRequestType->assignment_type)->toBe(ServiceRequestTypeAssignmentTypes::Workload);
+        expect($getServiceRequestType->fresh()->last_assigned_id)->ToBe($user->getKey());
+        expect($latestServiceRequest->assignedTo->user_id)->ToBe($user->getKey());
+    }
+
+    livewire(CreateServiceRequest::class)
+        ->fillForm($request->toArray())
+        ->fillForm([
+            'respondent_id' => Contact::factory()->create()->getKey(),
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    $latestServiceRequest = ServiceRequest::latest()->first();
+    $getServiceRequestType = ServiceRequestType::where('assignment_type', 'workload')->first();
+    expect($getServiceRequestType->last_assigned_id)->ToBe($factoryUsers->take(3)->sortBy('id')->sortBy('name')->first()->getKey());
+    expect($latestServiceRequest->assignedTo->user_id)->ToBe($factoryUsers->take(3)->sortBy('id')->sortBy('name')->first()->getKey());
+})->only();
