@@ -604,4 +604,4 @@ test('assignment type workload will auto-assign to new service requests', functi
     $getServiceRequestType = ServiceRequestType::where('assignment_type', 'workload')->first();
     expect($getServiceRequestType->last_assigned_id)->ToBe($factoryUsers->take(3)->sortBy('id')->sortBy('name')->first()->getKey());
     expect($latestServiceRequest->assignedTo->user_id)->ToBe($factoryUsers->take(3)->sortBy('id')->sortBy('name')->first()->getKey());
-})->only();
+});
