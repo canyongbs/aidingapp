@@ -518,9 +518,9 @@ test('assignment type round robin will auto-assign to new service requests', fun
             ->assertHasNoFormErrors();
 
         $latestServiceRequest = ServiceRequest::latest()->first();
-        $getServiceRequestType = ServiceRequestType::where('assignment_type', 'round-robin')->first();
+        $getServiceRequestType = ServiceRequestType::where('assignment_type', ServiceRequestTypeAssignmentTypes::RoundRobin->value)->first();
         expect($getServiceRequestType->assignment_type)->toBe(ServiceRequestTypeAssignmentTypes::RoundRobin);
-        expect($getServiceRequestType->fresh()->last_assigned_id)->ToBe($user->getKey());
+        expect($getServiceRequestType->last_assigned_id)->ToBe($user->getKey());
         expect($latestServiceRequest->assignedTo->user_id)->ToBe($user->getKey());
     }
 
@@ -533,7 +533,7 @@ test('assignment type round robin will auto-assign to new service requests', fun
         ->assertHasNoFormErrors();
 
     $latestServiceRequest = ServiceRequest::latest()->first();
-    $getServiceRequestType = ServiceRequestType::where('assignment_type', 'round-robin')->first();
+    $getServiceRequestType = ServiceRequestType::where('assignment_type', ServiceRequestTypeAssignmentTypes::RoundRobin->value)->first();
     expect($getServiceRequestType->last_assigned_id)->ToBe($team->users()->orderBy('name')->orderBy('id')->first()->getKey());
     expect($latestServiceRequest->assignedTo->user_id)->ToBe($team->users()->orderBy('name')->orderBy('id')->first()->getKey());
 });
