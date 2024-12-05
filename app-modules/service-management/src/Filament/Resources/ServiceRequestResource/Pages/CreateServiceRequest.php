@@ -46,6 +46,7 @@ use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
 use AidingApp\Division\Models\Division;
 use Filament\Forms\Components\Textarea;
+use Illuminate\Database\Eloquent\Model;
 use Filament\Forms\Components\TextInput;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Resources\Pages\CreateRecord;
@@ -56,7 +57,9 @@ use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Rules\ManagedServiceRequestType;
+use AidingApp\ServiceManagement\Actions\CreateServiceRequestAction;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
+use AidingApp\ServiceManagement\DataTransferObjects\ServiceRequestDataObject;
 
 class CreateServiceRequest extends CreateRecord
 {
@@ -129,5 +132,12 @@ class CreateServiceRequest extends CreateRecord
                     ->required()
                     ->hiddenOn([RelationManager::class, ManageRelatedRecords::class]),
             ]);
+    }
+
+    protected function handleRecordCreation(array $data): Model
+    {
+        $serviceRequestDataObject = ServiceRequestDataObject::fromData($data);
+
+        return app(CreateServiceRequestAction::class)->execute($serviceRequestDataObject);
     }
 }

@@ -46,6 +46,7 @@ use function Pest\Livewire\livewire;
 
 use AidingApp\Contact\Models\Contact;
 use Filament\Forms\Components\Select;
+use AidingApp\Authorization\Models\License;
 
 use function PHPUnit\Framework\assertCount;
 use function Pest\Laravel\assertDatabaseHas;
@@ -342,7 +343,7 @@ test('displays only service request types managed by the current user', function
             $options = $field->getOptions();
 
             return in_array($serviceRequestTypesWithManagers->getKey(), array_keys($options)) &&
-                   ! in_array($serviceRequestTypesWithoutManagers->getKey(), array_keys($options));
+                ! in_array($serviceRequestTypesWithoutManagers->getKey(), array_keys($options));
         });
 });
 
@@ -464,11 +465,74 @@ test('assignment type individual manager will auto assign to new service request
         ])
         ->create();
 
-    $serviceRequest = ServiceRequest::factory()->create([
+    $request = collect(CreateServiceRequestRequestFactory::new()->create([
         'priority_id' => ServiceRequestPriority::factory()->create([
             'type_id' => $serviceRequestTypesWithManager->getKey(),
         ])->getKey(),
-    ]);
+    ]));
+
+    livewire(CreateServiceRequest::class)
+        ->fillForm($request->toArray())
+        ->fillForm([
+            'respondent_id' => Contact::factory()->create()->getKey(),
+        ])
+        ->call('create');
+
+    $serviceRequest = ServiceRequest::first();
 
     expect($serviceRequest->assignments()->first())->user->id->toBe($user->getKey());
+});
+
+test('assignment type round robin will auto-assign to new service requests', function () {
+    asSuperAdmin();
+    $factoryUsers = User::factory()->licensed(LicenseType::cases())->count(3)->create();
+    $team = Team::factory()
+        ->hasAttached($factoryUsers, [], 'users')->create();
+
+    $serviceRequestTypeWithManager = ServiceRequestType::factory()
+        ->hasAttached(
+            factory: $team,
+            relationship: 'managers'
+        )
+        ->state([
+            'assignment_type' => ServiceRequestTypeAssignmentTypes::RoundRobin,
+        ])
+        ->create();
+
+    $request = collect(CreateServiceRequestRequestFactory::new()->create([
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $serviceRequestTypeWithManager->getKey(),
+        ])->getKey(),
+    ]));
+
+    $users = $team->users()->orderBy('name')->orderBy('id')->get();
+
+    foreach ($users as $user) {
+        livewire(CreateServiceRequest::class)
+            ->fillForm($request->toArray())
+            ->fillForm([
+                'respondent_id' => Contact::factory()->create()->getKey(),
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $latestServiceRequest = ServiceRequest::latest()->first();
+        $getServiceRequestType = ServiceRequestType::where('assignment_type', ServiceRequestTypeAssignmentTypes::RoundRobin->value)->first();
+        expect($getServiceRequestType->assignment_type)->toBe(ServiceRequestTypeAssignmentTypes::RoundRobin);
+        expect($getServiceRequestType->last_assigned_id)->ToBe($user->getKey());
+        expect($latestServiceRequest->assignedTo->user_id)->ToBe($user->getKey());
+    }
+
+    livewire(CreateServiceRequest::class)
+        ->fillForm($request->toArray())
+        ->fillForm([
+            'respondent_id' => Contact::factory()->create()->getKey(),
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    $latestServiceRequest = ServiceRequest::latest()->first();
+    $getServiceRequestType = ServiceRequestType::where('assignment_type', ServiceRequestTypeAssignmentTypes::RoundRobin->value)->first();
+    expect($getServiceRequestType->last_assigned_id)->ToBe($team->users()->orderBy('name')->orderBy('id')->first()->getKey());
+    expect($latestServiceRequest->assignedTo->user_id)->ToBe($team->users()->orderBy('name')->orderBy('id')->first()->getKey());
 });

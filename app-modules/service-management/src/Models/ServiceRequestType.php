@@ -80,6 +80,7 @@ class ServiceRequestType extends BaseModel implements Auditable
         'is_auditors_service_request_assigned_notification_enabled',
         'is_auditors_service_request_resolved_email_enabled',
         'is_auditors_service_request_resolved_notification_enabled',
+        'last_assigned_id',
     ];
 
     protected $casts = [
@@ -137,6 +138,11 @@ class ServiceRequestType extends BaseModel implements Auditable
             foreignKey: 'assignment_type_individual_id',
             relation: 'serviceRequestTypeIndividualAssignment',
         );
+    }
+
+    public function lastAssignedUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'last_assigned_id', 'id');
     }
 
     protected function serializeDate(DateTimeInterface $date): string

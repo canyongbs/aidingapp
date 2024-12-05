@@ -34,35 +34,28 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Enums;
+namespace AidingApp\ServiceManagement\Actions;
 
-use Filament\Support\Contracts\HasLabel;
-use AidingApp\ServiceManagement\Services\ServiceRequestType\IndividualAssigner;
-use AidingApp\ServiceManagement\Services\ServiceRequestType\RoundRobinAssigner;
-use AidingApp\ServiceManagement\Services\ServiceRequestType\ServiceRequestTypeAssigner;
+use Illuminate\Support\Facades\DB;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\DataTransferObjects\ServiceRequestDataObject;
 
-// TODO This might belong in a more generalized space so we can re-use this across modules
-enum ServiceRequestTypeAssignmentTypes: string implements HasLabel
+class CreateServiceRequestAction
 {
-    case None = 'none';
-
-    case Individual = 'individual';
-
-    case RoundRobin = 'round-robin';
-
-    case Workload = 'workload';
-
-    public function getLabel(): string
+    public function execute(ServiceRequestDataObject $serviceRequestDataObject)
     {
-        return str()->headline($this->name);
-    }
+        return DB::transaction(
+            function () use ($serviceRequestDataObject) {
+                $serviceRequest = new ServiceRequest($serviceRequestDataObject->toArray());
+                $assignmentClass = $serviceRequest->priority->type?->assignment_type?->getAssignerClass();
+                $serviceRequest->save();
 
-    public function getAssignerClass(): ?ServiceRequestTypeAssigner
-    {
-        return match ($this) {
-            self::Individual => app(IndividualAssigner::class),
-            self::RoundRobin => app(RoundRobinAssigner::class),
-            default => null
-        };
+                if ($assignmentClass) {
+                    $assignmentClass->execute($serviceRequest);
+                }
+
+                return $serviceRequest;
+            }
+        );
     }
 }

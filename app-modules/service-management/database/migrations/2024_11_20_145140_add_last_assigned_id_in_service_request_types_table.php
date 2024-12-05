@@ -34,35 +34,24 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Enums;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
-use Filament\Support\Contracts\HasLabel;
-use AidingApp\ServiceManagement\Services\ServiceRequestType\IndividualAssigner;
-use AidingApp\ServiceManagement\Services\ServiceRequestType\RoundRobinAssigner;
-use AidingApp\ServiceManagement\Services\ServiceRequestType\ServiceRequestTypeAssigner;
-
-// TODO This might belong in a more generalized space so we can re-use this across modules
-enum ServiceRequestTypeAssignmentTypes: string implements HasLabel
-{
-    case None = 'none';
-
-    case Individual = 'individual';
-
-    case RoundRobin = 'round-robin';
-
-    case Workload = 'workload';
-
-    public function getLabel(): string
+return new class () extends Migration {
+    public function up(): void
     {
-        return str()->headline($this->name);
+        Schema::table('service_request_types', function (Blueprint $table) {
+            $table->foreignUuid('last_assigned_id')
+                ->nullable()
+                ->constrained('users');
+        });
     }
 
-    public function getAssignerClass(): ?ServiceRequestTypeAssigner
+    public function down(): void
     {
-        return match ($this) {
-            self::Individual => app(IndividualAssigner::class),
-            self::RoundRobin => app(RoundRobinAssigner::class),
-            default => null
-        };
+        Schema::table('service_request_types', function (Blueprint $table) {
+            $table->dropColumn('last_assigned_id');
+        });
     }
-}
+};

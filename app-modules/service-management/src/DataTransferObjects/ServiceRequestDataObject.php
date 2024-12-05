@@ -34,35 +34,37 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Enums;
+namespace AidingApp\ServiceManagement\DataTransferObjects;
 
-use Filament\Support\Contracts\HasLabel;
-use AidingApp\ServiceManagement\Services\ServiceRequestType\IndividualAssigner;
-use AidingApp\ServiceManagement\Services\ServiceRequestType\RoundRobinAssigner;
-use AidingApp\ServiceManagement\Services\ServiceRequestType\ServiceRequestTypeAssigner;
+use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Optional;
 
-// TODO This might belong in a more generalized space so we can re-use this across modules
-enum ServiceRequestTypeAssignmentTypes: string implements HasLabel
+class ServiceRequestDataObject extends Data
 {
-    case None = 'none';
+    public function __construct(
+        public string|Optional $division_id,
+        public string|Optional $status_id,
+        public string $type_id,
+        public string|Optional $priority_id,
+        public string|Optional $title,
+        public string|Optional $close_details,
+        public string|Optional $res_details,
+        public string $respondent_type,
+        public string $respondent_id,
+    ) {}
 
-    case Individual = 'individual';
-
-    case RoundRobin = 'round-robin';
-
-    case Workload = 'workload';
-
-    public function getLabel(): string
+    public static function fromData(array $data): static
     {
-        return str()->headline($this->name);
-    }
-
-    public function getAssignerClass(): ?ServiceRequestTypeAssigner
-    {
-        return match ($this) {
-            self::Individual => app(IndividualAssigner::class),
-            self::RoundRobin => app(RoundRobinAssigner::class),
-            default => null
-        };
+        return new self(
+            division_id: $data['division_id'],
+            status_id: $data['status_id'],
+            type_id: $data['type_id'],
+            priority_id: $data['priority_id'],
+            title: $data['title'],
+            close_details: $data['close_details'],
+            res_details: $data['res_details'],
+            respondent_type: $data['respondent_type'],
+            respondent_id: $data['respondent_id'],
+        );
     }
 }

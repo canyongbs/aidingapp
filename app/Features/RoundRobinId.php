@@ -34,35 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Enums;
+namespace App\Features;
 
-use Filament\Support\Contracts\HasLabel;
-use AidingApp\ServiceManagement\Services\ServiceRequestType\IndividualAssigner;
-use AidingApp\ServiceManagement\Services\ServiceRequestType\RoundRobinAssigner;
-use AidingApp\ServiceManagement\Services\ServiceRequestType\ServiceRequestTypeAssigner;
+use App\Support\AbstractFeatureFlag;
 
-// TODO This might belong in a more generalized space so we can re-use this across modules
-enum ServiceRequestTypeAssignmentTypes: string implements HasLabel
+class RoundRobinId extends AbstractFeatureFlag
 {
-    case None = 'none';
-
-    case Individual = 'individual';
-
-    case RoundRobin = 'round-robin';
-
-    case Workload = 'workload';
-
-    public function getLabel(): string
+    public function resolve(mixed $scope): mixed
     {
-        return str()->headline($this->name);
-    }
-
-    public function getAssignerClass(): ?ServiceRequestTypeAssigner
-    {
-        return match ($this) {
-            self::Individual => app(IndividualAssigner::class),
-            self::RoundRobin => app(RoundRobinAssigner::class),
-            default => null
-        };
+        return false;
     }
 }
