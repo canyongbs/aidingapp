@@ -58,6 +58,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Staudenmeir\EloquentHasManyDeep\HasRelationships;
 use AidingApp\Notification\Models\OutboundDeliverable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use AidingApp\Notification\Models\Contracts\Subscribable;
 use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
 use Illuminate\Database\UniqueConstraintViolationException;
@@ -69,7 +70,6 @@ use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\MediaCollections\UploadsMediaCollection;
 use AidingApp\ServiceManagement\Exceptions\ServiceRequestNumberExceededReRollsException;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
  * @property-read Contact $respondent
