@@ -109,21 +109,4 @@ class WorkloadAssigner implements ServiceRequestTypeAssigner
             }
         }
     }
-    // public function execute(ServiceRequest $serviceRequest): void
-    // {
-    //   $usersWithLowestServiceRequests = User::whereRelation(
-    //     'teams.managableServiceRequestTypes.serviceRequests.status',
-    //     function (Builder $query) {
-    //       $query->where('classification', '!=', 'closed'); // Filter for non-closed service requests
-    //     }
-    //   )
-    //     ->withCount([
-    //       'teams.managableServiceRequestTypes.serviceRequests as service_request_count' => function (Builder $query) {
-    //         $query->where('status', '!=', 'closed'); // Count only non-closed requests
-    //       },
-    //     ])
-    //     ->orderBy('service_request_count', 'asc') // Order by the lowest count
-    //     ->get();
-    //   dd($usersWithLowestServiceRequests);
-    // }
 }
