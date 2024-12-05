@@ -58,6 +58,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Staudenmeir\EloquentHasManyDeep\HasRelationships;
 use AidingApp\Notification\Models\OutboundDeliverable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use AidingApp\Notification\Models\Contracts\Subscribable;
 use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
 use Illuminate\Database\UniqueConstraintViolationException;
@@ -83,6 +84,7 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
     use AuditableTrait;
     use HasRelationships;
     use InteractsWithMedia;
+    use HasFactory;
 
     protected $fillable = [
         'respondent_type',
