@@ -38,7 +38,6 @@ namespace Database\Seeders;
 
 use App\Models\Authenticatable;
 use Illuminate\Database\Seeder;
-use App\Features\SuperAdminRole;
 use AidingApp\Authorization\Models\Role;
 use AidingApp\Division\Database\Seeders\DivisionSeeder;
 use AidingApp\Contact\Database\Seeders\ContactSourceSeeder;
@@ -56,34 +55,34 @@ use AidingApp\ServiceManagement\Database\Seeders\ServiceRequestStatusSeeder;
 
 class NewTenantSeeder extends Seeder
 {
-    public function run(): void
-    {
-        Role::create([
-            'name' => SuperAdminRole::active() ? Authenticatable::SUPER_ADMIN_ROLE : 'authorization.super_admin',
-            'guard_name' => 'web',
-        ]);
+  public function run(): void
+  {
+    Role::create([
+      'name' => Authenticatable::SUPER_ADMIN_ROLE,
+      'guard_name' => 'web',
+    ]);
 
-        $this->call([
-            DivisionSeeder::class,
-            ServiceRequestStatusSeeder::class,
-            ServiceRequestTypeSeeder::class,
-            ContactStatusSeeder::class,
-            ContactSourceSeeder::class,
-            KnowledgeBaseCategorySeeder::class,
-            KnowledgeBaseQualitySeeder::class,
-            KnowledgeBaseStatusSeeder::class,
-            PronounsSeeder::class,
+    $this->call([
+      DivisionSeeder::class,
+      ServiceRequestStatusSeeder::class,
+      ServiceRequestTypeSeeder::class,
+      ContactStatusSeeder::class,
+      ContactSourceSeeder::class,
+      KnowledgeBaseCategorySeeder::class,
+      KnowledgeBaseQualitySeeder::class,
+      KnowledgeBaseStatusSeeder::class,
+      PronounsSeeder::class,
 
-            // InventoryManagement
-            ...AssetSeeder::metadataSeeders(),
+      // InventoryManagement
+      ...AssetSeeder::metadataSeeders(),
 
-            // Change Request
-            ChangeRequestTypeSeeder::class,
-            ChangeRequestStatusSeeder::class,
+      // Change Request
+      ChangeRequestTypeSeeder::class,
+      ChangeRequestStatusSeeder::class,
 
-            //Organization Seeder
-            OrganizationTypeSeeder::class,
-            OrganizationIndustrySeeder::class,
-        ]);
-    }
+      //Organization Seeder
+      OrganizationTypeSeeder::class,
+      OrganizationIndustrySeeder::class,
+    ]);
+  }
 }

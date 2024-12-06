@@ -36,7 +36,6 @@
 
 use App\Models\User;
 use App\Models\Authenticatable;
-use App\Features\SuperAdminRole;
 
 use function Tests\asSuperAdmin;
 use function Pest\Laravel\actingAs;
@@ -185,7 +184,7 @@ it('does not allow a user which does not have the SaaS Global Admin role to assi
     ])
         ->mountTableAction(AttachAction::class)
         ->assertFormFieldExists('recordId', 'mountedTableActionForm', function (Select $select) {
-            $options = $select->getSearchResults(SuperAdminRole::active() ? Authenticatable::SUPER_ADMIN_ROLE : 'authorization.super_admin');
+            $options = $select->getSearchResults(Authenticatable::SUPER_ADMIN_ROLE);
 
             return empty($options);
         });

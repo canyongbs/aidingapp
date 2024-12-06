@@ -38,7 +38,6 @@ namespace App\Providers;
 
 use App\Enums\Feature;
 use App\Models\Authenticatable;
-use App\Features\SuperAdminRole;
 use Illuminate\Auth\Access\Response;
 use Illuminate\Support\Facades\Gate;
 use App\Support\FeatureAccessResponse;
@@ -46,27 +45,27 @@ use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvid
 
 class AuthServiceProvider extends ServiceProvider
 {
-    /**
-     * The model to policy mappings for the application.
-     *
-     * @var array<class-string, class-string>
-     */
-    protected $policies = [];
+  /**
+   * The model to policy mappings for the application.
+   *
+   * @var array<class-string, class-string>
+   */
+  protected $policies = [];
 
-    /**
-     * Register any authentication / authorization services.
-     */
-    public function boot(): void
-    {
-        $this->registerPolicies();
+  /**
+   * Register any authentication / authorization services.
+   */
+  public function boot(): void
+  {
+    $this->registerPolicies();
 
-        Gate::after(function (Authenticatable $authenticatable, string $ability, bool|null|Response $result, mixed $arguments) {
-            return $authenticatable->hasRole(SuperAdminRole::active() ? Authenticatable::SUPER_ADMIN_ROLE : 'authorization.super_admin') && ! $result instanceof FeatureAccessResponse
-                    ? true
-                    : $result;
-        });
+    Gate::after(function (Authenticatable $authenticatable, string $ability, bool|null|Response $result, mixed $arguments) {
+      return $authenticatable->hasRole(Authenticatable::SUPER_ADMIN_ROLE) && ! $result instanceof FeatureAccessResponse
+        ? true
+        : $result;
+    });
 
-        collect(Feature::cases())
-            ->each(fn (Feature $feature) => $feature->generateGate());
-    }
+    collect(Feature::cases())
+      ->each(fn(Feature $feature) => $feature->generateGate());
+  }
 }
