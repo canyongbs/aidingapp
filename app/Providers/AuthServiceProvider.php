@@ -38,7 +38,6 @@ namespace App\Providers;
 
 use App\Enums\Feature;
 use App\Models\Authenticatable;
-use App\Features\SuperAdminRole;
 use Illuminate\Auth\Access\Response;
 use Illuminate\Support\Facades\Gate;
 use App\Support\FeatureAccessResponse;
@@ -61,9 +60,9 @@ class AuthServiceProvider extends ServiceProvider
         $this->registerPolicies();
 
         Gate::after(function (Authenticatable $authenticatable, string $ability, bool|null|Response $result, mixed $arguments) {
-            return $authenticatable->hasRole(SuperAdminRole::active() ? Authenticatable::SUPER_ADMIN_ROLE : 'authorization.super_admin') && ! $result instanceof FeatureAccessResponse
-                    ? true
-                    : $result;
+            return $authenticatable->hasRole(Authenticatable::SUPER_ADMIN_ROLE) && ! $result instanceof FeatureAccessResponse
+              ? true
+              : $result;
         });
 
         collect(Feature::cases())

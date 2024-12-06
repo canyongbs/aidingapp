@@ -38,7 +38,6 @@ namespace Database\Seeders;
 
 use App\Models\Authenticatable;
 use Illuminate\Database\Seeder;
-use App\Features\SuperAdminRole;
 use AidingApp\Authorization\Models\Role;
 use AidingApp\Division\Database\Seeders\DivisionSeeder;
 use AidingApp\Contact\Database\Seeders\ContactSourceSeeder;
@@ -59,7 +58,7 @@ class NewTenantSeeder extends Seeder
     public function run(): void
     {
         Role::create([
-            'name' => SuperAdminRole::active() ? Authenticatable::SUPER_ADMIN_ROLE : 'authorization.super_admin',
+            'name' => Authenticatable::SUPER_ADMIN_ROLE,
             'guard_name' => 'web',
         ]);
 

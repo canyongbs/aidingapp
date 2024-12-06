@@ -39,7 +39,6 @@ namespace AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use App\Models\Authenticatable;
-use App\Features\SuperAdminRole;
 use Filament\Infolists\Infolist;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
@@ -72,7 +71,7 @@ class ServiceRequestsRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('id')
             ->modifyQueryUsing(function ($query) {
-                $query->when(! auth()->user()->hasRole(SuperAdminRole::active() ? Authenticatable::SUPER_ADMIN_ROLE : 'authorization.super_admin'), function (Builder $q) {
+                $query->when(! auth()->user()->hasRole(Authenticatable::SUPER_ADMIN_ROLE), function (Builder $q) {
                     return $q->whereHas('priority.type.managers', function (Builder $query): void {
                         $query->where('teams.id', auth()->user()->teams()->first()?->getKey());
                     })
@@ -132,8 +131,7 @@ class ServiceRequestsRelationManager extends RelationManager
                         return $data;
                     }),
             ])
-            ->bulkActions([
-            ])
+            ->bulkActions([])
             ->defaultSort('created_at', 'desc');
     }
 }

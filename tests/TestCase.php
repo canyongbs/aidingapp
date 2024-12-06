@@ -39,7 +39,6 @@ namespace Tests;
 use App\Models\Tenant;
 use Illuminate\Support\Str;
 use App\Models\Authenticatable;
-use App\Features\SuperAdminRole;
 use Tests\Concerns\LoadsFixtures;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\Finder\Finder;
@@ -117,7 +116,7 @@ abstract class TestCase extends BaseTestCase
         });
 
         Role::create([
-            'name' => SuperAdminRole::active() ? Authenticatable::SUPER_ADMIN_ROLE : 'authorization.super_admin',
+            'name' => Authenticatable::SUPER_ADMIN_ROLE,
             'guard_name' => 'web',
         ]);
 

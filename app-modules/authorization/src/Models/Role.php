@@ -37,7 +37,6 @@
 namespace AidingApp\Authorization\Models;
 
 use App\Models\Authenticatable;
-use App\Features\SuperAdminRole;
 use OwenIt\Auditing\Contracts\Auditable;
 use Illuminate\Database\Eloquent\Builder;
 use Spatie\Permission\PermissionRegistrar;
@@ -82,7 +81,7 @@ class Role extends SpatieRole implements Auditable
     public function scopeSuperAdmin(Builder $query): void
     {
         $query
-            ->where('name', SuperAdminRole::active() ? Authenticatable::SUPER_ADMIN_ROLE : 'authorization.super_admin')
+            ->where('name', Authenticatable::SUPER_ADMIN_ROLE)
             ->where('guard_name', 'web');
     }
 }

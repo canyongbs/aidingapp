@@ -41,7 +41,6 @@ use DateTimeInterface;
 use Illuminate\Support\Arr;
 use AidingApp\Task\Models\Task;
 use AidingApp\Team\Models\Team;
-use App\Features\SuperAdminRole;
 use Spatie\MediaLibrary\HasMedia;
 use App\Support\HasAdvancedFilter;
 use AidingApp\Team\Models\TeamUser;
@@ -302,7 +301,7 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
 
     public function canBeImpersonated(): bool
     {
-        return ! $this->hasRole(SuperAdminRole::active() ? Authenticatable::SUPER_ADMIN_ROLE : 'authorization.super_admin');
+        return ! $this->hasRole(Authenticatable::SUPER_ADMIN_ROLE);
     }
 
     public function registerMediaCollections(): void

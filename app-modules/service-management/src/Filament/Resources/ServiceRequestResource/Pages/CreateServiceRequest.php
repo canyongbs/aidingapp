@@ -40,7 +40,6 @@ use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Forms\Form;
 use App\Models\Authenticatable;
-use App\Features\SuperAdminRole;
 use Illuminate\Support\Collection;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
@@ -89,7 +88,7 @@ class CreateServiceRequest extends CreateRecord
                 Grid::make()
                     ->schema([
                         Select::make('type_id')
-                            ->options(ServiceRequestType::when(! auth()->user()->hasRole(SuperAdminRole::active() ? Authenticatable::SUPER_ADMIN_ROLE : 'authorization.super_admin'), function (Builder $query) {
+                            ->options(ServiceRequestType::when(! auth()->user()->hasRole(Authenticatable::SUPER_ADMIN_ROLE), function (Builder $query) {
                                 $query->whereHas('managers', function (Builder $query): void {
                                     $query->where('teams.id', auth()->user()->teams()->first()?->getKey());
                                 });
