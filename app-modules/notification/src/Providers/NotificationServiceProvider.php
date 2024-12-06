@@ -46,12 +46,10 @@ use AidingApp\Notification\Events\SubscriptionCreated;
 use AidingApp\Notification\Events\SubscriptionDeleted;
 use AidingApp\Notification\Models\OutboundDeliverable;
 use Illuminate\Notifications\Events\NotificationFailed;
-use AidingApp\Notification\Observers\SubscriptionObserver;
 use AidingApp\Notification\Events\TriggeredAutoSubscription;
 use AidingApp\Notification\Listeners\CreateAutoSubscription;
 use AidingApp\Notification\Listeners\HandleNotificationSent;
 use AidingApp\Notification\Listeners\HandleNotificationFailed;
-use AidingApp\Notification\Observers\OutboundDeliverableObserver;
 use AidingApp\Notification\Listeners\NotifyUserOfSubscriptionCreated;
 use AidingApp\Notification\Listeners\NotifyUserOfSubscriptionDeleted;
 
@@ -68,16 +66,9 @@ class NotificationServiceProvider extends ServiceProvider
             'outbound_deliverable' => OutboundDeliverable::class,
         ]);
 
-        $this->registerObservers();
         $this->registerEvents();
 
         $this->discoverSchema(__DIR__ . '/../../graphql/subscription.graphql');
-    }
-
-    protected function registerObservers(): void
-    {
-        Subscription::observe(SubscriptionObserver::class);
-        OutboundDeliverable::observe(OutboundDeliverableObserver::class);
     }
 
     protected function registerEvents(): void

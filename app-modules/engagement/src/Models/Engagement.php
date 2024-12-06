@@ -55,6 +55,8 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 use AidingApp\Timeline\Timelines\EngagementTimeline;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use AidingApp\Engagement\Observers\EngagementObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use AidingApp\Engagement\Enums\EngagementDeliveryStatus;
 use AidingApp\Notification\Models\Contracts\Subscribable;
 use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
@@ -67,6 +69,7 @@ use AidingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
  *
  * @mixin IdeHelperEngagement
  */
+#[ObservedBy([EngagementObserver::class])]
 class Engagement extends BaseModel implements Auditable, CanTriggerAutoSubscription, ProvidesATimeline, HasMedia
 {
     use AuditableTrait;

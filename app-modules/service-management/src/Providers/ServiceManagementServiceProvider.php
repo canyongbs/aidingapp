@@ -56,14 +56,8 @@ use AidingApp\ServiceManagement\Models\ServiceRequestFormStep;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
-use AidingApp\ServiceManagement\Observers\ChangeRequestObserver;
-use AidingApp\ServiceManagement\Observers\ServiceRequestObserver;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormSubmission;
-use AidingApp\ServiceManagement\Observers\ServiceRequestTypeObserver;
-use AidingApp\ServiceManagement\Observers\ServiceRequestUpdateObserver;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormAuthentication;
-use AidingApp\ServiceManagement\Observers\ServiceRequestHistoryObserver;
-use AidingApp\ServiceManagement\Observers\ServiceRequestAssignmentObserver;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\SqidPlusSixServiceRequestNumberGenerator;
 
@@ -100,18 +94,6 @@ class ServiceManagementServiceProvider extends ServiceProvider
             'sla' => Sla::class,
         ]);
 
-        $this->registerObservers();
-
         $this->discoverSchema(__DIR__ . '/../../graphql/service-management.graphql');
-    }
-
-    protected function registerObservers(): void
-    {
-        ChangeRequest::observe(ChangeRequestObserver::class);
-        ServiceRequest::observe(ServiceRequestObserver::class);
-        ServiceRequestAssignment::observe(ServiceRequestAssignmentObserver::class);
-        ServiceRequestHistory::observe(ServiceRequestHistoryObserver::class);
-        ServiceRequestUpdate::observe(ServiceRequestUpdateObserver::class);
-        ServiceRequestType::observe(ServiceRequestTypeObserver::class);
     }
 }

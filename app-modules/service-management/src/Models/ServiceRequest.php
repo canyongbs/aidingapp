@@ -58,10 +58,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Staudenmeir\EloquentHasManyDeep\HasRelationships;
 use AidingApp\Notification\Models\OutboundDeliverable;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use AidingApp\Notification\Models\Contracts\Subscribable;
 use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
 use Illuminate\Database\UniqueConstraintViolationException;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\ServiceManagement\Observers\ServiceRequestObserver;
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateDirection;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
@@ -75,6 +77,7 @@ use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceR
  *
  * @mixin IdeHelperServiceRequest
  */
+#[ObservedBy([ServiceRequestObserver::class])]
 class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubscription, HasMedia
 {
     use BelongsToEducatable;

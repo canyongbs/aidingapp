@@ -47,13 +47,16 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\ServiceManagement\Observers\ServiceRequestTypeObserver;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
 
 /**
  * @mixin IdeHelperServiceRequestType
  */
+#[ObservedBy([ServiceRequestTypeObserver::class])]
 class ServiceRequestType extends BaseModel implements Auditable
 {
     use SoftDeletes;
