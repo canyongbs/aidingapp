@@ -40,6 +40,7 @@ use Throwable;
 use App\Models\User;
 use App\Models\Tenant;
 use Filament\Forms\Form;
+use App\Models\Authenticatable;
 use Filament\Pages\SettingsPage;
 use Illuminate\Support\Facades\DB;
 use Filament\Support\Exceptions\Halt;
@@ -71,7 +72,7 @@ class ManageAmazonSesSettings extends SettingsPage
         /** @var User $user */
         $user = auth()->user();
 
-        return $user->can('integration-aws-ses-event-handling.view_ses_settings');
+        return $user->hasRole(Authenticatable::SUPER_ADMIN_ROLE) && parent::canAccess();
     }
 
     public function form(Form $form): Form

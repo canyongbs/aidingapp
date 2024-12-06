@@ -38,6 +38,7 @@ namespace AidingApp\Authorization\Filament\Pages;
 
 use Filament\Forms\Get;
 use Filament\Forms\Form;
+use App\Models\Authenticatable;
 use Filament\Pages\SettingsPage;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Section;
@@ -61,7 +62,10 @@ class ManageGoogleSsoSettings extends SettingsPage
 
     public static function canAccess(): bool
     {
-        return auth()->user()->can('authorization.view_google_sso_settings');
+        /** @var User $user */
+        $user = auth()->user();
+
+        return $user->hasRole(Authenticatable::SUPER_ADMIN_ROLE) && parent::canAccess();
     }
 
     public function form(Form $form): Form

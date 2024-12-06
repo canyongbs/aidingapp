@@ -41,6 +41,7 @@ use App\Models\User;
 use App\Models\Tenant;
 use Filament\Forms\Form;
 use Filament\Pages\Page;
+use App\Models\Authenticatable;
 use Illuminate\Support\Facades\DB;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\ComponentContainer;
@@ -83,7 +84,7 @@ class AmazonS3 extends Page implements HasForms
         /** @var User $user */
         $user = auth()->user();
 
-        return $user->can('amazon-s3.manage_s3_settings');
+        return $user->hasRole(Authenticatable::SUPER_ADMIN_ROLE) && parent::canAccess();
     }
 
     public function mount(): void
