@@ -36,8 +36,10 @@
 
 namespace App\Filament\Pages;
 
+use App\Models\User;
 use Filament\Forms\Form;
 use Filament\Actions\Action;
+use App\Models\Authenticatable;
 use Filament\Pages\SettingsPage;
 use App\Settings\LicenseSettings;
 use Filament\Forms\Components\Toggle;
@@ -61,7 +63,10 @@ class ManageLicenseSettings extends SettingsPage
 
     public static function canAccess(): bool
     {
-        return auth()->user()->can('license_settings.manage');
+        /** @var User $user */
+        $user = auth()->user();
+
+        return $user->hasRole(Authenticatable::SUPER_ADMIN_ROLE) && parent::canAccess();
     }
 
     public function form(Form $form): Form
