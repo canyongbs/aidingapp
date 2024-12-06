@@ -45,18 +45,18 @@ use AidingApp\Authorization\Enums\LicenseType;
 
 class SampleSuperAdminUserSeeder extends Seeder
 {
-  public function run(): void
-  {
-    if (app()->environment('local')) {
-      $superAdminRole = Role::where('name', Authenticatable::SUPER_ADMIN_ROLE)->firstOrFail();
+    public function run(): void
+    {
+        if (app()->environment('local')) {
+            $superAdminRole = Role::where('name', Authenticatable::SUPER_ADMIN_ROLE)->firstOrFail();
 
-      $superAdmin = User::factory()->licensed(LicenseType::cases())->create([
-        'name' => 'Super Admin',
-        'email' => config('local_development.super_admin.email'),
-        'password' => Hash::make('password'),
-      ]);
+            $superAdmin = User::factory()->licensed(LicenseType::cases())->create([
+                'name' => 'Super Admin',
+                'email' => config('local_development.super_admin.email'),
+                'password' => Hash::make('password'),
+            ]);
 
-      $superAdmin->roles()->sync($superAdminRole);
+            $superAdmin->roles()->sync($superAdminRole);
+        }
     }
-  }
 }

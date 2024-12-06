@@ -105,11 +105,11 @@ class ServiceRequestsRelationManager extends RelationManager
                     ->relationship(
                         name: 'priority',
                         titleAttribute: 'name',
-                        modifyQueryUsing: fn(Builder $query) => $query
+                        modifyQueryUsing: fn (Builder $query) => $query
                             ->whereHas('type')
                             ->with('type')
                     )
-                    ->getOptionLabelFromRecordUsing(fn(ServiceRequestPriority $record) => "{$record->type->name} - {$record->name}")
+                    ->getOptionLabelFromRecordUsing(fn (ServiceRequestPriority $record) => "{$record->type->name} - {$record->name}")
                     ->multiple()
                     ->preload(),
                 SelectFilter::make('status')

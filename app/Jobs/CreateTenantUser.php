@@ -54,37 +54,37 @@ use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
 
 class CreateTenantUser implements ShouldQueue, NotTenantAware
 {
-  use Batchable;
-  use Dispatchable;
-  use InteractsWithQueue;
-  use Queueable;
-  use SerializesModels;
+    use Batchable;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
 
-  public int $timeout = 1200;
+    public int $timeout = 1200;
 
-  public function __construct(
-    public Tenant $tenant,
-    public TenantUser $data,
-  ) {}
+    public function __construct(
+        public Tenant $tenant,
+        public TenantUser $data,
+    ) {}
 
-  public function middleware(): array
-  {
-    return [new SkipIfBatchCancelled()];
-  }
+    public function middleware(): array
+    {
+        return [new SkipIfBatchCancelled()];
+    }
 
-  public function handle(): void
-  {
-    $this->tenant->execute(function () {
-      $user = User::create($this->data->toArray());
+    public function handle(): void
+    {
+        $this->tenant->execute(function () {
+            $user = User::create($this->data->toArray());
 
-      foreach (Arr::wrap(LicenseType::cases()) as $licenseType) {
-        /** @var LicenseType $licenseType */
-        if ($licenseType->hasAvailableLicenses()) {
-          $user->licenses()->create(['type' => $licenseType]);
-        }
-      }
+            foreach (Arr::wrap(LicenseType::cases()) as $licenseType) {
+                /** @var LicenseType $licenseType */
+                if ($licenseType->hasAvailableLicenses()) {
+                    $user->licenses()->create(['type' => $licenseType]);
+                }
+            }
 
-      $user->roles()->sync(Role::where('name', Authenticatable::SUPER_ADMIN_ROLE)->firstOrFail());
-    });
-  }
+            $user->roles()->sync(Role::where('name', Authenticatable::SUPER_ADMIN_ROLE)->firstOrFail());
+        });
+    }
 }

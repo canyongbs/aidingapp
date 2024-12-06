@@ -52,36 +52,36 @@ use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
  */
 class Role extends SpatieRole implements Auditable
 {
-  use HasFactory;
-  use HasUuids;
-  use AuditableTrait;
-  use UsesTenantConnection;
+    use HasFactory;
+    use HasUuids;
+    use AuditableTrait;
+    use UsesTenantConnection;
 
-  public function users(): BelongsToMany
-  {
-    return $this->morphedByMany(
-      getModelForGuard($this->attributes['guard_name'] ?? config('auth.defaults.guard')),
-      'model',
-      config('permission.table_names.model_has_roles'),
-      PermissionRegistrar::$pivotRole,
-      config('permission.column_names.model_morph_key')
-    )->withPivot('via');
-  }
+    public function users(): BelongsToMany
+    {
+        return $this->morphedByMany(
+            getModelForGuard($this->attributes['guard_name'] ?? config('auth.defaults.guard')),
+            'model',
+            config('permission.table_names.model_has_roles'),
+            PermissionRegistrar::$pivotRole,
+            config('permission.column_names.model_morph_key')
+        )->withPivot('via');
+    }
 
-  public function scopeApi(Builder $query): void
-  {
-    $query->where('guard_name', 'api');
-  }
+    public function scopeApi(Builder $query): void
+    {
+        $query->where('guard_name', 'api');
+    }
 
-  public function scopeWeb(Builder $query): void
-  {
-    $query->where('guard_name', 'web');
-  }
+    public function scopeWeb(Builder $query): void
+    {
+        $query->where('guard_name', 'web');
+    }
 
-  public function scopeSuperAdmin(Builder $query): void
-  {
-    $query
-      ->where('name', Authenticatable::SUPER_ADMIN_ROLE)
-      ->where('guard_name', 'web');
-  }
+    public function scopeSuperAdmin(Builder $query): void
+    {
+        $query
+            ->where('name', Authenticatable::SUPER_ADMIN_ROLE)
+            ->where('guard_name', 'web');
+    }
 }
