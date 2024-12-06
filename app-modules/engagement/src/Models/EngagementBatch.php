@@ -41,11 +41,14 @@ use App\Models\BaseModel;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use AidingApp\Engagement\Observers\EngagementBatchObserver;
 use AidingApp\Engagement\Models\Concerns\HasManyEngagements;
 
 /**
  * @mixin IdeHelperEngagementBatch
  */
+#[ObservedBy([EngagementBatchObserver::class])]
 class EngagementBatch extends BaseModel implements HasMedia
 {
     use HasManyEngagements;

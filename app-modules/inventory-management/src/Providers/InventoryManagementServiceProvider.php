@@ -48,9 +48,6 @@ use AidingApp\InventoryManagement\Models\AssetLocation;
 use AidingApp\InventoryManagement\InventoryManagementPlugin;
 use AidingApp\InventoryManagement\Models\MaintenanceActivity;
 use AidingApp\InventoryManagement\Models\MaintenanceProvider;
-use AidingApp\InventoryManagement\Observers\AssetCheckInObserver;
-use AidingApp\InventoryManagement\Observers\AssetCheckOutObserver;
-use AidingApp\InventoryManagement\Observers\MaintenanceActivityObserver;
 
 class InventoryManagementServiceProvider extends ServiceProvider
 {
@@ -71,14 +68,5 @@ class InventoryManagementServiceProvider extends ServiceProvider
             'maintenance_activity' => MaintenanceActivity::class,
             'maintenance_provider' => MaintenanceProvider::class,
         ]);
-
-        $this->registerObservers();
-    }
-
-    public function registerObservers(): void
-    {
-        AssetCheckIn::observe(AssetCheckInObserver::class);
-        AssetCheckOut::observe(AssetCheckOutObserver::class);
-        MaintenanceActivity::observe(MaintenanceActivityObserver::class);
     }
 }

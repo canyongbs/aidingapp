@@ -44,16 +44,19 @@ use OwenIt\Auditing\Contracts\Auditable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use AidingApp\Notification\Models\Contracts\Subscribable;
 use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
 use AidingApp\Timeline\Timelines\ServiceRequestUpdateTimeline;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateDirection;
 use AidingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
+use AidingApp\ServiceManagement\Observers\ServiceRequestUpdateObserver;
 
 /**
  * @mixin IdeHelperServiceRequestUpdate
  */
+#[ObservedBy([ServiceRequestUpdateObserver::class])]
 class ServiceRequestUpdate extends BaseModel implements Auditable, CanTriggerAutoSubscription, ProvidesATimeline
 {
     use SoftDeletes;
