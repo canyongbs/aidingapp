@@ -46,14 +46,17 @@ use AidingApp\Notification\Drivers\EmailDriver;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use AidingApp\Notification\Enums\NotificationChannel;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
 use AidingApp\Notification\Enums\NotificationDeliveryStatus;
 use AidingApp\Timeline\Timelines\OutboundDeliverableTimeline;
+use AidingApp\Notification\Observers\OutboundDeliverableObserver;
 use AidingApp\Notification\Drivers\Contracts\OutboundDeliverableDriver;
 
 /**
  * @mixin IdeHelperOutboundDeliverable
  */
+#[ObservedBy([OutboundDeliverableObserver::class])]
 class OutboundDeliverable extends BaseModel implements ProvidesATimeline
 {
     use SoftDeletes;

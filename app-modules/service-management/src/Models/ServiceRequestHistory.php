@@ -46,12 +46,15 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
 use AidingApp\Timeline\Timelines\ServiceRequestHistoryTimeline;
+use AidingApp\ServiceManagement\Observers\ServiceRequestHistoryObserver;
 
 /**
  * @mixin IdeHelperServiceRequestHistory
  */
+#[ObservedBy([ServiceRequestHistoryObserver::class])]
 class ServiceRequestHistory extends BaseModel implements ProvidesATimeline
 {
     use SoftDeletes;

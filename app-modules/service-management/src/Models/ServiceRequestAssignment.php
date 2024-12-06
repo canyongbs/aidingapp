@@ -43,16 +43,19 @@ use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Contracts\Auditable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use AidingApp\Notification\Models\Contracts\Subscribable;
 use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Timeline\Timelines\ServiceRequestAssignmentTimeline;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
+use AidingApp\ServiceManagement\Observers\ServiceRequestAssignmentObserver;
 
 /**
  * @mixin IdeHelperServiceRequestAssignment
  */
+#[ObservedBy([ServiceRequestAssignmentObserver::class])]
 class ServiceRequestAssignment extends BaseModel implements Auditable, CanTriggerAutoSubscription, ProvidesATimeline
 {
     use AuditableTrait;

@@ -45,7 +45,6 @@ use AidingApp\Alert\Enums\AlertStatus;
 use Illuminate\Support\ServiceProvider;
 use AidingApp\Alert\Enums\AlertSeverity;
 use AidingApp\Alert\Events\AlertCreated;
-use AidingApp\Alert\Observers\AlertObserver;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use AidingApp\Alert\Listeners\NotifySubscribersOfAlertCreated;
 
@@ -64,16 +63,9 @@ class AlertServiceProvider extends ServiceProvider
             'alert' => Alert::class,
         ]);
 
-        $this->registerObservers();
-
         $this->registerEvents();
 
         $this->registerGraphQL();
-    }
-
-    protected function registerObservers(): void
-    {
-        Alert::observe(AlertObserver::class);
     }
 
     protected function registerEvents(): void
