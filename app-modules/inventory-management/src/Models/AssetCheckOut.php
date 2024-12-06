@@ -48,13 +48,16 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use AidingApp\Timeline\Timelines\AssetCheckOutTimeline;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
 use AidingApp\InventoryManagement\Enums\AssetCheckOutStatus;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\InventoryManagement\Observers\AssetCheckOutObserver;
 
 /**
  * @mixin IdeHelperAssetCheckOut
  */
+#[ObservedBy([AssetCheckOutObserver::class])]
 class AssetCheckOut extends BaseModel implements Auditable, ProvidesATimeline
 {
     use AuditableTrait;
