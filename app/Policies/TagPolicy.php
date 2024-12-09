@@ -45,7 +45,7 @@ class TagPolicy
     public function viewAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['tag.view-any'],
+            abilities: ['product_admin.view-any'],
             denyResponse: 'You do not have permission to view tags.'
         );
     }
@@ -53,7 +53,7 @@ class TagPolicy
     public function view(Authenticatable $authenticatable, Tag $tag): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['tag.*.view', "tag.{$tag->id}.view"],
+            abilities: ["product_admin.{$tag->getKey()}.view"],
             denyResponse: 'You do not have permission to view this tag.'
         );
     }
@@ -61,7 +61,7 @@ class TagPolicy
     public function create(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: 'tag.create',
+            abilities: 'product_admin.create',
             denyResponse: 'You do not have permission to create tags.'
         );
     }
@@ -69,7 +69,7 @@ class TagPolicy
     public function update(Authenticatable $authenticatable, Tag $tag): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['tag.*.update', "tag.{$tag->id}.update"],
+            abilities: ["product_admin.{$tag->getKey()}.update"],
             denyResponse: 'You do not have permission to update this tag.'
         );
     }
@@ -77,7 +77,7 @@ class TagPolicy
     public function delete(Authenticatable $authenticatable, Tag $tag): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['tag.*.delete', "tag.{$tag->id}.delete"],
+            abilities: ["product_admin.{$tag->getKey()}.delete"],
             denyResponse: 'You do not have permission to delete this tag.'
         );
     }
@@ -85,7 +85,7 @@ class TagPolicy
     public function restore(Authenticatable $authenticatable, Tag $tag): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['tag.*.restore', "tag.{$tag->id}.restore"],
+            abilities: ["product_admin.{$tag->getKey()}.restore"],
             denyResponse: 'You do not have permission to restore this tag.'
         );
     }
@@ -93,7 +93,7 @@ class TagPolicy
     public function forceDelete(Authenticatable $authenticatable, Tag $tag): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['tag.*.force-delete', "tag.{$tag->id}.force-delete"],
+            abilities: ["product_admin.{$tag->getKey()}.force-delete"],
             denyResponse: 'You do not have permission to permanently delete this tag.'
         );
     }
