@@ -55,7 +55,7 @@ class ContactStatusPolicy
     public function viewAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: 'contact_status.view-any',
+            abilities: 'product_admin.view-any',
             denyResponse: 'You do not have permission to view contact statuses.'
         );
     }
@@ -63,7 +63,7 @@ class ContactStatusPolicy
     public function view(Authenticatable $authenticatable, ContactStatus $contactStatus): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['contact_status.*.view', "contact_status.{$contactStatus->id}.view"],
+            abilities: ["product_admin.{$contactStatus->id}.view"],
             denyResponse: 'You do not have permission to view contact statuses.'
         );
     }
@@ -71,7 +71,7 @@ class ContactStatusPolicy
     public function create(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: 'contact_status.create',
+            abilities: 'product_admin.create',
             denyResponse: 'You do not have permission to create contact statuses.'
         );
     }
@@ -79,7 +79,7 @@ class ContactStatusPolicy
     public function update(Authenticatable $authenticatable, ContactStatus $contactStatus): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['contact_status.*.update', "contact_status.{$contactStatus->id}.update"],
+            abilities: ["product_admin.{$contactStatus->id}.update"],
             denyResponse: 'You do not have permission to update contact statuses.'
         );
     }
@@ -87,7 +87,7 @@ class ContactStatusPolicy
     public function delete(Authenticatable $authenticatable, ContactStatus $contactStatus): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['contact_status.*.delete', "contact_status.{$contactStatus->id}.delete"],
+            abilities: ["product_admin.{$contactStatus->id}.delete"],
             denyResponse: 'You do not have permission to delete contact statuses.'
         );
     }
@@ -95,7 +95,7 @@ class ContactStatusPolicy
     public function restore(Authenticatable $authenticatable, ContactStatus $contactStatus): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['contact_status.*.restore', "contact_status.{$contactStatus->id}.restore"],
+            abilities: ["product_admin.{$contactStatus->id}.restore"],
             denyResponse: 'You do not have permission to restore contact statuses.'
         );
     }
@@ -103,7 +103,7 @@ class ContactStatusPolicy
     public function forceDelete(Authenticatable $authenticatable, ContactStatus $contactStatus): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['contact_status.*.force-delete', "contact_status.{$contactStatus->id}.force-delete"],
+            abilities: ["product_admin.{$contactStatus->id}.force-delete"],
             denyResponse: 'You do not have permission to force delete contact statuses.'
         );
     }
