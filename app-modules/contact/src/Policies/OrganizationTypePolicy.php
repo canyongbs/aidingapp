@@ -63,7 +63,7 @@ class OrganizationTypePolicy
     public function view(Authenticatable $authenticatable, OrganizationType $organizationType): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ["product_admin.{$organizationType->id}.view"],
+            abilities: ["product_admin.{$organizationType->getKey()}.view"],
             denyResponse: 'You do not have permission to view this organization types.'
         );
     }
@@ -79,7 +79,7 @@ class OrganizationTypePolicy
     public function update(Authenticatable $authenticatable, OrganizationType $organizationType): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ["product_admin.{$organizationType->id}.update"],
+            abilities: ["product_admin.{$organizationType->getKey()}.update"],
             denyResponse: 'You do not have permission to update this organization type.'
         );
     }
@@ -87,7 +87,7 @@ class OrganizationTypePolicy
     public function delete(Authenticatable $authenticatable, OrganizationType $organizationType): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ["product_admin.{$organizationType->id}.delete"],
+            abilities: ["product_admin.{$organizationType->getKey()}.delete"],
             denyResponse: 'You do not have permission to delete this organization type.'
         );
     }
@@ -95,7 +95,7 @@ class OrganizationTypePolicy
     public function restore(Authenticatable $authenticatable, OrganizationType $organizationType): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ["product_admin.{$organizationType->id}.restore"],
+            abilities: ["product_admin.{$organizationType->getKey()}.restore"],
             denyResponse: 'You do not have permission to restore this organization type.'
         );
     }
@@ -103,7 +103,7 @@ class OrganizationTypePolicy
     public function forceDelete(Authenticatable $authenticatable, OrganizationType $organizationType): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ["product_admin.{$organizationType->id}.force-delete"],
+            abilities: ["product_admin.{$organizationType->getKey()}.force-delete"],
             denyResponse: 'You do not have permission to force delete this organization type.'
         );
     }
