@@ -60,8 +60,8 @@ test('ViewKnowledgeBaseStatus is gated with proper access control', function () 
             ])
         )->assertForbidden();
 
-    $user->givePermissionTo('knowledge_base_status.view-any');
-    $user->givePermissionTo('knowledge_base_status.*.view');
+    $user->givePermissionTo('product_admin.view-any');
+    $user->givePermissionTo('product_admin.*.view');
 
     actingAs($user)
         ->get(
@@ -80,8 +80,8 @@ test('ViewKnowledgeBaseStatus is gated with proper feature access control', func
 
     $user = User::factory()->licensed(LicenseType::cases())->create();
 
-    $user->givePermissionTo('knowledge_base_status.view-any');
-    $user->givePermissionTo('knowledge_base_status.*.view');
+    $user->givePermissionTo('product_admin.view-any');
+    $user->givePermissionTo('product_admin.*.view');
 
     $knowledgeBaseStatus = KnowledgeBaseStatus::factory()->create();
 
