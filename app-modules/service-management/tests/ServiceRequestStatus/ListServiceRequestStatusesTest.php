@@ -104,7 +104,7 @@ test('ListServiceRequestStatuses is gated with proper access control', function 
             ServiceRequestStatusResource::getUrl('index')
         )->assertForbidden();
 
-    $user->givePermissionTo('service_request_status.view-any');
+    $user->givePermissionTo('product_admin.view-any');
 
     actingAs($user)
         ->get(
@@ -121,7 +121,7 @@ test('ListServiceRequestStatuses is gated with proper feature access control', f
 
     $user = User::factory()->licensed([Contact::getLicenseType()])->create();
 
-    $user->givePermissionTo('service_request_status.view-any');
+    $user->givePermissionTo('product_admin.view-any');
 
     actingAs($user)
         ->get(

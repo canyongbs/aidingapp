@@ -60,8 +60,8 @@ test('Create Organization Industry is gated with proper access control', functio
     livewire(CreateOrganizationIndustry::class)
         ->assertForbidden();
 
-    $user->givePermissionTo('organization_industry.view-any');
-    $user->givePermissionTo('organization_industry.create');
+    $user->givePermissionTo('product_admin.view-any');
+    $user->givePermissionTo('product_admin.create');
 
     actingAs($user)
         ->get(
@@ -71,8 +71,8 @@ test('Create Organization Industry is gated with proper access control', functio
 test('Create New Organization Industry', function () {
     $user = User::factory()->licensed(Contact::getLicenseType())->create();
 
-    $user->givePermissionTo('organization_industry.view-any');
-    $user->givePermissionTo('organization_industry.create');
+    $user->givePermissionTo('product_admin.view-any');
+    $user->givePermissionTo('product_admin.create');
 
     actingAs($user);
 

@@ -49,7 +49,7 @@ test('List OrganizationType is gated with proper access control', function () {
             OrganizationTypeResource::getUrl('index')
         )->assertForbidden();
 
-    $user->givePermissionTo('organization_type.view-any');
+    $user->givePermissionTo('product_admin.view-any');
 
     actingAs($user)
         ->get(

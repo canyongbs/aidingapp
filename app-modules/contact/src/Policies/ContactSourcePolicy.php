@@ -55,7 +55,7 @@ class ContactSourcePolicy
     public function viewAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: 'contact_source.view-any',
+            abilities: 'product_admin.view-any',
             denyResponse: 'You do not have permission to view contact sources.'
         );
     }
@@ -63,7 +63,7 @@ class ContactSourcePolicy
     public function view(Authenticatable $authenticatable, ContactSource $contactSource): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['contact_source.*.view', "contact_source.{$contactSource->id}.view"],
+            abilities: ["product_admin.{$contactSource->getKey()}.view"],
             denyResponse: 'You do not have permission to view this contact source.'
         );
     }
@@ -71,7 +71,7 @@ class ContactSourcePolicy
     public function create(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: 'contact_source.create',
+            abilities: 'product_admin.create',
             denyResponse: 'You do not have permission to create contact sources.'
         );
     }
@@ -79,7 +79,7 @@ class ContactSourcePolicy
     public function update(Authenticatable $authenticatable, ContactSource $contactSource): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['contact_source.*.update', "contact_source.{$contactSource->id}.update"],
+            abilities: ["product_admin.{$contactSource->getKey()}.update"],
             denyResponse: 'You do not have permission to update this contact source.'
         );
     }
@@ -87,7 +87,7 @@ class ContactSourcePolicy
     public function delete(Authenticatable $authenticatable, ContactSource $contactSource): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['contact_source.*.delete', "contact_source.{$contactSource->id}.delete"],
+            abilities: ["product_admin.{$contactSource->getKey()}.delete"],
             denyResponse: 'You do not have permission to delete this contact source.'
         );
     }
@@ -95,7 +95,7 @@ class ContactSourcePolicy
     public function restore(Authenticatable $authenticatable, ContactSource $contactSource): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['contact_source.*.restore', "contact_source.{$contactSource->id}.restore"],
+            abilities: ["product_admin.{$contactSource->getKey()}.restore"],
             denyResponse: 'You do not have permission to restore this contact source.'
         );
     }
@@ -103,7 +103,7 @@ class ContactSourcePolicy
     public function forceDelete(Authenticatable $authenticatable, ContactSource $contactSource): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['contact_source.*.force-delete', "contact_source.{$contactSource->id}.force-delete"],
+            abilities: ["product_admin.{$contactSource->getKey()}.force-delete"],
             denyResponse: 'You do not have permission to force delete this contact source.'
         );
     }

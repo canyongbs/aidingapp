@@ -49,7 +49,7 @@ test('List OrganizationIndustry is gated with proper access control', function (
             OrganizationIndustryResource::getUrl('index')
         )->assertForbidden();
 
-    $user->givePermissionTo('organization_industry.view-any');
+    $user->givePermissionTo('product_admin.view-any');
 
     actingAs($user)
         ->get(

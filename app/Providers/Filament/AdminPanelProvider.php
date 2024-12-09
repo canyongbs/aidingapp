@@ -158,6 +158,10 @@ class AdminPanelProvider extends PanelProvider
                     ->icon('heroicon-o-rocket-launch')
                     ->collapsed(),
                 NavigationGroup::make()
+                    ->label('People Administration')
+                    ->icon('heroicon-o-users')
+                    ->collapsed(),
+                NavigationGroup::make()
                     ->label('Product Administration')
                     ->icon('heroicon-o-wrench-screwdriver')
                     ->collapsed(),

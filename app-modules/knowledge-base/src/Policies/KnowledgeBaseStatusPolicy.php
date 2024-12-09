@@ -66,7 +66,7 @@ class KnowledgeBaseStatusPolicy implements PerformsChecksBeforeAuthorization
     public function viewAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: 'knowledge_base_status.view-any',
+            abilities: 'product_admin.view-any',
             denyResponse: 'You do not have permission to view any knowledge base statuses.'
         );
     }
@@ -74,7 +74,7 @@ class KnowledgeBaseStatusPolicy implements PerformsChecksBeforeAuthorization
     public function view(Authenticatable $authenticatable, KnowledgeBaseStatus $knowledgeBaseStatus): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['knowledge_base_status.*.view', "knowledge_base_status.{$knowledgeBaseStatus->id}.view"],
+            abilities: ["product_admin.{$knowledgeBaseStatus->getKey()}.view"],
             denyResponse: 'You do not have permission to view this knowledge base status.'
         );
     }
@@ -82,7 +82,7 @@ class KnowledgeBaseStatusPolicy implements PerformsChecksBeforeAuthorization
     public function create(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: 'knowledge_base_status.create',
+            abilities: 'product_admin.create',
             denyResponse: 'You do not have permission to create knowledge base statuses.'
         );
     }
@@ -90,7 +90,7 @@ class KnowledgeBaseStatusPolicy implements PerformsChecksBeforeAuthorization
     public function update(Authenticatable $authenticatable, KnowledgeBaseStatus $knowledgeBaseStatus): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['knowledge_base_status.*.update', "knowledge_base_status.{$knowledgeBaseStatus->id}.update"],
+            abilities: ["product_admin.{$knowledgeBaseStatus->getKey()}.update"],
             denyResponse: 'You do not have permission to update this knowledge base status.'
         );
     }
@@ -98,7 +98,7 @@ class KnowledgeBaseStatusPolicy implements PerformsChecksBeforeAuthorization
     public function delete(Authenticatable $authenticatable, KnowledgeBaseStatus $knowledgeBaseStatus): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['knowledge_base_status.*.delete', "knowledge_base_status.{$knowledgeBaseStatus->id}.delete"],
+            abilities: ["product_admin.{$knowledgeBaseStatus->getKey()}.delete"],
             denyResponse: 'You do not have permission to delete this knowledge base status.'
         );
     }
@@ -106,7 +106,7 @@ class KnowledgeBaseStatusPolicy implements PerformsChecksBeforeAuthorization
     public function restore(Authenticatable $authenticatable, KnowledgeBaseStatus $knowledgeBaseStatus): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['knowledge_base_status.*.restore', "knowledge_base_status.{$knowledgeBaseStatus->id}.restore"],
+            abilities: ["product_admin.{$knowledgeBaseStatus->getKey()}.restore"],
             denyResponse: 'You do not have permission to restore this knowledge base status.'
         );
     }
@@ -114,7 +114,7 @@ class KnowledgeBaseStatusPolicy implements PerformsChecksBeforeAuthorization
     public function forceDelete(Authenticatable $authenticatable, KnowledgeBaseStatus $knowledgeBaseStatus): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['knowledge_base_status.*.force-delete', "knowledge_base_status.{$knowledgeBaseStatus->id}.force-delete"],
+            abilities: ["product_admin.{$knowledgeBaseStatus->getKey()}.force-delete"],
             denyResponse: 'You do not have permission to permanently delete this knowledge base status.'
         );
     }

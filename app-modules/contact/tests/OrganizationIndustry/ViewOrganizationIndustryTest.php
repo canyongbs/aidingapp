@@ -45,22 +45,22 @@ use AidingApp\Contact\Filament\Resources\OrganizationIndustryResource;
 test('View OrganizationIndustry is gated with proper access control', function () {
     $user = User::factory()->licensed(Contact::getLicenseType())->create();
 
-    $organization_industry = OrganizationIndustry::factory()->create();
+    $organizationIndustry = OrganizationIndustry::factory()->create();
 
     actingAs($user)
         ->get(
             OrganizationIndustryResource::getUrl('view', [
-                'record' => $organization_industry,
+                'record' => $organizationIndustry,
             ])
         )->assertForbidden();
 
-    $user->givePermissionTo('organization_industry.view-any');
-    $user->givePermissionTo('organization_industry.*.view');
+    $user->givePermissionTo('product_admin.view-any');
+    $user->givePermissionTo('product_admin.*.view');
 
     actingAs($user)
         ->get(
             OrganizationIndustryResource::getUrl('view', [
-                'record' => $organization_industry,
+                'record' => $organizationIndustry,
             ])
         )->assertSuccessful();
 });

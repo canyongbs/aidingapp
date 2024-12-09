@@ -105,8 +105,8 @@ test('CreateServiceRequestStatus is gated with proper access control', function 
     livewire(CreateServiceRequestStatus::class)
         ->assertForbidden();
 
-    $user->givePermissionTo('service_request_status.view-any');
-    $user->givePermissionTo('service_request_status.create');
+    $user->givePermissionTo('product_admin.view-any');
+    $user->givePermissionTo('product_admin.create');
 
     actingAs($user)
         ->get(
@@ -134,8 +134,8 @@ test('CreateServiceRequestStatus is gated with proper feature access control', f
 
     $user = User::factory()->licensed([Contact::getLicenseType()])->create();
 
-    $user->givePermissionTo('service_request_status.view-any');
-    $user->givePermissionTo('service_request_status.create');
+    $user->givePermissionTo('product_admin.view-any');
+    $user->givePermissionTo('product_admin.create');
 
     actingAs($user)
         ->get(
