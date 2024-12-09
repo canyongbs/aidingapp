@@ -63,7 +63,7 @@ class ContactStatusPolicy
     public function view(Authenticatable $authenticatable, ContactStatus $contactStatus): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ["product_admin.{$contactStatus->id}.view"],
+            abilities: ["product_admin.{$contactStatus->getKey()}.view"],
             denyResponse: 'You do not have permission to view contact statuses.'
         );
     }
@@ -79,7 +79,7 @@ class ContactStatusPolicy
     public function update(Authenticatable $authenticatable, ContactStatus $contactStatus): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ["product_admin.{$contactStatus->id}.update"],
+            abilities: ["product_admin.{$contactStatus->getKey()}.update"],
             denyResponse: 'You do not have permission to update contact statuses.'
         );
     }
@@ -87,7 +87,7 @@ class ContactStatusPolicy
     public function delete(Authenticatable $authenticatable, ContactStatus $contactStatus): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ["product_admin.{$contactStatus->id}.delete"],
+            abilities: ["product_admin.{$contactStatus->getKey()}.delete"],
             denyResponse: 'You do not have permission to delete contact statuses.'
         );
     }
@@ -95,7 +95,7 @@ class ContactStatusPolicy
     public function restore(Authenticatable $authenticatable, ContactStatus $contactStatus): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ["product_admin.{$contactStatus->id}.restore"],
+            abilities: ["product_admin.{$contactStatus->getKey()}.restore"],
             denyResponse: 'You do not have permission to restore contact statuses.'
         );
     }
@@ -103,7 +103,7 @@ class ContactStatusPolicy
     public function forceDelete(Authenticatable $authenticatable, ContactStatus $contactStatus): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ["product_admin.{$contactStatus->id}.force-delete"],
+            abilities: ["product_admin.{$contactStatus->getKey()}.force-delete"],
             denyResponse: 'You do not have permission to force delete contact statuses.'
         );
     }
