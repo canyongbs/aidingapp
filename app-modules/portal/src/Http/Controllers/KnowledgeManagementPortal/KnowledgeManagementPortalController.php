@@ -47,40 +47,40 @@ use AidingApp\Portal\Settings\PortalSettings;
 
 class KnowledgeManagementPortalController extends Controller
 {
-  public function show(): JsonResponse
-  {
-    $settings = resolve(PortalSettings::class);
-    $logo = $settings->getSettingsPropertyModel('portal.logo')
-      ->getFirstMedia('logo');
-    $favicon = $settings->getSettingsPropertyModel('portal.favicon')
-      ->getFirstMedia('portal_favicon');
+    public function show(): JsonResponse
+    {
+        $settings = resolve(PortalSettings::class);
+        $logo = $settings->getSettingsPropertyModel('portal.logo')
+            ->getFirstMedia('logo');
+        $favicon = $settings->getSettingsPropertyModel('portal.favicon')
+            ->getFirstMedia('portal_favicon');
 
-    if (! auth()->guard('contact')->check() && ! session()->has('guest_id')) {
-      $portalGuest = PortalGuest::create();
-      session()->put('guest_id', $portalGuest->getKey());
+        if (! auth()->guard('contact')->check() && ! session()->has('guest_id')) {
+            $portalGuest = PortalGuest::create();
+            session()->put('guest_id', $portalGuest->getKey());
+        }
+
+        return response()->json([
+            'layout' => $settings->knowledge_management_portal_layout ?? PortalLayout::Full,
+            'header_logo' => $logo ? $logo->getTemporaryUrl(
+                expiration: now()->addMinutes(5),
+            ) : url(Vite::asset('resources/images/default-logo-light-1733734551.svg')),
+            'favicon' => $favicon?->getTemporaryUrl(
+                expiration: now()->addMinutes(5),
+                conversionName: 'portal_favicon',
+            ),
+            'app_name' => config('app.name'),
+            'primary_color' => Color::all()[$settings->knowledge_management_portal_primary_color ?? 'blue'],
+            'rounding' => $settings->knowledge_management_portal_rounding,
+            'requires_authentication' => $settings->knowledge_management_portal_requires_authentication,
+            'service_management_enabled' => $settings->knowledge_management_portal_service_management,
+            'authentication_url' => URL::to(
+                URL::signedRoute(
+                    name: 'api.portal.request-authentication',
+                    absolute: false,
+                )
+            ),
+            'footer_logo' => Vite::asset('resources/svg/CGBS_Logo_FullColor_Light.svg'),
+        ]);
     }
-
-    return response()->json([
-      'layout' => $settings->knowledge_management_portal_layout ?? PortalLayout::Full,
-      'header_logo' => $logo ? $logo->getTemporaryUrl(
-        expiration: now()->addMinutes(5),
-      ) : url(Vite::asset('resources/images/default-logo-light-1733734551.svg')),
-      'favicon' => $favicon?->getTemporaryUrl(
-        expiration: now()->addMinutes(5),
-        conversionName: 'portal_favicon',
-      ),
-      'app_name' => config('app.name'),
-      'primary_color' => Color::all()[$settings->knowledge_management_portal_primary_color ?? 'blue'],
-      'rounding' => $settings->knowledge_management_portal_rounding,
-      'requires_authentication' => $settings->knowledge_management_portal_requires_authentication,
-      'service_management_enabled' => $settings->knowledge_management_portal_service_management,
-      'authentication_url' => URL::to(
-        URL::signedRoute(
-          name: 'api.portal.request-authentication',
-          absolute: false,
-        )
-      ),
-      'footer_logo' => Vite::asset('resources/svg/CGBS_Logo_FullColor_Light.svg'),
-    ]);
-  }
 }
