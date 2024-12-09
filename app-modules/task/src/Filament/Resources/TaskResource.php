@@ -44,24 +44,24 @@ use AidingApp\Task\Filament\Resources\TaskResource\Pages\CreateTask;
 
 class TaskResource extends Resource
 {
-    protected static ?string $model = Task::class;
+  protected static ?string $model = Task::class;
 
-    protected static ?string $navigationGroup = 'Service Management';
+  protected static ?string $navigationGroup = 'Service Management';
 
-    protected static ?int $navigationSort = 60;
+  protected static ?int $navigationSort = 70;
 
-    protected static ?string $breadcrumb = 'Task Management';
+  protected static ?string $breadcrumb = 'Task Management';
 
-    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
+  protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
 
-    protected static ?string $navigationLabel = 'Task Management';
+  protected static ?string $navigationLabel = 'Task Management';
 
-    public static function getPages(): array
-    {
-        return [
-            'index' => ListTasks::route('/'),
-            'create' => CreateTask::route('/create'),
-            'edit' => EditTask::route('/{record}/edit'),
-        ];
-    }
+  public static function getPages(): array
+  {
+    return [
+      'index' => ListTasks::route('/'),
+      'create' => CreateTask::route('/create'),
+      'edit' => EditTask::route('/{record}/edit'),
+    ];
+  }
 }
