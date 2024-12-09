@@ -45,25 +45,25 @@ use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestResource\Pages\C
 
 class ChangeRequestResource extends Resource
 {
-  protected static ?string $model = ChangeRequest::class;
+    protected static ?string $model = ChangeRequest::class;
 
-  protected static ?string $navigationLabel = 'Change Management';
+    protected static ?string $navigationLabel = 'Change Management';
 
-  protected static ?string $navigationIcon = 'heroicon-m-arrow-path-rounded-square';
+    protected static ?string $navigationIcon = 'heroicon-m-arrow-path-rounded-square';
 
-  protected static ?string $navigationGroup = 'Service Management';
+    protected static ?string $navigationGroup = 'Service Management';
 
-  protected static ?int $navigationSort = 60;
+    protected static ?int $navigationSort = 60;
 
-  protected static ?string $breadcrumb = 'Change Management';
+    protected static ?string $breadcrumb = 'Change Management';
 
-  public static function getPages(): array
-  {
-    return [
-      'index' => ListChangeRequests::route('/'),
-      'create' => CreateChangeRequest::route('/create'),
-      'view' => ViewChangeRequest::route('/{record}'),
-      'edit' => EditChangeRequest::route('/{record}/edit'),
-    ];
-  }
+    public static function getPages(): array
+    {
+        return [
+            'index' => ListChangeRequests::route('/'),
+            'create' => CreateChangeRequest::route('/create'),
+            'view' => ViewChangeRequest::route('/{record}'),
+            'edit' => EditChangeRequest::route('/{record}/edit'),
+        ];
+    }
 }
