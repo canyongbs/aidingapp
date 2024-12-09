@@ -59,7 +59,7 @@ class ServiceRequests extends Dashboard
 
     protected static string $routePath = 'service-requests';
 
-    protected static ?int $navigationSort = 30;
+    protected static ?int $navigationSort = 10;
 
     protected $cacheTag = 'report-service-requests';
 
