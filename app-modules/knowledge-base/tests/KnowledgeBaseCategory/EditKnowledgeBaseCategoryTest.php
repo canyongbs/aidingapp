@@ -39,12 +39,17 @@ use App\Settings\LicenseSettings;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
+
+use Filament\Tables\Actions\AssociateAction;
+
 use function PHPUnit\Framework\assertEquals;
 
 use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\Pages\EditKnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Tests\KnowledgeBaseCategory\RequestFactories\EditKnowledgeBaseCategoryRequestFactory;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\RelationManagers\SubCategoriesRelationManager;
 
 // TODO: Write EditKnowledgeBaseCategory tests
 //test('A successful action on the EditKnowledgeBaseCategory page', function () {});
@@ -65,7 +70,7 @@ test('EditKnowledgeBaseCategory is gated with proper access control', function (
             ])
         )->assertForbidden();
 
-    livewire(KnowledgeBaseCategoryResource\Pages\EditKnowledgeBaseCategory::class, [
+    livewire(EditKnowledgeBaseCategory::class, [
         'record' => $knowledgeBaseCategory->getRouteKey(),
     ])
         ->assertForbidden();
@@ -82,7 +87,7 @@ test('EditKnowledgeBaseCategory is gated with proper access control', function (
 
     $request = collect(EditKnowledgeBaseCategoryRequestFactory::new()->create());
 
-    livewire(KnowledgeBaseCategoryResource\Pages\EditKnowledgeBaseCategory::class, [
+    livewire(EditKnowledgeBaseCategory::class, [
         'record' => $knowledgeBaseCategory->getRouteKey(),
     ])
         ->fillForm($request->toArray())
@@ -113,7 +118,7 @@ test('EditKnowledgeBaseCategory is gated with proper feature access control', fu
             ])
         )->assertForbidden();
 
-    livewire(KnowledgeBaseCategoryResource\Pages\EditKnowledgeBaseCategory::class, [
+    livewire(EditKnowledgeBaseCategory::class, [
         'record' => $knowledgeBaseCategory->getRouteKey(),
     ])
         ->assertForbidden();
@@ -131,7 +136,7 @@ test('EditKnowledgeBaseCategory is gated with proper feature access control', fu
 
     $request = collect(EditKnowledgeBaseCategoryRequestFactory::new()->create());
 
-    livewire(KnowledgeBaseCategoryResource\Pages\EditKnowledgeBaseCategory::class, [
+    livewire(EditKnowledgeBaseCategory::class, [
         'record' => $knowledgeBaseCategory->getRouteKey(),
     ])
         ->fillForm($request->toArray())
@@ -140,3 +145,28 @@ test('EditKnowledgeBaseCategory is gated with proper feature access control', fu
 
     assertEquals($request['name'], $knowledgeBaseCategory->fresh()->name);
 });
+
+test('can attach subcategories into categories', function () {
+    $user = User::factory()->licensed(LicenseType::cases())->create();
+
+    $user->givePermissionTo('knowledge_base_category.view-any');
+    $user->givePermissionTo('knowledge_base_category.*.update');
+
+    $knowledgeBaseCategory = KnowledgeBaseCategory::factory()->create();
+
+    $knowledgeBaseSubCategory = KnowledgeBaseCategory::factory()->create();
+
+    livewire(SubCategoriesRelationManager::class, [
+        'ownerRecord' => $knowledgeBaseCategory,
+        'pageClass' => EditKnowledgeBaseCategory::class,
+    ])
+        ->callTableAction(
+            AssociateAction::class,
+            data: ['recordId' => $knowledgeBaseSubCategory->getKey()]
+        )->assertSuccessful();
+
+    expect($knowledgeBaseCategory->refresh())
+        ->subCategories
+        ->pluck('id')
+        ->toContain($knowledgeBaseSubCategory->getKey());
+})->only();
