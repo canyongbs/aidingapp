@@ -43,9 +43,11 @@ use AidingApp\Alert\Enums\AlertSeverity;
 use OwenIt\Auditing\Contracts\Auditable;
 use Illuminate\Database\Eloquent\Builder;
 use App\Models\Scopes\LicensedToEducatable;
+use AidingApp\Alert\Observers\AlertObserver;
 use App\Models\Concerns\BelongsToEducatable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use AidingApp\Notification\Models\Contracts\Subscribable;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
@@ -55,6 +57,7 @@ use AidingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
  *
  * @mixin IdeHelperAlert
  */
+#[ObservedBy([AlertObserver::class])]
 class Alert extends BaseModel implements Auditable, CanTriggerAutoSubscription
 {
     use SoftDeletes;

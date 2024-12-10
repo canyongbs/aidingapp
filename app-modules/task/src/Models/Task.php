@@ -43,12 +43,14 @@ use App\Models\Contracts\Educatable;
 use AidingApp\Contact\Models\Contact;
 use OwenIt\Auditing\Contracts\Auditable;
 use Illuminate\Database\Eloquent\Builder;
+use AidingApp\Task\Observers\TaskObserver;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Bvtterfly\ModelStateMachine\HasStateMachine;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use AidingApp\Notification\Models\Contracts\Subscribable;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
@@ -58,6 +60,7 @@ use AidingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
  *
  * @mixin IdeHelperTask
  */
+#[ObservedBy([TaskObserver::class])]
 class Task extends BaseModel implements Auditable, CanTriggerAutoSubscription
 {
     use HasFactory;

@@ -51,6 +51,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Engagement\Models\EngagementFile;
 use AidingApp\Notification\Models\Subscription;
+use AidingApp\Contact\Observers\ContactObserver;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -63,6 +64,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use AidingApp\Engagement\Models\EngagementFileEntities;
 use AidingApp\InventoryManagement\Models\AssetCheckOut;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Notification\Models\Contracts\Subscribable;
@@ -81,6 +83,7 @@ use AidingApp\Engagement\Models\Concerns\HasManyMorphedEngagementResponses;
  *
  * @mixin IdeHelperContact
  */
+#[ObservedBy([ContactObserver::class])]
 class Contact extends BaseAuthenticatable implements Auditable, Subscribable, Educatable, HasFilamentResource, NotifiableInterface
 {
     use AuditableTrait;
