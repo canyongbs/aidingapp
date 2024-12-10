@@ -47,7 +47,6 @@ use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
-use App\Filament\Clusters\UserManagement;
 use App\Filament\Tables\Columns\IdColumn;
 use AidingApp\Authorization\Models\License;
 use App\Filament\Forms\Components\Licenses;
@@ -65,9 +64,7 @@ class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-users';
-
-    protected static ?string $cluster = UserManagement::class;
+    protected static ?string $navigationGroup = 'People Administration';
 
     protected static ?int $navigationSort = 10;
 

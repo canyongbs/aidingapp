@@ -98,8 +98,8 @@ test('CreateContactSource is gated with proper access control', function () {
     livewire(ContactSourceResource\Pages\CreateContactSource::class)
         ->assertForbidden();
 
-    $user->givePermissionTo('contact_source.view-any');
-    $user->givePermissionTo('contact_source.create');
+    $user->givePermissionTo('product_admin.view-any');
+    $user->givePermissionTo('product_admin.create');
 
     actingAs($user)
         ->get(

@@ -121,8 +121,8 @@ test('EditServiceRequestType is gated with proper access control', function () {
     ])
         ->assertForbidden();
 
-    $user->givePermissionTo('service_request_type.view-any');
-    $user->givePermissionTo('service_request_type.*.update');
+    $user->givePermissionTo('product_admin.view-any');
+    $user->givePermissionTo('product_admin.*.update');
 
     actingAs($user)
         ->get(
@@ -152,8 +152,8 @@ test('EditServiceRequestType is gated with proper feature access control', funct
 
     $user = User::factory()->licensed([Contact::getLicenseType()])->create();
 
-    $user->givePermissionTo('service_request_type.view-any');
-    $user->givePermissionTo('service_request_type.*.update');
+    $user->givePermissionTo('product_admin.view-any');
+    $user->givePermissionTo('product_admin.*.update');
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 

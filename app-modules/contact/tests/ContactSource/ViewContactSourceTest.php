@@ -75,8 +75,8 @@ test('ViewContactSource is gated with proper access control', function () {
             ])
         )->assertForbidden();
 
-    $user->givePermissionTo('contact_source.view-any');
-    $user->givePermissionTo('contact_source.*.view');
+    $user->givePermissionTo('product_admin.view-any');
+    $user->givePermissionTo('product_admin.*.view');
 
     actingAs($user)
         ->get(

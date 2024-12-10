@@ -60,7 +60,7 @@ it('can attach team member to service request type', function () {
             ])
         )->assertForbidden();
 
-    $user->givePermissionTo('service_request_type.view-any');
+    $user->givePermissionTo('product_admin.view-any');
     $user->givePermissionTo('team.view-any');
 
     livewire(ManageServiceRequestTypeManagers::class, [

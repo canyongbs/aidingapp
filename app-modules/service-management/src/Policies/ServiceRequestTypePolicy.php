@@ -64,7 +64,7 @@ class ServiceRequestTypePolicy
     public function viewAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: 'service_request_type.view-any',
+            abilities: 'product_admin.view-any',
             denyResponse: 'You do not have permissions to view service request types.'
         );
     }
@@ -72,7 +72,7 @@ class ServiceRequestTypePolicy
     public function view(Authenticatable $authenticatable, ServiceRequestType $serviceRequestType): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['service_request_type.*.view', "service_request_type.{$serviceRequestType->id}.view"],
+            abilities: ["product_admin.{$serviceRequestType->getKey()}.view"],
             denyResponse: 'You do not have permissions to view this service request type.'
         );
     }
@@ -80,7 +80,7 @@ class ServiceRequestTypePolicy
     public function create(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: 'service_request_type.create',
+            abilities: 'product_admin.create',
             denyResponse: 'You do not have permissions to create service request types.'
         );
     }
@@ -88,7 +88,7 @@ class ServiceRequestTypePolicy
     public function update(Authenticatable $authenticatable, ServiceRequestType $serviceRequestType): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['service_request_type.*.update', "service_request_type.{$serviceRequestType->id}.update"],
+            abilities: ["product_admin.{$serviceRequestType->getKey()}.update"],
             denyResponse: 'You do not have permissions to update this service request type.'
         );
     }
@@ -96,7 +96,7 @@ class ServiceRequestTypePolicy
     public function delete(Authenticatable $authenticatable, ServiceRequestType $serviceRequestType): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['service_request_type.*.delete', "service_request_type.{$serviceRequestType->id}.delete"],
+            abilities: ["product_admin.{$serviceRequestType->getKey()}.delete"],
             denyResponse: 'You do not have permissions to delete this service request type.'
         );
     }
@@ -104,7 +104,7 @@ class ServiceRequestTypePolicy
     public function restore(Authenticatable $authenticatable, ServiceRequestType $serviceRequestType): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['service_request_type.*.restore', "service_request_type.{$serviceRequestType->id}.restore"],
+            abilities: ["product_admin.{$serviceRequestType->getKey()}.restore"],
             denyResponse: 'You do not have permissions to restore this service request type.'
         );
     }
@@ -116,7 +116,7 @@ class ServiceRequestTypePolicy
         }
 
         return $authenticatable->canOrElse(
-            abilities: ['service_request_type.*.force-delete', "service_request_type.{$serviceRequestType->id}.force-delete"],
+            abilities: ["product_admin.{$serviceRequestType->getKey()}.force-delete"],
             denyResponse: 'You do not have permissions to force delete this service request type.'
         );
     }

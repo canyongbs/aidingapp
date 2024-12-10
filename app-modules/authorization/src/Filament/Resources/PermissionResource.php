@@ -42,7 +42,6 @@ use Filament\Resources\Resource;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
-use App\Filament\Clusters\UserManagement;
 use App\Filament\Tables\Columns\IdColumn;
 use AidingApp\Authorization\Models\Permission;
 use AidingApp\Authorization\Filament\Resources\PermissionResource\Pages\ViewPermission;
@@ -53,9 +52,7 @@ class PermissionResource extends Resource
 {
     protected static ?string $model = Permission::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-key';
-
-    protected static ?string $cluster = UserManagement::class;
+    protected static ?string $navigationGroup = 'People Administration';
 
     protected static ?int $navigationSort = 40;
 

@@ -47,53 +47,53 @@ use AidingApp\Contact\Tests\OrganizationIndustry\RequestFactories\EditOrganizati
 
 test('Edit Organization Industry is gated with proper access control', function () {
     $user = User::factory()->licensed(Contact::getLicenseType())->create();
-    $organization_industry = OrganizationIndustry::factory()->create();
+    $organizationIndustry = OrganizationIndustry::factory()->create();
 
     actingAs($user)
         ->get(
             OrganizationIndustryResource::getUrl('edit', [
-                'record' => $organization_industry,
+                'record' => $organizationIndustry,
             ])
         )->assertForbidden();
 
     livewire(EditOrganizationIndustry::class, [
-        'record' => $organization_industry->getRouteKey(),
+        'record' => $organizationIndustry->getRouteKey(),
     ])
         ->assertForbidden();
 
-    $user->givePermissionTo('organization_industry.view-any');
-    $user->givePermissionTo('organization_industry.*.update');
+    $user->givePermissionTo('product_admin.view-any');
+    $user->givePermissionTo('product_admin.*.update');
 
     actingAs($user)
         ->get(
             OrganizationIndustryResource::getUrl('edit', [
-                'record' => $organization_industry,
+                'record' => $organizationIndustry,
             ])
         )->assertSuccessful();
     livewire(EditOrganizationIndustry::class, [
-        'record' => $organization_industry->getRouteKey(),
+        'record' => $organizationIndustry->getRouteKey(),
     ])
         ->assertSuccessful();
 });
 test('Edit Organization Industry Record', function () {
     $user = User::factory()->licensed(Contact::getLicenseType())->create();
-    $organization_industry = OrganizationIndustry::factory()->create();
+    $organizationIndustry = OrganizationIndustry::factory()->create();
 
-    $user->givePermissionTo('organization_industry.view-any');
-    $user->givePermissionTo('organization_industry.*.update');
+    $user->givePermissionTo('product_admin.view-any');
+    $user->givePermissionTo('product_admin.*.update');
 
     actingAs($user);
 
     $request = collect(EditOrganizationIndustryRequestFactory::new()->create());
 
     livewire(EditOrganizationIndustry::class, [
-        'record' => $organization_industry->getRouteKey(),
+        'record' => $organizationIndustry->getRouteKey(),
     ])
         ->fillForm($request->toArray())
         ->call('save')
         ->assertHasNoFormErrors();
 
-    $organization_industry->refresh();
+    $organizationIndustry->refresh();
 
-    expect($organization_industry->name)->toEqual($request->get('name'));
+    expect($organizationIndustry->name)->toEqual($request->get('name'));
 });
