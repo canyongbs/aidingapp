@@ -42,6 +42,7 @@ use OwenIt\Auditing\Contracts\Auditable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 
 /**
@@ -63,6 +64,16 @@ class KnowledgeBaseCategory extends BaseModel implements Auditable
     public function knowledgeBaseItems(): HasMany
     {
         return $this->hasMany(KnowledgeBaseItem::class, 'category_id');
+    }
+
+    public function parentCategory(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'parent_id', 'id');
+    }
+
+    public function subCategories(): HasMany
+    {
+        return $this->hasMany(self::class, 'parent_id');
     }
 
     protected function serializeDate(DateTimeInterface $date): string
