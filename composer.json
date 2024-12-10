@@ -17,6 +17,7 @@
         "aws/aws-sdk-php": "^3.316",
         "barryvdh/laravel-debugbar": "^3.9",
         "bvtterfly/model-state-machine": "^0.3.0",
+        "canyon-gbs/ai": "*",
         "canyon-gbs/aiding-app-alert": "*",
         "canyon-gbs/aiding-app-audit": "*",
         "canyon-gbs/aiding-app-authorization": "*",
