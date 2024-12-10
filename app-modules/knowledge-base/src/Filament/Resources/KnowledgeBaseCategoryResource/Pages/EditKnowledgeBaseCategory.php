@@ -39,9 +39,12 @@ namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResour
 use Filament\Forms\Form;
 use Filament\Actions\ViewAction;
 use Filament\Actions\DeleteAction;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Database\Eloquent\Builder;
+use App\Features\KnowledgeBaseSubcategory;
 use App\Filament\Forms\Components\IconSelect;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource;
 
@@ -57,6 +60,12 @@ class EditKnowledgeBaseCategory extends EditRecord
                     ->label('Name')
                     ->required()
                     ->string(),
+                Select::make('parent_id')
+                    ->label('Choose Parent Category')
+                    ->required(! blank($this->getRecord()->parent_id) ? true : false)
+                    ->relationship('parentCategory', 'name', modifyQueryUsing: fn (Builder $query) => $query->doesntHave('parentCategory'))
+                    ->visible(KnowledgeBaseSubcategory::active() && ! blank($this->getRecord()->parent_id) ? true : false)
+                    ->searchable(),
                 IconSelect::make('icon'),
                 TextInput::make('slug')
                     ->regex('/^[a-zA-Z0-9]+(-[a-zA-Z0-9]+)*$/')
@@ -70,6 +79,11 @@ class EditKnowledgeBaseCategory extends EditRecord
                     ->string()
                     ->columnSpanFull(),
             ]);
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return 'Edit';
     }
 
     protected function getHeaderActions(): array
