@@ -48,9 +48,9 @@ class AiPlugin implements Plugin
 
     public function register(Panel $panel): void
     {
-        $panel->discoverResources(
-            in: __DIR__ . '/Filament/Resources',
-            for: 'AidingApp\\Ai\\Filament\\Resources'
+        $panel->discoverPages(
+            in: __DIR__ . '/Filament/Pages',
+            for: 'AidingApp\\Ai\\Filament\\Pages'
         );
     }
 

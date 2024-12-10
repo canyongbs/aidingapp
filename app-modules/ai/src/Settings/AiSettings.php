@@ -2,9 +2,7 @@
 
 namespace AidingApp\Ai\Settings;
 
-use AdvisingApp\Ai\Enums\AiModel;
 use Spatie\LaravelSettings\Settings;
-use AdvisingApp\Ai\Enums\AiMaxTokens;
 
 class AiSettings extends Settings
 {
@@ -21,7 +19,7 @@ class AiSettings extends Settings
         return 'ai';
     }
 
-     public static function encrypted(): array
+    public static function encrypted(): array
     {
         return [
             'url',
