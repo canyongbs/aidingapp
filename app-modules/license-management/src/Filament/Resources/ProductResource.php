@@ -55,7 +55,7 @@ class ProductResource extends Resource
 
     protected static ?string $navigationLabel = 'License Management';
 
-    protected static ?int $navigationSort = 31;
+    protected static ?int $navigationSort = 50;
 
     public static function getRecordSubNavigation(Page $page): array
     {
