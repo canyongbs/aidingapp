@@ -38,6 +38,7 @@ namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResour
 
 use Filament\Forms\Form;
 use Filament\Tables\Table;
+use Filament\Infolists\Infolist;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
@@ -47,6 +48,8 @@ use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Actions\CreateAction;
 use Filament\Tables\Actions\DeleteAction;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Infolists\Components\Section;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Tables\Actions\AssociateAction;
 use Filament\Tables\Actions\BulkActionGroup;
 use App\Filament\Forms\Components\IconSelect;
@@ -55,12 +58,35 @@ use Filament\Tables\Actions\DissociateAction;
 use Filament\Tables\Actions\DissociateBulkAction;
 use App\Filament\Tables\Columns\OpenSearch\TextColumn;
 use Filament\Resources\RelationManagers\RelationManager;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 
 class SubCategoriesRelationManager extends RelationManager
 {
     protected static string $relationship = 'subCategories';
 
     protected static ?string $inverseRelationship = 'parentCategory';
+
+    public function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                Section::make()
+                    ->schema([
+                        TextEntry::make('name')
+                            ->label('Name'),
+                        TextEntry::make('icon')
+                            ->state(fn (KnowledgeBaseCategory $record): string => (string) str($record->icon)->after('heroicon-o-')->headline())
+                            ->icon(fn (KnowledgeBaseCategory $record): string => $record->icon)
+                            ->hidden(fn (KnowledgeBaseCategory $record): bool => blank($record->icon)),
+                        TextEntry::make('description')
+                            ->label('Description')
+                            ->columnSpanFull(),
+                        TextEntry::make('slug')
+                            ->hidden(fn (KnowledgeBaseCategory $record): bool => blank($record->slug)),
+                    ])
+                    ->columns(),
+            ]);
+    }
 
     public function form(Form $form): Form
     {
@@ -103,6 +129,7 @@ class SubCategoriesRelationManager extends RelationManager
                     ->modalHeading('Create knowledge base subcategory'),
                 AssociateAction::make()
                     ->modalHeading('Associate knowledge base subcategory')
+                    ->preloadRecordSelect()
                     ->recordSelectOptionsQuery(
                         fn (Builder $query) => $query->where('id', '!=', $this->getOwnerRecord()->getKey())
                             ->doesntHave('parentCategory')
