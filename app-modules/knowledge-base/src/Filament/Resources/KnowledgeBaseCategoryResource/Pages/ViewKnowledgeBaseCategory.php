@@ -56,8 +56,6 @@ class ViewKnowledgeBaseCategory extends ViewRecord
                     ->schema([
                         TextEntry::make('name')
                             ->label('Name'),
-                        TextEntry::make('parentCategory.name')
-                            ->label('Parent Category'),
                         TextEntry::make('icon')
                             ->state(fn (KnowledgeBaseCategory $record): string => (string) str($record->icon)->after('heroicon-o-')->headline())
                             ->icon(fn (KnowledgeBaseCategory $record): string => $record->icon)
