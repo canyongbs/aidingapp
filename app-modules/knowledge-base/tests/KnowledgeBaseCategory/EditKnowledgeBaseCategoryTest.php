@@ -152,7 +152,10 @@ test('can create subcategory', function () {
     $user = User::factory()->licensed(LicenseType::cases())->create();
 
     $user->givePermissionTo('product_admin.view-any');
+    $user->givePermissionTo('product_admin.create');
     $user->givePermissionTo('product_admin.*.update');
+
+    actingAs($user);
 
     $knowledgeBaseCategory = KnowledgeBaseCategory::factory()->create();
 
@@ -164,21 +167,23 @@ test('can create subcategory', function () {
         'ownerRecord' => $knowledgeBaseCategory,
         'pageClass' => EditKnowledgeBaseCategory::class,
     ])
-        // ->mountTableAction(CreateAction::class)
-        // ->setTableActionData($knowledgeBaseSubCategory->toArray())
-        // ->assertTableActionDataSet($knowledgeBaseSubCategory->toArray())
-        ->callTableAction(CreateAction::class, null, $knowledgeBaseCategory->toArray())
+        ->callTableAction(
+            name: CreateAction::class,
+            data: $knowledgeBaseSubCategory->toArray()
+        )
         ->assertHasNoTableActionErrors();
-    dd($knowledgeBaseCategory->fresh()->subCategories()->count());
-    expect($knowledgeBaseCategory->subCategories->refresh())
-        ->toHaveCount(1);
-})->skip();
+
+    expect($knowledgeBaseCategory->fresh()->subCategories()->count())
+        ->toEqual(1);
+});
 
 test('exclude already attached subcategories in search', function () {
     $user = User::factory()->licensed(LicenseType::cases())->create();
 
     $user->givePermissionTo('product_admin.view-any');
     $user->givePermissionTo('product_admin.*.update');
+
+    actingAs($user);
 
     $knowledgeBaseCategory = KnowledgeBaseCategory::factory()->create();
 
@@ -214,6 +219,8 @@ test('can attach subcategories into categories', function () {
 
     $user->givePermissionTo('product_admin.view-any');
     $user->givePermissionTo('product_admin.*.update');
+
+    actingAs($user);
 
     $knowledgeBaseCategory = KnowledgeBaseCategory::factory()->create();
 
