@@ -95,7 +95,6 @@ class ListServiceRequests extends ListRecords
                     ->description(fn (ServiceRequest $record): string => $record->title),
                 TextColumn::make('status.name')
                     ->label('Status')
-                    ->searchable()
                     ->sortable()
                     ->toggleable(),
                 TextColumn::make('respondent.display_name')
