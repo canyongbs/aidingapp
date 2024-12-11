@@ -70,6 +70,11 @@ class ViewKnowledgeBaseCategory extends ViewRecord
             ]);
     }
 
+    public static function getNavigationLabel(): string
+    {
+        return 'View';
+    }
+
     protected function getHeaderActions(): array
     {
         return [

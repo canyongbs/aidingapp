@@ -72,6 +72,11 @@ class EditKnowledgeBaseCategory extends EditRecord
             ]);
     }
 
+    public static function getNavigationLabel(): string
+    {
+        return 'Edit';
+    }
+
     protected function getHeaderActions(): array
     {
         return [
