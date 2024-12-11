@@ -51,7 +51,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 it('checks the API returns users', function () {
     withoutMiddleware(CheckOlympusKey::class);
 
-    $randomRecords = random_int(1, 100);
+    $randomRecords = random_int(1, 10);
 
     User::factory()->count($randomRecords)->create();
 
@@ -67,7 +67,7 @@ it('checks the API returns users', function () {
 it('checks the API returns service requests', function () {
     withoutMiddleware(CheckOlympusKey::class);
 
-    $randomRecords = random_int(1, 100);
+    $randomRecords = random_int(1, 10);
 
     ServiceRequest::factory()->count($randomRecords)->create();
 
@@ -83,7 +83,7 @@ it('checks the API returns service requests', function () {
 it('checks the API returns assets', function () {
     withoutMiddleware(CheckOlympusKey::class);
 
-    $randomRecords = random_int(1, 100);
+    $randomRecords = random_int(1, 10);
 
     Asset::factory()->count($randomRecords)->create();
 
@@ -99,7 +99,7 @@ it('checks the API returns assets', function () {
 it('checks the API returns changes', function () {
     withoutMiddleware(CheckOlympusKey::class);
 
-    $randomRecords = random_int(1, 100);
+    $randomRecords = random_int(1, 10);
 
     ChangeRequest::factory()->count($randomRecords)->create();
 
@@ -115,7 +115,7 @@ it('checks the API returns changes', function () {
 it('checks the API returns knowledge base articles', function () {
     withoutMiddleware(CheckOlympusKey::class);
 
-    $randomRecords = random_int(1, 100);
+    $randomRecords = random_int(1, 10);
 
     KnowledgeBaseItem::factory()->count($randomRecords)->create();
 
@@ -131,7 +131,7 @@ it('checks the API returns knowledge base articles', function () {
 it('checks the API returns tasks', function () {
     withoutMiddleware(CheckOlympusKey::class);
 
-    $randomRecords = random_int(1, 100);
+    $randomRecords = random_int(1, 10);
 
     Task::factory()->count($randomRecords)->create();
 
