@@ -42,12 +42,15 @@ use OwenIt\Auditing\Contracts\Auditable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\Concerns\HasRelationBasedStateMachine;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\ServiceManagement\Observers\ChangeRequestObserver;
 use AidingApp\ServiceManagement\Enums\SystemChangeRequestClassification;
 
 /**
  * @mixin IdeHelperChangeRequest
  */
+#[ObservedBy([ChangeRequestObserver::class])]
 class ChangeRequest extends BaseModel implements Auditable
 {
     use AuditableTrait;

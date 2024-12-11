@@ -51,12 +51,6 @@ use AidingApp\Engagement\Models\EngagementResponse;
 use AidingApp\Engagement\Actions\DeliverEngagements;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use AidingApp\Engagement\Models\EngagementDeliverable;
-use AidingApp\Engagement\Observers\EngagementObserver;
-use AidingApp\Engagement\Models\EngagementFileEntities;
-use AidingApp\Engagement\Observers\SmsTemplateObserver;
-use AidingApp\Engagement\Observers\EmailTemplateObserver;
-use AidingApp\Engagement\Observers\EngagementBatchObserver;
-use AidingApp\Engagement\Observers\EngagementFileEntitiesObserver;
 
 class EngagementServiceProvider extends ServiceProvider
 {
@@ -93,16 +87,5 @@ class EngagementServiceProvider extends ServiceProvider
                 ->onOneServer()
                 ->withoutOverlapping();
         });
-
-        $this->registerObservers();
-    }
-
-    public function registerObservers(): void
-    {
-        EmailTemplate::observe(EmailTemplateObserver::class);
-        Engagement::observe(EngagementObserver::class);
-        EngagementBatch::observe(EngagementBatchObserver::class);
-        EngagementFileEntities::observe(EngagementFileEntitiesObserver::class);
-        SmsTemplate::observe(SmsTemplateObserver::class);
     }
 }
