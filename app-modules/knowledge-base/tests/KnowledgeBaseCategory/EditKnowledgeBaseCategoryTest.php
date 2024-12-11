@@ -40,6 +40,8 @@ use App\Settings\LicenseSettings;
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
+use Filament\Forms\Components\Select;
+use Filament\Tables\Actions\CreateAction;
 use Filament\Tables\Actions\AssociateAction;
 
 use function PHPUnit\Framework\assertEquals;
@@ -146,6 +148,67 @@ test('EditKnowledgeBaseCategory is gated with proper feature access control', fu
     assertEquals($request['name'], $knowledgeBaseCategory->fresh()->name);
 });
 
+test('can create subcategory', function () {
+    $user = User::factory()->licensed(LicenseType::cases())->create();
+
+    $user->givePermissionTo('knowledge_base_category.view-any');
+    $user->givePermissionTo('knowledge_base_category.*.update');
+
+    $knowledgeBaseCategory = KnowledgeBaseCategory::factory()->create();
+
+    $knowledgeBaseSubCategory = KnowledgeBaseCategory::factory()->state([
+        'parent_id' => $knowledgeBaseCategory->getKey(),
+    ])->make();
+
+    livewire(SubCategoriesRelationManager::class, [
+        'ownerRecord' => $knowledgeBaseCategory,
+        'pageClass' => EditKnowledgeBaseCategory::class,
+    ])
+        // ->mountTableAction(CreateAction::class)
+        // ->setTableActionData($knowledgeBaseSubCategory->toArray())
+        // ->assertTableActionDataSet($knowledgeBaseSubCategory->toArray())
+        ->callTableAction(CreateAction::class, null, $knowledgeBaseCategory->toArray())
+        ->assertHasNoTableActionErrors();
+    dd($knowledgeBaseCategory->fresh()->subCategories()->count());
+    expect($knowledgeBaseCategory->subCategories->refresh())
+        ->toHaveCount(1);
+})->skip();
+
+test('exclude already attached subcategories in search', function () {
+    $user = User::factory()->licensed(LicenseType::cases())->create();
+
+    $user->givePermissionTo('knowledge_base_category.view-any');
+    $user->givePermissionTo('knowledge_base_category.*.update');
+
+    $knowledgeBaseCategory = KnowledgeBaseCategory::factory()->create();
+
+    $knowledgeBaseSubCategory = KnowledgeBaseCategory::factory()->state([
+        'parent_id' => $knowledgeBaseCategory->getKey(),
+    ])->make();
+
+    expect($knowledgeBaseCategory->subCategories)
+        ->toBeEmpty();
+
+    $newknowledgeBaseCategory = KnowledgeBaseCategory::factory()->create();
+
+    livewire(SubCategoriesRelationManager::class, [
+        'ownerRecord' => $knowledgeBaseCategory,
+        'pageClass' => EditKnowledgeBaseCategory::class,
+    ])
+        ->mountTableAction(AssociateAction::class)
+        ->assertFormFieldExists('recordId', 'mountedTableActionForm', function (Select $select) use ($knowledgeBaseSubCategory) {
+            $options = $select->getOptions();
+            $searchOptions = $select->getSearchResults($knowledgeBaseSubCategory->name);
+
+            return ! in_array($knowledgeBaseSubCategory->name, $options) && empty($searchOptions);
+        })
+        ->assertFormFieldExists('recordId', 'mountedTableActionForm', function (Select $select) use ($newknowledgeBaseCategory) {
+            $searchOptions = $select->getSearchResults($newknowledgeBaseCategory->name);
+
+            return ! empty($searchOptions) ? true : false;
+        });
+});
+
 test('can attach subcategories into categories', function () {
     $user = User::factory()->licensed(LicenseType::cases())->create();
 
@@ -155,6 +218,9 @@ test('can attach subcategories into categories', function () {
     $knowledgeBaseCategory = KnowledgeBaseCategory::factory()->create();
 
     $knowledgeBaseSubCategory = KnowledgeBaseCategory::factory()->create();
+
+    expect($knowledgeBaseCategory->subCategories)
+        ->toBeEmpty();
 
     livewire(SubCategoriesRelationManager::class, [
         'ownerRecord' => $knowledgeBaseCategory,
@@ -169,4 +235,4 @@ test('can attach subcategories into categories', function () {
         ->subCategories
         ->pluck('id')
         ->toContain($knowledgeBaseSubCategory->getKey());
-})->only();
+});

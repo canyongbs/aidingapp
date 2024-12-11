@@ -7,6 +7,7 @@ use Filament\Tables\Table;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Actions\CreateAction;
@@ -20,8 +21,6 @@ use Filament\Tables\Actions\DissociateAction;
 use Filament\Tables\Actions\DissociateBulkAction;
 use App\Filament\Tables\Columns\OpenSearch\TextColumn;
 use Filament\Resources\RelationManagers\RelationManager;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource;
 
 class SubCategoriesRelationManager extends RelationManager
 {
@@ -40,7 +39,7 @@ class SubCategoriesRelationManager extends RelationManager
                 IconSelect::make('icon'),
                 TextInput::make('slug')
                     ->regex('/^[a-zA-Z0-9]+(-[a-zA-Z0-9]+)*$/')
-                    ->unique()
+                    ->unique(ignoreRecord: true)
                     ->maxLength(255)
                     ->required()
                     ->dehydrateStateUsing(fn (string $state): string => strtolower($state)),
@@ -59,6 +58,10 @@ class SubCategoriesRelationManager extends RelationManager
             ->heading('Subcategories')
             ->columns([
                 TextColumn::make('name'),
+                TextColumn::make('slug'),
+                IconColumn::make('icon')
+                    ->icon(fn (string $state): string => $state)
+                    ->tooltip(fn (?string $state): ?string => filled($state) ? (string) str($state)->after('heroicon-o-')->headline() : null),
             ])
             ->headerActions([
                 CreateAction::make()
@@ -74,10 +77,8 @@ class SubCategoriesRelationManager extends RelationManager
             ])
             ->actions([
                 ActionGroup::make([
-                    ViewAction::make()
-                        ->url(fn (KnowledgeBaseCategory $record) => KnowledgeBaseCategoryResource::getUrl('view', ['record' => $record->getKey()])),
-                    EditAction::make()
-                        ->url(fn (KnowledgeBaseCategory $record) => KnowledgeBaseCategoryResource::getUrl('edit', ['record' => $record->getKey()])),
+                    ViewAction::make(),
+                    EditAction::make(),
                     DissociateAction::make(),
                     DeleteAction::make(),
                 ]),

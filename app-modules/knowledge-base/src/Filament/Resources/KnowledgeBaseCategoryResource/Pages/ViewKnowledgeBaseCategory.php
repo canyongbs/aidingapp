@@ -39,7 +39,6 @@ namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResour
 use Filament\Actions\EditAction;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
-use App\Features\KnowledgeBaseSubcategory;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
@@ -58,8 +57,7 @@ class ViewKnowledgeBaseCategory extends ViewRecord
                         TextEntry::make('name')
                             ->label('Name'),
                         TextEntry::make('parentCategory.name')
-                            ->label('Parent Category')
-                            ->visible(fn (KnowledgeBaseCategory $record) => KnowledgeBaseSubcategory::active() && ! blank($record->parent_id)),
+                            ->label('Parent Category'),
                         TextEntry::make('icon')
                             ->state(fn (KnowledgeBaseCategory $record): string => (string) str($record->icon)->after('heroicon-o-')->headline())
                             ->icon(fn (KnowledgeBaseCategory $record): string => $record->icon)

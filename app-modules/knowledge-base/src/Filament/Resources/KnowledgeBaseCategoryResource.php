@@ -37,14 +37,13 @@
 namespace AidingApp\KnowledgeBase\Filament\Resources;
 
 use Filament\Resources\Resource;
-use Filament\Resources\Pages\Page;
 use App\Filament\Clusters\KnowledgeManagement;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\Pages\ManageSubCategories;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\Pages\EditKnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\Pages\ViewKnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\Pages\CreateKnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\Pages\ListKnowledgeBaseCategories;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\RelationManagers\SubCategoriesRelationManager;
 
 class KnowledgeBaseCategoryResource extends Resource
 {
@@ -65,16 +64,13 @@ class KnowledgeBaseCategoryResource extends Resource
             'create' => CreateKnowledgeBaseCategory::route('/create'),
             'view' => ViewKnowledgeBaseCategory::route('/{record}'),
             'edit' => EditKnowledgeBaseCategory::route('/{record}/edit'),
-            'subcategories' => ManageSubCategories::route('/{record}/subcategories'),
         ];
     }
 
-    public static function getRecordSubNavigation(Page $page): array
+    public static function getRelations(): array
     {
-        return $page->generateNavigationItems([
-            ViewKnowledgeBaseCategory::class,
-            EditKnowledgeBaseCategory::class,
-            ManageSubCategories::class,
-        ]);
+        return [
+            SubCategoriesRelationManager::class,
+        ];
     }
 }
