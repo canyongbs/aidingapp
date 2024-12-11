@@ -46,10 +46,13 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphPivot;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use AidingApp\Notification\Observers\SubscriptionObserver;
 
 /**
  * @mixin IdeHelperSubscription
  */
+#[ObservedBy([SubscriptionObserver::class])]
 class Subscription extends MorphPivot
 {
     use BelongsToEducatable;

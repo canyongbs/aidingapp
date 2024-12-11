@@ -41,7 +41,6 @@ use AidingApp\Task\TaskPlugin;
 use AidingApp\Task\Models\Task;
 use Filament\Support\Assets\Js;
 use Illuminate\Support\ServiceProvider;
-use AidingApp\Task\Observers\TaskObserver;
 use Filament\Support\Facades\FilamentAsset;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
@@ -60,14 +59,7 @@ class TaskServiceProvider extends ServiceProvider
             ]
         );
 
-        $this->registerObservers();
-
         $this->registerAssets();
-    }
-
-    protected function registerObservers(): void
-    {
-        Task::observe(TaskObserver::class);
     }
 
     protected function registerAssets(): void
