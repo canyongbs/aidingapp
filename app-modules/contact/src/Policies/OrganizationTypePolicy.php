@@ -55,7 +55,7 @@ class OrganizationTypePolicy
     public function viewAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: 'organization_type.view-any',
+            abilities: 'product_admin.view-any',
             denyResponse: 'You do not have permission to view organization types.'
         );
     }
@@ -63,7 +63,7 @@ class OrganizationTypePolicy
     public function view(Authenticatable $authenticatable, OrganizationType $organizationType): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['organization_type.*.view', "organization_type.{$organizationType->id}.view"],
+            abilities: ["product_admin.{$organizationType->getKey()}.view"],
             denyResponse: 'You do not have permission to view this organization types.'
         );
     }
@@ -71,7 +71,7 @@ class OrganizationTypePolicy
     public function create(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: 'organization_type.create',
+            abilities: 'product_admin.create',
             denyResponse: 'You do not have permission to create organization types.'
         );
     }
@@ -79,7 +79,7 @@ class OrganizationTypePolicy
     public function update(Authenticatable $authenticatable, OrganizationType $organizationType): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['organization_type.*.update', "organization_type.{$organizationType->id}.update"],
+            abilities: ["product_admin.{$organizationType->getKey()}.update"],
             denyResponse: 'You do not have permission to update this organization type.'
         );
     }
@@ -87,7 +87,7 @@ class OrganizationTypePolicy
     public function delete(Authenticatable $authenticatable, OrganizationType $organizationType): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['organization_type.*.delete', "organization_type.{$organizationType->id}.delete"],
+            abilities: ["product_admin.{$organizationType->getKey()}.delete"],
             denyResponse: 'You do not have permission to delete this organization type.'
         );
     }
@@ -95,7 +95,7 @@ class OrganizationTypePolicy
     public function restore(Authenticatable $authenticatable, OrganizationType $organizationType): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['organization_type.*.restore', "organization_type.{$organizationType->id}.restore"],
+            abilities: ["product_admin.{$organizationType->getKey()}.restore"],
             denyResponse: 'You do not have permission to restore this organization type.'
         );
     }
@@ -103,7 +103,7 @@ class OrganizationTypePolicy
     public function forceDelete(Authenticatable $authenticatable, OrganizationType $organizationType): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['organization_type.*.force-delete', "organization_type.{$organizationType->id}.force-delete"],
+            abilities: ["product_admin.{$organizationType->getKey()}.force-delete"],
             denyResponse: 'You do not have permission to force delete this organization type.'
         );
     }
