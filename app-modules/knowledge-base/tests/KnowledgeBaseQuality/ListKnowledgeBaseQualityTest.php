@@ -57,7 +57,7 @@ test('ListKnowledgeBaseQuality is gated with proper access control', function ()
             KnowledgeBaseQualityResource::getUrl('index')
         )->assertForbidden();
 
-    $user->givePermissionTo('knowledge_base_quality.view-any');
+    $user->givePermissionTo('product_admin.view-any');
 
     actingAs($user)
         ->get(
@@ -74,7 +74,7 @@ test('ListKnowledgeBaseQuality is gated with proper feature access control', fun
 
     $user = User::factory()->licensed(LicenseType::cases())->create();
 
-    $user->givePermissionTo('knowledge_base_quality.view-any');
+    $user->givePermissionTo('product_admin.view-any');
 
     actingAs($user)
         ->get(
@@ -103,7 +103,7 @@ test('ListKnowledgeBaseQuality is gated with proper license access control', fun
 
     // And the authenticatable has the correct permissions
     // But they do not have the appropriate license
-    $user->givePermissionTo('knowledge_base_quality.view-any');
+    $user->givePermissionTo('product_admin.view-any');
 
     // They should not be able to access the resource
     actingAs($user)

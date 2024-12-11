@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6234f83fbb8e283bf2ade226bba4a751",
+    "content-hash": "5a7591a46a611e909a946e86d0465375",
     "packages": [
         {
             "name": "amphp/amp",
@@ -1507,6 +1507,41 @@
             },
             "abandoned": true,
             "time": "2023-03-05T21:00:11+00:00"
+        },
+        {
+            "name": "canyon-gbs/aiding-app-ai",
+            "version": "1.0",
+            "dist": {
+                "type": "path",
+                "url": "app-modules/ai",
+                "reference": "5891faad88c18a3564d35fe872a4c09c73cffec2"
+            },
+            "require": {
+                "filament/filament": "^3.2"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "AidingApp\\Ai\\Providers\\AiServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "AidingApp\\Ai\\": "src/",
+                    "AidingApp\\Ai\\Tests\\": "tests/",
+                    "AidingApp\\Ai\\Database\\Factories\\": "database/factories/",
+                    "AidingApp\\Ai\\Database\\Seeders\\": "database/seeders/"
+                }
+            },
+            "license": [
+                "proprietary"
+            ],
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
         },
         {
             "name": "canyon-gbs/aiding-app-alert",

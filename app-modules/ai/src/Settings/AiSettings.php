@@ -34,17 +34,32 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Clusters;
+namespace AidingApp\Ai\Settings;
 
-use Filament\Clusters\Cluster;
+use Spatie\LaravelSettings\Settings;
 
-class UserManagement extends Cluster
+class AiSettings extends Settings
 {
-    protected static ?string $navigationIcon = 'heroicon-o-squares-2x2';
+    public ?string $url = null;
 
-    protected static ?string $navigationGroup = 'Product Administration';
+    public ?string $key = null;
 
-    protected static ?string $navigationLabel = 'User Management';
+    public ?string $api_version = null;
 
-    protected static ?int $navigationSort = 1;
+    public ?string $model = null;
+
+    public static function group(): string
+    {
+        return 'ai';
+    }
+
+    public static function encrypted(): array
+    {
+        return [
+            'url',
+            'key',
+            'api_version',
+            'model',
+        ];
+    }
 }
