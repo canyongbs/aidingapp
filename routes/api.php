@@ -37,9 +37,16 @@
 use Illuminate\Support\Facades\Route;
 use App\Multitenancy\Http\Middleware\CheckOlympusKey;
 use App\Http\Controllers\SetAzureSsoSettingController;
+use App\Http\Controllers\UtilizationMetricsApisController;
 
 Route::group(['prefix' => 'v1', 'as' => 'api.', 'middleware' => ['auth:sanctum']], function () {});
 
-Route::middleware([CheckOlympusKey::class])
-    ->post('azure-sso/update', SetAzureSsoSettingController::class)
-    ->name('azure-sso.update');
+Route::middleware([
+  CheckOlympusKey::class,
+])->group(function () {
+  Route::post('/azure-sso/update', SetAzureSsoSettingController::class)
+      ->name('azure-sso.update');
+
+  Route::get('/utilization-metrics', UtilizationMetricsApisController::class)
+      ->name('utilization-metrics');
+});
