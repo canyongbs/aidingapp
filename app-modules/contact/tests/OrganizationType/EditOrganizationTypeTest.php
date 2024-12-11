@@ -47,53 +47,53 @@ use AidingApp\Contact\Tests\OrganizationType\RequestFactories\EditOrganizationTy
 
 test('Edit Organization Type is gated with proper access control', function () {
     $user = User::factory()->licensed(Contact::getLicenseType())->create();
-    $organization_type = OrganizationType::factory()->create();
+    $organizationType = OrganizationType::factory()->create();
 
     actingAs($user)
         ->get(
             OrganizationTypeResource::getUrl('edit', [
-                'record' => $organization_type,
+                'record' => $organizationType,
             ])
         )->assertForbidden();
 
     livewire(EditOrganizationType::class, [
-        'record' => $organization_type->getRouteKey(),
+        'record' => $organizationType->getRouteKey(),
     ])
         ->assertForbidden();
 
-    $user->givePermissionTo('organization_type.view-any');
-    $user->givePermissionTo('organization_type.*.update');
+    $user->givePermissionTo('product_admin.view-any');
+    $user->givePermissionTo('product_admin.*.update');
 
     actingAs($user)
         ->get(
             OrganizationTypeResource::getUrl('edit', [
-                'record' => $organization_type,
+                'record' => $organizationType,
             ])
         )->assertSuccessful();
 
     livewire(EditOrganizationType::class, [
-        'record' => $organization_type->getRouteKey(),
+        'record' => $organizationType->getRouteKey(),
     ])->assertSuccessful();
 });
 test('Edit Organization Type Record', function () {
     $user = User::factory()->licensed(Contact::getLicenseType())->create();
-    $organization_type = OrganizationType::factory()->create();
+    $organizationType = OrganizationType::factory()->create();
 
-    $user->givePermissionTo('organization_type.view-any');
-    $user->givePermissionTo('organization_type.*.update');
+    $user->givePermissionTo('product_admin.view-any');
+    $user->givePermissionTo('product_admin.*.update');
 
     actingAs($user);
 
     $request = collect(EditOrganizationTypeRequestFactory::new()->create());
 
     livewire(EditOrganizationType::class, [
-        'record' => $organization_type->getRouteKey(),
+        'record' => $organizationType->getRouteKey(),
     ])
         ->fillForm($request->toArray())
         ->call('save')
         ->assertHasNoFormErrors();
 
-    $organization_type->refresh();
+    $organizationType->refresh();
 
-    expect($organization_type->name)->toEqual($request->get('name'));
+    expect($organizationType->name)->toEqual($request->get('name'));
 });

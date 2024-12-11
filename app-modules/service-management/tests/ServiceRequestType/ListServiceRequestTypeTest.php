@@ -92,7 +92,7 @@ test('ListServiceRequestTypes is gated with proper access control', function () 
             ServiceRequestTypeResource::getUrl('index')
         )->assertForbidden();
 
-    $user->givePermissionTo('service_request_type.view-any');
+    $user->givePermissionTo('product_admin.view-any');
 
     actingAs($user)
         ->get(
@@ -109,7 +109,7 @@ test('ListServiceRequestTypes is gated with proper feature access control', func
 
     $user = User::factory()->licensed([Contact::getLicenseType()])->create();
 
-    $user->givePermissionTo('service_request_type.view-any');
+    $user->givePermissionTo('product_admin.view-any');
 
     actingAs($user)
         ->get(

@@ -65,8 +65,8 @@ test('CreateKnowledgeBaseStatus is gated with proper access control', function (
     livewire(KnowledgeBaseStatusResource\Pages\CreateKnowledgeBaseStatus::class)
         ->assertForbidden();
 
-    $user->givePermissionTo('knowledge_base_status.view-any');
-    $user->givePermissionTo('knowledge_base_status.create');
+    $user->givePermissionTo('product_admin.view-any');
+    $user->givePermissionTo('product_admin.create');
 
     actingAs($user)
         ->get(
@@ -94,8 +94,8 @@ test('CreateKnowledgeBaseStatus is gated with proper feature access control', fu
 
     $user = User::factory()->licensed(LicenseType::cases())->create();
 
-    $user->givePermissionTo('knowledge_base_status.view-any');
-    $user->givePermissionTo('knowledge_base_status.create');
+    $user->givePermissionTo('product_admin.view-any');
+    $user->givePermissionTo('product_admin.create');
 
     actingAs($user)
         ->get(

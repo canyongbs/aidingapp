@@ -66,7 +66,7 @@ class KnowledgeBaseCategoryPolicy implements PerformsChecksBeforeAuthorization
     public function viewAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: 'knowledge_base_category.view-any',
+            abilities: 'product_admin.view-any',
             denyResponse: 'You do not have permissions to view knowledge base categories.'
         );
     }
@@ -74,7 +74,7 @@ class KnowledgeBaseCategoryPolicy implements PerformsChecksBeforeAuthorization
     public function view(Authenticatable $authenticatable, KnowledgeBaseCategory $knowledgeBaseCategory): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['knowledge_base_category.*.view', "knowledge_base_category.{$knowledgeBaseCategory->id}.view"],
+            abilities: ["product_admin.{$knowledgeBaseCategory->getKey()}.view"],
             denyResponse: 'You do not have permissions to view this knowledge base category.'
         );
     }
@@ -82,7 +82,7 @@ class KnowledgeBaseCategoryPolicy implements PerformsChecksBeforeAuthorization
     public function create(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: 'knowledge_base_category.create',
+            abilities: 'product_admin.create',
             denyResponse: 'You do not have permissions to create knowledge base categories.'
         );
     }
@@ -90,7 +90,7 @@ class KnowledgeBaseCategoryPolicy implements PerformsChecksBeforeAuthorization
     public function update(Authenticatable $authenticatable, KnowledgeBaseCategory $knowledgeBaseCategory): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['knowledge_base_category.*.update', "knowledge_base_category.{$knowledgeBaseCategory->id}.update"],
+            abilities: ["product_admin.{$knowledgeBaseCategory->getKey()}.update"],
             denyResponse: 'You do not have permissions to update this knowledge base category.'
         );
     }
@@ -98,7 +98,7 @@ class KnowledgeBaseCategoryPolicy implements PerformsChecksBeforeAuthorization
     public function delete(Authenticatable $authenticatable, KnowledgeBaseCategory $knowledgeBaseCategory): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['knowledge_base_category.*.delete', "knowledge_base_category.{$knowledgeBaseCategory->id}.delete"],
+            abilities: ["product_admin.{$knowledgeBaseCategory->getKey()}.delete"],
             denyResponse: 'You do not have permissions to delete this knowledge base category.'
         );
     }
@@ -106,7 +106,7 @@ class KnowledgeBaseCategoryPolicy implements PerformsChecksBeforeAuthorization
     public function restore(Authenticatable $authenticatable, KnowledgeBaseCategory $knowledgeBaseCategory): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['knowledge_base_category.*.restore', "knowledge_base_category.{$knowledgeBaseCategory->id}.restore"],
+            abilities: ["product_admin.{$knowledgeBaseCategory->getKey()}.restore"],
             denyResponse: 'You do not have permissions to restore this knowledge base category.'
         );
     }
@@ -114,7 +114,7 @@ class KnowledgeBaseCategoryPolicy implements PerformsChecksBeforeAuthorization
     public function forceDelete(Authenticatable $authenticatable, KnowledgeBaseCategory $knowledgeBaseCategory): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['knowledge_base_category.*.force-delete', "knowledge_base_category.{$knowledgeBaseCategory->id}.force-delete"],
+            abilities: ["product_admin.{$knowledgeBaseCategory->getKey()}.force-delete"],
             denyResponse: 'You do not have permissions to permanently delete this knowledge base category.'
         );
     }

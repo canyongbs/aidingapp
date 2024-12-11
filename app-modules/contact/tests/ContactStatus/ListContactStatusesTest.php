@@ -100,7 +100,7 @@ test('ListContactStatuses is gated with proper access control', function () {
             ContactStatusResource::getUrl('index')
         )->assertForbidden();
 
-    $user->givePermissionTo('contact_status.view-any');
+    $user->givePermissionTo('product_admin.view-any');
 
     actingAs($user)
         ->get(

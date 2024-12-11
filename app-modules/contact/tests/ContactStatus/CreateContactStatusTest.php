@@ -101,8 +101,8 @@ test('CreateContactStatus is gated with proper access control', function () {
     livewire(ContactStatusResource\Pages\CreateContactStatus::class)
         ->assertForbidden();
 
-    $user->givePermissionTo('contact_status.view-any');
-    $user->givePermissionTo('contact_status.create');
+    $user->givePermissionTo('product_admin.view-any');
+    $user->givePermissionTo('product_admin.create');
 
     actingAs($user)
         ->get(

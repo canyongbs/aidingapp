@@ -90,7 +90,7 @@ test('ListContactSources is gated with proper access control', function () {
             ContactSourceResource::getUrl('index')
         )->assertForbidden();
 
-    $user->givePermissionTo('contact_source.view-any');
+    $user->givePermissionTo('product_admin.view-any');
 
     actingAs($user)
         ->get(
