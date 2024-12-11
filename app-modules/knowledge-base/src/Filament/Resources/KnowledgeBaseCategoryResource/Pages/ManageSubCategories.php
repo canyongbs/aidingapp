@@ -36,61 +36,35 @@
 
 namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\Pages;
 
-use Filament\Forms\Form;
-use Filament\Actions\ViewAction;
-use Filament\Actions\DeleteAction;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
-use Filament\Resources\Pages\EditRecord;
-use Illuminate\Database\Eloquent\Builder;
 use App\Features\KnowledgeBaseSubcategory;
-use App\Filament\Forms\Components\IconSelect;
+use Filament\Resources\Pages\ManageRelatedRecords;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\RelationManagers\SubCategoriesRelationManager;
 
-class EditKnowledgeBaseCategory extends EditRecord
+class ManageSubCategories extends ManageRelatedRecords
 {
     protected static string $resource = KnowledgeBaseCategoryResource::class;
 
-    public function form(Form $form): Form
-    {
-        return $form
-            ->schema([
-                TextInput::make('name')
-                    ->label('Name')
-                    ->required()
-                    ->string(),
-                Select::make('parent_id')
-                    ->label('Choose Parent Category')
-                    ->required(! blank($this->getRecord()->parent_id) ? true : false)
-                    ->relationship('parentCategory', 'name', modifyQueryUsing: fn (Builder $query) => $query->doesntHave('parentCategory'))
-                    ->visible(KnowledgeBaseSubcategory::active() && ! blank($this->getRecord()->parent_id) ? true : false)
-                    ->searchable(),
-                IconSelect::make('icon'),
-                TextInput::make('slug')
-                    ->regex('/^[a-zA-Z0-9]+(-[a-zA-Z0-9]+)*$/')
-                    ->unique(ignoreRecord: true)
-                    ->maxLength(255)
-                    ->required()
-                    ->dehydrateStateUsing(fn (string $state): string => strtolower($state)),
-                Textarea::make('description')
-                    ->label('Description')
-                    ->nullable()
-                    ->string()
-                    ->columnSpanFull(),
-            ]);
-    }
+    protected static string $relationship = 'subCategories';
+
+    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+
+    protected static ?string $title = 'Manage Subcategories';
 
     public static function getNavigationLabel(): string
     {
-        return 'Edit';
+        return 'Manage Subcategories';
     }
 
-    protected function getHeaderActions(): array
+    public static function canAccess(array $arguments = []): bool
+    {
+        return parent::canAccess($arguments) && KnowledgeBaseSubcategory::active() && blank($arguments['record']->parent_id);
+    }
+
+    public function getRelationManagers(): array
     {
         return [
-            ViewAction::make(),
-            DeleteAction::make(),
+            SubCategoriesRelationManager::class,
         ];
     }
 }

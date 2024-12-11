@@ -34,50 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase\Models;
+namespace App\Features;
 
-use DateTimeInterface;
-use App\Models\BaseModel;
-use OwenIt\Auditing\Contracts\Auditable;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use App\Support\AbstractFeatureFlag;
 
-/**
- * @mixin IdeHelperKnowledgeBaseCategory
- */
-class KnowledgeBaseCategory extends BaseModel implements Auditable
+class KnowledgeBaseSubcategory extends AbstractFeatureFlag
 {
-    use SoftDeletes;
-    use AuditableTrait;
-    use HasUuids;
-
-    protected $fillable = [
-        'name',
-        'description',
-        'icon',
-        'slug',
-    ];
-
-    public function knowledgeBaseItems(): HasMany
+    public function resolve(mixed $scope): mixed
     {
-        return $this->hasMany(KnowledgeBaseItem::class, 'category_id');
-    }
-
-    public function parentCategory(): BelongsTo
-    {
-        return $this->belongsTo(self::class, 'parent_id', 'id');
-    }
-
-    public function subCategories(): HasMany
-    {
-        return $this->hasMany(self::class, 'parent_id');
-    }
-
-    protected function serializeDate(DateTimeInterface $date): string
-    {
-        return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
+        return false;
     }
 }

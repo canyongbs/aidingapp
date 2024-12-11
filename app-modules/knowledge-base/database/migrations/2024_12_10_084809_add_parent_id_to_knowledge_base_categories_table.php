@@ -34,50 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase\Models;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
-use DateTimeInterface;
-use App\Models\BaseModel;
-use OwenIt\Auditing\Contracts\Auditable;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-
-/**
- * @mixin IdeHelperKnowledgeBaseCategory
- */
-class KnowledgeBaseCategory extends BaseModel implements Auditable
-{
-    use SoftDeletes;
-    use AuditableTrait;
-    use HasUuids;
-
-    protected $fillable = [
-        'name',
-        'description',
-        'icon',
-        'slug',
-    ];
-
-    public function knowledgeBaseItems(): HasMany
+return new class () extends Migration {
+    public function up(): void
     {
-        return $this->hasMany(KnowledgeBaseItem::class, 'category_id');
+        Schema::table('knowledge_base_categories', function (Blueprint $table) {
+            $table->foreignUuid('parent_id')->nullable()->constrained('knowledge_base_categories');
+        });
     }
 
-    public function parentCategory(): BelongsTo
+    public function down(): void
     {
-        return $this->belongsTo(self::class, 'parent_id', 'id');
+        Schema::table('knowledge_base_categories', function (Blueprint $table) {
+            $table->dropConstrainedForeignId('parent_id');
+        });
     }
-
-    public function subCategories(): HasMany
-    {
-        return $this->hasMany(self::class, 'parent_id');
-    }
-
-    protected function serializeDate(DateTimeInterface $date): string
-    {
-        return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
-    }
-}
+};
