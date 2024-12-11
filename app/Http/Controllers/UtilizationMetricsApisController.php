@@ -36,15 +36,15 @@
 
 namespace App\Http\Controllers;
 
+use Exception;
+use App\Models\User;
+use Illuminate\Http\Request;
+use AidingApp\Task\Models\Task;
+use Illuminate\Http\JsonResponse;
 use AidingApp\InventoryManagement\Models\Asset;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\ServiceManagement\Models\ChangeRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
-use AidingApp\Task\Models\Task;
-use Exception;
-use App\Models\User;
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
 
 class UtilizationMetricsApisController extends Controller
 {
@@ -57,7 +57,7 @@ class UtilizationMetricsApisController extends Controller
                 'assets' => Asset::count(),
                 'changes' => ChangeRequest::count(),
                 'knowledge_base_articles' => KnowledgeBaseItem::count(),
-                'tasks' => Task::count()
+                'tasks' => Task::count(),
             ];
 
             return response()->json([
