@@ -39,10 +39,10 @@ use Spatie\LaravelSettings\Migrations\SettingsMigration;
 return new class () extends SettingsMigration {
     public function up(): void
     {
-        $this->migrator->add('ai.url', '', encrypted: true);
-        $this->migrator->add('ai.key', '', encrypted: true);
-        $this->migrator->add('ai.api_version', '', encrypted: true);
-        $this->migrator->add('ai.model', '', encrypted: true);
+        $this->migrator->add('ai.url', null, encrypted: true);
+        $this->migrator->add('ai.key', null, encrypted: true);
+        $this->migrator->add('ai.api_version', null, encrypted: true);
+        $this->migrator->add('ai.model', null, encrypted: true);
     }
 
     public function down(): void
