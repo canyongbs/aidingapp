@@ -5,13 +5,13 @@ use App\Models\User;
 use function Pest\Laravel\get;
 
 use AidingApp\Task\Models\Task;
-use App\Http\Middleware\CheckOlympusKey;
 
 use function Pest\Laravel\withoutMiddleware;
 
 use AidingApp\InventoryManagement\Models\Asset;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\ServiceManagement\Models\ChangeRequest;
+use App\Multitenancy\Http\Middleware\CheckOlympusKey;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 
 it('checks the API returns users', function () {
