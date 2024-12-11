@@ -151,8 +151,8 @@ test('EditKnowledgeBaseCategory is gated with proper feature access control', fu
 test('can create subcategory', function () {
     $user = User::factory()->licensed(LicenseType::cases())->create();
 
-    $user->givePermissionTo('knowledge_base_category.view-any');
-    $user->givePermissionTo('knowledge_base_category.*.update');
+    $user->givePermissionTo('product_admin.view-any');
+    $user->givePermissionTo('product_admin.*.update');
 
     $knowledgeBaseCategory = KnowledgeBaseCategory::factory()->create();
 
@@ -177,8 +177,8 @@ test('can create subcategory', function () {
 test('exclude already attached subcategories in search', function () {
     $user = User::factory()->licensed(LicenseType::cases())->create();
 
-    $user->givePermissionTo('knowledge_base_category.view-any');
-    $user->givePermissionTo('knowledge_base_category.*.update');
+    $user->givePermissionTo('product_admin.view-any');
+    $user->givePermissionTo('product_admin.*.update');
 
     $knowledgeBaseCategory = KnowledgeBaseCategory::factory()->create();
 
@@ -212,8 +212,8 @@ test('exclude already attached subcategories in search', function () {
 test('can attach subcategories into categories', function () {
     $user = User::factory()->licensed(LicenseType::cases())->create();
 
-    $user->givePermissionTo('knowledge_base_category.view-any');
-    $user->givePermissionTo('knowledge_base_category.*.update');
+    $user->givePermissionTo('product_admin.view-any');
+    $user->givePermissionTo('product_admin.*.update');
 
     $knowledgeBaseCategory = KnowledgeBaseCategory::factory()->create();
 
