@@ -36,6 +36,7 @@
 
 namespace AidingApp\Authorization\Http\Controllers;
 
+use Throwable;
 use App\Models\User;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
@@ -43,8 +44,10 @@ use Filament\Facades\Filament;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use Symfony\Component\Mime\MimeTypes;
 use Filament\Notifications\Notification;
 use AidingApp\Authorization\Enums\SocialiteProvider;
+use AidingApp\Authorization\Exceptions\InvalidUserAvatarMimeType;
 
 class SocialiteController extends Controller
 {
@@ -89,11 +92,28 @@ class SocialiteController extends Controller
         }
 
         if ($provider === SocialiteProvider::Azure) {
-            $request = Http::withToken($socialiteUser->token)
-                ->contentType('image/jpeg')
-                ->get('https://graph.microsoft.com/v1.0/me/photo/$value');
+            try {
+                $request = Http::withToken($socialiteUser->token)
+                    ->retry(3, 500)
+                    ->get('https://graph.microsoft.com/v1.0/me/photo/$value')
+                    ->throw();
 
-            $user->addMediaFromString($request->body())->usingFileName(Str::uuid() . '.jpg')->toMediaCollection('avatar');
+                $mimeType = $request->header('Content-Type');
+
+                if (in_array($mimeType, ['image/png', 'image/jpeg', 'image/webp', 'image/jpg', 'image/svg+xml'])) {
+                    $extension = (new MimeTypes())->getExtensions($mimeType)[0] ?? null;
+
+                    $body = $request->body();
+
+                    if ($extension && $body) {
+                        $user->addMediaFromString($body)->usingFileName(Str::uuid() . '.' . $extension)->toMediaCollection('avatar');
+                    }
+                } else {
+                    throw new InvalidUserAvatarMimeType($mimeType, $user);
+                }
+            } catch (Throwable $e) {
+                report($e);
+            }
         }
 
         $user->update([
