@@ -177,7 +177,7 @@ class ListServiceRequests extends ListRecords
                                 ->delete();
 
                             Notification::make()
-                                ->title('Deleted ' . $deletedRecordsCount . ' prompt types')
+                                ->title('Deleted ' . $deletedRecordsCount . ' service requests')
                                 ->body(($deletedRecordsCount < $records->count()) ? ($records->count() - $deletedRecordsCount) . ' service requests were not deleted because you\'re not an auditor or manager of it.' : null)
                                 ->success()
                                 ->send();

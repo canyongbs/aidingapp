@@ -56,13 +56,13 @@ class ServiceRequestDataObject extends Data
     public static function fromData(array $data): static
     {
         return new self(
-            division_id: $data['division_id'],
-            status_id: $data['status_id'],
+            division_id: $data['division_id'] ?? Optional::create(),
+            status_id: $data['status_id'] ?? Optional::create(),
             type_id: $data['type_id'],
-            priority_id: $data['priority_id'],
-            title: $data['title'],
-            close_details: $data['close_details'],
-            res_details: $data['res_details'],
+            priority_id: $data['priority_id'] ?? Optional::create(),
+            title: $data['title'] ?? Optional::create(),
+            close_details: $data['close_details'] ?? Optional::create(),
+            res_details: $data['res_details'] ?? Optional::create(),
             respondent_type: $data['respondent_type'],
             respondent_id: $data['respondent_id'],
         );
