@@ -48,6 +48,8 @@ class ContactsRelationManager extends RelationManager
 {
     protected static string $relationship = 'contacts';
 
+    protected static ?string $inverseRelationship = 'organizations';
+
     public function table(Table $table): Table
     {
         return $table
