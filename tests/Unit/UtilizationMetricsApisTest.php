@@ -48,12 +48,17 @@ use AidingApp\ServiceManagement\Models\ChangeRequest;
 use App\Multitenancy\Http\Middleware\CheckOlympusKey;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 
-it('checks the API returns users', function () {
+beforeEach(function () {
     withoutMiddleware(CheckOlympusKey::class);
+});
 
+it('checks the API returns users', function () {
     $randomRecords = random_int(1, 10);
 
     User::factory()->count($randomRecords)->create();
+
+    $softDeleteUser = User::factory()->create();
+    $softDeleteUser->delete();
 
     $response = get('/api/utilization-metrics');
 
@@ -65,11 +70,12 @@ it('checks the API returns users', function () {
 });
 
 it('checks the API returns service requests', function () {
-    withoutMiddleware(CheckOlympusKey::class);
-
     $randomRecords = random_int(1, 10);
 
     ServiceRequest::factory()->count($randomRecords)->create();
+
+    $softDeleteServiceRequest = ServiceRequest::factory()->create();
+    $softDeleteServiceRequest->delete();
 
     $response = get('/api/utilization-metrics');
 
@@ -81,11 +87,12 @@ it('checks the API returns service requests', function () {
 });
 
 it('checks the API returns assets', function () {
-    withoutMiddleware(CheckOlympusKey::class);
-
     $randomRecords = random_int(1, 10);
 
     Asset::factory()->count($randomRecords)->create();
+
+    $softDeleteAsset = Asset::factory()->create();
+    $softDeleteAsset->delete();
 
     $response = get('/api/utilization-metrics');
 
@@ -97,8 +104,6 @@ it('checks the API returns assets', function () {
 });
 
 it('checks the API returns changes', function () {
-    withoutMiddleware(CheckOlympusKey::class);
-
     $randomRecords = random_int(1, 10);
 
     ChangeRequest::factory()->count($randomRecords)->create();
@@ -113,11 +118,12 @@ it('checks the API returns changes', function () {
 });
 
 it('checks the API returns knowledge base articles', function () {
-    withoutMiddleware(CheckOlympusKey::class);
-
     $randomRecords = random_int(1, 10);
 
     KnowledgeBaseItem::factory()->count($randomRecords)->create();
+
+    $softDeleteKnowledgeBaseItem = KnowledgeBaseItem::factory()->create();
+    $softDeleteKnowledgeBaseItem->delete();
 
     $response = get('/api/utilization-metrics');
 
@@ -129,11 +135,12 @@ it('checks the API returns knowledge base articles', function () {
 });
 
 it('checks the API returns tasks', function () {
-    withoutMiddleware(CheckOlympusKey::class);
-
     $randomRecords = random_int(1, 10);
 
     Task::factory()->count($randomRecords)->create();
+
+    $softDeleteTask = Task::factory()->create();
+    $softDeleteTask->delete();
 
     $response = get('/api/utilization-metrics');
 
