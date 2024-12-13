@@ -34,43 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase\Filament\Resources;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
-use Filament\Resources\Resource;
-use App\Filament\Clusters\KnowledgeManagement;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\Pages\EditKnowledgeBaseCategory;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\Pages\ViewKnowledgeBaseCategory;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\Pages\CreateKnowledgeBaseCategory;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\Pages\ListKnowledgeBaseCategories;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\RelationManagers\SubCategoriesRelationManager;
-
-class KnowledgeBaseCategoryResource extends Resource
-{
-    protected static ?string $model = KnowledgeBaseCategory::class;
-
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
-    protected static ?string $navigationLabel = 'Categories';
-
-    protected static ?int $navigationSort = 1;
-
-    protected static ?string $cluster = KnowledgeManagement::class;
-
-    public static function getPages(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            'index' => ListKnowledgeBaseCategories::route('/'),
-            'create' => CreateKnowledgeBaseCategory::route('/create'),
-            'view' => ViewKnowledgeBaseCategory::route('/{record}'),
-            'edit' => EditKnowledgeBaseCategory::route('/{record}/edit'),
-        ];
+        Schema::table('knowledge_base_categories', function (Blueprint $table) {
+            $table->foreignUuid('parent_id')->nullable()->constrained('knowledge_base_categories');
+        });
     }
 
-    public static function getRelations(): array
+    public function down(): void
     {
-        return [
-            SubCategoriesRelationManager::class,
-        ];
+        Schema::table('knowledge_base_categories', function (Blueprint $table) {
+            $table->dropConstrainedForeignId('parent_id');
+        });
     }
-}
+};

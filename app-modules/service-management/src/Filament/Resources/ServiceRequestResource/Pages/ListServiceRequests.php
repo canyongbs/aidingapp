@@ -93,6 +93,10 @@ class ListServiceRequests extends ListRecords
                     ->searchable(['service_request_number', 'title'])
                     ->sortable()
                     ->description(fn (ServiceRequest $record): string => $record->title),
+                TextColumn::make('status.name')
+                    ->label('Status')
+                    ->sortable()
+                    ->toggleable(),
                 TextColumn::make('respondent.display_name')
                     ->label('Related To')
                     ->getStateUsing(fn (ServiceRequest $record) => $record->respondent->{$record->respondent::displayNameKey()})
