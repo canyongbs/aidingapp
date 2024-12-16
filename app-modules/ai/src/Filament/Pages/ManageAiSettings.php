@@ -40,7 +40,6 @@ use App\Models\User;
 use Filament\Forms\Form;
 use App\Models\Authenticatable;
 use Filament\Pages\SettingsPage;
-use App\Features\AiSettingsFeature;
 use AidingApp\Ai\Settings\AiSettings;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
@@ -65,7 +64,7 @@ class ManageAiSettings extends SettingsPage
         /** @var User $user */
         $user = auth()->user();
 
-        return AiSettingsFeature::active() && $user->hasRole(Authenticatable::SUPER_ADMIN_ROLE);
+        return $user->hasRole(Authenticatable::SUPER_ADMIN_ROLE);
     }
 
     public function form(Form $form): Form

@@ -45,7 +45,6 @@ use Filament\Tables\Columns\TextColumn;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
-use App\Features\KnowledgeBaseSubcategory;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource;
@@ -58,7 +57,7 @@ class ListKnowledgeBaseCategories extends ListRecords
     {
         return $table
             ->modifyQueryUsing(
-                fn (Builder $query) => $query->when(KnowledgeBaseSubcategory::active(), fn (Builder $query) => $query->doesntHave('parentCategory'))
+                fn (Builder $query) => $query->doesntHave('parentCategory')
             )
             ->columns([
                 IdColumn::make(),
