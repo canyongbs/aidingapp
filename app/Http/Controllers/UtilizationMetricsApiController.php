@@ -34,19 +34,38 @@
 </COPYRIGHT>
 */
 
-use Illuminate\Support\Facades\Route;
-use App\Multitenancy\Http\Middleware\CheckOlympusKey;
-use App\Http\Controllers\SetAzureSsoSettingController;
-use App\Http\Controllers\UtilizationMetricsApiController;
+namespace App\Http\Controllers;
 
-Route::group(['prefix' => 'v1', 'as' => 'api.', 'middleware' => ['auth:sanctum']], function () {});
+use Exception;
+use App\Models\User;
+use Illuminate\Http\Request;
+use AidingApp\Task\Models\Task;
+use Illuminate\Http\JsonResponse;
+use AidingApp\InventoryManagement\Models\Asset;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use AidingApp\ServiceManagement\Models\ChangeRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 
-Route::middleware([
-    CheckOlympusKey::class,
-])->group(function () {
-    Route::post('/azure-sso/update', SetAzureSsoSettingController::class)
-        ->name('azure-sso.update');
+class UtilizationMetricsApiController extends Controller
+{
+    public function __invoke(Request $request): JsonResponse
+    {
+        try {
+            return response()->json([
+                'data' => [
+                    'users' => User::count(),
+                    'service_requests' => ServiceRequest::count(),
+                    'assets' => Asset::count(),
+                    'changes' => ChangeRequest::count(),
+                    'knowledge_base_articles' => KnowledgeBaseItem::count(),
+                    'tasks' => Task::count(),
+                ],
+            ], 200);
+        } catch (Exception $e) {
+            report($e);
 
-    Route::get('/utilization-metrics', UtilizationMetricsApiController::class)
-        ->name('utilization-metrics');
-});
+            return response()->json([
+            ], 500);
+        }
+    }
+}
