@@ -37,8 +37,8 @@
     import AppLoading from '../Components/AppLoading.vue';
     import Badge from '../Components/Badge.vue';
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
-    import { consumer } from '../Services/Consumer.js';
     import Pagination from '../Components/Pagination.vue';
+    import { consumer } from '../Services/Consumer.js';
 
     const route = useRoute();
 
@@ -102,7 +102,7 @@
 
         const { get } = consumer();
 
-        get(props.apiUrl + '/service-request/' + route.params.serviceRequestId , { page: page }).then((response) => {
+        get(props.apiUrl + '/service-request/' + route.params.serviceRequestId, { page: page }).then((response) => {
             serviceRequest.value = response.data.serviceRequestDetails;
             serviceRequestUpdates.value = response.data.serviceRequestUpdates.data || [];
             directionEnums.value = response.data.directionEnums || [];
