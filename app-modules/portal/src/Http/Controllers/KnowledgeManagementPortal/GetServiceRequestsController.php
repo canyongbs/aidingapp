@@ -117,8 +117,8 @@ class GetServiceRequestsController extends Controller
                 ->serviceRequestUpdates()
                 ->latest('created_at')
                 ->where('internal', false)
-                ->get()
-                ->map(function (ServiceRequestUpdate $serviceRequestUpdate) {
+                ->paginate(3) // Adjust the number 10 to control items per page
+                ->through(function (ServiceRequestUpdate $serviceRequestUpdate) {
                     return [
                         'id' => $serviceRequestUpdate->getKey(),
                         'update' => $serviceRequestUpdate->update,

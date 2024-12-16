@@ -38,6 +38,7 @@
     import Badge from '../Components/Badge.vue';
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import { consumer } from '../Services/Consumer.js';
+    import Pagination from '../Components/Pagination.vue';
 
     const route = useRoute();
 
@@ -67,6 +68,24 @@
     const updateMessage = ref('');
     const validationErrors = ref({});
     const authorizationError = ref(null);
+    const currentPage = ref(1);
+    const nextPageUrl = ref(null);
+    const prevPageUrl = ref(null);
+    const lastPage = ref(null);
+    const totalRecords = ref(0);
+    const fromRecord = ref(0);
+    const toRecord = ref(0);
+
+    const setPagination = (pagination) => {
+        console.log(pagination, 'paginationpagination');
+        currentPage.value = pagination.current_page;
+        prevPageUrl.value = pagination.prev_page_url;
+        nextPageUrl.value = pagination.next_page_url;
+        lastPage.value = pagination.last_page;
+        totalRecords.value = pagination.total;
+        fromRecord.value = pagination.from;
+        toRecord.value = pagination.to;
+    };
 
     watch(
         route.params.serviceRequestId,
@@ -78,16 +97,17 @@
         },
     );
 
-    function getData() {
+    function getData(page = 1) {
         loadingResults.value = true;
 
         const { get } = consumer();
 
-        get(props.apiUrl + '/service-request/' + route.params.serviceRequestId).then((response) => {
+        get(props.apiUrl + '/service-request/' + route.params.serviceRequestId , { page: page }).then((response) => {
             serviceRequest.value = response.data.serviceRequestDetails;
-            serviceRequestUpdates.value = response.data.serviceRequestUpdates || [];
+            serviceRequestUpdates.value = response.data.serviceRequestUpdates.data || [];
             directionEnums.value = response.data.directionEnums || [];
             loadingResults.value = false;
+            setPagination(response.data.serviceRequestUpdates);
         });
     }
     async function submitUpdate() {
@@ -117,6 +137,21 @@
             loadingResults.value = false;
         }
     }
+
+    const fetchNextPage = () => {
+        currentPage.value = currentPage.value !== lastPage.value ? currentPage.value + 1 : lastPage.value;
+        getData(currentPage.value);
+    };
+
+    const fetchPreviousPage = () => {
+        currentPage.value = currentPage.value !== 1 ? currentPage.value - 1 : 1;
+        getData(currentPage.value);
+    };
+
+    const fetchPage = (page) => {
+        currentPage.value = page;
+        getData(currentPage.value);
+    };
 </script>
 
 <template>
@@ -251,7 +286,16 @@
                                                     {{ serviceRequestUpdate.created_at }}
                                                 </span>
                                             </div>
-
+                                            <Pagination
+                                                :currentPage="currentPage"
+                                                :lastPage="lastPage"
+                                                :fromArticle="fromRecord"
+                                                :toArticle="toRecord"
+                                                :totalArticles="totalRecords"
+                                                @fetchNextPage="fetchNextPage"
+                                                @fetchPreviousPage="fetchPreviousPage"
+                                                @fetchPage="fetchPage"
+                                            />
                                             <!-- More updates can be added here -->
                                         </div>
                                     </div>
