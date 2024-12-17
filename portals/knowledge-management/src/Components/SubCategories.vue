@@ -76,7 +76,9 @@
 
                     <div class="w-full mt-8">
                         <h3 class="text-base font-semibold leading-6 text-gray-900">
-                            <router-link :to="{ name: 'view-subcategory', params: { subCategorySlug: subCategory.slug } }">
+                            <router-link
+                                :to="{ name: 'view-subcategory', params: { subCategorySlug: subCategory.slug } }"
+                            >
                                 <span class="absolute inset-0" aria-hidden="true" />
                                 {{ subCategory.name }}
                             </router-link>
