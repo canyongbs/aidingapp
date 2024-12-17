@@ -164,7 +164,7 @@ test('can filter service request by organization', function () {
 
     livewire(ListServiceRequests::class)
         ->assertCanSeeTableRecords($serviceRequestsInOrganization->merge($serviceRequestsNotInOrganization))
-        ->filterTable('organizations', $organization->id)
+        ->filterTable('organization', $organization->id)
         ->assertCanSeeTableRecords(
             $serviceRequestsInOrganization
         )
