@@ -74,7 +74,7 @@ class KnowledgeManagementPortalCategoryController extends Controller
                 'description' => $category->description,
                 'parent_id' => $category->parent_id,
             ]),
-            'parentCategory' => $category?->parentCategory,
+            'parentCategory' => $category->parentCategory,
             'subCategories' => $category
                 ->subCategories()
                 ->get()

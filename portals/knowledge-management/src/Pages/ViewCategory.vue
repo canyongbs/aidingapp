@@ -85,7 +85,7 @@
     const toArticle = ref(0);
     const filter = ref('');
     const fromSearch = ref(false);
-    const parentCategory = ref({});
+    const parentCategory = ref(null);
 
     const debounceSearch = debounce((value, page = 1) => {
         const { post } = consumer();
@@ -179,22 +179,15 @@
         debounceSearch(searchQuery.value);
     };
 
-    if(parentCategory.value){
-        console.log('xx');
-    }
+    const breadcrumbs = computed(() => {
+        if (parentCategory.value) {
+            return [
+                { name: parentCategory.value.name, route: 'view-category', params: { categorySlug: parentCategory.value.slug } },
+            ];
+        }
 
-
-    // const breadcrumbs = computed(() => {
-    //     if (parentCategory.value) {
-    //         return [
-    //             { name: parentCategory.name, route: 'view-subcategory', params: { subCategorySlug: parentCategory.slug } },
-    //         ];
-    //     }
-
-    //     return [{name :'Ankit', slug:'default'}];
-    // });
-
-    // console.log('bred',breadcrumbs);
+        return [];
+    });
 
     watch(
         route,
@@ -209,15 +202,17 @@
     );
 
     async function getData(page = 1) {
+        
         if (fromSearch.value) {
             debounceSearch(searchQuery.value, page);
             return;
         }
+
         loadingResults.value = true;
 
         const { get } = consumer();
         const slug = route.params.categorySlug ?? route.params.subCategorySlug;
-
+        
         await get(props.apiUrl + '/categories/' + slug, { page: page, filter: filter.value }).then(
             (response) => {
                 if (response.data.category.slug !== slug) {
