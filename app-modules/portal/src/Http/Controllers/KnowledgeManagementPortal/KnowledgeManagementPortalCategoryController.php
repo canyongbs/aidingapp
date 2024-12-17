@@ -72,7 +72,20 @@ class KnowledgeManagementPortalCategoryController extends Controller
                 'slug' => $category->slug,
                 'name' => $category->name,
                 'description' => $category->description,
+                'parent_id' => $category->parent_id,
             ]),
+            'parentCategory' => $category?->parentCategory,
+            'subCategories' => $category
+                ->subCategories()
+                ->get()
+                ->map(function (KnowledgeBaseCategory $subCategory) {
+                    return [
+                        'slug' => $subCategory->slug,
+                        'name' => $subCategory->name,
+                        'description' => $subCategory->description,
+                        'icon' => $subCategory->icon ? svg($subCategory->icon, 'h-6 w-6')->toHtml() : null,
+                    ];
+                }),
             'articles' => $category->knowledgeBaseItems()
                 ->with('tags')
                 ->public()
