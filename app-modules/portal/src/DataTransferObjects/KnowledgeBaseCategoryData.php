@@ -45,5 +45,6 @@ class KnowledgeBaseCategoryData extends Data
         public string $name,
         public ?string $description,
         public ?string $icon,
+        public ?string $parent_id,
     ) {}
 }
