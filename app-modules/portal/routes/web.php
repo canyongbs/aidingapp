@@ -71,6 +71,8 @@ Route::prefix('portal')
                 ->name('show');
             Route::get('/categories/{category}', RenderKnowledgeManagementPortal::class)
                 ->name('category.show');
+            Route::get('/subcategories/{subcategory}', RenderKnowledgeManagementPortal::class)
+                ->name('subcategory.show');
             Route::get('/categories/{category}/articles/{article}', RenderKnowledgeManagementPortal::class)
                 ->name('article.show');
             Route::get('/service-request-type/select', RenderKnowledgeManagementPortal::class)
