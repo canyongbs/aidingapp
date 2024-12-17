@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages;
 
 use Filament\Tables\Table;
+use Illuminate\Support\Str;
 use App\Models\Authenticatable;
 use Filament\Actions\CreateAction;
 use Filament\Tables\Filters\Filter;
@@ -92,7 +93,7 @@ class ListServiceRequests extends ListRecords
                     ->label('Service Request #')
                     ->searchable(['service_request_number', 'title'])
                     ->sortable()
-                    ->description(fn (ServiceRequest $record): string => $record->title),
+                    ->description(fn (ServiceRequest $record): string => Str::limit($record->title, 40)),
                 TextColumn::make('status.name')
                     ->label('Status')
                     ->sortable()
@@ -177,7 +178,7 @@ class ListServiceRequests extends ListRecords
                                 ->delete();
 
                             Notification::make()
-                                ->title('Deleted ' . $deletedRecordsCount . ' prompt types')
+                                ->title('Deleted ' . $deletedRecordsCount . ' service requests')
                                 ->body(($deletedRecordsCount < $records->count()) ? ($records->count() - $deletedRecordsCount) . ' service requests were not deleted because you\'re not an auditor or manager of it.' : null)
                                 ->success()
                                 ->send();

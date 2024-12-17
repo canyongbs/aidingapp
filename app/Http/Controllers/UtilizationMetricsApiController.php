@@ -34,37 +34,38 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\DataTransferObjects;
+namespace App\Http\Controllers;
 
-use Spatie\LaravelData\Data;
-use Spatie\LaravelData\Optional;
+use Exception;
+use App\Models\User;
+use Illuminate\Http\Request;
+use AidingApp\Task\Models\Task;
+use Illuminate\Http\JsonResponse;
+use AidingApp\InventoryManagement\Models\Asset;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use AidingApp\ServiceManagement\Models\ChangeRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 
-class ServiceRequestDataObject extends Data
+class UtilizationMetricsApiController extends Controller
 {
-    public function __construct(
-        public string|Optional $division_id,
-        public string|Optional $status_id,
-        public string $type_id,
-        public string|Optional $priority_id,
-        public string|Optional $title,
-        public string|Optional $close_details,
-        public string|Optional $res_details,
-        public string $respondent_type,
-        public string $respondent_id,
-    ) {}
-
-    public static function fromData(array $data): static
+    public function __invoke(Request $request): JsonResponse
     {
-        return new self(
-            division_id: $data['division_id'] ?? Optional::create(),
-            status_id: $data['status_id'] ?? Optional::create(),
-            type_id: $data['type_id'],
-            priority_id: $data['priority_id'] ?? Optional::create(),
-            title: $data['title'] ?? Optional::create(),
-            close_details: $data['close_details'] ?? Optional::create(),
-            res_details: $data['res_details'] ?? Optional::create(),
-            respondent_type: $data['respondent_type'],
-            respondent_id: $data['respondent_id'],
-        );
+        try {
+            return response()->json([
+                'data' => [
+                    'users' => User::count(),
+                    'service_requests' => ServiceRequest::count(),
+                    'assets' => Asset::count(),
+                    'changes' => ChangeRequest::count(),
+                    'knowledge_base_articles' => KnowledgeBaseItem::count(),
+                    'tasks' => Task::count(),
+                ],
+            ], 200);
+        } catch (Exception $e) {
+            report($e);
+
+            return response()->json([
+            ], 500);
+        }
     }
 }
