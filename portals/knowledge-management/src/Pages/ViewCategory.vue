@@ -43,8 +43,8 @@
     import FilterComponent from '../Components/FilterComponent.vue';
     import Pagination from '../Components/Pagination.vue';
     import SearchResults from '../Components/SearchResults.vue';
-    import { consumer } from '../Services/Consumer.js';
     import SubCategories from '../Components/SubCategories.vue';
+    import { consumer } from '../Services/Consumer.js';
 
     const route = useRoute();
     const router = useRouter();
@@ -182,7 +182,11 @@
     const breadcrumbs = computed(() => {
         if (parentCategory.value) {
             return [
-                { name: parentCategory.value.name, route: 'view-category', params: { categorySlug: parentCategory.value.slug } },
+                {
+                    name: parentCategory.value.name,
+                    route: 'view-category',
+                    params: { categorySlug: parentCategory.value.slug },
+                },
             ];
         }
 
@@ -202,7 +206,6 @@
     );
 
     async function getData(page = 1) {
-        
         if (fromSearch.value) {
             debounceSearch(searchQuery.value, page);
             return;
@@ -212,28 +215,27 @@
 
         const { get } = consumer();
         const slug = route.params.categorySlug ?? route.params.subCategorySlug;
-        
-        await get(props.apiUrl + '/categories/' + slug, { page: page, filter: filter.value }).then(
-            (response) => {
-                if (response.data.category.slug !== slug) {
-                    if(route.params.categorySlug) {
-                        router.replace({ name: 'view-category', params: { categorySlug: response.data.category.slug } });
-                    } else{
-                        router.replace({ name: 'view-subcategory', params: { subCategorySlug: response.data.category.slug } });
-                    }
+
+        await get(props.apiUrl + '/categories/' + slug, { page: page, filter: filter.value }).then((response) => {
+            if (response.data.category.slug !== slug) {
+                if (route.params.categorySlug) {
+                    router.replace({ name: 'view-category', params: { categorySlug: response.data.category.slug } });
+                } else {
+                    router.replace({
+                        name: 'view-subcategory',
+                        params: { subCategorySlug: response.data.category.slug },
+                    });
                 }
+            }
 
-                category.value = response.data.category;
-                subCategories.value = response.data.subCategories;
-                parentCategory.value = response.data.parentCategory;
-                articles.value = response.data.articles.data;
-                setPagination(response.data.articles);
-                loadingResults.value = false;
-            },
-        );
+            category.value = response.data.category;
+            subCategories.value = response.data.subCategories;
+            parentCategory.value = response.data.parentCategory;
+            articles.value = response.data.articles.data;
+            setPagination(response.data.articles);
+            loadingResults.value = false;
+        });
     }
-
-   
 </script>
 
 <template>
@@ -313,7 +315,10 @@
                                 <h2 class="text-2xl font-bold text-primary-950">
                                     {{ category.name }}
                                 </h2>
-                                <SubCategories v-if="subCategories.length > 0" :subCategories="subCategories"></SubCategories>
+                                <SubCategories
+                                    v-if="subCategories.length > 0"
+                                    :subCategories="subCategories"
+                                ></SubCategories>
                                 <filter-component
                                     @change-filter="changeFilter"
                                     :selected-filter="filter"
