@@ -57,7 +57,7 @@ class StoreServiceRequestUpdateController extends Controller
         $serviceRequest = ServiceRequest::findOrFail($request->serviceRequestId);
 
         $serviceRequestUpdates = $serviceRequest
-            ->serviceRequestUpdates() // Call the relationship method on the instance
+            ->serviceRequestUpdates()
             ->latest('created_at')
             ->where('internal', false)
             ->paginate(10)
