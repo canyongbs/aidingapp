@@ -77,7 +77,6 @@
     const toRecord = ref(0);
 
     const setPagination = (pagination) => {
-        console.log(pagination, 'paginationpagination');
         currentPage.value = pagination.current_page;
         prevPageUrl.value = pagination.prev_page_url;
         nextPageUrl.value = pagination.next_page_url;
@@ -111,17 +110,14 @@
         });
     }
     async function submitUpdate() {
-        loadingResults.value = true;
-
         try {
             const { post } = consumer();
             const response = await post(props.apiUrl + '/service-request-update/store', {
                 description: updateMessage.value,
                 serviceRequestId: route.params.serviceRequestId,
             });
-
-            // Add the new update to the list
-            getData();
+            serviceRequestUpdates.value = response.data.serviceRequestUpdates.data || [];
+            setPagination(response.data.serviceRequestUpdates);
             updateMessage.value = ''; // Clear the textarea
         } catch (error) {
             if (error.response && error.response.status === 422) {
@@ -133,8 +129,6 @@
             } else {
                 console.error('Error creating update:', error);
             }
-        } finally {
-            loadingResults.value = false;
         }
     }
 
