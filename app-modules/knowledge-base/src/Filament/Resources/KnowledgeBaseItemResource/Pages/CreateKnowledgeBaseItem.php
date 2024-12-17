@@ -110,7 +110,11 @@ class CreateKnowledgeBaseItem extends CreateRecord
                             ->exists((new KnowledgeBaseStatus())->getTable(), (new KnowledgeBaseStatus())->getKeyName()),
                         Select::make('category_id')
                             ->label('Category')
-                            ->relationship('category', 'name')
+                            ->relationship(
+                                'category',
+                                'name',
+                                modifyQueryUsing: fn (Builder $query) => $query->where('parent_id', null)
+                            )
                             ->searchable()
                             ->preload()
                             ->exists((new KnowledgeBaseCategory())->getTable(), (new KnowledgeBaseCategory())->getKeyName()),

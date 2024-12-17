@@ -50,6 +50,7 @@ class KnowledgeManagementPortalCategoryController extends Controller
         return response()->json(
             KnowledgeBaseCategoryData::collection(
                 KnowledgeBaseCategory::query()
+                    ->where('parent_id', null)
                     ->orderBy('name')
                     ->get()
                     ->map(function (KnowledgeBaseCategory $category) {
