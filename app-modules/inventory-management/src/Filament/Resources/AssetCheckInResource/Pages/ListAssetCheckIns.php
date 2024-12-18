@@ -36,15 +36,15 @@
 
 namespace AidingApp\InventoryManagement\Filament\Resources\AssetCheckInResource\Pages;
 
-use Filament\Tables\Table;
-use Filament\Tables\Actions\ViewAction;
-use Filament\Tables\Columns\TextColumn;
+use AidingApp\InventoryManagement\Enums\AssetCheckOutStatus;
+use AidingApp\InventoryManagement\Filament\Resources\AssetCheckInResource;
+use AidingApp\InventoryManagement\Filament\Resources\AssetResource;
+use AidingApp\InventoryManagement\Models\AssetCheckIn;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Resources\Pages\ListRecords;
-use AidingApp\InventoryManagement\Models\AssetCheckIn;
-use AidingApp\InventoryManagement\Enums\AssetCheckOutStatus;
-use AidingApp\InventoryManagement\Filament\Resources\AssetResource;
-use AidingApp\InventoryManagement\Filament\Resources\AssetCheckInResource;
+use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 
 class ListAssetCheckIns extends ListRecords
 {

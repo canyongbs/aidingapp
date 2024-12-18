@@ -36,19 +36,19 @@
 
 namespace AidingApp\Contact\Providers;
 
-use Filament\Panel;
-use App\Concerns\ImplementsGraphQL;
 use AidingApp\Contact\ContactPlugin;
-use AidingApp\Contact\Models\Contact;
-use Illuminate\Support\ServiceProvider;
-use AidingApp\Contact\Models\Organization;
-use AidingApp\Contact\Models\ContactSource;
-use AidingApp\Contact\Models\ContactStatus;
-use AidingApp\Contact\Models\OrganizationType;
-use AidingApp\Contact\Models\OrganizationIndustry;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use AidingApp\Contact\Enums\ContactStatusColorOptions;
 use AidingApp\Contact\Enums\SystemContactClassification;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\ContactSource;
+use AidingApp\Contact\Models\ContactStatus;
+use AidingApp\Contact\Models\Organization;
+use AidingApp\Contact\Models\OrganizationIndustry;
+use AidingApp\Contact\Models\OrganizationType;
+use App\Concerns\ImplementsGraphQL;
+use Filament\Panel;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\ServiceProvider;
 
 class ContactServiceProvider extends ServiceProvider
 {

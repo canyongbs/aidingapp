@@ -36,13 +36,13 @@
 
 namespace AidingApp\Contact\Filament\Resources;
 
-use Filament\Resources\Resource;
-use App\Filament\Clusters\ContactManagement;
-use AidingApp\Contact\Models\OrganizationType;
-use AidingApp\Contact\Filament\Resources\OrganizationTypeResource\Pages\EditOrganizationType;
-use AidingApp\Contact\Filament\Resources\OrganizationTypeResource\Pages\ViewOrganizationType;
-use AidingApp\Contact\Filament\Resources\OrganizationTypeResource\Pages\ListOrganizationTypes;
 use AidingApp\Contact\Filament\Resources\OrganizationTypeResource\Pages\CreateOrganizationType;
+use AidingApp\Contact\Filament\Resources\OrganizationTypeResource\Pages\EditOrganizationType;
+use AidingApp\Contact\Filament\Resources\OrganizationTypeResource\Pages\ListOrganizationTypes;
+use AidingApp\Contact\Filament\Resources\OrganizationTypeResource\Pages\ViewOrganizationType;
+use AidingApp\Contact\Models\OrganizationType;
+use App\Filament\Clusters\ContactManagement;
+use Filament\Resources\Resource;
 
 class OrganizationTypeResource extends Resource
 {

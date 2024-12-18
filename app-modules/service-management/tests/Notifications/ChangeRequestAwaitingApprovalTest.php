@@ -1,10 +1,10 @@
 <?php
 
-use App\Models\User;
-use Illuminate\Support\Facades\Notification;
 use AidingApp\ServiceManagement\Models\ChangeRequest;
 use AidingApp\ServiceManagement\Models\ChangeRequestType;
 use AidingApp\ServiceManagement\Notifications\ChangeRequestAwaitingApprovalNotification;
+use App\Models\User;
+use Illuminate\Support\Facades\Notification;
 
 /*
 <COPYRIGHT>

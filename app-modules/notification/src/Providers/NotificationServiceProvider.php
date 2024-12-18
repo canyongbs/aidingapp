@@ -36,22 +36,22 @@
 
 namespace AidingApp\Notification\Providers;
 
-use App\Concerns\ImplementsGraphQL;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Support\ServiceProvider;
-use AidingApp\Notification\Models\Subscription;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Notifications\Events\NotificationSent;
 use AidingApp\Notification\Events\SubscriptionCreated;
 use AidingApp\Notification\Events\SubscriptionDeleted;
-use AidingApp\Notification\Models\OutboundDeliverable;
-use Illuminate\Notifications\Events\NotificationFailed;
 use AidingApp\Notification\Events\TriggeredAutoSubscription;
 use AidingApp\Notification\Listeners\CreateAutoSubscription;
-use AidingApp\Notification\Listeners\HandleNotificationSent;
 use AidingApp\Notification\Listeners\HandleNotificationFailed;
+use AidingApp\Notification\Listeners\HandleNotificationSent;
 use AidingApp\Notification\Listeners\NotifyUserOfSubscriptionCreated;
 use AidingApp\Notification\Listeners\NotifyUserOfSubscriptionDeleted;
+use AidingApp\Notification\Models\OutboundDeliverable;
+use AidingApp\Notification\Models\Subscription;
+use App\Concerns\ImplementsGraphQL;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Notifications\Events\NotificationFailed;
+use Illuminate\Notifications\Events\NotificationSent;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\ServiceProvider;
 
 class NotificationServiceProvider extends ServiceProvider
 {

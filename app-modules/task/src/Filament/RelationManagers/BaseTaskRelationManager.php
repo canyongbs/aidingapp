@@ -36,30 +36,30 @@
 
 namespace AidingApp\Task\Filament\RelationManagers;
 
-use Filament\Forms\Form;
-use Filament\Tables\Table;
-use AidingApp\Task\Models\Task;
-use App\Models\Scopes\HasLicense;
-use Filament\Tables\Filters\Filter;
-use AidingApp\Task\Enums\TaskStatus;
+use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
-use Filament\Forms\Components\Select;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Columns\TextColumn;
-use Illuminate\Database\Eloquent\Model;
+use AidingApp\Task\Enums\TaskStatus;
+use AidingApp\Task\Filament\Resources\TaskResource\Components\TaskViewAction;
+use AidingApp\Task\Models\Task;
 use App\Filament\Resources\UserResource;
-use Filament\Forms\Components\TextInput;
 use App\Filament\Tables\Columns\IdColumn;
+use App\Models\Scopes\HasLicense;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
+use Filament\Resources\Pages\ManageRelatedRecords;
+use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\CreateAction;
 use Filament\Tables\Actions\DetachAction;
-use Filament\Tables\Filters\SelectFilter;
-use Illuminate\Database\Eloquent\Builder;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Forms\Components\DateTimePicker;
 use Filament\Tables\Actions\DetachBulkAction;
-use Filament\Resources\Pages\ManageRelatedRecords;
-use AidingApp\Contact\Filament\Resources\ContactResource;
-use AidingApp\Task\Filament\Resources\TaskResource\Components\TaskViewAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
 abstract class BaseTaskRelationManager extends ManageRelatedRecords
 {

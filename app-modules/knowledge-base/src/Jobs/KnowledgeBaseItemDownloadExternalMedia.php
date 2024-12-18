@@ -36,18 +36,18 @@
 
 namespace AidingApp\KnowledgeBase\Jobs;
 
-use Exception;
-use Illuminate\Support\Str;
-use Illuminate\Bus\Queueable;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Exceptions\KnowledgeBaseExternalMediaFileAccessException;
 use AidingApp\KnowledgeBase\Exceptions\KnowledgeBaseExternalMediaValidationException;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use Exception;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class KnowledgeBaseItemDownloadExternalMedia implements ShouldQueue
 {

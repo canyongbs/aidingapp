@@ -36,16 +36,16 @@
 
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
-use App\Settings\LicenseSettings;
-use Illuminate\Http\JsonResponse;
-use Filament\Support\Colors\Color;
-use App\Http\Controllers\Controller;
-use Filament\Support\Colors\ColorManager;
-use AidingApp\Portal\Settings\PortalSettings;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\Portal\DataTransferObjects\ServiceRequestData;
-use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use AidingApp\Portal\Settings\PortalSettings;
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateDirection;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use App\Http\Controllers\Controller;
+use App\Settings\LicenseSettings;
+use Filament\Support\Colors\Color;
+use Filament\Support\Colors\ColorManager;
+use Illuminate\Http\JsonResponse;
 
 class GetServiceRequestsController extends Controller
 {

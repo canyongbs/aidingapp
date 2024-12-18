@@ -36,19 +36,19 @@
 
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\URL;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Hash;
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Portal\Enums\PortalType;
 use AidingApp\Contact\Models\Organization;
-use App\Actions\ResolveEducatableFromEmail;
-use Illuminate\Support\Facades\Notification;
-use Illuminate\Validation\ValidationException;
+use AidingApp\Portal\Enums\PortalType;
+use AidingApp\Portal\Http\Requests\KnowledgeManagementPortalAuthenticationRequest;
 use AidingApp\Portal\Models\PortalAuthentication;
 use AidingApp\Portal\Notifications\AuthenticatePortalNotification;
-use AidingApp\Portal\Http\Requests\KnowledgeManagementPortalAuthenticationRequest;
+use App\Actions\ResolveEducatableFromEmail;
+use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Validation\ValidationException;
 
 class KnowledgeManagementPortalRequestAuthenticationController extends Controller
 {

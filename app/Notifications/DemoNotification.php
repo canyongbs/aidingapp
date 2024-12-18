@@ -36,12 +36,12 @@
 
 namespace App\Notifications;
 
-use App\Models\User;
-use App\Models\NotificationSetting;
 use AidingApp\Notification\Notifications\BaseNotification;
+use AidingApp\Notification\Notifications\Concerns\EmailChannelTrait;
 use AidingApp\Notification\Notifications\EmailNotification;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
-use AidingApp\Notification\Notifications\Concerns\EmailChannelTrait;
+use App\Models\NotificationSetting;
+use App\Models\User;
 
 class DemoNotification extends BaseNotification implements EmailNotification
 {

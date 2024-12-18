@@ -36,11 +36,11 @@
 
 namespace AidingApp\ServiceManagement\Rules;
 
-use Closure;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Models\Authenticatable;
+use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Translation\PotentiallyTranslatedString;
-use AidingApp\ServiceManagement\Models\ServiceRequestType;
 
 class ManagedServiceRequestType implements ValidationRule
 {

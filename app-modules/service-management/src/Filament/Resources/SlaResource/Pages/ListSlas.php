@@ -36,14 +36,14 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\SlaResource\Pages;
 
-use Filament\Tables\Table;
+use AidingApp\ServiceManagement\Filament\Resources\SlaResource;
+use App\Filament\Tables\Columns\OpenSearch\TextColumn;
 use Filament\Actions\CreateAction;
-use Filament\Tables\Actions\EditAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
-use App\Filament\Tables\Columns\OpenSearch\TextColumn;
-use AidingApp\ServiceManagement\Filament\Resources\SlaResource;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Table;
 
 class ListSlas extends ListRecords
 {

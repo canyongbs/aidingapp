@@ -36,13 +36,13 @@
 
 namespace AidingApp\Engagement\Filament\Resources\EmailTemplateResource\Pages;
 
-use Filament\Forms\Form;
+use AidingApp\Engagement\Filament\Resources\EmailTemplateResource;
 use Filament\Actions\DeleteAction;
-use FilamentTiptapEditor\TiptapEditor;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
 use Filament\Resources\Pages\EditRecord;
-use AidingApp\Engagement\Filament\Resources\EmailTemplateResource;
+use FilamentTiptapEditor\TiptapEditor;
 
 class EditEmailTemplate extends EditRecord
 {

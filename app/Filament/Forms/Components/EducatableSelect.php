@@ -36,15 +36,15 @@
 
 namespace App\Filament\Forms\Components;
 
-use Closure;
-use App\Models\Authenticatable;
 use AidingApp\Contact\Models\Contact;
-use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\Select;
+use App\Models\Authenticatable;
+use Closure;
 use Filament\Forms\Components\Component;
-use Filament\Forms\Components\MorphToSelect;
 use Filament\Forms\Components\Concerns\HasName;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\MorphToSelect;
 use Filament\Forms\Components\MorphToSelect\Type;
+use Filament\Forms\Components\Select;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class EducatableSelect extends Component

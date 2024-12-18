@@ -34,20 +34,17 @@
 </COPYRIGHT>
 */
 
-use App\Models\User;
-
-use function Tests\asSuperAdmin;
-use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
-
+use AidingApp\Contact\Filament\Resources\ContactSourceResource;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactSource;
-
-use function Pest\Laravel\assertDatabaseHas;
-use function PHPUnit\Framework\assertEquals;
-
-use AidingApp\Contact\Filament\Resources\ContactSourceResource;
 use AidingApp\Contact\Tests\ContactSource\RequestFactories\EditContactSourceRequestFactory;
+use App\Models\User;
+
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Livewire\livewire;
+use function PHPUnit\Framework\assertEquals;
+use function Tests\asSuperAdmin;
 
 test('A successful action on the EditContactSource page', function () {
     $contactSource = ContactSource::factory()->create();

@@ -36,12 +36,12 @@
 
 namespace AidingApp\InventoryManagement\Filament\Resources\AssetStatusResource\Pages;
 
+use AidingApp\InventoryManagement\Filament\Resources\AssetStatusResource;
 use Filament\Actions\EditAction;
-use Filament\Infolists\Infolist;
-use Filament\Resources\Pages\ViewRecord;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
-use AidingApp\InventoryManagement\Filament\Resources\AssetStatusResource;
+use Filament\Infolists\Infolist;
+use Filament\Resources\Pages\ViewRecord;
 
 class ViewAssetStatus extends ViewRecord
 {

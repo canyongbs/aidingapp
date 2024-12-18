@@ -36,18 +36,18 @@
 
 namespace AidingApp\InventoryManagement\Providers;
 
-use Filament\Panel;
-use Illuminate\Support\ServiceProvider;
+use AidingApp\InventoryManagement\InventoryManagementPlugin;
 use AidingApp\InventoryManagement\Models\Asset;
-use AidingApp\InventoryManagement\Models\AssetType;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use AidingApp\InventoryManagement\Models\AssetStatus;
 use AidingApp\InventoryManagement\Models\AssetCheckIn;
 use AidingApp\InventoryManagement\Models\AssetCheckOut;
 use AidingApp\InventoryManagement\Models\AssetLocation;
-use AidingApp\InventoryManagement\InventoryManagementPlugin;
+use AidingApp\InventoryManagement\Models\AssetStatus;
+use AidingApp\InventoryManagement\Models\AssetType;
 use AidingApp\InventoryManagement\Models\MaintenanceActivity;
 use AidingApp\InventoryManagement\Models\MaintenanceProvider;
+use Filament\Panel;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\ServiceProvider;
 
 class InventoryManagementServiceProvider extends ServiceProvider
 {

@@ -36,12 +36,12 @@
 
 namespace AidingApp\ServiceManagement\Observers;
 
-use Illuminate\Support\Facades\Notification;
+use AidingApp\ServiceManagement\Enums\SystemChangeRequestClassification;
 use AidingApp\ServiceManagement\Models\ChangeRequest;
 use AidingApp\ServiceManagement\Models\ChangeRequestStatus;
 use AidingApp\ServiceManagement\Models\Scopes\ClassifiedAs;
-use AidingApp\ServiceManagement\Enums\SystemChangeRequestClassification;
 use AidingApp\ServiceManagement\Notifications\ChangeRequestAwaitingApprovalNotification;
+use Illuminate\Support\Facades\Notification;
 
 class ChangeRequestObserver
 {

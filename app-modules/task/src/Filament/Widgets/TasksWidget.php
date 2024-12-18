@@ -36,14 +36,14 @@
 
 namespace AidingApp\Task\Filament\Widgets;
 
-use App\Models\User;
-use Filament\Tables\Table;
 use AidingApp\Task\Enums\TaskStatus;
-use Filament\Tables\Columns\TextColumn;
-use App\Filament\Tables\Columns\IdColumn;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Widgets\TableWidget as BaseWidget;
 use AidingApp\Task\Filament\Resources\TaskResource\Components\TaskViewAction;
+use App\Filament\Tables\Columns\IdColumn;
+use App\Models\User;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
+use Filament\Widgets\TableWidget as BaseWidget;
 
 abstract class TasksWidget extends BaseWidget
 {

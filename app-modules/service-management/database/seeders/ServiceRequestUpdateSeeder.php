@@ -36,9 +36,9 @@
 
 namespace AidingApp\ServiceManagement\Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use Illuminate\Database\Seeder;
 
 class ServiceRequestUpdateSeeder extends Seeder
 {

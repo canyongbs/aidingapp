@@ -34,12 +34,11 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Contact\Models\Contact;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
-
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Contact\Filament\Resources\ContactResource;
 
 // TODO: Write ViewContactSource page test
 //test('The correct details are displayed on the ViewContact page', function () {});

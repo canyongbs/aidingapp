@@ -36,20 +36,20 @@
 
 namespace AidingApp\Notification\Notifications\Channels;
 
-use Exception;
-use Twilio\Rest\Client;
-use App\Settings\LicenseSettings;
-use Illuminate\Support\Facades\DB;
-use Twilio\Exceptions\TwilioException;
-use AidingApp\Notification\Enums\NotificationChannel;
 use AidingApp\Engagement\Models\EngagementDeliverable;
-use AidingApp\Notification\Models\OutboundDeliverable;
-use AidingApp\Notification\Notifications\SmsNotification;
-use Talkroute\MessageSegmentCalculator\SegmentCalculator;
+use AidingApp\Notification\DataTransferObjects\NotificationResultData;
+use AidingApp\Notification\DataTransferObjects\SmsChannelResultData;
+use AidingApp\Notification\Enums\NotificationChannel;
 use AidingApp\Notification\Enums\NotificationDeliveryStatus;
 use AidingApp\Notification\Exceptions\NotificationQuotaExceeded;
-use AidingApp\Notification\DataTransferObjects\SmsChannelResultData;
-use AidingApp\Notification\DataTransferObjects\NotificationResultData;
+use AidingApp\Notification\Models\OutboundDeliverable;
+use AidingApp\Notification\Notifications\SmsNotification;
+use App\Settings\LicenseSettings;
+use Exception;
+use Illuminate\Support\Facades\DB;
+use Talkroute\MessageSegmentCalculator\SegmentCalculator;
+use Twilio\Exceptions\TwilioException;
+use Twilio\Rest\Client;
 
 class SmsChannel
 {

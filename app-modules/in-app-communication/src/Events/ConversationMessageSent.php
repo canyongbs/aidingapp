@@ -36,12 +36,12 @@
 
 namespace AidingApp\InAppCommunication\Events;
 
+use AidingApp\InAppCommunication\Models\TwilioConversation;
 use App\Models\User;
 use Carbon\CarbonInterface;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use AidingApp\InAppCommunication\Models\TwilioConversation;
+use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Queue\SerializesModels;
 
 class ConversationMessageSent
 {

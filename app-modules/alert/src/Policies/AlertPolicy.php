@@ -36,10 +36,10 @@
 
 namespace AidingApp\Alert\Policies;
 
-use App\Models\Authenticatable;
 use AidingApp\Alert\Models\Alert;
-use Illuminate\Auth\Access\Response;
 use AidingApp\Contact\Models\Contact;
+use App\Models\Authenticatable;
+use Illuminate\Auth\Access\Response;
 
 class AlertPolicy
 {

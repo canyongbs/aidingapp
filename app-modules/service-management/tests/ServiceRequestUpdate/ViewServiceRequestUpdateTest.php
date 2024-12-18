@@ -34,17 +34,14 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource;
+use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use App\Models\User;
-
-use function Tests\asSuperAdmin;
-
 use App\Settings\LicenseSettings;
 
 use function Pest\Laravel\actingAs;
-
-use AidingApp\Authorization\Enums\LicenseType;
-use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource;
+use function Tests\asSuperAdmin;
 
 test('The correct details are displayed on the ViewServiceRequestUpdate page', function () {
     $serviceRequestUpdate = ServiceRequestUpdate::factory()->create();

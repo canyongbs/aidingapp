@@ -36,10 +36,10 @@
 
 namespace AidingApp\Contact\Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use AidingApp\Contact\Models\ContactStatus;
 use AidingApp\Contact\Enums\ContactStatusColorOptions;
 use AidingApp\Contact\Enums\SystemContactClassification;
+use AidingApp\Contact\Models\ContactStatus;
+use Illuminate\Database\Seeder;
 
 class ContactStatusSeeder extends Seeder
 {

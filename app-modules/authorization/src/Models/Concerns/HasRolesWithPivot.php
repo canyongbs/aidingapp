@@ -36,10 +36,10 @@
 
 namespace AidingApp\Authorization\Models\Concerns;
 
-use Spatie\Permission\Traits\HasRoles;
-use Spatie\Permission\PermissionRegistrar;
 use App\Actions\Finders\ApplicationModules;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Spatie\Permission\PermissionRegistrar;
+use Spatie\Permission\Traits\HasRoles;
 
 trait HasRolesWithPivot
 {

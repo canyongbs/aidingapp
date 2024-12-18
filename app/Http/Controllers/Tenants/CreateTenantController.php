@@ -36,21 +36,21 @@
 
 namespace App\Http\Controllers\Tenants;
 
-use Illuminate\Http\JsonResponse;
-use App\Http\Controllers\Controller;
-use App\Multitenancy\Actions\CreateTenant;
-use App\Http\Requests\Tenants\CreateTenantRequest;
-use App\Multitenancy\DataTransferObjects\TenantUser;
-use App\Multitenancy\DataTransferObjects\TenantConfig;
+use App\DataTransferObjects\LicenseManagement\LicenseAddonsData;
 use App\DataTransferObjects\LicenseManagement\LicenseData;
+use App\DataTransferObjects\LicenseManagement\LicenseLimitsData;
+use App\DataTransferObjects\LicenseManagement\LicenseSubscriptionData;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Tenants\CreateTenantRequest;
+use App\Multitenancy\Actions\CreateTenant;
+use App\Multitenancy\DataTransferObjects\TenantConfig;
+use App\Multitenancy\DataTransferObjects\TenantDatabaseConfig;
 use App\Multitenancy\DataTransferObjects\TenantMailConfig;
 use App\Multitenancy\DataTransferObjects\TenantMailersConfig;
-use App\Multitenancy\DataTransferObjects\TenantDatabaseConfig;
-use App\DataTransferObjects\LicenseManagement\LicenseAddonsData;
-use App\DataTransferObjects\LicenseManagement\LicenseLimitsData;
-use App\Multitenancy\DataTransferObjects\TenantSmtpMailerConfig;
 use App\Multitenancy\DataTransferObjects\TenantS3FilesystemConfig;
-use App\DataTransferObjects\LicenseManagement\LicenseSubscriptionData;
+use App\Multitenancy\DataTransferObjects\TenantSmtpMailerConfig;
+use App\Multitenancy\DataTransferObjects\TenantUser;
+use Illuminate\Http\JsonResponse;
 
 class CreateTenantController extends Controller
 {

@@ -36,10 +36,10 @@
 
 namespace AidingApp\InventoryManagement\Filament\Resources\AssetCheckInResource\Pages;
 
-use Filament\Infolists\Infolist;
-use Filament\Resources\Pages\ViewRecord;
 use AidingApp\InventoryManagement\Filament\Resources\AssetCheckInResource;
 use AidingApp\InventoryManagement\Filament\Resources\AssetCheckInResource\Concerns\HasAssetCheckInInfolist;
+use Filament\Infolists\Infolist;
+use Filament\Resources\Pages\ViewRecord;
 
 class ViewAssetCheckIn extends ViewRecord
 {

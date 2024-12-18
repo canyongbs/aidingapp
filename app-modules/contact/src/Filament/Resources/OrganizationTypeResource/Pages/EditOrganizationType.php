@@ -36,15 +36,15 @@
 
 namespace AidingApp\Contact\Filament\Resources\OrganizationTypeResource\Pages;
 
-use Filament\Forms\Form;
-use Filament\Actions\ViewAction;
+use AidingApp\Contact\Filament\Resources\OrganizationTypeResource;
+use AidingApp\Contact\Models\OrganizationType;
 use Filament\Actions\DeleteAction;
-use Filament\Forms\Components\Toggle;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Form;
 use Filament\Resources\Pages\EditRecord;
-use AidingApp\Contact\Models\OrganizationType;
-use AidingApp\Contact\Filament\Resources\OrganizationTypeResource;
 
 class EditOrganizationType extends EditRecord
 {

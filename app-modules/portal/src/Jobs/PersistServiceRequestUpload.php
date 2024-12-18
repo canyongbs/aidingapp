@@ -36,14 +36,14 @@
 
 namespace AidingApp\Portal\Jobs;
 
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
+use Illuminate\Queue\SerializesModels;
 
 class PersistServiceRequestUpload implements ShouldQueue
 {

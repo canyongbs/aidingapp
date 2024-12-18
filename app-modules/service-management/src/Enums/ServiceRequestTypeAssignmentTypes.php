@@ -36,11 +36,11 @@
 
 namespace AidingApp\ServiceManagement\Enums;
 
-use Filament\Support\Contracts\HasLabel;
-use AidingApp\ServiceManagement\Services\ServiceRequestType\WorkloadAssigner;
 use AidingApp\ServiceManagement\Services\ServiceRequestType\IndividualAssigner;
 use AidingApp\ServiceManagement\Services\ServiceRequestType\RoundRobinAssigner;
 use AidingApp\ServiceManagement\Services\ServiceRequestType\ServiceRequestTypeAssigner;
+use AidingApp\ServiceManagement\Services\ServiceRequestType\WorkloadAssigner;
+use Filament\Support\Contracts\HasLabel;
 
 // TODO This might belong in a more generalized space so we can re-use this across modules
 enum ServiceRequestTypeAssignmentTypes: string implements HasLabel

@@ -36,9 +36,9 @@
 
 namespace AidingApp\Portal\Http\Routing;
 
-use Illuminate\Http\Request;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\Request;
 
 class CategoryShowMissingHandler
 {

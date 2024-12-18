@@ -36,9 +36,9 @@
 
 namespace AidingApp\IntegrationGoogleRecaptcha\Providers;
 
+use AidingApp\IntegrationGoogleRecaptcha\IntegrationGoogleRecaptchaPlugin;
 use Filament\Panel;
 use Illuminate\Support\ServiceProvider;
-use AidingApp\IntegrationGoogleRecaptcha\IntegrationGoogleRecaptchaPlugin;
 
 class IntegrationGoogleRecaptchaServiceProvider extends ServiceProvider
 {

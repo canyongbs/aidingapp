@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-use function Pest\Laravel\seed;
-
-use AidingApp\InventoryManagement\Models\Asset;
-use AidingApp\InventoryManagement\Models\MaintenanceActivity;
 use AidingApp\InventoryManagement\Database\Seeders\AssetStatusSeeder;
 use AidingApp\InventoryManagement\Enums\SystemAssetStatusClassification;
+use AidingApp\InventoryManagement\Models\Asset;
+use AidingApp\InventoryManagement\Models\MaintenanceActivity;
+
+use function Pest\Laravel\seed;
 
 beforeEach(function () {
     seed(AssetStatusSeeder::class);

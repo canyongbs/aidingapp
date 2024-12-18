@@ -36,9 +36,9 @@
 
 namespace AidingApp\Contact\Tests\ContactStatus\RequestFactories;
 
-use Worksome\RequestFactories\RequestFactory;
 use AidingApp\Contact\Enums\ContactStatusColorOptions;
 use AidingApp\Contact\Enums\SystemContactClassification;
+use Worksome\RequestFactories\RequestFactory;
 
 class EditContactStatusRequestFactory extends RequestFactory
 {

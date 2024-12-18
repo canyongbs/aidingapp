@@ -36,12 +36,12 @@
 
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
-use Illuminate\Http\JsonResponse;
-use App\Http\Controllers\Controller;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
-use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use AidingApp\Portal\Http\Requests\StoreServiceRequestUpdateRequest;
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateDirection;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
 
 class StoreServiceRequestUpdateController extends Controller
 {

@@ -36,13 +36,13 @@
 
 namespace AidingApp\Authorization;
 
-use Filament\Panel;
-use Livewire\Livewire;
-use Filament\Contracts\Plugin;
-use Filament\Navigation\MenuItem;
-use Livewire\Mechanisms\ComponentRegistry;
 use AidingApp\Authorization\Filament\Pages\Auth\SetPassword;
 use AidingApp\Authorization\Http\Middleware\RedirectIfPasswordNotSet;
+use Filament\Contracts\Plugin;
+use Filament\Navigation\MenuItem;
+use Filament\Panel;
+use Livewire\Livewire;
+use Livewire\Mechanisms\ComponentRegistry;
 
 class AuthorizationPlugin implements Plugin
 {

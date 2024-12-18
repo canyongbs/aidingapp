@@ -36,9 +36,9 @@
 
 namespace AidingApp\Engagement\Actions;
 
-use Illuminate\Support\Facades\Log;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Engagement\Actions\Contracts\EngagementResponseSenderFinder;
+use Illuminate\Support\Facades\Log;
 
 class FindEngagementResponseSender implements EngagementResponseSenderFinder
 {

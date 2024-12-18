@@ -36,10 +36,10 @@
 
 namespace AidingApp\Report\Filament\Widgets;
 
-use Filament\Support\Colors\Color;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Database\Eloquent\Collection;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use Filament\Support\Colors\Color;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Cache;
 
 class ServiceRequestStatusDistributionDonutChart extends ChartReportWidget
 {

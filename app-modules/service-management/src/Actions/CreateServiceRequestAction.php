@@ -36,9 +36,9 @@
 
 namespace AidingApp\ServiceManagement\Actions;
 
-use Illuminate\Support\Facades\DB;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\DataTransferObjects\ServiceRequestDataObject;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use Illuminate\Support\Facades\DB;
 
 class CreateServiceRequestAction
 {

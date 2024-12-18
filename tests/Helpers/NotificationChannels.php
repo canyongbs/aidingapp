@@ -36,9 +36,9 @@
 
 namespace Tests\Helpers;
 
+use AidingApp\Notification\Notifications\BaseNotification;
 use Closure;
 use Illuminate\Support\Facades\Notification;
-use AidingApp\Notification\Notifications\BaseNotification;
 
 function testItIsDispatchedToTheProperChannels(string $notification, array $deliveryChannels, Closure $triggerNotificationToNotifiable)
 {

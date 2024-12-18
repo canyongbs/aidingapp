@@ -36,15 +36,15 @@
 
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
-use Illuminate\Http\JsonResponse;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
+use AidingApp\Contact\Enums\SystemContactClassification;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactSource;
 use AidingApp\Contact\Models\ContactStatus;
-use AidingApp\Portal\Models\PortalAuthentication;
-use AidingApp\Contact\Enums\SystemContactClassification;
 use AidingApp\Portal\Http\Requests\KnowledgeManagementPortalRegisterRequest;
+use AidingApp\Portal\Models\PortalAuthentication;
+use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
 
 class KnowledgeManagementPortalRegisterController extends Controller
 {

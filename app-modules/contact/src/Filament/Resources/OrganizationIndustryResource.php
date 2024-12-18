@@ -36,13 +36,13 @@
 
 namespace AidingApp\Contact\Filament\Resources;
 
-use Filament\Resources\Resource;
-use App\Filament\Clusters\ContactManagement;
-use AidingApp\Contact\Models\OrganizationIndustry;
-use AidingApp\Contact\Filament\Resources\OrganizationIndustryResource\Pages\EditOrganizationIndustry;
-use AidingApp\Contact\Filament\Resources\OrganizationIndustryResource\Pages\ViewOrganizationIndustry;
 use AidingApp\Contact\Filament\Resources\OrganizationIndustryResource\Pages\CreateOrganizationIndustry;
+use AidingApp\Contact\Filament\Resources\OrganizationIndustryResource\Pages\EditOrganizationIndustry;
 use AidingApp\Contact\Filament\Resources\OrganizationIndustryResource\Pages\ListOrganizationIndustries;
+use AidingApp\Contact\Filament\Resources\OrganizationIndustryResource\Pages\ViewOrganizationIndustry;
+use AidingApp\Contact\Models\OrganizationIndustry;
+use App\Filament\Clusters\ContactManagement;
+use Filament\Resources\Resource;
 
 class OrganizationIndustryResource extends Resource
 {

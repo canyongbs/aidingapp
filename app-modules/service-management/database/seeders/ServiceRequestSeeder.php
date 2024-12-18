@@ -36,10 +36,10 @@
 
 namespace AidingApp\ServiceManagement\Database\Seeders;
 
-use App\Models\User;
-use Illuminate\Database\Seeder;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
+use App\Models\User;
+use Illuminate\Database\Seeder;
 
 class ServiceRequestSeeder extends Seeder
 {

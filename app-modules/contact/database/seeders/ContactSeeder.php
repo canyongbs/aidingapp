@@ -36,8 +36,8 @@
 
 namespace AidingApp\Contact\Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use AidingApp\Contact\Models\Contact;
+use Illuminate\Database\Seeder;
 
 class ContactSeeder extends Seeder
 {

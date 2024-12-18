@@ -36,11 +36,11 @@
 
 namespace AidingApp\Webhook\Filament\Resources;
 
-use Filament\Resources\Resource;
-use App\Filament\Clusters\GlobalSettings;
-use AidingApp\Webhook\Models\InboundWebhook;
-use AidingApp\Webhook\Filament\Resources\InboundWebhookResource\Pages\ViewInboundWebhook;
 use AidingApp\Webhook\Filament\Resources\InboundWebhookResource\Pages\ListInboundWebhooks;
+use AidingApp\Webhook\Filament\Resources\InboundWebhookResource\Pages\ViewInboundWebhook;
+use AidingApp\Webhook\Models\InboundWebhook;
+use App\Filament\Clusters\GlobalSettings;
+use Filament\Resources\Resource;
 
 class InboundWebhookResource extends Resource
 {

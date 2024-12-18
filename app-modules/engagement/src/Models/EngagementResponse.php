@@ -36,19 +36,19 @@
 
 namespace AidingApp\Engagement\Models;
 
-use App\Models\BaseModel;
-use Illuminate\Support\Collection;
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Timeline\Models\Timeline;
-use Illuminate\Database\Eloquent\Model;
-use OwenIt\Auditing\Contracts\Auditable;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Contracts\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Database\Eloquent\Relations\MorphOne;
-use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
-use AidingApp\Timeline\Timelines\EngagementResponseTimeline;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
+use AidingApp\Timeline\Models\Timeline;
+use AidingApp\Timeline\Timelines\EngagementResponseTimeline;
+use App\Models\BaseModel;
+use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Collection;
+use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * @mixin IdeHelperEngagementResponse

@@ -36,9 +36,9 @@
 
 namespace AidingApp\ServiceManagement\Models\Scopes;
 
-use Illuminate\Database\Eloquent\Builder;
 use AidingApp\ServiceManagement\Enums\SystemChangeRequestClassification;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
+use Illuminate\Database\Eloquent\Builder;
 
 class ClassifiedAs
 {

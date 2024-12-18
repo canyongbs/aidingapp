@@ -36,11 +36,11 @@
 
 namespace AidingApp\InventoryManagement\Filament\Resources\AssetResource\Pages;
 
-use AidingApp\Timeline\Filament\Pages\TimelinePage;
+use AidingApp\InventoryManagement\Filament\Resources\AssetResource;
 use AidingApp\InventoryManagement\Models\AssetCheckIn;
 use AidingApp\InventoryManagement\Models\AssetCheckOut;
 use AidingApp\InventoryManagement\Models\MaintenanceActivity;
-use AidingApp\InventoryManagement\Filament\Resources\AssetResource;
+use AidingApp\Timeline\Filament\Pages\TimelinePage;
 
 class AssetTimeline extends TimelinePage
 {

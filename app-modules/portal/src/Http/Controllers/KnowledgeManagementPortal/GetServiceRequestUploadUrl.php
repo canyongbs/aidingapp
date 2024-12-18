@@ -36,11 +36,11 @@
 
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
-use Illuminate\Support\Str;
-use Illuminate\Http\JsonResponse;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Storage;
 use AidingApp\Portal\Http\Requests\GetServiceRequestUploadUrlRequest;
+use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class GetServiceRequestUploadUrl extends Controller
 {

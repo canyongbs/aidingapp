@@ -36,17 +36,17 @@
 
 namespace AidingApp\Alert\Providers;
 
-use Filament\Panel;
 use AidingApp\Alert\AlertPlugin;
+use AidingApp\Alert\Enums\AlertSeverity;
+use AidingApp\Alert\Enums\AlertStatus;
+use AidingApp\Alert\Events\AlertCreated;
+use AidingApp\Alert\Listeners\NotifySubscribersOfAlertCreated;
 use AidingApp\Alert\Models\Alert;
 use App\Concerns\ImplementsGraphQL;
-use Illuminate\Support\Facades\Event;
-use AidingApp\Alert\Enums\AlertStatus;
-use Illuminate\Support\ServiceProvider;
-use AidingApp\Alert\Enums\AlertSeverity;
-use AidingApp\Alert\Events\AlertCreated;
+use Filament\Panel;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use AidingApp\Alert\Listeners\NotifySubscribersOfAlertCreated;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\ServiceProvider;
 
 class AlertServiceProvider extends ServiceProvider
 {

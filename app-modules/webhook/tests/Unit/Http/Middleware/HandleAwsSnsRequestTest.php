@@ -34,13 +34,12 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Webhook\Enums\InboundWebhookSource;
+use AidingApp\Webhook\Http\Middleware\HandleAwsSnsRequest;
+use AidingApp\Webhook\Models\InboundWebhook;
 use Illuminate\Http\Request;
 
 use function Tests\loadFixtureFromModule;
-
-use AidingApp\Webhook\Models\InboundWebhook;
-use AidingApp\Webhook\Enums\InboundWebhookSource;
-use AidingApp\Webhook\Http\Middleware\HandleAwsSnsRequest;
 
 it('will successfully handle a SubscriptionConfirmation request', function () {
     $request = Request::create(

@@ -36,20 +36,20 @@
 
 namespace AidingApp\Engagement\Actions;
 
-use Illuminate\Bus\Batch;
-use Illuminate\Bus\Queueable;
-use Illuminate\Support\Facades\Bus;
 use AidingApp\Contact\Models\Contact;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\InteractsWithQueue;
+use AidingApp\Engagement\DataTransferObjects\EngagementBatchCreationData;
 use AidingApp\Engagement\Models\Engagement;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
 use AidingApp\Engagement\Models\EngagementBatch;
 use AidingApp\Engagement\Models\EngagementDeliverable;
-use AidingApp\Engagement\DataTransferObjects\EngagementBatchCreationData;
-use AidingApp\Engagement\Notifications\EngagementBatchStartedNotification;
 use AidingApp\Engagement\Notifications\EngagementBatchFinishedNotification;
+use AidingApp\Engagement\Notifications\EngagementBatchStartedNotification;
+use Illuminate\Bus\Batch;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Bus;
 
 class CreateEngagementBatch implements ShouldQueue
 {

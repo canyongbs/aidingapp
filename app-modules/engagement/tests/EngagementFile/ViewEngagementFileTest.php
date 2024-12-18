@@ -34,13 +34,12 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\Engagement\Filament\Resources\EngagementFileResource;
+use AidingApp\Engagement\Models\EngagementFile;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
-
-use AidingApp\Authorization\Enums\LicenseType;
-use AidingApp\Engagement\Models\EngagementFile;
-use AidingApp\Engagement\Filament\Resources\EngagementFileResource;
 
 // TODO: Add tests for the ViewEngagementFile
 //test('The correct details are displayed on the ViewEngagementFile page', function () {});

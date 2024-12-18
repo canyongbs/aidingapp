@@ -36,8 +36,8 @@
 
 namespace AidingApp\KnowledgeBase\Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * @extends Factory<KnowledgeBaseStatus>

@@ -36,13 +36,13 @@
 
 namespace AidingApp\InventoryManagement\Policies;
 
+use AidingApp\Contact\Models\Contact;
+use AidingApp\InventoryManagement\Models\AssetType;
 use App\Enums\Feature;
 use App\Models\Authenticatable;
+use App\Support\FeatureAccessResponse;
 use Illuminate\Auth\Access\Response;
 use Illuminate\Support\Facades\Gate;
-use AidingApp\Contact\Models\Contact;
-use App\Support\FeatureAccessResponse;
-use AidingApp\InventoryManagement\Models\AssetType;
 
 class AssetTypePolicy
 {

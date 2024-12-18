@@ -38,9 +38,9 @@ namespace AidingApp\Form\Notifications;
 
 use AidingApp\Form\Models\Submission;
 use AidingApp\Notification\Notifications\BaseNotification;
+use AidingApp\Notification\Notifications\Concerns\EmailChannelTrait;
 use AidingApp\Notification\Notifications\EmailNotification;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
-use AidingApp\Notification\Notifications\Concerns\EmailChannelTrait;
 
 class FormSubmissionRequestNotification extends BaseNotification implements EmailNotification
 {

@@ -34,15 +34,16 @@
 </COPYRIGHT>
 */
 
+use App\Filament\Resources\UserResource\Pages\ListUsers;
 use App\Models\User;
+use Lab404\Impersonate\Services\ImpersonateManager;
 
-use function Tests\asSuperAdmin;
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
-use Lab404\Impersonate\Services\ImpersonateManager;
 use STS\FilamentImpersonate\Tables\Actions\Impersonate;
-use App\Filament\Resources\UserResource\Pages\ListUsers;
+
+use function Tests\asSuperAdmin;
 
 it('renders impersonate button for non super admin users when user is super admin', function () {
     asSuperAdmin();

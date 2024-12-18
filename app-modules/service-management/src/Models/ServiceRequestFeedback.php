@@ -36,10 +36,10 @@
 
 namespace AidingApp\ServiceManagement\Models;
 
-use App\Models\BaseModel;
 use AidingApp\Contact\Models\Contact;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * @mixin IdeHelperServiceRequestFeedback

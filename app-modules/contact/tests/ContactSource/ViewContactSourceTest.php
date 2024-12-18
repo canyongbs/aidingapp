@@ -34,14 +34,13 @@
 </COPYRIGHT>
 */
 
-use App\Models\User;
-
-use function Tests\asSuperAdmin;
-use function Pest\Laravel\actingAs;
-
+use AidingApp\Contact\Filament\Resources\ContactSourceResource;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactSource;
-use AidingApp\Contact\Filament\Resources\ContactSourceResource;
+use App\Models\User;
+
+use function Pest\Laravel\actingAs;
+use function Tests\asSuperAdmin;
 
 test('The correct details are displayed on the ViewContactSource page', function () {
     $contactSource = ContactSource::factory()->create();

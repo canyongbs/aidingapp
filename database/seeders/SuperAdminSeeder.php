@@ -36,9 +36,9 @@
 
 namespace Database\Seeders;
 
+use AidingApp\Contact\Models\Contact;
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use AidingApp\Contact\Models\Contact;
 
 class SuperAdminSeeder extends Seeder
 {

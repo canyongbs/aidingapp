@@ -36,16 +36,16 @@
 
 namespace AidingApp\Timeline\Providers;
 
-use Filament\Panel;
-use Illuminate\Support\Facades\Event;
-use AidingApp\Timeline\TimelinePlugin;
-use AidingApp\Timeline\Models\Timeline;
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use AidingApp\Timeline\Listeners\AddRecordToTimeline;
 use AidingApp\Timeline\Events\TimelineableRecordCreated;
 use AidingApp\Timeline\Events\TimelineableRecordDeleted;
+use AidingApp\Timeline\Listeners\AddRecordToTimeline;
 use AidingApp\Timeline\Listeners\RemoveRecordFromTimeline;
+use AidingApp\Timeline\Models\Timeline;
+use AidingApp\Timeline\TimelinePlugin;
+use Filament\Panel;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\ServiceProvider;
 
 class TimelineServiceProvider extends ServiceProvider
 {

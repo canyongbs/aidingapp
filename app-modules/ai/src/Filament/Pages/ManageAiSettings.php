@@ -36,14 +36,14 @@
 
 namespace AidingApp\Ai\Filament\Pages;
 
-use App\Models\User;
-use Filament\Forms\Form;
-use App\Models\Authenticatable;
-use Filament\Pages\SettingsPage;
 use AidingApp\Ai\Settings\AiSettings;
+use App\Filament\Clusters\ProductIntegrations;
+use App\Models\Authenticatable;
+use App\Models\User;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
-use App\Filament\Clusters\ProductIntegrations;
+use Filament\Forms\Form;
+use Filament\Pages\SettingsPage;
 
 class ManageAiSettings extends SettingsPage
 {

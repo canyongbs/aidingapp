@@ -36,13 +36,13 @@
 
 namespace App\Filament\Resources\UserResource\Pages;
 
+use App\Filament\Resources\UserResource;
 use App\Models\User;
+use App\Notifications\SetPasswordNotification;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
-use App\Filament\Resources\UserResource;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
-use App\Notifications\SetPasswordNotification;
 use STS\FilamentImpersonate\Pages\Actions\Impersonate;
 
 class EditUser extends EditRecord

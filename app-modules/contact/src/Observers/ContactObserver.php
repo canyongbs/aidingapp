@@ -36,8 +36,8 @@
 
 namespace AidingApp\Contact\Observers;
 
-use App\Models\User;
 use AidingApp\Contact\Models\Contact;
+use App\Models\User;
 use Illuminate\Support\Facades\Cache;
 
 class ContactObserver

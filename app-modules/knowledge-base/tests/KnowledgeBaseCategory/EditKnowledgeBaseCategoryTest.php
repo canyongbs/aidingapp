@@ -34,24 +34,21 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\Pages\EditKnowledgeBaseCategory;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\RelationManagers\SubCategoriesRelationManager;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
+use AidingApp\KnowledgeBase\Tests\KnowledgeBaseCategory\RequestFactories\EditKnowledgeBaseCategoryRequestFactory;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Filament\Forms\Components\Select;
+use Filament\Tables\Actions\AssociateAction;
+use Filament\Tables\Actions\CreateAction;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
-
-use Filament\Forms\Components\Select;
-use Filament\Tables\Actions\CreateAction;
-use Filament\Tables\Actions\AssociateAction;
-
 use function PHPUnit\Framework\assertEquals;
-
-use AidingApp\Authorization\Enums\LicenseType;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\Pages\EditKnowledgeBaseCategory;
-use AidingApp\KnowledgeBase\Tests\KnowledgeBaseCategory\RequestFactories\EditKnowledgeBaseCategoryRequestFactory;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\RelationManagers\SubCategoriesRelationManager;
 
 // TODO: Write EditKnowledgeBaseCategory tests
 //test('A successful action on the EditKnowledgeBaseCategory page', function () {});

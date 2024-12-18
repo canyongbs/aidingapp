@@ -36,21 +36,21 @@
 
 namespace AidingApp\Notification\Notifications;
 
-use Exception;
-use Illuminate\Support\Str;
-use Illuminate\Bus\Queueable;
-use Illuminate\Notifications\Notification;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use AidingApp\Notification\Models\OutboundDeliverable;
 use AidingApp\Notification\Actions\MakeOutboundDeliverable;
-use AidingApp\Notification\Notifications\Channels\SmsChannel;
-use AidingApp\Notification\Notifications\Channels\EmailChannel;
-use AidingApp\Notification\Notifications\Concerns\ChannelTrait;
-use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
-use AidingApp\Notification\DataTransferObjects\SmsChannelResultData;
+use AidingApp\Notification\DataTransferObjects\DatabaseChannelResultData;
 use AidingApp\Notification\DataTransferObjects\EmailChannelResultData;
 use AidingApp\Notification\DataTransferObjects\NotificationResultData;
-use AidingApp\Notification\DataTransferObjects\DatabaseChannelResultData;
+use AidingApp\Notification\DataTransferObjects\SmsChannelResultData;
+use AidingApp\Notification\Models\OutboundDeliverable;
+use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
+use AidingApp\Notification\Notifications\Channels\EmailChannel;
+use AidingApp\Notification\Notifications\Channels\SmsChannel;
+use AidingApp\Notification\Notifications\Concerns\ChannelTrait;
+use Exception;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Notification;
+use Illuminate\Support\Str;
 
 abstract class BaseNotification extends Notification implements ShouldQueue
 {

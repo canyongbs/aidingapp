@@ -34,19 +34,16 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource\Pages\EditKnowledgeBaseItem;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use App\Models\User;
-
-use function Pest\Laravel\get;
-
 use App\Settings\LicenseSettings;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\get;
 use function Pest\Livewire\livewire;
-
-use AidingApp\Authorization\Enums\LicenseType;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource\Pages\EditKnowledgeBaseItem;
 
 // TODO: Write EditKnowledgeBaseItem tests
 //test('A successful action on the EditKnowledgeBaseItem page', function () {});

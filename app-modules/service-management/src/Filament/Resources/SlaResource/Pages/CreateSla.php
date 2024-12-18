@@ -36,8 +36,8 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\SlaResource\Pages;
 
-use Filament\Resources\Pages\CreateRecord;
 use AidingApp\ServiceManagement\Filament\Resources\SlaResource;
+use Filament\Resources\Pages\CreateRecord;
 
 class CreateSla extends CreateRecord
 {

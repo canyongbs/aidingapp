@@ -36,13 +36,13 @@
 
 namespace AidingApp\KnowledgeBase\Filament\Resources;
 
-use Filament\Resources\Resource;
-use App\Filament\Clusters\KnowledgeManagement;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualityResource\Pages\EditKnowledgeBaseQuality;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualityResource\Pages\ViewKnowledgeBaseQuality;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualityResource\Pages\CreateKnowledgeBaseQuality;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualityResource\Pages\EditKnowledgeBaseQuality;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualityResource\Pages\ListKnowledgeBaseQualities;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualityResource\Pages\ViewKnowledgeBaseQuality;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
+use App\Filament\Clusters\KnowledgeManagement;
+use Filament\Resources\Resource;
 
 class KnowledgeBaseQualityResource extends Resource
 {

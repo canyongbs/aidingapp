@@ -36,12 +36,12 @@
 
 namespace AidingApp\ServiceManagement\Observers;
 
-use App\Models\User;
+use AidingApp\Notification\Events\TriggeredAutoSubscription;
+use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
+use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use AidingApp\Timeline\Events\TimelineableRecordCreated;
 use AidingApp\Timeline\Events\TimelineableRecordDeleted;
-use AidingApp\Notification\Events\TriggeredAutoSubscription;
-use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
-use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
+use App\Models\User;
 
 class ServiceRequestAssignmentObserver
 {

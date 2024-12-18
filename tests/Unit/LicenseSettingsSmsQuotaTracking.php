@@ -34,22 +34,22 @@
 </COPYRIGHT>
 */
 
-use Twilio\Rest\Client;
-use Tests\Unit\ClientMock;
-use Twilio\Rest\Api\V2010;
-use Twilio\Rest\MessagingBase;
-use App\Settings\LicenseSettings;
-use Tests\Unit\TestSmsNotification;
 use AidingApp\Contact\Models\Contact;
-
-use function Pest\Laravel\assertDatabaseCount;
-
-use Twilio\Rest\Api\V2010\Account\MessageList;
-use Twilio\Rest\Api\V2010\Account\MessageInstance;
-use AidingApp\Notification\Models\OutboundDeliverable;
 use AidingApp\IntegrationTwilio\Settings\TwilioSettings;
 use AidingApp\Notification\Enums\NotificationDeliveryStatus;
 use AidingApp\Notification\Exceptions\NotificationQuotaExceeded;
+use AidingApp\Notification\Models\OutboundDeliverable;
+use App\Settings\LicenseSettings;
+
+use function Pest\Laravel\assertDatabaseCount;
+
+use Tests\Unit\ClientMock;
+use Tests\Unit\TestSmsNotification;
+use Twilio\Rest\Api\V2010;
+use Twilio\Rest\Api\V2010\Account\MessageInstance;
+use Twilio\Rest\Api\V2010\Account\MessageList;
+use Twilio\Rest\Client;
+use Twilio\Rest\MessagingBase;
 
 it('An sms is allowed to be sent if there is available quota and it\'s quota usage is tracked', function () {
     $notifiable = Contact::factory()->create();

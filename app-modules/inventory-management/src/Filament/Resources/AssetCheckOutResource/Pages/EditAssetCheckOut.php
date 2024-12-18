@@ -36,8 +36,8 @@
 
 namespace AidingApp\InventoryManagement\Filament\Resources\AssetCheckOutResource\Pages;
 
-use Filament\Resources\Pages\EditRecord;
 use AidingApp\InventoryManagement\Filament\Resources\AssetCheckOutResource;
+use Filament\Resources\Pages\EditRecord;
 
 class EditAssetCheckOut extends EditRecord
 {

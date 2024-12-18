@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-use function Tests\Helpers\Events\testEventIsBeingListenedTo;
-
 use AidingApp\IntegrationAwsSesEventHandling\Events\SesRejectEvent;
 use AidingApp\IntegrationAwsSesEventHandling\Listeners\HandleSesRejectEvent;
+
+use function Tests\Helpers\Events\testEventIsBeingListenedTo;
 
 testEventIsBeingListenedTo(
     event: SesRejectEvent::class,

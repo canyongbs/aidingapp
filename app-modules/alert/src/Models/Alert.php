@@ -36,21 +36,21 @@
 
 namespace AidingApp\Alert\Models;
 
-use App\Models\BaseModel;
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Alert\Enums\AlertStatus;
 use AidingApp\Alert\Enums\AlertSeverity;
-use OwenIt\Auditing\Contracts\Auditable;
-use Illuminate\Database\Eloquent\Builder;
-use App\Models\Scopes\LicensedToEducatable;
+use AidingApp\Alert\Enums\AlertStatus;
 use AidingApp\Alert\Observers\AlertObserver;
-use App\Models\Concerns\BelongsToEducatable;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use AidingApp\Notification\Models\Contracts\Subscribable;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Contact\Models\Contact;
 use AidingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
+use AidingApp\Notification\Models\Contracts\Subscribable;
+use App\Models\BaseModel;
+use App\Models\Concerns\BelongsToEducatable;
+use App\Models\Scopes\LicensedToEducatable;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * @property-read Contact $concern

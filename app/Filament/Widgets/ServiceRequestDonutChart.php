@@ -36,9 +36,9 @@
 
 namespace App\Filament\Widgets;
 
-use Filament\Widgets\ChartWidget;
-use Filament\Support\Colors\Color;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use Filament\Support\Colors\Color;
+use Filament\Widgets\ChartWidget;
 
 class ServiceRequestDonutChart extends ChartWidget
 {

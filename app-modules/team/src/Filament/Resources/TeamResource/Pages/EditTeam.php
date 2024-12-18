@@ -36,12 +36,12 @@
 
 namespace AidingApp\Team\Filament\Resources\TeamResource\Pages;
 
-use Filament\Forms\Form;
+use AidingApp\Team\Filament\Resources\TeamResource;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
 use Filament\Resources\Pages\EditRecord;
-use AidingApp\Team\Filament\Resources\TeamResource;
 
 class EditTeam extends EditRecord
 {

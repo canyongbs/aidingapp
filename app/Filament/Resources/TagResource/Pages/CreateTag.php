@@ -36,15 +36,15 @@
 
 namespace App\Filament\Resources\TagResource\Pages;
 
-use Filament\Forms\Get;
-use Filament\Forms\Form;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Section;
-use App\Filament\Resources\TagResource;
-use Illuminate\Validation\Rules\Unique;
-use Filament\Forms\Components\TextInput;
-use Filament\Resources\Pages\CreateRecord;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use App\Filament\Resources\TagResource;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
+use Filament\Forms\Get;
+use Filament\Resources\Pages\CreateRecord;
+use Illuminate\Validation\Rules\Unique;
 
 class CreateTag extends CreateRecord
 {

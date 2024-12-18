@@ -36,16 +36,16 @@
 
 namespace AidingApp\Team\Filament\Resources\TeamResource\RelationManagers;
 
-use Closure;
-use App\Models\User;
-use Filament\Forms\Form;
-use Filament\Tables\Table;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Forms\Components\TextInput;
 use App\Filament\Tables\Columns\IdColumn;
+use App\Models\User;
+use Closure;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
+use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Actions\AttachAction;
 use Filament\Tables\Actions\DetachAction;
-use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 
 class UsersRelationManager extends RelationManager
 {

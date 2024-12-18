@@ -36,9 +36,9 @@
 
 namespace AidingApp\Division\Policies;
 
+use AidingApp\Division\Models\Division;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
-use AidingApp\Division\Models\Division;
 
 class DivisionPolicy
 {

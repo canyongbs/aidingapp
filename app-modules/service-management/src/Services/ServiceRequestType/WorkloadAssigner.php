@@ -36,12 +36,12 @@
 
 namespace AidingApp\ServiceManagement\Services\ServiceRequestType;
 
-use App\Models\User;
-use Illuminate\Database\Eloquent\Builder;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
-use Illuminate\Contracts\Database\Query\Builder as QueryBuilder;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Models\User;
+use Illuminate\Contracts\Database\Query\Builder as QueryBuilder;
+use Illuminate\Database\Eloquent\Builder;
 
 class WorkloadAssigner implements ServiceRequestTypeAssigner
 {

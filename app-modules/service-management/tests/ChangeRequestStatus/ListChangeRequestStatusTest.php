@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-use function Tests\Helpers\testResourceRequiresPermissionForAccess;
-
 use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestStatusResource;
+
+use function Tests\Helpers\testResourceRequiresPermissionForAccess;
 
 testResourceRequiresPermissionForAccess(
     resource: ChangeRequestStatusResource::class,

@@ -36,21 +36,21 @@
 
 namespace AidingApp\InventoryManagement\Filament\Resources\AssetResource\Pages;
 
-use Filament\Tables\Table;
+use AidingApp\InventoryManagement\Enums\SystemAssetStatusClassification;
+use AidingApp\InventoryManagement\Filament\Resources\AssetResource;
+use AidingApp\InventoryManagement\Models\Asset;
+use AidingApp\InventoryManagement\Models\Scopes\ClassifiedAs;
+use App\Filament\Tables\Columns\OpenSearch\TextColumn;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Components\Tab;
-use Filament\Tables\Actions\EditAction;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\DeleteBulkAction;
-use AidingApp\InventoryManagement\Models\Asset;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
 use Illuminate\Contracts\Database\Eloquent\Builder;
-use App\Filament\Tables\Columns\OpenSearch\TextColumn;
-use AidingApp\InventoryManagement\Models\Scopes\ClassifiedAs;
-use AidingApp\InventoryManagement\Filament\Resources\AssetResource;
-use AidingApp\InventoryManagement\Enums\SystemAssetStatusClassification;
 
 class ListAssets extends ListRecords
 {

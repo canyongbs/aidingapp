@@ -36,10 +36,10 @@
 
 namespace AidingApp\Contact\Rules;
 
-use Closure;
-use Illuminate\Database\Eloquent\Builder;
 use AidingApp\Contact\Models\Organization;
+use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Translation\PotentiallyTranslatedString;
 
 class UniqueOrganizationDomain implements ValidationRule

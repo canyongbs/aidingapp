@@ -34,14 +34,13 @@
 </COPYRIGHT>
 */
 
-use App\Models\User;
-
-use function Tests\asSuperAdmin;
-use function Pest\Laravel\actingAs;
-
+use AidingApp\Contact\Filament\Resources\ContactStatusResource;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactStatus;
-use AidingApp\Contact\Filament\Resources\ContactStatusResource;
+use App\Models\User;
+
+use function Pest\Laravel\actingAs;
+use function Tests\asSuperAdmin;
 
 test('The correct details are displayed on the ViewContactStatus page', function () {
     $contactStatus = ContactStatus::factory()->create();

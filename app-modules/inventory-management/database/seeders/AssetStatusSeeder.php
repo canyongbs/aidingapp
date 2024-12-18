@@ -36,9 +36,9 @@
 
 namespace AidingApp\InventoryManagement\Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use AidingApp\InventoryManagement\Models\AssetStatus;
 use AidingApp\InventoryManagement\Enums\SystemAssetStatusClassification;
+use AidingApp\InventoryManagement\Models\AssetStatus;
+use Illuminate\Database\Seeder;
 
 class AssetStatusSeeder extends Seeder
 {

@@ -36,18 +36,18 @@
 
 namespace App\Filament\Widgets;
 
-use Filament\Tables\Table;
-use App\Models\Scopes\EducatableSort;
-use App\Models\Scopes\EducatableSearch;
-use Filament\Tables\Actions\ViewAction;
-use Filament\Tables\Columns\TextColumn;
-use App\Filament\Tables\Columns\IdColumn;
-use Filament\Tables\Filters\SelectFilter;
-use Illuminate\Database\Eloquent\Builder;
-use Filament\Widgets\TableWidget as BaseWidget;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
+use App\Filament\Tables\Columns\IdColumn;
+use App\Models\Scopes\EducatableSearch;
+use App\Models\Scopes\EducatableSort;
+use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
+use Filament\Widgets\TableWidget as BaseWidget;
+use Illuminate\Database\Eloquent\Builder;
 
 class MyServiceRequests extends BaseWidget
 {

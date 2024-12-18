@@ -37,8 +37,8 @@
 namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Form\Models\SubmissibleField;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * @mixin IdeHelperServiceRequestFormField

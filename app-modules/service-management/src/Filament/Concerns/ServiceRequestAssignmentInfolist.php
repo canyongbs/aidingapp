@@ -36,10 +36,10 @@
 
 namespace AidingApp\ServiceManagement\Filament\Concerns;
 
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
+use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use App\Filament\Resources\UserResource;
 use Filament\Infolists\Components\TextEntry;
-use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 
 // TODO Re-use this trait across other places where infolist is rendered
 trait ServiceRequestAssignmentInfolist

@@ -36,12 +36,12 @@
 
 namespace AidingApp\InventoryManagement\Filament\Resources\AssetLocationResource\Pages;
 
+use AidingApp\InventoryManagement\Filament\Resources\AssetLocationResource;
 use Filament\Actions\EditAction;
-use Filament\Infolists\Infolist;
-use Filament\Resources\Pages\ViewRecord;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
-use AidingApp\InventoryManagement\Filament\Resources\AssetLocationResource;
+use Filament\Infolists\Infolist;
+use Filament\Resources\Pages\ViewRecord;
 
 class ViewAssetLocation extends ViewRecord
 {

@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-use function Tests\asSuperAdmin;
-
 use AidingApp\Audit\Settings\AuditSettings;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+
+use function Tests\asSuperAdmin;
 
 test('Audit logs are only created if the Model is not set to be excluded from Auditing by audit settings', function () {
     asSuperAdmin();

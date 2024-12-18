@@ -36,18 +36,18 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages;
 
-use App\Enums\Feature;
-use Filament\Forms\Get;
-use Filament\Actions\EditAction;
-use Filament\Infolists\Infolist;
-use Illuminate\Support\Facades\Gate;
-use Filament\Infolists\Components\Group;
-use Filament\Resources\Pages\ViewRecord;
-use Filament\Infolists\Components\Section;
-use Filament\Infolists\Components\TextEntry;
-use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestFormResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use App\Enums\Feature;
+use Filament\Actions\EditAction;
+use Filament\Forms\Get;
+use Filament\Infolists\Components\Group;
+use Filament\Infolists\Components\Section;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Infolist;
+use Filament\Resources\Pages\ViewRecord;
+use Illuminate\Support\Facades\Gate;
 
 class ViewServiceRequestType extends ViewRecord
 {

@@ -36,22 +36,22 @@
 
 namespace Database\Seeders;
 
-use App\Models\Authenticatable;
-use Illuminate\Database\Seeder;
 use AidingApp\Authorization\Models\Role;
-use AidingApp\Division\Database\Seeders\DivisionSeeder;
 use AidingApp\Contact\Database\Seeders\ContactSourceSeeder;
 use AidingApp\Contact\Database\Seeders\ContactStatusSeeder;
-use AidingApp\Contact\Database\Seeders\OrganizationTypeSeeder;
-use AidingApp\InventoryManagement\Database\Seeders\AssetSeeder;
 use AidingApp\Contact\Database\Seeders\OrganizationIndustrySeeder;
-use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseStatusSeeder;
-use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseQualitySeeder;
+use AidingApp\Contact\Database\Seeders\OrganizationTypeSeeder;
+use AidingApp\Division\Database\Seeders\DivisionSeeder;
+use AidingApp\InventoryManagement\Database\Seeders\AssetSeeder;
 use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseCategorySeeder;
-use AidingApp\ServiceManagement\Database\Seeders\ChangeRequestTypeSeeder;
-use AidingApp\ServiceManagement\Database\Seeders\ServiceRequestTypeSeeder;
+use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseQualitySeeder;
+use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseStatusSeeder;
 use AidingApp\ServiceManagement\Database\Seeders\ChangeRequestStatusSeeder;
+use AidingApp\ServiceManagement\Database\Seeders\ChangeRequestTypeSeeder;
 use AidingApp\ServiceManagement\Database\Seeders\ServiceRequestStatusSeeder;
+use AidingApp\ServiceManagement\Database\Seeders\ServiceRequestTypeSeeder;
+use App\Models\Authenticatable;
+use Illuminate\Database\Seeder;
 
 class NewTenantSeeder extends Seeder
 {

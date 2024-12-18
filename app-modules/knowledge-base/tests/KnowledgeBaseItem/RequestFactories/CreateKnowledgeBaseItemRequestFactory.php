@@ -37,10 +37,10 @@
 namespace AidingApp\KnowledgeBase\Tests\KnowledgeBaseItem\RequestFactories;
 
 use AidingApp\Division\Models\Division;
-use Worksome\RequestFactories\RequestFactory;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
+use Worksome\RequestFactories\RequestFactory;
 
 class CreateKnowledgeBaseItemRequestFactory extends RequestFactory
 {

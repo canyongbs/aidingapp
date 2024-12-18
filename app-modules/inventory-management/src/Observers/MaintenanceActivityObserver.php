@@ -36,10 +36,10 @@
 
 namespace AidingApp\InventoryManagement\Observers;
 
+use AidingApp\InventoryManagement\Actions\UpdateAssetStatusBasedOnMaintenanceActivity;
+use AidingApp\InventoryManagement\Models\MaintenanceActivity;
 use AidingApp\Timeline\Events\TimelineableRecordCreated;
 use AidingApp\Timeline\Events\TimelineableRecordDeleted;
-use AidingApp\InventoryManagement\Models\MaintenanceActivity;
-use AidingApp\InventoryManagement\Actions\UpdateAssetStatusBasedOnMaintenanceActivity;
 
 class MaintenanceActivityObserver
 {

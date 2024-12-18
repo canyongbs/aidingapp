@@ -36,9 +36,9 @@
 
 namespace AidingApp\Report\Filament\Widgets;
 
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
 
 class ServiceRequestsOverTimeLineChart extends LineChartReportWidget
 {

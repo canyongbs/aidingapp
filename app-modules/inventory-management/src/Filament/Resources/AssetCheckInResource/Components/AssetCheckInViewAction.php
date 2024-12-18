@@ -36,8 +36,8 @@
 
 namespace AidingApp\InventoryManagement\Filament\Resources\AssetCheckInResource\Components;
 
-use Filament\Actions\ViewAction;
 use AidingApp\InventoryManagement\Filament\Resources\AssetCheckInResource\Concerns\HasAssetCheckInInfolist;
+use Filament\Actions\ViewAction;
 
 class AssetCheckInViewAction extends ViewAction
 {

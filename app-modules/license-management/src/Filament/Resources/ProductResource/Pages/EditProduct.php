@@ -36,13 +36,13 @@
 
 namespace AidingApp\LicenseManagement\Filament\Resources\ProductResource\Pages;
 
-use Filament\Forms\Form;
-use Filament\Actions\ViewAction;
+use AidingApp\LicenseManagement\Filament\Resources\ProductResource;
 use Filament\Actions\DeleteAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
 use Filament\Resources\Pages\EditRecord;
-use AidingApp\LicenseManagement\Filament\Resources\ProductResource;
 
 class EditProduct extends EditRecord
 {

@@ -36,9 +36,9 @@
 
 namespace AidingApp\Engagement\Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use AidingApp\Engagement\Models\Engagement;
 use AidingApp\Engagement\Models\EngagementDeliverable;
+use Illuminate\Database\Seeder;
 
 class EngagementSeeder extends Seeder
 {

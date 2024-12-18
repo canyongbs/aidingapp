@@ -36,12 +36,12 @@
 
 namespace AidingApp\ContractManagement\Filament\Resources;
 
-use Filament\Resources\Resource;
-use AidingApp\ContractManagement\Models\Contract;
-use AidingApp\ContractManagement\Filament\Resources\ContractResource\Pages\EditContract;
-use AidingApp\ContractManagement\Filament\Resources\ContractResource\Pages\ViewContract;
-use AidingApp\ContractManagement\Filament\Resources\ContractResource\Pages\ListContracts;
 use AidingApp\ContractManagement\Filament\Resources\ContractResource\Pages\CreateContract;
+use AidingApp\ContractManagement\Filament\Resources\ContractResource\Pages\EditContract;
+use AidingApp\ContractManagement\Filament\Resources\ContractResource\Pages\ListContracts;
+use AidingApp\ContractManagement\Filament\Resources\ContractResource\Pages\ViewContract;
+use AidingApp\ContractManagement\Models\Contract;
+use Filament\Resources\Resource;
 
 class ContractResource extends Resource
 {

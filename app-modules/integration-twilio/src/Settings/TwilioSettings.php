@@ -36,8 +36,8 @@
 
 namespace AidingApp\IntegrationTwilio\Settings;
 
-use Spatie\LaravelSettings\Settings;
 use AidingApp\IntegrationTwilio\DataTransferObjects\TwilioApiKey;
+use Spatie\LaravelSettings\Settings;
 
 class TwilioSettings extends Settings
 {

@@ -36,13 +36,13 @@
 
 namespace AidingApp\InAppCommunication\Providers;
 
-use Filament\Panel;
-use Filament\Support\Assets\Js;
-use Illuminate\Support\ServiceProvider;
-use Filament\Support\Facades\FilamentAsset;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use AidingApp\InAppCommunication\InAppCommunicationPlugin;
 use AidingApp\InAppCommunication\Models\TwilioConversation;
+use Filament\Panel;
+use Filament\Support\Assets\Js;
+use Filament\Support\Facades\FilamentAsset;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\ServiceProvider;
 
 class InAppCommunicationServiceProvider extends ServiceProvider
 {

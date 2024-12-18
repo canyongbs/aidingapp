@@ -34,11 +34,10 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Team\Filament\Resources\TeamResource;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
-
-use AidingApp\Team\Filament\Resources\TeamResource;
 
 // Permission Tests
 

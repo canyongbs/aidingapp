@@ -1,7 +1,7 @@
 <?php
 
-use AidingApp\Authorization\Models\Role;
 use AidingApp\Authorization\Models\Permission;
+use AidingApp\Authorization\Models\Role;
 
 /*
 <COPYRIGHT>

@@ -36,8 +36,8 @@
 
 namespace AidingApp\IntegrationAwsSesEventHandling;
 
-use Filament\Panel;
 use Filament\Contracts\Plugin;
+use Filament\Panel;
 
 class IntegrationAwsSesEventHandlingPlugin implements Plugin
 {

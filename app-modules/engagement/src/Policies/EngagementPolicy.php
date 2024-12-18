@@ -36,10 +36,10 @@
 
 namespace AidingApp\Engagement\Policies;
 
-use App\Models\Authenticatable;
-use Illuminate\Auth\Access\Response;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Engagement\Models\Engagement;
+use App\Models\Authenticatable;
+use Illuminate\Auth\Access\Response;
 
 class EngagementPolicy
 {

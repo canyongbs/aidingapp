@@ -35,10 +35,10 @@
 */
 
 use AidingApp\Audit\Models\Audit;
-use OwenIt\Auditing\Resolvers\UrlResolver;
-use OwenIt\Auditing\Resolvers\UserResolver;
 use OwenIt\Auditing\Resolvers\IpAddressResolver;
+use OwenIt\Auditing\Resolvers\UrlResolver;
 use OwenIt\Auditing\Resolvers\UserAgentResolver;
+use OwenIt\Auditing\Resolvers\UserResolver;
 
 return [
     'enabled' => env('AUDITING_ENABLED', true),

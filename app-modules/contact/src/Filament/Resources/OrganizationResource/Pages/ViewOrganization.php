@@ -36,14 +36,14 @@
 
 namespace AidingApp\Contact\Filament\Resources\OrganizationResource\Pages;
 
+use AidingApp\Contact\Filament\Resources\OrganizationResource;
 use Filament\Actions\EditAction;
+use Filament\Infolists\Components\RepeatableEntry;
+use Filament\Infolists\Components\Section;
+use Filament\Infolists\Components\SpatieMediaLibraryImageEntry;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
-use Filament\Infolists\Components\Section;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Components\RepeatableEntry;
-use AidingApp\Contact\Filament\Resources\OrganizationResource;
-use Filament\Infolists\Components\SpatieMediaLibraryImageEntry;
 
 class ViewOrganization extends ViewRecord
 {

@@ -36,8 +36,8 @@
 
 namespace AidingApp\InventoryManagement\Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
 use AidingApp\InventoryManagement\Enums\SystemAssetStatusClassification;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AidingApp\InventoryManagement\Models\AssetStatus>

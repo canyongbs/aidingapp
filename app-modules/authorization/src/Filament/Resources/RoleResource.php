@@ -36,14 +36,14 @@
 
 namespace AidingApp\Authorization\Filament\Resources;
 
-use Filament\Resources\Resource;
-use AidingApp\Authorization\Models\Role;
-use Illuminate\Database\Eloquent\Builder;
-use AidingApp\Authorization\Filament\Resources\RoleResource\Pages\EditRole;
-use AidingApp\Authorization\Filament\Resources\RoleResource\Pages\ViewRole;
-use AidingApp\Authorization\Filament\Resources\RoleResource\Pages\ListRoles;
 use AidingApp\Authorization\Filament\Resources\RoleResource\Pages\CreateRole;
+use AidingApp\Authorization\Filament\Resources\RoleResource\Pages\EditRole;
+use AidingApp\Authorization\Filament\Resources\RoleResource\Pages\ListRoles;
+use AidingApp\Authorization\Filament\Resources\RoleResource\Pages\ViewRole;
 use AidingApp\Authorization\Filament\Resources\RoleResource\RelationManagers\PermissionsRelationManager;
+use AidingApp\Authorization\Models\Role;
+use Filament\Resources\Resource;
+use Illuminate\Database\Eloquent\Builder;
 
 class RoleResource extends Resource
 {

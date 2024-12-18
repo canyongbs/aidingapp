@@ -36,9 +36,9 @@
 
 namespace Database\Seeders;
 
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use App\Models\Tag;
 use Illuminate\Database\Seeder;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 
 class TagSeeder extends Seeder
 {

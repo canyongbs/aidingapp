@@ -36,10 +36,10 @@
 
 namespace AidingApp\Contact\Policies;
 
-use App\Models\Authenticatable;
-use Illuminate\Auth\Access\Response;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\OrganizationIndustry;
+use App\Models\Authenticatable;
+use Illuminate\Auth\Access\Response;
 
 class OrganizationIndustryPolicy
 {

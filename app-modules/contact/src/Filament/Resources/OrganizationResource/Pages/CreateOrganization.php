@@ -36,19 +36,19 @@
 
 namespace AidingApp\Contact\Filament\Resources\OrganizationResource\Pages;
 
-use Filament\Forms\Form;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\Section;
+use AidingApp\Contact\Filament\Resources\OrganizationResource;
+use AidingApp\Contact\Models\OrganizationIndustry;
+use AidingApp\Contact\Models\OrganizationType;
+use AidingApp\Contact\Rules\UniqueOrganizationDomain;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Form;
 use Filament\Resources\Pages\CreateRecord;
-use AidingApp\Contact\Models\OrganizationType;
-use AidingApp\Contact\Models\OrganizationIndustry;
-use AidingApp\Contact\Rules\UniqueOrganizationDomain;
-use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
-use AidingApp\Contact\Filament\Resources\OrganizationResource;
 
 class CreateOrganization extends CreateRecord
 {

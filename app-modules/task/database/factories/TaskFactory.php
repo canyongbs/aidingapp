@@ -36,10 +36,10 @@
 
 namespace AidingApp\Task\Database\Factories;
 
-use App\Models\User;
-use AidingApp\Task\Models\Task;
-use AidingApp\Task\Enums\TaskStatus;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Task\Enums\TaskStatus;
+use AidingApp\Task\Models\Task;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

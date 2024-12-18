@@ -36,12 +36,12 @@
 
 namespace AidingApp\ServiceManagement\Actions;
 
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 use Illuminate\Bus\Queueable;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
 
 class CreateServiceRequestHistory implements ShouldQueue
 {

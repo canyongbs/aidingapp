@@ -37,8 +37,8 @@
 namespace AidingApp\Portal\Rules;
 
 use Closure;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Translation\PotentiallyTranslatedString;
 
 class PortalAuthenticateCodeValidation implements ValidationRule

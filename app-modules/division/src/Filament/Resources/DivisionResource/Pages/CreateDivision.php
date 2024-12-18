@@ -36,12 +36,12 @@
 
 namespace AidingApp\Division\Filament\Resources\DivisionResource\Pages;
 
-use Filament\Forms\Form;
-use FilamentTiptapEditor\TiptapEditor;
+use AidingApp\Division\Filament\Resources\DivisionResource;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
 use Filament\Resources\Pages\CreateRecord;
-use AidingApp\Division\Filament\Resources\DivisionResource;
+use FilamentTiptapEditor\TiptapEditor;
 
 class CreateDivision extends CreateRecord
 {

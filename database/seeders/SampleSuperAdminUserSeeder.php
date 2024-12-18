@@ -36,12 +36,12 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
+use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\Authorization\Models\Role;
 use App\Models\Authenticatable;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-use AidingApp\Authorization\Models\Role;
-use AidingApp\Authorization\Enums\LicenseType;
 
 class SampleSuperAdminUserSeeder extends Seeder
 {

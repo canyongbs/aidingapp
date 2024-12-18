@@ -36,9 +36,9 @@
 
 namespace AidingApp\Engagement\Observers;
 
-use App\Models\User;
 use AidingApp\Engagement\Models\EngagementFileEntities;
 use AidingApp\Notification\Events\TriggeredAutoSubscription;
+use App\Models\User;
 
 class EngagementFileEntitiesObserver
 {

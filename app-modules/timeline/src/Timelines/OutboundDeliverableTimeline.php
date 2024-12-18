@@ -36,12 +36,12 @@
 
 namespace AidingApp\Timeline\Timelines;
 
-use Filament\Actions\ViewAction;
-use AidingApp\Timeline\Models\CustomTimeline;
 use AidingApp\Notification\Enums\NotificationChannel;
+use AidingApp\Notification\Filament\Actions\OutboundDeliverableViewAction;
 use AidingApp\Notification\Models\OutboundDeliverable;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
-use AidingApp\Notification\Filament\Actions\OutboundDeliverableViewAction;
+use AidingApp\Timeline\Models\CustomTimeline;
+use Filament\Actions\ViewAction;
 
 class OutboundDeliverableTimeline extends CustomTimeline
 {

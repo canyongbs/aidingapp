@@ -36,8 +36,8 @@
 
 namespace AidingApp\IntegrationTwilio;
 
-use Filament\Panel;
 use Filament\Contracts\Plugin;
+use Filament\Panel;
 
 class IntegrationTwilioPlugin implements Plugin
 {

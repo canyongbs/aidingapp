@@ -36,15 +36,15 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources;
 
+use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypeResource\Pages\CreateChangeRequestType;
+use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypeResource\Pages\EditChangeRequestType;
+use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypeResource\Pages\ListChangeRequestTypes;
+use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypeResource\Pages\ViewChangeRequestType;
+use AidingApp\ServiceManagement\Models\ChangeRequestType;
+use App\Filament\Clusters\ServiceManagementAdministration;
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use AidingApp\ServiceManagement\Models\ChangeRequestType;
-use App\Filament\Clusters\ServiceManagementAdministration;
-use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypeResource\Pages\EditChangeRequestType;
-use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypeResource\Pages\ViewChangeRequestType;
-use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypeResource\Pages\ListChangeRequestTypes;
-use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypeResource\Pages\CreateChangeRequestType;
 
 class ChangeRequestTypeResource extends Resource
 {

@@ -36,8 +36,8 @@
 
 namespace AidingApp\ServiceManagement\Actions;
 
-use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\MediaCollections\UploadsMediaCollection;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 
 class ResolveUploadsMediaCollectionForServiceRequest
 {

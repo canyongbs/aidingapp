@@ -36,17 +36,17 @@
 
 namespace AidingApp\Notification\Actions;
 
-use Illuminate\Notifications\AnonymousNotifiable;
 use AidingApp\Notification\Enums\NotificationChannel;
 use AidingApp\Notification\Models\OutboundDeliverable;
-use AidingApp\Notification\Notifications\SmsNotification;
 use AidingApp\Notification\Notifications\BaseNotification;
-use AidingApp\Notification\Notifications\EmailNotification;
+use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
+use AidingApp\Notification\Notifications\Channels\EmailChannel;
 use AidingApp\Notification\Notifications\Channels\SmsChannel;
 use AidingApp\Notification\Notifications\DatabaseNotification;
+use AidingApp\Notification\Notifications\EmailNotification;
 use AidingApp\Notification\Notifications\OnDemandNotification;
-use AidingApp\Notification\Notifications\Channels\EmailChannel;
-use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
+use AidingApp\Notification\Notifications\SmsNotification;
+use Illuminate\Notifications\AnonymousNotifiable;
 
 class MakeOutboundDeliverable
 {

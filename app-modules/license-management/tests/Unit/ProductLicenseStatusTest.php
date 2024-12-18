@@ -34,8 +34,8 @@
 </COPYRIGHT>
 */
 
-use AidingApp\LicenseManagement\Models\ProductLicense;
 use AidingApp\LicenseManagement\Enums\ProductLicenseStatus;
+use AidingApp\LicenseManagement\Models\ProductLicense;
 
 it('returns Pending when the current date is before the start date', function () {
     $productLicense = ProductLicense::factory()->pending()->create();

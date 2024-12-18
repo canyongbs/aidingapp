@@ -36,12 +36,12 @@
 
 namespace AidingApp\Alert\Observers;
 
-use App\Models\User;
+use AidingApp\Alert\Events\AlertCreated;
 use AidingApp\Alert\Models\Alert;
 use AidingApp\Contact\Models\Contact;
-use Illuminate\Support\Facades\Cache;
-use AidingApp\Alert\Events\AlertCreated;
 use AidingApp\Notification\Actions\SubscriptionCreate;
+use App\Models\User;
+use Illuminate\Support\Facades\Cache;
 
 class AlertObserver
 {

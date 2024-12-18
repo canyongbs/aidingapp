@@ -36,18 +36,18 @@
 
 namespace AidingApp\Authorization\Http\Controllers;
 
-use Throwable;
-use App\Models\User;
-use Illuminate\Support\Str;
-use Illuminate\Http\Request;
-use Filament\Facades\Filament;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Http;
-use Symfony\Component\Mime\MimeTypes;
-use Filament\Notifications\Notification;
 use AidingApp\Authorization\Enums\SocialiteProvider;
 use AidingApp\Authorization\Exceptions\InvalidUserAvatarMimeType;
+use App\Http\Controllers\Controller;
+use App\Models\User;
+use Filament\Facades\Filament;
+use Filament\Notifications\Notification;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
+use Symfony\Component\Mime\MimeTypes;
+use Throwable;
 
 class SocialiteController extends Controller
 {

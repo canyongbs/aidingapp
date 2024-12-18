@@ -36,9 +36,9 @@
 
 namespace AidingApp\Engagement\Policies;
 
+use AidingApp\Engagement\Models\SmsTemplate;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
-use AidingApp\Engagement\Models\SmsTemplate;
 
 class SmsTemplatePolicy
 {

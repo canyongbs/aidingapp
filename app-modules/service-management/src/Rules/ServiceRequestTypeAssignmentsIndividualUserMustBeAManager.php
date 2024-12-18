@@ -36,10 +36,10 @@
 
 namespace AidingApp\ServiceManagement\Rules;
 
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Translation\PotentiallyTranslatedString;
-use AidingApp\ServiceManagement\Models\ServiceRequestType;
 
 class ServiceRequestTypeAssignmentsIndividualUserMustBeAManager implements ValidationRule
 {

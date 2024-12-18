@@ -36,11 +36,11 @@
 
 namespace App\Filament\Resources\NotificationSettingResource\Pages;
 
-use Filament\Forms\Form;
-use Filament\Actions\DeleteAction;
-use Filament\Resources\Pages\EditRecord;
 use App\Filament\Resources\NotificationSettingResource;
 use App\Filament\Resources\NotificationSettingResource\Forms\NotificationSettingForm;
+use Filament\Actions\DeleteAction;
+use Filament\Forms\Form;
+use Filament\Resources\Pages\EditRecord;
 
 class EditNotificationSetting extends EditRecord
 {

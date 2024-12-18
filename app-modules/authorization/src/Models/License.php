@@ -36,15 +36,15 @@
 
 namespace AidingApp\Authorization\Models;
 
-use App\Models\User;
-use App\Models\BaseModel;
-use OwenIt\Auditing\Contracts\Auditable;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use AidingApp\Authorization\Enums\LicenseType;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use AidingApp\Authorization\Observers\LicenseObserver;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableConcern;
+use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\Authorization\Observers\LicenseObserver;
+use App\Models\BaseModel;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * @mixin IdeHelperLicense

@@ -36,11 +36,11 @@
 
 namespace AidingApp\Team\Filament\Resources\TeamResource\Pages;
 
-use Filament\Forms\Form;
+use AidingApp\Team\Filament\Resources\TeamResource;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
 use Filament\Resources\Pages\CreateRecord;
-use AidingApp\Team\Filament\Resources\TeamResource;
 
 class CreateTeam extends CreateRecord
 {

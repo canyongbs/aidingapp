@@ -36,11 +36,11 @@
 
 namespace AidingApp\InventoryManagement\Filament\Resources\AssetCheckOutResource\Concerns;
 
+use AidingApp\InventoryManagement\Enums\AssetCheckOutStatus;
+use AidingApp\InventoryManagement\Models\AssetCheckOut;
 use App\Filament\Resources\UserResource;
 use Filament\Infolists\Components\Fieldset;
 use Filament\Infolists\Components\TextEntry;
-use AidingApp\InventoryManagement\Models\AssetCheckOut;
-use AidingApp\InventoryManagement\Enums\AssetCheckOutStatus;
 
 trait HasAssetCheckOutInfolist
 {

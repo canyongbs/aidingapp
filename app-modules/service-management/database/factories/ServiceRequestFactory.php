@@ -36,13 +36,13 @@
 
 namespace AidingApp\ServiceManagement\Database\Factories;
 
-use App\Models\User;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Division\Models\Division;
-use Illuminate\Database\Eloquent\Factories\Factory;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
-use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
+use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * @extends Factory<ServiceRequest>

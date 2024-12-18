@@ -36,9 +36,9 @@
 
 namespace AidingApp\Notification\Events;
 
-use Illuminate\Foundation\Events\Dispatchable;
 use AidingApp\Notification\Models\Subscription;
 use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Foundation\Events\Dispatchable;
 
 class SubscriptionDeleted
 {

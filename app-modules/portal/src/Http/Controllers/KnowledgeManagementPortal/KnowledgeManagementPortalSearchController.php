@@ -36,16 +36,16 @@
 
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
-use Illuminate\Http\Request;
-use App\Models\Scopes\SearchBy;
-use Illuminate\Support\Stringable;
-use App\Http\Controllers\Controller;
-use Illuminate\Database\Eloquent\Builder;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\Portal\DataTransferObjects\KnowledgeBaseArticleData;
 use AidingApp\Portal\DataTransferObjects\KnowledgeBaseCategoryData;
 use AidingApp\Portal\DataTransferObjects\KnowledgeManagementSearchData;
+use App\Http\Controllers\Controller;
+use App\Models\Scopes\SearchBy;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
+use Illuminate\Support\Stringable;
 
 class KnowledgeManagementPortalSearchController extends Controller
 {

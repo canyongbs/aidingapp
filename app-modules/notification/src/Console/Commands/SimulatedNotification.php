@@ -37,8 +37,8 @@
 namespace AidingApp\Notification\Console\Commands;
 
 use App\Models\User;
-use Illuminate\Console\Command;
 use Filament\Notifications\Notification;
+use Illuminate\Console\Command;
 use Spatie\Multitenancy\Commands\Concerns\TenantAware;
 
 class SimulatedNotification extends Command

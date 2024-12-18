@@ -36,8 +36,8 @@
 
 namespace AidingApp\IntegrationTwilio\DataTransferObjects;
 
-use Spatie\LaravelData\Data;
 use AidingApp\IntegrationTwilio\DataTransferObjects\Concerns\CanBeGeneratedFromRequest;
+use Spatie\LaravelData\Data;
 
 abstract class TwilioWebhookData extends Data implements CanBeGeneratedFromRequest
 {

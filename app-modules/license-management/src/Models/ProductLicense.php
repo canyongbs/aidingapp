@@ -36,20 +36,23 @@
 
 namespace AidingApp\LicenseManagement\Models;
 
-use Carbon\Carbon;
-use App\Models\BaseModel;
-use AidingApp\Contact\Models\Contact;
-use OwenIt\Auditing\Contracts\Auditable;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use AidingApp\LicenseManagement\Enums\ProductLicenseStatus;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\LicenseManagement\Enums\ProductLicenseStatus;
 use AidingApp\LicenseManagement\Observers\ProductLicenseObserver;
 use App\LicenseManagement\Exceptions\FailedToDetermineProductLicenseStatus;
+use App\Models\BaseModel;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use OwenIt\Auditing\Contracts\Auditable;
 
 #[ObservedBy(ProductLicenseObserver::class)]
+/**
+ * @mixin IdeHelperProductLicense
+ */
 class ProductLicense extends BaseModel implements Auditable
 {
     use AuditableTrait;

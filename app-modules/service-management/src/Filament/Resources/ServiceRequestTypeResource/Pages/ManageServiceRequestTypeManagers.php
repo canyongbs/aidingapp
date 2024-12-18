@@ -36,14 +36,14 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages;
 
-use Filament\Tables\Table;
-use Filament\Tables\Actions\AttachAction;
-use Filament\Tables\Actions\DetachAction;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DetachBulkAction;
-use Filament\Resources\Pages\ManageRelatedRecords;
-use App\Filament\Tables\Columns\OpenSearch\TextColumn;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
+use App\Filament\Tables\Columns\OpenSearch\TextColumn;
+use Filament\Resources\Pages\ManageRelatedRecords;
+use Filament\Tables\Actions\AttachAction;
+use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Tables\Actions\DetachAction;
+use Filament\Tables\Actions\DetachBulkAction;
+use Filament\Tables\Table;
 
 class ManageServiceRequestTypeManagers extends ManageRelatedRecords
 {

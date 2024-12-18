@@ -36,14 +36,14 @@
 
 namespace AidingApp\Contact\Filament\Resources;
 
-use Filament\Resources\Resource;
-use Filament\Resources\Pages\Page;
-use AidingApp\Contact\Models\Organization;
-use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\ManageContacts;
-use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\EditOrganization;
-use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\ViewOrganization;
-use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\ListOrganizations;
 use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\CreateOrganization;
+use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\EditOrganization;
+use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\ListOrganizations;
+use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\ManageContacts;
+use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\ViewOrganization;
+use AidingApp\Contact\Models\Organization;
+use Filament\Resources\Pages\Page;
+use Filament\Resources\Resource;
 
 class OrganizationResource extends Resource
 {

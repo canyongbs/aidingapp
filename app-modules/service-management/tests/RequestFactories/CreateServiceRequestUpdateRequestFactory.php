@@ -36,9 +36,9 @@
 
 namespace AidingApp\ServiceManagement\Tests\RequestFactories;
 
-use Worksome\RequestFactories\RequestFactory;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateDirection;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use Worksome\RequestFactories\RequestFactory;
 
 class CreateServiceRequestUpdateRequestFactory extends RequestFactory
 {

@@ -36,15 +36,15 @@
 
 namespace AidingApp\Engagement\Notifications;
 
-use Throwable;
-use App\Models\Tenant;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use AidingApp\Engagement\Models\EngagementDeliverable;
 use AidingApp\Notification\Models\OutboundDeliverable;
-use AidingApp\Notification\Notifications\SmsNotification;
 use AidingApp\Notification\Notifications\BaseNotification;
-use AidingApp\Notification\Notifications\Messages\TwilioMessage;
 use AidingApp\Notification\Notifications\Concerns\SmsChannelTrait;
+use AidingApp\Notification\Notifications\Messages\TwilioMessage;
+use AidingApp\Notification\Notifications\SmsNotification;
+use App\Models\Tenant;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
+use Throwable;
 
 class EngagementSmsNotification extends BaseNotification implements SmsNotification, ShouldBeUnique
 {

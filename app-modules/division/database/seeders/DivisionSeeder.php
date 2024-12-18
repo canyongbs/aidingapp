@@ -36,8 +36,8 @@
 
 namespace AidingApp\Division\Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use AidingApp\Division\Models\Division;
+use Illuminate\Database\Seeder;
 
 class DivisionSeeder extends Seeder
 {

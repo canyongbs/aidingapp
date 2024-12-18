@@ -36,8 +36,8 @@
 
 namespace AidingApp\ContractManagement\Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
 use AidingApp\ContractManagement\Models\ContractType;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * @extends ContractType>

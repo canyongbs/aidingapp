@@ -34,13 +34,12 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
 use function Pest\Laravel\actingAs;
-
-use AidingApp\Authorization\Enums\LicenseType;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource;
 
 // TODO: Write ListKnowledgeBaseCategory tests
 //test('The correct details are displayed on the ListKnowledgeBaseCategory page', function () {});

@@ -36,12 +36,12 @@
 
 namespace AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers;
 
-use Filament\Tables\Table;
-use Filament\Infolists\Infolist;
-use Illuminate\Database\Eloquent\Model;
-use Filament\Resources\RelationManagers\RelationManager;
-use AidingApp\InventoryManagement\Filament\Resources\AssetCheckInResource\Pages\ListAssetCheckIns;
 use AidingApp\InventoryManagement\Filament\Resources\AssetCheckInResource\Concerns\HasAssetCheckInInfolist;
+use AidingApp\InventoryManagement\Filament\Resources\AssetCheckInResource\Pages\ListAssetCheckIns;
+use Filament\Infolists\Infolist;
+use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 
 class AssetCheckInRelationManager extends RelationManager
 {

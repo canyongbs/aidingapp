@@ -36,9 +36,9 @@
 
 namespace App\Filament\Resources\UserResource\Pages;
 
+use App\Filament\Resources\UserResource;
 use App\Models\User;
 use Filament\Actions\EditAction;
-use App\Filament\Resources\UserResource;
 use Filament\Resources\Pages\ViewRecord;
 use STS\FilamentImpersonate\Pages\Actions\Impersonate;
 

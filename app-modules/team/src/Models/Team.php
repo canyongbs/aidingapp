@@ -36,14 +36,14 @@
 
 namespace AidingApp\Team\Models;
 
-use App\Models\User;
-use App\Models\BaseModel;
 use AidingApp\Division\Models\Division;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeAuditor;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeManager;
+use App\Models\BaseModel;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
  * @mixin IdeHelperTeam

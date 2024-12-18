@@ -36,11 +36,11 @@
 
 namespace AidingApp\ServiceManagement\Actions\ChangeRequest;
 
-use App\Models\User;
+use AidingApp\ServiceManagement\Enums\SystemChangeRequestClassification;
 use AidingApp\ServiceManagement\Models\ChangeRequest;
 use AidingApp\ServiceManagement\Models\ChangeRequestStatus;
 use AidingApp\ServiceManagement\Models\Scopes\ClassifiedAs;
-use AidingApp\ServiceManagement\Enums\SystemChangeRequestClassification;
+use App\Models\User;
 
 class ApproveChangeRequest
 {

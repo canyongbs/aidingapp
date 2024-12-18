@@ -36,15 +36,15 @@
 
 namespace App\Console;
 
-use Throwable;
-use App\Models\Tenant;
 use AidingApp\Audit\Models\Audit;
-use Illuminate\Support\Facades\Log;
-use App\Models\Scopes\SetupIsComplete;
-use Illuminate\Console\Scheduling\Schedule;
 use AidingApp\Engagement\Models\EngagementFile;
+use App\Models\Scopes\SetupIsComplete;
+use App\Models\Tenant;
 use Filament\Actions\Imports\Models\FailedImportRow;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class Kernel extends ConsoleKernel
 {

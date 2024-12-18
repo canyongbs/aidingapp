@@ -36,8 +36,8 @@
 
 namespace AidingApp\InventoryManagement\Filament\Resources\AssetCheckInResource\Pages;
 
-use Filament\Resources\Pages\CreateRecord;
 use AidingApp\InventoryManagement\Filament\Resources\AssetCheckInResource;
+use Filament\Resources\Pages\CreateRecord;
 
 class CreateAssetCheckIn extends CreateRecord
 {

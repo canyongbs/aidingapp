@@ -36,17 +36,17 @@
 
 namespace AidingApp\Engagement\Notifications;
 
-use App\Models\User;
-use App\Models\NotificationSetting;
 use AidingApp\Engagement\Models\Engagement;
-use AidingApp\Notification\Notifications\BaseNotification;
-use AidingApp\Notification\Notifications\EmailNotification;
-use AidingApp\Notification\Notifications\DatabaseNotification;
-use AidingApp\Notification\Notifications\Messages\MailMessage;
 use AidingApp\Notification\Models\Contracts\NotifiableInterface;
-use Filament\Notifications\Notification as FilamentNotification;
-use AidingApp\Notification\Notifications\Concerns\EmailChannelTrait;
+use AidingApp\Notification\Notifications\BaseNotification;
 use AidingApp\Notification\Notifications\Concerns\DatabaseChannelTrait;
+use AidingApp\Notification\Notifications\Concerns\EmailChannelTrait;
+use AidingApp\Notification\Notifications\DatabaseNotification;
+use AidingApp\Notification\Notifications\EmailNotification;
+use AidingApp\Notification\Notifications\Messages\MailMessage;
+use App\Models\NotificationSetting;
+use App\Models\User;
+use Filament\Notifications\Notification as FilamentNotification;
 
 class EngagementFailedNotification extends BaseNotification implements EmailNotification, DatabaseNotification
 {

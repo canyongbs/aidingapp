@@ -36,13 +36,13 @@
 
 namespace AidingApp\ContractManagement\Filament\Resources\ContractTypeResource\Pages;
 
-use Filament\Forms\Form;
-use Illuminate\Support\Facades\DB;
-use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\TextInput;
-use Filament\Resources\Pages\CreateRecord;
-use AidingApp\ContractManagement\Models\ContractType;
 use AidingApp\ContractManagement\Filament\Resources\ContractTypeResource;
+use AidingApp\ContractManagement\Models\ContractType;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Form;
+use Filament\Resources\Pages\CreateRecord;
+use Illuminate\Support\Facades\DB;
 
 class CreateContractType extends CreateRecord
 {

@@ -36,9 +36,9 @@
 
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
-use Illuminate\Http\JsonResponse;
-use App\Http\Controllers\Controller;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
 
 class ServiceRequestTypesController extends Controller
 {

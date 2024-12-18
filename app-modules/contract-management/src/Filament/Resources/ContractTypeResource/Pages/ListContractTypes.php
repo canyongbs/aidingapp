@@ -36,16 +36,16 @@
 
 namespace AidingApp\ContractManagement\Filament\Resources\ContractTypeResource\Pages;
 
-use Filament\Tables\Table;
+use AidingApp\ContractManagement\Filament\Resources\ContractTypeResource;
 use Filament\Actions\CreateAction;
+use Filament\Resources\Pages\ListRecords;
+use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Resources\Pages\ListRecords;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DeleteBulkAction;
-use AidingApp\ContractManagement\Filament\Resources\ContractTypeResource;
+use Filament\Tables\Table;
 
 class ListContractTypes extends ListRecords
 {

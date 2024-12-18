@@ -36,8 +36,8 @@
 
 namespace AidingApp\InventoryManagement\Filament\Resources\AssetCheckOutResource\Components;
 
-use Filament\Actions\ViewAction;
 use AidingApp\InventoryManagement\Filament\Resources\AssetCheckOutResource\Concerns\HasAssetCheckOutInfolist;
+use Filament\Actions\ViewAction;
 
 class AssetCheckOutViewAction extends ViewAction
 {

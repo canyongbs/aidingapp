@@ -1,8 +1,8 @@
 <?php
 
-use App\Models\User;
-use App\Models\SystemUser;
 use AidingApp\Contact\Models\Contact;
+use App\Models\SystemUser;
+use App\Models\User;
 
 /*
 <COPYRIGHT>

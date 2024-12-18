@@ -36,13 +36,13 @@
 
 namespace AidingApp\Task\Providers;
 
-use Filament\Panel;
-use AidingApp\Task\TaskPlugin;
 use AidingApp\Task\Models\Task;
+use AidingApp\Task\TaskPlugin;
+use Filament\Panel;
 use Filament\Support\Assets\Js;
-use Illuminate\Support\ServiceProvider;
 use Filament\Support\Facades\FilamentAsset;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\ServiceProvider;
 
 class TaskServiceProvider extends ServiceProvider
 {

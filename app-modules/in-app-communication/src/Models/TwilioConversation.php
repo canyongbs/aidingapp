@@ -36,11 +36,11 @@
 
 namespace AidingApp\InAppCommunication\Models;
 
+use AidingApp\InAppCommunication\Enums\ConversationType;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use AidingApp\InAppCommunication\Enums\ConversationType;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**

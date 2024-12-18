@@ -36,15 +36,15 @@
 
 namespace App\Models\States;
 
-use BackedEnum;
-use Illuminate\Support\Collection;
-use Illuminate\Database\Eloquent\Model;
 use App\Models\Concerns\TargetsRelationships;
+use BackedEnum;
 use Bvtterfly\ModelStateMachine\ConfigLoader;
-use Bvtterfly\ModelStateMachine\TransitionManager;
-use Bvtterfly\ModelStateMachine\Exceptions\UnknownState;
-use Bvtterfly\ModelStateMachine\Exceptions\InvalidTransition;
 use Bvtterfly\ModelStateMachine\DataTransferObjects\StateMachineConfig;
+use Bvtterfly\ModelStateMachine\Exceptions\InvalidTransition;
+use Bvtterfly\ModelStateMachine\Exceptions\UnknownState;
+use Bvtterfly\ModelStateMachine\TransitionManager;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 
 class StateMachine
 {

@@ -36,11 +36,11 @@
 
 namespace AidingApp\Notification\Actions;
 
-use App\Models\User;
-use Illuminate\Support\Facades\DB;
-use AidingApp\Notification\Models\Contracts\Subscribable;
-use Illuminate\Database\UniqueConstraintViolationException;
 use AidingApp\Notification\Exceptions\SubscriptionAlreadyExistsException;
+use AidingApp\Notification\Models\Contracts\Subscribable;
+use App\Models\User;
+use Illuminate\Database\UniqueConstraintViolationException;
+use Illuminate\Support\Facades\DB;
 
 class SubscriptionCreate
 {

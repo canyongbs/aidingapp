@@ -36,8 +36,8 @@
 
 namespace AidingApp\ServiceManagement\Services\ServiceRequestNumber;
 
-use Sqids\Sqids;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
+use Sqids\Sqids;
 
 class SqidPlusSixServiceRequestNumberGenerator implements ServiceRequestNumberGenerator
 {

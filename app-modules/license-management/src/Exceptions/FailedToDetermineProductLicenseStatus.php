@@ -36,8 +36,8 @@
 
 namespace App\LicenseManagement\Exceptions;
 
-use Exception;
 use AidingApp\LicenseManagement\Models\ProductLicense;
+use Exception;
 
 class FailedToDetermineProductLicenseStatus extends Exception
 {

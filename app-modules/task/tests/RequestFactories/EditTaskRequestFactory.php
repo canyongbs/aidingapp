@@ -36,9 +36,9 @@
 
 namespace AidingApp\Task\Tests\RequestFactories;
 
-use App\Models\User;
-use AidingApp\Task\Enums\TaskStatus;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Task\Enums\TaskStatus;
+use App\Models\User;
 use Worksome\RequestFactories\RequestFactory;
 
 class EditTaskRequestFactory extends RequestFactory

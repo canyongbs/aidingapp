@@ -36,12 +36,12 @@
 
 namespace AidingApp\Notification\Listeners;
 
-use Illuminate\Support\HtmlString;
+use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Notification\Events\SubscriptionDeleted;
 use Filament\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use AidingApp\Notification\Events\SubscriptionDeleted;
-use AidingApp\Contact\Filament\Resources\ContactResource;
+use Illuminate\Support\HtmlString;
 
 class NotifyUserOfSubscriptionDeleted implements ShouldQueue
 {

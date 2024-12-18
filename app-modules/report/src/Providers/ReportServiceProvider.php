@@ -36,8 +36,8 @@
 
 namespace AidingApp\Report\Providers;
 
-use Filament\Panel;
 use AidingApp\Report\ReportPlugin;
+use Filament\Panel;
 use Illuminate\Support\ServiceProvider;
 
 class ReportServiceProvider extends ServiceProvider

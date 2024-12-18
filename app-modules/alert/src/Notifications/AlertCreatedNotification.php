@@ -37,13 +37,13 @@
 namespace AidingApp\Alert\Notifications;
 
 use AidingApp\Alert\Models\Alert;
-use Illuminate\Support\HtmlString;
-use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Contact\Models\Contact;
 use AidingApp\Notification\Notifications\BaseNotification;
+use AidingApp\Notification\Notifications\Concerns\DatabaseChannelTrait;
 use AidingApp\Notification\Notifications\DatabaseNotification;
 use Filament\Notifications\Notification as FilamentNotification;
-use AidingApp\Notification\Notifications\Concerns\DatabaseChannelTrait;
+use Illuminate\Support\HtmlString;
 
 class AlertCreatedNotification extends BaseNotification implements DatabaseNotification
 {

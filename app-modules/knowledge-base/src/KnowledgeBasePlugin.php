@@ -36,8 +36,8 @@
 
 namespace AidingApp\KnowledgeBase;
 
-use Filament\Panel;
 use Filament\Contracts\Plugin;
+use Filament\Panel;
 
 class KnowledgeBasePlugin implements Plugin
 {

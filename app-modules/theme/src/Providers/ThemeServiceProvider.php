@@ -36,11 +36,11 @@
 
 namespace AidingApp\Theme\Providers;
 
-use Filament\Panel;
-use AidingApp\Theme\ThemePlugin;
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use AidingApp\Theme\Settings\SettingsProperties\ThemeSettingsProperty;
+use AidingApp\Theme\ThemePlugin;
+use Filament\Panel;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\ServiceProvider;
 
 class ThemeServiceProvider extends ServiceProvider
 {

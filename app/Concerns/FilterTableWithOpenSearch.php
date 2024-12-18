@@ -36,15 +36,15 @@
 
 namespace App\Concerns;
 
+use AidingApp\Contact\Models\Contact;
+use App\Filament\Tables\Columns\OpenSearch\OpenSearchColumn;
+use App\Filament\Tables\Filters\OpenSearch\OpenSearchFilter;
 use Exception;
 use Filament\Tables\Columns\Column;
-use AidingApp\Contact\Models\Contact;
 use Filament\Tables\Filters\BaseFilter;
 use Illuminate\Database\Eloquent\Builder;
 use OpenSearch\Adapter\Documents\Document;
 use OpenSearch\ScoutDriverPlus\Support\Query;
-use App\Filament\Tables\Columns\OpenSearch\OpenSearchColumn;
-use App\Filament\Tables\Filters\OpenSearch\OpenSearchFilter;
 
 trait FilterTableWithOpenSearch
 {

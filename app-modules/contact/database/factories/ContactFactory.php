@@ -36,10 +36,10 @@
 
 namespace AidingApp\Contact\Database\Factories;
 
-use App\Models\User;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactSource;
 use AidingApp\Contact\Models\ContactStatus;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

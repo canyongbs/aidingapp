@@ -37,8 +37,8 @@
 namespace AidingApp\Engagement\Drivers\Contracts;
 
 use AidingApp\Engagement\Actions\QueuedEngagementDelivery;
-use AidingApp\Notification\DataTransferObjects\UpdateSmsDeliveryStatusData;
 use AidingApp\Notification\DataTransferObjects\UpdateEmailDeliveryStatusData;
+use AidingApp\Notification\DataTransferObjects\UpdateSmsDeliveryStatusData;
 
 interface EngagementDeliverableDriver
 {

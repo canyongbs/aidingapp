@@ -34,16 +34,15 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Contact\Filament\Resources\OrganizationTypeResource;
+use AidingApp\Contact\Filament\Resources\OrganizationTypeResource\Pages\EditOrganizationType;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\OrganizationType;
+use AidingApp\Contact\Tests\OrganizationType\RequestFactories\EditOrganizationTypeRequestFactory;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
-
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Contact\Models\OrganizationType;
-use AidingApp\Contact\Filament\Resources\OrganizationTypeResource;
-use AidingApp\Contact\Filament\Resources\OrganizationTypeResource\Pages\EditOrganizationType;
-use AidingApp\Contact\Tests\OrganizationType\RequestFactories\EditOrganizationTypeRequestFactory;
 
 test('Edit Organization Type is gated with proper access control', function () {
     $user = User::factory()->licensed(Contact::getLicenseType())->create();

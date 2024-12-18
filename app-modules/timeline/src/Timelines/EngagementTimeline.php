@@ -36,10 +36,10 @@
 
 namespace AidingApp\Timeline\Timelines;
 
-use Filament\Actions\ViewAction;
+use AidingApp\Engagement\Filament\Resources\EngagementResource\Components\EngagementViewAction;
 use AidingApp\Engagement\Models\Engagement;
 use AidingApp\Timeline\Models\CustomTimeline;
-use AidingApp\Engagement\Filament\Resources\EngagementResource\Components\EngagementViewAction;
+use Filament\Actions\ViewAction;
 
 // TODO Decide where these belong - might want to keep these in the context of the original module
 class EngagementTimeline extends CustomTimeline

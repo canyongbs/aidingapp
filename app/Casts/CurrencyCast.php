@@ -37,8 +37,8 @@
 namespace App\Casts;
 
 use Cknow\Money\Money;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
+use Illuminate\Database\Eloquent\Model;
 
 class CurrencyCast implements CastsAttributes
 {

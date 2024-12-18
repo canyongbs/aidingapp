@@ -36,9 +36,9 @@
 
 namespace AidingApp\ServiceManagement\Observers;
 
+use AidingApp\ServiceManagement\Models\ServiceRequestHistory;
 use AidingApp\Timeline\Events\TimelineableRecordCreated;
 use AidingApp\Timeline\Events\TimelineableRecordDeleted;
-use AidingApp\ServiceManagement\Models\ServiceRequestHistory;
 
 class ServiceRequestHistoryObserver
 {

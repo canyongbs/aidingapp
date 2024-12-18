@@ -36,12 +36,12 @@
 
 namespace AidingApp\Division\Providers;
 
-use Filament\Panel;
-use App\Concerns\ImplementsGraphQL;
 use AidingApp\Division\DivisionPlugin;
 use AidingApp\Division\Models\Division;
-use Illuminate\Support\ServiceProvider;
+use App\Concerns\ImplementsGraphQL;
+use Filament\Panel;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\ServiceProvider;
 
 class DivisionServiceProvider extends ServiceProvider
 {

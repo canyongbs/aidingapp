@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-use Illuminate\Support\Facades\Route;
+use AidingApp\IntegrationAwsSesEventHandling\Http\Controllers\AwsSesInboundWebhookController;
 use AidingApp\Webhook\Http\Middleware\HandleAwsSnsRequest;
 use AidingApp\Webhook\Http\Middleware\VerifyAwsSnsRequest;
-use AidingApp\IntegrationAwsSesEventHandling\Http\Controllers\AwsSesInboundWebhookController;
+use Illuminate\Support\Facades\Route;
 
 Route::post('/inbound/webhook/awsses', AwsSesInboundWebhookController::class)
     ->middleware(

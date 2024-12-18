@@ -34,20 +34,17 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Contact\Filament\Resources\OrganizationIndustryResource;
+use AidingApp\Contact\Filament\Resources\OrganizationIndustryResource\Pages\CreateOrganizationIndustry;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\OrganizationIndustry;
+use AidingApp\Contact\Tests\OrganizationIndustry\RequestFactories\CreateOrganizationIndustryRequestFactory;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
-
-use AidingApp\Contact\Models\Contact;
-
-use function PHPUnit\Framework\assertCount;
 use function Pest\Laravel\assertDatabaseHas;
-
-use AidingApp\Contact\Models\OrganizationIndustry;
-use AidingApp\Contact\Filament\Resources\OrganizationIndustryResource;
-use AidingApp\Contact\Filament\Resources\OrganizationIndustryResource\Pages\CreateOrganizationIndustry;
-use AidingApp\Contact\Tests\OrganizationIndustry\RequestFactories\CreateOrganizationIndustryRequestFactory;
+use function Pest\Livewire\livewire;
+use function PHPUnit\Framework\assertCount;
 
 test('Create Organization Industry is gated with proper access control', function () {
     $user = User::factory()->licensed(Contact::getLicenseType())->create();

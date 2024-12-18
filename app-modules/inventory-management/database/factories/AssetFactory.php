@@ -36,10 +36,10 @@
 
 namespace AidingApp\InventoryManagement\Database\Factories;
 
+use AidingApp\InventoryManagement\Models\AssetLocation;
+use AidingApp\InventoryManagement\Models\AssetStatus;
 use AidingApp\InventoryManagement\Models\AssetType;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use AidingApp\InventoryManagement\Models\AssetStatus;
-use AidingApp\InventoryManagement\Models\AssetLocation;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AidingApp\InventoryManagement\Models\Asset>

@@ -36,9 +36,9 @@
 
 namespace AidingApp\IntegrationMicrosoftClarity\Providers;
 
+use AidingApp\IntegrationMicrosoftClarity\IntegrationMicrosoftClarityPlugin;
 use Filament\Panel;
 use Illuminate\Support\ServiceProvider;
-use AidingApp\IntegrationMicrosoftClarity\IntegrationMicrosoftClarityPlugin;
 
 class IntegrationMicrosoftClarityServiceProvider extends ServiceProvider
 {

@@ -36,15 +36,15 @@
 
 namespace AidingApp\Task\Filament\Concerns;
 
-use AidingApp\Task\Models\Task;
-use AidingApp\Task\Enums\TaskStatus;
-use AidingApp\Contact\Models\Contact;
-use Filament\Infolists\Components\Grid;
-use App\Filament\Resources\UserResource;
-use Filament\Infolists\Components\Split;
-use Filament\Infolists\Components\Fieldset;
-use Filament\Infolists\Components\TextEntry;
 use AidingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Task\Enums\TaskStatus;
+use AidingApp\Task\Models\Task;
+use App\Filament\Resources\UserResource;
+use Filament\Infolists\Components\Fieldset;
+use Filament\Infolists\Components\Grid;
+use Filament\Infolists\Components\Split;
+use Filament\Infolists\Components\TextEntry;
 
 trait TaskViewActionInfoList
 {

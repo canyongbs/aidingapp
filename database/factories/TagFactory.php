@@ -36,8 +36,8 @@
 
 namespace Database\Factories;
 
-use App\Models\Tag;
 use App\Models\Contracts\HasTags;
+use App\Models\Tag;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

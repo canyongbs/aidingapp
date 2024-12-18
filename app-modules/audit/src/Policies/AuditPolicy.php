@@ -36,8 +36,8 @@
 
 namespace AidingApp\Audit\Policies;
 
-use App\Models\Authenticatable;
 use AidingApp\Audit\Models\Audit;
+use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
 
 class AuditPolicy

@@ -850,7 +850,9 @@ namespace AidingApp\Contact\Models{
  * @property-read int|null $ordered_engagement_responses_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Engagement\Models\Engagement> $orderedEngagements
  * @property-read int|null $ordered_engagements_count
- * @property-read \AidingApp\Contact\Models\Organization|null $organizations
+ * @property-read \AidingApp\Contact\Models\Organization|null $organization
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\LicenseManagement\Models\ProductLicense> $productLicenses
+ * @property-read int|null $product_licenses_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\ServiceManagement\Models\ServiceRequest> $serviceRequests
  * @property-read int|null $service_requests_count
  * @property-read \AidingApp\Contact\Models\ContactSource $source
@@ -1934,10 +1936,14 @@ namespace AidingApp\KnowledgeBase\Models{
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property string $slug
+ * @property string|null $parent_id
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
  * @property-read int|null $audits_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\KnowledgeBase\Models\KnowledgeBaseItem> $knowledgeBaseItems
  * @property-read int|null $knowledge_base_items_count
+ * @property-read KnowledgeBaseCategory|null $parentCategory
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, KnowledgeBaseCategory> $subCategories
+ * @property-read int|null $sub_categories_count
  * @method static \AidingApp\KnowledgeBase\Database\Factories\KnowledgeBaseCategoryFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseCategory newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseCategory newQuery()
@@ -1949,6 +1955,7 @@ namespace AidingApp\KnowledgeBase\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseCategory whereIcon($value)
  * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseCategory whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseCategory whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseCategory whereParentId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseCategory whereSlug($value)
  * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseCategory whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|KnowledgeBaseCategory withTrashed()
@@ -2076,6 +2083,91 @@ namespace AidingApp\KnowledgeBase\Models{
  */
 	#[\AllowDynamicProperties]
 	class IdeHelperKnowledgeBaseStatus {}
+}
+
+namespace AidingApp\LicenseManagement\Models{
+/**
+ * AidingApp\LicenseManagement\Models\Product
+ *
+ * @property string $id
+ * @property string $name
+ * @property string|null $url
+ * @property string|null $description
+ * @property string|null $version
+ * @property string|null $additional_notes
+ * @property string|null $created_by_id
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
+ * @property-read int|null $audits_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\LicenseManagement\Models\ProductLicense> $productLicenses
+ * @property-read int|null $product_licenses_count
+ * @method static \AidingApp\LicenseManagement\Database\Factories\ProductFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|Product newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Product newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Product onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|Product query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Product whereAdditionalNotes($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Product whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Product whereCreatedById($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Product whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Product whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Product whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Product whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Product whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Product whereUrl($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Product whereVersion($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Product withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|Product withoutTrashed()
+ * @mixin \Eloquent
+ */
+	#[\AllowDynamicProperties]
+	class IdeHelperProduct {}
+}
+
+namespace AidingApp\LicenseManagement\Models{
+/**
+ * AidingApp\LicenseManagement\Models\ProductLicense
+ *
+ * @property string $id
+ * @property string $product_id
+ * @property mixed $license
+ * @property string|null $description
+ * @property string|null $assigned_to
+ * @property \Illuminate\Support\Carbon $start_date
+ * @property \Illuminate\Support\Carbon|null $expiration_date
+ * @property string|null $created_by_id
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
+ * @property-read int|null $audits_count
+ * @property-read \AidingApp\Contact\Models\Contact|null $contact
+ * @property-read \AidingApp\LicenseManagement\Models\Product $product
+ * @property-read \AidingApp\LicenseManagement\Enums\ProductLicenseStatus $status
+ * @method static \AidingApp\LicenseManagement\Database\Factories\ProductLicenseFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|ProductLicense newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|ProductLicense newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|ProductLicense onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|ProductLicense query()
+ * @method static \Illuminate\Database\Eloquent\Builder|ProductLicense whereAssignedTo($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ProductLicense whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ProductLicense whereCreatedById($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ProductLicense whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ProductLicense whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ProductLicense whereExpirationDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ProductLicense whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ProductLicense whereLicense($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ProductLicense whereProductId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ProductLicense whereStartDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ProductLicense whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ProductLicense withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|ProductLicense withoutTrashed()
+ * @mixin \Eloquent
+ */
+	#[\AllowDynamicProperties]
+	class IdeHelperProductLicense {}
 }
 
 namespace AidingApp\Notification\Models{
@@ -2896,12 +2988,14 @@ namespace AidingApp\ServiceManagement\Models{
  * @property bool $is_auditors_service_request_assigned_notification_enabled
  * @property bool $is_auditors_service_request_resolved_email_enabled
  * @property bool $is_auditors_service_request_resolved_notification_enabled
+ * @property string|null $last_assigned_id
  * @property-read \App\Models\User|null $assignmentTypeIndividual
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Team\Models\Team> $auditors
  * @property-read int|null $auditors_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
  * @property-read int|null $audits_count
  * @property-read \AidingApp\ServiceManagement\Models\ServiceRequestForm|null $form
+ * @property-read \App\Models\User|null $lastAssignedUser
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Team\Models\Team> $managers
  * @property-read int|null $managers_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\ServiceManagement\Models\ServiceRequestPriority> $priorities
@@ -2935,6 +3029,7 @@ namespace AidingApp\ServiceManagement\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereIsManagersServiceRequestCreatedNotificationEnabled($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereIsManagersServiceRequestResolvedEmailEnabled($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereIsManagersServiceRequestResolvedNotificationEnabled($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereLastAssignedId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ServiceRequestType withTrashed()

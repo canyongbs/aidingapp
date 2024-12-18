@@ -36,9 +36,9 @@
 
 namespace AidingApp\Form\Filament\Tables\Filters;
 
-use Illuminate\Database\Eloquent\Builder;
 use AidingApp\Form\Enums\FormSubmissionStatus;
 use App\Filament\Tables\Filters\OpenSearch\SelectFilter;
+use Illuminate\Database\Eloquent\Builder;
 
 class FormSubmissionStatusFilter extends SelectFilter
 {

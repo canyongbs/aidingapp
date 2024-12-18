@@ -36,13 +36,13 @@
 
 namespace AidingApp\Engagement\Drivers;
 
-use AidingApp\Engagement\Models\EngagementDeliverable;
-use AidingApp\Engagement\Actions\QueuedEngagementDelivery;
 use AidingApp\Engagement\Actions\EngagementEmailChannelDelivery;
+use AidingApp\Engagement\Actions\QueuedEngagementDelivery;
 use AidingApp\Engagement\Drivers\Contracts\EngagementDeliverableDriver;
-use AidingApp\Notification\DataTransferObjects\UpdateSmsDeliveryStatusData;
-use AidingApp\Notification\DataTransferObjects\UpdateEmailDeliveryStatusData;
+use AidingApp\Engagement\Models\EngagementDeliverable;
 use AidingApp\IntegrationAwsSesEventHandling\DataTransferObjects\SesEventData;
+use AidingApp\Notification\DataTransferObjects\UpdateEmailDeliveryStatusData;
+use AidingApp\Notification\DataTransferObjects\UpdateSmsDeliveryStatusData;
 
 class EngagementEmailDriver implements EngagementDeliverableDriver
 {
