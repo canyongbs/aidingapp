@@ -15,12 +15,12 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
 
-ENV NVM_VERSION v0.39.7
-ENV NODE_VERSION 21.6.0
+ENV NVM_VERSION v0.40.1
+ENV NODE_VERSION 23.4.0
 ENV NVM_DIR /usr/local/nvm
 RUN mkdir "$NVM_DIR"
 
-RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/$NVM_VERSION/install.sh | bash
 
 ENV NODE_PATH $NVM_DIR/v$NODE_VERSION/lib/node_modules
 ENV PATH $NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
