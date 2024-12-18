@@ -75,6 +75,7 @@
     const totalRecords = ref(0);
     const fromRecord = ref(0);
     const toRecord = ref(0);
+    const disableSubmitBtn = ref(false);
 
     const setPagination = (pagination) => {
         currentPage.value = pagination.current_page;
@@ -96,8 +97,10 @@
         },
     );
 
-    function getData(page = 1) {
-        loadingResults.value = true;
+    function getData(page = 1, fromPagination = false) {
+        if(!fromPagination) {
+            loadingResults.value = true;
+        }
 
         const { get } = consumer();
 
@@ -105,12 +108,15 @@
             serviceRequest.value = response.data.serviceRequestDetails;
             serviceRequestUpdates.value = response.data.serviceRequestUpdates.data || [];
             directionEnums.value = response.data.directionEnums || [];
-            loadingResults.value = false;
+            if(!fromPagination) {
+                loadingResults.value = false;
+            }
             setPagination(response.data.serviceRequestUpdates);
         });
     }
     async function submitUpdate() {
         try {
+            disableSubmitBtn.value = true;
             const { post } = consumer();
             const response = await post(props.apiUrl + '/service-request-update/store', {
                 description: updateMessage.value,
@@ -129,22 +135,24 @@
             } else {
                 console.error('Error creating update:', error);
             }
+        } finally {
+            disableSubmitBtn.value = false;
         }
     }
 
     const fetchNextPage = () => {
         currentPage.value = currentPage.value !== lastPage.value ? currentPage.value + 1 : lastPage.value;
-        getData(currentPage.value);
+        getData(currentPage.value, true);
     };
 
     const fetchPreviousPage = () => {
         currentPage.value = currentPage.value !== 1 ? currentPage.value - 1 : 1;
-        getData(currentPage.value);
+        getData(currentPage.value, true);
     };
 
     const fetchPage = (page) => {
         currentPage.value = page;
-        getData(currentPage.value);
+        getData(currentPage.value, true);
     };
 </script>
 
@@ -238,6 +246,7 @@
                                             <button
                                                 type="submit"
                                                 class="w-auto py-2 px-4 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-500 transition duration-200"
+                                                :disabled="disableSubmitBtn"
                                             >
                                                 Submit Update
                                             </button>

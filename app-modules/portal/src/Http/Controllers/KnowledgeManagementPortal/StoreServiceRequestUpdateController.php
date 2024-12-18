@@ -60,7 +60,7 @@ class StoreServiceRequestUpdateController extends Controller
             ->serviceRequestUpdates()
             ->latest('created_at')
             ->where('internal', false)
-            ->paginate(10)
+            ->paginate(5)
             ->through(function (ServiceRequestUpdate $update) {
                 return [
                     'id' => $update->getKey(),
