@@ -17,6 +17,7 @@ RUN apt-get update \
 
 ENV NVM_VERSION v0.40.1
 ENV NODE_VERSION 23.4.0
+ENV NPM_VERSION ^11.0.0
 ENV NVM_DIR /usr/local/nvm
 RUN mkdir "$NVM_DIR"
 
@@ -29,7 +30,7 @@ RUN echo "source $NVM_DIR/nvm.sh \
     && nvm install $NODE_VERSION \
     && nvm alias default $NODE_VERSION \
     && nvm use default \
-    && nvm install-latest-npm" | bash
+    && npm install -g npm@$NPM_VERSION" | bash
 
 COPY ./docker/s6-overlay/scripts/ /etc/s6-overlay/scripts/
 COPY docker/s6-overlay/s6-rc.d/ /etc/s6-overlay/s6-rc.d/
