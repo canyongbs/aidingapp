@@ -114,11 +114,7 @@ class EditKnowledgeBaseItemMetadata
                         ->exists((new KnowledgeBaseStatus())->getTable(), (new KnowledgeBaseStatus())->getKeyName()),
                     Select::make('category_id')
                         ->label('Category')
-                        ->relationship(
-                            'category',
-                            'name',
-                            modifyQueryUsing: fn (Builder $query) => $query->where('parent_id', null)
-                        )
+                        ->relationship('category', 'name')
                         ->searchable()
                         ->preload()
                         ->exists((new KnowledgeBaseCategory())->getTable(), (new KnowledgeBaseCategory())->getKeyName()),

@@ -76,6 +76,7 @@ class KnowledgeManagementPortalArticleController extends Controller
                 'name' => $category->name,
                 'description' => $category->description,
             ]),
+            'parentCategory' => $category->parentCategory,
             'article' => KnowledgeBaseArticleData::from([
                 'id' => $article->getKey(),
                 'categorySlug' => $article->category->slug,
