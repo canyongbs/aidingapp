@@ -50,6 +50,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
 
 #[ObservedBy(ProductLicenseObserver::class)]
+/**
+ * @mixin IdeHelperProductLicense
+ */
 class ProductLicense extends BaseModel implements Auditable
 {
     use AuditableTrait;
