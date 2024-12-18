@@ -36,12 +36,12 @@
 
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
-use Illuminate\Http\JsonResponse;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use AidingApp\Portal\DataTransferObjects\KnowledgeBaseCategoryData;
 use App\Http\Controllers\Controller;
 use Illuminate\Database\Eloquent\Builder;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
-use AidingApp\Portal\DataTransferObjects\KnowledgeBaseCategoryData;
+use Illuminate\Http\JsonResponse;
 
 class KnowledgeManagementPortalCategoryController extends Controller
 {

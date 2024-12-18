@@ -36,14 +36,14 @@
 
 namespace AidingApp\KnowledgeBase\Filament\Resources;
 
-use Filament\Resources\Resource;
-use App\Filament\Clusters\KnowledgeManagement;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\Pages\EditKnowledgeBaseCategory;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\Pages\ViewKnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\Pages\CreateKnowledgeBaseCategory;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\Pages\EditKnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\Pages\ListKnowledgeBaseCategories;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\Pages\ViewKnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\RelationManagers\SubCategoriesRelationManager;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
+use App\Filament\Clusters\KnowledgeManagement;
+use Filament\Resources\Resource;
 
 class KnowledgeBaseCategoryResource extends Resource
 {

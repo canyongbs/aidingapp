@@ -36,8 +36,8 @@
 
 namespace AidingApp\Alert\Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use AidingApp\Alert\Models\Alert;
+use Illuminate\Database\Seeder;
 
 class AlertSeeder extends Seeder
 {

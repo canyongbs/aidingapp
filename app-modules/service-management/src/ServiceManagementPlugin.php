@@ -36,8 +36,8 @@
 
 namespace AidingApp\ServiceManagement;
 
-use Filament\Panel;
 use Filament\Contracts\Plugin;
+use Filament\Panel;
 
 class ServiceManagementPlugin implements Plugin
 {

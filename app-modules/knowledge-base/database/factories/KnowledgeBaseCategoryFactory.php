@@ -36,10 +36,10 @@
 
 namespace AidingApp\KnowledgeBase\Database\Factories;
 
-use Illuminate\Support\Facades\File;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use BladeUI\Icons\Factory as BladeUIIconsFactory;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
+use Illuminate\Support\Facades\File;
 
 /**
  * @extends Factory<KnowledgeBaseCategory>

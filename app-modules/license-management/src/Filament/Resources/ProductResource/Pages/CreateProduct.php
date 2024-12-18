@@ -36,11 +36,11 @@
 
 namespace AidingApp\LicenseManagement\Filament\Resources\ProductResource\Pages;
 
-use Filament\Forms\Form;
+use AidingApp\LicenseManagement\Filament\Resources\ProductResource;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
 use Filament\Resources\Pages\CreateRecord;
-use AidingApp\LicenseManagement\Filament\Resources\ProductResource;
 
 class CreateProduct extends CreateRecord
 {

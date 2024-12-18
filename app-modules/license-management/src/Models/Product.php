@@ -36,13 +36,13 @@
 
 namespace AidingApp\LicenseManagement\Models;
 
-use App\Models\BaseModel;
-use OwenIt\Auditing\Contracts\Auditable;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use AidingApp\LicenseManagement\Observers\ProductObserver;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\LicenseManagement\Observers\ProductObserver;
+use App\Models\BaseModel;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use OwenIt\Auditing\Contracts\Auditable;
 
 #[ObservedBy(ProductObserver::class)]
 class Product extends BaseModel implements Auditable

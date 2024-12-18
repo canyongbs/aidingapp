@@ -36,9 +36,9 @@
 
 namespace AidingApp\Contact\Tests\Organization\RequestFactories;
 
-use Worksome\RequestFactories\RequestFactory;
-use AidingApp\Contact\Models\OrganizationType;
 use AidingApp\Contact\Models\OrganizationIndustry;
+use AidingApp\Contact\Models\OrganizationType;
+use Worksome\RequestFactories\RequestFactory;
 
 class EditOrganizationRequestFactory extends RequestFactory
 {

@@ -36,11 +36,11 @@
 
 namespace AidingApp\Timeline\Actions;
 
-use Illuminate\Support\Carbon;
-use AidingApp\Timeline\Models\Timeline;
-use Illuminate\Database\Eloquent\Model;
 use AidingApp\Timeline\Exceptions\ModelMustHaveATimeline;
 use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
+use AidingApp\Timeline\Models\Timeline;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 class SyncTimelineData
 {

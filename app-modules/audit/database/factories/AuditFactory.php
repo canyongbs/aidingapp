@@ -36,10 +36,10 @@
 
 namespace AidingApp\Audit\Database\Factories;
 
-use App\Models\User;
 use AidingApp\Audit\Models\Audit;
-use Illuminate\Database\Eloquent\Factories\Factory;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * @extends Factory<Audit>

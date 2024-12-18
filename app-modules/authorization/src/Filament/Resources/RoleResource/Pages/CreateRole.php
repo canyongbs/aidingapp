@@ -36,14 +36,14 @@
 
 namespace AidingApp\Authorization\Filament\Resources\RoleResource\Pages;
 
-use Filament\Forms\Get;
-use Filament\Forms\Form;
+use AidingApp\Authorization\Filament\Resources\RoleResource;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
-use Illuminate\Validation\Rules\Unique;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Resources\Pages\CreateRecord;
-use AidingApp\Authorization\Filament\Resources\RoleResource;
+use Illuminate\Validation\Rules\Unique;
 
 class CreateRole extends CreateRecord
 {

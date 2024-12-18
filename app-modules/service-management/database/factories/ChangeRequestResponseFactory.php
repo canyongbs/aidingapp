@@ -36,9 +36,9 @@
 
 namespace AidingApp\ServiceManagement\Database\Factories;
 
+use AidingApp\ServiceManagement\Models\ChangeRequest;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use AidingApp\ServiceManagement\Models\ChangeRequest;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AidingApp\ServiceManagement\Models\ChangeRequestResponse>

@@ -36,30 +36,30 @@
 
 namespace AidingApp\Alert\Filament\Resources\AlertResource\Pages;
 
-use Filament\Tables\Table;
-use Filament\Infolists\Infolist;
-use AidingApp\Alert\Models\Alert;
-use Filament\Actions\CreateAction;
-use Filament\Tables\Filters\Filter;
-use Filament\Forms\Components\Group;
-use AidingApp\Contact\Models\Contact;
-use Filament\Forms\Components\Select;
-use AidingApp\Alert\Enums\AlertStatus;
-use App\Models\Scopes\EducatableSearch;
-use Filament\Forms\Components\Textarea;
-use Filament\Tables\Actions\ViewAction;
-use Filament\Tables\Columns\TextColumn;
 use AidingApp\Alert\Enums\AlertSeverity;
+use AidingApp\Alert\Enums\AlertStatus;
+use AidingApp\Alert\Filament\Resources\AlertResource;
+use AidingApp\Alert\Models\Alert;
+use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactAlerts;
+use AidingApp\Contact\Models\Contact;
+use App\Filament\Forms\Components\EducatableSelect;
 use App\Filament\Tables\Columns\IdColumn;
-use Filament\Resources\Pages\ListRecords;
-use Filament\Tables\Filters\SelectFilter;
-use Illuminate\Database\Eloquent\Builder;
+use App\Models\Scopes\EducatableSearch;
+use Filament\Actions\CreateAction;
+use Filament\Forms\Components\Group;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Infolist;
+use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
-use App\Filament\Forms\Components\EducatableSelect;
-use AidingApp\Alert\Filament\Resources\AlertResource;
-use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactAlerts;
+use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class ListAlerts extends ListRecords
 {

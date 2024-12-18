@@ -36,18 +36,18 @@
 
 namespace AidingApp\Notification\Models;
 
+use AidingApp\Notification\Observers\SubscriptionObserver;
+use App\Models\Concerns\BelongsToEducatable;
+use App\Models\Scopes\LicensedToEducatable;
 use App\Models\User;
 use DateTimeInterface;
-use Illuminate\Database\Eloquent\Builder;
-use App\Models\Scopes\LicensedToEducatable;
-use App\Models\Concerns\BelongsToEducatable;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\MorphPivot;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use AidingApp\Notification\Observers\SubscriptionObserver;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphPivot;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 /**
  * @mixin IdeHelperSubscription

@@ -34,13 +34,12 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\Task\Filament\Resources\TaskResource;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
-
-use AidingApp\Authorization\Enums\LicenseType;
-use AidingApp\Task\Filament\Resources\TaskResource;
 
 // TODO: Write CreateTask page tests
 //test('A successful action on the CreateTask page', function () {});

@@ -34,16 +34,15 @@
 </COPYRIGHT>
 */
 
-use App\Models\User;
-
-use function Tests\asSuperAdmin;
-use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
-
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Contact\Models\ContactStatus;
 use AidingApp\Contact\Filament\Resources\ContactStatusResource;
 use AidingApp\Contact\Filament\Resources\ContactStatusResource\Pages\ListContactStatuses;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\ContactStatus;
+use App\Models\User;
+
+use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
+use function Tests\asSuperAdmin;
 
 test('The correct details are displayed on the ListContactStatuses page', function () {
     $contactStatuses = ContactStatus::factory()

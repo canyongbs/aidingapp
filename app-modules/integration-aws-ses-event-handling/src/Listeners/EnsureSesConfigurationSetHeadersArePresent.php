@@ -36,9 +36,9 @@
 
 namespace AidingApp\IntegrationAwsSesEventHandling\Listeners;
 
+use AidingApp\IntegrationAwsSesEventHandling\Settings\SesSettings;
 use Exception;
 use Illuminate\Mail\Events\MessageSending;
-use AidingApp\IntegrationAwsSesEventHandling\Settings\SesSettings;
 
 class EnsureSesConfigurationSetHeadersArePresent
 {

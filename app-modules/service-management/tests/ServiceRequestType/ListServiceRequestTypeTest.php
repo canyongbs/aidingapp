@@ -34,19 +34,16 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Contact\Models\Contact;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Models\User;
-
-use function Tests\asSuperAdmin;
-
 use App\Settings\LicenseSettings;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
-
-use AidingApp\Contact\Models\Contact;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
-use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
+use function Tests\asSuperAdmin;
 
 test('The correct details are displayed on the ListServiceRequestType page', function () {
     $serviceRequestTypes = ServiceRequestType::factory()

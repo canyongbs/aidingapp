@@ -36,10 +36,10 @@
 
 namespace App\Filament\Widgets;
 
-use Illuminate\Support\Number;
 use AidingApp\Contact\Models\Contact;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
+use Illuminate\Support\Number;
 
 class TotalContacts extends StatsOverviewWidget
 {

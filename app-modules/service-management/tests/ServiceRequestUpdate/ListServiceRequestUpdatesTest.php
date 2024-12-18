@@ -34,20 +34,17 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Contact\Models\Contact;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use App\Models\User;
-use Illuminate\Support\Str;
-
-use function Tests\asSuperAdmin;
-
 use App\Settings\LicenseSettings;
+use Illuminate\Support\Str;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
-
-use AidingApp\Contact\Models\Contact;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
-use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource;
+use function Tests\asSuperAdmin;
 
 test('The correct details are displayed on the ListServiceRequestUpdates page', function () {
     $serviceRequestUpdates = ServiceRequestUpdate::factory()

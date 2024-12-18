@@ -36,12 +36,12 @@
 
 namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource\Pages;
 
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource;
 use Filament\Actions;
-use Filament\Infolists\Infolist;
-use Filament\Resources\Pages\ViewRecord;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource;
+use Filament\Infolists\Infolist;
+use Filament\Resources\Pages\ViewRecord;
 
 class ViewKnowledgeBaseStatus extends ViewRecord
 {

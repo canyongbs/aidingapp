@@ -36,21 +36,21 @@
 
 namespace AidingApp\Notification\Notifications\Channels;
 
-use Exception;
-use App\Settings\LicenseSettings;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Notifications\Notification;
-use Illuminate\Notifications\AnonymousNotifiable;
-use Illuminate\Notifications\Channels\MailChannel;
 use AidingApp\Engagement\Models\EngagementDeliverable;
-use AidingApp\Notification\Models\OutboundDeliverable;
-use AidingApp\Notification\Notifications\BaseNotification;
-use AidingApp\Notification\Notifications\EmailNotification;
+use AidingApp\Notification\DataTransferObjects\EmailChannelResultData;
+use AidingApp\Notification\DataTransferObjects\NotificationResultData;
 use AidingApp\Notification\Enums\NotificationDeliveryStatus;
 use AidingApp\Notification\Exceptions\NotificationQuotaExceeded;
 use AidingApp\Notification\Models\Contracts\NotifiableInterface;
-use AidingApp\Notification\DataTransferObjects\EmailChannelResultData;
-use AidingApp\Notification\DataTransferObjects\NotificationResultData;
+use AidingApp\Notification\Models\OutboundDeliverable;
+use AidingApp\Notification\Notifications\BaseNotification;
+use AidingApp\Notification\Notifications\EmailNotification;
+use App\Settings\LicenseSettings;
+use Exception;
+use Illuminate\Notifications\AnonymousNotifiable;
+use Illuminate\Notifications\Channels\MailChannel;
+use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\DB;
 
 class EmailChannel extends MailChannel
 {

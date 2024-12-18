@@ -36,16 +36,16 @@
 
 namespace AidingApp\ContractManagement\Models;
 
-use App\Models\BaseModel;
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\ContractManagement\Enums\ContractStatus;
 use App\Casts\CurrencyCast;
-use Spatie\MediaLibrary\HasMedia;
-use OwenIt\Auditing\Contracts\Auditable;
-use Spatie\MediaLibrary\InteractsWithMedia;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use AidingApp\ContractManagement\Enums\ContractStatus;
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use OwenIt\Auditing\Contracts\Auditable;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
 /**
  * @mixin IdeHelperContract

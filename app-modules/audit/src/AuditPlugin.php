@@ -36,9 +36,9 @@
 
 namespace AidingApp\Audit;
 
-use Filament\Panel;
-use Filament\Contracts\Plugin;
 use AidingApp\Audit\Filament\Pages\ManageAuditSettings;
+use Filament\Contracts\Plugin;
+use Filament\Panel;
 
 class AuditPlugin implements Plugin
 {

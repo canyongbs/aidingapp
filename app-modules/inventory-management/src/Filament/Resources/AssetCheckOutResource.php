@@ -36,9 +36,9 @@
 
 namespace AidingApp\InventoryManagement\Filament\Resources;
 
-use Filament\Resources\Resource;
-use AidingApp\InventoryManagement\Models\AssetCheckOut;
 use AidingApp\InventoryManagement\Filament\Resources\AssetCheckOutResource\Pages\ListAssetCheckOuts;
+use AidingApp\InventoryManagement\Models\AssetCheckOut;
+use Filament\Resources\Resource;
 
 class AssetCheckOutResource extends Resource
 {

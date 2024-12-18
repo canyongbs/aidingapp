@@ -36,9 +36,9 @@
 
 namespace AidingApp\Portal\Http\Middleware;
 
+use AidingApp\Portal\Settings\PortalSettings;
 use Closure;
 use Illuminate\Http\Request;
-use AidingApp\Portal\Settings\PortalSettings;
 use Symfony\Component\HttpFoundation\Response;
 
 class EnsureKnowledgeManagementPortalIsEnabled

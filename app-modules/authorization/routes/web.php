@@ -34,8 +34,8 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Http\Controllers\SocialiteController;
 use AidingApp\Authorization\Http\Controllers\Auth\OneTimeLoginController;
+use AidingApp\Authorization\Http\Controllers\SocialiteController;
 
 Route::middleware('web')->group(function () {
     Route::prefix('auth')->name('socialite.')->group(function () {

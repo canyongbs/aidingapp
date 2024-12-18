@@ -36,13 +36,13 @@
 
 namespace AidingApp\Contact\Filament\Resources\OrganizationTypeResource\Pages;
 
-use Filament\Forms\Form;
-use Filament\Forms\Components\Toggle;
+use AidingApp\Contact\Filament\Resources\OrganizationTypeResource;
+use AidingApp\Contact\Models\OrganizationType;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Form;
 use Filament\Resources\Pages\CreateRecord;
-use AidingApp\Contact\Models\OrganizationType;
-use AidingApp\Contact\Filament\Resources\OrganizationTypeResource;
 
 class CreateOrganizationType extends CreateRecord
 {

@@ -34,14 +34,13 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
 use function Pest\Laravel\actingAs;
-
-use AidingApp\Authorization\Enums\LicenseType;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource;
 
 // TODO: Write ViewKnowledgeBaseStatus tests
 //test('The correct details are displayed on the ViewKnowledgeBaseStatus page', function () {});

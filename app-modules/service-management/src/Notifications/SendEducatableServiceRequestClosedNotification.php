@@ -36,14 +36,14 @@
 
 namespace AidingApp\ServiceManagement\Notifications;
 
-use Illuminate\Support\Str;
-use App\Models\NotificationSetting;
 use AidingApp\Notification\Models\OutboundDeliverable;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\Notification\Notifications\BaseNotification;
+use AidingApp\Notification\Notifications\Concerns\EmailChannelTrait;
 use AidingApp\Notification\Notifications\EmailNotification;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
-use AidingApp\Notification\Notifications\Concerns\EmailChannelTrait;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Models\NotificationSetting;
+use Illuminate\Support\Str;
 
 class SendEducatableServiceRequestClosedNotification extends BaseNotification implements EmailNotification
 {

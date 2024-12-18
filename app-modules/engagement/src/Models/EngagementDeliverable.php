@@ -36,16 +36,16 @@
 
 namespace AidingApp\Engagement\Models;
 
-use App\Models\BaseModel;
-use OwenIt\Auditing\Contracts\Auditable;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use AidingApp\Engagement\Drivers\EngagementSmsDriver;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use AidingApp\Engagement\Drivers\EngagementEmailDriver;
-use AidingApp\Engagement\Enums\EngagementDeliveryMethod;
-use AidingApp\Engagement\Enums\EngagementDeliveryStatus;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Engagement\Drivers\Contracts\EngagementDeliverableDriver;
+use AidingApp\Engagement\Drivers\EngagementEmailDriver;
+use AidingApp\Engagement\Drivers\EngagementSmsDriver;
+use AidingApp\Engagement\Enums\EngagementDeliveryMethod;
+use AidingApp\Engagement\Enums\EngagementDeliveryStatus;
+use App\Models\BaseModel;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * @mixin IdeHelperEngagementDeliverable

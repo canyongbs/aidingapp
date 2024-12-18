@@ -36,8 +36,8 @@
 
 namespace AidingApp\KnowledgeBase\Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
+use Illuminate\Database\Seeder;
 
 class KnowledgeBaseCategorySeeder extends Seeder
 {

@@ -36,10 +36,10 @@
 
 namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource\Pages;
 
-use Filament\Forms\Form;
-use Filament\Forms\Components\TextInput;
-use Filament\Resources\Pages\CreateRecord;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
+use Filament\Resources\Pages\CreateRecord;
 
 class CreateKnowledgeBaseStatus extends CreateRecord
 {

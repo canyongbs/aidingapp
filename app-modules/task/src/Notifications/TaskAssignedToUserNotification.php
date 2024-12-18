@@ -36,19 +36,19 @@
 
 namespace AidingApp\Task\Notifications;
 
-use App\Models\User;
-use AidingApp\Task\Models\Task;
-use Illuminate\Support\HtmlString;
-use App\Models\NotificationSetting;
-use Illuminate\Queue\SerializesModels;
 use AidingApp\Notification\Notifications\BaseNotification;
-use AidingApp\Notification\Notifications\EmailNotification;
-use AidingApp\Notification\Notifications\DatabaseNotification;
-use AidingApp\Notification\Notifications\Messages\MailMessage;
-use Filament\Notifications\Notification as FilamentNotification;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\ListTasks;
-use AidingApp\Notification\Notifications\Concerns\EmailChannelTrait;
 use AidingApp\Notification\Notifications\Concerns\DatabaseChannelTrait;
+use AidingApp\Notification\Notifications\Concerns\EmailChannelTrait;
+use AidingApp\Notification\Notifications\DatabaseNotification;
+use AidingApp\Notification\Notifications\EmailNotification;
+use AidingApp\Notification\Notifications\Messages\MailMessage;
+use AidingApp\Task\Filament\Resources\TaskResource\Pages\ListTasks;
+use AidingApp\Task\Models\Task;
+use App\Models\NotificationSetting;
+use App\Models\User;
+use Filament\Notifications\Notification as FilamentNotification;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\HtmlString;
 
 class TaskAssignedToUserNotification extends BaseNotification implements DatabaseNotification, EmailNotification
 {

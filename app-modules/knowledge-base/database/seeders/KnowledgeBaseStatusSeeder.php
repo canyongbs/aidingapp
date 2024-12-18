@@ -36,8 +36,8 @@
 
 namespace AidingApp\KnowledgeBase\Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
+use Illuminate\Database\Seeder;
 
 class KnowledgeBaseStatusSeeder extends Seeder
 {

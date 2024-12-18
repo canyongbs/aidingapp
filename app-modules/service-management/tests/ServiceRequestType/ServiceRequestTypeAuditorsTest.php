@@ -34,17 +34,16 @@
 </COPYRIGHT>
 */
 
-use App\Models\User;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\ManageServiceRequestTypeAuditors;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\Team\Models\Team;
+use App\Models\User;
+use Filament\Tables\Actions\AttachAction;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
-
-use AidingApp\Contact\Models\Contact;
-use Filament\Tables\Actions\AttachAction;
-use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\ManageServiceRequestTypeAuditors;
 
 it('can attach audit member to service request type', function () {
     $user = User::factory()->licensed([Contact::getLicenseType()])->create();

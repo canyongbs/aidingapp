@@ -36,9 +36,9 @@
 
 namespace AidingApp\InventoryManagement\Policies;
 
+use AidingApp\InventoryManagement\Models\MaintenanceActivity;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
-use AidingApp\InventoryManagement\Models\MaintenanceActivity;
 
 class MaintenanceActivityPolicy
 {

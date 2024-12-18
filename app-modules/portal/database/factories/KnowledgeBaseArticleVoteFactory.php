@@ -37,9 +37,9 @@
 namespace AidingApp\Portal\Database\Factories;
 
 use AidingApp\Contact\Models\Contact;
-use Illuminate\Database\Eloquent\Factories\Factory;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\Portal\Models\KnowledgeBaseArticleVote;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * @extends Factory<KnowledgeBaseArticleVote>

@@ -36,11 +36,11 @@
 
 namespace AidingApp\ServiceManagement\Observers;
 
-use App\Models\User;
-use AidingApp\Timeline\Events\TimelineableRecordCreated;
-use AidingApp\Timeline\Events\TimelineableRecordDeleted;
 use AidingApp\Notification\Events\TriggeredAutoSubscription;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use AidingApp\Timeline\Events\TimelineableRecordCreated;
+use AidingApp\Timeline\Events\TimelineableRecordDeleted;
+use App\Models\User;
 
 class ServiceRequestUpdateObserver
 {

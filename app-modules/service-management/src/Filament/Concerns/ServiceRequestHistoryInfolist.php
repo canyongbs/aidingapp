@@ -36,9 +36,9 @@
 
 namespace AidingApp\ServiceManagement\Filament\Concerns;
 
-use Filament\Infolists\Components\TextEntry;
-use AidingApp\ServiceManagement\Models\ServiceRequestHistory;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
+use AidingApp\ServiceManagement\Models\ServiceRequestHistory;
+use Filament\Infolists\Components\TextEntry;
 
 // TODO Re-use this trait across other places where infolist is rendered
 trait ServiceRequestHistoryInfolist

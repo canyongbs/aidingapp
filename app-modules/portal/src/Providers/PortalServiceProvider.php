@@ -36,13 +36,13 @@
 
 namespace AidingApp\Portal\Providers;
 
-use Filament\Panel;
-use AidingApp\Portal\PortalPlugin;
-use Illuminate\Support\ServiceProvider;
-use AidingApp\Portal\Models\PortalGuest;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use AidingApp\Portal\Models\KnowledgeBaseArticleVote;
+use AidingApp\Portal\Models\PortalGuest;
+use AidingApp\Portal\PortalPlugin;
 use AidingApp\Portal\Settings\SettingsProperties\PortalSettingsProperty;
+use Filament\Panel;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\ServiceProvider;
 
 class PortalServiceProvider extends ServiceProvider
 {

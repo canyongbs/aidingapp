@@ -36,15 +36,15 @@
 
 namespace AidingApp\Engagement\Notifications;
 
-use Throwable;
-use App\Models\Tenant;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use AidingApp\Engagement\Models\EngagementDeliverable;
 use AidingApp\Notification\Models\OutboundDeliverable;
 use AidingApp\Notification\Notifications\BaseNotification;
+use AidingApp\Notification\Notifications\Concerns\EmailChannelTrait;
 use AidingApp\Notification\Notifications\EmailNotification;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
-use AidingApp\Notification\Notifications\Concerns\EmailChannelTrait;
+use App\Models\Tenant;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
+use Throwable;
 
 class EngagementEmailNotification extends BaseNotification implements EmailNotification, ShouldBeUnique
 {

@@ -36,31 +36,31 @@
 
 namespace Tests;
 
-use App\Models\Tenant;
-use Illuminate\Support\Str;
-use App\Models\Authenticatable;
-use Tests\Concerns\LoadsFixtures;
-use Illuminate\Support\Facades\DB;
-use Symfony\Component\Finder\Finder;
-use Symfony\Component\Process\Process;
 use AidingApp\Authorization\Models\Role;
-use Illuminate\Contracts\Console\Kernel;
-use Symfony\Component\Finder\SplFileInfo;
+use App\Models\Authenticatable;
+use App\Models\Tenant;
 use App\Multitenancy\Actions\CreateTenant;
-use Spatie\Permission\PermissionRegistrar;
-use Illuminate\Support\Facades\ParallelTesting;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Multitenancy\DataTransferObjects\TenantConfig;
-use Illuminate\Foundation\Testing\RefreshDatabaseState;
-use Spatie\Multitenancy\Concerns\UsesMultitenancyConfig;
-use App\Multitenancy\DataTransferObjects\TenantMailConfig;
-use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
-use App\Multitenancy\DataTransferObjects\TenantMailersConfig;
 use App\Multitenancy\DataTransferObjects\TenantDatabaseConfig;
-use Illuminate\Foundation\Testing\DatabaseTransactionsManager;
-use App\Multitenancy\DataTransferObjects\TenantSmtpMailerConfig;
+use App\Multitenancy\DataTransferObjects\TenantMailConfig;
+use App\Multitenancy\DataTransferObjects\TenantMailersConfig;
 use App\Multitenancy\DataTransferObjects\TenantS3FilesystemConfig;
+use App\Multitenancy\DataTransferObjects\TenantSmtpMailerConfig;
+use Illuminate\Contracts\Console\Kernel;
+use Illuminate\Foundation\Testing\DatabaseTransactionsManager;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\RefreshDatabaseState;
+use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Foundation\Testing\Traits\CanConfigureMigrationCommands;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\ParallelTesting;
+use Illuminate\Support\Str;
+use Spatie\Multitenancy\Concerns\UsesMultitenancyConfig;
+use Spatie\Permission\PermissionRegistrar;
+use Symfony\Component\Finder\Finder;
+use Symfony\Component\Finder\SplFileInfo;
+use Symfony\Component\Process\Process;
+use Tests\Concerns\LoadsFixtures;
 
 abstract class TestCase extends BaseTestCase
 {

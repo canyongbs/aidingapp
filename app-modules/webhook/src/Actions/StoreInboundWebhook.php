@@ -36,8 +36,8 @@
 
 namespace AidingApp\Webhook\Actions;
 
-use AidingApp\Webhook\Models\InboundWebhook;
 use AidingApp\Webhook\Enums\InboundWebhookSource;
+use AidingApp\Webhook\Models\InboundWebhook;
 
 class StoreInboundWebhook
 {

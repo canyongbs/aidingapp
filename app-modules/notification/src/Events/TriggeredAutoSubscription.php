@@ -36,12 +36,12 @@
 
 namespace AidingApp\Notification\Events;
 
-use App\Models\User;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Foundation\Events\Dispatchable;
-use Illuminate\Broadcasting\InteractsWithSockets;
-use AidingApp\Notification\Models\Contracts\Subscribable;
 use AidingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
+use AidingApp\Notification\Models\Contracts\Subscribable;
+use App\Models\User;
+use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Queue\SerializesModels;
 
 class TriggeredAutoSubscription
 {

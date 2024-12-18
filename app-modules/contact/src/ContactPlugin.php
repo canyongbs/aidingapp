@@ -36,8 +36,8 @@
 
 namespace AidingApp\Contact;
 
-use Filament\Panel;
 use Filament\Contracts\Plugin;
+use Filament\Panel;
 
 class ContactPlugin implements Plugin
 {

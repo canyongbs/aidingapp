@@ -36,9 +36,9 @@
 
 namespace AidingApp\Contact\Tests\Contact\RequestFactories;
 
-use App\Models\User;
 use AidingApp\Contact\Models\ContactSource;
 use AidingApp\Contact\Models\ContactStatus;
+use App\Models\User;
 use Worksome\RequestFactories\RequestFactory;
 
 class CreateContactRequestFactory extends RequestFactory

@@ -36,8 +36,8 @@
 
 namespace AidingApp\Notification\Rules;
 
-use Closure;
 use AidingApp\Notification\Models\Subscription;
+use Closure;
 use Illuminate\Contracts\Validation\DataAwareRule;
 use Illuminate\Contracts\Validation\ValidationRule;
 

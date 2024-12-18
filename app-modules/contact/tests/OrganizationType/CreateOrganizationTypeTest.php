@@ -34,20 +34,17 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Contact\Filament\Resources\OrganizationTypeResource;
+use AidingApp\Contact\Filament\Resources\OrganizationTypeResource\Pages\CreateOrganizationType;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\OrganizationType;
+use AidingApp\Contact\Tests\OrganizationType\RequestFactories\CreateOrganizationTypeRequestFactory;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
-
-use AidingApp\Contact\Models\Contact;
-
-use function PHPUnit\Framework\assertCount;
 use function Pest\Laravel\assertDatabaseHas;
-
-use AidingApp\Contact\Models\OrganizationType;
-use AidingApp\Contact\Filament\Resources\OrganizationTypeResource;
-use AidingApp\Contact\Filament\Resources\OrganizationTypeResource\Pages\CreateOrganizationType;
-use AidingApp\Contact\Tests\OrganizationType\RequestFactories\CreateOrganizationTypeRequestFactory;
+use function Pest\Livewire\livewire;
+use function PHPUnit\Framework\assertCount;
 
 test('Create Organization Type is gated with proper access control', function () {
     $user = User::factory()->licensed(Contact::getLicenseType())->create();

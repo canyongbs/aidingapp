@@ -34,13 +34,13 @@
 </COPYRIGHT>
 */
 
-use Illuminate\Support\Facades\Route;
-use AidingApp\ServiceManagement\Http\Middleware\FeedbackManagementIsOn;
 use AidingApp\Form\Http\Middleware\EnsureSubmissibleIsEmbeddableAndAuthorized;
-use AidingApp\ServiceManagement\Http\Middleware\ServiceRequestTypeFeedbackIsOn;
+use AidingApp\ServiceManagement\Http\Controllers\ServiceRequestFeedbackFormWidgetController;
 use AidingApp\ServiceManagement\Http\Controllers\ServiceRequestFormWidgetController;
 use AidingApp\ServiceManagement\Http\Middleware\EnsureServiceManagementFeatureIsActive;
-use AidingApp\ServiceManagement\Http\Controllers\ServiceRequestFeedbackFormWidgetController;
+use AidingApp\ServiceManagement\Http\Middleware\FeedbackManagementIsOn;
+use AidingApp\ServiceManagement\Http\Middleware\ServiceRequestTypeFeedbackIsOn;
+use Illuminate\Support\Facades\Route;
 
 Route::prefix('api')
     ->middleware([

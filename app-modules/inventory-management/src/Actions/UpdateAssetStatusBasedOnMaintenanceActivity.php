@@ -36,8 +36,8 @@
 
 namespace AidingApp\InventoryManagement\Actions;
 
-use AidingApp\InventoryManagement\Models\MaintenanceActivity;
 use AidingApp\InventoryManagement\Enums\MaintenanceActivityStatus;
+use AidingApp\InventoryManagement\Models\MaintenanceActivity;
 
 class UpdateAssetStatusBasedOnMaintenanceActivity
 {

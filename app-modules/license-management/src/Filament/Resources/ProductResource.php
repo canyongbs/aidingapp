@@ -36,14 +36,14 @@
 
 namespace AidingApp\LicenseManagement\Filament\Resources;
 
-use Filament\Resources\Resource;
-use Filament\Resources\Pages\Page;
-use AidingApp\LicenseManagement\Models\Product;
-use AidingApp\LicenseManagement\Filament\Resources\ProductResource\Pages\EditProduct;
-use AidingApp\LicenseManagement\Filament\Resources\ProductResource\Pages\ViewProduct;
-use AidingApp\LicenseManagement\Filament\Resources\ProductResource\Pages\ListProducts;
 use AidingApp\LicenseManagement\Filament\Resources\ProductResource\Pages\CreateProduct;
+use AidingApp\LicenseManagement\Filament\Resources\ProductResource\Pages\EditProduct;
+use AidingApp\LicenseManagement\Filament\Resources\ProductResource\Pages\ListProducts;
 use AidingApp\LicenseManagement\Filament\Resources\ProductResource\Pages\ManageProductLicenses;
+use AidingApp\LicenseManagement\Filament\Resources\ProductResource\Pages\ViewProduct;
+use AidingApp\LicenseManagement\Models\Product;
+use Filament\Resources\Pages\Page;
+use Filament\Resources\Resource;
 
 class ProductResource extends Resource
 {

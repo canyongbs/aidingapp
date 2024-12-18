@@ -36,16 +36,16 @@
 
 namespace AidingApp\Division\Filament\Resources\DivisionResource\Pages;
 
-use Filament\Tables\Table;
-use Filament\Actions\CreateAction;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\ViewAction;
-use Filament\Tables\Columns\TextColumn;
+use AidingApp\Division\Filament\Resources\DivisionResource;
 use App\Filament\Tables\Columns\IdColumn;
+use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
-use AidingApp\Division\Filament\Resources\DivisionResource;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 
 class ListDivisions extends ListRecords
 {

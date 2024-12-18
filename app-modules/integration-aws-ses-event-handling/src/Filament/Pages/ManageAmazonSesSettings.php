@@ -36,22 +36,22 @@
 
 namespace AidingApp\IntegrationAwsSesEventHandling\Filament\Pages;
 
-use Throwable;
-use App\Models\User;
-use App\Models\Tenant;
-use Filament\Forms\Form;
+use AidingApp\IntegrationAwsSesEventHandling\Settings\SesSettings;
+use App\Filament\Clusters\ProductIntegrations;
 use App\Models\Authenticatable;
-use Filament\Pages\SettingsPage;
-use Illuminate\Support\Facades\DB;
-use Filament\Support\Exceptions\Halt;
+use App\Models\Tenant;
+use App\Models\User;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
+use Filament\Pages\SettingsPage;
+use Filament\Support\Exceptions\Halt;
+use Filament\Support\Facades\FilamentView;
 
 use function Filament\Support\is_app_url;
 
-use Filament\Support\Facades\FilamentView;
-use App\Filament\Clusters\ProductIntegrations;
-use AidingApp\IntegrationAwsSesEventHandling\Settings\SesSettings;
+use Illuminate\Support\Facades\DB;
+use Throwable;
 
 class ManageAmazonSesSettings extends SettingsPage
 {

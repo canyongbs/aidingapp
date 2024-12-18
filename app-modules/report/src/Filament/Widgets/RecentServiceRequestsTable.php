@@ -36,12 +36,12 @@
 
 namespace AidingApp\Report\Filament\Widgets;
 
-use Carbon\Carbon;
-use Filament\Tables\Table;
-use Livewire\Attributes\On;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Widgets\TableWidget as BaseWidget;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use Carbon\Carbon;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use Filament\Widgets\TableWidget as BaseWidget;
+use Livewire\Attributes\On;
 
 class RecentServiceRequestsTable extends BaseWidget
 {

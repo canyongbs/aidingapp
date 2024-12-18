@@ -36,9 +36,9 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\SlaResource\Pages;
 
+use AidingApp\ServiceManagement\Filament\Resources\SlaResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
-use AidingApp\ServiceManagement\Filament\Resources\SlaResource;
 
 class EditSla extends EditRecord
 {

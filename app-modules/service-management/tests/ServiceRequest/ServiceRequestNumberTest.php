@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-use Mockery\MockInterface;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
-use AidingApp\ServiceManagement\Exceptions\ServiceRequestNumberUpdateAttemptException;
 use AidingApp\ServiceManagement\Exceptions\ServiceRequestNumberExceededReRollsException;
+use AidingApp\ServiceManagement\Exceptions\ServiceRequestNumberUpdateAttemptException;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
+use Mockery\MockInterface;
 
 test('An Exception is thrown if it is attempted to change the service_request_number', function () {
     $serviceRequest = ServiceRequest::factory()->create();

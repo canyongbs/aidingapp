@@ -38,8 +38,8 @@ namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Form\Enums\Rounding;
 use AidingApp\Form\Models\Submissible;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @mixin IdeHelperServiceRequestForm

@@ -36,12 +36,12 @@
 
 namespace App\Filament\Resources;
 
-use App\Models\Tag;
-use Filament\Resources\Resource;
 use App\Filament\Clusters\KnowledgeManagement;
+use App\Filament\Resources\TagResource\Pages\CreateTag;
 use App\Filament\Resources\TagResource\Pages\EditTag;
 use App\Filament\Resources\TagResource\Pages\ListTags;
-use App\Filament\Resources\TagResource\Pages\CreateTag;
+use App\Models\Tag;
+use Filament\Resources\Resource;
 
 class TagResource extends Resource
 {

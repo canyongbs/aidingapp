@@ -36,21 +36,21 @@
 
 namespace AidingApp\Contact\Filament\Resources\OrganizationResource\Pages;
 
-use Filament\Forms\Form;
-use Filament\Actions\ViewAction;
+use AidingApp\Contact\Filament\Resources\OrganizationResource;
+use AidingApp\Contact\Models\OrganizationIndustry;
+use AidingApp\Contact\Models\OrganizationType;
+use AidingApp\Contact\Rules\UniqueOrganizationDomain;
 use Filament\Actions\DeleteAction;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\Section;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Form;
 use Filament\Resources\Pages\EditRecord;
-use AidingApp\Contact\Models\OrganizationType;
-use AidingApp\Contact\Models\OrganizationIndustry;
-use AidingApp\Contact\Rules\UniqueOrganizationDomain;
-use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
-use AidingApp\Contact\Filament\Resources\OrganizationResource;
 
 class EditOrganization extends EditRecord
 {

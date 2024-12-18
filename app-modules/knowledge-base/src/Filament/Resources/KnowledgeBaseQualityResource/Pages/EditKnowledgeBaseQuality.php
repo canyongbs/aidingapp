@@ -36,11 +36,11 @@
 
 namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualityResource\Pages;
 
-use Filament\Actions;
-use Filament\Forms\Form;
-use Filament\Forms\Components\TextInput;
-use Filament\Resources\Pages\EditRecord;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualityResource;
+use Filament\Actions;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
+use Filament\Resources\Pages\EditRecord;
 
 class EditKnowledgeBaseQuality extends EditRecord
 {

@@ -36,8 +36,8 @@
 
 namespace AidingApp\InventoryManagement\Filament\Resources\MaintenanceActivityResource;
 
-use Filament\Actions\ViewAction;
 use AidingApp\InventoryManagement\Filament\Concerns\MaintenanceActivityInfolist;
+use Filament\Actions\ViewAction;
 
 class MaintenanceActivityViewAction extends ViewAction
 {

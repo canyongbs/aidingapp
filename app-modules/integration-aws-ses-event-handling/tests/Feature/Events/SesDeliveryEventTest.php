@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-use function Tests\Helpers\Events\testEventIsBeingListenedTo;
-
 use AidingApp\IntegrationAwsSesEventHandling\Events\SesDeliveryEvent;
 use AidingApp\IntegrationAwsSesEventHandling\Listeners\HandleSesDeliveryEvent;
+
+use function Tests\Helpers\Events\testEventIsBeingListenedTo;
 
 testEventIsBeingListenedTo(
     event: SesDeliveryEvent::class,

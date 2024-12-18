@@ -36,12 +36,12 @@
 
 namespace AidingApp\ContractManagement\Providers;
 
-use Filament\Panel;
-use Illuminate\Support\ServiceProvider;
-use AidingApp\ContractManagement\Models\Contract;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use AidingApp\ContractManagement\Models\ContractType;
 use AidingApp\ContractManagement\ContractManagementPlugin;
+use AidingApp\ContractManagement\Models\Contract;
+use AidingApp\ContractManagement\Models\ContractType;
+use Filament\Panel;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\ServiceProvider;
 
 class ContractManagementServiceProvider extends ServiceProvider
 {

@@ -36,19 +36,19 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\SlaResource\RelationManagers;
 
-use Filament\Forms\Get;
-use Filament\Tables\Table;
-use Illuminate\Support\Arr;
-use Filament\Forms\Components\Select;
-use Filament\Tables\Columns\TextColumn;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
+use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use App\Filament\Tables\Columns\IdColumn;
-use Illuminate\Database\Eloquent\Builder;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Get;
+use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Actions\AssociateAction;
 use Filament\Tables\Actions\DissociateAction;
 use Filament\Tables\Actions\DissociateBulkAction;
-use Filament\Resources\RelationManagers\RelationManager;
-use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Arr;
 
 class ServiceRequestPrioritiesRelationManager extends RelationManager
 {

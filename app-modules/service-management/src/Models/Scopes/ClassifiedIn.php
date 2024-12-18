@@ -36,8 +36,8 @@
 
 namespace AidingApp\ServiceManagement\Models\Scopes;
 
-use Illuminate\Database\Eloquent\Builder;
 use AidingApp\ServiceManagement\Models\Contracts\ClassificationInterface;
+use Illuminate\Database\Eloquent\Builder;
 
 class ClassifiedIn
 {

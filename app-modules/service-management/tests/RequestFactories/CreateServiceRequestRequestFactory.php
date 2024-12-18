@@ -38,9 +38,9 @@ namespace AidingApp\ServiceManagement\Tests\RequestFactories;
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Division\Models\Division;
-use Worksome\RequestFactories\RequestFactory;
-use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
+use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use Worksome\RequestFactories\RequestFactory;
 
 class CreateServiceRequestRequestFactory extends RequestFactory
 {

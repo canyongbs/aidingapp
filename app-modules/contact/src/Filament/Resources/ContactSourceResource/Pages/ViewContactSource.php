@@ -36,12 +36,12 @@
 
 namespace AidingApp\Contact\Filament\Resources\ContactSourceResource\Pages;
 
+use AidingApp\Contact\Filament\Resources\ContactSourceResource;
 use Filament\Actions;
-use Filament\Infolists\Infolist;
-use Filament\Resources\Pages\ViewRecord;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
-use AidingApp\Contact\Filament\Resources\ContactSourceResource;
+use Filament\Infolists\Infolist;
+use Filament\Resources\Pages\ViewRecord;
 
 class ViewContactSource extends ViewRecord
 {

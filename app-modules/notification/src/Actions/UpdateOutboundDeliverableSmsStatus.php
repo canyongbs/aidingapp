@@ -36,15 +36,15 @@
 
 namespace AidingApp\Notification\Actions;
 
+use AidingApp\IntegrationTwilio\DataTransferObjects\TwilioStatusCallbackData;
+use AidingApp\Notification\DataTransferObjects\UpdateSmsDeliveryStatusData;
+use AidingApp\Notification\Models\OutboundDeliverable;
 use Illuminate\Bus\Queueable;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
-use AidingApp\Notification\Models\OutboundDeliverable;
-use AidingApp\Notification\DataTransferObjects\UpdateSmsDeliveryStatusData;
-use AidingApp\IntegrationTwilio\DataTransferObjects\TwilioStatusCallbackData;
+use Illuminate\Queue\SerializesModels;
 
 class UpdateOutboundDeliverableSmsStatus implements ShouldQueue
 {

@@ -36,13 +36,13 @@
 
 namespace AidingApp\Engagement\Drivers;
 
-use AidingApp\Engagement\Models\EngagementDeliverable;
-use AidingApp\Engagement\Actions\QueuedEngagementDelivery;
 use AidingApp\Engagement\Actions\EngagementSmsChannelDelivery;
+use AidingApp\Engagement\Actions\QueuedEngagementDelivery;
 use AidingApp\Engagement\Drivers\Contracts\EngagementDeliverableDriver;
-use AidingApp\Notification\DataTransferObjects\UpdateSmsDeliveryStatusData;
+use AidingApp\Engagement\Models\EngagementDeliverable;
 use AidingApp\IntegrationTwilio\DataTransferObjects\TwilioStatusCallbackData;
 use AidingApp\Notification\DataTransferObjects\UpdateEmailDeliveryStatusData;
+use AidingApp\Notification\DataTransferObjects\UpdateSmsDeliveryStatusData;
 
 class EngagementSmsDriver implements EngagementDeliverableDriver
 {

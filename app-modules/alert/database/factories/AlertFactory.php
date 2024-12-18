@@ -36,10 +36,10 @@
 
 namespace AidingApp\Alert\Database\Factories;
 
+use AidingApp\Alert\Enums\AlertSeverity;
+use AidingApp\Alert\Enums\AlertStatus;
 use AidingApp\Alert\Models\Alert;
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Alert\Enums\AlertStatus;
-use AidingApp\Alert\Enums\AlertSeverity;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Relations\Relation;
 

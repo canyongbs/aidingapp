@@ -34,19 +34,16 @@
 </COPYRIGHT>
 */
 
-use App\Models\User;
-
-use function Pest\Laravel\get;
-
-use AidingApp\Task\Models\Task;
-
-use function Pest\Laravel\withoutMiddleware;
-
 use AidingApp\InventoryManagement\Models\Asset;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\ServiceManagement\Models\ChangeRequest;
-use App\Multitenancy\Http\Middleware\CheckOlympusKey;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\Task\Models\Task;
+use App\Models\User;
+use App\Multitenancy\Http\Middleware\CheckOlympusKey;
+
+use function Pest\Laravel\get;
+use function Pest\Laravel\withoutMiddleware;
 
 beforeEach(function () {
     withoutMiddleware(CheckOlympusKey::class);

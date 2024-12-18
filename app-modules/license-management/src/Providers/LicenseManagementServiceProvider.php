@@ -36,12 +36,12 @@
 
 namespace AidingApp\LicenseManagement\Providers;
 
-use Filament\Panel;
-use Illuminate\Support\ServiceProvider;
-use AidingApp\LicenseManagement\Models\Product;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use AidingApp\LicenseManagement\Models\ProductLicense;
 use AidingApp\LicenseManagement\LicenseManagementPlugin;
+use AidingApp\LicenseManagement\Models\Product;
+use AidingApp\LicenseManagement\Models\ProductLicense;
+use Filament\Panel;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\ServiceProvider;
 
 class LicenseManagementServiceProvider extends ServiceProvider
 {

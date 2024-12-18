@@ -36,12 +36,12 @@
 
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
-use Illuminate\Http\JsonResponse;
-use App\Http\Controllers\Controller;
-use AidingApp\Portal\Models\PortalGuest;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
-use AidingApp\Portal\Models\KnowledgeBaseArticleVote;
 use AidingApp\Portal\Http\Requests\StoreKnowledgeBaseArticleVoteRequest;
+use AidingApp\Portal\Models\KnowledgeBaseArticleVote;
+use AidingApp\Portal\Models\PortalGuest;
+use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
 
 class StoreKnowledgeBaseArticleVoteController extends Controller
 {

@@ -36,9 +36,9 @@
 
 namespace AidingApp\Contact\Policies;
 
+use AidingApp\Contact\Models\Contact;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
-use AidingApp\Contact\Models\Contact;
 
 class ContactPolicy
 {

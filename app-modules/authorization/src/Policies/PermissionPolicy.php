@@ -36,9 +36,9 @@
 
 namespace AidingApp\Authorization\Policies;
 
+use AidingApp\Authorization\Models\Permission;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
-use AidingApp\Authorization\Models\Permission;
 
 class PermissionPolicy
 {

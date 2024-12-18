@@ -36,10 +36,10 @@
 
 namespace AidingApp\ServiceManagement\Tests\RequestFactories;
 
-use App\Models\User;
-use AidingApp\Team\Models\Team;
-use Worksome\RequestFactories\RequestFactory;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
+use AidingApp\Team\Models\Team;
+use App\Models\User;
+use Worksome\RequestFactories\RequestFactory;
 
 class EditServiceRequestTypeAssignmentsRequestFactory extends RequestFactory
 {

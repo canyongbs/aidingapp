@@ -36,10 +36,10 @@
 
 namespace AidingApp\ServiceManagement\Database\Factories;
 
-use Illuminate\Support\Facades\File;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use BladeUI\Icons\Factory as BladeUIIconsFactory;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use Illuminate\Support\Facades\File;
 
 /**
  * @extends Factory<ServiceRequestType>

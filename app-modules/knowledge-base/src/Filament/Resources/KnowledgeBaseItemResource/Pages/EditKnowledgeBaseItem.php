@@ -36,19 +36,19 @@
 
 namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource\Pages;
 
-use Filament\Forms\Form;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource;
+use App\Filament\Pages\Concerns\BreadcrumbCharacterLimit;
+use Filament\Actions\Action as BaseAction;
 use Filament\Actions\EditAction;
-use Filament\Forms\Components\View;
+use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\Section;
-use FilamentTiptapEditor\TiptapEditor;
-use Illuminate\Database\Eloquent\Model;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\View;
+use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
-use Filament\Actions\Action as BaseAction;
-use Filament\Forms\Components\Actions\Action;
-use App\Filament\Pages\Concerns\BreadcrumbCharacterLimit;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource;
+use FilamentTiptapEditor\TiptapEditor;
+use Illuminate\Database\Eloquent\Model;
 
 class EditKnowledgeBaseItem extends EditRecord
 {

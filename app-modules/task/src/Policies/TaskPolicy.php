@@ -36,12 +36,12 @@
 
 namespace AidingApp\Task\Policies;
 
-use AidingApp\Task\Models\Task;
-use App\Models\Authenticatable;
-use Illuminate\Auth\Access\Response;
-use App\Concerns\PerformsLicenseChecks;
 use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\Task\Models\Task;
+use App\Concerns\PerformsLicenseChecks;
+use App\Models\Authenticatable;
 use App\Policies\Contracts\PerformsChecksBeforeAuthorization;
+use Illuminate\Auth\Access\Response;
 
 class TaskPolicy implements PerformsChecksBeforeAuthorization
 {

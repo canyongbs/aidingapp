@@ -36,11 +36,11 @@
 
 namespace AidingApp\Engagement\Filament\Concerns;
 
+use AidingApp\Engagement\Enums\EngagementDeliveryStatus;
 use AidingApp\Engagement\Models\Engagement;
 use Filament\Infolists\Components\Fieldset;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
-use AidingApp\Engagement\Enums\EngagementDeliveryStatus;
 
 // TODO Re-use this trait across other places where infolist is rendered
 trait EngagementInfolist

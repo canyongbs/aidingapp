@@ -36,19 +36,19 @@
 
 namespace AidingApp\Authorization\Providers;
 
-use Filament\Panel;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Support\ServiceProvider;
-use AidingApp\Authorization\Models\Role;
+use AidingApp\Authorization\AuthorizationPlugin;
+use AidingApp\Authorization\Http\Controllers\Auth\LogoutController;
 use AidingApp\Authorization\Models\License;
 use AidingApp\Authorization\Models\Permission;
-use AidingApp\Authorization\AuthorizationPlugin;
-use SocialiteProviders\Azure\AzureExtendSocialite;
-use SocialiteProviders\Manager\SocialiteWasCalled;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use SocialiteProviders\Google\GoogleExtendSocialite;
-use AidingApp\Authorization\Http\Controllers\Auth\LogoutController;
+use AidingApp\Authorization\Models\Role;
 use Filament\Http\Controllers\Auth\LogoutController as FilamentLogoutController;
+use Filament\Panel;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\ServiceProvider;
+use SocialiteProviders\Azure\AzureExtendSocialite;
+use SocialiteProviders\Google\GoogleExtendSocialite;
+use SocialiteProviders\Manager\SocialiteWasCalled;
 
 class AuthorizationServiceProvider extends ServiceProvider
 {

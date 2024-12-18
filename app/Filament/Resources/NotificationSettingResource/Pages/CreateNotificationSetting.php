@@ -36,10 +36,10 @@
 
 namespace App\Filament\Resources\NotificationSettingResource\Pages;
 
-use Filament\Forms\Form;
-use Filament\Resources\Pages\CreateRecord;
 use App\Filament\Resources\NotificationSettingResource;
 use App\Filament\Resources\NotificationSettingResource\Forms\NotificationSettingForm;
+use Filament\Forms\Form;
+use Filament\Resources\Pages\CreateRecord;
 
 class CreateNotificationSetting extends CreateRecord
 {

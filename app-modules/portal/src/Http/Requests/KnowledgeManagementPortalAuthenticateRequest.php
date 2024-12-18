@@ -36,9 +36,9 @@
 
 namespace AidingApp\Portal\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Contracts\Validation\ValidationRule;
 use AidingApp\Portal\Rules\PortalAuthenticateCodeValidation;
+use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Foundation\Http\FormRequest;
 
 class KnowledgeManagementPortalAuthenticateRequest extends FormRequest
 {

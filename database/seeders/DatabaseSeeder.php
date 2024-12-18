@@ -36,29 +36,29 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Notification;
-use AidingApp\Task\Database\Seeders\TaskSeeder;
-use AidingApp\Team\Database\Seeders\TeamSeeder;
 use AidingApp\Alert\Database\Seeders\AlertSeeder;
 use AidingApp\Contact\Database\Seeders\ContactSeeder;
-use AidingApp\Division\Database\Seeders\DivisionSeeder;
 use AidingApp\Contact\Database\Seeders\ContactSourceSeeder;
 use AidingApp\Contact\Database\Seeders\ContactStatusSeeder;
-use AidingApp\Contact\Database\Seeders\OrganizationTypeSeeder;
-use AidingApp\InventoryManagement\Database\Seeders\AssetSeeder;
 use AidingApp\Contact\Database\Seeders\OrganizationIndustrySeeder;
-use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseItemSeeder;
-use AidingApp\ServiceManagement\Database\Seeders\ServiceRequestSeeder;
-use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseStatusSeeder;
-use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseQualitySeeder;
-use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseCategorySeeder;
-use AidingApp\ServiceManagement\Database\Seeders\ChangeRequestTypeSeeder;
-use AidingApp\ServiceManagement\Database\Seeders\ServiceRequestTypeSeeder;
-use AidingApp\ServiceManagement\Database\Seeders\ChangeRequestStatusSeeder;
-use AidingApp\ServiceManagement\Database\Seeders\ServiceRequestStatusSeeder;
-use AidingApp\ServiceManagement\Database\Seeders\ServiceRequestUpdateSeeder;
+use AidingApp\Contact\Database\Seeders\OrganizationTypeSeeder;
+use AidingApp\Division\Database\Seeders\DivisionSeeder;
+use AidingApp\InventoryManagement\Database\Seeders\AssetSeeder;
 use AidingApp\InventoryManagement\Database\Seeders\MaintenanceProviderSeeder;
+use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseCategorySeeder;
+use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseItemSeeder;
+use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseQualitySeeder;
+use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseStatusSeeder;
+use AidingApp\ServiceManagement\Database\Seeders\ChangeRequestStatusSeeder;
+use AidingApp\ServiceManagement\Database\Seeders\ChangeRequestTypeSeeder;
+use AidingApp\ServiceManagement\Database\Seeders\ServiceRequestSeeder;
+use AidingApp\ServiceManagement\Database\Seeders\ServiceRequestStatusSeeder;
+use AidingApp\ServiceManagement\Database\Seeders\ServiceRequestTypeSeeder;
+use AidingApp\ServiceManagement\Database\Seeders\ServiceRequestUpdateSeeder;
+use AidingApp\Task\Database\Seeders\TaskSeeder;
+use AidingApp\Team\Database\Seeders\TeamSeeder;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Notification;
 
 class DatabaseSeeder extends Seeder
 {

@@ -36,33 +36,33 @@
 
 namespace AidingApp\Engagement\Models;
 
-use App\Models\User;
-use App\Models\BaseModel;
-use Spatie\MediaLibrary\HasMedia;
-use Illuminate\Support\Collection;
-use Illuminate\Support\HtmlString;
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Timeline\Models\Timeline;
-use Illuminate\Database\Eloquent\Model;
-use OwenIt\Auditing\Contracts\Auditable;
-use Illuminate\Database\Eloquent\Builder;
-use App\Models\Scopes\LicensedToEducatable;
-use Spatie\MediaLibrary\InteractsWithMedia;
-use App\Models\Concerns\BelongsToEducatable;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
-use AidingApp\Timeline\Timelines\EngagementTimeline;
-use Illuminate\Database\Eloquent\Relations\MorphOne;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use AidingApp\Engagement\Observers\EngagementObserver;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use AidingApp\Engagement\Actions\GenerateEngagementBodyContent;
 use AidingApp\Engagement\Enums\EngagementDeliveryStatus;
+use AidingApp\Engagement\Observers\EngagementObserver;
+use AidingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
 use AidingApp\Notification\Models\Contracts\Subscribable;
 use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
-use AidingApp\Engagement\Actions\GenerateEngagementBodyContent;
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
+use AidingApp\Timeline\Models\Timeline;
+use AidingApp\Timeline\Timelines\EngagementTimeline;
+use App\Models\BaseModel;
+use App\Models\Concerns\BelongsToEducatable;
+use App\Models\Scopes\LicensedToEducatable;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Collection;
+use Illuminate\Support\HtmlString;
+use OwenIt\Auditing\Contracts\Auditable;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
 /**
  * @property-read Educatable $recipient

@@ -36,14 +36,14 @@
 
 namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\Pages;
 
-use Filament\Forms\Form;
-use Filament\Actions\ViewAction;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource;
+use App\Filament\Forms\Components\IconSelect;
 use Filament\Actions\DeleteAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
 use Filament\Resources\Pages\EditRecord;
-use App\Filament\Forms\Components\IconSelect;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource;
 
 class EditKnowledgeBaseCategory extends EditRecord
 {

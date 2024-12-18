@@ -36,12 +36,12 @@
 
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
-use App\Models\Tag;
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
-use App\Models\Scopes\TagsForClass;
-use App\Http\Controllers\Controller;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use App\Http\Controllers\Controller;
+use App\Models\Scopes\TagsForClass;
+use App\Models\Tag;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class GetKnowledgeManagementPortalTagsController extends Controller
 {

@@ -34,19 +34,20 @@
 </COPYRIGHT>
 */
 
-use App\Models\User;
+use App\Filament\Resources\UserResource;
+use App\Filament\Resources\UserResource\Pages\EditUser;
+use App\Filament\Resources\UserResource\RelationManagers\RolesRelationManager;
 use App\Models\Authenticatable;
+use App\Models\User;
+use Filament\Forms\Components\Select;
+use Filament\Tables\Actions\AttachAction;
 
-use function Tests\asSuperAdmin;
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
-use Filament\Forms\Components\Select;
-use App\Filament\Resources\UserResource;
-use Filament\Tables\Actions\AttachAction;
 use STS\FilamentImpersonate\Pages\Actions\Impersonate;
-use App\Filament\Resources\UserResource\Pages\EditUser;
-use App\Filament\Resources\UserResource\RelationManagers\RolesRelationManager;
+
+use function Tests\asSuperAdmin;
 
 it('renders impersonate button for non super admin users when user is super admin', function () {
     asSuperAdmin();

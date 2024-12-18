@@ -36,13 +36,13 @@
 
 namespace AidingApp\Authorization\Enums;
 
-use Exception;
-use Mockery\MockInterface;
-use SocialiteProviders\Manager\Config;
-use Laravel\Socialite\Facades\Socialite;
-use Laravel\Socialite\Contracts\Provider;
 use AidingApp\Authorization\Settings\AzureSsoSettings;
 use AidingApp\Authorization\Settings\GoogleSsoSettings;
+use Exception;
+use Laravel\Socialite\Contracts\Provider;
+use Laravel\Socialite\Facades\Socialite;
+use Mockery\MockInterface;
+use SocialiteProviders\Manager\Config;
 
 enum SocialiteProvider: string
 {

@@ -36,15 +36,15 @@
 
 namespace AidingApp\InventoryManagement\Filament\Resources\AssetTypeResource\Pages;
 
-use Filament\Tables\Table;
+use AidingApp\InventoryManagement\Filament\Resources\AssetTypeResource;
 use Filament\Actions\CreateAction;
+use Filament\Resources\Pages\ListRecords;
+use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Resources\Pages\ListRecords;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DeleteBulkAction;
-use AidingApp\InventoryManagement\Filament\Resources\AssetTypeResource;
+use Filament\Tables\Table;
 
 class ListAssetTypes extends ListRecords
 {

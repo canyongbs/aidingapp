@@ -36,8 +36,8 @@
 
 namespace AidingApp\Form\Providers;
 
-use Filament\Panel;
 use AidingApp\Form\FormPlugin;
+use Filament\Panel;
 use Illuminate\Support\ServiceProvider;
 
 class FormServiceProvider extends ServiceProvider

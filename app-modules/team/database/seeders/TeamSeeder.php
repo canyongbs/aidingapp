@@ -36,8 +36,8 @@
 
 namespace AidingApp\Team\Database\Seeders;
 
-use App\Models\User;
 use AidingApp\Team\Models\Team;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class TeamSeeder extends Seeder

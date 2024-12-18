@@ -36,23 +36,23 @@
 
 namespace AidingApp\InventoryManagement\Models;
 
-use App\Models\BaseModel;
-use Illuminate\Support\Collection;
-use AidingApp\Timeline\Models\Timeline;
-use Illuminate\Database\Eloquent\Model;
-use OwenIt\Auditing\Contracts\Auditable;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Database\Eloquent\Relations\MorphOne;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use AidingApp\Timeline\Timelines\AssetCheckOutTimeline;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
-use AidingApp\InventoryManagement\Enums\AssetCheckOutStatus;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\InventoryManagement\Enums\AssetCheckOutStatus;
 use AidingApp\InventoryManagement\Observers\AssetCheckOutObserver;
+use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
+use AidingApp\Timeline\Models\Timeline;
+use AidingApp\Timeline\Timelines\AssetCheckOutTimeline;
+use App\Models\BaseModel;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Collection;
+use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * @mixin IdeHelperAssetCheckOut

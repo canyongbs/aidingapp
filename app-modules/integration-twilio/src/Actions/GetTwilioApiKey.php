@@ -36,9 +36,9 @@
 
 namespace AidingApp\IntegrationTwilio\Actions;
 
-use Twilio\Rest\Client;
-use AidingApp\IntegrationTwilio\Settings\TwilioSettings;
 use AidingApp\IntegrationTwilio\DataTransferObjects\TwilioApiKey;
+use AidingApp\IntegrationTwilio\Settings\TwilioSettings;
+use Twilio\Rest\Client;
 
 class GetTwilioApiKey
 {

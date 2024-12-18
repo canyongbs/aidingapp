@@ -36,14 +36,14 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypeResource\Pages;
 
-use Filament\Actions\EditAction;
-use Filament\Infolists\Infolist;
+use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypeResource;
 use App\Filament\Resources\UserResource;
-use Filament\Resources\Pages\ViewRecord;
+use Filament\Actions\EditAction;
+use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Components\RepeatableEntry;
-use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypeResource;
+use Filament\Infolists\Infolist;
+use Filament\Resources\Pages\ViewRecord;
 
 class ViewChangeRequestType extends ViewRecord
 {

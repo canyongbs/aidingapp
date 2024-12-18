@@ -36,15 +36,15 @@
 
 namespace AidingApp\Authorization\Filament\Pages;
 
-use Filament\Forms\Get;
-use Filament\Forms\Form;
+use AidingApp\Authorization\Settings\GoogleSsoSettings;
+use App\Filament\Clusters\ProductIntegrations;
 use App\Models\Authenticatable;
-use Filament\Pages\SettingsPage;
-use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
-use App\Filament\Clusters\ProductIntegrations;
-use AidingApp\Authorization\Settings\GoogleSsoSettings;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Form;
+use Filament\Forms\Get;
+use Filament\Pages\SettingsPage;
 
 class ManageGoogleSsoSettings extends SettingsPage
 {

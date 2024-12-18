@@ -36,13 +36,13 @@
 
 namespace AidingApp\Webhook\Http\Middleware;
 
+use AidingApp\Webhook\Actions\StoreInboundWebhook;
+use AidingApp\Webhook\DataTransferObjects\SnsMessage;
+use AidingApp\Webhook\Enums\InboundWebhookSource;
 use Closure;
 use Exception;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
-use AidingApp\Webhook\Enums\InboundWebhookSource;
-use AidingApp\Webhook\Actions\StoreInboundWebhook;
-use AidingApp\Webhook\DataTransferObjects\SnsMessage;
 
 class HandleAwsSnsRequest
 {

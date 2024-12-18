@@ -36,8 +36,8 @@
 
 namespace AidingApp\Portal\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Foundation\Http\FormRequest;
 
 class StoreKnowledgeBaseArticleVoteRequest extends FormRequest
 {

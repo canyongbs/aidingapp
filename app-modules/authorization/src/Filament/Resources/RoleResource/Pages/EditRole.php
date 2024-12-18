@@ -36,15 +36,15 @@
 
 namespace AidingApp\Authorization\Filament\Resources\RoleResource\Pages;
 
-use Filament\Forms\Form;
+use AidingApp\Authorization\Filament\Resources\RoleResource;
+use AidingApp\Authorization\Models\Role;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
-use Illuminate\Validation\Rules\Unique;
-use AidingApp\Authorization\Models\Role;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
 use Filament\Resources\Pages\EditRecord;
-use AidingApp\Authorization\Filament\Resources\RoleResource;
+use Illuminate\Validation\Rules\Unique;
 
 class EditRole extends EditRecord
 {

@@ -37,16 +37,16 @@
 namespace App\Console\Commands;
 
 use App\Models\Tenant;
-use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Artisan;
+use App\Multitenancy\Actions\CreateTenant as CreateTenantAction;
 use App\Multitenancy\DataTransferObjects\TenantConfig;
+use App\Multitenancy\DataTransferObjects\TenantDatabaseConfig;
 use App\Multitenancy\DataTransferObjects\TenantMailConfig;
 use App\Multitenancy\DataTransferObjects\TenantMailersConfig;
-use App\Multitenancy\DataTransferObjects\TenantDatabaseConfig;
-use App\Multitenancy\Actions\CreateTenant as CreateTenantAction;
-use App\Multitenancy\DataTransferObjects\TenantSmtpMailerConfig;
 use App\Multitenancy\DataTransferObjects\TenantS3FilesystemConfig;
+use App\Multitenancy\DataTransferObjects\TenantSmtpMailerConfig;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 
 class CreateTenant extends Command
 {

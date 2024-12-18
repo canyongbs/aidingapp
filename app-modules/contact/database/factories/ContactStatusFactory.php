@@ -36,10 +36,10 @@
 
 namespace AidingApp\Contact\Database\Factories;
 
-use AidingApp\Contact\Models\ContactStatus;
-use Illuminate\Database\Eloquent\Factories\Factory;
 use AidingApp\Contact\Enums\ContactStatusColorOptions;
 use AidingApp\Contact\Enums\SystemContactClassification;
+use AidingApp\Contact\Models\ContactStatus;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * @extends Factory<ContactStatus>

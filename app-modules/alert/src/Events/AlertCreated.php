@@ -37,9 +37,9 @@
 namespace AidingApp\Alert\Events;
 
 use AidingApp\Alert\Models\Alert;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Queue\SerializesModels;
 
 class AlertCreated
 {

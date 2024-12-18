@@ -36,8 +36,8 @@
 
 namespace AidingApp\Portal\Livewire;
 
-use Livewire\Component;
 use Illuminate\Contracts\View\View;
+use Livewire\Component;
 
 class RenderKnowledgeManagementPortal extends Component
 {

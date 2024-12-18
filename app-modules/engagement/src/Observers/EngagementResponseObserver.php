@@ -36,10 +36,10 @@
 
 namespace AidingApp\Engagement\Observers;
 
-use Illuminate\Database\Eloquent\Model;
 use AidingApp\Engagement\Models\EngagementResponse;
 use AidingApp\Timeline\Events\TimelineableRecordCreated;
 use AidingApp\Timeline\Events\TimelineableRecordDeleted;
+use Illuminate\Database\Eloquent\Model;
 
 class EngagementResponseObserver
 {

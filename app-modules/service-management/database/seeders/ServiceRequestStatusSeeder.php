@@ -36,10 +36,10 @@
 
 namespace AidingApp\ServiceManagement\Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use AidingApp\ServiceManagement\Enums\ColumnColorOptions;
-use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
+use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use Illuminate\Database\Seeder;
 
 class ServiceRequestStatusSeeder extends Seeder
 {

@@ -36,10 +36,10 @@
 
 namespace AidingApp\Contact\Filament\Resources\ContactResource\Pages;
 
+use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Engagement\Models\Engagement;
 use AidingApp\Engagement\Models\EngagementResponse;
 use AidingApp\Timeline\Filament\Pages\TimelinePage;
-use AidingApp\Contact\Filament\Resources\ContactResource;
 
 class ContactEngagementTimeline extends TimelinePage
 {

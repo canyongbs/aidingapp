@@ -34,17 +34,14 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Contact\Models\Contact;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Models\User;
-
-use function Tests\asSuperAdmin;
-
 use App\Settings\LicenseSettings;
 
 use function Pest\Laravel\actingAs;
-
-use AidingApp\Contact\Models\Contact;
-use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
+use function Tests\asSuperAdmin;
 
 test('The correct details are displayed on the ViewServiceRequestType page', function () {
     $serviceRequestType = ServiceRequestType::factory()->create();

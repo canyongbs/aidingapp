@@ -36,8 +36,8 @@
 
 namespace AidingApp\Timeline\Listeners;
 
-use AidingApp\Timeline\Models\Timeline;
 use AidingApp\Timeline\Events\TimelineableRecordDeleted;
+use AidingApp\Timeline\Models\Timeline;
 
 class RemoveRecordFromTimeline
 {

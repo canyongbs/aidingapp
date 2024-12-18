@@ -36,11 +36,11 @@
 
 namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource\Pages;
 
-use Filament\Actions;
-use Filament\Forms\Form;
-use Filament\Forms\Components\TextInput;
-use Filament\Resources\Pages\EditRecord;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource;
+use Filament\Actions;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
+use Filament\Resources\Pages\EditRecord;
 
 class EditKnowledgeBaseStatus extends EditRecord
 {

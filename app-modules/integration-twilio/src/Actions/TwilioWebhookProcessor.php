@@ -36,9 +36,9 @@
 
 namespace AidingApp\IntegrationTwilio\Actions;
 
+use AidingApp\IntegrationTwilio\DataTransferObjects\TwilioWebhookData;
 use Illuminate\Http\Response;
 use Twilio\TwiML\MessagingResponse;
-use AidingApp\IntegrationTwilio\DataTransferObjects\TwilioWebhookData;
 
 class TwilioWebhookProcessor
 {

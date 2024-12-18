@@ -36,8 +36,8 @@
 
 namespace AidingApp\InventoryManagement\Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use AidingApp\InventoryManagement\Models\AssetLocation;
+use Illuminate\Database\Seeder;
 
 class AssetLocationSeeder extends Seeder
 {

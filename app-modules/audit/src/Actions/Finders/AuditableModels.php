@@ -36,10 +36,10 @@
 
 namespace AidingApp\Audit\Actions\Finders;
 
-use ReflectionClass;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection;
 use OwenIt\Auditing\Contracts\Auditable;
-use Illuminate\Database\Eloquent\Relations\Relation;
+use ReflectionClass;
 
 class AuditableModels
 {

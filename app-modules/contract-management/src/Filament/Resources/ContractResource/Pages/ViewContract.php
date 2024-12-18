@@ -36,15 +36,15 @@
 
 namespace AidingApp\ContractManagement\Filament\Resources\ContractResource\Pages;
 
-use Illuminate\Support\Str;
-use Filament\Actions\EditAction;
-use Filament\Infolists\Infolist;
+use AidingApp\ContractManagement\Filament\Resources\ContractResource;
+use AidingApp\ContractManagement\Models\Contract;
 use Filament\Actions\DeleteAction;
-use Filament\Resources\Pages\ViewRecord;
+use Filament\Actions\EditAction;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
-use AidingApp\ContractManagement\Models\Contract;
-use AidingApp\ContractManagement\Filament\Resources\ContractResource;
+use Filament\Infolists\Infolist;
+use Filament\Resources\Pages\ViewRecord;
+use Illuminate\Support\Str;
 
 class ViewContract extends ViewRecord
 {

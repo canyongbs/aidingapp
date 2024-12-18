@@ -36,12 +36,12 @@
 
 namespace AidingApp\ContractManagement\Filament\Resources;
 
-use Filament\Resources\Resource;
-use App\Filament\Clusters\ContractManagement;
-use AidingApp\ContractManagement\Models\ContractType;
+use AidingApp\ContractManagement\Filament\Resources\ContractTypeResource\Pages\CreateContractType;
 use AidingApp\ContractManagement\Filament\Resources\ContractTypeResource\Pages\EditContractType;
 use AidingApp\ContractManagement\Filament\Resources\ContractTypeResource\Pages\ListContractTypes;
-use AidingApp\ContractManagement\Filament\Resources\ContractTypeResource\Pages\CreateContractType;
+use AidingApp\ContractManagement\Models\ContractType;
+use App\Filament\Clusters\ContractManagement;
+use Filament\Resources\Resource;
 
 class ContractTypeResource extends Resource
 {

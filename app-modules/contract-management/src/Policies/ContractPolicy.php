@@ -36,10 +36,10 @@
 
 namespace AidingApp\ContractManagement\Policies;
 
-use App\Models\Authenticatable;
-use Illuminate\Auth\Access\Response;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\ContractManagement\Models\Contract;
+use App\Models\Authenticatable;
+use Illuminate\Auth\Access\Response;
 
 class ContractPolicy
 {

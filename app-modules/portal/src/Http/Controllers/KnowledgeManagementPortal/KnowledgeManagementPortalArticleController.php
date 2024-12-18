@@ -36,14 +36,14 @@
 
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
-use Illuminate\Http\JsonResponse;
-use App\Http\Controllers\Controller;
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Portal\Models\PortalGuest;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\Portal\DataTransferObjects\KnowledgeBaseArticleData;
 use AidingApp\Portal\DataTransferObjects\KnowledgeBaseCategoryData;
+use AidingApp\Portal\Models\PortalGuest;
+use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
 
 class KnowledgeManagementPortalArticleController extends Controller
 {

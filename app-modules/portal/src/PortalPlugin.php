@@ -36,8 +36,8 @@
 
 namespace AidingApp\Portal;
 
-use Filament\Panel;
 use Filament\Contracts\Plugin;
+use Filament\Panel;
 
 class PortalPlugin implements Plugin
 {

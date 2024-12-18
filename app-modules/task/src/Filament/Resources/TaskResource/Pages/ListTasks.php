@@ -36,33 +36,33 @@
 
 namespace AidingApp\Task\Filament\Resources\TaskResource\Pages;
 
-use App\Models\User;
-use Filament\Forms\Set;
-use Filament\Tables\Table;
-use Filament\Actions\Action;
+use AidingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Task\Enums\TaskStatus;
+use AidingApp\Task\Filament\Resources\TaskResource;
+use AidingApp\Task\Filament\Resources\TaskResource\Components\TaskViewAction;
+use AidingApp\Task\Imports\TaskImporter;
 use AidingApp\Task\Models\Task;
+use App\Filament\Resources\UserResource;
+use App\Filament\Tables\Columns\IdColumn;
+use App\Models\Scopes\EducatableSearch;
+use App\Models\User;
+use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Actions\ImportAction;
-use Filament\Tables\Filters\Filter;
-use AidingApp\Task\Enums\TaskStatus;
-use AidingApp\Contact\Models\Contact;
-use App\Models\Scopes\EducatableSearch;
 use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Set;
+use Filament\Pages\Concerns\ExposesTableToWidgets;
+use Filament\Resources\Pages\ListRecords;
+use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\BaseFilter;
-use AidingApp\Task\Imports\TaskImporter;
-use App\Filament\Resources\UserResource;
-use App\Filament\Tables\Columns\IdColumn;
-use Filament\Resources\Pages\ListRecords;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DeleteBulkAction;
-use Filament\Pages\Concerns\ExposesTableToWidgets;
-use AidingApp\Task\Filament\Resources\TaskResource;
-use AidingApp\Contact\Filament\Resources\ContactResource;
-use AidingApp\Task\Filament\Resources\TaskResource\Components\TaskViewAction;
 
 class ListTasks extends ListRecords
 {

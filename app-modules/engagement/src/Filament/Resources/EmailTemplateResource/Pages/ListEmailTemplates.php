@@ -36,14 +36,14 @@
 
 namespace AidingApp\Engagement\Filament\Resources\EmailTemplateResource\Pages;
 
-use Filament\Tables\Table;
+use AidingApp\Engagement\Filament\Resources\EmailTemplateResource;
+use App\Filament\Tables\Columns\OpenSearch\TextColumn;
 use Filament\Actions\CreateAction;
-use Filament\Tables\Actions\EditAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
-use App\Filament\Tables\Columns\OpenSearch\TextColumn;
-use AidingApp\Engagement\Filament\Resources\EmailTemplateResource;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Table;
 
 class ListEmailTemplates extends ListRecords
 {

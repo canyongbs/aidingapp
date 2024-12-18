@@ -36,9 +36,9 @@
 
 namespace AidingApp\Engagement\Actions;
 
-use AidingApp\Engagement\Models\EngagementResponse;
-use AidingApp\Engagement\DataTransferObjects\EngagementResponseData;
 use AidingApp\Engagement\Actions\Contracts\EngagementResponseSenderFinder;
+use AidingApp\Engagement\DataTransferObjects\EngagementResponseData;
+use AidingApp\Engagement\Models\EngagementResponse;
 
 class CreateEngagementResponse
 {

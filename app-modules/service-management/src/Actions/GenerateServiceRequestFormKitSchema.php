@@ -36,8 +36,8 @@
 
 namespace AidingApp\ServiceManagement\Actions;
 
-use AidingApp\Form\Models\Submissible;
 use AidingApp\Form\Actions\GenerateFormKitSchema;
+use AidingApp\Form\Models\Submissible;
 
 class GenerateServiceRequestFormKitSchema extends GenerateFormKitSchema
 {

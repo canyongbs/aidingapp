@@ -36,9 +36,9 @@
 
 namespace AidingApp\Timeline\Models\Contracts;
 
-use Illuminate\Support\Collection;
-use Illuminate\Database\Eloquent\Model;
 use AidingApp\Timeline\Models\CustomTimeline;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 
 interface ProvidesATimeline
 {

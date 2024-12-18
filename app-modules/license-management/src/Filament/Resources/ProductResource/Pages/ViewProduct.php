@@ -36,12 +36,12 @@
 
 namespace AidingApp\LicenseManagement\Filament\Resources\ProductResource\Pages;
 
+use AidingApp\LicenseManagement\Filament\Resources\ProductResource;
 use Filament\Actions\EditAction;
-use Filament\Infolists\Infolist;
-use Filament\Resources\Pages\ViewRecord;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
-use AidingApp\LicenseManagement\Filament\Resources\ProductResource;
+use Filament\Infolists\Infolist;
+use Filament\Resources\Pages\ViewRecord;
 
 class ViewProduct extends ViewRecord
 {

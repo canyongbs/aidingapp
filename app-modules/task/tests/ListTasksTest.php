@@ -34,19 +34,16 @@
 </COPYRIGHT>
 */
 
-use App\Models\User;
-use AidingApp\Task\Models\Task;
-
-use function Tests\asSuperAdmin;
-use function Pest\Laravel\actingAs;
-
-use AidingApp\Task\Enums\TaskStatus;
-
-use function Pest\Livewire\livewire;
-
 use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\Task\Enums\TaskStatus;
 use AidingApp\Task\Filament\Resources\TaskResource;
 use AidingApp\Task\Filament\Resources\TaskResource\Pages\ListTasks;
+use AidingApp\Task\Models\Task;
+use App\Models\User;
+
+use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
+use function Tests\asSuperAdmin;
 
 test('ListTasks page displays the correct details for available my tasks', function () {
     asSuperAdmin();

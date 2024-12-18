@@ -36,10 +36,10 @@
 
 namespace AidingApp\InventoryManagement\Database\Factories;
 
-use Carbon\Carbon;
-use App\Models\User;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\InventoryManagement\Models\Asset;
+use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Relations\Relation;
 

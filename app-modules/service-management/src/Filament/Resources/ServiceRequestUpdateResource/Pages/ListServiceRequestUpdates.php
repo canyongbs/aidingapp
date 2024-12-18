@@ -36,9 +36,9 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource\Pages;
 
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource;
 
 class ListServiceRequestUpdates extends ListRecords
 {

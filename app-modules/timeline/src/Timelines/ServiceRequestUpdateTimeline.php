@@ -36,10 +36,10 @@
 
 namespace AidingApp\Timeline\Timelines;
 
-use Filament\Actions\ViewAction;
-use AidingApp\Timeline\Models\CustomTimeline;
-use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource\Components\ServiceRequestUpdateViewAction;
+use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use AidingApp\Timeline\Models\CustomTimeline;
+use Filament\Actions\ViewAction;
 
 // TODO Decide where these belong - might want to keep these in the context of the original module
 class ServiceRequestUpdateTimeline extends CustomTimeline

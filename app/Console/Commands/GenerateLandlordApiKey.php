@@ -37,8 +37,8 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Console\ConfirmableTrait;
+use Illuminate\Support\Facades\Hash;
 
 class GenerateLandlordApiKey extends Command
 {

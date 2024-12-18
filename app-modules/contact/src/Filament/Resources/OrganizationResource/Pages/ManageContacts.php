@@ -36,9 +36,9 @@
 
 namespace AidingApp\Contact\Filament\Resources\OrganizationResource\Pages;
 
-use Filament\Resources\Pages\ManageRelatedRecords;
 use AidingApp\Contact\Filament\Resources\OrganizationResource;
 use AidingApp\Contact\Filament\Resources\OrganizationResource\RelationManagers\ContactsRelationManager;
+use Filament\Resources\Pages\ManageRelatedRecords;
 
 class ManageContacts extends ManageRelatedRecords
 {

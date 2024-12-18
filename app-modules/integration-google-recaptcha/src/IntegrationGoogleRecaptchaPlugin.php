@@ -36,8 +36,8 @@
 
 namespace AidingApp\IntegrationGoogleRecaptcha;
 
-use Filament\Panel;
 use Filament\Contracts\Plugin;
+use Filament\Panel;
 
 class IntegrationGoogleRecaptchaPlugin implements Plugin
 {

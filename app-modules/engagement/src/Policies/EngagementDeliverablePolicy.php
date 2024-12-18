@@ -36,9 +36,9 @@
 
 namespace AidingApp\Engagement\Policies;
 
+use AidingApp\Engagement\Models\EngagementDeliverable;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
-use AidingApp\Engagement\Models\EngagementDeliverable;
 
 class EngagementDeliverablePolicy
 {

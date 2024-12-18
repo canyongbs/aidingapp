@@ -36,9 +36,9 @@
 
 namespace AidingApp\ServiceManagement\Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use AidingApp\ServiceManagement\Models\ChangeRequestStatus;
 use AidingApp\ServiceManagement\Enums\SystemChangeRequestClassification;
+use AidingApp\ServiceManagement\Models\ChangeRequestStatus;
+use Illuminate\Database\Seeder;
 
 class ChangeRequestStatusSeeder extends Seeder
 {

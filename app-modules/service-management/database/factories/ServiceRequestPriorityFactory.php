@@ -36,9 +36,9 @@
 
 namespace AidingApp\ServiceManagement\Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
-use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * @extends Factory<ServiceRequestPriority>

@@ -36,16 +36,16 @@
 
 namespace AidingApp\ServiceManagement\Models;
 
-use App\Models\User;
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Form\Models\Submission;
-use Illuminate\Database\Eloquent\Builder;
-use App\Models\Scopes\LicensedToEducatable;
+use AidingApp\Form\Enums\FormSubmissionRequestDeliveryMethod;
 use AidingApp\Form\Enums\FormSubmissionStatus;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use AidingApp\Form\Models\Submission;
+use App\Models\Scopes\LicensedToEducatable;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use AidingApp\Form\Enums\FormSubmissionRequestDeliveryMethod;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * @property Contact|null $author

@@ -36,12 +36,12 @@
 
 namespace AidingApp\Engagement\Observers;
 
-use App\Models\User;
-use Illuminate\Database\Eloquent\Model;
 use AidingApp\Engagement\Models\Engagement;
+use AidingApp\Notification\Events\TriggeredAutoSubscription;
 use AidingApp\Timeline\Events\TimelineableRecordCreated;
 use AidingApp\Timeline\Events\TimelineableRecordDeleted;
-use AidingApp\Notification\Events\TriggeredAutoSubscription;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
 
 class EngagementObserver
 {

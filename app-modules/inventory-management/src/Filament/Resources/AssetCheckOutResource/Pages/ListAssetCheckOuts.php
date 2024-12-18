@@ -36,16 +36,16 @@
 
 namespace AidingApp\InventoryManagement\Filament\Resources\AssetCheckOutResource\Pages;
 
-use Filament\Tables\Table;
-use Filament\Tables\Actions\ViewAction;
-use Filament\Tables\Columns\TextColumn;
+use AidingApp\InventoryManagement\Enums\AssetCheckOutStatus;
+use AidingApp\InventoryManagement\Filament\Resources\AssetCheckOutResource;
+use AidingApp\InventoryManagement\Filament\Resources\AssetResource;
+use AidingApp\InventoryManagement\Models\AssetCheckOut;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use AidingApp\InventoryManagement\Models\AssetCheckOut;
-use AidingApp\InventoryManagement\Enums\AssetCheckOutStatus;
-use AidingApp\InventoryManagement\Filament\Resources\AssetResource;
-use AidingApp\InventoryManagement\Filament\Resources\AssetCheckOutResource;
 
 class ListAssetCheckOuts extends ListRecords
 {

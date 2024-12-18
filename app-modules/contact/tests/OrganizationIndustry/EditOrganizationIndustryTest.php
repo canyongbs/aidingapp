@@ -34,16 +34,15 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Contact\Filament\Resources\OrganizationIndustryResource;
+use AidingApp\Contact\Filament\Resources\OrganizationIndustryResource\Pages\EditOrganizationIndustry;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\OrganizationIndustry;
+use AidingApp\Contact\Tests\OrganizationIndustry\RequestFactories\EditOrganizationIndustryRequestFactory;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
-
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Contact\Models\OrganizationIndustry;
-use AidingApp\Contact\Filament\Resources\OrganizationIndustryResource;
-use AidingApp\Contact\Filament\Resources\OrganizationIndustryResource\Pages\EditOrganizationIndustry;
-use AidingApp\Contact\Tests\OrganizationIndustry\RequestFactories\EditOrganizationIndustryRequestFactory;
 
 test('Edit Organization Industry is gated with proper access control', function () {
     $user = User::factory()->licensed(Contact::getLicenseType())->create();

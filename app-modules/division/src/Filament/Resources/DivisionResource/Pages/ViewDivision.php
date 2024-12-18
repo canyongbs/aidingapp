@@ -36,15 +36,15 @@
 
 namespace AidingApp\Division\Filament\Resources\DivisionResource\Pages;
 
-use Filament\Actions\EditAction;
-use Filament\Infolists\Infolist;
+use AidingApp\Division\Filament\Resources\DivisionResource;
 use AidingApp\Division\Models\Division;
+use App\Filament\Resources\NotificationSettingResource;
 use App\Filament\Resources\UserResource;
-use Filament\Resources\Pages\ViewRecord;
+use Filament\Actions\EditAction;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
-use App\Filament\Resources\NotificationSettingResource;
-use AidingApp\Division\Filament\Resources\DivisionResource;
+use Filament\Infolists\Infolist;
+use Filament\Resources\Pages\ViewRecord;
 
 class ViewDivision extends ViewRecord
 {

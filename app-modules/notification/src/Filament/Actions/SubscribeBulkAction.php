@@ -36,10 +36,10 @@
 
 namespace AidingApp\Notification\Filament\Actions;
 
-use Filament\Tables\Actions\BulkAction;
-use Illuminate\Database\Eloquent\Collection;
 use AidingApp\Notification\Actions\SubscriptionToggle;
 use AidingApp\Notification\Models\Contracts\Subscribable;
+use Filament\Tables\Actions\BulkAction;
+use Illuminate\Database\Eloquent\Collection;
 
 class SubscribeBulkAction extends BulkAction
 {

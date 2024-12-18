@@ -36,9 +36,9 @@
 
 namespace AidingApp\ServiceManagement\Tests\RequestFactories;
 
-use Worksome\RequestFactories\RequestFactory;
 use AidingApp\ServiceManagement\Enums\ColumnColorOptions;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
+use Worksome\RequestFactories\RequestFactory;
 
 class EditServiceRequestStatusRequestFactory extends RequestFactory
 {

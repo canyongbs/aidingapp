@@ -36,15 +36,15 @@
 
 namespace App\Filament\Forms\Components;
 
-use App\Models\User;
-use Filament\Support\Colors\Color;
-use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Fieldset;
-use Filament\Notifications\Notification;
-use Filament\Forms\Components\Placeholder;
-use AidingApp\Authorization\Models\License;
 use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\Authorization\Models\License;
+use App\Models\User;
+use Filament\Forms\Components\Fieldset;
+use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Toggle;
+use Filament\Notifications\Notification;
+use Filament\Support\Colors\Color;
 
 class Licenses extends Section
 {

@@ -37,11 +37,11 @@
 namespace AidingApp\ServiceManagement\Models\Concerns;
 
 use App\Models\Concerns\TargetsRelationships;
-use Bvtterfly\ModelStateMachine\StateMachine;
-use Bvtterfly\ModelStateMachine\HasStateMachine;
-use Bvtterfly\ModelStateMachine\Exceptions\FieldWithoutCast;
 use App\Models\States\StateMachine as RelationBasedStateMachine;
 use Bvtterfly\ModelStateMachine\Exceptions\CouldNotFindStateMachineField;
+use Bvtterfly\ModelStateMachine\Exceptions\FieldWithoutCast;
+use Bvtterfly\ModelStateMachine\HasStateMachine;
+use Bvtterfly\ModelStateMachine\StateMachine;
 
 trait HasRelationBasedStateMachine
 {

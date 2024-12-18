@@ -36,12 +36,12 @@
 
 namespace AidingApp\Engagement\Database\Factories;
 
-use AidingApp\Engagement\Models\Engagement;
-use Database\Factories\Concerns\RandomizeState;
-use Illuminate\Database\Eloquent\Factories\Factory;
-use AidingApp\Engagement\Models\EngagementDeliverable;
 use AidingApp\Engagement\Enums\EngagementDeliveryMethod;
 use AidingApp\Engagement\Enums\EngagementDeliveryStatus;
+use AidingApp\Engagement\Models\Engagement;
+use AidingApp\Engagement\Models\EngagementDeliverable;
+use Database\Factories\Concerns\RandomizeState;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * @extends Factory<EngagementDeliverable>

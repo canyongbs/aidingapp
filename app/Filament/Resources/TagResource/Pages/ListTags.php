@@ -36,15 +36,15 @@
 
 namespace App\Filament\Resources\TagResource\Pages;
 
-use Filament\Tables\Table;
+use App\Filament\Resources\TagResource;
 use App\Models\Contracts\HasTags;
 use Filament\Actions\CreateAction;
-use App\Filament\Resources\TagResource;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
 class ListTags extends ListRecords

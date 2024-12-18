@@ -36,9 +36,9 @@
 
 namespace AidingApp\Authorization\Filament\Widgets;
 
-use Filament\Widgets\Widget;
-use App\Models\Authenticatable;
 use AidingApp\Authorization\Enums\LicenseType;
+use App\Models\Authenticatable;
+use Filament\Widgets\Widget;
 
 class UnlicensedNotice extends Widget
 {

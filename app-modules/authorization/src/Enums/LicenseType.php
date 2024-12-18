@@ -36,9 +36,9 @@
 
 namespace AidingApp\Authorization\Enums;
 
+use AidingApp\Authorization\Models\License;
 use App\Settings\LicenseSettings;
 use Filament\Support\Contracts\HasLabel;
-use AidingApp\Authorization\Models\License;
 
 enum LicenseType: string implements HasLabel
 {

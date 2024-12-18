@@ -36,21 +36,21 @@
 
 namespace AidingApp\Engagement\Providers;
 
-use Filament\Panel;
-use App\Models\Tenant;
-use App\Models\Scopes\SetupIsComplete;
-use Illuminate\Support\ServiceProvider;
-use AidingApp\Engagement\EngagementPlugin;
-use AidingApp\Engagement\Models\Engagement;
-use Illuminate\Console\Scheduling\Schedule;
-use AidingApp\Engagement\Models\SmsTemplate;
-use AidingApp\Engagement\Models\EmailTemplate;
-use AidingApp\Engagement\Models\EngagementFile;
-use AidingApp\Engagement\Models\EngagementBatch;
-use AidingApp\Engagement\Models\EngagementResponse;
 use AidingApp\Engagement\Actions\DeliverEngagements;
-use Illuminate\Database\Eloquent\Relations\Relation;
+use AidingApp\Engagement\EngagementPlugin;
+use AidingApp\Engagement\Models\EmailTemplate;
+use AidingApp\Engagement\Models\Engagement;
+use AidingApp\Engagement\Models\EngagementBatch;
 use AidingApp\Engagement\Models\EngagementDeliverable;
+use AidingApp\Engagement\Models\EngagementFile;
+use AidingApp\Engagement\Models\EngagementResponse;
+use AidingApp\Engagement\Models\SmsTemplate;
+use App\Models\Scopes\SetupIsComplete;
+use App\Models\Tenant;
+use Filament\Panel;
+use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\ServiceProvider;
 
 class EngagementServiceProvider extends ServiceProvider
 {

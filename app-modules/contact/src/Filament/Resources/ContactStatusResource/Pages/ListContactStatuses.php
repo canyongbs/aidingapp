@@ -36,17 +36,17 @@
 
 namespace AidingApp\Contact\Filament\Resources\ContactStatusResource\Pages;
 
+use AidingApp\Contact\Filament\Resources\ContactStatusResource;
+use AidingApp\Contact\Models\ContactStatus;
+use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions;
-use Filament\Tables\Table;
+use Filament\Resources\Pages\ListRecords;
+use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
-use App\Filament\Tables\Columns\IdColumn;
-use Filament\Resources\Pages\ListRecords;
-use AidingApp\Contact\Models\ContactStatus;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DeleteBulkAction;
-use AidingApp\Contact\Filament\Resources\ContactStatusResource;
+use Filament\Tables\Table;
 
 class ListContactStatuses extends ListRecords
 {

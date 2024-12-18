@@ -36,10 +36,10 @@
 
 namespace AidingApp\Portal\Http\Routing;
 
-use Illuminate\Http\Request;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
+use Illuminate\Http\Request;
 
 class ArticleShowMissingHandler
 {

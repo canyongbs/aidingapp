@@ -36,12 +36,12 @@
 
 namespace AidingApp\Audit\Filament\Resources\AuditResource\Pages;
 
-use Filament\Infolists\Infolist;
+use AidingApp\Audit\Filament\Resources\AuditResource;
 use AidingApp\Audit\Models\Audit;
-use Filament\Resources\Pages\ViewRecord;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
-use AidingApp\Audit\Filament\Resources\AuditResource;
+use Filament\Infolists\Infolist;
+use Filament\Resources\Pages\ViewRecord;
 
 class ViewAudit extends ViewRecord
 {

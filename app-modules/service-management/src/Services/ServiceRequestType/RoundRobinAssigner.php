@@ -36,11 +36,11 @@
 
 namespace AidingApp\ServiceManagement\Services\ServiceRequestType;
 
-use App\Models\User;
-use App\Features\RoundRobinId;
-use Illuminate\Database\Eloquent\Builder;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Features\RoundRobinId;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 
 class RoundRobinAssigner implements ServiceRequestTypeAssigner
 {

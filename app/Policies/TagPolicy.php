@@ -36,8 +36,8 @@
 
 namespace App\Policies;
 
-use App\Models\Tag;
 use App\Models\Authenticatable;
+use App\Models\Tag;
 use Illuminate\Auth\Access\Response;
 
 class TagPolicy

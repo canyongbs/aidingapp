@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
+use AidingApp\IntegrationTwilio\Settings\TwilioSettings;
+
 use function Pest\Laravel\post;
 use function Pest\Laravel\withHeaders;
 use function Tests\loadFixtureFromModule;
-
-use AidingApp\IntegrationTwilio\Settings\TwilioSettings;
 
 it('will abort the request if the request does not have the necessary header', function () {
     $response = post(

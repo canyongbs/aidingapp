@@ -36,8 +36,8 @@
 
 namespace AidingApp\Contact\Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use AidingApp\Contact\Models\OrganizationIndustry;
+use Illuminate\Database\Seeder;
 
 class OrganizationIndustrySeeder extends Seeder
 {

@@ -36,9 +36,9 @@
 
 namespace AidingApp\Alert\Filament\Resources;
 
-use Filament\Resources\Resource;
-use AidingApp\Alert\Models\Alert;
 use AidingApp\Alert\Filament\Resources\AlertResource\Pages\ListAlerts;
+use AidingApp\Alert\Models\Alert;
+use Filament\Resources\Resource;
 
 class AlertResource extends Resource
 {

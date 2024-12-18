@@ -36,15 +36,15 @@
 
 namespace AidingApp\Authorization\Filament\Resources\RoleResource\Pages;
 
-use Filament\Tables\Table;
+use AidingApp\Authorization\Filament\Resources\RoleResource;
+use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Components\Tab;
+use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
-use App\Filament\Tables\Columns\IdColumn;
-use Filament\Resources\Pages\ListRecords;
+use Filament\Tables\Table;
 use Illuminate\Contracts\Database\Eloquent\Builder;
-use AidingApp\Authorization\Filament\Resources\RoleResource;
 
 class ListRoles extends ListRecords
 {

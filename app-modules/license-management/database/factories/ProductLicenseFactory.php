@@ -38,8 +38,8 @@ namespace AidingApp\LicenseManagement\Database\Factories;
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\LicenseManagement\Models\Product;
-use Illuminate\Database\Eloquent\Factories\Factory;
 use AidingApp\LicenseManagement\Models\ProductLicense;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * @extends Factory<ProductLicense>

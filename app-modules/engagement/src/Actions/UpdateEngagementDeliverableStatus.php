@@ -36,13 +36,13 @@
 
 namespace AidingApp\Engagement\Actions;
 
+use AidingApp\Engagement\Models\EngagementDeliverable;
 use Illuminate\Bus\Queueable;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
-use AidingApp\Engagement\Models\EngagementDeliverable;
+use Illuminate\Queue\SerializesModels;
 
 class UpdateEngagementDeliverableStatus implements ShouldQueue
 {

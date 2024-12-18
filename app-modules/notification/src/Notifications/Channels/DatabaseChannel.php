@@ -36,12 +36,12 @@
 
 namespace AidingApp\Notification\Notifications\Channels;
 
-use Illuminate\Notifications\Notification;
+use AidingApp\Notification\DataTransferObjects\DatabaseChannelResultData;
+use AidingApp\Notification\DataTransferObjects\NotificationResultData;
 use AidingApp\Notification\Models\OutboundDeliverable;
 use AidingApp\Notification\Notifications\BaseNotification;
-use AidingApp\Notification\DataTransferObjects\NotificationResultData;
-use AidingApp\Notification\DataTransferObjects\DatabaseChannelResultData;
 use Illuminate\Notifications\Channels\DatabaseChannel as BaseDatabaseChannel;
+use Illuminate\Notifications\Notification;
 
 class DatabaseChannel extends BaseDatabaseChannel
 {

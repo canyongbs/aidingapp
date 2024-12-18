@@ -36,10 +36,10 @@
 
 namespace AidingApp\Notification\Listeners;
 
+use AidingApp\Engagement\Actions\HandleEngagementEmailNotificationFailed;
+use AidingApp\Engagement\Notifications\EngagementEmailNotification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Events\NotificationSent;
-use AidingApp\Engagement\Notifications\EngagementEmailNotification;
-use AidingApp\Engagement\Actions\HandleEngagementEmailNotificationFailed;
 
 class HandleNotificationFailed implements ShouldQueue
 {

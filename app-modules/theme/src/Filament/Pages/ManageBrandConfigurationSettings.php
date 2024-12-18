@@ -36,17 +36,17 @@
 
 namespace AidingApp\Theme\Filament\Pages;
 
+use AidingApp\Theme\Settings\ThemeSettings;
+use App\Filament\Clusters\GlobalSettings;
+use App\Models\Authenticatable;
 use App\Models\User;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
-use Filament\Forms\Form;
-use App\Models\Authenticatable;
 use Filament\Pages\SettingsPage;
-use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\Section;
-use App\Filament\Clusters\GlobalSettings;
-use AidingApp\Theme\Settings\ThemeSettings;
-use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 
 class ManageBrandConfigurationSettings extends SettingsPage
 {

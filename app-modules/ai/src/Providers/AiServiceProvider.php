@@ -36,10 +36,10 @@
 
 namespace AidingApp\Ai\Providers;
 
-use Filament\Panel;
 use AidingApp\Ai\AiPlugin;
-use Illuminate\Support\ServiceProvider;
+use Filament\Panel;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\ServiceProvider;
 
 class AiServiceProvider extends ServiceProvider
 {

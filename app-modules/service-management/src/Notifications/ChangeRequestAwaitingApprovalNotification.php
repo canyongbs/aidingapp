@@ -36,18 +36,18 @@
 
 namespace AidingApp\ServiceManagement\Notifications;
 
-use App\Models\User;
-use App\Models\NotificationSetting;
-use Filament\Notifications\Notification;
-use Filament\Notifications\Actions\Action;
-use AidingApp\ServiceManagement\Models\ChangeRequest;
 use AidingApp\Notification\Notifications\BaseNotification;
-use AidingApp\Notification\Notifications\EmailNotification;
-use AidingApp\Notification\Notifications\DatabaseNotification;
-use AidingApp\Notification\Notifications\Messages\MailMessage;
-use AidingApp\Notification\Notifications\Concerns\EmailChannelTrait;
 use AidingApp\Notification\Notifications\Concerns\DatabaseChannelTrait;
+use AidingApp\Notification\Notifications\Concerns\EmailChannelTrait;
+use AidingApp\Notification\Notifications\DatabaseNotification;
+use AidingApp\Notification\Notifications\EmailNotification;
+use AidingApp\Notification\Notifications\Messages\MailMessage;
 use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestResource;
+use AidingApp\ServiceManagement\Models\ChangeRequest;
+use App\Models\NotificationSetting;
+use App\Models\User;
+use Filament\Notifications\Actions\Action;
+use Filament\Notifications\Notification;
 
 class ChangeRequestAwaitingApprovalNotification extends BaseNotification implements EmailNotification, DatabaseNotification
 {

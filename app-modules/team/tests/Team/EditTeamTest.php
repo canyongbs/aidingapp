@@ -34,14 +34,13 @@
 </COPYRIGHT>
 */
 
-use App\Models\User;
+use AidingApp\Team\Filament\Resources\TeamResource;
+use AidingApp\Team\Filament\Resources\TeamResource\Pages\EditTeam;
 use AidingApp\Team\Models\Team;
+use App\Models\User;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
-
-use AidingApp\Team\Filament\Resources\TeamResource;
-use AidingApp\Team\Filament\Resources\TeamResource\Pages\EditTeam;
 
 // Permission Tests
 

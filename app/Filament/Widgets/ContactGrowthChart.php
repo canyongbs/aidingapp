@@ -36,9 +36,9 @@
 
 namespace App\Filament\Widgets;
 
-use Illuminate\Support\Carbon;
-use Filament\Widgets\ChartWidget;
 use AidingApp\Contact\Models\Contact;
+use Filament\Widgets\ChartWidget;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 
 class ContactGrowthChart extends ChartWidget

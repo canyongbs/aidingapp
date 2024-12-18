@@ -36,10 +36,10 @@
 
 namespace AidingApp\ServiceManagement\Database\Factories;
 
+use AidingApp\ServiceManagement\Models\ChangeRequestStatus;
+use AidingApp\ServiceManagement\Models\ChangeRequestType;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use AidingApp\ServiceManagement\Models\ChangeRequestType;
-use AidingApp\ServiceManagement\Models\ChangeRequestStatus;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AidingApp\ServiceManagement\Models\ChangeRequest>

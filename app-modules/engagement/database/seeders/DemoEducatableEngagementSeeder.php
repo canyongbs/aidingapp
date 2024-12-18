@@ -36,11 +36,11 @@
 
 namespace AidingApp\Engagement\Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Engagement\Models\Engagement;
-use AidingApp\Engagement\Models\EngagementResponse;
 use AidingApp\Engagement\Models\EngagementDeliverable;
+use AidingApp\Engagement\Models\EngagementResponse;
+use Illuminate\Database\Seeder;
 
 class DemoEducatableEngagementSeeder extends Seeder
 {

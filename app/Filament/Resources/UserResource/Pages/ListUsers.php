@@ -36,8 +36,8 @@
 
 namespace App\Filament\Resources\UserResource\Pages;
 
-use Filament\Actions\CreateAction;
 use App\Filament\Resources\UserResource;
+use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Contracts\Support\Htmlable;
 

@@ -36,8 +36,8 @@
 
 namespace AidingApp\Webhook\Models;
 
-use App\Models\BaseModel;
 use AidingApp\Webhook\Enums\InboundWebhookSource;
+use App\Models\BaseModel;
 
 /**
  * @mixin IdeHelperInboundWebhook

@@ -36,14 +36,14 @@
 
 namespace AidingApp\Engagement\Models;
 
-use App\Models\User;
+use AidingApp\Engagement\Models\Concerns\HasManyEngagements;
+use AidingApp\Engagement\Observers\EngagementBatchObserver;
 use App\Models\BaseModel;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use AidingApp\Engagement\Observers\EngagementBatchObserver;
-use AidingApp\Engagement\Models\Concerns\HasManyEngagements;
 
 /**
  * @mixin IdeHelperEngagementBatch

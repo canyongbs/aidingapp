@@ -36,9 +36,9 @@
 
 namespace AidingApp\Audit\Filament\Actions;
 
-use OwenIt\Auditing\Contracts\Auditable;
 use Filament\Tables\Actions\AttachAction;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use OwenIt\Auditing\Contracts\Auditable;
 
 class AuditAttachAction extends AttachAction
 {

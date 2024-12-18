@@ -37,10 +37,10 @@
 namespace AidingApp\Form\Notifications;
 
 use AidingApp\Form\Models\Submission;
-use AidingApp\Notification\Notifications\SmsNotification;
 use AidingApp\Notification\Notifications\BaseNotification;
-use AidingApp\Notification\Notifications\Messages\TwilioMessage;
 use AidingApp\Notification\Notifications\Concerns\SmsChannelTrait;
+use AidingApp\Notification\Notifications\Messages\TwilioMessage;
+use AidingApp\Notification\Notifications\SmsNotification;
 
 class FormSubmissionRequestSmsNotification extends BaseNotification implements SmsNotification
 {

@@ -36,8 +36,8 @@
 
 namespace AidingApp\InventoryManagement\Models\Scopes;
 
-use Illuminate\Database\Eloquent\Builder;
 use AidingApp\InventoryManagement\Enums\SystemAssetStatusClassification;
+use Illuminate\Database\Eloquent\Builder;
 
 // TODO Make this somewhat re-usable across any system classifications
 class ClassifiedAs

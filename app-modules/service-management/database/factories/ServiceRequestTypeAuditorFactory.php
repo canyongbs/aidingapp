@@ -36,10 +36,10 @@
 
 namespace AidingApp\ServiceManagement\Database\Factories;
 
-use AidingApp\Team\Models\Team;
-use Illuminate\Database\Eloquent\Factories\Factory;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeAuditor;
+use AidingApp\Team\Models\Team;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * @extends Factory<ServiceRequestTypeAuditor>

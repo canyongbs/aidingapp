@@ -36,14 +36,14 @@
 
 namespace AidingApp\ContractManagement\Filament\Resources\ContractTypeResource\Pages;
 
-use Filament\Forms\Form;
-use Illuminate\Support\Str;
-use Filament\Actions\DeleteAction;
-use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\TextInput;
-use Filament\Resources\Pages\EditRecord;
-use AidingApp\ContractManagement\Models\ContractType;
 use AidingApp\ContractManagement\Filament\Resources\ContractTypeResource;
+use AidingApp\ContractManagement\Models\ContractType;
+use Filament\Actions\DeleteAction;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Form;
+use Filament\Resources\Pages\EditRecord;
+use Illuminate\Support\Str;
 
 class EditContractType extends EditRecord
 {

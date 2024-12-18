@@ -36,8 +36,8 @@
 
 namespace AidingApp\ServiceManagement\Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
 use AidingApp\ServiceManagement\Enums\SystemChangeRequestClassification;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AidingApp\ServiceManagement\Models\ChangeRequestStatus>

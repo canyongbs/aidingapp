@@ -36,12 +36,12 @@
 
 namespace AidingApp\KnowledgeBase\Database\Seeders;
 
+use AidingApp\Form\Enums\Rounding;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use AidingApp\Portal\Settings\PortalSettings;
+use App\Models\Scopes\TagsForClass;
 use App\Models\Tag;
 use Illuminate\Database\Seeder;
-use AidingApp\Form\Enums\Rounding;
-use App\Models\Scopes\TagsForClass;
-use AidingApp\Portal\Settings\PortalSettings;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 
 class KnowledgeBaseItemSeeder extends Seeder
 {

@@ -36,14 +36,14 @@
 
 namespace AidingApp\ServiceManagement\Policies;
 
-use App\Enums\Feature;
-use App\Models\Authenticatable;
-use Illuminate\Auth\Access\Response;
-use App\Concerns\PerformsFeatureChecks;
-use App\Concerns\PerformsLicenseChecks;
 use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
+use App\Concerns\PerformsFeatureChecks;
+use App\Concerns\PerformsLicenseChecks;
+use App\Enums\Feature;
+use App\Models\Authenticatable;
 use App\Policies\Contracts\PerformsChecksBeforeAuthorization;
+use Illuminate\Auth\Access\Response;
 
 class ServiceRequestFormPolicy implements PerformsChecksBeforeAuthorization
 {

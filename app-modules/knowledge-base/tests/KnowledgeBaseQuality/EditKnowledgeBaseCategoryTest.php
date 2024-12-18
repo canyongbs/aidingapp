@@ -34,17 +34,16 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualityResource;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
+use AidingApp\KnowledgeBase\Tests\KnowledgeBaseQuality\RequestFactories\EditKnowledgeBaseQualityRequestFactory;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 use function PHPUnit\Framework\assertEquals;
-
-use AidingApp\Authorization\Enums\LicenseType;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualityResource;
-use AidingApp\KnowledgeBase\Tests\KnowledgeBaseQuality\RequestFactories\EditKnowledgeBaseQualityRequestFactory;
 
 // TODO: Write EditKnowledgeBaseQuality tests
 //test('A successful action on the EditKnowledgeBaseQuality page', function () {});

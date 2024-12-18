@@ -36,14 +36,14 @@
 
 namespace AidingApp\Notification\Filament\Actions;
 
+use AidingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Notification\Models\OutboundDeliverable;
+use App\Filament\Resources\UserResource;
 use App\Models\User;
 use Filament\Actions\ViewAction;
-use Illuminate\Support\HtmlString;
-use AidingApp\Contact\Models\Contact;
-use App\Filament\Resources\UserResource;
 use Filament\Infolists\Components\TextEntry;
-use AidingApp\Notification\Models\OutboundDeliverable;
-use AidingApp\Contact\Filament\Resources\ContactResource;
+use Illuminate\Support\HtmlString;
 
 class OutboundDeliverableViewAction extends ViewAction
 {

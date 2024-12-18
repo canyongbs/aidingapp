@@ -36,9 +36,9 @@
 
 namespace App\Filament\Widgets;
 
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 use Carbon\Carbon;
 use Filament\Widgets\ChartWidget;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
 
 class ServiceRequestLineChart extends ChartWidget
 {

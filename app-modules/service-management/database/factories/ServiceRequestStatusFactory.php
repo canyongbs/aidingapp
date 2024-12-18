@@ -36,10 +36,10 @@
 
 namespace AidingApp\ServiceManagement\Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
 use AidingApp\ServiceManagement\Enums\ColumnColorOptions;
-use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
+use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * @extends Factory<ServiceRequestStatus>

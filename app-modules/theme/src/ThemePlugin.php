@@ -36,8 +36,8 @@
 
 namespace AidingApp\Theme;
 
-use Filament\Panel;
 use Filament\Contracts\Plugin;
+use Filament\Panel;
 
 class ThemePlugin implements Plugin
 {

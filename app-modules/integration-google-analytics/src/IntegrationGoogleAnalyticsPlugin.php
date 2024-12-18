@@ -36,11 +36,11 @@
 
 namespace AidingApp\IntegrationGoogleAnalytics;
 
-use Filament\Panel;
-use Filament\Contracts\Plugin;
-use Illuminate\Support\Facades\Blade;
-use Filament\Support\Facades\FilamentView;
 use AidingApp\IntegrationGoogleAnalytics\Settings\GoogleAnalyticsSettings;
+use Filament\Contracts\Plugin;
+use Filament\Panel;
+use Filament\Support\Facades\FilamentView;
+use Illuminate\Support\Facades\Blade;
 
 class IntegrationGoogleAnalyticsPlugin implements Plugin
 {

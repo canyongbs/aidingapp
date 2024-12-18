@@ -36,11 +36,11 @@
 
 namespace AidingApp\InventoryManagement\Filament\Resources\AssetResource\Pages;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Contracts\Support\Htmlable;
-use Filament\Resources\Pages\ManageRelatedRecords;
 use AidingApp\InventoryManagement\Filament\Resources\AssetResource;
 use AidingApp\InventoryManagement\Filament\Resources\AssetResource\RelationManagers\MaintenanceActivitiesRelationManager;
+use Filament\Resources\Pages\ManageRelatedRecords;
+use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Database\Eloquent\Model;
 
 class ManageAssetMaintenanceActivity extends ManageRelatedRecords
 {

@@ -36,8 +36,8 @@
 
 namespace AidingApp\Timeline\Listeners;
 
-use AidingApp\Timeline\Models\Timeline;
 use AidingApp\Timeline\Events\TimelineableRecordCreated;
+use AidingApp\Timeline\Models\Timeline;
 
 class AddRecordToTimeline
 {

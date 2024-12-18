@@ -36,15 +36,15 @@
 
 namespace AidingApp\Engagement\Models;
 
-use App\Models\BaseModel;
-use Spatie\MediaLibrary\HasMedia;
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Models\Contact;
-use OwenIt\Auditing\Contracts\Auditable;
+use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Prunable;
-use Spatie\MediaLibrary\InteractsWithMedia;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use OwenIt\Auditing\Contracts\Auditable;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
 /**
  * @mixin IdeHelperEngagementFile

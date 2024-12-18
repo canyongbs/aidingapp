@@ -36,14 +36,14 @@
 
 namespace AidingApp\InventoryManagement\Filament\Resources;
 
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
-use Filament\Forms\Components\TextInput;
-use App\Filament\Clusters\AssetManagement;
-use AidingApp\InventoryManagement\Models\AssetStatus;
-use AidingApp\InventoryManagement\Filament\Resources\AssetStatusResource\Pages\ViewAssetStatus;
 use AidingApp\InventoryManagement\Filament\Resources\AssetStatusResource\Pages\CreateAssetStatus;
 use AidingApp\InventoryManagement\Filament\Resources\AssetStatusResource\Pages\ListAssetStatuses;
+use AidingApp\InventoryManagement\Filament\Resources\AssetStatusResource\Pages\ViewAssetStatus;
+use AidingApp\InventoryManagement\Models\AssetStatus;
+use App\Filament\Clusters\AssetManagement;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
 
 class AssetStatusResource extends Resource
 {

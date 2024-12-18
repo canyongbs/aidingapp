@@ -36,13 +36,13 @@
 
 namespace AidingApp\KnowledgeBase\Filament\Resources;
 
-use Filament\Resources\Resource;
-use App\Filament\Clusters\KnowledgeManagement;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource\Pages\EditKnowledgeBaseStatus;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource\Pages\ViewKnowledgeBaseStatus;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource\Pages\CreateKnowledgeBaseStatus;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource\Pages\EditKnowledgeBaseStatus;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource\Pages\ListKnowledgeBaseStatuses;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource\Pages\ViewKnowledgeBaseStatus;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
+use App\Filament\Clusters\KnowledgeManagement;
+use Filament\Resources\Resource;
 
 class KnowledgeBaseStatusResource extends Resource
 {

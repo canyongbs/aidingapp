@@ -36,12 +36,12 @@
 
 namespace AidingApp\Webhook\Providers;
 
-use Filament\Panel;
-use Aws\Sns\MessageValidator;
-use AidingApp\Webhook\WebhookPlugin;
-use Illuminate\Support\ServiceProvider;
 use AidingApp\Webhook\Models\InboundWebhook;
+use AidingApp\Webhook\WebhookPlugin;
+use Aws\Sns\MessageValidator;
+use Filament\Panel;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\ServiceProvider;
 
 class WebhookServiceProvider extends ServiceProvider
 {

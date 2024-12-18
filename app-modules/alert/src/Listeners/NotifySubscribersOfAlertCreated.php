@@ -36,11 +36,11 @@
 
 namespace AidingApp\Alert\Listeners;
 
-use AidingApp\Contact\Models\Contact;
 use AidingApp\Alert\Events\AlertCreated;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use AidingApp\Notification\Models\Subscription;
 use AidingApp\Alert\Notifications\AlertCreatedNotification;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Notification\Models\Subscription;
+use Illuminate\Contracts\Queue\ShouldQueue;
 
 class NotifySubscribersOfAlertCreated implements ShouldQueue
 {

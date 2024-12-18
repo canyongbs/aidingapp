@@ -36,11 +36,11 @@
 
 namespace AidingApp\Team\Providers;
 
-use Filament\Panel;
-use AidingApp\Team\TeamPlugin;
 use AidingApp\Team\Models\Team;
-use Illuminate\Support\ServiceProvider;
+use AidingApp\Team\TeamPlugin;
+use Filament\Panel;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\ServiceProvider;
 
 class TeamServiceProvider extends ServiceProvider
 {

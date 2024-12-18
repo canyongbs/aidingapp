@@ -36,9 +36,9 @@
 
 namespace AidingApp\Timeline\Filament\Pages\Concerns;
 
+use AidingApp\Timeline\Models\Timeline;
 use Illuminate\Pagination\Cursor;
 use Illuminate\Support\Collection;
-use AidingApp\Timeline\Models\Timeline;
 
 trait LoadsTimelineRecords
 {

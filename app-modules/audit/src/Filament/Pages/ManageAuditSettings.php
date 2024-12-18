@@ -36,15 +36,15 @@
 
 namespace AidingApp\Audit\Filament\Pages;
 
-use App\Models\User;
-use Filament\Forms\Form;
+use AidingApp\Audit\Actions\Finders\AuditableModels;
+use AidingApp\Audit\Settings\AuditSettings;
+use App\Filament\Clusters\GlobalSettings;
 use App\Models\Authenticatable;
-use Filament\Pages\SettingsPage;
+use App\Models\User;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use App\Filament\Clusters\GlobalSettings;
-use AidingApp\Audit\Settings\AuditSettings;
-use AidingApp\Audit\Actions\Finders\AuditableModels;
+use Filament\Forms\Form;
+use Filament\Pages\SettingsPage;
 
 class ManageAuditSettings extends SettingsPage
 {

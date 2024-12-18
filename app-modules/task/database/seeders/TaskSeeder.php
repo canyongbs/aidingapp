@@ -36,8 +36,8 @@
 
 namespace AidingApp\Task\Database\Seeders;
 
-use App\Models\User;
 use AidingApp\Task\Models\Task;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class TaskSeeder extends Seeder

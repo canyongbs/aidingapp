@@ -36,10 +36,10 @@
 
 namespace AidingApp\InventoryManagement\Filament\Resources\AssetLocationResource\Pages;
 
-use Filament\Forms\Form;
-use Filament\Forms\Components\TextInput;
-use Filament\Resources\Pages\CreateRecord;
 use AidingApp\InventoryManagement\Filament\Resources\AssetLocationResource;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
+use Filament\Resources\Pages\CreateRecord;
 
 class CreateAssetLocation extends CreateRecord
 {

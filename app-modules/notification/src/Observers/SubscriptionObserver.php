@@ -36,12 +36,12 @@
 
 namespace AidingApp\Notification\Observers;
 
-use App\Models\User;
 use AidingApp\Contact\Models\Contact;
-use Illuminate\Support\Facades\Cache;
-use AidingApp\Notification\Models\Subscription;
 use AidingApp\Notification\Events\SubscriptionCreated;
 use AidingApp\Notification\Events\SubscriptionDeleted;
+use AidingApp\Notification\Models\Subscription;
+use App\Models\User;
+use Illuminate\Support\Facades\Cache;
 
 class SubscriptionObserver
 {

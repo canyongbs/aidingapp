@@ -36,14 +36,14 @@
 
 namespace AidingApp\InventoryManagement\Filament\Resources;
 
+use AidingApp\InventoryManagement\Filament\Resources\AssetLocationResource\Pages\CreateAssetLocation;
+use AidingApp\InventoryManagement\Filament\Resources\AssetLocationResource\Pages\ListAssetLocations;
+use AidingApp\InventoryManagement\Filament\Resources\AssetLocationResource\Pages\ViewAssetLocation;
+use AidingApp\InventoryManagement\Models\AssetLocation;
+use App\Filament\Clusters\AssetManagement;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Forms\Components\TextInput;
-use App\Filament\Clusters\AssetManagement;
-use AidingApp\InventoryManagement\Models\AssetLocation;
-use AidingApp\InventoryManagement\Filament\Resources\AssetLocationResource\Pages\ViewAssetLocation;
-use AidingApp\InventoryManagement\Filament\Resources\AssetLocationResource\Pages\ListAssetLocations;
-use AidingApp\InventoryManagement\Filament\Resources\AssetLocationResource\Pages\CreateAssetLocation;
 
 class AssetLocationResource extends Resource
 {

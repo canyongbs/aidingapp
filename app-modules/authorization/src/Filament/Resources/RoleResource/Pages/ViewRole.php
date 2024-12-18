@@ -36,13 +36,13 @@
 
 namespace AidingApp\Authorization\Filament\Resources\RoleResource\Pages;
 
-use Filament\Forms\Form;
+use AidingApp\Authorization\Filament\Resources\RoleResource;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
 use Filament\Resources\Pages\ViewRecord;
-use AidingApp\Authorization\Filament\Resources\RoleResource;
 
 class ViewRole extends ViewRecord
 {

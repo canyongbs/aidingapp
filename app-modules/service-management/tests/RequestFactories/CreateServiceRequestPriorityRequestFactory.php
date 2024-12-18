@@ -36,8 +36,8 @@
 
 namespace AidingApp\ServiceManagement\Tests\RequestFactories;
 
-use Worksome\RequestFactories\RequestFactory;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
+use Worksome\RequestFactories\RequestFactory;
 
 class CreateServiceRequestPriorityRequestFactory extends RequestFactory
 {

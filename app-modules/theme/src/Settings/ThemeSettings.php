@@ -36,8 +36,8 @@
 
 namespace AidingApp\Theme\Settings;
 
-use App\Settings\SettingsWithMedia;
 use AidingApp\Theme\Settings\SettingsProperties\ThemeSettingsProperty;
+use App\Settings\SettingsWithMedia;
 
 class ThemeSettings extends SettingsWithMedia
 {

@@ -36,8 +36,8 @@
 
 namespace AidingApp\Form\Actions;
 
-use AidingApp\Form\Models\Submission;
 use AidingApp\Form\Models\SubmissibleField;
+use AidingApp\Form\Models\Submission;
 
 class InjectSubmissionStateIntoTipTapContent
 {

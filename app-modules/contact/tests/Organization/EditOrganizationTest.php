@@ -34,17 +34,16 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Contact\Filament\Resources\OrganizationResource;
+use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\EditOrganization;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\Organization;
+use AidingApp\Contact\Tests\Organization\RequestFactories\EditOrganizationRequestFactory;
 use App\Models\User;
+use Filament\Forms\Components\Repeater;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
-
-use AidingApp\Contact\Models\Contact;
-use Filament\Forms\Components\Repeater;
-use AidingApp\Contact\Models\Organization;
-use AidingApp\Contact\Filament\Resources\OrganizationResource;
-use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\EditOrganization;
-use AidingApp\Contact\Tests\Organization\RequestFactories\EditOrganizationRequestFactory;
 
 test('Edit Organization is gated with proper access control', function () {
     $user = User::factory()->licensed(Contact::getLicenseType())->create();

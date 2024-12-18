@@ -36,13 +36,13 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
+use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\Authorization\Models\Role;
+use AidingApp\Contact\Models\Contact;
 use App\Models\Authenticatable;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Authorization\Models\Role;
-use AidingApp\Authorization\Enums\LicenseType;
 
 class LocalDevelopmentSeeder extends Seeder
 {

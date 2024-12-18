@@ -34,25 +34,20 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Contact\Models\Contact;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\CreateServiceRequestType;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\ServiceManagement\Tests\RequestFactories\CreateServiceRequestTypeRequestFactory;
 use App\Models\User;
-
-use function Tests\asSuperAdmin;
-
 use App\Settings\LicenseSettings;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Livewire\livewire;
-
-use AidingApp\Contact\Models\Contact;
-
 use function PHPUnit\Framework\assertCount;
 use function PHPUnit\Framework\assertEmpty;
-use function Pest\Laravel\assertDatabaseHas;
-
-use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
-use AidingApp\ServiceManagement\Tests\RequestFactories\CreateServiceRequestTypeRequestFactory;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\CreateServiceRequestType;
+use function Tests\asSuperAdmin;
 
 test('A successful action on the CreateServiceRequestType page', function () {
     asSuperAdmin()

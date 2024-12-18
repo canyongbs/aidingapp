@@ -36,8 +36,8 @@
 
 namespace AidingApp\ContractManagement;
 
-use Filament\Panel;
 use Filament\Contracts\Plugin;
+use Filament\Panel;
 
 class ContractManagementPlugin implements Plugin
 {

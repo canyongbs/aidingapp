@@ -36,19 +36,19 @@
 
 namespace AidingApp\Authorization\Filament\Resources\RoleResource\RelationManagers;
 
-use Filament\Tables\Table;
-use Filament\Facades\Filament;
-use Filament\Tables\Columns\TextColumn;
 use AidingApp\Authorization\Models\Role;
-use Filament\Resources\Pages\ViewRecord;
 use App\Filament\Tables\Columns\IdColumn;
-use Filament\Tables\Actions\AttachAction;
-use Filament\Tables\Actions\DetachAction;
-use Filament\Tables\Filters\SelectFilter;
-use Illuminate\Database\Eloquent\Builder;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DetachBulkAction;
+use Filament\Facades\Filament;
+use Filament\Resources\Pages\ViewRecord;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Tables\Actions\AttachAction;
+use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Tables\Actions\DetachAction;
+use Filament\Tables\Actions\DetachBulkAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class PermissionsRelationManager extends RelationManager
 {

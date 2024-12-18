@@ -36,11 +36,11 @@
 
 namespace AidingApp\Task\Filament\Resources;
 
-use AidingApp\Task\Models\Task;
-use Filament\Resources\Resource;
+use AidingApp\Task\Filament\Resources\TaskResource\Pages\CreateTask;
 use AidingApp\Task\Filament\Resources\TaskResource\Pages\EditTask;
 use AidingApp\Task\Filament\Resources\TaskResource\Pages\ListTasks;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\CreateTask;
+use AidingApp\Task\Models\Task;
+use Filament\Resources\Resource;
 
 class TaskResource extends Resource
 {

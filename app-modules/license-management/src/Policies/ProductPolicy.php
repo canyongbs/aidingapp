@@ -36,10 +36,10 @@
 
 namespace AidingApp\LicenseManagement\Policies;
 
-use App\Models\Authenticatable;
-use Illuminate\Auth\Access\Response;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\LicenseManagement\Models\Product;
+use App\Models\Authenticatable;
+use Illuminate\Auth\Access\Response;
 
 class ProductPolicy
 {
