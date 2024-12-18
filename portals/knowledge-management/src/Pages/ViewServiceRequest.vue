@@ -98,7 +98,7 @@
     );
 
     function getData(page = 1, fromPagination = false) {
-        if(!fromPagination) {
+        if (!fromPagination) {
             loadingResults.value = true;
         }
 
@@ -108,7 +108,7 @@
             serviceRequest.value = response.data.serviceRequestDetails;
             serviceRequestUpdates.value = response.data.serviceRequestUpdates.data || [];
             directionEnums.value = response.data.directionEnums || [];
-            if(!fromPagination) {
+            if (!fromPagination) {
                 loadingResults.value = false;
             }
             setPagination(response.data.serviceRequestUpdates);
