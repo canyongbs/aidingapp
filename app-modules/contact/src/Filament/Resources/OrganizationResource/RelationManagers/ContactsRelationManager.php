@@ -52,6 +52,7 @@ class ContactsRelationManager extends RelationManager
     {
         return $table
             ->recordTitleAttribute('full_name')
+            ->inverseRelationship('organization')
             ->columns([
                 TextColumn::make('full_name'),
                 TextColumn::make('email'),

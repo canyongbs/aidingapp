@@ -137,7 +137,7 @@ class ListServiceRequests extends ListRecords
                     ->relationship('status', 'name')
                     ->multiple()
                     ->preload(),
-                SelectFilter::make('organizations')
+                SelectFilter::make('organization')
                     ->options(Organization::pluck('name', 'id')->toArray())
                     ->modifyQueryUsing(fn (Builder $query, $state): Builder => $query->when(
                         ! empty($state['value']),
@@ -145,7 +145,7 @@ class ListServiceRequests extends ListRecords
                             'respondent',
                             [Contact::class],
                             fn (Builder $query): Builder => $query->whereRelation(
-                                'organizations',
+                                'organization',
                                 (new Organization())->getKeyName(),
                                 $state['value']
                             )
