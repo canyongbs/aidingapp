@@ -37,6 +37,7 @@
     import AppLoading from '../Components/AppLoading.vue';
     import Badge from '../Components/Badge.vue';
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
+    import Pagination from '../Components/Pagination.vue';
     import { consumer } from '../Services/Consumer.js';
 
     const route = useRoute();
@@ -67,6 +68,24 @@
     const updateMessage = ref('');
     const validationErrors = ref({});
     const authorizationError = ref(null);
+    const currentPage = ref(1);
+    const nextPageUrl = ref(null);
+    const prevPageUrl = ref(null);
+    const lastPage = ref(null);
+    const totalRecords = ref(0);
+    const fromRecord = ref(0);
+    const toRecord = ref(0);
+    const disableSubmitBtn = ref(false);
+
+    const setPagination = (pagination) => {
+        currentPage.value = pagination.current_page;
+        prevPageUrl.value = pagination.prev_page_url;
+        nextPageUrl.value = pagination.next_page_url;
+        lastPage.value = pagination.last_page;
+        totalRecords.value = pagination.total;
+        fromRecord.value = pagination.from;
+        toRecord.value = pagination.to;
+    };
 
     watch(
         route.params.serviceRequestId,
@@ -78,30 +97,33 @@
         },
     );
 
-    function getData() {
-        loadingResults.value = true;
+    function getData(page = 1, fromPagination = false) {
+        if (!fromPagination) {
+            loadingResults.value = true;
+        }
 
         const { get } = consumer();
 
-        get(props.apiUrl + '/service-request/' + route.params.serviceRequestId).then((response) => {
+        get(props.apiUrl + '/service-request/' + route.params.serviceRequestId, { page: page }).then((response) => {
             serviceRequest.value = response.data.serviceRequestDetails;
-            serviceRequestUpdates.value = response.data.serviceRequestUpdates || [];
+            serviceRequestUpdates.value = response.data.serviceRequestUpdates.data || [];
             directionEnums.value = response.data.directionEnums || [];
-            loadingResults.value = false;
+            if (!fromPagination) {
+                loadingResults.value = false;
+            }
+            setPagination(response.data.serviceRequestUpdates);
         });
     }
     async function submitUpdate() {
-        loadingResults.value = true;
-
         try {
+            disableSubmitBtn.value = true;
             const { post } = consumer();
             const response = await post(props.apiUrl + '/service-request-update/store', {
                 description: updateMessage.value,
                 serviceRequestId: route.params.serviceRequestId,
             });
-
-            // Add the new update to the list
-            getData();
+            serviceRequestUpdates.value = response.data.serviceRequestUpdates.data || [];
+            setPagination(response.data.serviceRequestUpdates);
             updateMessage.value = ''; // Clear the textarea
         } catch (error) {
             if (error.response && error.response.status === 422) {
@@ -114,9 +136,24 @@
                 console.error('Error creating update:', error);
             }
         } finally {
-            loadingResults.value = false;
+            disableSubmitBtn.value = false;
         }
     }
+
+    const fetchNextPage = () => {
+        currentPage.value = currentPage.value !== lastPage.value ? currentPage.value + 1 : lastPage.value;
+        getData(currentPage.value, true);
+    };
+
+    const fetchPreviousPage = () => {
+        currentPage.value = currentPage.value !== 1 ? currentPage.value - 1 : 1;
+        getData(currentPage.value, true);
+    };
+
+    const fetchPage = (page) => {
+        currentPage.value = page;
+        getData(currentPage.value, true);
+    };
 </script>
 
 <template>
@@ -209,6 +246,7 @@
                                             <button
                                                 type="submit"
                                                 class="w-auto py-2 px-4 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-500 transition duration-200"
+                                                :disabled="disableSubmitBtn"
                                             >
                                                 Submit Update
                                             </button>
@@ -251,7 +289,16 @@
                                                     {{ serviceRequestUpdate.created_at }}
                                                 </span>
                                             </div>
-
+                                            <Pagination
+                                                :currentPage="currentPage"
+                                                :lastPage="lastPage"
+                                                :fromArticle="fromRecord"
+                                                :toArticle="toRecord"
+                                                :totalArticles="totalRecords"
+                                                @fetchNextPage="fetchNextPage"
+                                                @fetchPreviousPage="fetchPreviousPage"
+                                                @fetchPage="fetchPage"
+                                            />
                                             <!-- More updates can be added here -->
                                         </div>
                                     </div>

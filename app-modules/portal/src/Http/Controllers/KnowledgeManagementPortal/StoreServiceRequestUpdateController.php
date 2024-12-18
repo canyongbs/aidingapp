@@ -38,6 +38,7 @@ namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use AidingApp\Portal\Http\Requests\StoreServiceRequestUpdateRequest;
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateDirection;
@@ -53,6 +54,22 @@ class StoreServiceRequestUpdateController extends Controller
         $serviceRequestUpdate->direction = ServiceRequestUpdateDirection::Inbound;
         $serviceRequestUpdate->save();
 
-        return response()->json($serviceRequestUpdate, 201);
+        $serviceRequest = ServiceRequest::findOrFail($request->serviceRequestId);
+
+        $serviceRequestUpdates = $serviceRequest
+            ->serviceRequestUpdates()
+            ->latest('created_at')
+            ->where('internal', false)
+            ->paginate(5)
+            ->through(function (ServiceRequestUpdate $update) {
+                return [
+                    'id' => $update->getKey(),
+                    'update' => $update->update,
+                    'direction' => $update->direction,
+                    'created_at' => $update->created_at->format('m-d-Y g:i A'),
+                ];
+            });
+
+        return response()->json(['serviceRequestUpdates' => $serviceRequestUpdates], 201);
     }
 }
