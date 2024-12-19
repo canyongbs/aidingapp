@@ -87,7 +87,7 @@
                 name: category.value.name,
                 route: parentCategory.value ? 'view-subcategory' : 'view-category',
                 params: parentCategory.value
-                    ? { subCategorySlug: category.value.slug }
+                    ? { parentCategorySlug : parentCategory.value.slug, subCategorySlug: category.value.slug }
                     : { categorySlug: category.value.slug },
             });
 
@@ -133,7 +133,7 @@
 
                     category.value = response.data.category;
                     article.value = response.data.article;
-                    parentCategory.value = response.data.parentCategory;
+                    parentCategory.value = response.data.category.parentCategory;
                     portalViewCount.value = response.data.portal_view_count;
                     feedback.value = response.data.article.vote ? response.data.article.vote.is_helpful : null;
                     helpfulVotePercentage.value = response.data.helpful_vote_percentage;

@@ -44,7 +44,7 @@
 
 <template>
     <div>
-        <h3 class="text-xl">Article Subcategories</h3>
+        <h3 class="text-xl">Subcategories</h3>
         <div
             class="mt-4 overflow-hidden rounded bg-gray-200 shadow-sm ring-1 ring-black/5 grid gap-px divide-y-0 lg:grid-cols-2"
         >
@@ -77,7 +77,7 @@
                     <div class="w-full mt-8">
                         <h3 class="text-base font-semibold leading-6 text-gray-900">
                             <router-link
-                                :to="{ name: 'view-subcategory', params: { subCategorySlug: subCategory.slug } }"
+                                :to="{ name: 'view-subcategory', params: { parentCategorySlug: subCategory.parentCategory.slug , categorySlug: subCategory.slug } }"
                             >
                                 <span class="absolute inset-0" aria-hidden="true" />
                                 {{ subCategory.name }}
