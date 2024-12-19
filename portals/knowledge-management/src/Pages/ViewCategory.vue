@@ -71,7 +71,6 @@
     const loadingResults = ref(true);
     const loadingeSearchResults = ref(true);
     const category = ref(null);
-    const subCategories = ref(null);
     const articles = ref(null);
     const searchQuery = ref('');
     const searchResults = ref(null);
@@ -85,7 +84,6 @@
     const toArticle = ref(0);
     const filter = ref('');
     const fromSearch = ref(false);
-    const parentCategory = ref(null);
 
     const debounceSearch = debounce((value, page = 1) => {
         const { post } = consumer();
@@ -180,16 +178,16 @@
     };
 
     const breadcrumbs = computed(() => {
-        if (parentCategory.value) {
+        if (category.value.parentCategory) {
             return [
                 {
-                    name: parentCategory.value.name,
+                    name: category.value.parentCategory.name,
                     route: 'view-category',
-                    params: { categorySlug: parentCategory.value.slug },
+                    params: { categorySlug: category.value.parentCategory.slug },
                 },
             ];
         }
-
+        
         return [];
     });
 
@@ -214,23 +212,19 @@
         loadingResults.value = true;
 
         const { get } = consumer();
-        const slug = route.params.categorySlug ?? route.params.subCategorySlug;
-
-        await get(props.apiUrl + '/categories/' + slug, { page: page, filter: filter.value }).then((response) => {
-            if (response.data.category.slug !== slug) {
+        
+        await get(props.apiUrl + '/categories/' + route.params.categorySlug, { page: page, filter: filter.value }).then((response) => {
+            
                 if (route.params.categorySlug) {
                     router.replace({ name: 'view-category', params: { categorySlug: response.data.category.slug } });
-                } else {
+                } else if(route.params.categorySlug && route.params.subCategorySlug) {
                     router.replace({
                         name: 'view-subcategory',
-                        params: { subCategorySlug: response.data.category.slug },
+                        params: { parentCategorySlug: response.data.category.parentCategory.slug, categorySlug: response.data.category.slug },
                     });
                 }
-            }
-
+            
             category.value = response.data.category;
-            subCategories.value = response.data.subCategories;
-            parentCategory.value = response.data.parentCategory;
             articles.value = response.data.articles.data;
             setPagination(response.data.articles);
             loadingResults.value = false;
@@ -316,8 +310,8 @@
                                     {{ category.name }}
                                 </h2>
                                 <SubCategories
-                                    v-if="subCategories.length > 0"
-                                    :subCategories="subCategories"
+                                    v-if="category.subCategories.length > 0"
+                                    :subCategories="category.subCategories"
                                 ></SubCategories>
                                 <filter-component
                                     @change-filter="changeFilter"

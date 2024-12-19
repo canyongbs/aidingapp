@@ -71,7 +71,7 @@ customElements.define(
                         component: ViewCategory,
                     },
                     {
-                        path: baseUrl + '/subcategories/:subCategorySlug',
+                        path: baseUrl + '/categories/:parentCategorySlug/:categorySlug',
                         name: 'view-subcategory',
                         component: ViewCategory,
                     },
