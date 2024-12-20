@@ -69,12 +69,29 @@
     const portalViewCount = ref(0);
     const feedback = ref(null);
     const helpfulVotePercentage = ref(0);
+    const parentCategory = ref(null);
 
     const breadcrumbs = computed(() => {
         if (article.value && category.value) {
-            return [
-                { name: category.value.name, route: 'view-category', params: { categorySlug: category.value.slug } },
-            ];
+            const breadcrumbsList = [];
+
+            if (parentCategory.value) {
+                breadcrumbsList.push({
+                    name: parentCategory.value.name,
+                    route: 'view-category',
+                    params: { categorySlug: parentCategory.value.slug },
+                });
+            }
+
+            breadcrumbsList.push({
+                name: category.value.name,
+                route: parentCategory.value ? 'view-subcategory' : 'view-category',
+                params: parentCategory.value
+                    ? { parentCategorySlug: parentCategory.value.slug, subCategorySlug: category.value.slug }
+                    : { categorySlug: category.value.slug },
+            });
+
+            return breadcrumbsList;
         }
 
         return [];
@@ -116,6 +133,7 @@
 
                     category.value = response.data.category;
                     article.value = response.data.article;
+                    parentCategory.value = response.data.category.parentCategory;
                     portalViewCount.value = response.data.portal_view_count;
                     feedback.value = response.data.article.vote ? response.data.article.vote.is_helpful : null;
                     helpfulVotePercentage.value = response.data.helpful_vote_percentage;
