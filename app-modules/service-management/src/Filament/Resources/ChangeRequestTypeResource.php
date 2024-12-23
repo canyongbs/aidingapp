@@ -54,6 +54,10 @@ class ChangeRequestTypeResource extends Resource
 
     protected static ?int $navigationSort = 40;
 
+    protected static ?string $navigationGroup = 'Change Requests';
+
+    protected static ?string $navigationLabel = 'Types';
+
     protected static ?string $cluster = ServiceManagementAdministration::class;
 
     public static function getEloquentQuery(): Builder

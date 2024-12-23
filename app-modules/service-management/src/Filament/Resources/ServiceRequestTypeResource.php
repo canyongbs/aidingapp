@@ -56,6 +56,10 @@ class ServiceRequestTypeResource extends Resource
 {
     protected static ?string $model = ServiceRequestType::class;
 
+    protected static ?string $navigationGroup = 'Service Requests';
+
+    protected static ?string $navigationLabel = 'Types';
+
     protected static ?string $navigationIcon = 'heroicon-m-rectangle-stack';
 
     protected static ?int $navigationSort = 10;

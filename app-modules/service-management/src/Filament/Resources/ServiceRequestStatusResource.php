@@ -54,6 +54,10 @@ class ServiceRequestStatusResource extends Resource
 
     protected static ?int $navigationSort = 20;
 
+    protected static ?string $navigationGroup = 'Service Requests';
+
+    protected static ?string $navigationLabel = 'Statuses';
+
     protected static ?string $cluster = ServiceManagementAdministration::class;
 
     public static function getEloquentQuery(): Builder
