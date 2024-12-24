@@ -51,6 +51,10 @@ class ServiceRequestFormResource extends Resource
 
     protected static ?int $navigationSort = 30;
 
+    protected static ?string $navigationGroup = 'Service Requests';
+
+    protected static ?string $navigationLabel = 'Forms';
+
     protected static ?string $cluster = ServiceManagementAdministration::class;
 
     public static function getPages(): array

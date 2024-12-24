@@ -60,6 +60,10 @@ class SlaResource extends Resource
 
     protected static ?string $pluralModelLabel = 'SLAs';
 
+    protected static ?string $navigationGroup = 'Service Levels';
+
+    protected static ?string $navigationLabel = 'SLAs';
+
     protected static ?string $cluster = ServiceManagementAdministration::class;
 
     public static function form(Form $form): Form
