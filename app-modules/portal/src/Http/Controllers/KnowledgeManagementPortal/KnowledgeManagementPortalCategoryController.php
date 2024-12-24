@@ -79,13 +79,13 @@ class KnowledgeManagementPortalCategoryController extends Controller
                     ->with(['parentCategory:id,name,slug'])
                     ->get()
                     ->map(function (KnowledgeBaseCategory $subCategory) {
-                        return [
+                        return KnowledgeBaseCategoryData::from([
                             'slug' => $subCategory->slug,
                             'name' => $subCategory->name,
                             'description' => $subCategory->description,
                             'icon' => $subCategory->icon ? svg($subCategory->icon, 'h-6 w-6')->toHtml() : null,
                             'parentCategory' => $subCategory->parentCategory,
-                        ];
+                        ]);
                     }),
             ]),
             'articles' => $category->knowledgeBaseItems()
