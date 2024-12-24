@@ -43,9 +43,7 @@ use AidingApp\Portal\Enums\PortalLayout;
 use AidingApp\Portal\Enums\PortalType;
 use AidingApp\Portal\Settings\PortalSettings;
 use App\Enums\Feature;
-use App\Filament\Clusters\GlobalSettings;
 use App\Filament\Forms\Components\ColorSelect;
-use App\Models\Authenticatable;
 use App\Models\User;
 use Filament\Forms\Components\Actions;
 use Filament\Forms\Components\Actions\Action;
@@ -68,20 +66,20 @@ class ManagePortalSettings extends SettingsPage
 
     protected static ?string $navigationLabel = 'Client Portal';
 
-    protected static ?int $navigationSort = 60;
+    protected static ?int $navigationSort = 50;
 
     protected static string $settings = PortalSettings::class;
 
     protected static ?string $title = 'Client Portal';
 
-    protected static ?string $cluster = GlobalSettings::class;
+    protected static ?string $navigationGroup = 'Product Administration';
 
     public static function canAccess(): bool
     {
         /** @var User $user */
         $user = auth()->user();
 
-        return $user->hasRole(Authenticatable::SUPER_ADMIN_ROLE) && parent::canAccess();
+        return $user->can(['product_admin.view-any']);
     }
 
     public function form(Form $form): Form
@@ -219,6 +217,28 @@ class ManagePortalSettings extends SettingsPage
                             ->label('GDPR Button Label'),
                     ])
                     ->visible(fn (Get $get) => $get('knowledge_management_portal_enabled')),
-            ]);
+            ])
+            ->disabled(! auth()->user()->can('product_admin.*.update'));
+    }
+
+    public function save(): void
+    {
+        if (! auth()->user()->can('product_admin.*.update')) {
+            return;
+        }
+
+        parent::save();
+    }
+
+    /**
+    * @return array<Action | ActionGroup>
+    */
+    public function getFormActions(): array
+    {
+        if (! auth()->user()->can('product_admin.*.update')) {
+            return [];
+        }
+
+        return parent::getFormActions();
     }
 }
