@@ -38,7 +38,6 @@ namespace AidingApp\Audit\Filament\Pages;
 
 use AidingApp\Audit\Actions\Finders\AuditableModels;
 use AidingApp\Audit\Settings\AuditSettings;
-use App\Filament\Clusters\GlobalSettings;
 use App\Models\Authenticatable;
 use App\Models\User;
 use Filament\Forms\Components\Select;
@@ -52,13 +51,13 @@ class ManageAuditSettings extends SettingsPage
 
     protected static ?string $navigationLabel = 'Auditing';
 
-    protected static ?int $navigationSort = 20;
+    protected static ?int $navigationSort = 30;
 
     protected static string $settings = AuditSettings::class;
 
     protected static ?string $title = 'Auditing';
 
-    protected static ?string $cluster = GlobalSettings::class;
+    protected static ?string $navigationGroup = 'Global Administration';
 
     public static function canAccess(): bool
     {
