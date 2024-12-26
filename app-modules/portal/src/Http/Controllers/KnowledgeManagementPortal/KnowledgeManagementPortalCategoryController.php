@@ -50,6 +50,7 @@ class KnowledgeManagementPortalCategoryController extends Controller
         return response()->json(
             KnowledgeBaseCategoryData::collection(
                 KnowledgeBaseCategory::query()
+                    ->where('parent_id', null)
                     ->orderBy('name')
                     ->get()
                     ->map(function (KnowledgeBaseCategory $category) {
@@ -72,6 +73,20 @@ class KnowledgeManagementPortalCategoryController extends Controller
                 'slug' => $category->slug,
                 'name' => $category->name,
                 'description' => $category->description,
+                'parentCategory' => $category->parentCategory,
+                'subCategories' => $category
+                    ->subCategories()
+                    ->with(['parentCategory:id,name,slug'])
+                    ->get()
+                    ->map(function (KnowledgeBaseCategory $subCategory) {
+                        return KnowledgeBaseCategoryData::from([
+                            'slug' => $subCategory->slug,
+                            'name' => $subCategory->name,
+                            'description' => $subCategory->description,
+                            'icon' => $subCategory->icon ? svg($subCategory->icon, 'h-6 w-6')->toHtml() : null,
+                            'parentCategory' => $subCategory->parentCategory,
+                        ]);
+                    }),
             ]),
             'articles' => $category->knowledgeBaseItems()
                 ->with('tags')

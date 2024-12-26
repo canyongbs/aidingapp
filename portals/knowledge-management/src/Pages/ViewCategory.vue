@@ -34,7 +34,7 @@
 <script setup>
     import { XMarkIcon } from '@heroicons/vue/20/solid/index.js';
     import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline';
-    import { defineProps, ref, watch } from 'vue';
+    import { computed, defineProps, ref, watch } from 'vue';
     import { useRoute, useRouter } from 'vue-router';
     import AppLoading from '../Components/AppLoading.vue';
     import Article from '../Components/Article.vue';
@@ -43,6 +43,7 @@
     import FilterComponent from '../Components/FilterComponent.vue';
     import Pagination from '../Components/Pagination.vue';
     import SearchResults from '../Components/SearchResults.vue';
+    import SubCategories from '../Components/SubCategories.vue';
     import { consumer } from '../Services/Consumer.js';
 
     const route = useRoute();
@@ -176,6 +177,20 @@
         debounceSearch(searchQuery.value);
     };
 
+    const breadcrumbs = computed(() => {
+        if (category.value.parentCategory) {
+            return [
+                {
+                    name: category.value.parentCategory.name,
+                    route: 'view-category',
+                    params: { categorySlug: category.value.parentCategory.slug },
+                },
+            ];
+        }
+
+        return [];
+    });
+
     watch(
         route,
         async function (newRouteValue) {
@@ -193,13 +208,22 @@
             debounceSearch(searchQuery.value, page);
             return;
         }
+
         loadingResults.value = true;
 
         const { get } = consumer();
 
         await get(props.apiUrl + '/categories/' + route.params.categorySlug, { page: page, filter: filter.value }).then(
             (response) => {
-                if (response.data.category.slug !== route.params.categorySlug) {
+                if (route.params.categorySlug && route.params.parentCategorySlug) {
+                    router.replace({
+                        name: 'view-subcategory',
+                        params: {
+                            parentCategorySlug: response.data.category.parentCategory.slug,
+                            categorySlug: response.data.category.slug,
+                        },
+                    });
+                } else if (route.params.categorySlug) {
                     router.replace({ name: 'view-category', params: { categorySlug: response.data.category.slug } });
                 }
 
@@ -284,11 +308,15 @@
                             </SearchResults>
                         </div>
                         <div v-else class="flex flex-col gap-6">
-                            <Breadcrumbs :currentCrumb="category.name"></Breadcrumbs>
+                            <Breadcrumbs :currentCrumb="category.name" :breadcrumbs="breadcrumbs"></Breadcrumbs>
                             <div class="flex flex-col gap-6">
                                 <h2 class="text-2xl font-bold text-primary-950">
                                     {{ category.name }}
                                 </h2>
+                                <SubCategories
+                                    v-if="category.subCategories.length > 0"
+                                    :subCategories="category.subCategories"
+                                ></SubCategories>
                                 <filter-component
                                     @change-filter="changeFilter"
                                     :selected-filter="filter"

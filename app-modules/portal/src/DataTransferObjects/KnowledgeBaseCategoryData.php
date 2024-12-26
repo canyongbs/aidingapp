@@ -36,6 +36,7 @@
 
 namespace AidingApp\Portal\DataTransferObjects;
 
+use Illuminate\Support\Collection;
 use Spatie\LaravelData\Data;
 
 class KnowledgeBaseCategoryData extends Data
@@ -45,5 +46,8 @@ class KnowledgeBaseCategoryData extends Data
         public string $name,
         public ?string $description,
         public ?string $icon,
+        public ?KnowledgeBaseCategoryData $parentCategory,
+        /** @var null|Collection<int, KnowledgeBaseCategoryData> */
+        public ?Collection $subCategories,
     ) {}
 }
