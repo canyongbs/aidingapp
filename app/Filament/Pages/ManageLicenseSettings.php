@@ -54,7 +54,7 @@ class ManageLicenseSettings extends SettingsPage
 
     protected static ?string $navigationLabel = 'Subscription';
 
-    protected static ?int $navigationSort = 20;
+    protected static ?int $navigationSort = 10;
 
     protected static string $settings = LicenseSettings::class;
 

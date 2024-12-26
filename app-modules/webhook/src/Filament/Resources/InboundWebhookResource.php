@@ -47,7 +47,7 @@ class InboundWebhookResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-signal';
 
-    protected static ?int $navigationSort = 50;
+    protected static ?int $navigationSort = 40;
 
     protected static ?string $navigationGroup = 'Global Administration';
 

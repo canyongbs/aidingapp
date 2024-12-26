@@ -44,5 +44,5 @@ class ProductIntegrations extends Cluster
 
     protected static ?string $navigationGroup = 'Global Administration';
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 50;
 }
