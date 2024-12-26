@@ -37,7 +37,6 @@
 namespace AidingApp\Theme\Filament\Pages;
 
 use AidingApp\Theme\Settings\ThemeSettings;
-use App\Filament\Clusters\GlobalSettings;
 use App\Models\Authenticatable;
 use App\Models\User;
 use Filament\Forms\Components\Section;
@@ -60,7 +59,7 @@ class ManageBrandConfigurationSettings extends SettingsPage
 
     protected static ?string $title = 'Branding';
 
-    protected static ?string $cluster = GlobalSettings::class;
+    protected static ?string $navigationGroup = 'Global Administration';
 
     public static function canAccess(): bool
     {

@@ -39,7 +39,6 @@ namespace AidingApp\Webhook\Filament\Resources;
 use AidingApp\Webhook\Filament\Resources\InboundWebhookResource\Pages\ListInboundWebhooks;
 use AidingApp\Webhook\Filament\Resources\InboundWebhookResource\Pages\ViewInboundWebhook;
 use AidingApp\Webhook\Models\InboundWebhook;
-use App\Filament\Clusters\GlobalSettings;
 use Filament\Resources\Resource;
 
 class InboundWebhookResource extends Resource
@@ -50,7 +49,7 @@ class InboundWebhookResource extends Resource
 
     protected static ?int $navigationSort = 40;
 
-    protected static ?string $cluster = GlobalSettings::class;
+    protected static ?string $navigationGroup = 'Global Administration';
 
     public static function getPages(): array
     {
