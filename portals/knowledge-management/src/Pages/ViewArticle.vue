@@ -87,7 +87,7 @@
                 name: category.value.name,
                 route: parentCategory.value ? 'view-subcategory' : 'view-category',
                 params: parentCategory.value
-                    ? { parentCategorySlug : parentCategory.value.slug, subCategorySlug: category.value.slug }
+                    ? { parentCategorySlug: parentCategory.value.slug, subCategorySlug: category.value.slug }
                     : { categorySlug: category.value.slug },
             });
 
