@@ -46,7 +46,6 @@ class KnowledgeBaseCategoryData extends Data
         public string $name,
         public ?string $description,
         public ?string $icon,
-        /** @var null|KnowledgeBaseCategoryData */
         public ?KnowledgeBaseCategoryData $parentCategory,
         /** @var null|Collection<int, KnowledgeBaseCategoryData> */
         public ?Collection $subCategories,

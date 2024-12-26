@@ -214,15 +214,14 @@
         const { get } = consumer();
         
         await get(props.apiUrl + '/categories/' + route.params.categorySlug, { page: page, filter: filter.value }).then((response) => {
-            
-                if (route.params.categorySlug) {
-                    router.replace({ name: 'view-category', params: { categorySlug: response.data.category.slug } });
-                } else if(route.params.categorySlug && route.params.subCategorySlug) {
-                    router.replace({
-                        name: 'view-subcategory',
-                        params: { parentCategorySlug: response.data.category.parentCategory.slug, categorySlug: response.data.category.slug },
-                    });
-                }
+            if(route.params.categorySlug && route.params.parentCategorySlug) {
+                router.replace({
+                    name: 'view-subcategory',
+                    params: { parentCategorySlug: response.data.category.parentCategory.slug, categorySlug: response.data.category.slug },
+                });
+            } else if (route.params.categorySlug) {
+                router.replace({ name: 'view-category', params: { categorySlug: response.data.category.slug } });
+            }
             
             category.value = response.data.category;
             articles.value = response.data.articles.data;

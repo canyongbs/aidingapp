@@ -75,10 +75,10 @@ class KnowledgeManagementPortalArticleController extends Controller
                 'slug' => $category->slug,
                 'name' => $category->name,
                 'description' => $category->description,
-                'parentCategory' => $category?->parentCategory ? KnowledgeBaseCategoryData::from([
-                    'slug' => $category?->parentCategory->slug,
-                    'name' => $category?->parentCategory->name,
-                    'description' => $category?->parentCategory->description,
+                'parentCategory' => $category->parentCategory ? KnowledgeBaseCategoryData::from([
+                    'slug' => $category->parentCategory->slug,
+                    'name' => $category->parentCategory->name,
+                    'description' => $category->parentCategory->description,
                 ]) : null,
             ]),
             'article' => KnowledgeBaseArticleData::from([
