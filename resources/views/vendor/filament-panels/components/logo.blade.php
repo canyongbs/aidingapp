@@ -68,7 +68,7 @@
     @endif
 @else
     <img
-        src="{{ Vite::asset('resources/images/default-logo-light-1733734551.svg') }}"
+        src="{{ Vite::asset('resources/images/default-logo-light-1735308866.svg') }}"
         class="h-9 dark:hidden block"
 
     />
