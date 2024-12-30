@@ -64,7 +64,7 @@ class KnowledgeManagementPortalController extends Controller
             'layout' => $settings->knowledge_management_portal_layout ?? PortalLayout::Full,
             'header_logo' => $logo ? $logo->getTemporaryUrl(
                 expiration: now()->addMinutes(5),
-            ) : url(Vite::asset('resources/images/default-logo-light-1733734551.svg')),
+            ) : url(Vite::asset('resources/images/default-logo-light-1735308866.svg')),
             'favicon' => $favicon?->getTemporaryUrl(
                 expiration: now()->addMinutes(5),
                 conversionName: 'portal_favicon',
