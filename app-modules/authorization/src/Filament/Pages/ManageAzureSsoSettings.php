@@ -36,11 +36,14 @@
 
 namespace AidingApp\Authorization\Filament\Pages;
 
+use AidingApp\Authorization\Enums\AzureMatchingProperty;
 use AidingApp\Authorization\Settings\AzureSsoSettings;
+use App\Features\AzureMatchingPropertyFeature;
 use App\Filament\Clusters\ProductIntegrations;
 use App\Models\Authenticatable;
 use App\Models\User;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
@@ -96,6 +99,12 @@ class ManageAzureSsoSettings extends SettingsPage
                             ->required(fn (Get $get) => $get('is_enabled'))
                             ->password()
                             ->revealable(),
+                        Select::make('matching_property')
+                            ->label('Matching Property')
+                            ->options(AzureMatchingProperty::class)
+                            ->enum(AzureMatchingProperty::class)
+                            ->required(fn (Get $get) => $get('is_enabled'))
+                            ->visible(AzureMatchingPropertyFeature::active()),
                     ])->visible(fn (Get $get) => $get('is_enabled')),
             ]);
     }

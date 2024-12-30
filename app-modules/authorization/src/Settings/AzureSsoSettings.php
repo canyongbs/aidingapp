@@ -36,6 +36,7 @@
 
 namespace AidingApp\Authorization\Settings;
 
+use AidingApp\Authorization\Enums\AzureMatchingProperty;
 use Spatie\LaravelSettings\Settings;
 
 class AzureSsoSettings extends Settings
@@ -47,6 +48,8 @@ class AzureSsoSettings extends Settings
     public ?string $client_secret = null;
 
     public ?string $tenant_id = null;
+
+    public AzureMatchingProperty $matching_property = AzureMatchingProperty::UserPrincipalName;
 
     public static function group(): string
     {

@@ -36,8 +36,10 @@
 
 namespace AidingApp\Authorization\Enums;
 
+use AidingApp\Authorization\Exceptions\InvalidAzureMatchingProperty;
 use AidingApp\Authorization\Settings\AzureSsoSettings;
 use AidingApp\Authorization\Settings\GoogleSsoSettings;
+use App\Features\AzureMatchingPropertyFeature;
 use Exception;
 use Laravel\Socialite\Contracts\Provider;
 use Laravel\Socialite\Facades\Socialite;
@@ -81,6 +83,27 @@ enum SocialiteProvider: string
                 $googleSsoSettings->client_secret,
                 route('socialite.callback', ['provider' => 'google'])
             ),
+            default => throw new Exception('Invalid socialite provider'),
+        };
+    }
+
+    public function getEmailFromUser(mixed $user): string
+    {
+        return match ($this->value) {
+            'azure', 'azure_calendar' => (function () use ($user) {
+                if (! AzureMatchingPropertyFeature::active()) {
+                    return $user->getEmail();
+                }
+
+                /** @var User $user */
+
+                return match (app(AzureSsoSettings::class)->matching_property) {
+                    AzureMatchingProperty::UserPrincipalName => $user->getPrincipalName(),
+                    AzureMatchingProperty::Mail => $user->getMail(),
+                    default => throw new InvalidAzureMatchingProperty(app(AzureSsoSettings::class)->matching_property),
+                };
+            })(),
+            'google' => $user->getEmail(),
             default => throw new Exception('Invalid socialite provider'),
         };
     }
