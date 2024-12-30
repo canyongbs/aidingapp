@@ -88,7 +88,21 @@ class EditServiceRequestTypeNotifications extends EditRecord
                             ->label('Notification'),
                         Heading::make()
                             ->three()
-                            ->content('Service Request Resolved'),
+                            ->content('Service Request Update'),
+                        Toggle::make('is_managers_service_request_update_email_enabled')
+                            ->label('Email'),
+                        Toggle::make('is_managers_service_request_update_notification_enabled')
+                            ->label('Notification'),
+                        Heading::make()
+                            ->three()
+                            ->content('Service Request Status Change (Non-Closed)'),
+                        Toggle::make('is_managers_service_request_status_change_email_enabled')
+                            ->label('Email'),
+                        Toggle::make('is_managers_service_request_status_change_notification_enabled')
+                            ->label('Notification'),
+                        Heading::make()
+                            ->three()
+                            ->content('Service Request Closed'),
                         Toggle::make('is_managers_service_request_resolved_email_enabled')
                             ->label('Email'),
                         Toggle::make('is_managers_service_request_resolved_notification_enabled')
@@ -110,12 +124,64 @@ class EditServiceRequestTypeNotifications extends EditRecord
                             ->label('Email'),
                         Toggle::make('is_auditors_service_request_assigned_notification_enabled')
                             ->label('Notification'),
+                            Heading::make()
+                            ->three()
+                            ->content('Service Request Update'),
+                        Toggle::make('is_auditors_service_request_update_email_enabled')
+                            ->label('Email'),
+                        Toggle::make('is_auditors_service_request_update_notification_enabled')
+                            ->label('Notification'),
                         Heading::make()
                             ->three()
-                            ->content('Service Request Resolved'),
+                            ->content('Service Request Status Change (Non-Closed)'),
+                        Toggle::make('is_auditors_service_request_status_change_email_enabled')
+                            ->label('Email'),
+                        Toggle::make('is_auditors_service_request_status_change_notification_enabled')
+                            ->label('Notification'),
+                        Heading::make()
+                            ->three()
+                            ->content('Service Request Closed'),
                         Toggle::make('is_auditors_service_request_resolved_email_enabled')
                             ->label('Email'),
                         Toggle::make('is_auditors_service_request_resolved_notification_enabled')
+                            ->label('Notification'),
+                            Heading::make()
+                            ->two()
+                            ->content('Customers'),
+                        Heading::make()
+                            ->three()
+                            ->content('Service Request Created'),
+                        Toggle::make('is_customers_service_request_created_email_enabled')
+                            ->label('Email'),
+                        Toggle::make('is_customers_service_request_created_notification_enabled')
+                            ->label('Notification'),
+                        Heading::make()
+                            ->three()
+                            ->content('Service Request Assigned'),
+                        Toggle::make('is_customers_service_request_assigned_email_enabled')
+                            ->label('Email'),
+                        Toggle::make('is_customers_service_request_assigned_notification_enabled')
+                            ->label('Notification'),
+                            Heading::make()
+                            ->three()
+                            ->content('Service Request Update'),
+                        Toggle::make('is_customers_service_request_update_email_enabled')
+                            ->label('Email'),
+                        Toggle::make('is_customers_service_request_update_notification_enabled')
+                            ->label('Notification'),
+                        Heading::make()
+                            ->three()
+                            ->content('Service Request Status Change (Non-Closed)'),
+                        Toggle::make('is_customers_service_request_status_change_email_enabled')
+                            ->label('Email'),
+                        Toggle::make('is_customers_service_request_status_change_notification_enabled')
+                            ->label('Notification'),
+                        Heading::make()
+                            ->three()
+                            ->content('Service Request Closed'),
+                        Toggle::make('is_customers_service_request_closed_email_enabled')
+                            ->label('Email'),
+                        Toggle::make('is_customers_service_request_closed_notification_enabled')
                             ->label('Notification'),
                     ]),
             ]);
