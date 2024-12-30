@@ -124,7 +124,7 @@ class EditServiceRequestTypeNotifications extends EditRecord
                             ->label('Email'),
                         Toggle::make('is_auditors_service_request_assigned_notification_enabled')
                             ->label('Notification'),
-                            Heading::make()
+                        Heading::make()
                             ->three()
                             ->content('Service Request Update'),
                         Toggle::make('is_auditors_service_request_update_email_enabled')
@@ -145,7 +145,7 @@ class EditServiceRequestTypeNotifications extends EditRecord
                             ->label('Email'),
                         Toggle::make('is_auditors_service_request_resolved_notification_enabled')
                             ->label('Notification'),
-                            Heading::make()
+                        Heading::make()
                             ->two()
                             ->content('Customers'),
                         Heading::make()
@@ -162,7 +162,7 @@ class EditServiceRequestTypeNotifications extends EditRecord
                             ->label('Email'),
                         Toggle::make('is_customers_service_request_assigned_notification_enabled')
                             ->label('Notification'),
-                            Heading::make()
+                        Heading::make()
                             ->three()
                             ->content('Service Request Update'),
                         Toggle::make('is_customers_service_request_update_email_enabled')
