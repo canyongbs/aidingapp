@@ -152,4 +152,9 @@ class ServiceRequestType extends BaseModel implements Auditable
     {
         return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
     }
+
+    public function templates(): HasMany
+    {
+        return $this->hasMany(ServiceRequestTypeEmailTemplate::class, 'service_request_type_id');
+    }
 }
