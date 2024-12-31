@@ -148,13 +148,13 @@ class ServiceRequestType extends BaseModel implements Auditable
         return $this->belongsTo(User::class, 'last_assigned_id', 'id');
     }
 
-    protected function serializeDate(DateTimeInterface $date): string
-    {
-        return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
-    }
-
     public function templates(): HasMany
     {
         return $this->hasMany(ServiceRequestTypeEmailTemplate::class, 'service_request_type_id');
+    }
+
+    protected function serializeDate(DateTimeInterface $date): string
+    {
+        return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
     }
 }
