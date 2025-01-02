@@ -72,12 +72,28 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
                             ->placeholder('Enter the email subject here...')
                             ->rules(['required'])
                             ->extraInputAttributes(['style' => 'min-height: 12rem;'])
+                            ->mergeTags([
+                                'created',
+                                'updated',
+                                'status',
+                                'assigned to',
+                                'title',
+                                'type',
+                            ])
                             ->columnSpanFull(),
                         TiptapEditor::make('body')
                             ->label('Body')
                             ->placeholder('Enter the email body here...')
                             ->rules(['required'])
                             ->extraInputAttributes(['style' => 'min-height: 12rem;'])
+                            ->mergeTags([
+                                'created',
+                                'updated',
+                                'status',
+                                'assigned to',
+                                'title',
+                                'type',
+                            ])
                             ->columnSpanFull(),
                     ]),
             ]);
@@ -86,6 +102,8 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
     public function save(bool $shouldRedirect = true, bool $shouldSendSavedNotification = true): void
     {
         $data = $this->form->getState();
+        $data['service_request_type_id'] = $this->getRecord()->id;
+        $data['type'] = $this->type;
 
         if ($this->template) {
             $this->template->update($data);
@@ -94,7 +112,6 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
         }
 
         unset($this->template);
-        $this->getSavedNotification()->send();
 
         parent::save($shouldRedirect, $shouldSendSavedNotification);
     }
@@ -104,7 +121,7 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
         $getRecord = $this->getRecord();
 
         $data['service_request_type_id'] = $getRecord->id;
-        $data['type'] = 'created';
+        $data['type'] = $this->type;
 
         if ($this->template) {
             $data['subject'] = $this->template->subject;
