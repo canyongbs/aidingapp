@@ -38,32 +38,44 @@
     $themeSettings = app(ThemeSettings::class);
 
     $settingsProperty = $themeSettings::getSettingsPropertyModel('theme.is_logo_active');
-
     $logo = $settingsProperty->getFirstMedia('logo');
     $darkLogo = $settingsProperty->getFirstMedia('dark_logo');
 @endphp
 
 @if ($themeSettings->is_logo_active && $logo)
-    <img
-        src="{{ $logo->getTemporaryUrl(
+    @php
+        $logoUrl = $logo->getTemporaryUrl(
             expiration: now()->addMinutes(5),
-            conversionName: 'logo-height-250px',
-        ) }}"
+            conversionName: $logo->hasGeneratedConversion('logo-height-250px') ? 'logo-height-250px' : '',
+        );
+    @endphp
+    <img
+        src="{{ $logoUrl }}"
         alt="{{ config('app.name') }}"
         @class([
-            'h-9',
+            'h-full max-h-9',
+            'w-full' => $logo->mime_type == 'image/svg+xml',
+            'max-w-full' => $logo->mime_type != 'image/svg+xml',
             'dark:hidden' => $darkLogo,
         ])
     />
 
     @if ($darkLogo)
-        <img
-            src="{{ $darkLogo->getTemporaryUrl(
+        @php
+            $darkLogoUrl = $darkLogo->getTemporaryUrl(
                 expiration: now()->addMinutes(5),
-                conversionName: 'logo-height-250px',
-            ) }}"
+                conversionName: $darkLogo->hasGeneratedConversion('logo-height-250px') ? 'logo-height-250px' : '',
+            );
+        @endphp
+        <img
+            src="{{ $darkLogoUrl }}"
             alt="{{ config('app.name') }}"
-            class="h-9 hidden dark:block"
+            @class([
+                'h-full max-h-9',
+                'w-full' => $darkLogo->mime_type == 'image/svg+xml',
+                'max-w-full' => $darkLogo->mime_type != 'image/svg+xml',
+                'hidden dark:block',
+            ])
         />
     @endif
 @else
