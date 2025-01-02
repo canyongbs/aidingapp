@@ -42,6 +42,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Filament\Notifications\Notification;
+use Illuminate\Database\Query\Expression;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -79,7 +80,7 @@ class SocialiteController extends Controller
 
         /** @var User $user */
         $user = User::query()
-            ->where('email', $socialiteUser->getEmail())
+            ->where(new Expression('lower(email)'), strtolower($provider->getEmailFromUser($socialiteUser)))
             ->first();
 
         if (! $user?->is_external) {
