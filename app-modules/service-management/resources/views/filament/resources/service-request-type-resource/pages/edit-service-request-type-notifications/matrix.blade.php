@@ -71,11 +71,11 @@
         'service_request_update' => 'Service Request Update',
         'service_request_status_change' => 'Service Request Status Change (Non-Closed)',
         'service_request_closed' => 'Service Request Closed',
-    ] as $permissionSlug => $permission)
+    ] as $eventSlug => $event)
             <div
                 class="flex flex-col divide-y divide-gray-950/5 dark:divide-white/10 xl:flex-row xl:divide-x xl:divide-y-0">
                 <div class="flex items-center px-3 py-2 text-sm text-gray-950 dark:text-white xl:flex-1">
-                    {{ $permission }}
+                    {{ $event }}
                 </div>
 
                 <div
@@ -94,7 +94,7 @@
                                     >
                                         <x-filament::input.checkbox
                                             :disabled="$isDisabled"
-                                            :wire:model="$statePath . '.is_' . $roleSlug . '_' . $permissionSlug . '_' . $typeSlug . '_enabled'"
+                                            :wire:model="$statePath . '.is_' . $roleSlug . '_' . $eventSlug . '_' . $typeSlug . '_enabled'"
                                         />
 
                                         <span class="xl:sr-only">
