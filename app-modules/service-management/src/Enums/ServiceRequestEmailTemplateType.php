@@ -46,11 +46,11 @@ enum ServiceRequestEmailTemplateType: string implements HasLabel
 
     case Update = 'update';
 
-    case StatusChange = 'status-change';
+    case StatusChange = 'status change';
 
     case Closed = 'closed';
 
-    case SurveyResponse = 'survey-response';
+    case SurveyResponse = 'survey response';
 
     public function getLabel(): string
     {

@@ -46,8 +46,8 @@ return new class () extends Migration {
             $table->foreignUuid('service_request_type_id')->constrained('service_request_types');
             $table->enum('type', ['created', 'assigned', 'update', 'status-change', 'closed', 'survey-response'])->default('created');
             $table->unique(['service_request_type_id', 'type']);
-            $table->json('subject');
-            $table->json('body');
+            $table->jsonb('subject');
+            $table->jsonb('body');
             $table->timestamps();
         });
     }

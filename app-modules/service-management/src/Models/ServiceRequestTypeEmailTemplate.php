@@ -39,6 +39,7 @@ namespace AidingApp\ServiceManagement\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ServiceRequestTypeEmailTemplate extends Model
 {
@@ -56,4 +57,9 @@ class ServiceRequestTypeEmailTemplate extends Model
         'subject' => 'array',
         'body' => 'array',
     ];
+
+    public function serviceRequestType(): BelongsTo
+    {
+        return $this->belongsTo(ServiceRequestType::class);
+    }
 }

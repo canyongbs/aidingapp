@@ -48,6 +48,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pa
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\ViewServiceRequestType;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\RelationManagers\ServiceRequestPrioritiesRelationManager;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use App\Features\ServiceRequestTypeEmailTemplateFeature;
 use App\Filament\Clusters\ServiceManagementAdministration;
 use Filament\Navigation\NavigationItem;
 use Filament\Resources\Pages\Page;
@@ -55,6 +56,7 @@ use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 
 class ServiceRequestTypeResource extends Resource
 {
@@ -96,12 +98,12 @@ class ServiceRequestTypeResource extends Resource
                 EditServiceRequestTypeAssignments::class,
                 EditServiceRequestTypeNotifications::class,
             ]),
-            ...array_map(
+            ...(ServiceRequestTypeEmailTemplateFeature::active() ? array_map(
                 fn (ServiceRequestEmailTemplateType $type): NavigationItem => Arr::first(ServiceRequestTypeEmailTemplatePage::getNavigationItems(['record' => $page->record, 'type' => $type]))
-                    ->label($type->getLabel())
-                    ->isActiveWhen(fn (): bool => request()->routeIs(static::getUrl('service-request-type-email-template', ['record' => $page->record, 'type' => $type]))),
+                    ->label(Str::headline($type->getLabel()))
+                    ->isActiveWhen(fn (): bool => Str::endsWith(request()->path(), $type)),
                 ServiceRequestEmailTemplateType::cases(),
-            ),
+            ) : []),
         ];
     }
 

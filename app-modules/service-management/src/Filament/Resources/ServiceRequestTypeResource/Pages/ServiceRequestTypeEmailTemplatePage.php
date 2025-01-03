@@ -52,6 +52,9 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
     #[Locked]
     public ?string $type;
 
+    /** @var ?ServiceRequestTypeEmailTemplate */
+    protected ?ServiceRequestTypeEmailTemplate $template = null;
+
     public static ?string $navigationGroup = 'Email Templates';
 
     public function getRelationManagers(): array
@@ -71,7 +74,8 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
                             ->label('Subject')
                             ->placeholder('Enter the email subject here...')
                             ->rules(['required'])
-                            ->extraInputAttributes(['style' => 'min-height: 12rem;'])
+                            ->extraInputAttributes(['style' => 'min-height: 2rem; overflow-y:none;'])
+                            ->disableToolbarMenus()
                             ->mergeTags([
                                 'created',
                                 'updated',
@@ -80,6 +84,8 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
                                 'title',
                                 'type',
                             ])
+                            ->showMergeTagsInBlocksPanel(false)
+                            ->helperText('You may use “merge tags” to substitute information about a service request into your subject line. Insert a “{{“ in the subject line field to see a list of available merge tags')
                             ->columnSpanFull(),
                         TiptapEditor::make('body')
                             ->label('Body')
@@ -105,6 +111,7 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
         $data['service_request_type_id'] = $this->getRecord()->id;
         $data['type'] = $this->type;
 
+        /** @var ?ServiceRequestTypeEmailTemplate $template */
         if ($this->template) {
             $this->template->update($data);
         } else {
