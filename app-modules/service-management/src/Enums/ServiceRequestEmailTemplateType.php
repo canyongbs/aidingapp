@@ -3,7 +3,7 @@
 /*
 <COPYRIGHT>
 
-    Copyright © 2016-2025, Canyon GBS LLC. All rights reserved.
+    Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
     Aiding App™ is licensed under the Elastic License 2.0. For more details,
     see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
@@ -46,11 +46,11 @@ enum ServiceRequestEmailTemplateType: string implements HasLabel
 
     case Update = 'update';
 
-    case StatusChange = 'status change';
+    case StatusChange = 'status-change';
 
     case Closed = 'closed';
 
-    case SurveyResponse = 'survey response';
+    case SurveyResponse = 'survey-response';
 
     public function getLabel(): string
     {
