@@ -33,6 +33,8 @@
 --}}
 
 @php
+    use Illuminate\Support\HtmlString;
+
     $isDisabled = $isDisabled();
     $statePath = $getStatePath();
 @endphp
@@ -43,7 +45,7 @@
 
         <div class="grid grid-cols-3 gap-0 divide-x divide-gray-950/5 text-xs dark:divide-white/10">
             @foreach (['Managers', 'Auditors', 'Customers'] as $role)
-                <div class="flex w-40 items-center justify-center p-2 text-gray-950 dark:text-white">
+                <div class="flex w-32 items-center justify-center p-2 text-gray-950 dark:text-white">
                     {{ $role }}
                 </div>
             @endforeach
@@ -55,8 +57,8 @@
 
         <div class="grid grid-cols-6 divide-x divide-gray-950/5 text-xs dark:divide-white/10">
             @foreach (['Managers', 'Auditors', 'Customers'] as $role)
-                @foreach (['Email', 'In-app Notification'] as $type)
-                    <div class="flex w-20 items-center justify-center p-2 text-center text-gray-950 dark:text-white">
+                @foreach (['Email', 'App'] as $type)
+                    <div class="flex w-16 items-center justify-center p-2 text-center text-gray-950 dark:text-white">
                         {{ $type }}
                     </div>
                 @endforeach
@@ -69,28 +71,31 @@
         'service_request_created' => 'Service Request Created',
         'service_request_assigned' => 'Service Request Assigned',
         'service_request_update' => 'Service Request Update',
-        'service_request_status_change' => 'Service Request Status Change (Non-Closed)',
+        'service_request_status_change' => 'Service Request Status Change',
         'service_request_closed' => 'Service Request Closed',
     ] as $eventSlug => $event)
             <div
                 class="flex flex-col divide-y divide-gray-950/5 dark:divide-white/10 xl:flex-row xl:divide-x xl:divide-y-0">
-                <div class="flex items-center px-3 py-2 text-sm text-gray-950 dark:text-white xl:flex-1">
+                <div
+                    class="flex items-center px-3 py-2 text-sm text-gray-950 dark:text-white xl:flex-1"
+                    @if ($eventSlug === 'service_request_status_change') x-tooltip.raw="Applies to all status changes other than those in a closed classification" @endif
+                >
                     {{ $event }}
                 </div>
 
                 <div
                     class="grid grid-cols-1 gap-3 divide-gray-950/5 px-3 py-2 text-sm dark:divide-white/10 xl:grid-cols-3 xl:gap-0 xl:divide-x xl:px-0 xl:py-0">
                     @foreach (['managers' => 'Managers', 'auditors' => 'Auditors', 'customers' => 'Customers'] as $roleSlug => $role)
-                        <div class="flex flex-col gap-1 xl:w-40">
+                        <div class="flex flex-col gap-1 xl:w-32">
                             <div class="xl:hidden">
                                 {{ $role }}
                             </div>
 
                             <div
                                 class="grid h-full grid-cols-2 gap-1 divide-gray-950/5 dark:divide-white/10 xl:gap-0 xl:divide-x">
-                                @foreach (['email' => 'Email', 'notification' => 'In-app Notification'] as $typeSlug => $type)
+                                @foreach (['email' => 'Email', 'notification' => 'App'] as $typeSlug => $type)
                                     <label
-                                        class="flex items-center gap-2 xl:flex xl:w-20 xl:justify-center xl:px-3 xl:py-2"
+                                        class="flex items-center gap-2 xl:flex xl:w-16 xl:justify-center xl:px-3 xl:py-2"
                                     >
                                         <x-filament::input.checkbox
                                             :disabled="$isDisabled"

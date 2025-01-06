@@ -62,7 +62,7 @@ class ManageServiceRequestTypeManagers extends ManageRelatedRecords
     {
         return $table
             ->recordTitleAttribute('name')
-            ->inverseRelationship('managableServiceRequestTypes')
+            ->inverseRelationship('manageableServiceRequestTypes')
             ->columns([
                 TextColumn::make('name')
                     ->label('Team'),

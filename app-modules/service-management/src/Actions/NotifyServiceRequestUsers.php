@@ -55,7 +55,7 @@ class NotifyServiceRequestUsers
                     $query->whereHas(
                         'teams',
                         fn (Builder $query) => $query->whereHas(
-                            'managableServiceRequestTypes',
+                            'manageableServiceRequestTypes',
                             fn (Builder $query) => $query->whereHas(
                                 'serviceRequests',
                                 fn (Builder $query) => $query->whereKey($serviceRequest),
@@ -77,7 +77,6 @@ class NotifyServiceRequestUsers
                     );
                 }
             })
-            ->when(auth()->hasUser(), fn (Builder $query) => $query->whereKeyNot(auth()->user()))
             ->get()
             ->each(fn (User $user) => $user->notify($notification));
     }

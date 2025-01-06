@@ -63,7 +63,7 @@ class Team extends BaseModel
             ->withTimestamps();
     }
 
-    public function managableServiceRequestTypes(): BelongsToMany
+    public function manageableServiceRequestTypes(): BelongsToMany
     {
         return $this->belongsToMany(ServiceRequestType::class, 'service_request_type_managers')
             ->using(ServiceRequestTypeManager::class)

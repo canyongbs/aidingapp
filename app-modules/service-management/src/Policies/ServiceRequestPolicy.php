@@ -95,7 +95,7 @@ class ServiceRequestPolicy
         if (! auth()->user()->hasRole(Authenticatable::SUPER_ADMIN_ROLE)) {
             $team = auth()->user()->teams()->first();
 
-            if (! $team?->managableServiceRequestTypes()->exists()) {
+            if (! $team?->manageableServiceRequestTypes()->exists()) {
                 return Response::deny("You don't have permission to create service requests because you're not a manager of any service request types.");
             }
         }

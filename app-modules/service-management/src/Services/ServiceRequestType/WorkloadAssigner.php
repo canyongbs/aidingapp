@@ -54,7 +54,7 @@ class WorkloadAssigner implements ServiceRequestTypeAssigner
             $user = null;
 
             if ($lastAssignee) {
-                $lowestServiceRequest = User::query()->whereRelation('teams.managableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey())
+                $lowestServiceRequest = User::query()->whereRelation('teams.manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey())
                     ->withCount([
                         'serviceRequests as service_request_count' => function (Builder $query) {
                             $query->whereRelation('status', 'classification', '!=', SystemServiceRequestClassification::Closed);
@@ -63,7 +63,7 @@ class WorkloadAssigner implements ServiceRequestTypeAssigner
                     ->orderBy('service_request_count', 'asc')
                     ->first()?->service_request_count ?? 0;
 
-                $user = User::query()->whereRelation('teams.managableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey())
+                $user = User::query()->whereRelation('teams.manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey())
                     ->where(function (QueryBuilder $query) {
                         $query->selectRaw('count(*)')
                             ->from('service_requests')
@@ -87,7 +87,7 @@ class WorkloadAssigner implements ServiceRequestTypeAssigner
             }
 
             if ($user === null) {
-                $user = User::query()->whereRelation('teams.managableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey())
+                $user = User::query()->whereRelation('teams.manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey())
                     ->withCount([
                         'serviceRequests as service_request_count' => function (Builder $query) {
                             $query->whereRelation('status', 'classification', '!=', SystemServiceRequestClassification::Closed);
