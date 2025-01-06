@@ -45,15 +45,13 @@ use FilamentTiptapEditor\TiptapEditor;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 
+/** @property-read ?ServiceRequestTypeEmailTemplate $template */
 class ServiceRequestTypeEmailTemplatePage extends EditRecord
 {
     protected static string $resource = ServiceRequestTypeResource::class;
 
     #[Locked]
     public ?string $type;
-
-    /** @var ?ServiceRequestTypeEmailTemplate */
-    protected ?ServiceRequestTypeEmailTemplate $template = null;
 
     public static ?string $navigationGroup = 'Email Templates';
 
@@ -111,7 +109,6 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
         $data['service_request_type_id'] = $this->getRecord()->id;
         $data['type'] = $this->type;
 
-        /** @var ?ServiceRequestTypeEmailTemplate $template */
         if ($this->template) {
             $this->template->update($data);
         } else {
