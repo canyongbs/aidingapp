@@ -40,17 +40,17 @@ use Filament\Support\Contracts\HasLabel;
 
 enum ServiceRequestEmailTemplateType: string implements HasLabel
 {
-    case Created = 'created';
+    case Created = 'Created';
 
-    case Assigned = 'assigned';
+    case Assigned = 'Assigned';
 
-    case Update = 'update';
+    case Update = 'Update';
 
-    case StatusChange = 'status-change';
+    case StatusChange = 'Status Change';
 
-    case Closed = 'closed';
+    case Closed = 'Closed';
 
-    case SurveyResponse = 'survey-response';
+    case SurveyResponse = 'Survey Response';
 
     public function getLabel(): string
     {

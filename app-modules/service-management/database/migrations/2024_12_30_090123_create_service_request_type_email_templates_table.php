@@ -44,7 +44,7 @@ return new class () extends Migration {
         Schema::create('service_request_type_email_templates', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('service_request_type_id')->constrained('service_request_types');
-            $table->enum('type', ['created', 'assigned', 'update', 'status-change', 'closed', 'survey-response'])->default('created');
+            $table->string('type');
             $table->unique(['service_request_type_id', 'type']);
             $table->jsonb('subject');
             $table->jsonb('body');

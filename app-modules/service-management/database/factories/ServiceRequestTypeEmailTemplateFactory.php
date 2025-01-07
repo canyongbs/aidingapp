@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Database\Factories;
 
+use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -52,9 +53,9 @@ class ServiceRequestTypeEmailTemplateFactory extends Factory
     {
         return [
             'service_request_type_id' => null,
-            'type' => $this->faker->randomElement(['created', 'assigned', 'update', 'status-change', 'closed', 'survey-response']),
-            'subject' => $this->faker->sentence(),
-            'body' => $this->faker->paragraph(),
+            'type' => $this->faker->randomElement(collect(ServiceRequestEmailTemplateType::cases())->values()->toArray()),
+            'subject' => ['type' => 'doc', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => $this->faker->sentence()]]]]],
+            'body' => ['type' => 'doc', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => $this->faker->sentence()]]]]],
         ];
     }
 }

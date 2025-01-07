@@ -117,28 +117,20 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
 
         unset($this->template);
 
-        parent::save($shouldRedirect, $shouldSendSavedNotification);
+        $this->getSavedNotification()->send();
+
     }
 
     protected function fillForm(): void
     {
-        $getRecord = $this->getRecord();
-
-        $data['service_request_type_id'] = $getRecord->id;
-        $data['type'] = $this->type;
+        $data = [];
 
         if ($this->template) {
             $data['subject'] = $this->template->subject;
             $data['body'] = $this->template->body;
         }
 
-        $this->callHook('beforeFill');
-
-        $data = $this->mutateFormDataBeforeFill($data);
-
         $this->form->fill($data);
-
-        $this->callHook('afterFill');
     }
 
     #[Computed]
