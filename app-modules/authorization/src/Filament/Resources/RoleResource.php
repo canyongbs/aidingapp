@@ -49,7 +49,7 @@ class RoleResource extends Resource
 {
     protected static ?string $model = Role::class;
 
-    protected static ?string $navigationGroup = 'People Administration';
+    protected static ?string $navigationGroup = 'User Management';
 
     protected static ?int $navigationSort = 30;
 
