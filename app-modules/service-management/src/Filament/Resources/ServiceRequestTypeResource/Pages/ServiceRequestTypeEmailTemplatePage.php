@@ -118,7 +118,6 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
         unset($this->template);
 
         $this->getSavedNotification()->send();
-
     }
 
     protected function fillForm(): void
