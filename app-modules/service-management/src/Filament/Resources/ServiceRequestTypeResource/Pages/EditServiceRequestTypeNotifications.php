@@ -37,10 +37,9 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages;
 
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
-use App\Filament\Forms\Components\Heading;
-use App\Filament\Forms\Components\Paragraph;
+use App\Features\ServiceRequestClosedNotificationColumns;
 use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\ViewField;
 use Filament\Forms\Form;
 use Filament\Resources\Pages\EditRecord;
 
@@ -62,128 +61,72 @@ class EditServiceRequestTypeNotifications extends EditRecord
     {
         return $form
             ->schema([
-                Section::make()
-                    ->columns()
+                Section::make('Notifications and Alerts')
+                    ->description('This page is used to configure notifications and alerts for this service request type.')
                     ->schema([
-                        Heading::make()
-                            ->content('Notifications and Alerts'),
-                        Paragraph::make()
-                            ->content('This page is used to configure notifications and alerts for this service request type.'),
-                        Heading::make()
-                            ->two()
-                            ->content('Managers'),
-                        Heading::make()
-                            ->three()
-                            ->content('Service Request Created'),
-                        Toggle::make('is_managers_service_request_created_email_enabled')
-                            ->label('Email'),
-                        Toggle::make('is_managers_service_request_created_notification_enabled')
-                            ->label('Notification'),
-                        Heading::make()
-                            ->three()
-                            ->content('Service Request Assigned'),
-                        Toggle::make('is_managers_service_request_assigned_email_enabled')
-                            ->label('Email'),
-                        Toggle::make('is_managers_service_request_assigned_notification_enabled')
-                            ->label('Notification'),
-                        Heading::make()
-                            ->three()
-                            ->content('Service Request Update'),
-                        Toggle::make('is_managers_service_request_update_email_enabled')
-                            ->label('Email'),
-                        Toggle::make('is_managers_service_request_update_notification_enabled')
-                            ->label('Notification'),
-                        Heading::make()
-                            ->three()
-                            ->content('Service Request Status Change (Non-Closed)'),
-                        Toggle::make('is_managers_service_request_status_change_email_enabled')
-                            ->label('Email'),
-                        Toggle::make('is_managers_service_request_status_change_notification_enabled')
-                            ->label('Notification'),
-                        Heading::make()
-                            ->three()
-                            ->content('Service Request Closed'),
-                        Toggle::make('is_managers_service_request_resolved_email_enabled')
-                            ->label('Email'),
-                        Toggle::make('is_managers_service_request_resolved_notification_enabled')
-                            ->label('Notification'),
-                        Heading::make()
-                            ->two()
-                            ->content('Auditors'),
-                        Heading::make()
-                            ->three()
-                            ->content('Service Request Created'),
-                        Toggle::make('is_auditors_service_request_created_email_enabled')
-                            ->label('Email'),
-                        Toggle::make('is_auditors_service_request_created_notification_enabled')
-                            ->label('Notification'),
-                        Heading::make()
-                            ->three()
-                            ->content('Service Request Assigned'),
-                        Toggle::make('is_auditors_service_request_assigned_email_enabled')
-                            ->label('Email'),
-                        Toggle::make('is_auditors_service_request_assigned_notification_enabled')
-                            ->label('Notification'),
-                        Heading::make()
-                            ->three()
-                            ->content('Service Request Update'),
-                        Toggle::make('is_auditors_service_request_update_email_enabled')
-                            ->label('Email'),
-                        Toggle::make('is_auditors_service_request_update_notification_enabled')
-                            ->label('Notification'),
-                        Heading::make()
-                            ->three()
-                            ->content('Service Request Status Change (Non-Closed)'),
-                        Toggle::make('is_auditors_service_request_status_change_email_enabled')
-                            ->label('Email'),
-                        Toggle::make('is_auditors_service_request_status_change_notification_enabled')
-                            ->label('Notification'),
-                        Heading::make()
-                            ->three()
-                            ->content('Service Request Closed'),
-                        Toggle::make('is_auditors_service_request_resolved_email_enabled')
-                            ->label('Email'),
-                        Toggle::make('is_auditors_service_request_resolved_notification_enabled')
-                            ->label('Notification'),
-                        Heading::make()
-                            ->two()
-                            ->content('Customers'),
-                        Heading::make()
-                            ->three()
-                            ->content('Service Request Created'),
-                        Toggle::make('is_customers_service_request_created_email_enabled')
-                            ->label('Email'),
-                        Toggle::make('is_customers_service_request_created_notification_enabled')
-                            ->label('Notification'),
-                        Heading::make()
-                            ->three()
-                            ->content('Service Request Assigned'),
-                        Toggle::make('is_customers_service_request_assigned_email_enabled')
-                            ->label('Email'),
-                        Toggle::make('is_customers_service_request_assigned_notification_enabled')
-                            ->label('Notification'),
-                        Heading::make()
-                            ->three()
-                            ->content('Service Request Update'),
-                        Toggle::make('is_customers_service_request_update_email_enabled')
-                            ->label('Email'),
-                        Toggle::make('is_customers_service_request_update_notification_enabled')
-                            ->label('Notification'),
-                        Heading::make()
-                            ->three()
-                            ->content('Service Request Status Change (Non-Closed)'),
-                        Toggle::make('is_customers_service_request_status_change_email_enabled')
-                            ->label('Email'),
-                        Toggle::make('is_customers_service_request_status_change_notification_enabled')
-                            ->label('Notification'),
-                        Heading::make()
-                            ->three()
-                            ->content('Service Request Closed'),
-                        Toggle::make('is_customers_service_request_closed_email_enabled')
-                            ->label('Email'),
-                        Toggle::make('is_customers_service_request_closed_notification_enabled')
-                            ->label('Notification'),
-                    ]),
+                        ViewField::make('settings')
+                            ->rules(['array'])
+                            ->view('service-management::filament.resources.service-request-type-resource.pages.edit-service-request-type-notifications.matrix'),
+                    ])
+                    ->visible(ServiceRequestClosedNotificationColumns::active())
+                    ->extraAttributes(['class' => 'fi-section-no-content-padding']),
             ]);
+    }
+
+    /**
+     * @return array<string>
+     */
+    protected function generateSettingsAttributeList(): array
+    {
+        $attributes = [];
+
+        foreach (['managers', 'auditors', 'customers'] as $role) {
+            foreach ([
+                'service_request_created',
+                'service_request_assigned',
+                'service_request_update',
+                'service_request_status_change',
+                'service_request_closed',
+            ] as $event) {
+                $attributes[] = "is_{$role}_{$event}_email_enabled";
+                $attributes[] = "is_{$role}_{$event}_notification_enabled";
+            }
+        }
+
+        return $attributes;
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     *
+     * @return array<string, mixed>
+     */
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        $record = $this->getRecord();
+
+        $data['settings'] = $record->only($this->generateSettingsAttributeList());
+
+        return $data;
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     *
+     * @return array<string, mixed>
+     */
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        $data = [
+            ...$data,
+            ...collect($data['settings'])
+                ->only($this->generateSettingsAttributeList())
+                ->filter(fn (mixed $value): bool => is_bool($value))
+                ->all(),
+        ];
+
+        unset($data['settings']);
+
+        return $data;
     }
 }

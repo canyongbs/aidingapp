@@ -37,13 +37,19 @@
 namespace AidingApp\ServiceManagement\Observers;
 
 use AidingApp\Notification\Events\TriggeredAutoSubscription;
+use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
+use AidingApp\Notification\Notifications\Channels\EmailChannel;
 use AidingApp\ServiceManagement\Actions\CreateServiceRequestHistory;
+use AidingApp\ServiceManagement\Actions\NotifyServiceRequestUsers;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Exceptions\ServiceRequestNumberUpdateAttemptException;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Notifications\SendClosedServiceFeedbackNotification;
 use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestClosedNotification;
 use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestOpenedNotification;
+use AidingApp\ServiceManagement\Notifications\ServiceRequestClosed;
+use AidingApp\ServiceManagement\Notifications\ServiceRequestCreated;
+use AidingApp\ServiceManagement\Notifications\ServiceRequestStatusChanged;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
 use App\Enums\Feature;
 use App\Models\User;
@@ -68,11 +74,20 @@ class ServiceRequestObserver
         if ($serviceRequest->status?->classification === SystemServiceRequestClassification::Open) {
             $serviceRequest->respondent->notify(new SendEducatableServiceRequestOpenedNotification($serviceRequest));
         }
-    }
 
-    public function updating(ServiceRequest $serviceRequest): void
-    {
-        throw_if($serviceRequest->isDirty('service_request_number'), new ServiceRequestNumberUpdateAttemptException());
+        app(NotifyServiceRequestUsers::class)->execute(
+            $serviceRequest,
+            new ServiceRequestCreated($serviceRequest, EmailChannel::class),
+            $serviceRequest->priority?->type->is_managers_service_request_created_email_enabled ?? false,
+            $serviceRequest->priority?->type->is_auditors_service_request_created_email_enabled ?? false,
+        );
+
+        app(NotifyServiceRequestUsers::class)->execute(
+            $serviceRequest,
+            new ServiceRequestCreated($serviceRequest, DatabaseChannel::class),
+            $serviceRequest->priority?->type->is_managers_service_request_created_notification_enabled ?? false,
+            $serviceRequest->priority?->type->is_auditors_service_request_created_notification_enabled ?? false,
+        );
     }
 
     public function saving(ServiceRequest $serviceRequest): void
@@ -112,6 +127,46 @@ class ServiceRequestObserver
             ! $serviceRequest?->feedback()->count()
         ) {
             $serviceRequest->respondent->notify(new SendClosedServiceFeedbackNotification($serviceRequest));
+        }
+    }
+
+    public function updating(ServiceRequest $serviceRequest): void
+    {
+        throw_if($serviceRequest->isDirty('service_request_number'), new ServiceRequestNumberUpdateAttemptException());
+    }
+
+    public function updated(ServiceRequest $serviceRequest): void
+    {
+        if ($serviceRequest->wasChanged('status_id')) {
+            if ($serviceRequest->status?->classification === SystemServiceRequestClassification::Closed) {
+                app(NotifyServiceRequestUsers::class)->execute(
+                    $serviceRequest,
+                    new ServiceRequestClosed($serviceRequest, EmailChannel::class),
+                    $serviceRequest->priority?->type->is_managers_service_request_closed_email_enabled ?? false,
+                    $serviceRequest->priority?->type->is_auditors_service_request_closed_email_enabled ?? false,
+                );
+
+                app(NotifyServiceRequestUsers::class)->execute(
+                    $serviceRequest,
+                    new ServiceRequestClosed($serviceRequest, DatabaseChannel::class),
+                    $serviceRequest->priority?->type->is_managers_service_request_closed_notification_enabled ?? false,
+                    $serviceRequest->priority?->type->is_auditors_service_request_closed_notification_enabled ?? false,
+                );
+            } elseif ($serviceRequest->status) {
+                app(NotifyServiceRequestUsers::class)->execute(
+                    $serviceRequest,
+                    new ServiceRequestStatusChanged($serviceRequest, EmailChannel::class),
+                    $serviceRequest->priority?->type->is_managers_service_request_status_change_email_enabled ?? false,
+                    $serviceRequest->priority?->type->is_auditors_service_request_status_change_email_enabled ?? false,
+                );
+
+                app(NotifyServiceRequestUsers::class)->execute(
+                    $serviceRequest,
+                    new ServiceRequestStatusChanged($serviceRequest, DatabaseChannel::class),
+                    $serviceRequest->priority?->type->is_managers_service_request_status_change_notification_enabled ?? false,
+                    $serviceRequest->priority?->type->is_auditors_service_request_status_change_notification_enabled ?? false,
+                );
+            }
         }
     }
 }

@@ -34,51 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Team\Models;
+use App\Features\ServiceRequestClosedNotificationColumns;
+use Illuminate\Database\Migrations\Migration;
 
-use AidingApp\Division\Models\Division;
-use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\ServiceManagement\Models\ServiceRequestTypeAuditor;
-use AidingApp\ServiceManagement\Models\ServiceRequestTypeManager;
-use App\Models\BaseModel;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-
-/**
- * @mixin IdeHelperTeam
- */
-class Team extends BaseModel
-{
-    protected $fillable = [
-        'name',
-        'description',
-    ];
-
-    public function users(): BelongsToMany
+return new class () extends Migration {
+    public function up(): void
     {
-        return $this
-            ->belongsToMany(User::class)
-            ->using(TeamUser::class)
-            ->withTimestamps();
+        ServiceRequestClosedNotificationColumns::activate();
     }
 
-    public function manageableServiceRequestTypes(): BelongsToMany
+    public function down(): void
     {
-        return $this->belongsToMany(ServiceRequestType::class, 'service_request_type_managers')
-            ->using(ServiceRequestTypeManager::class)
-            ->withTimestamps();
+        ServiceRequestClosedNotificationColumns::deactivate();
     }
-
-    public function auditableServiceRequestTypes(): BelongsToMany
-    {
-        return $this->belongsToMany(ServiceRequestType::class, 'service_request_type_auditors')
-            ->using(ServiceRequestTypeAuditor::class)
-            ->withTimestamps();
-    }
-
-    public function division(): BelongsTo
-    {
-        return $this->belongsTo(Division::class);
-    }
-}
+};

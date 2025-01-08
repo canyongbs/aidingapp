@@ -34,51 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Team\Models;
+namespace App\Features;
 
-use AidingApp\Division\Models\Division;
-use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\ServiceManagement\Models\ServiceRequestTypeAuditor;
-use AidingApp\ServiceManagement\Models\ServiceRequestTypeManager;
-use App\Models\BaseModel;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use App\Support\AbstractFeatureFlag;
 
-/**
- * @mixin IdeHelperTeam
- */
-class Team extends BaseModel
+class ServiceRequestClosedNotificationColumns extends AbstractFeatureFlag
 {
-    protected $fillable = [
-        'name',
-        'description',
-    ];
-
-    public function users(): BelongsToMany
+    public function resolve(mixed $scope): mixed
     {
-        return $this
-            ->belongsToMany(User::class)
-            ->using(TeamUser::class)
-            ->withTimestamps();
-    }
-
-    public function manageableServiceRequestTypes(): BelongsToMany
-    {
-        return $this->belongsToMany(ServiceRequestType::class, 'service_request_type_managers')
-            ->using(ServiceRequestTypeManager::class)
-            ->withTimestamps();
-    }
-
-    public function auditableServiceRequestTypes(): BelongsToMany
-    {
-        return $this->belongsToMany(ServiceRequestType::class, 'service_request_type_auditors')
-            ->using(ServiceRequestTypeAuditor::class)
-            ->withTimestamps();
-    }
-
-    public function division(): BelongsTo
-    {
-        return $this->belongsTo(Division::class);
+        return false;
     }
 }

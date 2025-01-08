@@ -92,7 +92,7 @@ class EditServiceRequestTypeAssignments extends EditRecord
                                 name: 'assignmentTypeIndividual',
                                 titleAttribute: 'name',
                                 modifyQueryUsing: fn (Builder $query) => $query->whereRelation(
-                                    'teams.managableServiceRequestTypes',
+                                    'teams.manageableServiceRequestTypes',
                                     'service_request_types.id',
                                     $this->record->getKey(),
                                 )

@@ -34,49 +34,28 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
-use App\Filament\Tables\Columns\OpenSearch\TextColumn;
-use Filament\Resources\Pages\ManageRelatedRecords;
-use Filament\Tables\Actions\AttachAction;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DetachAction;
-use Filament\Tables\Actions\DetachBulkAction;
-use Filament\Tables\Table;
-
-class ManageServiceRequestTypeManagers extends ManageRelatedRecords
-{
-    protected static string $resource = ServiceRequestTypeResource::class;
-
-    protected static string $relationship = 'managers';
-
-    protected static ?string $navigationIcon = 'heroicon-o-adjustments-horizontal';
-
-    public static function getNavigationLabel(): string
+return new class () extends Migration {
+    public function up(): void
     {
-        return 'Managers';
+        Schema::table('service_request_types', function (Blueprint $table) {
+            $table->renameColumn('is_managers_service_request_resolved_email_enabled', 'is_managers_service_request_closed_email_enabled');
+            $table->renameColumn('is_managers_service_request_resolved_notification_enabled', 'is_managers_service_request_closed_notification_enabled');
+            $table->renameColumn('is_auditors_service_request_resolved_email_enabled', 'is_auditors_service_request_closed_email_enabled');
+            $table->renameColumn('is_auditors_service_request_resolved_notification_enabled', 'is_auditors_service_request_closed_notification_enabled');
+        });
     }
 
-    public function table(Table $table): Table
+    public function down(): void
     {
-        return $table
-            ->recordTitleAttribute('name')
-            ->inverseRelationship('manageableServiceRequestTypes')
-            ->columns([
-                TextColumn::make('name')
-                    ->label('Team'),
-            ])
-            ->headerActions([
-                AttachAction::make(),
-            ])
-            ->actions([
-                DetachAction::make(),
-            ])
-            ->bulkActions([
-                BulkActionGroup::make([
-                    DetachBulkAction::make(),
-                ]),
-            ]);
+        Schema::table('service_request_types', function (Blueprint $table) {
+            $table->renameColumn('is_managers_service_request_closed_email_enabled', 'is_managers_service_request_resolved_email_enabled');
+            $table->renameColumn('is_managers_service_request_closed_notification_enabled', 'is_managers_service_request_resolved_notification_enabled');
+            $table->renameColumn('is_auditors_service_request_closed_email_enabled', 'is_auditors_service_request_resolved_email_enabled');
+            $table->renameColumn('is_auditors_service_request_closed_notification_enabled', 'is_auditors_service_request_resolved_notification_enabled');
+        });
     }
-}
+};

@@ -37,7 +37,11 @@
 namespace AidingApp\ServiceManagement\Observers;
 
 use AidingApp\Notification\Events\TriggeredAutoSubscription;
+use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
+use AidingApp\Notification\Notifications\Channels\EmailChannel;
+use AidingApp\ServiceManagement\Actions\NotifyServiceRequestUsers;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use AidingApp\ServiceManagement\Notifications\ServiceRequestUpdated;
 use AidingApp\Timeline\Events\TimelineableRecordCreated;
 use AidingApp\Timeline\Events\TimelineableRecordDeleted;
 use App\Models\User;
@@ -53,6 +57,20 @@ class ServiceRequestUpdateObserver
         }
 
         TimelineableRecordCreated::dispatch($serviceRequestUpdate->serviceRequest, $serviceRequestUpdate);
+
+        app(NotifyServiceRequestUsers::class)->execute(
+            $serviceRequestUpdate->serviceRequest,
+            new ServiceRequestUpdated($serviceRequestUpdate->serviceRequest, EmailChannel::class),
+            $serviceRequestUpdate->serviceRequest->priority?->type->is_managers_service_request_update_email_enabled ?? false,
+            $serviceRequestUpdate->serviceRequest->priority?->type->is_auditors_service_request_update_email_enabled ?? false,
+        );
+
+        app(NotifyServiceRequestUsers::class)->execute(
+            $serviceRequestUpdate->serviceRequest,
+            new ServiceRequestUpdated($serviceRequestUpdate->serviceRequest, DatabaseChannel::class),
+            $serviceRequestUpdate->serviceRequest->priority?->type->is_managers_service_request_update_notification_enabled ?? false,
+            $serviceRequestUpdate->serviceRequest->priority?->type->is_auditors_service_request_update_notification_enabled ?? false,
+        );
     }
 
     public function deleted(ServiceRequestUpdate $serviceRequestUpdate): void

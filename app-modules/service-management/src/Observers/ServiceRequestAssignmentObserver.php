@@ -37,8 +37,12 @@
 namespace AidingApp\ServiceManagement\Observers;
 
 use AidingApp\Notification\Events\TriggeredAutoSubscription;
+use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
+use AidingApp\Notification\Notifications\Channels\EmailChannel;
+use AidingApp\ServiceManagement\Actions\NotifyServiceRequestUsers;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
+use AidingApp\ServiceManagement\Notifications\ServiceRequestAssigned;
 use AidingApp\Timeline\Events\TimelineableRecordCreated;
 use AidingApp\Timeline\Events\TimelineableRecordDeleted;
 use App\Models\User;
@@ -58,6 +62,20 @@ class ServiceRequestAssignmentObserver
         ]);
 
         TimelineableRecordCreated::dispatch($serviceRequestAssignment->serviceRequest, $serviceRequestAssignment);
+
+        app(NotifyServiceRequestUsers::class)->execute(
+            $serviceRequestAssignment->serviceRequest,
+            new ServiceRequestAssigned($serviceRequestAssignment->serviceRequest, EmailChannel::class),
+            $serviceRequestAssignment->serviceRequest->priority?->type->is_managers_service_request_assigned_email_enabled ?? false,
+            $serviceRequestAssignment->serviceRequest->priority?->type->is_auditors_service_request_assigned_email_enabled ?? false,
+        );
+
+        app(NotifyServiceRequestUsers::class)->execute(
+            $serviceRequestAssignment->serviceRequest,
+            new ServiceRequestAssigned($serviceRequestAssignment->serviceRequest, DatabaseChannel::class),
+            $serviceRequestAssignment->serviceRequest->priority?->type->is_managers_service_request_assigned_notification_enabled ?? false,
+            $serviceRequestAssignment->serviceRequest->priority?->type->is_auditors_service_request_assigned_notification_enabled ?? false,
+        );
     }
 
     public function deleted(ServiceRequestAssignment $serviceRequestAssignment): void
