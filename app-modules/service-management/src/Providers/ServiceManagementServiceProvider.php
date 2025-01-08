@@ -51,6 +51,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestHistory;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use AidingApp\ServiceManagement\Models\Sla;
 use AidingApp\ServiceManagement\ServiceManagementPlugin;
@@ -92,6 +93,7 @@ class ServiceManagementServiceProvider extends ServiceProvider
             'service_request_update' => ServiceRequestUpdate::class,
             'service_request' => ServiceRequest::class,
             'sla' => Sla::class,
+            'service-request-type-email-template' => ServiceRequestTypeEmailTemplate::class,
         ]);
 
         $this->discoverSchema(__DIR__ . '/../../graphql/service-management.graphql');

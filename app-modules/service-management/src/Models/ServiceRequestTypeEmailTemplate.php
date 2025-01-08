@@ -36,15 +36,18 @@
 
 namespace AidingApp\ServiceManagement\Models;
 
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class ServiceRequestTypeEmailTemplate extends Model
+class ServiceRequestTypeEmailTemplate extends Model implements Auditable
 {
     use HasFactory;
     use HasUuids;
+    use AuditableTrait;
 
     protected $fillable = [
         'service_request_type_id',
