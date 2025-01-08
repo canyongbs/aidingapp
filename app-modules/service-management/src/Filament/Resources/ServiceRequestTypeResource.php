@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources;
 
+use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\CreateServiceRequestType;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\EditServiceRequestType;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\EditServiceRequestTypeAssignments;
@@ -43,14 +44,19 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pa
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\ListServiceRequestTypes;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\ManageServiceRequestTypeAuditors;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\ManageServiceRequestTypeManagers;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\ServiceRequestTypeEmailTemplatePage;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\ViewServiceRequestType;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\RelationManagers\ServiceRequestPrioritiesRelationManager;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use App\Features\ServiceRequestTypeEmailTemplateFeature;
 use App\Filament\Clusters\ServiceManagementAdministration;
+use Filament\Navigation\NavigationItem;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 
 class ServiceRequestTypeResource extends Resource
 {
@@ -83,14 +89,22 @@ class ServiceRequestTypeResource extends Resource
 
     public static function getRecordSubNavigation(Page $page): array
     {
-        return $page->generateNavigationItems([
-            ViewServiceRequestType::class,
-            EditServiceRequestType::class,
-            ManageServiceRequestTypeManagers::class,
-            ManageServiceRequestTypeAuditors::class,
-            EditServiceRequestTypeAssignments::class,
-            EditServiceRequestTypeNotifications::class,
-        ]);
+        return [
+            ...$page->generateNavigationItems([
+                ViewServiceRequestType::class,
+                EditServiceRequestType::class,
+                ManageServiceRequestTypeManagers::class,
+                ManageServiceRequestTypeAuditors::class,
+                EditServiceRequestTypeAssignments::class,
+                EditServiceRequestTypeNotifications::class,
+            ]),
+            ...(ServiceRequestTypeEmailTemplateFeature::active() ? array_map(
+                fn (ServiceRequestEmailTemplateType $type): NavigationItem => Arr::first(ServiceRequestTypeEmailTemplatePage::getNavigationItems(['record' => $page->record, 'type' => $type]))
+                    ->label($type->getLabel())
+                    ->isActiveWhen(fn (): bool => Str::endsWith(request()->path(), $type)),
+                ServiceRequestEmailTemplateType::cases(),
+            ) : []),
+        ];
     }
 
     public static function getPages(): array
@@ -104,6 +118,7 @@ class ServiceRequestTypeResource extends Resource
             'service-request-type-auditors' => ManageServiceRequestTypeAuditors::route('/{record}/auditors'),
             'service-request-type-assignments' => EditServiceRequestTypeAssignments::route('/{record}/assignments'),
             'service-request-type-notifications' => EditServiceRequestTypeNotifications::route('/{record}/notifications'),
+            'service-request-type-email-template' => ServiceRequestTypeEmailTemplatePage::route('/{record}/email-template/{type}'),
         ];
     }
 }
