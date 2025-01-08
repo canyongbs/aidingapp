@@ -78,7 +78,7 @@ it('can notify a user if they belong to a team managing a service request type',
 
     app(NotifyServiceRequestUsers::class)->execute(
         $serviceRequest,
-        app(ServiceRequestCreated::class, ['serviceRequest' => $serviceRequest, 'channel' => EmailChannel::class]),
+        new ServiceRequestCreated($serviceRequest, EmailChannel::class),
         true,
         false,
     );
@@ -122,7 +122,7 @@ it('can notify a user if they belong to a team auditing a service request type',
 
     app(NotifyServiceRequestUsers::class)->execute(
         $serviceRequest,
-        app(ServiceRequestCreated::class, ['serviceRequest' => $serviceRequest, 'channel' => EmailChannel::class]),
+        new ServiceRequestCreated($serviceRequest, EmailChannel::class),
         false,
         true,
     );
@@ -166,7 +166,7 @@ it('does not notify a user if they belong to a team managing a service request t
 
     app(NotifyServiceRequestUsers::class)->execute(
         $serviceRequest,
-        app(ServiceRequestCreated::class, ['serviceRequest' => $serviceRequest, 'channel' => EmailChannel::class]),
+        new ServiceRequestCreated($serviceRequest, EmailChannel::class),
         false,
         false,
     );
@@ -210,7 +210,7 @@ it('does not notify a user if they belong to a team auditing a service request t
 
     app(NotifyServiceRequestUsers::class)->execute(
         $serviceRequest,
-        app(ServiceRequestCreated::class, ['serviceRequest' => $serviceRequest, 'channel' => EmailChannel::class]),
+        new ServiceRequestCreated($serviceRequest, EmailChannel::class),
         false,
         false,
     );
@@ -256,7 +256,7 @@ it('does not notify a user twice if they belong to a team managing and auditing 
 
     app(NotifyServiceRequestUsers::class)->execute(
         $serviceRequest,
-        app(ServiceRequestCreated::class, ['serviceRequest' => $serviceRequest, 'channel' => EmailChannel::class]),
+        new ServiceRequestCreated($serviceRequest, EmailChannel::class),
         true,
         true,
     );

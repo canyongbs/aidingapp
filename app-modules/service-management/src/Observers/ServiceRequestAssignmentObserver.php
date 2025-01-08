@@ -65,14 +65,14 @@ class ServiceRequestAssignmentObserver
 
         app(NotifyServiceRequestUsers::class)->execute(
             $serviceRequestAssignment->serviceRequest,
-            app(ServiceRequestAssigned::class, ['serviceRequest' => $serviceRequestAssignment->serviceRequest, 'channel' => EmailChannel::class]),
+            new ServiceRequestAssigned($serviceRequestAssignment->serviceRequest, EmailChannel::class),
             $serviceRequestAssignment->serviceRequest->priority?->type->is_managers_service_request_assigned_email_enabled ?? false,
             $serviceRequestAssignment->serviceRequest->priority?->type->is_auditors_service_request_assigned_email_enabled ?? false,
         );
 
         app(NotifyServiceRequestUsers::class)->execute(
             $serviceRequestAssignment->serviceRequest,
-            app(ServiceRequestAssigned::class, ['serviceRequest' => $serviceRequestAssignment->serviceRequest, 'channel' => DatabaseChannel::class]),
+            new ServiceRequestAssigned($serviceRequestAssignment->serviceRequest, DatabaseChannel::class),
             $serviceRequestAssignment->serviceRequest->priority?->type->is_managers_service_request_assigned_notification_enabled ?? false,
             $serviceRequestAssignment->serviceRequest->priority?->type->is_auditors_service_request_assigned_notification_enabled ?? false,
         );
