@@ -75,6 +75,29 @@ test('it creates a ServiceRequestTypeEmailTemplate if it did not already exist',
     ]);
 });
 
-// test('it updates a ServiceRequestTypeEmailTemplate if it already exists', function() {
+test('it updates a ServiceRequestTypeEmailTemplate if it already exists', function () {
+    $emailTemplate = ServiceRequestTypeEmailTemplate::factory()->create();
 
-// });
+    asSuperAdmin();
+
+    $request = ServiceRequestTypeEmailTemplateRequestFactory::new()->create();
+
+    expect($emailTemplate->subject)->not->toEqualCanonicalizing($request['subject'])
+        ->and($emailTemplate->body)->not->toEqualCanonicalizing($request['body']);
+
+    livewire(ServiceRequestTypeEmailTemplatePage::class, [
+        'record' => $emailTemplate->serviceRequestType->getKey(),
+        'type' => $emailTemplate->type,
+    ])
+        ->fillForm([
+            'subject' => $request['subject'],
+            'body' => $request['body'],
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    $emailTemplate->refresh();
+
+    expect($emailTemplate->subject)->toEqualCanonicalizing($request['subject'])
+        ->and($emailTemplate->body)->toEqualCanonicalizing($request['body']);
+});
