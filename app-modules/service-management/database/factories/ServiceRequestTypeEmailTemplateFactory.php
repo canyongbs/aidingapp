@@ -38,10 +38,11 @@ namespace AidingApp\ServiceManagement\Database\Factories;
 
 use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AidingApp\ServiceManagement\Models\Model>
+ * @extends Factory<ServiceRequestTypeEmailTemplate>
  */
 class ServiceRequestTypeEmailTemplateFactory extends Factory
 {
