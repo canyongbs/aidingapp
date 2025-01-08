@@ -106,30 +106,24 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
     public function save(bool $shouldRedirect = true, bool $shouldSendSavedNotification = true): void
     {
         $data = $this->form->getState();
-        $data['service_request_type_id'] = $this->getRecord()->id;
-        $data['type'] = $this->type;
 
         if ($this->template) {
             $this->template->update($data);
         } else {
-            $this->getRecord()?->templates()->create($data);
-        }
+            $data['service_request_type_id'] = $this->getRecord()->id;
+            $data['type'] = $this->type;
 
-        unset($this->template);
+            $this->getRecord()?->templates()->create($data);
+
+            unset($this->template);
+        }
 
         $this->getSavedNotification()->send();
     }
 
     protected function fillForm(): void
     {
-        $data = [];
-
-        if ($this->template) {
-            $data['subject'] = $this->template->subject;
-            $data['body'] = $this->template->body;
-        }
-
-        $this->form->fill($data);
+        $this->form->fill($this->template?->only(['subject', 'body']));
     }
 
     #[Computed]

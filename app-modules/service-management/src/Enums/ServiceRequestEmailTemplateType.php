@@ -37,23 +37,24 @@
 namespace AidingApp\ServiceManagement\Enums;
 
 use Filament\Support\Contracts\HasLabel;
+use Illuminate\Support\Str;
 
 enum ServiceRequestEmailTemplateType: string implements HasLabel
 {
-    case Created = 'Created';
+    case Created = 'created';
 
-    case Assigned = 'Assigned';
+    case Assigned = 'assigned';
 
-    case Update = 'Update';
+    case Update = 'update';
 
-    case StatusChange = 'Status Change';
+    case StatusChange = 'status_change';
 
-    case Closed = 'Closed';
+    case Closed = 'closed';
 
-    case SurveyResponse = 'Survey Response';
+    case SurveyResponse = 'survey_response';
 
     public function getLabel(): string
     {
-        return $this->value;
+        return Str::headline($this->value);
     }
 }
