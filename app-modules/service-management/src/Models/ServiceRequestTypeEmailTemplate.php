@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -59,6 +60,7 @@ class ServiceRequestTypeEmailTemplate extends Model implements Auditable
     protected $casts = [
         'subject' => 'array',
         'body' => 'array',
+        'type' => ServiceRequestEmailTemplateType::class,
     ];
 
     public function serviceRequestType(): BelongsTo

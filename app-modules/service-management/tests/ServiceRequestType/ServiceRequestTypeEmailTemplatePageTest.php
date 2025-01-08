@@ -3,7 +3,7 @@
 /*
 <COPYRIGHT>
 
-    Copyright © 2016-2025, Canyon GBS LLC. All rights reserved.
+    Copyright © 2016-2024, Canyon GBS LLC. All rights reserved.
 
     Aiding App™ is licensed under the Elastic License 2.0. For more details,
     see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
@@ -34,30 +34,47 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Database\Factories;
-
 use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\ServiceRequestTypeEmailTemplatePage;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
-use Illuminate\Database\Eloquent\Factories\Factory;
+use AidingApp\ServiceManagement\Tests\ServiceRequestType\RequestFactories\ServiceRequestTypeEmailTemplateRequestFactory;
 
-/**
- * @extends Factory<ServiceRequestTypeEmailTemplate>
- */
-class ServiceRequestTypeEmailTemplateFactory extends Factory
-{
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
-    {
-        return [
-            'service_request_type_id' => ServiceRequestType::factory(),
-            'type' => fake()->randomElement(collect(ServiceRequestEmailTemplateType::cases())->values()->toArray()),
-            'subject' => ['type' => 'doc', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => fake()->sentence()]]]]],
-            'body' => ['type' => 'doc', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => fake()->sentence()]]]]],
-        ];
-    }
-}
+use function Pest\Laravel\assertDatabaseEmpty;
+use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Livewire\livewire;
+use function Tests\asSuperAdmin;
+
+test('it creates a ServiceRequestTypeEmailTemplate if it did not already exist', function () {
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    asSuperAdmin();
+
+    $request = ServiceRequestTypeEmailTemplateRequestFactory::new()->create();
+
+    assertDatabaseEmpty(ServiceRequestTypeEmailTemplate::class);
+
+    $type = collect(ServiceRequestEmailTemplateType::cases())->random();
+
+    livewire(ServiceRequestTypeEmailTemplatePage::class, [
+        'record' => $serviceRequestType->getKey(),
+        'type' => $type,
+    ])
+        ->fillForm([
+            'subject' => $request['subject'],
+            'body' => $request['body'],
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    assertDatabaseHas(ServiceRequestTypeEmailTemplate::class, [
+        'service_request_type_id' => $serviceRequestType->getKey(),
+        'type' => $type,
+        'subject' => json_encode($request['subject']),
+        'body' => json_encode($request['body']),
+    ]);
+});
+
+// test('it updates a ServiceRequestTypeEmailTemplate if it already exists', function() {
+
+// });

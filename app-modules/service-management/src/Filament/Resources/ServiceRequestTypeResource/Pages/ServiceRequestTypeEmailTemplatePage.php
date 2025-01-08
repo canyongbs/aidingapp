@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages;
 
+use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use Filament\Forms\Components\Section;
@@ -51,7 +52,7 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
     protected static string $resource = ServiceRequestTypeResource::class;
 
     #[Locked]
-    public ?string $type;
+    public ServiceRequestEmailTemplateType $type;
 
     public static ?string $navigationGroup = 'Email Templates';
 

@@ -35,12 +35,9 @@
 */
 
 use AidingApp\Contact\Models\Contact;
-use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\CreateServiceRequestType;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\ServiceRequestTypeEmailTemplatePage;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use AidingApp\ServiceManagement\Tests\RequestFactories\CreateServiceRequestTypeRequestFactory;
 use App\Models\User;
 use App\Settings\LicenseSettings;
@@ -159,27 +156,4 @@ test('CreateServiceRequestType is gated with proper feature access control', fun
     assertCount(1, ServiceRequestType::all());
 
     assertDatabaseHas(ServiceRequestType::class, $request->toArray());
-});
-
-test('it create Service Request Type Email Template', function () {
-    $serviceRequestType = ServiceRequestType::factory()->create();
-
-    asSuperAdmin()
-        ->get(
-            ServiceRequestTypeResource::getUrl('service-request-type-email-template', [
-                'record' => $serviceRequestType->getKey(),
-                'type' => collect(ServiceRequestEmailTemplateType::cases())->random(),
-            ])
-        )
-        ->assertSuccessful();
-
-    $request = collect(ServiceRequestTypeEmailTemplate::factory()->create())->toArray();
-
-    livewire(ServiceRequestTypeEmailTemplatePage::class, [
-        'record' => $serviceRequestType->getKey(),
-        'type' => $request['type']->getLabel(),
-    ])
-        ->fillForm($request)
-        ->call('save')
-        ->assertHasNoFormErrors();
 });
