@@ -38,7 +38,6 @@ namespace AidingApp\Authorization\Filament\Pages;
 
 use AidingApp\Authorization\Enums\AzureMatchingProperty;
 use AidingApp\Authorization\Settings\AzureSsoSettings;
-use App\Features\AzureMatchingPropertyFeature;
 use App\Filament\Clusters\ProductIntegrations;
 use App\Models\Authenticatable;
 use App\Models\User;
@@ -103,8 +102,7 @@ class ManageAzureSsoSettings extends SettingsPage
                             ->label('Matching Property')
                             ->options(AzureMatchingProperty::class)
                             ->enum(AzureMatchingProperty::class)
-                            ->required(fn (Get $get) => $get('is_enabled'))
-                            ->visible(AzureMatchingPropertyFeature::active()),
+                            ->required(fn (Get $get) => $get('is_enabled')),
                     ])->visible(fn (Get $get) => $get('is_enabled')),
             ]);
     }
