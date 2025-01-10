@@ -37,7 +37,6 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages;
 
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
-use App\Features\ServiceRequestClosedNotificationColumns;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\ViewField;
 use Filament\Forms\Form;
@@ -68,7 +67,6 @@ class EditServiceRequestTypeNotifications extends EditRecord
                             ->rules(['array'])
                             ->view('service-management::filament.resources.service-request-type-resource.pages.edit-service-request-type-notifications.matrix'),
                     ])
-                    ->visible(ServiceRequestClosedNotificationColumns::active())
                     ->extraAttributes(['class' => 'fi-section-no-content-padding']),
             ]);
     }
