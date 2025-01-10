@@ -45,6 +45,8 @@ class Login extends FilamentLogin
 {
     protected static string $view = 'authorization::login';
 
+    protected static string $layout = 'filament-panels::components.layouts.login';
+
     protected function getSsoFormActions(): array
     {
         $ssoActions = [];

@@ -31,25 +31,36 @@
 
 </COPYRIGHT>
 --}}
-<x-filament-panels::page.simple>
-    @if (filament()->hasRegistration())
-        <x-slot name="subheading">
-            {{ __('filament-panels::pages/auth/login.actions.register.before') }}
+<div class="flex w-full flex-col items-center justify-center gap-8 lg:flex-row">
+    <div class="w-full lg:w-1/2 lg:pr-8">
+        @if (filament()->hasRegistration())
+            <x-slot name="subheading">
+                {{ __('filament-panels::pages/auth/login.actions.register.before') }}
 
-            {{ $this->registerAction }}
-        </x-slot>
-    @endif
+                {{ $this->registerAction }}
+            </x-slot>
+        @endif
 
-    <x-filament-panels::form wire:submit="authenticate">
-        {{ $this->form }}
+        <x-filament-panels::form wire:submit="authenticate">
+            {{ $this->form }}
 
-        <x-filament-panels::form.actions
-            :actions="$this->getCachedFormActions()"
-            :full-width="$this->hasFullWidthFormActions()"
-        />
-        <x-filament-panels::form.actions
-            :actions="$this->getSsoFormActions()"
-            :full-width="$this->hasFullWidthFormActions()"
-        />
-    </x-filament-panels::form>
-</x-filament-panels::page.simple>
+            <x-filament-panels::form.actions
+                :actions="$this->getCachedFormActions()"
+                :full-width="$this->hasFullWidthFormActions()"
+            />
+            @if (count($this->getSsoFormActions()) > 0)
+                <small class="text-gray-800 dark:text-gray-300">or log in with single sign-on</small>
+            @endif
+            <x-filament-panels::form.actions
+                :actions="$this->getSsoFormActions()"
+                :full-width="$this->hasFullWidthFormActions()"
+            />
+        </x-filament-panels::form>
+    </div>
+
+    <div class="w-full lg:w-1/2">
+        <x-filament-panels::login-version-card />
+        <x-filament-panels::login-resource-portal-card />
+    </div>
+
+</div>
