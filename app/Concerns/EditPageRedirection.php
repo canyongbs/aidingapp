@@ -34,49 +34,20 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Filament\Resources\SmsTemplateResource\Pages;
+namespace App\Concerns;
 
-use AidingApp\Engagement\Filament\Resources\SmsTemplateResource;
-use App\Concerns\EditPageRedirection;
-use Filament\Actions\DeleteAction;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
-use Filament\Resources\Pages\EditRecord;
-use FilamentTiptapEditor\TiptapEditor;
-
-class EditSmsTemplate extends EditRecord
+trait EditPageRedirection
 {
-  use EditPageRedirection;
-  protected static string $resource = SmsTemplateResource::class;
 
-  public function form(Form $form): Form
+  public function getRedirectUrl(): string
   {
-    return $form
-      ->columns(1)
-      ->schema([
-        TextInput::make('name')
-          ->string()
-          ->required()
-          ->autocomplete(false),
-        Textarea::make('description')
-          ->string(),
-        TiptapEditor::make('content')
-          ->mergeTags([
-            'contact full name',
-            'contact email',
-          ])
-          ->profile('sms')
-          ->columnSpanFull()
-          ->extraInputAttributes(['style' => 'min-height: 12rem;'])
-          ->required(),
-      ]);
-  }
+    /** @var class-string<Resource> $resource */
+    $resource = $this->getResource();
 
-  protected function getHeaderActions(): array
-  {
-    return [
-      DeleteAction::make(),
-    ];
+    if ($resource::hasPage('view')) {
+      return $resource::getUrl('view', ['record' => $this->record]);
+    }
+
+    return null;
   }
 }

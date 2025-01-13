@@ -39,6 +39,7 @@ namespace AidingApp\ContractManagement\Filament\Resources\ContractResource\Pages
 use AidingApp\ContractManagement\Filament\Resources\ContractResource;
 use AidingApp\ContractManagement\Models\Contract;
 use AidingApp\ContractManagement\Models\ContractType;
+use App\Concerns\EditPageRedirection;
 use Cknow\Money\Money;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\DatePicker;
@@ -55,6 +56,7 @@ use Illuminate\Support\Str;
 
 class EditContract extends EditRecord
 {
+    use EditPageRedirection;
     protected static string $resource = ContractResource::class;
 
     public function form(Form $form): Form
@@ -68,13 +70,13 @@ class EditContract extends EditRecord
                     ->required()
                     ->label('Contract Type')
                     ->relationship(
-                        name : 'contractType',
+                        name: 'contractType',
                         titleAttribute: 'name',
-                        modifyQueryUsing: fn (Builder $query) => $query->orderBy('order', 'ASC')
+                        modifyQueryUsing: fn(Builder $query) => $query->orderBy('order', 'ASC')
                     )
                     ->preload()
                     ->default(
-                        fn () => ContractType::query()
+                        fn() => ContractType::query()
                             ->where('is_default', true)
                             ->first()
                             ?->getKey()
@@ -98,7 +100,7 @@ class EditContract extends EditRecord
                     ->displayFormat('m/d/Y')
                     ->live(onBlur: true)
                     ->afterStateUpdated(
-                        fn (Get $get, Set $set) => $get('start_date') > $get('end_date') ? $set('end_date', '') : ''
+                        fn(Get $get, Set $set) => $get('start_date') > $get('end_date') ? $set('end_date', '') : ''
                     )
                     ->closeOnDateSelection()
                     ->placeholder('Select start date')
@@ -108,7 +110,7 @@ class EditContract extends EditRecord
                     ->native(false)
                     ->displayFormat('m/d/Y')
                     ->placeholder('Select end date')
-                    ->minDate(fn (Get $get) => $get('start_date'))
+                    ->minDate(fn(Get $get) => $get('start_date'))
                     ->live(onBlur: true)
                     ->closeOnDateSelection()
                     ->required(),

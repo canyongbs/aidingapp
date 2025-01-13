@@ -40,6 +40,7 @@ use AidingApp\Contact\Filament\Resources\OrganizationResource;
 use AidingApp\Contact\Models\OrganizationIndustry;
 use AidingApp\Contact\Models\OrganizationType;
 use AidingApp\Contact\Rules\UniqueOrganizationDomain;
+use App\Concerns\EditPageRedirection;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Repeater;
@@ -54,6 +55,7 @@ use Filament\Resources\Pages\EditRecord;
 
 class EditOrganization extends EditRecord
 {
+    use EditPageRedirection;
     protected static string $resource = OrganizationResource::class;
 
     protected static ?string $navigationLabel = 'Edit';
@@ -113,13 +115,13 @@ class EditOrganization extends EditRecord
                         Select::make('industry_id')
                             ->label('Industry')
                             ->relationship('industry', 'name')
-                            ->default(fn () => OrganizationIndustry::query()
+                            ->default(fn() => OrganizationIndustry::query()
                                 ->where('is_default', true)
                                 ->first()?->getKey()),
                         Select::make('type_id')
                             ->label('Type')
                             ->relationship('type', 'name')
-                            ->default(fn () => OrganizationType::query()
+                            ->default(fn() => OrganizationType::query()
                                 ->where('is_default', true)
                                 ->first()?->getKey()),
                         Textarea::make('description')

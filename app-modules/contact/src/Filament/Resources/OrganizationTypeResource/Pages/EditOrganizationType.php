@@ -45,9 +45,11 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Resources\Pages\EditRecord;
+use App\Concerns\EditPageRedirection;
 
 class EditOrganizationType extends EditRecord
 {
+    use EditPageRedirection;
     protected static string $resource = OrganizationTypeResource::class;
 
     public function form(Form $form): Form
