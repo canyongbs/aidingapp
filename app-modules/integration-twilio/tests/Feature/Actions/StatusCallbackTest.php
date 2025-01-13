@@ -34,8 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Engagement\Enums\EngagementDeliveryStatus;
-use AidingApp\Engagement\Models\EngagementDeliverable;
 use AidingApp\IntegrationTwilio\Actions\StatusCallback;
 use AidingApp\IntegrationTwilio\DataTransferObjects\TwilioStatusCallbackData;
 use AidingApp\Notification\Enums\NotificationDeliveryStatus;
