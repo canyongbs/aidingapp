@@ -47,51 +47,52 @@ use Filament\Resources\Pages\EditRecord;
 
 class EditSystemUser extends EditRecord
 {
-  use EditPageRedirection;
-  protected static string $resource = SystemUserResource::class;
+    use EditPageRedirection;
 
-  protected ?string $heading = 'Edit Programmatic (API) User';
+    protected static string $resource = SystemUserResource::class;
 
-  public function form(Form $form): Form
-  {
-    return $form->schema([
-      TextInput::make('name')
-        ->required()
-        ->string(),
-      TextInput::make('token')
-        ->hint('Please copy the token, it will only be shown once.')
-        ->disabled()
-        ->dehydrated(false)
-        ->visible(fn(?string $state) => filled($state)),
-    ]);
-  }
+    protected ?string $heading = 'Edit Programmatic (API) User';
 
-  protected function mutateFormDataBeforeFill(array $data): array
-  {
-    /** @var SystemUser $systemUser */
-    $systemUser = $this->getRecord();
-
-    if (! $systemUser->tokens()->where('name', 'api')->first()) {
-      $token = str($systemUser->createToken('api')->plainTextToken)->after('|')->toString();
-
-      $data['token'] = $token;
+    public function form(Form $form): Form
+    {
+        return $form->schema([
+            TextInput::make('name')
+                ->required()
+                ->string(),
+            TextInput::make('token')
+                ->hint('Please copy the token, it will only be shown once.')
+                ->disabled()
+                ->dehydrated(false)
+                ->visible(fn (?string $state) => filled($state)),
+        ]);
     }
 
-    return $data;
-  }
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        /** @var SystemUser $systemUser */
+        $systemUser = $this->getRecord();
 
-  protected function getHeaderActions(): array
-  {
-    return [
-      Action::make('Reset Token')
-        ->action(function (SystemUser $record) {
-          $record->tokens()->where('name', 'api')->delete();
+        if (! $systemUser->tokens()->where('name', 'api')->first()) {
+            $token = str($systemUser->createToken('api')->plainTextToken)->after('|')->toString();
 
-          $token = str($record->createToken('api')->plainTextToken)->after('|')->toString();
+            $data['token'] = $token;
+        }
 
-          $this->data['token'] = $token;
-        }),
-      DeleteAction::make(),
-    ];
-  }
+        return $data;
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('Reset Token')
+                ->action(function (SystemUser $record) {
+                    $record->tokens()->where('name', 'api')->delete();
+
+                    $token = str($record->createToken('api')->plainTextToken)->after('|')->toString();
+
+                    $this->data['token'] = $token;
+                }),
+            DeleteAction::make(),
+        ];
+    }
 }

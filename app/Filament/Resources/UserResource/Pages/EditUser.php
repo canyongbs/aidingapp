@@ -48,35 +48,35 @@ use STS\FilamentImpersonate\Pages\Actions\Impersonate;
 
 class EditUser extends EditRecord
 {
-  use EditPageRedirection;
+    use EditPageRedirection;
 
-  protected static string $resource = UserResource::class;
+    protected static string $resource = UserResource::class;
 
-  protected function getHeaderActions(): array
-  {
-    /** @var User $user */
-    $user = $this->getRecord();
+    protected function getHeaderActions(): array
+    {
+        /** @var User $user */
+        $user = $this->getRecord();
 
-    return [
-      Impersonate::make()
-        ->record($user),
-      Action::make('resetPassword')
-        ->color('gray')
-        ->requiresConfirmation()
-        ->modalDescription('This will remove the user\'s current password and send them an email with a link to set a new password.')
-        ->hidden($user->is_external)
-        ->action(function () use ($user) {
-          $user->password = null;
-          $user->save();
+        return [
+            Impersonate::make()
+                ->record($user),
+            Action::make('resetPassword')
+                ->color('gray')
+                ->requiresConfirmation()
+                ->modalDescription('This will remove the user\'s current password and send them an email with a link to set a new password.')
+                ->hidden($user->is_external)
+                ->action(function () use ($user) {
+                    $user->password = null;
+                    $user->save();
 
-          $user->notify(new SetPasswordNotification());
+                    $user->notify(new SetPasswordNotification());
 
-          Notification::make()
-            ->title('The password has been reset')
-            ->success()
-            ->send();
-        }),
-      DeleteAction::make(),
-    ];
-  }
+                    Notification::make()
+                        ->title('The password has been reset')
+                        ->success()
+                        ->send();
+                }),
+            DeleteAction::make(),
+        ];
+    }
 }

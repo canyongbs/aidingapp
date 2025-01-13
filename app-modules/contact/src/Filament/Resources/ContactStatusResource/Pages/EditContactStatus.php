@@ -48,37 +48,38 @@ use Filament\Resources\Pages\EditRecord;
 
 class EditContactStatus extends EditRecord
 {
-  use EditPageRedirection;
-  protected static string $resource = ContactStatusResource::class;
+    use EditPageRedirection;
 
-  public function form(Form $form): Form
-  {
-    return $form
-      ->schema([
-        TextInput::make('name')
-          ->label('Name')
-          ->required()
-          ->string(),
-        Select::make('classification')
-          ->label('Classification')
-          ->searchable()
-          ->options(SystemContactClassification::class)
-          ->required()
-          ->enum(SystemContactClassification::class),
-        Select::make('color')
-          ->label('Color')
-          ->searchable()
-          ->options(ContactStatusColorOptions::class)
-          ->required()
-          ->enum(ContactStatusColorOptions::class),
-      ]);
-  }
+    protected static string $resource = ContactStatusResource::class;
 
-  protected function getHeaderActions(): array
-  {
-    return [
-      Actions\ViewAction::make(),
-      Actions\DeleteAction::make(),
-    ];
-  }
+    public function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                TextInput::make('name')
+                    ->label('Name')
+                    ->required()
+                    ->string(),
+                Select::make('classification')
+                    ->label('Classification')
+                    ->searchable()
+                    ->options(SystemContactClassification::class)
+                    ->required()
+                    ->enum(SystemContactClassification::class),
+                Select::make('color')
+                    ->label('Color')
+                    ->searchable()
+                    ->options(ContactStatusColorOptions::class)
+                    ->required()
+                    ->enum(ContactStatusColorOptions::class),
+            ]);
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Actions\ViewAction::make(),
+            Actions\DeleteAction::make(),
+        ];
+    }
 }

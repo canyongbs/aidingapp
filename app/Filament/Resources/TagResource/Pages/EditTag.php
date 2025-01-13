@@ -50,40 +50,41 @@ use Illuminate\Validation\Rules\Unique;
 
 class EditTag extends EditRecord
 {
-  use EditPageRedirection;
-  protected static string $resource = TagResource::class;
+    use EditPageRedirection;
 
-  public function form(Form $form): Form
-  {
-    return $form
-      ->schema([
-        Section::make()
-          ->schema([
-            //change this if we want non-class types
-            Select::make('type')
-              ->options([
-                KnowledgeBaseItem::getTagType() => KnowledgeBaseItem::getTagLabel(),
-              ])
-              ->required()
-              ->string()
-              ->columnSpanFull()
-              ->live(),
-            TextInput::make('name')
-              ->autocomplete(false)
-              ->required()
-              ->string()
-              ->unique(ignoreRecord: true, modifyRuleUsing: function (Unique $rule, Get $get) {
-                return $rule->where('type', $get('type'));
-              })
-              ->columnSpanFull(),
-          ]),
-      ]);
-  }
+    protected static string $resource = TagResource::class;
 
-  protected function getHeaderActions(): array
-  {
-    return [
-      DeleteAction::make(),
-    ];
-  }
+    public function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                Section::make()
+                    ->schema([
+                        //change this if we want non-class types
+                        Select::make('type')
+                            ->options([
+                                KnowledgeBaseItem::getTagType() => KnowledgeBaseItem::getTagLabel(),
+                            ])
+                            ->required()
+                            ->string()
+                            ->columnSpanFull()
+                            ->live(),
+                        TextInput::make('name')
+                            ->autocomplete(false)
+                            ->required()
+                            ->string()
+                            ->unique(ignoreRecord: true, modifyRuleUsing: function (Unique $rule, Get $get) {
+                                return $rule->where('type', $get('type'));
+                            })
+                            ->columnSpanFull(),
+                    ]),
+            ]);
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            DeleteAction::make(),
+        ];
+    }
 }

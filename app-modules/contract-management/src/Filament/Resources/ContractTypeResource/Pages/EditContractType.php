@@ -49,6 +49,7 @@ use Illuminate\Support\Str;
 class EditContractType extends EditRecord
 {
     use EditPageRedirection;
+
     protected static string $resource = ContractTypeResource::class;
 
     protected ?bool $hasDatabaseTransactions = true;

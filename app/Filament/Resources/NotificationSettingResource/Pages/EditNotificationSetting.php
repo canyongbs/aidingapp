@@ -45,19 +45,19 @@ use Filament\Resources\Pages\EditRecord;
 
 class EditNotificationSetting extends EditRecord
 {
-  use EditPageRedirection;
+    use EditPageRedirection;
 
-  protected static string $resource = NotificationSettingResource::class;
+    protected static string $resource = NotificationSettingResource::class;
 
-  public function form(Form $form): Form
-  {
-    return resolve(NotificationSettingForm::class)->form($form);
-  }
+    public function form(Form $form): Form
+    {
+        return resolve(NotificationSettingForm::class)->form($form);
+    }
 
-  protected function getHeaderActions(): array
-  {
-    return [
-      DeleteAction::make(),
-    ];
-  }
+    protected function getHeaderActions(): array
+    {
+        return [
+            DeleteAction::make(),
+        ];
+    }
 }

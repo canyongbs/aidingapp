@@ -45,25 +45,26 @@ use Filament\Resources\Pages\EditRecord;
 
 class EditContactSource extends EditRecord
 {
-  use EditPageRedirection;
-  protected static string $resource = ContactSourceResource::class;
+    use EditPageRedirection;
 
-  public function form(Form $form): Form
-  {
-    return $form
-      ->schema([
-        TextInput::make('name')
-          ->label('Name')
-          ->required()
-          ->string(),
-      ]);
-  }
+    protected static string $resource = ContactSourceResource::class;
 
-  protected function getHeaderActions(): array
-  {
-    return [
-      Actions\ViewAction::make(),
-      Actions\DeleteAction::make(),
-    ];
-  }
+    public function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                TextInput::make('name')
+                    ->label('Name')
+                    ->required()
+                    ->string(),
+            ]);
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Actions\ViewAction::make(),
+            Actions\DeleteAction::make(),
+        ];
+    }
 }

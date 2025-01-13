@@ -50,6 +50,7 @@ use Filament\Resources\Pages\EditRecord;
 class EditOrganizationIndustry extends EditRecord
 {
     use EditPageRedirection;
+
     protected static string $resource = OrganizationIndustryResource::class;
 
     public function form(Form $form): Form

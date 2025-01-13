@@ -47,37 +47,38 @@ use FilamentTiptapEditor\TiptapEditor;
 
 class EditEmailTemplate extends EditRecord
 {
-  use EditPageRedirection;
-  protected static string $resource = EmailTemplateResource::class;
+    use EditPageRedirection;
 
-  public function form(Form $form): Form
-  {
-    return $form
-      ->columns(1)
-      ->schema([
-        TextInput::make('name')
-          ->string()
-          ->required()
-          ->autocomplete(false),
-        Textarea::make('description')
-          ->string(),
-        TiptapEditor::make('content')
-          ->disk('s3-public')
-          ->mergeTags([
-            'contact full name',
-            'contact email',
-          ])
-          ->profile('email')
-          ->columnSpanFull()
-          ->extraInputAttributes(['style' => 'min-height: 12rem;'])
-          ->required(),
-      ]);
-  }
+    protected static string $resource = EmailTemplateResource::class;
 
-  protected function getHeaderActions(): array
-  {
-    return [
-      DeleteAction::make(),
-    ];
-  }
+    public function form(Form $form): Form
+    {
+        return $form
+            ->columns(1)
+            ->schema([
+                TextInput::make('name')
+                    ->string()
+                    ->required()
+                    ->autocomplete(false),
+                Textarea::make('description')
+                    ->string(),
+                TiptapEditor::make('content')
+                    ->disk('s3-public')
+                    ->mergeTags([
+                        'contact full name',
+                        'contact email',
+                    ])
+                    ->profile('email')
+                    ->columnSpanFull()
+                    ->extraInputAttributes(['style' => 'min-height: 12rem;'])
+                    ->required(),
+            ]);
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            DeleteAction::make(),
+        ];
+    }
 }

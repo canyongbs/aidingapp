@@ -38,16 +38,15 @@ namespace App\Concerns;
 
 trait EditPageRedirection
 {
+    public function getRedirectUrl(): string
+    {
+        /** @var class-string<Resource> $resource */
+        $resource = $this->getResource();
 
-  public function getRedirectUrl(): string
-  {
-    /** @var class-string<Resource> $resource */
-    $resource = $this->getResource();
+        if ($resource::hasPage('view')) {
+            return $resource::getUrl('view', ['record' => $this->record]);
+        }
 
-    if ($resource::hasPage('view')) {
-      return $resource::getUrl('view', ['record' => $this->record]);
+        return null;
     }
-
-    return null;
-  }
 }

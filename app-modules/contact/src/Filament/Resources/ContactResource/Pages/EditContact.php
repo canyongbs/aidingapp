@@ -59,6 +59,7 @@ use Illuminate\Database\Eloquent\Builder;
 class EditContact extends EditRecord
 {
     use EditPageRedirection;
+
     protected static string $resource = ContactResource::class;
 
     // TODO: Automatically set from Filament
@@ -203,7 +204,7 @@ class EditContact extends EditRecord
                             ->relationship(
                                 'assignedTo',
                                 'name',
-                                fn(Builder $query) => $query->tap(new HasLicense(Contact::getLicenseType())),
+                                fn (Builder $query) => $query->tap(new HasLicense(Contact::getLicenseType())),
                             )
                             ->searchable()
                             ->nullable()
