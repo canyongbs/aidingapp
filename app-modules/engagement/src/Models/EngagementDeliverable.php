@@ -39,7 +39,6 @@ namespace AidingApp\Engagement\Models;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Engagement\Drivers\Contracts\EngagementDeliverableDriver;
 use AidingApp\Engagement\Drivers\EngagementEmailDriver;
-use AidingApp\Engagement\Drivers\EngagementSmsDriver;
 use AidingApp\Engagement\Enums\EngagementDeliveryMethod;
 use AidingApp\Engagement\Enums\EngagementDeliveryStatus;
 use App\Models\BaseModel;
@@ -108,7 +107,6 @@ class EngagementDeliverable extends BaseModel implements Auditable
     {
         return match ($this->channel) {
             EngagementDeliveryMethod::Email => new EngagementEmailDriver($this),
-            EngagementDeliveryMethod::Sms => new EngagementSmsDriver($this),
         };
     }
 }

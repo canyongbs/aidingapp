@@ -39,7 +39,6 @@ namespace AidingApp\Engagement\Filament\Resources\EngagementResource\Pages;
 use AidingApp\Engagement\Actions\CreateEngagementDeliverable;
 use AidingApp\Engagement\Enums\EngagementDeliveryMethod;
 use AidingApp\Engagement\Filament\Resources\EngagementResource;
-use AidingApp\Engagement\Filament\Resources\EngagementResource\Fields\EngagementSmsBodyField;
 use AidingApp\Engagement\Models\EmailTemplate;
 use App\Filament\Forms\Components\EducatableSelect;
 use Filament\Forms\Components\Actions\Action;
@@ -79,7 +78,6 @@ class CreateEngagement extends CreateRecord
                             ->autofocus()
                             ->required()
                             ->placeholder(__('Subject'))
-                            ->hidden(fn (Get $get): bool => $get('delivery_method') === EngagementDeliveryMethod::Sms->value)
                             ->columnSpanFull(),
                         TiptapEditor::make('body')
                             ->disk('s3-public')
@@ -142,10 +140,8 @@ class CreateEngagement extends CreateRecord
                                         $component->generateImageUrls($template->content),
                                     );
                                 }))
-                            ->hidden(fn (Get $get): bool => $get('delivery_method') === EngagementDeliveryMethod::Sms->value)
                             ->helperText('You can insert contact information by typing {{ and choosing a merge value to insert.')
                             ->columnSpanFull(),
-                        EngagementSmsBodyField::make(context: 'create', form: $form),
                     ]),
                 EducatableSelect::make('recipient')
                     ->label('Recipient')

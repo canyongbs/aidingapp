@@ -58,7 +58,7 @@ class EngagementCreateAction
             ->modalDescription("Send an engagement to {$educatable->display_name}.")
             ->steps([
                 Step::make('Choose your delivery method')
-                    ->description('Select email or sms.')
+                    ->description('Select email')
                     ->schema([
                         Select::make('delivery_method')
                             ->label('How would you like to send this engagement?')
@@ -78,17 +78,9 @@ class EngagementCreateAction
                             ->placeholder(__('Body'))
                             ->required()
                             ->maxLength(function (callable $get) {
-                                if (collect($get('delivery_method'))->contains(EngagementDeliveryMethod::Sms->value)) {
-                                    return 320;
-                                }
-
                                 return 65535;
                             })
                             ->helperText(function (callable $get) {
-                                if (collect($get('delivery_method'))->contains(EngagementDeliveryMethod::Sms->value)) {
-                                    return 'The body of your message can be up to 320 characters long.';
-                                }
-
                                 return 'The body of your message can be up to 65,535 characters long.';
                             }),
                     ]),
