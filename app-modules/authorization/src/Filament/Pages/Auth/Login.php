@@ -55,7 +55,7 @@ class Login extends FilamentLogin
 
         if ($azureSsoSettings->is_enabled && ! empty($azureSsoSettings->client_id)) {
             $ssoActions[] = Action::make('azure_sso')
-                ->label(__('Login with Azure SSO'))
+                ->label(__('Microsoft'))
                 ->url(route('socialite.redirect', ['provider' => 'azure']))
                 ->color('gray')
                 ->icon('icon-microsoft')
