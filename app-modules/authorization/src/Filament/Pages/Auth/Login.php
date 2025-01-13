@@ -66,7 +66,7 @@ class Login extends FilamentLogin
 
         if ($googleSsoSettings->is_enabled && ! empty($googleSsoSettings->client_id)) {
             $ssoActions[] = Action::make('google_sso')
-                ->label(__('Login with Google SSO'))
+                ->label(__('Google'))
                 ->url(route('socialite.redirect', ['provider' => 'google']))
                 ->icon('icon-google')
                 ->color('gray')
