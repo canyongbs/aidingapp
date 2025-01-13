@@ -50,7 +50,7 @@ class ManageContactEngagement extends ManageRelatedRecords
     // TODO: Obsolete when there is no table, remove from Filament
     protected static string $relationship = 'engagements';
 
-    protected static ?string $navigationLabel = 'Email and Texts';
+    protected static ?string $navigationLabel = 'Emails';
 
     protected static ?string $breadcrumb = 'Email and Texts';
 
@@ -58,7 +58,7 @@ class ManageContactEngagement extends ManageRelatedRecords
 
     public function getTitle(): string | Htmlable
     {
-        return 'Manage Contact Email and Texts';
+        return 'Manage Contact Emails';
     }
 
     public static function canAccess(array $arguments = []): bool
