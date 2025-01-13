@@ -69,7 +69,7 @@ class CreateEngagement extends CreateRecord
             ->schema([
                 Select::make('delivery_method')
                     ->label('What would you like to send?')
-                    ->options([EngagementDeliveryMethod::Email->value => 'Email'])
+                    ->options(EngagementDeliveryMethod::class)
                     ->default(EngagementDeliveryMethod::Email->value)
                     ->selectablePlaceholder(false)
                     ->live(),
