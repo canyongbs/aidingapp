@@ -121,7 +121,7 @@ class EngagementsRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->heading('Email and Text Messages')
+            ->heading('Emails')
             ->recordTitleAttribute('id')
             ->columns([
                 IdColumn::make(),
@@ -133,8 +133,8 @@ class EngagementsRelationManager extends RelationManager
             ])
             ->headerActions([
                 CreateAction::make()
-                    ->label('New Email or Text')
-                    ->modalHeading('Create new email or text')
+                    ->label('New Email')
+                    ->modalHeading('Create new email')
                     ->after(function (Engagement $engagement, array $data) {
                         $this->afterCreate($engagement, $data['delivery_method']);
                     }),

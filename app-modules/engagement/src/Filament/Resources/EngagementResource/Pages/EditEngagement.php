@@ -38,7 +38,6 @@ namespace AidingApp\Engagement\Filament\Resources\EngagementResource\Pages;
 
 use AidingApp\Engagement\Enums\EngagementDeliveryMethod;
 use AidingApp\Engagement\Filament\Resources\EngagementResource;
-use AidingApp\Engagement\Filament\Resources\EngagementResource\Fields\EngagementSmsBodyField;
 use AidingApp\Engagement\Models\EmailTemplate;
 use AidingApp\Engagement\Models\Engagement;
 use App\Concerns\EditPageRedirection;
@@ -141,7 +140,6 @@ class EditEngagement extends EditRecord
                     ->showMergeTagsInBlocksPanel($form->getLivewire() instanceof Page)
                     ->helperText('You can insert contact information by typing {{ and choosing a merge value to insert.')
                     ->columnSpanFull(),
-                EngagementSmsBodyField::make(context: 'edit', form: $form),
                 EducatableSelect::make('recipient')
                     ->label('Recipient')
                     ->required(),

@@ -36,7 +36,6 @@
 
 use AidingApp\Engagement\Actions\DeliverEngagements;
 use AidingApp\Engagement\Actions\EngagementEmailChannelDelivery;
-use AidingApp\Engagement\Actions\EngagementSmsChannelDelivery;
 use AidingApp\Engagement\Models\Engagement;
 use AidingApp\Engagement\Models\EngagementDeliverable;
 use Carbon\Carbon;
@@ -67,34 +66,6 @@ it('will dispatch a job to send all engagements that should be delivered via ema
     });
 
     Queue::assertNotPushed(EngagementEmailChannelDelivery::class, function ($job) use ($futureEngagement) {
-        return $job->deliverable->is($futureEngagement->deliverable);
-    });
-});
-
-it('will dispatch a job to send all engagements that should be delivered via sms', function () {
-    Queue::fake(EngagementSmsChannelDelivery::class);
-
-    // Given that we have an engagement that should be delivered
-    $engagement = Engagement::factory()
-        ->deliverNow()
-        ->has(EngagementDeliverable::factory()->sms()->count(1))
-        ->create();
-
-    // And an engagement that shouldn't be sent until some point in the future
-    $futureEngagement = Engagement::factory()
-        ->deliverLater()
-        ->has(EngagementDeliverable::factory()->sms()->count(1))
-        ->create();
-
-    // When we dispatch our job to deliver engagements
-    DeliverEngagements::dispatchSync();
-
-    // A job to "send" the engagement should be dispatched for only the first engagement
-    Queue::assertPushed(EngagementSmsChannelDelivery::class, function ($job) use ($engagement) {
-        return $job->deliverable->is($engagement->deliverable);
-    });
-
-    Queue::assertNotPushed(EngagementSmsChannelDelivery::class, function ($job) use ($futureEngagement) {
         return $job->deliverable->is($futureEngagement->deliverable);
     });
 });
