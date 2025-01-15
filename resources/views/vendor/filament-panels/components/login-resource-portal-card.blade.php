@@ -1,6 +1,4 @@
-<?php
-
-/*
+{{--
 <COPYRIGHT>
 
     Copyright © 2016-2025, Canyon GBS LLC. All rights reserved.
@@ -32,47 +30,14 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
-
-namespace AidingApp\Authorization\Filament\Pages\Auth;
-
-use AidingApp\Authorization\Settings\AzureSsoSettings;
-use AidingApp\Authorization\Settings\GoogleSsoSettings;
-use Filament\Actions\Action;
-use Filament\Pages\Auth\Login as FilamentLogin;
-
-class Login extends FilamentLogin
-{
-    protected static string $view = 'authorization::login';
-
-    protected static string $layout = 'filament-panels::components.layouts.login';
-
-    protected function getSsoFormActions(): array
-    {
-        $ssoActions = [];
-
-        $azureSsoSettings = app(AzureSsoSettings::class);
-
-        if ($azureSsoSettings->is_enabled && ! empty($azureSsoSettings->client_id)) {
-            $ssoActions[] = Action::make('azure_sso')
-                ->label(__('Microsoft'))
-                ->url(route('socialite.redirect', ['provider' => 'azure']))
-                ->color('gray')
-                ->icon('icon-microsoft')
-                ->size('sm');
-        }
-
-        $googleSsoSettings = app(GoogleSsoSettings::class);
-
-        if ($googleSsoSettings->is_enabled && ! empty($googleSsoSettings->client_id)) {
-            $ssoActions[] = Action::make('google_sso')
-                ->label(__('Google'))
-                ->url(route('socialite.redirect', ['provider' => 'google']))
-                ->icon('icon-google')
-                ->color('gray')
-                ->size('sm');
-        }
-
-        return $ssoActions;
-    }
-}
+--}}
+<div class="bg-turkish-300 text-white rounded-xl p-6">
+    <div class="flex md:flex-row flex-col justify-center items-center gap-6">
+        <div>
+            <p class="text-gray-800 text-sm font-semibold">Resource Portal</p>
+            <p class="text-gray-700 text-sm my-4">Visit our resource portal for answers to frequently asked questions.</p>
+            <a href="https://canyongbs.aiding.app/portal"  target="_blank" class="border-2 border-gray-700 px-4 py-2 text-gray-700 rounded-xl text-sm font-semibold inline-block">Visit Resource Portal</a>
+        </div>
+        <img src="{{ Vite::asset('resources/images/changelog_image.svg') }}" class="block max-h-32" />
+    </div>
+</div>

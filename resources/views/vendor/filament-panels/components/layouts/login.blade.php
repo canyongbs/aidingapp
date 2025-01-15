@@ -1,6 +1,4 @@
-<?php
-
-/*
+{{--
 <COPYRIGHT>
 
     Copyright © 2016-2025, Canyon GBS LLC. All rights reserved.
@@ -32,47 +30,20 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
+--}}
+<x-filament-panels::layout.base :livewire="$livewire">
+    <div class="fi-layout flex h-screen w-full flex-col lg:flex-row-reverse">
+        <div class="fi-main-ctn w-full flex flex-col h-full">
+            <div class="flex justify-center items-center w-full border-b border-gray-200 mb-4 flex-shrink-0 p-4">
+                <x-filament-panels::logo />
+            </div>
 
-namespace AidingApp\Authorization\Filament\Pages\Auth;
-
-use AidingApp\Authorization\Settings\AzureSsoSettings;
-use AidingApp\Authorization\Settings\GoogleSsoSettings;
-use Filament\Actions\Action;
-use Filament\Pages\Auth\Login as FilamentLogin;
-
-class Login extends FilamentLogin
-{
-    protected static string $view = 'authorization::login';
-
-    protected static string $layout = 'filament-panels::components.layouts.login';
-
-    protected function getSsoFormActions(): array
-    {
-        $ssoActions = [];
-
-        $azureSsoSettings = app(AzureSsoSettings::class);
-
-        if ($azureSsoSettings->is_enabled && ! empty($azureSsoSettings->client_id)) {
-            $ssoActions[] = Action::make('azure_sso')
-                ->label(__('Microsoft'))
-                ->url(route('socialite.redirect', ['provider' => 'azure']))
-                ->color('gray')
-                ->icon('icon-microsoft')
-                ->size('sm');
-        }
-
-        $googleSsoSettings = app(GoogleSsoSettings::class);
-
-        if ($googleSsoSettings->is_enabled && ! empty($googleSsoSettings->client_id)) {
-            $ssoActions[] = Action::make('google_sso')
-                ->label(__('Google'))
-                ->url(route('socialite.redirect', ['provider' => 'google']))
-                ->icon('icon-google')
-                ->color('gray')
-                ->size('sm');
-        }
-
-        return $ssoActions;
-    }
-}
+            <main class="fi-main mx-auto flex-grow flex justify-center items-center w-full px-4 md:px-6 lg:px-8 max-w-screen-lg mb-4">
+                {{ $slot }}
+            </main>
+            <div class="mt-auto mb-4 lg:mb-4 inline-block w-full h-16">
+                {{ \Filament\Support\Facades\FilamentView::renderHook(\Filament\View\PanelsRenderHook::FOOTER, scopes: $livewire->getRenderHookScopes()) }}
+            </div>
+        </div>
+    </div>
+</x-filament-panels::layout.base>
