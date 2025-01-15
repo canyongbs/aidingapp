@@ -52,40 +52,41 @@ use Filament\Resources\Pages\EditRecord;
 
 class EditChangeRequestStatus extends EditRecord
 {
-  use EditPageRedirection;
-  protected static string $resource = ChangeRequestStatusResource::class;
+    use EditPageRedirection;
 
-  public function form(Form $form): Form
-  {
-    return $form
-      ->schema([
-        Section::make()
-          ->columns()
-          ->schema([
-            TextInput::make('name')
-              ->required()
-              ->string(),
-            Select::make('classification')
-              ->searchable()
-              ->options(SystemChangeRequestClassification::class)
-              ->required()
-              ->enum(SystemChangeRequestClassification::class),
-          ]),
-      ])->disabled(fn(ChangeRequestStatus $record) => $record->trashed());
-  }
+    protected static string $resource = ChangeRequestStatusResource::class;
 
-  protected function getSaveFormAction(): Action
-  {
-    return parent::getSaveFormAction()
-      ->hidden(fn(ChangeRequestStatus $record) => $record->trashed());
-  }
+    public function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                Section::make()
+                    ->columns()
+                    ->schema([
+                        TextInput::make('name')
+                            ->required()
+                            ->string(),
+                        Select::make('classification')
+                            ->searchable()
+                            ->options(SystemChangeRequestClassification::class)
+                            ->required()
+                            ->enum(SystemChangeRequestClassification::class),
+                    ]),
+            ])->disabled(fn (ChangeRequestStatus $record) => $record->trashed());
+    }
 
-  protected function getHeaderActions(): array
-  {
-    return [
-      DeleteAction::make(),
-      RestoreAction::make(),
-      ForceDeleteAction::make(),
-    ];
-  }
+    protected function getSaveFormAction(): Action
+    {
+        return parent::getSaveFormAction()
+            ->hidden(fn (ChangeRequestStatus $record) => $record->trashed());
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            DeleteAction::make(),
+            RestoreAction::make(),
+            ForceDeleteAction::make(),
+        ];
+    }
 }

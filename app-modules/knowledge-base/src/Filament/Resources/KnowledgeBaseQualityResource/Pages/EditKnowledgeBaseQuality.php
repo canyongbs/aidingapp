@@ -45,25 +45,26 @@ use Filament\Resources\Pages\EditRecord;
 
 class EditKnowledgeBaseQuality extends EditRecord
 {
-  use EditPageRedirection;
-  protected static string $resource = KnowledgeBaseQualityResource::class;
+    use EditPageRedirection;
 
-  public function form(Form $form): Form
-  {
-    return $form
-      ->schema([
-        TextInput::make('name')
-          ->label('Name')
-          ->required()
-          ->string(),
-      ]);
-  }
+    protected static string $resource = KnowledgeBaseQualityResource::class;
 
-  protected function getHeaderActions(): array
-  {
-    return [
-      Actions\ViewAction::make(),
-      Actions\DeleteAction::make(),
-    ];
-  }
+    public function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                TextInput::make('name')
+                    ->label('Name')
+                    ->required()
+                    ->string(),
+            ]);
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Actions\ViewAction::make(),
+            Actions\DeleteAction::make(),
+        ];
+    }
 }

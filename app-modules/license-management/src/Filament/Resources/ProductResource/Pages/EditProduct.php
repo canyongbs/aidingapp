@@ -47,46 +47,47 @@ use Filament\Resources\Pages\EditRecord;
 
 class EditProduct extends EditRecord
 {
-  use EditPageRedirection;
-  protected static string $resource = ProductResource::class;
+    use EditPageRedirection;
 
-  public function form(Form $form): Form
-  {
-    return $form
-      ->schema([
-        TextInput::make('name')
-          ->label('Product Name')
-          ->required()
-          ->string()
-          ->maxLength(255),
-        TextInput::make('url')
-          ->label('Product Link')
-          ->maxLength(255)
-          ->url()
-          ->nullable(),
-        Textarea::make('description')
-          ->label('Description')
-          ->string()
-          ->nullable()
-          ->maxLength(65535),
-        TextInput::make('version')
-          ->label('Version')
-          ->string()
-          ->nullable()
-          ->maxLength(255),
-        Textarea::make('additional_notes')
-          ->label('Additional Notes')
-          ->nullable()
-          ->maxLength(65535)
-          ->string(),
-      ]);
-  }
+    protected static string $resource = ProductResource::class;
 
-  protected function getHeaderActions(): array
-  {
-    return [
-      ViewAction::make(),
-      DeleteAction::make(),
-    ];
-  }
+    public function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                TextInput::make('name')
+                    ->label('Product Name')
+                    ->required()
+                    ->string()
+                    ->maxLength(255),
+                TextInput::make('url')
+                    ->label('Product Link')
+                    ->maxLength(255)
+                    ->url()
+                    ->nullable(),
+                Textarea::make('description')
+                    ->label('Description')
+                    ->string()
+                    ->nullable()
+                    ->maxLength(65535),
+                TextInput::make('version')
+                    ->label('Version')
+                    ->string()
+                    ->nullable()
+                    ->maxLength(255),
+                Textarea::make('additional_notes')
+                    ->label('Additional Notes')
+                    ->nullable()
+                    ->maxLength(65535)
+                    ->string(),
+            ]);
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            ViewAction::make(),
+            DeleteAction::make(),
+        ];
+    }
 }

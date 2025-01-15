@@ -46,6 +46,7 @@ use Filament\Resources\Pages\EditRecord;
 class EditServiceRequestTypeNotifications extends EditRecord
 {
     use EditPageRedirection;
+
     protected static string $resource = ServiceRequestTypeResource::class;
 
     protected static ?string $title = 'Notifications';
@@ -123,7 +124,7 @@ class EditServiceRequestTypeNotifications extends EditRecord
             ...$data,
             ...collect($data['settings'])
                 ->only($this->generateSettingsAttributeList())
-                ->filter(fn(mixed $value): bool => is_bool($value))
+                ->filter(fn (mixed $value): bool => is_bool($value))
                 ->all(),
         ];
 

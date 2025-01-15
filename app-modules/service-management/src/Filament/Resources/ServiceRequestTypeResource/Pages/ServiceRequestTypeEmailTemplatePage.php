@@ -51,6 +51,7 @@ use Livewire\Attributes\Locked;
 class ServiceRequestTypeEmailTemplatePage extends EditRecord
 {
     use EditPageRedirection;
+
     protected static string $resource = ServiceRequestTypeResource::class;
 
     #[Locked]

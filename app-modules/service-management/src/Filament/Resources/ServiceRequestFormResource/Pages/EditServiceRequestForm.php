@@ -49,52 +49,52 @@ use Filament\Resources\Pages\EditRecord;
 
 class EditServiceRequestForm extends EditRecord
 {
-  use HasSharedFormConfiguration;
-  use EditPageRedirection;
+    use HasSharedFormConfiguration;
+    use EditPageRedirection;
 
-  protected static string $resource = ServiceRequestFormResource::class;
+    protected static string $resource = ServiceRequestFormResource::class;
 
-  public function form(Form $form): Form
-  {
-    return $form
-      ->schema($this->fields());
-  }
+    public function form(Form $form): Form
+    {
+        return $form
+            ->schema($this->fields());
+    }
 
-  protected function getHeaderActions(): array
-  {
-    return [
-      Action::make('view')
-        ->url(fn(ServiceRequestForm $serviceRequestForm) => route('service-request-forms.show', ['serviceRequestForm' => $serviceRequestForm]))
-        ->icon('heroicon-m-arrow-top-right-on-square')
-        ->openUrlInNewTab(),
-      Action::make('embed_snippet')
-        ->label('Embed Snippet')
-        ->infolist(
-          [
-            TextEntry::make('snippet')
-              ->label('Click to Copy')
-              ->state(function (ServiceRequestForm $serviceRequestForm) {
-                $code = resolve(GenerateSubmissibleEmbedCode::class)->handle($serviceRequestForm);
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('view')
+                ->url(fn (ServiceRequestForm $serviceRequestForm) => route('service-request-forms.show', ['serviceRequestForm' => $serviceRequestForm]))
+                ->icon('heroicon-m-arrow-top-right-on-square')
+                ->openUrlInNewTab(),
+            Action::make('embed_snippet')
+                ->label('Embed Snippet')
+                ->infolist(
+                    [
+                        TextEntry::make('snippet')
+                            ->label('Click to Copy')
+                            ->state(function (ServiceRequestForm $serviceRequestForm) {
+                                $code = resolve(GenerateSubmissibleEmbedCode::class)->handle($serviceRequestForm);
 
-                $state = <<<EOD
+                                $state = <<<EOD
                                 ```
                                 {$code}
                                 ```
                                 EOD;
 
-                return str($state)->markdown()->toHtmlString();
-              })
-              ->copyable()
-              ->copyableState(fn(ServiceRequestForm $serviceRequestForm) => resolve(GenerateSubmissibleEmbedCode::class)->handle($serviceRequestForm))
-              ->copyMessage('Copied!')
-              ->copyMessageDuration(1500)
-              ->extraAttributes(['class' => 'embed-code-snippet']),
-          ]
-        )
-        ->modalSubmitAction(false)
-        ->modalCancelActionLabel('Close')
-        ->hidden(fn(ServiceRequestForm $serviceRequestForm) => ! $serviceRequestForm->embed_enabled),
-      DeleteAction::make(),
-    ];
-  }
+                                return str($state)->markdown()->toHtmlString();
+                            })
+                            ->copyable()
+                            ->copyableState(fn (ServiceRequestForm $serviceRequestForm) => resolve(GenerateSubmissibleEmbedCode::class)->handle($serviceRequestForm))
+                            ->copyMessage('Copied!')
+                            ->copyMessageDuration(1500)
+                            ->extraAttributes(['class' => 'embed-code-snippet']),
+                    ]
+                )
+                ->modalSubmitAction(false)
+                ->modalCancelActionLabel('Close')
+                ->hidden(fn (ServiceRequestForm $serviceRequestForm) => ! $serviceRequestForm->embed_enabled),
+            DeleteAction::make(),
+        ];
+    }
 }

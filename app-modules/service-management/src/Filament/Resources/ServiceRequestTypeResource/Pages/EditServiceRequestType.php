@@ -58,6 +58,7 @@ use Illuminate\Support\Facades\Gate;
 class EditServiceRequestType extends EditRecord
 {
     use EditPageRedirection;
+
     protected static string $resource = ServiceRequestTypeResource::class;
 
     public function form(Form $form): Form
@@ -83,30 +84,30 @@ class EditServiceRequestType extends EditRecord
                                     ->validationMessages([
                                         'accepted' => 'At least one option must be accepted, CSAT or NPS.',
                                     ])
-                                    ->accepted(fn(Get $get) => ! $get('has_enabled_nps') ? true : false)
-                                    ->visible(fn(Get $get) => $get('has_enabled_feedback_collection')),
+                                    ->accepted(fn (Get $get) => ! $get('has_enabled_nps') ? true : false)
+                                    ->visible(fn (Get $get) => $get('has_enabled_feedback_collection')),
                                 Toggle::make('has_enabled_nps')
                                     ->label('NPS')
                                     ->live()
                                     ->validationMessages([
                                         'accepted' => 'At least one option must be accepted, CSAT or NPS.',
                                     ])
-                                    ->accepted(fn(Get $get) => ! $get('has_enabled_csat') ? true : false)
-                                    ->visible(fn(Get $get) => $get('has_enabled_feedback_collection')),
+                                    ->accepted(fn (Get $get) => ! $get('has_enabled_csat') ? true : false)
+                                    ->visible(fn (Get $get) => $get('has_enabled_feedback_collection')),
                             ])
-                            ->visible(fn(Get $get): bool => Gate::check(Feature::FeedbackManagement->getGateName())),
+                            ->visible(fn (Get $get): bool => Gate::check(Feature::FeedbackManagement->getGateName())),
                         Textarea::make('description')
                             ->string()
                             ->columnSpanFull(),
                     ]),
             ])
-            ->disabled(fn(ServiceRequestType $record) => $record->trashed());
+            ->disabled(fn (ServiceRequestType $record) => $record->trashed());
     }
 
     protected function getSaveFormAction(): Action
     {
         return parent::getSaveFormAction()
-            ->hidden(fn(ServiceRequestType $record) => $record->trashed());
+            ->hidden(fn (ServiceRequestType $record) => $record->trashed());
     }
 
     protected function getHeaderActions(): array

@@ -46,22 +46,22 @@ use Filament\Resources\Pages\EditRecord;
 
 class EditTask extends EditRecord
 {
-  use TaskEditForm;
-  use EditPageRedirection;
+    use TaskEditForm;
+    use EditPageRedirection;
 
-  protected static string $resource = TaskResource::class;
+    protected static string $resource = TaskResource::class;
 
-  public function form(Form $form): Form
-  {
-    return $form
-      ->schema($this->editFormFields());
-  }
+    public function form(Form $form): Form
+    {
+        return $form
+            ->schema($this->editFormFields());
+    }
 
-  protected function getHeaderActions(): array
-  {
-    return [
-      TaskViewHeaderAction::make('view'),
-      DeleteAction::make(),
-    ];
-  }
+    protected function getHeaderActions(): array
+    {
+        return [
+            TaskViewHeaderAction::make('view'),
+            DeleteAction::make(),
+        ];
+    }
 }

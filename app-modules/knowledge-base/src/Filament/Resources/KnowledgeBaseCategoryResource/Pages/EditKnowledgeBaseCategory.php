@@ -48,42 +48,43 @@ use Filament\Resources\Pages\EditRecord;
 
 class EditKnowledgeBaseCategory extends EditRecord
 {
-  use EditPageRedirection;
-  protected static string $resource = KnowledgeBaseCategoryResource::class;
+    use EditPageRedirection;
 
-  public function form(Form $form): Form
-  {
-    return $form
-      ->schema([
-        TextInput::make('name')
-          ->label('Name')
-          ->required()
-          ->string(),
-        IconSelect::make('icon'),
-        TextInput::make('slug')
-          ->regex('/^[a-zA-Z0-9]+(-[a-zA-Z0-9]+)*$/')
-          ->unique(ignoreRecord: true)
-          ->maxLength(255)
-          ->required()
-          ->dehydrateStateUsing(fn(string $state): string => strtolower($state)),
-        Textarea::make('description')
-          ->label('Description')
-          ->nullable()
-          ->string()
-          ->columnSpanFull(),
-      ]);
-  }
+    protected static string $resource = KnowledgeBaseCategoryResource::class;
 
-  public static function getNavigationLabel(): string
-  {
-    return 'Edit';
-  }
+    public function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                TextInput::make('name')
+                    ->label('Name')
+                    ->required()
+                    ->string(),
+                IconSelect::make('icon'),
+                TextInput::make('slug')
+                    ->regex('/^[a-zA-Z0-9]+(-[a-zA-Z0-9]+)*$/')
+                    ->unique(ignoreRecord: true)
+                    ->maxLength(255)
+                    ->required()
+                    ->dehydrateStateUsing(fn (string $state): string => strtolower($state)),
+                Textarea::make('description')
+                    ->label('Description')
+                    ->nullable()
+                    ->string()
+                    ->columnSpanFull(),
+            ]);
+    }
 
-  protected function getHeaderActions(): array
-  {
-    return [
-      ViewAction::make(),
-      DeleteAction::make(),
-    ];
-  }
+    public static function getNavigationLabel(): string
+    {
+        return 'Edit';
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            ViewAction::make(),
+            DeleteAction::make(),
+        ];
+    }
 }

@@ -46,27 +46,28 @@ use Filament\Resources\Pages\EditRecord;
 
 class EditTeam extends EditRecord
 {
-  use EditPageRedirection;
-  protected static string $resource = TeamResource::class;
+    use EditPageRedirection;
 
-  public function form(Form $form): Form
-  {
-    return $form
-      ->schema([
-        TextInput::make('name')
-          ->required()
-          ->string()
-          ->maxLength(255),
-        Textarea::make('description')
-          ->required()
-          ->string(),
-      ]);
-  }
+    protected static string $resource = TeamResource::class;
 
-  protected function getHeaderActions(): array
-  {
-    return [
-      DeleteAction::make(),
-    ];
-  }
+    public function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                TextInput::make('name')
+                    ->required()
+                    ->string()
+                    ->maxLength(255),
+                Textarea::make('description')
+                    ->required()
+                    ->string(),
+            ]);
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            DeleteAction::make(),
+        ];
+    }
 }

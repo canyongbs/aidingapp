@@ -64,6 +64,7 @@ use Illuminate\Support\Collection;
 class EditServiceRequest extends EditRecord
 {
     use EditPageRedirection;
+
     protected static string $resource = ServiceRequestResource::class;
 
     public function form(Form $form): Form
@@ -85,22 +86,22 @@ class EditServiceRequest extends EditRecord
                         Select::make('status_id')
                             ->relationship('status', 'name')
                             ->label('Status')
-                            ->options(fn(ServiceRequest $record) => ServiceRequestStatus::withTrashed()
+                            ->options(fn (ServiceRequest $record) => ServiceRequestStatus::withTrashed()
                                 ->whereKey($record->status_id)
                                 ->orWhereNull('deleted_at')
                                 ->orderBy('classification')
                                 ->orderBy('name')
                                 ->get(['id', 'name', 'classification'])
-                                ->groupBy(fn(ServiceRequestStatus $status) => $status->classification->getlabel())
-                                ->map(fn(Collection $group) => $group->pluck('name', 'id')))
+                                ->groupBy(fn (ServiceRequestStatus $status) => $status->classification->getlabel())
+                                ->map(fn (Collection $group) => $group->pluck('name', 'id')))
                             ->required()
                             ->exists((new ServiceRequestStatus())->getTable(), 'id')
-                            ->disableOptionWhen(fn(string $value) => $disabledStatuses->contains($value)),
+                            ->disableOptionWhen(fn (string $value) => $disabledStatuses->contains($value)),
                         Grid::make()
                             ->schema([
                                 Select::make('type_id')
                                     ->options(
-                                        fn(ServiceRequest $record) => ServiceRequestType::withTrashed()
+                                        fn (ServiceRequest $record) => ServiceRequestType::withTrashed()
                                             ->whereKey($record->priority?->type_id)
                                             ->orWhereNull('deleted_at')
                                             ->when(! auth()->user()->hasRole(Authenticatable::SUPER_ADMIN_ROLE), function (Builder $query) {
@@ -111,23 +112,23 @@ class EditServiceRequest extends EditRecord
                                             ->orderBy('name')
                                             ->pluck('name', 'id')
                                     )
-                                    ->afterStateUpdated(fn(Set $set) => $set('priority_id', null))
+                                    ->afterStateUpdated(fn (Set $set) => $set('priority_id', null))
                                     ->label('Type')
                                     ->required()
                                     ->rule(new ManagedServiceRequestType())
                                     ->live()
                                     ->exists(ServiceRequestType::class, 'id')
-                                    ->disableOptionWhen(fn(string $value) => $disabledTypes->contains($value)),
+                                    ->disableOptionWhen(fn (string $value) => $disabledTypes->contains($value)),
                                 Select::make('priority_id')
                                     ->relationship(
                                         name: 'priority',
                                         titleAttribute: 'name',
-                                        modifyQueryUsing: fn(Get $get, Builder $query, $record) => $query->where('type_id', $get('type_id'))->orderBy('order'),
+                                        modifyQueryUsing: fn (Get $get, Builder $query, $record) => $query->where('type_id', $get('type_id'))->orderBy('order'),
                                     )
                                     ->label('Priority')
                                     ->required()
                                     ->exists(ServiceRequestPriority::class, 'id')
-                                    ->visible(fn(Get $get): bool => filled($get('type_id'))),
+                                    ->visible(fn (Get $get): bool => filled($get('type_id'))),
                             ]),
                         TextInput::make('title')
                             ->required()
@@ -155,8 +156,8 @@ class EditServiceRequest extends EditRecord
                             ->visibility('private')
                             ->collection($uploadsMediaCollection->getName())
                             ->multiple($uploadsMediaCollection->getMaxNumberOfFiles() > 1)
-                            ->when($uploadsMediaCollection->getMaxNumberOfFiles(), fn(SpatieMediaLibraryFileUpload $component) => $component->maxFiles($uploadsMediaCollection->getMaxNumberOfFiles()))
-                            ->when($uploadsMediaCollection->getMaxFileSizeInMB(), fn(SpatieMediaLibraryFileUpload $component) => $component->maxSize($uploadsMediaCollection->getMaxFileSizeInMB() * 1000))
+                            ->when($uploadsMediaCollection->getMaxNumberOfFiles(), fn (SpatieMediaLibraryFileUpload $component) => $component->maxFiles($uploadsMediaCollection->getMaxNumberOfFiles()))
+                            ->when($uploadsMediaCollection->getMaxFileSizeInMB(), fn (SpatieMediaLibraryFileUpload $component) => $component->maxSize($uploadsMediaCollection->getMaxFileSizeInMB() * 1000))
                             ->acceptedFileTypes($uploadsMediaCollection->getMimes())
                             ->downloadable(),
                     ]),

@@ -42,6 +42,7 @@ use Filament\Resources\Pages\EditRecord;
 
 class EditAssetCheckIn extends EditRecord
 {
-  use EditPageRedirection;
-  protected static string $resource = AssetCheckInResource::class;
+    use EditPageRedirection;
+
+    protected static string $resource = AssetCheckInResource::class;
 }

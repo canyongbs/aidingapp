@@ -43,14 +43,15 @@ use Filament\Resources\Pages\EditRecord;
 
 class EditServiceRequestUpdate extends EditRecord
 {
-  use EditPageRedirection;
-  protected static string $resource = ServiceRequestUpdateResource::class;
+    use EditPageRedirection;
 
-  protected function getHeaderActions(): array
-  {
-    return [
-      Actions\ViewAction::make(),
-      Actions\DeleteAction::make(),
-    ];
-  }
+    protected static string $resource = ServiceRequestUpdateResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Actions\ViewAction::make(),
+            Actions\DeleteAction::make(),
+        ];
+    }
 }
