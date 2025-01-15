@@ -37,11 +37,14 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource\Pages;
 
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource;
+use App\Concerns\EditPageRedirection;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
 class EditServiceRequestUpdate extends EditRecord
 {
+    use EditPageRedirection;
+
     protected static string $resource = ServiceRequestUpdateResource::class;
 
     protected function getHeaderActions(): array

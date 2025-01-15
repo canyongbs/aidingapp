@@ -37,6 +37,7 @@
 namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource\Pages;
 
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource;
+use App\Concerns\EditPageRedirection;
 use Filament\Actions;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -44,6 +45,8 @@ use Filament\Resources\Pages\EditRecord;
 
 class EditKnowledgeBaseStatus extends EditRecord
 {
+    use EditPageRedirection;
+
     protected static string $resource = KnowledgeBaseStatusResource::class;
 
     public function form(Form $form): Form

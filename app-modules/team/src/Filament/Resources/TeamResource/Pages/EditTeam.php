@@ -37,6 +37,7 @@
 namespace AidingApp\Team\Filament\Resources\TeamResource\Pages;
 
 use AidingApp\Team\Filament\Resources\TeamResource;
+use App\Concerns\EditPageRedirection;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -45,6 +46,8 @@ use Filament\Resources\Pages\EditRecord;
 
 class EditTeam extends EditRecord
 {
+    use EditPageRedirection;
+
     protected static string $resource = TeamResource::class;
 
     public function form(Form $form): Form

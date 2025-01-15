@@ -44,6 +44,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Rules\ManagedServiceRequestType;
+use App\Concerns\EditPageRedirection;
 use App\Filament\Forms\Components\EducatableSelect;
 use App\Models\Authenticatable;
 use Filament\Actions;
@@ -62,6 +63,8 @@ use Illuminate\Support\Collection;
 
 class EditServiceRequest extends EditRecord
 {
+    use EditPageRedirection;
+
     protected static string $resource = ServiceRequestResource::class;
 
     public function form(Form $form): Form

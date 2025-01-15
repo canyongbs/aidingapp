@@ -36,6 +36,7 @@
 
 namespace App\Filament\Resources\UserResource\Pages;
 
+use App\Concerns\EditPageRedirection;
 use App\Filament\Resources\UserResource;
 use App\Models\User;
 use App\Notifications\SetPasswordNotification;
@@ -47,6 +48,8 @@ use STS\FilamentImpersonate\Pages\Actions\Impersonate;
 
 class EditUser extends EditRecord
 {
+    use EditPageRedirection;
+
     protected static string $resource = UserResource::class;
 
     protected function getHeaderActions(): array

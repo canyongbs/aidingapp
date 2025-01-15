@@ -37,6 +37,7 @@
 namespace App\Filament\Resources\TagResource\Pages;
 
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use App\Concerns\EditPageRedirection;
 use App\Filament\Resources\TagResource;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Section;
@@ -49,6 +50,8 @@ use Illuminate\Validation\Rules\Unique;
 
 class EditTag extends EditRecord
 {
+    use EditPageRedirection;
+
     protected static string $resource = TagResource::class;
 
     public function form(Form $form): Form

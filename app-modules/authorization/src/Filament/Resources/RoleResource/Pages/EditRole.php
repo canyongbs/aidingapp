@@ -38,6 +38,7 @@ namespace AidingApp\Authorization\Filament\Resources\RoleResource\Pages;
 
 use AidingApp\Authorization\Filament\Resources\RoleResource;
 use AidingApp\Authorization\Models\Role;
+use App\Concerns\EditPageRedirection;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -48,6 +49,8 @@ use Illuminate\Validation\Rules\Unique;
 
 class EditRole extends EditRecord
 {
+    use EditPageRedirection;
+
     protected static string $resource = RoleResource::class;
 
     public function form(Form $form): Form

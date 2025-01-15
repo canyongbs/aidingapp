@@ -36,6 +36,7 @@
 
 namespace App\Filament\Resources\NotificationSettingResource\Pages;
 
+use App\Concerns\EditPageRedirection;
 use App\Filament\Resources\NotificationSettingResource;
 use App\Filament\Resources\NotificationSettingResource\Forms\NotificationSettingForm;
 use Filament\Actions\DeleteAction;
@@ -44,6 +45,8 @@ use Filament\Resources\Pages\EditRecord;
 
 class EditNotificationSetting extends EditRecord
 {
+    use EditPageRedirection;
+
     protected static string $resource = NotificationSettingResource::class;
 
     public function form(Form $form): Form

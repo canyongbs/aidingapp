@@ -34,37 +34,19 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualityResource\Pages;
+namespace App\Concerns;
 
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualityResource;
-use App\Concerns\EditPageRedirection;
-use Filament\Actions;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
-use Filament\Resources\Pages\EditRecord;
-
-class EditKnowledgeBaseQuality extends EditRecord
+trait EditPageRedirection
 {
-    use EditPageRedirection;
-
-    protected static string $resource = KnowledgeBaseQualityResource::class;
-
-    public function form(Form $form): Form
+    public function getRedirectUrl(): ?string
     {
-        return $form
-            ->schema([
-                TextInput::make('name')
-                    ->label('Name')
-                    ->required()
-                    ->string(),
-            ]);
-    }
+        /** @var class-string<Resource> $resource */
+        $resource = $this->getResource();
 
-    protected function getHeaderActions(): array
-    {
-        return [
-            Actions\ViewAction::make(),
-            Actions\DeleteAction::make(),
-        ];
+        if ($resource::hasPage('view')) {
+            return $resource::getUrl('view', ['record' => $this->record]);
+        }
+
+        return null;
     }
 }

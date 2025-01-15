@@ -39,6 +39,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ChangeRequestResource\P
 use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestResource;
 use AidingApp\ServiceManagement\Models\ChangeRequest;
 use AidingApp\ServiceManagement\Models\ChangeRequestType;
+use App\Concerns\EditPageRedirection;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DateTimePicker;
@@ -53,6 +54,8 @@ use Illuminate\Database\Eloquent\Builder;
 
 class EditChangeRequest extends EditRecord
 {
+    use EditPageRedirection;
+
     protected static string $resource = ChangeRequestResource::class;
 
     public function form(Form $form): Form

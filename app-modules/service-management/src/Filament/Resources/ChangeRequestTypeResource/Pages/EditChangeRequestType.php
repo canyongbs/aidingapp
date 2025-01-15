@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypeResour
 
 use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ChangeRequestType;
+use App\Concerns\EditPageRedirection;
 use App\Models\User;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
@@ -51,6 +52,8 @@ use Filament\Resources\Pages\EditRecord;
 
 class EditChangeRequestType extends EditRecord
 {
+    use EditPageRedirection;
+
     protected static string $resource = ChangeRequestTypeResource::class;
 
     public function form(Form $form): Form

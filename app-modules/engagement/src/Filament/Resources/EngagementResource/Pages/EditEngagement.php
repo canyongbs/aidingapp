@@ -41,6 +41,7 @@ use AidingApp\Engagement\Filament\Resources\EngagementResource;
 use AidingApp\Engagement\Filament\Resources\EngagementResource\Fields\EngagementSmsBodyField;
 use AidingApp\Engagement\Models\EmailTemplate;
 use AidingApp\Engagement\Models\Engagement;
+use App\Concerns\EditPageRedirection;
 use App\Filament\Forms\Components\EducatableSelect;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
@@ -62,6 +63,8 @@ use Illuminate\Database\Query\Expression;
 
 class EditEngagement extends EditRecord
 {
+    use EditPageRedirection;
+
     protected static string $resource = EngagementResource::class;
 
     public function form(Form $form): Form

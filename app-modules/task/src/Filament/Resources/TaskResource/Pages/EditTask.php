@@ -39,6 +39,7 @@ namespace AidingApp\Task\Filament\Resources\TaskResource\Pages;
 use AidingApp\Task\Filament\Concerns\TaskEditForm;
 use AidingApp\Task\Filament\Resources\TaskResource;
 use AidingApp\Task\Filament\Resources\TaskResource\Components\TaskViewHeaderAction;
+use App\Concerns\EditPageRedirection;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Form;
 use Filament\Resources\Pages\EditRecord;
@@ -46,6 +47,7 @@ use Filament\Resources\Pages\EditRecord;
 class EditTask extends EditRecord
 {
     use TaskEditForm;
+    use EditPageRedirection;
 
     protected static string $resource = TaskResource::class;
 

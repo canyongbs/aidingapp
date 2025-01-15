@@ -40,6 +40,7 @@ use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactSource;
 use AidingApp\Contact\Models\ContactStatus;
+use App\Concerns\EditPageRedirection;
 use App\Models\Scopes\HasLicense;
 use App\Models\User;
 use Filament\Actions\DeleteAction;
@@ -57,6 +58,8 @@ use Illuminate\Database\Eloquent\Builder;
 
 class EditContact extends EditRecord
 {
+    use EditPageRedirection;
+
     protected static string $resource = ContactResource::class;
 
     // TODO: Automatically set from Filament
@@ -88,14 +91,14 @@ class EditContact extends EditRecord
                             ->label('First Name')
                             ->required()
                             ->string()
-                            ->live(onBlur : true)
+                            ->live(onBlur: true)
                             ->afterStateUpdated($generateFullName)
                             ->maxLength(255),
                         TextInput::make('last_name')
                             ->label('Last Name')
                             ->required()
                             ->string()
-                            ->live(onBlur : true)
+                            ->live(onBlur: true)
                             ->afterStateUpdated($generateFullName)
                             ->maxLength(255),
                         TextInput::make(Contact::displayNameKey())

@@ -37,6 +37,7 @@
 namespace AidingApp\Contact\Filament\Resources\ContactSourceResource\Pages;
 
 use AidingApp\Contact\Filament\Resources\ContactSourceResource;
+use App\Concerns\EditPageRedirection;
 use Filament\Actions;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -44,6 +45,8 @@ use Filament\Resources\Pages\EditRecord;
 
 class EditContactSource extends EditRecord
 {
+    use EditPageRedirection;
+
     protected static string $resource = ContactSourceResource::class;
 
     public function form(Form $form): Form

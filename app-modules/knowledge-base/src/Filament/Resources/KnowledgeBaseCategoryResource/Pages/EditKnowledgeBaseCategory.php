@@ -37,6 +37,7 @@
 namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\Pages;
 
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource;
+use App\Concerns\EditPageRedirection;
 use App\Filament\Forms\Components\IconSelect;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
@@ -47,6 +48,8 @@ use Filament\Resources\Pages\EditRecord;
 
 class EditKnowledgeBaseCategory extends EditRecord
 {
+    use EditPageRedirection;
+
     protected static string $resource = KnowledgeBaseCategoryResource::class;
 
     public function form(Form $form): Form

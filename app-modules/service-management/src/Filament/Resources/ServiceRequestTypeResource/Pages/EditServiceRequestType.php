@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResou
 
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use App\Concerns\EditPageRedirection;
 use App\Enums\Feature;
 use App\Filament\Forms\Components\IconSelect;
 use Filament\Actions\Action;
@@ -56,6 +57,8 @@ use Illuminate\Support\Facades\Gate;
 
 class EditServiceRequestType extends EditRecord
 {
+    use EditPageRedirection;
+
     protected static string $resource = ServiceRequestTypeResource::class;
 
     public function form(Form $form): Form
