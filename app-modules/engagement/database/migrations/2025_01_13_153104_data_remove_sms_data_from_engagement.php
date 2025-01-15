@@ -56,12 +56,12 @@ return new class () extends Migration {
                     ->where('channel', 'sms')
                     ->delete();
 
-                DB::table('engagements')
-                    ->whereIn('id', $engagementIds)
-                    ->delete();
-
                 DB::table('engagement_deliverables')
                     ->whereIn('id', $deliverableIds)
+                    ->delete();
+
+                DB::table('engagements')
+                    ->whereIn('id', $engagementIds)
                     ->delete();
             });
     }
