@@ -37,6 +37,7 @@
 namespace AidingApp\Team\Filament\Resources\TeamResource\Pages;
 
 use AidingApp\Team\Filament\Resources\TeamResource;
+use App\Concerns\EditPageRedirection;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -45,26 +46,27 @@ use Filament\Resources\Pages\EditRecord;
 
 class EditTeam extends EditRecord
 {
-    protected static string $resource = TeamResource::class;
+  use EditPageRedirection;
+  protected static string $resource = TeamResource::class;
 
-    public function form(Form $form): Form
-    {
-        return $form
-            ->schema([
-                TextInput::make('name')
-                    ->required()
-                    ->string()
-                    ->maxLength(255),
-                Textarea::make('description')
-                    ->required()
-                    ->string(),
-            ]);
-    }
+  public function form(Form $form): Form
+  {
+    return $form
+      ->schema([
+        TextInput::make('name')
+          ->required()
+          ->string()
+          ->maxLength(255),
+        Textarea::make('description')
+          ->required()
+          ->string(),
+      ]);
+  }
 
-    protected function getHeaderActions(): array
-    {
-        return [
-            DeleteAction::make(),
-        ];
-    }
+  protected function getHeaderActions(): array
+  {
+    return [
+      DeleteAction::make(),
+    ];
+  }
 }

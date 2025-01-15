@@ -39,6 +39,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ChangeRequestResource\P
 use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestResource;
 use AidingApp\ServiceManagement\Models\ChangeRequest;
 use AidingApp\ServiceManagement\Models\ChangeRequestType;
+use App\Concerns\EditPageRedirection;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DateTimePicker;
@@ -53,6 +54,7 @@ use Illuminate\Database\Eloquent\Builder;
 
 class EditChangeRequest extends EditRecord
 {
+    use EditPageRedirection;
     protected static string $resource = ChangeRequestResource::class;
 
     public function form(Form $form): Form
@@ -72,22 +74,22 @@ class EditChangeRequest extends EditRecord
                         TextInput::make('title')
                             ->required()
                             ->columnSpanFull()
-                            ->disabled(fn (ChangeRequest $record) => $record->isNotNew()),
+                            ->disabled(fn(ChangeRequest $record) => $record->isNotNew()),
                         TextInput::make('description')
                             ->required()
                             ->columnSpanFull()
-                            ->disabled(fn (ChangeRequest $record) => $record->isNotNew()),
+                            ->disabled(fn(ChangeRequest $record) => $record->isNotNew()),
                         Select::make('change_request_type_id')
-                            ->relationship('type', 'name', fn (ChangeRequest $record, Builder $query) => $query->withTrashed()
+                            ->relationship('type', 'name', fn(ChangeRequest $record, Builder $query) => $query->withTrashed()
                                 ->whereKey($record->change_request_type_id)
                                 ->orWhereNull('deleted_at'))
                             ->preload()
                             ->required()
                             ->columnSpan(1)
-                            ->disabled(fn (ChangeRequest $record) => $record->isNotNew())
-                            ->disableOptionWhen(fn (string $value) => $disabledTypes->contains($value)),
+                            ->disabled(fn(ChangeRequest $record) => $record->isNotNew())
+                            ->disableOptionWhen(fn(string $value) => $disabledTypes->contains($value)),
                         Select::make('change_request_status_id')
-                            ->relationship('status', 'name', fn (ChangeRequest $record, Builder $query) => $query->withTrashed()
+                            ->relationship('status', 'name', fn(ChangeRequest $record, Builder $query) => $query->withTrashed()
                                 ->whereKey($record->change_request_status_id)
                                 ->orWhereNull('deleted_at'))
                             ->searchable()
@@ -100,20 +102,20 @@ class EditChangeRequest extends EditRecord
                             ->rows(5)
                             ->required()
                             ->columnSpanFull()
-                            ->disabled(fn (ChangeRequest $record) => $record->isNotNew()),
+                            ->disabled(fn(ChangeRequest $record) => $record->isNotNew()),
                         Textarea::make('backout_strategy')
                             ->rows(5)
                             ->required()
                             ->columnSpanFull()
-                            ->disabled(fn (ChangeRequest $record) => $record->isNotNew()),
+                            ->disabled(fn(ChangeRequest $record) => $record->isNotNew()),
                         DateTimePicker::make('start_time')
                             ->required()
                             ->columnSpan(1)
-                            ->disabled(fn (ChangeRequest $record) => $record->isNotNew()),
+                            ->disabled(fn(ChangeRequest $record) => $record->isNotNew()),
                         DateTimePicker::make('end_time')
                             ->required()
                             ->columnSpan(1)
-                            ->disabled(fn (ChangeRequest $record) => $record->isNotNew()),
+                            ->disabled(fn(ChangeRequest $record) => $record->isNotNew()),
                     ])
                     ->columns(2),
                 Section::make('Risk Management')
@@ -127,7 +129,7 @@ class EditChangeRequest extends EditRecord
                             ->minValue(1)
                             ->maxValue(5)
                             ->columnSpan(1)
-                            ->disabled(fn (ChangeRequest $record) => $record->isNotNew()),
+                            ->disabled(fn(ChangeRequest $record) => $record->isNotNew()),
                         TextInput::make('likelihood')
                             ->reactive()
                             ->helperText('Please enter a number between 1 and 5.')
@@ -136,7 +138,7 @@ class EditChangeRequest extends EditRecord
                             ->minValue(1)
                             ->maxValue(5)
                             ->columnSpan(1)
-                            ->disabled(fn (ChangeRequest $record) => $record->isNotNew()),
+                            ->disabled(fn(ChangeRequest $record) => $record->isNotNew()),
                         ViewField::make('risk_score')
                             ->view('filament.forms.components.change-request.calculated-risk-score'),
                     ])
@@ -149,7 +151,7 @@ class EditChangeRequest extends EditRecord
         return [
             ViewAction::make(),
             DeleteAction::make()
-                ->disabled(fn ($record) => $record->isNotNew()),
+                ->disabled(fn($record) => $record->isNotNew()),
         ];
     }
 }

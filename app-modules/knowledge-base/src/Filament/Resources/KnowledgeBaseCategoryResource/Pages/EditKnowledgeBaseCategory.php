@@ -37,6 +37,7 @@
 namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\Pages;
 
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource;
+use App\Concerns\EditPageRedirection;
 use App\Filament\Forms\Components\IconSelect;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
@@ -47,41 +48,42 @@ use Filament\Resources\Pages\EditRecord;
 
 class EditKnowledgeBaseCategory extends EditRecord
 {
-    protected static string $resource = KnowledgeBaseCategoryResource::class;
+  use EditPageRedirection;
+  protected static string $resource = KnowledgeBaseCategoryResource::class;
 
-    public function form(Form $form): Form
-    {
-        return $form
-            ->schema([
-                TextInput::make('name')
-                    ->label('Name')
-                    ->required()
-                    ->string(),
-                IconSelect::make('icon'),
-                TextInput::make('slug')
-                    ->regex('/^[a-zA-Z0-9]+(-[a-zA-Z0-9]+)*$/')
-                    ->unique(ignoreRecord: true)
-                    ->maxLength(255)
-                    ->required()
-                    ->dehydrateStateUsing(fn (string $state): string => strtolower($state)),
-                Textarea::make('description')
-                    ->label('Description')
-                    ->nullable()
-                    ->string()
-                    ->columnSpanFull(),
-            ]);
-    }
+  public function form(Form $form): Form
+  {
+    return $form
+      ->schema([
+        TextInput::make('name')
+          ->label('Name')
+          ->required()
+          ->string(),
+        IconSelect::make('icon'),
+        TextInput::make('slug')
+          ->regex('/^[a-zA-Z0-9]+(-[a-zA-Z0-9]+)*$/')
+          ->unique(ignoreRecord: true)
+          ->maxLength(255)
+          ->required()
+          ->dehydrateStateUsing(fn(string $state): string => strtolower($state)),
+        Textarea::make('description')
+          ->label('Description')
+          ->nullable()
+          ->string()
+          ->columnSpanFull(),
+      ]);
+  }
 
-    public static function getNavigationLabel(): string
-    {
-        return 'Edit';
-    }
+  public static function getNavigationLabel(): string
+  {
+    return 'Edit';
+  }
 
-    protected function getHeaderActions(): array
-    {
-        return [
-            ViewAction::make(),
-            DeleteAction::make(),
-        ];
-    }
+  protected function getHeaderActions(): array
+  {
+    return [
+      ViewAction::make(),
+      DeleteAction::make(),
+    ];
+  }
 }

@@ -39,6 +39,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResou
 use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
+use App\Concerns\EditPageRedirection;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Form;
 use Filament\Resources\Pages\EditRecord;
@@ -49,6 +50,7 @@ use Livewire\Attributes\Locked;
 /** @property-read ?ServiceRequestTypeEmailTemplate $template */
 class ServiceRequestTypeEmailTemplatePage extends EditRecord
 {
+    use EditPageRedirection;
     protected static string $resource = ServiceRequestTypeResource::class;
 
     #[Locked]

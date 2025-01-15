@@ -37,9 +37,11 @@
 namespace AidingApp\InventoryManagement\Filament\Resources\AssetCheckInResource\Pages;
 
 use AidingApp\InventoryManagement\Filament\Resources\AssetCheckInResource;
+use App\Concerns\EditPageRedirection;
 use Filament\Resources\Pages\EditRecord;
 
 class EditAssetCheckIn extends EditRecord
 {
-    protected static string $resource = AssetCheckInResource::class;
+  use EditPageRedirection;
+  protected static string $resource = AssetCheckInResource::class;
 }

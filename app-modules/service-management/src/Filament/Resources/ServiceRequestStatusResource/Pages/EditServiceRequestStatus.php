@@ -40,6 +40,7 @@ use AidingApp\ServiceManagement\Enums\ColumnColorOptions;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use App\Concerns\EditPageRedirection;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ForceDeleteAction;
@@ -52,46 +53,47 @@ use Filament\Resources\Pages\EditRecord;
 
 class EditServiceRequestStatus extends EditRecord
 {
-    protected static string $resource = ServiceRequestStatusResource::class;
+  use EditPageRedirection;
+  protected static string $resource = ServiceRequestStatusResource::class;
 
-    public function form(Form $form): Form
-    {
-        return $form
-            ->schema([
-                Section::make()
-                    ->columns()
-                    ->schema([
-                        TextInput::make('name')
-                            ->label('Name')
-                            ->required()
-                            ->string(),
-                        Select::make('classification')
-                            ->searchable()
-                            ->options(SystemServiceRequestClassification::class)
-                            ->required()
-                            ->enum(SystemServiceRequestClassification::class),
-                        Select::make('color')
-                            ->label('Color')
-                            ->searchable()
-                            ->options(ColumnColorOptions::class)
-                            ->required()
-                            ->enum(ColumnColorOptions::class),
-                    ]),
-            ])->disabled(fn (ServiceRequestStatus $record) => $record->trashed());
-    }
+  public function form(Form $form): Form
+  {
+    return $form
+      ->schema([
+        Section::make()
+          ->columns()
+          ->schema([
+            TextInput::make('name')
+              ->label('Name')
+              ->required()
+              ->string(),
+            Select::make('classification')
+              ->searchable()
+              ->options(SystemServiceRequestClassification::class)
+              ->required()
+              ->enum(SystemServiceRequestClassification::class),
+            Select::make('color')
+              ->label('Color')
+              ->searchable()
+              ->options(ColumnColorOptions::class)
+              ->required()
+              ->enum(ColumnColorOptions::class),
+          ]),
+      ])->disabled(fn(ServiceRequestStatus $record) => $record->trashed());
+  }
 
-    protected function getSaveFormAction(): Action
-    {
-        return parent::getSaveFormAction()
-            ->hidden(fn (ServiceRequestStatus $record) => $record->trashed());
-    }
+  protected function getSaveFormAction(): Action
+  {
+    return parent::getSaveFormAction()
+      ->hidden(fn(ServiceRequestStatus $record) => $record->trashed());
+  }
 
-    protected function getHeaderActions(): array
-    {
-        return [
-            DeleteAction::make(),
-            RestoreAction::make(),
-            ForceDeleteAction::make(),
-        ];
-    }
+  protected function getHeaderActions(): array
+  {
+    return [
+      DeleteAction::make(),
+      RestoreAction::make(),
+      ForceDeleteAction::make(),
+    ];
+  }
 }

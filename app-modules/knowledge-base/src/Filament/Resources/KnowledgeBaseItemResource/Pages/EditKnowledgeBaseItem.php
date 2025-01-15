@@ -37,6 +37,7 @@
 namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource\Pages;
 
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource;
+use App\Concerns\EditPageRedirection;
 use App\Filament\Pages\Concerns\BreadcrumbCharacterLimit;
 use Filament\Actions\Action as BaseAction;
 use Filament\Actions\EditAction;
@@ -53,6 +54,7 @@ use Illuminate\Database\Eloquent\Model;
 class EditKnowledgeBaseItem extends EditRecord
 {
     use BreadcrumbCharacterLimit;
+    use EditPageRedirection;
 
     protected static string $resource = KnowledgeBaseItemResource::class;
 

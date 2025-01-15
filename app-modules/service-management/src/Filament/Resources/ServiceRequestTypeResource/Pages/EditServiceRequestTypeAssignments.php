@@ -40,6 +40,7 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Rules\ServiceRequestTypeAssignmentsIndividualUserMustBeAManager;
+use App\Concerns\EditPageRedirection;
 use App\Filament\Forms\Components\Heading;
 use App\Filament\Forms\Components\Paragraph;
 use Filament\Forms\Components\Radio;
@@ -53,6 +54,7 @@ use Illuminate\Support\HtmlString;
 
 class EditServiceRequestTypeAssignments extends EditRecord
 {
+    use EditPageRedirection;
     protected static string $resource = ServiceRequestTypeResource::class;
 
     protected static ?string $title = 'Assignments';
@@ -91,7 +93,7 @@ class EditServiceRequestTypeAssignments extends EditRecord
                             ->relationship(
                                 name: 'assignmentTypeIndividual',
                                 titleAttribute: 'name',
-                                modifyQueryUsing: fn (Builder $query) => $query->whereRelation(
+                                modifyQueryUsing: fn(Builder $query) => $query->whereRelation(
                                     'teams.manageableServiceRequestTypes',
                                     'service_request_types.id',
                                     $this->record->getKey(),
@@ -100,8 +102,8 @@ class EditServiceRequestTypeAssignments extends EditRecord
                             ->searchable(['name', 'email'])
                             ->preload()
                             ->required()
-                            ->rules(fn (ServiceRequestType $record) => [new ServiceRequestTypeAssignmentsIndividualUserMustBeAManager($record)])
-                            ->visible(fn (Get $get) => $get('assignment_type') === ServiceRequestTypeAssignmentTypes::Individual->value),
+                            ->rules(fn(ServiceRequestType $record) => [new ServiceRequestTypeAssignmentsIndividualUserMustBeAManager($record)])
+                            ->visible(fn(Get $get) => $get('assignment_type') === ServiceRequestTypeAssignmentTypes::Individual->value),
                         Heading::make()
                             ->three()
                             ->content('Assignment Types'),

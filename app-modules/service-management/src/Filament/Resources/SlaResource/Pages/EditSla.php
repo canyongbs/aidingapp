@@ -37,17 +37,19 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\SlaResource\Pages;
 
 use AidingApp\ServiceManagement\Filament\Resources\SlaResource;
+use App\Concerns\EditPageRedirection;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
 class EditSla extends EditRecord
 {
-    protected static string $resource = SlaResource::class;
+  use EditPageRedirection;
+  protected static string $resource = SlaResource::class;
 
-    protected function getHeaderActions(): array
-    {
-        return [
-            Actions\DeleteAction::make(),
-        ];
-    }
+  protected function getHeaderActions(): array
+  {
+    return [
+      Actions\DeleteAction::make(),
+    ];
+  }
 }

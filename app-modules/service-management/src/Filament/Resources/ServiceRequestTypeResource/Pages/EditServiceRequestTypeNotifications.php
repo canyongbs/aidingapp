@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages;
 
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
+use App\Concerns\EditPageRedirection;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\ViewField;
 use Filament\Forms\Form;
@@ -44,6 +45,7 @@ use Filament\Resources\Pages\EditRecord;
 
 class EditServiceRequestTypeNotifications extends EditRecord
 {
+    use EditPageRedirection;
     protected static string $resource = ServiceRequestTypeResource::class;
 
     protected static ?string $title = 'Notifications';
@@ -79,13 +81,15 @@ class EditServiceRequestTypeNotifications extends EditRecord
         $attributes = [];
 
         foreach (['managers', 'auditors', 'customers'] as $role) {
-            foreach ([
-                'service_request_created',
-                'service_request_assigned',
-                'service_request_update',
-                'service_request_status_change',
-                'service_request_closed',
-            ] as $event) {
+            foreach (
+                [
+                    'service_request_created',
+                    'service_request_assigned',
+                    'service_request_update',
+                    'service_request_status_change',
+                    'service_request_closed',
+                ] as $event
+            ) {
                 $attributes[] = "is_{$role}_{$event}_email_enabled";
                 $attributes[] = "is_{$role}_{$event}_notification_enabled";
             }
@@ -119,7 +123,7 @@ class EditServiceRequestTypeNotifications extends EditRecord
             ...$data,
             ...collect($data['settings'])
                 ->only($this->generateSettingsAttributeList())
-                ->filter(fn (mixed $value): bool => is_bool($value))
+                ->filter(fn(mixed $value): bool => is_bool($value))
                 ->all(),
         ];
 

@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypeResour
 
 use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ChangeRequestType;
+use App\Concerns\EditPageRedirection;
 use App\Models\User;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
@@ -51,47 +52,48 @@ use Filament\Resources\Pages\EditRecord;
 
 class EditChangeRequestType extends EditRecord
 {
-    protected static string $resource = ChangeRequestTypeResource::class;
+  use EditPageRedirection;
+  protected static string $resource = ChangeRequestTypeResource::class;
 
-    public function form(Form $form): Form
-    {
-        return $form
-            ->schema([
-                Section::make()
-                    ->columns()
-                    ->schema([
-                        TextInput::make('name')
-                            ->required()
-                            ->string(),
-                        Select::make('number_of_required_approvals')
-                            ->options([
-                                '0' => '0',
-                                '1' => '1',
-                                '2' => '2',
-                            ])
-                            ->required(),
-                        Select::make('userApprovers')
-                            ->label('User approvers')
-                            ->relationship('userApprovers', 'name')
-                            ->preload()
-                            ->multiple()
-                            ->exists((new User())->getTable(), 'id'),
-                    ]),
-            ])->disabled(fn (ChangeRequestType $record) => $record->trashed());
-    }
+  public function form(Form $form): Form
+  {
+    return $form
+      ->schema([
+        Section::make()
+          ->columns()
+          ->schema([
+            TextInput::make('name')
+              ->required()
+              ->string(),
+            Select::make('number_of_required_approvals')
+              ->options([
+                '0' => '0',
+                '1' => '1',
+                '2' => '2',
+              ])
+              ->required(),
+            Select::make('userApprovers')
+              ->label('User approvers')
+              ->relationship('userApprovers', 'name')
+              ->preload()
+              ->multiple()
+              ->exists((new User())->getTable(), 'id'),
+          ]),
+      ])->disabled(fn(ChangeRequestType $record) => $record->trashed());
+  }
 
-    protected function getSaveFormAction(): Action
-    {
-        return parent::getSaveFormAction()
-            ->hidden(fn (ChangeRequestType $record) => $record->trashed());
-    }
+  protected function getSaveFormAction(): Action
+  {
+    return parent::getSaveFormAction()
+      ->hidden(fn(ChangeRequestType $record) => $record->trashed());
+  }
 
-    protected function getHeaderActions(): array
-    {
-        return [
-            DeleteAction::make(),
-            RestoreAction::make(),
-            ForceDeleteAction::make(),
-        ];
-    }
+  protected function getHeaderActions(): array
+  {
+    return [
+      DeleteAction::make(),
+      RestoreAction::make(),
+      ForceDeleteAction::make(),
+    ];
+  }
 }
