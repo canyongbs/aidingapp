@@ -1,6 +1,4 @@
-<?php
-
-/*
+{{--
 <COPYRIGHT>
 
     Copyright © 2016-2025, Canyon GBS LLC. All rights reserved.
@@ -32,39 +30,14 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
-
-namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualityResource\Pages;
-
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualityResource;
-use App\Concerns\EditPageRedirection;
-use Filament\Actions;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
-use Filament\Resources\Pages\EditRecord;
-
-class EditKnowledgeBaseQuality extends EditRecord
-{
-    use EditPageRedirection;
-
-    protected static string $resource = KnowledgeBaseQualityResource::class;
-
-    public function form(Form $form): Form
-    {
-        return $form
-            ->schema([
-                TextInput::make('name')
-                    ->label('Name')
-                    ->required()
-                    ->string(),
-            ]);
-    }
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            Actions\ViewAction::make(),
-            Actions\DeleteAction::make(),
-        ];
-    }
-}
+--}}
+<div class="bg-turkish-500 text-white rounded-xl p-6 mb-6">
+    <div class="flex md:flex-row flex-col justify-center items-center gap-6">
+        <div>
+            <p class="text-white text-sm font-semibold">Version {{ app('current-version') }} is now available!</p>
+            <p class="text-white-500 text-sm my-4">Your instance of Aiding App&#174; was automatically updated with our latest available features.</p>
+            <a href="https://github.com/canyongbs/aidingapp/releases" target="_blank" class="border-2 border-white px-4 py-2 text-white rounded-xl text-sm font-semibold inline-block">Learn More</a>
+        </div>
+        <img src="{{ Vite::asset('resources/images/version_image.svg') }}" class="block max-h-32" />
+    </div>
+</div>

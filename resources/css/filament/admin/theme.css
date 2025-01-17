@@ -161,3 +161,7 @@ li[data-group-label=''] > ul > .fi-sidebar-item > .fi-sidebar-item-button > .fi-
 .fi-section.fi-section-no-content-padding .fi-section-content {
     @apply p-0;
 }
+
+.dark_button_border {
+    @apply dark:border dark:border-white dark:hover:border-white !important;
+}

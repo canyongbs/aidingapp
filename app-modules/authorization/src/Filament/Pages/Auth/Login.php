@@ -45,6 +45,8 @@ class Login extends FilamentLogin
 {
     protected static string $view = 'authorization::login';
 
+    protected static string $layout = 'filament-panels::components.layouts.login';
+
     protected function getSsoFormActions(): array
     {
         $ssoActions = [];
@@ -53,7 +55,7 @@ class Login extends FilamentLogin
 
         if ($azureSsoSettings->is_enabled && ! empty($azureSsoSettings->client_id)) {
             $ssoActions[] = Action::make('azure_sso')
-                ->label(__('Login with Azure SSO'))
+                ->label(__('Microsoft'))
                 ->url(route('socialite.redirect', ['provider' => 'azure']))
                 ->color('gray')
                 ->icon('icon-microsoft')
@@ -64,7 +66,7 @@ class Login extends FilamentLogin
 
         if ($googleSsoSettings->is_enabled && ! empty($googleSsoSettings->client_id)) {
             $ssoActions[] = Action::make('google_sso')
-                ->label(__('Login with Google SSO'))
+                ->label(__('Google'))
                 ->url(route('socialite.redirect', ['provider' => 'google']))
                 ->icon('icon-google')
                 ->color('gray')

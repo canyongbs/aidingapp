@@ -34,37 +34,35 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualityResource\Pages;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
 
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualityResource;
-use App\Concerns\EditPageRedirection;
-use Filament\Actions;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
-use Filament\Resources\Pages\EditRecord;
-
-class EditKnowledgeBaseQuality extends EditRecord
-{
-    use EditPageRedirection;
-
-    protected static string $resource = KnowledgeBaseQualityResource::class;
-
-    public function form(Form $form): Form
+return new class () extends Migration {
+    public function up(): void
     {
-        return $form
-            ->schema([
-                TextInput::make('name')
-                    ->label('Name')
-                    ->required()
-                    ->string(),
-            ]);
-    }
+        DB::table('engagement_deliverables')
+            ->where('channel', 'sms')
+            ->chunkById(100, function ($deliverables) {
+                $engagementIds = $deliverables->pluck('engagement_id')->toArray();
+                $deliverableIds = $deliverables->pluck('id')->toArray();
 
-    protected function getHeaderActions(): array
-    {
-        return [
-            Actions\ViewAction::make(),
-            Actions\DeleteAction::make(),
-        ];
+                DB::table('timelines')
+                    ->whereIn('timelineable_id', $engagementIds)
+                    ->whereIn('timelineable_type', ['outbound_deliverable', 'engagement'])
+                    ->delete();
+
+                DB::table('outbound_deliverables')
+                    ->whereIn('related_id', $deliverableIds)
+                    ->where('channel', 'sms')
+                    ->delete();
+
+                DB::table('engagement_deliverables')
+                    ->whereIn('id', $deliverableIds)
+                    ->delete();
+
+                DB::table('engagements')
+                    ->whereIn('id', $engagementIds)
+                    ->delete();
+            });
     }
-}
+};

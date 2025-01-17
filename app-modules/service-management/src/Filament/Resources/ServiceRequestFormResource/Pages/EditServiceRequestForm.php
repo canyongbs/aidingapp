@@ -40,6 +40,7 @@ use AidingApp\Form\Actions\GenerateSubmissibleEmbedCode;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestFormResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestFormResource\Pages\Concerns\HasSharedFormConfiguration;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
+use App\Concerns\EditPageRedirection;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Form;
@@ -49,6 +50,7 @@ use Filament\Resources\Pages\EditRecord;
 class EditServiceRequestForm extends EditRecord
 {
     use HasSharedFormConfiguration;
+    use EditPageRedirection;
 
     protected static string $resource = ServiceRequestFormResource::class;
 

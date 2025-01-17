@@ -39,6 +39,7 @@ namespace AidingApp\Contact\Filament\Resources\ContactStatusResource\Pages;
 use AidingApp\Contact\Enums\ContactStatusColorOptions;
 use AidingApp\Contact\Enums\SystemContactClassification;
 use AidingApp\Contact\Filament\Resources\ContactStatusResource;
+use App\Concerns\EditPageRedirection;
 use Filament\Actions;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -47,6 +48,8 @@ use Filament\Resources\Pages\EditRecord;
 
 class EditContactStatus extends EditRecord
 {
+    use EditPageRedirection;
+
     protected static string $resource = ContactStatusResource::class;
 
     public function form(Form $form): Form

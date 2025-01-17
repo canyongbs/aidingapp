@@ -38,6 +38,7 @@ namespace AidingApp\ContractManagement\Filament\Resources\ContractTypeResource\P
 
 use AidingApp\ContractManagement\Filament\Resources\ContractTypeResource;
 use AidingApp\ContractManagement\Models\ContractType;
+use App\Concerns\EditPageRedirection;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -47,6 +48,8 @@ use Illuminate\Support\Str;
 
 class EditContractType extends EditRecord
 {
+    use EditPageRedirection;
+
     protected static string $resource = ContractTypeResource::class;
 
     protected ?bool $hasDatabaseTransactions = true;
@@ -86,8 +89,8 @@ class EditContractType extends EditRecord
     }
 
     /**
-    * @return array<int|string, string|null>
-    */
+     * @return array<int|string, string|null>
+     */
     public function getBreadcrumbs(): array
     {
         $resource = static::getResource();

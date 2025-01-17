@@ -37,6 +37,7 @@
 namespace AidingApp\Engagement\Filament\Resources\EmailTemplateResource\Pages;
 
 use AidingApp\Engagement\Filament\Resources\EmailTemplateResource;
+use App\Concerns\EditPageRedirection;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -46,6 +47,8 @@ use FilamentTiptapEditor\TiptapEditor;
 
 class EditEmailTemplate extends EditRecord
 {
+    use EditPageRedirection;
+
     protected static string $resource = EmailTemplateResource::class;
 
     public function form(Form $form): Form

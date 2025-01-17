@@ -40,6 +40,7 @@ use AidingApp\ServiceManagement\Enums\ColumnColorOptions;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use App\Concerns\EditPageRedirection;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ForceDeleteAction;
@@ -52,6 +53,8 @@ use Filament\Resources\Pages\EditRecord;
 
 class EditServiceRequestStatus extends EditRecord
 {
+    use EditPageRedirection;
+
     protected static string $resource = ServiceRequestStatusResource::class;
 
     public function form(Form $form): Form

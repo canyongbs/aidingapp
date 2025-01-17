@@ -40,7 +40,6 @@ use AidingApp\Engagement\Actions\CreateEngagementBatch;
 use AidingApp\Engagement\DataTransferObjects\EngagementBatchCreationData;
 use AidingApp\Engagement\Enums\EngagementDeliveryMethod;
 use AidingApp\Engagement\Filament\Actions\Contracts\HasBulkEngagementAction;
-use AidingApp\Engagement\Filament\Resources\EngagementResource\Fields\EngagementSmsBodyField;
 use AidingApp\Engagement\Models\EmailTemplate;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\Checkbox;
@@ -67,7 +66,7 @@ class BulkEngagementAction
             ->modalDescription(fn (Collection $records) => "You have selected {$records->count()} {$context} to engage.")
             ->steps([
                 Step::make('Choose your delivery method')
-                    ->description('Select email or sms.')
+                    ->description('Select')
                     ->schema([
                         Select::make('delivery_method')
                             ->label('How would you like to send this engagement?')
@@ -83,7 +82,6 @@ class BulkEngagementAction
                             ->autofocus()
                             ->required()
                             ->placeholder(__('Subject'))
-                            ->hidden(fn (Get $get): bool => $get('delivery_method') === EngagementDeliveryMethod::Sms->value)
                             ->columnSpanFull(),
                         TiptapEditor::make('body')
                             ->disk('s3-public')
@@ -146,10 +144,8 @@ class BulkEngagementAction
                                         $component->generateImageUrls($template->content),
                                     );
                                 }))
-                            ->hidden(fn (Get $get): bool => $get('delivery_method') === EngagementDeliveryMethod::Sms->value)
                             ->helperText('You can insert contact information by typing {{ and choosing a merge value to insert.')
                             ->columnSpanFull(),
-                        EngagementSmsBodyField::make(context: 'create'),
                     ]),
             ])
             ->action(function (Collection $records, array $data, Form $form) {

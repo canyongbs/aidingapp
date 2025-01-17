@@ -67,7 +67,7 @@ class EngagementResponsesRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->heading('Email and Text Messages')
+            ->heading('Email')
             ->recordTitleAttribute('id')
             ->columns([
                 IdColumn::make(),

@@ -38,6 +38,7 @@ namespace AidingApp\Division\Filament\Resources\DivisionResource\Pages;
 
 use AidingApp\Division\Filament\Resources\DivisionResource;
 use AidingApp\Division\Models\Division;
+use App\Concerns\EditPageRedirection;
 use App\Models\NotificationSetting;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Select;
@@ -49,6 +50,8 @@ use FilamentTiptapEditor\TiptapEditor;
 
 class EditDivision extends EditRecord
 {
+    use EditPageRedirection;
+
     protected static string $resource = DivisionResource::class;
 
     public function form(Form $form): Form

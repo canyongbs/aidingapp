@@ -40,6 +40,7 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Rules\ServiceRequestTypeAssignmentsIndividualUserMustBeAManager;
+use App\Concerns\EditPageRedirection;
 use App\Filament\Forms\Components\Heading;
 use App\Filament\Forms\Components\Paragraph;
 use Filament\Forms\Components\Radio;
@@ -53,6 +54,8 @@ use Illuminate\Support\HtmlString;
 
 class EditServiceRequestTypeAssignments extends EditRecord
 {
+    use EditPageRedirection;
+
     protected static string $resource = ServiceRequestTypeResource::class;
 
     protected static ?string $title = 'Assignments';

@@ -68,13 +68,6 @@ class EngagementDeliverableFactory extends Factory
         ]);
     }
 
-    public function sms(): self
-    {
-        return $this->state([
-            'channel' => EngagementDeliveryMethod::Sms,
-        ]);
-    }
-
     public function deliveryAwaiting(): self
     {
         return $this->state([
