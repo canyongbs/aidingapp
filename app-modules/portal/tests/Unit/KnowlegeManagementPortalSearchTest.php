@@ -2,14 +2,11 @@
 
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use AidingApp\Portal\Settings\PortalSettings;
 use App\Models\Tag;
 use Illuminate\Support\Facades\URL;
 
 use function Pest\Laravel\json;
-use function PHPUnit\Framework\assertContains;
 
 test('search will not work if `Knowledge Management Portal` is not enabled.', function () {
     $url = URL::signedRoute(name: 'api.portal.search', absolute: false);
@@ -31,7 +28,7 @@ test('search will work if `Knowledge Management Portal` is enabled.', function (
     $response->assertStatus(201);
 });
 
-test('response should contain `article` and `categories`', function () {
+test('ensuring snapshot integrity for Knowledge Base Search API Response', function () {
     $settings = app(PortalSettings::class);
 
     $settings->knowledge_management_portal_enabled = true;
@@ -117,7 +114,7 @@ test('filter `featured` articles', function () {
     expect($response)->data->articles->data->toHaveCount(1)->toMatchSnapshot();
 });
 
-test('filter article based on `tags`', function () {
+test('filter article based on selected `tags`', function () {
 
     $settings = app(PortalSettings::class);
 
@@ -278,8 +275,8 @@ test('filter `most viewed` articles', function () {
 
     expect($response)->data->articles->data->toHaveCount(2)->toMatchSnapshot();
 
-    $mostViewedArticles = $response['data']['articles']['data'][0];
+    $mostViewedArticle = $response['data']['articles']['data'][0];
     
-    expect($mostViewedArticles)->toMatchArray(['id' => '9dbe944d-330e-40c1-94b2-3312b07c7547'])->toMatchSnapshot();
+    expect($mostViewedArticle)->toMatchArray(['id' => '9dbe944d-330e-40c1-94b2-3312b07c7547'])->toMatchSnapshot();
 
 });
