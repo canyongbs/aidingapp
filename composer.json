@@ -81,6 +81,7 @@
         "shuvroroy/filament-spatie-laravel-health": "^2.1.0",
         "socialiteproviders/google": "^4.1",
         "socialiteproviders/microsoft-azure": "^5.2",
+        "solution-forest/filament-simplelightbox": "^0.0.10",
         "spatie/laravel-cookie-consent": "^3.3",
         "spatie/laravel-data": "^3.11",
         "spatie/laravel-health": "v1.24.1",

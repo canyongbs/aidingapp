@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5a7591a46a611e909a946e86d0465375",
+    "content-hash": "89a584d0f21d211d2a819d97335e76f4",
     "packages": [
         {
             "name": "amphp/amp",
@@ -12904,6 +12904,88 @@
                 "source": "https://github.com/socialiteproviders/providers"
             },
             "time": "2024-03-15T03:02:10+00:00"
+        },
+        {
+            "name": "solution-forest/filament-simplelightbox",
+            "version": "0.0.10",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/solutionforest/Filament-SimpleLightBox.git",
+                "reference": "873fe865b11eaded4a469dcc8816ee61599375f3"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/solutionforest/Filament-SimpleLightBox/zipball/873fe865b11eaded4a469dcc8816ee61599375f3",
+                "reference": "873fe865b11eaded4a469dcc8816ee61599375f3",
+                "shasum": ""
+            },
+            "require": {
+                "filament/filament": "^3.0",
+                "filament/infolists": "^3.0",
+                "filament/tables": "^3.0",
+                "illuminate/contracts": "^10.0|^11.0",
+                "php": "^8.1",
+                "spatie/laravel-package-tools": "^1.15.0"
+            },
+            "require-dev": {
+                "laravel/pint": "^1.0",
+                "nunomaduro/collision": "^7.9",
+                "nunomaduro/larastan": "^2.0.1",
+                "orchestra/testbench": "^8.0",
+                "pestphp/pest": "^2.0",
+                "pestphp/pest-plugin-arch": "^2.0",
+                "pestphp/pest-plugin-laravel": "^2.0",
+                "phpstan/extension-installer": "^1.1",
+                "phpstan/phpstan-deprecation-rules": "^1.0",
+                "phpstan/phpstan-phpunit": "^1.0",
+                "spatie/laravel-ray": "^1.26"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "aliases": {
+                        "FilamentSimpleLightBox": "SolutionForest\\FilamentSimpleLightBox\\Facades\\FilamentSimpleLightBox"
+                    },
+                    "providers": [
+                        "SolutionForest\\FilamentSimpleLightBox\\FilamentSimpleLightBoxServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "SolutionForest\\FilamentSimpleLightBox\\": "src/",
+                    "SolutionForest\\FilamentSimpleLightBox\\Database\\Factories\\": "database/factories/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "alan",
+                    "email": "info@solutionforest.net",
+                    "role": "Developer"
+                }
+            ],
+            "description": "This is my package filament-simplelightbox",
+            "homepage": "https://github.com/solutionforest/filament-simplelightbox",
+            "keywords": [
+                "filament-simplelightbox",
+                "laravel",
+                "solutionforest"
+            ],
+            "support": {
+                "issues": "https://github.com/solutionforest/filament-simplelightbox/issues",
+                "source": "https://github.com/solutionforest/filament-simplelightbox"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/SolutionForest",
+                    "type": "github"
+                }
+            ],
+            "time": "2024-08-06T04:15:14+00:00"
         },
         {
             "name": "spatie/color",
