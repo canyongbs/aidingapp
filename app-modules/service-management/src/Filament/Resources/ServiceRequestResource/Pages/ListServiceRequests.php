@@ -129,6 +129,14 @@ class ListServiceRequests extends ListRecords
                     ->toggleable(),
             ])
             ->filters([
+                Filter::make('classification')
+                    ->default()
+                    ->label('All (Except Closed)')
+                    ->query(
+                        fn (Builder $query) => $query->whereHas('status',fn($q) =>
+                            $q->where('classification','!=',SystemServiceRequestClassification::Closed)
+                        )
+                    ),
                 SelectFilter::make('priority')
                     ->relationship('priority', 'name', fn (Builder $query) => $query->with('type')->whereRelation('type', 'deleted_at'))
                     ->getOptionLabelFromRecordUsing(fn (ServiceRequestPriority $record) => "{$record->type->name} - {$record->name}")
