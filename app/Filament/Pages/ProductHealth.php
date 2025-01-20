@@ -36,6 +36,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Models\Authenticatable;
 use App\Models\User;
 use Illuminate\Contracts\Support\Htmlable;
 use ShuvroRoy\FilamentSpatieLaravelHealth\Pages\HealthCheckResults;
@@ -56,12 +57,12 @@ class ProductHealth extends HealthCheckResults
 
     public static function getNavigationGroup(): ?string
     {
-        return 'Report Center';
+        return 'Global Administration';
     }
 
     public static function getNavigationSort(): ?int
     {
-        return 3;
+        return 60;
     }
 
     public static function getNavigationBadge(): ?string
@@ -85,6 +86,6 @@ class ProductHealth extends HealthCheckResults
         /** @var User $user */
         $user = auth()->user();
 
-        return $user->can('authorization.view_product_health_dashboard');
+        return $user->hasRole(Authenticatable::SUPER_ADMIN_ROLE) && parent::canAccess();
     }
 }
