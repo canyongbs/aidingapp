@@ -548,14 +548,22 @@ test('assignment type workload will auto-assign to new service requests', functi
         ->create();
 
     foreach ($factoryUsers->take(-2) as $factoryUser) {
-        $serviceRequest = ServiceRequest::factory()->create();
+        $serviceRequest = ServiceRequest::factory()->state([
+            'priority_id' => ServiceRequestPriority::factory()->create([
+                'type_id' => $serviceRequestTypeWithManager->getKey(),
+            ])->getKey(),
+        ])->create();
         $serviceRequest->assignments()->create([
             'user_id' => $factoryUser->getKey(),
             'assigned_at' => now(),
             'status' => ServiceRequestAssignmentStatus::Active,
         ]);
 
-        $serviceRequest = ServiceRequest::factory()->create();
+        $serviceRequest = ServiceRequest::factory()->state([
+            'priority_id' => ServiceRequestPriority::factory()->create([
+                'type_id' => $serviceRequestTypeWithManager->getKey(),
+            ])->getKey(),
+        ])->create();
         $serviceRequest->assignments()->create([
             'user_id' => $factoryUser->getKey(),
             'assigned_at' => now(),

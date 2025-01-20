@@ -54,13 +54,33 @@ use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 test('The correct details are displayed on the ListServiceRequests page', function () {
+    $user = User::factory()->create();
+
+    $team = Team::factory()->create();
+
+    $user->teams()->attach($team);
+
+    $user->refresh();
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $serviceRequestType->managers()->attach($team);
+
     $serviceRequests = ServiceRequest::factory()
         ->has(
             factory: ServiceRequestAssignment::factory()
+                ->state([
+                    'user_id' => $user->getKey(),
+                ])
                 ->count(1)
                 ->active(),
             relationship: 'assignments'
         )
+        ->state([
+            'priority_id' => ServiceRequestPriority::factory()->create([
+                'type_id' => $serviceRequestType->getKey(),
+            ])->getKey(),
+        ])
         ->count(10)
         ->create();
 
@@ -298,12 +318,32 @@ test('can list audit member to service request type', function () {
 it('filters unassigned service requests', function () {
     $unassignedRequest = ServiceRequest::factory()->create();
 
+    $user = User::factory()->create();
+
+    $team = Team::factory()->create();
+
+    $user->teams()->attach($team);
+
+    $user->refresh();
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $serviceRequestType->managers()->attach($team);
+
     $assignedRequest = ServiceRequest::factory()
         ->has(
             factory: ServiceRequestAssignment::factory()
+                ->state([
+                    'user_id' => $user->getKey(),
+                ])
                 ->active(),
             relationship: 'assignments'
         )
+        ->state([
+            'priority_id' => ServiceRequestPriority::factory()->create([
+                'type_id' => $serviceRequestType->getKey(),
+            ])->getKey(),
+        ])
         ->create();
 
     asSuperAdmin();
