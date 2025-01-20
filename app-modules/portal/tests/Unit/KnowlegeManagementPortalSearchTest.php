@@ -158,7 +158,7 @@ test('filter article based on selected tags', function () {
 
     $response = $response->json();
 
-    expect($response)->data->articles->data->toHaveCount(1)->toMatchSnapshot();
+    expect($response)->data->articles->data->toMatchSnapshot();
 });
 
 test('filter article and category based on searched keyword', function () {
@@ -211,8 +211,8 @@ test('filter article and category based on searched keyword', function () {
 
     $response = $response->json();
 
-    expect($response)->data->articles->data->toHaveCount(2)->toMatchSnapshot();
-    expect($response)->data->categories->toHaveCount(1)->toMatchSnapshot();
+    expect($response)->data->articles->data->toMatchSnapshot();
+    expect($response)->data->categories->toMatchSnapshot();
 });
 
 test('filter most viewed articles', function () {
