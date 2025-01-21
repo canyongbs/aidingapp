@@ -64,7 +64,7 @@ class CreateServiceRequestStatusBulkAction
                 BulkProcessingMachine::make($records->all())
                     ->check(function (ServiceRequest $serviceRequest): ?Closure {
                         if ($serviceRequest?->status?->classification !== SystemServiceRequestClassification::Closed) {
-                            return;
+                            return null;
                         }
 
                         return function (int $count): string {
@@ -79,13 +79,13 @@ class CreateServiceRequestStatusBulkAction
                         $user = auth()->user();
 
                         if ($user->hasRole(Authenticatable::SUPER_ADMIN_ROLE)) {
-                            return;
+                            return null;
                         }
 
                         $team = $user->teams->first();
 
                         if ($serviceRequest?->priority?->type?->managers?->contains('id', $team?->getKey())) {
-                            return;
+                            return null;
                         }
 
                         return function (int $count): string {
