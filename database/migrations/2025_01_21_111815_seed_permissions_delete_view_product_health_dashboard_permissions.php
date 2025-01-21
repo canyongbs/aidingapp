@@ -40,10 +40,9 @@ use Illuminate\Database\Migrations\Migration;
 return new class () extends Migration {
     use CanModifyPermissions;
 
-    private array $permissions =
-        [
-            'authorization.view_product_health_dashboard' => 'Authorization',
-        ];
+    private array $permissions = [
+        'authorization.view_product_health_dashboard' => 'Authorization',
+    ];
 
     private array $guards = [
         'web',
