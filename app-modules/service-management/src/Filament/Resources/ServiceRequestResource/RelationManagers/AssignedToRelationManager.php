@@ -81,26 +81,40 @@ class AssignedToRelationManager extends RelationManager
             ->paginated(false)
             ->headerActions([
                 Action::make('assign-to-me')
-                    ->visible($this->getOwnerRecord()?->status?->classification == SystemServiceRequestClassification::Closed ? false : true && ! $this->getOwnerRecord()->assignedTo && in_array(auth()->user()?->id, $this->getOwnerRecord()->priority->type?->managers
-                        ->flatMap(fn ($managers) => $managers->users)
-                        ->pluck('id')
-                        ->toArray()))
+                    ->visible(function () {
+                        $ownerRecord = $this->getOwnerRecord();
+
+                        if ($ownerRecord?->status?->classification === SystemServiceRequestClassification::Closed) {
+                            return false;
+                        }
+
+                        if (! is_null($ownerRecord->assignedTo)) {
+                            return false;
+                        }
+
+                        $isManager = in_array(auth()->user()?->id, $ownerRecord->priority->type?->managers
+                            ->flatMap(fn ($managers) => $managers->users)
+                            ->pluck('id')
+                            ->toArray());
+
+                        return $isManager;
+                    })
                     ->label('Assign To Me')
                     ->color('gray')
                     ->requiresConfirmation()
                     ->action(fn (array $data) => $this->getOwnerRecord()->assignments()->create([
                         'user_id' => auth()->user()?->id,
-                        'assigned_by_id' => auth()->user()?->id ?? null,
+                        'assigned_by_id' => auth()->user()->id ?? null,
                         'assigned_at' => now(),
                         'status' => ServiceRequestAssignmentStatus::Active,
                     ])),
                 Action::make('assign-service-request')
-                    ->visible($this->getOwnerRecord()?->status?->classification == SystemServiceRequestClassification::Closed ? false : true)
+                    ->visible($this->getOwnerRecord()?->status?->classification !== SystemServiceRequestClassification::Closed)
                     ->label(fn () => $this->getOwnerRecord()->assignedTo ? 'Reassign' : 'Assign')
                     ->color('gray')
                     ->action(fn (array $data) => $this->getOwnerRecord()->assignments()->create([
                         'user_id' => $data['userId'],
-                        'assigned_by_id' => auth()->user()?->id ?? null,
+                        'assigned_by_id' => auth()->user()->id ?? null,
                         'assigned_at' => now(),
                         'status' => ServiceRequestAssignmentStatus::Active,
                     ]))
@@ -111,10 +125,9 @@ class AssignedToRelationManager extends RelationManager
                             ->getSearchResultsUsing(fn (string $search): array => User::query()
                                 ->tap(new HasLicense($this->getOwnerRecord()->respondent->getLicenseType()))
                                 ->where(new Expression('lower(name)'), 'like', '%' . str($search)->lower() . '%')
-                                ->whereIn('id', $this->getOwnerRecord()->priority->type?->managers
-                                    ->flatMap(fn ($managers) => $managers->users)
-                                    ->pluck('id')
-                                    ->toArray())
+                                ->whereHas('teams.manageableServiceRequestTypes', function ($query) {
+                                    $query->where('service_request_type_id', $this->getOwnerRecord()?->priority?->type_id ?? null);
+                                })
                                 ->where('id', '!=', $this->getOwnerRecord()->assignedTo?->user_id)
                                 ->pluck('name', 'id')
                                 ->all())
