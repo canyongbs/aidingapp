@@ -59,8 +59,8 @@ enum SystemServiceRequestClassification: string implements HasLabel, Classificat
     case Closed = 'closed';
 
     #[AllowTransitionTo(self::Open)]
-    #[AllowTransitionTo(self::Closed)]
     #[AllowTransitionTo(self::InProgress)]
+    #[AllowTransitionTo(self::Closed)]
     #[AllowTransitionTo(self::Custom)]
     case Waiting = 'waiting';
 
