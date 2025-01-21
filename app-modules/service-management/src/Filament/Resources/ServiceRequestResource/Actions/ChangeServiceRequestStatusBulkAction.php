@@ -63,9 +63,31 @@ class ChangeServiceRequestStatusBulkAction
                     ->required(),
             ])
             ->action(function (array $data, Collection $records) {
-                $records->loadMissing(['priority.type.managers', 'status']);
+                $records->loadMissing(['priority.type.managers', 'respondent', 'status']);
+
+                $user = auth()->user();
+                $isUserSuperAdmin = $user->hasRole(Authenticatable::SUPER_ADMIN_ROLE);
+                $canUserUpdateServiceRequest = $user->can('service_request.*.update');
 
                 BulkProcessingMachine::make($records->all())
+                    ->check(function (ServiceRequest $serviceRequest) use ($user, $canUserUpdateServiceRequest): ?Closure {
+                        $user = auth()->user();
+
+                        if (
+                            $user->hasLicense($serviceRequest->respondent->getLicenseType()) &&
+                            $canUserUpdateServiceRequest
+                        ) {
+                            return null;
+                        }
+
+                        return function (int $count): string {
+                            if ($count === 1) {
+                                return '1 service request cannot be updated because you do not have permission.';
+                            }
+
+                            return "{$count} service requests cannot be updated because you do not have permission.";
+                        };
+                    })
                     ->check(function (ServiceRequest $serviceRequest): ?Closure {
                         if ($serviceRequest?->status?->classification !== SystemServiceRequestClassification::Closed) {
                             return null;
@@ -79,10 +101,8 @@ class ChangeServiceRequestStatusBulkAction
                             return "{$count} service requests are closed and cannot be edited.";
                         };
                     })
-                    ->check(function (ServiceRequest $serviceRequest): ?Closure {
-                        $user = auth()->user();
-
-                        if ($user->hasRole(Authenticatable::SUPER_ADMIN_ROLE)) {
+                    ->check(function (ServiceRequest $serviceRequest) use ($user, $isUserSuperAdmin): ?Closure {
+                        if ($isUserSuperAdmin) {
                             return null;
                         }
 
