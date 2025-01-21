@@ -39,7 +39,6 @@ namespace AidingApp\Portal\Filament\Pages;
 use AidingApp\Form\Enums\Rounding;
 use AidingApp\Portal\Actions\GeneratePortalEmbedCode;
 use AidingApp\Portal\Enums\GdprBannerButtonLabel;
-use AidingApp\Portal\Enums\PortalLayout;
 use AidingApp\Portal\Enums\PortalType;
 use AidingApp\Portal\Settings\PortalSettings;
 use App\Enums\Feature;
@@ -52,7 +51,6 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Infolists\Components\TextEntry;
@@ -94,15 +92,6 @@ class ManagePortalSettings extends SettingsPage
                             ->hintIcon(fn (Toggle $component) => $component->isDisabled() ? 'heroicon-m-lock-closed' : null)
                             ->hintIconTooltip('Knowledge Management is not a part of your current subscription.')
                             ->live()
-                            ->columnSpanFull(),
-                        ToggleButtons::make('knowledge_management_portal_layout')
-                            ->options(PortalLayout::class)
-                            ->enum(PortalLayout::class)
-                            ->visible(fn (Get $get) => $get('knowledge_management_portal_enabled'))
-                            ->disabled(! Gate::check(Feature::KnowledgeManagement->getGateName()))
-                            ->hintIcon(fn (ToggleButtons $component) => $component->isDisabled() ? 'heroicon-m-lock-closed' : null)
-                            ->hintIconTooltip('Knowledge Management is not a part of your current subscription.')
-                            ->inline()
                             ->columnSpanFull(),
                         ColorSelect::make('knowledge_management_portal_primary_color')
                             ->label('Primary Color')
