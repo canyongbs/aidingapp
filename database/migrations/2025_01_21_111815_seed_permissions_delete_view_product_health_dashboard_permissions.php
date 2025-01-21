@@ -42,7 +42,7 @@ return new class () extends Migration {
 
     private array $permissions =
         [
-            'authorization.view_product_health_dashboard ' => 'Authorization',
+            'authorization.view_product_health_dashboard' => 'Authorization',
         ];
 
     private array $guards = [
