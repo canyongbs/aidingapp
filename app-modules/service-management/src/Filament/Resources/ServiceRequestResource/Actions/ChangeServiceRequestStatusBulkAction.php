@@ -46,14 +46,18 @@ use Filament\Forms\Components\Select;
 use Filament\Tables\Actions\BulkAction;
 use Illuminate\Database\Eloquent\Collection;
 
-class CreateServiceRequestStatusBulkAction
+class ChangeServiceRequestStatusBulkAction
 {
     public static function make(): BulkAction
     {
-        return BulkAction::make('createServiceRequestStatus')
+        return BulkAction::make('changeServiceRequestStatus')
+            ->label('Change status')
+            ->icon('heroicon-m-pencil-square')
+            ->modalHeading('Bulk change service request statuses')
+            ->modalWidth('md')
             ->form([
                 Select::make('statusId')
-                    ->label('Status')
+                    ->label('New status')
                     ->options(ServiceRequestStatus::query()->pluck('name', 'id'))
                     ->exists(ServiceRequestStatus::class, 'id')
                     ->required(),
