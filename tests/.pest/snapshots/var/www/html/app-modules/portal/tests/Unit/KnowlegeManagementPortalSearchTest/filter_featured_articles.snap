@@ -1,12 +1,58 @@
-[
-    {
-        "id": "9dbe944d-330e-40c1-94b2-3312b07a7590",
-        "categorySlug": "tech-driven-education",
-        "name": "Gamification in Education: Transforming Classrooms into Playgrounds",
-        "lastUpdated": null,
-        "content": null,
-        "tags": [],
-        "vote": null,
-        "featured": true
+{
+    "data": {
+        "articles": {
+            "data": [
+                {
+                    "id": "9dbe944d-330e-40c1-94b2-3312b07a7590",
+                    "categorySlug": "tech-driven-education",
+                    "name": "Gamification in Education: Transforming Classrooms into Playgrounds",
+                    "lastUpdated": null,
+                    "content": null,
+                    "tags": [],
+                    "vote": null,
+                    "featured": true
+                }
+            ],
+            "links": [
+                {
+                    "url": null,
+                    "label": "&laquo; Previous",
+                    "active": false
+                },
+                {
+                    "url": "https:\/\/test.aidingapp.local\/api\/portal\/search?page=1",
+                    "label": "1",
+                    "active": true
+                },
+                {
+                    "url": null,
+                    "label": "Next &raquo;",
+                    "active": false
+                }
+            ],
+            "meta": {
+                "current_page": 1,
+                "first_page_url": "https:\/\/test.aidingapp.local\/api\/portal\/search?page=1",
+                "from": 1,
+                "last_page": 1,
+                "last_page_url": "https:\/\/test.aidingapp.local\/api\/portal\/search?page=1",
+                "next_page_url": null,
+                "path": "https:\/\/test.aidingapp.local\/api\/portal\/search",
+                "per_page": 5,
+                "prev_page_url": null,
+                "to": 1,
+                "total": 1
+            }
+        },
+        "categories": [
+            {
+                "slug": "tech-driven-education",
+                "name": "Tech-Driven Education",
+                "description": "Explore how technology is shaping education, from virtual classrooms to AI-driven learning tools.",
+                "icon": null,
+                "parentCategory": null,
+                "subCategories": null
+            }
+        ]
     }
-]
+}

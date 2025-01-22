@@ -6,7 +6,6 @@ use AidingApp\Portal\Settings\PortalSettings;
 use App\Models\Tag;
 use Illuminate\Support\Facades\URL;
 
-use function Pest\Laravel\json;
 use function Pest\Laravel\post;
 
 test('search will not work if Knowledge Management Portal is not enabled.', function () {
@@ -63,8 +62,10 @@ test('category should present in response', function () {
     $settings->knowledge_management_portal_enabled = true;
     $settings->save();
 
-    $knowledgeBaseCategory = KnowledgeBaseCategory::factory()->create([
+    KnowledgeBaseCategory::factory()->create([
         'name' => 'Innovative Learning Approaches',
+        'slug' => 'innovative-learning-approaches',
+        'description' => 'Explore new methods and tools that are revolutionizing the way we teach and learn.',
     ]);
 
     $url = URL::signedRoute(name: 'api.portal.search', absolute: false);
@@ -72,8 +73,7 @@ test('category should present in response', function () {
 
     $data = $response->json();
 
-    $categoryNames = collect($data['data']['categories'])->pluck('name');
-    expect($categoryNames)->toContain($knowledgeBaseCategory->name)->toMatchSnapshot();
+    expect($data)->toMatchSnapshot();
 });
 
 test('filter featured articles', function () {
@@ -111,7 +111,7 @@ test('filter featured articles', function () {
 
     $response = $response->json();
 
-    expect($response)->data->articles->data->toMatchSnapshot();
+    expect($response)->toMatchSnapshot();
 });
 
 test('filter article based on selected tags', function () {
@@ -158,7 +158,7 @@ test('filter article based on selected tags', function () {
 
     $response = $response->json();
 
-    expect($response)->data->articles->data->toMatchSnapshot();
+    expect($response)->toMatchSnapshot();
 });
 
 test('filter article and category based on searched keyword', function () {
@@ -211,8 +211,7 @@ test('filter article and category based on searched keyword', function () {
 
     $response = $response->json();
 
-    expect($response)->data->articles->data->toMatchSnapshot();
-    expect($response)->data->categories->toMatchSnapshot();
+    expect($response)->toMatchSnapshot();
 });
 
 test('filter most viewed articles', function () {
@@ -268,9 +267,5 @@ test('filter most viewed articles', function () {
 
     $response = $response->json();
 
-    expect($response)->data->articles->data->toMatchSnapshot();
-
-    $mostViewedArticle = $response['data']['articles']['data'][0];
-
-    expect($mostViewedArticle)->toMatchArray(['id' => '9dbe944d-330e-40c1-94b2-3312b07c7547'])->toMatchSnapshot();
+    expect($response)->toMatchSnapshot();
 });
