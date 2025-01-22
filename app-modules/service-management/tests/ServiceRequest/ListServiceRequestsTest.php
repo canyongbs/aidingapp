@@ -343,6 +343,6 @@ it('default non closed service request will not display',function(){
     livewire(ListServiceRequests::class)
         ->assertCanSeeTableRecords($nonClosedServiceRequests)
         ->assertCanNotSeeTableRecords($closedServiceRequests)
-        ->removeTableFilter('classification')
+        ->removeTableFilter('status')
         ->assertCanSeeTableRecords($nonClosedServiceRequests->merge($closedServiceRequests));
 })->only();

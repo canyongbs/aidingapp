@@ -45,6 +45,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Actions\ChangeServiceRequestStatusBulkAction;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
+use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Authenticatable;
 use App\Models\Scopes\EducatableSearch;
@@ -129,14 +130,6 @@ class ListServiceRequests extends ListRecords
                     ->toggleable(),
             ])
             ->filters([
-                Filter::make('classification')
-                    ->default()
-                    ->label('All (Except Closed)')
-                    ->query(
-                        fn (Builder $query) => $query->whereHas('status',fn($q) =>
-                            $q->where('classification','!=',SystemServiceRequestClassification::Closed)
-                        )
-                    ),
                 SelectFilter::make('priority')
                     ->relationship('priority', 'name', fn (Builder $query) => $query->with('type')->whereRelation('type', 'deleted_at'))
                     ->getOptionLabelFromRecordUsing(fn (ServiceRequestPriority $record) => "{$record->type->name} - {$record->name}")
@@ -144,6 +137,15 @@ class ListServiceRequests extends ListRecords
                     ->preload(),
                 SelectFilter::make('status')
                     ->relationship('status', 'name')
+                    ->default(fn () => ServiceRequestStatus::query()
+                                        ->where(
+                                            'classification',
+                                            '!=',
+                                            SystemServiceRequestClassification::Closed
+                                        )
+                                        ->pluck('id')
+                                        ->toArray()
+                    )
                     ->multiple()
                     ->preload(),
                 SelectFilter::make('organization')
