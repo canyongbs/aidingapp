@@ -44,7 +44,6 @@ use AidingApp\Engagement\Models\EngagementBatch;
 use AidingApp\Engagement\Models\EngagementDeliverable;
 use AidingApp\Engagement\Models\EngagementFile;
 use AidingApp\Engagement\Models\EngagementResponse;
-use AidingApp\Engagement\Models\SmsTemplate;
 use App\Models\Scopes\SetupIsComplete;
 use App\Models\Tenant;
 use Filament\Panel;
@@ -68,7 +67,6 @@ class EngagementServiceProvider extends ServiceProvider
             'engagement_file' => EngagementFile::class,
             'engagement_response' => EngagementResponse::class,
             'engagement' => Engagement::class,
-            'sms_template' => SmsTemplate::class,
         ]);
 
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule) {

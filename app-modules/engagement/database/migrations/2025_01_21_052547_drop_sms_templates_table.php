@@ -34,35 +34,28 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Models;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-use AidingApp\Engagement\Observers\SmsTemplateObserver;
-use App\Models\BaseModel;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
-
-/**
- * @mixin IdeHelperSmsTemplate
- */
-#[ObservedBy([SmsTemplateObserver::class])]
-class SmsTemplate extends BaseModel
-{
-    use SoftDeletes;
-
-    protected $fillable = [
-        'name',
-        'description',
-        'content',
-    ];
-
-    protected $casts = [
-        'content' => 'array',
-    ];
-
-    public function user(): BelongsTo
+return new class () extends Migration {
+    public function up(): void
     {
-        return $this->belongsTo(User::class);
+        Schema::dropIfExists('sms_templates');
     }
-}
+
+    public function down(): void
+    {
+        Schema::create('sms_templates', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+
+            $table->string('name');
+            $table->text('description')->nullable();
+            $table->json('content');
+            $table->foreignUuid('user_id')->nullable()->constrained()->nullOnDelete();
+
+            $table->timestamps();
+            $table->softDeletes();
+        });
+    }
+};
