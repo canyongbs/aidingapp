@@ -34,58 +34,32 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Pages;
+use Database\Migrations\Concerns\CanModifyPermissions;
+use Illuminate\Database\Migrations\Migration;
 
-use App\Models\Authenticatable;
-use App\Models\User;
-use Illuminate\Contracts\Support\Htmlable;
-use ShuvroRoy\FilamentSpatieLaravelHealth\Pages\HealthCheckResults;
-use Spatie\Health\Enums\Status;
-use Spatie\Health\ResultStores\ResultStore;
+return new class () extends Migration {
+    use CanModifyPermissions;
 
-class ProductHealth extends HealthCheckResults
-{
-    public static function getNavigationLabel(): string
+    private array $permissions = [
+        'authorization.view_product_health_dashboard' => 'Authorization',
+    ];
+
+    private array $guards = [
+        'web',
+        'api',
+    ];
+
+    public function up(): void
     {
-        return 'Product Health';
+        collect($this->guards)
+            ->each(fn (string $guard) => $this->deletePermissions(array_keys($this->permissions), $guard));
     }
 
-    public function getHeading(): string | Htmlable
+    public function down(): void
     {
-        return 'Product Health';
+        collect($this->guards)
+            ->each(function (string $guard) {
+                $this->createPermissions($this->permissions, $guard);
+            });
     }
-
-    public static function getNavigationGroup(): ?string
-    {
-        return 'Global Administration';
-    }
-
-    public static function getNavigationSort(): ?int
-    {
-        return 60;
-    }
-
-    public static function getNavigationBadge(): ?string
-    {
-        $count = app(ResultStore::class)
-            ->latestResults()
-            ?->storedCheckResults
-            ->filter(fn ($check) => ! in_array($check->status, [Status::ok()->value, Status::skipped()->value]))
-            ->count();
-
-        return $count > 0 ? $count : null;
-    }
-
-    public static function getNavigationBadgeColor(): string | array | null
-    {
-        return 'danger';
-    }
-
-    public static function canAccess(): bool
-    {
-        /** @var User $user */
-        $user = auth()->user();
-
-        return $user->hasRole(Authenticatable::SUPER_ADMIN_ROLE) && parent::canAccess();
-    }
-}
+};
