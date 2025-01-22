@@ -67,4 +67,14 @@ enum ServiceRequestTypeAssignmentTypes: string implements HasLabel
             default => null
         };
     }
+
+    public function getDescription(): array
+    {
+        return [
+            'none' => 'No assignment is made when this option is selected, allowing service requests to remain unassigned until manual intervention. Ideal for flexible workflows where task assignment is determined later.',
+            'individual' => 'All service requests are assigned to a specific manager. Best suited for cases with a dedicated resource responsible for managing tasks, ensuring consistent oversight and accountability.',
+            'round-robin' => "Service requests are distributed evenly among request managers in a circular order. This ensures fair ticket allocation but doesn't factor in current workloads.",
+            'workload' => 'Assignments are made based on the current workload, with requests directed to the user handling the fewest open tickets. This method balances workloads, improving efficiency and avoiding bottlenecks.',
+        ];
+    }
 }
