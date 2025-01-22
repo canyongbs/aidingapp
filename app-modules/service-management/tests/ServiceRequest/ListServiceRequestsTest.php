@@ -320,23 +320,24 @@ it('filters unassigned service requests', function () {
         ->assertCanNotSeeTableRecords([$assignedRequest]);
 });
 
-it('default non closed service request will not display',function(){
+it('default non closed service request will not display', function () {
     $nonClosedServiceRequests = ServiceRequest::factory()
-                                    ->for(
-                                        ServiceRequestStatus::factory()
-                                        ->state(['classification' => SystemServiceRequestClassification::Open]),'status'
-                                    )
-                                    ->count(3)
-                                    ->create();
-
+        ->for(
+            ServiceRequestStatus::factory()
+                ->state(['classification' => SystemServiceRequestClassification::Open]),
+            'status'
+        )
+        ->count(3)
+        ->create();
 
     $closedServiceRequests = ServiceRequest::factory()
-                                ->for(
-                                    ServiceRequestStatus::factory()
-                                    ->state(['classification' => SystemServiceRequestClassification::Closed]),'status'
-                                )
-                                ->count(3)
-                                ->create();
+        ->for(
+            ServiceRequestStatus::factory()
+                ->state(['classification' => SystemServiceRequestClassification::Closed]),
+            'status'
+        )
+        ->count(3)
+        ->create();
 
     asSuperAdmin();
 

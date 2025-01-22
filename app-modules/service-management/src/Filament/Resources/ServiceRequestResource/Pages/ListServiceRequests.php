@@ -137,14 +137,15 @@ class ListServiceRequests extends ListRecords
                     ->preload(),
                 SelectFilter::make('status')
                     ->relationship('status', 'name')
-                    ->default(fn () => ServiceRequestStatus::query()
-                                        ->where(
-                                            'classification',
-                                            '!=',
-                                            SystemServiceRequestClassification::Closed
-                                        )
-                                        ->pluck('id')
-                                        ->toArray()
+                    ->default(
+                        fn () => ServiceRequestStatus::query()
+                            ->where(
+                                'classification',
+                                '!=',
+                                SystemServiceRequestClassification::Closed
+                            )
+                            ->pluck('id')
+                            ->toArray()
                     )
                     ->multiple()
                     ->preload(),
