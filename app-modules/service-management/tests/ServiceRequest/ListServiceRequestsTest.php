@@ -346,4 +346,4 @@ it('default non closed service request will not display', function () {
         ->assertCanNotSeeTableRecords($closedServiceRequests)
         ->removeTableFilter('status')
         ->assertCanSeeTableRecords($nonClosedServiceRequests->merge($closedServiceRequests));
-})->only();
+});
