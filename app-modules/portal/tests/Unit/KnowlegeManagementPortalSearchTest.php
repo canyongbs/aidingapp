@@ -71,9 +71,9 @@ test('category should present in response', function () {
     $url = URL::signedRoute(name: 'api.portal.search', absolute: false);
     $response = post($url);
 
-    $data = $response->json();
+    $response = $response->json();
 
-    expect($data)->toMatchSnapshot();
+    expect($response)->toMatchSnapshot();
 });
 
 test('filter featured articles', function () {
