@@ -39,11 +39,13 @@ use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ContactServiceMan
 use AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers\ServiceRequestsRelationManager;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
+use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ListServiceRequests;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
+use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\Team\Models\Team;
 use App\Models\User;
@@ -316,4 +318,32 @@ it('filters unassigned service requests', function () {
         ->filterTable('Unassigned')
         ->assertCanSeeTableRecords([$unassignedRequest])
         ->assertCanNotSeeTableRecords([$assignedRequest]);
+});
+
+it('default non closed service request will not display', function () {
+    $nonClosedServiceRequests = ServiceRequest::factory()
+        ->for(
+            ServiceRequestStatus::factory()
+                ->state(['classification' => SystemServiceRequestClassification::Open]),
+            'status'
+        )
+        ->count(3)
+        ->create();
+
+    $closedServiceRequests = ServiceRequest::factory()
+        ->for(
+            ServiceRequestStatus::factory()
+                ->state(['classification' => SystemServiceRequestClassification::Closed]),
+            'status'
+        )
+        ->count(3)
+        ->create();
+
+    asSuperAdmin();
+
+    livewire(ListServiceRequests::class)
+        ->assertCanSeeTableRecords($nonClosedServiceRequests)
+        ->assertCanNotSeeTableRecords($closedServiceRequests)
+        ->removeTableFilter('status')
+        ->assertCanSeeTableRecords($nonClosedServiceRequests->merge($closedServiceRequests));
 });

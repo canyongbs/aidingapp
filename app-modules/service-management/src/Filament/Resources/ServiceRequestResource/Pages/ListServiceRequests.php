@@ -45,6 +45,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Actions\ChangeServiceRequestStatusBulkAction;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
+use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Authenticatable;
 use App\Models\Scopes\EducatableSearch;
@@ -136,6 +137,16 @@ class ListServiceRequests extends ListRecords
                     ->preload(),
                 SelectFilter::make('status')
                     ->relationship('status', 'name')
+                    ->default(
+                        fn () => ServiceRequestStatus::query()
+                            ->where(
+                                'classification',
+                                '!=',
+                                SystemServiceRequestClassification::Closed
+                            )
+                            ->pluck('id')
+                            ->toArray()
+                    )
                     ->multiple()
                     ->preload(),
                 SelectFilter::make('organization')
