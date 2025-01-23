@@ -46,6 +46,7 @@ use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Forms\Components\Select;
 
+use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
@@ -151,4 +152,133 @@ test('During reassignment current assigned user should not be in options', funct
             return empty($options) ? false : true;
         })
         ->assertSuccessful();
+});
+
+test('Assign To Me action visible when the Service Request is unassigned and the logged-in user belongs to a Team that is Manager of the Type of this Service Request', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->serviceManagement = true;
+
+    $settings->save();
+
+    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
+
+    actingAs($user);
+
+    $team = Team::factory()->create();
+
+    $user->teams()->attach($team);
+
+    $user->refresh();
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $serviceRequestType->managers()->attach($team);
+
+    $serviceRequestsWithManager = ServiceRequest::factory()->state([
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $serviceRequestType->getKey(),
+        ])->getKey(),
+    ])
+        ->create();
+
+    livewire(AssignedToRelationManager::class, [
+        'ownerRecord' => $serviceRequestsWithManager,
+        'pageClass' => ManageAssignments::class,
+    ])
+        ->assertTableActionVisible('assign-to-me');
+});
+
+test('Assign To Me action is not visible when the Service Request is already assigned and the logged-in user belongs to a Team that is Manager of the Type of this Service Request', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->serviceManagement = true;
+
+    $settings->save();
+
+    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
+
+    actingAs($user);
+
+    $team = Team::factory()->create();
+
+    $user->teams()->attach($team);
+
+    $user->refresh();
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $serviceRequestType->managers()->attach($team);
+
+    $serviceRequestsWithManager = ServiceRequest::factory()->state([
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $serviceRequestType->getKey(),
+        ])->getKey(),
+    ])
+        ->create();
+
+    $assignedServiceRequest = ServiceRequestAssignment::factory()->state([
+        'service_request_id' => $serviceRequestsWithManager->getKey(),
+        'user_id' => $user->getKey(),
+    ])
+        ->create();
+
+    livewire(AssignedToRelationManager::class, [
+        'ownerRecord' => $serviceRequestsWithManager,
+        'pageClass' => ManageAssignments::class,
+    ])
+        ->assertTableActionHidden('assign-to-me');
+});
+
+test('Assign To Me action is not visible when the Service Request is unassigned and the logged-in user not belongs to a Team that is Manager of the Type of this Service Request', function () {
+    asSuperAdmin();
+
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->serviceManagement = true;
+
+    $settings->save();
+
+    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
+
+    $team = Team::factory()->create();
+
+    $user->teams()->attach($team);
+
+    $user->refresh();
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $serviceRequestType->managers()->attach($team);
+
+    $serviceRequestsWithManager = ServiceRequest::factory()->state([
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $serviceRequestType->getKey(),
+        ])->getKey(),
+    ])
+        ->create();
+
+    livewire(AssignedToRelationManager::class, [
+        'ownerRecord' => $serviceRequestsWithManager,
+        'pageClass' => ManageAssignments::class,
+    ])
+        ->assertTableActionHidden('assign-to-me');
+});
+
+test('Assign Service Request action is visible when the Service Request is unassigned', function () {
+    asSuperAdmin();
+
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->serviceManagement = true;
+
+    $settings->save();
+
+    $serviceRequestsWithManager = ServiceRequest::factory()->create();
+
+    livewire(AssignedToRelationManager::class, [
+        'ownerRecord' => $serviceRequestsWithManager,
+        'pageClass' => ManageAssignments::class,
+    ])
+        ->assertTableActionVisible('assign-service-request');
 });
