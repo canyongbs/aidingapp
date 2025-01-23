@@ -34,50 +34,32 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Filament\Resources\SmsTemplateResource\Pages;
+use Database\Migrations\Concerns\CanModifyPermissions;
+use Illuminate\Database\Migrations\Migration;
 
-use AidingApp\Engagement\Filament\Resources\SmsTemplateResource;
-use App\Concerns\EditPageRedirection;
-use Filament\Actions\DeleteAction;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
-use Filament\Resources\Pages\EditRecord;
-use FilamentTiptapEditor\TiptapEditor;
+return new class () extends Migration {
+    use CanModifyPermissions;
 
-class EditSmsTemplate extends EditRecord
-{
-    use EditPageRedirection;
+    private array $permissions = [
+        'authorization.view_product_health_dashboard' => 'Authorization',
+    ];
 
-    protected static string $resource = SmsTemplateResource::class;
+    private array $guards = [
+        'web',
+        'api',
+    ];
 
-    public function form(Form $form): Form
+    public function up(): void
     {
-        return $form
-            ->columns(1)
-            ->schema([
-                TextInput::make('name')
-                    ->string()
-                    ->required()
-                    ->autocomplete(false),
-                Textarea::make('description')
-                    ->string(),
-                TiptapEditor::make('content')
-                    ->mergeTags([
-                        'contact full name',
-                        'contact email',
-                    ])
-                    ->profile('sms')
-                    ->columnSpanFull()
-                    ->extraInputAttributes(['style' => 'min-height: 12rem;'])
-                    ->required(),
-            ]);
+        collect($this->guards)
+            ->each(fn (string $guard) => $this->deletePermissions(array_keys($this->permissions), $guard));
     }
 
-    protected function getHeaderActions(): array
+    public function down(): void
     {
-        return [
-            DeleteAction::make(),
-        ];
+        collect($this->guards)
+            ->each(function (string $guard) {
+                $this->createPermissions($this->permissions, $guard);
+            });
     }
-}
+};

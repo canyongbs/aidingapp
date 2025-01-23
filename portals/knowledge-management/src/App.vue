@@ -79,7 +79,6 @@
     const hasServiceManagement = ref(false);
     const showLogin = ref(false);
 
-    const portalLayout = ref('');
     const portalPrimaryColor = ref('');
     const portalRounding = ref('');
     const categories = ref({});
@@ -166,8 +165,6 @@
                 const { setHasServiceManagement } = useFeatureStore();
 
                 portalPrimaryColor.value = response.data.primary_color;
-
-                portalLayout.value = response.data.layout;
 
                 headerLogo.value = response.data.header_logo;
 
@@ -397,8 +394,7 @@
 
 <template>
     <div
-        class="font-sans bg-gray-50 min-h-screen"
-        :class="{ 'mx-auto max-w-7xl': portalLayout === 'fixed' }"
+        class="font-sans bg-gray-50 min-h-screen w-full max-w-full"
         :style="{
             '--primary-50': portalPrimaryColor[50],
             '--primary-100': portalPrimaryColor[100],

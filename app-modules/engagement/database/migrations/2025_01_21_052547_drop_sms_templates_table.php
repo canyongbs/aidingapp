@@ -34,21 +34,28 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Database\Factories;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
-
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AidingApp\Engagement\Models\SmsTemplate>
- */
-class SmsTemplateFactory extends Factory
-{
-    public function definition(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            'name' => fake()->word(),
-            'description' => fake()->sentence(),
-            'content' => fake()->paragraph(),
-        ];
+        Schema::dropIfExists('sms_templates');
     }
-}
+
+    public function down(): void
+    {
+        Schema::create('sms_templates', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+
+            $table->string('name');
+            $table->text('description')->nullable();
+            $table->json('content');
+            $table->foreignUuid('user_id')->nullable()->constrained()->nullOnDelete();
+
+            $table->timestamps();
+            $table->softDeletes();
+        });
+    }
+};

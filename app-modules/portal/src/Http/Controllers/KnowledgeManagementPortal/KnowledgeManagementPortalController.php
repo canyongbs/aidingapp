@@ -36,7 +36,6 @@
 
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
-use AidingApp\Portal\Enums\PortalLayout;
 use AidingApp\Portal\Models\PortalGuest;
 use AidingApp\Portal\Settings\PortalSettings;
 use App\Http\Controllers\Controller;
@@ -61,7 +60,6 @@ class KnowledgeManagementPortalController extends Controller
         }
 
         return response()->json([
-            'layout' => $settings->knowledge_management_portal_layout ?? PortalLayout::Full,
             'header_logo' => $logo ? $logo->getTemporaryUrl(
                 expiration: now()->addMinutes(5),
             ) : url(Vite::asset('resources/images/default-logo-light-1735308866.svg')),

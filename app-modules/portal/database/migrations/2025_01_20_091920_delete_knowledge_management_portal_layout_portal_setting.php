@@ -34,35 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Models;
+use Spatie\LaravelSettings\Migrations\SettingsMigration;
 
-use AidingApp\Engagement\Observers\SmsTemplateObserver;
-use App\Models\BaseModel;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
-
-/**
- * @mixin IdeHelperSmsTemplate
- */
-#[ObservedBy([SmsTemplateObserver::class])]
-class SmsTemplate extends BaseModel
-{
-    use SoftDeletes;
-
-    protected $fillable = [
-        'name',
-        'description',
-        'content',
-    ];
-
-    protected $casts = [
-        'content' => 'array',
-    ];
-
-    public function user(): BelongsTo
+return new class () extends SettingsMigration {
+    public function up(): void
     {
-        return $this->belongsTo(User::class);
+        $this->migrator->deleteIfExists('portal.knowledge_management_portal_layout');
     }
-}
+
+    public function down(): void
+    {
+        $this->migrator->add('portal.knowledge_management_portal_layout', null);
+    }
+};
