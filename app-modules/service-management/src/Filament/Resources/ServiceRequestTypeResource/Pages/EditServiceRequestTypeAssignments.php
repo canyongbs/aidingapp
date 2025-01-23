@@ -87,7 +87,11 @@ class EditServiceRequestTypeAssignments extends EditRecord
                             )
                             ->options(ServiceRequestTypeAssignmentTypes::class)
                             ->enum(ServiceRequestTypeAssignmentTypes::class)
-                            ->descriptions($this->record->assignment_type->getDescription())
+                            ->descriptions(
+                                collect(ServiceRequestTypeAssignmentTypes::cases())
+                                    ->mapWithKeys(fn ($assignmentType) => [$assignmentType->value => $assignmentType->getDescription()])
+                                    ->toArray()
+                            )
                             ->required(),
                         Select::make('assignment_type_individual_id')
                             ->label('Assignment Individual')
