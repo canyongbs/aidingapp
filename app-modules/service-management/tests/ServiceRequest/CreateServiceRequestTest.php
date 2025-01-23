@@ -532,6 +532,7 @@ test('assignment type round robin will auto-assign to new service requests', fun
 });
 
 test('assignment type workload will auto-assign to new service requests', function () {
+    asSuperAdmin();
     $factoryUsers = User::factory()->licensed(LicenseType::cases())->count(5)->create();
     $team = Team::factory()
         ->hasAttached($factoryUsers, [], 'users')->create();
