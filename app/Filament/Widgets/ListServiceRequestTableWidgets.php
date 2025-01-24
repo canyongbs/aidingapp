@@ -37,9 +37,11 @@
 namespace App\Filament\Widgets;
 
 use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
+use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
+use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Scopes\EducatableSearch;
 use App\Models\Scopes\EducatableSort;
@@ -111,6 +113,16 @@ class ListServiceRequestTableWidgets extends BaseWidget
                     ->preload(),
                 SelectFilter::make('status')
                     ->relationship('status', 'name')
+                    ->default(
+                        fn () => ServiceRequestStatus::query()
+                            ->where(
+                                'classification',
+                                '!=',
+                                SystemServiceRequestClassification::Closed
+                            )
+                            ->pluck('id')
+                            ->toArray()
+                    )
                     ->multiple()
                     ->preload(),
             ])
