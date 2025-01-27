@@ -54,6 +54,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
 
 class ListServiceRequestTableWidgets extends BaseWidget
 {
@@ -76,14 +77,12 @@ class ListServiceRequestTableWidgets extends BaseWidget
                 IdColumn::make(),
                 TextColumn::make('service_request_number')
                     ->label('Service Request #')
-                    ->searchable()
+                    ->searchable(['service_request_number', 'title'])
                     ->sortable()
                     ->url(fn (ServiceRequest $record) => ServiceRequestResource::getUrl('view', ['record' => $record]))
-                    ->color('primary'),
+                    ->color('primary')
+                    ->description(fn (ServiceRequest $record): string => Str::limit($record->title, 40)),
                 TextColumn::make('status.name')
-                    ->searchable()
-                    ->sortable(),
-                TextColumn::make('title')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('respondent.display_name')
