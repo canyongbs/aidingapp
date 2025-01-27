@@ -89,7 +89,7 @@ class EditServiceRequestTypeAssignments extends EditRecord
                             ->enum(ServiceRequestTypeAssignmentTypes::class)
                             ->descriptions(
                                 collect(ServiceRequestTypeAssignmentTypes::cases())
-                                    ->mapWithKeys(fn ($assignmentType) => [$assignmentType->value => $assignmentType->getDescription()])
+                                    ->mapWithKeys(fn (ServiceRequestTypeAssignmentTypes $assignmentType): array => [$assignmentType->value => $assignmentType->getDescription()])
                                     ->toArray()
                             )
                             ->required(),
