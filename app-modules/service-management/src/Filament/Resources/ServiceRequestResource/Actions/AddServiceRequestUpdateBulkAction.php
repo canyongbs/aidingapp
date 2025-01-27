@@ -115,7 +115,7 @@ class AddServiceRequestUpdateBulkAction
                     })
                     ->process(function (ServiceRequest $serviceRequest) use ($data) {
                         ServiceRequestUpdate::create([
-                            'service_request_id' => $serviceRequest->id,
+                            'service_request_id' => $serviceRequest->getKey(),
                             'update' => $data['update'],
                             'direction' => ServiceRequestUpdateDirection::Outbound,
                             'internal' => $data['internal'],
@@ -130,7 +130,7 @@ class AddServiceRequestUpdateBulkAction
                             return 'Service request update has been created for 1 service request.';
                         }
 
-                        return "Service request update has been created for {$successCount} service request.";
+                        return "Service request update has been created for {$successCount} service requests.";
                     });
             });
     }
