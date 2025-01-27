@@ -65,6 +65,7 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Saade\FilamentFullCalendar\FilamentFullCalendarPlugin;
 use ShuvroRoy\FilamentSpatieLaravelHealth\FilamentSpatieLaravelHealthPlugin;
+use SolutionForest\FilamentSimpleLightBox\SimpleLightBoxPlugin;
 use Spatie\Multitenancy\Http\Middleware\EnsureValidTenantSession;
 
 class AdminPanelProvider extends PanelProvider
@@ -175,6 +176,7 @@ class AdminPanelProvider extends PanelProvider
                 FilamentSpatieLaravelHealthPlugin::make()
                     ->usingPage(ProductHealth::class),
                 FilamentFullCalendarPlugin::make(),
+                SimpleLightBoxPlugin::make(),
             ])
             ->userMenuItems([
                 'profile' => MenuItem::make()
