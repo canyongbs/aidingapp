@@ -37,7 +37,6 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\RelationManagers;
 
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
-use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use App\Filament\Resources\UserResource;
@@ -81,24 +80,7 @@ class AssignedToRelationManager extends RelationManager
             ->paginated(false)
             ->headerActions([
                 Action::make('assign-to-me')
-                    ->visible(function () {
-                        $ownerRecord = $this->getOwnerRecord();
-
-                        if ($ownerRecord?->status?->classification === SystemServiceRequestClassification::Closed) {
-                            return false;
-                        }
-
-                        if (! is_null($ownerRecord->assignedTo)) {
-                            return false;
-                        }
-
-                        $isManager = in_array(auth()->user()?->id, $ownerRecord->priority->type?->managers
-                            ->flatMap(fn ($managers) => $managers->users)
-                            ->pluck('id')
-                            ->toArray());
-
-                        return $isManager;
-                    })
+                    ->visible(fn () => auth()->user()->can('update'))
                     ->label('Assign To Me')
                     ->color('gray')
                     ->requiresConfirmation()
@@ -109,7 +91,7 @@ class AssignedToRelationManager extends RelationManager
                         'status' => ServiceRequestAssignmentStatus::Active,
                     ])),
                 Action::make('assign-service-request')
-                    ->visible($this->getOwnerRecord()?->status?->classification !== SystemServiceRequestClassification::Closed)
+                    ->visible(fn () => auth()->user()->can('update'))
                     ->label(fn () => $this->getOwnerRecord()->assignedTo ? 'Reassign' : 'Assign')
                     ->color('gray')
                     ->action(fn (array $data) => $this->getOwnerRecord()->assignments()->create([
