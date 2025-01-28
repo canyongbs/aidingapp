@@ -37,7 +37,6 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\RelationManagers;
 
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
-use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use App\Filament\Resources\UserResource;
@@ -80,23 +79,38 @@ class AssignedToRelationManager extends RelationManager
             ])
             ->paginated(false)
             ->headerActions([
-                Action::make('reassign-service-request')
-                    ->visible($this->getOwnerRecord()?->status?->classification == SystemServiceRequestClassification::Closed ? false : true)
-                    ->label('Reassign Service Request')
+                Action::make('assign-to-me')
+                    ->visible(fn () => auth()->user()->can('update', $this->getOwnerRecord()))
+                    ->label('Assign To Me')
+                    ->color('gray')
+                    ->requiresConfirmation()
+                    ->action(fn (array $data) => $this->getOwnerRecord()->assignments()->create([
+                        'user_id' => auth()->user()?->id,
+                        'assigned_by_id' => auth()->user()->id ?? null,
+                        'assigned_at' => now(),
+                        'status' => ServiceRequestAssignmentStatus::Active,
+                    ])),
+                Action::make('assign-service-request')
+                    ->visible(fn () => auth()->user()->can('update', $this->getOwnerRecord()))
+                    ->label(fn () => $this->getOwnerRecord()->assignedTo ? 'Reassign' : 'Assign')
                     ->color('gray')
                     ->action(fn (array $data) => $this->getOwnerRecord()->assignments()->create([
                         'user_id' => $data['userId'],
-                        'assigned_by_id' => auth()->user()?->id ?? null,
+                        'assigned_by_id' => auth()->user()->id ?? null,
                         'assigned_at' => now(),
                         'status' => ServiceRequestAssignmentStatus::Active,
                     ]))
                     ->form([
                         Select::make('userId')
-                            ->label('Reassign Service Request To')
+                            ->label(fn () => $this->getOwnerRecord()->assignedTo ? 'Reassign' : 'Assign')
                             ->searchable()
                             ->getSearchResultsUsing(fn (string $search): array => User::query()
                                 ->tap(new HasLicense($this->getOwnerRecord()->respondent->getLicenseType()))
                                 ->where(new Expression('lower(name)'), 'like', '%' . str($search)->lower() . '%')
+                                ->whereHas('teams.manageableServiceRequestTypes', function ($query) {
+                                    $query->where('service_request_type_id', $this->getOwnerRecord()?->priority?->type_id ?? null);
+                                })
+                                ->where('id', '!=', $this->getOwnerRecord()->assignedTo?->user_id)
                                 ->pluck('name', 'id')
                                 ->all())
                             ->getOptionLabelUsing(fn ($value): ?string => User::find($value)?->name)

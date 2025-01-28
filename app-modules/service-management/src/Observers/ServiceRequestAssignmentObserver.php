@@ -41,6 +41,7 @@ use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
 use AidingApp\Notification\Notifications\Channels\EmailChannel;
 use AidingApp\ServiceManagement\Actions\NotifyServiceRequestUsers;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
+use AidingApp\ServiceManagement\Exceptions\AttemptedToAssignNonManagerToServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use AidingApp\ServiceManagement\Notifications\ServiceRequestAssigned;
 use AidingApp\Timeline\Events\TimelineableRecordCreated;
@@ -49,6 +50,14 @@ use App\Models\User;
 
 class ServiceRequestAssignmentObserver
 {
+    public function creating(ServiceRequestAssignment $serviceRequestAssignment): void
+    {
+        throw_if(! in_array($serviceRequestAssignment->user_id, $serviceRequestAssignment->serviceRequest->priority->type?->managers
+            ->flatMap(fn ($managers) => $managers->users)
+            ->pluck('id')
+            ->toArray()), new AttemptedToAssignNonManagerToServiceRequest());
+    }
+
     public function created(ServiceRequestAssignment $serviceRequestAssignment): void
     {
         $user = auth()->user();
