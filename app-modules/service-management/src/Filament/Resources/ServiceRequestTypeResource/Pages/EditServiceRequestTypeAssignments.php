@@ -87,6 +87,11 @@ class EditServiceRequestTypeAssignments extends EditRecord
                             )
                             ->options(ServiceRequestTypeAssignmentTypes::class)
                             ->enum(ServiceRequestTypeAssignmentTypes::class)
+                            ->descriptions(
+                                collect(ServiceRequestTypeAssignmentTypes::cases())
+                                    ->mapWithKeys(fn (ServiceRequestTypeAssignmentTypes $assignmentType): array => [$assignmentType->value => $assignmentType->getDescription()])
+                                    ->toArray()
+                            )
                             ->required(),
                         Select::make('assignment_type_individual_id')
                             ->label('Assignment Individual')
@@ -105,17 +110,6 @@ class EditServiceRequestTypeAssignments extends EditRecord
                             ->required()
                             ->rules(fn (ServiceRequestType $record) => [new ServiceRequestTypeAssignmentsIndividualUserMustBeAManager($record)])
                             ->visible(fn (Get $get) => $get('assignment_type') === ServiceRequestTypeAssignmentTypes::Individual->value),
-                        Heading::make()
-                            ->three()
-                            ->content('Assignment Types'),
-                        Paragraph::make()
-                            ->content('None: No assignment is made when this option is selected, allowing service requests to remain unassigned until manual intervention. Ideal for flexible workflows where task assignment is determined later.'),
-                        Paragraph::make()
-                            ->content('Individual: All service requests are assigned to a specific manager. Best suited for cases with a dedicated resource responsible for managing tasks, ensuring consistent oversight and accountability.'),
-                        Paragraph::make()
-                            ->content('Round Robin: Service requests are distributed evenly among request managers in a circular order. This ensures fair ticket allocation but doesn\'t factor in current workloads.'),
-                        Paragraph::make()
-                            ->content('Workload: Assignments are made based on the current workload, with requests directed to the user handling the fewest open tickets. This method balances workloads, improving efficiency and avoiding bottlenecks.'),
                     ]),
             ]);
     }
