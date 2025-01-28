@@ -80,7 +80,7 @@ class AssignedToRelationManager extends RelationManager
             ->paginated(false)
             ->headerActions([
                 Action::make('assign-to-me')
-                    ->visible(fn () => auth()->user()->can('update'))
+                    ->visible(fn () => auth()->user()->can('update', $this->getOwnerRecord()))
                     ->label('Assign To Me')
                     ->color('gray')
                     ->requiresConfirmation()
@@ -91,7 +91,7 @@ class AssignedToRelationManager extends RelationManager
                         'status' => ServiceRequestAssignmentStatus::Active,
                     ])),
                 Action::make('assign-service-request')
-                    ->visible(fn () => auth()->user()->can('update'))
+                    ->visible(fn () => auth()->user()->can('update', $this->getOwnerRecord()))
                     ->label(fn () => $this->getOwnerRecord()->assignedTo ? 'Reassign' : 'Assign')
                     ->color('gray')
                     ->action(fn (array $data) => $this->getOwnerRecord()->assignments()->create([

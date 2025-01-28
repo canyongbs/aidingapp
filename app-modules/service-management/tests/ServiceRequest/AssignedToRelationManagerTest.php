@@ -165,13 +165,7 @@ test('Assign To Me action visible when the Service Request is unassigned and the
 
     $user = User::factory()->licensed([Contact::getLicenseType()])->create();
 
-    $user->givePermissionTo('service_request.view-any');
-    $user->givePermissionTo('service_request.*.view');
     $user->givePermissionTo('service_request.*.update');
-    $user->givePermissionTo('service_request_assignment.view-any');
-    $user->givePermissionTo('service_request_assignment.*.view');
-    $user->givePermissionTo('service_request_assignment.*.update');
-    $user->givePermissionTo('service_request_assignment.create');
 
     $team = Team::factory()->create();
 
@@ -283,7 +277,6 @@ test('Assign Service Request action visible when the Service Request is unassign
 
     $user = User::factory()->licensed([Contact::getLicenseType()])->create();
 
-    $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.*.update');
 
     actingAs($user);
@@ -299,6 +292,9 @@ test('Assign Service Request action visible when the Service Request is unassign
     $serviceRequestType->managers()->attach($team);
 
     $serviceRequestsWithManager = ServiceRequest::factory()->state([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ])->getKey(),
         'priority_id' => ServiceRequestPriority::factory()->create([
             'type_id' => $serviceRequestType->getKey(),
         ])->getKey(),
