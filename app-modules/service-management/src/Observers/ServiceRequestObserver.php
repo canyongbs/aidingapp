@@ -103,7 +103,7 @@ class ServiceRequestObserver
                 $currentTime = Carbon::now();
 
                 // Calculate the difference in seconds
-                $secondsDifference = $createdTime ? $createdTime->diffInSeconds($currentTime) : null;
+                $secondsDifference = $createdTime ? round($createdTime->diffInSeconds($currentTime)) : null;
                 $serviceRequest->time_to_resolution = $secondsDifference;
             }
         }

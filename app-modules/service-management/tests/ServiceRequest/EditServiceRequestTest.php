@@ -131,7 +131,7 @@ test('check if time to resolution has correct value when status is changed', fun
     $updatedTime = $serviceRequest->updated_at;
 
     // Calculate the difference in seconds
-    $secondsDifference = ($createdTime && $updatedTime) ? $createdTime->diffInSeconds($updatedTime) : null;
+    $secondsDifference = ($createdTime && $updatedTime) ? round($createdTime->diffInSeconds($updatedTime)) : null;
 
     expect($serviceRequest->time_to_resolution)
         ->toEqual($secondsDifference);

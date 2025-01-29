@@ -55,7 +55,7 @@ return new class () extends Migration {
             $updatedTime = Carbon::parse($serviceRequest->updated_at);
 
             // Calculate the difference in seconds
-            $secondsDifference = ($createdTime && $updatedTime) ? $createdTime->diffInSeconds($updatedTime) : null;
+            $secondsDifference = ($createdTime && $updatedTime) ? round($createdTime->diffInSeconds($updatedTime)) : null;
 
             DB::table('service_requests')
                 ->where('id', $serviceRequest->id)
