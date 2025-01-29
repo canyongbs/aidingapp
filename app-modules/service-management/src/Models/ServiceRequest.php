@@ -106,6 +106,7 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
 
     protected $casts = [
         'status_updated_at' => 'immutable_datetime',
+        'time_to_resolution' => 'integer',
     ];
 
     public function registerMediaCollections(): void
