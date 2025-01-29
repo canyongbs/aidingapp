@@ -63,9 +63,9 @@ class Role extends SpatieRole implements Auditable
             getModelForGuard($this->attributes['guard_name'] ?? config('auth.defaults.guard')),
             'model',
             config('permission.table_names.model_has_roles'),
-            PermissionRegistrar::$pivotRole,
+            app(PermissionRegistrar::class)->pivotRole,
             config('permission.column_names.model_morph_key')
-        )->withPivot('via');
+        );
     }
 
     public function scopeApi(Builder $query): void

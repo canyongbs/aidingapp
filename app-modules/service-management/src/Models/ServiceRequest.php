@@ -106,6 +106,7 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
 
     protected $casts = [
         'status_updated_at' => 'immutable_datetime',
+        'time_to_resolution' => 'integer',
     ];
 
     public function registerMediaCollections(): void
@@ -273,14 +274,14 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
     public function getLatestResponseSeconds(): int
     {
         if (! $this->latestInboundServiceRequestUpdate) {
-            return $this->created_at->diffInSeconds(now());
+            return round($this->created_at->diffInSeconds(now()));
         }
 
         if (
             $this->isResolved() &&
             ($resolvedAt = $this->getResolvedAt())->isAfter($this->latestInboundServiceRequestUpdate->created_at)
         ) {
-            return $resolvedAt->diffInSeconds($this->latestInboundServiceRequestUpdate->created_at);
+            return round($resolvedAt->diffInSeconds($this->latestInboundServiceRequestUpdate->created_at));
         }
 
         if (
@@ -289,21 +290,21 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
                 $this->latestInboundServiceRequestUpdate->created_at,
             )
         ) {
-            return $this->latestOutboundServiceRequestUpdate->created_at->diffInSeconds(
+            return round($this->latestOutboundServiceRequestUpdate->created_at->diffInSeconds(
                 $this->latestInboundServiceRequestUpdate->created_at,
-            );
+            ));
         }
 
-        return $this->latestInboundServiceRequestUpdate->created_at->diffInSeconds();
+        return round($this->latestInboundServiceRequestUpdate->created_at->diffInSeconds());
     }
 
     public function getResolutionSeconds(): int
     {
         if (! $this->isResolved()) {
-            return $this->created_at->diffInSeconds();
+            return round($this->created_at->diffInSeconds());
         }
 
-        return $this->created_at->diffInSeconds($this->getResolvedAt());
+        return round($this->created_at->diffInSeconds($this->getResolvedAt()));
     }
 
     public function getSlaResponseSeconds(): ?int
