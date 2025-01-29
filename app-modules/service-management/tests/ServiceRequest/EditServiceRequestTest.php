@@ -52,6 +52,9 @@ use Illuminate\Support\Facades\Notification;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\freezeTime;
+use function Pest\Laravel\travel;
+use function Pest\Laravel\travelBack;
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
@@ -105,7 +108,7 @@ test('A successful action on the EditServiceRequest page', function () {
 });
 
 test('check if time to resolution has correct value when status is changed', function () {
-    $this->travel(-10)->seconds();
+    travel(-10)->seconds();
 
     $serviceRequest = ServiceRequest::factory([
         'status_id' => ServiceRequestStatus::factory()->create([
@@ -115,9 +118,9 @@ test('check if time to resolution has correct value when status is changed', fun
 
     asSuperAdmin();
 
-    $this->travelBack();
+    travelBack();
 
-    $this->freezeTime(function () use ($serviceRequest) {
+    freezeTime(function () use ($serviceRequest) {
         $request = collect(EditServiceRequestRequestFactory::new([
             'status_id' => ServiceRequestStatus::factory()->create([
                 'classification' => SystemServiceRequestClassification::Closed,
@@ -137,7 +140,7 @@ test('check if time to resolution has correct value when status is changed', fun
         $updatedTime = $serviceRequest->updated_at;
 
         // Calculate the difference in seconds
-        $secondsDifference = ($createdTime && $updatedTime) ? round($createdTime->diffInSeconds($updatedTime)) : null;
+        $secondsDifference = ($createdTime && $updatedTime) ? round($createdTime->diffInSeconds(now())) : null;
 
         expect($serviceRequest->time_to_resolution)
             ->toEqual($secondsDifference);
