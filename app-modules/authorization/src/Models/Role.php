@@ -37,6 +37,7 @@
 namespace AidingApp\Authorization\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use App\Models\Authenticatable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -80,7 +81,7 @@ class Role extends SpatieRole implements Auditable
     public function scopeSuperAdmin(Builder $query): void
     {
         $query
-            ->where('name', 'SaaS Global Admin')
+            ->where('name', Authenticatable::SUPER_ADMIN_ROLE)
             ->where('guard_name', 'web');
     }
 }
