@@ -105,36 +105,43 @@ test('A successful action on the EditServiceRequest page', function () {
 });
 
 test('check if time to resolution has correct value when status is changed', function () {
+    $this->travel(-10)->seconds();
+
     $serviceRequest = ServiceRequest::factory([
         'status_id' => ServiceRequestStatus::factory()->create([
             'classification' => SystemServiceRequestClassification::Open,
         ])->id,
     ])->create();
+
     asSuperAdmin();
-    sleep(10);
-    $request = collect(EditServiceRequestRequestFactory::new([
-        'status_id' => ServiceRequestStatus::factory()->create([
-            'classification' => SystemServiceRequestClassification::Closed,
-        ])->id,
-    ])->create());
 
-    livewire(EditServiceRequest::class, [
-        'record' => $serviceRequest->getRouteKey(),
-    ])
-        ->fillForm($request->toArray())
-        ->call('save')
-        ->assertHasNoFormErrors();
+    $this->travelBack();
 
-    $serviceRequest->refresh();
+    $this->freezeTime(function () use ($serviceRequest) {
+        $request = collect(EditServiceRequestRequestFactory::new([
+            'status_id' => ServiceRequestStatus::factory()->create([
+                'classification' => SystemServiceRequestClassification::Closed,
+            ])->id,
+        ])->create());
 
-    $createdTime = $serviceRequest->created_at;
-    $updatedTime = $serviceRequest->updated_at;
+        livewire(EditServiceRequest::class, [
+            'record' => $serviceRequest->getRouteKey(),
+        ])
+            ->fillForm($request->toArray())
+            ->call('save')
+            ->assertHasNoFormErrors();
 
-    // Calculate the difference in seconds
-    $secondsDifference = ($createdTime && $updatedTime) ? round($createdTime->diffInSeconds($updatedTime)) : null;
+        $serviceRequest->refresh();
 
-    expect($serviceRequest->time_to_resolution)
-        ->toEqual($secondsDifference);
+        $createdTime = $serviceRequest->created_at;
+        $updatedTime = $serviceRequest->updated_at;
+
+        // Calculate the difference in seconds
+        $secondsDifference = ($createdTime && $updatedTime) ? round($createdTime->diffInSeconds($updatedTime)) : null;
+
+        expect($serviceRequest->time_to_resolution)
+            ->toEqual($secondsDifference);
+    });
 });
 
 test('EditServiceRequest requires valid data', function ($data, $errors) {
