@@ -72,16 +72,14 @@ class AddServiceRequestUpdateBulkAction
                 $records->loadMissing(['priority.type.managers', 'serviceRequestUpdates']);
 
                 $user = auth()->user();
-                $isUserSuperAdmin = $user->hasRole(Authenticatable::SUPER_ADMIN_ROLE);
-                $canUserAddServiceRequestUpdate = $user->can('service_request.*.update') && $user->can('service_request_update.create');
 
                 BulkProcessingMachine::make($records->all())
-                    ->check(function (ServiceRequest $serviceRequest) use ($user, $canUserAddServiceRequestUpdate): ?Closure {
+                    ->check(function (ServiceRequest $serviceRequest) use ($user): ?Closure {
                         $user = auth()->user();
 
                         if (
                             $user->hasLicense($serviceRequest->respondent->getLicenseType()) &&
-                            $canUserAddServiceRequestUpdate
+                            $user->can('service_request.*.update') && $user->can('service_request_update.create')
                         ) {
                             return null;
                         }
@@ -94,8 +92,8 @@ class AddServiceRequestUpdateBulkAction
                             return "Service request update cannot be created for {$count} service requests because you do not have permission.";
                         };
                     })
-                    ->check(function (ServiceRequest $serviceRequest) use ($user, $isUserSuperAdmin): ?Closure {
-                        if ($isUserSuperAdmin) {
+                    ->check(function (ServiceRequest $serviceRequest) use ($user): ?Closure {
+                        if ($user->hasRole(Authenticatable::SUPER_ADMIN_ROLE)) {
                             return null;
                         }
 
