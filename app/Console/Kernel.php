@@ -38,6 +38,7 @@ namespace App\Console;
 
 use AidingApp\Audit\Models\Audit;
 use AidingApp\Engagement\Models\EngagementFile;
+use App\Models\HealthCheckResultHistoryItem;
 use App\Models\Scopes\SetupIsComplete;
 use App\Models\Tenant;
 use Filament\Actions\Imports\Models\FailedImportRow;
@@ -77,6 +78,7 @@ class Kernel extends ConsoleKernel
                         Audit::class,
                         EngagementFile::class,
                         FailedImportRow::class,
+                        HealthCheckResultHistoryItem::class,
                     ])
                         ->each(
                             fn ($model) => $schedule->command("tenants:artisan \"model:prune --model={$model}\" --tenant={$tenant->id}")
