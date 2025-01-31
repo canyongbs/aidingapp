@@ -56,7 +56,11 @@ use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 test('The correct details are displayed on the ListServiceRequests page', function () {
+    asSuperAdmin();
+
     $user = User::factory()->create();
+
+    $user->givePermissionTo('service_request.*.update');
 
     $team = Team::factory()->create();
 
@@ -85,8 +89,6 @@ test('The correct details are displayed on the ListServiceRequests page', functi
         ])
         ->count(10)
         ->create();
-
-    asSuperAdmin();
 
     $component = livewire(ListServiceRequests::class);
 
@@ -322,6 +324,8 @@ it('filters unassigned service requests', function () {
 
     $user = User::factory()->create();
 
+    $user->givePermissionTo('service_request.*.update');
+
     $team = Team::factory()->create();
 
     $user->teams()->attach($team);
@@ -331,6 +335,8 @@ it('filters unassigned service requests', function () {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     $serviceRequestType->managers()->attach($team);
+
+    asSuperAdmin();
 
     $assignedRequest = ServiceRequest::factory()
         ->has(
@@ -347,8 +353,6 @@ it('filters unassigned service requests', function () {
             ])->getKey(),
         ])
         ->create();
-
-    asSuperAdmin();
 
     livewire(ListServiceRequests::class)
         ->assertCanSeeTableRecords([
