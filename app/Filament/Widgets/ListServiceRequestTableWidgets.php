@@ -86,10 +86,6 @@ class ListServiceRequestTableWidgets extends BaseWidget
                     ->searchable()
                     ->sortable()
                     ->toggleable(),
-                TextColumn::make('title')
-                    ->searchable()
-                    ->sortable()
-                    ->toggleable(),
                 TextColumn::make('respondent.display_name')
                     ->label('Related To')
                     ->getStateUsing(fn (ServiceRequest $record) => $record->respondent->{$record->respondent::displayNameKey()})
