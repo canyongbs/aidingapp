@@ -205,6 +205,8 @@ test('Assign To Me action is not visible when the Service Request is already ass
 
     $user = User::factory()->licensed([Contact::getLicenseType()])->create();
 
+    $user->givePermissionTo('service_request.*.update');
+
     actingAs($user);
 
     $team = Team::factory()->create();
@@ -348,6 +350,8 @@ test('Assign To Me action is not visible when the Service Request is Closed and 
 
     $user = User::factory()->licensed([Contact::getLicenseType()])->create();
 
+    $user->givePermissionTo('service_request.*.update');
+
     actingAs($user);
 
     $team = Team::factory()->create();
@@ -367,12 +371,6 @@ test('Assign To Me action is not visible when the Service Request is Closed and 
         'status_id' => ServiceRequestStatus::factory()->create([
             'classification' => SystemServiceRequestClassification::Closed,
         ])->getKey(),
-    ])
-        ->create();
-
-    $assignedServiceRequest = ServiceRequestAssignment::factory()->state([
-        'service_request_id' => $serviceRequestsWithManager->getKey(),
-        'user_id' => $user->getKey(),
     ])
         ->create();
 

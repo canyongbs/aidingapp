@@ -80,7 +80,7 @@ class AssignedToRelationManager extends RelationManager
             ->paginated(false)
             ->headerActions([
                 Action::make('assign-to-me')
-                    ->visible(fn () => auth()->user()->can('update', $this->getOwnerRecord()))
+                    ->visible(fn () => auth()->user()->can('update', $this->getOwnerRecord()) && is_null($this->getOwnerRecord()->assignedTo))
                     ->label('Assign To Me')
                     ->color('gray')
                     ->requiresConfirmation()

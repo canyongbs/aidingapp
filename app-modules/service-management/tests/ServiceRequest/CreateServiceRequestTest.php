@@ -439,6 +439,7 @@ test('assignment type individual manager will auto assign to new service request
 
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.create');
+    $user->givePermissionTo('service_request.*.update');
 
     $team = Team::factory()->create();
 

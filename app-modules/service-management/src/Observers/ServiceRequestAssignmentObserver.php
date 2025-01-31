@@ -52,7 +52,7 @@ class ServiceRequestAssignmentObserver
 {
     public function creating(ServiceRequestAssignment $serviceRequestAssignment): void
     {
-        throw_if(! auth()->user()->can('update', $serviceRequestAssignment->serviceRequest), new AttemptedToAssignNonManagerToServiceRequest());
+        throw_if(! auth()->user()->can('update', $serviceRequestAssignment->serviceRequest) && ! $serviceRequestAssignment->user()->can('update', $serviceRequestAssignment->serviceRequest), new AttemptedToAssignNonManagerToServiceRequest());
     }
 
     public function created(ServiceRequestAssignment $serviceRequestAssignment): void
