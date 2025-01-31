@@ -76,7 +76,7 @@ test('it can add updates to multiple service requests as super admin', function 
     });
 });
 
-test('AddServiceRequestUpdateBulkAction is gated with proper access control', function () {
+test('it can add updates to multiple service requests for user with update permission', function () {
     $user = User::factory()->licensed([Contact::getLicenseType()])->create();
 
     $team = Team::factory()->create();
