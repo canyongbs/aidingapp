@@ -39,10 +39,12 @@ use AidingApp\Authorization\Models\License;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
+use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\CreateServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
+use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Tests\RequestFactories\CreateServiceRequestRequestFactory;
 use AidingApp\Team\Models\Team;
@@ -461,6 +463,9 @@ test('assignment type individual manager will auto assign to new service request
         ->create();
 
     $request = collect(CreateServiceRequestRequestFactory::new()->create([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ])->getKey(),
         'priority_id' => ServiceRequestPriority::factory()->create([
             'type_id' => $serviceRequestTypesWithManager->getKey(),
         ])->getKey(),
@@ -495,6 +500,9 @@ test('assignment type round robin will auto-assign to new service requests', fun
         ->create();
 
     $request = collect(CreateServiceRequestRequestFactory::new()->create([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ])->getKey(),
         'priority_id' => ServiceRequestPriority::factory()->create([
             'type_id' => $serviceRequestTypeWithManager->getKey(),
         ])->getKey(),
@@ -535,6 +543,7 @@ test('assignment type round robin will auto-assign to new service requests', fun
 test('assignment type workload will auto-assign to new service requests', function () {
     asSuperAdmin();
     $factoryUsers = User::factory()->licensed(LicenseType::cases())->count(5)->create();
+    $factoryUsers->each(fn ($user) => $user->givePermissionTo('service_request.*.update'));
     $team = Team::factory()
         ->hasAttached($factoryUsers, [], 'users')->create();
 
@@ -553,6 +562,9 @@ test('assignment type workload will auto-assign to new service requests', functi
             'priority_id' => ServiceRequestPriority::factory()->create([
                 'type_id' => $serviceRequestTypeWithManager->getKey(),
             ])->getKey(),
+            'status_id' => ServiceRequestStatus::factory()->create([
+                'classification' => SystemServiceRequestClassification::Open,
+            ])->getKey(),
         ])->create();
         $serviceRequest->assignments()->create([
             'user_id' => $factoryUser->getKey(),
@@ -563,6 +575,9 @@ test('assignment type workload will auto-assign to new service requests', functi
         $serviceRequest = ServiceRequest::factory()->state([
             'priority_id' => ServiceRequestPriority::factory()->create([
                 'type_id' => $serviceRequestTypeWithManager->getKey(),
+            ])->getKey(),
+            'status_id' => ServiceRequestStatus::factory()->create([
+                'classification' => SystemServiceRequestClassification::Open,
             ])->getKey(),
         ])->create();
         $serviceRequest->assignments()->create([
