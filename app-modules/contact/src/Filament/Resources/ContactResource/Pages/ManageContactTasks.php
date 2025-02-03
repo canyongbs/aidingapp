@@ -50,6 +50,4 @@ class ManageContactTasks extends BaseTaskRelationManager
 
     // TODO: Automatically set from Filament based on relationship name
     protected static ?string $breadcrumb = 'Tasks';
-
-    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
 }

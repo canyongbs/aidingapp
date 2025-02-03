@@ -54,8 +54,6 @@ class ManageContactEngagement extends ManageRelatedRecords
 
     protected static ?string $breadcrumb = 'Email and Texts';
 
-    protected static ?string $navigationIcon = 'heroicon-o-chat-bubble-bottom-center-text';
-
     public function getTitle(): string | Htmlable
     {
         return 'Manage Contact Emails';

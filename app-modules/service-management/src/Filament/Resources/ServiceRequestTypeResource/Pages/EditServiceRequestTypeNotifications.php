@@ -51,8 +51,6 @@ class EditServiceRequestTypeNotifications extends EditRecord
 
     protected static ?string $title = 'Notifications';
 
-    protected static ?string $navigationIcon = 'heroicon-o-bell-alert';
-
     public function getRelationManagers(): array
     {
         // Needed to prevent Filament from loading the relation managers on this page.

@@ -49,8 +49,6 @@ class KnowledgeBaseCategoryResource extends Resource
 {
     protected static ?string $model = KnowledgeBaseCategory::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
     protected static ?string $navigationLabel = 'Categories';
 
     protected static ?int $navigationSort = 1;

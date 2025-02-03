@@ -48,8 +48,6 @@ class OrganizationIndustryResource extends Resource
 {
     protected static ?string $model = OrganizationIndustry::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
     protected static ?string $navigationLabel = 'Org Industries';
 
     protected static ?int $navigationSort = 4;
