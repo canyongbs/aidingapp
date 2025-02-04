@@ -47,8 +47,6 @@ class ServiceRequestFormResource extends Resource
 {
     protected static ?string $model = ServiceRequestForm::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-clipboard';
-
     protected static ?int $navigationSort = 30;
 
     protected static ?string $navigationGroup = 'Service Requests';

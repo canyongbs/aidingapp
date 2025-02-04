@@ -70,8 +70,6 @@ class ManageContactAlerts extends ManageRelatedRecords
     // TODO: Automatically set from Filament based on relationship name
     protected static ?string $breadcrumb = 'Alerts';
 
-    protected static ?string $navigationIcon = 'heroicon-o-bell-alert';
-
     public static function getNavigationItems(array $urlParameters = []): array
     {
         $item = parent::getNavigationItems($urlParameters)[0];

@@ -48,8 +48,6 @@ class AuditResource extends Resource
 
     protected static ?string $navigationLabel = 'Other Records';
 
-    protected static ?string $navigationIcon = 'heroicon-o-shield-check';
-
     protected static ?int $navigationSort = 40;
 
     protected static ?string $cluster = UsageAuditing::class;

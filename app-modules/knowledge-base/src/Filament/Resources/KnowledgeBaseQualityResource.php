@@ -48,8 +48,6 @@ class KnowledgeBaseQualityResource extends Resource
 {
     protected static ?string $model = KnowledgeBaseQuality::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
     protected static ?string $navigationLabel = 'Qualities';
 
     protected static ?int $navigationSort = 2;

@@ -51,8 +51,6 @@ class ManageServiceRequestTypeManagers extends ManageRelatedRecords
 
     protected static string $relationship = 'managers';
 
-    protected static ?string $navigationIcon = 'heroicon-o-adjustments-horizontal';
-
     public static function getNavigationLabel(): string
     {
         return 'Managers';
