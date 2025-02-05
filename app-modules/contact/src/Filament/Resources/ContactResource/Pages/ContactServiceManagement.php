@@ -55,8 +55,6 @@ class ContactServiceManagement extends ManageRelatedRecords
 
     protected static ?string $breadcrumb = 'Service Requests';
 
-    protected static ?string $navigationIcon = 'heroicon-o-briefcase';
-
     public function getTitle(): string | Htmlable
     {
         return 'Service Requests';

@@ -49,8 +49,6 @@ class ContactStatusResource extends Resource
 {
     protected static ?string $model = ContactStatus::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-tag';
-
     protected static ?string $navigationLabel = 'Statuses';
 
     protected static ?int $navigationSort = 1;

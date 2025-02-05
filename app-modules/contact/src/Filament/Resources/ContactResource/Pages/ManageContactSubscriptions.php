@@ -64,8 +64,6 @@ class ManageContactSubscriptions extends ManageRelatedRecords
     // TODO: Automatically set from Filament based on relationship name
     protected static ?string $breadcrumb = 'Subscriptions';
 
-    protected static ?string $navigationIcon = 'heroicon-o-user';
-
     //TODO: manually override check canAccess for policy
 
     public function table(Table $table): Table

@@ -47,8 +47,6 @@ class ContractTypeResource extends Resource
 {
     protected static ?string $model = ContractType::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-document-duplicate';
-
     protected static ?string $cluster = ContractManagement::class;
 
     public static function getPages(): array

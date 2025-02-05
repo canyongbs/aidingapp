@@ -165,3 +165,30 @@ li[data-group-label=''] > ul > .fi-sidebar-item > .fi-sidebar-item-button > .fi-
 .dark_button_border {
     @apply dark:border dark:border-white dark:hover:border-white !important;
 }
+
+.fi-sidebar {
+    @apply !bg-white dark:!bg-gray-900;
+}
+
+.fi-sidebar-nav > ul > li .fi-active > a {
+    @apply dark:bg-white/20;
+}
+
+.fi-sidebar-nav > ul > li a {
+    @apply dark:hover:!bg-white/20;
+}
+.fi-page-sub-navigation-sidebar-ctn {
+    @apply bg-white border border-gray-950/5 rounded-xl dark:bg-gray-900 dark:border-white/10;
+}
+
+.fi-page-sub-navigation-sidebar {
+    @apply p-3;
+}
+
+.fi-page-sub-navigation-sidebar .fi-sidebar-item-icon {
+    @apply hidden;
+}
+
+.fi-page-sub-navigation-sidebar .fi-sidebar-item-grouped-border {
+    @apply hidden;
+}

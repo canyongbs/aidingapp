@@ -42,6 +42,7 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Actions\AddServiceRequestUpdateBulkAction;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Actions\ChangeServiceRequestStatusBulkAction;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
@@ -179,6 +180,7 @@ class ListServiceRequests extends ListRecords
             ->bulkActions([
                 BulkActionGroup::make([
                     ChangeServiceRequestStatusBulkAction::make(),
+                    AddServiceRequestUpdateBulkAction::make(),
                     DeleteBulkAction::make()
                         ->action(function ($records) {
                             $deletedRecordsCount = ServiceRequest::query()

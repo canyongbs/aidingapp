@@ -66,8 +66,6 @@ class ServiceRequestTypeResource extends Resource
 
     protected static ?string $navigationLabel = 'Types';
 
-    protected static ?string $navigationIcon = 'heroicon-m-rectangle-stack';
-
     protected static ?int $navigationSort = 10;
 
     protected static ?string $cluster = ServiceManagementAdministration::class;

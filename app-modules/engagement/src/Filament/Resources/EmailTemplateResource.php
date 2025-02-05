@@ -47,8 +47,6 @@ class EmailTemplateResource extends Resource
 {
     protected static ?string $model = EmailTemplate::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-envelope';
-
     protected static ?string $navigationGroup = 'Communication';
 
     protected static ?int $navigationSort = 120;
