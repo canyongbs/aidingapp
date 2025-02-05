@@ -80,13 +80,16 @@ class AssignedToRelationManager extends RelationManager
             ->paginated(false)
             ->headerActions([
                 Action::make('assign-to-me')
-                    ->visible(fn () => auth()->user()->can('update', $this->getOwnerRecord()))
+                    ->visible(fn () => auth()->user()->can('update', $this->getOwnerRecord()) && is_null($this->getOwnerRecord()->assignedTo) && in_array(auth()->user()?->getKey(), $this->getOwnerRecord()->priority->type?->managers
+                        ->flatMap(fn ($managers) => $managers->users)
+                        ->pluck('id')
+                        ->toArray()))
                     ->label('Assign To Me')
                     ->color('gray')
                     ->requiresConfirmation()
                     ->action(fn (array $data) => $this->getOwnerRecord()->assignments()->create([
-                        'user_id' => auth()->user()?->id,
-                        'assigned_by_id' => auth()->user()->id ?? null,
+                        'user_id' => auth()->user()?->getKey(),
+                        'assigned_by_id' => auth()->user()->getKey() ?? null,
                         'assigned_at' => now(),
                         'status' => ServiceRequestAssignmentStatus::Active,
                     ])),
@@ -96,7 +99,7 @@ class AssignedToRelationManager extends RelationManager
                     ->color('gray')
                     ->action(fn (array $data) => $this->getOwnerRecord()->assignments()->create([
                         'user_id' => $data['userId'],
-                        'assigned_by_id' => auth()->user()->id ?? null,
+                        'assigned_by_id' => auth()->user()->getKey() ?? null,
                         'assigned_at' => now(),
                         'status' => ServiceRequestAssignmentStatus::Active,
                     ]))
