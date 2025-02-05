@@ -44,7 +44,6 @@ class SyncTenantRequest extends FormRequest
     {
         return [
             'limits' => ['required', 'array'],
-            'limits.conversationalAiSeats' => ['required', 'integer', 'min:0'],
             'limits.recruitmentCrmSeats' => ['required', 'integer', 'min:0'],
             'limits.emails' => ['required', 'integer', 'min:0'],
             'limits.sms' => ['required', 'integer', 'min:0'],

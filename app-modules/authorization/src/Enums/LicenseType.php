@@ -69,7 +69,6 @@ enum LicenseType: string implements HasLabel
         $licenseSettings = app(LicenseSettings::class);
 
         return match ($this) {
-            LicenseType::ConversationalAi => $licenseSettings->data->limits->conversationalAiSeats,
             LicenseType::RecruitmentCrm => $licenseSettings->data->limits->recruitmentCrmSeats,
         };
     }
