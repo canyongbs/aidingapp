@@ -59,7 +59,6 @@ class Licenses extends Section
             ])
             ->collapsible()
             ->schema([
-                $this->generateBlockForLicenseType(LicenseType::ConversationalAi),
                 $this->generateBlockForLicenseType(LicenseType::RecruitmentCrm),
             ]);
     }

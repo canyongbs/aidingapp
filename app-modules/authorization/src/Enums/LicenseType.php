@@ -42,14 +42,11 @@ use Filament\Support\Contracts\HasLabel;
 
 enum LicenseType: string implements HasLabel
 {
-    case ConversationalAi = 'conversational_ai';
-
     case RecruitmentCrm = 'recruitment_crm';
 
     public function getLabel(): ?string
     {
         return match ($this) {
-            LicenseType::ConversationalAi => 'Support Assistant',
             LicenseType::RecruitmentCrm => 'Helpdesk',
         };
     }
