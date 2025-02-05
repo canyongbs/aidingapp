@@ -48,8 +48,6 @@ class OrganizationTypeResource extends Resource
 {
     protected static ?string $model = OrganizationType::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
     protected static ?string $navigationLabel = 'Org Types';
 
     protected static ?int $navigationSort = 3;

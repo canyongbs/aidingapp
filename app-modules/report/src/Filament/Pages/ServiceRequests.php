@@ -47,8 +47,6 @@ use Filament\Pages\Dashboard;
 
 class ServiceRequests extends Dashboard
 {
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
-
     protected static ?string $cluster = ReportLibrary::class;
 
     protected static ?string $navigationGroup = 'Service Management';

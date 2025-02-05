@@ -47,8 +47,6 @@ use Filament\Pages\SettingsPage;
 
 class ManageAiSettings extends SettingsPage
 {
-    protected static ?string $navigationIcon = 'heroicon-o-cog-6-tooth';
-
     protected static string $settings = AiSettings::class;
 
     protected static ?string $title = 'Cognitive Services Settings';

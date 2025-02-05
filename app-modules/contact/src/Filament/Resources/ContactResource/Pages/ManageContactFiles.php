@@ -52,8 +52,6 @@ class ManageContactFiles extends ManageRelatedRecords
 
     protected static ?string $breadcrumb = 'Files';
 
-    protected static ?string $navigationIcon = 'heroicon-o-folder';
-
     public static function canAccess(array $arguments = []): bool
     {
         return (bool) count(static::managers($arguments['record'] ?? null));

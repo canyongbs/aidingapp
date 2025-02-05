@@ -50,8 +50,6 @@ class ServiceRequestStatusResource extends Resource
 {
     protected static ?string $model = ServiceRequestStatus::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-tag';
-
     protected static ?int $navigationSort = 20;
 
     protected static ?string $navigationGroup = 'Service Requests';

@@ -51,8 +51,6 @@ class ManageServiceRequestTypeAuditors extends ManageRelatedRecords
 
     protected static string $relationship = 'auditors';
 
-    protected static ?string $navigationIcon = 'heroicon-o-book-open';
-
     public static function getNavigationLabel(): string
     {
         return 'Auditors';

@@ -50,8 +50,6 @@ class ManageContacts extends ManageRelatedRecords
 
     protected static ?string $breadcrumb = 'Contacts';
 
-    protected static ?string $navigationIcon = 'heroicon-o-identification';
-
     public function getRelationManagers(): array
     {
         return [

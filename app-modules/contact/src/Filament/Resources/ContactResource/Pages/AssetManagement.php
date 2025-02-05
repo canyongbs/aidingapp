@@ -57,8 +57,6 @@ class AssetManagement extends ManageRelatedRecords
 
     protected static ?string $breadcrumb = 'Assets';
 
-    protected static ?string $navigationIcon = 'heroicon-o-briefcase';
-
     public function getTitle(): string | Htmlable
     {
         return 'Assets';

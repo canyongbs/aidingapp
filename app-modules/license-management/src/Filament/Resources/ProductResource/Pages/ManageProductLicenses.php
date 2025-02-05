@@ -71,8 +71,6 @@ class ManageProductLicenses extends ManageRelatedRecords
 
     protected static ?string $breadcrumb = 'License';
 
-    protected static ?string $navigationIcon = 'heroicon-o-key';
-
     public function form(Form $form): Form
     {
         return $form
