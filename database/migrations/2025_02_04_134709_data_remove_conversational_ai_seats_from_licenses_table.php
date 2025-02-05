@@ -34,31 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace App\Http\Requests\Tenants;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
 
-use Illuminate\Foundation\Http\FormRequest;
-
-class SyncTenantRequest extends FormRequest
-{
-    public function rules(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            'limits' => ['required', 'array'],
-            'limits.recruitmentCrmSeats' => ['required', 'integer', 'min:0'],
-            'limits.emails' => ['required', 'integer', 'min:0'],
-            'limits.sms' => ['required', 'integer', 'min:0'],
-            'limits.resetDate' => ['required', 'string', 'date_format:m-d'],
-            'addons' => ['required', 'array'],
-            'addons.onlineForms' => ['required', 'boolean'],
-            'addons.onlineSurveys' => ['required', 'boolean'],
-            'addons.serviceManagement' => ['required', 'boolean'],
-            'addons.knowledgeManagement' => ['required', 'boolean'],
-            'addons.realtimeChat' => ['required', 'boolean'],
-            'addons.mobileApps' => ['required', 'boolean'],
-            'addons.changeManagement' => ['required', 'boolean'],
-            'addons.assetManagement' => ['required', 'boolean'],
-            'addons.feedbackManagement' => ['required', 'boolean'],
-            'addons.experimentalReporting' => ['required', 'boolean'],
-        ];
+        DB::table('licenses')->where('type', 'conversational_ai')->delete();
     }
-}
+};

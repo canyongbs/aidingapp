@@ -50,7 +50,6 @@ class CreateTenantRequest extends FormRequest
             'user.email' => ['required', 'email', 'max:255'],
             'user.password' => ['required', 'string'],
             'limits' => ['required', 'array'],
-            'limits.conversationalAiSeats' => ['required', 'integer', 'min:0'],
             'limits.recruitmentCrmSeats' => ['required', 'integer', 'min:0'],
             'limits.emails' => ['required', 'integer', 'min:0'],
             'limits.sms' => ['required', 'integer', 'min:0'],

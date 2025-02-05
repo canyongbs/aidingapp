@@ -107,10 +107,6 @@ class ManageLicenseSettings extends SettingsPage
                     ->columns()
                     ->schema(
                         [
-                            TextInput::make('data.limits.conversationalAiSeats')
-                                ->label('Artificial Intelligence Seats')
-                                ->numeric()
-                                ->required(),
                             TextInput::make('data.limits.recruitmentCrmSeats')
                                 ->label('Recruitment CRM Seats')
                                 ->numeric()
@@ -150,7 +146,6 @@ class ManageLicenseSettings extends SettingsPage
                                 ->label('Feedback Management'),
                             Toggle::make('data.addons.experimentalReporting')
                                 ->label('Experimental Reporting')
-                                ->disabled(fn (LicenseSettings $settings): bool => $settings->data->limits->conversationalAiSeats < 1)
                                 ->live()
                                 ->afterStateUpdated(fn (Toggle $component, $state) => $state ? $component->state(false) && $this->mountAction('enableExperimentalReporting') : null),
                         ]
