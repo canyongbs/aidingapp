@@ -92,10 +92,10 @@ class ViewServiceRequest extends ViewRecord
                             ->label('Type'),
                         TextEntry::make('close_details')
                             ->label('Description')
-                            ->columnSpan(1),
+                            ->columnSpan(2),
                         TextEntry::make('res_details')
                             ->label('Internal Details')
-                            ->columnSpan(1),
+                            ->columnSpan(2),
                         TextEntry::make('respondent')
                             ->label('Related To')
                             ->color('primary')
