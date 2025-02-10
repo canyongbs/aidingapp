@@ -127,6 +127,12 @@ class CreateServiceRequestController extends Controller
 
             $serviceRequest->save();
 
+            $assignmentClass = $serviceRequest->priority->type?->assignment_type?->getAssignerClass();
+
+            if ($assignmentClass) {
+                $assignmentClass->execute($serviceRequest);
+            }
+
             $files = collect($data->pull('Main.upload-file', []));
 
             Bus::batch([
