@@ -5,6 +5,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\IncidentStatusResource\
 use AidingApp\ServiceManagement\Enums\SystemIncidentStatusClassification;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentStatusResource;
 use AidingApp\ServiceManagement\Models\IncidentStatus;
+use App\Concerns\EditPageRedirection;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Select;
@@ -15,6 +16,8 @@ use Illuminate\Support\Str;
 
 class EditIncidentStatus extends EditRecord
 {
+    use EditPageRedirection;
+
     protected static string $resource = IncidentStatusResource::class;
 
     public function form(Form $form): Form

@@ -5,6 +5,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\IncidentSeverityResourc
 use AidingApp\ServiceManagement\Enums\IncidentSeverityColorOptions;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentSeverityResource;
 use AidingApp\ServiceManagement\Models\IncidentSeverity;
+use App\Concerns\EditPageRedirection;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Select;
@@ -15,6 +16,8 @@ use Illuminate\Support\Str;
 
 class EditIncidentSeverity extends EditRecord
 {
+    use EditPageRedirection;
+
     protected static string $resource = IncidentSeverityResource::class;
 
     public function form(Form $form): Form
