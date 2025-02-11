@@ -2,8 +2,8 @@
 
 namespace AidingApp\ServiceManagement\Database\Seeders;
 
-use AidingApp\KnowledgeBase\Enums\IncidentSeverityColorOptions;
-use AidingApp\KnowledgeBase\Models\IncidentSeverity;
+use AidingApp\ServiceManagement\Enums\IncidentSeverityColorOptions;
+use AidingApp\ServiceManagement\Models\IncidentSeverity;
 use Illuminate\Database\Seeder;
 
 class IncidentSeveritySeeder extends Seeder
