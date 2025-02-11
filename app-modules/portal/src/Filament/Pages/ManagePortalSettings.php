@@ -64,7 +64,7 @@ class ManagePortalSettings extends SettingsPage
 
     protected static ?string $navigationLabel = 'Client Portal';
 
-    protected static ?int $navigationSort = 50;
+    protected static ?int $navigationSort = 90;
 
     protected static string $settings = PortalSettings::class;
 
