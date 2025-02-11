@@ -2,8 +2,8 @@
 
 namespace AidingApp\ServiceManagement\Database\Seeders;
 
-use AidingApp\KnowledgeBase\Enums\SystemIncidentStatusClassification;
-use AidingApp\KnowledgeBase\Models\IncidentStatus;
+use AidingApp\ServiceManagement\Enums\SystemIncidentStatusClassification;
+use AidingApp\ServiceManagement\Models\IncidentStatus;
 use Illuminate\Database\Seeder;
 
 class IncidentStatusSeeder extends Seeder
