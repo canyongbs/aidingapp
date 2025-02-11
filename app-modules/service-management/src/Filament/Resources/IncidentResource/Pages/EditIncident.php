@@ -4,6 +4,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\IncidentResource\Pages;
 
 use AidingApp\ServiceManagement\Filament\Resources\IncidentResource;
 use AidingApp\ServiceManagement\Models\Incident;
+use App\Concerns\EditPageRedirection;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Select;
@@ -15,6 +16,8 @@ use Illuminate\Support\Str;
 
 class EditIncident extends EditRecord
 {
+    use EditPageRedirection;
+
     protected static string $resource = IncidentResource::class;
 
     public function form(Form $form): Form
