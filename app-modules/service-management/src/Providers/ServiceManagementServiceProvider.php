@@ -40,6 +40,9 @@ use AidingApp\ServiceManagement\Models\ChangeRequest;
 use AidingApp\ServiceManagement\Models\ChangeRequestResponse;
 use AidingApp\ServiceManagement\Models\ChangeRequestStatus;
 use AidingApp\ServiceManagement\Models\ChangeRequestType;
+use AidingApp\ServiceManagement\Models\Incident;
+use AidingApp\ServiceManagement\Models\IncidentSeverity;
+use AidingApp\ServiceManagement\Models\IncidentStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
@@ -94,6 +97,9 @@ class ServiceManagementServiceProvider extends ServiceProvider
             'service_request' => ServiceRequest::class,
             'sla' => Sla::class,
             'service-request-type-email-template' => ServiceRequestTypeEmailTemplate::class,
+            'incident' => Incident::class,
+            'incident_severity' => IncidentSeverity::class,
+            'incident_status' => IncidentStatus::class,
         ]);
 
         $this->discoverSchema(__DIR__ . '/../../graphql/service-management.graphql');
