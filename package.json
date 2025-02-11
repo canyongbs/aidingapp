@@ -32,7 +32,7 @@
         "chokidar": "^3.6.0",
         "cross-env": "^7.0.3",
         "dropzone": "^5.9.2",
-        "esbuild": "^0.20.0",
+        "esbuild": "^0.25.0",
         "flatpickr": "^4.6.9",
         "jquery": "^3.2",
         "postcss": "^8.4.31",
