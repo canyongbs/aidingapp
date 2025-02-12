@@ -39,6 +39,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateDirection;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource;
+use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Forms\Components\Select;
@@ -53,6 +54,7 @@ use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Collection;
 
 class ServiceRequestUpdatesRelationManager extends RelationManager
 {
@@ -70,15 +72,27 @@ class ServiceRequestUpdatesRelationManager extends RelationManager
                     ->columnSpan('full')
                     ->required()
                     ->string(),
+                Toggle::make('internal')
+                    ->label('Internal')
+                    ->rule(['boolean'])
+                    ->columnSpan('full'),
                 Select::make('direction')
                     ->options(ServiceRequestUpdateDirection::class)
                     ->label('Direction')
                     ->required()
                     ->enum(ServiceRequestUpdateDirection::class)
                     ->default(ServiceRequestUpdateDirection::default()),
-                Toggle::make('internal')
-                    ->label('Internal')
-                    ->rule(['boolean']),
+                Select::make('status_id')
+                    ->label('Status')
+                    ->options(fn () => ServiceRequestStatus::orderBy('classification')
+                        ->orderBy('name')
+                        ->get(['id', 'name', 'classification'])
+                        ->groupBy(fn (ServiceRequestStatus $status) => $status->classification->getlabel())
+                        ->map(fn (Collection $group) => $group->pluck('name', 'id')->map(
+                            fn ($name, $id) => $name . ($id === $this->getOwnerRecord()->status->getKey() ? ' (Current)' : '')
+                        )))
+                    ->exists((new ServiceRequestStatus())->getTable(), 'id')
+                    ->default($this->getOwnerRecord()->status->getKey()),
             ]);
     }
 
@@ -105,7 +119,10 @@ class ServiceRequestUpdatesRelationManager extends RelationManager
             ])
             ->headerActions([
                 CreateAction::make()
-                    ->visible($this->getOwnerRecord()?->status?->classification == SystemServiceRequestClassification::Closed ? false : true),
+                    ->visible($this->getOwnerRecord()?->status?->classification == SystemServiceRequestClassification::Closed ? false : true)
+                    ->after(function ($data, ServiceRequestUpdate $serviceRequestUpdate) {
+                        $serviceRequestUpdate->serviceRequest->update(['status_id'=>$data['status_id']]);
+                    }),
             ])
             ->actions([
                 ViewAction::make()
