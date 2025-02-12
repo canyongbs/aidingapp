@@ -121,7 +121,7 @@ class ServiceRequestUpdatesRelationManager extends RelationManager
                 CreateAction::make()
                     ->visible($this->getOwnerRecord()?->status?->classification == SystemServiceRequestClassification::Closed ? false : true)
                     ->after(function ($data, ServiceRequestUpdate $serviceRequestUpdate) {
-                        $serviceRequestUpdate->serviceRequest->update(['status_id'=>$data['status_id']]);
+                        $serviceRequestUpdate->serviceRequest->update(['status_id' => $data['status_id']]);
                     }),
             ])
             ->actions([
