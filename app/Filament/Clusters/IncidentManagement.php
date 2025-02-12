@@ -10,5 +10,7 @@ class IncidentManagement extends Cluster
 
     protected static ?int $navigationSort = 50;
 
+    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+
     protected static ?string $title = 'Incident Management';
 }

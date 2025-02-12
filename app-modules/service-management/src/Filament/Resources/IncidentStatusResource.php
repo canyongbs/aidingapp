@@ -7,6 +7,7 @@ use AidingApp\ServiceManagement\Filament\Resources\IncidentStatusResource\Pages\
 use AidingApp\ServiceManagement\Filament\Resources\IncidentStatusResource\Pages\ListIncidentStatuses;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentStatusResource\Pages\ViewIncidentStatus;
 use AidingApp\ServiceManagement\Models\IncidentStatus;
+use App\Features\IncidentSeverityStatus;
 use App\Filament\Clusters\IncidentManagement;
 use Filament\Resources\Resource;
 
@@ -19,6 +20,11 @@ class IncidentStatusResource extends Resource
     protected static ?string $navigationLabel = 'Statuses';
 
     protected static ?int $navigationSort = 20;
+
+    public static function canAccess(): bool
+    {
+        return IncidentSeverityStatus::active() && parent::canAccess();
+    }
 
     public static function getPages(): array
     {

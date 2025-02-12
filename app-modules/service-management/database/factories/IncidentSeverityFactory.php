@@ -2,7 +2,6 @@
 
 namespace AidingApp\ServiceManagement\Database\Factories;
 
-use AidingApp\ServiceManagement\Enums\IncidentSeverityColorOptions;
 use AidingApp\ServiceManagement\Models\IncidentSeverity;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -20,7 +19,6 @@ class IncidentSeverityFactory extends Factory
     {
         return [
             'name' => fake()->word(10),
-            'color' => $this->faker->randomElement(IncidentSeverityColorOptions::cases()),
         ];
     }
 }

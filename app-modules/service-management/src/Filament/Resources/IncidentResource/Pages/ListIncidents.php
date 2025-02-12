@@ -3,7 +3,6 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\IncidentResource\Pages;
 
 use AidingApp\ServiceManagement\Filament\Resources\IncidentResource;
-use AidingApp\ServiceManagement\Models\Incident;
 use App\Filament\Tables\Columns\OpenSearch\TextColumn;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
@@ -12,7 +11,6 @@ use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
 
 class ListIncidents extends ListRecords
 {
@@ -26,20 +24,10 @@ class ListIncidents extends ListRecords
                     ->label('Title')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('severity')
+                TextColumn::make('severity.name')
                     ->label('Severity')
-                    ->badge()
-                    ->state(function (Incident $record) {
-                        return $record->severity->name;
-                    })
-                    ->color(function (Incident $record) {
-                        return $record->severity->color->value;
-                    })
-                    ->sortable(query: function (Builder $query, string $direction): Builder {
-                        return $query
-                            ->join('incident_severities', 'incidents.severity_id', '=', 'incident_severities.id')
-                            ->orderBy('incident_severities.title', $direction);
-                    }),
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('status.name')
                     ->label('Status')
                     ->searchable()

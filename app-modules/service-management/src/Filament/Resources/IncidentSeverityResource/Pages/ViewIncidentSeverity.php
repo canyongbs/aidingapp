@@ -23,10 +23,6 @@ class ViewIncidentSeverity extends ViewRecord
                     ->schema([
                         TextEntry::make('name')
                             ->label('Name'),
-                        TextEntry::make('color')
-                            ->label('Color')
-                            ->badge()
-                            ->color(fn (IncidentSeverity $incidentSeverity) => $incidentSeverity->color->value),
                     ])
                     ->columns(),
             ]);

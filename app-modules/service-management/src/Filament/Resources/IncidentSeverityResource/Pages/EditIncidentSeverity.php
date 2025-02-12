@@ -2,13 +2,11 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\IncidentSeverityResource\Pages;
 
-use AidingApp\ServiceManagement\Enums\IncidentSeverityColorOptions;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentSeverityResource;
 use AidingApp\ServiceManagement\Models\IncidentSeverity;
 use App\Concerns\EditPageRedirection;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Pages\EditRecord;
@@ -28,12 +26,6 @@ class EditIncidentSeverity extends EditRecord
                     ->label('Name')
                     ->required()
                     ->string(),
-                Select::make('color')
-                    ->label('Color')
-                    ->searchable()
-                    ->options(IncidentSeverityColorOptions::class)
-                    ->required()
-                    ->enum(IncidentSeverityColorOptions::class),
             ]);
     }
 
