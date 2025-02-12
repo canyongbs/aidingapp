@@ -1,39 +1,52 @@
 <?php
 
-use AidingApp\ServiceManagement\Enums\IncidentSeverityColorOptions;
 use AidingApp\ServiceManagement\Enums\SystemIncidentStatusClassification;
-use AidingApp\ServiceManagement\Models\IncidentSeverity;
-use AidingApp\ServiceManagement\Models\IncidentStatus;
-use App\Models\Tenant;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 return new class () extends Migration {
+    private array $incidentSeverities = [
+        ['name' => 'Critical'],
+        ['name' => 'Major'],
+        ['name' => 'Minor'],
+        ['name' => 'Warning'],
+        ['name' => 'Informational'],
+    ];
+
+    private array $incidentStatuses = [
+        ['classification' => SystemIncidentStatusClassification::Open, 'name' => 'Identified'],
+        ['classification' => SystemIncidentStatusClassification::Open, 'name' => 'Investigating'],
+        ['classification' => SystemIncidentStatusClassification::Open, 'name' => 'Mitigating'],
+        ['classification' => SystemIncidentStatusClassification::Open, 'name' => 'Monitoring'],
+        ['classification' => SystemIncidentStatusClassification::Resolved, 'name' => 'Resolved'],
+    ];
+
     public function up(): void
     {
-        Tenant::all()->each(function (Tenant $tenant) {
-            $tenant->makeCurrent();
+        DB::table('incident_severities')->insert(collect($this->incidentSeverities)->map(function ($item) {
+            $item['id'] = Str::uuid()->toString();
+            $item['created_at'] = now();
 
-            foreach ([
-                ['name' => 'Critical', 'color' => IncidentSeverityColorOptions::Danger->value],
-                ['name' => 'Major', 'color' => IncidentSeverityColorOptions::Danger->value],
-                ['name' => 'Minor', 'color' => IncidentSeverityColorOptions::Gray->value],
-                ['name' => 'Warning', 'color' => IncidentSeverityColorOptions::Warning->value],
-                ['name' => 'Informational', 'color' => IncidentSeverityColorOptions::Info->value],
-            ] as $severity) {
-                IncidentSeverity::firstOrCreate(['name' => $severity['name']], $severity);
-            }
+            return $item;
+        })->toArray());
 
-            foreach ([
-                ['classification' => SystemIncidentStatusClassification::Open, 'name' => 'Identified'],
-                ['classification' => SystemIncidentStatusClassification::Open, 'name' => 'Investigating'],
-                ['classification' => SystemIncidentStatusClassification::Open, 'name' => 'Mitigating'],
-                ['classification' => SystemIncidentStatusClassification::Open, 'name' => 'Monitoring'],
-                ['classification' => SystemIncidentStatusClassification::Resolved, 'name' => 'Resolved'],
-            ] as $status) {
-                IncidentStatus::firstOrCreate(['name' => $status['name']], $status);
-            }
+        DB::table('incident_statuses')->insert(collect($this->incidentStatuses)->map(function ($item) {
+            $item['id'] = Str::uuid()->toString();
+            $item['created_at'] = now();
 
-            app(Tenant::class)::forgetCurrent();
-        });
+            return $item;
+        })->toArray());
+    }
+
+    public function down(): void
+    {
+        DB::table('incident_severities')
+            ->whereIn('name', collect($this->incidentSeverities)->pluck('name'))
+            ->delete();
+
+        DB::table('incident_statuses')
+            ->whereIn('name', collect($this->incidentStatuses)->pluck('name'))
+            ->delete();
     }
 };
