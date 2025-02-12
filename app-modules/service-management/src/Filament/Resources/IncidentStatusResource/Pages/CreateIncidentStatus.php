@@ -19,6 +19,7 @@ class CreateIncidentStatus extends CreateRecord
             ->schema([
                 TextInput::make('name')
                     ->label('Name')
+                    ->maxLength('255')
                     ->required()
                     ->string(),
                 Select::make('classification')
