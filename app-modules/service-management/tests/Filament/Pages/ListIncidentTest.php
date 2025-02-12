@@ -34,34 +34,46 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Task\Filament\Resources;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentResource;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentResource\Pages\ListIncidents;
+use AidingApp\ServiceManagement\Models\Incident;
+use App\Models\User;
 
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\CreateTask;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\EditTask;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\ListTasks;
-use AidingApp\Task\Models\Task;
-use Filament\Resources\Resource;
+use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
 
-class TaskResource extends Resource
-{
-    protected static ?string $model = Task::class;
+test('ListIncidents is gated with proper access control', function () {
+    $user = User::factory()->licensed(Contact::getLicenseType())->create();
 
-    protected static ?string $navigationGroup = 'Service Management';
+    actingAs($user)
+        ->get(
+            IncidentResource::getUrl('index')
+        )->assertForbidden();
 
-    protected static ?int $navigationSort = 80;
+    $user->givePermissionTo('incident.view-any');
 
-    protected static ?string $breadcrumb = 'Task Management';
+    actingAs($user)
+        ->get(
+            IncidentResource::getUrl('index')
+        )->assertSuccessful();
+});
 
-    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
+test('can list records', function () {
+    $user = User::factory()->licensed(Contact::getLicenseType())->create();
 
-    protected static ?string $navigationLabel = 'Task Management';
+    actingAs($user)
+        ->get(
+            IncidentResource::getUrl('index')
+        )->assertForbidden();
 
-    public static function getPages(): array
-    {
-        return [
-            'index' => ListTasks::route('/'),
-            'create' => CreateTask::route('/create'),
-            'edit' => EditTask::route('/{record}/edit'),
-        ];
-    }
-}
+    $user->givePermissionTo('incident.view-any');
+
+    $records = Incident::factory()->count(5)->create();
+
+    livewire(ListIncidents::class)
+        ->assertCountTableRecords(5)
+        ->sortTable('id', 'desc')
+        ->assertCanSeeTableRecords($records)
+        ->assertSuccessful();
+});

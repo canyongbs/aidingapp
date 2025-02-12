@@ -34,34 +34,18 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Task\Filament\Resources;
+namespace AidingApp\ServiceManagement\Tests\RequestFactories;
 
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\CreateTask;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\EditTask;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\ListTasks;
-use AidingApp\Task\Models\Task;
-use Filament\Resources\Resource;
+use AidingApp\ServiceManagement\Enums\SystemIncidentStatusClassification;
+use Worksome\RequestFactories\RequestFactory;
 
-class TaskResource extends Resource
+class IncidentStatusRequestFactory extends RequestFactory
 {
-    protected static ?string $model = Task::class;
-
-    protected static ?string $navigationGroup = 'Service Management';
-
-    protected static ?int $navigationSort = 80;
-
-    protected static ?string $breadcrumb = 'Task Management';
-
-    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
-
-    protected static ?string $navigationLabel = 'Task Management';
-
-    public static function getPages(): array
+    public function definition(): array
     {
         return [
-            'index' => ListTasks::route('/'),
-            'create' => CreateTask::route('/create'),
-            'edit' => EditTask::route('/{record}/edit'),
+            'name' => fake()->word(10),
+            'classification' => fake()->randomElement(SystemIncidentStatusClassification::cases()),
         ];
     }
 }

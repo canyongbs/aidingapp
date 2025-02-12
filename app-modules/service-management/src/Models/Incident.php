@@ -34,34 +34,43 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Task\Filament\Resources;
+namespace AidingApp\ServiceManagement\Models;
 
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\CreateTask;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\EditTask;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\ListTasks;
-use AidingApp\Task\Models\Task;
-use Filament\Resources\Resource;
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Team\Models\Team;
+use App\Models\BaseModel;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class TaskResource extends Resource
+/**
+ * @mixin IdeHelperIncident
+ */
+class Incident extends BaseModel implements Auditable
 {
-    protected static ?string $model = Task::class;
+    use AuditableTrait;
+    use SoftDeletes;
 
-    protected static ?string $navigationGroup = 'Service Management';
+    protected $fillable = [
+        'title',
+        'description',
+        'severity_id',
+        'status_id',
+        'assigned_team_id',
+    ];
 
-    protected static ?int $navigationSort = 80;
-
-    protected static ?string $breadcrumb = 'Task Management';
-
-    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
-
-    protected static ?string $navigationLabel = 'Task Management';
-
-    public static function getPages(): array
+    public function assignedTeam(): BelongsTo
     {
-        return [
-            'index' => ListTasks::route('/'),
-            'create' => CreateTask::route('/create'),
-            'edit' => EditTask::route('/{record}/edit'),
-        ];
+        return $this->belongsTo(Team::class, 'assigned_team_id', 'id');
+    }
+
+    public function status(): BelongsTo
+    {
+        return $this->belongsTo(IncidentStatus::class);
+    }
+
+    public function severity(): BelongsTo
+    {
+        return $this->belongsTo(IncidentSeverity::class);
     }
 }

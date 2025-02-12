@@ -34,34 +34,40 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Task\Filament\Resources;
+namespace AidingApp\ServiceManagement\Database\Seeders;
 
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\CreateTask;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\EditTask;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\ListTasks;
-use AidingApp\Task\Models\Task;
-use Filament\Resources\Resource;
+use AidingApp\ServiceManagement\Enums\SystemIncidentStatusClassification;
+use AidingApp\ServiceManagement\Models\IncidentStatus;
+use Illuminate\Database\Seeder;
 
-class TaskResource extends Resource
+class IncidentStatusSeeder extends Seeder
 {
-    protected static ?string $model = Task::class;
-
-    protected static ?string $navigationGroup = 'Service Management';
-
-    protected static ?int $navigationSort = 80;
-
-    protected static ?string $breadcrumb = 'Task Management';
-
-    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
-
-    protected static ?string $navigationLabel = 'Task Management';
-
-    public static function getPages(): array
+    public function run(): void
     {
-        return [
-            'index' => ListTasks::route('/'),
-            'create' => CreateTask::route('/create'),
-            'edit' => EditTask::route('/{record}/edit'),
-        ];
+        IncidentStatus::factory()
+            ->createMany(
+                [
+                    [
+                        'classification' => SystemIncidentStatusClassification::Open,
+                        'name' => 'Identified',
+                    ],
+                    [
+                        'classification' => SystemIncidentStatusClassification::Open,
+                        'name' => 'Investigating',
+                    ],
+                    [
+                        'classification' => SystemIncidentStatusClassification::Open,
+                        'name' => 'Mitigating',
+                    ],
+                    [
+                        'classification' => SystemIncidentStatusClassification::Open,
+                        'name' => 'Monitoring',
+                    ],
+                    [
+                        'classification' => SystemIncidentStatusClassification::Resolved,
+                        'name' => 'Resolved',
+                    ],
+                ]
+            );
     }
 }

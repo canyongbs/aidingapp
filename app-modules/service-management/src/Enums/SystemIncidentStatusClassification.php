@@ -34,34 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Task\Filament\Resources;
+namespace AidingApp\ServiceManagement\Enums;
 
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\CreateTask;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\EditTask;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\ListTasks;
-use AidingApp\Task\Models\Task;
-use Filament\Resources\Resource;
+use Filament\Support\Contracts\HasLabel;
 
-class TaskResource extends Resource
+enum SystemIncidentStatusClassification: string implements HasLabel
 {
-    protected static ?string $model = Task::class;
+    case Open = 'open';
 
-    protected static ?string $navigationGroup = 'Service Management';
+    case Resolved = 'resolved';
 
-    protected static ?int $navigationSort = 80;
-
-    protected static ?string $breadcrumb = 'Task Management';
-
-    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
-
-    protected static ?string $navigationLabel = 'Task Management';
-
-    public static function getPages(): array
+    public function getLabel(): ?string
     {
-        return [
-            'index' => ListTasks::route('/'),
-            'create' => CreateTask::route('/create'),
-            'edit' => EditTask::route('/{record}/edit'),
-        ];
+        return match ($this) {
+            self::Open => 'Open',
+            self::Resolved => 'Resolved',
+            default => $this->name,
+        };
     }
 }

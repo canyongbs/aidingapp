@@ -34,34 +34,39 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Task\Filament\Resources;
+namespace AidingApp\ServiceManagement\Filament\Resources;
 
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\CreateTask;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\EditTask;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\ListTasks;
-use AidingApp\Task\Models\Task;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentStatusResource\Pages\CreateIncidentStatus;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentStatusResource\Pages\EditIncidentStatus;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentStatusResource\Pages\ListIncidentStatuses;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentStatusResource\Pages\ViewIncidentStatus;
+use AidingApp\ServiceManagement\Models\IncidentStatus;
+use App\Features\IncidentSeverityStatus;
+use App\Filament\Clusters\IncidentManagement;
 use Filament\Resources\Resource;
 
-class TaskResource extends Resource
+class IncidentStatusResource extends Resource
 {
-    protected static ?string $model = Task::class;
+    protected static ?string $model = IncidentStatus::class;
 
-    protected static ?string $navigationGroup = 'Service Management';
+    protected static ?string $cluster = IncidentManagement::class;
 
-    protected static ?int $navigationSort = 80;
+    protected static ?string $navigationLabel = 'Statuses';
 
-    protected static ?string $breadcrumb = 'Task Management';
+    protected static ?int $navigationSort = 20;
 
-    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
-
-    protected static ?string $navigationLabel = 'Task Management';
+    public static function canAccess(): bool
+    {
+        return parent::canAccess() && IncidentSeverityStatus::active();
+    }
 
     public static function getPages(): array
     {
         return [
-            'index' => ListTasks::route('/'),
-            'create' => CreateTask::route('/create'),
-            'edit' => EditTask::route('/{record}/edit'),
+            'index' => ListIncidentStatuses::route('/'),
+            'create' => CreateIncidentStatus::route('/create'),
+            'view' => ViewIncidentStatus::route('/{record}'),
+            'edit' => EditIncidentStatus::route('/{record}/edit'),
         ];
     }
 }
