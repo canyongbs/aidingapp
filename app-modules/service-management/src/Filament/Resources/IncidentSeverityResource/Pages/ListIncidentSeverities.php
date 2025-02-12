@@ -26,10 +26,6 @@ class ListIncidentSeverities extends ListRecords
                     ->label('Name')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('color')
-                    ->label('Color')
-                    ->badge()
-                    ->color(fn (IncidentSeverity $incidentSeverity) => $incidentSeverity->color->value),
             ])
             ->actions([
                 ViewAction::make(),

@@ -44,7 +44,7 @@ class CreateIncident extends CreateRecord
                     ->preload()
                     ->searchable()
                     ->relationship('assignedTeam', 'name')
-                    ->default(auth()->user()?->teams()->first()->getKey()),
+                    ->default(auth()->user()?->teams()->first()?->getKey()),
             ]);
     }
 }
