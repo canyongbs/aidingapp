@@ -23,7 +23,7 @@ class IncidentSeverityResource extends Resource
 
     public static function canAccess(): bool
     {
-        return IncidentSeverityStatus::active() && parent::canAccess();
+        return parent::canAccess() && IncidentSeverityStatus::active();
     }
 
     public static function getPages(): array
