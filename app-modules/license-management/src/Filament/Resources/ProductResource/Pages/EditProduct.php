@@ -51,6 +51,8 @@ class EditProduct extends EditRecord
 
     protected static string $resource = ProductResource::class;
 
+    protected static ?string $navigationLabel = 'Edit';
+
     public function form(Form $form): Form
     {
         return $form

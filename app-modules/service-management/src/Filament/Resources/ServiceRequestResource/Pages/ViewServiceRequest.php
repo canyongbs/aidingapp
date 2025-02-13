@@ -63,6 +63,8 @@ class ViewServiceRequest extends ViewRecord
 
     protected static string $resource = ServiceRequestResource::class;
 
+    protected static ?string $navigationLabel = 'View';
+
     public function infolist(Infolist $infolist): Infolist
     {
         $formatSecondsAsInterval = fn (?int $state): ?string => $state ? CarbonInterval::seconds($state)->cascade()->forHumans(short: true) : null;

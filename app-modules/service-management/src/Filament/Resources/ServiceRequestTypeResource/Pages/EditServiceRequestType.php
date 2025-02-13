@@ -61,6 +61,8 @@ class EditServiceRequestType extends EditRecord
 
     protected static string $resource = ServiceRequestTypeResource::class;
 
+    protected static ?string $navigationLabel = 'Edit';
+
     public function form(Form $form): Form
     {
         return $form
