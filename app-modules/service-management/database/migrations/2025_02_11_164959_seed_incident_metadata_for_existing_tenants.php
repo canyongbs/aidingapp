@@ -24,6 +24,10 @@ return new class () extends Migration {
 
     public function up(): void
     {
+        if (app()->runningUnitTests()) {
+            return;
+        }
+
         DB::table('incident_severities')->insert(collect($this->incidentSeverities)->map(function ($item) {
             $item['id'] = Str::uuid()->toString();
             $item['created_at'] = now();
