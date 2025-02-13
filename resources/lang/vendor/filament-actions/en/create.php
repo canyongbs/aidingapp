@@ -34,48 +34,28 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\LicenseManagement\Filament\Resources\ProductResource\Pages;
+return [
+    'single' => [
+        'label' => 'New',
 
-use AidingApp\LicenseManagement\Filament\Resources\ProductResource;
-use Filament\Actions\EditAction;
-use Filament\Infolists\Components\Section;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Infolist;
-use Filament\Resources\Pages\ViewRecord;
+        'modal' => [
+            'heading' => 'Create :label',
 
-class ViewProduct extends ViewRecord
-{
-    protected static string $resource = ProductResource::class;
+            'actions' => [
+                'create' => [
+                    'label' => 'Create',
+                ],
 
-    protected static ?string $navigationLabel = 'View';
+                'create_another' => [
+                    'label' => 'Create & create another',
+                ],
+            ],
+        ],
 
-    public function infolist(Infolist $infolist): Infolist
-    {
-        return $infolist
-            ->schema([
-                Section::make()
-                    ->schema([
-                        TextEntry::make('name')
-                            ->label('Product Name'),
-                        TextEntry::make('url')
-                            ->label('Product Link')
-                            ->url(fn ($record) => $record->url, true)
-                            ->openUrlInNewTab(),
-                        TextEntry::make('description')
-                            ->label('Description'),
-                        TextEntry::make('version')
-                            ->label('Version'),
-                        TextEntry::make('additional_notes')
-                            ->label('Additional Notes'),
-                    ])
-                    ->columns(),
-            ]);
-    }
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            EditAction::make(),
-        ];
-    }
-}
+        'notifications' => [
+            'created' => [
+                'title' => 'Created',
+            ],
+        ],
+    ],
+];
