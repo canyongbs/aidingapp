@@ -1,16 +1,18 @@
 <?php
 
-use AidingApp\Contact\Models\Contact;
+use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentResource;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentResource\Pages\ListIncidents;
 use AidingApp\ServiceManagement\Models\Incident;
 use App\Models\User;
+use Filament\Tables\Actions\DeleteBulkAction;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\assertSoftDeleted;
 use function Pest\Livewire\livewire;
 
 test('ListIncidents is gated with proper access control', function () {
-    $user = User::factory()->licensed(Contact::getLicenseType())->create();
+    $user = User::factory()->licensed(LicenseType::cases())->create();
 
     actingAs($user)
         ->get(
@@ -26,7 +28,7 @@ test('ListIncidents is gated with proper access control', function () {
 });
 
 test('can list records', function () {
-    $user = User::factory()->licensed(Contact::getLicenseType())->create();
+    $user = User::factory()->licensed(LicenseType::cases())->create();
 
     actingAs($user)
         ->get(
@@ -39,7 +41,24 @@ test('can list records', function () {
 
     livewire(ListIncidents::class)
         ->assertCountTableRecords(5)
-        ->sortTable('id', 'desc')
         ->assertCanSeeTableRecords($records)
         ->assertSuccessful();
+});
+
+test('bulk delete Incidents', function () {
+    $user = User::factory()->licensed(LicenseType::cases())->create();
+
+    actingAs($user);
+
+    $user->givePermissionTo('incident.view-any');
+    $user->givePermissionTo('incident.*.delete');
+
+    $incidents = Incident::factory()->count(10)->create();
+
+    livewire(ListIncidents::class)
+        ->callTableBulkAction(DeleteBulkAction::class, $incidents);
+
+    foreach ($incidents as $incident) {
+        assertSoftDeleted($incident);
+    }
 });

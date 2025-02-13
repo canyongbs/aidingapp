@@ -6,10 +6,10 @@ use AidingApp\ServiceManagement\Filament\Resources\IncidentResource\Pages\EditIn
 use AidingApp\ServiceManagement\Models\Incident;
 use AidingApp\ServiceManagement\Tests\RequestFactories\IncidentRequestFactory;
 use App\Models\User;
+use Filament\Actions\DeleteAction;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
-use function Tests\asSuperAdmin;
 
 test('EditIncident is gated with proper access control', function () {
     $user = User::factory()->licensed(LicenseType::cases())->create();
@@ -55,7 +55,12 @@ test('EditIncident is gated with proper access control', function () {
 });
 
 test('EditIncident validates the inputs', function ($data, $errors) {
-    asSuperAdmin();
+    $user = User::factory()->licensed(LicenseType::cases())->create();
+
+    actingAs($user);
+
+    $user->givePermissionTo('incident.view-any');
+    $user->givePermissionTo('incident.*.update');
 
     $incident = Incident::factory()->create();
 
@@ -66,12 +71,11 @@ test('EditIncident validates the inputs', function ($data, $errors) {
     ])
         ->fillForm($request)
         ->call('save')
-        ->assertHasNoFormErrors()
-        ->assertHasNoErrors();
+        ->assertHasFormErrors($errors);
 })->with(
     [
         'title required' => [
-            IncidentRequestFactory::new()->without('title'),
+            IncidentRequestFactory::new()->state(['title' => null]),
             ['title' => 'required'],
         ],
         'title string' => [
@@ -83,19 +87,25 @@ test('EditIncident validates the inputs', function ($data, $errors) {
             ['title' => 'max'],
         ],
         'description required' => [
-            IncidentRequestFactory::new()->without('description'),
+            IncidentRequestFactory::new()->state(['description' => null]),
             ['description' => 'required'],
         ],
         'description max' => [
             IncidentRequestFactory::new()->state(['description' => str()->random(65536)]),
             ['description' => 'max'],
         ],
-        'severity_id missing' => [IncidentRequestFactory::new()->without('severity_id'), ['severity_id' => 'required']],
+        'severity_id missing' => [
+            IncidentRequestFactory::new()->state(['severity_id' => null]),
+            ['severity_id' => 'required'],
+        ],
         'severity_id does not exist' => [
             IncidentRequestFactory::new()->state(['severity_id' => fake()->uuid()]),
             ['severity_id' => 'exists'],
         ],
-        'status_id missing' => [IncidentRequestFactory::new()->without('status_id'), ['status_id' => 'required']],
+        'status_id missing' => [
+            IncidentRequestFactory::new()->state(['status_id' => null]),
+            ['status_id' => 'required'],
+        ],
         'status_id does not exist' => [
             IncidentRequestFactory::new()->state(['status_id' => fake()->uuid()]),
             ['status_id' => 'exists'],
@@ -105,4 +115,27 @@ test('EditIncident validates the inputs', function ($data, $errors) {
             ['assigned_team_id' => 'exists'],
         ],
     ]
-)->skip();
+);
+
+test('delete action visible with proper access control', function () {
+    $user = User::factory()->licensed(LicenseType::cases())->create();
+
+    $incident = Incident::factory()->create();
+
+    actingAs($user);
+
+    $user->givePermissionTo('incident.view-any');
+    $user->givePermissionTo('incident.*.update');
+
+    livewire(EditIncident::class, [
+        'record' => $incident->getRouteKey(),
+    ])
+        ->assertActionHidden(DeleteAction::class);
+
+    $user->givePermissionTo('incident.*.delete');
+
+    livewire(EditIncident::class, [
+        'record' => $incident->getRouteKey(),
+    ])
+        ->assertActionVisible(DeleteAction::class);
+});

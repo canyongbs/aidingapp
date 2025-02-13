@@ -25,6 +25,7 @@ class EditIncidentSeverity extends EditRecord
                 TextInput::make('name')
                     ->label('Name')
                     ->required()
+                    ->maxLength(255)
                     ->string(),
             ]);
     }
