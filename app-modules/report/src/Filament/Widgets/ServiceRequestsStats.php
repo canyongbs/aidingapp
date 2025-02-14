@@ -151,7 +151,9 @@ class ServiceRequestsStats extends StatsOverviewReportWidget
     private function calculateAverageServiceResolutionTime(Carbon $intervalStart): array
     {
         $averageServiceResolutionTime = ServiceRequest::avg('time_to_resolution');
-        $interval = Carbon::now()->diffAsCarbonInterval(Carbon::now()->addSeconds($averageServiceResolutionTime));
+
+        $interval = Carbon::now()->diffAsCarbonInterval(Carbon::now()->addSeconds((float) $averageServiceResolutionTime));
+
         $days = $interval->d;
         $hours = $interval->h;
         $minutes = $interval->i;
@@ -176,8 +178,8 @@ class ServiceRequestsStats extends StatsOverviewReportWidget
     private function getPercentageChange(int $oldValue, int $newValue): int
     {
         return $oldValue > 0
-                        ? (($newValue - $oldValue) / $oldValue) * 100
-                        : ($newValue > 0 ? 100 : 0);
+            ? (($newValue - $oldValue) / $oldValue) * 100
+            : ($newValue > 0 ? 100 : 0);
     }
 
     private function getFormattedPercentageChangeDetails(int $percentageChange): array
