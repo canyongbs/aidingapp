@@ -34,34 +34,52 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Task\Filament\Resources;
+use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentSeverityResource;
+use AidingApp\ServiceManagement\Models\IncidentSeverity;
+use App\Models\User;
 
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\CreateTask;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\EditTask;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\ListTasks;
-use AidingApp\Task\Models\Task;
-use Filament\Resources\Resource;
+use function Pest\Laravel\actingAs;
+use function Tests\asSuperAdmin;
 
-class TaskResource extends Resource
-{
-    protected static ?string $model = Task::class;
+test('The correct details are displayed on the ViewIncidentSeverity page', function () {
+    $user = User::factory()->licensed(LicenseType::cases())->create();
 
-    protected static ?string $navigationGroup = 'Service Management';
+    actingAs($user);
 
-    protected static ?int $navigationSort = 80;
+    $user->givePermissionTo('product_admin.view-any');
+    $user->givePermissionTo('product_admin.*.view');
 
-    protected static ?string $breadcrumb = 'Task Management';
+    $incidentSeverity = IncidentSeverity::factory()->create();
 
-    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
+    asSuperAdmin()
+        ->get(
+            IncidentSeverityResource::getUrl('view', [
+                'record' => $incidentSeverity,
+            ])
+        )
+        ->assertSuccessful()
+        ->assertSeeInOrder(
+            [
+                'Name',
+                $incidentSeverity->name,
+                'Color',
+                $incidentSeverity->rgb_color,
+            ]
+        );
+});
 
-    protected static ?string $navigationLabel = 'Task Management';
+test('ViewIncidentSeverity is gated with proper access control', function () {
+    $user = User::factory()->licensed(LicenseType::cases())->create();
 
-    public static function getPages(): array
-    {
-        return [
-            'index' => ListTasks::route('/'),
-            'create' => CreateTask::route('/create'),
-            'edit' => EditTask::route('/{record}/edit'),
-        ];
-    }
-}
+    $incidentSeverity = IncidentSeverity::factory()->create();
+
+    asSuperAdmin($user);
+
+    actingAs($user)
+        ->get(
+            IncidentSeverityResource::getUrl('view', [
+                'record' => $incidentSeverity,
+            ])
+        )->assertSuccessful();
+});

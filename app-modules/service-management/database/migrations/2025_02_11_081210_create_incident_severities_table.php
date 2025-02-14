@@ -34,34 +34,24 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Task\Filament\Resources;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\CreateTask;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\EditTask;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\ListTasks;
-use AidingApp\Task\Models\Task;
-use Filament\Resources\Resource;
-
-class TaskResource extends Resource
-{
-    protected static ?string $model = Task::class;
-
-    protected static ?string $navigationGroup = 'Service Management';
-
-    protected static ?int $navigationSort = 80;
-
-    protected static ?string $breadcrumb = 'Task Management';
-
-    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
-
-    protected static ?string $navigationLabel = 'Task Management';
-
-    public static function getPages(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            'index' => ListTasks::route('/'),
-            'create' => CreateTask::route('/create'),
-            'edit' => EditTask::route('/{record}/edit'),
-        ];
+        Schema::create('incident_severities', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->string('name');
+            $table->string('color');
+            $table->timestamps();
+            $table->softDeletes();
+        });
     }
-}
+
+    public function down(): void
+    {
+        Schema::dropIfExists('incident_severities');
+    }
+};

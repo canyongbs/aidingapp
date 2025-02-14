@@ -34,34 +34,40 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Task\Filament\Resources;
+use Database\Migrations\Concerns\CanModifyPermissions;
+use Illuminate\Database\Migrations\Migration;
 
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\CreateTask;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\EditTask;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\ListTasks;
-use AidingApp\Task\Models\Task;
-use Filament\Resources\Resource;
+return new class () extends Migration {
+    use CanModifyPermissions;
 
-class TaskResource extends Resource
-{
-    protected static ?string $model = Task::class;
+    private array $permissions = [
+        'incident.view-any' => 'Incident',
+        'incident.create' => 'Incident',
+        'incident.*.view' => 'Incident',
+        'incident.*.update' => 'Incident',
+        'incident.*.delete' => 'Incident',
+        'incident.*.restore' => 'Incident',
+        'incident.*.force-delete' => 'Incident',
+    ];
 
-    protected static ?string $navigationGroup = 'Service Management';
+    private array $guards = [
+        'web',
+        'api',
+    ];
 
-    protected static ?int $navigationSort = 80;
-
-    protected static ?string $breadcrumb = 'Task Management';
-
-    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
-
-    protected static ?string $navigationLabel = 'Task Management';
-
-    public static function getPages(): array
+    public function up(): void
     {
-        return [
-            'index' => ListTasks::route('/'),
-            'create' => CreateTask::route('/create'),
-            'edit' => EditTask::route('/{record}/edit'),
-        ];
+        collect($this->guards)
+            ->each(function (string $guard) {
+                $this->createPermissions($this->permissions, $guard);
+            });
     }
-}
+
+    public function down(): void
+    {
+        collect($this->guards)
+            ->each(function (string $guard) {
+                $this->deletePermissions(array_keys($this->permissions), $guard);
+            });
+    }
+};

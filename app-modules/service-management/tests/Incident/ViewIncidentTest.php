@@ -34,34 +34,58 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Task\Filament\Resources;
+use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentResource;
+use AidingApp\ServiceManagement\Models\Incident;
+use App\Models\User;
 
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\CreateTask;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\EditTask;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\ListTasks;
-use AidingApp\Task\Models\Task;
-use Filament\Resources\Resource;
+use function Pest\Laravel\actingAs;
+use function Tests\asSuperAdmin;
 
-class TaskResource extends Resource
-{
-    protected static ?string $model = Task::class;
+test('The correct details are displayed on the ViewIncident page', function () {
+    $user = User::factory()->licensed(LicenseType::cases())->create();
 
-    protected static ?string $navigationGroup = 'Service Management';
+    actingAs($user);
 
-    protected static ?int $navigationSort = 80;
+    $user->givePermissionTo('incident.view-any');
+    $user->givePermissionTo('incident.*.view');
 
-    protected static ?string $breadcrumb = 'Task Management';
+    $incident = Incident::factory()->create();
 
-    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
+    asSuperAdmin()
+        ->get(
+            IncidentResource::getUrl('view', [
+                'record' => $incident,
+            ])
+        )
+        ->assertSuccessful()
+        ->assertSeeInOrder(
+            [
+                'Title',
+                $incident->title,
+                'Description',
+                $incident->description,
+                'Severity',
+                $incident->severity->name,
+                'Status',
+                $incident->status->name,
+                'Assigned Team',
+                $incident->assignedTeam->name,
+            ]
+        );
+});
 
-    protected static ?string $navigationLabel = 'Task Management';
+test('ViewIncident is gated with proper access control', function () {
+    $user = User::factory()->licensed(LicenseType::cases())->create();
 
-    public static function getPages(): array
-    {
-        return [
-            'index' => ListTasks::route('/'),
-            'create' => CreateTask::route('/create'),
-            'edit' => EditTask::route('/{record}/edit'),
-        ];
-    }
-}
+    $incident = Incident::factory()->create();
+
+    asSuperAdmin($user);
+
+    actingAs($user)
+        ->get(
+            IncidentResource::getUrl('view', [
+                'record' => $incident,
+            ])
+        )->assertSuccessful();
+});
