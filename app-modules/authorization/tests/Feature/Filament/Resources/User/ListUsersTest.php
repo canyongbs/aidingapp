@@ -34,6 +34,7 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Team\Models\Team;
 use App\Filament\Resources\UserResource\Pages\ListUsers;
 use App\Models\User;
@@ -193,3 +194,27 @@ it('can filter users by teams', function () {
         ->assertCanSeeTableRecords($userWithTeam1->merge($userWithTeam2))
         ->assertCanNotSeeTableRecords($userWithoutTeam);
 });
+
+it('Filter users based on licenses', function () {
+    asSuperAdmin();
+
+    $usersWithRecruitmentCrmLicense = User::factory()
+        ->count(3)
+        ->create()
+        ->each(function ($user) {
+            $user->grantLicense(LicenseType::RecruitmentCrm);
+        });
+
+    $usersWithoutLicense = User::factory()
+        ->count(3)
+        ->create();
+
+    livewire(ListUsers::class)
+        ->assertCanSeeTableRecords($usersWithRecruitmentCrmLicense->merge($usersWithoutLicense))
+        ->filterTable('licenses', [LicenseType::RecruitmentCrm->value])
+        ->assertCanSeeTableRecords($usersWithRecruitmentCrmLicense)
+        ->assertCanNotSeeTableRecords($usersWithoutLicense)
+        ->filterTable('licenses', ['no_assigned_license'])
+        ->assertCanSeeTableRecords($usersWithoutLicense)
+        ->assertCanNotSeeTableRecords($usersWithRecruitmentCrmLicense);
+})->only();
