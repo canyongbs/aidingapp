@@ -5,6 +5,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\IncidentSeverityResourc
 use AidingApp\ServiceManagement\Filament\Resources\IncidentSeverityResource;
 use AidingApp\ServiceManagement\Models\IncidentSeverity;
 use Filament\Actions\EditAction;
+use Filament\Infolists\Components\ColorEntry;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
@@ -23,6 +24,8 @@ class ViewIncidentSeverity extends ViewRecord
                     ->schema([
                         TextEntry::make('name')
                             ->label('Name'),
+                        ColorEntry::make('rgb_color')
+                            ->label('Color'),
                     ])
                     ->columns(),
             ]);

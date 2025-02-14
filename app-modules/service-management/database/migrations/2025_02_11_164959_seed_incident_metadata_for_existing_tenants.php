@@ -7,11 +7,11 @@ use Illuminate\Support\Str;
 
 return new class () extends Migration {
     private array $incidentSeverities = [
-        ['name' => 'Critical'],
-        ['name' => 'Major'],
-        ['name' => 'Minor'],
-        ['name' => 'Warning'],
-        ['name' => 'Informational'],
+        ['name' => 'Critical', 'color' => 'red'],
+        ['name' => 'Major', 'color' => 'orange'],
+        ['name' => 'Minor', 'color' => 'yellow'],
+        ['name' => 'Warning', 'color' => 'amber'],
+        ['name' => 'Informational', 'color' => 'blue'],
     ];
 
     private array $incidentStatuses = [

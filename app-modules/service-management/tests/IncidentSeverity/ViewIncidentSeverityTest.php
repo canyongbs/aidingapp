@@ -25,10 +25,12 @@ test('The correct details are displayed on the ViewIncidentSeverity page', funct
             ])
         )
         ->assertSuccessful()
-        ->assertSeeTextInOrder(
+        ->assertSeeInOrder(
             [
                 'Name',
                 $incidentSeverity->name,
+                'Color',
+                $incidentSeverity->rgb_color,
             ]
         );
 });
