@@ -172,13 +172,13 @@ it('can filter users by teams', function () {
 
     $userWithTeam1 = User::factory()
         ->count(5)
-        ->create()
-        ->each(fn ($user) => $user->teams()->sync([$team1->getKey()]));
+        ->hasAttached($team1, [], 'teams')
+        ->create();
 
     $userWithTeam2 = User::factory()
         ->count(5)
-        ->create()
-        ->each(fn ($user) => $user->teams()->sync([$team2->getKey()]));
+        ->hasAttached($team2, [], 'teams')
+        ->create();
 
     livewire(ListUsers::class)
         ->set('tableRecordsPerPage', 10)
