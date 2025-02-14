@@ -56,6 +56,7 @@ use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Carbon;
 use STS\FilamentImpersonate\Tables\Actions\Impersonate;
@@ -131,6 +132,14 @@ class UserResource extends Resource
                     ->label('Updated At')
                     ->dateTime(config('project.datetime_format') ?? 'Y-m-d H:i:s')
                     ->sortable(),
+            ])
+            ->filters([
+                SelectFilter::make('teams')
+                    ->label('Team')
+                    ->relationship('teams', 'name')
+                    ->multiple()
+                    ->searchable()
+                    ->preload(),
             ])
             ->actions([
                 Impersonate::make(),
