@@ -67,5 +67,9 @@ test('CreateIncidentSeverity validates the inputs', function ($data, $errors) {
             IncidentSeverityRequestFactory::new()->state(['name' => str()->random(256)]),
             ['name' => 'max'],
         ],
+        'color required' => [
+            IncidentSeverityRequestFactory::new()->without('color'),
+            ['color' => 'required'],
+        ],
     ]
 );

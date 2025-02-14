@@ -12,11 +12,11 @@ class IncidentSeveritySeeder extends Seeder
         IncidentSeverity::factory()
             ->createMany(
                 [
-                    ['name' => 'Critical'],
-                    ['name' => 'Major'],
-                    ['name' => 'Minor'],
-                    ['name' => 'Warning'],
-                    ['name' => 'Informational'],
+                    ['name' => 'Critical', 'color' => 'red'],
+                    ['name' => 'Major', 'color' => 'orange'],
+                    ['name' => 'Minor', 'color' => 'yellow'],
+                    ['name' => 'Warning', 'color' => 'amber'],
+                    ['name' => 'Informational', 'color' => 'blue'],
                 ]
             );
     }

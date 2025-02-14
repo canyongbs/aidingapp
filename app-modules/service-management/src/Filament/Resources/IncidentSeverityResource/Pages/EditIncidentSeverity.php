@@ -5,6 +5,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\IncidentSeverityResourc
 use AidingApp\ServiceManagement\Filament\Resources\IncidentSeverityResource;
 use AidingApp\ServiceManagement\Models\IncidentSeverity;
 use App\Concerns\EditPageRedirection;
+use App\Filament\Forms\Components\ColorSelect;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\TextInput;
@@ -27,6 +28,9 @@ class EditIncidentSeverity extends EditRecord
                     ->required()
                     ->maxLength(255)
                     ->string(),
+                ColorSelect::make('color')
+                    ->label('Color')
+                    ->required(),
             ]);
     }
 

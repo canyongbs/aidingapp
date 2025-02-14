@@ -12,6 +12,7 @@ use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Columns\ColorColumn;
 use Filament\Tables\Table;
 
 class ListIncidentSeverities extends ListRecords
@@ -26,6 +27,8 @@ class ListIncidentSeverities extends ListRecords
                     ->label('Name')
                     ->searchable()
                     ->sortable(),
+                ColorColumn::make('rgb_color')
+                    ->label('Color'),
             ])
             ->actions([
                 ViewAction::make(),

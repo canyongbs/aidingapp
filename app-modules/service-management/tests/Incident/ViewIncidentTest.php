@@ -25,7 +25,7 @@ test('The correct details are displayed on the ViewIncident page', function () {
             ])
         )
         ->assertSuccessful()
-        ->assertSeeTextInOrder(
+        ->assertSeeInOrder(
             [
                 'Title',
                 $incident->title,

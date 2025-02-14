@@ -5,6 +5,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\IncidentResource\Pages;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentResource;
 use AidingApp\ServiceManagement\Models\Incident;
 use Filament\Actions\EditAction;
+use Filament\Infolists\Components\ColorEntry;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
@@ -25,8 +26,9 @@ class ViewIncident extends ViewRecord
                             ->label('Title'),
                         TextEntry::make('description')
                             ->label('Description'),
-                        TextEntry::make('severity.name')
-                            ->label('Severity'),
+                        ColorEntry::make('severity.rgb_color')
+                            ->label('Severity')
+                            ->tooltip(fn (Incident $record) => $record->severity->name),
                         TextEntry::make('status.name')
                             ->label('Status'),
                         TextEntry::make('assignedTeam.name')

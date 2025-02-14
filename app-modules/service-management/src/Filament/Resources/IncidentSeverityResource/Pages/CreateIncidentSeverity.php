@@ -3,6 +3,7 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\IncidentSeverityResource\Pages;
 
 use AidingApp\ServiceManagement\Filament\Resources\IncidentSeverityResource;
+use App\Filament\Forms\Components\ColorSelect;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Pages\CreateRecord;
@@ -20,6 +21,9 @@ class CreateIncidentSeverity extends CreateRecord
                     ->required()
                     ->maxLength(255)
                     ->string(),
+                ColorSelect::make('color')
+                    ->label('Color')
+                    ->required(),
             ]);
     }
 }
