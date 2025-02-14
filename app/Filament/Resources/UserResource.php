@@ -36,6 +36,7 @@
 
 namespace App\Filament\Resources;
 
+use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Authorization\Models\License;
 use App\Filament\Forms\Components\Licenses;
 use App\Filament\Resources\UserResource\Pages\CreateUser;
@@ -58,6 +59,7 @@ use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 use STS\FilamentImpersonate\Tables\Actions\Impersonate;
 
@@ -137,6 +139,36 @@ class UserResource extends Resource
                 SelectFilter::make('teams')
                     ->label('Team')
                     ->relationship('teams', 'name')
+                    ->multiple()
+                    ->searchable()
+                    ->preload(),
+                SelectFilter::make('licenses')
+                    ->label('License')
+                    ->options(
+                        fn (): array => [
+                            '' => [
+                                'no_assigned_license' => 'No Assigned License',
+                            ],
+                            'Licenses' => collect(LicenseType::cases())
+                                ->mapWithKeys(fn ($case) => [$case->value => $case->name])
+                                ->toArray(),
+                        ]
+                    )
+                    ->getSearchResultsUsing(fn (string $search): array => ['Licenses' => collect(LicenseType::cases())->filter(fn ($case) => str_contains(strtolower($case->name), strtolower($search)))->mapWithKeys(fn ($case) => [$case->value => $case->name])->toArray()])
+                    ->query(
+                        function (Builder $query, array $data) {
+                            if (empty($data['values'])) {
+                                return;
+                            }
+
+                            $query->when(in_array('no_assigned_license', $data['values']), function ($query) {
+                                $query->whereDoesntHave('licenses');
+                            })
+                                ->{in_array('no_assigned_license', $data['values']) ? 'orWhereHas' : 'whereHas'}('licenses', function ($query) use ($data) {
+                                    $query->whereIn('type', array_filter($data['values'], fn ($value) => $value !== 'no_assigned_license'));
+                                });
+                        }
+                    )
                     ->multiple()
                     ->searchable()
                     ->preload(),
