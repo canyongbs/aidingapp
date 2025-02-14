@@ -171,9 +171,9 @@ class Contact extends BaseAuthenticatable implements Auditable, Subscribable, Ed
             ->withTimestamps();
     }
 
-    public function tasks(): MorphMany
+    public function tasks(): HasMany
     {
-        return $this->morphMany(Task::class, 'concern');
+        return $this->hasMany(Task::class, 'concern_id');
     }
 
     public function alerts(): MorphMany

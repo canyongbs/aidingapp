@@ -34,26 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Task\Tests\RequestFactories;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Task\Enums\TaskStatus;
-use App\Models\User;
-use Worksome\RequestFactories\RequestFactory;
-
-class EditTaskRequestFactory extends RequestFactory
-{
-    public function definition(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        $contact = Contact::factory()->create();
-
-        return [
-            'title' => str(fake()->words(asText: 3))->title()->toString(),
-            'description' => fake()->sentence(),
-            'status' => fake()->randomElement(TaskStatus::cases())->value,
-            'due' => now()->addWeek(),
-            'assigned_to' => User::factory()->create()->id,
-            'concern_id' => $contact->getKey(),
-        ];
+        Schema::table('tasks', function (Blueprint $table) {
+            $table->dropColumn('concern_type');
+        });
     }
-}
+
+    public function down(): void
+    {
+        Schema::table('tasks', function (Blueprint $table) {
+            $table->string('concern_type')->nullable();
+        });
+    }
+};
