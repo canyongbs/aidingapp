@@ -217,4 +217,4 @@ it('Filter users based on licenses', function () {
         ->filterTable('licenses', ['no_assigned_license'])
         ->assertCanSeeTableRecords($usersWithoutLicense)
         ->assertCanNotSeeTableRecords($usersWithRecruitmentCrmLicense);
-})->only();
+});
