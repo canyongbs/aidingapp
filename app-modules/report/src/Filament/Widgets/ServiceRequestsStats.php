@@ -151,9 +151,7 @@ class ServiceRequestsStats extends StatsOverviewReportWidget
     private function calculateAverageServiceResolutionTime(Carbon $intervalStart): array
     {
         $averageServiceResolutionTime = ServiceRequest::avg('time_to_resolution');
-
         $interval = Carbon::now()->diffAsCarbonInterval(Carbon::now()->addSeconds((float) $averageServiceResolutionTime));
-
         $days = $interval->d;
         $hours = $interval->h;
         $minutes = $interval->i;
