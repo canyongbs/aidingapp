@@ -34,6 +34,7 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Team\Models\Team;
 use App\Filament\Resources\UserResource\Pages\ListUsers;
 use App\Models\User;
 use Lab404\Impersonate\Services\ImpersonateManager;
@@ -159,4 +160,36 @@ it('allows a user to leave impersonate', function () {
 
     expect($second->isImpersonated())->toBeFalse();
     expect(auth()->id())->toBe($first->id);
+});
+
+it('can filter users by teams', function () {
+    asSuperAdmin();
+
+    $team1 = Team::factory()->create();
+    $team2 = Team::factory()->create();
+
+    $userWithoutTeam = User::factory()->count(5)->create();
+
+    $userWithTeam1 = User::factory()
+        ->count(5)
+        ->create()
+        ->each(fn ($user) => $user->teams()->sync([$team1->getKey()]));
+
+    $userWithTeam2 = User::factory()
+        ->count(5)
+        ->create()
+        ->each(fn ($user) => $user->teams()->sync([$team2->getKey()]));
+
+    livewire(ListUsers::class)
+        ->set('tableRecordsPerPage', 10)
+        ->assertCanSeeTableRecords($userWithoutTeam->merge($userWithTeam1)->merge($userWithTeam2))
+        ->filterTable('teams', [$team1->getKey()])
+        ->assertCanSeeTableRecords($userWithTeam1)
+        ->assertCanNotSeeTableRecords($userWithoutTeam->merge($userWithTeam2))
+        ->filterTable('teams', [$team2->getKey()])
+        ->assertCanSeeTableRecords($userWithTeam2)
+        ->assertCanNotSeeTableRecords($userWithoutTeam->merge($userWithTeam1))
+        ->filterTable('teams', [$team2->id, $team1->id])
+        ->assertCanSeeTableRecords($userWithTeam1->merge($userWithTeam2))
+        ->assertCanNotSeeTableRecords($userWithoutTeam);
 });
