@@ -176,8 +176,8 @@ class ServiceRequestsStats extends StatsOverviewReportWidget
     private function getPercentageChange(int $oldValue, int $newValue): int
     {
         return $oldValue > 0
-            ? (($newValue - $oldValue) / $oldValue) * 100
-            : ($newValue > 0 ? 100 : 0);
+                        ? (($newValue - $oldValue) / $oldValue) * 100
+                        : ($newValue > 0 ? 100 : 0);
     }
 
     private function getFormattedPercentageChangeDetails(int $percentageChange): array
