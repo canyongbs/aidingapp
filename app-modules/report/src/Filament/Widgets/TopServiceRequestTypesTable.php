@@ -87,7 +87,7 @@ class TopServiceRequestTypesTable extends BaseWidget
                     ->label('Count'),
                 TextColumn::make('service_requests_avg_time_to_resolution')
                     ->formatStateUsing(function ($state) {
-                        $interval = Carbon::now()->diffAsCarbonInterval(Carbon::now()->addSeconds($state));
+                        $interval = Carbon::now()->diffAsCarbonInterval(Carbon::now()->addSeconds((float) $state));
                         $days = $interval->d;
                         $hours = $interval->h;
                         $minutes = $interval->i;
