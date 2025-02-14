@@ -43,7 +43,6 @@ use AidingApp\Notification\Models\Contracts\Subscribable;
 use AidingApp\Task\Enums\TaskStatus;
 use AidingApp\Task\Observers\TaskObserver;
 use App\Models\BaseModel;
-use App\Models\Contracts\Educatable;
 use App\Models\User;
 use Bvtterfly\ModelStateMachine\HasStateMachine;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
@@ -51,7 +50,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
 
@@ -74,7 +72,6 @@ class Task extends BaseModel implements Auditable, CanTriggerAutoSubscription
         'description',
         'due',
         'concern_id',
-        'concern_type',
     ];
 
     protected $casts = [
@@ -89,10 +86,9 @@ class Task extends BaseModel implements Auditable, CanTriggerAutoSubscription
         ];
     }
 
-    /** @return MorphTo<Educatable> */
-    public function concern(): MorphTo
+    public function concern(): BelongsTo
     {
-        return $this->morphTo();
+        return $this->belongsTo(Contact::class, 'concern_id');
     }
 
     public function assignedTo(): BelongsTo
