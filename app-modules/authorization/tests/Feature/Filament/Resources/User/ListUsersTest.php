@@ -181,7 +181,7 @@ it('can filter users by teams', function () {
         ->create();
 
     livewire(ListUsers::class)
-        ->set('tableRecordsPerPage', 10)
+        ->set('tableRecordsPerPage', 16)
         ->assertCanSeeTableRecords($userWithoutTeam->merge($userWithTeam1)->merge($userWithTeam2))
         ->filterTable('teams', [$team1->getKey()])
         ->assertCanSeeTableRecords($userWithTeam1)
