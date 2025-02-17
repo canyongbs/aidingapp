@@ -36,12 +36,15 @@
 
 use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Team\Models\Team;
+use App\Filament\Resources\UserResource\Actions\AssignLicensesBulkAction;
 use App\Filament\Resources\UserResource\Pages\ListUsers;
 use App\Models\User;
 use Lab404\Impersonate\Services\ImpersonateManager;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
+use function PHPUnit\Framework\assertFalse;
+use function PHPUnit\Framework\assertTrue;
 
 use STS\FilamentImpersonate\Tables\Actions\Impersonate;
 
@@ -217,4 +220,55 @@ it('Filter users based on licenses', function () {
         ->filterTable('licenses', ['no_assigned_license'])
         ->assertCanSeeTableRecords($usersWithoutLicense)
         ->assertCanNotSeeTableRecords($usersWithRecruitmentCrmLicense);
+});
+
+it('does not allow a user without permission to assign licenses in bulk', function () {
+    $user = User::factory()->create();
+    $user->givePermissionTo([
+        'user.view-any',
+        'user.*.update',
+    ]);
+    actingAs($user);
+
+    $records = User::factory(2)->create()->prepend($user);
+
+    livewire(ListUsers::class)
+        ->assertSuccessful()
+        ->assertCountTableRecords($records->count())
+        ->assertTableBulkActionHidden(AssignLicensesBulkAction::class);
+});
+
+it('allows a user with permission to assign licenses in bulk', function () {
+    $user = User::factory()->create();
+    $user->givePermissionTo([
+        'user.view-any',
+        'user.*.update',
+        'license.view-any',
+        'license.create',
+        'license.*.update',
+    ]);
+    actingAs($user);
+
+    $records = User::factory(2)->create()->prepend($user);
+
+    $licenseTypes = collect(LicenseType::cases());
+
+    $records->each(function (User $record) use ($licenseTypes) {
+        $licenseTypes->each(fn ($license) => assertFalse($record->hasLicense($license)));
+    });
+
+    livewire(ListUsers::class)
+        ->assertSuccessful()
+        ->assertCountTableRecords($records->count())
+        ->callTableBulkAction(AssignLicensesBulkAction::class, $records, [
+            'replace' => true,
+            ...$licenseTypes->mapWithKeys(fn (LicenseType $licenseType) => [$licenseType->value => true]),
+        ])
+        ->assertHasNoTableBulkActionErrors()
+        ->assertNotified('Assigned Licenses');
+
+    $records->each(function (User $record) use ($licenseTypes) {
+        $record->refresh();
+        $licenseTypes->each(fn (LicenseType $licenseType) => assertTrue($record->hasLicense($licenseType)));
+    });
 });
