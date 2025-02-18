@@ -34,41 +34,53 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Resources\UserResource\Pages;
+namespace App\Rules;
 
-use App\Filament\Imports\UserImporter;
-use App\Filament\Resources\UserResource;
 use App\Models\User;
-use Filament\Actions\CreateAction;
-use Filament\Actions\ImportAction;
-use Filament\Resources\Pages\ListRecords;
-use Illuminate\Contracts\Support\Htmlable;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Translation\PotentiallyTranslatedString;
 
-class ListUsers extends ListRecords
+class EmailNotInUseOrSoftDeleted implements ValidationRule
 {
-    protected static string $resource = UserResource::class;
+    protected $message;
 
-    protected ?string $heading = 'Users';
+    protected $currentUserId;
 
-    public function getSubheading(): string | Htmlable | null
+    public function __construct($currentUserId = null)
     {
-        // TODO: Either remove or change to show all possible seats
-
-        //return new HtmlString(view('crm-seats', [
-        //    'count' => User::count(),
-        //    'max' => app(LicenseSettings::class)->data->limits->crmSeats,
-        //])->render());
-
-        return null;
+        $this->currentUserId = $currentUserId;
     }
 
-    protected function getHeaderActions(): array
+    /**
+     * Run the validation rule.
+     *
+     * @param  Closure(string): PotentiallyTranslatedString  $fail
+     */
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        return [
-            ImportAction::make()
-                ->importer(UserImporter::class)
-                ->authorize('import', User::class),
-            CreateAction::make(),
-        ];
+        $user = User::withTrashed()->where('email', $value)->first();
+
+        if ($user) {
+            if ($this->currentUserId && $user->id === $this->currentUserId) {
+                return; // Allow the current user to keep their email
+            }
+
+            if ($user->trashed()) {
+                $fail('An archived user with this email address already exists. Please contact an administrator to restore this user or use a different email address.');
+            } else {
+                $fail("A user with this email address already exists. Please use a different email address or contact your administrator if you need to modify this user's account.");
+            }
+        }
+    }
+
+    /**
+     * Get the validation error message.
+     *
+     * @return string
+     */
+    public function message()
+    {
+        return $this->message;
     }
 }

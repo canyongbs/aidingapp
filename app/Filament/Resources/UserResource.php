@@ -46,6 +46,7 @@ use App\Filament\Resources\UserResource\RelationManagers\PermissionsRelationMana
 use App\Filament\Resources\UserResource\RelationManagers\RolesRelationManager;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\User;
+use App\Rules\EmailNotInUseOrSoftDeleted;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -90,7 +91,10 @@ class UserResource extends Resource
                             ->label('Email address')
                             ->email()
                             ->required()
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->rules([
+                                new EmailNotInUseOrSoftDeleted(),
+                            ]),
                         TextInput::make('job_title')
                             ->string()
                             ->maxLength(255),
