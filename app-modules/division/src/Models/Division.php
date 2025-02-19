@@ -62,6 +62,13 @@ class Division extends BaseModel implements Auditable
         'name',
         'code',
         'description',
+        'header',
+        'footer',
+        'is_default',
+    ];
+
+    protected $casts = [
+        'is_default' => 'boolean',
     ];
 
     public function createdBy(): BelongsTo

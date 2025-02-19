@@ -53,6 +53,18 @@ class DivisionFactory extends Factory
             'name' => fake()->unique()->company(),
             'code' => fake()->unique()->word(),
             'description' => fake()->optional()->sentences(asText: true),
+            'header' => fake()->words(asText: true),
+            'footer' => fake()->words(asText: true),
+            'is_default' => false,
         ];
+    }
+
+    public function default(): Factory
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'is_default' => true,
+            ];
+        });
     }
 }
