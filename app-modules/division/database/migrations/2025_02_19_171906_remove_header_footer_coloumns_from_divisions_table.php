@@ -34,32 +34,23 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Division\Filament\Resources\DivisionResource\Pages;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-use AidingApp\Division\Filament\Resources\DivisionResource;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
-use Filament\Resources\Pages\CreateRecord;
-
-class CreateDivision extends CreateRecord
-{
-    protected static string $resource = DivisionResource::class;
-
-    public function form(Form $form): Form
+return new class () extends Migration {
+    public function up(): void
     {
-        return $form
-            ->schema([
-                TextInput::make('name')
-                    ->required()
-                    ->string()
-                    ->unique(),
-                TextInput::make('code')
-                    ->required()
-                    ->string()
-                    ->unique(),
-                Textarea::make('description')
-                    ->string(),
-            ]);
+        Schema::table('divisions', function (Blueprint $table) {
+            $table->dropColumn(['header', 'footer']);
+        });
     }
-}
+
+    public function down(): void
+    {
+        Schema::table('divisions', function (Blueprint $table) {
+            $table->longText('header')->nullable();
+            $table->longText('footer')->nullable();
+        });
+    }
+};
