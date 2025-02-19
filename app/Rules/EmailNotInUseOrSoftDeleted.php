@@ -34,41 +34,53 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Task\Enums;
+namespace App\Rules;
 
-use Bvtterfly\ModelStateMachine\Attributes\AllowTransitionTo;
-use Bvtterfly\ModelStateMachine\Attributes\InitialState;
-use Filament\Support\Contracts\HasColor;
-use Filament\Support\Contracts\HasLabel;
+use App\Models\User;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Translation\PotentiallyTranslatedString;
 
-enum TaskStatus: string implements HasColor, HasLabel
+class EmailNotInUseOrSoftDeleted implements ValidationRule
 {
-    #[InitialState]
-    #[AllowTransitionTo(self::InProgress)]
-    #[AllowTransitionTo(self::Canceled)]
-    case Pending = 'pending';
+    protected $message;
 
-    #[AllowTransitionTo(self::Completed)]
-    #[AllowTransitionTo(self::Canceled)]
-    case InProgress = 'in_progress';
+    protected $currentUserId;
 
-    case Completed = 'completed';
-
-    #[AllowTransitionTo(self::InProgress)]
-    case Canceled = 'canceled';
-
-    public function getColor(): string
+    public function __construct($currentUserId = null)
     {
-        return match ($this) {
-            self::Pending => 'gray',
-            self::InProgress => 'primary',
-            self::Completed => 'success',
-            self::Canceled => 'danger',
-        };
+        $this->currentUserId = $currentUserId;
     }
 
-    public function getLabel(): string
+    /**
+     * Run the validation rule.
+     *
+     * @param  Closure(string): PotentiallyTranslatedString  $fail
+     */
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        return str($this->value)->headline()->toString();
+        $user = User::withTrashed()->where('email', $value)->first();
+
+        if ($user) {
+            if ($this->currentUserId && $user->id === $this->currentUserId) {
+                return; // Allow the current user to keep their email
+            }
+
+            if ($user->trashed()) {
+                $fail('An archived user with this email address already exists. Please contact an administrator to restore this user or use a different email address.');
+            } else {
+                $fail("A user with this email address already exists. Please use a different email address or contact your administrator if you need to modify this user's account.");
+            }
+        }
+    }
+
+    /**
+     * Get the validation error message.
+     *
+     * @return string
+     */
+    public function message()
+    {
+        return $this->message;
     }
 }

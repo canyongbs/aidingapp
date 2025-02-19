@@ -34,6 +34,8 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\Team\Models\Team;
 use App\Filament\Resources\UserResource\Pages\ListUsers;
 use App\Models\User;
 use Lab404\Impersonate\Services\ImpersonateManager;
@@ -159,4 +161,60 @@ it('allows a user to leave impersonate', function () {
 
     expect($second->isImpersonated())->toBeFalse();
     expect(auth()->id())->toBe($first->id);
+});
+
+it('can filter users by teams', function () {
+    asSuperAdmin();
+
+    $team1 = Team::factory()->create();
+    $team2 = Team::factory()->create();
+
+    $userWithoutTeam = User::factory()->count(5)->create();
+
+    $userWithTeam1 = User::factory()
+        ->count(5)
+        ->hasAttached($team1, [], 'teams')
+        ->create();
+
+    $userWithTeam2 = User::factory()
+        ->count(5)
+        ->hasAttached($team2, [], 'teams')
+        ->create();
+
+    livewire(ListUsers::class)
+        ->set('tableRecordsPerPage', 16)
+        ->assertCanSeeTableRecords($userWithoutTeam->merge($userWithTeam1)->merge($userWithTeam2))
+        ->filterTable('teams', [$team1->getKey()])
+        ->assertCanSeeTableRecords($userWithTeam1)
+        ->assertCanNotSeeTableRecords($userWithoutTeam->merge($userWithTeam2))
+        ->filterTable('teams', [$team2->getKey()])
+        ->assertCanSeeTableRecords($userWithTeam2)
+        ->assertCanNotSeeTableRecords($userWithoutTeam->merge($userWithTeam1))
+        ->filterTable('teams', [$team2->getKey(), $team1->getKey()])
+        ->assertCanSeeTableRecords($userWithTeam1->merge($userWithTeam2))
+        ->assertCanNotSeeTableRecords($userWithoutTeam);
+});
+
+it('Filter users based on licenses', function () {
+    asSuperAdmin();
+
+    $usersWithRecruitmentCrmLicense = User::factory()
+        ->count(3)
+        ->create()
+        ->each(function ($user) {
+            $user->grantLicense(LicenseType::RecruitmentCrm);
+        });
+
+    $usersWithoutLicense = User::factory()
+        ->count(3)
+        ->create();
+
+    livewire(ListUsers::class)
+        ->assertCanSeeTableRecords($usersWithRecruitmentCrmLicense->merge($usersWithoutLicense))
+        ->filterTable('licenses', [LicenseType::RecruitmentCrm->value])
+        ->assertCanSeeTableRecords($usersWithRecruitmentCrmLicense)
+        ->assertCanNotSeeTableRecords($usersWithoutLicense)
+        ->filterTable('licenses', ['no_assigned_license'])
+        ->assertCanSeeTableRecords($usersWithoutLicense)
+        ->assertCanNotSeeTableRecords($usersWithRecruitmentCrmLicense);
 });
