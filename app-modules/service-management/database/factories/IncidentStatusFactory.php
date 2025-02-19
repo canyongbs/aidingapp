@@ -34,34 +34,27 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Task\Filament\Resources;
+namespace AidingApp\ServiceManagement\Database\Factories;
 
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\CreateTask;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\EditTask;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\ListTasks;
-use AidingApp\Task\Models\Task;
-use Filament\Resources\Resource;
+use AidingApp\ServiceManagement\Enums\SystemIncidentStatusClassification;
+use AidingApp\ServiceManagement\Models\IncidentStatus;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-class TaskResource extends Resource
+/**
+ * @extends Factory<IncidentStatus>
+ */
+class IncidentStatusFactory extends Factory
 {
-    protected static ?string $model = Task::class;
-
-    protected static ?string $navigationGroup = 'Service Management';
-
-    protected static ?int $navigationSort = 80;
-
-    protected static ?string $breadcrumb = 'Task Management';
-
-    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
-
-    protected static ?string $navigationLabel = 'Task Management';
-
-    public static function getPages(): array
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition(): array
     {
         return [
-            'index' => ListTasks::route('/'),
-            'create' => CreateTask::route('/create'),
-            'edit' => EditTask::route('/{record}/edit'),
+            'name' => fake()->word(10),
+            'classification' => fake()->randomElement(SystemIncidentStatusClassification::cases()),
         ];
     }
 }

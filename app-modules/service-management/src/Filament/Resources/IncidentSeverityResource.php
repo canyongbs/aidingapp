@@ -34,34 +34,39 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Task\Filament\Resources;
+namespace AidingApp\ServiceManagement\Filament\Resources;
 
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\CreateTask;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\EditTask;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\ListTasks;
-use AidingApp\Task\Models\Task;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentSeverityResource\Pages\CreateIncidentSeverity;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentSeverityResource\Pages\EditIncidentSeverity;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentSeverityResource\Pages\ListIncidentSeverities;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentSeverityResource\Pages\ViewIncidentSeverity;
+use AidingApp\ServiceManagement\Models\IncidentSeverity;
+use App\Features\IncidentSeverityStatus;
+use App\Filament\Clusters\IncidentManagement;
 use Filament\Resources\Resource;
 
-class TaskResource extends Resource
+class IncidentSeverityResource extends Resource
 {
-    protected static ?string $model = Task::class;
+    protected static ?string $model = IncidentSeverity::class;
 
-    protected static ?string $navigationGroup = 'Service Management';
+    protected static ?string $cluster = IncidentManagement::class;
 
-    protected static ?int $navigationSort = 80;
+    protected static ?string $navigationLabel = 'Severities';
 
-    protected static ?string $breadcrumb = 'Task Management';
+    protected static ?int $navigationSort = 10;
 
-    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
-
-    protected static ?string $navigationLabel = 'Task Management';
+    public static function canAccess(): bool
+    {
+        return parent::canAccess() && IncidentSeverityStatus::active();
+    }
 
     public static function getPages(): array
     {
         return [
-            'index' => ListTasks::route('/'),
-            'create' => CreateTask::route('/create'),
-            'edit' => EditTask::route('/{record}/edit'),
+            'index' => ListIncidentSeverities::route('/'),
+            'create' => CreateIncidentSeverity::route('/create'),
+            'view' => ViewIncidentSeverity::route('/{record}'),
+            'edit' => EditIncidentSeverity::route('/{record}/edit'),
         ];
     }
 }

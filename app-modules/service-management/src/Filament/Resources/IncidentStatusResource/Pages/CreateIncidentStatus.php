@@ -34,34 +34,35 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Task\Filament\Resources;
+namespace AidingApp\ServiceManagement\Filament\Resources\IncidentStatusResource\Pages;
 
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\CreateTask;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\EditTask;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\ListTasks;
-use AidingApp\Task\Models\Task;
-use Filament\Resources\Resource;
+use AidingApp\ServiceManagement\Enums\SystemIncidentStatusClassification;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentStatusResource;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
+use Filament\Resources\Pages\CreateRecord;
 
-class TaskResource extends Resource
+class CreateIncidentStatus extends CreateRecord
 {
-    protected static ?string $model = Task::class;
+    protected static string $resource = IncidentStatusResource::class;
 
-    protected static ?string $navigationGroup = 'Service Management';
-
-    protected static ?int $navigationSort = 80;
-
-    protected static ?string $breadcrumb = 'Task Management';
-
-    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
-
-    protected static ?string $navigationLabel = 'Task Management';
-
-    public static function getPages(): array
+    public function form(Form $form): Form
     {
-        return [
-            'index' => ListTasks::route('/'),
-            'create' => CreateTask::route('/create'),
-            'edit' => EditTask::route('/{record}/edit'),
-        ];
+        return $form
+            ->schema([
+                TextInput::make('name')
+                    ->label('Name')
+                    ->maxLength('255')
+                    ->required()
+                    ->string(),
+                Select::make('classification')
+                    ->label('Classification')
+                    ->required()
+                    ->preload()
+                    ->searchable()
+                    ->options(SystemIncidentStatusClassification::class)
+                    ->enum(SystemIncidentStatusClassification::class),
+            ]);
     }
 }

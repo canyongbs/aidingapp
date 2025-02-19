@@ -34,34 +34,52 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Task\Filament\Resources;
+use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentStatusResource;
+use AidingApp\ServiceManagement\Models\IncidentStatus;
+use App\Models\User;
 
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\CreateTask;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\EditTask;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\ListTasks;
-use AidingApp\Task\Models\Task;
-use Filament\Resources\Resource;
+use function Pest\Laravel\actingAs;
+use function Tests\asSuperAdmin;
 
-class TaskResource extends Resource
-{
-    protected static ?string $model = Task::class;
+test('The correct details are displayed on the ViewIncidentStatus page', function () {
+    $user = User::factory()->licensed(LicenseType::cases())->create();
 
-    protected static ?string $navigationGroup = 'Service Management';
+    actingAs($user);
 
-    protected static ?int $navigationSort = 80;
+    $user->givePermissionTo('product_admin.view-any');
+    $user->givePermissionTo('product_admin.*.view');
 
-    protected static ?string $breadcrumb = 'Task Management';
+    $incidentStatus = IncidentStatus::factory()->create();
 
-    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
+    asSuperAdmin()
+        ->get(
+            IncidentStatusResource::getUrl('view', [
+                'record' => $incidentStatus,
+            ])
+        )
+        ->assertSuccessful()
+        ->assertSeeTextInOrder(
+            [
+                'Name',
+                $incidentStatus->name,
+                'Classification',
+                $incidentStatus->classification->name,
+            ]
+        );
+});
 
-    protected static ?string $navigationLabel = 'Task Management';
+test('ViewIncidentStatus is gated with proper access control', function () {
+    $user = User::factory()->licensed(LicenseType::cases())->create();
 
-    public static function getPages(): array
-    {
-        return [
-            'index' => ListTasks::route('/'),
-            'create' => CreateTask::route('/create'),
-            'edit' => EditTask::route('/{record}/edit'),
-        ];
-    }
-}
+    $incidentStatus = IncidentStatus::factory()->create();
+
+    asSuperAdmin($user);
+
+    actingAs($user)
+        ->get(
+            IncidentStatusResource::getUrl('view', [
+                'record' => $incidentStatus,
+            ])
+        )->assertSuccessful();
+});

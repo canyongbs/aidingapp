@@ -53,7 +53,7 @@ class ChangeRequestResource extends Resource
 
     protected static ?string $navigationGroup = 'Service Management';
 
-    protected static ?int $navigationSort = 60;
+    protected static ?int $navigationSort = 70;
 
     protected static ?string $breadcrumb = 'Change Management';
 

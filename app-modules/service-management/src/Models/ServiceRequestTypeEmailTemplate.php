@@ -44,6 +44,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use OwenIt\Auditing\Contracts\Auditable;
 
+/**
+ * @mixin IdeHelperServiceRequestTypeEmailTemplate
+ */
 class ServiceRequestTypeEmailTemplate extends Model implements Auditable
 {
     use HasFactory;

@@ -34,34 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Task\Filament\Resources;
+namespace App\Filament\Clusters;
 
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\CreateTask;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\EditTask;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\ListTasks;
-use AidingApp\Task\Models\Task;
-use Filament\Resources\Resource;
+use Filament\Clusters\Cluster;
 
-class TaskResource extends Resource
+class IncidentManagement extends Cluster
 {
-    protected static ?string $model = Task::class;
+    protected static ?string $navigationGroup = 'Product Administration';
 
-    protected static ?string $navigationGroup = 'Service Management';
+    protected static ?int $navigationSort = 50;
 
-    protected static ?int $navigationSort = 80;
+    protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
-    protected static ?string $breadcrumb = 'Task Management';
-
-    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
-
-    protected static ?string $navigationLabel = 'Task Management';
-
-    public static function getPages(): array
-    {
-        return [
-            'index' => ListTasks::route('/'),
-            'create' => CreateTask::route('/create'),
-            'edit' => EditTask::route('/{record}/edit'),
-        ];
-    }
+    protected static ?string $title = 'Incident Management';
 }

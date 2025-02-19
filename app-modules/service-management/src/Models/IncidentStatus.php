@@ -34,34 +34,34 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Task\Filament\Resources;
+namespace AidingApp\ServiceManagement\Models;
 
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\CreateTask;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\EditTask;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\ListTasks;
-use AidingApp\Task\Models\Task;
-use Filament\Resources\Resource;
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\ServiceManagement\Enums\SystemIncidentStatusClassification;
+use App\Models\BaseModel;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class TaskResource extends Resource
+/**
+ * @mixin IdeHelperIncidentStatus
+ */
+class IncidentStatus extends BaseModel implements Auditable
 {
-    protected static ?string $model = Task::class;
+    use AuditableTrait;
+    use SoftDeletes;
 
-    protected static ?string $navigationGroup = 'Service Management';
+    protected $fillable = [
+        'classification',
+        'name',
+    ];
 
-    protected static ?int $navigationSort = 80;
+    protected $casts = [
+        'classification' => SystemIncidentStatusClassification::class,
+    ];
 
-    protected static ?string $breadcrumb = 'Task Management';
-
-    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
-
-    protected static ?string $navigationLabel = 'Task Management';
-
-    public static function getPages(): array
+    public function incidents(): HasMany
     {
-        return [
-            'index' => ListTasks::route('/'),
-            'create' => CreateTask::route('/create'),
-            'edit' => EditTask::route('/{record}/edit'),
-        ];
+        return $this->hasMany(Incident::class, 'status_id');
     }
 }

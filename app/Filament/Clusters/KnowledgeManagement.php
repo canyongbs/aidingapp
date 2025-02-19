@@ -48,5 +48,5 @@ class KnowledgeManagement extends Cluster
 
     protected static ?string $clusterBreadcrumb = 'Knowledge Base';
 
-    protected static ?int $navigationSort = 8;
+    protected static ?int $navigationSort = 60;
 }

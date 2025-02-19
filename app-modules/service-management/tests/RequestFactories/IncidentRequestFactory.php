@@ -34,34 +34,23 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Task\Filament\Resources;
+namespace AidingApp\ServiceManagement\Tests\RequestFactories;
 
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\CreateTask;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\EditTask;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\ListTasks;
-use AidingApp\Task\Models\Task;
-use Filament\Resources\Resource;
+use AidingApp\ServiceManagement\Models\IncidentSeverity;
+use AidingApp\ServiceManagement\Models\IncidentStatus;
+use AidingApp\Team\Models\Team;
+use Worksome\RequestFactories\RequestFactory;
 
-class TaskResource extends Resource
+class IncidentRequestFactory extends RequestFactory
 {
-    protected static ?string $model = Task::class;
-
-    protected static ?string $navigationGroup = 'Service Management';
-
-    protected static ?int $navigationSort = 80;
-
-    protected static ?string $breadcrumb = 'Task Management';
-
-    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
-
-    protected static ?string $navigationLabel = 'Task Management';
-
-    public static function getPages(): array
+    public function definition(): array
     {
         return [
-            'index' => ListTasks::route('/'),
-            'create' => CreateTask::route('/create'),
-            'edit' => EditTask::route('/{record}/edit'),
+            'title' => fake()->word(20),
+            'description' => fake()->paragraph(),
+            'severity_id' => IncidentSeverity::factory(),
+            'status_id' => IncidentStatus::factory(),
+            'assigned_team_id' => Team::factory(),
         ];
     }
 }
