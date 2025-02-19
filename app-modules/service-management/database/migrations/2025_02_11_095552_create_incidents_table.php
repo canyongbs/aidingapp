@@ -45,9 +45,9 @@ return new class () extends Migration {
             $table->uuid('id')->primary();
             $table->string('title');
             $table->longText('description');
-            $table->foreignUuid('severity_id')->references('id')->on('incident_severities')->onDelete('cascade');
-            $table->foreignUuid('status_id')->references('id')->on('incident_statuses')->onDelete('cascade');
-            $table->foreignUuid('assigned_team_id')->nullable()->references('id')->on('teams')->onDelete('cascade');
+            $table->foreignUuid('severity_id')->references('id')->on('incident_severities');
+            $table->foreignUuid('status_id')->references('id')->on('incident_statuses');
+            $table->foreignUuid('assigned_team_id')->nullable()->references('id')->on('teams');
             $table->timestamps();
             $table->softDeletes();
         });
