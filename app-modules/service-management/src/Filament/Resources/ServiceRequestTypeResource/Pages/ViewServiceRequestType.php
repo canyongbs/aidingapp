@@ -53,6 +53,8 @@ class ViewServiceRequestType extends ViewRecord
 {
     protected static string $resource = ServiceRequestTypeResource::class;
 
+    protected static ?string $navigationLabel = 'View';
+
     public function infolist(Infolist $infolist): Infolist
     {
         return $infolist
