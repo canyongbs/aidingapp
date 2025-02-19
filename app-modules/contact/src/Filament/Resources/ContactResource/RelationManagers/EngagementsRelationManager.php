@@ -133,7 +133,6 @@ class EngagementsRelationManager extends RelationManager
             ])
             ->headerActions([
                 CreateAction::make()
-                    ->label('New')
                     ->modalHeading('Create new email')
                     ->after(function (Engagement $engagement, array $data) {
                         $this->afterCreate($engagement, $data['delivery_method']);

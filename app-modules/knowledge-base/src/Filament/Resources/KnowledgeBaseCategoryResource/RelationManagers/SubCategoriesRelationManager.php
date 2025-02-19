@@ -125,7 +125,6 @@ class SubCategoriesRelationManager extends RelationManager
             ])
             ->headerActions([
                 CreateAction::make()
-                    ->label('New')
                     ->modalHeading('Create knowledge base subcategory'),
                 AssociateAction::make()
                     ->modalHeading('Associate knowledge base subcategory')
