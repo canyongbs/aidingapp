@@ -119,7 +119,7 @@ class ServiceRequestsRelationManager extends RelationManager
             ])
             ->headerActions([
                 CreateAction::make()
-                    ->label('New Service Request')
+                    ->label('New')
                     ->modalHeading('Create new service request'),
             ])
             ->actions([
