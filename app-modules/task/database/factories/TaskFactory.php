@@ -57,7 +57,6 @@ class TaskFactory extends Factory
             'assigned_to' => null,
             'created_by' => User::factory(),
             'concern_id' => null,
-            'concern_type' => null,
         ];
     }
 
@@ -65,7 +64,6 @@ class TaskFactory extends Factory
     {
         return $this->state([
             'concern_id' => $contact?->id ?? Contact::factory(),
-            'concern_type' => (new Contact())->getMorphClass(),
         ]);
     }
 

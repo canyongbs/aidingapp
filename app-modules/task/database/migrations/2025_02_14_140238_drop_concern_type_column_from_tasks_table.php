@@ -34,41 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Task\Filament\Concerns;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
-
-trait TaskEditForm
-{
-    use TaskForm;
-
-    public function editFormFields(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            TextInput::make('title')
-                ->required()
-                ->maxLength(100)
-                ->string(),
-            Textarea::make('description')
-                ->required()
-                ->string(),
-            DateTimePicker::make('due')
-                ->label('Due Date')
-                ->native(false),
-            Select::make('assigned_to')
-                ->label('Assigned To')
-                ->relationship('assignedTo', 'name', $this->scopeAssignmentRelationshipBasedOnConcern())
-                ->nullable()
-                ->searchable(['name', 'email'])
-                ->default(auth()->id()),
-            Select::make('concern_id')
-                ->label('Related To')
-                ->relationship('concern', 'first_name')
-                ->nullable()
-                ->afterStateUpdated($this->updateAssignmentAfterConcernSelected()),
-        ];
+        Schema::table('tasks', function (Blueprint $table) {
+            $table->dropColumn('concern_type');
+        });
     }
-}
+
+    public function down(): void
+    {
+        Schema::table('tasks', function (Blueprint $table) {
+            $table->string('concern_type')->nullable();
+        });
+    }
+};

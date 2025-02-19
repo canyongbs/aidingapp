@@ -41,7 +41,6 @@ use AidingApp\Task\Filament\Concerns\TaskEditForm;
 use AidingApp\Task\Filament\Pages\Components\TaskKanbanViewAction;
 use AidingApp\Task\Filament\Resources\TaskResource\Pages\ListTasks;
 use AidingApp\Task\Models\Task;
-use App\Filament\Forms\Components\EducatableSelect;
 use Bvtterfly\ModelStateMachine\Exceptions\InvalidTransition;
 use Exception;
 use Filament\Actions\Action;
@@ -150,8 +149,10 @@ class TaskKanban extends Component implements HasForms, HasActions
                     ->nullable()
                     ->searchable(['name', 'email'])
                     ->default(auth()->id()),
-                EducatableSelect::make('concern')
-                    ->label('Related To'),
+                Select::make('concern_id')
+                    ->label('Related To')
+                    ->relationship('concern', 'first_name')
+                    ->nullable(),
             ])
             ->action(function (array $data, array $arguments) {
                 $record = new Task(Arr::except($data, 'assigned_to'));
