@@ -40,6 +40,7 @@ use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Authorization\Models\License;
 use App\Filament\Forms\Components\Licenses;
 use App\Filament\Resources\UserResource\Actions\AssignLicensesBulkAction;
+use App\Filament\Resources\UserResource\Actions\AssignTeamBulkAction;
 use App\Filament\Resources\UserResource\Pages\CreateUser;
 use App\Filament\Resources\UserResource\Pages\EditUser;
 use App\Filament\Resources\UserResource\Pages\ListUsers;
@@ -186,6 +187,13 @@ class UserResource extends Resource
             ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
+                    AssignTeamBulkAction::make()
+                        ->visible(function (User $record): bool {
+                            /** @var User $user */
+                            $user = auth()->user();
+
+                            return $user->can('update', $record);
+                        }),
                     AssignLicensesBulkAction::make()
                         ->visible(fn () => auth()->user()->can('create', License::class)),
                 ]),
