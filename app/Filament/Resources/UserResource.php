@@ -188,7 +188,12 @@ class UserResource extends Resource
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                     AssignTeamBulkAction::make()
-                        ->visible(fn () => auth()->user()->can('update', User::class)),
+                        ->visible(function (User $record): bool {
+                            /** @var User $user */
+                            $user = auth()->user();
+
+                            return $user->can('update', $record);
+                        }),
                     AssignLicensesBulkAction::make()
                         ->visible(fn () => auth()->user()->can('create', License::class)),
                 ]),
