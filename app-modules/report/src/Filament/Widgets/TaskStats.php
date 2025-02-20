@@ -81,4 +81,3 @@ class TaskStats extends StatsOverviewReportWidget
         ];
     }
 }
-
