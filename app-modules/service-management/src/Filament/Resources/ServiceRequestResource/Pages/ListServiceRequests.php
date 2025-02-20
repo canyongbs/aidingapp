@@ -208,8 +208,7 @@ class ListServiceRequests extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make()
-                ->label('Add Service Request'),
+            CreateAction::make(),
         ];
     }
 }

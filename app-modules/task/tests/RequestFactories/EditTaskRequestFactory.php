@@ -45,16 +45,13 @@ class EditTaskRequestFactory extends RequestFactory
 {
     public function definition(): array
     {
-        $contact = Contact::factory()->create();
-
         return [
             'title' => str(fake()->words(asText: 3))->title()->toString(),
             'description' => fake()->sentence(),
             'status' => fake()->randomElement(TaskStatus::cases())->value,
             'due' => now()->addWeek(),
             'assigned_to' => User::factory()->create()->id,
-            'concern_type' => $contact->getMorphClass(),
-            'concern_id' => $contact->getKey(),
+            'concern_id' => Contact::factory(),
         ];
     }
 }

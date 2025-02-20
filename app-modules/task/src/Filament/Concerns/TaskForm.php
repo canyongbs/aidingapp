@@ -93,9 +93,7 @@ trait TaskForm
 
             $canAccessContacts = $user->hasLicense(Contact::getLicenseType());
 
-            $concernType = $get('concern_type');
-
-            if ($canAccessContacts && blank($concernType)) {
+            if ($canAccessContacts) {
                 return;
             }
 

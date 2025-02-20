@@ -47,6 +47,8 @@ class ViewProduct extends ViewRecord
 {
     protected static string $resource = ProductResource::class;
 
+    protected static ?string $navigationLabel = 'View';
+
     public function infolist(Infolist $infolist): Infolist
     {
         return $infolist

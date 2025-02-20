@@ -39,7 +39,6 @@ namespace AidingApp\Task\Filament\Resources\TaskResource\Pages;
 use AidingApp\Task\Filament\Concerns\TaskForm;
 use AidingApp\Task\Filament\Resources\TaskResource;
 use AidingApp\Task\Models\Task;
-use App\Filament\Forms\Components\EducatableSelect;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -75,8 +74,10 @@ class CreateTask extends CreateRecord
                     ->nullable()
                     ->searchable(['name', 'email'])
                     ->default(auth()->id()),
-                EducatableSelect::make('concern')
+                Select::make('concern_id')
                     ->label('Related To')
+                    ->relationship('concern', 'first_name')
+                    ->nullable()
                     ->afterStateUpdated($this->updateAssignmentAfterConcernSelected()),
             ]);
     }
