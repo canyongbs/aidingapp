@@ -70,7 +70,7 @@ class TaskStats extends StatsOverviewReportWidget
                 }),
                 maxPrecision: 2,
             )),
-            Stat::make('Contacst with Open Tasks', Number::abbreviate(
+            Stat::make('Contacts with Open Tasks', Number::abbreviate(
                 Cache::tags([$this->cacheTag])->remember('students-with-open-tasks-count', now()->addHours(24), function (): int {
                     return Contact::query()->whereHas('tasks', function (Builder $query) {
                         $query->whereIn('status', [TaskStatus::Pending, TaskStatus::InProgress]);
@@ -81,4 +81,3 @@ class TaskStats extends StatsOverviewReportWidget
         ];
     }
 }
-

@@ -36,7 +36,6 @@
 
 namespace AidingApp\Report\Filament\Widgets;
 
-use AidingApp\Contact\Models\Contact;
 use AidingApp\Task\Models\Task;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
@@ -67,7 +66,7 @@ class TaskCumulativeCountLineChart extends LineChartReportWidget
     {
         $runningTotalPerMonth = Cache::tags([$this->cacheTag])->remember('task_cumulative_count_line_chart', now()->addHours(24), function (): array {
             $totalContactTasksPerMonth = Task::query()
-                ->whereHasMorph('concern', Contact::class)
+                ->whereHas('concern')
                 ->toBase()
                 ->selectRaw('date_trunc(\'month\', created_at) as month')
                 ->selectRaw('count(*) as total')
@@ -100,7 +99,7 @@ class TaskCumulativeCountLineChart extends LineChartReportWidget
             'datasets' => [
                 [
                     'label' => 'Contact Tasks',
-                    'data' => array_values($runningTotalPerMonth['contactTask']),
+                    'data' => array_values($runningTotalPerMonth['contactTasks']),
                     'borderColor' => '#2C8BCA',
                     'pointBackgroundColor' => '#2C8BCA',
                 ],
@@ -111,7 +110,7 @@ class TaskCumulativeCountLineChart extends LineChartReportWidget
                     'pointBackgroundColor' => '#FFA500',
                 ],
             ],
-            'labels' => array_keys($runningTotalPerMonth['contactTask']),
+            'labels' => array_keys($runningTotalPerMonth['contactTasks']),
         ];
     }
 }

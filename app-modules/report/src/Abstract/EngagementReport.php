@@ -49,4 +49,3 @@ abstract class EngagementReport extends Dashboard
         return $user->hasLicense(LicenseType::RecruitmentCrm) && $user->can('report-library.view-any');
     }
 }
-

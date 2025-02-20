@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-
 namespace AidingApp\Report\Filament\Pages;
 
 use AidingApp\Report\Abstract\EngagementReport;
