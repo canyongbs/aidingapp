@@ -36,7 +36,6 @@
 
 namespace AidingApp\ServiceManagement\Policies;
 
-
 class IncidentUpdatePolicy
 {
     /**
