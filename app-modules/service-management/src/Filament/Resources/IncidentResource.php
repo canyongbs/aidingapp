@@ -39,6 +39,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentResource\Pages\CreateIncident;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentResource\Pages\EditIncident;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentResource\Pages\ListIncidents;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentResource\Pages\ManageIncidentUpdate;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentResource\Pages\ViewIncident;
 use AidingApp\ServiceManagement\Models\Incident;
 use Filament\Resources\Resource;
@@ -61,6 +62,7 @@ class IncidentResource extends Resource
     {
         return [
             'index' => ListIncidents::route('/'),
+            'manage-incident-update' => ManageIncidentUpdate::route('/{record}/updates'),
             'create' => CreateIncident::route('/create'),
             'view' => ViewIncident::route('/{record}'),
             'edit' => EditIncident::route('/{record}/edit'),
