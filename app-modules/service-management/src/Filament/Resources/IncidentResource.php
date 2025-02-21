@@ -58,6 +58,17 @@ class IncidentResource extends Resource
 
     protected static ?string $breadcrumb = 'Incident Management';
 
+    public static function getRecordSubNavigation(Page $page): array
+    {
+        $navigationItems = [
+            ViewIncident::class,
+            EditIncident::class,
+            ManageIncidentUpdate::class,
+        ];
+
+        return $page->generateNavigationItems($navigationItems);
+    }
+
     public static function getPages(): array
     {
         return [
