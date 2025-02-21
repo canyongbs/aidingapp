@@ -79,11 +79,11 @@ class TaskAssignedToUserNotification extends BaseNotification implements Databas
         $title = str($this->task->title)->limit();
 
         $message = match (true) {
+            is_null($this->task->concern) => "You have been assigned a new Task: <a href='{$url}' target='_blank' class='underline'>{$title}</a>",
+
             is_null($this->task->concern->organization) => "You have been assigned a new Task: <a href='{$url}' target='_blank' class='underline'>{$title}</a> related to Contact <a href='" . ContactResource::getUrl('view', ['record' => $this->task->concern]) . "' target='_blank' class='underline'>{$this->task->concern?->full_name}</a>",
 
             ! is_null($this->task->concern->organization) => "You have been assigned a new Task: <a href='{$url}' target='_blank' class='underline'>{$title}</a> related to Contact <a href='" . ContactResource::getUrl('view', ['record' => $this->task->concern]) . "' target='_blank' class='underline'>{$this->task->concern?->full_name}</a><a href='" . OrganizationResource::getUrl('view', ['record' => $this->task->concern->organization]) . "' target='_blank' class='underline'>({$this->task->concern->organization?->name})</a>",
-
-            default => "You have been assigned a new Task: <a href='{$url}' target='_blank' class='underline'>{$title}</a>",
         };
 
         return FilamentNotification::make()
