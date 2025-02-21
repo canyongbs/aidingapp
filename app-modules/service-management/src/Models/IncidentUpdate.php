@@ -37,11 +37,12 @@
 namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use OwenIt\Auditing\Contracts\Auditable;
 
-class IncidentUpdate extends Model implements Auditable
+class IncidentUpdate extends BaseModel implements Auditable
 {
     use AuditableTrait;
 
