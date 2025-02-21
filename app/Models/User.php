@@ -250,16 +250,6 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
         return $this->belongsToMany(ChangeRequestType::class);
     }
 
-    public function getIsAdminAttribute()
-    {
-        return $this->roles()->where('title', 'Admin')->exists();
-    }
-
-    public function scopeAdmins()
-    {
-        return $this->whereHas('roles', fn ($q) => $q->where('title', 'Admin'));
-    }
-
     public function pronouns(): BelongsTo
     {
         return $this->belongsTo(Pronouns::class);
