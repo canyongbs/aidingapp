@@ -44,5 +44,5 @@ class ContactManagement extends Cluster
 
     protected static ?string $navigationGroup = 'Product Administration';
 
-    protected static ?int $navigationSort = 5;
+    protected static ?int $navigationSort = 20;
 }

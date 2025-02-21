@@ -36,8 +36,11 @@
 
 namespace App\Filament\Resources;
 
+use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Authorization\Models\License;
 use App\Filament\Forms\Components\Licenses;
+use App\Filament\Resources\UserResource\Actions\AssignLicensesBulkAction;
+use App\Filament\Resources\UserResource\Actions\AssignTeamBulkAction;
 use App\Filament\Resources\UserResource\Pages\CreateUser;
 use App\Filament\Resources\UserResource\Pages\EditUser;
 use App\Filament\Resources\UserResource\Pages\ListUsers;
@@ -46,6 +49,7 @@ use App\Filament\Resources\UserResource\RelationManagers\PermissionsRelationMana
 use App\Filament\Resources\UserResource\RelationManagers\RolesRelationManager;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\User;
+use App\Rules\EmailNotInUseOrSoftDeleted;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -56,7 +60,9 @@ use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 use STS\FilamentImpersonate\Tables\Actions\Impersonate;
 
@@ -89,7 +95,10 @@ class UserResource extends Resource
                             ->label('Email address')
                             ->email()
                             ->required()
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->rules([
+                                new EmailNotInUseOrSoftDeleted(),
+                            ]),
                         TextInput::make('job_title')
                             ->string()
                             ->maxLength(255),
@@ -132,6 +141,44 @@ class UserResource extends Resource
                     ->dateTime(config('project.datetime_format') ?? 'Y-m-d H:i:s')
                     ->sortable(),
             ])
+            ->filters([
+                SelectFilter::make('teams')
+                    ->label('Team')
+                    ->relationship('teams', 'name')
+                    ->multiple()
+                    ->searchable()
+                    ->preload(),
+                SelectFilter::make('licenses')
+                    ->label('License')
+                    ->options(
+                        fn (): array => [
+                            '' => [
+                                'no_assigned_license' => 'No Assigned License',
+                            ],
+                            'Licenses' => collect(LicenseType::cases())
+                                ->mapWithKeys(fn ($case) => [$case->value => $case->name])
+                                ->toArray(),
+                        ]
+                    )
+                    ->getSearchResultsUsing(fn (string $search): array => ['Licenses' => collect(LicenseType::cases())->filter(fn ($case) => str_contains(strtolower($case->name), strtolower($search)))->mapWithKeys(fn ($case) => [$case->value => $case->name])->toArray()])
+                    ->query(
+                        function (Builder $query, array $data) {
+                            if (empty($data['values'])) {
+                                return;
+                            }
+
+                            $query->when(in_array('no_assigned_license', $data['values']), function ($query) {
+                                $query->whereDoesntHave('licenses');
+                            })
+                                ->{in_array('no_assigned_license', $data['values']) ? 'orWhereHas' : 'whereHas'}('licenses', function ($query) use ($data) {
+                                    $query->whereIn('type', array_filter($data['values'], fn ($value) => $value !== 'no_assigned_license'));
+                                });
+                        }
+                    )
+                    ->multiple()
+                    ->searchable()
+                    ->preload(),
+            ])
             ->actions([
                 Impersonate::make(),
                 ViewAction::make(),
@@ -140,6 +187,15 @@ class UserResource extends Resource
             ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
+                    AssignTeamBulkAction::make()
+                        ->visible(function (User $record): bool {
+                            /** @var User $user */
+                            $user = auth()->user();
+
+                            return $user->can('update', $record);
+                        }),
+                    AssignLicensesBulkAction::make()
+                        ->visible(fn () => auth()->user()->can('create', License::class)),
                 ]),
             ]);
     }

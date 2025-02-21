@@ -404,6 +404,13 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
         return "{$context}. When you respond please use this information about me to tailor your response.";
     }
 
+    public function assignTeam($teamId)
+    {
+        $this->teams()->detach();
+
+        $this->teams()->attach($teamId);
+    }
+
     protected function serializeDate(DateTimeInterface $date): string
     {
         return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
