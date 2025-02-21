@@ -48,6 +48,7 @@ use App\Filament\Resources\UserResource\Pages\ViewUser;
 use App\Filament\Resources\UserResource\RelationManagers\PermissionsRelationManager;
 use App\Filament\Resources\UserResource\RelationManagers\RolesRelationManager;
 use App\Filament\Tables\Columns\IdColumn;
+use App\Models\Authenticatable;
 use App\Models\User;
 use App\Rules\EmailNotInUseOrSoftDeleted;
 use Filament\Forms\Components\Section;
@@ -119,8 +120,8 @@ class UserResource extends Resource
                             ->label('')
                             ->relationship('teams', 'name')
                             ->disabled(fn (string $operation) => $operation === 'view'),
-                    ]),
-                // ->hidden(fn (?User $record) => $record->IsAdmin),
+                    ])
+                    ->hidden(fn (?User $record) => $record->hasRole(Authenticatable::SUPER_ADMIN_ROLE)),
                 Licenses::make()
                     ->hidden(fn (?User $record) => is_null($record))
                     ->disabled(function () {
