@@ -51,6 +51,7 @@ use App\Filament\Tables\Columns\IdColumn;
 use App\Models\User;
 use App\Rules\EmailNotInUseOrSoftDeleted;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
@@ -112,6 +113,14 @@ class UserResource extends Resource
                             ->disabled(),
                     ])
                     ->disabled(fn (string $operation) => $operation === 'view'),
+                Section::make('Team')
+                    ->schema([
+                        Select::make('teams')
+                            ->label('')
+                            ->relationship('teams', 'name')
+                            ->disabled(fn (string $operation) => $operation === 'view'),
+                    ]),
+                // ->hidden(fn (?User $record) => $record->IsAdmin),
                 Licenses::make()
                     ->hidden(fn (?User $record) => is_null($record))
                     ->disabled(function () {
