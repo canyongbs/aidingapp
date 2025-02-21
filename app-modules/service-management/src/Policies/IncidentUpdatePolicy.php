@@ -34,49 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Models;
+namespace AidingApp\ServiceManagement\Policies;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\Team\Models\Team;
-use App\Models\BaseModel;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use OwenIt\Auditing\Contracts\Auditable;
-
-/**
- * @mixin IdeHelperIncident
- */
-class Incident extends BaseModel implements Auditable
+class IncidentUpdatePolicy
 {
-    use AuditableTrait;
-    use SoftDeletes;
-
-    protected $fillable = [
-        'title',
-        'description',
-        'severity_id',
-        'status_id',
-        'assigned_team_id',
-    ];
-
-    public function assignedTeam(): BelongsTo
-    {
-        return $this->belongsTo(Team::class, 'assigned_team_id', 'id');
-    }
-
-    public function status(): BelongsTo
-    {
-        return $this->belongsTo(IncidentStatus::class);
-    }
-
-    public function severity(): BelongsTo
-    {
-        return $this->belongsTo(IncidentSeverity::class);
-    }
-
-    public function incidentUpdates(): HasMany
-    {
-        return $this->hasMany(IncidentUpdate::class, 'incident_id');
-    }
+    /**
+     * Create a new policy instance.
+     */
+    public function __construct() {}
 }

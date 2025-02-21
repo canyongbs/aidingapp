@@ -34,49 +34,21 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Models;
+namespace AidingApp\ServiceManagement\Database\Seeders;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\Team\Models\Team;
-use App\Models\BaseModel;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use OwenIt\Auditing\Contracts\Auditable;
+use AidingApp\ServiceManagement\Models\Incident;
+use AidingApp\ServiceManagement\Models\IncidentUpdate;
+use Illuminate\Database\Seeder;
 
-/**
- * @mixin IdeHelperIncident
- */
-class Incident extends BaseModel implements Auditable
+class IncidentUpdateSeeder extends Seeder
 {
-    use AuditableTrait;
-    use SoftDeletes;
-
-    protected $fillable = [
-        'title',
-        'description',
-        'severity_id',
-        'status_id',
-        'assigned_team_id',
-    ];
-
-    public function assignedTeam(): BelongsTo
+    public function run(): void
     {
-        return $this->belongsTo(Team::class, 'assigned_team_id', 'id');
-    }
-
-    public function status(): BelongsTo
-    {
-        return $this->belongsTo(IncidentStatus::class);
-    }
-
-    public function severity(): BelongsTo
-    {
-        return $this->belongsTo(IncidentSeverity::class);
-    }
-
-    public function incidentUpdates(): HasMany
-    {
-        return $this->hasMany(IncidentUpdate::class, 'incident_id');
+        Incident::each(function (Incident $incident) {
+            IncidentUpdate::factory()
+                ->count(3)
+                ->for($incident, 'incident')
+                ->create();
+        });
     }
 }

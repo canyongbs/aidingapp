@@ -34,49 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Models;
+namespace AidingApp\ServiceManagement\Database\Factories;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\Team\Models\Team;
-use App\Models\BaseModel;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use OwenIt\Auditing\Contracts\Auditable;
+use AidingApp\ServiceManagement\Models\Incident;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @mixin IdeHelperIncident
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AidingApp\ServiceManagement\Models\Model>
  */
-class Incident extends BaseModel implements Auditable
+class IncidentUpdateFactory extends Factory
 {
-    use AuditableTrait;
-    use SoftDeletes;
-
-    protected $fillable = [
-        'title',
-        'description',
-        'severity_id',
-        'status_id',
-        'assigned_team_id',
-    ];
-
-    public function assignedTeam(): BelongsTo
+    public function definition(): array
     {
-        return $this->belongsTo(Team::class, 'assigned_team_id', 'id');
-    }
-
-    public function status(): BelongsTo
-    {
-        return $this->belongsTo(IncidentStatus::class);
-    }
-
-    public function severity(): BelongsTo
-    {
-        return $this->belongsTo(IncidentSeverity::class);
-    }
-
-    public function incidentUpdates(): HasMany
-    {
-        return $this->hasMany(IncidentUpdate::class, 'incident_id');
+        return [
+            'incident_id' => Incident::factory(),
+            'update' => $this->faker->sentence(),
+            'internal' => $this->faker->boolean(),
+        ];
     }
 }

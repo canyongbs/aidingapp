@@ -34,49 +34,27 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Models;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\Team\Models\Team;
-use App\Models\BaseModel;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use OwenIt\Auditing\Contracts\Auditable;
-
-/**
- * @mixin IdeHelperIncident
- */
-class Incident extends BaseModel implements Auditable
-{
-    use AuditableTrait;
-    use SoftDeletes;
-
-    protected $fillable = [
-        'title',
-        'description',
-        'severity_id',
-        'status_id',
-        'assigned_team_id',
-    ];
-
-    public function assignedTeam(): BelongsTo
+return new class () extends Migration {
+    public function up(): void
     {
-        return $this->belongsTo(Team::class, 'assigned_team_id', 'id');
+        Schema::create('incident_updates', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+
+            $table->foreignUuid('incident_id')->nullable()->constrained('incidents');
+            $table->text('update');
+            $table->boolean('internal');
+
+            $table->timestamps();
+            $table->softDeletes();
+        });
     }
 
-    public function status(): BelongsTo
+    public function down(): void
     {
-        return $this->belongsTo(IncidentStatus::class);
+        Schema::dropIfExists('incident_updates');
     }
-
-    public function severity(): BelongsTo
-    {
-        return $this->belongsTo(IncidentSeverity::class);
-    }
-
-    public function incidentUpdates(): HasMany
-    {
-        return $this->hasMany(IncidentUpdate::class, 'incident_id');
-    }
-}
+};
