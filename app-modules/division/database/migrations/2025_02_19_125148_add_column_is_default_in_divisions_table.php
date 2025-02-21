@@ -34,35 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Division\Database\Factories;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-use AidingApp\Division\Models\Division;
-use Illuminate\Database\Eloquent\Factories\Factory;
-
-/**
- * @extends Factory<Division>
- */
-class DivisionFactory extends Factory
-{
-    /**
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            'name' => fake()->unique()->company(),
-            'code' => fake()->unique()->word(),
-            'description' => fake()->optional()->sentences(asText: true),
-            'is_default' => false,
-        ];
-    }
-
-    public function default(): Factory
-    {
-        return $this->state(function (array $attributes) {
-            return [
-                'is_default' => true,
-            ];
+        Schema::table('divisions', function (Blueprint $table) {
+            $table->boolean('is_default')->default(false);
         });
     }
-}
+
+    public function down(): void
+    {
+        Schema::table('divisions', function (Blueprint $table) {
+            $table->dropColumn('is_default');
+        });
+    }
+};

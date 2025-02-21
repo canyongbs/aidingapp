@@ -34,35 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Division\Database\Factories;
+use App\Features\DivisionIsDefault;
+use Illuminate\Database\Migrations\Migration;
 
-use AidingApp\Division\Models\Division;
-use Illuminate\Database\Eloquent\Factories\Factory;
-
-/**
- * @extends Factory<Division>
- */
-class DivisionFactory extends Factory
-{
-    /**
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            'name' => fake()->unique()->company(),
-            'code' => fake()->unique()->word(),
-            'description' => fake()->optional()->sentences(asText: true),
-            'is_default' => false,
-        ];
+        DivisionIsDefault::activate();
     }
 
-    public function default(): Factory
+    public function down(): void
     {
-        return $this->state(function (array $attributes) {
-            return [
-                'is_default' => true,
-            ];
-        });
+        DivisionIsDefault::deactivate();
     }
-}
+};

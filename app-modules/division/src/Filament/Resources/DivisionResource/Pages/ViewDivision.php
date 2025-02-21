@@ -38,9 +38,12 @@ namespace AidingApp\Division\Filament\Resources\DivisionResource\Pages;
 
 use AidingApp\Division\Filament\Resources\DivisionResource;
 use AidingApp\Division\Models\Division;
+use App\Features\DivisionIsDefault;
 use App\Filament\Resources\NotificationSettingResource;
 use App\Filament\Resources\UserResource;
 use Filament\Actions\EditAction;
+use Filament\Infolists\Components\Grid;
+use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
@@ -56,8 +59,15 @@ class ViewDivision extends ViewRecord
             ->schema([
                 Section::make()
                     ->schema([
-                        TextEntry::make('name'),
-                        TextEntry::make('code'),
+                        Grid::make()
+                            ->schema([
+                                TextEntry::make('name'),
+                                TextEntry::make('code'),
+                                IconEntry::make('is_default')
+                                    ->visible(DivisionIsDefault::active())
+                                    ->label('Default'),
+                            ])
+                            ->columns(3),
                         TextEntry::make('description')
                             ->columnSpanFull(),
                         Section::make()
