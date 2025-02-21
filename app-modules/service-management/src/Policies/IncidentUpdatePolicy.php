@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Policies;
 
+use App\Models\User;
 
 class IncidentUpdatePolicy
 {
