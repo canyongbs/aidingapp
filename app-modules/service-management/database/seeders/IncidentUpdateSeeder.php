@@ -42,9 +42,6 @@ use Illuminate\Database\Seeder;
 
 class IncidentUpdateSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         Incident::each(function (Incident $incident) {
