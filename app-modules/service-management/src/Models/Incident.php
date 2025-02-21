@@ -77,6 +77,6 @@ class Incident extends BaseModel implements Auditable
 
     public function incidentUpdates(): HasMany
     {
-      return $this->hasMany(IncidentUpdate::class, 'incident_id');
+        return $this->hasMany(IncidentUpdate::class, 'incident_id');
     }
 }

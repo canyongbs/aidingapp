@@ -73,7 +73,6 @@ class IncidentResource extends Resource
             ManageIncidentUpdate::class,
         ];
 
-
         return $page->generateNavigationItems($navigationItems);
     }
 

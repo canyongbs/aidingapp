@@ -43,7 +43,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class ManageIncidentUpdate extends ManageRelatedRecords
 {
-
     protected static string $resource = IncidentResource::class;
 
     // TODO: Obsolete when there is no table, remove from Filament
