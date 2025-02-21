@@ -34,49 +34,24 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Models;
+namespace AidingApp\ServiceManagement\Filament\Resources\IncidentUpdateResource\Pages;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\Team\Models\Team;
-use App\Models\BaseModel;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use OwenIt\Auditing\Contracts\Auditable;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentUpdateResource;
+use App\Concerns\EditPageRedirection;
+use Filament\Actions;
+use Filament\Resources\Pages\EditRecord;
 
-/**
- * @mixin IdeHelperIncident
- */
-class Incident extends BaseModel implements Auditable
+class EditIncidentUpdate extends EditRecord
 {
-    use AuditableTrait;
-    use SoftDeletes;
+    use EditPageRedirection;
 
-    protected $fillable = [
-        'title',
-        'description',
-        'severity_id',
-        'status_id',
-        'assigned_team_id',
-    ];
+    protected static string $resource = IncidentUpdateResource::class;
 
-    public function assignedTeam(): BelongsTo
+    protected function getHeaderActions(): array
     {
-        return $this->belongsTo(Team::class, 'assigned_team_id', 'id');
-    }
-
-    public function status(): BelongsTo
-    {
-        return $this->belongsTo(IncidentStatus::class);
-    }
-
-    public function severity(): BelongsTo
-    {
-        return $this->belongsTo(IncidentSeverity::class);
-    }
-
-    public function incidentUpdates(): HasMany
-    {
-      return $this->hasMany(IncidentUpdate::class, 'incident_id');
+        return [
+            Actions\ViewAction::make(),
+            Actions\DeleteAction::make(),
+        ];
     }
 }

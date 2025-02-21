@@ -34,49 +34,45 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Models;
+namespace AidingApp\ServiceManagement\Filament\Resources\IncidentUpdateResource\Pages;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\Team\Models\Team;
-use App\Models\BaseModel;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use OwenIt\Auditing\Contracts\Auditable;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentResource;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentUpdateResource;
+use AidingApp\ServiceManagement\Models\IncidentUpdate;
+use Filament\Actions\EditAction;
+use Filament\Infolists\Components\IconEntry;
+use Filament\Infolists\Components\Section;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Infolist;
+use Filament\Resources\Pages\ViewRecord;
 
-/**
- * @mixin IdeHelperIncident
- */
-class Incident extends BaseModel implements Auditable
+class ViewIncidentUpdate extends ViewRecord
 {
-    use AuditableTrait;
-    use SoftDeletes;
+    protected static string $resource = IncidentUpdateResource::class;
 
-    protected $fillable = [
-        'title',
-        'description',
-        'severity_id',
-        'status_id',
-        'assigned_team_id',
-    ];
-
-    public function assignedTeam(): BelongsTo
+    public function infolist(Infolist $infolist): Infolist
     {
-        return $this->belongsTo(Team::class, 'assigned_team_id', 'id');
+        return $infolist
+            ->schema([
+                Section::make()
+                    ->schema([
+                        TextEntry::make('serviceRequest.service_request_number')
+                            ->label('Incident')
+                            ->url(fn (IncidentUpdate $incidentUpdate): string => IncidentResource::getUrl('view', ['record' => $incidentUpdate->incident]))
+                            ->color('primary'),
+                        IconEntry::make('internal')
+                            ->boolean(),
+                        TextEntry::make('update')
+                            ->columnSpanFull(),
+                    ])
+                    ->columns(),
+            ]);
     }
 
-    public function status(): BelongsTo
+    protected function getHeaderActions(): array
     {
-        return $this->belongsTo(IncidentStatus::class);
-    }
-
-    public function severity(): BelongsTo
-    {
-        return $this->belongsTo(IncidentSeverity::class);
-    }
-
-    public function incidentUpdates(): HasMany
-    {
-      return $this->hasMany(IncidentUpdate::class, 'incident_id');
+        return [
+            EditAction::make(),
+        ];
     }
 }

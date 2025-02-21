@@ -34,49 +34,40 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Models;
+namespace AidingApp\ServiceManagement\Filament\Resources\IncidentResource\Pages;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\Team\Models\Team;
-use App\Models\BaseModel;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use OwenIt\Auditing\Contracts\Auditable;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentResource;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentResource\RelationManagers\IncidentUpdatesRelationManager;
+use Filament\Resources\Pages\ManageRelatedRecords;
+use Illuminate\Database\Eloquent\Model;
 
-/**
- * @mixin IdeHelperIncident
- */
-class Incident extends BaseModel implements Auditable
+class ManageIncidentUpdate extends ManageRelatedRecords
 {
-    use AuditableTrait;
-    use SoftDeletes;
 
-    protected $fillable = [
-        'title',
-        'description',
-        'severity_id',
-        'status_id',
-        'assigned_team_id',
-    ];
+    protected static string $resource = IncidentResource::class;
 
-    public function assignedTeam(): BelongsTo
+    // TODO: Obsolete when there is no table, remove from Filament
+    protected static string $relationship = 'incidentUpdates';
+
+    protected static ?string $navigationLabel = 'Updates';
+
+    protected static ?string $breadcrumb = 'Updates';
+
+    public static function canAccess(array $arguments = []): bool
     {
-        return $this->belongsTo(Team::class, 'assigned_team_id', 'id');
+        return (bool) count(static::managers($arguments['record'] ?? null));
     }
 
-    public function status(): BelongsTo
+    public function getRelationManagers(): array
     {
-        return $this->belongsTo(IncidentStatus::class);
+        return static::managers($this->getRecord());
     }
 
-    public function severity(): BelongsTo
+    private static function managers(?Model $record = null): array
     {
-        return $this->belongsTo(IncidentSeverity::class);
-    }
-
-    public function incidentUpdates(): HasMany
-    {
-      return $this->hasMany(IncidentUpdate::class, 'incident_id');
+        return collect([
+            IncidentUpdatesRelationManager::class,
+        ])
+            ->toArray();
     }
 }
