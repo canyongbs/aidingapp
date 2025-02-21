@@ -36,6 +36,8 @@
 
 namespace AidingApp\Task\Notifications;
 
+use AidingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Contact\Filament\Resources\OrganizationResource;
 use AidingApp\Notification\Notifications\BaseNotification;
 use AidingApp\Notification\Notifications\Concerns\DatabaseChannelTrait;
 use AidingApp\Notification\Notifications\Concerns\EmailChannelTrait;
@@ -48,7 +50,6 @@ use App\Models\NotificationSetting;
 use App\Models\User;
 use Filament\Notifications\Notification as FilamentNotification;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\HtmlString;
 
 class TaskAssignedToUserNotification extends BaseNotification implements DatabaseNotification, EmailNotification
 {
@@ -77,11 +78,17 @@ class TaskAssignedToUserNotification extends BaseNotification implements Databas
 
         $title = str($this->task->title)->limit();
 
-        $link = new HtmlString("<a href='{$url}' target='_blank' class='underline'>{$title}</a>");
+        $message = match (true) {
+            is_null($this->task->concern) => "You have been assigned a new Task: <a href='{$url}' target='_blank' class='underline'>{$title}</a>",
+
+            is_null($this->task->concern->organization) => "You have been assigned a new Task: <a href='{$url}' target='_blank' class='underline'>{$title}</a> related to Contact <a href='" . ContactResource::getUrl('view', ['record' => $this->task->concern]) . "' target='_blank' class='underline'>{$this->task->concern?->full_name}</a>",
+
+            ! is_null($this->task->concern->organization) => "You have been assigned a new Task: <a href='{$url}' target='_blank' class='underline'>{$title}</a> related to Contact <a href='" . ContactResource::getUrl('view', ['record' => $this->task->concern]) . "' target='_blank' class='underline'>{$this->task->concern?->full_name}</a><a href='" . OrganizationResource::getUrl('view', ['record' => $this->task->concern->organization]) . "' target='_blank' class='underline'>({$this->task->concern->organization?->name})</a>",
+        };
 
         return FilamentNotification::make()
             ->success()
-            ->title("You have been assigned a new Task: {$link}")
+            ->title($message)
             ->getDatabaseMessage();
     }
 
