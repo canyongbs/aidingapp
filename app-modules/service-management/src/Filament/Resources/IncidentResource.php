@@ -41,7 +41,6 @@ use AidingApp\ServiceManagement\Filament\Resources\IncidentResource\Pages\EditIn
 use AidingApp\ServiceManagement\Filament\Resources\IncidentResource\Pages\ListIncidents;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentResource\Pages\ViewIncident;
 use AidingApp\ServiceManagement\Models\Incident;
-use App\Features\IncidentSeverityStatus;
 use Filament\Resources\Resource;
 
 class IncidentResource extends Resource
@@ -57,11 +56,6 @@ class IncidentResource extends Resource
     protected static ?int $navigationSort = 60;
 
     protected static ?string $breadcrumb = 'Incident Management';
-
-    public static function canAccess(): bool
-    {
-        return IncidentSeverityStatus::active() && parent::canAccess();
-    }
 
     public static function getPages(): array
     {
