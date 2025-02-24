@@ -34,13 +34,12 @@
 </COPYRIGHT>
 */
 
-use Illuminate\Database\Migrations\Migration;
 use Database\Migrations\Concerns\CanModifyPermissions;
+use Illuminate\Database\Migrations\Migration;
 
-return new class extends Migration
-{
+return new class () extends Migration {
     use CanModifyPermissions;
-    
+
     private array $permissions = [
         'incident_update.view-any' => 'Incident Update',
         'incident_update.create' => 'Incident Update',
