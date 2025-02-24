@@ -68,10 +68,10 @@ class ViewIncident extends ViewRecord
                         TextEntry::make('assignedTeam.name')
                             ->label('Assigned Team'),
                         TextEntry::make('created_at')
-                            ->datetime(config('project.datetime_format') ?? 'Y-m-d H:i:s')
+                            ->datetime('Y-m-d H:i:s')
                             ->label('Created'),
                         TextEntry::make('updated_at')
-                            ->datetime(config('project.datetime_format') ?? 'Y-m-d H:i:s')
+                            ->datetime('Y-m-d H:i:s')
                             ->label('Last Updated'),
                     ])
                     ->columns(),
