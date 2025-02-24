@@ -40,6 +40,7 @@ use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactSource;
 use AidingApp\Contact\Models\ContactStatus;
+use AidingApp\Contact\Models\Organization;
 use App\Models\Scopes\HasLicense;
 use App\Models\User;
 use Filament\Forms\Components\Radio;
@@ -138,7 +139,13 @@ class CreateContact extends CreateRecord
                             table: (new ContactSource())->getTable(),
                             column: (new ContactSource())->getKeyName()
                         ),
-
+                    Select::make('organization_id')
+                        ->label('Organization')
+                        ->relationship('organization', 'name')
+                        ->exists(
+                            table: (new Organization())->getTable(),
+                            column: (new Organization())->getKeyName()
+                        ),
                     Textarea::make('description')
                         ->label('Description')
                         ->string()->columnSpanFull(),
