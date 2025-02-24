@@ -36,12 +36,12 @@
 
 namespace AidingApp\Contact\Filament\Resources\OrganizationResource\RelationManagers;
 
-use App\Filament\Tables\Columns\OpenSearch\TextColumn;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Actions\AssociateAction;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DissociateAction;
 use Filament\Tables\Actions\DissociateBulkAction;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
 class ContactsRelationManager extends RelationManager

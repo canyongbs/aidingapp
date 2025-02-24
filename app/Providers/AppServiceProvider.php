@@ -53,7 +53,6 @@ use Illuminate\Support\ServiceProvider;
 use Laravel\Pennant\Feature;
 use LastDragon_ru\LaraASP\GraphQL\SearchBy\Definitions\SearchByDirective as GraphQLSearchByDirectiveAlias;
 use LastDragon_ru\LaraASP\GraphQL\SearchBy\Types\Condition\Condition as GraphQLSearchByTypesCondition;
-use OpenSearch\Migrations\Filesystem\MigrationStorage;
 
 use function Sentry\configureScope;
 
@@ -79,10 +78,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        resolve(MigrationStorage::class)->registerPaths([
-            'app-modules/contact/opensearch/migrations',
-        ]);
-
         Relation::morphMap([
             'system_user' => SystemUser::class,
             'tenant' => Tenant::class,

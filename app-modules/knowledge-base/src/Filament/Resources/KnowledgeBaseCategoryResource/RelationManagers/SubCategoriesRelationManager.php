@@ -38,7 +38,6 @@ namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResour
 
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use App\Filament\Forms\Components\IconSelect;
-use App\Filament\Tables\Columns\OpenSearch\TextColumn;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -57,6 +56,7 @@ use Filament\Tables\Actions\DissociateBulkAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 

@@ -38,7 +38,6 @@ namespace AidingApp\ServiceManagement\Filament\Resources\IncidentSeverityResourc
 
 use AidingApp\ServiceManagement\Filament\Resources\IncidentSeverityResource;
 use AidingApp\ServiceManagement\Models\IncidentSeverity;
-use App\Filament\Tables\Columns\OpenSearch\TextColumn;
 use Filament\Actions\CreateAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
@@ -47,6 +46,7 @@ use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\ColorColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
 class ListIncidentSeverities extends ListRecords
