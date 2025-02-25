@@ -60,9 +60,9 @@ test('A successful action on the CreateIncidentUpdate page', function () {
     $request = collect(CreateIncidentUpdateRequestFactory::new()->create());
 
     livewire(CreateIncidentUpdate::class)
-            ->fillForm($request->toArray())
-            ->call('create')
-            ->assertHasNoFormErrors();
+        ->fillForm($request->toArray())
+        ->call('create')
+        ->assertHasNoFormErrors();
 
     assertCount(1, IncidentUpdate::all());
 
@@ -138,7 +138,7 @@ test('CreateIncidentUpdate is gated with proper feature access control', functio
 
     actingAs($user)
         ->get(
-           IncidentUpdateResource::getUrl('create')
+            IncidentUpdateResource::getUrl('create')
         )->assertForbidden();
 
     livewire(CreateIncidentUpdate::class)

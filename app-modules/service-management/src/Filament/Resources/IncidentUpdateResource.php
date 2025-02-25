@@ -56,7 +56,6 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
 
 class IncidentUpdateResource extends Resource
 {
@@ -70,7 +69,7 @@ class IncidentUpdateResource extends Resource
     {
         return $form
             ->schema([
-                 Select::make('incident_id')
+                Select::make('incident_id')
                     ->relationship('incident', 'id')
                     ->preload()
                     ->label('Incident')
@@ -87,7 +86,7 @@ class IncidentUpdateResource extends Resource
                     ->string(),
                 Toggle::make('internal')
                     ->label('Internal')
-                    ->rule(['boolean']), 
+                    ->rule(['boolean']),
             ]);
     }
 
@@ -102,9 +101,9 @@ class IncidentUpdateResource extends Resource
                     ->searchable(),
                 IconColumn::make('internal')
                     ->boolean()
-                    ->label('Internal'), 
+                    ->label('Internal'),
             ])
-             ->filters([
+            ->filters([
                 TernaryFilter::make('internal')
                     ->label('Internal'),
             ])
@@ -117,7 +116,7 @@ class IncidentUpdateResource extends Resource
                     DeleteBulkAction::make(),
                 ]),
             ]);
-    } 
+    }
 
     public static function getRelations(): array
     {
