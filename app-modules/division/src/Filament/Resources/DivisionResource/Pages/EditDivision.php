@@ -55,6 +55,8 @@ class EditDivision extends EditRecord
 
     protected static string $resource = DivisionResource::class;
 
+    protected ?bool $hasDatabaseTransactions = true;
+
     public function form(Form $form): Form
     {
         return $form
