@@ -65,7 +65,7 @@ class IncidentUpdatesRelationManager extends RelationManager
     {
         return $form
             ->schema([
-                /* Textarea::make('update')
+                 Textarea::make('update')
                     ->label('Update')
                     ->rows(3)
                     ->columnSpan('full')
@@ -85,7 +85,7 @@ class IncidentUpdatesRelationManager extends RelationManager
                             fn ($name, $id) => $name . ($id === $this->getOwnerRecord()->status->getKey() ? ' (Current)' : '')
                         )))
                     ->exists((new IncidentStatus())->getTable(), 'id')
-                    ->default($this->getOwnerRecord()->status->getKey()), */
+                    ->default($this->getOwnerRecord()->status->getKey()), 
             ]);
     }
 
@@ -93,7 +93,7 @@ class IncidentUpdatesRelationManager extends RelationManager
     {
         return $table
             ->columns([
-                /* IdColumn::make(),
+                 IdColumn::make(),
                 TextColumn::make('update')
                     ->label('Update')
                     ->words(6),
@@ -102,26 +102,26 @@ class IncidentUpdatesRelationManager extends RelationManager
                 TextColumn::make('created_at')
                     ->sortable(),
                 TextColumn::make('updated_at')
-                    ->sortable(), */
+                    ->sortable(), 
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([
             ])
             ->headerActions([
-                /* CreateAction::make()
+                 CreateAction::make()
                     ->visible($this->getOwnerRecord()?->status?->classification == SystemIncidentStatusClassification::Resolved ? false : true)
                     ->after(function ($data, incidentUpdate $incidentUpdate) {
                         $incidentUpdate->incident->update(['status_id' => $data['status_id']]);
-                    }), */
+                    }), 
             ])
             ->actions([
-                /* ViewAction::make()
-                    ->url(fn (IncidentUpdate $incidentUpdate) => IncidentUpdateResource::getUrl('view', ['record' => $incidentUpdate])), */
+                 ViewAction::make()
+                    ->url(fn (IncidentUpdate $incidentUpdate) => IncidentUpdateResource::getUrl('view', ['record' => $incidentUpdate])), 
             ])
             ->bulkActions([
-                /* BulkActionGroup::make([
+                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
-                ]), */
+                ]), 
             ]);
     }
 }

@@ -34,29 +34,19 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Models;
+namespace AidingApp\ServiceManagement\Tests\RequestFactories;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use App\Models\BaseModel;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use OwenIt\Auditing\Contracts\Auditable;
+use AidingApp\ServiceManagement\Models\Incident;
+use Worksome\RequestFactories\RequestFactory;
 
-class IncidentUpdate extends BaseModel implements Auditable
+class CreateIncidentUpdateRequestFactory extends RequestFactory
 {
-    use AuditableTrait;
-
-    protected $fillable = [
-        'incident_id',
-        'update',
-        'internal',
-    ];
-
-    protected $casts = [
-        'internal' => 'boolean',
-    ];
-
-    public function incident(): BelongsTo
+    public function definition(): array
     {
-        return $this->belongsTo(Incident::class);
+        return [
+            'incident_id' => Incident::factory()->create()->id,
+            'update' => $this->faker->sentence(),
+            'internal' => $this->faker->boolean(),
+        ];
     }
 }

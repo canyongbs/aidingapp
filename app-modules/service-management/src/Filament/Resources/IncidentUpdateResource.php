@@ -70,7 +70,7 @@ class IncidentUpdateResource extends Resource
     {
         return $form
             ->schema([
-                /* Select::make('incident_id')
+                 Select::make('incident_id')
                     ->relationship('incident', 'id')
                     ->preload()
                     ->label('Incident')
@@ -87,7 +87,7 @@ class IncidentUpdateResource extends Resource
                     ->string(),
                 Toggle::make('internal')
                     ->label('Internal')
-                    ->rule(['boolean']), */
+                    ->rule(['boolean']), 
             ]);
     }
 
@@ -95,28 +95,16 @@ class IncidentUpdateResource extends Resource
     {
         return $table
             ->columns([
-                /* IdColumn::make(),
-                TextColumn::make('serviceRequest.respondent.full')
-                    ->label('Related To')
-                    ->sortable(query: function (Builder $query, string $direction, $record): Builder {
-                        // TODO: Update this to work with other respondent types
-                        return $query->join('service_requests', 'service_request_updates.service_request_id', '=', 'service_requests.id')
-                            ->join('contacts', function ($join) {
-                                $join->on('service_requests.respondent_id', '=', 'contacts.id')
-                                    ->where('service_requests.respondent_type', '=', 'contact');
-                            })
-                            ->orderBy('full', $direction);
-                    })
-                    ->searchable(),
-                TextColumn::make('serviceRequest.service_request_number')
-                    ->label('Service Request')
+                IdColumn::make(),
+                TextColumn::make('incident.title')
+                    ->label('Title')
                     ->sortable()
                     ->searchable(),
                 IconColumn::make('internal')
                     ->boolean()
-                    ->label('Internal'), */
+                    ->label('Internal'), 
             ])
-            /* ->filters([
+             ->filters([
                 TernaryFilter::make('internal')
                     ->label('Internal'),
             ])
@@ -128,8 +116,8 @@ class IncidentUpdateResource extends Resource
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
-            ]) */;
-    }
+            ]);
+    } 
 
     public static function getRelations(): array
     {
