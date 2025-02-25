@@ -301,7 +301,7 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
 
     public function isSuperAdmin(): bool
     {
-        return $this->isSuperAdmin();
+        return $this->hasRole(Authenticatable::SUPER_ADMIN_ROLE);
     }
 
     public function canBeImpersonated(): bool
