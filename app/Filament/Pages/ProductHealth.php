@@ -36,7 +36,6 @@
 
 namespace App\Filament\Pages;
 
-use App\Models\Authenticatable;
 use App\Models\User;
 use Illuminate\Contracts\Support\Htmlable;
 use ShuvroRoy\FilamentSpatieLaravelHealth\Pages\HealthCheckResults;
@@ -86,6 +85,6 @@ class ProductHealth extends HealthCheckResults
         /** @var User $user */
         $user = auth()->user();
 
-        return $user->hasRole(Authenticatable::SUPER_ADMIN_ROLE) && parent::canAccess();
+        return $user->isSuperAdmin() && parent::canAccess();
     }
 }

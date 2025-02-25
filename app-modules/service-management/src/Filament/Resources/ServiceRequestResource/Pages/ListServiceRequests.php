@@ -48,7 +48,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use App\Filament\Tables\Columns\IdColumn;
-use App\Models\Authenticatable;
 use App\Models\Scopes\EducatableSearch;
 use App\Models\Scopes\EducatableSort;
 use Filament\Actions\CreateAction;
@@ -83,7 +82,7 @@ class ListServiceRequests extends ListRecords
                 ],
                 'status',
             ])
-                ->when(! auth()->user()->hasRole(Authenticatable::SUPER_ADMIN_ROLE), function (Builder $q) {
+                ->when(! auth()->user()->isSuperAdmin(), function (Builder $q) {
                     return $q->whereHas('priority.type.managers', function (Builder $query): void {
                         $query->where('teams.id', auth()->user()->teams()->first()?->getKey());
                     })->orWhereHas('priority.type.auditors', function (Builder $query): void {
@@ -185,7 +184,7 @@ class ListServiceRequests extends ListRecords
                         ->action(function ($records) {
                             $deletedRecordsCount = ServiceRequest::query()
                                 ->whereKey($records)
-                                ->when(! auth()->user()->hasRole(Authenticatable::SUPER_ADMIN_ROLE), function (Builder $query) {
+                                ->when(! auth()->user()->isSuperAdmin(), function (Builder $query) {
                                     $query->whereHas('priority.type.managers', function (Builder $query): void {
                                         $query->where('teams.id', auth()->user()->teams()->first()?->getKey());
                                     });

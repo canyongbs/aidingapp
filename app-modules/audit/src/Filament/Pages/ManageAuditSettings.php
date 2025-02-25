@@ -38,7 +38,6 @@ namespace AidingApp\Audit\Filament\Pages;
 
 use AidingApp\Audit\Actions\Finders\AuditableModels;
 use AidingApp\Audit\Settings\AuditSettings;
-use App\Models\Authenticatable;
 use App\Models\User;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -64,7 +63,7 @@ class ManageAuditSettings extends SettingsPage
         /** @var User $user */
         $user = auth()->user();
 
-        return $user->hasRole(Authenticatable::SUPER_ADMIN_ROLE) && parent::canAccess();
+        return $user->isSuperAdmin() && parent::canAccess();
     }
 
     public function form(Form $form): Form

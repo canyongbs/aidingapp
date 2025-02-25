@@ -76,7 +76,7 @@ class ServiceRequestPolicy
             return Response::deny('You do not have permission to view this service request.');
         }
 
-        if (! auth()->user()->hasRole(Authenticatable::SUPER_ADMIN_ROLE)) {
+        if (! auth()->user()->isSuperAdmin()) {
             $team = auth()->user()->teams()->first();
 
             if (! $serviceRequest?->priority?->type?->managers?->contains('id', $team?->getKey()) && ! $serviceRequest?->priority?->type?->auditors?->contains('id', $team?->getKey())) {
@@ -92,7 +92,7 @@ class ServiceRequestPolicy
 
     public function create(Authenticatable $authenticatable): Response
     {
-        if (! auth()->user()->hasRole(Authenticatable::SUPER_ADMIN_ROLE)) {
+        if (! auth()->user()->isSuperAdmin()) {
             $team = auth()->user()->teams()->first();
 
             if (! $team?->manageableServiceRequestTypes()->exists()) {
@@ -116,7 +116,7 @@ class ServiceRequestPolicy
             return Response::deny('Closed service request cannot be edited.');
         }
 
-        if (! auth()->user()->hasRole(Authenticatable::SUPER_ADMIN_ROLE)) {
+        if (! auth()->user()->isSuperAdmin()) {
             $team = auth()->user()->teams()->first();
 
             if (! $serviceRequest?->priority?->type?->managers?->contains('id', $team?->getKey())) {
@@ -136,7 +136,7 @@ class ServiceRequestPolicy
             return Response::deny('You do not have permission to delete this service request.');
         }
 
-        if (! auth()->user()->hasRole(Authenticatable::SUPER_ADMIN_ROLE)) {
+        if (! auth()->user()->isSuperAdmin()) {
             $team = auth()->user()->teams()->first();
 
             if (! $serviceRequest?->priority?->type?->managers?->contains('id', $team?->getKey())) {
@@ -156,7 +156,7 @@ class ServiceRequestPolicy
             return Response::deny('You do not have permission to restore this service request.');
         }
 
-        if (! auth()->user()->hasRole(Authenticatable::SUPER_ADMIN_ROLE)) {
+        if (! auth()->user()->isSuperAdmin()) {
             $team = auth()->user()->teams()->first();
 
             if (! $serviceRequest?->priority?->type?->managers?->contains('id', $team?->getKey())) {
@@ -176,7 +176,7 @@ class ServiceRequestPolicy
             return Response::deny('You do not have permission to permanently delete this service request.');
         }
 
-        if (! auth()->user()->hasRole(Authenticatable::SUPER_ADMIN_ROLE)) {
+        if (! auth()->user()->isSuperAdmin()) {
             $team = auth()->user()->teams()->first();
 
             if (! $serviceRequest?->priority?->type?->managers?->contains('id', $team?->getKey())) {
