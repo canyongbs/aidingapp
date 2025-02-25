@@ -122,7 +122,7 @@ class UserResource extends Resource
                             ->relationship('teams', 'name')
                             ->disabled(fn (string $operation) => $operation === 'view'),
                     ])
-                    ->hidden(fn (?User $record) => $record->hasRole(Authenticatable::SUPER_ADMIN_ROLE)),
+                    ->hidden(fn (?User $record) => (bool) $record?->hasRole(Authenticatable::SUPER_ADMIN_ROLE)),
                 Licenses::make()
                     ->hidden(fn (?User $record) => is_null($record))
                     ->disabled(function () {
