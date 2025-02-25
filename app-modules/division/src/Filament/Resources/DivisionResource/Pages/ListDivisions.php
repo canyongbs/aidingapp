@@ -37,6 +37,7 @@
 namespace AidingApp\Division\Filament\Resources\DivisionResource\Pages;
 
 use AidingApp\Division\Filament\Resources\DivisionResource;
+use App\Features\DivisionIsDefault;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
@@ -44,6 +45,7 @@ use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -62,6 +64,10 @@ class ListDivisions extends ListRecords
                 TextColumn::make('code')
                     ->sortable()
                     ->searchable(),
+                IconColumn::make('is_default')
+                    ->label('Default')
+                    ->visible(DivisionIsDefault::active())
+                    ->boolean(),
                 TextColumn::make('createdBy.name')
                     ->default('N/A')
                     ->label('Created By')

@@ -34,35 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Division\Database\Factories;
+namespace App\Features;
 
-use AidingApp\Division\Models\Division;
-use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Support\AbstractFeatureFlag;
 
-/**
- * @extends Factory<Division>
- */
-class DivisionFactory extends Factory
+class DivisionIsDefault extends AbstractFeatureFlag
 {
-    /**
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+    public function resolve(mixed $scope): mixed
     {
-        return [
-            'name' => fake()->unique()->company(),
-            'code' => fake()->unique()->word(),
-            'description' => fake()->optional()->sentences(asText: true),
-            'is_default' => false,
-        ];
-    }
-
-    public function default(): Factory
-    {
-        return $this->state(function (array $attributes) {
-            return [
-                'is_default' => true,
-            ];
-        });
+        return false;
     }
 }
