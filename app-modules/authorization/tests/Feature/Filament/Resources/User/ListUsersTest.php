@@ -38,6 +38,7 @@ use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Team\Models\Team;
 use App\Filament\Resources\UserResource\Actions\AssignLicensesBulkAction;
 use App\Filament\Resources\UserResource\Pages\ListUsers;
+use App\Models\Authenticatable;
 use App\Models\User;
 use Lab404\Impersonate\Services\ImpersonateManager;
 
@@ -76,7 +77,7 @@ it('does not render impersonate button for super admin users when user is not su
 
     $component
         ->assertSuccessful()
-        ->assertCountTableRecords(2)
+        ->assertCountTableRecords(1)
         ->assertTableActionHidden(Impersonate::class, $superAdmin);
 });
 
@@ -95,13 +96,14 @@ it('does not render impersonate button for super admin users at all', function (
         ->assertTableActionHidden(Impersonate::class, $superAdmin);
 });
 
-it('does not render impersonate button for super admin users even if user has permission', function () {
+it('does not render impersonate button for super admin users even if user is also a Super Admin', function () {
     $superAdmin = User::factory()->create();
     asSuperAdmin($superAdmin);
 
     $user = User::factory()
-        ->create()
-        ->givePermissionTo('user.view-any', 'user.*.view', 'authorization.impersonate');
+        ->create();
+
+    $user->assignRole(Authenticatable::SUPER_ADMIN_ROLE);
 
     actingAs($user);
 
@@ -126,44 +128,25 @@ it('allows super admin user to impersonate', function () {
         ->assertCountTableRecords(2)
         ->callTableAction(Impersonate::class, $user);
 
-    expect($user->isImpersonated())->toBeTrue();
-    expect(auth()->id())->toBe($user->id);
-});
-
-it('allows user with permission to impersonate', function () {
-    $first = User::factory()->create();
-    $first->givePermissionTo('user.view-any', 'user.*.view', 'authorization.impersonate');
-    actingAs($first);
-
-    $second = User::factory()->create();
-
-    $component = livewire(ListUsers::class);
-
-    $component
-        ->assertSuccessful()
-        ->assertCountTableRecords(2)
-        ->callTableAction(Impersonate::class, $second);
-
-    expect($second->isImpersonated())->toBeTrue();
-    expect(auth()->id())->toBe($second->id);
+    expect($user->isImpersonated())->toBeTrue()
+        ->and(auth()->id())->toBe($user->id);
 });
 
 it('allows a user to leave impersonate', function () {
     $first = User::factory()->create();
-    $first->givePermissionTo('authorization.impersonate');
-    actingAs($first);
+    asSuperAdmin($first);
 
     $second = User::factory()->create();
 
     app(ImpersonateManager::class)->take($first, $second);
 
-    expect($second->isImpersonated())->toBeTrue();
-    expect(auth()->id())->toBe($second->id);
+    expect($second->isImpersonated())->toBeTrue()
+        ->and(auth()->id())->toBe($second->id);
 
     $second->leaveImpersonation();
 
-    expect($second->isImpersonated())->toBeFalse();
-    expect(auth()->id())->toBe($first->id);
+    expect($second->isImpersonated())->toBeFalse()
+        ->and(auth()->id())->toBe($first->id);
 });
 
 it('can filter users by teams', function () {

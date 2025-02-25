@@ -88,13 +88,50 @@ trait CanModifyPermissions
     }
 
     /**
-     * @param array<int, string> $names Just the names of the permissions to delete. The group is not needed.
+     * @param array<string> $names
      */
-    public function deletePermissions(array $names, string|array $guardName): void
+    public function deletePermissions(array $names, string $guardName): void
     {
         DB::table('permissions')
+            ->where('guard_name', $guardName)
             ->whereIn('name', $names)
-            ->whereIn('guard_name', collect($guardName))
             ->delete();
+
+        // Delete groups that no longer have any permissions
+        DB::table('permission_groups')
+            ->leftJoin('permissions', 'permission_groups.id', '=', 'permissions.group_id')
+            ->whereNull('permissions.id')
+            ->delete();
+    }
+
+    /**
+     * @param array<string, string> $names
+     */
+    public function renamePermissions(array $names, string $guardName): void
+    {
+        collect($names)
+            ->each(function (string $newName, string $oldName) use ($guardName) {
+                DB::table('permissions')
+                    ->where('guard_name', $guardName)
+                    ->where('name', $oldName)
+                    ->update([
+                        'name' => $newName,
+                    ]);
+            });
+    }
+
+    /**
+     * @param array<string, string> $groups
+     */
+    public function renamePermissionGroups(array $groups): void
+    {
+        collect($groups)
+            ->each(function (string $newName, string $oldName) {
+                DB::table('permission_groups')
+                    ->where('name', $oldName)
+                    ->update([
+                        'name' => $newName,
+                    ]);
+            });
     }
 }

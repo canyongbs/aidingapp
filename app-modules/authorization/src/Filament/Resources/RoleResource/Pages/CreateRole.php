@@ -37,11 +37,14 @@
 namespace AidingApp\Authorization\Filament\Resources\RoleResource\Pages;
 
 use AidingApp\Authorization\Filament\Resources\RoleResource;
+use AidingApp\Authorization\Models\PermissionGroup;
+use CanyonGBS\Common\Filament\Forms\Components\PermissionsMatrix;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
+use Filament\Forms\Set;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Validation\Rules\Unique;
 
@@ -68,10 +71,19 @@ class CreateRole extends CreateRecord
                     ->options([
                         'web' => 'Web',
                         'api' => 'API',
-                    ]),
+                    ])
+                    ->default('web')
+                    ->live()
+                    ->afterStateUpdated(fn (Set $set) => $set('permissions', [])),
                 Textarea::make('description')
                     ->nullable()
-                    ->maxLength(65535),
+                    ->maxLength(65535)
+                    ->columnSpanFull(),
+                PermissionsMatrix::make('permissions')
+                    ->columnSpanFull()
+                    ->guard(fn (Get $get): string => $get('guard_name'))
+                    ->visible(fn (Get $get): bool => filled($get('guard_name')))
+                    ->permissionGroupModel(PermissionGroup::class),
             ]);
     }
 }

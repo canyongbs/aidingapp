@@ -37,11 +37,14 @@
 namespace AidingApp\Authorization\Filament\Resources\RoleResource\Pages;
 
 use AidingApp\Authorization\Filament\Resources\RoleResource;
+use AidingApp\Authorization\Models\PermissionGroup;
+use CanyonGBS\Common\Filament\Forms\Components\PermissionsMatrix;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Resources\Pages\ViewRecord;
 
 class ViewRole extends ViewRecord
@@ -64,7 +67,12 @@ class ViewRole extends ViewRecord
                     ]),
                 Textarea::make('description')
                     ->nullable()
-                    ->maxLength(65535),
+                    ->maxLength(65535)
+                    ->columnSpanFull(),
+                PermissionsMatrix::make('permissions')
+                    ->columnSpanFull()
+                    ->guard(fn (Get $get): string => $get('guard_name'))
+                    ->permissionGroupModel(PermissionGroup::class),
             ]);
     }
 
