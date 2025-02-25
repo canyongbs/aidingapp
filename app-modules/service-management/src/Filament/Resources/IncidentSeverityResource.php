@@ -41,7 +41,6 @@ use AidingApp\ServiceManagement\Filament\Resources\IncidentSeverityResource\Page
 use AidingApp\ServiceManagement\Filament\Resources\IncidentSeverityResource\Pages\ListIncidentSeverities;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentSeverityResource\Pages\ViewIncidentSeverity;
 use AidingApp\ServiceManagement\Models\IncidentSeverity;
-use App\Features\IncidentSeverityStatus;
 use App\Filament\Clusters\IncidentManagement;
 use Filament\Resources\Resource;
 
@@ -54,11 +53,6 @@ class IncidentSeverityResource extends Resource
     protected static ?string $navigationLabel = 'Severities';
 
     protected static ?int $navigationSort = 10;
-
-    public static function canAccess(): bool
-    {
-        return parent::canAccess() && IncidentSeverityStatus::active();
-    }
 
     public static function getPages(): array
     {
