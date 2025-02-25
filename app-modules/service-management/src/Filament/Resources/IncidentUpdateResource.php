@@ -43,8 +43,8 @@ use AidingApp\ServiceManagement\Filament\Resources\IncidentUpdateResource\Pages\
 use AidingApp\ServiceManagement\Models\Incident;
 use AidingApp\ServiceManagement\Models\IncidentUpdate;
 use App\Filament\Tables\Columns\IdColumn;
-use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\ViewAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
@@ -128,8 +128,8 @@ class IncidentUpdateResource extends Resource
         return [
             'index' => ListIncidentUpdates::route('/'),
             'create' => CreateIncidentUpdate::route('/create'),
-            'view' => ViewIncidentUpdate::route('/{incident}'),
-            'edit' => EditIncidentUpdate::route('/{incident}/edit'),
+            'view' => ViewIncidentUpdate::route('/{record}'),
+            'edit' => EditIncidentUpdate::route('/{record}/edit'),
         ];
     }
 }

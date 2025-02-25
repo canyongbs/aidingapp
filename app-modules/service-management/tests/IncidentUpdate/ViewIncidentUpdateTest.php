@@ -35,64 +35,62 @@
 */
 
 use AidingApp\Authorization\Enums\LicenseType;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource;
-use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentUpdateResource;
+use AidingApp\ServiceManagement\Models\IncidentUpdate;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
-test('The correct details are displayed on the ViewServiceRequestUpdate page', function () {
-    $serviceRequestUpdate = ServiceRequestUpdate::factory()->create();
+test('The correct details are displayed on the ViewIncidentUpdate page', function () {
+    $incidentUpdate = IncidentUpdate::factory()->create();
 
     asSuperAdmin()
         ->get(
-            ServiceRequestUpdateResource::getUrl('view', [
-                'record' => $serviceRequestUpdate,
+            IncidentUpdateResource::getUrl('view', [
+                'record' => $incidentUpdate,
             ])
         )
         ->assertSuccessful()
         ->assertSeeTextInOrder(
             [
-                'Service Request',
-                $serviceRequestUpdate->serviceRequest->service_request_number,
+                'Incident',
+                $incidentUpdate->incident->title,
                 'Internal',
-                // TODO: Figure out how to check whether this internal value the check or the X icon
-                'Direction',
-                $serviceRequestUpdate->direction->name,
+                // TODO: Figure out how to check whether this internal value the check or the X icon0
                 'Update',
-                $serviceRequestUpdate->update,
+                $incidentUpdate->update,
             ]
         );
 });
 
 // Permission Tests
 
-test('ViewServiceRequestUpdate is gated with proper access control', function () {
+test('ViewIncidentUpdate is gated with proper access control', function () {
     $user = User::factory()->licensed(LicenseType::cases())->create();
 
-    $serviceRequestUpdate = ServiceRequestUpdate::factory()->create();
+    $incidentUpdate = IncidentUpdate::factory()->create();
 
     actingAs($user)
         ->get(
-            ServiceRequestUpdateResource::getUrl('view', [
-                'record' => $serviceRequestUpdate,
+            IncidentUpdateResource::getUrl('view', [
+                'record' => $incidentUpdate,
             ])
         )->assertForbidden();
 
-    $user->givePermissionTo('service_request_update.view-any');
-    $user->givePermissionTo('service_request_update.*.view');
+    $user->givePermissionTo('incident_update.view-any');
+    $user->givePermissionTo('incident_update.*.view');
 
     actingAs($user)
         ->get(
-            ServiceRequestUpdateResource::getUrl('view', [
-                'record' => $serviceRequestUpdate,
+            IncidentUpdateResource::getUrl('view', [
+                'record' => $incidentUpdate,
             ])
         )->assertSuccessful();
 });
 
-test('ViewServiceRequestUpdate is gated with proper feature access control', function () {
+test('ViewIncidentUpdate is gated with proper feature access control', function () {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = false;
@@ -101,15 +99,15 @@ test('ViewServiceRequestUpdate is gated with proper feature access control', fun
 
     $user = User::factory()->licensed(LicenseType::cases())->create();
 
-    $user->givePermissionTo('service_request_update.view-any');
-    $user->givePermissionTo('service_request_update.*.view');
+    $user->givePermissionTo('incident_update.view-any');
+    $user->givePermissionTo('incident_update.*.view');
 
-    $serviceRequestUpdate = ServiceRequestUpdate::factory()->create();
+    $incidentUpdate = IncidentUpdate::factory()->create();
 
     actingAs($user)
         ->get(
-            ServiceRequestUpdateResource::getUrl('view', [
-                'record' => $serviceRequestUpdate,
+            IncidentUpdateResource::getUrl('view', [
+                'record' => $incidentUpdate,
             ])
         )->assertForbidden();
 
@@ -119,8 +117,8 @@ test('ViewServiceRequestUpdate is gated with proper feature access control', fun
 
     actingAs($user)
         ->get(
-            ServiceRequestUpdateResource::getUrl('view', [
-                'record' => $serviceRequestUpdate,
+            IncidentUpdateResource::getUrl('view', [
+                'record' => $incidentUpdate,
             ])
         )->assertSuccessful();
 });

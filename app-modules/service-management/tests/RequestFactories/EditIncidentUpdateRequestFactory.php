@@ -34,45 +34,19 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\IncidentUpdateResource\Pages;
+namespace AidingApp\ServiceManagement\Tests\RequestFactories;
 
-use AidingApp\ServiceManagement\Filament\Resources\IncidentResource;
-use AidingApp\ServiceManagement\Filament\Resources\IncidentUpdateResource;
-use AidingApp\ServiceManagement\Models\IncidentUpdate;
-use Filament\Actions\EditAction;
-use Filament\Infolists\Components\IconEntry;
-use Filament\Infolists\Components\Section;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Infolist;
-use Filament\Resources\Pages\ViewRecord;
+use AidingApp\ServiceManagement\Models\Incident;
+use Worksome\RequestFactories\RequestFactory;
 
-class ViewIncidentUpdate extends ViewRecord
+class EditIncidentUpdateRequestFactory extends RequestFactory
 {
-    protected static string $resource = IncidentUpdateResource::class;
-
-    public function infolist(Infolist $infolist): Infolist
-    {
-        return $infolist
-            ->schema([
-                Section::make()
-                    ->schema([
-                        TextEntry::make('incident.title')
-                            ->label('Incident')
-                            ->url(fn (IncidentUpdate $incidentUpdate): string => IncidentResource::getUrl('view', ['record' => $incidentUpdate->incident]))
-                            ->color('primary'),
-                        IconEntry::make('internal')
-                            ->boolean(),
-                        TextEntry::make('update')
-                            ->columnSpanFull(),
-                    ])
-                    ->columns(),
-            ]);
-    }
-
-    protected function getHeaderActions(): array
+    public function definition(): array
     {
         return [
-            EditAction::make(),
+            'incident_id' => Incident::factory()->create()->id,
+            'update' => $this->faker->sentence,
+            'internal' => $this->faker->boolean,
         ];
     }
 }

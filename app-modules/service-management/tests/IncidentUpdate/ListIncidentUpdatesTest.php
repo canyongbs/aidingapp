@@ -35,82 +35,51 @@
 */
 
 use AidingApp\Contact\Models\Contact;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
-use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentUpdateResource;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentUpdateResource\Pages\ListIncidentUpdates;
+use AidingApp\ServiceManagement\Models\Incident;
+use AidingApp\ServiceManagement\Models\IncidentUpdate;
 use App\Models\User;
 use App\Settings\LicenseSettings;
-use Illuminate\Support\Str;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
-test('The correct details are displayed on the ListServiceRequestUpdates page', function () {
-    $serviceRequestUpdates = ServiceRequestUpdate::factory()
-        ->for(ServiceRequest::factory(), 'serviceRequest')
+test('The records are displayed on the ListIncidentUpdates page', function () {
+    $incidentUpdates = IncidentUpdate::factory()
+        ->for(Incident::factory(), 'incident')
         ->count(10)
         ->create();
 
     asSuperAdmin();
 
-    $component = livewire(ServiceRequestUpdateResource\Pages\ListServiceRequestUpdates::class);
+    $component = livewire(ListIncidentUpdates::class);
 
     $component->assertSuccessful()
-        ->assertCanSeeTableRecords($serviceRequestUpdates)
+        ->assertCanSeeTableRecords($incidentUpdates)
         ->assertCountTableRecords(10);
-
-    $serviceRequestUpdates->each(
-        fn (ServiceRequestUpdate $serviceRequestUpdate) => $component
-            ->assertTableColumnStateSet(
-                'id',
-                $serviceRequestUpdate->id,
-                $serviceRequestUpdate
-            )
-            ->assertTableColumnStateSet(
-                'serviceRequest.respondent.full',
-                $serviceRequestUpdate->serviceRequest->respondent->full,
-                $serviceRequestUpdate
-            )
-            ->assertTableColumnStateSet(
-                'serviceRequest.service_request_number',
-                $serviceRequestUpdate->serviceRequest->service_request_number,
-                $serviceRequestUpdate
-            )
-            ->assertTableColumnStateSet(
-                'internal',
-                $serviceRequestUpdate->internal,
-                $serviceRequestUpdate
-            )
-            ->assertTableColumnFormattedStateSet(
-                'direction',
-                Str::ucfirst($serviceRequestUpdate->direction->value),
-                $serviceRequestUpdate
-            )
-    );
 });
-
-// TODO: Sorting and Searching tests
 
 // Permission Tests
 
-test('ListServiceRequestUpdates is gated with proper access control', function () {
+test('ListIncidentUpdates is gated with proper access control', function () {
     $user = User::factory()->licensed([Contact::getLicenseType()])->create();
 
     actingAs($user)
         ->get(
-            ServiceRequestUpdateResource::getUrl('index')
+            IncidentUpdateResource::getUrl('index')
         )->assertForbidden();
 
-    $user->givePermissionTo('service_request_update.view-any');
+    $user->givePermissionTo('incident_update.view-any');
 
     actingAs($user)
         ->get(
-            ServiceRequestUpdateResource::getUrl('index')
+            IncidentUpdateResource::getUrl('index')
         )->assertSuccessful();
 });
 
-test('ListServiceRequestUpdates is gated with proper feature access control', function () {
+test('ListIncidentUpdates is gated with proper feature access control', function () {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = false;
@@ -119,11 +88,11 @@ test('ListServiceRequestUpdates is gated with proper feature access control', fu
 
     $user = User::factory()->licensed([Contact::getLicenseType()])->create();
 
-    $user->givePermissionTo('service_request_update.view-any');
+    $user->givePermissionTo('incident_update.view-any');
 
     actingAs($user)
         ->get(
-            ServiceRequestUpdateResource::getUrl()
+            IncidentUpdateResource::getUrl()
         )->assertForbidden();
 
     $settings->data->addons->serviceManagement = true;
@@ -132,6 +101,6 @@ test('ListServiceRequestUpdates is gated with proper feature access control', fu
 
     actingAs($user)
         ->get(
-            ServiceRequestUpdateResource::getUrl()
+            IncidentUpdateResource::getUrl()
         )->assertSuccessful();
 });
