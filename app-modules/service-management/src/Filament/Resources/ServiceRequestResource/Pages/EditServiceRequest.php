@@ -46,7 +46,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Rules\ManagedServiceRequestType;
 use App\Concerns\EditPageRedirection;
 use App\Filament\Forms\Components\EducatableSelect;
-use App\Models\Authenticatable;
 use Filament\Actions;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Section;
@@ -106,7 +105,7 @@ class EditServiceRequest extends EditRecord
                                         fn (ServiceRequest $record) => ServiceRequestType::withTrashed()
                                             ->whereKey($record->priority?->type_id)
                                             ->orWhereNull('deleted_at')
-                                            ->when(! auth()->user()->hasRole(Authenticatable::SUPER_ADMIN_ROLE), function (Builder $query) {
+                                            ->when(! auth()->user()->isSuperAdmin(), function (Builder $query) {
                                                 $query->whereHas('managers', function (Builder $query): void {
                                                     $query->where('teams.id', auth()->user()->teams()->first()?->getKey());
                                                 });

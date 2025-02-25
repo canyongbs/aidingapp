@@ -39,7 +39,6 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use App\Models\Authenticatable;
 use App\Support\BulkProcessingMachine;
 use Closure;
 use Filament\Forms\Components\Select;
@@ -66,7 +65,7 @@ class ChangeServiceRequestStatusBulkAction
                 $records->loadMissing(['priority.type.managers', 'respondent', 'status']);
 
                 $user = auth()->user();
-                $isUserSuperAdmin = $user->hasRole(Authenticatable::SUPER_ADMIN_ROLE);
+                $isUserSuperAdmin = $user->isSuperAdmin();
                 $canUserUpdateServiceRequest = $user->can('service_request.*.update');
 
                 BulkProcessingMachine::make($records->all())

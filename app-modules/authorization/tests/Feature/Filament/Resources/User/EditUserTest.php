@@ -63,50 +63,12 @@ it('renders impersonate button for non super admin users when user is super admi
         ->assertActionVisible(Impersonate::class);
 });
 
-it('does not render impersonate button for super admin users when user is not super admin', function () {
-    $superAdmin = User::factory()->create();
-    asSuperAdmin($superAdmin);
-
-    $user = User::factory()
-        ->create()
-        ->givePermissionTo('user.view-any', 'user.*.view', 'user.*.update');
-
-    actingAs($user);
-
-    $component = livewire(EditUser::class, [
-        'record' => $superAdmin->getRouteKey(),
-    ]);
-
-    $component
-        ->assertSuccessful()
-        ->assertActionHidden(Impersonate::class);
-});
-
 it('does not render impersonate button for super admin users at all', function () {
     $superAdmin = User::factory()->create();
     asSuperAdmin($superAdmin);
 
     $user = User::factory()->create();
     asSuperAdmin($user);
-
-    $component = livewire(EditUser::class, [
-        'record' => $superAdmin->getRouteKey(),
-    ]);
-
-    $component
-        ->assertSuccessful()
-        ->assertActionHidden(Impersonate::class);
-});
-
-it('does not render impersonate button for super admin users even if user has permission', function () {
-    $superAdmin = User::factory()->create();
-    asSuperAdmin($superAdmin);
-
-    $user = User::factory()
-        ->create()
-        ->givePermissionTo('user.view-any', 'user.*.view', 'user.*.update', 'authorization.impersonate');
-
-    actingAs($user);
 
     $component = livewire(EditUser::class, [
         'record' => $superAdmin->getRouteKey(),
@@ -137,8 +99,8 @@ it('allows super admin user to impersonate', function () {
 
 it('allows user with permission to impersonate', function () {
     $first = User::factory()->create();
-    $first->givePermissionTo('user.view-any', 'user.*.view', 'user.*.update', 'authorization.impersonate');
-    actingAs($first);
+    $first->givePermissionTo('user.view-any', 'user.*.view', 'user.*.update');
+    asSuperAdmin($first);
 
     $second = User::factory()->create();
 

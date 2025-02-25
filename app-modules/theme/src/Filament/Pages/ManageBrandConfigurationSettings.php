@@ -37,7 +37,6 @@
 namespace AidingApp\Theme\Filament\Pages;
 
 use AidingApp\Theme\Settings\ThemeSettings;
-use App\Models\Authenticatable;
 use App\Models\User;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
@@ -66,7 +65,7 @@ class ManageBrandConfigurationSettings extends SettingsPage
         /** @var User $user */
         $user = auth()->user();
 
-        return $user->hasRole(Authenticatable::SUPER_ADMIN_ROLE) && parent::canAccess();
+        return $user->isSuperAdmin() && parent::canAccess();
     }
 
     public function form(Form $form): Form

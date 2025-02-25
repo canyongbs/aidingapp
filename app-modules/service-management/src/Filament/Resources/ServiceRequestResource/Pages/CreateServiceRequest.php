@@ -45,7 +45,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Rules\ManagedServiceRequestType;
 use App\Filament\Forms\Components\EducatableSelect;
-use App\Models\Authenticatable;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -88,7 +87,7 @@ class CreateServiceRequest extends CreateRecord
                 Grid::make()
                     ->schema([
                         Select::make('type_id')
-                            ->options(ServiceRequestType::when(! auth()->user()->hasRole(Authenticatable::SUPER_ADMIN_ROLE), function (Builder $query) {
+                            ->options(ServiceRequestType::when(! auth()->user()->isSuperAdmin(), function (Builder $query) {
                                 $query->whereHas('managers', function (Builder $query): void {
                                     $query->where('teams.id', auth()->user()->teams()->first()?->getKey());
                                 });

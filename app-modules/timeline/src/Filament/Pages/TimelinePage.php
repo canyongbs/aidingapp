@@ -90,7 +90,7 @@ abstract class TimelinePage extends Page
 
     public static function canAccess(array $parameters = []): bool
     {
-        if (auth()->user()->cannot('timeline.access')) {
+        if (auth()->user()->cannot(['engagement.view-any', 'engagement.*.view'])) {
             return false;
         }
 

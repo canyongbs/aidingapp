@@ -37,7 +37,6 @@
 namespace AidingApp\ServiceManagement\Rules;
 
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use App\Models\Authenticatable;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Translation\PotentiallyTranslatedString;
@@ -51,7 +50,7 @@ class ManagedServiceRequestType implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if (auth()->user()->hasRole(Authenticatable::SUPER_ADMIN_ROLE)) {
+        if (auth()->user()->isSuperAdmin()) {
             return;
         }
 

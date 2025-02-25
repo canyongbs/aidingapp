@@ -38,7 +38,6 @@ namespace AidingApp\IntegrationTwilio\Filament\Pages;
 
 use AidingApp\IntegrationTwilio\Settings\TwilioSettings;
 use App\Filament\Clusters\ProductIntegrations;
-use App\Models\Authenticatable;
 use App\Models\User;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
@@ -64,7 +63,7 @@ class ManageTwilioSettings extends SettingsPage
         /** @var User $user */
         $user = auth()->user();
 
-        return $user->hasRole(Authenticatable::SUPER_ADMIN_ROLE) && parent::canAccess();
+        return $user->isSuperAdmin() && parent::canAccess();
     }
 
     public function form(Form $form): Form

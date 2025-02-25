@@ -37,13 +37,16 @@
 namespace AidingApp\Authorization\Filament\Resources\RoleResource\Pages;
 
 use AidingApp\Authorization\Filament\Resources\RoleResource;
+use AidingApp\Authorization\Models\PermissionGroup;
 use AidingApp\Authorization\Models\Role;
 use App\Concerns\EditPageRedirection;
+use CanyonGBS\Common\Filament\Forms\Components\PermissionsMatrix;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Validation\Rules\Unique;
 
@@ -76,10 +79,16 @@ class EditRole extends EditRecord
                         'web' => 'Web',
                         'api' => 'API',
                     ])
-                    ->disabled()->dehydrated(),
+                    ->disabled()
+                    ->dehydrated(),
                 Textarea::make('description')
                     ->nullable()
-                    ->maxLength(65535),
+                    ->maxLength(65535)
+                    ->columnSpanFull(),
+                PermissionsMatrix::make('permissions')
+                    ->columnSpanFull()
+                    ->guard(fn (Get $get): string => $get('guard_name'))
+                    ->permissionGroupModel(PermissionGroup::class),
             ]);
     }
 
