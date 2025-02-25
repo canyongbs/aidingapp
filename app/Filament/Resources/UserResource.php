@@ -40,6 +40,7 @@ use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Authorization\Models\License;
 use App\Filament\Forms\Components\Licenses;
 use App\Filament\Resources\UserResource\Actions\AssignLicensesBulkAction;
+use App\Filament\Resources\UserResource\Actions\AssignRolesBulkAction;
 use App\Filament\Resources\UserResource\Actions\AssignTeamBulkAction;
 use App\Filament\Resources\UserResource\Pages\CreateUser;
 use App\Filament\Resources\UserResource\Pages\EditUser;
@@ -206,6 +207,8 @@ class UserResource extends Resource
                         }),
                     AssignLicensesBulkAction::make()
                         ->visible(fn () => auth()->user()->can('create', License::class)),
+                    AssignRolesBulkAction::make()
+                        ->visible(fn () => auth()->user()->can('user.*.update', User::class)),
                 ]),
             ]);
     }
