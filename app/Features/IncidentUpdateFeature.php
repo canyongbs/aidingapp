@@ -34,49 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Models;
+namespace App\Features;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\Team\Models\Team;
-use App\Models\BaseModel;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use OwenIt\Auditing\Contracts\Auditable;
+use App\Support\AbstractFeatureFlag;
 
-/**
- * @mixin IdeHelperIncident
- */
-class Incident extends BaseModel implements Auditable
+class IncidentUpdateFeature extends AbstractFeatureFlag
 {
-    use AuditableTrait;
-    use SoftDeletes;
-
-    protected $fillable = [
-        'title',
-        'description',
-        'severity_id',
-        'status_id',
-        'assigned_team_id',
-    ];
-
-    public function assignedTeam(): BelongsTo
+    public function resolve(mixed $scope): mixed
     {
-        return $this->belongsTo(Team::class, 'assigned_team_id', 'id');
-    }
-
-    public function status(): BelongsTo
-    {
-        return $this->belongsTo(IncidentStatus::class);
-    }
-
-    public function severity(): BelongsTo
-    {
-        return $this->belongsTo(IncidentSeverity::class);
-    }
-
-    public function incidentUpdates(): HasMany
-    {
-        return $this->hasMany(IncidentUpdate::class, 'incident_id');
+        return false;
     }
 }

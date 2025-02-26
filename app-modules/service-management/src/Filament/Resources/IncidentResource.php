@@ -39,8 +39,11 @@ namespace AidingApp\ServiceManagement\Filament\Resources;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentResource\Pages\CreateIncident;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentResource\Pages\EditIncident;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentResource\Pages\ListIncidents;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentResource\Pages\ManageIncidentUpdate;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentResource\Pages\ViewIncident;
 use AidingApp\ServiceManagement\Models\Incident;
+use App\Features\IncidentUpdateFeature;
+use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 
 class IncidentResource extends Resource
@@ -57,6 +60,24 @@ class IncidentResource extends Resource
 
     protected static ?string $breadcrumb = 'Incident Management';
 
+    public static function getRecordSubNavigation(Page $page): array
+    {
+        $navigationItems = [
+            ViewIncident::class,
+            EditIncident::class,
+        ];
+
+        if (IncidentUpdateFeature::active()) {
+            $navigationItems = [
+                ViewIncident::class,
+                EditIncident::class,
+                ManageIncidentUpdate::class,
+            ];
+        }
+
+        return $page->generateNavigationItems($navigationItems);
+    }
+
     public static function getPages(): array
     {
         return [
@@ -64,6 +85,7 @@ class IncidentResource extends Resource
             'create' => CreateIncident::route('/create'),
             'view' => ViewIncident::route('/{record}'),
             'edit' => EditIncident::route('/{record}/edit'),
+            'manage-incident-update' => ManageIncidentUpdate::route('/{record}/updates'),
         ];
     }
 }
