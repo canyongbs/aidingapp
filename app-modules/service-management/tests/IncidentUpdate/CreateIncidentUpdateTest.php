@@ -68,7 +68,7 @@ test('A successful action on the CreateIncidentUpdate page', function () {
 
     assertDatabaseHas(IncidentUpdate::class, $request->except('incident_id')->toArray());
 
-    expect(IncidentUpdate::first()->incident->id)
+    expect(IncidentUpdate::first()->incident->getKey())
         ->toEqual($request->get('incident_id'));
 });
 

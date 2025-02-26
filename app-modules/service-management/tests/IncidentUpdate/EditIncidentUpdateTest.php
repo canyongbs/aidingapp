@@ -81,7 +81,7 @@ test('A successful action on the EditIncidentUpdate page', function () {
 
     assertDatabaseHas(IncidentUpdate::class, $request->except('incident_id')->toArray());
 
-    expect(IncidentUpdate::first()->incident->id)
+    expect(IncidentUpdate::first()->incident->getKey())
         ->toEqual($request->get('incident_id'));
 });
 
@@ -109,8 +109,8 @@ test('EditIncidentUpdate requires valid data', function ($data, $errors) {
 
     assertDatabaseHas(IncidentUpdate::class, $incidentUpdate->toArray());
 
-    expect(IncidentUpdate::first()->incident->id)
-        ->toEqual($incidentUpdate->incident->id);
+    expect(IncidentUpdate::first()->incident->getKey())
+        ->toEqual($incidentUpdate->incident->getKey());
 })->with(
     [
         'incident missing' => [EditIncidentUpdateRequestFactory::new()->state(['incident_id' => null]), ['incident_id' => 'required']],
@@ -169,7 +169,7 @@ test('EditIncidentUpdate is gated with proper access control', function () {
 
     assertDatabaseHas(IncidentUpdate::class, $request->except('incident_id')->toArray());
 
-    expect(IncidentUpdate::first()->incident->id)
+    expect(IncidentUpdate::first()->incident->getKey())
         ->toEqual($request->get('incident_id'));
 });
 

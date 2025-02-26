@@ -37,10 +37,11 @@
 namespace AidingApp\ServiceManagement\Database\Factories;
 
 use AidingApp\ServiceManagement\Models\Incident;
+use AidingApp\ServiceManagement\Models\IncidentUpdate;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AidingApp\ServiceManagement\Models\Model>
+ * @extends Factory<IncidentUpdate>
  */
 class IncidentUpdateFactory extends Factory
 {
@@ -48,8 +49,8 @@ class IncidentUpdateFactory extends Factory
     {
         return [
             'incident_id' => Incident::factory(),
-            'update' => $this->faker->sentence(),
-            'internal' => $this->faker->boolean(),
+            'update' => fake()->sentence(),
+            'internal' => fake()->boolean(),
         ];
     }
 }

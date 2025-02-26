@@ -44,9 +44,9 @@ class CreateIncidentUpdateRequestFactory extends RequestFactory
     public function definition(): array
     {
         return [
-            'incident_id' => Incident::factory()->create()->id,
-            'update' => $this->faker->sentence(),
-            'internal' => $this->faker->boolean(),
+            'incident_id' => Incident::factory()->create()->getKey(),
+            'update' => fake()->sentence(),
+            'internal' => fake()->boolean(),
         ];
     }
 }

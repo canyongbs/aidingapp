@@ -73,7 +73,7 @@ class IncidentUpdatePolicy
     public function view(Authenticatable $authenticatable, IncidentUpdate $incidentUpdate): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['incident_update.*.view', "incident_update.{$incidentUpdate->id}.view"],
+            abilities: 'incident_update.*.view',
             denyResponse: 'You do not have permissions to view this incident update.'
         );
     }
@@ -93,7 +93,7 @@ class IncidentUpdatePolicy
         }
 
         return $authenticatable->canOrElse(
-            abilities: ['incident_update.*.update', "incident_update.{$incidentUpdate->id}.update"],
+            abilities: 'incident_update.*.update',
             denyResponse: 'You do not have permissions to update this incident update.'
         );
     }
@@ -101,7 +101,7 @@ class IncidentUpdatePolicy
     public function delete(Authenticatable $authenticatable, IncidentUpdate $incidentUpdate): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['incident_update.*.delete', "incident_update.{$incidentUpdate->id}.delete"],
+            abilities: 'incident_update.*.delete',
             denyResponse: 'You do not have permissions to delete this incident update.'
         );
     }
@@ -109,7 +109,7 @@ class IncidentUpdatePolicy
     public function restore(Authenticatable $authenticatable, IncidentUpdate $incidentUpdate): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['incident_update.*.restore', "incident_update.{$incidentUpdate->id}.restore"],
+            abilities: 'incident_update.*.restore',
             denyResponse: 'You do not have permissions to restore this incident update.'
         );
     }
@@ -117,7 +117,7 @@ class IncidentUpdatePolicy
     public function forceDelete(Authenticatable $authenticatable, IncidentUpdate $incidentUpdate): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['incident_update.*.force-delete', "incident_update.{$incidentUpdate->id}.force-delete"],
+            abilities: 'incident_update.*.force-delete',
             denyResponse: 'You do not have permissions to force delete this incident update.'
         );
     }

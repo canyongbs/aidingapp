@@ -82,10 +82,10 @@ class IncidentResource extends Resource
     {
         return [
             'index' => ListIncidents::route('/'),
-            'manage-incident-update' => ManageIncidentUpdate::route('/{record}/updates'),
             'create' => CreateIncident::route('/create'),
             'view' => ViewIncident::route('/{record}'),
             'edit' => EditIncident::route('/{record}/edit'),
+            'manage-incident-update' => ManageIncidentUpdate::route('/{record}/updates'),
         ];
     }
 }

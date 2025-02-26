@@ -36,10 +36,26 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\IncidentResource\Pages;
 
+use AidingApp\ServiceManagement\Enums\SystemIncidentStatusClassification;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentResource;
-use AidingApp\ServiceManagement\Filament\Resources\IncidentResource\RelationManagers\IncidentUpdatesRelationManager;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentUpdateResource;
+use AidingApp\ServiceManagement\Models\IncidentStatus;
+use AidingApp\ServiceManagement\Models\IncidentUpdate;
+use App\Features\IncidentUpdateFeature;
+use App\Filament\Tables\Columns\IdColumn;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Form;
 use Filament\Resources\Pages\ManageRelatedRecords;
-use Illuminate\Database\Eloquent\Model;
+use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Tables\Actions\CreateAction;
+use Filament\Tables\Actions\DeleteBulkAction;
+use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Collection;
 
 class ManageIncidentUpdate extends ManageRelatedRecords
 {
@@ -54,19 +70,68 @@ class ManageIncidentUpdate extends ManageRelatedRecords
 
     public static function canAccess(array $arguments = []): bool
     {
-        return (bool) count(static::managers($arguments['record'] ?? null));
+        return IncidentUpdateFeature::active();
     }
 
-    public function getRelationManagers(): array
+    public function form(Form $form): Form
     {
-        return static::managers($this->getRecord());
+        return $form
+            ->schema([
+                Textarea::make('update')
+                    ->label('Update')
+                    ->rows(3)
+                    ->columnSpan('full')
+                    ->required()
+                    ->string(),
+                Toggle::make('internal')
+                    ->label('Internal')
+                    ->rule(['boolean'])
+                    ->columnSpan('full'),
+                Select::make('status_id')
+                    ->label('Status')
+                    ->options(fn () => IncidentStatus::orderBy('classification')
+                        ->orderBy('name')
+                        ->get(['id', 'name', 'classification'])
+                        ->groupBy(fn (IncidentStatus $status) => $status->classification->getlabel())
+                        ->map(fn (Collection $group) => $group->pluck('name', 'id')->map(
+                            fn ($name, $id) => $name . ($id === $this->getOwnerRecord()->status->getKey() ? ' (Current)' : '')
+                        )))
+                    ->exists((new IncidentStatus())->getTable(), 'id')
+                    ->default($this->getOwnerRecord()->status->getKey()),
+            ]);
     }
 
-    private static function managers(?Model $record = null): array
+    public function table(Table $table): Table
     {
-        return collect([
-            IncidentUpdatesRelationManager::class,
-        ])
-            ->toArray();
+        return $table
+            ->columns([
+                IdColumn::make(),
+                TextColumn::make('update')
+                    ->label('Update')
+                    ->words(6),
+                IconColumn::make('internal')
+                    ->boolean(),
+                TextColumn::make('created_at')
+                    ->sortable(),
+                TextColumn::make('updated_at')
+                    ->sortable(),
+            ])
+            ->defaultSort('created_at', 'desc')
+            ->headerActions([
+                CreateAction::make()
+                    ->visible($this->getOwnerRecord()?->status?->classification === SystemIncidentStatusClassification::Resolved ? false : true)
+                    ->after(function ($data, IncidentUpdate $incidentUpdate) {
+                        $incidentUpdate->incident->update(['status_id' => $data['status_id']]);
+                    }),
+            ])
+            ->actions([
+                ViewAction::make()
+                    ->url(fn (IncidentUpdate $incidentUpdate) => IncidentUpdateResource::getUrl('view', ['record' => $incidentUpdate])),
+            ])
+            ->bulkActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
+            ]);
     }
 }
