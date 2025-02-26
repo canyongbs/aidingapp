@@ -118,7 +118,6 @@ class IncidentUpdateResource extends Resource
             ]);
     }
 
-
     public static function getPages(): array
     {
         return [
