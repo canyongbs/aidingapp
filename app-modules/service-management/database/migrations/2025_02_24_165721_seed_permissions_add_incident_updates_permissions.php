@@ -34,49 +34,38 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Models;
+use Database\Migrations\Concerns\CanModifyPermissions;
+use Illuminate\Database\Migrations\Migration;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\Team\Models\Team;
-use App\Models\BaseModel;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use OwenIt\Auditing\Contracts\Auditable;
+return new class () extends Migration {
+    use CanModifyPermissions;
 
-/**
- * @mixin IdeHelperIncident
- */
-class Incident extends BaseModel implements Auditable
-{
-    use AuditableTrait;
-    use SoftDeletes;
-
-    protected $fillable = [
-        'title',
-        'description',
-        'severity_id',
-        'status_id',
-        'assigned_team_id',
+    private array $permissions = [
+        'incident_update.view-any' => 'Incident Update',
+        'incident_update.create' => 'Incident Update',
+        'incident_update.*.view' => 'Incident Update',
+        'incident_update.*.update' => 'Incident Update',
+        'incident_update.*.delete' => 'Incident Update',
+        'incident_update.*.restore' => 'Incident Update',
+        'incident_update.*.force-delete' => 'Incident Update',
     ];
 
-    public function assignedTeam(): BelongsTo
+    private array $guards = [
+        'web',
+        'api',
+    ];
+
+    public function up(): void
     {
-        return $this->belongsTo(Team::class, 'assigned_team_id', 'id');
+        foreach ($this->guards as $guard) {
+            $this->createPermissions($this->permissions, $guard);
+        }
     }
 
-    public function status(): BelongsTo
+    public function down(): void
     {
-        return $this->belongsTo(IncidentStatus::class);
+        foreach ($this->guards as $guard) {
+            $this->deletePermissions(array_keys($this->permissions), $guard);
+        }
     }
-
-    public function severity(): BelongsTo
-    {
-        return $this->belongsTo(IncidentSeverity::class);
-    }
-
-    public function incidentUpdates(): HasMany
-    {
-        return $this->hasMany(IncidentUpdate::class, 'incident_id');
-    }
-}
+};

@@ -43,6 +43,7 @@ use AidingApp\ServiceManagement\Models\ChangeRequestType;
 use AidingApp\ServiceManagement\Models\Incident;
 use AidingApp\ServiceManagement\Models\IncidentSeverity;
 use AidingApp\ServiceManagement\Models\IncidentStatus;
+use AidingApp\ServiceManagement\Models\IncidentUpdate;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
@@ -100,6 +101,7 @@ class ServiceManagementServiceProvider extends ServiceProvider
             'incident' => Incident::class,
             'incident_severity' => IncidentSeverity::class,
             'incident_status' => IncidentStatus::class,
+            'incident_update' => IncidentUpdate::class,
         ]);
 
         $this->discoverSchema(__DIR__ . '/../../graphql/service-management.graphql');
