@@ -38,7 +38,6 @@ namespace AidingApp\ServiceManagement\Filament\Resources\IncidentStatusResource\
 
 use AidingApp\ServiceManagement\Filament\Resources\IncidentStatusResource;
 use AidingApp\ServiceManagement\Models\IncidentStatus;
-use App\Filament\Tables\Columns\OpenSearch\TextColumn;
 use Filament\Actions\CreateAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
@@ -46,6 +45,7 @@ use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
 class ListIncidentStatuses extends ListRecords
