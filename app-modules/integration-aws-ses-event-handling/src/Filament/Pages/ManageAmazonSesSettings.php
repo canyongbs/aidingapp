@@ -38,7 +38,6 @@ namespace AidingApp\IntegrationAwsSesEventHandling\Filament\Pages;
 
 use AidingApp\IntegrationAwsSesEventHandling\Settings\SesSettings;
 use App\Filament\Clusters\ProductIntegrations;
-use App\Models\Authenticatable;
 use App\Models\Tenant;
 use App\Models\User;
 use Filament\Forms\Components\Section;
@@ -70,7 +69,7 @@ class ManageAmazonSesSettings extends SettingsPage
         /** @var User $user */
         $user = auth()->user();
 
-        return $user->hasRole(Authenticatable::SUPER_ADMIN_ROLE) && parent::canAccess();
+        return $user->isSuperAdmin() && parent::canAccess();
     }
 
     public function form(Form $form): Form

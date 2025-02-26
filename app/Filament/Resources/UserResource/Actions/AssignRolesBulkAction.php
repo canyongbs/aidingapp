@@ -34,57 +34,54 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Pages;
+namespace App\Filament\Resources\UserResource\Actions;
 
+use AidingApp\Authorization\Models\Role;
 use App\Models\User;
-use Illuminate\Contracts\Support\Htmlable;
-use ShuvroRoy\FilamentSpatieLaravelHealth\Pages\HealthCheckResults;
-use Spatie\Health\Enums\Status;
-use Spatie\Health\ResultStores\ResultStore;
+use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\Select;
+use Filament\Notifications\Notification;
+use Filament\Support\Enums\MaxWidth;
+use Filament\Tables\Actions\BulkAction;
+use Illuminate\Database\Eloquent\Collection;
 
-class ProductHealth extends HealthCheckResults
+class AssignRolesBulkAction extends BulkAction
 {
-    public static function getNavigationLabel(): string
+    protected function setUp(): void
     {
-        return 'Product Health';
+        parent::setUp();
+
+        $this->icon('heroicon-s-wrench-screwdriver')
+            ->modalWidth(MaxWidth::Small)
+            ->fillForm(fn (Collection $records): array => [
+                'records' => $records,
+            ])
+            ->form([
+                Checkbox::make('replace')
+                    ->label('Replace existing roles?'),
+                Select::make('roles')
+                    ->label('Roles')
+                    ->options(Role::where('guard_name', 'web')->pluck('name', 'name'))
+                    ->multiple(),
+            ])
+            ->action(function (array $data, Collection $records) {
+                $records->each(function (User $record) use ($data) {
+                    if ($data['replace']) {
+                        $record->syncRoles($data['roles']);
+                    } else {
+                        $record->assignRole($data['roles']);
+                    }
+                });
+
+                Notification::make()
+                    ->title('Assigned Roles')
+                    ->success()
+                    ->send();
+            });
     }
 
-    public function getHeading(): string | Htmlable
+    public static function getDefaultName(): ?string
     {
-        return 'Product Health';
-    }
-
-    public static function getNavigationGroup(): ?string
-    {
-        return 'Global Administration';
-    }
-
-    public static function getNavigationSort(): ?int
-    {
-        return 60;
-    }
-
-    public static function getNavigationBadge(): ?string
-    {
-        $count = app(ResultStore::class)
-            ->latestResults()
-            ?->storedCheckResults
-            ->filter(fn ($check) => ! in_array($check->status, [Status::ok()->value, Status::skipped()->value]))
-            ->count();
-
-        return $count > 0 ? $count : null;
-    }
-
-    public static function getNavigationBadgeColor(): string | array | null
-    {
-        return 'danger';
-    }
-
-    public static function canAccess(): bool
-    {
-        /** @var User $user */
-        $user = auth()->user();
-
-        return $user->isSuperAdmin() && parent::canAccess();
+        return 'assign_roles';
     }
 }

@@ -34,57 +34,60 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ServiceManagement\Enums\SystemIncidentStatusClassification;
+use Database\Migrations\Concerns\CanModifyPermissions;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 return new class () extends Migration {
-    private array $incidentSeverities = [
-        ['name' => 'Critical', 'color' => 'red'],
-        ['name' => 'Major', 'color' => 'orange'],
-        ['name' => 'Minor', 'color' => 'yellow'],
-        ['name' => 'Warning', 'color' => 'amber'],
-        ['name' => 'Informational', 'color' => 'blue'],
-    ];
-
-    private array $incidentStatuses = [
-        ['classification' => SystemIncidentStatusClassification::Open, 'name' => 'Identified'],
-        ['classification' => SystemIncidentStatusClassification::Open, 'name' => 'Investigating'],
-        ['classification' => SystemIncidentStatusClassification::Open, 'name' => 'Mitigating'],
-        ['classification' => SystemIncidentStatusClassification::Open, 'name' => 'Monitoring'],
-        ['classification' => SystemIncidentStatusClassification::Resolved, 'name' => 'Resolved'],
-    ];
+    use CanModifyPermissions;
 
     public function up(): void
     {
-        if (app()->runningUnitTests()) {
-            return;
-        }
+        $this->deletePermissions([
+            'timeline.access',
+            'authorization.impersonate',
+            'authorization.view_dashboard',
+            'authorization.view_api_documentation',
+            'amazon-ses.manage_ses_settings',
+        ], guardName: 'web');
 
-        DB::table('incident_severities')->insert(collect($this->incidentSeverities)->map(function ($item) {
-            $item['id'] = Str::uuid()->toString();
-            $item['created_at'] = now();
+        $this->renamePermissions([
+            'in-app-communication.realtime-chat.access' => 'realtime_chat.view-any',
+        ], guardName: 'web');
 
-            return $item;
-        })->toArray());
+        $this->renamePermissionGroups([
+            'In-App Communication' => 'Realtime Chat',
+        ]);
 
-        DB::table('incident_statuses')->insert(collect($this->incidentStatuses)->map(function ($item) {
-            $item['id'] = Str::uuid()->toString();
-            $item['created_at'] = now();
+        $this->createPermissions([
+            'realtime_chat.*.view' => 'Realtime Chat',
+        ], guardName: 'web');
 
-            return $item;
-        })->toArray());
+        DB::table('permissions')
+            ->whereRaw("name ~ '^task\\.[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}\\.update$'")
+            ->delete();
     }
 
     public function down(): void
     {
-        DB::table('incident_severities')
-            ->whereIn('name', collect($this->incidentSeverities)->pluck('name'))
-            ->delete();
+        $this->deletePermissions([
+            'realtime_chat.*.view',
+        ], guardName: 'web');
 
-        DB::table('incident_statuses')
-            ->whereIn('name', collect($this->incidentStatuses)->pluck('name'))
-            ->delete();
+        $this->renamePermissionGroups([
+            'Realtime Chat' => 'In-App Communication',
+        ]);
+
+        $this->renamePermissions([
+            'realtime_chat.view-any' => 'in-app-communication.realtime-chat.access',
+        ], guardName: 'web');
+
+        $this->createPermissions([
+            'timeline.access' => 'Timeline',
+            'authorization.impersonate' => 'Authorization',
+            'authorization.view_dashboard' => 'Authorization',
+            'authorization.view_api_documentation' => 'Authorization',
+            'amazon-ses.manage_ses_settings' => 'Amazon SES',
+        ], guardName: 'web');
     }
 };

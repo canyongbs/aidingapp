@@ -97,6 +97,8 @@ class ViewContact extends ViewRecord
                             ->label('Status'),
                         TextEntry::make('source.name')
                             ->label('Source'),
+                        TextEntry::make('organization.name')
+                            ->label('Organization'),
                         TextEntry::make('description')
                             ->label('Description')
                             ->columnSpanFull(),

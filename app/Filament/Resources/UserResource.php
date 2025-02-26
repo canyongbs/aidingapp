@@ -40,6 +40,7 @@ use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Authorization\Models\License;
 use App\Filament\Forms\Components\Licenses;
 use App\Filament\Resources\UserResource\Actions\AssignLicensesBulkAction;
+use App\Filament\Resources\UserResource\Actions\AssignRolesBulkAction;
 use App\Filament\Resources\UserResource\Actions\AssignTeamBulkAction;
 use App\Filament\Resources\UserResource\Pages\CreateUser;
 use App\Filament\Resources\UserResource\Pages\EditUser;
@@ -48,9 +49,11 @@ use App\Filament\Resources\UserResource\Pages\ViewUser;
 use App\Filament\Resources\UserResource\RelationManagers\PermissionsRelationManager;
 use App\Filament\Resources\UserResource\RelationManagers\RolesRelationManager;
 use App\Filament\Tables\Columns\IdColumn;
+use App\Models\Authenticatable;
 use App\Models\User;
 use App\Rules\EmailNotInUseOrSoftDeleted;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
@@ -112,6 +115,14 @@ class UserResource extends Resource
                             ->disabled(),
                     ])
                     ->disabled(fn (string $operation) => $operation === 'view'),
+                Section::make('Team')
+                    ->schema([
+                        Select::make('teams')
+                            ->label('')
+                            ->relationship('teams', 'name')
+                            ->disabled(fn (string $operation) => $operation === 'view'),
+                    ])
+                    ->hidden(fn (?User $record) => (bool) $record?->hasRole(Authenticatable::SUPER_ADMIN_ROLE)),
                 Licenses::make()
                     ->hidden(fn (?User $record) => is_null($record))
                     ->disabled(function () {
@@ -196,6 +207,8 @@ class UserResource extends Resource
                         }),
                     AssignLicensesBulkAction::make()
                         ->visible(fn () => auth()->user()->can('create', License::class)),
+                    AssignRolesBulkAction::make()
+                        ->visible(fn () => auth()->user()->can('user.*.update', User::class)),
                 ]),
             ]);
     }

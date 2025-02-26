@@ -36,8 +36,6 @@
 
 namespace AidingApp\Task\Observers;
 
-use AidingApp\Authorization\Models\Permission;
-use AidingApp\Authorization\Models\PermissionGroup;
 use AidingApp\Notification\Events\TriggeredAutoSubscription;
 use AidingApp\Task\Models\Task;
 use AidingApp\Task\Notifications\TaskAssignedToUserNotification;
@@ -64,47 +62,10 @@ class TaskObserver
         }
     }
 
-    public function creating(Task $task): void
-    {
-        Permission::create([
-            'name' => "task.{$task->id}.update",
-            'group_id' => PermissionGroup::query()
-                ->where('name', 'Task')
-                ->value('id'),
-            'guard_name' => 'web',
-        ]);
-    }
-
     public function created(Task $task): void
     {
         try {
-            // Add permissions to creator
-            $task->createdBy?->givePermissionTo("task.{$task->id}.update");
-
-            // Add permissions to assigned User unless they are the creator
-            if ($task->assigned_to !== $task->created_by) {
-                $task->assignedTo?->givePermissionTo("task.{$task->id}.update");
-            }
-
             TriggeredAutoSubscription::dispatchIf(! empty($task->createdBy), $task->createdBy, $task);
-        } catch (Exception $e) {
-            DB::rollBack();
-
-            throw $e;
-        }
-    }
-
-    public function updated(Task $task): void
-    {
-        try {
-            if ($task->isDirty('assigned_to') && $task->assigned_to !== $task->created_by) {
-                if ($task->getOriginal('assigned_to') !== $task->created_by) {
-                    User::find($task->getOriginal('assigned_to'))?->revokePermissionTo("task.{$task->id}.update");
-                }
-
-                // Add permissions to newly assigned User
-                $task->assignedTo?->givePermissionTo("task.{$task->id}.update");
-            }
         } catch (Exception $e) {
             DB::rollBack();
 
@@ -121,10 +82,5 @@ class TaskObserver
 
             TriggeredAutoSubscription::dispatch($task->assignedTo, $task);
         }
-    }
-
-    public function deleted(Task $task): void
-    {
-        // Remove permissions from creator and assigned User
     }
 }

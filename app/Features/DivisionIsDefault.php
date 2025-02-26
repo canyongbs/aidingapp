@@ -34,53 +34,14 @@
 </COPYRIGHT>
 */
 
-use App\Filament\Resources\UserResource\Pages\ViewUser;
-use App\Models\User;
+namespace App\Features;
 
-use function Pest\Livewire\livewire;
+use App\Support\AbstractFeatureFlag;
 
-use STS\FilamentImpersonate\Pages\Actions\Impersonate;
-
-use function Tests\asSuperAdmin;
-
-it('renders impersonate button for non super admin users when user is super admin', function () {
-    asSuperAdmin();
-
-    $user = User::factory()->create();
-
-    livewire(ViewUser::class, [
-        'record' => $user->getRouteKey(),
-    ])
-        ->assertSuccessful()
-        ->assertActionVisible(Impersonate::class);
-});
-
-it('does not render impersonate button for super admin users at all', function () {
-    $superAdmin = User::factory()->create();
-    asSuperAdmin($superAdmin);
-
-    $user = User::factory()->create();
-    asSuperAdmin($user);
-
-    livewire(ViewUser::class, [
-        'record' => $superAdmin->getRouteKey(),
-    ])
-        ->assertSuccessful()
-        ->assertActionHidden(Impersonate::class);
-});
-
-it('allows super admin user to impersonate', function () {
-    $superAdmin = User::factory()->create();
-    asSuperAdmin($superAdmin);
-
-    $user = User::factory()->create();
-
-    livewire(ViewUser::class, [
-        'record' => $user->getRouteKey(),
-    ])
-        ->assertSuccessful()
-        ->callAction(Impersonate::class);
-
-    expect($user->isImpersonated())->toBeTrue();
-    expect(auth()->id())->toBe($user->id);
-});
+class DivisionIsDefault extends AbstractFeatureFlag
+{
+    public function resolve(mixed $scope): mixed
+    {
+        return false;
+    }
+}

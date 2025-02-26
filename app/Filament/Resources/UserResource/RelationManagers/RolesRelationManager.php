@@ -84,7 +84,7 @@ class RolesRelationManager extends RelationManager
                         /** @var User $user */
                         $user = auth()->user();
 
-                        if (! $user->hasRole(Authenticatable::SUPER_ADMIN_ROLE)) {
+                        if (! $user->isSuperAdmin()) {
                             $query->where('name', '!=', Authenticatable::SUPER_ADMIN_ROLE);
                         }
                     })

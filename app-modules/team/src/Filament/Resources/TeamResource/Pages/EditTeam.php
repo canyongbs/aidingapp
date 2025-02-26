@@ -36,13 +36,17 @@
 
 namespace AidingApp\Team\Filament\Resources\TeamResource\Pages;
 
+use AidingApp\Division\Models\Division;
 use AidingApp\Team\Filament\Resources\TeamResource;
 use App\Concerns\EditPageRedirection;
+use App\Features\DivisionIsDefault;
 use Filament\Actions\DeleteAction;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Database\Eloquent\Builder;
 
 class EditTeam extends EditRecord
 {
@@ -57,10 +61,17 @@ class EditTeam extends EditRecord
                 TextInput::make('name')
                     ->required()
                     ->string()
+                    ->unique(ignoreRecord: true)
                     ->maxLength(255),
                 Textarea::make('description')
                     ->required()
                     ->string(),
+                Select::make('division_id')
+                    ->visible(DivisionIsDefault::active())
+                    ->relationship('division', 'name', modifyQueryUsing: fn (Builder $query) => $query->orderBy('is_default', 'DESC'))
+                    ->searchable()
+                    ->preload()
+                    ->default(fn () => Division::query()->where('is_default', true)->first()?->getKey()),
             ]);
     }
 

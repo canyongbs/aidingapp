@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b48556877b6e0858963a3696b99acdce",
+    "content-hash": "c39905cd4bdd1b37ce7fa214b6c5e36a",
     "packages": [
         {
             "name": "amphp/amp",
@@ -2338,6 +2338,56 @@
                 "symlink": true,
                 "relative": true
             }
+        },
+        {
+            "name": "canyongbs/common",
+            "version": "v1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/canyongbs/common.git",
+                "reference": "5fd504c66b3226740c5d00803279f26df2e81c94"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/canyongbs/common/zipball/5fd504c66b3226740c5d00803279f26df2e81c94",
+                "reference": "5fd504c66b3226740c5d00803279f26df2e81c94",
+                "shasum": ""
+            },
+            "require": {
+                "filament/filament": "^3.0",
+                "laravel/framework": "^11.0"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^3.60",
+                "phpstan/phpstan": "^2.1"
+            },
+            "type": "package",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "CanyonGBS\\Common\\CommonServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "CanyonGBS\\Common\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Elastic-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "Canyon GBS"
+                }
+            ],
+            "support": {
+                "issues": "https://github.com/canyongbs/common/issues",
+                "source": "https://github.com/canyongbs/common/tree/v1.0.0"
+            },
+            "time": "2025-02-24T20:54:42+00:00"
         },
         {
             "name": "canyongbs/filament-tiptap-editor",

@@ -40,7 +40,6 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ViewServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use App\Filament\Tables\Columns\IdColumn;
-use App\Models\Authenticatable;
 use Filament\Forms\Form;
 use Filament\Infolists\Infolist;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -71,7 +70,7 @@ class ServiceRequestsRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('id')
             ->modifyQueryUsing(function ($query) {
-                $query->when(! auth()->user()->hasRole(Authenticatable::SUPER_ADMIN_ROLE), function (Builder $q) {
+                $query->when(! auth()->user()->isSuperAdmin(), function (Builder $q) {
                     return $q->whereHas('priority.type.managers', function (Builder $query): void {
                         $query->where('teams.id', auth()->user()->teams()->first()?->getKey());
                     })

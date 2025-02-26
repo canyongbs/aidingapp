@@ -38,7 +38,6 @@ namespace AidingApp\IntegrationGoogleRecaptcha\Filament\Pages;
 
 use AidingApp\IntegrationGoogleRecaptcha\Settings\GoogleRecaptchaSettings;
 use App\Filament\Clusters\ProductIntegrations;
-use App\Models\Authenticatable;
 use App\Models\User;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -63,7 +62,7 @@ class ManageGoogleRecaptchaSettings extends SettingsPage
         /** @var User $user */
         $user = auth()->user();
 
-        return $user->hasRole(Authenticatable::SUPER_ADMIN_ROLE) && parent::canAccess();
+        return $user->isSuperAdmin() && parent::canAccess();
     }
 
     public function form(Form $form): Form

@@ -37,14 +37,19 @@
 namespace AidingApp\Division\Filament\Resources\DivisionResource\Pages;
 
 use AidingApp\Division\Filament\Resources\DivisionResource;
+use AidingApp\Division\Models\Division;
+use App\Features\DivisionIsDefault;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateDivision extends CreateRecord
 {
     protected static string $resource = DivisionResource::class;
+
+    protected ?bool $hasDatabaseTransactions = true;
 
     public function form(Form $form): Form
     {
@@ -60,6 +65,31 @@ class CreateDivision extends CreateRecord
                     ->unique(),
                 Textarea::make('description')
                     ->string(),
+                Toggle::make('is_default')
+                    ->visible(DivisionIsDefault::active())
+                    ->label('Default')
+                    ->live()
+                    ->hint(function (?Division $record, $state): ?string {
+                        if ($record?->is_default) {
+                            return null;
+                        }
+
+                        if (! $state) {
+                            return null;
+                        }
+
+                        $currentDefault = Division::query()
+                            ->where('is_default', true)
+                            ->value('name');
+
+                        if (blank($currentDefault)) {
+                            return null;
+                        }
+
+                        return "The current default status is '{$currentDefault}', you are replacing it.";
+                    })
+                    ->hintColor('danger')
+                    ->columnStart(1),
             ]);
     }
 }

@@ -39,7 +39,6 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateDirection;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
-use App\Models\Authenticatable;
 use App\Support\BulkProcessingMachine;
 use Closure;
 use Filament\Forms\Components\Textarea;
@@ -93,7 +92,7 @@ class AddServiceRequestUpdateBulkAction
                         };
                     })
                     ->check(function (ServiceRequest $serviceRequest) use ($user): ?Closure {
-                        if ($user->hasRole(Authenticatable::SUPER_ADMIN_ROLE)) {
+                        if ($user->isSuperAdmin()) {
                             return null;
                         }
 

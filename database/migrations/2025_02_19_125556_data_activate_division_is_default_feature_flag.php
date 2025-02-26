@@ -34,17 +34,17 @@
 </COPYRIGHT>
 */
 
-use App\Features\IncidentSeverityStatus;
+use App\Features\DivisionIsDefault;
 use Illuminate\Database\Migrations\Migration;
 
 return new class () extends Migration {
     public function up(): void
     {
-        IncidentSeverityStatus::activate();
+        DivisionIsDefault::activate();
     }
 
     public function down(): void
     {
-        IncidentSeverityStatus::deactivate();
+        DivisionIsDefault::deactivate();
     }
 };

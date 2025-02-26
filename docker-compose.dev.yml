@@ -41,6 +41,7 @@ services:
       - 'host.docker.internal:host-gateway'
     volumes:
       - '.:/var/www/html'
+      # - '../common:/var/www/common'
     networks:
       cgbs-development:
         ipv4_address: 172.16.1.4

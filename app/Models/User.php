@@ -250,16 +250,6 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
         return $this->belongsToMany(ChangeRequestType::class);
     }
 
-    public function getIsAdminAttribute()
-    {
-        return $this->roles()->where('title', 'Admin')->exists();
-    }
-
-    public function scopeAdmins()
-    {
-        return $this->whereHas('roles', fn ($q) => $q->where('title', 'Admin'));
-    }
-
     public function pronouns(): BelongsTo
     {
         return $this->belongsTo(Pronouns::class);
@@ -296,12 +286,17 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
 
     public function canImpersonate(): bool
     {
-        return $this->can('authorization.impersonate');
+        return $this->isSuperAdmin();
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return $this->hasRole(Authenticatable::SUPER_ADMIN_ROLE);
     }
 
     public function canBeImpersonated(): bool
     {
-        return ! $this->hasRole(Authenticatable::SUPER_ADMIN_ROLE);
+        return ! $this->isSuperAdmin();
     }
 
     public function registerMediaCollections(): void
