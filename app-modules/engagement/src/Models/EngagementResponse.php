@@ -38,21 +38,27 @@ namespace AidingApp\Engagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Engagement\Observers\EngagementResponseObserver;
 use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
 use AidingApp\Timeline\Models\Timeline;
 use AidingApp\Timeline\Timelines\EngagementResponseTimeline;
 use App\Models\BaseModel;
 use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
+use Illuminate\Support\HtmlString;
 use OwenIt\Auditing\Contracts\Auditable;
+use Symfony\Component\HtmlSanitizer\HtmlSanitizer;
+use Symfony\Component\HtmlSanitizer\HtmlSanitizerConfig;
 
 /**
  * @mixin IdeHelperEngagementResponse
  */
+#[ObservedBy([EngagementResponseObserver::class])]
 class EngagementResponse extends BaseModel implements Auditable, ProvidesATimeline
 {
     use AuditableTrait;
@@ -82,6 +88,26 @@ class EngagementResponse extends BaseModel implements Auditable, ProvidesATimeli
     public static function getTimelineData(Model $forModel): Collection
     {
         return $forModel->orderedEngagementResponses()->get();
+    }
+
+    public function getBody(): HtmlString
+    {
+        $content = $this->content;
+
+        if (preg_match('/<body[^>]*>(.*?)<\/body>/is', $content, $matches)) {
+            $content = $matches[1];
+        }
+
+        return str(
+            (new HtmlSanitizer(
+                (new HtmlSanitizerConfig())
+                    ->allowSafeElements()
+                    ->forceHttpsUrls()
+                    ->withMaxInputLength(500000)
+            ))
+                ->sanitize($content)
+        )
+            ->toHtmlString();
     }
 
     public function sender(): MorphTo
