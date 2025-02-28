@@ -415,7 +415,10 @@
         }"
     >
         <div>
-            <link rel="stylesheet" v-bind:href="hostUrl + '/js/portals/knowledge-management/aiding-app-knowledge-management-portal.css'" />
+            <link
+                rel="stylesheet"
+                v-bind:href="hostUrl + '/js/portals/knowledge-management/aiding-app-knowledge-management-portal.css'"
+            />
         </div>
 
         <div v-if="loading">
