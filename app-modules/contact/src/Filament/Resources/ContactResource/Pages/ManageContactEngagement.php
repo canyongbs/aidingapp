@@ -73,7 +73,7 @@ class ManageContactEngagement extends ManageRelatedRecords
     {
         return collect([
             EngagementsRelationManager::class,
-            EngagementResponsesRelationManager::class,
+            // EngagementResponsesRelationManager::class,
         ])
             ->reject(fn ($relationManager) => $record && (! $relationManager::canViewForRecord($record, static::class)))
             ->toArray();

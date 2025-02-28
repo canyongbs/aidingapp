@@ -57,6 +57,7 @@ use AidingApp\Portal\Models\KnowledgeBaseArticleVote;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\Task\Models\Task;
 use AidingApp\Timeline\Models\Contracts\HasFilamentResource;
+use AidingApp\Timeline\Models\Timeline;
 use App\Models\Authenticatable;
 use App\Models\Contracts\Educatable;
 use App\Models\Scopes\HasLicense;
@@ -70,6 +71,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as BaseAuthenticatable;
@@ -140,6 +142,11 @@ class Contact extends BaseAuthenticatable implements Auditable, Subscribable, Ed
             id: 'respondent_id',
             localKey: 'id'
         );
+    }
+
+    public function timeline(): MorphOne
+    {
+        return $this->morphOne(Timeline::class, 'entity');
     }
 
     public function createdBy(): BelongsTo

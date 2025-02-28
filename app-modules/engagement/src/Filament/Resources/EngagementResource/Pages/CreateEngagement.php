@@ -143,10 +143,10 @@ class CreateEngagement extends CreateRecord
                             ->helperText('You can insert contact information by typing {{ and choosing a merge value to insert.')
                             ->columnSpanFull(),
                     ]),
-                EducatableSelect::make('recipient')
-                    ->label('Recipient')
-                    ->required()
-                    ->hiddenOn([RelationManager::class, ManageRelatedRecords::class]),
+                // EducatableSelect::make('recipient')
+                //     ->label('Recipient')
+                //     ->required()
+                //     ->hiddenOn([RelationManager::class, ManageRelatedRecords::class]),
                 Fieldset::make('Send your email or text')
                     ->schema([
                         Toggle::make('send_later')
