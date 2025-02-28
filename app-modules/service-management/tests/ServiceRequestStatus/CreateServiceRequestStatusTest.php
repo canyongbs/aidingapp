@@ -72,6 +72,8 @@ test('A successful action on the CreateServiceRequestStatus page', function () {
 test('CreateServiceRequestStatus requires valid data', function ($data, $errors) {
     asSuperAdmin();
 
+    ServiceRequestStatus::query()->truncate();
+
     livewire(CreateServiceRequestStatus::class)
         ->fillForm(CreateServiceRequestStatusRequestFactory::new($data)->create())
         ->call('create')
