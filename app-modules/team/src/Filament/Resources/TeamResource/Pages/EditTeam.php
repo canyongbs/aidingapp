@@ -39,7 +39,6 @@ namespace AidingApp\Team\Filament\Resources\TeamResource\Pages;
 use AidingApp\Division\Models\Division;
 use AidingApp\Team\Filament\Resources\TeamResource;
 use App\Concerns\EditPageRedirection;
-use App\Features\DivisionIsDefault;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -67,7 +66,6 @@ class EditTeam extends EditRecord
                     ->required()
                     ->string(),
                 Select::make('division_id')
-                    ->visible(DivisionIsDefault::active())
                     ->relationship('division', 'name', modifyQueryUsing: fn (Builder $query) => $query->orderBy('is_default', 'DESC'))
                     ->searchable()
                     ->preload()

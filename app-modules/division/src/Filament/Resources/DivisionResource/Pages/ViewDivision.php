@@ -38,7 +38,6 @@ namespace AidingApp\Division\Filament\Resources\DivisionResource\Pages;
 
 use AidingApp\Division\Filament\Resources\DivisionResource;
 use AidingApp\Division\Models\Division;
-use App\Features\DivisionIsDefault;
 use App\Filament\Resources\NotificationSettingResource;
 use App\Filament\Resources\UserResource;
 use Filament\Actions\EditAction;
@@ -64,7 +63,6 @@ class ViewDivision extends ViewRecord
                                 TextEntry::make('name'),
                                 TextEntry::make('code'),
                                 IconEntry::make('is_default')
-                                    ->visible(DivisionIsDefault::active())
                                     ->label('Default'),
                             ])
                             ->columns(3),

@@ -39,7 +39,6 @@ namespace AidingApp\Division\Filament\Resources\DivisionResource\Pages;
 use AidingApp\Division\Filament\Resources\DivisionResource;
 use AidingApp\Division\Models\Division;
 use App\Concerns\EditPageRedirection;
-use App\Features\DivisionIsDefault;
 use App\Models\NotificationSetting;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Select;
@@ -78,7 +77,6 @@ class EditDivision extends EditRecord
                     ->searchable(),
                 Toggle::make('is_default')
                     ->label('Default')
-                    ->visible(DivisionIsDefault::active())
                     ->live()
                     ->hint(function (?Division $record, $state): ?string {
                         if ($record?->is_default) {

@@ -38,7 +38,6 @@ namespace AidingApp\Division\Filament\Resources\DivisionResource\Pages;
 
 use AidingApp\Division\Filament\Resources\DivisionResource;
 use AidingApp\Division\Models\Division;
-use App\Features\DivisionIsDefault;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -66,7 +65,6 @@ class CreateDivision extends CreateRecord
                 Textarea::make('description')
                     ->string(),
                 Toggle::make('is_default')
-                    ->visible(DivisionIsDefault::active())
                     ->label('Default')
                     ->live()
                     ->hint(function (?Division $record, $state): ?string {
