@@ -37,7 +37,6 @@
 namespace AidingApp\Division\Filament\Resources\DivisionResource\Pages;
 
 use AidingApp\Division\Filament\Resources\DivisionResource;
-use App\Features\DivisionIsDefault;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
@@ -66,7 +65,6 @@ class ListDivisions extends ListRecords
                     ->searchable(),
                 IconColumn::make('is_default')
                     ->label('Default')
-                    ->visible(DivisionIsDefault::active())
                     ->boolean(),
                 TextColumn::make('createdBy.name')
                     ->default('N/A')
