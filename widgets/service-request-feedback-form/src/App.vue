@@ -314,7 +314,13 @@
         class="font-sans px-6"
     >
         <div>
-            <link rel="stylesheet" v-bind:href="hostUrl + '/js/widgets/service-request-feedback-form/style.css'" />
+            <link
+                rel="stylesheet"
+                v-bind:href="
+                    hostUrl +
+                    '/js/widgets/service-request-feedback-form/aiding-app-service-request-feedback-form-widget.css'
+                "
+            />
         </div>
 
         <div v-if="loading">
