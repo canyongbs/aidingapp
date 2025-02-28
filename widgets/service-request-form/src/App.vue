@@ -303,10 +303,7 @@
         class="font-sans"
     >
         <div class="prose max-w-none" v-if="display && !submittedSuccess">
-            <link
-                rel="stylesheet"
-                v-bind:href="hostUrl + '/js/widgets/service-request-form/aiding-app-service-request-form-widget.css'"
-            />
+            <link rel="stylesheet" v-bind:href="hostUrl + '/js/widgets/service-request-form/style.css'" />
 
             <h1>
                 {{ formName }}
