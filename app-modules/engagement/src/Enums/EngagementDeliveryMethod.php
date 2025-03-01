@@ -36,9 +36,10 @@
 
 namespace AidingApp\Engagement\Enums;
 
+use Filament\Support\Contracts\HasIcon;
 use Filament\Support\Contracts\HasLabel;
 
-enum EngagementDeliveryMethod: string implements HasLabel
+enum EngagementDeliveryMethod: string implements HasLabel, HasIcon
 {
     case Email = 'email';
 
@@ -46,6 +47,13 @@ enum EngagementDeliveryMethod: string implements HasLabel
     {
         return match ($this) {
             static::Email => 'Email',
+        };
+    }
+
+    public function getIcon(): ?string
+    {
+        return match ($this) {
+            self::Email => 'heroicon-o-envelope',
         };
     }
 }

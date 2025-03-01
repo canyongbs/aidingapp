@@ -34,48 +34,13 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Filament\Resources\ContactResource\Pages;
+namespace AidingApp\Engagement\Models\Contracts;
 
-use AidingApp\Contact\Filament\Resources\ContactResource;
-use AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers\EngagementResponsesRelationManager;
-use AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers\EngagementsRelationManager;
-use Filament\Resources\Pages\ManageRelatedRecords;
-use Illuminate\Contracts\Support\Htmlable;
-use Illuminate\Database\Eloquent\Model;
+use AidingApp\Engagement\Enums\EngagementDeliveryMethod;
+use AidingApp\Notification\Enums\NotificationChannel;
 
-class ManageContactEngagement extends ManageRelatedRecords
+interface HasDeliveryMethod
 {
-    protected static string $resource = ContactResource::class;
-
-    // TODO: Obsolete when there is no table, remove from Filament
-    protected static string $relationship = 'engagements';
-
-    protected static ?string $navigationLabel = 'Emails';
-
-    protected static ?string $breadcrumb = 'Email and Texts';
-
-    public function getTitle(): string | Htmlable
-    {
-        return 'Manage Contact Emails';
-    }
-
-    public static function canAccess(array $arguments = []): bool
-    {
-        return (bool) count(static::managers($arguments['record'] ?? null));
-    }
-
-    public function getRelationManagers(): array
-    {
-        return static::managers($this->getRecord());
-    }
-
-    private static function managers(?Model $record = null): array
-    {
-        return collect([
-            EngagementsRelationManager::class,
-            // EngagementResponsesRelationManager::class,
-        ])
-            ->reject(fn ($relationManager) => $record && (! $relationManager::canViewForRecord($record, static::class)))
-            ->toArray();
-    }
+    // public function getDeliveryMethod(): NotificationChannel;
+    public function getDeliveryMethod(): EngagementDeliveryMethod;
 }
