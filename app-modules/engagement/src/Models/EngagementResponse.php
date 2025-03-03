@@ -90,6 +90,20 @@ class EngagementResponse extends BaseModel implements Auditable, ProvidesATimeli
         return $forModel->orderedEngagementResponses()->get();
     }
 
+    public function sender(): MorphTo
+    {
+        return $this->morphTo(
+            name: 'sender',
+            type: 'sender_type',
+            id: 'sender_id',
+        );
+    }
+
+    public function scopeSentByContact(Builder $query): void
+    {
+        $query->where('sender_type', resolve(Contact::class)->getMorphClass());
+    }
+
     public function getBody(): HtmlString
     {
         $content = $this->content;
@@ -108,19 +122,5 @@ class EngagementResponse extends BaseModel implements Auditable, ProvidesATimeli
                 ->sanitize($content)
         )
             ->toHtmlString();
-    }
-
-    public function sender(): MorphTo
-    {
-        return $this->morphTo(
-            name: 'sender',
-            type: 'sender_type',
-            id: 'sender_id',
-        );
-    }
-
-    public function scopeSentByContact(Builder $query): void
-    {
-        $query->where('sender_type', resolve(Contact::class)->getMorphClass());
     }
 }

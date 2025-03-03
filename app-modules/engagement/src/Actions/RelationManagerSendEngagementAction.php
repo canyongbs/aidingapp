@@ -7,6 +7,7 @@ use AidingApp\Engagement\Models\Engagement;
 use Carbon\Carbon;
 use Filament\Actions\StaticAction;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\CreateAction;
@@ -66,6 +67,11 @@ class RelationManagerSendEngagementAction extends CreateAction
                 $createEngagementDeliverable = resolve(CreateEngagementDeliverable::class);
 
                 $createEngagementDeliverable($engagement, $data['delivery_method']);
+
+                Notification::make()
+                    ->title('Created')
+                    ->success()
+                    ->send();
             })
             ->modalSubmitActionLabel('Send')
             ->modalCloseButton(false)
@@ -87,12 +93,4 @@ class RelationManagerSendEngagementAction extends CreateAction
     {
         return 'engage';
     }
-
-    // public function afterCreate(Engagement $engagement, string $deliveryMethod): void
-    // {
-    //     dd($engagement);
-    //     $createEngagementDeliverable = resolve(CreateEngagementDeliverable::class);
-
-    //     $createEngagementDeliverable($engagement, $deliveryMethod);
-    // }
 }

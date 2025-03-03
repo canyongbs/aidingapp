@@ -34,11 +34,19 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Contact\Filament\Resources\ContactResource\Pages\EditContact;
+use AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers\EngagementsRelationManager;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactSource;
 use AidingApp\Contact\Models\ContactStatus;
+use AidingApp\Engagement\Models\Engagement;
+use AidingApp\Engagement\Models\EngagementResponse;
+use AidingApp\Timeline\Events\TimelineableRecordCreated;
+use AidingApp\Timeline\Listeners\AddRecordToTimeline;
 use App\Models\User;
+use Illuminate\Support\Facades\Queue;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -130,4 +138,115 @@ test('ListContacts can bulk update characteristics', function () {
                 ->source_id->toBe($source->id)
                 ->status_id->toBe($status->id)
         );
+});
+
+test('can list records of engagements timelineable', function () {
+    Queue::fake();
+    $user = User::factory()->licensed(LicenseType::cases())->create();
+
+    $contact = Contact::factory()->create();
+
+    actingAs($user)
+        ->get(
+            ContactResource::getUrl('manage-engagement', [
+                'record' => $contact->getKey(),
+            ])
+        )->assertForbidden();
+
+    $user->givePermissionTo('engagement.view-any');
+    $user->givePermissionTo('engagement_response.view-any');
+
+    actingAs($user);
+
+    $engagements = Engagement::factory()->count(1)
+        ->state([
+            'recipient_id' => $contact->getKey(),
+            'recipient_type' => $contact->getMorphClass(),
+        ])->createQuietly();
+
+    $engagementResponses = EngagementResponse::factory()->count(5)
+        ->state([
+            'sender_id' => $contact->getKey(),
+            'sender_type' => $contact->getMorphClass(),
+        ])->createQuietly();
+
+    $engagements->each(function ($response) {
+        $event = new TimelineableRecordCreated($response->recipient, $response);
+        $listener = app(AddRecordToTimeline::class);
+
+        $listener->handle($event);
+    });
+
+    $engagementResponses->each(function ($response) {
+        $event = new TimelineableRecordCreated($response->sender, $response);
+        $listener = app(AddRecordToTimeline::class);
+
+        $listener->handle($event);
+    });
+
+    livewire(EngagementsRelationManager::class, [
+        'ownerRecord' => $contact,
+        'pageClass' => EditContact::class,
+    ])
+        ->assertCanSeeTableRecords($engagements->pluck('timelineRecord')->merge($engagementResponses->pluck('timelineRecord')))
+        ->assertSuccessful();
+});
+
+test('can filter engagements timelineable', function () {
+    Queue::fake();
+    $user = User::factory()->licensed(LicenseType::cases())->create();
+
+    $contact = Contact::factory()->create();
+
+    actingAs($user)
+        ->get(
+            ContactResource::getUrl('manage-engagement', [
+                'record' => $contact->getKey(),
+            ])
+        )->assertForbidden();
+
+    $user->givePermissionTo('engagement.view-any');
+    $user->givePermissionTo('engagement_response.view-any');
+
+    actingAs($user);
+
+    $engagements = Engagement::factory()->count(1)
+        ->state([
+            'recipient_id' => $contact->getKey(),
+            'recipient_type' => $contact->getMorphClass(),
+        ])->createQuietly();
+
+    $engagementResponses = EngagementResponse::factory()->count(5)
+        ->state([
+            'sender_id' => $contact->getKey(),
+            'sender_type' => $contact->getMorphClass(),
+        ])->createQuietly();
+
+    $engagements->each(function ($response) {
+        $event = new TimelineableRecordCreated($response->recipient, $response);
+        $listener = app(AddRecordToTimeline::class);
+
+        $listener->handle($event);
+    });
+
+    $engagementResponses->each(function ($response) {
+        $event = new TimelineableRecordCreated($response->sender, $response);
+        $listener = app(AddRecordToTimeline::class);
+
+        $listener->handle($event);
+    });
+
+    livewire(EngagementsRelationManager::class, [
+        'ownerRecord' => $contact,
+        'pageClass' => EditContact::class,
+    ])
+        ->assertCanSeeTableRecords($engagements->pluck('timelineRecord')->merge($engagementResponses->pluck('timelineRecord')))
+        ->filterTable('direction', Engagement::class)
+        ->assertCanSeeTableRecords($engagements->pluck('timelineRecord'))
+        ->assertCanNotSeeTableRecords($engagementResponses->pluck('timelineRecord'))
+        ->removeTableFilter('direction')
+        ->filterTable('direction', EngagementResponse::class)
+        ->assertCanSeeTableRecords($engagementResponses->pluck('timelineRecord'))
+        ->assertCanNotSeeTableRecords($engagements->pluck('timelineRecord'))
+        ->assertSuccessful();
 });

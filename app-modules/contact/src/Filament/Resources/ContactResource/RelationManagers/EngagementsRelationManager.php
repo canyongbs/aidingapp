@@ -38,21 +38,19 @@ namespace AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers;
 
 use AidingApp\Engagement\Actions\RelationManagerSendEngagementAction;
 use AidingApp\Engagement\Enums\EngagementDeliveryMethod;
+use AidingApp\Engagement\Enums\EngagementDeliveryStatus;
 use AidingApp\Engagement\Models\Engagement;
 use AidingApp\Engagement\Models\EngagementResponse;
 use AidingApp\Notification\Enums\NotificationChannel;
 use AidingApp\Timeline\Models\Timeline;
-use App\Filament\Tables\Filters\OpenSearch\SelectFilter;
-use Filament\Infolists\Components\Fieldset as InfolistFieldset;
-use Filament\Infolists\Components\Section;
-use Filament\Infolists\Components\Split;
-use Filament\Infolists\Components\Tabs;
-use Filament\Infolists\Components\Tabs\Tab;
+use Filament\Infolists\Components\Fieldset;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Support\Enums\IconPosition;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\HtmlString;
@@ -67,71 +65,63 @@ class EngagementsRelationManager extends RelationManager
     {
         return $infolist->schema(fn (Timeline $record) => match ($record->timelineable::class) {
             Engagement::class => [
-                Tabs::make()
-                    ->columnSpanFull()
-                    ->tabs([
-                        Tab::make('Content')
-                            ->schema([
-                                TextEntry::make('user.name')
-                                    ->label('Created By')
-                                    ->getStateUsing(fn (Timeline $record): string => $record->timelineable->user->name),
-                                InfolistFieldset::make('Content')
-                                    ->schema([
-                                        TextEntry::make('subject')
-                                            ->getStateUsing(fn (Timeline $record): ?string => $record->timelineable->subject)
-                                            ->hidden(fn ($state): bool => blank($state))
-                                            ->columnSpanFull(),
-                                        TextEntry::make('body')
-                                            ->getStateUsing(fn (Timeline $record): HtmlString => $record->timelineable->getBody())
-                                            ->columnSpanFull(),
-                                    ]),
-                                InfolistFieldset::make('delivery')
-                                    ->label('Delivery Information')
-                                    ->columnSpanFull()
-                                    ->schema([
-                                        TextEntry::make('channel')
-                                            ->label('Channel')
-                                            ->getStateUsing(function (Timeline $record): string {
-                                                $timelineable = $record->timelineable?->engagementDeliverable;
-
-                                                return $timelineable->channel->getLabel() ?? EngagementDeliveryMethod::Email->value;
-                                            }),
-                                    ])
-                                    ->columns(),
-                            ]),
-                    ]),
-            ],
-            EngagementResponse::class => [
-                Split::make([
-                    Section::make([
+                TextEntry::make('user.name')
+                    ->label('Created By')
+                    ->getStateUsing(fn (Timeline $record): string => $record->timelineable->user->name),
+                Fieldset::make('Content')
+                    ->schema([
+                        TextEntry::make('subject')
+                            ->getStateUsing(fn (Timeline $record): ?string => $record->timelineable->subject)
+                            ->hidden(fn ($state): bool => blank($state))
+                            ->columnSpanFull(),
                         TextEntry::make('body')
                             ->getStateUsing(fn (Timeline $record): HtmlString => $record->timelineable->getBody())
+                            ->markdown()
                             ->columnSpanFull(),
                     ]),
-                    Section::make([
-                        TextEntry::make('sent_at')
-                            ->getStateUsing(fn (Timeline $record): string => $record->timelineable->sent_at)
-                            ->dateTime('Y-m-d H:i:s')
-                            ->hintIcon(function (TextEntry $entry): ?string {
-                                if (! ($entry->isTime() || $entry->isDateTime())) {
-                                    return null;
-                                }
-
-                                return 'heroicon-m-clock';
+                Fieldset::make('deliverable')
+                    ->label('Delivery Information')
+                    ->columnSpanFull()
+                    ->schema([
+                        TextEntry::make('deliverable.channel')
+                            ->getStateUsing(fn (Timeline $record): EngagementDeliveryMethod => $record->timelineable->deliverable->channel)
+                            ->label('Channel'),
+                        TextEntry::make('deliverable.delivery_status')
+                            ->getStateUsing(fn (Timeline $record): EngagementDeliveryStatus => $record->timelineable->deliverable->delivery_status)
+                            ->iconPosition(IconPosition::After)
+                            ->icon(fn (EngagementDeliveryStatus $state): string => match ($state) {
+                                EngagementDeliveryStatus::Successful => 'heroicon-o-check-circle',
+                                EngagementDeliveryStatus::Awaiting, EngagementDeliveryStatus::Dispatched => 'heroicon-o-clock',
+                                EngagementDeliveryStatus::Failed, EngagementDeliveryStatus::DispatchFailed, EngagementDeliveryStatus::RateLimited => 'heroicon-o-x-circle',
                             })
-                            ->hintIconTooltip(function (TextEntry $entry): ?string {
-                                $timezoneLabel = config('app.timezone');
-
-                                if (! ($entry->isTime() || $entry->isDateTime())) {
-                                    return null;
-                                }
-
-                                return "This time is set in {$timezoneLabel}.";
+                            ->iconColor(fn (EngagementDeliveryStatus $state): string => match ($state) {
+                                EngagementDeliveryStatus::Successful => 'success',
+                                EngagementDeliveryStatus::Awaiting, EngagementDeliveryStatus::Dispatched => 'info',
+                                EngagementDeliveryStatus::Failed, EngagementDeliveryStatus::DispatchFailed, EngagementDeliveryStatus::RateLimited => 'danger',
+                            })
+                            ->label('Status')
+                            ->formatStateUsing(fn (Timeline $record): string => match ($record->timelineable->deliverable->delivery_status) {
+                                EngagementDeliveryStatus::Successful => 'Successfully delivered',
+                                EngagementDeliveryStatus::Awaiting, EngagementDeliveryStatus::Dispatched => 'Awaiting delivery',
+                                EngagementDeliveryStatus::Failed, EngagementDeliveryStatus::DispatchFailed => 'Failed to send',
+                                EngagementDeliveryStatus::RateLimited => 'Failed to send due to rate limits',
                             }),
-                    ])->grow(false),
-                ])
-                    ->from('md')
-                    ->columnSpanFull(),
+                        TextEntry::make('deliverable.delivered_at')
+                            ->label('Delivered At')
+                            ->getStateUsing(fn (Timeline $record): string => $record->timelineable->deliverable->delivered_at)
+                            ->hidden(fn (Timeline $record): bool => is_null($record->timelineable->deliverable->delivered_at)),
+                        TextEntry::make('deliverable.delivery_response')
+                            ->label('Error Details')
+                            ->getStateUsing(fn (Timeline $record): string => $record->timelineable->deliverable->delivery_response)
+                            ->hidden(fn (Timeline $record): bool => is_null($record->timelineable->deliverable->delivery_response)),
+                    ])
+                    ->columns(2),
+            ],
+            EngagementResponse::class => [
+                TextEntry::make('content')->getStateUsing(fn (Timeline $record): HtmlString => $record->timelineable->getBody()),
+                TextEntry::make('sent_at')
+                    ->getStateUsing(fn (Timeline $record): string => $record->timelineable->sent_at)
+                    ->dateTime('Y-m-d H:i:s'),
             ],
         });
     }
@@ -163,8 +153,9 @@ class EngagementsRelationManager extends RelationManager
                     ->getStateUsing(function (Timeline $record) {
                         $timelineable = $record->timelineable?->engagementDeliverable;
 
-                        return $timelineable->channel ?? EngagementDeliveryMethod::Email;
-                    }),
+                        return $timelineable->channel ?? NotificationChannel::Sms;
+                    })
+                    ->icon(fn ($state) => $state->getIcon()),
                 TextColumn::make('record_sortable_date')
                     ->label('Date')
                     ->sortable(),
@@ -176,7 +167,7 @@ class EngagementsRelationManager extends RelationManager
                 ViewAction::make()
                     ->modalHeading(function (Timeline $record) {
                         $timelineable = $record->timelineable?->engagementDeliverable;
-                        $deliveryMethod = $timelineable->channel ?? EngagementDeliveryMethod::Email;
+                        $deliveryMethod = $timelineable->channel ?? NotificationChannel::Sms;
 
                         return "View {$deliveryMethod->getLabel()}";
                     }),
@@ -201,6 +192,17 @@ class EngagementsRelationManager extends RelationManager
                                 fn (Builder $query) => $query
                                     ->whereHasMorph(
                                         'timelineable',
+                                        [Engagement::class],
+                                        fn (Builder $query, string $type) => match ($type) {
+                                            Engagement::class => $query->whereHas('engagementDeliverable', fn (Builder $query) => $query->where('channel', $data['value'])),
+                                        }
+                                    )
+                            )
+                            ->when(
+                                $data['value'] === NotificationChannel::Sms->value,
+                                fn (Builder $query) => $query
+                                    ->whereHasMorph(
+                                        'timelineable',
                                         [Engagement::class, EngagementResponse::class],
                                         fn (Builder $query, string $type) => match ($type) {
                                             Engagement::class => $query->whereHas('engagementDeliverable', fn (Builder $query) => $query->where('channel', $data['value'])),
@@ -208,20 +210,7 @@ class EngagementsRelationManager extends RelationManager
                                         }
                                     )
                             )
-                        // ->when(
-                        //     $data['value'] === NotificationChannel::Sms->value,
-                        //     fn (Builder $query) => $query
-                        //         ->whereHasMorph(
-                        //             'timelineable',
-                        //             [Engagement::class, EngagementResponse::class],
-                        //             fn (Builder $query, string $type) => match ($type) {
-                        //                 Engagement::class => $query->whereHas('engagementDeliverable', fn (Builder $query) => $query->where('channel', $data['value'])),
-                        //                 EngagementResponse::class => $query,
-                        //             }
-                        //         )
-                        // )
                     ),
-            ])
-            ->poll('5s');
+            ]);
     }
 }
