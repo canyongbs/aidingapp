@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9d8a9e5458a2e7c11a6724c02e5e431f",
+    "content-hash": "7cf0575c784c42cb3fce6ed04c806921",
     "packages": [
         {
             "name": "amphp/amp",
@@ -12732,7 +12732,7 @@
         },
         {
             "name": "spatie/laravel-health",
-            "version": "dev-main",
+            "version": "1.32.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/spatie/laravel-health.git",
@@ -12777,7 +12777,6 @@
                 "spatie/pest-plugin-test-time": "^1.1.1|^1.1|^2.0|^3.0",
                 "spatie/test-time": "^1.3|^2.0"
             },
-            "default-branch": true,
             "type": "library",
             "extra": {
                 "laravel": {
@@ -12814,7 +12813,7 @@
                 "spatie"
             ],
             "support": {
-                "source": "https://github.com/spatie/laravel-health/tree/main"
+                "source": "https://github.com/spatie/laravel-health/tree/1.32.4"
             },
             "funding": [
                 {
@@ -23465,17 +23464,9 @@
             "time": "2024-04-29T21:42:39+00:00"
         }
     ],
-    "aliases": [
-        {
-            "package": "spatie/laravel-health",
-            "version": "dev-main",
-            "alias": "1.32.4",
-            "alias_normalized": "1.32.4.0"
-        }
-    ],
+    "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "spatie/laravel-health": 20,
         "serversideup/spin": 10
     },
     "prefer-stable": true,
