@@ -40,7 +40,6 @@ use AidingApp\Engagement\Actions\CreateEngagementDeliverable;
 use AidingApp\Engagement\Enums\EngagementDeliveryMethod;
 use AidingApp\Engagement\Filament\Resources\EngagementResource;
 use AidingApp\Engagement\Models\EmailTemplate;
-use App\Filament\Forms\Components\EducatableSelect;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DateTimePicker;
@@ -52,7 +51,6 @@ use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Resources\Pages\CreateRecord;
-use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Resources\RelationManagers\RelationManager;
 use FilamentTiptapEditor\TiptapEditor;
 use Illuminate\Database\Eloquent\Builder;
@@ -143,10 +141,6 @@ class CreateEngagement extends CreateRecord
                             ->helperText('You can insert contact information by typing {{ and choosing a merge value to insert.')
                             ->columnSpanFull(),
                     ]),
-                EducatableSelect::make('recipient')
-                    ->label('Recipient')
-                    ->required()
-                    ->hiddenOn([RelationManager::class, ManageRelatedRecords::class]),
                 Fieldset::make('Send your email or text')
                     ->schema([
                         Toggle::make('send_later')

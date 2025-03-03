@@ -51,4 +51,13 @@ enum NotificationChannel: string implements HasLabel
             default => $this->name,
         };
     }
+
+    public function getIcon(): ?string
+    {
+        return match ($this) {
+            self::Email => 'heroicon-o-envelope',
+            self::Sms => 'heroicon-o-chat-bubble-bottom-center-text',
+            self::Database => 'heroicon-o-bell',
+        };
+    }
 }

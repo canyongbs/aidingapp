@@ -37,7 +37,6 @@
 namespace AidingApp\Contact\Filament\Resources\ContactResource\Pages;
 
 use AidingApp\Contact\Filament\Resources\ContactResource;
-use AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers\EngagementResponsesRelationManager;
 use AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers\EngagementsRelationManager;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Illuminate\Contracts\Support\Htmlable;
@@ -73,7 +72,6 @@ class ManageContactEngagement extends ManageRelatedRecords
     {
         return collect([
             EngagementsRelationManager::class,
-            EngagementResponsesRelationManager::class,
         ])
             ->reject(fn ($relationManager) => $record && (! $relationManager::canViewForRecord($record, static::class)))
             ->toArray();
