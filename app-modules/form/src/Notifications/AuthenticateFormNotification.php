@@ -39,9 +39,9 @@ namespace AidingApp\Form\Notifications;
 use AidingApp\Form\Models\SubmissibleAuthentication;
 use AidingApp\Notification\Notifications\BaseNotification;
 use AidingApp\Notification\Notifications\Concerns\EmailChannelTrait;
+use AidingApp\Notification\Notifications\Contracts\OnDemandNotification;
 use AidingApp\Notification\Notifications\EmailNotification;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
-use AidingApp\Notification\Notifications\OnDemandNotification;
 
 class AuthenticateFormNotification extends BaseNotification implements EmailNotification, OnDemandNotification
 {
