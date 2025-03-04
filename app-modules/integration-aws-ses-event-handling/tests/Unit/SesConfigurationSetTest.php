@@ -36,12 +36,12 @@
 
 use AidingApp\IntegrationAwsSesEventHandling\Settings\SesSettings;
 use AidingApp\Notification\Models\OutboundDeliverable;
-use AidingApp\Notification\Notifications\BaseNotification;
-use AidingApp\Notification\Notifications\Concerns\EmailChannelTrait;
-use AidingApp\Notification\Notifications\EmailNotification;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
 use App\Models\User;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Events\MessageSent;
+use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Mail;
 
@@ -98,11 +98,19 @@ it('X-SES-CONFIGURATION-SET is not present if mail.mailers.ses.configuration_set
     );
 });
 
-class TestEmailNotification extends BaseNotification implements EmailNotification
+class TestEmailNotification extends Notification implements ShouldQueue
 {
-    use EmailChannelTrait;
+    use Queueable;
 
-    public function toEmail(object $notifiable): MailMessage
+    /**
+     * @return array<int, string>
+     */
+    public function via(object $notifiable): array
+    {
+        return ['mail'];
+    }
+
+    public function toMail(object $notifiable): MailMessage
     {
         return MailMessage::make()
             ->subject('Test Subject')

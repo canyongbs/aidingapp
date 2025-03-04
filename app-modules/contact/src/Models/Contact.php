@@ -50,7 +50,7 @@ use AidingApp\InventoryManagement\Models\AssetCheckOut;
 use AidingApp\LicenseManagement\Models\ProductLicense;
 use AidingApp\Notification\Models\Concerns\HasSubscriptions;
 use AidingApp\Notification\Models\Concerns\NotifiableViaSms;
-use AidingApp\Notification\Models\Contracts\NotifiableInterface;
+use AidingApp\Notification\Models\Contracts\CanBeNotified;
 use AidingApp\Notification\Models\Contracts\Subscribable;
 use AidingApp\Notification\Models\Subscription;
 use AidingApp\Portal\Models\KnowledgeBaseArticleVote;
@@ -86,7 +86,7 @@ use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
  * @mixin IdeHelperContact
  */
 #[ObservedBy([ContactObserver::class])]
-class Contact extends BaseAuthenticatable implements Auditable, Subscribable, Educatable, HasFilamentResource, NotifiableInterface
+class Contact extends BaseAuthenticatable implements Auditable, Subscribable, Educatable, HasFilamentResource, CanBeNotified
 {
     use AuditableTrait;
     use HasFactory;
@@ -127,6 +127,11 @@ class Contact extends BaseAuthenticatable implements Auditable, Subscribable, Ed
         'sms_opt_out' => 'boolean',
         'email_bounce' => 'boolean',
     ];
+
+    public function canRecieveSms(): bool
+    {
+        return filled($this->mobile);
+    }
 
     public function assignedTo(): BelongsTo
     {

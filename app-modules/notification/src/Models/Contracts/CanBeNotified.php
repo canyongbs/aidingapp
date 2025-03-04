@@ -36,7 +36,7 @@
 
 namespace AidingApp\Notification\Models\Contracts;
 
-interface NotifiableInterface
+interface CanBeNotified
 {
     public function notify($instance);
 
@@ -49,4 +49,6 @@ interface NotifiableInterface
     public function readNotifications();
 
     public function unreadNotifications();
+
+    public function canRecieveSms(): bool;
 }

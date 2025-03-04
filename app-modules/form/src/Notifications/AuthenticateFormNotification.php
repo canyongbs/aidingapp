@@ -37,22 +37,30 @@
 namespace AidingApp\Form\Notifications;
 
 use AidingApp\Form\Models\SubmissibleAuthentication;
-use AidingApp\Notification\Notifications\BaseNotification;
-use AidingApp\Notification\Notifications\Concerns\EmailChannelTrait;
 use AidingApp\Notification\Notifications\Contracts\OnDemandNotification;
-use AidingApp\Notification\Notifications\EmailNotification;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Notification;
 
-class AuthenticateFormNotification extends BaseNotification implements EmailNotification, OnDemandNotification
+class AuthenticateFormNotification extends Notification implements ShouldQueue, OnDemandNotification
 {
-    use EmailChannelTrait;
+    use Queueable;
 
     public function __construct(
         public SubmissibleAuthentication $submissibleAuthentication,
         public int $code,
     ) {}
 
-    public function toEmail(object $notifiable): MailMessage
+    /**
+     * @return array<int, string>
+     */
+    public function via(object $notifiable): array
+    {
+        return ['mail'];
+    }
+
+    public function toMail(object $notifiable): MailMessage
     {
         return MailMessage::make()
             ->subject("Your authentication code for {$this->submissibleAuthentication->submissible->name}")

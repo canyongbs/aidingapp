@@ -36,11 +36,6 @@
 
 namespace AidingApp\ServiceManagement\Notifications;
 
-use AidingApp\Notification\Notifications\BaseNotification;
-use AidingApp\Notification\Notifications\Concerns\DatabaseChannelTrait;
-use AidingApp\Notification\Notifications\Concerns\EmailChannelTrait;
-use AidingApp\Notification\Notifications\DatabaseNotification;
-use AidingApp\Notification\Notifications\EmailNotification;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
 use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestResource;
 use AidingApp\ServiceManagement\Models\ChangeRequest;
@@ -48,15 +43,25 @@ use App\Models\NotificationSetting;
 use App\Models\User;
 use Filament\Notifications\Actions\Action;
 use Filament\Notifications\Notification;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Notification as BaseNotification;
 
-class ChangeRequestAwaitingApprovalNotification extends BaseNotification implements EmailNotification, DatabaseNotification
+class ChangeRequestAwaitingApprovalNotification extends BaseNotification implements ShouldQueue
 {
-    use EmailChannelTrait;
-    use DatabaseChannelTrait;
+    use Queueable;
 
     public function __construct(
         public ChangeRequest $changeRequest,
     ) {}
+
+    /**
+     * @return array<int, string>
+     */
+    public function via(object $notifiable): array
+    {
+        return ['mail', 'database'];
+    }
 
     public function toEmail(object $notifiable): MailMessage
     {
