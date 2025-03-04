@@ -36,14 +36,12 @@
 
 use AidingApp\Notification\Enums\NotificationChannel;
 use AidingApp\Notification\Models\OutboundDeliverable;
-use AidingApp\Notification\Notifications\BaseNotification;
-use AidingApp\Notification\Notifications\Concerns\DatabaseChannelTrait;
-use AidingApp\Notification\Notifications\Concerns\EmailChannelTrait;
-use AidingApp\Notification\Notifications\DatabaseNotification;
-use AidingApp\Notification\Notifications\EmailNotification;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
 use App\Models\User;
 use Filament\Notifications\Notification as FilamentNotification;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Notification;
 use Tests\Unit\TestEmailNotification;
 
 it('will create an outbound deliverable for the outbound notification', function () {
@@ -69,12 +67,19 @@ it('will create an outbound deliverable for each of the channels that the notifi
     expect(OutboundDeliverable::where('channel', NotificationChannel::Database)->count())->toBe(1);
 });
 
-class TestMultipleChannelNotification extends BaseNotification implements EmailNotification, DatabaseNotification
+class TestMultipleChannelNotification extends Notification implements ShouldQueue
 {
-    use EmailChannelTrait;
-    use DatabaseChannelTrait;
+    use Queueable;
 
-    public function toEmail(object $notifiable): MailMessage
+    /**
+     * @return array<int, string>
+     */
+    public function via(object $notifiable): array
+    {
+        return ['mail', 'database'];
+    }
+
+    public function toMail(object $notifiable): MailMessage
     {
         return MailMessage::make()
             ->subject('Test Subject')

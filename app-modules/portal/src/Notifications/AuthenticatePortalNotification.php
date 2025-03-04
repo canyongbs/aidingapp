@@ -36,23 +36,31 @@
 
 namespace AidingApp\Portal\Notifications;
 
-use AidingApp\Notification\Notifications\BaseNotification;
-use AidingApp\Notification\Notifications\Concerns\EmailChannelTrait;
 use AidingApp\Notification\Notifications\Contracts\OnDemandNotification;
-use AidingApp\Notification\Notifications\EmailNotification;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
 use AidingApp\Portal\Models\PortalAuthentication;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Notification;
 
-class AuthenticatePortalNotification extends BaseNotification implements EmailNotification, OnDemandNotification
+class AuthenticatePortalNotification extends Notification implements ShouldQueue, OnDemandNotification
 {
-    use EmailChannelTrait;
+    use Queueable;
 
     public function __construct(
         public PortalAuthentication $authentication,
         public int $code,
     ) {}
 
-    public function toEmail(object $notifiable): MailMessage
+    /**
+     * @return array<int, string>
+     */
+    public function via(object $notifiable): array
+    {
+        return ['mail'];
+    }
+
+    public function toMail(object $notifiable): MailMessage
     {
         return MailMessage::make()
             ->subject(__('Your authentication code for :appname', ['appname' => config('app.name')]))

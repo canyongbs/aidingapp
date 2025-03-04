@@ -39,17 +39,21 @@ namespace AidingApp\Alert\Notifications;
 use AidingApp\Alert\Models\Alert;
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Notification\Notifications\BaseNotification;
-use AidingApp\Notification\Notifications\Concerns\DatabaseChannelTrait;
-use AidingApp\Notification\Notifications\DatabaseNotification;
 use Filament\Notifications\Notification as FilamentNotification;
+use Illuminate\Notifications\Notification;
 use Illuminate\Support\HtmlString;
 
-class AlertCreatedNotification extends BaseNotification implements DatabaseNotification
+class AlertCreatedNotification extends Notification
 {
-    use DatabaseChannelTrait;
-
     public function __construct(public Alert $alert) {}
+
+    /**
+     * @return array<int, string>
+     */
+    public function via(object $notifiable): array
+    {
+        return ['database'];
+    }
 
     public function toDatabase(object $notifiable): array
     {
