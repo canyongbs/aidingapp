@@ -37,9 +37,8 @@
 namespace AidingApp\Notification\Notifications\Messages;
 
 use AidingApp\IntegrationTwilio\Settings\TwilioSettings;
-use AidingApp\Notification\Notifications\Messages\Contracts\Message;
 
-class TwilioMessage implements Message
+class TwilioMessage
 {
     public function __construct(
         protected object $notifiable,
