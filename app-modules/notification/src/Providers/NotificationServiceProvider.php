@@ -49,8 +49,17 @@ use AidingApp\Notification\Models\OutboundDeliverable;
 use AidingApp\Notification\Models\SmsMessage;
 use AidingApp\Notification\Models\SmsMessageEvent;
 use AidingApp\Notification\Models\Subscription;
+use AidingApp\Notification\Notifications\ChannelManager;
+use AidingApp\Notification\Notifications\Channels\EmailChannel;
+use AidingApp\Notification\Notifications\Channels\MailChannel;
+use AidingApp\Notification\Notifications\Channels\SmsChannel;
 use App\Concerns\ImplementsGraphQL;
+use App\Features\NewMessageModels;
+use Illuminate\Contracts\Container\Container;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Notifications\ChannelManager as BaseChannelManager;
+use Illuminate\Notifications\Channels\DatabaseChannel as BaseDatabaseChannel;
+use Illuminate\Notifications\Channels\MailChannel as BaseMailChannel;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
@@ -58,7 +67,13 @@ class NotificationServiceProvider extends ServiceProvider
 {
     use ImplementsGraphQL;
 
-    public function register(): void {}
+    public function register(): void
+    {
+        $this->app->bind(BaseMailChannel::class, fn (Container $app) => NewMessageModels::active() ? MailChannel::class : EmailChannel::class);
+        $this->app->bind(BaseDatabaseChannel::class, DatabaseChannel::class);
+        $this->app->singleton(BaseChannelManager::class, fn (Container $app) => (new ChannelManager($app))
+            ->extend('sms', fn (): SmsChannel => $this->app->make(SmsChannel::class)));
+    }
 
     public function boot(): void
     {
