@@ -41,7 +41,6 @@ use AidingApp\ServiceManagement\Filament\Resources\IncidentResource;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentUpdateResource;
 use AidingApp\ServiceManagement\Models\IncidentStatus;
 use AidingApp\ServiceManagement\Models\IncidentUpdate;
-use App\Features\IncidentUpdateFeature;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -67,11 +66,6 @@ class ManageIncidentUpdate extends ManageRelatedRecords
     protected static ?string $navigationLabel = 'Updates';
 
     protected static ?string $breadcrumb = 'Updates';
-
-    public static function canAccess(array $arguments = []): bool
-    {
-        return IncidentUpdateFeature::active();
-    }
 
     public function form(Form $form): Form
     {
