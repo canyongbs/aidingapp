@@ -64,11 +64,6 @@ class IncidentResource extends Resource
         $navigationItems = [
             ViewIncident::class,
             EditIncident::class,
-        ];
-
-        $navigationItems = [
-            ViewIncident::class,
-            EditIncident::class,
             ManageIncidentUpdate::class,
         ];
 
