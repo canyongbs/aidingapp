@@ -36,9 +36,13 @@
 
 namespace AidingApp\Notification\Notifications\Channels;
 
+use AidingApp\Notification\Actions\MakeOutboundDeliverable;
 use AidingApp\Notification\DataTransferObjects\DatabaseChannelResultData;
 use AidingApp\Notification\DataTransferObjects\NotificationResultData;
+use AidingApp\Notification\Enums\NotificationChannel;
 use AidingApp\Notification\Models\OutboundDeliverable;
+use AidingApp\Notification\Notifications\Contracts\HasAfterSendHook;
+use AidingApp\Notification\Notifications\Contracts\HasBeforeSendHook;
 use Illuminate\Notifications\Channels\DatabaseChannel as BaseDatabaseChannel;
 use Illuminate\Notifications\Notification;
 
@@ -46,7 +50,17 @@ class DatabaseChannel extends BaseDatabaseChannel
 {
     public function send($notifiable, Notification $notification): void
     {
-        $deliverable = $notification->beforeSend($notifiable, DatabaseChannel::class);
+        $deliverable = resolve(MakeOutboundDeliverable::class)->handle($notification, $notifiable, NotificationChannel::Database);
+
+        if ($notification instanceof HasBeforeSendHook) {
+            $notification->beforeSend(
+                notifiable: $notifiable,
+                message: $deliverable,
+                channel: NotificationChannel::Database
+            );
+        }
+
+        $deliverable->save();
 
         if ($deliverable === false) {
             // Do anything else we need to notify sending party that notification was not sent
@@ -55,7 +69,11 @@ class DatabaseChannel extends BaseDatabaseChannel
 
         $result = $this->handle($notifiable, $notification);
 
-        $notification->afterSend($notifiable, $deliverable, $result);
+        $this::afterSending($notifiable, $deliverable, $result);
+
+        if ($notification instanceof HasAfterSendHook) {
+            $notification->afterSend($notifiable, $deliverable, $result);
+        }
     }
 
     public function handle(object $notifiable, Notification $notification): NotificationResultData
