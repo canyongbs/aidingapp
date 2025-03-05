@@ -36,23 +36,20 @@
 
 namespace AidingApp\ServiceManagement\Notifications;
 
-use AidingApp\Notification\Notifications\BaseNotification;
 use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
-use AidingApp\Notification\Notifications\Channels\EmailChannel;
-use AidingApp\Notification\Notifications\Concerns\DatabaseChannelTrait;
-use AidingApp\Notification\Notifications\Concerns\EmailChannelTrait;
-use AidingApp\Notification\Notifications\DatabaseNotification;
-use AidingApp\Notification\Notifications\EmailNotification;
+use AidingApp\Notification\Notifications\Channels\MailChannel;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Models\NotificationSetting;
 use Filament\Notifications\Notification;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Notification as BaseNotification;
 
-class ServiceRequestCreated extends BaseNotification implements EmailNotification, DatabaseNotification
+class ServiceRequestCreated extends BaseNotification implements ShouldQueue
 {
-    use EmailChannelTrait;
-    use DatabaseChannelTrait;
+    use Queueable;
 
     /**
      * @param class-string $channel
@@ -69,11 +66,11 @@ class ServiceRequestCreated extends BaseNotification implements EmailNotificatio
     {
         return [match ($this->channel) {
             DatabaseChannel::class => 'database',
-            EmailChannel::class => 'mail',
+            MailChannel::class => 'mail',
         }];
     }
 
-    public function toEmail(object $notifiable): MailMessage
+    public function toMail(object $notifiable): MailMessage
     {
         return MailMessage::make()
             ->settings($this->resolveNotificationSetting($notifiable))

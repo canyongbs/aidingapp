@@ -38,7 +38,7 @@ namespace AidingApp\ServiceManagement\Observers;
 
 use AidingApp\Notification\Events\TriggeredAutoSubscription;
 use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
-use AidingApp\Notification\Notifications\Channels\EmailChannel;
+use AidingApp\Notification\Notifications\Channels\MailChannel;
 use AidingApp\ServiceManagement\Actions\NotifyServiceRequestUsers;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Exceptions\AttemptedToAssignNonManagerToServiceRequest;
@@ -74,7 +74,7 @@ class ServiceRequestAssignmentObserver
 
         app(NotifyServiceRequestUsers::class)->execute(
             $serviceRequestAssignment->serviceRequest,
-            new ServiceRequestAssigned($serviceRequestAssignment->serviceRequest, EmailChannel::class),
+            new ServiceRequestAssigned($serviceRequestAssignment->serviceRequest, MailChannel::class),
             $serviceRequestAssignment->serviceRequest->priority?->type->is_managers_service_request_assigned_email_enabled ?? false,
             $serviceRequestAssignment->serviceRequest->priority?->type->is_auditors_service_request_assigned_email_enabled ?? false,
         );

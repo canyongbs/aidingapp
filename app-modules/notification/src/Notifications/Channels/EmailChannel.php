@@ -43,7 +43,6 @@ use AidingApp\Notification\Enums\NotificationDeliveryStatus;
 use AidingApp\Notification\Exceptions\NotificationQuotaExceeded;
 use AidingApp\Notification\Models\Contracts\NotifiableInterface;
 use AidingApp\Notification\Models\OutboundDeliverable;
-use AidingApp\Notification\Notifications\BaseNotification;
 use AidingApp\Notification\Notifications\EmailNotification;
 use App\Settings\LicenseSettings;
 use Exception;
@@ -64,7 +63,6 @@ class EmailChannel extends MailChannel
                 return;
             }
 
-            /** @var BaseNotification $notification */
             $deliverable = $notification->beforeSend($notifiable, EmailChannel::class);
 
             if (! $this->canSendWithinQuotaLimits($notification, $notifiable)) {
@@ -93,7 +91,7 @@ class EmailChannel extends MailChannel
         }
     }
 
-    public function handle(object $notifiable, BaseNotification $notification): NotificationResultData
+    public function handle(object $notifiable, Notification $notification): NotificationResultData
     {
         $result = new EmailChannelResultData(
             success: false,

@@ -39,7 +39,6 @@ namespace AidingApp\Notification\Notifications\Channels;
 use AidingApp\Notification\DataTransferObjects\DatabaseChannelResultData;
 use AidingApp\Notification\DataTransferObjects\NotificationResultData;
 use AidingApp\Notification\Models\OutboundDeliverable;
-use AidingApp\Notification\Notifications\BaseNotification;
 use Illuminate\Notifications\Channels\DatabaseChannel as BaseDatabaseChannel;
 use Illuminate\Notifications\Notification;
 
@@ -47,7 +46,6 @@ class DatabaseChannel extends BaseDatabaseChannel
 {
     public function send($notifiable, Notification $notification): void
     {
-        /** @var BaseNotification $notification */
         $deliverable = $notification->beforeSend($notifiable, DatabaseChannel::class);
 
         if ($deliverable === false) {
@@ -60,7 +58,7 @@ class DatabaseChannel extends BaseDatabaseChannel
         $notification->afterSend($notifiable, $deliverable, $result);
     }
 
-    public function handle(object $notifiable, BaseNotification $notification): NotificationResultData
+    public function handle(object $notifiable, Notification $notification): NotificationResultData
     {
         parent::send($notifiable, $notification);
 

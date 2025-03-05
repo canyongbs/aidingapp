@@ -36,14 +36,22 @@
 
 namespace Tests\Unit;
 
-use AidingApp\Notification\Notifications\BaseNotification;
-use AidingApp\Notification\Notifications\Concerns\SmsChannelTrait;
 use AidingApp\Notification\Notifications\Messages\TwilioMessage;
-use AidingApp\Notification\Notifications\SmsNotification;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Notification;
 
-class TestSmsNotification extends BaseNotification implements SmsNotification
+class TestSmsNotification extends Notification implements ShouldQueue
 {
-    use SmsChannelTrait;
+    use Queueable;
+
+    /**
+     * @return array<int, string>
+     */
+    public function via(object $notifiable): array
+    {
+        return ['sms'];
+    }
 
     public function toSms(object $notifiable): TwilioMessage
     {

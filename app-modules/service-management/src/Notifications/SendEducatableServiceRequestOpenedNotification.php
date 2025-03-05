@@ -37,24 +37,37 @@
 namespace AidingApp\ServiceManagement\Notifications;
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Notification\Enums\NotificationChannel;
+use AidingApp\Notification\Models\Contracts\CanBeNotified;
+use AidingApp\Notification\Models\Contracts\Message;
 use AidingApp\Notification\Models\OutboundDeliverable;
-use AidingApp\Notification\Notifications\BaseNotification;
-use AidingApp\Notification\Notifications\Concerns\EmailChannelTrait;
-use AidingApp\Notification\Notifications\EmailNotification;
+use AidingApp\Notification\Notifications\Contracts\HasBeforeSendHook;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Models\Contracts\Educatable;
 use App\Models\NotificationSetting;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\AnonymousNotifiable;
+use Illuminate\Notifications\Notification;
 
-class SendEducatableServiceRequestOpenedNotification extends BaseNotification implements EmailNotification
+class SendEducatableServiceRequestOpenedNotification extends Notification implements ShouldQueue, HasBeforeSendHook
 {
-    use EmailChannelTrait;
+    use Queueable;
 
     public function __construct(
         protected ServiceRequest $serviceRequest,
     ) {}
 
-    public function toEmail(object $notifiable): MailMessage
+    /**
+     * @return array<int, string>
+     */
+    public function via(object $notifiable): array
+    {
+        return ['mail'];
+    }
+
+    public function toMail(object $notifiable): MailMessage
     {
         /** @var Educatable $educatable */
         $educatable = $notifiable;
@@ -75,9 +88,9 @@ class SendEducatableServiceRequestOpenedNotification extends BaseNotification im
             ->lines(str(nl2br($this->serviceRequest->close_details))->explode('<br />'));
     }
 
-    protected function beforeSendHook(object $notifiable, OutboundDeliverable $deliverable, string $channel): void
+    public function beforeSend(AnonymousNotifiable|CanBeNotified $notifiable, OutboundDeliverable|Message $message, NotificationChannel $channel): void
     {
-        $deliverable->related()->associate($this->serviceRequest);
+        $message->related()->associate($this->serviceRequest);
     }
 
     private function resolveNotificationSetting(object $notifiable): ?NotificationSetting
