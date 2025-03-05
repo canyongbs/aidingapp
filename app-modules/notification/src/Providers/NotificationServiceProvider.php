@@ -40,8 +40,6 @@ use AidingApp\Notification\Events\SubscriptionCreated;
 use AidingApp\Notification\Events\SubscriptionDeleted;
 use AidingApp\Notification\Events\TriggeredAutoSubscription;
 use AidingApp\Notification\Listeners\CreateAutoSubscription;
-use AidingApp\Notification\Listeners\HandleNotificationFailed;
-use AidingApp\Notification\Listeners\HandleNotificationSent;
 use AidingApp\Notification\Listeners\NotifyUserOfSubscriptionCreated;
 use AidingApp\Notification\Listeners\NotifyUserOfSubscriptionDeleted;
 use AidingApp\Notification\Models\DatabaseMessage;
@@ -53,8 +51,6 @@ use AidingApp\Notification\Models\SmsMessageEvent;
 use AidingApp\Notification\Models\Subscription;
 use App\Concerns\ImplementsGraphQL;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Notifications\Events\NotificationFailed;
-use Illuminate\Notifications\Events\NotificationSent;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
@@ -83,20 +79,6 @@ class NotificationServiceProvider extends ServiceProvider
 
     protected function registerEvents(): void
     {
-        Event::listen(
-            NotificationSent::class,
-            HandleNotificationSent::class
-        );
-
-        Event::listen(
-            NotificationFailed::class,
-            HandleNotificationFailed::class
-        );
-
-        // TODO Listen to the MessageSent event in order to update email statuses
-        // as best as we can without the SES information...
-
-        // TODO Should subscriptions exist in their own module???
         Event::listen(
             SubscriptionCreated::class,
             NotifyUserOfSubscriptionCreated::class
