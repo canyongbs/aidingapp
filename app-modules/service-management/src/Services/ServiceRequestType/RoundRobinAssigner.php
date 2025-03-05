@@ -38,7 +38,6 @@ namespace AidingApp\ServiceManagement\Services\ServiceRequestType;
 
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
-use App\Features\RoundRobinId;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -48,7 +47,7 @@ class RoundRobinAssigner implements ServiceRequestTypeAssigner
     {
         $serviceRequestType = $serviceRequest->priority->type;
 
-        if (! is_null($serviceRequestType) && RoundRobinId::active()) {
+        if (! is_null($serviceRequestType)) {
             $lastAssignee = $serviceRequestType->lastAssignedUser;
             $user = null;
 
