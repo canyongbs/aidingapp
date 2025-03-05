@@ -47,6 +47,8 @@ use AidingApp\Notification\Listeners\NotifyUserOfSubscriptionDeleted;
 use AidingApp\Notification\Models\EmailMessage;
 use AidingApp\Notification\Models\EmailMessageEvent;
 use AidingApp\Notification\Models\OutboundDeliverable;
+use AidingApp\Notification\Models\SmsMessage;
+use AidingApp\Notification\Models\SmsMessageEvent;
 use AidingApp\Notification\Models\Subscription;
 use App\Concerns\ImplementsGraphQL;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -68,6 +70,8 @@ class NotificationServiceProvider extends ServiceProvider
             'outbound_deliverable' => OutboundDeliverable::class,
             'email_message' => EmailMessage::class,
             'email_message_event' => EmailMessageEvent::class,
+            'sms_message' => SmsMessage::class,
+            'sms_message_event' => SmsMessageEvent::class,
         ]);
 
         $this->registerEvents();
