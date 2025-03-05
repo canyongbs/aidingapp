@@ -48,7 +48,6 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pa
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\ViewServiceRequestType;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\RelationManagers\ServiceRequestPrioritiesRelationManager;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use App\Features\ServiceRequestTypeEmailTemplateFeature;
 use App\Filament\Clusters\ServiceManagementAdministration;
 use Filament\Navigation\NavigationItem;
 use Filament\Resources\Pages\Page;
@@ -96,12 +95,12 @@ class ServiceRequestTypeResource extends Resource
                 EditServiceRequestTypeAssignments::class,
                 EditServiceRequestTypeNotifications::class,
             ]),
-            ...(ServiceRequestTypeEmailTemplateFeature::active() ? array_map(
+            ...(array_map(
                 fn (ServiceRequestEmailTemplateType $type): NavigationItem => Arr::first(ServiceRequestTypeEmailTemplatePage::getNavigationItems(['record' => $page->record, 'type' => $type]))
                     ->label($type->getLabel())
                     ->isActiveWhen(fn (): bool => Str::endsWith(request()->path(), $type)),
                 ServiceRequestEmailTemplateType::cases(),
-            ) : []),
+            )),
         ];
     }
 
