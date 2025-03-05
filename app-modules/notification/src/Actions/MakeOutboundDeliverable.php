@@ -39,7 +39,7 @@ namespace AidingApp\Notification\Actions;
 use AidingApp\Notification\Enums\NotificationChannel;
 use AidingApp\Notification\Models\OutboundDeliverable;
 use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
-use AidingApp\Notification\Notifications\Channels\EmailChannel;
+use AidingApp\Notification\Notifications\Channels\MailChannel;
 use AidingApp\Notification\Notifications\Channels\SmsChannel;
 use AidingApp\Notification\Notifications\Contracts\OnDemandNotification;
 use AidingApp\Notification\Notifications\DatabaseNotification;
@@ -54,7 +54,7 @@ class MakeOutboundDeliverable
     {
         $channel = match ($channel) {
             SmsChannel::class => NotificationChannel::Sms,
-            EmailChannel::class => NotificationChannel::Email,
+            MailChannel::class => NotificationChannel::Email,
             DatabaseChannel::class => NotificationChannel::Database,
         };
 

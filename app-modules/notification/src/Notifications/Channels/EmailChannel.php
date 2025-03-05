@@ -37,12 +37,16 @@
 namespace AidingApp\Notification\Notifications\Channels;
 
 use AidingApp\Engagement\Models\EngagementDeliverable;
+use AidingApp\Notification\Actions\MakeOutboundDeliverable;
 use AidingApp\Notification\DataTransferObjects\EmailChannelResultData;
 use AidingApp\Notification\DataTransferObjects\NotificationResultData;
+use AidingApp\Notification\Enums\NotificationChannel;
 use AidingApp\Notification\Enums\NotificationDeliveryStatus;
 use AidingApp\Notification\Exceptions\NotificationQuotaExceeded;
 use AidingApp\Notification\Models\Contracts\NotifiableInterface;
 use AidingApp\Notification\Models\OutboundDeliverable;
+use AidingApp\Notification\Notifications\Contracts\HasAfterSendHook;
+use AidingApp\Notification\Notifications\Contracts\HasBeforeSendHook;
 use AidingApp\Notification\Notifications\EmailNotification;
 use App\Settings\LicenseSettings;
 use Exception;
@@ -63,7 +67,17 @@ class EmailChannel extends MailChannel
                 return;
             }
 
-            $deliverable = $notification->beforeSend($notifiable, EmailChannel::class);
+            $deliverable = resolve(MakeOutboundDeliverable::class)->handle($notification, $notifiable, MailChannel::class);
+
+            if ($notification instanceof HasBeforeSendHook) {
+                $notification->beforeSend(
+                    notifiable: $notifiable,
+                    message: $deliverable,
+                    channel: NotificationChannel::Email
+                );
+            }
+
+            $deliverable->save();
 
             if (! $this->canSendWithinQuotaLimits($notification, $notifiable)) {
                 $deliverable->update(['delivery_status' => NotificationDeliveryStatus::RateLimited]);
@@ -81,7 +95,11 @@ class EmailChannel extends MailChannel
 
             $result = $this->handle($notifiable, $notification);
 
-            $notification->afterSend($notifiable, $deliverable, $result);
+            $this::afterSending($notifiable, $deliverable, $result);
+
+            if ($notification instanceof HasAfterSendHook) {
+                $notification->afterSend($notifiable, $deliverable, $result);
+            }
 
             DB::commit();
         } catch (Exception $e) {
