@@ -78,7 +78,7 @@ class MostRecentTasksTable extends BaseWidget
                 Task::query()
                     ->with(['concern'])
                     ->orderBy('created_at', 'desc')
-                    ->limit(10)
+                    ->limit(100)
             )
             ->columns([
                 TextColumn::make('title'),
