@@ -38,30 +38,18 @@ namespace AidingApp\Notification\Actions;
 
 use AidingApp\Notification\Enums\NotificationChannel;
 use AidingApp\Notification\Models\OutboundDeliverable;
-use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
-use AidingApp\Notification\Notifications\Channels\MailChannel;
-use AidingApp\Notification\Notifications\Channels\SmsChannel;
 use AidingApp\Notification\Notifications\Contracts\OnDemandNotification;
-use AidingApp\Notification\Notifications\DatabaseNotification;
-use AidingApp\Notification\Notifications\EmailNotification;
-use AidingApp\Notification\Notifications\SmsNotification;
 use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Notifications\Notification;
 
 class MakeOutboundDeliverable
 {
-    public function handle(Notification $notification, object $notifiable, string $channel): OutboundDeliverable
+    public function handle(Notification $notification, object $notifiable, NotificationChannel $channel): OutboundDeliverable
     {
-        $channel = match ($channel) {
-            SmsChannel::class => NotificationChannel::Sms,
-            MailChannel::class => NotificationChannel::Email,
-            DatabaseChannel::class => NotificationChannel::Database,
-        };
-
         $content = match (true) {
-            $channel == NotificationChannel::Sms && $notification instanceof SmsNotification => $notification->toSms($notifiable)->toArray(),
-            $channel == NotificationChannel::Email && $notification instanceof EmailNotification => $notification->toMail($notifiable)->toArray(),
-            $channel == NotificationChannel::Database && $notification instanceof DatabaseNotification => $notification->toDatabase($notifiable),
+            $channel == NotificationChannel::Sms => $notification->toSms($notifiable)->toArray(),
+            $channel == NotificationChannel::Email => $notification->toMail($notifiable)->toArray(),
+            $channel == NotificationChannel::Database => $notification->toDatabase($notifiable),
         };
 
         $recipientId = null;

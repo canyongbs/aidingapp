@@ -37,15 +37,18 @@
 namespace AidingApp\Notification\Notifications\Channels;
 
 use AidingApp\Engagement\Models\EngagementDeliverable;
+use AidingApp\Notification\Actions\MakeOutboundDeliverable;
 use AidingApp\Notification\DataTransferObjects\NotificationResultData;
 use AidingApp\Notification\DataTransferObjects\SmsChannelResultData;
 use AidingApp\Notification\Enums\NotificationChannel;
 use AidingApp\Notification\Enums\NotificationDeliveryStatus;
 use AidingApp\Notification\Exceptions\NotificationQuotaExceeded;
 use AidingApp\Notification\Models\OutboundDeliverable;
-use AidingApp\Notification\Notifications\SmsNotification;
+use AidingApp\Notification\Notifications\Contracts\HasAfterSendHook;
+use AidingApp\Notification\Notifications\Contracts\HasBeforeSendHook;
 use App\Settings\LicenseSettings;
 use Exception;
+use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\DB;
 use Talkroute\MessageSegmentCalculator\SegmentCalculator;
 use Twilio\Exceptions\TwilioException;
@@ -53,12 +56,22 @@ use Twilio\Rest\Client;
 
 class SmsChannel
 {
-    public function send(object $notifiable, SmsNotification $notification): void
+    public function send(object $notifiable, Notification $notification): void
     {
         try {
             DB::beginTransaction();
 
-            $deliverable = $notification->beforeSend($notifiable, SmsChannel::class);
+            $deliverable = resolve(MakeOutboundDeliverable::class)->handle($notification, $notifiable, NotificationChannel::Sms);
+
+            if ($notification instanceof HasBeforeSendHook) {
+                $notification->beforeSend(
+                    notifiable: $notifiable,
+                    message: $deliverable,
+                    channel: NotificationChannel::Sms
+                );
+            }
+
+            $deliverable->save();
 
             if (! $this->canSendWithinQuotaLimits($notification, $notifiable)) {
                 $deliverable->update(['delivery_status' => NotificationDeliveryStatus::RateLimited]);
@@ -76,7 +89,11 @@ class SmsChannel
 
             $smsData = $this->handle($notifiable, $notification);
 
-            $notification->afterSend($notifiable, $deliverable, $smsData);
+            $this::afterSending($notifiable, $deliverable, $smsData);
+
+            if ($notification instanceof HasAfterSendHook) {
+                $notification->afterSend($notifiable, $deliverable, $smsData);
+            }
 
             DB::commit();
         } catch (Exception $e) {
@@ -86,7 +103,7 @@ class SmsChannel
         }
     }
 
-    public function handle(object $notifiable, SmsNotification $notification): NotificationResultData
+    public function handle(object $notifiable, Notification $notification): NotificationResultData
     {
         $twilioMessage = $notification->toSms($notifiable);
 
@@ -137,7 +154,7 @@ class SmsChannel
         }
     }
 
-    public function canSendWithinQuotaLimits(SmsNotification $notification, object $notifiable): bool
+    public function canSendWithinQuotaLimits(Notification $notification, object $notifiable): bool
     {
         $estimatedQuotaUsage = SegmentCalculator::segmentsCount($notification->toSms($notifiable)->getContent());
 
