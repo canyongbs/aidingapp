@@ -44,6 +44,7 @@ use AidingApp\Notification\Listeners\HandleNotificationFailed;
 use AidingApp\Notification\Listeners\HandleNotificationSent;
 use AidingApp\Notification\Listeners\NotifyUserOfSubscriptionCreated;
 use AidingApp\Notification\Listeners\NotifyUserOfSubscriptionDeleted;
+use AidingApp\Notification\Models\DatabaseMessage;
 use AidingApp\Notification\Models\EmailMessage;
 use AidingApp\Notification\Models\EmailMessageEvent;
 use AidingApp\Notification\Models\OutboundDeliverable;
@@ -72,6 +73,7 @@ class NotificationServiceProvider extends ServiceProvider
             'email_message_event' => EmailMessageEvent::class,
             'sms_message' => SmsMessage::class,
             'sms_message_event' => SmsMessageEvent::class,
+            'database_message' => DatabaseMessage::class,
         ]);
 
         $this->registerEvents();
