@@ -38,9 +38,6 @@ namespace AidingApp\Notification\Notifications;
 
 use AidingApp\Notification\Notifications\Messages\TwilioMessage;
 
-/**
- * @mixin BaseNotification
- */
 interface SmsNotification
 {
     public function toSms(object $notifiable): TwilioMessage;
