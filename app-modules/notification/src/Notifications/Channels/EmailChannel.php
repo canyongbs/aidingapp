@@ -47,7 +47,6 @@ use AidingApp\Notification\Models\Contracts\NotifiableInterface;
 use AidingApp\Notification\Models\OutboundDeliverable;
 use AidingApp\Notification\Notifications\Contracts\HasAfterSendHook;
 use AidingApp\Notification\Notifications\Contracts\HasBeforeSendHook;
-use AidingApp\Notification\Notifications\EmailNotification;
 use App\Settings\LicenseSettings;
 use Exception;
 use Illuminate\Notifications\AnonymousNotifiable;
@@ -63,11 +62,7 @@ class EmailChannel extends MailChannel
         try {
             DB::beginTransaction();
 
-            if (! $notification instanceof EmailNotification) {
-                return;
-            }
-
-            $deliverable = resolve(MakeOutboundDeliverable::class)->handle($notification, $notifiable, MailChannel::class);
+            $deliverable = resolve(MakeOutboundDeliverable::class)->handle($notification, $notifiable, NotificationChannel::Email);
 
             if ($notification instanceof HasBeforeSendHook) {
                 $notification->beforeSend(
@@ -141,10 +136,6 @@ class EmailChannel extends MailChannel
 
     public function canSendWithinQuotaLimits(Notification $notification, object $notifiable): bool
     {
-        if (! $notification instanceof EmailNotification) {
-            throw new Exception('Invalid notification type.');
-        }
-
         // 1 for the primary recipient, plus the number of cc and bcc recipients
         $estimatedQuotaUsage = 1 + count($notification->toMail($notifiable)->cc) + count($notification->toMail($notifiable)->bcc);
 
