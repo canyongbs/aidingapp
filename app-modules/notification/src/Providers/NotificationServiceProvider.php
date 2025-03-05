@@ -44,6 +44,8 @@ use AidingApp\Notification\Listeners\HandleNotificationFailed;
 use AidingApp\Notification\Listeners\HandleNotificationSent;
 use AidingApp\Notification\Listeners\NotifyUserOfSubscriptionCreated;
 use AidingApp\Notification\Listeners\NotifyUserOfSubscriptionDeleted;
+use AidingApp\Notification\Models\EmailMessage;
+use AidingApp\Notification\Models\EmailMessageEvent;
 use AidingApp\Notification\Models\OutboundDeliverable;
 use AidingApp\Notification\Models\Subscription;
 use App\Concerns\ImplementsGraphQL;
@@ -64,6 +66,8 @@ class NotificationServiceProvider extends ServiceProvider
         Relation::morphMap([
             'subscription' => Subscription::class,
             'outbound_deliverable' => OutboundDeliverable::class,
+            'email_message' => EmailMessage::class,
+            'email_message_event' => EmailMessageEvent::class,
         ]);
 
         $this->registerEvents();
