@@ -42,7 +42,6 @@ use AidingApp\ServiceManagement\Filament\Resources\IncidentResource\Pages\ListIn
 use AidingApp\ServiceManagement\Filament\Resources\IncidentResource\Pages\ManageIncidentUpdate;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentResource\Pages\ViewIncident;
 use AidingApp\ServiceManagement\Models\Incident;
-use App\Features\IncidentUpdateFeature;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 
@@ -65,15 +64,8 @@ class IncidentResource extends Resource
         $navigationItems = [
             ViewIncident::class,
             EditIncident::class,
+            ManageIncidentUpdate::class,
         ];
-
-        if (IncidentUpdateFeature::active()) {
-            $navigationItems = [
-                ViewIncident::class,
-                EditIncident::class,
-                ManageIncidentUpdate::class,
-            ];
-        }
 
         return $page->generateNavigationItems($navigationItems);
     }
