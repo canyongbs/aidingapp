@@ -37,8 +37,6 @@
 namespace AidingApp\Engagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\Engagement\Enums\EngagementDeliveryMethod;
-use AidingApp\Engagement\Enums\EngagementDeliveryStatus;
 use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -63,8 +61,6 @@ class EngagementDeliverable extends BaseModel implements Auditable
     ];
 
     protected $casts = [
-        'channel' => EngagementDeliveryMethod::class,
-        'delivery_status' => EngagementDeliveryStatus::class,
         'delivered_at' => 'datetime',
         'last_delivery_attempt' => 'datetime',
     ];
@@ -77,27 +73,5 @@ class EngagementDeliverable extends BaseModel implements Auditable
     public function hasBeenDelivered(): bool
     {
         return ! is_null($this->delivered_at);
-    }
-
-    public function markDeliverySuccessful(): void
-    {
-        if (! $this->hasBeenDelivered()) {
-            $this->update([
-                'delivery_status' => EngagementDeliveryStatus::Successful,
-                'delivered_at' => now(),
-                'last_delivery_attempt' => now(),
-            ]);
-        }
-    }
-
-    public function markDeliveryFailed(?string $reason): void
-    {
-        if (! $this->hasBeenDelivered()) {
-            $this->update([
-                'delivery_status' => EngagementDeliveryStatus::Failed,
-                'last_delivery_attempt' => now(),
-                'delivery_response' => $reason,
-            ]);
-        }
     }
 }
