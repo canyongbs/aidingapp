@@ -37,12 +37,14 @@
 namespace AidingApp\Form\Notifications;
 
 use AidingApp\Form\Models\SubmissibleAuthentication;
+use AidingApp\Notification\Notifications\Attributes\SystemNotification;
 use AidingApp\Notification\Notifications\Contracts\OnDemandNotification;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 
+#[SystemNotification]
 class AuthenticateFormNotification extends Notification implements ShouldQueue, OnDemandNotification
 {
     use Queueable;

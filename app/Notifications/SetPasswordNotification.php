@@ -36,6 +36,7 @@
 
 namespace App\Notifications;
 
+use AidingApp\Notification\Notifications\Attributes\SystemNotification;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
 use App\Models\NotificationSetting;
 use App\Models\User;
@@ -44,6 +45,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\URL;
 
+#[SystemNotification]
 class SetPasswordNotification extends Notification implements ShouldQueue
 {
     use Queueable;
