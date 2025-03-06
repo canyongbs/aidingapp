@@ -72,8 +72,9 @@ class NotificationServiceProvider extends ServiceProvider
 
     public function register(): void
     {
-        $this->app->bind(BaseMailChannel::class, fn (Container $app) => NewMessageModels::active() ? MailChannel::class : EmailChannel::class);
-        $this->app->bind(BaseDatabaseChannel::class, fn (Container $app) => NewMessageModels::active() ? DatabaseChannel::class : OldDatabaseChannel::class);
+        // Note: Email and Database can be changed to regular binds just passing in the contrete class in the cleanup ticket
+        $this->app->bind(BaseMailChannel::class, fn (Container $app) => NewMessageModels::active() ? $this->app->make(MailChannel::class) : $this->app->make(EmailChannel::class));
+        $this->app->bind(BaseDatabaseChannel::class, fn (Container $app) => NewMessageModels::active() ? $this->app->make(DatabaseChannel::class) : $this->app->make(OldDatabaseChannel::class));
         $this->app->singleton(BaseChannelManager::class, fn (Container $app) => (new ChannelManager($app))
             ->extend('sms', fn (): SmsChannel => NewMessageModels::active() ? $this->app->make(SmsChannel::class) : $this->app->make(OldSmsChannel::class)));
     }
