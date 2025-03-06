@@ -40,9 +40,12 @@ use AidingApp\IntegrationAwsSesEventHandling\Settings\SesSettings;
 use App\Filament\Clusters\ProductIntegrations;
 use App\Models\Tenant;
 use App\Models\User;
+use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Pages\SettingsPage;
 use Filament\Support\Exceptions\Halt;
 use Filament\Support\Facades\FilamentView;
@@ -76,15 +79,17 @@ class ManageAmazonSesSettings extends SettingsPage
     {
         return $form
             ->schema([
+                Toggle::make('isDemoModeEnabled')
+                    ->label('Demo Mode')
+                    ->live(),
+                Checkbox::make('isExcludingSystemNotificationsFromDemoMode')
+                    ->label('Exclude authentication related messages')
+                    ->visible(fn (Get $get): bool => (bool) $get('isDemoModeEnabled')),
                 Section::make()
                     ->columnSpanFull()
                     ->schema([
                         TextInput::make('configuration_set')
                             ->label('Configuration Set'),
-                        TextInput::make('fromAddress')
-                            ->label('From Address')
-                            ->email()
-                            ->required(),
                         TextInput::make('fromName')
                             ->label('From Name')
                             ->string()
@@ -117,7 +122,8 @@ class ManageAmazonSesSettings extends SettingsPage
                                     ->label('Local Domain')
                                     ->nullable(),
                             ]),
-                    ]),
+                    ])
+                    ->visible(fn (Get $get): bool => ! $get('isDemoModeEnabled')),
             ]);
     }
 
@@ -137,20 +143,33 @@ class ManageAmazonSesSettings extends SettingsPage
 
             $this->callHook('beforeSave');
 
-            $this->saveTenantData(
-                emailFrom: $data['fromAddress'],
-                emailName: $data['fromName'],
-                host: $data['smtp_host'],
-                port: $data['smtp_port'],
-                encryption: $data['smtp_encryption'],
-                username: $data['smtp_username'],
-                password: $data['smtp_password'],
-                timeout: $data['smtp_timeout'],
-                localDomain: $data['smtp_local_domain'],
-            );
+            /** @var Tenant $tenant */
+            $tenant = Tenant::current();
+
+            /** @var TenantConfig $config */
+            $config = $tenant->config;
+
+            if ($data['isDemoModeEnabled']) {
+                $config->mail->isDemoModeEnabled = $data['isDemoModeEnabled'];
+                $config->mail->isExcludingSystemNotificationsFromDemoMode = $data['isExcludingSystemNotificationsFromDemoMode'];
+            } else {
+                $config->mail->isDemoModeEnabled = $data['isDemoModeEnabled'];
+                $config->mail->fromName = $data['fromName'];
+                $config->mail->mailers->smtp->host = $data['smtp_host'];
+                $config->mail->mailers->smtp->port = $data['smtp_port'];
+                $config->mail->mailers->smtp->encryption = $data['smtp_encryption'];
+                $config->mail->mailers->smtp->username = $data['smtp_username'];
+                $config->mail->mailers->smtp->password = $data['smtp_password'];
+                $config->mail->mailers->smtp->timeout = $data['smtp_timeout'];
+                $config->mail->mailers->smtp->localDomain = $data['smtp_local_domain'];
+            }
+
+            $tenant->config = $config;
+
+            $tenant->save();
 
             unset(
-                $data['fromAddress'],
+                $data['isDemoModeEnabled'],
                 $data['fromName'],
                 $data['smtp_host'],
                 $data['smtp_port'],
@@ -211,7 +230,8 @@ class ManageAmazonSesSettings extends SettingsPage
         $data = $this->mutateFormDataBeforeFill(
             [
                 ...$settings->toArray(),
-                'fromAddress' => $config->mail->fromAddress,
+                'isDemoModeEnabled' => $config->mail->isDemoModeEnabled ?? false,
+                'isExcludingSystemNotificationsFromDemoMode' => $config->mail->isExcludingSystemNotificationsFromDemoMode ?? true,
                 'fromName' => $config->mail->fromName,
                 'smtp_host' => $config->mail->mailers->smtp->host,
                 'smtp_port' => $config->mail->mailers->smtp->port,
@@ -226,37 +246,5 @@ class ManageAmazonSesSettings extends SettingsPage
         $this->form->fill($data);
 
         $this->callHook('afterFill');
-    }
-
-    protected function saveTenantData(
-        string $emailFrom,
-        string $emailName,
-        ?string $host,
-        int $port,
-        ?string $encryption,
-        ?string $username,
-        ?string $password,
-        ?int $timeout,
-        ?string $localDomain,
-    ): void {
-        /** @var Tenant $tenant */
-        $tenant = Tenant::current();
-
-        /** @var TenantConfig $config */
-        $config = $tenant->config;
-
-        $config->mail->fromAddress = $emailFrom;
-        $config->mail->fromName = $emailName;
-        $config->mail->mailers->smtp->host = $host;
-        $config->mail->mailers->smtp->port = $port;
-        $config->mail->mailers->smtp->encryption = $encryption;
-        $config->mail->mailers->smtp->username = $username;
-        $config->mail->mailers->smtp->password = $password;
-        $config->mail->mailers->smtp->timeout = $timeout;
-        $config->mail->mailers->smtp->localDomain = $localDomain;
-
-        $tenant->config = $config;
-
-        $tenant->save();
     }
 }
