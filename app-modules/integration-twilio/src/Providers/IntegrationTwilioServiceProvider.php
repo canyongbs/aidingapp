@@ -36,9 +36,6 @@
 
 namespace AidingApp\IntegrationTwilio\Providers;
 
-use AidingApp\Engagement\Actions\Contracts\EngagementResponseSenderFinder;
-use AidingApp\Engagement\Actions\FindEngagementResponseSender;
-use AidingApp\IntegrationTwilio\Actions\Playground\FindEngagementResponseSender as PlaygroundFindEngagementResponseSender;
 use AidingApp\IntegrationTwilio\IntegrationTwilioPlugin;
 use AidingApp\IntegrationTwilio\Settings\TwilioSettings;
 use Filament\Panel;
@@ -50,14 +47,6 @@ class IntegrationTwilioServiceProvider extends ServiceProvider
     public function register(): void
     {
         Panel::configureUsing(fn (Panel $panel) => ($panel->getId() !== 'admin') || $panel->plugin(new IntegrationTwilioPlugin()));
-
-        $this->app->bind(EngagementResponseSenderFinder::class, function () {
-            if (config('services.twilio.enable_test_sender') === true) {
-                return new PlaygroundFindEngagementResponseSender();
-            }
-
-            return new FindEngagementResponseSender();
-        });
 
         $settings = $this->app->make(TwilioSettings::class);
 

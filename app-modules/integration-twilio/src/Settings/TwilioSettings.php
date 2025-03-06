@@ -43,8 +43,6 @@ class TwilioSettings extends Settings
 {
     public bool $is_enabled = false;
 
-    public bool $is_demo_mode_enabled = false;
-
     public ?TwilioApiKey $api_key = null;
 
     public ?string $account_sid = null;
