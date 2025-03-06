@@ -38,9 +38,9 @@ namespace AidingApp\Engagement\Filament\Actions;
 
 use AidingApp\Engagement\Actions\CreateEngagementBatch;
 use AidingApp\Engagement\DataTransferObjects\EngagementBatchCreationData;
-use AidingApp\Engagement\Enums\EngagementDeliveryMethod;
 use AidingApp\Engagement\Filament\Actions\Contracts\HasBulkEngagementAction;
 use AidingApp\Engagement\Models\EmailTemplate;
+use AidingApp\Notification\Enums\NotificationChannel;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Select;
@@ -70,8 +70,8 @@ class BulkEngagementAction
                     ->schema([
                         Select::make('delivery_method')
                             ->label('How would you like to send this engagement?')
-                            ->options(EngagementDeliveryMethod::class)
-                            ->default(EngagementDeliveryMethod::Email->value)
+                            ->options(NotificationChannel::getEngagementOptions())
+                            ->default(NotificationChannel::Email->value)
                             ->selectablePlaceholder(false)
                             ->live(),
                     ]),

@@ -39,7 +39,6 @@ namespace AidingApp\Engagement\Models;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Engagement\Actions\GenerateEngagementBodyContent;
-use AidingApp\Engagement\Enums\EngagementDeliveryStatus;
 use AidingApp\Engagement\Observers\EngagementObserver;
 use AidingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
 use AidingApp\Notification\Models\Contracts\Subscribable;
@@ -152,13 +151,6 @@ class Engagement extends BaseModel implements Auditable, CanTriggerAutoSubscript
     public function scopeIsScheduled(Builder $query): void
     {
         $query->where('scheduled', true);
-    }
-
-    public function scopeIsAwaitingDelivery(Builder $query): void
-    {
-        $query->whereHas('engagementDeliverable', function (Builder $query) {
-            $query->where('delivery_status', EngagementDeliveryStatus::Awaiting);
-        });
     }
 
     public function scopeHasBeenDelivered(Builder $query): void
