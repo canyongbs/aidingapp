@@ -36,6 +36,7 @@
 
 namespace AidingApp\Portal\Notifications;
 
+use AidingApp\Notification\Notifications\Attributes\SystemNotification;
 use AidingApp\Notification\Notifications\Contracts\OnDemandNotification;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
 use AidingApp\Portal\Models\PortalAuthentication;
@@ -43,6 +44,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 
+#[SystemNotification]
 class AuthenticatePortalNotification extends Notification implements ShouldQueue, OnDemandNotification
 {
     use Queueable;
