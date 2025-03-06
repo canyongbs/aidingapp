@@ -114,10 +114,6 @@ class OldSmsChannel
             'body' => $twilioMessage->getContent(),
         ];
 
-        if (! app()->environment('local')) {
-            $messageContent['statusCallback'] = config('app.url') . route('inbound.webhook.twilio', 'status_callback', false);
-        }
-
         $result = SmsChannelResultData::from([
             'success' => false,
         ]);
