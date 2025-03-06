@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace Tests\Unit;
+namespace AidingApp\IntegrationTwilio\Tests\Fixtures;
 
 use AllowDynamicProperties;
 use Twilio\Http\Client as HttpClient;
