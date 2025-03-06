@@ -42,8 +42,9 @@ class TenantMailConfig extends Data
 {
     public function __construct(
         public TenantMailersConfig $mailers,
+        public bool $isDemoModeEnabled = false,
+        public bool $isExcludingSystemNotificationsFromDemoMode = true,
         public string $mailer = 'smtp',
-        public string $fromAddress = 'no-reply@aiding.app',
         public string $fromName = 'Aiding App™',
     ) {}
 }

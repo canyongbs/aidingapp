@@ -84,16 +84,16 @@ class SwitchMailTask implements SwitchTenantTask
         $subDomainBasedEmail = $matches[1] . '@' . config('mail.from.root_domain');
 
         $this->setMailConfig(
-            mailer: $config->mail->mailer,
+            mailer: $config->mailer,
             fromAddress: $subDomainBasedEmail,
-            fromName: $config->mail->fromName,
-            smtpHost: $config->mail->mailers->smtp->host,
-            smtpPort: $config->mail->mailers->smtp->port,
-            smtpEncryption: $config->mail->mailers->smtp->encryption,
-            smtpUsername: $config->mail->mailers->smtp->username,
-            smtpPassword: $config->mail->mailers->smtp->password,
-            smtpTimeout: $config->mail->mailers->smtp->timeout,
-            smtpLocalDomain: $config->mail->mailers->smtp->localDomain,
+            fromName: $config->fromName,
+            smtpHost: $config->mailers->smtp->host,
+            smtpPort: $config->mailers->smtp->port,
+            smtpEncryption: $config->mailers->smtp->encryption,
+            smtpUsername: $config->mailers->smtp->username,
+            smtpPassword: $config->mailers->smtp->password,
+            smtpTimeout: $config->mailers->smtp->timeout,
+            smtpLocalDomain: $config->mailers->smtp->localDomain,
         );
     }
 

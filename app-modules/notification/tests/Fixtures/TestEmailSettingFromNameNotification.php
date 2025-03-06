@@ -34,66 +34,37 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Notification\Enums\NotificationChannel;
-use AidingApp\Notification\Models\OutboundDeliverable;
+namespace AidingApp\Notification\Tests\Fixtures;
+
 use AidingApp\Notification\Notifications\Messages\MailMessage;
-use App\Models\User;
-use Filament\Notifications\Notification as FilamentNotification;
+use App\Models\NotificationSetting;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
-use Tests\Unit\TestEmailNotification;
 
-it('will create an outbound deliverable for the outbound notification', function () {
-    $notifiable = User::factory()->create();
-
-    $notification = new TestEmailNotification();
-
-    $notifiable->notify($notification);
-
-    expect(OutboundDeliverable::count())->toBe(1);
-    expect(OutboundDeliverable::first()->notification_class)->toBe(TestEmailNotification::class);
-});
-
-it('will create an outbound deliverable for each of the channels that the notification specifies', function () {
-    $notifiable = User::factory()->create();
-
-    $notification = new TestMultipleChannelNotification();
-
-    $notifiable->notify($notification);
-
-    expect(OutboundDeliverable::count())->toBe(2);
-    expect(OutboundDeliverable::where('channel', NotificationChannel::Email)->count())->toBe(1);
-    expect(OutboundDeliverable::where('channel', NotificationChannel::Database)->count())->toBe(1);
-});
-
-class TestMultipleChannelNotification extends Notification implements ShouldQueue
+class TestEmailSettingFromNameNotification extends Notification implements ShouldQueue
 {
     use Queueable;
+
+    public function __construct(
+        public NotificationSetting $setting,
+    ) {}
 
     /**
      * @return array<int, string>
      */
     public function via(object $notifiable): array
     {
-        return ['mail', 'database'];
+        return ['mail'];
     }
 
     public function toMail(object $notifiable): MailMessage
     {
         return MailMessage::make()
+            ->settings($this->setting)
             ->subject('Test Subject')
             ->greeting('Test Greeting')
             ->content('This is a test email')
             ->salutation('Test Salutation');
-    }
-
-    public function toDatabase(object $notifiable): array
-    {
-        return FilamentNotification::make()
-            ->success()
-            ->title('This is a test database notification.')
-            ->body('This is the content of your test database notification')
-            ->getDatabaseMessage();
     }
 }
