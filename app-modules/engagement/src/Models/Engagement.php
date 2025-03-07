@@ -53,7 +53,6 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -117,16 +116,6 @@ class Engagement extends BaseModel implements Auditable, CanTriggerAutoSubscript
     public function createdBy(): BelongsTo
     {
         return $this->user();
-    }
-
-    public function engagementDeliverable(): HasOne
-    {
-        return $this->hasOne(EngagementDeliverable::class);
-    }
-
-    public function deliverable(): HasOne
-    {
-        return $this->engagementDeliverable();
     }
 
     public function recipient(): MorphTo
