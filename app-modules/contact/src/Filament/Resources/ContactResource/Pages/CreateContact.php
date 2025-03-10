@@ -53,6 +53,7 @@ use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Builder;
+use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
 class CreateContact extends CreateRecord
 {
@@ -108,10 +109,10 @@ class CreateContact extends CreateRecord
                     TextInput::make('email')
                         ->label('Primary Email')
                         ->email(),
-                    TextInput::make('mobile')
+                    PhoneInput::make('mobile')
                         ->label('Mobile')
                         ->string(),
-                    TextInput::make('phone')
+                    PhoneInput::make('phone')
                         ->label('Other Phone')
                         ->string(),
                     TextInput::make('address')
