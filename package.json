@@ -57,7 +57,7 @@
         "@twilio/conversations": "^2.5.0",
         "alpinejs": "^3.13.2",
         "autoprefixer": "^10.4.19",
-        "axios": "^1.6.7",
+        "axios": "^1.8.2",
         "dompurify": "^3.2.4",
         "env-cmd": "^10.1.0",
         "esbuild-plugin-polyfill-node": "^0.3.0",
