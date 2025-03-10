@@ -38,8 +38,11 @@ namespace AidingApp\Engagement\Models;
 
 use AidingApp\Engagement\Models\Concerns\HasManyEngagements;
 use AidingApp\Engagement\Observers\EngagementBatchObserver;
+use AidingApp\Notification\Enums\NotificationChannel;
 use App\Models\BaseModel;
 use App\Models\User;
+use DOMDocument;
+use DOMXPath;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\MediaLibrary\HasMedia;
@@ -56,10 +59,44 @@ class EngagementBatch extends BaseModel implements HasMedia
 
     protected $fillable = [
         'user_id',
+        'subject',
+        'body',
+        'scheduled_at',
+        'channel',
+        'total_engagements',
+        'processed_engagements',
+        'successful_engagements',
+    ];
+
+    protected $casts = [
+        'body' => 'array',
+        'scheduled_at' => 'datetime',
+        'channel' => NotificationChannel::class,
+        'total_engagements' => 'integer',
+        'processed_engagements' => 'integer',
+        'successful_engagements' => 'integer',
     ];
 
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public static function renderWithMergeTags(string $html): string
+    {
+        $dom = new DOMDocument();
+        libxml_use_internal_errors(true);
+        $dom->loadHTML($html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+
+        $xpath = new DOMXPath($dom);
+
+        $spans = $xpath->query("//span[@data-type='mergeTag']");
+
+        foreach ($spans as $span) {
+            $dataId = $span->getAttribute('data-id');
+            $span->nodeValue = "{{ {$dataId} }}";
+        }
+
+        return $dom->saveHTML();
     }
 }
