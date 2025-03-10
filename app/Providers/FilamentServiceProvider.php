@@ -50,6 +50,9 @@ use Filament\Support\Facades\FilamentColor;
 use Filament\Support\Facades\FilamentView;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\View\View;
+use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
+use Ysfkaya\FilamentPhoneInput\Infolists\PhoneEntry;
+use Ysfkaya\FilamentPhoneInput\PhoneInputNumberType;
 
 class FilamentServiceProvider extends ServiceProvider
 {
@@ -193,6 +196,20 @@ class FilamentServiceProvider extends ServiceProvider
             return $this->disabled(! $user->hasAnyLicense($licenses))
                 ->hintIcon(fn (Checkbox $component) => $component->isDisabled() ? 'heroicon-m-lock-closed' : null)
                 ->hintIconTooltip('A CRM license is required for our public profile features.');
+        });
+
+        PhoneInput::configureUsing(function (PhoneInput $phoneInput): void {
+            $phoneInput->defaultCountry('US')
+                ->initialCountry('US')
+                ->strictMode()
+                ->validateFor(
+                    lenient: true,
+                )
+                ->performIpLookup(false);
+        });
+
+        PhoneEntry::configureUsing(function (PhoneEntry $phoneEntry): void {
+            $phoneEntry->displayFormat(PhoneInputNumberType::INTERNATIONAL);
         });
     }
 }
