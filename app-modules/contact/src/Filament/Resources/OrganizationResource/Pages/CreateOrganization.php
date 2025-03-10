@@ -49,6 +49,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Resources\Pages\CreateRecord;
+use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
 class CreateOrganization extends CreateRecord
 {
@@ -71,9 +72,8 @@ class CreateOrganization extends CreateRecord
                             ->label('Organization Email')
                             ->maxLength(255)
                             ->email(),
-                        TextInput::make('phone_number')
+                        PhoneInput::make('phone_number')
                             ->label('Organization Phone Number')
-                            ->maxLength(255)
                             ->string(),
                         SpatieMediaLibraryFileUpload::make('logo')
                             ->label('Organization Logo')
