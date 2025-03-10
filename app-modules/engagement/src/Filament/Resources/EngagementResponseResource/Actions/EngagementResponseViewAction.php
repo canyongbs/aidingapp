@@ -34,20 +34,34 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Filament\Resources\EngagementResponseResource\Components;
+namespace AidingApp\Engagement\Filament\Resources\EngagementResponseResource\Actions;
 
-use AidingApp\Engagement\Filament\Concerns\EngagementResponseInfolist;
+use AidingApp\Engagement\Models\EngagementResponse;
 use Filament\Actions\ViewAction;
+use Filament\Infolists\Components\Section;
+use Filament\Infolists\Components\Split;
+use Filament\Infolists\Components\TextEntry;
+use Illuminate\Support\HtmlString;
 
-// TODO Move this
-class EngagementResponseViewAction extends ViewAction
+class EngagementResponseViewAction
 {
-    use EngagementResponseInfolist;
-
-    protected function setUp(): void
+    public static function make(): ViewAction
     {
-        parent::setUp();
-
-        $this->infolist($this->engagementResponseInfolist());
+        return ViewAction::make()
+            ->infolist([
+                Split::make([
+                    Section::make([
+                        TextEntry::make('subject')
+                            ->getStateUsing(fn (EngagementResponse $record): ?string => $record->subject)
+                            ->hidden(fn ($state): bool => blank($state)),
+                        TextEntry::make('content')
+                            ->getStateUsing(fn (EngagementResponse $record): HtmlString => $record->getBody()),
+                    ]),
+                    Section::make([
+                        TextEntry::make('sent_at')
+                            ->dateTime('Y-m-d H:i:s'),
+                    ])->grow(false),
+                ]),
+            ]);
     }
 }

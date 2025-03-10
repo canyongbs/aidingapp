@@ -36,23 +36,27 @@
 
 namespace AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers;
 
-use AidingApp\Engagement\Actions\RelationManagerSendEngagementAction;
-use AidingApp\Engagement\Enums\EngagementDeliveryMethod;
-use AidingApp\Engagement\Enums\EngagementDeliveryStatus;
+use AidingApp\Engagement\Filament\Actions\RelationManagerSendEngagementAction;
 use AidingApp\Engagement\Models\Engagement;
 use AidingApp\Engagement\Models\EngagementResponse;
 use AidingApp\Notification\Enums\NotificationChannel;
+use AidingApp\Notification\Models\EmailMessageEvent;
 use AidingApp\Timeline\Models\Timeline;
-use Filament\Infolists\Components\Fieldset;
+use Filament\Infolists\Components\Fieldset as InfolistFieldset;
+use Filament\Infolists\Components\RepeatableEntry;
+use Filament\Infolists\Components\Section;
+use Filament\Infolists\Components\Split;
+use Filament\Infolists\Components\Tabs;
+use Filament\Infolists\Components\Tabs\Tab;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Support\Enums\IconPosition;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\HtmlString;
 
 class EngagementsRelationManager extends RelationManager
@@ -65,63 +69,85 @@ class EngagementsRelationManager extends RelationManager
     {
         return $infolist->schema(fn (Timeline $record) => match ($record->timelineable::class) {
             Engagement::class => [
-                TextEntry::make('user.name')
-                    ->label('Created By')
-                    ->getStateUsing(fn (Timeline $record): string => $record->timelineable->user->name),
-                Fieldset::make('Content')
-                    ->schema([
+                Tabs::make()
+                    ->columnSpanFull()
+                    ->tabs([
+                        Tab::make('Content')
+                            ->schema([
+                                TextEntry::make('user.name')
+                                    ->label('Created By')
+                                    ->getStateUsing(fn (Timeline $record): string => $record->timelineable->user->name),
+                                InfolistFieldset::make('Content')
+                                    ->schema([
+                                        TextEntry::make('subject')
+                                            ->getStateUsing(fn (Timeline $record): ?string => $record->timelineable->subject)
+                                            ->hidden(fn ($state): bool => blank($state))
+                                            ->columnSpanFull(),
+                                        TextEntry::make('body')
+                                            ->getStateUsing(fn (Timeline $record): HtmlString => $record->timelineable->getBody())
+                                            ->columnSpanFull(),
+                                    ]),
+                                InfolistFieldset::make('delivery')
+                                    ->label('Delivery Information')
+                                    ->columnSpanFull()
+                                    ->schema([
+                                        TextEntry::make('channel')
+                                            ->label('Channel')
+                                            ->getStateUsing(function (Timeline $record): string {
+                                                /** @var HasDeliveryMethod $timelineable */
+                                                $timelineable = $record->timelineable;
+
+                                                return $timelineable->getDeliveryMethod()->getLabel();
+                                            }),
+                                    ])
+                                    ->columns(),
+                            ]),
+                        Tab::make('Events')
+                            ->schema([
+                                RepeatableEntry::make('message_events')
+                                    ->state(function (Timeline $record) {
+                                        $timelineable = $record->timelineable;
+
+                                        if ($timelineable instanceof Engagement) {
+                                            return match ($timelineable->channel) {
+                                                NotificationChannel::Email => $timelineable->latestEmailMessage->events()->orderBy('occurred_at', 'desc')->get(),
+                                                default => [],
+                                            };
+                                        }
+                                    })
+                                    ->schema([
+                                        Section::make()
+                                            ->schema([
+                                                TextEntry::make('type')
+                                                    ->getStateUsing(fn (EmailMessageEvent $record): string => $record->type?->getLabel()),
+                                                TextEntry::make('occured_at')
+                                                    ->getStateUsing(fn (EmailMessageEvent $record): string => $record->occurred_at->format('Y-m-d H:i:s')),
+                                            ])
+                                            ->columns(),
+                                    ])
+                                    ->contained(false),
+                            ]),
+                    ]),
+            ],
+            EngagementResponse::class => [
+                Split::make([
+                    Section::make([
                         TextEntry::make('subject')
                             ->getStateUsing(fn (Timeline $record): ?string => $record->timelineable->subject)
                             ->hidden(fn ($state): bool => blank($state))
                             ->columnSpanFull(),
                         TextEntry::make('body')
                             ->getStateUsing(fn (Timeline $record): HtmlString => $record->timelineable->getBody())
-                            ->markdown()
                             ->columnSpanFull(),
                     ]),
-                Fieldset::make('deliverable')
-                    ->label('Delivery Information')
-                    ->columnSpanFull()
-                    ->schema([
-                        TextEntry::make('deliverable.channel')
-                            ->getStateUsing(fn (Timeline $record): EngagementDeliveryMethod => $record->timelineable->deliverable->channel)
-                            ->label('Channel'),
-                        TextEntry::make('deliverable.delivery_status')
-                            ->getStateUsing(fn (Timeline $record): EngagementDeliveryStatus => $record->timelineable->deliverable->delivery_status)
-                            ->iconPosition(IconPosition::After)
-                            ->icon(fn (EngagementDeliveryStatus $state): string => match ($state) {
-                                EngagementDeliveryStatus::Successful => 'heroicon-o-check-circle',
-                                EngagementDeliveryStatus::Awaiting, EngagementDeliveryStatus::Dispatched => 'heroicon-o-clock',
-                                EngagementDeliveryStatus::Failed, EngagementDeliveryStatus::DispatchFailed, EngagementDeliveryStatus::RateLimited => 'heroicon-o-x-circle',
-                            })
-                            ->iconColor(fn (EngagementDeliveryStatus $state): string => match ($state) {
-                                EngagementDeliveryStatus::Successful => 'success',
-                                EngagementDeliveryStatus::Awaiting, EngagementDeliveryStatus::Dispatched => 'info',
-                                EngagementDeliveryStatus::Failed, EngagementDeliveryStatus::DispatchFailed, EngagementDeliveryStatus::RateLimited => 'danger',
-                            })
-                            ->label('Status')
-                            ->formatStateUsing(fn (Timeline $record): string => match ($record->timelineable->deliverable->delivery_status) {
-                                EngagementDeliveryStatus::Successful => 'Successfully delivered',
-                                EngagementDeliveryStatus::Awaiting, EngagementDeliveryStatus::Dispatched => 'Awaiting delivery',
-                                EngagementDeliveryStatus::Failed, EngagementDeliveryStatus::DispatchFailed => 'Failed to send',
-                                EngagementDeliveryStatus::RateLimited => 'Failed to send due to rate limits',
-                            }),
-                        TextEntry::make('deliverable.delivered_at')
-                            ->label('Delivered At')
-                            ->getStateUsing(fn (Timeline $record): string => $record->timelineable->deliverable->delivered_at)
-                            ->hidden(fn (Timeline $record): bool => is_null($record->timelineable->deliverable->delivered_at)),
-                        TextEntry::make('deliverable.delivery_response')
-                            ->label('Error Details')
-                            ->getStateUsing(fn (Timeline $record): string => $record->timelineable->deliverable->delivery_response)
-                            ->hidden(fn (Timeline $record): bool => is_null($record->timelineable->deliverable->delivery_response)),
-                    ])
-                    ->columns(2),
-            ],
-            EngagementResponse::class => [
-                TextEntry::make('content')->getStateUsing(fn (Timeline $record): HtmlString => $record->timelineable->getBody()),
-                TextEntry::make('sent_at')
-                    ->getStateUsing(fn (Timeline $record): string => $record->timelineable->sent_at)
-                    ->dateTime('Y-m-d H:i:s'),
+                    Section::make([
+                        TextEntry::make('sent_at')
+                            ->getStateUsing(fn (Timeline $record): string => $record->timelineable->sent_at)
+                            ->dateTime('Y-m-d H:i:s'),
+                    ])->grow(false),
+                ])
+                    ->from('md')
+                    ->columnSpanFull(),
             ],
         });
     }
@@ -132,8 +158,8 @@ class EngagementsRelationManager extends RelationManager
         $canAccessEngagementResponses = auth()->user()->can('viewAny', EngagementResponse::class);
 
         return $table
-            ->emptyStateHeading('No email.')
-            ->emptyStateDescription('Create an email to get started.')
+            ->emptyStateHeading('No email or text messages.')
+            ->emptyStateDescription('Create an email or text message to get started.')
             ->defaultSort('record_sortable_date', 'desc')
             ->modifyQueryUsing(fn (Builder $query) => $query->whereHasMorph('timelineable', [
                 ...($canAccessEngagements ? [Engagement::class] : []),
@@ -151,11 +177,11 @@ class EngagementsRelationManager extends RelationManager
                     }),
                 TextColumn::make('type')
                     ->getStateUsing(function (Timeline $record) {
-                        $timelineable = $record->timelineable?->engagementDeliverable;
+                        /** @var HasDeliveryMethod $timelineable */
+                        $timelineable = $record->timelineable;
 
-                        return $timelineable->channel ?? NotificationChannel::Sms;
-                    })
-                    ->icon(fn ($state) => $state->getIcon()),
+                        return $timelineable->getDeliveryMethod();
+                    }),
                 TextColumn::make('record_sortable_date')
                     ->label('Date')
                     ->sortable(),
@@ -166,10 +192,10 @@ class EngagementsRelationManager extends RelationManager
             ->actions([
                 ViewAction::make()
                     ->modalHeading(function (Timeline $record) {
-                        $timelineable = $record->timelineable?->engagementDeliverable;
-                        $deliveryMethod = $timelineable->channel ?? NotificationChannel::Sms;
+                        /** @var HasDeliveryMethod $timelineable */
+                        $timelineable = $record->timelineable;
 
-                        return "View {$deliveryMethod->getLabel()}";
+                        return "View {$timelineable->getDeliveryMethod()->getLabel()}";
                     }),
             ])
             ->filters([
@@ -194,23 +220,18 @@ class EngagementsRelationManager extends RelationManager
                                         'timelineable',
                                         [Engagement::class],
                                         fn (Builder $query, string $type) => match ($type) {
-                                            Engagement::class => $query->whereHas('engagementDeliverable', fn (Builder $query) => $query->where('channel', $data['value'])),
-                                        }
-                                    )
-                            )
-                            ->when(
-                                $data['value'] === NotificationChannel::Sms->value,
-                                fn (Builder $query) => $query
-                                    ->whereHasMorph(
-                                        'timelineable',
-                                        [Engagement::class, EngagementResponse::class],
-                                        fn (Builder $query, string $type) => match ($type) {
-                                            Engagement::class => $query->whereHas('engagementDeliverable', fn (Builder $query) => $query->where('channel', $data['value'])),
-                                            EngagementResponse::class => $query,
+                                            Engagement::class => $query->where('channel', $data['value']),
                                         }
                                     )
                             )
                     ),
-            ]);
+            ])
+            ->poll('5s');
+    }
+
+    public static function canViewForRecord(Model $ownerRecord, string $pageClass): bool
+    {
+        return auth()->user()->can('viewAny', Engagement::class)
+            || auth()->user()->can('viewAny', EngagementResponse::class);
     }
 }

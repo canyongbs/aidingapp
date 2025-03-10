@@ -33,8 +33,7 @@
 --}}
 @php
     use App\Filament\Resources\UserResource;
-    use AidingApp\Engagement\Enums\EngagementDeliveryMethod;
-    use AidingApp\Engagement\Enums\EngagementDeliveryStatus;
+    use AdvisingApp\Notification\Enums\NotificationChannel;
 @endphp
 
 <div>
@@ -46,37 +45,6 @@
             >
                 {{ $record->createdBy->name }}
             </a>
-            <span class="ml-2 flex space-x-2">
-                @php
-                    $deliverable = $record->deliverable;
-                @endphp
-
-                @if ($deliverable->channel === EngagementDeliveryMethod::Email)
-                    <div class="relative">
-                        <x-filament::icon
-                            class="h-5 w-5 text-gray-400 dark:text-gray-100"
-                            icon="heroicon-o-envelope"
-                        />
-                        @php
-                            $emailStatusColor = match ($deliverable->delivery_status) {
-                                EngagementDeliveryStatus::Awaiting => 'text-yellow-500',
-                                EngagementDeliveryStatus::Successful => 'text-green-500',
-                                EngagementDeliveryStatus::Failed => 'text-red-500',
-                            };
-
-                            $emailStatusIcon = match ($deliverable->delivery_status) {
-                                EngagementDeliveryStatus::Awaiting => 'heroicon-s-clock',
-                                EngagementDeliveryStatus::Successful => 'heroicon-s-check-circle',
-                                EngagementDeliveryStatus::Failed => 'heroicon-s-exclamation-circle',
-                            };
-                        @endphp
-                        <x-filament::icon
-                            class="{{ $emailStatusColor }} absolute bottom-0 right-0 h-2 w-2"
-                            icon="{{ $emailStatusIcon }}"
-                        />
-                    </div>
-                @endif
-            </span>
         </h3>
 
         <div>
@@ -85,7 +53,7 @@
     </div>
 
     <time class="mb-2 block text-sm font-normal leading-none text-gray-400 dark:text-gray-500">
-        Sent {{ $record->deliver_at->diffForHumans() }}
+        Sent {{ $record->dispatched_at->diffForHumans() }}
     </time>
 
     <div
@@ -99,7 +67,7 @@
         <div class="flex flex-col">
             <p class="text-xs text-gray-400 dark:text-gray-500">Body:</p>
             <div class="prose dark:prose-invert">
-                {{ str($record->getBody())->markdown()->sanitizeHtml()->toHtmlString() }}
+                {{ $record->getBody() }}
             </div>
         </div>
     </div>

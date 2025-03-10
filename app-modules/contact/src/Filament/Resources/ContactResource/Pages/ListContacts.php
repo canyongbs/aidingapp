@@ -42,8 +42,6 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactSource;
 use AidingApp\Contact\Models\ContactStatus;
 use AidingApp\Engagement\Filament\Actions\BulkEngagementAction;
-use AidingApp\Engagement\Filament\Actions\Concerns\ImplementsHasBulkEngagementAction;
-use AidingApp\Engagement\Filament\Actions\Contracts\HasBulkEngagementAction;
 use AidingApp\Notification\Filament\Actions\SubscribeBulkAction;
 use AidingApp\Notification\Filament\Actions\SubscribeTableAction;
 use App\Filament\Tables\Columns\IdColumn;
@@ -67,10 +65,8 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
-class ListContacts extends ListRecords implements HasBulkEngagementAction
+class ListContacts extends ListRecords
 {
-    use ImplementsHasBulkEngagementAction;
-
     protected static string $resource = ContactResource::class;
 
     public function table(Table $table): Table
@@ -125,6 +121,7 @@ class ListContacts extends ListRecords implements HasBulkEngagementAction
                 ViewAction::make(),
                 EditAction::make(),
                 SubscribeTableAction::make(),
+                BulkEngagementAction::make(context: 'contacts'),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
