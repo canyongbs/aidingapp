@@ -36,7 +36,7 @@
 
 namespace AidingApp\Engagement\Console\Commands;
 
-use AdvisingApp\Engagement\Jobs\DeliverEngagements as DeliverEngagementsJob;
+use AidingApp\Engagement\Jobs\DeliverEngagements as DeliverEngagementsJob;
 use Illuminate\Console\Command;
 use Spatie\Multitenancy\Commands\Concerns\TenantAware;
 

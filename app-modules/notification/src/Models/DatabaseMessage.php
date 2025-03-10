@@ -6,6 +6,9 @@ use AidingApp\Notification\Models\Contracts\Message;
 use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
+/**
+ * @mixin IdeHelperDatabaseMessage
+ */
 class DatabaseMessage extends BaseModel implements Message
 {
     protected $fillable = [

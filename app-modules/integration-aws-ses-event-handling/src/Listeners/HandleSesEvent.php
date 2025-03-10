@@ -51,7 +51,7 @@ abstract class HandleSesEvent implements ShouldQueue
             ->first();
 
         if (is_null($outboundDeliverable)) {
-            CouldNotFindOutboundDeliverableFromExternalReference::dispatch($event->data);
+            // CouldNotFindOutboundDeliverableFromExternalReference::dispatch($event->data);
 
             return;
         }

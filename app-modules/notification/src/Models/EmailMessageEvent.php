@@ -6,6 +6,9 @@ use AidingApp\Notification\Enums\EmailMessageEventType;
 use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @mixin IdeHelperEmailMessageEvent
+ */
 class EmailMessageEvent extends BaseModel
 {
     // TODO: Create Factory

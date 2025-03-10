@@ -102,7 +102,6 @@ class CreateTenantController extends Controller
                         )
                     ),
                     mailer: config('mail.default'),
-                    fromAddress: config('mail.from.address'),
                     fromName: config('mail.from.name')
                 ),
             ),

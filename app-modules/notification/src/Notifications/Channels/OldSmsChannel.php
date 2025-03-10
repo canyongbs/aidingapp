@@ -36,7 +36,6 @@
 
 namespace AidingApp\Notification\Notifications\Channels;
 
-use AidingApp\Engagement\Models\EngagementDeliverable;
 use AidingApp\Notification\Actions\MakeOutboundDeliverable;
 use AidingApp\Notification\DataTransferObjects\NotificationResultData;
 use AidingApp\Notification\DataTransferObjects\SmsChannelResultData;
@@ -75,12 +74,6 @@ class OldSmsChannel
 
             if (! $this->canSendWithinQuotaLimits($notification, $notifiable)) {
                 $deliverable->update(['delivery_status' => NotificationDeliveryStatus::RateLimited]);
-
-                // Do anything else we need to notify sending party that notification was not sent
-
-                if ($deliverable->related instanceof EngagementDeliverable) {
-                    $deliverable->related->update(['delivery_status' => NotificationDeliveryStatus::RateLimited]);
-                }
 
                 DB::commit();
 

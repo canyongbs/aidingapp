@@ -2,13 +2,12 @@
 
 namespace AidingApp\Engagement\Jobs;
 
+use AidingApp\Contact\Models\Contact;
 use AidingApp\Engagement\Enums\EngagementResponseType;
 use AidingApp\Engagement\Exceptions\SesS3InboundSpamOrVirusDetected;
-use AidingApp\Engagement\Exceptions\UnableToDetectAnyMatchingEducatablesFromSesS3EmailPayload;
+use AidingApp\Engagement\Exceptions\UnableToDetectAnyMatchingContactsFromSesS3EmailPayload;
 use AidingApp\Engagement\Exceptions\UnableToDetectTenantFromSesS3EmailPayload;
 use AidingApp\Engagement\Exceptions\UnableToRetrieveContentFromSesS3EmailPayload;
-use AidingApp\Prospect\Models\Prospect;
-use AidingApp\StudentDataModel\Models\Student;
 use App\Models\Tenant;
 use Aws\Crypto\KmsMaterialsProviderV2;
 use Aws\Kms\KmsClient;
@@ -131,50 +130,18 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
 
             $matchedTenants->each(function (Tenant $tenant) use ($parser, $content, $sender) {
                 $tenant->execute(function () use ($parser, $content, $sender) {
-                    $students = Student::query()
-                        // This will need to be changed when we refactor email into a different table
-                        ->where('email', $sender)
-                        ->get();
-
-                    if ($students->isNotEmpty()) {
-                        $students->each(function (Student $student) use ($parser, $content) {
-                            /** @var EngagementResponse $engagementResponse */
-                            $engagementResponse = $student->engagementResponses()
-                                ->create([
-                                    'subject' => $parser->getHeader('subject'),
-                                    'content' => $parser->getMessageBody('htmlEmbedded'),
-                                    'sent_at' => $parser->getHeader('date'),
-                                    'type' => EngagementResponseType::Email,
-                                    'raw' => $content,
-                                ]);
-
-                            collect($parser->getAttachments())->each(function (Attachment $attachment) use ($engagementResponse) {
-                                $engagementResponse->addMediaFromStream($attachment->getStream())
-                                    ->toMediaCollection('attachments');
-                            });
-                        });
-
-                        Storage::disk('s3-inbound-email')->delete($this->emailFilePath);
-
-                        DB::commit();
-
-                        // If we found students and added records, we can stop here as Student records take final precedence over Prospect records.
-                        return;
-                    }
-
-                    $prospects = Prospect::query()
-                        // This will need to be changed when we refactor email into a different table
+                    $contacts = Contact::query()
                         ->where('email', $sender)
                         ->get();
 
                     throw_if(
-                        $prospects->isEmpty(),
-                        new UnableToDetectAnyMatchingEducatablesFromSesS3EmailPayload($this->emailFilePath),
+                        $contacts->isEmpty(),
+                        new UnableToDetectAnyMatchingContactsFromSesS3EmailPayload($this->emailFilePath),
                     );
 
-                    $prospects->each(function (Prospect $prospect) use ($parser, $content) {
+                    $contacts->each(function (Contact $contact) use ($parser, $content) {
                         /** @var EngagementResponse $engagementResponse */
-                        $engagementResponse = $prospect->engagementResponses()
+                        $engagementResponse = $contact->engagementResponses()
                             ->create([
                                 'subject' => $parser->getHeader('subject'),
                                 'content' => $parser->getMessageBody('htmlEmbedded'),
@@ -197,7 +164,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                 });
             });
         } catch (
-            UnableToRetrieveContentFromSesS3EmailPayload | SesS3InboundSpamOrVirusDetected | UnableToDetectTenantFromSesS3EmailPayload | UnableToDetectAnyMatchingEducatablesFromSesS3EmailPayload $e) {
+            UnableToRetrieveContentFromSesS3EmailPayload | SesS3InboundSpamOrVirusDetected | UnableToDetectTenantFromSesS3EmailPayload | UnableToDetectAnyMatchingContactsFromSesS3EmailPayload $e) {
                 DB::rollBack();
 
                 // Instantly fail for this exception
