@@ -37,9 +37,9 @@
 namespace AidingApp\Engagement\Database\Factories;
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Engagement\Enums\EngagementResponseType;
 use AidingApp\Engagement\Models\EngagementResponse;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Database\Eloquent\Relations\Relation;
 
 /**
  * @extends Factory<EngagementResponse>
@@ -49,21 +49,14 @@ class EngagementResponseFactory extends Factory
     public function definition(): array
     {
         return [
-            'sender_type' => fake()->randomElement([
-                (new Contact())->getMorphClass(),
-            ]),
-            'sender_id' => function (array $attributes) {
-                $senderClass = Relation::getMorphedModel($attributes['sender_type']);
-
-                /** @var Contact $senderModel */
-                $senderModel = new $senderClass();
-
-                $sender = $senderModel::factory()->create();
-
-                return $sender->getKey();
-            },
+            'sender_type' => (new Contact())->getMorphClass(),
+            'sender_id' => Contact::factory(),
             'content' => fake()->sentence(),
             'sent_at' => fake()->dateTimeBetween('-1 year', '-1 day'),
+            'type' => fake()->randomElement(EngagementResponseType::cases()),
+            'subject' => fake()->sentence(),
+            // Bring in a raw value here for testing later
+            'raw' => null,
         ];
     }
 }
