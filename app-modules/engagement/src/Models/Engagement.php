@@ -110,7 +110,7 @@ class Engagement extends BaseModel implements Auditable, CanTriggerAutoSubscript
 
     public static function getTimelineData(Model $forModel): Collection
     {
-        return $forModel->orderedEngagements()->with(['deliverable', 'batch'])->get();
+        return $forModel->orderedEngagements()->with(['latestEmailMessage', 'batch'])->get();
     }
 
     public function user(): BelongsTo

@@ -37,6 +37,7 @@
 namespace AidingApp\Timeline\Timelines;
 
 use AidingApp\Engagement\Models\Engagement;
+use AidingApp\Notification\Enums\NotificationChannel;
 use AidingApp\Timeline\Models\CustomTimeline;
 use Filament\Actions\ViewAction;
 use Filament\Infolists\Components\Fieldset;
@@ -52,12 +53,15 @@ class EngagementTimeline extends CustomTimeline
 
     public function icon(): string
     {
-        return 'heroicon-o-arrow-small-right';
+        return match ($this->engagement->getDeliveryMethod()) {
+            NotificationChannel::Email => 'heroicon-o-envelope',
+            default => 'heroicon-o-arrow-small-right',
+        };
     }
 
     public function sortableBy(): string
     {
-        return $this->engagement->deliver_at;
+        return $this->engagement->scheduled_at ?? $this->engagement->created_at;
     }
 
     public function providesCustomView(): bool

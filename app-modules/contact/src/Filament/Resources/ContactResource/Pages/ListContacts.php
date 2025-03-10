@@ -121,7 +121,6 @@ class ListContacts extends ListRecords
                 ViewAction::make(),
                 EditAction::make(),
                 SubscribeTableAction::make(),
-                BulkEngagementAction::make(context: 'contacts'),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
