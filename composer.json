@@ -111,7 +111,7 @@
         "rector/rector": "^0.19.0",
         "serversideup/spin": "v2.0.0-beta-3",
         "spatie/laravel-ignition": "^2.0",
-        "spatie/laravel-ray": "^1.32",
+        "spatie/laravel-ray": "1.39.1",
         "worksome/request-factories": "^3.2"
     },
     "autoload": {
