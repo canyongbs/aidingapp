@@ -319,7 +319,7 @@ test('can list audit member to service request type', function () {
         ->assertCanNotSeeTableRecords($serviceRequestsWithoutManager);
 });
 
-it('filters unassigned service requests', function () {
+it('can filter service requests by assigned to with unassigned option', function () {
     $unassignedRequest = ServiceRequest::factory()->create();
 
     $user = User::factory()->create();
@@ -359,9 +359,18 @@ it('filters unassigned service requests', function () {
             $unassignedRequest,
             $assignedRequest,
         ])
-        ->filterTable('Unassigned')
+        ->filterTable('assignedTo', 'unassigned')
         ->assertCanSeeTableRecords([$unassignedRequest])
-        ->assertCanNotSeeTableRecords([$assignedRequest]);
+        ->assertCanNotSeeTableRecords([$assignedRequest])
+        ->removeTableFilter('assignedTo')
+        ->filterTable('assignedTo', $user->getKey())
+        ->assertCanSeeTableRecords([$assignedRequest])
+        ->assertCanNotSeeTableRecords([$unassignedRequest])
+        ->removeTableFilter('assignedTo')
+        ->assertCanSeeTableRecords([
+            $unassignedRequest,
+            $assignedRequest,
+        ]);
 });
 
 it('default non closed service request will not display', function () {
