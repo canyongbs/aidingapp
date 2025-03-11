@@ -39,11 +39,21 @@ use AidingApp\Webhook\Http\Middleware\HandleAwsSnsRequest;
 use AidingApp\Webhook\Http\Middleware\VerifyAwsSnsRequest;
 use Illuminate\Support\Facades\Route;
 
-Route::post('/inbound/webhook/awsses', AwsSesInboundWebhookController::class)
-    ->middleware(
-        [
-            VerifyAwsSnsRequest::class,
-            HandleAwsSnsRequest::class,
-        ]
+Route::prefix('landlord/api')
+    ->as('landlord.api.')
+    ->domain(
+        (string) str(config('app.landlord_url'))
+            ->after('http://')
+            ->after('https://')
+            ->rtrim('/'),
     )
-    ->name('inbound.webhook.awsses');
+    ->group(function () {
+        Route::post('/inbound/webhook/awsses', AwsSesInboundWebhookController::class)
+            ->middleware(
+                [
+                    VerifyAwsSnsRequest::class,
+                    HandleAwsSnsRequest::class,
+                ]
+            )
+            ->name('inbound.webhook.awsses');
+    });

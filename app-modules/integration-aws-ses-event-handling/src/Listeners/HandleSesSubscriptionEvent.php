@@ -6,7 +6,7 @@ use AidingApp\IntegrationAwsSesEventHandling\Events\SesEvent;
 use AidingApp\IntegrationAwsSesEventHandling\Exceptions\CouldNotFindEmailMessageFromData;
 use AidingApp\Notification\Enums\EmailMessageEventType;
 
-class HandleSesRenderingFailureEvent extends HandleSesEvent
+class HandleSesSubscriptionEvent extends HandleSesEvent
 {
     public function handle(SesEvent $event): void
     {
@@ -19,9 +19,9 @@ class HandleSesRenderingFailureEvent extends HandleSesEvent
         }
 
         $emailMessage->events()->create([
-            'type' => EmailMessageEventType::RenderingFailure,
+            'type' => EmailMessageEventType::Subscription,
             'payload' => $event->data->toArray(),
-            'occurred_at' => now(),
+            'occurred_at' => $event->data->subscription->timestamp,
         ]);
     }
 }

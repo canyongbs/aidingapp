@@ -37,14 +37,12 @@
 namespace AidingApp\IntegrationAwsSesEventHandling\Events;
 
 use AidingApp\IntegrationAwsSesEventHandling\DataTransferObjects\SesEventData;
-use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
 abstract class SesEvent
 {
     use Dispatchable;
-    use InteractsWithSockets;
     use SerializesModels;
 
     public function __construct(
