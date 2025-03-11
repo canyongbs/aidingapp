@@ -1410,7 +1410,9 @@ namespace AidingApp\Engagement\Models{
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property string|null $subject
  * @property \AidingApp\Engagement\Enums\EngagementResponseType $type
+ * @property string|null $raw
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
  * @property-read int|null $audits_count
  * @property-read \Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection<int, \Spatie\MediaLibrary\MediaCollections\Models\Media> $media
@@ -1427,9 +1429,12 @@ namespace AidingApp\Engagement\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EngagementResponse whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EngagementResponse whereDeletedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EngagementResponse whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|EngagementResponse whereRaw($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EngagementResponse whereSenderId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EngagementResponse whereSenderType($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EngagementResponse whereSentAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|EngagementResponse whereSubject($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|EngagementResponse whereType($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EngagementResponse whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EngagementResponse withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EngagementResponse withoutTrashed()
@@ -2100,6 +2105,7 @@ namespace AidingApp\Notification\Models{
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent|null $recipient
  * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent|null $related
+ * @method static \AidingApp\Notification\Database\Factories\DatabaseMessageFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|DatabaseMessage newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|DatabaseMessage newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|DatabaseMessage query()
@@ -2138,6 +2144,7 @@ namespace AidingApp\Notification\Models{
  * @property-read int|null $events_count
  * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent|null $recipient
  * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent|null $related
+ * @method static \AidingApp\Notification\Database\Factories\EmailMessageFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailMessage newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailMessage newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EmailMessage query()
@@ -2246,73 +2253,6 @@ namespace AidingApp\Notification\Models{
  * 
  *
  * @property string $id
- * @property string $notification_class
- * @property string|null $external_reference_id
- * @property array<array-key, mixed> $content
- * @property int $quota_usage
- * @property string|null $related_type
- * @property string|null $related_id
- * @property string|null $recipient_id
- * @property string|null $recipient_type
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Notification\Models\SmsMessageEvent> $events
- * @property-read int|null $events_count
- * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent|null $recipient
- * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent|null $related
- * @method static \Illuminate\Database\Eloquent\Builder<static>|SmsMessage newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|SmsMessage newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|SmsMessage query()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|SmsMessage whereContent($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|SmsMessage whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|SmsMessage whereExternalReferenceId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|SmsMessage whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|SmsMessage whereNotificationClass($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|SmsMessage whereQuotaUsage($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|SmsMessage whereRecipientId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|SmsMessage whereRecipientType($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|SmsMessage whereRelatedId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|SmsMessage whereRelatedType($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|SmsMessage whereUpdatedAt($value)
- * @mixin \Eloquent
- */
-	#[\AllowDynamicProperties]
-	class IdeHelperSmsMessage {}
-}
-
-namespace AidingApp\Notification\Models{
-/**
- * 
- *
- * @property string $id
- * @property string $sms_message_id
- * @property \AidingApp\Notification\Enums\SmsMessageEventType $type
- * @property array<array-key, mixed> $payload
- * @property \Illuminate\Support\Carbon $occurred_at
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \AidingApp\Notification\Models\SmsMessage|null $message
- * @method static \Illuminate\Database\Eloquent\Builder<static>|SmsMessageEvent newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|SmsMessageEvent newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|SmsMessageEvent query()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|SmsMessageEvent whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|SmsMessageEvent whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|SmsMessageEvent whereOccurredAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|SmsMessageEvent wherePayload($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|SmsMessageEvent whereSmsMessageId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|SmsMessageEvent whereType($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|SmsMessageEvent whereUpdatedAt($value)
- * @mixin \Eloquent
- */
-	#[\AllowDynamicProperties]
-	class IdeHelperSmsMessageEvent {}
-}
-
-namespace AidingApp\Notification\Models{
-/**
- * 
- *
- * @property string $id
  * @property string $user_id
  * @property string $subscribable_id
  * @property string $subscribable_type
@@ -2320,6 +2260,7 @@ namespace AidingApp\Notification\Models{
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $subscribable
  * @property-read \App\Models\User $user
+ * @method static \AidingApp\Notification\Database\Factories\SubscriptionFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Subscription licensedToEducatable(string $relationship)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Subscription newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Subscription newQuery()
@@ -3629,5 +3570,19 @@ namespace AidingApp\Webhook\Models{
  */
 	#[\AllowDynamicProperties]
 	class IdeHelperInboundWebhook {}
+}
+
+namespace AidingApp\Webhook\Models{
+/**
+ * 
+ *
+ * @property \AidingApp\Webhook\Enums\InboundWebhookSource $source
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LandlordInboundWebhook newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LandlordInboundWebhook newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LandlordInboundWebhook query()
+ * @mixin \Eloquent
+ */
+	#[\AllowDynamicProperties]
+	class IdeHelperLandlordInboundWebhook {}
 }
 
