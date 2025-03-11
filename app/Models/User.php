@@ -152,6 +152,9 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
         'are_working_hours_visible_on_profile',
         'working_hours',
         'job_title',
+        'work_number',
+        'work_extension',
+        'mobile',
     ];
 
     public $orderable = [
