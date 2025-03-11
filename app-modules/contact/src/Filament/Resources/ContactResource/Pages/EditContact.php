@@ -56,6 +56,7 @@ use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Database\Eloquent\Builder;
+use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
 class EditContact extends EditRecord
 {
@@ -121,14 +122,12 @@ class EditContact extends EditRecord
                             ->label('Primary Email')
                             ->email()
                             ->maxLength(255),
-                        TextInput::make('mobile')
+                        PhoneInput::make('mobile')
                             ->label('Mobile')
-                            ->string()
-                            ->maxLength(255),
-                        TextInput::make('phone')
+                            ->string(),
+                        PhoneInput::make('phone')
                             ->label('Other Phone')
-                            ->string()
-                            ->maxLength(255),
+                            ->string(),
                         TextInput::make('address')
                             ->label('Address')
                             ->string()
