@@ -35,7 +35,6 @@ class EngagementNotification extends Notification implements ShouldQueue, HasBef
     {
         return [match ($this->engagement->channel) {
             NotificationChannel::Email => 'mail',
-            NotificationChannel::Sms => 'sms',
         }];
     }
 

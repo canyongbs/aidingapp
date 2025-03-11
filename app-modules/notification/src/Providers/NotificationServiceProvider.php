@@ -46,21 +46,15 @@ use AidingApp\Notification\Models\DatabaseMessage;
 use AidingApp\Notification\Models\EmailMessage;
 use AidingApp\Notification\Models\EmailMessageEvent;
 use AidingApp\Notification\Models\OutboundDeliverable;
-use AidingApp\Notification\Models\SmsMessage;
-use AidingApp\Notification\Models\SmsMessageEvent;
 use AidingApp\Notification\Models\Subscription;
-use AidingApp\Notification\Notifications\ChannelManager;
 use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
 use AidingApp\Notification\Notifications\Channels\EmailChannel;
 use AidingApp\Notification\Notifications\Channels\MailChannel;
 use AidingApp\Notification\Notifications\Channels\OldDatabaseChannel;
-use AidingApp\Notification\Notifications\Channels\OldSmsChannel;
-use AidingApp\Notification\Notifications\Channels\SmsChannel;
 use App\Concerns\ImplementsGraphQL;
 use App\Features\NewMessageModels;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Notifications\ChannelManager as BaseChannelManager;
 use Illuminate\Notifications\Channels\DatabaseChannel as BaseDatabaseChannel;
 use Illuminate\Notifications\Channels\MailChannel as BaseMailChannel;
 use Illuminate\Support\Facades\Event;
@@ -75,8 +69,6 @@ class NotificationServiceProvider extends ServiceProvider
         // Note: Email and Database can be changed to regular binds just passing in the contrete class in the cleanup ticket
         $this->app->bind(BaseMailChannel::class, fn (Container $app) => NewMessageModels::active() ? $this->app->make(MailChannel::class) : $this->app->make(EmailChannel::class));
         $this->app->bind(BaseDatabaseChannel::class, fn (Container $app) => NewMessageModels::active() ? $this->app->make(DatabaseChannel::class) : $this->app->make(OldDatabaseChannel::class));
-        $this->app->singleton(BaseChannelManager::class, fn (Container $app) => (new ChannelManager($app))
-            ->extend('sms', fn (): SmsChannel => NewMessageModels::active() ? $this->app->make(SmsChannel::class) : $this->app->make(OldSmsChannel::class)));
     }
 
     public function boot(): void
@@ -86,8 +78,6 @@ class NotificationServiceProvider extends ServiceProvider
             'outbound_deliverable' => OutboundDeliverable::class,
             'email_message' => EmailMessage::class,
             'email_message_event' => EmailMessageEvent::class,
-            'sms_message' => SmsMessage::class,
-            'sms_message_event' => SmsMessageEvent::class,
             'database_message' => DatabaseMessage::class,
         ]);
 

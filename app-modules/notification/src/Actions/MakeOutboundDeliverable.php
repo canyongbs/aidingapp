@@ -47,7 +47,6 @@ class MakeOutboundDeliverable
     public function handle(Notification $notification, object $notifiable, NotificationChannel $channel): OutboundDeliverable
     {
         $content = match (true) {
-            $channel == NotificationChannel::Sms => $notification->toSms($notifiable)->toArray(),
             $channel == NotificationChannel::Email => $notification->toMail($notifiable)->toArray(),
             $channel == NotificationChannel::Database => $notification->toDatabase($notifiable),
         };

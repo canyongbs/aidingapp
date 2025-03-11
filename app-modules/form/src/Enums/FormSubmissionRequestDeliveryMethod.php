@@ -37,20 +37,17 @@
 namespace AidingApp\Form\Enums;
 
 use AidingApp\Form\Actions\DeliverFormSubmissionRequestByEmail;
-use AidingApp\Form\Actions\DeliverFormSubmissionRequestBySms;
 use AidingApp\Form\Models\Submission;
 use Filament\Support\Contracts\HasLabel;
 
 enum FormSubmissionRequestDeliveryMethod: string implements HasLabel
 {
     case Email = 'email';
-    case Sms = 'sms';
 
     public function getLabel(): ?string
     {
         return match ($this) {
             static::Email => 'Email',
-            static::Sms => 'SMS',
         };
     }
 
@@ -58,7 +55,6 @@ enum FormSubmissionRequestDeliveryMethod: string implements HasLabel
     {
         match ($this) {
             static::Email => DeliverFormSubmissionRequestByEmail::dispatch($submission),
-            static::Sms => DeliverFormSubmissionRequestBySms::dispatch($submission),
         };
     }
 }

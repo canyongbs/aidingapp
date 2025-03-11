@@ -37,7 +37,6 @@ class EngagementBatchFinishedNotification extends Notification implements Should
             return $message
                 ->subject(match ($this->engagementBatch->channel) {
                     NotificationChannel::Email => 'Bulk email has been processed with failures',
-                    NotificationChannel::Sms => 'Bulk SMS has been processed with failures',
                     default => 'Bulk engagement has been processed with failures',
                 })
                 ->line(($this->engagementBatch->total_engagements - $this->engagementBatch->successful_engagements) . " engagements failed out of {$this->engagementBatch->total_engagements}.");
@@ -46,7 +45,6 @@ class EngagementBatchFinishedNotification extends Notification implements Should
         return $message
             ->subject(match ($this->engagementBatch->channel) {
                 NotificationChannel::Email => 'Bulk email has been processed',
-                NotificationChannel::Sms => 'Bulk SMS has been processed',
                 default => 'Bulk engagement has been processed',
             })
             ->line("{$this->engagementBatch->total_engagements} engagements sent successfully.");
@@ -59,7 +57,6 @@ class EngagementBatchFinishedNotification extends Notification implements Should
                 ->warning()
                 ->title(match ($this->engagementBatch->channel) {
                     NotificationChannel::Email => 'Bulk email has been processed with failures',
-                    NotificationChannel::Sms => 'Bulk SMS has been processed with failures',
                     default => 'Bulk engagement has been processed with failures',
                 })
                 ->body(($this->engagementBatch->total_engagements - $this->engagementBatch->successful_engagements) . " engagements failed out of {$this->engagementBatch->total_engagements}.")
@@ -70,7 +67,6 @@ class EngagementBatchFinishedNotification extends Notification implements Should
             ->success()
             ->title(match ($this->engagementBatch->channel) {
                 NotificationChannel::Email => 'Bulk email has been processed',
-                NotificationChannel::Sms => 'Bulk SMS has been processed',
                 default => 'Bulk engagement has been processed',
             })
             ->body("{$this->engagementBatch->total_engagements} engagements sent successfully.")
