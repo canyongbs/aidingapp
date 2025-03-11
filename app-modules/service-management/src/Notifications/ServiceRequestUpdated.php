@@ -36,18 +36,24 @@
 
 namespace AidingApp\ServiceManagement\Notifications;
 
+use AidingApp\Notification\Enums\NotificationChannel;
+use AidingApp\Notification\Models\Contracts\CanBeNotified;
+use AidingApp\Notification\Models\Contracts\Message;
+use AidingApp\Notification\Models\OutboundDeliverable;
 use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
 use AidingApp\Notification\Notifications\Channels\MailChannel;
+use AidingApp\Notification\Notifications\Contracts\HasBeforeSendHook;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use App\Models\NotificationSetting;
 use Filament\Notifications\Notification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Notifications\Notification as BaseNotification;
 
-class ServiceRequestUpdated extends BaseNotification implements ShouldQueue
+class ServiceRequestUpdated extends BaseNotification implements ShouldQueue, HasBeforeSendHook
 {
     use Queueable;
 
@@ -55,7 +61,7 @@ class ServiceRequestUpdated extends BaseNotification implements ShouldQueue
      * @param class-string $channel
      */
     public function __construct(
-        public ServiceRequest $serviceRequest,
+        public ServiceRequestUpdate $serviceRequestUpdate,
         public string $channel,
     ) {}
 
@@ -74,21 +80,26 @@ class ServiceRequestUpdated extends BaseNotification implements ShouldQueue
     {
         return MailMessage::make()
             ->settings($this->resolveNotificationSetting($notifiable))
-            ->subject("New update on service request {$this->serviceRequest->service_request_number}")
-            ->line("The service request {$this->serviceRequest->service_request_number} has a new update.")
-            ->action('View Service Request', ServiceRequestResource::getUrl('view', ['record' => $this->serviceRequest]));
+            ->subject("New update on service request {$this->serviceRequestUpdate->serviceRequest->service_request_number}")
+            ->line("The service request {$this->serviceRequestUpdate->serviceRequest->service_request_number} has a new update.")
+            ->action('View Service Request', ServiceRequestResource::getUrl('view', ['record' => $this->serviceRequestUpdate->serviceRequest]));
     }
 
     public function toDatabase(object $notifiable): array
     {
         return Notification::make()
             ->success()
-            ->title((string) str("New update on [service request {$this->serviceRequest->service_request_number}](" . ServiceRequestResource::getUrl('view', ['record' => $this->serviceRequest]) . ')')->markdown())
+            ->title((string) str("New update on [service request {$this->serviceRequestUpdate->serviceRequest->service_request_number}](" . ServiceRequestResource::getUrl('view', ['record' => $this->serviceRequestUpdate->serviceRequest]) . ')')->markdown())
             ->getDatabaseMessage();
+    }
+
+    public function beforeSend(AnonymousNotifiable|CanBeNotified $notifiable, OutboundDeliverable|Message $message, NotificationChannel $channel): void
+    {
+        $message->related()->associate($this->serviceRequestUpdate);
     }
 
     private function resolveNotificationSetting(object $notifiable): ?NotificationSetting
     {
-        return $this->serviceRequest->division?->notificationSetting?->setting;
+        return $this->serviceRequestUpdate->serviceRequest->division?->notificationSetting?->setting;
     }
 }
