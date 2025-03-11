@@ -35,8 +35,9 @@
 */
 
 use AidingApp\IntegrationAwsSesEventHandling\Settings\SesSettings;
-use AidingApp\Notification\Models\OutboundDeliverable;
+use AidingApp\Notification\Models\EmailMessage;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
+use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -81,7 +82,7 @@ it('The configuration set headers are present and emails are sent if configurati
 
     Event::assertDispatched(
         fn (MessageSent $event) => $event->message->getHeaders()->get('X-SES-CONFIGURATION-SET')->getBody() === $configurationSet
-            && $event->message->getHeaders()->get('X-SES-MESSAGE-TAGS')->getBody() === 'outbound_deliverable_id=' . OutboundDeliverable::first()->getKey()
+            && $event->message->getHeaders()->get('X-SES-MESSAGE-TAGS')->getBody() === sprintf('app_message_id=%s, tenant_id=%s', EmailMessage::first()->getKey(), Tenant::current()->getKey())
     );
 });
 
