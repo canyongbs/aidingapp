@@ -36,8 +36,8 @@
 
 namespace AidingApp\ServiceManagement\Tests\RequestFactories;
 
-use AidingApp\ServiceManagement\Enums\ColumnColorOptions;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
+use CanyonGBS\Common\Enums\Color;
 use Worksome\RequestFactories\RequestFactory;
 
 class EditServiceRequestStatusRequestFactory extends RequestFactory
@@ -47,7 +47,7 @@ class EditServiceRequestStatusRequestFactory extends RequestFactory
         return [
             'classification' => fake()->randomElement(SystemServiceRequestClassification::cases()),
             'name' => fake()->name(),
-            'color' => fake()->randomElement(ColumnColorOptions::cases()),
+            'color' => fake()->randomElement(Color::cases()),
         ];
     }
 }
