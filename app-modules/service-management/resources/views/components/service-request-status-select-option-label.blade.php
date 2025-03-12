@@ -1,6 +1,4 @@
-<?php
-
-/*
+{{--
 <COPYRIGHT>
 
     Copyright © 2016-2025, Canyon GBS LLC. All rights reserved.
@@ -32,22 +30,9 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
-
-namespace AidingApp\ServiceManagement\Tests\RequestFactories;
-
-use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
-use CanyonGBS\Common\Enums\Color;
-use Worksome\RequestFactories\RequestFactory;
-
-class EditServiceRequestStatusRequestFactory extends RequestFactory
-{
-    public function definition(): array
-    {
-        return [
-            'classification' => fake()->randomElement(SystemServiceRequestClassification::cases()),
-            'name' => fake()->name(),
-            'color' => fake()->randomElement(Color::cases()),
-        ];
-    }
-}
+--}}
+<div class="flex">
+    <x-filament::badge :color="$status->color->value">
+        {{ $status->name }}
+    </x-filament::badge>
+</div>

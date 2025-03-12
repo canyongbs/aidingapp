@@ -36,9 +36,9 @@
 
 namespace AidingApp\ServiceManagement\Database\Seeders;
 
-use AidingApp\ServiceManagement\Enums\ColumnColorOptions;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use CanyonGBS\Common\Enums\Color;
 use Illuminate\Database\Seeder;
 
 class ServiceRequestStatusSeeder extends Seeder
@@ -48,7 +48,7 @@ class ServiceRequestStatusSeeder extends Seeder
         ServiceRequestStatus::query()->createOrFirst([
             'classification' => SystemServiceRequestClassification::Open,
             'name' => 'New',
-            'color' => ColumnColorOptions::Info,
+            'color' => Color::Blue,
             'is_system_protected' => true,
         ]);
 
@@ -58,17 +58,17 @@ class ServiceRequestStatusSeeder extends Seeder
                     [
                         'classification' => SystemServiceRequestClassification::InProgress,
                         'name' => 'In-Progress',
-                        'color' => ColumnColorOptions::Info,
+                        'color' => Color::Blue,
                     ],
                     [
                         'classification' => SystemServiceRequestClassification::Waiting,
                         'name' => 'Pending for Customer',
-                        'color' => ColumnColorOptions::Warning,
+                        'color' => Color::Amber,
                     ],
                     [
                         'classification' => SystemServiceRequestClassification::Closed,
                         'name' => 'Closed',
-                        'color' => ColumnColorOptions::Info,
+                        'color' => Color::Red,
                     ],
                 ]
             );

@@ -81,9 +81,8 @@ class ViewServiceRequest extends ViewRecord
                             ->label('Division'),
                         TextEntry::make('status.name')
                             ->label('Status')
-                            ->state(
-                                fn (ServiceRequest $record) => $record->status()->withTrashed()->first()?->name
-                            ),
+                            ->badge()
+                            ->color(fn (ServiceRequest $record): string => $record->status->color->value),
                         TextEntry::make('title'),
                         TextEntry::make('priority.name')
                             ->label('Priority'),

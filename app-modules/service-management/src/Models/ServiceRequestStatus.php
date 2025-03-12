@@ -39,7 +39,9 @@ namespace AidingApp\ServiceManagement\Models;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\ServiceManagement\Enums\ColumnColorOptions;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
+use App\Features\ServiceRequestStatusColorFeature;
 use App\Models\BaseModel;
+use CanyonGBS\Common\Enums\Color;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -60,15 +62,21 @@ class ServiceRequestStatus extends BaseModel implements Auditable
         'is_system_protected',
     ];
 
-    protected $casts = [
-        'classification' => SystemServiceRequestClassification::class,
-        'color' => ColumnColorOptions::class,
-        'is_system_protected' => 'boolean',
-    ];
-
     public function serviceRequests(): HasMany
     {
         return $this->hasMany(ServiceRequest::class, 'status_id');
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'classification' => SystemServiceRequestClassification::class,
+            'color' => ServiceRequestStatusColorFeature::active() ? Color::class : ColumnColorOptions::class,
+            'is_system_protected' => 'boolean',
+        ];
     }
 
     protected function serializeDate(DateTimeInterface $date): string

@@ -83,6 +83,8 @@ class ListServiceRequestTableWidgets extends BaseWidget
                     ->color('primary')
                     ->description(fn (ServiceRequest $record): string => Str::limit($record->title, 40)),
                 TextColumn::make('status.name')
+                    ->badge()
+                    ->color(fn (ServiceRequest $record): string => $record->status->color->value)
                     ->searchable()
                     ->sortable()
                     ->toggleable(),

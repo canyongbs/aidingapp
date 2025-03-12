@@ -34,20 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Tests\RequestFactories;
+use App\Features\ServiceRequestStatusColorFeature;
+use Illuminate\Database\Migrations\Migration;
 
-use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
-use CanyonGBS\Common\Enums\Color;
-use Worksome\RequestFactories\RequestFactory;
-
-class EditServiceRequestStatusRequestFactory extends RequestFactory
-{
-    public function definition(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            'classification' => fake()->randomElement(SystemServiceRequestClassification::cases()),
-            'name' => fake()->name(),
-            'color' => fake()->randomElement(Color::cases()),
-        ];
+        ServiceRequestStatusColorFeature::activate();
     }
-}
+
+    public function down(): void
+    {
+        ServiceRequestStatusColorFeature::deactivate();
+    }
+};

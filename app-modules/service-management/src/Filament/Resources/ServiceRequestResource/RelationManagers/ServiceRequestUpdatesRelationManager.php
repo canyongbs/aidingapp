@@ -84,13 +84,15 @@ class ServiceRequestUpdatesRelationManager extends RelationManager
                     ->default(ServiceRequestUpdateDirection::default()),
                 Select::make('status_id')
                     ->label('Status')
+                    ->native(false)
+                    ->allowHtml()
                     ->options(fn () => ServiceRequestStatus::orderBy('classification')
                         ->orderBy('name')
-                        ->get(['id', 'name', 'classification'])
+                        ->get(['id', 'name', 'classification', 'color'])
                         ->groupBy(fn (ServiceRequestStatus $status) => $status->classification->getlabel())
-                        ->map(fn (Collection $group) => $group->pluck('name', 'id')->map(
-                            fn ($name, $id) => $name . ($id === $this->getOwnerRecord()->status->getKey() ? ' (Current)' : '')
-                        )))
+                        ->map(fn (Collection $group) => $group->mapWithKeys(fn (ServiceRequestStatus $status): array => [
+                            $status->getKey() => view('service-management::components.service-request-status-select-option-label', ['status' => $status])->render(),
+                        ])))
                     ->exists((new ServiceRequestStatus())->getTable(), 'id')
                     ->default($this->getOwnerRecord()->status->getKey()),
             ]);

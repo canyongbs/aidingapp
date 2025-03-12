@@ -34,20 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Tests\RequestFactories;
+namespace App\Features;
 
-use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
-use CanyonGBS\Common\Enums\Color;
-use Worksome\RequestFactories\RequestFactory;
+use App\Support\AbstractFeatureFlag;
 
-class EditServiceRequestStatusRequestFactory extends RequestFactory
+class ServiceRequestStatusColorFeature extends AbstractFeatureFlag
 {
-    public function definition(): array
+    public function resolve(mixed $scope): mixed
     {
-        return [
-            'classification' => fake()->randomElement(SystemServiceRequestClassification::cases()),
-            'name' => fake()->name(),
-            'color' => fake()->randomElement(Color::cases()),
-        ];
+        return false;
     }
 }

@@ -37,6 +37,7 @@
 namespace App\Filament\Widgets;
 
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use App\Features\ServiceRequestStatusColorFeature;
 use Filament\Support\Colors\Color;
 use Filament\Widgets\ChartWidget;
 
@@ -72,21 +73,21 @@ class ServiceRequestDonutChart extends ChartWidget
 
     protected function getData(): array
     {
-        $serviceRequestByStatus = ServiceRequestStatus::withCount(['serviceRequests'])->get(['id', 'name']);
-
-        $serviceRequestByStatus = $serviceRequestByStatus->map(function (ServiceRequestStatus $status) {
-            $status['bg_color'] = $this->getColorForStatus($status->color->value);
-
-            return $status;
-        });
+        $serviceRequestStatuses = ServiceRequestStatus::withCount(['serviceRequests'])->get(['id', 'name']);
 
         return [
-            'labels' => $serviceRequestByStatus->pluck('name'),
+            'labels' => $serviceRequestStatuses->pluck('name'),
             'datasets' => [
                 [
-                    'label' => 'My First Dataset',
-                    'data' => $serviceRequestByStatus->pluck('service_requests_count'),
-                    'backgroundColor' => $serviceRequestByStatus->pluck('bg_color'),
+                    'data' => $serviceRequestStatuses->pluck('service_requests_count'),
+                    'backgroundColor' => $serviceRequestStatuses->map(fn (ServiceRequestStatus $serviceRequestStatus): string => ServiceRequestStatusColorFeature::active() ? $serviceRequestStatus->color->getRgb() : ('rgb(' . match ($serviceRequestStatus->color->value) {
+                        'primary' => Color::Indigo[500],
+                        'success' => Color::Emerald[500],
+                        'info' => Color::Blue[500],
+                        'warning' => Color::Orange[500],
+                        'danger' => Color::Red[500],
+                        'gray' => Color::Gray[500],
+                    } . ')'))->all(),
                     'hoverOffset' => 4,
                 ],
             ],
@@ -96,22 +97,5 @@ class ServiceRequestDonutChart extends ChartWidget
     protected function getType(): string
     {
         return 'doughnut';
-    }
-
-    protected function getColorForStatus($color)
-    {
-        return match ($color) {
-            'primary' => $this->getRgbString(Color::Indigo[500]),
-            'success' => $this->getRgbString(Color::Emerald[500]),
-            'info' => $this->getRgbString(Color::Blue[500]),
-            'warning' => $this->getRgbString(Color::Orange[500]),
-            'danger' => $this->getRgbString(Color::Red[500]),
-            'gray' => $this->getRgbString(Color::Gray[500]),
-        };
-    }
-
-    protected function getRgbString($color): string
-    {
-        return "rgb({$color})";
     }
 }

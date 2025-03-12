@@ -188,7 +188,7 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
 
     public function status(): BelongsTo
     {
-        return $this->belongsTo(ServiceRequestStatus::class);
+        return $this->belongsTo(ServiceRequestStatus::class)->withTrashed();
     }
 
     public function priority(): BelongsTo

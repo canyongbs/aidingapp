@@ -36,9 +36,9 @@
 
 namespace AidingApp\ServiceManagement\Database\Factories;
 
-use AidingApp\ServiceManagement\Enums\ColumnColorOptions;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use CanyonGBS\Common\Enums\Color;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -51,7 +51,7 @@ class ServiceRequestStatusFactory extends Factory
         return [
             'classification' => $this->faker->randomElement(SystemServiceRequestClassification::cases()),
             'name' => $this->faker->word,
-            'color' => $this->faker->randomElement(ColumnColorOptions::cases()),
+            'color' => $this->faker->randomElement(Color::cases()),
             'is_system_protected' => false,
         ];
     }
@@ -67,7 +67,7 @@ class ServiceRequestStatusFactory extends Factory
             return [
                 'classification' => SystemServiceRequestClassification::Open,
                 'name' => 'Open',
-                'color' => ColumnColorOptions::Success,
+                'color' => Color::Green,
             ];
         });
     }
@@ -78,7 +78,7 @@ class ServiceRequestStatusFactory extends Factory
             return [
                 'classification' => SystemServiceRequestClassification::InProgress,
                 'name' => 'In Progress',
-                'color' => ColumnColorOptions::Info->value,
+                'color' => Color::Blue,
             ];
         });
     }
@@ -89,7 +89,7 @@ class ServiceRequestStatusFactory extends Factory
             return [
                 'classification' => SystemServiceRequestClassification::Closed,
                 'name' => 'Closed',
-                'color' => ColumnColorOptions::Warning->value,
+                'color' => Color::Red,
             ];
         });
     }

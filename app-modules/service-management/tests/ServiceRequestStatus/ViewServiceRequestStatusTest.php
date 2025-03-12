@@ -60,7 +60,7 @@ test('The correct details are displayed on the ViewServiceRequestStatus page', f
                 'Name',
                 $serviceRequestStatus->name,
                 'Color',
-                $serviceRequestStatus->color,
+                $serviceRequestStatus->color->getLabel(),
             ]
         );
 });
