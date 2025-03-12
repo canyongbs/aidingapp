@@ -191,7 +191,12 @@ class ListServiceRequests extends ListRecords
                                 ! empty($data['value']) && $data['value'] !== 'unassigned',
                                 fn (Builder $baseQuery) => $baseQuery->whereHas(
                                     'assignedTo.user',
-                                    fn (Builder $userQuery) => $userQuery->where('id', $data['value'])
+                                    fn (Builder $userQuery) => $userQuery
+                                        ->where('id', $data['value'])
+                                )->whereHas(
+                                    'assignedTo',
+                                    fn (Builder $assignedToQuery) => $assignedToQuery
+                                        ->where('status', ServiceRequestAssignmentStatus::Active)
                                 )
                             )
                     ),
