@@ -98,6 +98,8 @@ class ListServiceRequests extends ListRecords
                     ->description(fn (ServiceRequest $record): string => Str::limit($record->title, 40)),
                 TextColumn::make('status.name')
                     ->label('Status')
+                    ->badge()
+                    ->color(fn (ServiceRequest $record): string => $record->status->color->value)
                     ->sortable()
                     ->toggleable(),
                 TextColumn::make('respondent.display_name')

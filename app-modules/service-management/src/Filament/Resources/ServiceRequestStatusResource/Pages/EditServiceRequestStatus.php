@@ -41,6 +41,8 @@ use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use App\Concerns\EditPageRedirection;
+use App\Features\ServiceRequestStatusColorFeature;
+use CanyonGBS\Common\Filament\Forms\Components\ColorSelect;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ForceDeleteAction;
@@ -78,7 +80,11 @@ class EditServiceRequestStatus extends EditRecord
                             ->searchable()
                             ->options(ColumnColorOptions::class)
                             ->required()
-                            ->enum(ColumnColorOptions::class),
+                            ->enum(ColumnColorOptions::class)
+                            ->hidden(ServiceRequestStatusColorFeature::active()),
+                        ColorSelect::make()
+                            ->required()
+                            ->visible(ServiceRequestStatusColorFeature::active()),
                     ]),
             ])->disabled(fn (ServiceRequestStatus $record) => $record->trashed());
     }

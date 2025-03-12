@@ -76,12 +76,16 @@ class CreateServiceRequest extends CreateRecord
                 Select::make('status_id')
                     ->relationship('status', 'name')
                     ->label('Status')
+                    ->native(false)
+                    ->allowHtml()
                     ->options(fn () => ServiceRequestStatus::query()
                         ->orderBy('classification')
                         ->orderBy('name')
-                        ->get(['id', 'name', 'classification'])
+                        ->get(['id', 'name', 'classification', 'color'])
                         ->groupBy(fn (ServiceRequestStatus $status) => $status->classification->getlabel())
-                        ->map(fn (Collection $group) => $group->pluck('name', 'id')))
+                        ->map(fn (Collection $group) => $group->mapWithKeys(fn (ServiceRequestStatus $status): array => [
+                            $status->getKey() => view('service-management::components.service-request-status-select-option-label', ['status' => $status])->render(),
+                        ])))
                     ->required()
                     ->exists((new ServiceRequestStatus())->getTable(), 'id'),
                 Grid::make()

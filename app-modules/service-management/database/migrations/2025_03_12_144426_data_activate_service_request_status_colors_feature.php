@@ -34,53 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Models;
-
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\ServiceManagement\Enums\ColumnColorOptions;
-use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use App\Features\ServiceRequestStatusColorFeature;
-use App\Models\BaseModel;
-use CanyonGBS\Common\Enums\Color;
-use DateTimeInterface;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use OwenIt\Auditing\Contracts\Auditable;
+use Illuminate\Database\Migrations\Migration;
 
-/**
- * @mixin IdeHelperServiceRequestStatus
- */
-class ServiceRequestStatus extends BaseModel implements Auditable
-{
-    use SoftDeletes;
-    use AuditableTrait;
-
-    protected $fillable = [
-        'classification',
-        'name',
-        'color',
-        'is_system_protected',
-    ];
-
-    public function serviceRequests(): HasMany
+return new class () extends Migration {
+    public function up(): void
     {
-        return $this->hasMany(ServiceRequest::class, 'status_id');
+        ServiceRequestStatusColorFeature::activate();
     }
 
-    /**
-     * @return array<string, string>
-     */
-    protected function casts(): array
+    public function down(): void
     {
-        return [
-            'classification' => SystemServiceRequestClassification::class,
-            'color' => ServiceRequestStatusColorFeature::active() ? Color::class : ColumnColorOptions::class,
-            'is_system_protected' => 'boolean',
-        ];
+        ServiceRequestStatusColorFeature::deactivate();
     }
-
-    protected function serializeDate(DateTimeInterface $date): string
-    {
-        return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
-    }
-}
+};

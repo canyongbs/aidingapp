@@ -91,7 +91,9 @@ class RecentServiceRequestsTable extends BaseWidget
                 TextColumn::make('service_request_number')
                     ->label('Service Request #'),
                 TextColumn::make('title'),
-                TextColumn::make('status.name'),
+                TextColumn::make('status.name')
+                    ->badge()
+                    ->color(fn (ServiceRequest $record): string => $record->status->color->value),
                 TextColumn::make('priority.name'),
                 TextColumn::make('priority.type.name'),
                 TextColumn::make('assignedTo.user.name')
