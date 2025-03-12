@@ -36,15 +36,16 @@
 
 namespace AidingApp\Notification\Notifications\Channels;
 
-use AidingApp\Engagement\Models\EngagementDeliverable;
+use AidingApp\Notification\Actions\MakeOutboundDeliverable;
 use AidingApp\Notification\DataTransferObjects\EmailChannelResultData;
 use AidingApp\Notification\DataTransferObjects\NotificationResultData;
+use AidingApp\Notification\Enums\NotificationChannel;
 use AidingApp\Notification\Enums\NotificationDeliveryStatus;
 use AidingApp\Notification\Exceptions\NotificationQuotaExceeded;
 use AidingApp\Notification\Models\Contracts\NotifiableInterface;
 use AidingApp\Notification\Models\OutboundDeliverable;
-use AidingApp\Notification\Notifications\BaseNotification;
-use AidingApp\Notification\Notifications\EmailNotification;
+use AidingApp\Notification\Notifications\Contracts\HasAfterSendHook;
+use AidingApp\Notification\Notifications\Contracts\HasBeforeSendHook;
 use App\Settings\LicenseSettings;
 use Exception;
 use Illuminate\Notifications\AnonymousNotifiable;
@@ -60,21 +61,22 @@ class EmailChannel extends MailChannel
         try {
             DB::beginTransaction();
 
-            if (! $notification instanceof EmailNotification) {
-                return;
+            $deliverable = resolve(MakeOutboundDeliverable::class)->handle($notification, $notifiable, NotificationChannel::Email);
+
+            if ($notification instanceof HasBeforeSendHook) {
+                $notification->beforeSend(
+                    notifiable: $notifiable,
+                    message: $deliverable,
+                    channel: NotificationChannel::Email
+                );
             }
 
-            /** @var BaseNotification $notification */
-            $deliverable = $notification->beforeSend($notifiable, EmailChannel::class);
+            $deliverable->save();
 
             if (! $this->canSendWithinQuotaLimits($notification, $notifiable)) {
                 $deliverable->update(['delivery_status' => NotificationDeliveryStatus::RateLimited]);
 
                 // Do anything else we need to notify sending party that notification was not sent
-
-                if ($deliverable->related instanceof EngagementDeliverable) {
-                    $deliverable->related->update(['delivery_status' => NotificationDeliveryStatus::RateLimited]);
-                }
 
                 DB::commit();
 
@@ -83,7 +85,11 @@ class EmailChannel extends MailChannel
 
             $result = $this->handle($notifiable, $notification);
 
-            $notification->afterSend($notifiable, $deliverable, $result);
+            $this::afterSending($notifiable, $deliverable, $result);
+
+            if ($notification instanceof HasAfterSendHook) {
+                $notification->afterSend($notifiable, $deliverable, $result);
+            }
 
             DB::commit();
         } catch (Exception $e) {
@@ -93,7 +99,7 @@ class EmailChannel extends MailChannel
         }
     }
 
-    public function handle(object $notifiable, BaseNotification $notification): NotificationResultData
+    public function handle(object $notifiable, Notification $notification): NotificationResultData
     {
         $result = new EmailChannelResultData(
             success: false,
@@ -125,10 +131,6 @@ class EmailChannel extends MailChannel
 
     public function canSendWithinQuotaLimits(Notification $notification, object $notifiable): bool
     {
-        if (! $notification instanceof EmailNotification) {
-            throw new Exception('Invalid notification type.');
-        }
-
         // 1 for the primary recipient, plus the number of cc and bcc recipients
         $estimatedQuotaUsage = 1 + count($notification->toMail($notifiable)->cc) + count($notification->toMail($notifiable)->bcc);
 

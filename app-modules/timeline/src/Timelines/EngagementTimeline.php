@@ -36,10 +36,13 @@
 
 namespace AidingApp\Timeline\Timelines;
 
-use AidingApp\Engagement\Filament\Resources\EngagementResource\Components\EngagementViewAction;
 use AidingApp\Engagement\Models\Engagement;
+use AidingApp\Notification\Enums\NotificationChannel;
 use AidingApp\Timeline\Models\CustomTimeline;
 use Filament\Actions\ViewAction;
+use Filament\Infolists\Components\Fieldset;
+use Filament\Infolists\Components\TextEntry;
+use Illuminate\Support\HtmlString;
 
 // TODO Decide where these belong - might want to keep these in the context of the original module
 class EngagementTimeline extends CustomTimeline
@@ -50,12 +53,15 @@ class EngagementTimeline extends CustomTimeline
 
     public function icon(): string
     {
-        return 'heroicon-o-arrow-small-right';
+        return match ($this->engagement->getDeliveryMethod()) {
+            NotificationChannel::Email => 'heroicon-o-envelope',
+            default => 'heroicon-o-arrow-small-right',
+        };
     }
 
     public function sortableBy(): string
     {
-        return $this->engagement->deliver_at;
+        return $this->engagement->scheduled_at ?? $this->engagement->created_at;
     }
 
     public function providesCustomView(): bool
@@ -70,6 +76,28 @@ class EngagementTimeline extends CustomTimeline
 
     public function modalViewAction(): ViewAction
     {
-        return EngagementViewAction::make()->record($this->engagement);
+        return ViewAction::make()
+            ->infolist([
+                TextEntry::make('user.name')
+                    ->label('Created By'),
+                Fieldset::make('Content')
+                    ->schema([
+                        TextEntry::make('subject')
+                            ->hidden(fn ($state): bool => blank($state))
+                            ->columnSpanFull(),
+                        TextEntry::make('body')
+                            ->getStateUsing(fn (Engagement $engagement): HtmlString => $engagement->getBody())
+                            ->columnSpanFull(),
+                    ]),
+                Fieldset::make('delivery')
+                    ->label('Delivery Information')
+                    ->columnSpanFull()
+                    ->schema([
+                        TextEntry::make('channel')
+                            ->label('Channel'),
+                    ])
+                    ->columns(2),
+            ])
+            ->record($this->engagement);
     }
 }

@@ -38,7 +38,10 @@ namespace AidingApp\Engagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Engagement\Enums\EngagementResponseType;
+use AidingApp\Engagement\Models\Contracts\HasDeliveryMethod;
 use AidingApp\Engagement\Observers\EngagementResponseObserver;
+use AidingApp\Notification\Enums\NotificationChannel;
 use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
 use AidingApp\Timeline\Models\Timeline;
 use AidingApp\Timeline\Timelines\EngagementResponseTimeline;
@@ -52,6 +55,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
 use Illuminate\Support\HtmlString;
 use OwenIt\Auditing\Contracts\Auditable;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 use Symfony\Component\HtmlSanitizer\HtmlSanitizer;
 use Symfony\Component\HtmlSanitizer\HtmlSanitizerConfig;
 
@@ -59,21 +64,31 @@ use Symfony\Component\HtmlSanitizer\HtmlSanitizerConfig;
  * @mixin IdeHelperEngagementResponse
  */
 #[ObservedBy([EngagementResponseObserver::class])]
-class EngagementResponse extends BaseModel implements Auditable, ProvidesATimeline
+class EngagementResponse extends BaseModel implements Auditable, ProvidesATimeline, HasDeliveryMethod, HasMedia
 {
     use AuditableTrait;
     use SoftDeletes;
+    use InteractsWithMedia;
 
     protected $fillable = [
         'sender_id',
         'sender_type',
         'content',
         'sent_at',
+        'subject',
+        'type',
+        'raw',
     ];
 
     protected $casts = [
         'sent_at' => 'datetime',
+        'type' => EngagementResponseType::class,
     ];
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('attachments');
+    }
 
     public function timelineRecord(): MorphOne
     {
@@ -122,5 +137,12 @@ class EngagementResponse extends BaseModel implements Auditable, ProvidesATimeli
                 ->sanitize($content)
         )
             ->toHtmlString();
+    }
+
+    public function getDeliveryMethod(): NotificationChannel
+    {
+        return match ($this->type) {
+            EngagementResponseType::Email => NotificationChannel::Email,
+        };
     }
 }

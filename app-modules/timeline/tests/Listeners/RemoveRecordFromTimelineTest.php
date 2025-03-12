@@ -34,6 +34,7 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Engagement\Enums\EngagementResponseType;
 use AidingApp\Engagement\Models\EngagementResponse;
 use AidingApp\Timeline\Events\TimelineableRecordCreated;
 use AidingApp\Timeline\Events\TimelineableRecordDeleted;
@@ -57,6 +58,8 @@ it('busts the timeline cache for the associated educatable', function () {
     $subsequentResponse = $initialResponse->sender->engagementResponses()->createQuietly([
         'content' => 'This is a test response',
         'sent_at' => now(),
+        'type' => EngagementResponseType::Email,
+        'subject' => 'Test Subject',
     ]);
 
     $event = new TimelineableRecordDeleted($subsequentResponse->sender, $subsequentResponse);

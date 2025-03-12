@@ -73,6 +73,7 @@
         "mll-lab/graphql-php-scalars": "^6.2",
         "nuwave/lighthouse": "^6.42",
         "owen-it/laravel-auditing": "^13.6",
+        "php-mime-mail-parser/php-mime-mail-parser": "^9.0",
         "saade/filament-fullcalendar": "^3.2",
         "sentry/sentry-laravel": "^4.7",
         "shuvroroy/filament-spatie-laravel-health": "^2.1.0",
@@ -89,7 +90,6 @@
         "sqids/sqids": "^0.4.1",
         "staudenmeir/eloquent-has-many-deep": "^1.19",
         "stechstudio/filament-impersonate": "^3.5",
-        "talkroute/message-segment-calculator": "^1.0",
         "tapp/filament-timezone-field": "^3.0",
         "tpetry/laravel-postgresql-enhanced": "^2.0",
         "twilio/sdk": "^7.15",
@@ -111,7 +111,7 @@
         "rector/rector": "^0.19.0",
         "serversideup/spin": "v2.0.0-beta-3",
         "spatie/laravel-ignition": "^2.0",
-        "spatie/laravel-ray": "^1.32",
+        "spatie/laravel-ray": "1.39.1",
         "worksome/request-factories": "^3.2"
     },
     "autoload": {

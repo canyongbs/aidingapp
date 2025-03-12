@@ -38,30 +38,33 @@ namespace AidingApp\Task\Notifications;
 
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Filament\Resources\OrganizationResource;
-use AidingApp\Notification\Notifications\BaseNotification;
-use AidingApp\Notification\Notifications\Concerns\DatabaseChannelTrait;
-use AidingApp\Notification\Notifications\Concerns\EmailChannelTrait;
-use AidingApp\Notification\Notifications\DatabaseNotification;
-use AidingApp\Notification\Notifications\EmailNotification;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
 use AidingApp\Task\Filament\Resources\TaskResource\Pages\ListTasks;
 use AidingApp\Task\Models\Task;
 use App\Models\NotificationSetting;
 use App\Models\User;
 use Filament\Notifications\Notification as FilamentNotification;
-use Illuminate\Queue\SerializesModels;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Notification;
 
-class TaskAssignedToUserNotification extends BaseNotification implements DatabaseNotification, EmailNotification
+class TaskAssignedToUserNotification extends Notification implements ShouldQueue
 {
-    use DatabaseChannelTrait;
-    use EmailChannelTrait;
-    use SerializesModels;
+    use Queueable;
 
     public function __construct(
         public Task $task,
     ) {}
 
-    public function toEmail(object $notifiable): MailMessage
+    /**
+     * @return array<int, string>
+     */
+    public function via(object $notifiable): array
+    {
+        return ['mail'];
+    }
+
+    public function toMail(object $notifiable): MailMessage
     {
         $truncatedTaskDescription = str($this->task->description)->limit(50);
 

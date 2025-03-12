@@ -37,6 +37,8 @@
 namespace App\Console;
 
 use AidingApp\Audit\Models\Audit;
+use AidingApp\Engagement\Jobs\DeliverEngagements;
+use AidingApp\Engagement\Jobs\GatherAndDispatchSesS3InboundEmails;
 use AidingApp\Engagement\Models\EngagementFile;
 use App\Models\HealthCheckResultHistoryItem;
 use App\Models\Scopes\SetupIsComplete;
@@ -54,25 +56,40 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
+        $schedule->job(new GatherAndDispatchSesS3InboundEmails())
+            ->everyMinute()
+            ->name('Gather and Dispatch SES S3 Inbound Emails')
+            ->onOneServer();
+
         Tenant::query()
             ->tap(new SetupIsComplete())
             ->cursor()
             ->each(function (Tenant $tenant) use ($schedule) {
                 try {
+                    $schedule->call(function () use ($tenant) {
+                        $tenant->execute(function () {
+                            dispatch(app(DeliverEngagements::class));
+                        });
+                    })
+                        ->everyMinute()
+                        ->name("Dispatch DeliverEngagements | Tenant {$tenant->domain}")
+                        ->onOneServer()
+                        ->withoutOverlapping(15);
+
                     $schedule->command("tenants:artisan \"cache:prune-stale-tags\" --tenant={$tenant->id}")
                         ->hourly()
                         ->onOneServer()
-                        ->withoutOverlapping();
+                        ->withoutOverlapping(15);
 
                     $schedule->command("tenants:artisan \"health:check\" --tenant={$tenant->id}")
                         ->everyMinute()
                         ->onOneServer()
-                        ->withoutOverlapping();
+                        ->withoutOverlapping(15);
 
                     $schedule->command("tenants:artisan \"health:queue-check-heartbeat\" --tenant={$tenant->id}")
                         ->everyMinute()
                         ->onOneServer()
-                        ->withoutOverlapping();
+                        ->withoutOverlapping(15);
 
                     collect([
                         Audit::class,
@@ -84,7 +101,7 @@ class Kernel extends ConsoleKernel
                             fn ($model) => $schedule->command("tenants:artisan \"model:prune --model={$model}\" --tenant={$tenant->id}")
                                 ->daily()
                                 ->onOneServer()
-                                ->withoutOverlapping()
+                                ->withoutOverlapping(720)
                         );
 
                     $schedule->command("tenants:artisan \"health:schedule-check-heartbeat\" --tenant={$tenant->id}")

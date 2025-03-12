@@ -36,7 +36,7 @@
 
 namespace AidingApp\Timeline\Timelines;
 
-use AidingApp\Engagement\Filament\Resources\EngagementResponseResource\Components\EngagementResponseViewAction;
+use AidingApp\Engagement\Filament\Resources\EngagementResponseResource\Actions\EngagementResponseViewAction;
 use AidingApp\Engagement\Models\EngagementResponse;
 use AidingApp\Timeline\Models\CustomTimeline;
 use Filament\Actions\ViewAction;

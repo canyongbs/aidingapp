@@ -39,10 +39,12 @@ namespace AidingApp\Engagement\Models;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Engagement\Actions\GenerateEngagementBodyContent;
-use AidingApp\Engagement\Enums\EngagementDeliveryStatus;
+use AidingApp\Engagement\Models\Contracts\HasDeliveryMethod;
 use AidingApp\Engagement\Observers\EngagementObserver;
+use AidingApp\Notification\Enums\NotificationChannel;
 use AidingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
 use AidingApp\Notification\Models\Contracts\Subscribable;
+use AidingApp\Notification\Models\EmailMessage;
 use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
 use AidingApp\Timeline\Models\Timeline;
 use AidingApp\Timeline\Timelines\EngagementTimeline;
@@ -54,7 +56,7 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -70,7 +72,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  * @mixin IdeHelperEngagement
  */
 #[ObservedBy([EngagementObserver::class])]
-class Engagement extends BaseModel implements Auditable, CanTriggerAutoSubscription, ProvidesATimeline, HasMedia
+class Engagement extends BaseModel implements Auditable, CanTriggerAutoSubscription, ProvidesATimeline, HasDeliveryMethod, HasMedia
 {
     use AuditableTrait;
     use BelongsToEducatable;
@@ -84,17 +86,18 @@ class Engagement extends BaseModel implements Auditable, CanTriggerAutoSubscript
         'body',
         'recipient_id',
         'recipient_type',
-        'scheduled',
-        'deliver_at',
+        'scheduled_at',
+        'dispatched_at',
+        'channel',
     ];
 
     protected $casts = [
         'body' => 'array',
-        'deliver_at' => 'datetime',
-        'scheduled' => 'boolean',
+        'scheduled_at' => 'datetime',
+        'dispatched_at' => 'datetime',
+        'channel' => NotificationChannel::class,
     ];
 
-    // TODO Consider changing this relationship if we ever needed to timeline something else where records might be shared across entities
     public function timelineRecord(): MorphOne
     {
         return $this->morphOne(Timeline::class, 'timelineable');
@@ -107,7 +110,7 @@ class Engagement extends BaseModel implements Auditable, CanTriggerAutoSubscript
 
     public static function getTimelineData(Model $forModel): Collection
     {
-        return $forModel->orderedEngagements()->with(['deliverable', 'batch'])->get();
+        return $forModel->orderedEngagements()->with(['latestEmailMessage', 'batch'])->get();
     }
 
     public function user(): BelongsTo
@@ -120,14 +123,20 @@ class Engagement extends BaseModel implements Auditable, CanTriggerAutoSubscript
         return $this->user();
     }
 
-    public function engagementDeliverable(): HasOne
+    public function emailMessages(): MorphMany
     {
-        return $this->hasOne(EngagementDeliverable::class);
+        return $this->morphMany(
+            related: EmailMessage::class,
+            name: 'related',
+            type: 'related_type',
+            id: 'related_id',
+            localKey: 'id',
+        );
     }
 
-    public function deliverable(): HasOne
+    public function latestEmailMessage(): MorphOne
     {
-        return $this->engagementDeliverable();
+        return $this->morphOne(EmailMessage::class, 'related')->latestOfMany();
     }
 
     public function recipient(): MorphTo
@@ -149,32 +158,6 @@ class Engagement extends BaseModel implements Auditable, CanTriggerAutoSubscript
         return $this->engagementBatch();
     }
 
-    public function scopeIsScheduled(Builder $query): void
-    {
-        $query->where('scheduled', true);
-    }
-
-    public function scopeIsAwaitingDelivery(Builder $query): void
-    {
-        $query->whereHas('engagementDeliverable', function (Builder $query) {
-            $query->where('delivery_status', EngagementDeliveryStatus::Awaiting);
-        });
-    }
-
-    public function scopeHasBeenDelivered(Builder $query): void
-    {
-        $query->whereDoesntHave('engagementDeliverable', function (Builder $query) {
-            $query->whereNull('delivered_at');
-        });
-    }
-
-    public function scopeHasNotBeenDelivered(Builder $query): void
-    {
-        $query->whereDoesntHave('engagementDeliverable', function (Builder $query) {
-            $query->whereNotNull('delivered_at');
-        });
-    }
-
     public function scopeIsNotPartOfABatch(Builder $query): void
     {
         $query->whereNull('engagement_batch_id');
@@ -183,11 +166,6 @@ class Engagement extends BaseModel implements Auditable, CanTriggerAutoSubscript
     public function scopeSentToContact(Builder $query): void
     {
         $query->where('recipient_type', resolve(Contact::class)->getMorphClass());
-    }
-
-    public function hasBeenDelivered(): bool
-    {
-        return (bool) $this->deliverable->hasBeenDelivered();
     }
 
     public function getSubscribable(): ?Subscribable
@@ -211,6 +189,25 @@ class Engagement extends BaseModel implements Auditable, CanTriggerAutoSubscript
             'contact full name' => $this->recipient->getAttribute($this->recipient->displayNameKey()),
             'contact email' => $this->recipient->getAttribute($this->recipient->displayEmailKey()),
         ];
+    }
+
+    /**
+     * @param class-string $type
+     */
+    public static function getMergeTags(string $type): array
+    {
+        return match ($type) {
+            Contact::class => [
+                'contact full name',
+                'contact email',
+            ],
+            default => [],
+        };
+    }
+
+    public function getDeliveryMethod(): NotificationChannel
+    {
+        return $this->channel;
     }
 
     protected static function booted(): void

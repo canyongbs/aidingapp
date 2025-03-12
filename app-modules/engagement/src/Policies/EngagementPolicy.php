@@ -82,8 +82,8 @@ class EngagementPolicy
 
     public function update(Authenticatable $authenticatable, Engagement $engagement): Response
     {
-        if ($engagement->hasBeenDelivered()) {
-            return Response::deny('You do not have permission to update this engagement because it has already been delivered.');
+        if ($engagement->dispatched_at !== null) {
+            return Response::deny('You do not have permission to update this engagement because it has already been dispatched.');
         }
 
         if (! $authenticatable->hasLicense($engagement->recipient?->getLicenseType())) {
@@ -98,8 +98,8 @@ class EngagementPolicy
 
     public function delete(Authenticatable $authenticatable, Engagement $engagement): Response
     {
-        if ($engagement->hasBeenDelivered()) {
-            return Response::deny('You do not have permission to delete this engagement because it has already been delivered.');
+        if ($engagement->dispatched_at !== null) {
+            return Response::deny('You do not have permission to delete this engagement because it has already been dispatched.');
         }
 
         if (! $authenticatable->hasLicense($engagement->recipient?->getLicenseType())) {
@@ -126,8 +126,8 @@ class EngagementPolicy
 
     public function forceDelete(Authenticatable $authenticatable, Engagement $engagement): Response
     {
-        if ($engagement->hasBeenDelivered()) {
-            return Response::deny('You cannot permanently delete this engagement because it has already been delivered.');
+        if ($engagement->dispatched_at !== null) {
+            return Response::deny('You cannot permanently delete this engagement because it has already been dispatched.');
         }
 
         if (! $authenticatable->hasLicense($engagement->recipient?->getLicenseType())) {

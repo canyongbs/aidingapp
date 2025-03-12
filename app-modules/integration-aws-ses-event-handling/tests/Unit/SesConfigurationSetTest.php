@@ -35,13 +35,14 @@
 */
 
 use AidingApp\IntegrationAwsSesEventHandling\Settings\SesSettings;
-use AidingApp\Notification\Models\OutboundDeliverable;
-use AidingApp\Notification\Notifications\BaseNotification;
-use AidingApp\Notification\Notifications\Concerns\EmailChannelTrait;
-use AidingApp\Notification\Notifications\EmailNotification;
+use AidingApp\Notification\Models\EmailMessage;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
+use App\Models\Tenant;
 use App\Models\User;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Events\MessageSent;
+use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Mail;
 
@@ -81,7 +82,7 @@ it('The configuration set headers are present and emails are sent if configurati
 
     Event::assertDispatched(
         fn (MessageSent $event) => $event->message->getHeaders()->get('X-SES-CONFIGURATION-SET')->getBody() === $configurationSet
-            && $event->message->getHeaders()->get('X-SES-MESSAGE-TAGS')->getBody() === 'outbound_deliverable_id=' . OutboundDeliverable::first()->getKey()
+            && $event->message->getHeaders()->get('X-SES-MESSAGE-TAGS')->getBody() === sprintf('app_message_id=%s, tenant_id=%s', EmailMessage::first()->getKey(), Tenant::current()->getKey())
     );
 });
 
@@ -98,11 +99,19 @@ it('X-SES-CONFIGURATION-SET is not present if mail.mailers.ses.configuration_set
     );
 });
 
-class TestEmailNotification extends BaseNotification implements EmailNotification
+class TestEmailNotification extends Notification implements ShouldQueue
 {
-    use EmailChannelTrait;
+    use Queueable;
 
-    public function toEmail(object $notifiable): MailMessage
+    /**
+     * @return array<int, string>
+     */
+    public function via(object $notifiable): array
+    {
+        return ['mail'];
+    }
+
+    public function toMail(object $notifiable): MailMessage
     {
         return MailMessage::make()
             ->subject('Test Subject')

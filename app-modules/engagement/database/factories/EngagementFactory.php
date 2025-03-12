@@ -39,9 +39,9 @@ namespace AidingApp\Engagement\Database\Factories;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Engagement\Models\Engagement;
 use AidingApp\Engagement\Models\EngagementBatch;
+use AidingApp\Notification\Enums\NotificationChannel;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Database\Eloquent\Relations\Relation;
 
 /**
  * @extends Factory<Engagement>
@@ -52,45 +52,26 @@ class EngagementFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'recipient_type' => fake()->randomElement([
-                (new Contact())->getMorphClass(),
-            ]),
-            'recipient_id' => function (array $attributes) {
-                $senderClass = Relation::getMorphedModel($attributes['recipient_type']);
-
-                /** @var Contact $senderModel */
-                $senderModel = new $senderClass();
-
-                $sender = $senderModel::factory()->create();
-
-                return $sender->getKey();
-            },
+            'recipient_type' => (new Contact())->getMorphClass(),
+            'recipient_id' => Contact::factory(),
             'subject' => fake()->sentence,
             'body' => ['type' => 'doc', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => fake()->paragraph]]]]],
-            'deliver_at' => fake()->dateTimeBetween('-1 year', '-1 day'),
-            'scheduled' => true,
+            'scheduled_at' => fake()->dateTimeBetween('-1 year', '-1 day'),
+            'channel' => NotificationChannel::Email,
         ];
-    }
-
-    public function forContact(): self
-    {
-        return $this->state([
-            'recipient_id' => Contact::factory(),
-            'recipient_type' => (new Contact())->getMorphClass(),
-        ]);
     }
 
     public function deliverNow(): self
     {
         return $this->state([
-            'deliver_at' => now(),
+            'scheduled_at' => null,
         ]);
     }
 
     public function deliverLater(): self
     {
         return $this->state([
-            'deliver_at' => fake()->dateTimeBetween('+1 day', '+1 week'),
+            'scheduled_at' => fake()->dateTimeBetween('+1 day', '+1 week'),
         ]);
     }
 
@@ -101,10 +82,10 @@ class EngagementFactory extends Factory
         ]);
     }
 
-    public function onDemand(): self
+    public function email(): self
     {
         return $this->state([
-            'scheduled' => false,
+            'channel' => NotificationChannel::Email,
         ]);
     }
 }

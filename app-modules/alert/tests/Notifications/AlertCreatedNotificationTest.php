@@ -38,27 +38,26 @@ use AidingApp\Alert\Models\Alert;
 use AidingApp\Alert\Notifications\AlertCreatedNotification;
 use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
 use App\Models\User;
+use Illuminate\Support\Facades\Notification;
 
-use function Tests\Helpers\testItIsDispatchedToTheProperChannels;
+it('can be sent', function () {
+    Notification::fake();
 
-testItIsDispatchedToTheProperChannels(
-    notification: AlertCreatedNotification::class,
-    deliveryChannels: [DatabaseChannel::class],
-    triggerNotificationToNotifiable: function () {
-        $user = User::factory()->licensed(LicenseType::cases())->create();
-        $contact = Contact::factory()->create();
+    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $contact = Contact::factory()->create();
 
-        $contact->subscriptions()->create([
-            'user_id' => $user->id,
-        ]);
+    $contact->subscriptions()->create([
+        'user_id' => $user->id,
+    ]);
 
-        Alert::factory()->create([
-            'concern_id' => $contact->getKey(),
-            'concern_type' => Contact::class,
-        ]);
+    Alert::factory()->create([
+        'concern_id' => $contact->getKey(),
+        'concern_type' => $contact->getMorphClass(),
+    ]);
 
-        return $user;
-    }
-);
+    Notification::assertSentTo(
+        $user,
+        AlertCreatedNotification::class,
+    );
+});

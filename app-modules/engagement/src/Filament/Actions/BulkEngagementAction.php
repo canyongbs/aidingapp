@@ -37,14 +37,15 @@
 namespace AidingApp\Engagement\Filament\Actions;
 
 use AidingApp\Engagement\Actions\CreateEngagementBatch;
-use AidingApp\Engagement\DataTransferObjects\EngagementBatchCreationData;
-use AidingApp\Engagement\Enums\EngagementDeliveryMethod;
-use AidingApp\Engagement\Filament\Actions\Contracts\HasBulkEngagementAction;
+use AidingApp\Engagement\DataTransferObjects\EngagementCreationData;
 use AidingApp\Engagement\Models\EmailTemplate;
+use AidingApp\Notification\Enums\NotificationChannel;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Wizard\Step;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
@@ -53,6 +54,7 @@ use Filament\Tables\Actions\BulkAction;
 use FilamentTiptapEditor\TiptapEditor;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\Expression;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
@@ -66,12 +68,12 @@ class BulkEngagementAction
             ->modalDescription(fn (Collection $records) => "You have selected {$records->count()} {$context} to engage.")
             ->steps([
                 Step::make('Choose your delivery method')
-                    ->description('Select')
                     ->schema([
-                        Select::make('delivery_method')
+                        Select::make('channel')
                             ->label('How would you like to send this engagement?')
-                            ->options(EngagementDeliveryMethod::class)
-                            ->default(EngagementDeliveryMethod::Email->value)
+                            ->options(NotificationChannel::getEngagementOptions())
+                            ->default(NotificationChannel::Email->value)
+                            // ->disableOptionWhen(fn (string $value): bool => NotificationChannel::tryFrom($value)?->getCaseDisabled())
                             ->selectablePlaceholder(false)
                             ->live(),
                     ]),
@@ -86,7 +88,7 @@ class BulkEngagementAction
                         TiptapEditor::make('body')
                             ->disk('s3-public')
                             ->label('Body')
-                            ->mergeTags([
+                            ->mergeTags($mergeTags = [
                                 'contact full name',
                                 'contact email',
                             ])
@@ -144,30 +146,43 @@ class BulkEngagementAction
                                         $component->generateImageUrls($template->content),
                                     );
                                 }))
-                            ->helperText('You can insert contact information by typing {{ and choosing a merge value to insert.')
+                            ->helperText('You can insert student information by typing {{ and choosing a merge value to insert.')
                             ->columnSpanFull(),
+                    ]),
+                Step::make('Schedule')
+                    ->description('Choose when you would like to send this engagement.')
+                    ->schema([
+                        Toggle::make('send_later')
+                            ->reactive()
+                            ->helperText('By default, this email or text will send as soon as it is created unless you schedule it to send later.'),
+                        DateTimePicker::make('scheduled_at')
+                            ->required()
+                            ->visible(fn (Get $get) => $get('send_later')),
                     ]),
             ])
             ->action(function (Collection $records, array $data, Form $form) {
-                CreateEngagementBatch::dispatch(EngagementBatchCreationData::from([
-                    'user' => auth()->user(),
-                    'records' => $records,
-                    'deliveryMethod' => $data['delivery_method'],
-                    'subject' => $data['subject'] ?? null,
-                    'body' => $data['body'] ?? null,
-                    'temporaryBodyImages' => array_map(
+                $channel = NotificationChannel::parse($data['channel']);
+
+                app(CreateEngagementBatch::class)->execute(new EngagementCreationData(
+                    user: auth()->user(),
+                    recipient: $records,
+                    channel: $channel,
+                    subject: $data['subject'] ?? null,
+                    body: $data['body'] ?? null,
+                    temporaryBodyImages: array_map(
                         fn (TemporaryUploadedFile $file): array => [
                             'extension' => $file->getClientOriginalExtension(),
                             'path' => (fn () => $this->path)->call($file),
                         ],
                         $form->getFlatFields()['body']->getTemporaryImages(),
                     ),
-                ]));
+                    scheduledAt: ($data['send_later'] ?? false) ? Carbon::parse($data['scheduled_at'] ?? null) : null,
+                ));
             })
             ->modalSubmitActionLabel('Send')
+            ->deselectRecordsAfterCompletion()
             ->modalCloseButton(false)
             ->closeModalByClickingAway(false)
-            ->modalCancelAction(fn (HasBulkEngagementAction $livewire) => $livewire->cancelBulkEngagementAction())
-            ->deselectRecordsAfterCompletion();
+            ->closeModalByEscaping(false);
     }
 }

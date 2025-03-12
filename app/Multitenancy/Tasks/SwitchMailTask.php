@@ -36,8 +36,15 @@
 
 namespace App\Multitenancy\Tasks;
 
-use Illuminate\Notifications\ChannelManager;
-use Illuminate\Notifications\Channels\MailChannel;
+use AidingApp\Notification\Notifications\ChannelManager;
+use AidingApp\Notification\Notifications\Channels\EmailChannel;
+use AidingApp\Notification\Notifications\Channels\MailChannel;
+use Illuminate\Contracts\Mail\Factory;
+use Illuminate\Contracts\Mail\Mailer;
+use Illuminate\Mail\Mailer as MailMailer;
+use Illuminate\Mail\MailManager;
+use Illuminate\Notifications\ChannelManager as BaseChannelManager;
+use Illuminate\Notifications\Channels\MailChannel as BaseMailChannel;
 use Spatie\Multitenancy\Models\Tenant;
 use Spatie\Multitenancy\Tasks\SwitchTenantTask;
 
@@ -69,19 +76,24 @@ class SwitchMailTask implements SwitchTenantTask
 
     public function makeCurrent(Tenant $tenant): void
     {
-        $config = $tenant->config;
+        /** @var TenantMailConfig $config */
+        $config = $tenant->config->mail;
+
+        preg_match('/^(.+)\.[^.]+\.[^.]+$/', $tenant->domain, $matches);
+
+        $subDomainBasedEmail = $matches[1] . '@' . config('mail.from.root_domain');
 
         $this->setMailConfig(
-            mailer: $config->mail->mailer,
-            fromAddress: $config->mail->fromAddress,
-            fromName: $config->mail->fromName,
-            smtpHost: $config->mail->mailers->smtp->host,
-            smtpPort: $config->mail->mailers->smtp->port,
-            smtpEncryption: $config->mail->mailers->smtp->encryption,
-            smtpUsername: $config->mail->mailers->smtp->username,
-            smtpPassword: $config->mail->mailers->smtp->password,
-            smtpTimeout: $config->mail->mailers->smtp->timeout,
-            smtpLocalDomain: $config->mail->mailers->smtp->localDomain,
+            mailer: $config->mailer,
+            fromAddress: $subDomainBasedEmail,
+            fromName: $config->fromName,
+            smtpHost: $config->mailers->smtp->host,
+            smtpPort: $config->mailers->smtp->port,
+            smtpEncryption: $config->mailers->smtp->encryption,
+            smtpUsername: $config->mailers->smtp->username,
+            smtpPassword: $config->mailers->smtp->password,
+            smtpTimeout: $config->mailers->smtp->timeout,
+            smtpLocalDomain: $config->mailers->smtp->localDomain,
         );
     }
 
@@ -130,8 +142,16 @@ class SwitchMailTask implements SwitchTenantTask
             ]
         );
 
+        app()->forgetInstance('mailer');
         app()->forgetInstance('mail.manager');
+        app()->forgetInstance(Mailer::class);
+        app()->forgetInstance(MailMailer::class);
+        app()->forgetInstance(MailManager::class);
+        app()->forgetInstance(Factory::class);
+        app()->forgetInstance(BaseChannelManager::class);
         app()->forgetInstance(ChannelManager::class);
+        app()->forgetInstance(BaseMailChannel::class);
         app()->forgetInstance(MailChannel::class);
+        app()->forgetInstance(EmailChannel::class);
     }
 }

@@ -38,7 +38,7 @@ namespace AidingApp\ServiceManagement\Observers;
 
 use AidingApp\Notification\Events\TriggeredAutoSubscription;
 use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
-use AidingApp\Notification\Notifications\Channels\EmailChannel;
+use AidingApp\Notification\Notifications\Channels\MailChannel;
 use AidingApp\ServiceManagement\Actions\CreateServiceRequestHistory;
 use AidingApp\ServiceManagement\Actions\NotifyServiceRequestUsers;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
@@ -77,7 +77,7 @@ class ServiceRequestObserver
 
         app(NotifyServiceRequestUsers::class)->execute(
             $serviceRequest,
-            new ServiceRequestCreated($serviceRequest, EmailChannel::class),
+            new ServiceRequestCreated($serviceRequest, MailChannel::class),
             $serviceRequest->priority?->type->is_managers_service_request_created_email_enabled ?? false,
             $serviceRequest->priority?->type->is_auditors_service_request_created_email_enabled ?? false,
         );
@@ -141,7 +141,7 @@ class ServiceRequestObserver
             if ($serviceRequest->status?->classification === SystemServiceRequestClassification::Closed) {
                 app(NotifyServiceRequestUsers::class)->execute(
                     $serviceRequest,
-                    new ServiceRequestClosed($serviceRequest, EmailChannel::class),
+                    new ServiceRequestClosed($serviceRequest, MailChannel::class),
                     $serviceRequest->priority?->type->is_managers_service_request_closed_email_enabled ?? false,
                     $serviceRequest->priority?->type->is_auditors_service_request_closed_email_enabled ?? false,
                 );
@@ -155,7 +155,7 @@ class ServiceRequestObserver
             } elseif ($serviceRequest->status) {
                 app(NotifyServiceRequestUsers::class)->execute(
                     $serviceRequest,
-                    new ServiceRequestStatusChanged($serviceRequest, EmailChannel::class),
+                    new ServiceRequestStatusChanged($serviceRequest, MailChannel::class),
                     $serviceRequest->priority?->type->is_managers_service_request_status_change_email_enabled ?? false,
                     $serviceRequest->priority?->type->is_auditors_service_request_status_change_email_enabled ?? false,
                 );

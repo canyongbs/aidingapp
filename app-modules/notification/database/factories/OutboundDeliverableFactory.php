@@ -40,7 +40,6 @@ use AidingApp\Notification\Enums\NotificationChannel;
 use AidingApp\Notification\Enums\NotificationDeliveryStatus;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Tests\Unit\TestEmailNotification;
-use Tests\Unit\TestSmsNotification;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AidingApp\Notification\Models\OutboundDeliverable>
@@ -52,16 +51,8 @@ class OutboundDeliverableFactory extends Factory
         return [
             'channel' => NotificationChannel::Email,
             'notification_class' => TestEmailNotification::class,
-            'delivery_status' => NotificationDeliveryStatus::Awaiting,
+            'delivery_status' => NotificationDeliveryStatus::Processing,
             'quota_usage' => 0,
         ];
-    }
-
-    public function smsChannel(): self
-    {
-        return $this->state(fn () => [
-            'channel' => NotificationChannel::Sms,
-            'notification_class' => TestSmsNotification::class,
-        ]);
     }
 }

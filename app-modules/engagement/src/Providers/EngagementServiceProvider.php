@@ -36,18 +36,13 @@
 
 namespace AidingApp\Engagement\Providers;
 
-use AidingApp\Engagement\Actions\DeliverEngagements;
 use AidingApp\Engagement\EngagementPlugin;
 use AidingApp\Engagement\Models\EmailTemplate;
 use AidingApp\Engagement\Models\Engagement;
 use AidingApp\Engagement\Models\EngagementBatch;
-use AidingApp\Engagement\Models\EngagementDeliverable;
 use AidingApp\Engagement\Models\EngagementFile;
 use AidingApp\Engagement\Models\EngagementResponse;
-use App\Models\Scopes\SetupIsComplete;
-use App\Models\Tenant;
 use Filament\Panel;
-use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 
@@ -63,27 +58,9 @@ class EngagementServiceProvider extends ServiceProvider
         Relation::morphMap([
             'email_template' => EmailTemplate::class,
             'engagement_batch' => EngagementBatch::class,
-            'engagement_deliverable' => EngagementDeliverable::class,
             'engagement_file' => EngagementFile::class,
             'engagement_response' => EngagementResponse::class,
             'engagement' => Engagement::class,
         ]);
-
-        $this->callAfterResolving(Schedule::class, function (Schedule $schedule) {
-            $schedule->call(function () {
-                Tenant::query()
-                    ->tap(new SetupIsComplete())
-                    ->cursor()
-                    ->each(function (Tenant $tenant) {
-                        $tenant->execute(function () {
-                            dispatch(new DeliverEngagements());
-                        });
-                    });
-            })
-                ->everyMinute()
-                ->name('DeliverEngagements')
-                ->onOneServer()
-                ->withoutOverlapping();
-        });
     }
 }

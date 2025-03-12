@@ -36,28 +36,49 @@
 
 namespace AidingApp\Notification\Enums;
 
+use Filament\Support\Contracts\HasIcon;
 use Filament\Support\Contracts\HasLabel;
 
-enum NotificationChannel: string implements HasLabel
+enum NotificationChannel: string implements HasLabel, HasIcon
 {
     case Email = 'email';
-    case Sms = 'sms';
     case Database = 'database';
 
-    public function getLabel(): ?string
+    public function getLabel(): string
     {
-        return match ($this) {
-            static::Sms => 'SMS',
-            default => $this->name,
-        };
+        return $this->name;
     }
 
     public function getIcon(): ?string
     {
         return match ($this) {
             self::Email => 'heroicon-o-envelope',
-            self::Sms => 'heroicon-o-chat-bubble-bottom-center-text',
             self::Database => 'heroicon-o-bell',
         };
+    }
+
+    public function getDefault(): NotificationChannel
+    {
+        return NotificationChannel::Email;
+    }
+
+    public static function getEngagementOptions(): array
+    {
+        return [
+            NotificationChannel::Email->value => 'Email',
+        ];
+    }
+
+    public static function parse(string | self | null $value): ?self
+    {
+        if (blank($value)) {
+            return null;
+        }
+
+        if ($value instanceof self) {
+            return $value;
+        }
+
+        return self::tryFrom($value);
     }
 }

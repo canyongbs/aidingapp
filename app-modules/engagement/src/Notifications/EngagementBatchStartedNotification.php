@@ -37,40 +37,51 @@
 namespace AidingApp\Engagement\Notifications;
 
 use AidingApp\Engagement\Models\EngagementBatch;
-use AidingApp\Notification\Notifications\BaseNotification;
-use AidingApp\Notification\Notifications\Concerns\DatabaseChannelTrait;
-use AidingApp\Notification\Notifications\Concerns\EmailChannelTrait;
-use AidingApp\Notification\Notifications\DatabaseNotification;
-use AidingApp\Notification\Notifications\EmailNotification;
+use AidingApp\Notification\Enums\NotificationChannel;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
 use App\Models\NotificationSetting;
 use App\Models\User;
 use Filament\Notifications\Notification as FilamentNotification;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Notification;
 
-class EngagementBatchStartedNotification extends BaseNotification implements DatabaseNotification, EmailNotification
+class EngagementBatchStartedNotification extends Notification implements ShouldQueue
 {
-    use DatabaseChannelTrait;
-    use EmailChannelTrait;
+    use Queueable;
 
     public function __construct(
         public EngagementBatch $engagementBatch,
-        public int $jobsToProcess,
     ) {}
 
-    public function toEmail(object $notifiable): MailMessage
+    /**
+     * @return array<int, string>
+     */
+    public function via(object $notifiable): array
+    {
+        return ['mail', 'database'];
+    }
+
+    public function toMail(object $notifiable): MailMessage
     {
         return MailMessage::make()
             ->settings($this->resolveNotificationSetting($notifiable))
-            ->subject('Bulk Engagement processing started')
-            ->line("We've started processing your bulk engagement of {$this->jobsToProcess} jobs, and we'll keep you updated on the progress.");
+            ->subject(match ($this->engagementBatch->channel) {
+                NotificationChannel::Email => 'Bulk email started processing',
+                default => 'Bulk engagement started processing',
+            })
+            ->line("We've started processing your bulk engagement of {$this->engagementBatch->total_engagements} messages, and we'll keep you updated on the progress.");
     }
 
     public function toDatabase(object $notifiable): array
     {
         return FilamentNotification::make()
             ->status('success')
-            ->title('Bulk Engagement processing started')
-            ->body("{$this->jobsToProcess} jobs due for processing.")
+            ->title(match ($this->engagementBatch->channel) {
+                NotificationChannel::Email => 'Bulk email started processing',
+                default => 'Bulk engagement started processing',
+            })
+            ->body("We've started processing your bulk engagement of {$this->engagementBatch->total_engagements} messages, and we'll keep you updated on the progress.")
             ->getDatabaseMessage();
     }
 

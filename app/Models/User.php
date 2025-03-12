@@ -45,7 +45,7 @@ use AidingApp\Engagement\Models\Concerns\HasManyEngagementBatches;
 use AidingApp\Engagement\Models\Concerns\HasManyEngagements;
 use AidingApp\InAppCommunication\Models\TwilioConversation;
 use AidingApp\InAppCommunication\Models\TwilioConversationUser;
-use AidingApp\Notification\Models\Contracts\NotifiableInterface;
+use AidingApp\Notification\Models\Contracts\CanBeNotified;
 use AidingApp\Notification\Models\Subscription;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Models\ChangeRequest;
@@ -84,7 +84,7 @@ use Staudenmeir\EloquentHasManyDeep\HasRelationships;
 /**
  * @mixin IdeHelperUser
  */
-class User extends Authenticatable implements HasLocalePreference, FilamentUser, Auditable, HasMedia, HasAvatar, NotifiableInterface, HasFilamentResource
+class User extends Authenticatable implements HasLocalePreference, FilamentUser, Auditable, HasMedia, HasAvatar, CanBeNotified, HasFilamentResource
 {
     use HasFactory;
     use HasAdvancedFilter;
@@ -175,6 +175,11 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
         'roles.title',
         'locale',
     ];
+
+    public function canRecieveSms(): bool
+    {
+        return false;
+    }
 
     public function conversations(): BelongsToMany
     {

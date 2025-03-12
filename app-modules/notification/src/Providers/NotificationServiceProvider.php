@@ -40,16 +40,23 @@ use AidingApp\Notification\Events\SubscriptionCreated;
 use AidingApp\Notification\Events\SubscriptionDeleted;
 use AidingApp\Notification\Events\TriggeredAutoSubscription;
 use AidingApp\Notification\Listeners\CreateAutoSubscription;
-use AidingApp\Notification\Listeners\HandleNotificationFailed;
-use AidingApp\Notification\Listeners\HandleNotificationSent;
 use AidingApp\Notification\Listeners\NotifyUserOfSubscriptionCreated;
 use AidingApp\Notification\Listeners\NotifyUserOfSubscriptionDeleted;
+use AidingApp\Notification\Models\DatabaseMessage;
+use AidingApp\Notification\Models\EmailMessage;
+use AidingApp\Notification\Models\EmailMessageEvent;
 use AidingApp\Notification\Models\OutboundDeliverable;
 use AidingApp\Notification\Models\Subscription;
+use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
+use AidingApp\Notification\Notifications\Channels\EmailChannel;
+use AidingApp\Notification\Notifications\Channels\MailChannel;
+use AidingApp\Notification\Notifications\Channels\OldDatabaseChannel;
 use App\Concerns\ImplementsGraphQL;
+use App\Features\NewMessageModels;
+use Illuminate\Contracts\Container\Container;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Notifications\Events\NotificationFailed;
-use Illuminate\Notifications\Events\NotificationSent;
+use Illuminate\Notifications\Channels\DatabaseChannel as BaseDatabaseChannel;
+use Illuminate\Notifications\Channels\MailChannel as BaseMailChannel;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
@@ -57,13 +64,21 @@ class NotificationServiceProvider extends ServiceProvider
 {
     use ImplementsGraphQL;
 
-    public function register(): void {}
+    public function register(): void
+    {
+        // Note: Email and Database can be changed to regular binds just passing in the contrete class in the cleanup ticket
+        $this->app->bind(BaseMailChannel::class, fn (Container $app) => NewMessageModels::active() ? $this->app->make(MailChannel::class) : $this->app->make(EmailChannel::class));
+        $this->app->bind(BaseDatabaseChannel::class, fn (Container $app) => NewMessageModels::active() ? $this->app->make(DatabaseChannel::class) : $this->app->make(OldDatabaseChannel::class));
+    }
 
     public function boot(): void
     {
         Relation::morphMap([
             'subscription' => Subscription::class,
             'outbound_deliverable' => OutboundDeliverable::class,
+            'email_message' => EmailMessage::class,
+            'email_message_event' => EmailMessageEvent::class,
+            'database_message' => DatabaseMessage::class,
         ]);
 
         $this->registerEvents();
@@ -73,20 +88,6 @@ class NotificationServiceProvider extends ServiceProvider
 
     protected function registerEvents(): void
     {
-        Event::listen(
-            NotificationSent::class,
-            HandleNotificationSent::class
-        );
-
-        Event::listen(
-            NotificationFailed::class,
-            HandleNotificationFailed::class
-        );
-
-        // TODO Listen to the MessageSent event in order to update email statuses
-        // as best as we can without the SES information...
-
-        // TODO Should subscriptions exist in their own module???
         Event::listen(
             SubscriptionCreated::class,
             NotifyUserOfSubscriptionCreated::class

@@ -36,78 +36,69 @@
 
 namespace AidingApp\Engagement\Actions;
 
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Engagement\DataTransferObjects\EngagementBatchCreationData;
-use AidingApp\Engagement\Models\Engagement;
+use AidingApp\Engagement\DataTransferObjects\EngagementCreationData;
+use AidingApp\Engagement\Jobs\CreateBatchedEngagement;
 use AidingApp\Engagement\Models\EngagementBatch;
-use AidingApp\Engagement\Models\EngagementDeliverable;
 use AidingApp\Engagement\Notifications\EngagementBatchFinishedNotification;
 use AidingApp\Engagement\Notifications\EngagementBatchStartedNotification;
-use Illuminate\Bus\Batch;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
+use AidingApp\Notification\Models\Contracts\CanBeNotified;
 use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\DB;
+use Throwable;
 
-class CreateEngagementBatch implements ShouldQueue
+class CreateEngagementBatch
 {
-    use Dispatchable;
-    use InteractsWithQueue;
-    use Queueable;
-    use SerializesModels;
-
-    public function __construct(
-        public EngagementBatchCreationData $data
-    ) {}
-
-    public function handle(): void
+    public function execute(EngagementCreationData $data): void
     {
-        $engagementBatch = EngagementBatch::create([
-            'user_id' => $this->data->user->id,
-        ]);
+        $engagementBatch = new EngagementBatch();
+        $engagementBatch->user()->associate($data->user);
+        $engagementBatch->channel = $data->channel;
+        $engagementBatch->subject = $data->subject;
+        $engagementBatch->scheduled_at = $data->scheduledAt;
+        $engagementBatch->total_engagements = $data->recipient->count();
+        $engagementBatch->processed_engagements = 0;
+        $engagementBatch->successful_engagements = 0;
 
-        [$body] = tiptap_converter()->saveImages(
-            $this->data->body,
-            disk: 's3-public',
-            record: $engagementBatch,
-            recordAttribute: 'body',
-            newImages: $this->data->temporaryBodyImages,
-        );
+        DB::transaction(function () use ($engagementBatch, $data) {
+            $engagementBatch->save();
 
-        $this->data->records->each(function (Contact $record) use ($body, $engagementBatch) {
-            /** @var Engagement $engagement */
-            $engagement = $engagementBatch->engagements()->create([
-                'user_id' => $engagementBatch->user_id,
-                'recipient_id' => $record->getKey(),
-                'recipient_type' => $record->getMorphClass(),
-                'body' => $body,
-                'subject' => $this->data->subject,
-                'scheduled' => false,
-            ]);
+            [$engagementBatch->body] = tiptap_converter()->saveImages(
+                $data->body,
+                disk: 's3-public',
+                record: $engagementBatch,
+                recordAttribute: 'body',
+                newImages: $data->temporaryBodyImages,
+            );
 
-            $createEngagementDeliverable = resolve(CreateEngagementDeliverable::class);
-
-            $createEngagementDeliverable($engagement, $this->data->deliveryMethod);
+            $engagementBatch->save();
         });
 
-        $deliverables = $engagementBatch->engagements->map(function (Engagement $engagement) {
-            return $engagement->deliverable;
-        });
+        try {
+            $batch = Bus::batch([
+                ...blank($data->scheduledAt) ? [fn () => $engagementBatch->user->notify(new EngagementBatchStartedNotification($engagementBatch))] : [],
+                ...$data->recipient
+                    ->map(fn (CanBeNotified $recipient): CreateBatchedEngagement => new CreateBatchedEngagement($engagementBatch, $recipient))
+                    ->all(),
+            ])
+                ->name("Bulk Engagement {$engagementBatch->getKey()}")
+                ->finally(function () use ($engagementBatch) {
+                    if ($engagementBatch->scheduled_at) {
+                        return;
+                    }
 
-        $deliverableJobs = $deliverables->flatten()->map(function (EngagementDeliverable $deliverable) {
-            return $deliverable->driver()->jobForDelivery();
-        });
+                    $engagementBatch->refresh();
 
-        $engagementBatch->user->notify(new EngagementBatchStartedNotification($engagementBatch, $deliverableJobs->count()));
+                    $engagementBatch->user->notify(new EngagementBatchFinishedNotification($engagementBatch));
+                })
+                ->allowFailures()
+                ->dispatch();
 
-        Bus::batch($deliverableJobs)
-            ->name("Process Bulk Engagement {$engagementBatch->id}")
-            ->finally(function (Batch $batchQueue) use ($engagementBatch) {
-                $engagementBatch->user->notify(new EngagementBatchFinishedNotification($engagementBatch, $batchQueue->totalJobs, $batchQueue->failedJobs));
-            })
-            ->allowFailures()
-            ->dispatch();
+            $engagementBatch->identifier = $batch->id;
+            $engagementBatch->save();
+        } catch (Throwable $exception) {
+            $engagementBatch->delete();
+
+            throw $exception;
+        }
     }
 }

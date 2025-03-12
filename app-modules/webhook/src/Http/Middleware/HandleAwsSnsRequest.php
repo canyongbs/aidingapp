@@ -36,27 +36,27 @@
 
 namespace AidingApp\Webhook\Http\Middleware;
 
-use AidingApp\Webhook\Actions\StoreInboundWebhook;
 use AidingApp\Webhook\DataTransferObjects\SnsMessage;
 use AidingApp\Webhook\Enums\InboundWebhookSource;
+use AidingApp\Webhook\Models\LandlordInboundWebhook;
 use Closure;
 use Exception;
+use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class HandleAwsSnsRequest
 {
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, Closure $next): Response|ResponseFactory
     {
         $data = SnsMessage::fromRequest($request);
 
-        app(StoreInboundWebhook::class)
-            ->handle(
-                InboundWebhookSource::AwsSns,
-                in_array($data->type, ['SubscriptionConfirmation', 'UnsubscribeConfirmation', 'Notification']) ? $data->type : 'UnknownSnsType',
-                $request->url(),
-                $request->getContent()
-            );
+        LandlordInboundWebhook::create([
+            'source' => InboundWebhookSource::AwsSns,
+            'event' => in_array($data->type, ['SubscriptionConfirmation', 'UnsubscribeConfirmation', 'Notification']) ? $data->type : 'UnknownSnsType',
+            'url' => $request->url(),
+            'payload' => is_array($request->getContent()) ? json_encode($request->getContent()) : $request->getContent(),
+        ]);
 
         if ($data->type === 'SubscriptionConfirmation') {
             if (app()->environment('testing')) {
