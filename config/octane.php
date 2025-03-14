@@ -35,9 +35,6 @@
 */
 
 use App\Listeners\ClearSentryUser;
-use Illuminate\Notifications\ChannelManager;
-use Illuminate\Notifications\Channels\DatabaseChannel;
-use Illuminate\Notifications\Channels\MailChannel;
 use Laravel\Octane\Contracts\OperationTerminated;
 use Laravel\Octane\Events\RequestHandled;
 use Laravel\Octane\Events\RequestReceived;
@@ -162,11 +159,7 @@ return [
         ...Octane::defaultServicesToWarm(),
     ],
 
-    'flush' => [
-        MailChannel::class,
-        DatabaseChannel::class,
-        ChannelManager::class,
-    ],
+    'flush' => [],
 
     /*
     |--------------------------------------------------------------------------

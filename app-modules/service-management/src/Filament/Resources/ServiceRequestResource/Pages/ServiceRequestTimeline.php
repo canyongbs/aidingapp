@@ -36,7 +36,6 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages;
 
-use AidingApp\Notification\Models\OutboundDeliverable;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use AidingApp\ServiceManagement\Models\ServiceRequestHistory;
@@ -57,6 +56,5 @@ class ServiceRequestTimeline extends TimelinePage
         ServiceRequestUpdate::class,
         ServiceRequestAssignment::class,
         ServiceRequestHistory::class,
-        OutboundDeliverable::class,
     ];
 }
