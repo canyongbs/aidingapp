@@ -45,16 +45,11 @@ use AidingApp\Notification\Listeners\NotifyUserOfSubscriptionDeleted;
 use AidingApp\Notification\Models\DatabaseMessage;
 use AidingApp\Notification\Models\EmailMessage;
 use AidingApp\Notification\Models\EmailMessageEvent;
-use AidingApp\Notification\Models\OutboundDeliverable;
 use AidingApp\Notification\Models\StoredAnonymousNotifiable;
 use AidingApp\Notification\Models\Subscription;
 use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
-use AidingApp\Notification\Notifications\Channels\EmailChannel;
 use AidingApp\Notification\Notifications\Channels\MailChannel;
-use AidingApp\Notification\Notifications\Channels\OldDatabaseChannel;
 use App\Concerns\ImplementsGraphQL;
-use App\Features\NewMessageModels;
-use Illuminate\Contracts\Container\Container;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Notifications\Channels\DatabaseChannel as BaseDatabaseChannel;
 use Illuminate\Notifications\Channels\MailChannel as BaseMailChannel;
@@ -68,15 +63,14 @@ class NotificationServiceProvider extends ServiceProvider
     public function register(): void
     {
         // Note: Email and Database can be changed to regular binds just passing in the contrete class in the cleanup ticket
-        $this->app->bind(BaseMailChannel::class, fn (Container $app) => NewMessageModels::active() ? $this->app->make(MailChannel::class) : $this->app->make(EmailChannel::class));
-        $this->app->bind(BaseDatabaseChannel::class, fn (Container $app) => NewMessageModels::active() ? $this->app->make(DatabaseChannel::class) : $this->app->make(OldDatabaseChannel::class));
+        $this->app->bind(BaseMailChannel::class, MailChannel::class);
+        $this->app->bind(BaseDatabaseChannel::class, DatabaseChannel::class);
     }
 
     public function boot(): void
     {
         Relation::morphMap([
             'subscription' => Subscription::class,
-            'outbound_deliverable' => OutboundDeliverable::class,
             'email_message' => EmailMessage::class,
             'email_message_event' => EmailMessageEvent::class,
             'database_message' => DatabaseMessage::class,
