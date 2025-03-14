@@ -37,7 +37,6 @@
 namespace App\Multitenancy\Tasks;
 
 use AidingApp\Notification\Notifications\ChannelManager;
-use AidingApp\Notification\Notifications\Channels\EmailChannel;
 use AidingApp\Notification\Notifications\Channels\MailChannel;
 use Illuminate\Contracts\Mail\Factory;
 use Illuminate\Contracts\Mail\Mailer;
@@ -152,6 +151,5 @@ class SwitchMailTask implements SwitchTenantTask
         app()->forgetInstance(ChannelManager::class);
         app()->forgetInstance(BaseMailChannel::class);
         app()->forgetInstance(MailChannel::class);
-        app()->forgetInstance(EmailChannel::class);
     }
 }

@@ -39,7 +39,6 @@ namespace AidingApp\ServiceManagement\Notifications;
 use AidingApp\Notification\Enums\NotificationChannel;
 use AidingApp\Notification\Models\Contracts\CanBeNotified;
 use AidingApp\Notification\Models\Contracts\Message;
-use AidingApp\Notification\Models\OutboundDeliverable;
 use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
 use AidingApp\Notification\Notifications\Channels\MailChannel;
 use AidingApp\Notification\Notifications\Contracts\HasBeforeSendHook;
@@ -93,7 +92,7 @@ class ServiceRequestUpdated extends BaseNotification implements ShouldQueue, Has
             ->getDatabaseMessage();
     }
 
-    public function beforeSend(AnonymousNotifiable|CanBeNotified $notifiable, OutboundDeliverable|Message $message, NotificationChannel $channel): void
+    public function beforeSend(AnonymousNotifiable|CanBeNotified $notifiable, Message $message, NotificationChannel $channel): void
     {
         $message->related()->associate($this->serviceRequestUpdate);
     }
