@@ -46,6 +46,7 @@ use AidingApp\Notification\Models\DatabaseMessage;
 use AidingApp\Notification\Models\EmailMessage;
 use AidingApp\Notification\Models\EmailMessageEvent;
 use AidingApp\Notification\Models\OutboundDeliverable;
+use AidingApp\Notification\Models\StoredAnonymousNotifiable;
 use AidingApp\Notification\Models\Subscription;
 use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
 use AidingApp\Notification\Notifications\Channels\EmailChannel;
@@ -79,6 +80,7 @@ class NotificationServiceProvider extends ServiceProvider
             'email_message' => EmailMessage::class,
             'email_message_event' => EmailMessageEvent::class,
             'database_message' => DatabaseMessage::class,
+            'stored_anonymous_notifiable' => StoredAnonymousNotifiable::class,
         ]);
 
         $this->registerEvents();

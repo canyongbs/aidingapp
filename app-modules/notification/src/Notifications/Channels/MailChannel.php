@@ -42,10 +42,12 @@ use AidingApp\Notification\Enums\EmailMessageEventType;
 use AidingApp\Notification\Enums\NotificationChannel;
 use AidingApp\Notification\Exceptions\NotificationQuotaExceeded;
 use AidingApp\Notification\Models\EmailMessage;
+use AidingApp\Notification\Models\StoredAnonymousNotifiable;
 use AidingApp\Notification\Notifications\Attributes\SystemNotification;
 use AidingApp\Notification\Notifications\Contracts\HasAfterSendHook;
 use AidingApp\Notification\Notifications\Contracts\HasBeforeSendHook;
 use AidingApp\Notification\Notifications\Contracts\OnDemandNotification;
+use App\Features\StoreAnonymousNotifiableInformationFeature;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Settings\LicenseSettings;
@@ -64,8 +66,16 @@ class MailChannel extends BaseMailChannel
     {
         [$recipientId, $recipientType] = match (true) {
             $notifiable instanceof Model => [$notifiable->getKey(), $notifiable->getMorphClass()],
-            $notifiable instanceof AnonymousNotifiable && $notification instanceof OnDemandNotification => $notification->identifyRecipient(),
-            default => [null, 'anonymous'],
+            $notifiable instanceof AnonymousNotifiable && $notification instanceof OnDemandNotification => $notification->identifyRecipient($notifiable),
+            default => StoreAnonymousNotifiableInformationFeature::active()
+                ? [
+                    StoredAnonymousNotifiable::query()->createOrFirst([
+                        'type' => NotificationChannel::Email,
+                        'route' => $notifiable->routeNotificationFor('mail', $notification),
+                    ])->getKey(),
+                    (new StoredAnonymousNotifiable())->getMorphClass(),
+                ]
+                : [null, 'anonymous'],
         };
 
         $emailMessage = new EmailMessage([

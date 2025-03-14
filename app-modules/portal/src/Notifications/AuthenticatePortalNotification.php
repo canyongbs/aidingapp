@@ -36,10 +36,13 @@
 
 namespace AidingApp\Portal\Notifications;
 
+use AidingApp\Notification\Enums\NotificationChannel;
+use AidingApp\Notification\Models\StoredAnonymousNotifiable;
 use AidingApp\Notification\Notifications\Attributes\SystemNotification;
 use AidingApp\Notification\Notifications\Contracts\OnDemandNotification;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
 use AidingApp\Portal\Models\PortalAuthentication;
+use App\Features\StoreAnonymousNotifiableInformationFeature;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
@@ -71,16 +74,21 @@ class AuthenticatePortalNotification extends Notification implements ShouldQueue
             ->line('For security reasons, the code will expire in 24 hours, but you can always request another.');
     }
 
-    public function identifyRecipient(): array
+    public function identifyRecipient(?object $notifiable = null): array
     {
         /** @var ?Contact $contact */
         $contact = $this->authentication->educatable;
 
         if (! $contact) {
-            return [
-                null,
-                'anonymous',
-            ];
+            return StoreAnonymousNotifiableInformationFeature::active()
+                ? [
+                    StoredAnonymousNotifiable::query()->createOrFirst([
+                        'type' => NotificationChannel::Email,
+                        'route' => $notifiable->routeNotificationFor('mail', $this),
+                    ])->getKey(),
+                    (new StoredAnonymousNotifiable())->getMorphClass(),
+                ]
+                : [null, 'anonymous'];
         }
 
         return [
