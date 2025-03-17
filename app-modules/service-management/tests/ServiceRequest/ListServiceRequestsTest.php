@@ -324,13 +324,19 @@ it('can filter service requests by assigned to with unassigned option', function
 
     $user = User::factory()->create();
 
+    $secondUser = User::factory()->create();
+
     $user->givePermissionTo('service_request.*.update');
 
     $team = Team::factory()->create();
 
     $user->teams()->attach($team);
 
+    $secondUser->teams()->attach($team);
+
     $user->refresh();
+
+    $secondUser->refresh();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
@@ -354,22 +360,52 @@ it('can filter service requests by assigned to with unassigned option', function
         ])
         ->create();
 
+    $assignedSecondRequest = ServiceRequest::factory()
+        ->has(
+            factory: ServiceRequestAssignment::factory()
+                ->state([
+                    'user_id' => $user->getKey(),
+                ])
+                ->active(),
+            relationship: 'assignments'
+        )
+        ->state([
+            'priority_id' => ServiceRequestPriority::factory()->create([
+                'type_id' => $serviceRequestType->getKey(),
+            ])->getKey(),
+        ])
+        ->create();
+
+    $changeAssignmentToSecondUser = ServiceRequestAssignment::factory()->state([
+        'service_request_id' => $assignedSecondRequest->getKey(),
+        'user_id' => $secondUser->getKey(),
+    ])
+        ->create();
+
     livewire(ListServiceRequests::class)
         ->assertCanSeeTableRecords([
             $unassignedRequest,
             $assignedRequest,
+            $assignedSecondRequest,
         ])
         ->filterTable('assignedTo', 'unassigned')
         ->assertCanSeeTableRecords([$unassignedRequest])
-        ->assertCanNotSeeTableRecords([$assignedRequest])
+        ->assertCanNotSeeTableRecords([
+            $assignedRequest,
+            $assignedSecondRequest,
+        ])
         ->removeTableFilter('assignedTo')
         ->filterTable('assignedTo', $user->getKey())
         ->assertCanSeeTableRecords([$assignedRequest])
-        ->assertCanNotSeeTableRecords([$unassignedRequest])
+        ->assertCanNotSeeTableRecords([
+            $unassignedRequest,
+            $assignedSecondRequest,
+        ])
         ->removeTableFilter('assignedTo')
         ->assertCanSeeTableRecords([
             $unassignedRequest,
             $assignedRequest,
+            $assignedSecondRequest,
         ]);
 });
 
