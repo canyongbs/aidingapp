@@ -38,7 +38,6 @@ namespace App\Filament\Resources;
 
 use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Authorization\Models\License;
-use App\Features\UserWorkFieldsFeature;
 use App\Filament\Forms\Components\Licenses;
 use App\Filament\Resources\UserResource\Actions\AssignLicensesBulkAction;
 use App\Filament\Resources\UserResource\Actions\AssignRolesBulkAction;
@@ -109,19 +108,16 @@ class UserResource extends Resource
                             ->maxLength(255),
                         PhoneInput::make('work_number')
                             ->label('Work Number')
-                            ->visible(fn (): bool => UserWorkFieldsFeature::active())
                             ->nullable(),
                         TextInput::make('work_extension')
                             ->label('Work Extension')
                             ->nullable()
-                            ->visible(fn (): bool => UserWorkFieldsFeature::active())
                             ->numeric(),
                         PhoneInput::make('mobile')
-                            ->visible(fn (): bool => UserWorkFieldsFeature::active())
                             ->nullable(),
                         Toggle::make('is_external')
                             ->label('User can only log in via a social provider.')
-                            ->columnSpan(UserWorkFieldsFeature::active() ? 'full' : 'default'), // TODO: Please change this to columnSpanFull while featureFlag cleanup
+                            ->columnSpanFull(),
                         TextInput::make('created_at')
                             ->formatStateUsing(fn ($state) => Carbon::parse($state)->format(config('project.datetime_format') ?? 'Y-m-d H:i:s'))
                             ->disabled(),
