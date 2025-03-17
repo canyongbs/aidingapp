@@ -36,14 +36,84 @@
 
 namespace App\Filament\Resources\UserResource\Pages;
 
+use AidingApp\Authorization\Models\License;
+use App\Filament\Forms\Components\Licenses;
 use App\Filament\Resources\UserResource;
+use App\Models\Authenticatable;
 use App\Models\User;
 use App\Notifications\SetPasswordNotification;
+use App\Rules\EmailNotInUseOrSoftDeleted;
+use Carbon\Carbon;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Form;
 use Filament\Resources\Pages\CreateRecord;
+use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
 class CreateUser extends CreateRecord
 {
     protected static string $resource = UserResource::class;
+
+    public function form(Form $form): Form
+    {
+        return $form
+            ->disabled(false)
+            ->schema([
+                Section::make()
+                    ->columns()
+                    ->schema([
+                        TextInput::make('name')
+                            ->required()
+                            ->maxLength(255),
+                        TextInput::make('email')
+                            ->label('Email address')
+                            ->email()
+                            ->required()
+                            ->maxLength(255)
+                            ->rules([
+                                new EmailNotInUseOrSoftDeleted(),
+                            ]),
+                        TextInput::make('job_title')
+                            ->string()
+                            ->maxLength(255),
+                        PhoneInput::make('work_number')
+                            ->label('Work Number')
+                            ->nullable(),
+                        TextInput::make('work_extension')
+                            ->label('Work Extension')
+                            ->nullable()
+                            ->numeric(),
+                        PhoneInput::make('mobile')
+                            ->nullable(),
+                        Toggle::make('is_external')
+                            ->label('User can only log in via a social provider.')
+                            ->columnSpanFull(),
+                        TextInput::make('created_at')
+                            ->formatStateUsing(fn ($state) => Carbon::parse($state)->format(config('project.datetime_format') ?? 'Y-m-d H:i:s'))
+                            ->disabled(),
+                        TextInput::make('updated_at')
+                            ->formatStateUsing(fn ($state) => Carbon::parse($state)->format(config('project.datetime_format') ?? 'Y-m-d H:i:s'))
+                            ->disabled(),
+                    ]),
+                Section::make('Team')
+                    ->schema([
+                        Select::make('teams')
+                            ->label('')
+                            ->relationship('teams', 'name'),
+                    ])
+                    ->hidden(fn (?User $record) => (bool) $record?->hasRole(Authenticatable::SUPER_ADMIN_ROLE)),
+                Licenses::make()
+                    ->hidden(fn (?User $record) => is_null($record))
+                    ->disabled(function () {
+                        /** @var User $user */
+                        $user = auth()->user();
+
+                        return $user->cannot('create', License::class);
+                    }),
+            ]);
+    }
 
     protected function afterCreate(): void
     {
