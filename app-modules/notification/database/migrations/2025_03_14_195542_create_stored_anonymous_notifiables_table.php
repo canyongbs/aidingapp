@@ -34,48 +34,25 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Form\Notifications;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-use AidingApp\Form\Models\SubmissibleAuthentication;
-use AidingApp\Notification\Notifications\Attributes\SystemNotification;
-use AidingApp\Notification\Notifications\Contracts\OnDemandNotification;
-use AidingApp\Notification\Notifications\Messages\MailMessage;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Notification;
-
-#[SystemNotification]
-class AuthenticateFormNotification extends Notification implements ShouldQueue, OnDemandNotification
-{
-    use Queueable;
-
-    public function __construct(
-        public SubmissibleAuthentication $submissibleAuthentication,
-        public int $code,
-    ) {}
-
-    /**
-     * @return array<int, string>
-     */
-    public function via(object $notifiable): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return ['mail'];
+        Schema::create('stored_anonymous_notifiables', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->string('type');
+            $table->string('route');
+            $table->timestamps();
+
+            $table->unique(['type', 'route']);
+        });
     }
 
-    public function toMail(object $notifiable): MailMessage
+    public function down(): void
     {
-        return MailMessage::make()
-            ->subject("Your authentication code for {$this->submissibleAuthentication->submissible->name}")
-            ->line("Your code is: {$this->code}.")
-            ->line('You should type this code into the form to authenticate yourself.')
-            ->line('For security reasons, the code will expire in 24 hours, but you can always request another.');
+        Schema::dropIfExists('stored_anonymous_notifiables');
     }
-
-    public function identifyRecipient(?object $notifiable = null): array
-    {
-        return [
-            $this->submissibleAuthentication->author->getKey(),
-            $this->submissibleAuthentication->author->getMorphClass(),
-        ];
-    }
-}
+};

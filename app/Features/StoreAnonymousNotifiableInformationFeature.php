@@ -34,48 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Form\Notifications;
+namespace App\Features;
 
-use AidingApp\Form\Models\SubmissibleAuthentication;
-use AidingApp\Notification\Notifications\Attributes\SystemNotification;
-use AidingApp\Notification\Notifications\Contracts\OnDemandNotification;
-use AidingApp\Notification\Notifications\Messages\MailMessage;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Notification;
+use App\Support\AbstractFeatureFlag;
 
-#[SystemNotification]
-class AuthenticateFormNotification extends Notification implements ShouldQueue, OnDemandNotification
+class StoreAnonymousNotifiableInformationFeature extends AbstractFeatureFlag
 {
-    use Queueable;
-
-    public function __construct(
-        public SubmissibleAuthentication $submissibleAuthentication,
-        public int $code,
-    ) {}
-
-    /**
-     * @return array<int, string>
-     */
-    public function via(object $notifiable): array
+    public function resolve(mixed $scope): mixed
     {
-        return ['mail'];
-    }
-
-    public function toMail(object $notifiable): MailMessage
-    {
-        return MailMessage::make()
-            ->subject("Your authentication code for {$this->submissibleAuthentication->submissible->name}")
-            ->line("Your code is: {$this->code}.")
-            ->line('You should type this code into the form to authenticate yourself.')
-            ->line('For security reasons, the code will expire in 24 hours, but you can always request another.');
-    }
-
-    public function identifyRecipient(?object $notifiable = null): array
-    {
-        return [
-            $this->submissibleAuthentication->author->getKey(),
-            $this->submissibleAuthentication->author->getMorphClass(),
-        ];
+        return false;
     }
 }
