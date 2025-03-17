@@ -37,9 +37,7 @@
 namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\ServiceManagement\Enums\ColumnColorOptions;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
-use App\Features\ServiceRequestStatusColorFeature;
 use App\Models\BaseModel;
 use CanyonGBS\Common\Enums\Color;
 use DateTimeInterface;
@@ -74,7 +72,7 @@ class ServiceRequestStatus extends BaseModel implements Auditable
     {
         return [
             'classification' => SystemServiceRequestClassification::class,
-            'color' => ServiceRequestStatusColorFeature::active() ? Color::class : ColumnColorOptions::class,
+            'color' => Color::class,
             'is_system_protected' => 'boolean',
         ];
     }

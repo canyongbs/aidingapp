@@ -36,10 +36,8 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusResource\Pages;
 
-use AidingApp\ServiceManagement\Enums\ColumnColorOptions;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusResource;
-use App\Features\ServiceRequestStatusColorFeature;
 use CanyonGBS\Common\Filament\Forms\Components\ColorSelect;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
@@ -67,16 +65,8 @@ class CreateServiceRequestStatus extends CreateRecord
                             ->options(SystemServiceRequestClassification::class)
                             ->required()
                             ->enum(SystemServiceRequestClassification::class),
-                        Select::make('color')
-                            ->label('Color')
-                            ->searchable()
-                            ->options(ColumnColorOptions::class)
-                            ->required()
-                            ->enum(ColumnColorOptions::class)
-                            ->hidden(ServiceRequestStatusColorFeature::active()),
                         ColorSelect::make()
-                            ->required()
-                            ->visible(ServiceRequestStatusColorFeature::active()),
+                            ->required(),
                     ]),
             ]);
     }
