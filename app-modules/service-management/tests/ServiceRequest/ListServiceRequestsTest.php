@@ -319,10 +319,12 @@ test('can list audit member to service request type', function () {
         ->assertCanNotSeeTableRecords($serviceRequestsWithoutManager);
 });
 
-it('filters unassigned service requests', function () {
+it('can filter service requests by assigned to with unassigned option', function () {
     $unassignedRequest = ServiceRequest::factory()->create();
 
     $user = User::factory()->create();
+
+    $secondUser = User::factory()->create();
 
     $user->givePermissionTo('service_request.*.update');
 
@@ -330,7 +332,11 @@ it('filters unassigned service requests', function () {
 
     $user->teams()->attach($team);
 
+    $secondUser->teams()->attach($team);
+
     $user->refresh();
+
+    $secondUser->refresh();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
@@ -354,14 +360,53 @@ it('filters unassigned service requests', function () {
         ])
         ->create();
 
+    $assignedSecondRequest = ServiceRequest::factory()
+        ->has(
+            factory: ServiceRequestAssignment::factory()
+                ->state([
+                    'user_id' => $user->getKey(),
+                ])
+                ->active(),
+            relationship: 'assignments'
+        )
+        ->state([
+            'priority_id' => ServiceRequestPriority::factory()->create([
+                'type_id' => $serviceRequestType->getKey(),
+            ])->getKey(),
+        ])
+        ->create();
+
+    $changeAssignmentToSecondUser = ServiceRequestAssignment::factory()->state([
+        'service_request_id' => $assignedSecondRequest->getKey(),
+        'user_id' => $secondUser->getKey(),
+    ])
+        ->create();
+
     livewire(ListServiceRequests::class)
         ->assertCanSeeTableRecords([
             $unassignedRequest,
             $assignedRequest,
+            $assignedSecondRequest,
         ])
-        ->filterTable('Unassigned')
+        ->filterTable('assignedTo', 'unassigned')
         ->assertCanSeeTableRecords([$unassignedRequest])
-        ->assertCanNotSeeTableRecords([$assignedRequest]);
+        ->assertCanNotSeeTableRecords([
+            $assignedRequest,
+            $assignedSecondRequest,
+        ])
+        ->removeTableFilter('assignedTo')
+        ->filterTable('assignedTo', $user->getKey())
+        ->assertCanSeeTableRecords([$assignedRequest])
+        ->assertCanNotSeeTableRecords([
+            $unassignedRequest,
+            $assignedSecondRequest,
+        ])
+        ->removeTableFilter('assignedTo')
+        ->assertCanSeeTableRecords([
+            $unassignedRequest,
+            $assignedRequest,
+            $assignedSecondRequest,
+        ]);
 });
 
 it('default non closed service request will not display', function () {

@@ -50,6 +50,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Scopes\EducatableSearch;
 use App\Models\Scopes\EducatableSort;
+use App\Models\User;
 use Filament\Actions\CreateAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
@@ -59,10 +60,10 @@ use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Query\Expression;
 use Illuminate\Support\Str;
 
 class ListServiceRequests extends ListRecords
@@ -166,11 +167,33 @@ class ListServiceRequests extends ListRecords
                         )
                     ))
                     ->preload(),
-                Filter::make('Unassigned')
+                SelectFilter::make('assignedTo')
+                    ->searchable()
+                    ->preload()
+                    ->options(fn () => [
+                        '' => ['unassigned' => 'Unassigned'],
+                        'Assigned to' => User::query()->limit(50)->pluck('name', 'id')->toArray(), // Initially load 50 users
+                    ])
+                    ->getSearchResultsUsing(fn (string $search): array => ['Assigned To' => User::query()->where(new Expression('lower(name)'), 'like', '%' . strtolower($search) . '%')->take(50)->pluck('name', 'id')->toArray()])
                     ->query(
-                        fn (Builder $query) => $query->whereDoesntHave('assignedTo', function (Builder $query) {
-                            $query->where('status', ServiceRequestAssignmentStatus::Active);
-                        })
+                        fn (Builder $query, array $data) => $query
+                            ->when(
+                                empty($data['value']),
+                                fn (Builder $baseQuery) => $baseQuery
+                            )
+                            ->when(
+                                $data['value'] === 'unassigned',
+                                fn (Builder $baseQuery) => $baseQuery->whereDoesntHave('assignedTo', function (Builder $query) {
+                                    $query->where('status', ServiceRequestAssignmentStatus::Active);
+                                })
+                            )
+                            ->when(
+                                ! empty($data['value']) && $data['value'] !== 'unassigned',
+                                fn (Builder $baseQuery) => $baseQuery->whereHas('assignedTo', function (Builder $assignedToQuery) use ($data) {
+                                    $assignedToQuery
+                                        ->whereHas('user', fn (Builder $userQuery) => $userQuery->where('id', $data['value']));
+                                })
+                            )
                     ),
             ])
             ->actions([
