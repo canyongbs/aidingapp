@@ -37,8 +37,6 @@
 namespace App\Filament\Widgets;
 
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use App\Features\ServiceRequestStatusColorFeature;
-use Filament\Support\Colors\Color;
 use Filament\Widgets\ChartWidget;
 
 class ServiceRequestDonutChart extends ChartWidget
@@ -80,14 +78,7 @@ class ServiceRequestDonutChart extends ChartWidget
             'datasets' => [
                 [
                     'data' => $serviceRequestStatuses->pluck('service_requests_count'),
-                    'backgroundColor' => $serviceRequestStatuses->map(fn (ServiceRequestStatus $serviceRequestStatus): string => ServiceRequestStatusColorFeature::active() ? $serviceRequestStatus->color->getRgb() : ('rgb(' . match ($serviceRequestStatus->color->value) {
-                        'primary' => Color::Indigo[500],
-                        'success' => Color::Emerald[500],
-                        'info' => Color::Blue[500],
-                        'warning' => Color::Orange[500],
-                        'danger' => Color::Red[500],
-                        'gray' => Color::Gray[500],
-                    } . ')'))->all(),
+                    'backgroundColor' => $serviceRequestStatuses->map(fn (ServiceRequestStatus $serviceRequestStatus): string => $serviceRequestStatus->color->getRgb())->all(),
                     'hoverOffset' => 4,
                 ],
             ],

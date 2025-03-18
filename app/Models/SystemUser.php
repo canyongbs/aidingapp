@@ -103,4 +103,9 @@ class SystemUser extends Authenticatable implements Auditable
 
         return false;
     }
+
+    public function isSuperAdmin(): bool
+    {
+        return false;
+    }
 }

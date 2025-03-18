@@ -74,7 +74,6 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Foundation\Auth\User as BaseAuthenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use OwenIt\Auditing\Contracts\Auditable;
@@ -86,7 +85,7 @@ use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
  * @mixin IdeHelperContact
  */
 #[ObservedBy([ContactObserver::class])]
-class Contact extends BaseAuthenticatable implements Auditable, Subscribable, Educatable, HasFilamentResource, CanBeNotified
+class Contact extends Authenticatable implements Auditable, Subscribable, Educatable, HasFilamentResource, CanBeNotified
 {
     use AuditableTrait;
     use HasFactory;
@@ -127,6 +126,21 @@ class Contact extends BaseAuthenticatable implements Auditable, Subscribable, Ed
         'sms_opt_out' => 'boolean',
         'email_bounce' => 'boolean',
     ];
+
+    public function hasLicense(LicenseType|string|array|null $type): bool
+    {
+        return false;
+    }
+
+    public function hasAnyLicense(LicenseType|string|array|null $type): bool
+    {
+        return false;
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return false;
+    }
 
     public function canRecieveSms(): bool
     {
