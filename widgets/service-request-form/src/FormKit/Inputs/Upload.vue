@@ -37,6 +37,18 @@
     import { onMounted, ref } from 'vue';
     import { consumer } from '../../../../../portals/knowledge-management/src/Services/Consumer.js';
 
+    // import { FilePondFile, FilePondOptions, FilePondServerConfigProps } from 'filepond'
+    import vueFilePond from 'vue-filepond';
+
+    import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type';
+    import FilePondPluginImagePreview from 'filepond-plugin-image-preview';
+    import FilePondPluginFileValidateSize from 'filepond-plugin-file-validate-size';
+
+    import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.css';
+    import 'filepond/dist/filepond.min.css';
+
+const FilePond = vueFilePond(FilePondPluginImagePreview, FilePondPluginFileValidateType, FilePondPluginFileValidateSize);
+
     const props = defineProps({
         context: Object,
     });
@@ -44,6 +56,7 @@
     const field = ref(null);
 
     onMounted(() => {
+        console.log(props,'props')
         field.value.node.on('input', ({ payload }) => {
             props.context.node.store.filter(() => false);
 
@@ -168,10 +181,20 @@
 </script>
 
 <template>
-    <FormKit ref="field" type="file" :accept="context.accept" :multiple="context.multiple" />
+    <!-- <FormKit ref="field" type="file" :accept="context.accept" :multiple="context.multiple" /> -->
+
+    <!-- <FilePond ref="field" v-bind="context?.attrs" :label-idle="context?.attrs.placeholder"
+        accepted-file-types="image/jpeg, image/png, text/html" /> -->
+    <file-pond ref="field"
+        label-idle="Drop files here or <span class='filepond--label-action'>Browse</span>"
+        :allow-multiple="context.multiple"
+        :accepted-file-types="context.accept.join(', ')"
+        :maxFiles="context.limit"
+        :maxFileSize="context.size * 1024" />
+
     <div :class="context.classes.help">Maximum number of files: {{ context.limit }}</div>
     <div :class="context.classes.help">Maximum file size: {{ context.size }} MB</div>
-    <div :class="context.classes.help">Supported file extensions: {{ context.accept.join(', ') }}</div>
+    <div :class="context.classes.help">Supported file extensions: {{ context.acceptnames?.join(', ') }}</div>
 </template>
 
 <style scoped></style>

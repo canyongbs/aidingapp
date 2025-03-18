@@ -263,7 +263,8 @@ class CreateServiceRequestController extends Controller
             $this->formatBlock('Upload File', UploadFormFieldBlock::type(), false, [
                 'multiple' => $uploadsMediaCollection->getMaxNumberOfFiles() > 1,
                 'limit' => $uploadsMediaCollection->getMaxNumberOfFiles(),
-                'accept' => $uploadsMediaCollection->getExtensions(),
+                'accept' => $uploadsMediaCollection->getExtensionsFull(),
+                'acceptnames' => $uploadsMediaCollection->getExtensions(),
                 'size' => $uploadsMediaCollection->getMaxFileSizeInMB(),
                 'uploadUrl' => route('api.portal.service-request.request-upload-url'),
             ]),

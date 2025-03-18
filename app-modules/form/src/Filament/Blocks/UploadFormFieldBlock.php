@@ -37,6 +37,7 @@
 namespace AidingApp\Form\Filament\Blocks;
 
 use AidingApp\Form\Models\SubmissibleField;
+use Log;
 
 class UploadFormFieldBlock extends FormFieldBlock
 {
@@ -57,6 +58,8 @@ class UploadFormFieldBlock extends FormFieldBlock
 
     public static function getFormKitSchema(SubmissibleField $field): array
     {
+        Log::info('sd', [$field]);
+
         return [
             '$formkit' => 'upload',
             'label' => $field->label,
@@ -64,6 +67,7 @@ class UploadFormFieldBlock extends FormFieldBlock
             ...($field->is_required ? ['validation' => 'required'] : []),
             'multiple' => $field->config['multiple'] ?? false,
             'accept' => $field->config['accept'] ?? '',
+            'acceptnames' => $field->config['acceptnames'] ?? '',
             'limit' => $field->config['limit'] ?? null,
             'size' => $field->config['size'] ?? null,
             'uploadUrl' => route('api.portal.service-request.request-upload-url'),
