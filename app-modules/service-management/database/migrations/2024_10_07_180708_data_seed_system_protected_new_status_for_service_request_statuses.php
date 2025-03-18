@@ -65,7 +65,7 @@ return new class () extends Migration {
             'id' => Str::orderedUuid(),
             'classification' => 'open',
             'name' => 'New',
-            'color' => 'info',
+            'color' => 'blue',
             'is_system_protected' => true,
             'created_at' => now(),
         ]);
