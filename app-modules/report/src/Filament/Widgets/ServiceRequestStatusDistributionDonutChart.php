@@ -37,7 +37,6 @@
 namespace AidingApp\Report\Filament\Widgets;
 
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use Filament\Support\Colors\Color;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
 
@@ -75,7 +74,7 @@ class ServiceRequestStatusDistributionDonutChart extends ChartReportWidget
             $serviceRequestByStatusData = ServiceRequestStatus::withCount(['serviceRequests'])->get(['id', 'name']);
 
             $serviceRequestByStatusData = $serviceRequestByStatusData->map(function (ServiceRequestStatus $status) {
-                $status['bg_color'] = $this->getColorForStatus($status->color->value);
+                $status['bg_color'] = $status->color->getRgb();
 
                 return $status;
             });
@@ -99,22 +98,5 @@ class ServiceRequestStatusDistributionDonutChart extends ChartReportWidget
     protected function getType(): string
     {
         return 'doughnut';
-    }
-
-    protected function getColorForStatus($color)
-    {
-        return match ($color) {
-            'primary' => $this->getRgbString(Color::Indigo[500]),
-            'success' => $this->getRgbString(Color::Emerald[500]),
-            'info' => $this->getRgbString(Color::Blue[500]),
-            'warning' => $this->getRgbString(Color::Orange[500]),
-            'danger' => $this->getRgbString(Color::Red[500]),
-            'gray' => $this->getRgbString(Color::Gray[500]),
-        };
-    }
-
-    protected function getRgbString($color): string
-    {
-        return "rgb({$color})";
     }
 }
