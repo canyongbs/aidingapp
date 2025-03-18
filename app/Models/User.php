@@ -51,6 +51,8 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Models\ChangeRequest;
 use AidingApp\ServiceManagement\Models\ChangeRequestResponse;
 use AidingApp\ServiceManagement\Models\ChangeRequestType;
+use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+use AidingApp\ServiceManagement\Models\ServiceMonitoringTargetUser;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\Task\Models\Task;
@@ -412,6 +414,13 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
         $this->teams()->detach();
 
         $this->teams()->attach($teamId);
+    }
+
+    public function serviceMonitoringTargets(): BelongsToMany
+    {
+        return $this->belongsToMany(ServiceMonitoringTarget::class)
+            ->using(ServiceMonitoringTargetUser::class)
+            ->withTimestamps();
     }
 
     protected function serializeDate(DateTimeInterface $date): string
