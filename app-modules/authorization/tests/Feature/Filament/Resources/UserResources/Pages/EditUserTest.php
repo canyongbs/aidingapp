@@ -258,6 +258,14 @@ test('EditUser validates the inputs', function ($data, $errors) {
             ['email' => 'invalidEmail'],
             ['email' => 'email'],
         ],
+        'work_extension numeric' => [
+            ['work_extension' => 'invalid'],
+            ['work_extension' => 'numeric'],
+        ],
+        'job_title max' => [
+            ['job_title' => str()->random(256)],
+            ['job_title' => 'max'],
+        ],
     ]
 );
 
