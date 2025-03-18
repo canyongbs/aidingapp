@@ -239,7 +239,7 @@ test('EditUser validates the inputs', function ($data, $errors) {
 })->with(
     [
         'names required' => [
-            ['name' => null], // Using only raw data instead of model instance
+            ['name' => null],
             ['name' => 'required'],
         ],
         'name max' => [
