@@ -37,6 +37,8 @@
 namespace AidingApp\Team\Models;
 
 use AidingApp\Division\Models\Division;
+use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+use AidingApp\ServiceManagement\Models\ServiceMonitoringTargetTeam;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeAuditor;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeManager;
@@ -60,6 +62,13 @@ class Team extends BaseModel
         return $this
             ->belongsToMany(User::class)
             ->using(TeamUser::class)
+            ->withTimestamps();
+    }
+
+    public function serviceMonitoringTargets(): BelongsToMany
+    {
+        return $this->belongsToMany(ServiceMonitoringTarget::class)
+            ->using(ServiceMonitoringTargetTeam::class)
             ->withTimestamps();
     }
 
