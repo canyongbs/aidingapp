@@ -59,4 +59,6 @@ abstract class Authenticatable extends BaseAuthenticatable
      * @param LicenseType | string | array<LicenseType | string> | null $type
      */
     abstract public function hasAnyLicense(LicenseType | string | array | null $type): bool;
+
+    abstract public function isSuperAdmin(): bool;
 }
