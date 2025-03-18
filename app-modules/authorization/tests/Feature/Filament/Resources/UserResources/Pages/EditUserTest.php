@@ -34,11 +34,13 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Authorization\Enums\LicenseType;
 use App\Filament\Resources\UserResource;
 use App\Filament\Resources\UserResource\Pages\EditUser;
 use App\Filament\Resources\UserResource\RelationManagers\RolesRelationManager;
 use App\Models\Authenticatable;
 use App\Models\User;
+use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Select;
 use Filament\Tables\Actions\AttachAction;
 
@@ -151,4 +153,148 @@ it('does not allow a user which does not have the SaaS Global Admin role to assi
 
             return empty($options);
         });
+});
+
+test('EditUser is gated with proper access control', function () {
+    $user = User::factory()->licensed(LicenseType::cases())->create();
+
+    $anotherUser = User::factory()->create();
+
+    actingAs($user)
+        ->get(
+            UserResource::getUrl('edit', [
+                'record' => $anotherUser,
+            ])
+        )->assertForbidden();
+
+    livewire(EditUser::class, [
+        'record' => $anotherUser->getRouteKey(),
+    ])
+        ->assertForbidden();
+
+    $user->givePermissionTo('user.view-any', 'user.*.view', 'user.*.update');
+
+    actingAs($user)
+        ->get(
+            UserResource::getUrl('edit', [
+                'record' => $anotherUser,
+            ])
+        )->assertSuccessful();
+
+    $request = collect(User::factory()->make());
+
+    livewire(EditUser::class, [
+        'record' => $anotherUser->getRouteKey(),
+    ])
+        ->fillForm($request->toArray())
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($anotherUser->fresh()->name)->toEqual($request->get('name'))
+        ->and($anotherUser->fresh()->email)->toEqual($request->get('email'))
+        ->and($anotherUser->fresh()->is_external)->toEqual($request->get('is_external'));
+});
+
+test('delete action visible with proper access control', function () {
+    $user = User::factory()->licensed(LicenseType::cases())->create();
+
+    $anotherUser = User::factory()->create();
+
+    actingAs($user);
+
+    $user->givePermissionTo('user.view-any');
+    $user->givePermissionTo('user.*.update');
+
+    livewire(EditUser::class, [
+        'record' => $anotherUser->getRouteKey(),
+    ])
+        ->assertActionHidden(DeleteAction::class);
+
+    $user->givePermissionTo('user.*.delete');
+
+    livewire(EditUser::class, [
+        'record' => $anotherUser->getRouteKey(),
+    ])
+        ->assertActionVisible(DeleteAction::class);
+});
+
+test('EditUser validates the inputs', function ($data, $errors) {
+    $user = User::factory()->licensed(LicenseType::cases())->create();
+
+    actingAs($user);
+
+    $user->givePermissionTo('user.view-any');
+    $user->givePermissionTo('user.*.update');
+
+    $anotherUser = User::factory()->create();
+
+    $request = User::factory()->state($data)->make()->toArray();
+
+    livewire(EditUser::class, [
+        'record' => $anotherUser->getRouteKey(),
+    ])
+        ->fillForm($request)
+        ->call('save')
+        ->assertHasFormErrors($errors);
+})->with(
+    [
+        'names required' => [
+            ['name' => null], // Using only raw data instead of model instance
+            ['name' => 'required'],
+        ],
+        'name max' => [
+            ['name' => str()->random(256)],
+            ['name' => 'max'],
+        ],
+        'email required' => [
+            ['email' => null],
+            ['email' => 'required'],
+        ],
+        'email max' => [
+            ['email' => str()->random(256) . '@example.com'],
+            ['email' => 'max'],
+        ],
+        'email valid' => [
+            ['email' => 'invalidEmail'],
+            ['email' => 'email'],
+        ],
+    ]
+);
+
+it('prevents assigning an email that belongs to a soft-deleted user', function () {
+    $user = User::factory()->create();
+    $deletedUser = User::factory()->state(['deleted_at' => now()])->create();
+
+    actingAs($user);
+
+    $user->givePermissionTo('user.view-any');
+    $user->givePermissionTo('user.*.update');
+
+    $request = User::factory()->make(['email' => $deletedUser->email])->toArray();
+
+    livewire(EditUser::class, [
+        'record' => $user->getRouteKey(),
+    ])
+        ->fillForm($request)
+        ->call('save')
+        ->assertHasFormErrors(['email' => 'An archived user with this email address already exists. Please contact an administrator to restore this user or use a different email address.']);
+});
+
+it('prevents assigning duplicate email to a user', function () {
+    $user = User::factory()->create();
+    $anotherUser = User::factory()->create();
+
+    actingAs($user);
+
+    $user->givePermissionTo('user.view-any');
+    $user->givePermissionTo('user.*.update');
+
+    $request = User::factory()->make(['email' => $anotherUser->email])->toArray();
+
+    livewire(EditUser::class, [
+        'record' => $user->getRouteKey(),
+    ])
+        ->fillForm($request)
+        ->call('save')
+        ->assertHasFormErrors(['email' => 'A user with this email address already exists. Please use a different email address or contact your administrator if you need to modify this user\'s account.']);
 });

@@ -59,7 +59,6 @@ class CreateUser extends CreateRecord
     public function form(Form $form): Form
     {
         return $form
-            ->disabled(false)
             ->schema([
                 Section::make()
                     ->columns()
