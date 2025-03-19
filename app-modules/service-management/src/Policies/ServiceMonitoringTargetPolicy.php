@@ -2,12 +2,22 @@
 
 namespace AidingApp\ServiceManagement\Policies;
 
+use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
 
 class ServiceMonitoringTargetPolicy
 {
+    public function before(Authenticatable $authenticatable): ?Response
+    {
+        if (! $authenticatable->hasAnyLicense([Contact::getLicenseType()])) {
+            return Response::deny('You are not licensed for the Recruitment CRM.');
+        }
+
+        return null;
+    }
+
     public function viewAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
