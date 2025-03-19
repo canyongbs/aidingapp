@@ -102,7 +102,7 @@ class WorkloadAssigner implements ServiceRequestTypeAssigner
                 $serviceRequestType->save();
                 $serviceRequest->assignments()->create([
                     'user_id' => $user->getKey(),
-                    'assigned_by_id' => auth()->user() ? auth()->user()->getKey() : null,
+                    'assigned_by_id' => null,
                     'assigned_at' => now(),
                     'status' => ServiceRequestAssignmentStatus::Active,
                 ]);
