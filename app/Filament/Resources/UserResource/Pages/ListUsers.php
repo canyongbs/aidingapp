@@ -36,19 +36,113 @@
 
 namespace App\Filament\Resources\UserResource\Pages;
 
+use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\Authorization\Models\License;
 use App\Filament\Imports\UserImporter;
 use App\Filament\Resources\UserResource;
+use App\Filament\Resources\UserResource\Actions\AssignLicensesBulkAction;
+use App\Filament\Resources\UserResource\Actions\AssignRolesBulkAction;
+use App\Filament\Resources\UserResource\Actions\AssignTeamBulkAction;
+use App\Filament\Tables\Columns\IdColumn;
 use App\Models\User;
 use Filament\Actions\CreateAction;
 use Filament\Actions\ImportAction;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Tables\Actions\DeleteBulkAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Database\Eloquent\Builder;
+use STS\FilamentImpersonate\Tables\Actions\Impersonate;
 
 class ListUsers extends ListRecords
 {
     protected static string $resource = UserResource::class;
 
     protected ?string $heading = 'Users';
+
+    public function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                IdColumn::make(),
+                TextColumn::make('name'),
+                TextColumn::make('email')
+                    ->label('Email address'),
+                TextColumn::make('job_title'),
+                TextColumn::make('created_at')
+                    ->label('Created At')
+                    ->dateTime(config('project.datetime_format') ?? 'Y-m-d H:i:s')
+                    ->sortable(),
+                TextColumn::make('updated_at')
+                    ->label('Updated At')
+                    ->dateTime(config('project.datetime_format') ?? 'Y-m-d H:i:s')
+                    ->sortable(),
+            ])
+            ->filters([
+                SelectFilter::make('teams')
+                    ->label('Team')
+                    ->relationship('teams', 'name')
+                    ->multiple()
+                    ->searchable()
+                    ->preload(),
+                SelectFilter::make('licenses')
+                    ->label('License')
+                    ->options(
+                        fn (): array => [
+                            '' => [
+                                'no_assigned_license' => 'No Assigned License',
+                            ],
+                            'Licenses' => collect(LicenseType::cases())
+                                ->mapWithKeys(fn ($case) => [$case->value => $case->name])
+                                ->toArray(),
+                        ]
+                    )
+                    ->getSearchResultsUsing(fn (string $search): array => ['Licenses' => collect(LicenseType::cases())->filter(fn ($case) => str_contains(strtolower($case->name), strtolower($search)))->mapWithKeys(fn ($case) => [$case->value => $case->name])->toArray()])
+                    ->query(
+                        function (Builder $query, array $data) {
+                            if (empty($data['values'])) {
+                                return;
+                            }
+
+                            $query->when(in_array('no_assigned_license', $data['values']), function ($query) {
+                                $query->whereDoesntHave('licenses');
+                            })
+                                ->{in_array('no_assigned_license', $data['values']) ? 'orWhereHas' : 'whereHas'}('licenses', function ($query) use ($data) {
+                                    $query->whereIn('type', array_filter($data['values'], fn ($value) => $value !== 'no_assigned_license'));
+                                });
+                        }
+                    )
+                    ->multiple()
+                    ->searchable()
+                    ->preload(),
+            ])
+            ->actions([
+                Impersonate::make(),
+                ViewAction::make(),
+                EditAction::make(),
+            ])
+            ->bulkActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                    AssignTeamBulkAction::make()
+                        ->visible(function (User $record): bool {
+                            /** @var User $user */
+                            $user = auth()->user();
+
+                            return $user->can('update', $record);
+                        }),
+                    AssignLicensesBulkAction::make()
+                        ->visible(fn () => auth()->user()->can('create', License::class)),
+                    AssignRolesBulkAction::make()
+                        ->visible(fn () => auth()->user()->can('user.*.update', User::class)),
+                ]),
+            ]);
+    }
 
     public function getSubheading(): string | Htmlable | null
     {
