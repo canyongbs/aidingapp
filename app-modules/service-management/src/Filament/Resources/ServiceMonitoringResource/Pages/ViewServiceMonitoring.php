@@ -3,7 +3,7 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Pages;
 
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource;
-use AidingApp\ServiceManagement\Models\Incident;
+use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
@@ -59,7 +59,7 @@ class ViewServiceMonitoring extends ViewRecord
     public function getBreadcrumbs(): array
     {
         $resource = static::getResource();
-        /** @var Incident $record */
+        /** @var ServiceMonitoringTarget $record */
         $record = $this->getRecord();
 
         /** @var array<string, string> $breadcrumbs */
