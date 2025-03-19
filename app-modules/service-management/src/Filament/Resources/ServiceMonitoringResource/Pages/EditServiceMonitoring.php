@@ -4,6 +4,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResour
 
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource;
+use App\Concerns\EditPageRedirection;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Section;
@@ -16,6 +17,8 @@ use Illuminate\Support\Str;
 
 class EditServiceMonitoring extends EditRecord
 {
+    use EditPageRedirection;
+
     protected static string $resource = ServiceMonitoringResource::class;
 
     public function form(Form $form): Form
