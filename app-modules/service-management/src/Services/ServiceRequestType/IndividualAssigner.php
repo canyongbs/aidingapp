@@ -48,7 +48,7 @@ class IndividualAssigner implements ServiceRequestTypeAssigner
         if ($manager) {
             $serviceRequest->assignments()->create([
                 'user_id' => $manager->getKey(),
-                'assigned_by_id' => auth()->user() ? auth()->user()->getKey() : null,
+                'assigned_by_id' => null,
                 'assigned_at' => now(),
                 'status' => ServiceRequestAssignmentStatus::Active,
             ]);
