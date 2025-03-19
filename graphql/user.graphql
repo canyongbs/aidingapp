@@ -3,9 +3,6 @@ type User @model(class: "App\\Models\\User") {
     "Unique primary key."
     id: UUID!
 
-    "Unique email address."
-    email: Email! @canRoot(ability: "viewEmail")
-
     audits: [Audit!] @hasMany
 
     audits_count: Int @count(relation: "audits")
@@ -14,9 +11,6 @@ type User @model(class: "App\\Models\\User") {
 input UsersQuery {
     "Unique primary key."
     id: UUID
-
-    "Users email address."
-    email: Email @canUseInQuery(ability: "viewEmail")
 
     audits: AuditsQuery
 }
