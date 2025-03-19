@@ -24,25 +24,30 @@ class ViewServiceMonitoring extends ViewRecord
                 Section::make()
                     ->schema([
                         TextEntry::make('name')
-                            ->label('name'),
+                            ->label('Name'),
                         TextEntry::make('description')
                             ->label('Description'),
                         TextEntry::make('domain')
                             ->label('Domain'),
                         TextEntry::make('frequency')
                             ->label('Frequency'),
-                        TextEntry::make('teams.name')
-                            ->label('Teams')
-                            ->listWithLineBreaks()
-                            ->limitList(3)
-                            ->expandableLimitedList()
-                            ->visible($this->getRecord()->teams()->count()),
-                        TextEntry::make('users.name')
-                            ->label('Users')
-                            ->listWithLineBreaks()
-                            ->limitList(3)
-                            ->expandableLimitedList()
-                            ->visible($this->getRecord()->users()->count()),
+                        Section::make('Notification Group')
+                            ->schema([
+                                TextEntry::make('teams.name')
+                                    ->label('Teams')
+                                    ->listWithLineBreaks()
+                                    ->limitList(3)
+                                    ->expandableLimitedList()
+                                    ->visible($this->getRecord()->teams()->count()),
+                                TextEntry::make('users.name')
+                                    ->label('Users')
+                                    ->listWithLineBreaks()
+                                    ->limitList(3)
+                                    ->expandableLimitedList()
+                                    ->visible($this->getRecord()->users()->count()),
+                            ])
+                            ->columns()
+                            ->visible($this->getRecord()->teams()->count() || $this->getRecord()->users()->count()),
                     ])
                     ->columns(),
             ]);

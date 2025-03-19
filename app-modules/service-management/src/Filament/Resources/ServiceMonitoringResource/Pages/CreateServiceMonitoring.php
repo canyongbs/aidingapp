@@ -4,6 +4,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResour
 
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -20,6 +21,7 @@ class CreateServiceMonitoring extends CreateRecord
             ->schema([
                 TextInput::make('name')
                     ->label('Name')
+                    ->string()
                     ->required()
                     ->maxLength(255),
                 Textarea::make('description')
@@ -36,18 +38,22 @@ class CreateServiceMonitoring extends CreateRecord
                     ->searchable()
                     ->options(ServiceMonitoringFrequency::class)
                     ->required(),
-                Select::make('team')
-                    ->relationship('teams', 'name')
-                    ->label('Team')
-                    ->multiple()
-                    ->preload()
-                    ->searchable(),
-                Select::make('user')
-                    ->relationship('users', 'name')
-                    ->label('User')
-                    ->multiple()
-                    ->preload()
-                    ->searchable(),
+                Section::make('Notification Group')
+                    ->schema([
+                        Select::make('team')
+                            ->relationship('teams', 'name')
+                            ->label('Team')
+                            ->multiple()
+                            ->preload()
+                            ->searchable(),
+                        Select::make('user')
+                            ->relationship('users', 'name')
+                            ->label('User')
+                            ->multiple()
+                            ->preload()
+                            ->searchable(),
+                    ])
+                    ->columns(2),
             ]);
     }
 }
