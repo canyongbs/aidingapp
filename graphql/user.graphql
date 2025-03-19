@@ -4,7 +4,7 @@ type User @model(class: "App\\Models\\User") {
     id: UUID!
 
     "Unique email address."
-    email: Email! @canRoot(ability: "viewEmail")
+    email: Email!
 
     audits: [Audit!] @hasMany
 
@@ -16,7 +16,7 @@ input UsersQuery {
     id: UUID
 
     "Users email address."
-    email: Email @canUseInQuery(ability: "viewEmail")
+    email: Email
 
     audits: AuditsQuery
 }
