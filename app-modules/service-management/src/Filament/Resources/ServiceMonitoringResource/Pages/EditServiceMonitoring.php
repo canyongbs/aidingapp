@@ -4,6 +4,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResour
 
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource;
+use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use App\Concerns\EditPageRedirection;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
@@ -69,7 +70,7 @@ class EditServiceMonitoring extends EditRecord
     public function getBreadcrumbs(): array
     {
         $resource = static::getResource();
-        /** @var Incident $record */
+        /** @var ServiceMonitoringTarget $record */
         $record = $this->getRecord();
 
         /** @var array<string, string> $breadcrumbs */
