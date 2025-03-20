@@ -64,7 +64,20 @@
     const serverOptions = computed(() => ({
         process: async (fieldName, file, metadata, load, error, progress, abort) => {
             console.log(`Uploading: ${file.name}`, fieldName, file, metadata, load, error, progress, abort);
+            const fileIndex = uploadedFiles.value.findIndex((f) => f.originalFileName === file.name);
+            if (fileIndex !== -1) {
+                props.context.node.store.set(
+                    createMessage({
+                        blocking: true,
+                        key: `uploaded.${fileIndex}`,
+                        value: `File already exists with name: ${file.name}.`,
+                    }),
+                );
+                load();
+                return;
+            }
             const index = fileIndexCounter.value++;
+            const { get } = consumer();
             try {
                 // const { data } = await axios.get(props.context.uploadUrl, {
                 //     params: { filename: file.name },
@@ -78,10 +91,10 @@
                 //         progress(e.lengthComputable, e.loaded, e.total);
                 //     },
                 // });
-                await axios
-                    .get(props.context.uploadUrl, {
-                        filename: file.name,
-                    })
+                console.log(file.name, 'sfile.name');
+                const data = await get(props.context.uploadUrl, {
+                    filename: file.name,
+                })
                     .then(async (response) => {
                         const { url, path } = response.data;
 
@@ -131,10 +144,23 @@
                     .finally(() => {
                         props.context.node.store.remove(`uploading.${index}`);
                     });
+                // console.log(props.context.node.input, 'input');
+                // console.log(uploads, 'uploads');
+                // payload.forEach((value, index) => {
+                //     uploads.push(processUpload(value.file, index));
+                // });
 
-                console.log(`Upload successful: ${file.name}`);
+                const { url, path } = data;
+
+                uploadedFiles.value.push({
+                    originalFileName: file.name,
+                    path: path,
+                });
+                Promise.all(uploadedFiles.value).then((files) => {
+                    props.context.node.input(files);
+                });
+                console.log(`Upload successful: ${uploadedFiles.value}`);
                 load(path);
-                uploadedFiles.value.push({ source: path, options: { type: 'local' } });
             } catch (err) {
                 console.error('Upload error:', err);
                 error('Upload failed');
@@ -148,34 +174,63 @@
             };
         },
         revert: async (uniqueFileId, load) => {
-            console.log(`Reverting file: ${uniqueFileId}`);
+            console.log(`Reverting file: ${uniqueFileId}`, uploadedFiles.value);
+
             try {
-                await axios.delete('/api/remove-file', { data: { filePath: uniqueFileId } });
-                uploadedFiles.value = uploadedFiles.value.filter((f) => f.source !== uniqueFileId);
+                // ✅ Correctly remove the matching file by `originalFileName`
+                const fileIndex = uploadedFiles.value.findIndex((f) => f.path === uniqueFileId);
+                if (fileIndex !== -1) {
+                    uploadedFiles.value.splice(fileIndex, 1);
+                    console.log('File removed from uploadedFiles array:', uniqueFileId);
+                    props.context.node.store.set(
+                        createMessage({
+                            type: 'success',
+                            key: `Removed.${fileIndex}`,
+                            value: `Removed successfully.`,
+                        }),
+                    );
+                } else {
+                    console.warn('File not found in uploadedFiles array:', uniqueFileId);
+                }
+
+                // uploadedFiles.value.forEach((value, index) => {
+                //     load(value.path); // Notify FilePond that the file was removed
+                // });
                 load();
+                Promise.all(uploadedFiles.value).then((files) => {
+                    props.context.node.input(files);
+                });
             } catch (err) {
                 console.error('Failed to remove file:', err);
             }
+
+            // try {
+            //     await axios.delete('/api/remove-file', { data: { filePath: uniqueFileId } });
+            //     uploadedFiles.value = uploadedFiles.value.filter((f) => f.source !== uniqueFileId);
+            //     load();
+            // } catch (err) {
+            //     console.error('Failed to remove file:', err);
+            // }
         },
-        // load: async (source, load, error, progress, abort) => {
-        //     console.log(`Loading file: ${source}`);
-        //     try {
-        //         const response = await axios.get("/api/load-file", {
-        //             params: { path: source },
-        //             responseType: "blob",
-        //         });
-        //         load(response.data);
-        //     } catch (err) {
-        //         console.error("Failed to load file:", err);
-        //         error("Failed to load file");
-        //     }
-        //     return {
-        //         abort: () => {
-        //             console.log("Load aborted");
-        //             abort();
-        //         },
-        //     };
-        // },
+        load: async (source, load, error, progress, abort) => {
+            console.log(`Loading file: ${source}`);
+            try {
+                const response = await axios.get('/api/load-file', {
+                    params: { path: source },
+                    responseType: 'blob',
+                });
+                load(response.data);
+            } catch (err) {
+                console.error('Failed to load file:', err);
+                error('Failed to load file');
+            }
+            return {
+                abort: () => {
+                    console.log('Load aborted');
+                    abort();
+                },
+            };
+        },
     }));
 
     onMounted(async () => {
