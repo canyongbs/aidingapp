@@ -34,10 +34,9 @@
 <script setup>
     import { createMessage } from '@formkit/core';
     import axios from 'axios';
-    import { computed, onMounted, ref } from 'vue';
+    import { computed, nextTick, ref } from 'vue';
     import { consumer } from '../../../../../portals/knowledge-management/src/Services/Consumer.js';
 
-    // import { FilePondFile, FilePondOptions, FilePondServerConfigProps } from 'filepond'
     import vueFilePond from 'vue-filepond';
 
     import FilePondPluginFileValidateSize from 'filepond-plugin-file-validate-size';
@@ -63,7 +62,6 @@
 
     const serverOptions = computed(() => ({
         process: async (fieldName, file, metadata, load, error, progress, abort) => {
-            console.log(`Uploading: ${file.name}`, fieldName, file, metadata, load, error, progress, abort);
             const fileIndex = uploadedFiles.value.findIndex((f) => f.originalFileName === file.name);
             if (fileIndex !== -1) {
                 props.context.node.store.set(
@@ -79,19 +77,6 @@
             const index = fileIndexCounter.value++;
             const { get } = consumer();
             try {
-                // const { data } = await axios.get(props.context.uploadUrl, {
-                //     params: { filename: file.name },
-                // });
-
-                // const { url, path } = data;
-
-                // await axios.put(url, file, {
-                //     headers: { "Content-Type": file.type },
-                //     onUploadProgress: (e) => {
-                //         progress(e.lengthComputable, e.loaded, e.total);
-                //     },
-                // });
-                console.log(file.name, 'sfile.name');
                 const data = await get(props.context.uploadUrl, {
                     filename: file.name,
                 })
@@ -144,13 +129,8 @@
                     .finally(() => {
                         props.context.node.store.remove(`uploading.${index}`);
                     });
-                // console.log(props.context.node.input, 'input');
-                // console.log(uploads, 'uploads');
-                // payload.forEach((value, index) => {
-                //     uploads.push(processUpload(value.file, index));
-                // });
 
-                const { url, path } = data;
+                const { path } = data;
 
                 uploadedFiles.value.push({
                     originalFileName: file.name,
@@ -159,7 +139,6 @@
                 Promise.all(uploadedFiles.value).then((files) => {
                     props.context.node.input(files);
                 });
-                console.log(`Upload successful: ${uploadedFiles.value}`);
                 load(path);
             } catch (err) {
                 console.error('Upload error:', err);
@@ -174,14 +153,10 @@
             };
         },
         revert: async (uniqueFileId, load) => {
-            console.log(`Reverting file: ${uniqueFileId}`, uploadedFiles.value);
-
             try {
-                // ✅ Correctly remove the matching file by `originalFileName`
                 const fileIndex = uploadedFiles.value.findIndex((f) => f.path === uniqueFileId);
                 if (fileIndex !== -1) {
                     uploadedFiles.value.splice(fileIndex, 1);
-                    console.log('File removed from uploadedFiles array:', uniqueFileId);
                     props.context.node.store.set(
                         createMessage({
                             type: 'success',
@@ -193,9 +168,6 @@
                     console.warn('File not found in uploadedFiles array:', uniqueFileId);
                 }
 
-                // uploadedFiles.value.forEach((value, index) => {
-                //     load(value.path); // Notify FilePond that the file was removed
-                // });
                 load();
                 Promise.all(uploadedFiles.value).then((files) => {
                     props.context.node.input(files);
@@ -203,268 +175,37 @@
             } catch (err) {
                 console.error('Failed to remove file:', err);
             }
-
-            // try {
-            //     await axios.delete('/api/remove-file', { data: { filePath: uniqueFileId } });
-            //     uploadedFiles.value = uploadedFiles.value.filter((f) => f.source !== uniqueFileId);
-            //     load();
-            // } catch (err) {
-            //     console.error('Failed to remove file:', err);
-            // }
-        },
-        load: async (source, load, error, progress, abort) => {
-            console.log(`Loading file: ${source}`);
-            try {
-                const response = await axios.get('/api/load-file', {
-                    params: { path: source },
-                    responseType: 'blob',
-                });
-                load(response.data);
-            } catch (err) {
-                console.error('Failed to load file:', err);
-                error('Failed to load file');
-            }
-            return {
-                abort: () => {
-                    console.log('Load aborted');
-                    abort();
-                },
-            };
         },
     }));
 
-    onMounted(async () => {
-        // try {
-        //     const { data } = await axios.get("/api/get-uploaded-files");
-        //     uploadedFiles.value = data.map((file) => ({
-        //         source: file.path,
-        //         options: { type: "local" },
-        //     }));
-        // } catch (error) {
-        //     console.error("Failed to load previous uploads:", error);
-        // }
-        // FilePond.setOptions({
-        //     server: {
-        //         process: (fieldName, file, metadata, load, error, progress, abort, transfer, options) => {
-        //             console.log('server called')
-        //             // fieldName is the name of the input field
-        //             // file is the actual file object to send
-        //             const formData = new FormData();
-        //             formData.append(fieldName, file, file.name);
-        //             const request = new XMLHttpRequest();
-        //             request.open('POST', 'url-to-api');
-        //             // Should call the progress method to update the progress to 100% before calling load
-        //             // Setting computable to false switches the loading indicator to infinite mode
-        //             request.upload.onprogress = (e) => {
-        //                 progress(e.lengthComputable, e.loaded, e.total);
-        //             };
-        //             // Should call the load method when done and pass the returned server file id
-        //             // this server file id is then used later on when reverting or restoring a file
-        //             // so your server knows which file to return without exposing that info to the client
-        //             request.onload = function () {
-        //                 if (request.status >= 200 && request.status < 300) {
-        //                     // the load method accepts either a string (id) or an object
-        //                     load(request.responseText);
-        //                 } else {
-        //                     // Can call the error method if something is wrong, should exit after
-        //                     error('oh no');
-        //                 }
-        //             };
-        //             request.send(formData);
-        //             // Should expose an abort method so the request can be cancelled
-        //             return {
-        //                 abort: () => {
-        //                     // This function is entered if the user has tapped the cancel button
-        //                     request.abort();
-        //                     // Let FilePond know the request has been cancelled
-        //                     abort();
-        //                 },
-        //             };
-        //         },
-        //     },
-        // });
-        // this.$refs.field.on('processfile', (error, file) => {
-        //     console.log("FilePond processed file:", file);
-        // });
-        // console.log(props, 'props');
-        // field.value.node.on('input', ({ payload }) => {
-        //     console.log('upload begun')
-        //     props.context.node.store.filter(() => false);
-        //     if (payload.length > props.context.limit) {
-        //         props.context.node.store.set(
-        //             createMessage({
-        //                 blocking: true,
-        //                 key: 'limit',
-        //                 value: `You can only upload a maximum of ${props.context.limit} files.`,
-        //             }),
-        //         );
-        //         return;
-        //     }
-        //     const size = props.context.size * 1000 * 1000;
-        //     const uploads = [];
-        //     for (const [index, value] of payload.entries()) {
-        //         const extension = `.${value.file.name.split('.').pop()}`;
-        //         // if (!props.context.accept.includes(extension)) {
-        //         //     props.context.node.store.set(
-        //         //         createMessage({
-        //         //             blocking: true,
-        //         //             key: `extension.${index}`,
-        //         //             value: `The file extension ${extension} of ${value.file.name} is not supported.`,
-        //         //         }),
-        //         //     );
-        //         //     return;
-        //         // }
-        //         if (value.file.size > size) {
-        //             props.context.node.store.set(
-        //                 createMessage({
-        //                     blocking: true,
-        //                     key: `size.${index}`,
-        //                     value: `The file size of ${value.file.name} exceeds the maximum size of ${props.context.size}MB.`,
-        //                 }),
-        //             );
-        //             return;
-        //         }
-        //     }
-        //     payload.forEach((value, index) => {
-        //         uploads.push(processUpload(value.file, index));
-        //     });
-        //     Promise.all(uploads).then((files) => {
-        //         props.context.node.input(files);
-        //     });
-        // });
-        // const processUpload = async (file, index) => {
-        //     console.log('process upload begun');
-        //     const { get } = consumer();
-        //     props.context.node.store.set(
-        //         createMessage({
-        //             blocking: true,
-        //             key: `uploading.${index}`,
-        //             value: `Uploading ${file.name}...`,
-        //         }),
-        //     );
-        //     return get(props.context.uploadUrl, {
-        //         filename: file.name,
-        //     })
-        //         .then(async (response) => {
-        //             const { url, path } = response.data;
-        //             return axios
-        //                 .put(url, file, {
-        //                     headers: {
-        //                         'Content-Type': file.type,
-        //                     },
-        //                 })
-        //                 .then(() => {
-        //                     props.context.node.store.set(
-        //                         createMessage({
-        //                             type: 'success',
-        //                             key: `uploaded.${index}`,
-        //                             value: `Uploaded ${file.name} successfully.`,
-        //                         }),
-        //                     );
-        //                     return {
-        //                         originalFileName: file.name,
-        //                         path: path,
-        //                     };
-        //                 })
-        //                 .catch(() => {
-        //                     props.context.node.store.set(
-        //                         createMessage({
-        //                             blocking: true,
-        //                             key: `uploaded.${index}`,
-        //                             value: `Failed to upload ${file.name}.`,
-        //                         }),
-        //                     );
-        //                     return null;
-        //                 });
-        //         })
-        //         .catch(() => {
-        //             props.context.node.store.set(
-        //                 createMessage({
-        //                     blocking: true,
-        //                     key: `uploaded.${index}`,
-        //                     value: `Failed to upload ${file.name}.`,
-        //                 }),
-        //             );
-        //             return null;
-        //         })
-        //         .finally(() => {
-        //             props.context.node.store.remove(`uploading.${index}`);
-        //         });
-        // };
-    });
-    const processUpload = async (file, index) => {
-        console.log('process upload begun');
-        const { get } = consumer();
+    const handleFileAdd = (error, file) => {
+        if (error) {
+            console.error('Error adding file:', error);
+            return;
+        }
 
-        props.context.node.store.set(
-            createMessage({
-                blocking: true,
-                key: `uploading.${index}`,
-                value: `Uploading ${file.name}...`,
-            }),
+        const isDuplicate = uploadedFiles.value.some(
+            (existingFile) => existingFile.originalFileName === file.file.name,
         );
 
-        return get(props.context.uploadUrl, {
-            filename: file.name,
-        })
-            .then(async (response) => {
-                const { url, path } = response.data;
-
-                return axios
-                    .put(url, file, {
-                        headers: {
-                            'Content-Type': file.type,
-                        },
-                    })
-                    .then(() => {
-                        props.context.node.store.set(
-                            createMessage({
-                                type: 'success',
-                                key: `uploaded.${index}`,
-                                value: `Uploaded ${file.name} successfully.`,
-                            }),
-                        );
-
-                        return {
-                            originalFileName: file.name,
-                            path: path,
-                        };
-                    })
-                    .catch(() => {
-                        props.context.node.store.set(
-                            createMessage({
-                                blocking: true,
-                                key: `uploaded.${index}`,
-                                value: `Failed to upload ${file.name}.`,
-                            }),
-                        );
-
-                        return null;
-                    });
-            })
-            .catch(() => {
-                props.context.node.store.set(
-                    createMessage({
-                        blocking: true,
-                        key: `uploaded.${index}`,
-                        value: `Failed to upload ${file.name}.`,
-                    }),
-                );
-
-                return null;
-            })
-            .finally(() => {
-                props.context.node.store.remove(`uploading.${index}`);
+        if (isDuplicate) {
+            props.context.node.store.set(
+                createMessage({
+                    blocking: true,
+                    key: `Already exists.${file.file.name}`,
+                    value: `The file "${file.file.name}" has already been uploaded.`,
+                }),
+            );
+            nextTick(() => {
+                const pond = field.value;
+                pond.removeFile(file.id);
             });
+            return;
+        }
     };
-    // };
 </script>
 
 <template>
-    <!-- <FormKit ref="field" type="file" accept="['.jpg']" :multiple="context.multiple" /> -->
-
-    <!-- <FilePond ref="field" v-bind="context?.attrs" :label-idle="context?.attrs.placeholder"
-        accepted-file-types="image/jpeg, image/png, text/html" /> -->
     <file-pond
         ref="field"
         label-idle="Drop files here or <span class='filepond--label-action'>Browse</span>"
@@ -474,6 +215,7 @@
         :maxFileSize="context.size + 'MB'"
         :files="uploadedFiles"
         :server="serverOptions"
+        @addfile="handleFileAdd"
     />
 
     <div :class="context.classes.help">Maximum number of files: {{ context.limit }}</div>
