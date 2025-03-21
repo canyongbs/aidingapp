@@ -143,4 +143,14 @@ class UploadsMediaCollection extends MediaCollection
             ->values()
             ->toArray();
     }
+
+    public function getExtensionsFull(): array
+    {
+        return collect($this->mimes)
+            ->unique()
+            ->sort()
+            ->keys()
+            ->values()
+            ->toArray();
+    }
 }
