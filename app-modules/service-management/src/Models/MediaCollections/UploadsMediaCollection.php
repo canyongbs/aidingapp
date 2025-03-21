@@ -115,7 +115,6 @@ class UploadsMediaCollection extends MediaCollection
     public function mimes(array $mimes): static
     {
         $this->mimes = $mimes;
-
         $this->acceptsMimeTypes(collect($mimes)->keys()->toArray());
 
         return $this;
