@@ -50,7 +50,7 @@ test('EditServiceMonitoring is gated with proper access control', function () {
     expect($serviceMonitoringTarget->fresh()->name)->toEqual($request->get('name'))
         ->and($serviceMonitoringTarget->fresh()->description)->toEqual($request->get('description'))
         ->and($serviceMonitoringTarget->fresh()->domain)->toEqual($request->get('domain'))
-        ->and($serviceMonitoringTarget->fresh()->frequency)->toEqual($request->get('frequency')->value);
+        ->and($serviceMonitoringTarget->fresh()->frequency)->toEqual($request->get('frequency'));
 });
 
 test('EditServiceMonitoring validates the inputs', function ($data, $errors) {
@@ -97,9 +97,9 @@ test('EditServiceMonitoring validates the inputs', function ($data, $errors) {
             ServiceMonitoringTargetRequestFactory::new()->state(['domain' => str()->random(256)]),
             ['domain' => 'max'],
         ],
-        'domain regex' => [
-            ServiceMonitoringTargetRequestFactory::new()->state(['domain' => 'invalid']),
-            ['domain' => 'regex'],
+        'domain url' => [
+            ServiceMonitoringTargetRequestFactory::new()->state(['domain' => 'invalid-url']),
+            ['domain' => 'url'],
         ],
         'frequency required' => [
             ServiceMonitoringTargetRequestFactory::new()->state(['frequency' => null]),

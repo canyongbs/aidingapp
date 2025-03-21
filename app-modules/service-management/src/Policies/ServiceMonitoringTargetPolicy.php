@@ -26,10 +26,10 @@ class ServiceMonitoringTargetPolicy
         );
     }
 
-    public function view(Authenticatable $authenticatable, ServiceMonitoringTarget $serviceMonitoringTarget): Response
+    public function view(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ["service_monitoring.{$serviceMonitoringTarget->getKey()}.view"],
+            abilities: ['service_monitoring.*.view'],
             denyResponse: 'You do not have permission to view this service monitoring.'
         );
     }
@@ -42,34 +42,34 @@ class ServiceMonitoringTargetPolicy
         );
     }
 
-    public function update(Authenticatable $authenticatable, ServiceMonitoringTarget $serviceMonitoringTarget): Response
+    public function update(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ["service_monitoring.{$serviceMonitoringTarget->getKey()}.update"],
+            abilities: ['service_monitoring.*.update'],
             denyResponse: 'You do not have permission to update this service monitoring.'
         );
     }
 
-    public function delete(Authenticatable $authenticatable, ServiceMonitoringTarget $serviceMonitoringTarget): Response
+    public function delete(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ["service_monitoring.{$serviceMonitoringTarget->getKey()}.delete"],
+            abilities: ['service_monitoring.*.delete'],
             denyResponse: 'You do not have permission to delete this service monitoring.'
         );
     }
 
-    public function restore(Authenticatable $authenticatable, ServiceMonitoringTarget $serviceMonitoringTarget): Response
+    public function restore(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ["service_monitoring.{$serviceMonitoringTarget->getKey()}.restore"],
+            abilities: ['service_monitoring.*.restore'],
             denyResponse: 'You do not have permission to restore this service monitoring.'
         );
     }
 
-    public function forceDelete(Authenticatable $authenticatable, ServiceMonitoringTarget $serviceMonitoringTarget): Response
+    public function forceDelete(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ["service_monitoring.{$serviceMonitoringTarget->getKey()}.force-delete"],
+            abilities: ['service_monitoring.*.force-delete'],
             denyResponse: 'You do not have permission to permanently delete this service monitoring.'
         );
     }

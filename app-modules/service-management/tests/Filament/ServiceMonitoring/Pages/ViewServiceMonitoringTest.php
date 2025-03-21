@@ -31,7 +31,7 @@ test('The correct details are displayed on the ViewServiceMonitoring page', func
                 $serviceMonitoringTarget->name,
                 'Description',
                 $serviceMonitoringTarget->description,
-                'Domain',
+                'URL',
                 $serviceMonitoringTarget->domain,
                 'Frequency',
                 $serviceMonitoringTarget->frequency,

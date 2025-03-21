@@ -12,7 +12,7 @@ class ServiceMonitoringTargetRequestFactory extends RequestFactory
         return [
             'name' => fake()->word(10),
             'description' => fake()->paragraph(),
-            'domain' => fake()->domainName(),
+            'domain' => fake()->url(),
             'frequency' => fake()->randomElement(ServiceMonitoringFrequency::cases()),
         ];
     }
