@@ -34,60 +34,28 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Team\Models;
+namespace AidingApp\ServiceManagement\Database\Factories;
 
-use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
-use AidingApp\ServiceManagement\Models\ServiceMonitoringTargetTeam;
-use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\ServiceManagement\Models\ServiceRequestTypeAuditor;
-use AidingApp\ServiceManagement\Models\ServiceRequestTypeManager;
-use App\Models\BaseModel;
+use AidingApp\ServiceManagement\Models\ServiceMonitoringTargetUser;
 use App\Models\User;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @mixin IdeHelperTeam
+ * @extends Factory<ServiceMonitoringTargetUser>
  */
-class Team extends BaseModel
+class ServiceMonitoringTargetUserFactory extends Factory
 {
-    protected $fillable = [
-        'name',
-        'description',
-    ];
-
-    public function users(): BelongsToMany
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition(): array
     {
-        return $this
-            ->belongsToMany(User::class)
-            ->using(TeamUser::class)
-            ->withTimestamps();
-    }
-
-    public function serviceMonitoringTargets(): BelongsToMany
-    {
-        return $this->belongsToMany(ServiceMonitoringTarget::class)
-            ->using(ServiceMonitoringTargetTeam::class)
-            ->withTimestamps();
-    }
-
-    public function manageableServiceRequestTypes(): BelongsToMany
-    {
-        return $this->belongsToMany(ServiceRequestType::class, 'service_request_type_managers')
-            ->using(ServiceRequestTypeManager::class)
-            ->withTimestamps();
-    }
-
-    public function auditableServiceRequestTypes(): BelongsToMany
-    {
-        return $this->belongsToMany(ServiceRequestType::class, 'service_request_type_auditors')
-            ->using(ServiceRequestTypeAuditor::class)
-            ->withTimestamps();
-    }
-
-    public function division(): BelongsTo
-    {
-        return $this->belongsTo(Division::class);
+        return [
+            'service_monitoring_target_id' => ServiceMonitoringTarget::factory(),
+            'user_id' => User::factory(),
+        ];
     }
 }
