@@ -37,7 +37,6 @@
 namespace AidingApp\ServiceManagement\Policies;
 
 use AidingApp\Contact\Models\Contact;
-use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
 
