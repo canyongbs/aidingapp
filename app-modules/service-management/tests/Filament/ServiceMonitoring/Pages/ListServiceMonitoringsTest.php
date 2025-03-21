@@ -8,7 +8,7 @@ use App\Models\User;
 use Filament\Tables\Actions\DeleteBulkAction;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Laravel\assertModelMissing;
+use function Pest\Laravel\assertSoftDeleted;
 use function Pest\Livewire\livewire;
 
 test('ListServiceMonitorings is gated with proper access control', function () {
@@ -59,6 +59,6 @@ test('bulk delete ServiceMonitorings', function () {
         ->callTableBulkAction(DeleteBulkAction::class, $serviceMonitoringTargets);
 
     foreach ($serviceMonitoringTargets as $serviceMonitoringTarget) {
-        assertModelMissing($serviceMonitoringTarget);
+        assertSoftDeleted($serviceMonitoringTarget);
     }
 });

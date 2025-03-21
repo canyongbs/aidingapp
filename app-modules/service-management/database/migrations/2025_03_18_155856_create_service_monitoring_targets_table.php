@@ -14,6 +14,7 @@ return new class () extends Migration {
             $table->string('domain');
             $table->string('frequency');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

@@ -29,14 +29,15 @@ class CreateServiceMonitoring extends CreateRecord
                     ->string()
                     ->maxLength(65535),
                 TextInput::make('domain')
-                    ->label('Domain')
+                    ->label('URL')
                     ->required()
                     ->maxLength(255)
-                    ->regex('/^(?!-)([a-zA-Z0-9-]{1,63}\.)+[a-zA-Z]{2,63}$/'),
+                    ->url(),
                 Select::make('frequency')
                     ->label('Frequency')
                     ->searchable()
                     ->options(ServiceMonitoringFrequency::class)
+                    ->enum(ServiceMonitoringFrequency::class)
                     ->required(),
                 Section::make('Notification Group')
                     ->schema([
