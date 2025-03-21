@@ -7,7 +7,7 @@ LABEL maintainer="CanyonGBS"
 ARG POSTGRES_VERSION=15
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends git gnupg zip unzip php8.2-apcu php8.2-pgsql php8.2-imagick php8.2-mailparse php8.2-redis php8.2-pcov php8.2-xdebug \
+    && apt-get install -y --no-install-recommends git cron gnupg zip unzip php8.2-apcu php8.2-pgsql php8.2-imagick php8.2-mailparse php8.2-redis php8.2-pcov php8.2-xdebug \
     && curl -sS https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor | tee /etc/apt/keyrings/pgdg.gpg >/dev/null \
     && echo "deb [signed-by=/etc/apt/keyrings/pgdg.gpg] https://apt.postgresql.org/pub/repos/apt jammy-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
     && apt-get update \
@@ -32,6 +32,7 @@ RUN echo "source $NVM_DIR/nvm.sh \
     && nvm use default \
     && npm install -g npm@$NPM_VERSION" | bash
 
+COPY --chmod=644 ./docker/cron.d/ /etc/cron.d/
 COPY ./docker/s6-overlay/scripts/ /etc/s6-overlay/scripts/
 COPY docker/s6-overlay/s6-rc.d/ /etc/s6-overlay/s6-rc.d/
 COPY ./docker/s6-overlay/user/ /etc/s6-overlay/s6-rc.d/user/contents.d/
