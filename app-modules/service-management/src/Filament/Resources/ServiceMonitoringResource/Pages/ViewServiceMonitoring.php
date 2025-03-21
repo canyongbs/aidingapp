@@ -28,7 +28,7 @@ class ViewServiceMonitoring extends ViewRecord
                         TextEntry::make('description')
                             ->label('Description'),
                         TextEntry::make('domain')
-                            ->label('Domain'),
+                            ->label('URL'),
                         TextEntry::make('frequency')
                             ->label('Frequency'),
                         Section::make('Notification Group')

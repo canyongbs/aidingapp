@@ -25,7 +25,7 @@ class ListServiceMonitorings extends ListRecords
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('domain')
-                    ->label('Domain')
+                    ->label('URL')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('frequency')
