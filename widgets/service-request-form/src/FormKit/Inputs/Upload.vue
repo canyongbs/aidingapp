@@ -216,6 +216,7 @@
         :files="uploadedFiles"
         :server="serverOptions"
         @addfile="handleFileAdd"
+        :credits="false"
     />
 
     <div :class="context.classes.help">Maximum number of files: {{ context.limit }}</div>
