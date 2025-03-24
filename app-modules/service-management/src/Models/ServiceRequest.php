@@ -126,6 +126,8 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
                 'text/csv' => ['csv'],
                 'text/markdown' => ['md', 'markdown', 'mkd'],
                 'text/plain' => ['txt', 'text'],
+                'application/octet-stream' => ['log'],
+                '.log' => ['log'],
             ]);
     }
 
