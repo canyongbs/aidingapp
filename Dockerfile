@@ -1,4 +1,3 @@
-FROM ghcr.io/roadrunner-server/roadrunner:2024.3.4 AS roadrunner
 FROM serversideup/php:8.2-fpm-nginx-v2.2.1 AS base
 
 LABEL authors="CanyonGBS"
@@ -7,7 +6,7 @@ LABEL maintainer="CanyonGBS"
 ARG POSTGRES_VERSION=15
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends git gnupg zip unzip php8.2-apcu php8.2-pgsql php8.2-imagick php8.2-mailparse php8.2-redis php8.2-pcov php8.2-xdebug \
+    && apt-get install -y --no-install-recommends git cron s6 gnupg zip unzip php8.2-apcu php8.2-pgsql php8.2-imagick php8.2-mailparse php8.2-redis php8.2-pcov php8.2-xdebug \
     && curl -sS https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor | tee /etc/apt/keyrings/pgdg.gpg >/dev/null \
     && echo "deb [signed-by=/etc/apt/keyrings/pgdg.gpg] https://apt.postgresql.org/pub/repos/apt jammy-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
     && apt-get update \
@@ -32,6 +31,7 @@ RUN echo "source $NVM_DIR/nvm.sh \
     && nvm use default \
     && npm install -g npm@$NPM_VERSION" | bash
 
+COPY --chmod=644 ./docker/cron.d/ /etc/cron.d/
 COPY ./docker/s6-overlay/scripts/ /etc/s6-overlay/scripts/
 COPY docker/s6-overlay/s6-rc.d/ /etc/s6-overlay/s6-rc.d/
 COPY ./docker/s6-overlay/user/ /etc/s6-overlay/s6-rc.d/user/contents.d/
@@ -48,7 +48,7 @@ COPY ./docker/nginx/site-opts.d /etc/nginx/site-opts.d
 RUN rm /etc/s6-overlay/s6-rc.d/user/contents.d/php-fpm
 RUN rm -rf /etc/s6-overlay/s6-rc.d/php-fpm
 
-COPY --from=roadrunner --chown=$PUID:$PGID --chmod=0755 /usr/bin/rr /usr/local/bin/rr
+COPY --from=ghcr.io/roadrunner-server/roadrunner:2024.3.4 --chown=$PUID:$PGID --chmod=0755 /usr/bin/rr /usr/local/bin/rr
 
 RUN apt-get update \
     && apt-get upgrade -y
