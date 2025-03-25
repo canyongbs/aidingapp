@@ -88,7 +88,7 @@
                     v-if="user"
                     @click="logout"
                     type="button"
-                    class="bg-gradient-to-br from-primary-500 to-primary-800 text-white text-sm font-medium m-3 p-2 rounded float-right"
+                    class="bg-gradient-to-br from-brand-500 to-brand-800 text-white text-sm font-medium m-3 p-2 rounded float-right"
                 >
                     Sign out
                 </button>
@@ -96,7 +96,7 @@
                     v-else
                     @click="$emit('showLogin')"
                     type="button"
-                    class="bg-gradient-to-br from-primary-500 to-primary-800 text-white text-sm font-medium m-3 p-2 rounded float-right"
+                    class="bg-gradient-to-br from-brand-500 to-brand-800 text-white text-sm font-medium m-3 p-2 rounded float-right"
                 >
                     Sign in
                 </button>

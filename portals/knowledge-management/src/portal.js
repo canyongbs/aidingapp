@@ -45,6 +45,7 @@ import ViewCategory from './Pages/ViewCategory.vue';
 import ViewServiceRequest from './Pages/ViewServiceRequest.vue';
 import './portal.css';
 import getAppContext from './Services/GetAppContext.js';
+import PrimeVue from 'primevue/config';
 
 customElements.define(
     'knowledge-management-portal-embed',
@@ -54,6 +55,9 @@ customElements.define(
             const pinia = createPinia();
 
             app.use(pinia);
+            app.use(PrimeVue, {
+                theme: 'none'
+            });
 
             const { isEmbeddedInAidingApp, baseUrl } = getAppContext(props.accessUrl);
 

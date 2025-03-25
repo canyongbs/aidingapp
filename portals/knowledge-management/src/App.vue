@@ -430,7 +430,7 @@
                 <div
                     class="max-w-md w-full bg-white rounded ring-1 ring-black/5 shadow-sm px-8 pt-6 pb-4 flex flex-col gap-6 mx-4 mt-4"
                 >
-                    <h1 class="text-primary-950 text-center text-2xl font-semibold">Login to Help Center</h1>
+                    <h1 class="text-brand-950 text-center text-2xl font-semibold">Login to Help Center</h1>
 
                     <FormKit type="form" @submit="authenticate" v-model="authentication" :actions="false">
                         <FormKit
@@ -534,6 +534,11 @@
             <div v-else class="min-h-screen">
                 <Header :api-url="apiUrl" @show-login="showLogin = true" :header-logo="headerLogo" :app-name="appName">
                 </Header>
+
+                <div>
+                    <Button label="Profile" />
+                </div>
+
                 <div v-if="errorLoading" class="text-center">
                     <h1 class="text-3xl font-bold text-red-500">Error Loading the Help Center</h1>
                     <p class="text-lg text-red-500">Please try again later</p>
@@ -561,6 +566,6 @@
 <style scoped>
     .bg-gradient {
         @apply relative bg-no-repeat;
-        background-image: radial-gradient(circle at top, theme('colors.primary.200'), theme('colors.white') 50%);
+        background-image: radial-gradient(circle at top, theme('colors.brand.200'), theme('colors.white') 50%);
     }
 </style>
