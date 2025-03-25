@@ -85,7 +85,6 @@
                                 },
                             })
                             .then(() => {
-
                                 return {
                                     originalFileName: file.name,
                                     path: path,
