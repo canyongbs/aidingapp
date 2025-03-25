@@ -6,12 +6,12 @@ use Filament\Support\Contracts\HasLabel;
 
 enum ServiceMonitoringFrequency: string implements HasLabel
 {
-    case OneHour = '1 hour';
+    case OneHour = '1_hour';
 
-    case TwentyFourHours = '24 hours';
+    case TwentyFourHours = '24_hours';
 
     public function getLabel(): string
     {
-        return $this->value;
+        return str_replace('_', ' ', $this->value);
     }
 }
