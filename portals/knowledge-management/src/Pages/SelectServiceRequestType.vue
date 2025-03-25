@@ -91,7 +91,7 @@
         </div>
         <div v-else>
             <div class="sticky top-0 z-40 flex flex-col items-center bg-gray-50">
-                <div class="bg-gradient-to-br from-primary-500 to-primary-800 w-full px-6">
+                <div class="bg-gradient-to-br from-brand-500 to-brand-800 w-full px-6">
                     <div class="max-w-screen-xl flex flex-col gap-y-6 mx-auto py-8">
                         <div class="flex flex-col gap-y-1 text-left">
                             <h3 class="text-3xl text-white">Help Center</h3>
@@ -119,7 +119,7 @@
                             <span
                                 v-if="type.icon"
                                 v-html="type.icon"
-                                class="pointer-events-none text-primary-600 dark:text-primary-400"
+                                class="pointer-events-none text-brand-600 dark:text-brand-400"
                                 aria-hidden="true"
                             >
                             </span>
@@ -137,7 +137,7 @@
                                 </p>
                             </div>
                             <span
-                                class="pointer-events-none text-gray-300 group-hover:text-primary-600 group-hover:dark:text-primary-400"
+                                class="pointer-events-none text-gray-300 group-hover:text-brand-600 group-hover:dark:text-brand-400"
                                 aria-hidden="true"
                             >
                                 <svg
