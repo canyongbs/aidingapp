@@ -34,7 +34,7 @@ test('The correct details are displayed on the ViewServiceMonitoring page', func
                 'URL',
                 $serviceMonitoringTarget->domain,
                 'Frequency',
-                $serviceMonitoringTarget->frequency,
+                $serviceMonitoringTarget->frequency->getLabel(),
                 'Team',
                 $serviceMonitoringTarget->teams()->pluck('name')->join(', '),
                 'User',
