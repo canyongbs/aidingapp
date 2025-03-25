@@ -85,13 +85,6 @@
                                 },
                             })
                             .then(() => {
-                                props.context.node.store.set(
-                                    createMessage({
-                                        type: 'success',
-                                        key: `uploaded.${index}`,
-                                        value: `Uploaded ${file.name} successfully.`,
-                                    }),
-                                );
 
                                 return {
                                     originalFileName: file.name,
@@ -99,26 +92,10 @@
                                 };
                             })
                             .catch(() => {
-                                props.context.node.store.set(
-                                    createMessage({
-                                        blocking: true,
-                                        key: `uploaded.${index}`,
-                                        value: `Failed to upload ${file.name}.`,
-                                    }),
-                                );
-
                                 return null;
                             });
                     })
                     .catch(() => {
-                        props.context.node.store.set(
-                            createMessage({
-                                blocking: true,
-                                key: `uploaded.${index}`,
-                                value: `Failed to upload ${file.name}.`,
-                            }),
-                        );
-
                         return null;
                     })
                     .finally(() => {
@@ -152,13 +129,6 @@
                 const fileIndex = uploadedFiles.value.findIndex((f) => f.path === uniqueFileId);
                 if (fileIndex !== -1) {
                     uploadedFiles.value.splice(fileIndex, 1);
-                    props.context.node.store.set(
-                        createMessage({
-                            type: 'success',
-                            key: `Removed.${fileIndex}`,
-                            value: `Removed successfully.`,
-                        }),
-                    );
                 } else {
                     console.warn('File not found in uploadedFiles array:', uniqueFileId);
                 }
