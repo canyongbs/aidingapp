@@ -61,6 +61,10 @@
         "dompurify": "^3.2.4",
         "env-cmd": "^10.1.0",
         "esbuild-plugin-polyfill-node": "^0.3.0",
+        "filepond": "^4.32.7",
+        "filepond-plugin-file-validate-size": "^2.2.8",
+        "filepond-plugin-file-validate-type": "^1.2.9",
+        "filepond-plugin-image-preview": "^4.6.12",
         "flowbite": "^2.3.0",
         "laravel-vite-plugin": "^1.2.0",
         "lodash": "^4.17.21",
@@ -72,6 +76,7 @@
         "tippy.js": "^6.3.7",
         "vite": "^6.2.3",
         "vue": "^3.3.4",
+        "vue-filepond": "^7.0.4",
         "vue-router": "^4.2.5"
     }
 }

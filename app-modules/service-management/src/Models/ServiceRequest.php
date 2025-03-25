@@ -110,8 +110,8 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
     public function registerMediaCollections(): void
     {
         $this->mediaCollections[] = UploadsMediaCollection::create()
-            ->maxFileSizeInMB(20)
-            ->maxNumberOfFiles(5)
+            ->maxFileSizeInMB(10)
+            ->maxNumberOfFiles(6)
             ->mimes([
                 'application/pdf' => ['pdf'],
                 'application/vnd.ms-excel' => ['xls'],
@@ -126,6 +126,8 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
                 'text/csv' => ['csv'],
                 'text/markdown' => ['md', 'markdown', 'mkd'],
                 'text/plain' => ['txt', 'text'],
+                'application/octet-stream' => ['log'],
+                '.log' => ['log'],
             ]);
     }
 
