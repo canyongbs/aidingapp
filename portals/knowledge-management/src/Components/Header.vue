@@ -1,49 +1,99 @@
-<!--
-<COPYRIGHT>
+<template>
+    <Menubar class="border border-none px-0 hidden lg:flex">
+        <!-- Logo -->
+        <template #start>
+            <router-link :to="{ name: 'home' }" class="flex items-center">
+                <img :src="headerLogo" :alt="appName" class="h-12 m-0" />
+            </router-link>
+        </template>
 
-    Copyright © 2016-2025, Canyon GBS LLC. All rights reserved.
+        <!-- Desktop Menu Items -->
+        <template #end>
+            <div class="flex items-center gap-6 ml-auto">
+                <div class="flex items-center gap-6">
+                    <template v-for="item in visibleMenuItems" :key="item.label">
+                        <a
+                            v-ripple
+                            class="flex items-center cursor-pointer text-sm font-medium"
+                            :class="{
+                                'text-transparent bg-clip-text bg-gradient-to-br from-brand-500 to-brand-800':
+                                    isActive(item),
+                                'text-gray-700 hover:text-brand-500': !isActive(item),
+                            }"
+                            @click="item.command"
+                        >
+                            <i :class="item.icon" class="mr-2"></i>
+                            <span>{{ item.label }}</span>
+                        </a>
+                    </template>
+                </div>
 
-    Aiding App™ is licensed under the Elastic License 2.0. For more details,
-    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
+                <!-- Global Search Bar if required -->
+                <GlobalSearchBar v-if="showSearchBar" class="mr-4" />
 
-    Notice:
+                <!-- Auth Buttons -->
+                <div v-if="requiresAuthentication || hasServiceManagement">
+                    <button
+                        v-if="user"
+                        @click="logout"
+                        type="button"
+                        class="bg-gradient-to-br from-brand-500 to-brand-800 text-white text-sm font-medium px-4 py-2 rounded"
+                    >
+                        Sign out
+                    </button>
+                    <button
+                        v-else
+                        @click="$emit('showLogin')"
+                        type="button"
+                        class="bg-gradient-to-br from-brand-500 to-brand-800 text-white text-sm font-medium px-4 py-2 rounded"
+                    >
+                        Sign in
+                    </button>
+                </div>
+            </div>
+        </template>
+    </Menubar>
 
-    - You may not provide the software to third parties as a hosted or managed
-      service, where the service provides users with access to any substantial set of
-      the features or functionality of the software.
-    - You may not move, change, disable, or circumvent the license key functionality
-      in the software, and you may not remove or obscure any functionality in the
-      software that is protected by the license key.
-    - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
-      to applicable law.
-    - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
-      Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
-      vigorously.
-    - The software solution, including services, infrastructure, and code, is offered as a
-      Software as a Service (SaaS) by Canyon GBS LLC.
-    - Use of this software implies agreement to the license terms and conditions as stated
-      in the Elastic License 2.0.
+    <!-- Mobile Navigation (Hidden in Desktop) -->
+    <div class="lg:hidden flex items-center justify-between px-4 py-2">
+        <router-link :to="{ name: 'home' }" class="flex items-center">
+            <img :src="headerLogo" :alt="appName" class="h-10 m-0" />
+        </router-link>
+        <button @click="toggleDrawer" class="text-gray-700 focus:outline-none">
+            <i class="pi pi-bars text-2xl"></i>
+        </button>
+    </div>
 
-    For more information or inquiries please visit our website at
-    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
+    <!-- Drawer for Mobile Menu -->
+    <Drawer v-model:visible="drawerVisible" position="right" class="w-64" modal :showCloseIcon="false">
+        <div class="p-4 flex justify-between items-center border-b border-gray-200">
+            <span class="text-lg font-semibold">Menu</span>
+            <button @click="toggleDrawer" class="text-gray-700">
+                <i class="pi pi-times text-xl"></i>
+            </button>
+        </div>
 
-</COPYRIGHT>
--->
+        <!-- PanelMenu in Drawer -->
+        <PanelMenu :model="panelMenuItems" class="p-4" />
+    </Drawer>
+</template>
+
 <script setup>
-    import { defineProps } from 'vue';
-    import { useRoute } from 'vue-router';
+    import Drawer from 'primevue/drawer';
+    import Menubar from 'primevue/menubar';
+    import PanelMenu from 'primevue/panelmenu';
+    import { computed, defineProps, ref } from 'vue';
+    import { useRoute, useRouter } from 'vue-router';
     import { consumer } from '../Services/Consumer.js';
     import { useAuthStore } from '../Stores/auth.js';
     import { useFeatureStore } from '../Stores/feature.js';
     import { useTokenStore } from '../Stores/token.js';
-    import GlobalSearchBar from './GlobalSearchBar.vue';
 
+    const route = useRoute();
+    const router = useRouter();
     const { user, requiresAuthentication } = useAuthStore();
     const { hasServiceManagement } = useFeatureStore();
     const { removeToken } = useTokenStore();
-    const route = useRoute();
 
     const props = defineProps({
         apiUrl: {
@@ -60,6 +110,7 @@
         },
     });
 
+    // Logout Handler
     const logout = () => {
         const { post } = consumer();
 
@@ -72,35 +123,79 @@
             window.location.href = response.data.redirect_url;
         });
     };
+
+    // Menu Items List
+    const menuItems = ref([
+        {
+            label: 'Home',
+            icon: 'pi pi-home',
+            routeName: 'home',
+            command: () => router.push({ name: 'home' }),
+        },
+        {
+            label: 'Service',
+            icon: 'pi pi-cog',
+            routeName: 'contact',
+            visible: hasServiceManagement,
+            command: () => router.push({ name: 'contact' }),
+        },
+        {
+            label: 'Incidents',
+            icon: 'pi pi-exclamation-triangle',
+        },
+        {
+            label: 'Knowledge Base',
+            icon: 'pi pi-book',
+        },
+        {
+            label: 'Assets',
+            icon: 'pi pi-desktop',
+        },
+        {
+            label: 'Licenses',
+            icon: 'pi pi-key',
+        },
+        {
+            label: 'Tasks',
+            icon: 'pi pi-check',
+        },
+    ]);
+
+    // Show Only Visible Menu Items
+    const visibleMenuItems = computed(() => menuItems.value.filter((item) => item.visible !== false));
+
+    // Active Menu Logic
+    const isActive = (item) => {
+        return route.name === item.routeName;
+    };
+
+    // Drawer State
+    const drawerVisible = ref(false);
+    const toggleDrawer = () => {
+        drawerVisible.value = !drawerVisible.value;
+    };
+
+    // Panel Menu Items (for Drawer)
+    const panelMenuItems = computed(() => {
+        return visibleMenuItems.value.map((item) => ({
+            label: item.label,
+            icon: item.icon,
+            command: item.command,
+        }));
+    });
+
+    const showSearchBar = computed(() => route.name === 'view-article');
 </script>
 
-<template>
-    <div class="header item-center bg-white">
-        <div class="flex">
-            <div class="flex-auto">
-                <router-link :to="{ name: 'home' }">
-                    <img :src="headerLogo" :alt="appName" class="max-h-20 m-3 max-w-64" />
-                </router-link>
-            </div>
-            <GlobalSearchBar v-if="route.name === 'view-article'"></GlobalSearchBar>
-            <div v-if="requiresAuthentication || hasServiceManagement">
-                <button
-                    v-if="user"
-                    @click="logout"
-                    type="button"
-                    class="bg-gradient-to-br from-brand-500 to-brand-800 text-white text-sm font-medium m-3 p-2 rounded float-right"
-                >
-                    Sign out
-                </button>
-                <button
-                    v-else
-                    @click="$emit('showLogin')"
-                    type="button"
-                    class="bg-gradient-to-br from-brand-500 to-brand-800 text-white text-sm font-medium m-3 p-2 rounded float-right"
-                >
-                    Sign in
-                </button>
-            </div>
-        </div>
-    </div>
-</template>
+<style scoped>
+    /* Prevent wrapping */
+    .gap-6 > * {
+        white-space: nowrap;
+    }
+
+    /* Active Menu Gradient Text */
+    .text-transparent.bg-clip-text {
+        -webkit-background-clip: text;
+        background-clip: text;
+    }
+</style>

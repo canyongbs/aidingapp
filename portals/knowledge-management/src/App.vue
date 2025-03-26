@@ -535,10 +535,6 @@
                 <Header :api-url="apiUrl" @show-login="showLogin = true" :header-logo="headerLogo" :app-name="appName">
                 </Header>
 
-                <div>
-                    <Button label="Profile" />
-                </div>
-
                 <div v-if="errorLoading" class="text-center">
                     <h1 class="text-3xl font-bold text-red-500">Error Loading the Help Center</h1>
                     <p class="text-lg text-red-500">Please try again later</p>
