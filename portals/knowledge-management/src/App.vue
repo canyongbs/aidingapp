@@ -77,6 +77,9 @@
     const userIsAuthenticated = ref(false);
     const requiresAuthentication = ref(false);
     const hasServiceManagement = ref(false);
+    const hasAssets = ref(false);
+    const hasLicense = ref(false);
+    const hasTasks = ref(false);
     const showLogin = ref(false);
 
     const portalPrimaryColor = ref('');
@@ -162,7 +165,7 @@
 
                 const { setRequiresAuthentication } = useAuthStore();
 
-                const { setHasServiceManagement } = useFeatureStore();
+                const { setHasServiceManagement, setHasAssets, setHasLicense, setHasTasks } = useFeatureStore();
 
                 portalPrimaryColor.value = response.data.primary_color;
 
@@ -180,6 +183,18 @@
 
                 setHasServiceManagement(response.data.service_management_enabled).then(() => {
                     hasServiceManagement.value = response.data.service_management_enabled;
+                });
+
+                setHasAssets(response.data.has_assets).then(() => {
+                    hasAssets.value = response.data.has_assets;
+                });
+
+                setHasLicense(response.data.has_license).then(() => {
+                    hasLicense.value = response.data.has_license;
+                });
+
+                setHasTasks(response.data.has_tasks).then(() => {
+                    hasTasks.value = response.data.has_tasks;
                 });
 
                 authentication.value.requestUrl = response.data.authentication_url ?? null;
@@ -298,6 +313,8 @@
         const { setToken } = useTokenStore();
         const { setUser } = useAuthStore();
 
+        const { setHasServiceManagement, setHasAssets, setHasLicense, setHasTasks } = useFeatureStore();
+
         const { isEmbeddedInAidingApp } = getAppContext(props.accessUrl);
 
         if (isEmbeddedInAidingApp) {
@@ -345,6 +362,24 @@
                     if (response.data.success === true) {
                         setToken(response.data.token);
                         setUser(response.data.user);
+
+                        setHasServiceManagement(response.data.service_management_enabled).then(() => {
+                            hasServiceManagement.value = response.data.service_management_enabled;
+                        });
+
+                        setHasAssets(response.data.has_assets).then(() => {
+                            hasAssets.value = response.data.has_assets;
+                        });
+
+                        setHasLicense(response.data.has_license).then(() => {
+                            hasLicense.value = response.data.has_license;
+                        });
+
+                        setHasTasks(response.data.has_tasks).then(() => {
+                            hasTasks.value = response.data.has_tasks;
+                        });
+
+                        const { hasServiceManagement, hasAssets, hasLicense, hasTasks } = useFeatureStore();
 
                         userIsAuthenticated.value = true;
 

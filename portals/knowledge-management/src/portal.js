@@ -46,6 +46,7 @@ import ViewServiceRequest from './Pages/ViewServiceRequest.vue';
 import './portal.css';
 import getAppContext from './Services/GetAppContext.js';
 import PrimeVue from 'primevue/config';
+import ComingSoon from './Components/ComingSoon.vue';
 
 customElements.define(
     'knowledge-management-portal-embed',
@@ -98,6 +99,36 @@ customElements.define(
                         path: baseUrl + '/service-request/:serviceRequestId',
                         name: 'view-service-request',
                         component: ViewServiceRequest,
+                    },
+                    {
+                        path: baseUrl + '/services',
+                        name: 'services',
+                        component: ComingSoon,
+                    },
+                    {
+                        path: baseUrl + '/incidents',
+                        name: 'incidents',
+                        component: ComingSoon,
+                    },
+                    {
+                        path: baseUrl + '/knowledge-base',
+                        name: 'knowledge-base',
+                        component: ComingSoon,
+                    },
+                    {
+                        path: baseUrl + '/assets',
+                        name: 'assets',
+                        component: ComingSoon,
+                    },
+                    {
+                        path: baseUrl + '/license',
+                        name: 'license',
+                        component: ComingSoon,
+                    },
+                    {
+                        path: baseUrl + '/tasks',
+                        name: 'tasks',
+                        component: ComingSoon,
                     },
                 ],
             });

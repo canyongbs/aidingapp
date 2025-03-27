@@ -40,6 +40,7 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Portal\Http\Requests\KnowledgeManagementPortalAuthenticateRequest;
 use AidingApp\Portal\Models\PortalAuthentication;
 use AidingApp\Portal\Models\PortalGuest;
+use AidingApp\Portal\Settings\PortalSettings;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -67,6 +68,8 @@ class KnowledgeManagementPortalAuthenticateController extends Controller
 
         Auth::guard('contact')->login($contact);
 
+        $settings = resolve(PortalSettings::class);
+
         $token = $contact->createToken('knowledge-management-portal-access-token');
 
         if ($request->hasSession()) {
@@ -77,6 +80,10 @@ class KnowledgeManagementPortalAuthenticateController extends Controller
             'success' => true,
             'token' => $token->plainTextToken,
             'user' => auth('contact')->user(),
+            'service_management_enabled' => $settings->knowledge_management_portal_service_management,
+            'has_assets' => auth()->guard('contact')->check() ? auth()->guard('contact')->user()->assetCheckIns()->exists() || auth()->guard('contact')->user()->assetCheckOuts()->exists() : false,
+            'has_license' => auth()->guard('contact')->check() ? auth()->guard('contact')->user()->productLicenses()->exists() : false,
+            'has_tasks' => auth()->guard('contact')->check() ? auth()->guard('contact')->user()->tasks()->exists() : false,
         ]);
     }
 }

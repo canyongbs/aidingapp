@@ -36,6 +36,9 @@ import { ref } from 'vue';
 
 export const useFeatureStore = defineStore('feature', () => {
     const hasServiceManagement = ref(false);
+    const hasAssets = ref(false);
+    const hasLicense = ref(false);
+    const hasTasks = ref(false);
 
     async function setHasServiceManagement(value) {
         hasServiceManagement.value = value;
@@ -44,10 +47,43 @@ export const useFeatureStore = defineStore('feature', () => {
     async function getHasServiceManagement() {
         return hasServiceManagement.value;
     }
+    
+    async function setHasAssets(value) {
+        hasAssets.value = value;
+    }
+
+    async function getHasAssets() {
+        return hasAssets.value;
+    }
+
+    async function setHasLicense(value) {
+        hasLicense.value = value;
+    }
+
+    async function getHasLicense() {
+        return hasLicense.value;
+    }
+
+    async function setHasTasks(value) {
+        hasTasks.value = value;
+    }
+
+    async function getHasTasks() {
+        return hasTasks.value
+    }
 
     return {
         hasServiceManagement,
         getHasServiceManagement,
         setHasServiceManagement,
+        hasAssets,
+        getHasAssets,
+        setHasAssets,
+        hasLicense,
+        getHasLicense,
+        setHasLicense,
+        hasTasks,
+        getHasTasks,
+        setHasTasks
     };
 });
