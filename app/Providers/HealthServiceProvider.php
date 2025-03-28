@@ -45,7 +45,6 @@ use Spatie\Health\Checks\Checks\OptimizedAppCheck;
 use Spatie\Health\Checks\Checks\PingCheck;
 use Spatie\Health\Checks\Checks\QueueCheck;
 use Spatie\Health\Checks\Checks\RedisCheck;
-use Spatie\Health\Checks\Checks\ScheduleCheck;
 use Spatie\Health\Facades\Health;
 
 class HealthServiceProvider extends ServiceProvider
@@ -81,8 +80,6 @@ class HealthServiceProvider extends ServiceProvider
                 ->timeout(2),
             QueueCheck::new(),
             RedisCheck::new(),
-            ScheduleCheck::new()
-                ->heartbeatMaxAgeInMinutes(2),
         ]);
     }
 }
