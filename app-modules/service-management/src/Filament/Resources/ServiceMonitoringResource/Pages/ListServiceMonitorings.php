@@ -34,34 +34,54 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Task\Filament\Resources;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Pages;
 
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\CreateTask;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\EditTask;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\ListTasks;
-use AidingApp\Task\Models\Task;
-use Filament\Resources\Resource;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource;
+use Filament\Actions\CreateAction;
+use Filament\Resources\Pages\ListRecords;
+use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Tables\Actions\DeleteBulkAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 
-class TaskResource extends Resource
+class ListServiceMonitorings extends ListRecords
 {
-    protected static ?string $model = Task::class;
+    protected static string $resource = ServiceMonitoringResource::class;
 
-    protected static ?string $navigationGroup = 'Service Management';
+    public function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                TextColumn::make('name')
+                    ->label('Name')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('domain')
+                    ->label('URL')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('frequency')
+                    ->label('Frequency')
+                    ->searchable()
+                    ->sortable(),
+            ])
+            ->actions([
+                ViewAction::make(),
+                EditAction::make(),
+            ])
+            ->bulkActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
+            ]);
+    }
 
-    protected static ?int $navigationSort = 90;
-
-    protected static ?string $breadcrumb = 'Task Management';
-
-    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
-
-    protected static ?string $navigationLabel = 'Task Management';
-
-    public static function getPages(): array
+    protected function getHeaderActions(): array
     {
         return [
-            'index' => ListTasks::route('/'),
-            'create' => CreateTask::route('/create'),
-            'edit' => EditTask::route('/{record}/edit'),
+            CreateAction::make(),
         ];
     }
 }

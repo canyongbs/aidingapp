@@ -34,34 +34,18 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Task\Filament\Resources;
+namespace AidingApp\ServiceManagement\Enums;
 
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\CreateTask;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\EditTask;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\ListTasks;
-use AidingApp\Task\Models\Task;
-use Filament\Resources\Resource;
+use Filament\Support\Contracts\HasLabel;
 
-class TaskResource extends Resource
+enum ServiceMonitoringFrequency: string implements HasLabel
 {
-    protected static ?string $model = Task::class;
+    case OneHour = '1_hour';
 
-    protected static ?string $navigationGroup = 'Service Management';
+    case TwentyFourHours = '24_hours';
 
-    protected static ?int $navigationSort = 90;
-
-    protected static ?string $breadcrumb = 'Task Management';
-
-    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
-
-    protected static ?string $navigationLabel = 'Task Management';
-
-    public static function getPages(): array
+    public function getLabel(): string
     {
-        return [
-            'index' => ListTasks::route('/'),
-            'create' => CreateTask::route('/create'),
-            'edit' => EditTask::route('/{record}/edit'),
-        ];
+        return str_replace('_', ' ', $this->value);
     }
 }
