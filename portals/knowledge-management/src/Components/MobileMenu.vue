@@ -1,6 +1,6 @@
 <template>
     <div>
-        <Bars3Icon @click="openDrawer" class="pointer h-6 w-6 text-gray-700" aria-hidden="true" />
+        <Bars3Icon @click="openDrawer" class="h-6 w-6 text-gray-700" aria-hidden="true" />
 
         <Transition name="backdrop">
             <div v-if="visible" class="fixed inset-0 z-40 bg-black bg-opacity-50" @click="closeDrawer"></div>
@@ -10,7 +10,7 @@
             <div v-if="visible" class="fixed top-0 right-0 w-64 h-full bg-white shadow-xl z-50" @click.stop>
                 <div class="flex justify-between items-center px-4 py-3 border-b">
                     <h3 class="text-lg font-semibold text-gray-700">Menu</h3>
-                    <XMarkIcon @click="closeDrawer" class="h-5 w-5 text-gray-700 cursor-pointer" />
+                    <XMarkIcon @click="closeDrawer" class="h-5 w-5 text-gray-700" />
                 </div>
 
                 <div class="p-4 space-y-5">
@@ -22,7 +22,7 @@
                         >
                             <a
                                 @click="navigate"
-                                class="cursor-pointer flex items-center font-medium text-sm"
+                                class="flex items-center font-medium text-sm"
                                 :class="[
                                     isActive || isExactActive ? 'text-brand-500' : 'text-gray-700',
                                     'hover:text-brand-500',
@@ -61,10 +61,6 @@
 </script>
 
 <style scoped>
-    .pointer {
-        cursor: pointer;
-    }
-
     .drawer-enter-active,
     .drawer-leave-active {
         transition:
