@@ -91,7 +91,6 @@
 </script>
 <template>
     <Menubar class="border border-none md:px-1.5 xl:px-0">
-        <!-- Logo -->
         <template #start>
             <router-link :to="{ name: 'home' }" class="flex items-center">
                 <img :src="headerLogo" :alt="appName" class="h-12 m-0" />
