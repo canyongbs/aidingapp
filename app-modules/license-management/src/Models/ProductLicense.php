@@ -39,17 +39,19 @@ namespace AidingApp\LicenseManagement\Models;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\LicenseManagement\Enums\ProductLicenseStatus;
+use AidingApp\LicenseManagement\Models\Scopes\AuthorizeLicensesScope;
 use AidingApp\LicenseManagement\Observers\ProductLicenseObserver;
 use App\LicenseManagement\Exceptions\FailedToDetermineProductLicenseStatus;
 use App\Models\BaseModel;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
 
-#[ObservedBy(ProductLicenseObserver::class)]
+#[ObservedBy(ProductLicenseObserver::class)] #[ScopedBy(AuthorizeLicensesScope::class)]
 /**
  * @mixin IdeHelperProductLicense
  */
