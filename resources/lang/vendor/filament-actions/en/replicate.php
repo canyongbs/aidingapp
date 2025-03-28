@@ -15,7 +15,7 @@ return [
         ],
 
         'notifications' => [
-            'Duplicated' => [
+            'replicate' => [
                 'title' => 'Duplicated',
             ],
         ],
