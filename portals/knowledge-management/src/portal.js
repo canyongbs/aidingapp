@@ -33,9 +33,11 @@
 */
 import { defaultConfig, plugin } from '@formkit/vue';
 import { createPinia } from 'pinia';
+import PrimeVue from 'primevue/config';
 import { createApp, defineCustomElement, getCurrentInstance, h } from 'vue';
 import { createMemoryHistory, createRouter, createWebHistory } from 'vue-router';
 import App from './App.vue';
+import ComingSoon from './Components/ComingSoon.vue';
 import config from './formkit.config.js';
 import CreateServiceRequest from './Pages/CreateServiceRequest.vue';
 import Home from './Pages/Home.vue';
@@ -45,8 +47,6 @@ import ViewCategory from './Pages/ViewCategory.vue';
 import ViewServiceRequest from './Pages/ViewServiceRequest.vue';
 import './portal.css';
 import getAppContext from './Services/GetAppContext.js';
-import PrimeVue from 'primevue/config';
-import ComingSoon from './Components/ComingSoon.vue';
 
 customElements.define(
     'knowledge-management-portal-embed',
@@ -57,7 +57,7 @@ customElements.define(
 
             app.use(pinia);
             app.use(PrimeVue, {
-                theme: 'none'
+                theme: 'none',
             });
 
             const { isEmbeddedInAidingApp, baseUrl } = getAppContext(props.accessUrl);
