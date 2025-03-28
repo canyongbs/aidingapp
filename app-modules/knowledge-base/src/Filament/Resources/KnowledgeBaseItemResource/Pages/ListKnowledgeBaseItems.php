@@ -156,7 +156,6 @@ class ListKnowledgeBaseItems extends ListRecords
             ->actions([
                 EditAction::make(),
                 ReplicateAction::make()
-                    ->label('Duplicate')
                     ->form([
                         Section::make()
                             ->schema([
@@ -237,7 +236,7 @@ class ListKnowledgeBaseItems extends ListRecords
                         $replica->save();
                     })
                     ->excludeAttributes(['views_count', 'upvotes_count', 'my_upvotes_count'])
-                    ->successNotificationTitle('Article replicated successfully!'),
+                    ->successNotificationTitle('Article duplicated successfully!'),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
