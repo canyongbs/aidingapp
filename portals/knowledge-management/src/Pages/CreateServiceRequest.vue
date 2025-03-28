@@ -143,10 +143,10 @@
         </div>
         <div v-else>
             <div class="sticky top-0 z-40 flex flex-col items-center bg-gray-50">
-                <div class="bg-gradient-to-br from-primary-500 to-primary-800 w-full px-6">
+                <div class="bg-gradient-to-br from-brand-500 to-brand-800 w-full px-6">
                     <div class="max-w-screen-xl flex flex-col gap-y-6 mx-auto py-8">
                         <div class="text-right" v-if="submittedSuccess">
-                            <button class="p-2 font-bold rounded bg-white text-primary-700 dark:text-primary-400">
+                            <button class="p-2 font-bold rounded bg-white text-brand-700 dark:text-brand-400">
                                 <router-link :to="{ name: 'create-service-request' }">
                                     Submit Another Request
                                 </router-link>

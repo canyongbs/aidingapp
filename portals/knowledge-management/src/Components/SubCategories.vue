@@ -58,12 +58,12 @@
                         <div
                             v-if="subCategory.icon"
                             v-html="subCategory.icon"
-                            class="pointer-events-none absolute top-6 text-primary-700"
+                            class="pointer-events-none absolute top-6 text-brand-700"
                             aria-hidden="true"
                         ></div>
 
                         <div
-                            class="pointer-events-none absolute right-6 top-6 text-gray-300 transition group-hover:text-primary-500"
+                            class="pointer-events-none absolute right-6 top-6 text-gray-300 transition group-hover:text-brand-500"
                             aria-hidden="true"
                         >
                             <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">

@@ -53,10 +53,10 @@
         <li
             role="presentation"
             @click="updateFilter('all-articles')"
-            class="text-sm font-semibold text-primary-600 px-4 py-3 hover:border-primary-600 cursor-pointer"
+            class="text-sm font-semibold text-brand-600 px-4 py-3 hover:border-brand-600 cursor-pointer"
             :class="
                 selectedFilter === '' || selectedFilter === 'all-articles'
-                    ? 'border-b-2 border-primary-600'
+                    ? 'border-b-2 border-brand-600'
                     : 'border-transparent'
             "
             aria-selected="true"
@@ -66,8 +66,8 @@
         <li
             role="presentation"
             @click="updateFilter('featured')"
-            class="text-sm font-semibold text-primary-600 px-4 py-3 border-b-2 hover:border-primary-600 cursor-pointer"
-            :class="selectedFilter === 'featured' ? 'border-b-2 border-primary-600' : 'border-transparent'"
+            class="text-sm font-semibold text-brand-600 px-4 py-3 border-b-2 hover:border-brand-600 cursor-pointer"
+            :class="selectedFilter === 'featured' ? 'border-b-2 border-brand-600' : 'border-transparent'"
             aria-selected="true"
         >
             Featured
@@ -75,8 +75,8 @@
         <li
             role="presentation"
             @click="updateFilter('most-viewed')"
-            class="text-sm font-semibold text-primary-600 px-4 py-3 border-b-2 hover:border-primary-600 cursor-pointer"
-            :class="selectedFilter === 'most-viewed' ? 'border-b-2 border-primary-600' : 'border-transparent'"
+            class="text-sm font-semibold text-brand-600 px-4 py-3 border-b-2 hover:border-brand-600 cursor-pointer"
+            :class="selectedFilter === 'most-viewed' ? 'border-b-2 border-brand-600' : 'border-transparent'"
             aria-selected="true"
         >
             Most Viewed

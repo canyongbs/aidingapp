@@ -101,7 +101,7 @@
     </div>
 
     <div v-if="!loadingResults && searchResults?.data" class="flex flex-col gap-6">
-        <h3 class="text-2xl font-bold text-primary-950">
+        <h3 class="text-2xl font-bold text-brand-950">
             Search results: <span class="font-normal">{{ searchQuery }}</span>
         </h3>
 
@@ -148,7 +148,7 @@
                             </h5>
 
                             <ChevronRightIcon
-                                class="opacity-0 h-5 w-5 text-primary-600 transition-all group-hover:translate-x-2 group-hover:opacity-100"
+                                class="opacity-0 h-5 w-5 text-brand-600 transition-all group-hover:translate-x-2 group-hover:opacity-100"
                             />
                         </router-link>
                     </li>
