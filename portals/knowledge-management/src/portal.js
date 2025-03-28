@@ -103,7 +103,7 @@ customElements.define(
                     {
                         path: baseUrl + '/services',
                         name: 'services',
-                        component: ComingSoon,
+                        component: Services,
                     },
                     {
                         path: baseUrl + '/incidents',
