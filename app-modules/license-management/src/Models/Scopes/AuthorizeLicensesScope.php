@@ -36,6 +36,7 @@
 
 namespace AidingApp\LicenseManagement\Models\Scopes;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
@@ -47,10 +48,16 @@ class AuthorizeLicensesScope implements Scope
      */
     public function apply(Builder $builder, Model $model): void
     {
-        if (auth()->user()?->isSuperAdmin()) {
+        $user = auth()->user();
+
+        if (! $user instanceof User) {
             return;
         }
 
-        $builder->where('created_by_id', auth()->id());
+        if ($user?->isSuperAdmin()) {
+            return;
+        }
+
+        $builder->where('created_by_id', $user?->getKey());
     }
 }
