@@ -72,6 +72,9 @@ class KnowledgeManagementPortalController extends Controller
             'rounding' => $settings->knowledge_management_portal_rounding,
             'requires_authentication' => $settings->knowledge_management_portal_requires_authentication,
             'service_management_enabled' => $settings->knowledge_management_portal_service_management,
+            'has_assets' => auth()->guard('contact')->check() ? auth()->guard('contact')->user()->assetCheckIns()->exists() || auth()->guard('contact')->user()->assetCheckOuts()->exists() : false,
+            'has_license' => auth()->guard('contact')->check() ? auth()->guard('contact')->user()->productLicenses()->exists() : false,
+            'has_tasks' => auth()->guard('contact')->check() ? auth()->guard('contact')->user()->tasks()->exists() : false,
             'authentication_url' => URL::to(
                 URL::signedRoute(
                     name: 'api.portal.request-authentication',

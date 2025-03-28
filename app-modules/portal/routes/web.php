@@ -81,5 +81,17 @@ Route::prefix('portal')
                 ->name('service-request.create');
             Route::get('/service-request/{serviceRequest}', RenderKnowledgeManagementPortal::class)
                 ->name('service-request.show');
+            Route::get('/services', RenderKnowledgeManagementPortal::class)
+                ->name('services');
+            Route::get('/incidents', RenderKnowledgeManagementPortal::class)
+                ->name('incidents');
+            Route::get('/knowledge-base', RenderKnowledgeManagementPortal::class)
+                ->name('knowledge-base');
+            Route::get('/assets', RenderKnowledgeManagementPortal::class)
+                ->name('assets');
+            Route::get('/licenses', RenderKnowledgeManagementPortal::class)
+                ->name('licenses');
+            Route::get('/tasks', RenderKnowledgeManagementPortal::class)
+                ->name('tasks');
         });
     });

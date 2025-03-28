@@ -73,7 +73,7 @@
                 <div class="flex items-center">
                     <ChevronRightIcon class="h-5 w-5 flex-shrink-0 text-gray-400" aria-hidden="true" />
 
-                    <div class="ml-4 text-sm font-medium text-primary-600">
+                    <div class="ml-4 text-sm font-medium text-brand-600">
                         {{ currentCrumb }}
                     </div>
                 </div>

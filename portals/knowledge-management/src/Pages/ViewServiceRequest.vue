@@ -176,7 +176,7 @@
                                         {{ error }}
                                     </p>
                                 </div>
-                                <h2 class="text-xl font-bold text-primary-950">Service Request Details</h2>
+                                <h2 class="text-xl font-bold text-brand-950">Service Request Details</h2>
 
                                 <div>
                                     <div
@@ -265,7 +265,7 @@
                                                 :class="
                                                     serviceRequestUpdate.direction == directionEnums.Inbound
                                                         ? 'mb-4 p-4 bg-gray-50 border border-gray-200 rounded'
-                                                        : 'mb-4 p-4 border border-blue-200 rounded bg-gradient-to-br from-primary-500 to-primary-800 text-white'
+                                                        : 'mb-4 p-4 border border-blue-200 rounded bg-gradient-to-br from-brand-500 to-brand-800 text-white'
                                                 "
                                                 v-for="serviceRequestUpdate in serviceRequestUpdates"
                                                 :key="serviceRequestUpdate.id"
