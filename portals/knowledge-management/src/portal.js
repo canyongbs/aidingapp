@@ -47,6 +47,7 @@ import ViewCategory from './Pages/ViewCategory.vue';
 import ViewServiceRequest from './Pages/ViewServiceRequest.vue';
 import './portal.css';
 import getAppContext from './Services/GetAppContext.js';
+import Services from './Components/Services.vue';
 
 customElements.define(
     'knowledge-management-portal-embed',
