@@ -54,10 +54,10 @@ class AuthorizeLicensesScope implements Scope
             return;
         }
 
-        if ($user?->isSuperAdmin()) {
+        if ($user->isSuperAdmin()) {
             return;
         }
 
-        $builder->where('created_by_id', $user?->getKey());
+        $builder->where('created_by_id', $user->getKey());
     }
 }
