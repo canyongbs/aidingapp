@@ -36,10 +36,10 @@
 
 namespace AidingApp\Purchasing\Providers;
 
+use AidingApp\Purchasing\PurchasingPlugin;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
-use AidingApp\Purchasing\PurchasingPlugin;
 
 class PurchasingServiceProvider extends ServiceProvider
 {
