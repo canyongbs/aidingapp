@@ -89,6 +89,7 @@
 
     const visibleMenuItems = computed(() => menuItems.value.filter((item) => item.visible !== false));
 </script>
+
 <template>
     <Menubar class="border border-none md:px-1.5 xl:px-0">
         <template #start>

@@ -1,3 +1,12 @@
+<script setup>
+    import { HomeIcon } from '@heroicons/vue/24/outline';
+    import { useRouter } from 'vue-router';
+    const router = useRouter();
+    const goHome = () => {
+        router.push({ name: 'home' });
+    };
+</script>
+
 <template>
     <div class="bg-gray-50 flex flex-col overflow-hidden" style="height: calc(100vh - 160px)">
         <div class="flex-grow flex items-center justify-center overflow-hidden">
@@ -19,12 +28,3 @@
         </div>
     </div>
 </template>
-
-<script setup>
-    import { HomeIcon } from '@heroicons/vue/24/outline';
-    import { useRouter } from 'vue-router';
-    const router = useRouter();
-    const goHome = () => {
-        router.push({ name: 'home' });
-    };
-</script>

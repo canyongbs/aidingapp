@@ -1,3 +1,25 @@
+<script setup>
+    import { Bars3Icon, XMarkIcon } from '@heroicons/vue/24/outline';
+    import { ref } from 'vue';
+
+    const props = defineProps({
+        visibleMenuItems: {
+            type: Object,
+            required: true,
+        },
+    });
+
+    const visible = ref(false);
+
+    const openDrawer = () => {
+        visible.value = true;
+    };
+
+    const closeDrawer = () => {
+        visible.value = false;
+    };
+</script>
+
 <template>
     <div>
         <Bars3Icon @click="openDrawer" class="h-6 w-6 text-gray-700" aria-hidden="true" />
@@ -37,28 +59,6 @@
         </Transition>
     </div>
 </template>
-
-<script setup>
-    import { Bars3Icon, XMarkIcon } from '@heroicons/vue/24/outline';
-    import { ref } from 'vue';
-
-    const props = defineProps({
-        visibleMenuItems: {
-            type: Object,
-            required: true,
-        },
-    });
-
-    const visible = ref(false);
-
-    const openDrawer = () => {
-        visible.value = true;
-    };
-
-    const closeDrawer = () => {
-        visible.value = false;
-    };
-</script>
 
 <style scoped>
     .drawer-enter-active,
