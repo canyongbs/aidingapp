@@ -81,9 +81,9 @@ class KnowledgeManagementPortalAuthenticateController extends Controller
             'token' => $token->plainTextToken,
             'user' => auth('contact')->user(),
             'service_management_enabled' => $settings->knowledge_management_portal_service_management,
-            'has_assets' => auth()->guard('contact')->check() ? auth()->guard('contact')->user()->assetCheckIns()->exists() || auth()->guard('contact')->user()->assetCheckOuts()->exists() : false,
-            'has_license' => auth()->guard('contact')->check() ? auth()->guard('contact')->user()->productLicenses()->exists() : false,
-            'has_tasks' => auth()->guard('contact')->check() ? auth()->guard('contact')->user()->tasks()->exists() : false,
+            'has_assets' => auth()->guard('contact')->user()?->assetCheckIns()->exists() || auth()->guard('contact')->user()?->assetCheckOuts()->exists() ?: false,
+            'has_license' => auth()->guard('contact')->user()?->productLicenses()->exists() ?: false,
+            'has_tasks' => auth()->guard('contact')->user()?->tasks()->exists() ?: false,
         ]);
     }
 }
