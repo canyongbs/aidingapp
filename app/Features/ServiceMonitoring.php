@@ -34,34 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Task\Filament\Resources;
+namespace App\Features;
 
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\CreateTask;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\EditTask;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\ListTasks;
-use AidingApp\Task\Models\Task;
-use Filament\Resources\Resource;
+use App\Support\AbstractFeatureFlag;
 
-class TaskResource extends Resource
+class ServiceMonitoring extends AbstractFeatureFlag
 {
-    protected static ?string $model = Task::class;
-
-    protected static ?string $navigationGroup = 'Service Management';
-
-    protected static ?int $navigationSort = 90;
-
-    protected static ?string $breadcrumb = 'Task Management';
-
-    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
-
-    protected static ?string $navigationLabel = 'Task Management';
-
-    public static function getPages(): array
+    public function resolve(mixed $scope): mixed
     {
-        return [
-            'index' => ListTasks::route('/'),
-            'create' => CreateTask::route('/create'),
-            'edit' => EditTask::route('/{record}/edit'),
-        ];
+        return false;
     }
 }

@@ -34,60 +34,26 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Team\Models;
+namespace AidingApp\ServiceManagement\Models;
 
-use AidingApp\Division\Models\Division;
-use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
-use AidingApp\ServiceManagement\Models\ServiceMonitoringTargetTeam;
-use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\ServiceManagement\Models\ServiceRequestTypeAuditor;
-use AidingApp\ServiceManagement\Models\ServiceRequestTypeManager;
-use App\Models\BaseModel;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
-/**
- * @mixin IdeHelperTeam
- */
-class Team extends BaseModel
+class ServiceMonitoringTargetUser extends Pivot
 {
-    protected $fillable = [
-        'name',
-        'description',
-    ];
+    use HasUuids;
+    use HasFactory;
 
-    public function users(): BelongsToMany
+    public function user(): BelongsTo
     {
-        return $this
-            ->belongsToMany(User::class)
-            ->using(TeamUser::class)
-            ->withTimestamps();
+        return $this->belongsTo(User::class);
     }
 
-    public function serviceMonitoringTargets(): BelongsToMany
+    public function serviceMonitoringTarget(): BelongsTo
     {
-        return $this->belongsToMany(ServiceMonitoringTarget::class)
-            ->using(ServiceMonitoringTargetTeam::class)
-            ->withTimestamps();
-    }
-
-    public function manageableServiceRequestTypes(): BelongsToMany
-    {
-        return $this->belongsToMany(ServiceRequestType::class, 'service_request_type_managers')
-            ->using(ServiceRequestTypeManager::class)
-            ->withTimestamps();
-    }
-
-    public function auditableServiceRequestTypes(): BelongsToMany
-    {
-        return $this->belongsToMany(ServiceRequestType::class, 'service_request_type_auditors')
-            ->using(ServiceRequestTypeAuditor::class)
-            ->withTimestamps();
-    }
-
-    public function division(): BelongsTo
-    {
-        return $this->belongsTo(Division::class);
+        return $this->belongsTo(ServiceMonitoringTarget::class);
     }
 }

@@ -34,60 +34,38 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Team\Models;
+namespace AidingApp\ServiceManagement\Filament\Resources;
 
-use AidingApp\Division\Models\Division;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Pages\CreateServiceMonitoring;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Pages\EditServiceMonitoring;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Pages\ListServiceMonitorings;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Pages\ViewServiceMonitoring;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
-use AidingApp\ServiceManagement\Models\ServiceMonitoringTargetTeam;
-use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\ServiceManagement\Models\ServiceRequestTypeAuditor;
-use AidingApp\ServiceManagement\Models\ServiceRequestTypeManager;
-use App\Models\BaseModel;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use App\Features\ServiceMonitoring;
+use Filament\Resources\Resource;
 
-/**
- * @mixin IdeHelperTeam
- */
-class Team extends BaseModel
+class ServiceMonitoringResource extends Resource
 {
-    protected $fillable = [
-        'name',
-        'description',
-    ];
+    protected static ?string $model = ServiceMonitoringTarget::class;
 
-    public function users(): BelongsToMany
+    protected static ?string $navigationGroup = 'Service Management';
+
+    protected static ?string $modelLabel = 'service monitoring';
+
+    protected static ?int $navigationSort = 80;
+
+    public static function canAccess(): bool
     {
-        return $this
-            ->belongsToMany(User::class)
-            ->using(TeamUser::class)
-            ->withTimestamps();
+        return ServiceMonitoring::active() && parent::canAccess();
     }
 
-    public function serviceMonitoringTargets(): BelongsToMany
+    public static function getPages(): array
     {
-        return $this->belongsToMany(ServiceMonitoringTarget::class)
-            ->using(ServiceMonitoringTargetTeam::class)
-            ->withTimestamps();
-    }
-
-    public function manageableServiceRequestTypes(): BelongsToMany
-    {
-        return $this->belongsToMany(ServiceRequestType::class, 'service_request_type_managers')
-            ->using(ServiceRequestTypeManager::class)
-            ->withTimestamps();
-    }
-
-    public function auditableServiceRequestTypes(): BelongsToMany
-    {
-        return $this->belongsToMany(ServiceRequestType::class, 'service_request_type_auditors')
-            ->using(ServiceRequestTypeAuditor::class)
-            ->withTimestamps();
-    }
-
-    public function division(): BelongsTo
-    {
-        return $this->belongsTo(Division::class);
+        return [
+            'index' => ListServiceMonitorings::route('/'),
+            'create' => CreateServiceMonitoring::route('/create'),
+            'view' => ViewServiceMonitoring::route('/{record}'),
+            'edit' => EditServiceMonitoring::route('/{record}/edit'),
+        ];
     }
 }
