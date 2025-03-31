@@ -47,7 +47,7 @@ export const useFeatureStore = defineStore('feature', () => {
     async function getHasServiceManagement() {
         return hasServiceManagement.value;
     }
-    
+
     async function setHasAssets(value) {
         hasAssets.value = value;
     }
@@ -69,7 +69,7 @@ export const useFeatureStore = defineStore('feature', () => {
     }
 
     async function getHasTasks() {
-        return hasTasks.value
+        return hasTasks.value;
     }
 
     return {
@@ -84,6 +84,6 @@ export const useFeatureStore = defineStore('feature', () => {
         setHasLicense,
         hasTasks,
         getHasTasks,
-        setHasTasks
+        setHasTasks,
     };
 });
