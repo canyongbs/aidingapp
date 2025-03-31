@@ -49,11 +49,11 @@ class ContractResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-document-check';
 
-    protected static ?string $navigationGroup = 'Service Management';
+    protected static ?string $navigationGroup = 'Purchasing';
 
     protected static ?string $navigationLabel = 'Contract Management';
 
-    protected static ?int $navigationSort = 40;
+    protected static ?int $navigationSort = 10;
 
     public static function getPages(): array
     {

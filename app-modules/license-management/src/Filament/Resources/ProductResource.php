@@ -51,11 +51,11 @@ class ProductResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static ?string $navigationGroup = 'Service Management';
+    protected static ?string $navigationGroup = 'Purchasing';
 
     protected static ?string $navigationLabel = 'License Management';
 
-    protected static ?int $navigationSort = 50;
+    protected static ?int $navigationSort = 20;
 
     public static function getRecordSubNavigation(Page $page): array
     {
