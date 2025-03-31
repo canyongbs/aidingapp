@@ -46,6 +46,8 @@ use AidingApp\Notification\Notifications\Contracts\HasAfterSendHook;
 use AidingApp\Notification\Notifications\Contracts\HasBeforeSendHook;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
 use AidingApp\Notification\Notifications\Messages\TwilioMessage;
+use App\Models\NotificationSetting;
+use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\AnonymousNotifiable;
@@ -74,6 +76,7 @@ class EngagementNotification extends Notification implements ShouldQueue, HasBef
     public function toMail(object $notifiable): MailMessage
     {
         return MailMessage::make()
+            ->settings($this->resolveNotificationSetting($this->engagement->user))
             ->subject($this->engagement->subject)
             ->greeting("Hello {$this->engagement->recipient->display_name}!")
             ->content($this->engagement->getBody());
@@ -110,5 +113,11 @@ class EngagementNotification extends Notification implements ShouldQueue, HasBef
                 'processed_engagements' => DB::raw('processed_engagements + 1'),
                 ...($result->success ? ['successful_engagements' => DB::raw('successful_engagements + 1')] : []),
             ]);
+    }
+
+    private function resolveNotificationSetting(User $notifiable): ?NotificationSetting
+    {
+        // Engagement->User->Team->Division->NotificationSetting
+        return $notifiable->teams()->first()?->division?->notificationSetting?->setting;
     }
 }
