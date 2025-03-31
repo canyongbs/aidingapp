@@ -2308,6 +2308,41 @@
             }
         },
         {
+            "name": "canyon-gbs/purchasing",
+            "version": "1.0",
+            "dist": {
+                "type": "path",
+                "url": "app-modules/purchasing",
+                "reference": "669737b96696f494114fca5cbc9e08c34057f4be"
+            },
+            "require": {
+                "filament/filament": "^3.2"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "AidingApp\\Purchasing\\Providers\\PurchasingServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "AidingApp\\Purchasing\\": "src/",
+                    "AidingApp\\Purchasing\\Tests\\": "tests/",
+                    "AidingApp\\Purchasing\\Database\\Factories\\": "database/factories/",
+                    "AidingApp\\Purchasing\\Database\\Seeders\\": "database/seeders/"
+                }
+            },
+            "license": [
+                "proprietary"
+            ],
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
             "name": "canyon-gbs/report",
             "version": "1.0",
             "dist": {
