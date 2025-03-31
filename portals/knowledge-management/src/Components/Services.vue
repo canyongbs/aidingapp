@@ -1,5 +1,7 @@
 <script setup>
+    import { XMarkIcon } from '@heroicons/vue/24/outline';
     import { defineProps } from 'vue';
+    import Breadcrumbs from './Breadcrumbs.vue';
 
     defineProps({
         categories: {
@@ -14,13 +16,14 @@
 </script>
 
 <template>
-    <main class="px-6 bg-gray-50" style="height: calc(100vh - 160px)">
+    <main class="px-6 bg-gray-50 min-h-screen">
         <div class="max-w-screen-xl flex flex-col gap-y-6 mx-auto py-8">
-            <div class="grid gap-4" :class="[serviceRequests?.length > 0 ? 'lg:grid-cols-2' : 'lg:grid-cols-1']">
+            <Breadcrumbs :currentCrumb="'Services'"></Breadcrumbs>
+            <div class="grid gap-4">
                 <div v-if="serviceRequests?.length > 0">
                     <h3 class="text-xl">Service Requests</h3>
                     <div
-                        class="mt-4 overflow-hidden rounded bg-gray-200 shadow-sm ring-1 ring-black/5 grid gap-px divide-y-0"
+                        class="mt-4 overflow-hidden rounded bg-gray-200 shadow-sm ring-1 ring-black/5 grid gap-px divide-y-0 lg:grid-cols-2"
                     >
                         <div
                             v-for="serviceRequest in serviceRequests"
@@ -49,31 +52,37 @@
                                 </div>
 
                                 <div class="w-full mt-8">
-                                    <router-link
-                                        :to="{
-                                            name: 'view-service-request',
-                                            params: { serviceRequestId: serviceRequest.id },
-                                        }"
-                                    >
-                                        <h3 class="text-base font-semibold leading-6 text-gray-900">
+                                    <h3 class="text-base font-semibold leading-6 text-gray-900">
+                                        <router-link
+                                            :to="{
+                                                name: 'view-service-request',
+                                                params: { serviceRequestId: serviceRequest.id },
+                                            }"
+                                        >
+                                            <span class="absolute inset-0" aria-hidden="true" />
                                             {{ serviceRequest.title }}
-                                        </h3>
-                                        <div class="mt-2">
-                                            <span
-                                                class="px-2 py-1 text-sm font-bold text-white rounded"
-                                                :style="'background-color: rgb(' + serviceRequest.status_color + ')'"
-                                            >
-                                                Status: {{ serviceRequest.status_name }}
-                                            </span>
-                                        </div>
-                                        <p class="mt-2 text-xs text-gray-500">
-                                            Last Updated: {{ serviceRequest.updated_at }}
-                                        </p>
-                                    </router-link>
+                                        </router-link>
+                                    </h3>
+                                    <div class="mt-2">
+                                        <span
+                                            class="px-2 py-1 text-sm font-bold text-white rounded"
+                                            :style="'background-color: rgb(' + serviceRequest.status_color + ')'"
+                                        >
+                                            Status: {{ serviceRequest.status_name }}
+                                        </span>
+                                    </div>
+                                    <p class="mt-2 text-xs text-gray-500">
+                                        Last Updated: {{ serviceRequest.updated_at }}
+                                    </p>
                                 </div>
                             </div>
                         </div>
                     </div>
+                </div>
+                <div v-else class="p-3 flex items-start gap-2">
+                    <XMarkIcon class="h-5 w-5 text-gray-400" />
+
+                    <p class="text-gray-600 text-sm font-medium">No service requests found.</p>
                 </div>
             </div>
         </div>
