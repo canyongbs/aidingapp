@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "852e9f9bda92b01bee9eb68a1eb9a57e",
+    "content-hash": "36718a48fb14fa95c31853d70df5b158",
     "packages": [
         {
             "name": "amphp/amp",
@@ -2297,6 +2297,41 @@
                     "AidingApp\\LicenseManagement\\Tests\\": "tests/",
                     "AidingApp\\LicenseManagement\\Database\\Factories\\": "database/factories/",
                     "AidingApp\\LicenseManagement\\Database\\Seeders\\": "database/seeders/"
+                }
+            },
+            "license": [
+                "proprietary"
+            ],
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "canyon-gbs/purchasing",
+            "version": "1.0",
+            "dist": {
+                "type": "path",
+                "url": "app-modules/purchasing",
+                "reference": "669737b96696f494114fca5cbc9e08c34057f4be"
+            },
+            "require": {
+                "filament/filament": "^3.2"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "AidingApp\\Purchasing\\Providers\\PurchasingServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "AidingApp\\Purchasing\\": "src/",
+                    "AidingApp\\Purchasing\\Tests\\": "tests/",
+                    "AidingApp\\Purchasing\\Database\\Factories\\": "database/factories/",
+                    "AidingApp\\Purchasing\\Database\\Seeders\\": "database/seeders/"
                 }
             },
             "license": [
