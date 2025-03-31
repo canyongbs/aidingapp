@@ -84,4 +84,11 @@ class KnowledgeManagementPortalController extends Controller
             'footer_logo' => Vite::asset('resources/svg/CGBS_Logo_FullColor_Light.svg'),
         ]);
     }
+
+    public function getLicense(): JsonResponse
+    {
+        return response()->json([
+            'license' => auth()->guard('contact')->user()->productLicenses(),
+        ]);
+    }
 }

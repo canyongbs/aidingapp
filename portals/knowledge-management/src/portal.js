@@ -47,6 +47,7 @@ import ViewCategory from './Pages/ViewCategory.vue';
 import ViewServiceRequest from './Pages/ViewServiceRequest.vue';
 import './portal.css';
 import getAppContext from './Services/GetAppContext.js';
+import Licenses from './Components/Licenses.vue';
 
 customElements.define(
     'knowledge-management-portal-embed',
@@ -121,9 +122,9 @@ customElements.define(
                         component: ComingSoon,
                     },
                     {
-                        path: baseUrl + '/license',
-                        name: 'license',
-                        component: ComingSoon,
+                        path: baseUrl + '/licenses',
+                        name: 'licenses',
+                        component: Licenses,
                     },
                     {
                         path: baseUrl + '/tasks',

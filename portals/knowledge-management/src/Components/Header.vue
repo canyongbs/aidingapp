@@ -108,9 +108,9 @@
         },
         {
             label: 'Licenses',
-            routeName: 'license',
+            routeName: 'licenses',
             visible: hasLicense,
-            command: () => router.push({ name: 'license' }),
+            command: () => router.push({ name: 'licenses' }),
         },
         {
             label: 'Tasks',
