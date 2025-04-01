@@ -51,12 +51,10 @@ class ServiceMonitoringJob implements ShouldQueue
     use InteractsWithQueue;
     use Queueable;
 
-    public function __construct(public ServiceMonitoringTarget $serviceMonitoringTarget)
-    {
-    }
+    public function __construct(public ServiceMonitoringTarget $serviceMonitoringTarget) {}
 
     public function handle(): void
-    {        
+    {
         try {
             $response = Http::get($this->serviceMonitoringTarget->domain);
         } catch (Exception $e) {
@@ -68,7 +66,7 @@ class ServiceMonitoringJob implements ShouldQueue
             'service_monitoring_target_id' => $this->serviceMonitoringTarget->id,
         ]);
 
-        if($response->status() !== 200) {
+        if ($response->status() !== 200) {
             // mail event
         }
     }
