@@ -280,7 +280,6 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
         return $this
             ->belongsToMany(Team::class, 'team_user', 'user_id', 'team_id')
             ->using(TeamUser::class)
-            ->limit(1)
             ->withTimestamps();
     }
 
