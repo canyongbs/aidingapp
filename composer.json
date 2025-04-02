@@ -59,7 +59,7 @@
         "internachi/modular": "^2.2",
         "kirschbaum-development/eloquent-power-joins": "^3.5",
         "laravel/framework": "^11.44.1",
-        "laravel/octane": "^2.5",
+        "laravel/octane": "^2.8.3",
         "laravel/pennant": "^1.10",
         "laravel/sanctum": "^4.0",
         "laravel/socialite": "^5.15",

@@ -33,9 +33,11 @@
 */
 import { defaultConfig, plugin } from '@formkit/vue';
 import { createPinia } from 'pinia';
+import PrimeVue from 'primevue/config';
 import { createApp, defineCustomElement, getCurrentInstance, h } from 'vue';
 import { createMemoryHistory, createRouter, createWebHistory } from 'vue-router';
 import App from './App.vue';
+import ComingSoon from './Components/ComingSoon.vue';
 import config from './formkit.config.js';
 import CreateServiceRequest from './Pages/CreateServiceRequest.vue';
 import Home from './Pages/Home.vue';
@@ -54,6 +56,9 @@ customElements.define(
             const pinia = createPinia();
 
             app.use(pinia);
+            app.use(PrimeVue, {
+                theme: 'none',
+            });
 
             const { isEmbeddedInAidingApp, baseUrl } = getAppContext(props.accessUrl);
 
@@ -94,6 +99,36 @@ customElements.define(
                         path: baseUrl + '/service-request/:serviceRequestId',
                         name: 'view-service-request',
                         component: ViewServiceRequest,
+                    },
+                    {
+                        path: baseUrl + '/services',
+                        name: 'services',
+                        component: ComingSoon,
+                    },
+                    {
+                        path: baseUrl + '/incidents',
+                        name: 'incidents',
+                        component: ComingSoon,
+                    },
+                    {
+                        path: baseUrl + '/knowledge-base',
+                        name: 'knowledge-base',
+                        component: ComingSoon,
+                    },
+                    {
+                        path: baseUrl + '/assets',
+                        name: 'assets',
+                        component: ComingSoon,
+                    },
+                    {
+                        path: baseUrl + '/license',
+                        name: 'license',
+                        component: ComingSoon,
+                    },
+                    {
+                        path: baseUrl + '/tasks',
+                        name: 'tasks',
+                        component: ComingSoon,
                     },
                 ],
             });

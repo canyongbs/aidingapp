@@ -77,6 +77,9 @@
     const userIsAuthenticated = ref(false);
     const requiresAuthentication = ref(false);
     const hasServiceManagement = ref(false);
+    const hasAssets = ref(false);
+    const hasLicense = ref(false);
+    const hasTasks = ref(false);
     const showLogin = ref(false);
 
     const portalPrimaryColor = ref('');
@@ -162,7 +165,7 @@
 
                 const { setRequiresAuthentication } = useAuthStore();
 
-                const { setHasServiceManagement } = useFeatureStore();
+                const { setHasServiceManagement, setHasAssets, setHasLicense, setHasTasks } = useFeatureStore();
 
                 portalPrimaryColor.value = response.data.primary_color;
 
@@ -180,6 +183,18 @@
 
                 setHasServiceManagement(response.data.service_management_enabled).then(() => {
                     hasServiceManagement.value = response.data.service_management_enabled;
+                });
+
+                setHasAssets(response.data.has_assets).then(() => {
+                    hasAssets.value = response.data.has_assets;
+                });
+
+                setHasLicense(response.data.has_license).then(() => {
+                    hasLicense.value = response.data.has_license;
+                });
+
+                setHasTasks(response.data.has_tasks).then(() => {
+                    hasTasks.value = response.data.has_tasks;
                 });
 
                 authentication.value.requestUrl = response.data.authentication_url ?? null;
@@ -298,6 +313,8 @@
         const { setToken } = useTokenStore();
         const { setUser } = useAuthStore();
 
+        const { setHasServiceManagement, setHasAssets, setHasLicense, setHasTasks } = useFeatureStore();
+
         const { isEmbeddedInAidingApp } = getAppContext(props.accessUrl);
 
         if (isEmbeddedInAidingApp) {
@@ -345,6 +362,24 @@
                     if (response.data.success === true) {
                         setToken(response.data.token);
                         setUser(response.data.user);
+
+                        setHasServiceManagement(response.data.service_management_enabled).then(() => {
+                            hasServiceManagement.value = response.data.service_management_enabled;
+                        });
+
+                        setHasAssets(response.data.has_assets).then(() => {
+                            hasAssets.value = response.data.has_assets;
+                        });
+
+                        setHasLicense(response.data.has_license).then(() => {
+                            hasLicense.value = response.data.has_license;
+                        });
+
+                        setHasTasks(response.data.has_tasks).then(() => {
+                            hasTasks.value = response.data.has_tasks;
+                        });
+
+                        const { hasServiceManagement, hasAssets, hasLicense, hasTasks } = useFeatureStore();
 
                         userIsAuthenticated.value = true;
 
@@ -430,7 +465,7 @@
                 <div
                     class="max-w-md w-full bg-white rounded ring-1 ring-black/5 shadow-sm px-8 pt-6 pb-4 flex flex-col gap-6 mx-4 mt-4"
                 >
-                    <h1 class="text-primary-950 text-center text-2xl font-semibold">Login to Help Center</h1>
+                    <h1 class="text-brand-950 text-center text-2xl font-semibold">Login to Help Center</h1>
 
                     <FormKit type="form" @submit="authenticate" v-model="authentication" :actions="false">
                         <FormKit
@@ -534,6 +569,7 @@
             <div v-else class="min-h-screen">
                 <Header :api-url="apiUrl" @show-login="showLogin = true" :header-logo="headerLogo" :app-name="appName">
                 </Header>
+
                 <div v-if="errorLoading" class="text-center">
                     <h1 class="text-3xl font-bold text-red-500">Error Loading the Help Center</h1>
                     <p class="text-lg text-red-500">Please try again later</p>
@@ -561,6 +597,6 @@
 <style scoped>
     .bg-gradient {
         @apply relative bg-no-repeat;
-        background-image: radial-gradient(circle at top, theme('colors.primary.200'), theme('colors.white') 50%);
+        background-image: radial-gradient(circle at top, theme('colors.brand.200'), theme('colors.white') 50%);
     }
 </style>
