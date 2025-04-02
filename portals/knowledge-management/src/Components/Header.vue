@@ -108,9 +108,9 @@
         },
         {
             label: 'Licenses',
-            routeName: 'license',
+            routeName: 'licenses',
             visible: hasLicense,
-            command: () => router.push({ name: 'license' }),
+            command: () => router.push({ name: 'licenses' }),
         },
         {
             label: 'Tasks',
@@ -156,7 +156,7 @@
 
                 <div class="flex items-center gap-4">
                     <GlobalSearchBar
-                        v-if="route.name === 'view-article' || route.name === 'services'"
+                        v-if="route.name === 'view-article' || route.name === 'services' || route.name === 'licenses'"
                     ></GlobalSearchBar>
 
                     <div v-if="requiresAuthentication || hasServiceManagement">
