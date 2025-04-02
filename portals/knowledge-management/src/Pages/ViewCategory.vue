@@ -238,11 +238,11 @@
 
 <template>
     <div class="top-0 z-40 flex flex-col items-center bg-gray-50">
-        <div class="bg-gradient-to-br from-primary-500 to-primary-800 w-full px-6">
+        <div class="bg-gradient-to-br from-brand-500 to-brand-800 w-full px-6">
             <div class="max-w-screen-xl flex flex-col gap-y-6 mx-auto py-8">
                 <div class="flex flex-col gap-y-1 text-left">
                     <h3 class="text-3xl font-semibold text-white">Need help?</h3>
-                    <p class="text-primary-100">Search our knowledge base for advice and answers</p>
+                    <p class="text-brand-100">Search our knowledge base for advice and answers</p>
                 </div>
 
                 <label for="search" class="sr-only">Search</label>
@@ -256,14 +256,14 @@
                             v-model="searchQuery"
                             id="search"
                             placeholder="Search for articles and categories"
-                            class="block w-full rounded border-0 pl-12 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-2-- sm:text-sm sm:leading-6"
+                            class="block w-full rounded border-0 pl-12 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-brand-2-- sm:text-sm sm:leading-6"
                             :class="{ 'rounded-b-none': tags.length > 0 }"
                         />
                     </div>
                 </div>
                 <details
                     v-if="tags.length > 0"
-                    class="rounded rounded-t-none bg-white py-3 p-4 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-2-- sm:text-sm sm:leading-6"
+                    class="rounded rounded-t-none bg-white py-3 p-4 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-brand-2-- sm:text-sm sm:leading-6"
                 >
                     <summary v-if="selectedTags.length > 0">Tags ({{ selectedTags.length }} selected)</summary>
                     <summary v-else>Tags</summary>
@@ -273,7 +273,7 @@
                             :key="tag.id"
                             :value="tag.name"
                             class="cursor-pointer"
-                            :class="{ 'bg-primary-600 text-white': selectedTags.includes(tag.id) }"
+                            :class="{ 'bg-brand-600 text-white': selectedTags.includes(tag.id) }"
                             @click="toggleTag(tag.id)"
                         />
                     </div>
@@ -310,7 +310,7 @@
                         <div v-else class="flex flex-col gap-6">
                             <Breadcrumbs :currentCrumb="category.name" :breadcrumbs="breadcrumbs"></Breadcrumbs>
                             <div class="flex flex-col gap-6">
-                                <h2 class="text-2xl font-bold text-primary-950">
+                                <h2 class="text-2xl font-bold text-brand-950">
                                     {{ category.name }}
                                 </h2>
                                 <SubCategories

@@ -57,7 +57,7 @@
         <div class="flex">
             <span> {{ article.name }} </span>
             <ChevronRightIcon
-                class="opacity-0 h-5 w-5 text-primary-600 transition-all group-hover:translate-x-2 group-hover:opacity-100"
+                class="opacity-0 h-5 w-5 text-brand-600 transition-all group-hover:translate-x-2 group-hover:opacity-100"
             />
         </div>
         <Tags :tags="article.tags" :featured="article.featured" />
