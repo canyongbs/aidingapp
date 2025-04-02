@@ -38,6 +38,7 @@ import { createApp, defineCustomElement, getCurrentInstance, h } from 'vue';
 import { createMemoryHistory, createRouter, createWebHistory } from 'vue-router';
 import App from './App.vue';
 import ComingSoon from './Components/ComingSoon.vue';
+import Services from './Components/Services.vue';
 import config from './formkit.config.js';
 import CreateServiceRequest from './Pages/CreateServiceRequest.vue';
 import Home from './Pages/Home.vue';
@@ -47,7 +48,6 @@ import ViewCategory from './Pages/ViewCategory.vue';
 import ViewServiceRequest from './Pages/ViewServiceRequest.vue';
 import './portal.css';
 import getAppContext from './Services/GetAppContext.js';
-import Services from './Components/Services.vue';
 
 customElements.define(
     'knowledge-management-portal-embed',
