@@ -54,6 +54,6 @@ class Purchases extends Page
         /** @var User $user */
         $user = auth()->user();
 
-        return $user->can(['purchase.view-any', 'purchase.*.view']);
+        return $user->can(['purchase.view-any']);
     }
 }
