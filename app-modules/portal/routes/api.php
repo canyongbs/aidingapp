@@ -46,6 +46,7 @@ use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagem
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalRegisterController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalRequestAuthenticationController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalSearchController;
+use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\LicenseManagementPortalController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\ServiceRequestTypesController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\StoreKnowledgeBaseArticleVoteController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\StoreServiceRequestUpdateController;
@@ -133,7 +134,7 @@ Route::prefix('api')
                 Route::post('/knowledge_base_article_vote/store', StoreKnowledgeBaseArticleVoteController::class)
                     ->name('knowledge_base_article_vote.storeKnowledgeBaseArticleVote');
 
-                Route::get('/product-licenses', [KnowledgeManagementPortalController::class, 'getProductLicenses'])
+                Route::get('/product-licenses', LicenseManagementPortalController::class)
                     ->middleware(['auth:sanctum'])
                     ->name('product.licenses');
             });

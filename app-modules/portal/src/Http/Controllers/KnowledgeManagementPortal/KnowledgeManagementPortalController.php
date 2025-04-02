@@ -36,7 +36,6 @@
 
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
-use AidingApp\LicenseManagement\Enums\ProductLicenseStatus;
 use AidingApp\Portal\Models\PortalGuest;
 use AidingApp\Portal\Settings\PortalSettings;
 use App\Http\Controllers\Controller;
@@ -83,34 +82,6 @@ class KnowledgeManagementPortalController extends Controller
                 )
             ),
             'footer_logo' => Vite::asset('resources/svg/CGBS_Logo_FullColor_Light.svg'),
-        ]);
-    }
-
-    public function getProductLicenses(): JsonResponse
-    {
-        $licenses = auth('contact')->user()->productLicenses()
-            ->with(['product:id,name,version'])
-            ->get()
-            ->map(function ($license) {
-                $license->formatted_expiration_date = $license->expiration_date
-                    ? $license->expiration_date->format('m-d-Y')
-                    : null;
-
-                return $license;
-            });
-
-        $activeLicenses = $licenses->filter(function ($license) {
-            return $license->status === ProductLicenseStatus::Active;
-        });
-
-        $expiredLicenses = $licenses->filter(function ($license) {
-            return $license->status === ProductLicenseStatus::Expired;
-        });
-
-        return response()->json([
-            'success' => true,
-            'activeLicense' => $activeLicenses->values(),
-            'expiredLicense' => $expiredLicenses->values(),
         ]);
     }
 }
