@@ -132,5 +132,9 @@ Route::prefix('api')
                     ->name('service-request-update.storeServiceRequestUpdate');
                 Route::post('/knowledge_base_article_vote/store', StoreKnowledgeBaseArticleVoteController::class)
                     ->name('knowledge_base_article_vote.storeKnowledgeBaseArticleVote');
+
+                Route::get('/product-licenses', [KnowledgeManagementPortalController::class, 'getProductLicenses'])
+                    ->middleware(['auth:sanctum'])
+                    ->name('product.licenses');
             });
     });
