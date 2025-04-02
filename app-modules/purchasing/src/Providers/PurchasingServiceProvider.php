@@ -38,18 +38,14 @@ namespace AidingApp\Purchasing\Providers;
 
 use AidingApp\Purchasing\PurchasingPlugin;
 use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 
 class PurchasingServiceProvider extends ServiceProvider
 {
-    public function register()
+    public function register(): void
     {
         Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new PurchasingPlugin()));
     }
 
-    public function boot()
-    {
-        Relation::morphMap([]);
-    }
+    public function boot(): void {}
 }
