@@ -87,7 +87,7 @@
         {
             label: 'Service',
             routeName: 'services',
-            visible: hasServiceManagement,
+            visible: hasServiceManagement && user !== null,
             command: () => router.push({ name: 'services' }),
         },
         {
@@ -155,7 +155,9 @@
                 </div>
 
                 <div class="flex items-center gap-4">
-                    <GlobalSearchBar v-if="route.name === 'view-article'"></GlobalSearchBar>
+                    <GlobalSearchBar
+                        v-if="route.name === 'view-article' || route.name === 'services'"
+                    ></GlobalSearchBar>
 
                     <div v-if="requiresAuthentication || hasServiceManagement">
                         <button
