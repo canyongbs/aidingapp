@@ -51,10 +51,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
 
-#[ObservedBy(ProductLicenseObserver::class)] #[ScopedBy(AuthorizeLicensesScope::class)]
 /**
+ * @property string $formatted_expiration_date
+ *
  * @mixin IdeHelperProductLicense
  */
+#[ObservedBy(ProductLicenseObserver::class)] #[ScopedBy(AuthorizeLicensesScope::class)]
 class ProductLicense extends BaseModel implements Auditable
 {
     use AuditableTrait;
