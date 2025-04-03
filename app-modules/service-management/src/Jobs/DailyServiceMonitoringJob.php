@@ -46,8 +46,5 @@ class DailyServiceMonitoringJob
 
     public function __construct() {}
 
-    public function handle(): void
-    {
-        
-    }
+    public function handle(): void {}
 }

@@ -58,21 +58,19 @@ class ServiceMonitoringCheckJob implements ShouldQueue
     {
         try {
             $response = Http::get($this->serviceMonitoringTarget->domain);
-            
-            new HistoricalServiceMonitoring([
-              'response' => $response->status(),
-              'service_monitoring_target_id' => $this->serviceMonitoringTarget->id,
-            ]);
-        
-            if ($response->status() !== 200) {
-              // mail event
-            }
 
+            new HistoricalServiceMonitoring([
+                'response' => $response->status(),
+                'service_monitoring_target_id' => $this->serviceMonitoringTarget->id,
+            ]);
+
+            if ($response->status() !== 200) {
+                // mail event
+            }
         } catch (Throwable $e) {
             Log::error('Error resolving target monitor.', ['exception' => $e]);
 
             report($e);
         }
-
     }
 }
