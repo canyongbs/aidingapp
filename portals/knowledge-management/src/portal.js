@@ -42,13 +42,13 @@ import Services from './Components/Services.vue';
 import config from './formkit.config.js';
 import CreateServiceRequest from './Pages/CreateServiceRequest.vue';
 import Home from './Pages/Home.vue';
+import Licenses from './Pages/Licenses.vue';
 import SelectServiceRequestType from './Pages/SelectServiceRequestType.vue';
 import ViewArticle from './Pages/ViewArticle.vue';
 import ViewCategory from './Pages/ViewCategory.vue';
 import ViewServiceRequest from './Pages/ViewServiceRequest.vue';
 import './portal.css';
 import getAppContext from './Services/GetAppContext.js';
-import Licenses from './Pages/Licenses.vue';
 
 customElements.define(
     'knowledge-management-portal-embed',
