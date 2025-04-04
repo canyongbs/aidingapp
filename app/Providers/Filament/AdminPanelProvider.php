@@ -173,10 +173,6 @@ class AdminPanelProvider extends PanelProvider
                     ->label('Global Administration')
                     ->icon('heroicon-o-adjustments-vertical')
                     ->collapsed(),
-                NavigationGroup::make()
-                    ->label('Project Management')
-                    ->icon('heroicon-o-clipboard-document-check')
-                    ->collapsed(),
             ])
             ->sidebarCollapsibleOnDesktop()
             ->plugins([
