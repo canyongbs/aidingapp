@@ -138,6 +138,10 @@ class AdminPanelProvider extends PanelProvider
                     ->icon('heroicon-o-users')
                     ->collapsed(),
                 NavigationGroup::make()
+                    ->label('Project Management')
+                    ->icon('heroicon-o-clipboard-document-check')
+                    ->collapsed(),
+                NavigationGroup::make()
                     ->label('Service Management')
                     ->icon('heroicon-o-wrench-screwdriver')
                     ->collapsed(),
