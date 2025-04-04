@@ -46,7 +46,7 @@ class TaskResource extends Resource
 {
     protected static ?string $model = Task::class;
 
-    protected static ?string $navigationGroup = 'Project Management';
+    protected static ?string $navigationGroup = 'Service Management';
 
     protected static ?int $navigationSort = 90;
 
