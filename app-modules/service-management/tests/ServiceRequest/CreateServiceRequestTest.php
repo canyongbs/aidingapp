@@ -608,7 +608,7 @@ test('assignment type workload will auto-assign to new service requests', functi
             ->call('create')
             ->assertHasNoFormErrors();
 
-        $latestServiceRequest = ServiceRequest::latest()->first();
+        $latestServiceRequest = ServiceRequest::query()->latest('id')->first();
         $getServiceRequestType = ServiceRequestType::where('assignment_type', ServiceRequestTypeAssignmentTypes::Workload->value)->first();
         expect($getServiceRequestType->assignment_type)->toBe(ServiceRequestTypeAssignmentTypes::Workload);
         expect($getServiceRequestType->last_assigned_id)->ToBe($user->getKey());
