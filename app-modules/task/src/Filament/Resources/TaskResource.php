@@ -46,15 +46,15 @@ class TaskResource extends Resource
 {
     protected static ?string $model = Task::class;
 
-    protected static ?string $navigationGroup = 'Service Management';
+    protected static ?string $navigationGroup = 'Project Management';
 
     protected static ?int $navigationSort = 90;
 
-    protected static ?string $breadcrumb = 'Task Management';
+    protected static ?string $breadcrumb = 'Tasks';
 
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
 
-    protected static ?string $navigationLabel = 'Task Management';
+    protected static ?string $navigationLabel = 'Tasks';
 
     public static function getPages(): array
     {
