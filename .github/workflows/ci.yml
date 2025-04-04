@@ -125,7 +125,7 @@ jobs:
 
     timeout-minutes: 15
 
-    needs: [enforce-copyright,fix-code-style]
+    needs: [enforce-copyright, fix-code-style]
 
     services:
       postgres:
@@ -216,7 +216,7 @@ jobs:
 
     timeout-minutes: 10
 
-    needs: [enforce-copyright,fix-code-style]
+    needs: [enforce-copyright, fix-code-style]
 
     steps:
       - uses: shivammathur/setup-php@v2
