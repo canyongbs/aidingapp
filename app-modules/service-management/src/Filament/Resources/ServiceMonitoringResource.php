@@ -49,7 +49,11 @@ class ServiceMonitoringResource extends Resource
 
     protected static ?string $navigationGroup = 'Service Management';
 
+    protected static ?string $pluralModelLabel = 'service monitoring';
+
     protected static ?string $modelLabel = 'service monitoring';
+
+    protected static ?string $slug = 'service-monitoring';
 
     protected static ?int $navigationSort = 80;
 
