@@ -41,7 +41,6 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Pag
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Pages\ListServiceMonitorings;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Pages\ViewServiceMonitoring;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
-use App\Features\ServiceMonitoring;
 use Filament\Resources\Resource;
 
 class ServiceMonitoringResource extends Resource
