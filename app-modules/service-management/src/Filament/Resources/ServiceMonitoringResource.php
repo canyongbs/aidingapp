@@ -54,11 +54,6 @@ class ServiceMonitoringResource extends Resource
 
     protected static ?int $navigationSort = 80;
 
-    public static function canAccess(): bool
-    {
-        return ServiceMonitoring::active() && parent::canAccess();
-    }
-
     public static function getPages(): array
     {
         return [
