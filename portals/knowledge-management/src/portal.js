@@ -42,6 +42,7 @@ import Services from './Components/Services.vue';
 import config from './formkit.config.js';
 import CreateServiceRequest from './Pages/CreateServiceRequest.vue';
 import Home from './Pages/Home.vue';
+import Licenses from './Pages/Licenses.vue';
 import SelectServiceRequestType from './Pages/SelectServiceRequestType.vue';
 import ViewArticle from './Pages/ViewArticle.vue';
 import ViewCategory from './Pages/ViewCategory.vue';
@@ -122,9 +123,9 @@ customElements.define(
                         component: ComingSoon,
                     },
                     {
-                        path: baseUrl + '/license',
-                        name: 'license',
-                        component: ComingSoon,
+                        path: baseUrl + '/licenses',
+                        name: 'licenses',
+                        component: Licenses,
                     },
                     {
                         path: baseUrl + '/tasks',
