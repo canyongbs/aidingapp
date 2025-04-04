@@ -519,11 +519,17 @@ test('assignment type round robin will auto-assign to new service requests', fun
             ->call('create')
             ->assertHasNoFormErrors();
 
-        $latestServiceRequest = ServiceRequest::latest()->first();
+        $latestServiceRequest = ServiceRequest::query()->latest('id')->first();
+
         $getServiceRequestType = ServiceRequestType::where('assignment_type', ServiceRequestTypeAssignmentTypes::RoundRobin->value)->first();
         expect($getServiceRequestType->assignment_type)->toBe(ServiceRequestTypeAssignmentTypes::RoundRobin);
         expect($getServiceRequestType->last_assigned_id)->ToBe($user->getKey());
         expect($latestServiceRequest->assignedTo->user_id)->ToBe($user->getKey());
+
+        // This needs to be added due to a bug in Laravel
+        // Laravel's uuidv4 orderedUuids is NOT same second safe
+        // So until we update to UUID v7 we need to sleep for 1 second
+        sleep(1);
     }
 
     livewire(CreateServiceRequest::class)
@@ -538,7 +544,7 @@ test('assignment type round robin will auto-assign to new service requests', fun
     $getServiceRequestType = ServiceRequestType::where('assignment_type', ServiceRequestTypeAssignmentTypes::RoundRobin->value)->first();
     expect($getServiceRequestType->last_assigned_id)->ToBe($team->users()->orderBy('name')->orderBy('id')->first()->getKey());
     expect($latestServiceRequest->assignedTo->user_id)->ToBe($team->users()->orderBy('name')->orderBy('id')->first()->getKey());
-});
+})->only()->repeat(10);
 
 test('assignment type workload will auto-assign to new service requests', function () {
     asSuperAdmin();
@@ -607,6 +613,11 @@ test('assignment type workload will auto-assign to new service requests', functi
         expect($getServiceRequestType->assignment_type)->toBe(ServiceRequestTypeAssignmentTypes::Workload);
         expect($getServiceRequestType->last_assigned_id)->ToBe($user->getKey());
         expect($latestServiceRequest->assignedTo->user_id)->ToBe($user->getKey());
+
+        // This needs to be added due to a bug in Laravel
+        // Laravel's uuidv4 orderedUuids is NOT same second safe
+        // So until we update to UUID v7 we need to sleep for 1 second
+        sleep(1);
     }
 
     livewire(CreateServiceRequest::class)
