@@ -40,6 +40,9 @@ use Illuminate\Database\Migrations\Migration;
 return new class () extends Migration {
     use CanModifyPermissions;
 
+    /**
+    * @var array<string, string>
+    */
     private array $permissions = [
         'purchase.view-any' => 'Purchase',
         'purchase.create' => 'Purchase',
@@ -50,6 +53,9 @@ return new class () extends Migration {
         'purchase.*.force-delete' => 'Purchase',
     ];
 
+    /**
+    * @var array<string>
+    */
     private array $guards = [
         'web',
         'api',
