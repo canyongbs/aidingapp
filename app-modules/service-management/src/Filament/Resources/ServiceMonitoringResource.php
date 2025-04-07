@@ -41,7 +41,6 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Pag
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Pages\ListServiceMonitorings;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Pages\ViewServiceMonitoring;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
-use App\Features\ServiceMonitoring;
 use Filament\Resources\Resource;
 
 class ServiceMonitoringResource extends Resource
@@ -53,11 +52,6 @@ class ServiceMonitoringResource extends Resource
     protected static ?string $modelLabel = 'service monitoring';
 
     protected static ?int $navigationSort = 80;
-
-    public static function canAccess(): bool
-    {
-        return ServiceMonitoring::active() && parent::canAccess();
-    }
 
     public static function getPages(): array
     {

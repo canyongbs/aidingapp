@@ -38,6 +38,7 @@ import { createApp, defineCustomElement, getCurrentInstance, h } from 'vue';
 import { createMemoryHistory, createRouter, createWebHistory } from 'vue-router';
 import App from './App.vue';
 import ComingSoon from './Components/ComingSoon.vue';
+import Services from './Components/Services.vue';
 import config from './formkit.config.js';
 import CreateServiceRequest from './Pages/CreateServiceRequest.vue';
 import Home from './Pages/Home.vue';
@@ -103,7 +104,7 @@ customElements.define(
                     {
                         path: baseUrl + '/services',
                         name: 'services',
-                        component: ComingSoon,
+                        component: Services,
                     },
                     {
                         path: baseUrl + '/incidents',

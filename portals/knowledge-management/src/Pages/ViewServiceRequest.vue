@@ -154,6 +154,14 @@
         currentPage.value = page;
         getData(currentPage.value, true);
     };
+
+    const breadcrumbs = [
+        {
+            name: 'Services',
+            route: 'services',
+            params: null,
+        },
+    ];
 </script>
 
 <template>
@@ -166,7 +174,10 @@
                 <div v-else>
                     <main class="flex flex-col gap-8">
                         <div class="flex flex-col gap-6">
-                            <Breadcrumbs :currentCrumb="serviceRequest.serviceRequestNumber"></Breadcrumbs>
+                            <Breadcrumbs
+                                :breadcrumbs="breadcrumbs"
+                                :currentCrumb="serviceRequest.serviceRequestNumber"
+                            ></Breadcrumbs>
                             <div class="flex flex-col gap-6">
                                 <div v-if="authorizationError" class="text-red-500 text-sm">
                                     {{ authorizationError }}

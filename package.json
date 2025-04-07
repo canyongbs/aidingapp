@@ -76,7 +76,7 @@
         "spectaql": "^3.0.0",
         "tailwindcss-primeui": "^0.5.1",
         "tippy.js": "^6.3.7",
-        "vite": "^6.2.4",
+        "vite": "^6.2.5",
         "vue": "^3.3.4",
         "vue-filepond": "^7.0.4",
         "vue-router": "^4.2.5"
