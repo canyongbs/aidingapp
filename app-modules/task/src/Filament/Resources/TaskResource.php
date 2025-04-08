@@ -48,8 +48,6 @@ class TaskResource extends Resource
 
     protected static ?string $navigationGroup = 'Project Management';
 
-    protected static ?int $navigationSort = 90;
-
     protected static ?string $breadcrumb = 'Tasks';
 
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
