@@ -47,53 +47,46 @@
 <template>
     <main class="px-6 bg-gray-50">
         <div class="max-w-screen-xl flex flex-col gap-y-6 mx-auto py-8">
-            <Breadcrumbs :currentCrumb="'Licenses'"></Breadcrumbs>
-            <div v-if="loading" class="grid gap-4 lg:grid-cols-2">
+            <Breadcrumbs :currentCrumb="'Licenses'" />
+
+            <div v-if="loading" class="flex flex-col gap-y-8">
                 <div>
-                    <div class="h-6 bg-gray-300 rounded w-1/5 mb-3"></div>
-                    <div
-                        v-for="n in 3"
-                        :key="'active-skel-' + n"
-                        class="p-7 mb-3 mt-1 bg-white text-sm shadow-md rounded-lg p-4 border border-gray-200 animate-pulse"
-                    >
-                        <div class="h-4 bg-gray-300 rounded w-1/2 mb-2"></div>
-                        <div class="h-4 bg-gray-300 rounded w-1/3 mb-2"></div>
-                        <div class="h-4 bg-gray-300 rounded w-1/4 mb-2"></div>
-                        <div class="h-4 bg-gray-300 rounded w-1/3"></div>
+                    <div class="h-6 bg-gray-300 rounded w-24 mb-3"></div>
+                    <div class="grid gap-4 lg:grid-cols-2">
+                        <div
+                            v-for="n in 4"
+                            :key="'active-skel-' + n"
+                            class="p-7 bg-white text-sm shadow-md rounded-lg border border-gray-200 animate-pulse"
+                        >
+                            <div class="h-4 bg-gray-300 rounded w-1/2 mb-2"></div>
+                            <div class="h-4 bg-gray-300 rounded w-1/3 mb-2"></div>
+                            <div class="h-4 bg-gray-300 rounded w-1/4 mb-2"></div>
+                            <div class="h-4 bg-gray-300 rounded w-1/3"></div>
+                        </div>
                     </div>
                 </div>
+
                 <div>
-                    <div class="h-6 bg-gray-300 rounded w-1/5 mb-3"></div>
-                    <div
-                        v-for="n in 3"
-                        :key="'active-skel-' + n"
-                        class="p-7 mb-3 mt-1 bg-white text-sm shadow-md rounded-lg p-4 border border-gray-200 animate-pulse"
-                    >
-                        <div class="h-4 bg-gray-300 rounded w-1/2 mb-2"></div>
-                        <div class="h-4 bg-gray-300 rounded w-1/3 mb-2"></div>
-                        <div class="h-4 bg-gray-300 rounded w-1/4 mb-2"></div>
-                        <div class="h-4 bg-gray-300 rounded w-1/3"></div>
+                    <div class="h-6 bg-gray-300 rounded w-24 mb-3"></div>
+                    <div class="grid gap-4 lg:grid-cols-2">
+                        <div
+                            v-for="n in 4"
+                            :key="'expired-skel-' + n"
+                            class="p-7 bg-white text-sm shadow-md rounded-lg border border-gray-200 animate-pulse"
+                        >
+                            <div class="h-4 bg-gray-300 rounded w-1/2 mb-2"></div>
+                            <div class="h-4 bg-gray-300 rounded w-1/3 mb-2"></div>
+                            <div class="h-4 bg-gray-300 rounded w-1/4 mb-2"></div>
+                            <div class="h-4 bg-gray-300 rounded w-1/3"></div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div
-                v-else
-                class="grid gap-4"
-                :class="
-                    productLicenses &&
-                    productLicenses.activeLicense?.length > 0 &&
-                    productLicenses.expiredLicense?.length > 0
-                        ? 'lg:grid-cols-2'
-                        : 'lg:grid-cols-1'
-                "
-            >
+            <div v-else class="flex flex-col gap-y-8">
                 <div v-if="productLicenses.activeLicense?.length > 0">
                     <h3 class="text-xl font-semibold text-gray-800 mb-3">Active</h3>
-                    <div
-                        class="grid gap-4"
-                        :class="!productLicenses.expiredLicense?.length ? 'lg:grid-cols-2' : 'lg:grid-cols-1'"
-                    >
+                    <div class="grid gap-4 lg:grid-cols-2">
                         <Card
                             v-for="activeLicense in productLicenses.activeLicense"
                             :key="activeLicense.id"
@@ -110,9 +103,9 @@
                                 </p>
                                 <p class="mb-2 font-semibold text-gray-800">
                                     Expiration:
-                                    <span class="font-normal text-gray-700">{{
-                                        activeLicense.formatted_expiration_date ?? 'No Expiration'
-                                    }}</span>
+                                    <span class="font-normal text-gray-700">
+                                        {{ activeLicense.formatted_expiration_date ?? 'No Expiration' }}
+                                    </span>
                                 </p>
                                 <p class="flex gap-2 font-semibold text-gray-800">
                                     License Key:
@@ -137,10 +130,7 @@
 
                 <div v-if="productLicenses.expiredLicense?.length > 0">
                     <h3 class="text-xl font-semibold text-gray-800 mb-3">Expired</h3>
-                    <div
-                        class="grid gap-4"
-                        :class="!productLicenses.activeLicense?.length ? 'lg:grid-cols-2' : 'lg:grid-cols-1'"
-                    >
+                    <div class="grid gap-4 lg:grid-cols-2">
                         <Card
                             v-for="expiredLicense in productLicenses.expiredLicense"
                             :key="expiredLicense.id"
@@ -157,9 +147,9 @@
                                 </p>
                                 <p class="mb-2 font-semibold text-gray-800">
                                     Expiration:
-                                    <span class="font-normal text-gray-700">{{
-                                        expiredLicense.formatted_expiration_date
-                                    }}</span>
+                                    <span class="font-normal text-gray-700">
+                                        {{ expiredLicense.formatted_expiration_date }}
+                                    </span>
                                 </p>
                                 <p class="flex gap-2 font-semibold text-gray-800">
                                     License Key:
@@ -182,7 +172,6 @@
                     </div>
                 </div>
             </div>
-
             <div
                 v-if="!loading && !productLicenses.activeLicense.length && !productLicenses.expiredLicense.length"
                 class="p-3 flex items-start gap-2"
