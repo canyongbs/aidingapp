@@ -50,7 +50,7 @@ class ContractManagementServiceProvider extends ServiceProvider
         Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new ContractManagementPlugin()));
     }
 
-    public function boot()
+    public function boot(): void
     {
         Relation::morphMap([
             'contract_type' => ContractType::class,

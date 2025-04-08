@@ -36,6 +36,7 @@
 
 namespace AidingApp\Task\Filament\Concerns;
 
+use Filament\Forms\Components\Component;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -45,6 +46,9 @@ trait TaskEditForm
 {
     use TaskForm;
 
+    /**
+     * @return array<Component>
+     */
     public function editFormFields(): array
     {
         return [

@@ -44,7 +44,7 @@ enum AzureMatchingProperty: string implements HasLabel
 
     case Mail = 'mail';
 
-    public function getLabel(): ?string
+    public function getLabel(): string
     {
         return $this->name;
     }

@@ -62,6 +62,9 @@ class OrganizationIndustry extends Model implements Auditable
         'is_default',
     ];
 
+    /**
+     * @return HasMany<Organization,$this>
+     */
     public function organizations(): HasMany
     {
         return $this->hasMany(Organization::class, 'industry_id');

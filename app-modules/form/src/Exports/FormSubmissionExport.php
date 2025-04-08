@@ -43,13 +43,22 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 
 class FormSubmissionExport implements FromCollection, WithHeadings, WithMapping
 {
+    /**
+     * @param Collection<int, object> $submissions
+     */
     public function __construct(protected Collection $submissions) {}
 
+    /**
+     * @return Collection<int, mixed>
+     */
     public function collection(): Collection
     {
         return $this->submissions;
     }
 
+    /**
+     * @return array<string>
+     */
     public function headings(): array
     {
         return [
@@ -61,6 +70,11 @@ class FormSubmissionExport implements FromCollection, WithHeadings, WithMapping
         ];
     }
 
+    /**
+     * @param mixed $row
+     *
+     * @return array<string>
+     */
     public function map($row): array
     {
         return [

@@ -54,6 +54,11 @@ class EmailFormFieldBlock extends FormFieldBlock
         return [];
     }
 
+    /**
+     * @param SubmissibleField $field
+     *
+     * @return array<string,string>
+     */
     public static function getFormKitSchema(SubmissibleField $field): array
     {
         return [
@@ -64,6 +69,11 @@ class EmailFormFieldBlock extends FormFieldBlock
         ];
     }
 
+    /**
+     * @param SubmissibleField $field
+     *
+     * @return array<string>
+     */
     public static function getValidationRules(SubmissibleField $field): array
     {
         return ['string', 'email', 'max:255'];

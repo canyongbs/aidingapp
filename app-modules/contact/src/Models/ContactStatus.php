@@ -64,6 +64,9 @@ class ContactStatus extends BaseModel implements Auditable
         'color' => ContactStatusColorOptions::class,
     ];
 
+    /**
+     * @return HasMany<Contact,$this>
+     */
     public function contacts(): HasMany
     {
         return $this->hasMany(Contact::class, 'status_id');

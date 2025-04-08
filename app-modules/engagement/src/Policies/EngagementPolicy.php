@@ -62,7 +62,12 @@ class EngagementPolicy
 
     public function view(Authenticatable $authenticatable, Engagement $engagement): Response
     {
-        if (! $authenticatable->hasLicense($engagement->recipient?->getLicenseType())) {
+        /**
+         * @var Contact|null $recipient
+         */
+        $recipient = $engagement->recipient;
+
+        if (! $authenticatable->hasLicense($recipient?->getLicenseType())) {
             return Response::deny('You do not have permission to view this engagement.');
         }
 
@@ -86,7 +91,12 @@ class EngagementPolicy
             return Response::deny('You do not have permission to update this engagement because it has already been dispatched.');
         }
 
-        if (! $authenticatable->hasLicense($engagement->recipient?->getLicenseType())) {
+        /**
+         * @var Contact|null $recipient
+         */
+        $recipient = $engagement->recipient;
+
+        if (! $authenticatable->hasLicense($recipient?->getLicenseType())) {
             return Response::deny('You do not have permission to update this engagement.');
         }
 
@@ -102,7 +112,12 @@ class EngagementPolicy
             return Response::deny('You do not have permission to delete this engagement because it has already been dispatched.');
         }
 
-        if (! $authenticatable->hasLicense($engagement->recipient?->getLicenseType())) {
+        /**
+         * @var Contact|null $recipient
+         */
+        $recipient = $engagement->recipient;
+
+        if (! $authenticatable->hasLicense($recipient?->getLicenseType())) {
             return Response::deny('You do not have permission to delete this engagement.');
         }
 
@@ -114,7 +129,12 @@ class EngagementPolicy
 
     public function restore(Authenticatable $authenticatable, Engagement $engagement): Response
     {
-        if (! $authenticatable->hasLicense($engagement->recipient?->getLicenseType())) {
+        /**
+         * @var Contact|null $recipient
+         */
+        $recipient = $engagement->recipient;
+
+        if (! $authenticatable->hasLicense($recipient?->getLicenseType())) {
             return Response::deny('You do not have permission to restore this engagement.');
         }
 
@@ -130,7 +150,12 @@ class EngagementPolicy
             return Response::deny('You cannot permanently delete this engagement because it has already been dispatched.');
         }
 
-        if (! $authenticatable->hasLicense($engagement->recipient?->getLicenseType())) {
+        /**
+         * @var Contact|null $recipient
+         */
+        $recipient = $engagement->recipient;
+
+        if (! $authenticatable->hasLicense($recipient?->getLicenseType())) {
             return Response::deny('You do not have permission to permanently delete this engagement.');
         }
 

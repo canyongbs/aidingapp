@@ -39,6 +39,7 @@ namespace AidingApp\Form\Filament\Blocks;
 use AidingApp\Form\Actions\ResolveSubmissionAuthorFromEmail;
 use AidingApp\Form\Models\SubmissibleField;
 use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\Component;
 use Filament\Forms\Components\TextInput as FilamentTextInput;
 
 class EducatableEmailFormFieldBlock extends FormFieldBlock
@@ -54,6 +55,9 @@ class EducatableEmailFormFieldBlock extends FormFieldBlock
         return 'educatable_email';
     }
 
+    /**
+     * @return array<Component>
+     */
     public function getFormSchema(): array
     {
         return [
@@ -68,6 +72,11 @@ class EducatableEmailFormFieldBlock extends FormFieldBlock
         ];
     }
 
+    /**
+     * @param SubmissibleField $field
+     *
+     * @return array<string,string>
+     */
     public static function getFormKitSchema(SubmissibleField $field): array
     {
         return [
@@ -78,11 +87,21 @@ class EducatableEmailFormFieldBlock extends FormFieldBlock
         ];
     }
 
+    /**
+     * @param SubmissibleField $field
+     *
+     * @return array<string>
+     */
     public static function getValidationRules(SubmissibleField $field): array
     {
         return ['string', 'email', 'max:255'];
     }
 
+    /**
+     * @param mixed $response
+     *
+     * @return array<string,string>
+     */
     public static function getSubmissionState(mixed $response): array
     {
         $author = app(ResolveSubmissionAuthorFromEmail::class)($response);

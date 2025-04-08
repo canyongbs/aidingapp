@@ -56,6 +56,9 @@ class ContractType extends BaseModel implements Auditable
         'is_default' => 'boolean',
     ];
 
+    /**
+     * @return HasMany<Contract, $this>
+     */
     public function contracts(): HasMany
     {
         return $this->hasMany(Contract::class, 'contract_type');

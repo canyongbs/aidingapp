@@ -37,6 +37,7 @@
 namespace AidingApp\Engagement\Filament\Resources\EngagementFileResource\Pages;
 
 use AidingApp\Engagement\Filament\Resources\EngagementFileResource;
+use AidingApp\Engagement\Models\EngagementFile;
 use Filament\Actions;
 use Filament\Infolists\Components\Actions\Action;
 use Filament\Infolists\Components\Section;
@@ -51,6 +52,11 @@ class ViewEngagementFile extends ViewRecord
 
     public function infolist(Infolist $infolist): Infolist
     {
+        /**
+         * @var EngagementFile $record
+         */
+        $record = $this->record;
+
         return $infolist
             ->schema([
                 Section::make()
@@ -71,7 +77,7 @@ class ViewEngagementFile extends ViewRecord
                                         'download' => true,
                                         'target' => '_blank',
                                     ])
-                                    ->url(route('engagement-file-download', ['file' => $this->record->id]))
+                                    ->url(route('engagement-file-download', ['file' => $record->getKey()]))
                             ),
                     ])
                     ->columns(),

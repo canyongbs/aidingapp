@@ -57,6 +57,9 @@ class ContactSource extends BaseModel implements Auditable
         'name',
     ];
 
+    /**
+     * @return HasMany<Contact,$this>
+     */
     public function contacts(): HasMany
     {
         return $this->hasMany(Contact::class, 'source_id');

@@ -40,6 +40,9 @@ use Illuminate\Database\Migrations\Migration;
 return new class () extends Migration {
     use CanModifyPermissions;
 
+    /**
+     * @var array<string,string>
+     */
     private array $permissions = [
         'engagement_deliverable.view-any' => 'Engagement Deliverable',
         'engagement_deliverable.create' => 'Engagement Deliverable',
@@ -50,6 +53,9 @@ return new class () extends Migration {
         'engagement_deliverable.*.force-delete' => 'Engagement Deliverable',
     ];
 
+    /**
+     * @var array<string>
+     */
     private array $guards = [
         'web',
         'api',
