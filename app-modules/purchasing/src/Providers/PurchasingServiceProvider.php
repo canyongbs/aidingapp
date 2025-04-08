@@ -34,36 +34,18 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources;
+namespace AidingApp\Purchasing\Providers;
 
-use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Pages\CreateServiceMonitoring;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Pages\EditServiceMonitoring;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Pages\ListServiceMonitorings;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Pages\ViewServiceMonitoring;
-use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
-use Filament\Resources\Resource;
+use AidingApp\Purchasing\PurchasingPlugin;
+use Filament\Panel;
+use Illuminate\Support\ServiceProvider;
 
-class ServiceMonitoringResource extends Resource
+class PurchasingServiceProvider extends ServiceProvider
 {
-    protected static ?string $model = ServiceMonitoringTarget::class;
-
-    protected static ?string $navigationGroup = 'Service Management';
-
-    protected static ?string $pluralModelLabel = 'service monitoring';
-
-    protected static ?string $modelLabel = 'service monitoring';
-
-    protected static ?string $slug = 'service-monitoring';
-
-    protected static ?int $navigationSort = 80;
-
-    public static function getPages(): array
+    public function register(): void
     {
-        return [
-            'index' => ListServiceMonitorings::route('/'),
-            'create' => CreateServiceMonitoring::route('/create'),
-            'view' => ViewServiceMonitoring::route('/{record}'),
-            'edit' => EditServiceMonitoring::route('/{record}/edit'),
-        ];
+        Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new PurchasingPlugin()));
     }
+
+    public function boot(): void {}
 }

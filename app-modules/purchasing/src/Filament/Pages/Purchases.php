@@ -34,36 +34,26 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources;
+namespace AidingApp\Purchasing\Filament\Pages;
 
-use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Pages\CreateServiceMonitoring;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Pages\EditServiceMonitoring;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Pages\ListServiceMonitorings;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Pages\ViewServiceMonitoring;
-use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
-use Filament\Resources\Resource;
+use App\Models\User;
+use Filament\Pages\Page;
 
-class ServiceMonitoringResource extends Resource
+class Purchases extends Page
 {
-    protected static ?string $model = ServiceMonitoringTarget::class;
+    protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
-    protected static ?string $navigationGroup = 'Service Management';
+    protected static string $view = 'filament.pages.coming-soon';
 
-    protected static ?string $pluralModelLabel = 'service monitoring';
+    protected static ?int $navigationSort = 30;
 
-    protected static ?string $modelLabel = 'service monitoring';
+    protected static ?string $navigationGroup = 'Purchasing';
 
-    protected static ?string $slug = 'service-monitoring';
-
-    protected static ?int $navigationSort = 80;
-
-    public static function getPages(): array
+    public static function canAccess(): bool
     {
-        return [
-            'index' => ListServiceMonitorings::route('/'),
-            'create' => CreateServiceMonitoring::route('/create'),
-            'view' => ViewServiceMonitoring::route('/{record}'),
-            'edit' => EditServiceMonitoring::route('/{record}/edit'),
-        ];
+        /** @var User $user */
+        $user = auth()->user();
+
+        return $user->can(['purchase.view-any']);
     }
 }

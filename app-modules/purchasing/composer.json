@@ -1,0 +1,26 @@
+{
+    "name": "canyon-gbs/purchasing",
+    "description": "",
+    "type": "library",
+    "version": "1.0",
+    "license": "proprietary",
+    "require": {
+        "filament/filament": "^3.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "AidingApp\\Purchasing\\": "src/",
+            "AidingApp\\Purchasing\\Tests\\": "tests/",
+            "AidingApp\\Purchasing\\Database\\Factories\\": "database/factories/",
+            "AidingApp\\Purchasing\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "minimum-stability": "stable",
+    "extra": {
+        "laravel": {
+            "providers": [
+                "AidingApp\\Purchasing\\Providers\\PurchasingServiceProvider"
+            ]
+        }
+    }
+}

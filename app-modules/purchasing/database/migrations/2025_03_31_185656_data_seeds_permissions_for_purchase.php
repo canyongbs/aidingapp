@@ -34,36 +34,46 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources;
+use Database\Migrations\Concerns\CanModifyPermissions;
+use Illuminate\Database\Migrations\Migration;
 
-use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Pages\CreateServiceMonitoring;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Pages\EditServiceMonitoring;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Pages\ListServiceMonitorings;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Pages\ViewServiceMonitoring;
-use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
-use Filament\Resources\Resource;
+return new class () extends Migration {
+    use CanModifyPermissions;
 
-class ServiceMonitoringResource extends Resource
-{
-    protected static ?string $model = ServiceMonitoringTarget::class;
+    /**
+    * @var array<string, string>
+    */
+    private array $permissions = [
+        'purchase.view-any' => 'Purchase',
+        'purchase.create' => 'Purchase',
+        'purchase.*.view' => 'Purchase',
+        'purchase.*.update' => 'Purchase',
+        'purchase.*.delete' => 'Purchase',
+        'purchase.*.restore' => 'Purchase',
+        'purchase.*.force-delete' => 'Purchase',
+    ];
 
-    protected static ?string $navigationGroup = 'Service Management';
+    /**
+    * @var array<string>
+    */
+    private array $guards = [
+        'web',
+        'api',
+    ];
 
-    protected static ?string $pluralModelLabel = 'service monitoring';
-
-    protected static ?string $modelLabel = 'service monitoring';
-
-    protected static ?string $slug = 'service-monitoring';
-
-    protected static ?int $navigationSort = 80;
-
-    public static function getPages(): array
+    public function up(): void
     {
-        return [
-            'index' => ListServiceMonitorings::route('/'),
-            'create' => CreateServiceMonitoring::route('/create'),
-            'view' => ViewServiceMonitoring::route('/{record}'),
-            'edit' => EditServiceMonitoring::route('/{record}/edit'),
-        ];
+        collect($this->guards)
+            ->each(function (string $guard) {
+                $this->createPermissions($this->permissions, $guard);
+            });
     }
-}
+
+    public function down(): void
+    {
+        collect($this->guards)
+            ->each(function (string $guard) {
+                $this->deletePermissions(array_keys($this->permissions), $guard);
+            });
+    }
+};

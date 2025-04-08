@@ -34,36 +34,29 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources;
+namespace AidingApp\Purchasing;
 
-use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Pages\CreateServiceMonitoring;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Pages\EditServiceMonitoring;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Pages\ListServiceMonitorings;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Pages\ViewServiceMonitoring;
-use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
-use Filament\Resources\Resource;
+use Filament\Contracts\Plugin;
+use Filament\Panel;
 
-class ServiceMonitoringResource extends Resource
+class PurchasingPlugin implements Plugin
 {
-    protected static ?string $model = ServiceMonitoringTarget::class;
-
-    protected static ?string $navigationGroup = 'Service Management';
-
-    protected static ?string $pluralModelLabel = 'service monitoring';
-
-    protected static ?string $modelLabel = 'service monitoring';
-
-    protected static ?string $slug = 'service-monitoring';
-
-    protected static ?int $navigationSort = 80;
-
-    public static function getPages(): array
+    public function getId(): string
     {
-        return [
-            'index' => ListServiceMonitorings::route('/'),
-            'create' => CreateServiceMonitoring::route('/create'),
-            'view' => ViewServiceMonitoring::route('/{record}'),
-            'edit' => EditServiceMonitoring::route('/{record}/edit'),
-        ];
+        return 'purchasing';
     }
+
+    public function register(Panel $panel): void
+    {
+        $panel->discoverResources(
+            in: __DIR__ . '/Filament/Resources',
+            for: 'AidingApp\\Purchasing\\Filament\\Resources'
+        )
+            ->discoverPages(
+                in: __DIR__ . '/Filament/Pages',
+                for: 'AidingApp\\Purchasing\\Filament\\Pages'
+            );
+    }
+
+    public function boot(Panel $panel): void {}
 }

@@ -6,7 +6,7 @@ LABEL maintainer="CanyonGBS"
 ARG POSTGRES_VERSION=15
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends git cron s6 gnupg zip unzip php8.2-apcu php8.2-pgsql php8.2-imagick php8.2-mailparse php8.2-redis php8.2-pcov php8.2-xdebug \
+    && apt-get install -y --no-install-recommends git cron s6 gnupg zip unzip php8.2-apcu php8.2-pgsql php8.2-imagick php8.2-mailparse php8.2-redis \
     && curl -sS https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor | tee /etc/apt/keyrings/pgdg.gpg >/dev/null \
     && echo "deb [signed-by=/etc/apt/keyrings/pgdg.gpg] https://apt.postgresql.org/pub/repos/apt jammy-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
     && apt-get update \
@@ -14,8 +14,8 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
 
-ENV NVM_VERSION v0.40.1
-ENV NODE_VERSION 23.4.0
+ENV NVM_VERSION v0.40.2
+ENV NODE_VERSION 23.11.0
 ENV NPM_VERSION ^11.0.0
 ENV NVM_DIR /usr/local/nvm
 RUN mkdir "$NVM_DIR"
@@ -48,7 +48,7 @@ COPY ./docker/nginx/site-opts.d /etc/nginx/site-opts.d
 RUN rm /etc/s6-overlay/s6-rc.d/user/contents.d/php-fpm
 RUN rm -rf /etc/s6-overlay/s6-rc.d/php-fpm
 
-COPY --from=ghcr.io/roadrunner-server/roadrunner:2024.3.4 --chown=$PUID:$PGID --chmod=0755 /usr/bin/rr /usr/local/bin/rr
+COPY --from=ghcr.io/roadrunner-server/roadrunner:2024.3.5 --chown=$PUID:$PGID --chmod=0755 /usr/bin/rr /usr/local/bin/rr
 
 RUN apt-get update \
     && apt-get upgrade -y
