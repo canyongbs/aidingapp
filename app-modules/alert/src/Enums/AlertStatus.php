@@ -46,7 +46,7 @@ enum AlertStatus: string implements HasLabel
 
     case Canceled = 'canceled';
 
-    public function getLabel(): ?string
+    public function getLabel(): string
     {
         return $this->name;
     }

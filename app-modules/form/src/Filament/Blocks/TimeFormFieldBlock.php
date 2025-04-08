@@ -54,6 +54,11 @@ class TimeFormFieldBlock extends FormFieldBlock
         return [];
     }
 
+    /**
+     * @param SubmissibleField $field
+     *
+     * @return array<string,string>
+     */
     public static function getFormKitSchema(SubmissibleField $field): array
     {
         return [

@@ -38,6 +38,7 @@ namespace App\Filament\Resources\UserResource\RelationManagers;
 
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Authenticatable;
+use App\Models\User;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;

@@ -79,6 +79,9 @@ class Task extends BaseModel implements Auditable, CanTriggerAutoSubscription
         'due' => 'datetime',
     ];
 
+    /**
+     * @return array<string>
+     */
     public function getStateMachineFields(): array
     {
         return [
@@ -86,16 +89,25 @@ class Task extends BaseModel implements Auditable, CanTriggerAutoSubscription
         ];
     }
 
+    /**
+     * @return BelongsTo<Contact, $this>
+     */
     public function concern(): BelongsTo
     {
         return $this->belongsTo(Contact::class, 'concern_id');
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function assignedTo(): BelongsTo
     {
         return $this->belongsTo(User::class, 'assigned_to');
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');

@@ -38,6 +38,7 @@ namespace AidingApp\Form\Filament\Blocks;
 
 use AidingApp\Form\Models\SubmissibleField;
 use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\Component;
 use Filament\Forms\Components\TextInput;
 use FilamentTiptapEditor\TiptapBlock;
 
@@ -51,6 +52,9 @@ abstract class FormFieldBlock extends TiptapBlock
 
     public static bool $internal = false;
 
+    /**
+     * @return array<Component>
+     */
     public function getFormSchema(): array
     {
         return [

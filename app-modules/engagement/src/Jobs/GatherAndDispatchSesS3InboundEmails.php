@@ -47,7 +47,7 @@ class GatherAndDispatchSesS3InboundEmails implements ShouldQueue, NotTenantAware
     use Queueable;
 
     // Unique for 15 minutes
-    public $uniqueFor = 900;
+    public int $uniqueFor = 900;
 
     public function handle(): void
     {

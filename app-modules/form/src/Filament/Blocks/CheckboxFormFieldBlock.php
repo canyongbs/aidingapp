@@ -56,6 +56,11 @@ class CheckboxFormFieldBlock extends FormFieldBlock
         return [];
     }
 
+    /**
+     * @param SubmissibleField $field
+     *
+     * @return array<string,string>
+     */
     public static function getFormKitSchema(SubmissibleField $field): array
     {
         return [
@@ -66,6 +71,11 @@ class CheckboxFormFieldBlock extends FormFieldBlock
         ];
     }
 
+    /**
+     * @param SubmissibleField $field
+     *
+     * @return array<string>
+     */
     public static function getValidationRules(SubmissibleField $field): array
     {
         return ['boolean'];

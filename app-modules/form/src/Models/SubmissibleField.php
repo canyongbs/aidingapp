@@ -54,21 +54,33 @@ abstract class SubmissibleField extends BaseModel
 
     abstract public function step(): BelongsTo;
 
+    /**
+     * @return Attribute<string, never>
+     */
     protected function isRequired(): Attribute
     {
         return Attribute::make(get: fn ($value) => $this->hasCast('is_required') ? $this->castAttribute('is_required', $value) : $value);
     }
 
+    /**
+     * @return Attribute<string, never>
+     */
     protected function type(): Attribute
     {
         return Attribute::make(get: fn ($value) => $this->hasCast('type') ? $this->castAttribute('type', $value) : $value);
     }
 
+    /**
+     * @return Attribute<string, never>
+     */
     protected function label(): Attribute
     {
         return Attribute::make(get: fn ($value) => $this->hasCast('label') ? $this->castAttribute('label', $value) : $value);
     }
 
+    /**
+     * @return Attribute<string, never>
+     */
     protected function config(): Attribute
     {
         return Attribute::make(get: fn ($value) => $this->hasCast('config') ? $this->castAttribute('config', $value) : $value);

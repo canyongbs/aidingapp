@@ -122,7 +122,7 @@ class CreateTwilioConversation
                 app(AddUserToConversation::class)(user: $user, conversation: $conversation);
             }
         } else {
-            /** @var User $user */
+            /** @var User $creator */
             $creator = auth()->user();
 
             foreach ($users as $user) {

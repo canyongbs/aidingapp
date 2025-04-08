@@ -47,6 +47,9 @@ class PortalGuest extends BaseModel
 {
     use SoftDeletes;
 
+    /**
+     * @return MorphMany<KnowledgeBaseArticleVote, $this>
+     */
     public function knowledgeBaseArticleVotes(): MorphMany
     {
         return $this->morphMany(KnowledgeBaseArticleVote::class, 'voter');

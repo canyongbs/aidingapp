@@ -57,11 +57,17 @@ abstract class SubmissibleStep extends BaseModel
 
     abstract public function fields(): HasMany;
 
+    /**
+     * @return Attribute<string, never>
+     */
     protected function label(): Attribute
     {
         return Attribute::make(get: fn ($value) => $this->hasCast('label') ? $this->castAttribute('label', $value) : $value);
     }
 
+    /**
+     * @return Attribute<string, never>
+     */
     protected function content(): Attribute
     {
         return Attribute::make(get: fn ($value) => $this->hasCast('content') ? $this->castAttribute('content', $value) : $value);

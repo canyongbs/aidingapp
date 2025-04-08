@@ -176,36 +176,57 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
         );
     }
 
+    /**
+     * @return BelongsTo<Division, $this>
+     */
     public function division(): BelongsTo
     {
         return $this->belongsTo(Division::class, 'division_id');
     }
 
+    /**
+     * @return HasMany<ServiceRequestUpdate, $this>
+     */
     public function serviceRequestUpdates(): HasMany
     {
         return $this->hasMany(ServiceRequestUpdate::class, 'service_request_id');
     }
 
+    /**
+     * @return BelongsTo<ServiceRequestStatus, $this>
+     */
     public function status(): BelongsTo
     {
         return $this->belongsTo(ServiceRequestStatus::class)->withTrashed();
     }
 
+    /**
+     * @return BelongsTo<ServiceRequestPriority, $this>
+     */
     public function priority(): BelongsTo
     {
         return $this->belongsTo(ServiceRequestPriority::class);
     }
 
+    /**
+     * @return BelongsTo<ServiceRequestFormSubmission, $this>
+     */
     public function serviceRequestFormSubmission(): BelongsTo
     {
         return $this->belongsTo(ServiceRequestFormSubmission::class, 'service_request_form_submission_id');
     }
 
+    /**
+     * @return HasMany<ServiceRequestAssignment, $this>
+     */
     public function assignments(): HasMany
     {
         return $this->hasMany(ServiceRequestAssignment::class);
     }
 
+    /**
+     * @return HasOne<ServiceRequestAssignment, $this>
+     */
     public function assignedTo(): HasOne
     {
         return $this->hasOne(ServiceRequestAssignment::class)
@@ -213,22 +234,34 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
             ->where('status', ServiceRequestAssignmentStatus::Active);
     }
 
+    /**
+     * @return HasOne<ServiceRequestAssignment, $this>
+     */
     public function initialAssignment(): HasOne
     {
         return $this->hasOne(ServiceRequestAssignment::class)
             ->oldest('assigned_at');
     }
 
+    /**
+     * @return HasMany<ServiceRequestHistory, $this>
+     */
     public function histories(): HasMany
     {
         return $this->hasMany(ServiceRequestHistory::class);
     }
 
+    /**
+     * @return HasOne<ServiceRequestFeedback, $this>
+     */
     public function feedback(): HasOne
     {
         return $this->hasOne(ServiceRequestFeedback::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -242,6 +275,9 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
         );
     }
 
+    /**
+     * @return BelongsTo<ServiceRequestUpdate, $this>
+     */
     public function latestInboundServiceRequestUpdate(): HasOne
     {
         return $this->hasOne(ServiceRequestUpdate::class, 'service_request_id')
@@ -254,6 +290,9 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
             });
     }
 
+    /**
+     * @return BelongsTo<ServiceRequestUpdate, $this>
+     */
     public function latestOutboundServiceRequestUpdate(): HasOne
     {
         return $this->hasOne(ServiceRequestUpdate::class, 'service_request_id')

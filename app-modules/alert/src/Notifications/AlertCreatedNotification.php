@@ -55,6 +55,12 @@ class AlertCreatedNotification extends Notification
         return ['database'];
     }
 
+    /**
+     *
+     * @param object $notifiable
+     *
+     * @return array
+     */
     public function toDatabase(object $notifiable): array
     {
         $concern = $this->alert->concern;

@@ -52,6 +52,11 @@ class TextInputFormFieldBlock extends FormFieldBlock
         return [];
     }
 
+    /**
+     * @param SubmissibleField $field
+     *
+     * @return array<string,string>
+     */
     public static function getFormKitSchema(SubmissibleField $field): array
     {
         return [
@@ -62,6 +67,11 @@ class TextInputFormFieldBlock extends FormFieldBlock
         ];
     }
 
+    /**
+     * @param SubmissibleField $field
+     *
+     * @return array<string>
+     */
     public static function getValidationRules(SubmissibleField $field): array
     {
         return ['string', 'max:255'];

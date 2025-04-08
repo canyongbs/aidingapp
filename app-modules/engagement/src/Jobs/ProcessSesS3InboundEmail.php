@@ -62,7 +62,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
     use Queueable;
 
     // Unique for 30 minutes
-    public $uniqueFor = 1800;
+    public int $uniqueFor = 1800;
 
     public function __construct(
         protected string $emailFilePath

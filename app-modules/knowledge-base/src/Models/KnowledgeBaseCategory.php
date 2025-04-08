@@ -61,6 +61,9 @@ class KnowledgeBaseCategory extends BaseModel implements Auditable
         'slug',
     ];
 
+    /**
+     * @return HasMany<KnowledgeBaseItem, $this>
+     */
     public function knowledgeBaseItems(): HasMany
     {
         return $this->hasMany(KnowledgeBaseItem::class, 'category_id');

@@ -41,6 +41,9 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 trait HasManyMorphedEngagements
 {
+    /**
+     * @return MorphMany<Engagement, $this>
+     */
     public function engagements(): MorphMany
     {
         return $this->morphMany(
@@ -49,6 +52,9 @@ trait HasManyMorphedEngagements
         );
     }
 
+    /**
+     * @return MorphMany<Engagement, $this>
+     */
     public function orderedEngagements(): MorphMany
     {
         return $this->engagements()

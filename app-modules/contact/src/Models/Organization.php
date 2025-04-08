@@ -97,16 +97,25 @@ class Organization extends BaseModel implements HasMedia, Auditable
             ]);
     }
 
+    /**
+     * @return BelongsTo<OrganizationIndustry,$this>
+     */
     public function industry(): BelongsTo
     {
         return $this->belongsTo(OrganizationIndustry::class);
     }
 
+    /**
+     * @return BelongsTo<OrganizationType,$this>
+     */
     public function type(): BelongsTo
     {
         return $this->belongsTo(OrganizationType::class);
     }
 
+    /**
+     * @return HasMany<Contact,$this>
+     */
     public function contacts(): HasMany
     {
         return $this->hasMany(Contact::class, 'organization_id');

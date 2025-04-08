@@ -38,6 +38,7 @@ namespace AidingApp\Authorization\Filament\Pages;
 
 use AidingApp\Authorization\Settings\GoogleSsoSettings;
 use App\Filament\Clusters\ProductIntegrations;
+use App\Models\User;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
