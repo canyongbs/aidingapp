@@ -250,7 +250,6 @@ class Contact extends Authenticatable implements Auditable, Subscribable, Educat
     }
 
     /**
-     *
      * @return MorphToMany<User, $this>
      */
     public function subscribedUsers(): MorphToMany

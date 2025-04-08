@@ -48,7 +48,6 @@ class Login extends FilamentLogin
     protected static string $layout = 'filament-panels::components.layouts.login';
 
     /**
-     *
      * @return array<Action>
      */
     protected function getSsoFormActions(): array

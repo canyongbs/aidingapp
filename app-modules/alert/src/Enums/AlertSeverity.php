@@ -47,7 +47,6 @@ enum AlertSeverity: string implements HasLabel
     case High = 'high';
 
     /**
-     *
      * @return string
      */
     public function getLabel(): string
