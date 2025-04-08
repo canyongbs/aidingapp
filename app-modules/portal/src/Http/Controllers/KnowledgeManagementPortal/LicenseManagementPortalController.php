@@ -13,7 +13,7 @@ class LicenseManagementPortalController extends Controller
     public function __invoke(Request $request): JsonResponse
     {
         $licenses = auth('contact')->user()->productLicenses()
-            ->with(['product:id,name,version'])
+            ->withWhereHas('product:id,name,version')
             ->get()
             ->map(function ($license) {
                 /** @var ProductLicense $license */
@@ -24,8 +24,12 @@ class LicenseManagementPortalController extends Controller
 
         return response()->json([
             'success' => true,
-            'activeLicense' => $licenses->filter(fn ($license) => $license->status === ProductLicenseStatus::Active)->values(),
-            'expiredLicense' => $licenses->filter(fn ($license) => $license->status === ProductLicenseStatus::Expired)->values(),
+            'activeLicense' => $licenses->filter(
+                fn (ProductLicense $license): bool => $license->status === ProductLicenseStatus::Active
+            )->values(),
+            'expiredLicense' => $licenses->filter(
+                fn (ProductLicense $license): bool => $license->status === ProductLicenseStatus::Expired
+            )->values(),
         ]);
     }
 }
