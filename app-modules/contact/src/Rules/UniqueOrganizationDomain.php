@@ -44,7 +44,7 @@ use Illuminate\Translation\PotentiallyTranslatedString;
 
 class UniqueOrganizationDomain implements ValidationRule
 {
-    protected int|null $ignoreId;
+    protected int|null|string $ignoreId;
 
     /**
      * Create a new rule instance.
