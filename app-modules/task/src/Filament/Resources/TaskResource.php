@@ -50,6 +50,8 @@ class TaskResource extends Resource
 
     protected static ?int $navigationSort = 20;
 
+    protected static ?string $breadcrumb = 'Tasks';
+
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
 
     public static function getPages(): array
