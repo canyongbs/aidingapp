@@ -54,7 +54,6 @@ class AiSettings extends Settings
     }
 
     /**
-     *
      * @return array<string>
      */
     public static function encrypted(): array
