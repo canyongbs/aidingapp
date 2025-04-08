@@ -11,4 +11,6 @@ class Projects extends Page
     protected static ?string $navigationLabel = 'Projects';
 
     protected static ?string $navigationGroup = 'Project Management';
+
+    protected static ?int $navigationSort = 10;
 }
