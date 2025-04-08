@@ -48,7 +48,7 @@ class TaskResource extends Resource
 
     protected static ?string $navigationGroup = 'Project Management';
 
-    protected static ?int $navigationSort = 90;
+    protected static ?int $navigationSort = 20;
 
     protected static ?string $breadcrumb = 'Tasks';
 
