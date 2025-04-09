@@ -3308,12 +3308,6 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/app-modules/license-management/src/Models/Scopes/AuthorizeLicensesScope.php',
 ];
 $ignoreErrors[] = [
-	'message' => '#^Access to an undefined property AidingApp\\\\LicenseManagement\\\\Models\\\\ProductLicense\\:\\:\\$created_by_id\\.$#',
-	'identifier' => 'property.notFound',
-	'count' => 1,
-	'path' => __DIR__ . '/app-modules/license-management/src/Observers/ProductLicenseObserver.php',
-];
-$ignoreErrors[] = [
 	'message' => '#^Access to an undefined property AidingApp\\\\LicenseManagement\\\\Models\\\\Product\\:\\:\\$created_by_id\\.$#',
 	'identifier' => 'property.notFound',
 	'count' => 1,
@@ -3324,18 +3318,6 @@ $ignoreErrors[] = [
 	'identifier' => 'missingType.return',
 	'count' => 1,
 	'path' => __DIR__ . '/app-modules/license-management/src/Providers/LicenseManagementServiceProvider.php',
-];
-$ignoreErrors[] = [
-	'message' => '#^Access to an undefined property AidingApp\\\\LicenseManagement\\\\Models\\\\ProductLicense\\:\\:\\$status\\.$#',
-	'identifier' => 'property.notFound',
-	'count' => 4,
-	'path' => __DIR__ . '/app-modules/license-management/tests/Unit/ProductLicenseStatusTest.php',
-];
-$ignoreErrors[] = [
-	'message' => '#^Unable to resolve the template type TValue in call to function expect$#',
-	'identifier' => 'argument.templateType',
-	'count' => 4,
-	'path' => __DIR__ . '/app-modules/license-management/tests/Unit/ProductLicenseStatusTest.php',
 ];
 $ignoreErrors[] = [
 	'message' => '#^Class AidingApp\\\\Notification\\\\Database\\\\Factories\\\\SubscriptionFactory extends generic class Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\Factory but does not specify its types\\: TModel$#',
