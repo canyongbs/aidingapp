@@ -34,30 +34,36 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Task\Filament\Resources;
+namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\CreateTask;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\EditTask;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\ListTasks;
-use AidingApp\Task\Models\Task;
-use Filament\Resources\Resource;
+use AidingApp\LicenseManagement\Enums\ProductLicenseStatus;
+use AidingApp\LicenseManagement\Models\ProductLicense;
+use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
-class TaskResource extends Resource
+class LicenseManagementPortalController extends Controller
 {
-    protected static ?string $model = Task::class;
-
-    protected static ?string $navigationGroup = 'Project Management';
-
-    protected static ?int $navigationSort = 10;
-
-    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
-
-    public static function getPages(): array
+    public function __invoke(Request $request): JsonResponse
     {
-        return [
-            'index' => ListTasks::route('/'),
-            'create' => CreateTask::route('/create'),
-            'edit' => EditTask::route('/{record}/edit'),
-        ];
+        $licenses = auth('contact')->user()->productLicenses()
+            ->withWhereHas('product:id,name,version')
+            ->get()
+            ->map(function ($license) {
+                /** @var ProductLicense $license */
+                $license->formatted_expiration_date = $license->expiration_date?->format('m-d-Y');
+
+                return $license;
+            });
+
+        return response()->json([
+            'success' => true,
+            'activeLicense' => $licenses->filter(
+                fn (ProductLicense $license): bool => $license->status === ProductLicenseStatus::Active
+            )->values(),
+            'expiredLicense' => $licenses->filter(
+                fn (ProductLicense $license): bool => $license->status === ProductLicenseStatus::Expired
+            )->values(),
+        ]);
     }
 }

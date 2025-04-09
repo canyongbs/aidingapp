@@ -61,7 +61,7 @@ class ListProducts extends ListRecords
                     ->label('Product Name')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('Version')
+                TextColumn::make('version')
                     ->label('Version')
                     ->searchable()
                     ->sortable(),
