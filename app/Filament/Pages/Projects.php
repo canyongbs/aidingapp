@@ -34,30 +34,26 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Task\Filament\Resources;
+namespace App\Filament\Pages;
 
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\CreateTask;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\EditTask;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\ListTasks;
-use AidingApp\Task\Models\Task;
-use Filament\Resources\Resource;
+use App\Models\User;
+use Filament\Pages\Page;
 
-class TaskResource extends Resource
+class Projects extends Page
 {
-    protected static ?string $model = Task::class;
+    protected static string $view = 'filament.pages.coming-soon';
+
+    protected static ?string $navigationLabel = 'Projects';
 
     protected static ?string $navigationGroup = 'Project Management';
 
-    protected static ?int $navigationSort = 20;
+    protected static ?int $navigationSort = 10;
 
-    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
-
-    public static function getPages(): array
+    public static function canAccess(): bool
     {
-        return [
-            'index' => ListTasks::route('/'),
-            'create' => CreateTask::route('/create'),
-            'edit' => EditTask::route('/{record}/edit'),
-        ];
+        /** @var User $user */
+        $user = auth()->user();
+
+        return $user->can(['project.view-any', 'project.*.view']) && parent::canAccess();
     }
 }

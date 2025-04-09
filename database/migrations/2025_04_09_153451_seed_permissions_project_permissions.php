@@ -34,30 +34,44 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Task\Filament\Resources;
+use Database\Migrations\Concerns\CanModifyPermissions;
+use Illuminate\Database\Migrations\Migration;
 
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\CreateTask;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\EditTask;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\ListTasks;
-use AidingApp\Task\Models\Task;
-use Filament\Resources\Resource;
+return new class () extends Migration {
+    use CanModifyPermissions;
 
-class TaskResource extends Resource
-{
-    protected static ?string $model = Task::class;
+    /**
+    * @var array<string, string>
+    */
+    private array $permissions = [
+        'project.view-any' => 'Project',
+        'project.create' => 'Project',
+        'project.*.view' => 'Project',
+        'project.*.update' => 'Project',
+        'project.*.delete' => 'Project',
+        'project.*.restore' => 'Project',
+        'project.*.force-delete' => 'Project',
+    ];
 
-    protected static ?string $navigationGroup = 'Project Management';
+    /**
+    * @var array<string>
+    */
+    private array $guards = [
+        'web',
+        'api',
+    ];
 
-    protected static ?int $navigationSort = 20;
-
-    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
-
-    public static function getPages(): array
+    public function up(): void
     {
-        return [
-            'index' => ListTasks::route('/'),
-            'create' => CreateTask::route('/create'),
-            'edit' => EditTask::route('/{record}/edit'),
-        ];
+        collect($this->guards)
+            ->each(function (string $guard) {
+                $this->createPermissions($this->permissions, $guard);
+            });
     }
-}
+
+    public function down(): void
+    {
+        collect($this->guards)
+            ->each(fn (string $guard) => $this->deletePermissions(array_keys($this->permissions), $guard));
+    }
+};
