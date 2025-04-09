@@ -37,6 +37,7 @@
 namespace AidingApp\Contact\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Contact\Database\Factories\OrganizationTypeFactory;
 use AidingApp\Contact\Observers\OrganizationTypeObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -52,7 +53,9 @@ use OwenIt\Auditing\Contracts\Auditable;
 #[ObservedBy([OrganizationTypeObserver::class])]
 class OrganizationType extends Model implements Auditable
 {
+    /** @use HasFactory<OrganizationTypeFactory> */
     use HasFactory;
+
     use HasUuids;
     use SoftDeletes;
     use AuditableTrait;
@@ -63,7 +66,7 @@ class OrganizationType extends Model implements Auditable
     ];
 
     /**
-     * @return HasMany<Organization,$this>
+     * @return HasMany<Organization, $this>
      */
     public function organizations(): HasMany
     {

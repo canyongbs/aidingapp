@@ -65,7 +65,7 @@ class ContactStatus extends BaseModel implements Auditable
     ];
 
     /**
-     * @return HasMany<Contact,$this>
+     * @return HasMany<Contact, $this>
      */
     public function contacts(): HasMany
     {

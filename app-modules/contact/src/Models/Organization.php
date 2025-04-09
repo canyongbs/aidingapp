@@ -37,6 +37,7 @@
 namespace AidingApp\Contact\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Contact\Database\Factories\OrganizationFactory;
 use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -52,7 +53,9 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  */
 class Organization extends BaseModel implements HasMedia, Auditable
 {
+    /** @use HasFactory<OrganizationFactory> */
     use HasFactory;
+
     use HasUuids;
     use SoftDeletes;
     use InteractsWithMedia;
@@ -98,7 +101,7 @@ class Organization extends BaseModel implements HasMedia, Auditable
     }
 
     /**
-     * @return BelongsTo<OrganizationIndustry,$this>
+     * @return BelongsTo<OrganizationIndustry, $this>
      */
     public function industry(): BelongsTo
     {
@@ -106,7 +109,7 @@ class Organization extends BaseModel implements HasMedia, Auditable
     }
 
     /**
-     * @return BelongsTo<OrganizationType,$this>
+     * @return BelongsTo<OrganizationType, $this>
      */
     public function type(): BelongsTo
     {
@@ -114,7 +117,7 @@ class Organization extends BaseModel implements HasMedia, Auditable
     }
 
     /**
-     * @return HasMany<Contact,$this>
+     * @return HasMany<Contact, $this>
      */
     public function contacts(): HasMany
     {

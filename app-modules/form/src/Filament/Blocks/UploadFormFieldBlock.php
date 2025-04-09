@@ -56,7 +56,7 @@ class UploadFormFieldBlock extends FormFieldBlock
     }
 
     /**
-     * @return array<string,string>
+     * @return array<string, string>
      */
     public static function getFormKitSchema(SubmissibleField $field): array
     {

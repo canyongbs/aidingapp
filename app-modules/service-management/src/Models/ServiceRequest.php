@@ -41,6 +41,7 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Division\Models\Division;
 use AidingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
 use AidingApp\Notification\Models\Contracts\Subscribable;
+use AidingApp\ServiceManagement\Database\Factories\ServiceRequestFactory;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateDirection;
 use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
@@ -85,6 +86,8 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
     use AuditableTrait;
     use HasRelationships;
     use InteractsWithMedia;
+
+    /** @use HasFactory<ServiceRequestFactory> */
     use HasFactory;
 
     protected $fillable = [
@@ -276,7 +279,7 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
     }
 
     /**
-     * @return BelongsTo<ServiceRequestUpdate, $this>
+     * @return HasOne<ServiceRequestUpdate, $this>
      */
     public function latestInboundServiceRequestUpdate(): HasOne
     {
@@ -291,7 +294,7 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
     }
 
     /**
-     * @return BelongsTo<ServiceRequestUpdate, $this>
+     * @return HasOne<ServiceRequestUpdate, $this>
      */
     public function latestOutboundServiceRequestUpdate(): HasOne
     {
@@ -308,14 +311,14 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
     public function getLatestResponseSeconds(): int
     {
         if (! $this->latestInboundServiceRequestUpdate) {
-            return round($this->created_at->diffInSeconds(now()));
+            return (int) round($this->created_at->diffInSeconds(now()));
         }
 
         if (
             $this->isResolved() &&
             ($resolvedAt = $this->getResolvedAt())->isAfter($this->latestInboundServiceRequestUpdate->created_at)
         ) {
-            return round($resolvedAt->diffInSeconds($this->latestInboundServiceRequestUpdate->created_at));
+            return (int) round($resolvedAt->diffInSeconds($this->latestInboundServiceRequestUpdate->created_at));
         }
 
         if (
@@ -324,21 +327,21 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
                 $this->latestInboundServiceRequestUpdate->created_at,
             )
         ) {
-            return round($this->latestOutboundServiceRequestUpdate->created_at->diffInSeconds(
+            return (int) round($this->latestOutboundServiceRequestUpdate->created_at->diffInSeconds(
                 $this->latestInboundServiceRequestUpdate->created_at,
             ));
         }
 
-        return round($this->latestInboundServiceRequestUpdate->created_at->diffInSeconds());
+        return (int) round($this->latestInboundServiceRequestUpdate->created_at->diffInSeconds());
     }
 
     public function getResolutionSeconds(): int
     {
         if (! $this->isResolved()) {
-            return round($this->created_at->diffInSeconds());
+            return (int) round($this->created_at->diffInSeconds());
         }
 
-        return round($this->created_at->diffInSeconds($this->getResolvedAt()));
+        return (int) round($this->created_at->diffInSeconds($this->getResolvedAt()));
     }
 
     public function getSlaResponseSeconds(): ?int

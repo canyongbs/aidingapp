@@ -37,6 +37,7 @@
 namespace AidingApp\Authorization\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Authorization\Database\Factories\RoleFactory;
 use App\Models\Authenticatable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -52,7 +53,9 @@ use Spatie\Permission\PermissionRegistrar;
  */
 class Role extends SpatieRole implements Auditable
 {
+    /** @use HasFactory<RoleFactory> */
     use HasFactory;
+
     use HasUuids;
     use AuditableTrait;
     use UsesTenantConnection;

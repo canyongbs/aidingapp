@@ -56,9 +56,7 @@ class AlertCreatedNotification extends Notification
     }
 
     /**
-     * @param object $notifiable
-     *
-     * @return array
+     * @return array<string, string>
      */
     public function toDatabase(object $notifiable): array
     {

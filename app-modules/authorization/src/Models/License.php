@@ -64,7 +64,7 @@ class License extends BaseModel implements Auditable
     ];
 
     /**
-     * @return BelongsTo<User,$this>
+     * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
     {

@@ -93,7 +93,7 @@ class Contract extends BaseModel implements HasMedia, Auditable
     }
 
     /**
-     * @return Attribute<string,never>
+     * @return Attribute<string, never>
      */
     protected function status(): Attribute
     {
