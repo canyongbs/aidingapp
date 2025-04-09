@@ -57,8 +57,6 @@ class SignatureFormFieldBlock extends FormFieldBlock
     }
 
     /**
-     * @param SubmissibleField $field
-     *
      * @return array<string,string>
      */
     public static function getFormKitSchema(SubmissibleField $field): array
