@@ -36,6 +36,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Models\User;
 use Filament\Pages\Page;
 
 class Projects extends Page
@@ -47,4 +48,12 @@ class Projects extends Page
     protected static ?string $navigationGroup = 'Project Management';
 
     protected static ?int $navigationSort = 10;
+
+    public static function canAccess(): bool
+    {
+        /** @var User $user */
+        $user = auth()->user();
+
+        return $user->can(['project.view-any', 'project.*.view']) && parent::canAccess();
+    }
 }
