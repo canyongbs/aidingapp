@@ -41,7 +41,7 @@ return new class () extends Migration {
     use CanModifyPermissions;
 
     /**
-     * @var array<string,string>
+     * @var array<string, string>
      */
     private array $permissions = [
         'engagement_deliverable.view-any' => 'Engagement Deliverable',

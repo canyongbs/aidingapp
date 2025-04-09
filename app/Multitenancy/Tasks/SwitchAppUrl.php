@@ -65,7 +65,7 @@ class SwitchAppUrl implements SwitchTenantTask
         URL::forceRootUrl($this->originalUrl);
     }
 
-    protected function setAppUrl(string $url)
+    protected function setAppUrl(string $url): void
     {
         config([
             'app.url' => $url,

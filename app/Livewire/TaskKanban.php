@@ -55,6 +55,7 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
 use Filament\Widgets\Concerns\InteractsWithPageTable;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
@@ -72,7 +73,7 @@ class TaskKanban extends Component implements HasForms, HasActions
 
     public ?Task $currentTask = null;
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.task-kanban', [
             'tasks' => $this->getTasks(),
@@ -97,6 +98,7 @@ class TaskKanban extends Component implements HasForms, HasActions
         $fromStatus = TaskStatus::from($fromStatusString);
         $toStatus = TaskStatus::from($toStatusString);
 
+        /** @var Task $task */
         $task = $this->getPageTableQuery()->firstWhere('id', $taskId);
 
         try {
@@ -121,7 +123,7 @@ class TaskKanban extends Component implements HasForms, HasActions
         ], ResponseAlias::HTTP_OK);
     }
 
-    public function viewTask(Task $task)
+    public function viewTask(Task $task): void
     {
         $this->currentTask = $task;
 
@@ -167,7 +169,7 @@ class TaskKanban extends Component implements HasForms, HasActions
             });
     }
 
-    public function viewAction()
+    public function viewAction(): TaskKanbanViewAction
     {
         return TaskKanbanViewAction::make()->record($this->currentTask)
             ->extraModalFooterActions(

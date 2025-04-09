@@ -45,7 +45,7 @@ class BuildAssets extends Command
 
     protected $description = 'Builds all assets, including custom CSS from the database.';
 
-    public function handle()
+    public function handle(): int
     {
         $script = $this->argument('script');
         $script = filled($script) ? "build:{$script}" : 'build';

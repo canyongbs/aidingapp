@@ -40,5 +40,6 @@ use Exception;
 
 class TenantAppKeyIsNull extends Exception
 {
+    /** @var mixed */
     protected $message = 'Tenant app key is null';
 }

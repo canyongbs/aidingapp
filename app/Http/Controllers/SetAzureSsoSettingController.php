@@ -38,11 +38,12 @@ namespace App\Http\Controllers;
 
 use AidingApp\Authorization\Settings\AzureSsoSettings;
 use App\Http\Requests\SetAzureSsoSettingRequest;
+use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
 class SetAzureSsoSettingController extends Controller
 {
-    public function __invoke(SetAzureSsoSettingRequest $request)
+    public function __invoke(SetAzureSsoSettingRequest $request): JsonResponse
     {
         $azureSsoSettings = app(AzureSsoSettings::class);
 

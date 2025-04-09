@@ -37,6 +37,7 @@
 namespace AidingApp\Authorization\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Authorization\Database\Factories\PermissionFactory;
 use App\Models\SystemUser;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -52,13 +53,15 @@ use Spatie\Permission\Models\Permission as SpatiePermission;
  */
 class Permission extends SpatiePermission implements Auditable
 {
+    /** @use HasFactory<PermissionFactory> */
     use HasFactory;
+
     use HasUuids;
     use AuditableTrait;
     use UsesTenantConnection;
 
     /**
-     * @return BelongsToMany<SystemUser,$this>
+     * @return BelongsToMany<SystemUser, $this>
      */
     public function systemUsers(): BelongsToMany
     {
@@ -66,7 +69,7 @@ class Permission extends SpatiePermission implements Auditable
     }
 
     /**
-     * @return BelongsTo<PermissionGroup,$this>
+     * @return BelongsTo<PermissionGroup, $this>
      */
     public function group(): BelongsTo
     {

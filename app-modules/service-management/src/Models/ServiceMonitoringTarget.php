@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\ServiceManagement\Database\Factories\ServiceMonitoringTargetFactory;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\Team\Models\Team;
 use App\Models\BaseModel;
@@ -48,7 +49,9 @@ use OwenIt\Auditing\Contracts\Auditable;
 
 class ServiceMonitoringTarget extends BaseModel implements Auditable
 {
+    /** @use HasFactory<ServiceMonitoringTargetFactory> */
     use HasFactory;
+
     use AuditableTrait;
     use SoftDeletes;
 

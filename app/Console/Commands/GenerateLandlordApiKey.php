@@ -65,7 +65,7 @@ class GenerateLandlordApiKey extends Command
         return static::FAILURE;
     }
 
-    protected function setKeyInEnvironmentFile($key): bool
+    protected function setKeyInEnvironmentFile(mixed $key): bool
     {
         $currentKey = $this->laravel['config']['app.key'];
 

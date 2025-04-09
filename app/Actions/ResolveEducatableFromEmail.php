@@ -46,7 +46,7 @@ class ResolveEducatableFromEmail
             return null;
         }
 
-        /** @var Contact $contact */
+        /** @var Contact|null $contact */
         $contact = Contact::query()
             ->where('email', $email)
             ->first();

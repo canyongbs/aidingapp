@@ -39,6 +39,7 @@ namespace AidingApp\Contact\Models;
 use AidingApp\Alert\Models\Alert;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\Contact\Database\Factories\ContactFactory;
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Observers\ContactObserver;
 use AidingApp\Engagement\Models\Concerns\HasManyMorphedEngagementResponses;
@@ -88,7 +89,10 @@ use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 class Contact extends Authenticatable implements Auditable, Subscribable, Educatable, HasFilamentResource, CanBeNotified
 {
     use AuditableTrait;
+
+    /** @use HasFactory<ContactFactory> */
     use HasFactory;
+
     use HasManyMorphedEngagementResponses;
     use HasManyMorphedEngagements;
     use HasSubscriptions;
@@ -148,7 +152,7 @@ class Contact extends Authenticatable implements Auditable, Subscribable, Educat
     }
 
     /**
-     * @return BelongsTo<User,$this>
+     * @return BelongsTo<User, $this>
      */
     public function assignedTo(): BelongsTo
     {
@@ -156,7 +160,7 @@ class Contact extends Authenticatable implements Auditable, Subscribable, Educat
     }
 
     /**
-     * @return MorphMany<ServiceRequest,$this>
+     * @return MorphMany<ServiceRequest, $this>
      */
     public function serviceRequests(): MorphMany
     {
@@ -170,7 +174,7 @@ class Contact extends Authenticatable implements Auditable, Subscribable, Educat
     }
 
     /**
-     * @return MorphOne<Timeline,$this>
+     * @return MorphOne<Timeline, $this>
      */
     public function timeline(): MorphOne
     {
@@ -178,7 +182,7 @@ class Contact extends Authenticatable implements Auditable, Subscribable, Educat
     }
 
     /**
-     * @return BelongsTo<User,$this>
+     * @return BelongsTo<User, $this>
      */
     public function createdBy(): BelongsTo
     {
@@ -186,7 +190,7 @@ class Contact extends Authenticatable implements Auditable, Subscribable, Educat
     }
 
     /**
-     * @return BelongsTo<ContactStatus,$this>
+     * @return BelongsTo<ContactStatus, $this>
      */
     public function status(): BelongsTo
     {
@@ -194,7 +198,7 @@ class Contact extends Authenticatable implements Auditable, Subscribable, Educat
     }
 
     /**
-     * @return BelongsTo<ContactSource,$this>
+     * @return BelongsTo<ContactSource, $this>
      */
     public function source(): BelongsTo
     {
@@ -202,7 +206,7 @@ class Contact extends Authenticatable implements Auditable, Subscribable, Educat
     }
 
     /**
-     * @return MorphToMany<EngagementFile,$this>
+     * @return MorphToMany<EngagementFile, $this>
      */
     public function engagementFiles(): MorphToMany
     {
@@ -219,7 +223,7 @@ class Contact extends Authenticatable implements Auditable, Subscribable, Educat
     }
 
     /**
-     * @return HasMany<Task,$this>
+     * @return HasMany<Task, $this>
      */
     public function tasks(): HasMany
     {
@@ -227,7 +231,7 @@ class Contact extends Authenticatable implements Auditable, Subscribable, Educat
     }
 
     /**
-     * @return MorphMany<Alert,$this>
+     * @return MorphMany<Alert, $this>
      */
     public function alerts(): MorphMany
     {
@@ -266,7 +270,7 @@ class Contact extends Authenticatable implements Auditable, Subscribable, Educat
     }
 
     /**
-     * @return MorphMany<AssetCheckIn,$this>
+     * @return MorphMany<AssetCheckIn, $this>
      */
     public function assetCheckIns(): MorphMany
     {
@@ -280,7 +284,7 @@ class Contact extends Authenticatable implements Auditable, Subscribable, Educat
     }
 
     /**
-     * @return MorphMany<AssetCheckOut,$this>
+     * @return MorphMany<AssetCheckOut, $this>
      */
     public function assetCheckOuts(): MorphMany
     {
@@ -299,7 +303,7 @@ class Contact extends Authenticatable implements Auditable, Subscribable, Educat
     }
 
     /**
-     * @return BelongsTo<Organization,$this>
+     * @return BelongsTo<Organization, $this>
      */
     public function organization(): BelongsTo
     {
@@ -307,7 +311,7 @@ class Contact extends Authenticatable implements Auditable, Subscribable, Educat
     }
 
     /**
-     * @return MorphMany<KnowledgeBaseArticleVote,$this>
+     * @return MorphMany<KnowledgeBaseArticleVote, $this>
      */
     public function knowledgeBaseArticleVotes(): MorphMany
     {
@@ -315,7 +319,7 @@ class Contact extends Authenticatable implements Auditable, Subscribable, Educat
     }
 
     /**
-     * @return HasMany<ProductLicense,$this>
+     * @return HasMany<ProductLicense, $this>
      */
     public function productLicenses(): HasMany
     {
