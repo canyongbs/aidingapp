@@ -38,9 +38,6 @@ namespace App\Multitenancy\Http\Middleware;
 
 class NeedsTenant extends \Spatie\Multitenancy\Http\Middleware\NeedsTenant
 {
-    /**
-     * @return void
-     */
     public function handleInvalidRequest(): void
     {
         abort(404);
