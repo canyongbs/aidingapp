@@ -52,7 +52,7 @@ class LicenseLimitsData extends Data
     ) {}
 
     /**
-     * @return array
+     * @return array<string, string>
      */
     public function getResetWindow(): array
     {

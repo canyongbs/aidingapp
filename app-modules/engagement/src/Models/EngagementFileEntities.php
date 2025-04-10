@@ -63,8 +63,6 @@ class EngagementFileEntities extends MorphPivot implements CanTriggerAutoSubscri
     }
 
     /**
-     * Undocumented function
-     *
      * @return BelongsTo<EngagementFile, $this>
      */
     public function engagementFile(): BelongsTo

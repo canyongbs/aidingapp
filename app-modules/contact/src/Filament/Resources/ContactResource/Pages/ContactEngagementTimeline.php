@@ -52,7 +52,7 @@ class ContactEngagementTimeline extends TimelinePage
     public string $noMoreRecordsMessage = "You have reached the end of this contacts's engagement timeline.";
 
     /**
-     * @var array<int,string>
+     * @var array<string>
      */
     public array $modelsToTimeline = [
         Engagement::class,
