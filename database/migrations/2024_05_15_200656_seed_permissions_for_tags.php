@@ -39,7 +39,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
-return new class () extends Migration {
+return new class() extends Migration {
     use CanModifyPermissions;
 
     /**
@@ -78,6 +78,9 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        $this->deletePermissions(array_keys($this->permissions), $this->guards);
+        collect($this->guards)
+            ->each(function (string $guard) {
+                $this->deletePermissions(array_keys($this->permissions), $guard);
+            });
     }
 };

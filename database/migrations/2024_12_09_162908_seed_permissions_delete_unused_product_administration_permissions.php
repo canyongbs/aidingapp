@@ -42,6 +42,9 @@ use Illuminate\Support\Facades\DB;
 return new class () extends Migration {
     use CanModifyPermissions;
 
+    /**
+     * @var array<string, string>
+     */
     private array $permissions = [
         'contact_status.view-any' => 'Contact Status',
         'contact_status.create' => 'Contact Status',
@@ -157,6 +160,9 @@ return new class () extends Migration {
         'sms_template.*.force-delete' => 'SMS Template',
     ];
 
+    /**
+     * @var array<string>
+     */
     private array $guards = [
         'web',
         'api',

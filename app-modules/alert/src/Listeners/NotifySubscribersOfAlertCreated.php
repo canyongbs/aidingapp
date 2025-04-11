@@ -49,7 +49,10 @@ class NotifySubscribersOfAlertCreated implements ShouldQueue
         /** @var Contact $concern */
         $concern = $event->alert->concern;
 
-        $concern->subscriptions?->each(function (Subscription $subscription) use ($event) {
+        /** @var Subscription|null $subscriptions */
+        $subscriptions = $concern->subscriptions;
+
+        $subscriptions?->each(function (Subscription $subscription) use ($event) {
             $subscription->user->notify(new AlertCreatedNotification($event->alert));
         });
     }

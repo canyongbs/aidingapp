@@ -37,13 +37,19 @@
 use Database\Migrations\Concerns\CanModifyPermissions;
 use Illuminate\Database\Migrations\Migration;
 
-return new class () extends Migration {
+return new class() extends Migration {
     use CanModifyPermissions;
 
+    /**
+     * @var array<string, string>
+     */
     private array $permissions = [
         'user.view-email' => 'User',
     ];
 
+    /**
+     * @var array<string>
+     */
     private array $guards = [
         'api',
     ];
@@ -51,7 +57,7 @@ return new class () extends Migration {
     public function up(): void
     {
         collect($this->guards)
-            ->each(fn (string $guard) => $this->deletePermissions(array_keys($this->permissions), $guard));
+            ->each(fn(string $guard) => $this->deletePermissions(array_keys($this->permissions), $guard));
     }
 
     public function down(): void
