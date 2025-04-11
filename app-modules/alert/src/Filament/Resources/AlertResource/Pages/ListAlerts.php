@@ -72,8 +72,8 @@ class ListAlerts extends ListRecords
             ->schema([
                 TextEntry::make('concern.display_name')
                     ->label('Related To')
-                    ->getStateUsing(fn(Alert $record): ?string => $record->concern?->{$record->concern::displayNameKey()})
-                    ->url(fn(Alert $record) => match ($record->concern ? $record->concern::class : null) {
+                    ->getStateUsing(fn (Alert $record): ?string => $record->concern?->{$record->concern::displayNameKey()})
+                    ->url(fn (Alert $record) => match ($record->concern ? $record->concern::class : null) {
                         Contact::class => ManageContactAlerts::getUrl(['record' => $record->concern]),
                         default => null,
                     }),
@@ -91,12 +91,12 @@ class ListAlerts extends ListRecords
                 IdColumn::make(),
                 TextColumn::make('concern.display_name')
                     ->label('Related To')
-                    ->getStateUsing(fn(Alert $record): ?string => $record->concern?->{$record->concern::displayNameKey()})
-                    ->url(fn(Alert $record) => match ($record->concern ? $record->concern::class : null) {
+                    ->getStateUsing(fn (Alert $record): ?string => $record->concern?->{$record->concern::displayNameKey()})
+                    ->url(fn (Alert $record) => match ($record->concern ? $record->concern::class : null) {
                         Contact::class => ManageContactAlerts::getUrl(['record' => $record->concern]),
                         default => null,
                     })
-                    ->searchable(query: fn(Builder $query, $search) => $query->tap(new EducatableSearch(relationship: 'concern', search: $search)))
+                    ->searchable(query: fn (Builder $query, $search) => $query->tap(new EducatableSearch(relationship: 'concern', search: $search)))
                     ->forceSearchCaseInsensitive()
                     ->sortable(),
                 TextColumn::make('description')
@@ -112,9 +112,9 @@ class ListAlerts extends ListRecords
             ->filters([
                 Filter::make('subscribed')
                     ->query(
-                        fn(Builder $query): Builder => $query->whereHas(
+                        fn (Builder $query): Builder => $query->whereHas(
                             relation: 'concern',
-                            callback: fn(Builder $query) => $query->whereRelation('subscriptions', 'user_id', auth()->id())
+                            callback: fn (Builder $query) => $query->whereRelation('subscriptions', 'user_id', auth()->id())
                         )
                     ),
                 SelectFilter::make('severity')

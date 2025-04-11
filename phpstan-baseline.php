@@ -36,5 +36,4 @@
 
 $ignoreErrors = [];
 
-
 return ['parameters' => ['ignoreErrors' => $ignoreErrors]];
