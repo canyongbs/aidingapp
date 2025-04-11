@@ -37,6 +37,7 @@
 namespace AidingApp\Contact\Filament\Resources\OrganizationResource\Pages;
 
 use AidingApp\Contact\Filament\Resources\OrganizationResource;
+use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Models\OrganizationIndustry;
 use AidingApp\Contact\Models\OrganizationType;
 use AidingApp\Contact\Rules\UniqueOrganizationDomain;
@@ -64,6 +65,11 @@ class EditOrganization extends EditRecord
 
     public function form(Form $form): Form
     {
+        /**
+         * @var Organization $record
+         */
+        $record = $this->record;
+
         return $form
             ->schema([
                 Section::make('Primary Info')
@@ -95,7 +101,7 @@ class EditOrganization extends EditRecord
                                     ->required()
                                     ->maxLength(255)
                                     ->regex('/^(?!-)([a-zA-Z0-9-]{1,63}\.)+[a-zA-Z]{2,63}$/')
-                                    ->rule(new UniqueOrganizationDomain($this->record->id))
+                                    ->rule(new UniqueOrganizationDomain($record->getKey()))
                                     ->distinct()
                                     ->validationMessages([
                                         'distinct' => 'This :attribute is already in use and may not be used a second time.',

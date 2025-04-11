@@ -40,6 +40,7 @@ use AidingApp\IntegrationAwsSesEventHandling\Settings\SesSettings;
 use App\Filament\Clusters\ProductIntegrations;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Multitenancy\DataTransferObjects\TenantConfig;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;

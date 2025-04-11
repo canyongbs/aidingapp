@@ -56,6 +56,9 @@ class AzureSsoSettings extends Settings
         return 'azure_sso';
     }
 
+    /**
+     * @return array<string>
+     */
     public static function encrypted(): array
     {
         return [

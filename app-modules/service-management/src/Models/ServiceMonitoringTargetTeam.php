@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Models;
 
+use AidingApp\ServiceManagement\Database\Factories\ServiceMonitoringTargetTeamFactory;
 use AidingApp\Team\Models\Team;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -45,13 +46,21 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
 class ServiceMonitoringTargetTeam extends Pivot
 {
     use HasUuids;
+
+    /** @use HasFactory<ServiceMonitoringTargetTeamFactory> */
     use HasFactory;
 
+    /**
+     * @return BelongsTo<Team, $this>
+     */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
+    /**
+     * @return BelongsTo<ServiceMonitoringTarget, $this>
+     */
     public function serviceMonitoringTarget(): BelongsTo
     {
         return $this->belongsTo(ServiceMonitoringTarget::class);

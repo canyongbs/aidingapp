@@ -63,6 +63,9 @@ class SelectFormFieldBlock extends FormFieldBlock
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public static function getFormKitSchema(SubmissibleField $field): array
     {
         return [
@@ -75,11 +78,14 @@ class SelectFormFieldBlock extends FormFieldBlock
         ];
     }
 
+    /**
+     * @return array<string>
+     */
     public static function getValidationRules(SubmissibleField $field): array
     {
         return [
             'string',
-            'in:' . collect($field->config['options'])->keys()->join(','),
+            'in:' . collect((array) $field->config['options'])->keys()->join(','),
         ];
     }
 }

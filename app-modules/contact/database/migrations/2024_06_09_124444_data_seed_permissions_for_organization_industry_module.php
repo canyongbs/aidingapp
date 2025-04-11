@@ -42,6 +42,9 @@ use Illuminate\Support\Facades\DB;
 return new class () extends Migration {
     use CanModifyPermissions;
 
+    /**
+     * @var array<string, string>
+     */
     private array $permissions = [
         'organization_industry.view-any' => 'Organization Industry',
         'organization_industry.create' => 'Organization Industry',
@@ -52,6 +55,9 @@ return new class () extends Migration {
         'organization_industry.*.force-delete' => 'Organization Industry',
     ];
 
+    /**
+     * @var array<string>
+     */
     private array $guards = [
         'web',
         'api',

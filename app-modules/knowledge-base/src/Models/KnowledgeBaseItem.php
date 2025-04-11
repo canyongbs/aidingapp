@@ -82,21 +82,33 @@ class KnowledgeBaseItem extends BaseModel implements Auditable, HasMedia, HasTag
         'is_featured',
     ];
 
+    /**
+     * @return BelongsTo<KnowledgeBaseQuality, $this>
+     */
     public function quality(): BelongsTo
     {
         return $this->belongsTo(KnowledgeBaseQuality::class);
     }
 
+    /**
+     * @return BelongsTo<KnowledgeBaseStatus, $this>
+     */
     public function status(): BelongsTo
     {
         return $this->belongsTo(KnowledgeBaseStatus::class);
     }
 
+    /**
+     * @return BelongsTo<KnowledgeBaseCategory, $this>
+     */
     public function category(): BelongsTo
     {
         return $this->belongsTo(KnowledgeBaseCategory::class);
     }
 
+    /**
+     * @return BelongsToMany<Division, $this>
+     */
     public function division(): BelongsToMany
     {
         return $this->belongsToMany(Division::class);
@@ -112,6 +124,9 @@ class KnowledgeBaseItem extends BaseModel implements Auditable, HasMedia, HasTag
         return $query->where('public', true);
     }
 
+    /**
+     * @return HasMany<KnowledgeBaseArticleVote, $this>
+     */
     public function votes(): HasMany
     {
         return $this->hasMany(KnowledgeBaseArticleVote::class, 'article_id');

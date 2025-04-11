@@ -40,6 +40,7 @@ use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
 use AidingApp\Notification\Models\Contracts\Subscribable;
+use AidingApp\Task\Database\Factories\TaskFactory;
 use AidingApp\Task\Enums\TaskStatus;
 use AidingApp\Task\Observers\TaskObserver;
 use App\Models\BaseModel;
@@ -61,7 +62,9 @@ use OwenIt\Auditing\Contracts\Auditable;
 #[ObservedBy([TaskObserver::class])]
 class Task extends BaseModel implements Auditable, CanTriggerAutoSubscription
 {
+    /** @use HasFactory<TaskFactory> */
     use HasFactory;
+
     use HasUuids;
     use AuditableTrait;
     use SoftDeletes;
@@ -79,6 +82,9 @@ class Task extends BaseModel implements Auditable, CanTriggerAutoSubscription
         'due' => 'datetime',
     ];
 
+    /**
+     * @return array<string>
+     */
     public function getStateMachineFields(): array
     {
         return [
@@ -86,16 +92,25 @@ class Task extends BaseModel implements Auditable, CanTriggerAutoSubscription
         ];
     }
 
+    /**
+     * @return BelongsTo<Contact, $this>
+     */
     public function concern(): BelongsTo
     {
         return $this->belongsTo(Contact::class, 'concern_id');
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function assignedTo(): BelongsTo
     {
         return $this->belongsTo(User::class, 'assigned_to');
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
@@ -106,11 +121,21 @@ class Task extends BaseModel implements Auditable, CanTriggerAutoSubscription
         return $this->concern instanceof Subscribable ? $this->concern : null;
     }
 
+    /**
+     * @param Builder<$this> $query
+     *
+     * @return void
+     */
     public function scopeByNextDue(Builder $query): void
     {
         $query->orderBy('due');
     }
 
+    /**
+     * @param Builder<$this> $query
+     *
+     * @return void
+     */
     public function scopeOpen(Builder $query): void
     {
         $query->where('status', '=', TaskStatus::Pending)

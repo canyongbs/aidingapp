@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\ServiceManagement\Database\Factories\ServiceRequestTypeEmailTemplateFactory;
 use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -49,7 +50,9 @@ use OwenIt\Auditing\Contracts\Auditable;
  */
 class ServiceRequestTypeEmailTemplate extends Model implements Auditable
 {
+    /** @use HasFactory<ServiceRequestTypeEmailTemplateFactory> */
     use HasFactory;
+
     use HasUuids;
     use AuditableTrait;
 
@@ -66,6 +69,9 @@ class ServiceRequestTypeEmailTemplate extends Model implements Auditable
         'type' => ServiceRequestEmailTemplateType::class,
     ];
 
+    /**
+     * @return BelongsTo<ServiceRequestType, $this>
+     */
     public function serviceRequestType(): BelongsTo
     {
         return $this->belongsTo(ServiceRequestType::class);

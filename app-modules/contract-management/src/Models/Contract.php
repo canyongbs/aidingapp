@@ -72,6 +72,9 @@ class Contract extends BaseModel implements HasMedia, Auditable
         'contract_value' => CurrencyCast::class,
     ];
 
+    /**
+     * @return BelongsTo<ContractType, $this>
+     */
     public function contractType(): BelongsTo
     {
         return $this->belongsTo(ContractType::class, 'contract_type_id', 'id');
@@ -89,6 +92,9 @@ class Contract extends BaseModel implements HasMedia, Auditable
             ]);
     }
 
+    /**
+     * @return Attribute<string, never>
+     */
     protected function status(): Attribute
     {
         return Attribute::make(

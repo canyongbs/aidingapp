@@ -59,13 +59,13 @@ class TopServiceRequestTypesTable extends BaseWidget
         'lg' => 4,
     ];
 
-    public function mount(string $cacheTag)
+    public function mount(string $cacheTag): void
     {
         $this->cacheTag = $cacheTag;
     }
 
     #[On('refresh-widgets')]
-    public function refreshWidget()
+    public function refreshWidget(): void
     {
         $this->dispatch('$refresh');
     }

@@ -53,6 +53,9 @@ class AiSettings extends Settings
         return 'ai';
     }
 
+    /**
+     * @return array<string>
+     */
     public static function encrypted(): array
     {
         return [

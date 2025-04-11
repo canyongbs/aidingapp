@@ -40,7 +40,6 @@ use DateTimeInterface;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
@@ -57,7 +56,6 @@ use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
  */
 abstract class Submissible extends Model
 {
-    use HasFactory;
     use HasUuids;
     use UsesTenantConnection;
 
@@ -67,26 +65,41 @@ abstract class Submissible extends Model
 
     abstract public function submissions(): HasMany;
 
+    /**
+     * @return Attribute<string, never>
+     */
     protected function name(): Attribute
     {
         return Attribute::make(get: fn ($value) => $this->hasCast('name') ? $this->castAttribute('name', $value) : $value);
     }
 
+    /**
+     * @return Attribute<string, never>
+     */
     protected function content(): Attribute
     {
         return Attribute::make(get: fn ($value) => $this->hasCast('content') ? $this->castAttribute('content', $value) : $value);
     }
 
+    /**
+     * @return Attribute<string, never>
+     */
     protected function embedEnabled(): Attribute
     {
         return Attribute::make(get: fn ($value) => $this->hasCast('embed_enabled') ? $this->castAttribute('embed_enabled', $value) : $value);
     }
 
+    /**
+     * @return Attribute<string, never>
+     */
     protected function allowedDomains(): Attribute
     {
         return Attribute::make(get: fn ($value) => $this->hasCast('allowed_domains') ? $this->castAttribute('allowed_domains', $value) : $value);
     }
 
+    /**
+     * @return Attribute<string, never>
+     */
     protected function isWizard(): Attribute
     {
         return Attribute::make(get: fn ($value) => $this->hasCast('is_wizard') ? $this->castAttribute('is_wizard', $value) : $value);

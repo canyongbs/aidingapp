@@ -36,6 +36,7 @@
 
 namespace AidingApp\Notification\Models;
 
+use AidingApp\Notification\Database\Factories\SubscriptionFactory;
 use AidingApp\Notification\Observers\SubscriptionObserver;
 use App\Models\Concerns\BelongsToEducatable;
 use App\Models\Scopes\LicensedToEducatable;
@@ -56,7 +57,10 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 class Subscription extends MorphPivot
 {
     use BelongsToEducatable;
+
+    /** @use HasFactory<SubscriptionFactory> */
     use HasFactory;
+
     use HasUuids;
 
     public $timestamps = true;

@@ -44,7 +44,7 @@ enum FormSubmissionRequestDeliveryMethod: string implements HasLabel
 {
     case Email = 'email';
 
-    public function getLabel(): ?string
+    public function getLabel(): string
     {
         return match ($this) {
             static::Email => 'Email',

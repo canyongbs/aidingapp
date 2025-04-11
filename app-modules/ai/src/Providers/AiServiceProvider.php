@@ -48,7 +48,7 @@ class AiServiceProvider extends ServiceProvider
         Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new AiPlugin()));
     }
 
-    public function boot()
+    public function boot(): void
     {
         Relation::morphMap([]);
     }

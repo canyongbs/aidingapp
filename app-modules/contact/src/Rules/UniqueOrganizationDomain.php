@@ -44,7 +44,7 @@ use Illuminate\Translation\PotentiallyTranslatedString;
 
 class UniqueOrganizationDomain implements ValidationRule
 {
-    protected $ignoreId;
+    protected int|null|string $ignoreId;
 
     /**
      * Create a new rule instance.
@@ -72,7 +72,7 @@ class UniqueOrganizationDomain implements ValidationRule
         }
     }
 
-    public function message()
+    public function message(): string
     {
         return 'This domain is already in use and may not be used a second time.';
     }

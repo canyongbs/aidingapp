@@ -41,7 +41,7 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 
 class GetRecordFromMorphAndKey
 {
-    public function via(string $morphReference, string $key)
+    public function via(string $morphReference, string $key): mixed
     {
         $className = Relation::getMorphedModel($morphReference);
 

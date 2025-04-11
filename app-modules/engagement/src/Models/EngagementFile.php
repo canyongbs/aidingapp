@@ -68,6 +68,9 @@ class EngagementFile extends BaseModel implements HasMedia, Auditable
             ->singleFile();
     }
 
+    /**
+     * @return MorphToMany<Contact, $this>
+     */
     public function contacts(): MorphToMany
     {
         return $this->morphedByMany(

@@ -46,7 +46,7 @@ enum SlaComplianceStatus implements HasColor, HasIcon, HasLabel
 
     case NonCompliant;
 
-    public function getLabel(): ?string
+    public function getLabel(): string
     {
         return match ($this) {
             self::Compliant => 'Within SLA',
@@ -54,7 +54,7 @@ enum SlaComplianceStatus implements HasColor, HasIcon, HasLabel
         };
     }
 
-    public function getColor(): string | array | null
+    public function getColor(): string
     {
         return match ($this) {
             self::Compliant => 'success',
@@ -62,7 +62,7 @@ enum SlaComplianceStatus implements HasColor, HasIcon, HasLabel
         };
     }
 
-    public function getIcon(): string | null
+    public function getIcon(): string
     {
         return match ($this) {
             self::Compliant => 'heroicon-m-check-circle',
