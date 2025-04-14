@@ -37,6 +37,7 @@
 namespace AidingApp\Form\Filament\Blocks;
 
 use AidingApp\Form\Models\SubmissibleField;
+use Filament\Forms\Components\Component;
 use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\TextInput;
 
@@ -51,6 +52,9 @@ class SelectFormFieldBlock extends FormFieldBlock
         return 'select';
     }
 
+    /**
+     * @return array<Component>
+     */
     public function fields(): array
     {
         return [

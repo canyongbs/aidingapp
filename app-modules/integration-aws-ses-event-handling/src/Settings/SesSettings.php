@@ -47,6 +47,9 @@ class SesSettings extends Settings
         return 'ses';
     }
 
+    /**
+     * @return array<string>
+     */
     public static function encrypted(): array
     {
         return [
