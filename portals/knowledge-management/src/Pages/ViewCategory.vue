@@ -34,7 +34,7 @@
 <script setup>
     import { XMarkIcon } from '@heroicons/vue/20/solid/index.js';
     import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline';
-    import { computed, defineProps, ref, watch } from 'vue';
+    import { computed, defineProps, onMounted, ref, watch } from 'vue';
     import { useRoute, useRouter } from 'vue-router';
     import AppLoading from '../Components/AppLoading.vue';
     import Article from '../Components/Article.vue';
