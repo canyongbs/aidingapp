@@ -121,15 +121,18 @@
     watch(searchQuery, (value) => {
         if (value == null) {
             fromSearch.value = false;
-            getData(1);
+            const pageFromQuery = parseInt(route.query.page) || 1;
+            getData(pageFromQuery);
 
             return;
         }
+
         debounceSearch(value);
     });
 
     watch(selectedTags, () => {
-        debounceSearch(searchQuery.value);
+        const pageFromQuery = parseInt(route.query.page) || 1;
+        debounceSearch(searchQuery.value, pageFromQuery);
     });
 
     function debounce(func, delay) {
@@ -153,18 +156,42 @@
     }
 
     const fetchNextPage = () => {
-        currentPage.value = currentPage.value !== lastPage.value ? currentPage.value + 1 : lastPage.value;
-        getData(currentPage.value);
+        if (currentPage.value !== lastPage.value) {
+            const newPage = currentPage.value + 1;
+            router.push({
+                name: route.name,
+                params: route.params,
+                query: {
+                    ...route.query,
+                    page: newPage,
+                },
+            });
+        }
     };
 
     const fetchPreviousPage = () => {
-        currentPage.value = currentPage.value !== 1 ? currentPage.value - 1 : 1;
-        getData(currentPage.value);
+        if (currentPage.value !== 1) {
+            const newPage = currentPage.value - 1;
+            router.push({
+                name: route.name,
+                params: route.params,
+                query: {
+                    ...route.query,
+                    page: newPage,
+                },
+            });
+        }
     };
 
     const fetchPage = (page) => {
-        currentPage.value = page;
-        getData(currentPage.value);
+        router.push({
+            name: route.name,
+            params: route.params,
+            query: {
+                ...route.query,
+                page: page,
+            },
+        });
     };
 
     const changeFilter = (value) => {
@@ -191,23 +218,17 @@
         return [];
     });
 
-    watch(
-        route,
-        async function (newRouteValue) {
-            searchQuery.value = '';
-            fromSearch.value = false;
-            await getData();
-        },
-        {
-            immediate: true,
-        },
-    );
+    onMounted(() => {
+        getData(2);
+    });
 
     async function getData(page = 1) {
         if (fromSearch.value) {
             debounceSearch(searchQuery.value, page);
             return;
         }
+
+        console.log('getData', page);
 
         loadingResults.value = true;
 
