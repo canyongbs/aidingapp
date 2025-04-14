@@ -41,7 +41,7 @@
 
     const emit = defineEmits(['fetchNextPage', 'fetchPreviousPage', 'fetchPage', 'change-filter']);
 
-    defineProps({
+    const props = defineProps({
         searchQuery: {
             type: String,
             required: true,
@@ -93,6 +93,8 @@
     function fetchPage(page) {
         emit('fetchPage', page);
     }
+
+    console.log('loadingResults', props.loadingResults);
 </script>
 
 <template>

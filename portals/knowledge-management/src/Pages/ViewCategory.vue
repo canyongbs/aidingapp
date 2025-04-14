@@ -34,7 +34,7 @@
 <script setup>
     import { XMarkIcon } from '@heroicons/vue/20/solid/index.js';
     import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline';
-    import { computed, defineProps, onMounted, ref, watch } from 'vue';
+    import { computed, defineProps, ref, watch } from 'vue';
     import { useRoute, useRouter } from 'vue-router';
     import AppLoading from '../Components/AppLoading.vue';
     import Article from '../Components/Article.vue';
@@ -87,6 +87,8 @@
 
     const debounceSearch = debounce((value, page = 1) => {
         const { post } = consumer();
+        console.log('me aaya nhi');
+
         fromSearch.value = true;
         if (!value && selectedTags.value.length < 1) {
             searchQuery.value = null;
@@ -109,6 +111,15 @@
     }, 500);
 
     const setPagination = (pagination) => {
+        // console.log('currentPage', currentPage.value);
+
+        // if (currentPage.value >= pagination.last_page) {
+        //     currentPage.value = pagination.last_page;
+        // } else {
+        // }
+
+        // console.log('currentPage', currentPage.value);
+
         currentPage.value = pagination.current_page;
         prevPageUrl.value = pagination.prev_page_url;
         nextPageUrl.value = pagination.next_page_url;
@@ -118,22 +129,82 @@
         toArticle.value = pagination.to;
     };
 
-    watch(searchQuery, (value) => {
-        if (value == null) {
-            fromSearch.value = false;
-            const pageFromQuery = parseInt(route.query.page) || 1;
-            getData(pageFromQuery);
+    // watch(searchQuery, (value) => {
+    //     if (value == null) {
+    //         fromSearch.value = false;
+    //         const pageFromQuery = parseInt(route.query.page) || 1;
+    //         getData(pageFromQuery);
+    //         return;
+    //     }
 
-            return;
-        }
+    //     isFilterChange.value = true; // <-- mark it as filter update
 
-        debounceSearch(value);
-    });
+    //     router.push({
+    //         name: route.name,
+    //         params: route.params,
+    //         query: {
+    //             ...route.query,
+    //             page: 1, // Reset page for new search
+    //             search: value || undefined,
+    //             tags: selectedTags.value.join(',') || undefined,
+    //             filter: filter.value || undefined,
+    //         },
+    //     });
 
-    watch(selectedTags, () => {
-        const pageFromQuery = parseInt(route.query.page) || 1;
-        debounceSearch(searchQuery.value, pageFromQuery);
-    });
+    //     debounceSearch(value, 1);
+    // });
+
+    // watch(selectedTags, () => {
+    //     isFilterChange.value = true;
+
+    //     router.push({
+    //         name: route.name,
+    //         params: route.params,
+    //         query: {
+    //             ...route.query,
+    //             page: 1, // Reset page for new tag selection
+    //             search: searchQuery.value || undefined,
+    //             tags: selectedTags.value.join(',') || undefined,
+    //             filter: filter.value || undefined,
+    //         },
+    //     });
+
+    //     debounceSearch(searchQuery.value, 1);
+    // });
+
+    watch(
+        () => [searchQuery.value, [...selectedTags.value]],
+        ([newSearch, newTags]) => {
+            const urlSearch = route.query.search || '';
+            const urlTags = route.query.tags ? route.query.tags.split(',') : [];
+
+            const isSearchChanged = newSearch !== urlSearch;
+            const isTagsChanged = newTags.length !== urlTags.length || newTags.some((tag, i) => tag !== urlTags[i]);
+
+            if (isSearchChanged || isTagsChanged) {
+                console.log('🔁 Triggered: search/tags differ from URL');
+
+                fromSearch.value = !!(newSearch || newTags.length);
+
+                router.push({
+                    name: route.name,
+                    params: route.params,
+                    query: {
+                        ...route.query,
+                        page: 1,
+                        search: newSearch || undefined,
+                        tags: newTags.join(',') || undefined,
+                        filter: filter.value || undefined,
+                    },
+                });
+
+                debounceSearch(newSearch, 1);
+            } else {
+                console.log('⏩ No change compared to URL — skip push');
+            }
+        },
+        { immediate: false },
+    );
 
     function debounce(func, delay) {
         let timerId;
@@ -156,40 +227,31 @@
     }
 
     const fetchNextPage = () => {
-        if (currentPage.value !== lastPage.value) {
+        if (currentPage.value < lastPage.value) {
             const newPage = currentPage.value + 1;
-            router.push({
-                name: route.name,
-                params: route.params,
-                query: {
-                    ...route.query,
-                    page: newPage,
-                },
-            });
+            fetchPage(newPage);
         }
     };
 
     const fetchPreviousPage = () => {
-        if (currentPage.value !== 1) {
+        if (currentPage.value > 1) {
             const newPage = currentPage.value - 1;
-            router.push({
-                name: route.name,
-                params: route.params,
-                query: {
-                    ...route.query,
-                    page: newPage,
-                },
-            });
+            fetchPage(newPage);
         }
     };
 
     const fetchPage = (page) => {
+        if (page === currentPage.value) return;
+
         router.push({
             name: route.name,
             params: route.params,
             query: {
                 ...route.query,
-                page: page,
+                page,
+                search: searchQuery.value || undefined,
+                tags: selectedTags.value.join(',') || undefined,
+                filter: filter.value || undefined,
             },
         });
     };
@@ -218,17 +280,38 @@
         return [];
     });
 
-    onMounted(() => {
-        getData(2);
-    });
+    watch(
+        route,
+        async (newRoute) => {
+            const page = parseInt(newRoute.query.page) || 1;
+            const search = newRoute.query.search || '';
+            const tags = newRoute.query.tags ? newRoute.query.tags.split(',') : [];
+            const appliedFilter = newRoute.query.filter || '';
+            const isSearchMode = !!search || tags.length > 0;
+
+            currentPage.value = page;
+            searchQuery.value = search;
+
+            selectedTags.value.splice(0, selectedTags.value.length, ...tags);
+
+            filter.value = appliedFilter;
+            fromSearch.value = isSearchMode;
+            console.log('route-watcher', page);
+            await getData(page);
+        },
+        { immediate: true },
+    );
 
     async function getData(page = 1) {
+        console.log('fromSearch', fromSearch.value);
+
         if (fromSearch.value) {
+            loadingResults.value = false;
+            console.log('getdata', page);
+
             debounceSearch(searchQuery.value, page);
             return;
         }
-
-        console.log('getData', page);
 
         loadingResults.value = true;
 
@@ -242,10 +325,15 @@
                         params: {
                             parentCategorySlug: response.data.category.parentCategory.slug,
                             categorySlug: response.data.category.slug,
+                            query: { page: page },
                         },
                     });
                 } else if (route.params.categorySlug) {
-                    router.replace({ name: 'view-category', params: { categorySlug: response.data.category.slug } });
+                    router.replace({
+                        name: 'view-category',
+                        params: { categorySlug: response.data.category.slug },
+                        query: { page: page },
+                    });
                 }
 
                 category.value = response.data.category;
