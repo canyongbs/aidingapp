@@ -54,6 +54,9 @@ class MaintenanceProvider extends BaseModel implements Auditable
         'name',
     ];
 
+    /**
+     * @return HasMany<MaintenanceActivity, $this>
+     */
     public function maintenanceActivities(): HasMany
     {
         return $this->hasMany(MaintenanceActivity::class, 'asset_id');

@@ -117,6 +117,9 @@ class AssetTypePolicy
         );
     }
 
+    /**
+     * @return array<int, Feature>
+     */
     protected function requiredFeatures(): array
     {
         return [Feature::AssetManagement];

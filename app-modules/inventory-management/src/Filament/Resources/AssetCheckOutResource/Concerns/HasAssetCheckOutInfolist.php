@@ -39,11 +39,15 @@ namespace AidingApp\InventoryManagement\Filament\Resources\AssetCheckOutResource
 use AidingApp\InventoryManagement\Enums\AssetCheckOutStatus;
 use AidingApp\InventoryManagement\Models\AssetCheckOut;
 use App\Filament\Resources\UserResource;
+use Filament\Infolists\Components\Component;
 use Filament\Infolists\Components\Fieldset;
 use Filament\Infolists\Components\TextEntry;
 
 trait HasAssetCheckOutInfolist
 {
+    /**
+     * @return array<Component>
+     */
     public function renderInfolist(): array
     {
         return [

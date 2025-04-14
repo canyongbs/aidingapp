@@ -56,7 +56,7 @@ class InventoryManagementServiceProvider extends ServiceProvider
         Panel::configureUsing(fn (Panel $panel) => ($panel->getId() !== 'admin') || $panel->plugin(new InventoryManagementPlugin()));
     }
 
-    public function boot()
+    public function boot(): void
     {
         Relation::morphMap([
             'asset_check_in' => AssetCheckIn::class,

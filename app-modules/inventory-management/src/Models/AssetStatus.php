@@ -60,6 +60,9 @@ class AssetStatus extends BaseModel implements Auditable
         'classification' => SystemAssetStatusClassification::class,
     ];
 
+    /**
+     * @return HasMany<Asset, $this>
+     */
     public function assets(): HasMany
     {
         return $this->hasMany(Asset::class, 'status_id');

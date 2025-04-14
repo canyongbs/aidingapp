@@ -46,7 +46,7 @@ enum MaintenanceActivityStatus: string implements HasLabel
     case Canceled = 'canceled';
     case Delayed = 'delayed';
 
-    public function getLabel(): ?string
+    public function getLabel(): string
     {
         return match ($this) {
             self::InProgress => 'In Progress',

@@ -56,6 +56,9 @@ class TwilioSettings extends Settings
         return 'twilio';
     }
 
+    /**
+     * @return array<string>
+     */
     public static function encrypted(): array
     {
         return [

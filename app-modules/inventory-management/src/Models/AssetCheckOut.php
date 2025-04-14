@@ -80,6 +80,9 @@ class AssetCheckOut extends BaseModel implements Auditable, ProvidesATimeline
         'expected_check_in_at' => 'datetime',
     ];
 
+    /**
+     * @return BelongsTo<Asset, $this>
+     */
     public function asset(): BelongsTo
     {
         return $this->belongsTo(Asset::class, 'asset_id');
@@ -103,11 +106,17 @@ class AssetCheckOut extends BaseModel implements Auditable, ProvidesATimeline
         );
     }
 
+    /**
+     * @return BelongsTo<AssetCheckIn, $this>
+     */
     public function checkIn(): BelongsTo
     {
         return $this->belongsTo(AssetCheckIn::class, 'asset_check_in_id');
     }
 
+    /**
+     * @return MorphOne<Timeline, $this>
+     */
     public function timelineRecord(): MorphOne
     {
         return $this->morphOne(Timeline::class, 'timelineable');

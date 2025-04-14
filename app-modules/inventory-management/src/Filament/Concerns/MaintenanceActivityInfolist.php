@@ -36,12 +36,16 @@
 
 namespace AidingApp\InventoryManagement\Filament\Concerns;
 
+use Filament\Infolists\Components\Component;
 use Filament\Infolists\Components\Fieldset;
 use Filament\Infolists\Components\TextEntry;
 
 // TODO Re-use this trait across other places where infolist is rendered
 trait MaintenanceActivityInfolist
 {
+    /**
+     * @return array<Component>
+     */
     public function renderInfolist(): array
     {
         return [
