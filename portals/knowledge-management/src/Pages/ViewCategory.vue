@@ -130,8 +130,6 @@
             const isTagsChanged = newTags.length !== urlTags.length || newTags.some((tag, i) => tag !== urlTags[i]);
 
             if (isSearchChanged || isTagsChanged) {
-                console.log('🔁 Triggered: search/tags differ from URL');
-
                 fromSearch.value = !!(newSearch || newTags.length);
 
                 router.push({
@@ -147,8 +145,6 @@
                 });
 
                 debounceSearch(newSearch, 1);
-            } else {
-                console.log('⏩ No change compared to URL — skip push');
             }
         },
         { immediate: false },
@@ -207,19 +203,16 @@
     const changeFilter = (value) => {
         filter.value = value;
 
-        router.push({
-            name: route.name,
-            params: route.params,
-            query: {
-                ...route.query,
-                page: 1,
-                filter: filter.value,
-            },
-        });
+        filterRouteChange();
     };
 
     const changeSearchFilter = (value) => {
         filter.value = value;
+        filterRouteChange();
+        debounceSearch(searchQuery.value);
+    };
+
+    const filterRouteChange = () => {
         router.push({
             name: route.name,
             params: route.params,
@@ -229,7 +222,6 @@
                 filter: filter.value,
             },
         });
-        debounceSearch(searchQuery.value);
     };
 
     const breadcrumbs = computed(() => {

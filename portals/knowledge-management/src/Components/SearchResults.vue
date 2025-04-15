@@ -93,8 +93,6 @@
     function fetchPage(page) {
         emit('fetchPage', page);
     }
-
-    console.log('loadingResults', props.loadingResults);
 </script>
 
 <template>
