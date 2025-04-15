@@ -87,9 +87,9 @@
 
     const debounceSearch = debounce((value, page = 1) => {
         const { post } = consumer();
-        console.log('me aaya nhi');
 
         fromSearch.value = true;
+
         if (!value && selectedTags.value.length < 1) {
             searchQuery.value = null;
             searchResults.value = null;
@@ -111,15 +111,6 @@
     }, 500);
 
     const setPagination = (pagination) => {
-        // console.log('currentPage', currentPage.value);
-
-        // if (currentPage.value >= pagination.last_page) {
-        //     currentPage.value = pagination.last_page;
-        // } else {
-        // }
-
-        // console.log('currentPage', currentPage.value);
-
         currentPage.value = pagination.current_page;
         prevPageUrl.value = pagination.prev_page_url;
         nextPageUrl.value = pagination.next_page_url;
@@ -128,49 +119,6 @@
         fromArticle.value = pagination.from;
         toArticle.value = pagination.to;
     };
-
-    // watch(searchQuery, (value) => {
-    //     if (value == null) {
-    //         fromSearch.value = false;
-    //         const pageFromQuery = parseInt(route.query.page) || 1;
-    //         getData(pageFromQuery);
-    //         return;
-    //     }
-
-    //     isFilterChange.value = true; // <-- mark it as filter update
-
-    //     router.push({
-    //         name: route.name,
-    //         params: route.params,
-    //         query: {
-    //             ...route.query,
-    //             page: 1, // Reset page for new search
-    //             search: value || undefined,
-    //             tags: selectedTags.value.join(',') || undefined,
-    //             filter: filter.value || undefined,
-    //         },
-    //     });
-
-    //     debounceSearch(value, 1);
-    // });
-
-    // watch(selectedTags, () => {
-    //     isFilterChange.value = true;
-
-    //     router.push({
-    //         name: route.name,
-    //         params: route.params,
-    //         query: {
-    //             ...route.query,
-    //             page: 1, // Reset page for new tag selection
-    //             search: searchQuery.value || undefined,
-    //             tags: selectedTags.value.join(',') || undefined,
-    //             filter: filter.value || undefined,
-    //         },
-    //     });
-
-    //     debounceSearch(searchQuery.value, 1);
-    // });
 
     watch(
         () => [searchQuery.value, [...selectedTags.value]],
@@ -258,11 +206,29 @@
 
     const changeFilter = (value) => {
         filter.value = value;
-        getData(1);
+
+        router.push({
+            name: route.name,
+            params: route.params,
+            query: {
+                ...route.query,
+                page: 1,
+                filter: filter.value,
+            },
+        });
     };
 
     const changeSearchFilter = (value) => {
         filter.value = value;
+        router.push({
+            name: route.name,
+            params: route.params,
+            query: {
+                ...route.query,
+                page: 1,
+                filter: filter.value,
+            },
+        });
         debounceSearch(searchQuery.value);
     };
 
@@ -296,19 +262,14 @@
 
             filter.value = appliedFilter;
             fromSearch.value = isSearchMode;
-            console.log('route-watcher', page);
             await getData(page);
         },
         { immediate: true },
     );
 
     async function getData(page = 1) {
-        console.log('fromSearch', fromSearch.value);
-
         if (fromSearch.value) {
             loadingResults.value = false;
-            console.log('getdata', page);
-
             debounceSearch(searchQuery.value, page);
             return;
         }
@@ -325,14 +286,14 @@
                         params: {
                             parentCategorySlug: response.data.category.parentCategory.slug,
                             categorySlug: response.data.category.slug,
-                            query: { page: page },
                         },
+                        query: { ...route.query },
                     });
                 } else if (route.params.categorySlug) {
                     router.replace({
                         name: 'view-category',
                         params: { categorySlug: response.data.category.slug },
-                        query: { page: page },
+                        query: { ...route.query },
                     });
                 }
 
