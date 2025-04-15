@@ -41,6 +41,7 @@ use AidingApp\Alert\Notifications\AlertCreatedNotification;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Notification\Models\Subscription;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Support\Collection;
 
 class NotifySubscribersOfAlertCreated implements ShouldQueue
 {
@@ -49,7 +50,7 @@ class NotifySubscribersOfAlertCreated implements ShouldQueue
         /** @var Contact $concern */
         $concern = $event->alert->concern;
 
-        /** @var Subscription|null $subscriptions */
+        /** @var ?Collection<int, Subscription> $subscriptions */
         $subscriptions = $concern->subscriptions;
 
         $subscriptions?->each(function (Subscription $subscription) use ($event) {
