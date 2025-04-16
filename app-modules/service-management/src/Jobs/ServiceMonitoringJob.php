@@ -54,14 +54,13 @@ class ServiceMonitoringJob implements ShouldQueue
     use Queueable;
     use SerializesModels;
 
-    public function __construct(public ServiceMonitoringFrequency $interval)
-    {}
+    public function __construct(public ServiceMonitoringFrequency $interval) {}
 
     public function handle(): void
     {
         ServiceMonitoringTarget::where('frequency', $this->interval)
             ->chunkById(100, function (Collection $serviceMonitoringTargets) {
-                foreach($serviceMonitoringTargets as $serviceMonitoringTarget) {
+                foreach ($serviceMonitoringTargets as $serviceMonitoringTarget) {
                     $this->batch()->add(new ServiceMonitoringCheckJob($serviceMonitoringTarget));
                 }
             });

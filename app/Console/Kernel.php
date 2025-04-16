@@ -77,16 +77,16 @@ class Kernel extends ConsoleKernel
                         ->name("Dispatch DeliverEngagements | Tenant {$tenant->domain}")
                         ->onOneServer()
                         ->withoutOverlapping(15);
-                    
+
                     $schedule->call(function () use ($tenant) {
-                        $tenant->execute(function() {
+                        $tenant->execute(function () {
                             dispatch(app(new ServiceMonitoringJob(ServiceMonitoringFrequency::OneHour)));
                         });
                     })
                         ->hourly();
-                    
+
                     $schedule->call(function () use ($tenant) {
-                        $tenant->execute(function() {
+                        $tenant->execute(function () {
                             dispatch(app(new ServiceMonitoringJob(ServiceMonitoringFrequency::OneHour)));
                         });
                     })

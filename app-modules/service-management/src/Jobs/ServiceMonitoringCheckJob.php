@@ -58,8 +58,7 @@ class ServiceMonitoringCheckJob implements ShouldQueue
     use Queueable;
     use SerializesModels;
 
-    public function __construct(public ServiceMonitoringTarget $serviceMonitoringTarget)
-    {}
+    public function __construct(public ServiceMonitoringTarget $serviceMonitoringTarget) {}
 
     public function handle(): void
     {
@@ -71,8 +70,8 @@ class ServiceMonitoringCheckJob implements ShouldQueue
                 'successful' => $response->status() === 200,
                 'service_monitoring_target_id' => $this->serviceMonitoringTarget->id,
             ]);
-    
-            if($response->status() !== 200) {
+
+            if ($response->status() !== 200) {
                 /** @var Collection<int,User> $recipients */
                 $recipients = $this->serviceMonitoringTarget->users()->get();
 
@@ -80,7 +79,7 @@ class ServiceMonitoringCheckJob implements ShouldQueue
                     $recipients->concat($team->users()->get())->unique();
                 });
 
-                $recipients->each(fn($user) => $user->notify(new ServiceMonitoringNotification()));
+                $recipients->each(fn ($user) => $user->notify(new ServiceMonitoringNotification()));
             }
         } catch (Exception $e) {
             // ???
