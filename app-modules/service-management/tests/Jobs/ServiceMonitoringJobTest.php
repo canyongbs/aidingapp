@@ -40,14 +40,20 @@ use AidingApp\ServiceManagement\Jobs\ServiceMonitoringJob;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use Illuminate\Support\Facades\Queue;
 
-it('successfully dispatches', function () {
+it('successfully dispatches', function ($frequency) {
     Queue::fake();
 
     $numJobs = rand(1, 10);
 
-    ServiceMonitoringTarget::factory()->count($numJobs)->create(['frequency' => ServiceMonitoringFrequency::OneHour]);
+    ServiceMonitoringTarget::factory()->count($numJobs)->create(['frequency' => $frequency]);
 
-    (new ServiceMonitoringJob(ServiceMonitoringFrequency::OneHour))->handle();
+    (new ServiceMonitoringJob($frequency))->handle();
 
     Queue::assertPushed(ServiceMonitoringCheckJob::class, $numJobs);
-});
+})
+  ->with(
+    [
+      fn() => ServiceMonitoringFrequency::OneHour,
+      fn() => ServiceMonitoringFrequency::TwentyFourHours,
+    ]
+  );

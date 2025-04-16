@@ -72,11 +72,14 @@ class ServiceMonitoringCheckJob implements ShouldQueue
             ]);
 
             if ($response->status() !== 200) {
-                /** @var Collection<int,User> $recipients */
+                /** @var Collection<int, User> $recipients */
                 $recipients = $this->serviceMonitoringTarget->users()->get();
 
                 $this->serviceMonitoringTarget->teams()->each(function ($team) use ($recipients) {
-                    $recipients->concat($team->users()->get())->unique();
+                  /** @var Collection<int, User> $users */
+                  $users = $team->users()->get();  
+                  
+                  $recipients->concat($users)->unique();
                 });
 
                 $recipients->each(fn ($user) => $user->notify(new ServiceMonitoringNotification()));

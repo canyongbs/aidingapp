@@ -34,24 +34,36 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Engagement\Jobs\DeliverEngagements;
-use AidingApp\Engagement\Models\Engagement;
-use AidingApp\Engagement\Notifications\EngagementNotification;
+use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
+use AidingApp\ServiceManagement\Jobs\ServiceMonitoringCheckJob;
+use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+use AidingApp\ServiceManagement\Notifications\ServiceMonitoringNotification;
+use App\Models\User;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
 
-//it successfully dispatches
-
-//it notifies if response is not 200
-
-it('successfully dispatches', function () {
+it('sends a notification if the response is not 200', function ($frequency) {
+    Http::fake(function () {
+        return Http::response('Test', 500);
+    });
     Notification::fake();
 
-    $engagement = Engagement::factory()->deliverNow()->create();
+    $user = User::factory()->create();
 
-    dispatch(app(DeliverEngagements::class));
+    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+    ->hasAttached($user)
+    ->create(['frequency' => $frequency]);
+
+    (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
 
     Notification::assertSentTo(
-        $engagement->recipient,
-        EngagementNotification::class
+        $user,
+        ServiceMonitoringNotification::class
     );
-});
+})
+    ->with(
+        [
+            fn() => ServiceMonitoringFrequency::OneHour,
+            fn() => ServiceMonitoringFrequency::TwentyFourHours,
+        ]
+    );

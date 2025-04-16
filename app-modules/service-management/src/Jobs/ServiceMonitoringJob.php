@@ -61,7 +61,7 @@ class ServiceMonitoringJob implements ShouldQueue
         ServiceMonitoringTarget::where('frequency', $this->interval)
             ->chunkById(100, function (Collection $serviceMonitoringTargets) {
                 foreach ($serviceMonitoringTargets as $serviceMonitoringTarget) {
-                    $this->batch()->add(new ServiceMonitoringCheckJob($serviceMonitoringTarget));
+                    dispatch(new ServiceMonitoringCheckJob($serviceMonitoringTarget));
                 }
             });
     }
