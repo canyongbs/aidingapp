@@ -48,6 +48,7 @@ use App\Models\Tenant;
 use Filament\Actions\Imports\Models\FailedImportRow;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
@@ -80,14 +81,14 @@ class Kernel extends ConsoleKernel
 
                     $schedule->call(function () use ($tenant) {
                         $tenant->execute(function () {
-                            dispatch(app(new ServiceMonitoringJob(ServiceMonitoringFrequency::OneHour)));
+                            Bus::batch([new ServiceMonitoringJob(ServiceMonitoringFrequency::OneHour)])->dispatch();
                         });
                     })
                         ->hourly();
 
                     $schedule->call(function () use ($tenant) {
                         $tenant->execute(function () {
-                            dispatch(app(new ServiceMonitoringJob(ServiceMonitoringFrequency::OneHour)));
+                            Bus::batch([new ServiceMonitoringJob(ServiceMonitoringFrequency::TwentyFourHours)])->dispatch();
                         });
                     })
                         ->daily();
