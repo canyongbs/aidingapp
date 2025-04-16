@@ -43,7 +43,7 @@ use Illuminate\Support\Facades\Queue;
 it('successfully dispatches', function () {
     Queue::fake();
 
-    $numJobs = rand(1,10);
+    $numJobs = rand(1, 10);
 
     ServiceMonitoringTarget::factory()->count($numJobs)->create(['frequency' => ServiceMonitoringFrequency::OneHour]);
 
