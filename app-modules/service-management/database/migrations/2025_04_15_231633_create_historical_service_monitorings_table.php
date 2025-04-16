@@ -45,6 +45,7 @@ return new class () extends Migration {
             $table->uuid('id')->primary();
 
             $table->integer('response');
+            $table->float('response_time');
             $table->boolean('succeeded');
             $table->foreignUuid('service_monitoring_target_id')->constrained()->cascadeOnDelete();
 
