@@ -51,7 +51,7 @@
     });
 
     async function getProductLicenses() {
-        const response = await get(`${props.apiUrl}/product-licenses`);
+        const response = await get(`${window.portalConfig.apiUrl}/product-licenses`);
 
         if (response.error) {
             throw new Error(response.error);

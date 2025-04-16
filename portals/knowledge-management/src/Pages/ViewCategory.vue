@@ -68,6 +68,8 @@
         },
     });
 
+    console.log('props', window.portalConfig.apiUrl);
+
     const loadingResults = ref(true);
     const loadingeSearchResults = ref(true);
     const category = ref(null);
@@ -98,7 +100,7 @@
 
         loadingeSearchResults.value = true;
 
-        post(props.searchUrl, {
+        post(window.portalConfig.searchUrl, {
             search: JSON.stringify(value),
             tags: selectedTags.value.join(','),
             filter: filter.value,
@@ -270,31 +272,32 @@
 
         const { get } = consumer();
 
-        await get(props.apiUrl + '/categories/' + route.params.categorySlug, { page: page, filter: filter.value }).then(
-            (response) => {
-                if (route.params.categorySlug && route.params.parentCategorySlug) {
-                    router.replace({
-                        name: 'view-subcategory',
-                        params: {
-                            parentCategorySlug: response.data.category.parentCategory.slug,
-                            categorySlug: response.data.category.slug,
-                        },
-                        query: { ...route.query },
-                    });
-                } else if (route.params.categorySlug) {
-                    router.replace({
-                        name: 'view-category',
-                        params: { categorySlug: response.data.category.slug },
-                        query: { ...route.query },
-                    });
-                }
+        await get(window.portalConfig.apiUrl + '/categories/' + route.params.categorySlug, {
+            page: page,
+            filter: filter.value,
+        }).then((response) => {
+            if (route.params.categorySlug && route.params.parentCategorySlug) {
+                router.replace({
+                    name: 'view-subcategory',
+                    params: {
+                        parentCategorySlug: response.data.category.parentCategory.slug,
+                        categorySlug: response.data.category.slug,
+                    },
+                    query: { ...route.query },
+                });
+            } else if (route.params.categorySlug) {
+                router.replace({
+                    name: 'view-category',
+                    params: { categorySlug: response.data.category.slug },
+                    query: { ...route.query },
+                });
+            }
 
-                category.value = response.data.category;
-                articles.value = response.data.articles.data;
-                setPagination(response.data.articles);
-                loadingResults.value = false;
-            },
-        );
+            category.value = response.data.category;
+            articles.value = response.data.articles.data;
+            setPagination(response.data.articles);
+            loadingResults.value = false;
+        });
     }
 </script>
 

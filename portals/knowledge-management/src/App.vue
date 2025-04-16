@@ -32,45 +32,18 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { defineProps, onMounted, ref, watch } from 'vue';
-    import { useRoute } from 'vue-router';
+    import { FormKit } from '@formkit/vue';
+    import { onMounted, ref, watch } from 'vue';
+    import { RouterView, useRoute } from 'vue-router';
     import AppLoading from './Components/AppLoading.vue';
     import Footer from './Components/Footer.vue';
     import Header from './Components/Header.vue';
     import axios from './Globals/Axios.js';
     import { consumer } from './Services/Consumer.js';
     import determineIfUserIsAuthenticated from './Services/DetermineIfUserIsAuthenticated.js';
-    import getAppContext from './Services/GetAppContext.js';
     import { useAuthStore } from './Stores/auth.js';
     import { useFeatureStore } from './Stores/feature.js';
     import { useTokenStore } from './Stores/token.js';
-
-    const props = defineProps({
-        url: {
-            type: String,
-            required: true,
-        },
-        searchUrl: {
-            type: String,
-            required: true,
-        },
-        apiUrl: {
-            type: String,
-            required: true,
-        },
-        accessUrl: {
-            type: String,
-            required: true,
-        },
-        userAuthenticationUrl: {
-            type: String,
-            required: true,
-        },
-        appUrl: {
-            type: String,
-            required: true,
-        },
-    });
 
     const errorLoading = ref(false);
     const loading = ref(true);
@@ -102,22 +75,12 @@
         registrationAllowed: false,
     });
 
-    const scriptUrl = new URL(document.currentScript.getAttribute('src'));
-    const protocol = scriptUrl.protocol;
-    const scriptHostname = scriptUrl.hostname;
-
-    const hostUrl = `${protocol}//${scriptHostname}`;
+    const hostUrl = window.portalConfig.hostUrl;
 
     const route = useRoute();
 
     onMounted(async () => {
-        const { isEmbeddedInAidingApp } = getAppContext(props.accessUrl);
-
-        if (isEmbeddedInAidingApp) {
-            await axios.get(props.appUrl + '/sanctum/csrf-cookie');
-        }
-
-        await determineIfUserIsAuthenticated(props.userAuthenticationUrl).then((response) => {
+        await determineIfUserIsAuthenticated(window.portalConfig.userAuthenticationUrl).then((response) => {
             userIsAuthenticated.value = response;
         });
         document.title = 'Help Center';
@@ -155,7 +118,7 @@
 
     async function getKnowledgeManagementPortal() {
         await axios
-            .get(props.url)
+            .get(window.portalConfig.url)
             .then((response) => {
                 errorLoading.value = false;
 
@@ -274,7 +237,7 @@
     async function getKnowledgeManagementPortalCategories() {
         const { get } = consumer();
 
-        return get(`${props.apiUrl}/categories`).then((response) => {
+        return get(`${window.portalConfig.apiUrl}/categories`).then((response) => {
             if (response.error) {
                 throw new Error(response.error);
             }
@@ -286,7 +249,7 @@
     async function getServiceRequests() {
         const { get } = consumer();
 
-        return get(`${props.apiUrl}/service-requests`).then((response) => {
+        return get(`${window.portalConfig.apiUrl}/service-requests`).then((response) => {
             if (response.error) {
                 throw new Error(response.error);
             }
@@ -298,7 +261,7 @@
     async function getTags() {
         const { get } = consumer();
 
-        return get(`${props.apiUrl}/tags`).then((response) => {
+        return get(`${window.portalConfig.apiUrl}/tags`).then((response) => {
             if (response.error) {
                 throw new Error(response.error);
             }
@@ -314,12 +277,6 @@
         const { setUser } = useAuthStore();
 
         const { setHasServiceManagement, setHasAssets, setHasLicense, setHasTasks } = useFeatureStore();
-
-        const { isEmbeddedInAidingApp } = getAppContext(props.accessUrl);
-
-        if (isEmbeddedInAidingApp) {
-            await axios.get(props.appUrl + '/sanctum/csrf-cookie');
-        }
 
         if (authentication.value.isRequested) {
             $data = {
@@ -452,7 +409,6 @@
         <div>
             <link rel="stylesheet" v-bind:href="hostUrl + '/js/portals/knowledge-management/style.css'" />
         </div>
-
         <div v-if="loading">
             <AppLoading />
         </div>

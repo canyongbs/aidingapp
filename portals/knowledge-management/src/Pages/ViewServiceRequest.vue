@@ -104,21 +104,23 @@
 
         const { get } = consumer();
 
-        get(props.apiUrl + '/service-request/' + route.params.serviceRequestId, { page: page }).then((response) => {
-            serviceRequest.value = response.data.serviceRequestDetails;
-            serviceRequestUpdates.value = response.data.serviceRequestUpdates.data || [];
-            directionEnums.value = response.data.directionEnums || [];
-            if (!fromPagination) {
-                loadingResults.value = false;
-            }
-            setPagination(response.data.serviceRequestUpdates);
-        });
+        get(window.portalConfig.apiUrl + '/service-request/' + route.params.serviceRequestId, { page: page }).then(
+            (response) => {
+                serviceRequest.value = response.data.serviceRequestDetails;
+                serviceRequestUpdates.value = response.data.serviceRequestUpdates.data || [];
+                directionEnums.value = response.data.directionEnums || [];
+                if (!fromPagination) {
+                    loadingResults.value = false;
+                }
+                setPagination(response.data.serviceRequestUpdates);
+            },
+        );
     }
     async function submitUpdate() {
         try {
             disableSubmitBtn.value = true;
             const { post } = consumer();
-            const response = await post(props.apiUrl + '/service-request-update/store', {
+            const response = await post(window.portalConfig.apiUrl + '/service-request-update/store', {
                 description: updateMessage.value,
                 serviceRequestId: route.params.serviceRequestId,
             });
