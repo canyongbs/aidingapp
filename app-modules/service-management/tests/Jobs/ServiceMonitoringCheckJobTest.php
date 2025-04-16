@@ -51,8 +51,8 @@ it('sends a notification if the response is not 200', function ($frequency) {
     $user = User::factory()->create();
 
     $serviceMonitorTarget = ServiceMonitoringTarget::factory()
-    ->hasAttached($user)
-    ->create(['frequency' => $frequency]);
+        ->hasAttached($user)
+        ->create(['frequency' => $frequency]);
 
     (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
 
@@ -63,7 +63,7 @@ it('sends a notification if the response is not 200', function ($frequency) {
 })
     ->with(
         [
-            fn() => ServiceMonitoringFrequency::OneHour,
-            fn() => ServiceMonitoringFrequency::TwentyFourHours,
+            fn () => ServiceMonitoringFrequency::OneHour,
+            fn () => ServiceMonitoringFrequency::TwentyFourHours,
         ]
     );

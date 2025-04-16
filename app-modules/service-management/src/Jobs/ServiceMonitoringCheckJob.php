@@ -76,10 +76,10 @@ class ServiceMonitoringCheckJob implements ShouldQueue
                 $recipients = $this->serviceMonitoringTarget->users()->get();
 
                 $this->serviceMonitoringTarget->teams()->each(function ($team) use ($recipients) {
-                  /** @var Collection<int, User> $users */
-                  $users = $team->users()->get();  
-                  
-                  $recipients->concat($users)->unique();
+                    /** @var Collection<int, User> $users */
+                    $users = $team->users()->get();
+
+                    $recipients->concat($users)->unique();
                 });
 
                 $recipients->each(fn ($user) => $user->notify(new ServiceMonitoringNotification()));

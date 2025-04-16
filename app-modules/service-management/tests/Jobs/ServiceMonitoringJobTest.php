@@ -51,9 +51,9 @@ it('successfully dispatches', function ($frequency) {
 
     Queue::assertPushed(ServiceMonitoringCheckJob::class, $numJobs);
 })
-  ->with(
-    [
-      fn() => ServiceMonitoringFrequency::OneHour,
-      fn() => ServiceMonitoringFrequency::TwentyFourHours,
-    ]
-  );
+    ->with(
+        [
+            fn () => ServiceMonitoringFrequency::OneHour,
+            fn () => ServiceMonitoringFrequency::TwentyFourHours,
+        ]
+    );
