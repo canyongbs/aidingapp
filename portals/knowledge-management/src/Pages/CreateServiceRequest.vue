@@ -107,7 +107,7 @@
 
             const { post } = consumer();
 
-            post(props.apiUrl + '/service-request/create/' + route.params.typeId, data)
+            post(window.portalConfig.apiUrl + '/service-request/create/' + route.params.typeId, data)
                 .then((response) => {
                     submittedSuccess.value = true;
                 })
@@ -128,7 +128,7 @@
 
         const { get } = consumer();
 
-        get(props.apiUrl + '/service-request/create/' + route.params.typeId).then((response) => {
+        get(window.portalConfig.apiUrl + '/service-request/create/' + route.params.typeId).then((response) => {
             loadingResults.value = false;
 
             schema.value = response.data.schema;

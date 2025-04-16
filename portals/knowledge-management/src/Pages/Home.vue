@@ -106,7 +106,7 @@
 
         loadingResults.value = true;
 
-        post(props.searchUrl, {
+        post(window.portalConfig.searchUrl, {
             search: JSON.stringify(value),
             tags: selectedTags.value.join(','),
             filter: filter.value || route.query.filter || undefined,

@@ -67,31 +67,35 @@ Route::prefix('portal')
                 ->middleware(['signed:relative', EnsureFrontendRequestsAreStateful::class])
                 ->name('register');
 
-            Route::get('/', RenderKnowledgeManagementPortal::class)
-                ->name('show');
-            Route::get('/categories/{category}', RenderKnowledgeManagementPortal::class)
-                ->name('category.show');
-            Route::get('/categories/{category}/{subcategory}', RenderKnowledgeManagementPortal::class)
-                ->name('subcategory.show');
-            Route::get('/categories/{category}/articles/{article}', RenderKnowledgeManagementPortal::class)
-                ->name('article.show');
-            Route::get('/service-request-type/select', RenderKnowledgeManagementPortal::class)
-                ->name('service-request-type.index');
-            Route::get('/service-request/create/{type}', RenderKnowledgeManagementPortal::class)
-                ->name('service-request.create');
-            Route::get('/service-request/{serviceRequest}', RenderKnowledgeManagementPortal::class)
-                ->name('service-request.show');
-            Route::get('/services', RenderKnowledgeManagementPortal::class)
-                ->name('services');
-            Route::get('/incidents', RenderKnowledgeManagementPortal::class)
-                ->name('incidents');
-            Route::get('/knowledge-base', RenderKnowledgeManagementPortal::class)
-                ->name('knowledge-base');
-            Route::get('/assets', RenderKnowledgeManagementPortal::class)
-                ->name('assets');
-            Route::get('/licenses', RenderKnowledgeManagementPortal::class)
-                ->name('licenses');
-            Route::get('/tasks', RenderKnowledgeManagementPortal::class)
-                ->name('tasks');
+            Route::get('/', fn () => view('portal::portal-standalone'))->name('show');
+
+            Route::get('{any}', function () {
+                return view('portal::portal-standalone');
+            })->where('any', '.*');
+
+            // Route::get('/categories/{category}', fn () => view('portal::portal-standalone'))->name('category.show');
+
+            // // Route::get('/categories/{category}/{subcategory}', RenderKnowledgeManagementPortal::class)
+            // //     ->name('subcategory.show');
+            // Route::get('/categories/{category}/articles/{article}', fn () => view('portal::portal-standalone'))
+            //     ->name('article.show');
+            // Route::get('/service-request-type/select', RenderKnowledgeManagementPortal::class)
+            //     ->name('service-request-type.index');
+            // Route::get('/service-request/create/{type}', RenderKnowledgeManagementPortal::class)
+            //     ->name('service-request.create');
+            // Route::get('/service-request/{serviceRequest}', RenderKnowledgeManagementPortal::class)
+            //     ->name('service-request.show');
+            // Route::get('/services', RenderKnowledgeManagementPortal::class)
+            //     ->name('services');
+            // Route::get('/incidents', RenderKnowledgeManagementPortal::class)
+            //     ->name('incidents');
+            // Route::get('/knowledge-base', RenderKnowledgeManagementPortal::class)
+            //     ->name('knowledge-base');
+            // Route::get('/assets', RenderKnowledgeManagementPortal::class)
+            //     ->name('assets');
+            // Route::get('/licenses', RenderKnowledgeManagementPortal::class)
+            //     ->name('licenses');
+            // Route::get('/tasks', RenderKnowledgeManagementPortal::class)
+            //     ->name('tasks');
         });
     });

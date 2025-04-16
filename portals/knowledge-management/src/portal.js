@@ -34,120 +34,25 @@
 import { defaultConfig, plugin } from '@formkit/vue';
 import { createPinia } from 'pinia';
 import PrimeVue from 'primevue/config';
-import { createApp, defineCustomElement, getCurrentInstance, h } from 'vue';
-import { createMemoryHistory, createRouter, createWebHistory } from 'vue-router';
+import { createApp } from 'vue';
+import { createRouter, createWebHistory } from 'vue-router';
 import App from './App.vue';
-import ComingSoon from './Components/ComingSoon.vue';
-import Services from './Components/Services.vue';
 import config from './formkit.config.js';
-import CreateServiceRequest from './Pages/CreateServiceRequest.vue';
-import Home from './Pages/Home.vue';
-import Licenses from './Pages/Licenses.vue';
-import SelectServiceRequestType from './Pages/SelectServiceRequestType.vue';
-import ViewArticle from './Pages/ViewArticle.vue';
-import ViewCategory from './Pages/ViewCategory.vue';
-import ViewServiceRequest from './Pages/ViewServiceRequest.vue';
+import routes from './router/router.js'; // optional: move your routes to a separate file
+
 import './portal.css';
-import getAppContext from './Services/GetAppContext.js';
 
-customElements.define(
-    'knowledge-management-portal-embed',
-    defineCustomElement({
-        setup(props) {
-            const app = createApp();
-            const pinia = createPinia();
+const app = createApp(App);
 
-            app.use(pinia);
-            app.use(PrimeVue, {
-                theme: 'none',
-            });
+app.use(createPinia());
+app.use(PrimeVue, { theme: 'none' });
 
-            const { isEmbeddedInAidingApp, baseUrl } = getAppContext(props.accessUrl);
+const router = createRouter({
+    history: createWebHistory(),
+    routes,
+});
 
-            const router = createRouter({
-                history: isEmbeddedInAidingApp ? createWebHistory() : createMemoryHistory(),
-                routes: [
-                    {
-                        path: baseUrl + '/',
-                        name: 'home',
-                        component: Home,
-                    },
-                    {
-                        path: baseUrl + '/categories/:categorySlug',
-                        name: 'view-category',
-                        component: ViewCategory,
-                    },
-                    {
-                        path: baseUrl + '/categories/:parentCategorySlug/:categorySlug',
-                        name: 'view-subcategory',
-                        component: ViewCategory,
-                    },
-                    {
-                        path: baseUrl + '/categories/:categorySlug/articles/:articleId',
-                        name: 'view-article',
-                        component: ViewArticle,
-                    },
-                    {
-                        path: baseUrl + '/service-request-type/select',
-                        name: 'create-service-request',
-                        component: SelectServiceRequestType,
-                    },
-                    {
-                        path: baseUrl + '/service-request/create/:typeId',
-                        name: 'create-service-request-from-type',
-                        component: CreateServiceRequest,
-                    },
-                    {
-                        path: baseUrl + '/service-request/:serviceRequestId',
-                        name: 'view-service-request',
-                        component: ViewServiceRequest,
-                    },
-                    {
-                        path: baseUrl + '/services',
-                        name: 'services',
-                        component: Services,
-                    },
-                    {
-                        path: baseUrl + '/incidents',
-                        name: 'incidents',
-                        component: ComingSoon,
-                    },
-                    {
-                        path: baseUrl + '/knowledge-base',
-                        name: 'knowledge-base',
-                        component: ComingSoon,
-                    },
-                    {
-                        path: baseUrl + '/assets',
-                        name: 'assets',
-                        component: ComingSoon,
-                    },
-                    {
-                        path: baseUrl + '/licenses',
-                        name: 'licenses',
-                        component: Licenses,
-                    },
-                    {
-                        path: baseUrl + '/tasks',
-                        name: 'tasks',
-                        component: ComingSoon,
-                    },
-                ],
-            });
+app.use(router);
+app.use(plugin, defaultConfig(config));
 
-            app.use(router);
-
-            app.config.devtools = true;
-
-            // FormKit plugin
-            app.use(plugin, defaultConfig(config));
-
-            const inst = getCurrentInstance();
-            Object.assign(inst.appContext, app._context);
-            Object.assign(inst.provides, app._context.provides);
-
-            return () => h(App, props);
-        },
-        props: ['url', 'userAuthenticationUrl', 'accessUrl', 'searchUrl', 'appUrl', 'apiUrl', 'tags'],
-    }),
-);
+app.mount('#app');

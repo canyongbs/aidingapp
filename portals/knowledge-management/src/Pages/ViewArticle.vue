@@ -76,6 +76,7 @@
             const breadcrumbsList = [];
 
             if (parentCategory.value) {
+                console.log('parentCategory', parentCategory.value);
                 breadcrumbsList.push({
                     name: parentCategory.value.name,
                     route: 'view-category',
@@ -118,7 +119,13 @@
     function getData() {
         loading.value = true;
 
-        get(props.apiUrl + '/categories/' + route.params.categorySlug + '/articles/' + route.params.articleId)
+        get(
+            window.portalConfig.apiUrl +
+                '/categories/' +
+                route.params.categorySlug +
+                '/articles/' +
+                route.params.articleId,
+        )
             .then((response) => {
                 if (response.data) {
                     if (response.data.category.slug !== route.params.categorySlug) {
@@ -150,7 +157,7 @@
             });
     }
     async function toggleFeedback(type) {
-        await post(props.apiUrl + '/knowledge_base_article_vote/store', {
+        await post(window.portalConfig.apiUrl + '/knowledge_base_article_vote/store', {
             article_vote: feedback.value === type ? null : type,
             article_id: route.params.articleId,
         })
