@@ -1,4 +1,4 @@
-/*
+{{--
 <COPYRIGHT>
 
     Copyright © 2016-2025, Canyon GBS LLC. All rights reserved.
@@ -30,29 +30,62 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
-import { defaultConfig, plugin } from '@formkit/vue';
-import { createPinia } from 'pinia';
-import PrimeVue from 'primevue/config';
-import { createApp } from 'vue';
-import { createRouter, createWebHistory } from 'vue-router';
-import App from './App.vue';
-import config from './formkit.config.js';
-import routes from './router/router.js'; // optional: move your routes to a separate file
+--}}
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
-import './portal.css';
+<head>
+    <meta charset="utf-8">
 
-const app = createApp(App);
+    <meta
+        name="application-name"
+        content="{{ config('app.name') }}"
+    >
+    <meta
+        name="csrf-token"
+        content="{{ csrf_token() }}"
+    >
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
 
-app.use(createPinia());
-app.use(PrimeVue, { theme: 'none' });
+    {{-- title kha se passs ho rha that i need to se --}}
 
-const router = createRouter({
-    history: createWebHistory(),
-    routes,
-});
+    <title>{{ __('Help Center') }}</title>
 
-app.use(router);
-app.use(plugin, defaultConfig(config));
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+    </style>
 
-app.mount('#app');
+    @filamentStyles
+    @vite('resources/css/app.css')
+</head>
+
+<body class="antialiased">
+    <div id="app"></div>
+
+    @include('cookie-consent::index')
+
+    @filamentScripts
+    @vite('resources/js/app.js')
+</body>
+<script>
+    window.portalConfig = {
+        accessUrl: "{{ route('portal.show') }}",
+        userAuthenticationUrl: "{{ route('api.user.auth-check') }}",
+        url: "{{ URL::to(URL::signedRoute('api.portal.define', [], false)) }}",
+        searchUrl: "{{ URL::to(URL::signedRoute('api.portal.search', [], false)) }}",
+        appUrl: "{{ config('app.url') }}",
+        apiUrl: "{{ route('api.portal.define') }}",
+        hostUrl: "{{ url('/') }}"
+    };
+</script>
+<script
+    type="module"
+    src="{{ url('js/portals/knowledge-management/aiding-app-knowledge-management-portal.js?v=' . app('current-commit')) }}"
+></script>
+
+</html>

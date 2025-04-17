@@ -36,7 +36,6 @@
 
 namespace AidingApp\Portal\Http\Middleware;
 
-use AidingApp\Portal\Settings\PortalSettings;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -58,12 +57,10 @@ class EnsureKnowledgeManagementPortalIsEmbeddableAndAuthorized
 
         $referer = parse_url($referer)['host'];
 
-        $settings = resolve(PortalSettings::class);
-
         if ($referer != parse_url(config('app.url'))['host']) {
-            if (parse_url($settings->knowledge_management_portal_authorized_domain)['host'] !== $referer) {
-                return response()->json(['error' => 'Referer not allowed. Domain must be added to allowed domains list'], 403);
-            }
+            // if (parse_url($settings->knowledge_management_portal_authorized_domain)['host'] !== $referer) {
+            return response()->json(['error' => 'Referer not allowed'], 403);
+            // }
         }
 
         return $next($request);

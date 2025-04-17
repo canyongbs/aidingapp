@@ -1,3 +1,5 @@
+<?php
+
 /*
 <COPYRIGHT>
 
@@ -31,28 +33,17 @@
 
 </COPYRIGHT>
 */
-import { defaultConfig, plugin } from '@formkit/vue';
-import { createPinia } from 'pinia';
-import PrimeVue from 'primevue/config';
-import { createApp } from 'vue';
-import { createRouter, createWebHistory } from 'vue-router';
-import App from './App.vue';
-import config from './formkit.config.js';
-import routes from './router/router.js'; // optional: move your routes to a separate file
 
-import './portal.css';
+use Spatie\LaravelSettings\Migrations\SettingsMigration;
 
-const app = createApp(App);
+return new class () extends SettingsMigration {
+    public function up(): void
+    {
+        $this->migrator->delete('portal.knowledge_management_portal_authorized_domain');
+    }
 
-app.use(createPinia());
-app.use(PrimeVue, { theme: 'none' });
-
-const router = createRouter({
-    history: createWebHistory(),
-    routes,
-});
-
-app.use(router);
-app.use(plugin, defaultConfig(config));
-
-app.mount('#app');
+    public function down(): void
+    {
+        $this->migrator->add('portal.knowledge_management_portal_authorized_domain');
+    }
+};
