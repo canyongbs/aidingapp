@@ -1,6 +1,4 @@
-<?php
-
-/*
+{{--
 <COPYRIGHT>
 
     Copyright © 2016-2025, Canyon GBS LLC. All rights reserved.
@@ -32,56 +30,24 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
+--}}
+@props(['settings' => null])
+<x-mail::layout :settings="$settings">
+    {{-- Header --}}
+    <x-slot:header>
+        <x-mail::header :url="config('app.url')" :settings="$settings">
+            {{ config('app.name') }}
+        </x-mail::header>
+    </x-slot:header>
 
-namespace AidingApp\ServiceManagement\Notifications;
+    {{-- Body --}}
+    
 
-use AidingApp\Notification\Notifications\Messages\MailMessage;
-use App\Models\User;
-use Illuminate\Bus\Queueable;
-use Illuminate\Notifications\Notification;
 
-class ServiceMonitoringNotification extends Notification
-{
-    use Queueable;
-
-    public function __construct() {}
-
-    /**
-     * @return array<int, string>
-     */
-    public function via(User $notifiable): array
-    {
-        return ['mail'];
-    }
-
-    public function toMail(User $notifiable): MailMessage
-    {
-        // return MailMessage::make()
-        //     ->settings($this->resolveNotificationSetting($notifiable))
-        //     ->subject('Alert: Service Check Failure for [TARGET_NAME] ([TARGET_DOMAIN])') //variables
-        //     ->greeting('Hello [Responsible_Party_Name],') //variable
-        //     ->view()
-        //     ->line('This is an automated alert from Aiding App.')
-        //     ->line('<strong>Issue Details:</strong>');
-
-        // Service Name: [TARGET_NAME]
-
-        // Domain: [TARGET_DOMAIN]
-
-        // Expected HTTP Status: 200
-
-        // Actual HTTP Status: [RESPONSE_CODE]
-
-        // Response Time: [RESPONSE_TIME] seconds
-
-        // Time of Incident: [CHECK_TIME]
-
-        // Our system detected that the service did not return the expected response during its latest check.
-    }
-
-    private function resolveNotificationSetting(User $notifiable): ?NotificationSetting
-    {
-        return null;
-    }
-}
+    {{-- Footer --}}
+    <x-slot:footer>
+        <x-mail::footer>
+            This email was sent using Aiding App™. <br /> <br /> © 2016-{{ date('Y') }} Canyon GBS LLC. All Rights Reserved. Canyon GBS™ and Aiding App™ are trademarks of Canyon GBS LLC.
+        </x-mail::footer>
+    </x-slot:footer>
+</x-mail::layout>
