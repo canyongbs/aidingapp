@@ -45,6 +45,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestTypeManager;
 use App\Models\BaseModel;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
@@ -57,12 +58,9 @@ class Team extends BaseModel
         'description',
     ];
 
-    public function users(): BelongsToMany
+    public function users(): hasMany
     {
-        return $this
-            ->belongsToMany(User::class)
-            ->using(TeamUser::class)
-            ->withTimestamps();
+        return $this->hasMany(User::class);
     }
 
     public function serviceMonitoringTargets(): BelongsToMany
