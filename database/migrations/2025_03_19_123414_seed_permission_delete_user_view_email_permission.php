@@ -40,10 +40,16 @@ use Illuminate\Database\Migrations\Migration;
 return new class () extends Migration {
     use CanModifyPermissions;
 
+    /**
+     * @var array<string, string>
+     */
     private array $permissions = [
         'user.view-email' => 'User',
     ];
 
+    /**
+     * @var array<string>
+     */
     private array $guards = [
         'api',
     ];

@@ -117,6 +117,9 @@ class AssetCheckInPolicy
         );
     }
 
+    /**
+     * @return array<int, Feature>
+     */
     protected function requiredFeatures(): array
     {
         return [Feature::ServiceManagement];

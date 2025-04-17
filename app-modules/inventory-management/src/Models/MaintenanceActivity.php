@@ -76,16 +76,25 @@ class MaintenanceActivity extends BaseModel implements Auditable, ProvidesATimel
         'status' => MaintenanceActivityStatus::class,
     ];
 
+    /**
+     * @return BelongsTo<Asset, $this>
+     */
     public function asset(): BelongsTo
     {
         return $this->belongsTo(Asset::class);
     }
 
+    /**
+     * @return BelongsTo<MaintenanceProvider, $this>
+     */
     public function maintenanceProvider(): BelongsTo
     {
         return $this->belongsTo(MaintenanceProvider::class);
     }
 
+    /**
+     * @return MorphOne<Timeline, $this>
+     */
     public function timelineRecord(): MorphOne
     {
         return $this->morphOne(Timeline::class, 'timelineable');

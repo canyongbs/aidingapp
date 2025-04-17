@@ -221,11 +221,17 @@ class Engagement extends BaseModel implements Auditable, CanTriggerAutoSubscript
         );
     }
 
+    /**
+     * @return array<string, string>
+     */
     public function getMergeData(): array
     {
+        /** @var Contact $contact */
+        $contact = $this->recipient;
+
         return [
-            'contact full name' => $this->recipient->getAttribute($this->recipient->displayNameKey()),
-            'contact email' => $this->recipient->getAttribute($this->recipient->displayEmailKey()),
+            'contact full name' => $contact->getAttribute($contact->displayNameKey()),
+            'contact email' => $contact->getAttribute($contact->displayEmailKey()),
         ];
     }
 

@@ -39,6 +39,7 @@ namespace AidingApp\Authorization\Enums;
 use AidingApp\Authorization\Exceptions\InvalidAzureMatchingProperty;
 use AidingApp\Authorization\Settings\AzureSsoSettings;
 use AidingApp\Authorization\Settings\GoogleSsoSettings;
+use App\Models\User;
 use Exception;
 use Laravel\Socialite\Contracts\Provider;
 use Laravel\Socialite\Facades\Socialite;

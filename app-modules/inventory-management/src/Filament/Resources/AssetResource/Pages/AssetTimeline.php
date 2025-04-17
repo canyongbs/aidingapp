@@ -52,6 +52,9 @@ class AssetTimeline extends TimelinePage
 
     public string $noMoreRecordsMessage = "You have reached the end of this asset's maintenance and activity timeline.";
 
+    /**
+     * @var array<class-string>
+     */
     public array $modelsToTimeline = [
         MaintenanceActivity::class,
         AssetCheckOut::class,

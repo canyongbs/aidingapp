@@ -42,6 +42,9 @@ use Illuminate\Support\Facades\DB;
 return new class () extends Migration {
     use CanModifyPermissions;
 
+    /**
+     * @var array<string, string>
+     */
     private array $permissions = [
         'product_admin.view-any' => 'Product Admin',
         'product_admin.create' => 'Product Admin',
@@ -52,6 +55,9 @@ return new class () extends Migration {
         'product_admin.*.force-delete' => 'Product Admin',
     ];
 
+    /**
+     * @var array<string>
+     */
     private array $guards = [
         'web',
         'api',
@@ -72,6 +78,9 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        $this->deletePermissions(array_keys($this->permissions), $this->guards);
+        collect($this->guards)
+            ->each(function (string $guard) {
+                $this->deletePermissions(array_keys($this->permissions), $guard);
+            });
     }
 };

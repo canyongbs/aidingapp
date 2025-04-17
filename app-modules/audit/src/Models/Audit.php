@@ -57,6 +57,9 @@ class Audit extends BaseAudit
     use HasUuids;
     use UsesTenantConnection;
 
+    /**
+     * @return Builder<Audit>
+     */
     public function prunable(): Builder
     {
         return static::where(

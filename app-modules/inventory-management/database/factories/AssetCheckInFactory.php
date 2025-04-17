@@ -61,7 +61,7 @@ class AssetCheckInFactory extends Factory
             'checked_in_from_id' => function (array $attributes) {
                 $checkedInFromClass = Relation::getMorphedModel($attributes['checked_in_from_type']);
 
-                /** @var Contact $senderModel */
+                /** @var Contact $checkedInFromModel */
                 $checkedInFromModel = new $checkedInFromClass();
 
                 $checkedInFromModel = $checkedInFromModel::factory()->create();

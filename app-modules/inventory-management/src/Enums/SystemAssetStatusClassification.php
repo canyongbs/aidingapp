@@ -50,7 +50,7 @@ enum SystemAssetStatusClassification: string implements HasLabel
 
     case Custom = 'custom';
 
-    public function getLabel(): ?string
+    public function getLabel(): string
     {
         return match ($this) {
             self::CheckedOut => 'Checked Out',

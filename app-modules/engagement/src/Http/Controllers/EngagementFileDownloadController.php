@@ -39,13 +39,14 @@ namespace AidingApp\Engagement\Http\Controllers;
 use AidingApp\Engagement\Http\Requests\EngagementFileDownloadRequest;
 use AidingApp\Engagement\Models\EngagementFile;
 use App\Http\Controllers\Controller;
+use Illuminate\Http\RedirectResponse;
 
 class EngagementFileDownloadController extends Controller
 {
     /**
      * Handle the incoming request.
      */
-    public function __invoke(EngagementFileDownloadRequest $request, EngagementFile $file)
+    public function __invoke(EngagementFileDownloadRequest $request, EngagementFile $file): RedirectResponse
     {
         return redirect(
             $file->getFirstMedia('file')

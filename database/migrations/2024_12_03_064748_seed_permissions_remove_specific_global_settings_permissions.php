@@ -40,6 +40,9 @@ use Illuminate\Database\Migrations\Migration;
 return new class () extends Migration {
     use CanModifyPermissions;
 
+    /**
+     * @var array<string, string>
+     */
     private array $permissions = [
         'license_settings.manage' => 'License Settings',
         'audit.view_audit_settings' => 'Audit',
@@ -57,6 +60,9 @@ return new class () extends Migration {
         'amazon-s3.manage_s3_settings' => 'Amazon S3',
     ];
 
+    /**
+     * @var array<string>
+     */
     private array $guards = [
         'web',
         'api',

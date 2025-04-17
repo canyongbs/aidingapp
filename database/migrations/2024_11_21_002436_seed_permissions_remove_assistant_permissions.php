@@ -42,6 +42,9 @@ use Illuminate\Support\Facades\DB;
 return new class () extends Migration {
     use CanModifyPermissions;
 
+    /**
+     * @var array<string, string>
+     */
     private array $permissions = [
         'assistant_chat.view-any' => 'Assistant Chat',
         'assistant_chat.create' => 'Assistant Chat',
@@ -86,6 +89,9 @@ return new class () extends Migration {
         'report.access_assistant_settings' => 'Report',
     ];
 
+    /**
+     * @var array<string>
+     */
     private array $guards = [
         'web',
         'api',

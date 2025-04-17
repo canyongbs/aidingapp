@@ -54,6 +54,9 @@ class AssetLocation extends BaseModel implements Auditable
         'name',
     ];
 
+    /**
+     * @return HasMany<Asset, $this>
+     */
     public function assets(): HasMany
     {
         return $this->hasMany(Asset::class, 'location_id');

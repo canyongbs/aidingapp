@@ -44,7 +44,7 @@ enum LicenseType: string implements HasLabel
 {
     case RecruitmentCrm = 'recruitment_crm';
 
-    public function getLabel(): ?string
+    public function getLabel(): string
     {
         return match ($this) {
             LicenseType::RecruitmentCrm => 'Helpdesk',

@@ -346,7 +346,7 @@ class UserChat extends Page implements HasForms, HasActions
                 $this->conversation->is_private_channel = $data['is_private'];
                 $this->conversation->save();
 
-                collect($data['managers'])
+                collect((array) $data['managers'])
                     ->each(fn (string $id) => app(PromoteUserToChannelManager::class)(user: User::find($id), conversation: $this->conversation));
 
                 $this->conversation->managers()

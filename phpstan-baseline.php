@@ -48,12 +48,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/alert/src/Filament/Resources/AlertResource/Pages/ListAlerts.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Using nullsafe method call on non\\-nullable type Illuminate\\\\Database\\\\Eloquent\\\\Collection\\<int, AidingApp\\\\Notification\\\\Models\\\\Subscription\\>\\. Use \\-\\> instead\\.$#',
-    'identifier' => 'nullsafe.neverNull',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/alert/src/Listeners/NotifySubscribersOfAlertCreated.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Instanceof between AidingApp\\\\Contact\\\\Models\\\\Contact and AidingApp\\\\Notification\\\\Models\\\\Contracts\\\\Subscribable will always evaluate to true\\.$#',
     'identifier' => 'instanceof.alwaysTrue',
     'count' => 1,
@@ -102,12 +96,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/alert/src/Observers/AlertObserver.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Using nullsafe method call on non\\-nullable type AidingApp\\\\Contact\\\\Models\\\\Contact\\. Use \\-\\> instead\\.$#',
-    'identifier' => 'nullsafe.neverNull',
-    'count' => 5,
-    'path' => __DIR__ . '/app-modules/alert/src/Policies/AlertPolicy.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\Alert\\\\Rules\\\\ConcernIdExistsRule\\:\\:setData\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#',
     'identifier' => 'missingType.iterableValue',
     'count' => 1,
@@ -142,12 +130,6 @@ $ignoreErrors[] = [
     'identifier' => 'missingType.generics',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/audit/src/Filament/Actions/AuditDetachAction.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\Audit\\\\Models\\\\Audit\\:\\:prunable\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/audit/src/Models/Audit.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Access to an undefined property OwenIt\\\\Auditing\\\\Contracts\\\\Auditable\\:\\:\\$auditCustomNew\\.$#',
@@ -282,20 +264,14 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/audit/tests/AuditTraitUsageTest.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\Authorization\\\\Enums\\\\LicenseType\\:\\:getLabel\\(\\) never returns null so it can be removed from the return type\\.$#',
-    'identifier' => 'return.unusedType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/authorization/src/Enums/LicenseType.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Call to method getMail\\(\\) on an unknown class AidingApp\\\\Authorization\\\\Enums\\\\User\\.$#',
-    'identifier' => 'class.notFound',
+    'message' => '#^Call to an undefined method App\\\\Models\\\\User\\:\\:getMail\\(\\)\\.$#',
+    'identifier' => 'method.notFound',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/authorization/src/Enums/SocialiteProvider.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Call to method getPrincipalName\\(\\) on an unknown class AidingApp\\\\Authorization\\\\Enums\\\\User\\.$#',
-    'identifier' => 'class.notFound',
+    'message' => '#^Call to an undefined method App\\\\Models\\\\User\\:\\:getPrincipalName\\(\\)\\.$#',
+    'identifier' => 'method.notFound',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/authorization/src/Enums/SocialiteProvider.php',
 ];
@@ -308,12 +284,6 @@ $ignoreErrors[] = [
 $ignoreErrors[] = [
     'message' => '#^Match arm comparison between AidingApp\\\\Authorization\\\\Enums\\\\AzureMatchingProperty\\:\\:Mail and AidingApp\\\\Authorization\\\\Enums\\\\AzureMatchingProperty\\:\\:Mail is always true\\.$#',
     'identifier' => 'match.alwaysTrue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/authorization/src/Enums/SocialiteProvider.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var for variable \\$user contains unknown class AidingApp\\\\Authorization\\\\Enums\\\\User\\.$#',
-    'identifier' => 'class.notFound',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/authorization/src/Enums/SocialiteProvider.php',
 ];
@@ -576,24 +546,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/contact/database/factories/OrganizationFactory.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Parameter \\#2 \\$guardName of method Illuminate\\\\Database\\\\Migrations\\\\Migration@anonymous/app\\-modules/contact/database/migrations/2024_06_09_122855_data_seed_permissions_for_organization_module\\.php\\:42\\:\\:deletePermissions\\(\\) expects string, array\\<string\\> given\\.$#',
-    'identifier' => 'argument.type',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contact/database/migrations/2024_06_09_122855_data_seed_permissions_for_organization_module.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#2 \\$guardName of method Illuminate\\\\Database\\\\Migrations\\\\Migration@anonymous/app\\-modules/contact/database/migrations/2024_06_09_124416_data_seed_permissions_for_organization_type_module\\.php\\:42\\:\\:deletePermissions\\(\\) expects string, array\\<string\\> given\\.$#',
-    'identifier' => 'argument.type',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contact/database/migrations/2024_06_09_124416_data_seed_permissions_for_organization_type_module.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#2 \\$guardName of method Illuminate\\\\Database\\\\Migrations\\\\Migration@anonymous/app\\-modules/contact/database/migrations/2024_06_09_124444_data_seed_permissions_for_organization_industry_module\\.php\\:42\\:\\:deletePermissions\\(\\) expects string, array\\<string\\> given\\.$#',
-    'identifier' => 'argument.type',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contact/database/migrations/2024_06_09_124444_data_seed_permissions_for_organization_industry_module.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Access to an undefined property Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:\\$email\\.$#',
     'identifier' => 'property.notFound',
     'count' => 1,
@@ -748,18 +700,6 @@ $ignoreErrors[] = [
     'identifier' => 'staticClassAccess.privateMethod',
     'count' => 2,
     'path' => __DIR__ . '/app-modules/contact/src/Filament/Resources/ContactResource/Pages/ManageContactFiles.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\Contact\\\\Filament\\\\Resources\\\\ContactResource\\\\RelationManagers\\\\AssetCheckInRelationManager\\:\\:renderInfolist\\(\\) return type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contact/src/Filament/Resources/ContactResource/RelationManagers/AssetCheckInRelationManager.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\Contact\\\\Filament\\\\Resources\\\\ContactResource\\\\RelationManagers\\\\AssetCheckOutRelationManager\\:\\:renderInfolist\\(\\) return type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contact/src/Filament/Resources/ContactResource/RelationManagers/AssetCheckOutRelationManager.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Access to an undefined property Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:\\$sent_at\\.$#',
@@ -960,12 +900,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/contact/src/Models/OrganizationType.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Using nullsafe property access on non\\-nullable type AidingApp\\\\Contact\\\\Models\\\\ContactSource\\. Use \\-\\> instead\\.$#',
-    'identifier' => 'nullsafe.neverNull',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contact/src/Observers/ContactObserver.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Call to method call\\(\\) on an unknown class static\\.$#',
     'identifier' => 'class.notFound',
     'count' => 1,
@@ -1152,24 +1086,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/contract-management/database/factories/ContractTypeFactory.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Parameter \\#2 \\$guardName of method Illuminate\\\\Database\\\\Migrations\\\\Migration@anonymous/app\\-modules/contract\\-management/database/migrations/2024_11_26_170828_seed_permissions_for_contract\\.php\\:42\\:\\:deletePermissions\\(\\) expects string, array given\\.$#',
-    'identifier' => 'argument.type',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contract-management/database/migrations/2024_11_26_170828_seed_permissions_for_contract.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Property Illuminate\\\\Database\\\\Migrations\\\\Migration@anonymous/app\\-modules/contract\\-management/database/migrations/2024_11_26_170828_seed_permissions_for_contract\\.php\\:42\\:\\:\\$guards type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contract-management/database/migrations/2024_11_26_170828_seed_permissions_for_contract.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Property Illuminate\\\\Database\\\\Migrations\\\\Migration@anonymous/app\\-modules/contract\\-management/database/migrations/2024_11_26_170828_seed_permissions_for_contract\\.php\\:42\\:\\:\\$permissions type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contract-management/database/migrations/2024_11_26_170828_seed_permissions_for_contract.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\ContractManagement\\\\Enums\\\\ContractStatus\\:\\:getStatus\\(\\) has parameter \\$endDate with no type specified\\.$#',
     'identifier' => 'missingType.parameter',
     'count' => 1,
@@ -1270,18 +1186,6 @@ $ignoreErrors[] = [
     'identifier' => 'return.type',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/division/src/Models/Division.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Call to an undefined method Illuminate\\\\Database\\\\Schema\\\\ForeignKeyDefinition\\:\\:unique\\(\\)\\.$#',
-    'identifier' => 'method.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/engagement/database/migrations/2023_08_17_183840_create_engagement_deliverables_table.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Call to an undefined method Illuminate\\\\Database\\\\Schema\\\\ForeignKeyDefinition\\:\\:unique\\(\\)\\.$#',
-    'identifier' => 'method.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/engagement/database/migrations/2025_03_06_200002_drop_engagement_deliverables_table.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Call to an undefined method App\\\\Models\\\\Contracts\\\\Educatable\\:\\:notify\\(\\)\\.$#',
@@ -1452,12 +1356,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/engagement/src/Filament/Resources/EngagementResponseResource/Pages/ViewEngagementResponse.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\Engagement\\\\Http\\\\Controllers\\\\EngagementFileDownloadController\\:\\:__invoke\\(\\) has no return type specified\\.$#',
-    'identifier' => 'missingType.return',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/engagement/src/Http/Controllers/EngagementFileDownloadController.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Call to an undefined method App\\\\Models\\\\Contracts\\\\Educatable\\:\\:notifyNow\\(\\)\\.$#',
     'identifier' => 'method.notFound',
     'count' => 1,
@@ -1494,26 +1392,8 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/engagement/src/Jobs/ProcessSesS3InboundEmail.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\Engagement\\\\Models\\\\EmailTemplate\\:\\:user\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/engagement/src/Models/EmailTemplate.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Call to an undefined method App\\\\Models\\\\Contracts\\\\Educatable\\:\\:getAttribute\\(\\)\\.$#',
-    'identifier' => 'method.notFound',
-    'count' => 2,
-    'path' => __DIR__ . '/app-modules/engagement/src/Models/Engagement.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Call to an undefined method Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:orderedEngagements\\(\\)\\.$#',
     'identifier' => 'method.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/engagement/src/Models/Engagement.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\Engagement\\\\Models\\\\Engagement\\:\\:getMergeData\\(\\) return type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/engagement/src/Models/Engagement.php',
 ];
@@ -1660,12 +1540,6 @@ $ignoreErrors[] = [
     'identifier' => 'property.notFound',
     'count' => 2,
     'path' => __DIR__ . '/app-modules/engagement/tests/Jobs/CreateBatchedEngagementTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\Form\\\\Actions\\\\GenerateFormKitSchema\\:\\:__invoke\\(\\) return type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/form/src/Actions/GenerateFormKitSchema.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\Form\\\\Actions\\\\GenerateFormKitSchema\\:\\:content\\(\\) has parameter \\$blocks with no value type specified in iterable type array\\.$#',
@@ -1900,12 +1774,6 @@ $ignoreErrors[] = [
     'identifier' => 'offsetAccess.notFound',
     'count' => 2,
     'path' => __DIR__ . '/app-modules/form/src/Filament/Blocks/RadioFormFieldBlock.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\Form\\\\Filament\\\\Blocks\\\\SelectFormFieldBlock\\:\\:fields\\(\\) return type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/form/src/Filament/Blocks/SelectFormFieldBlock.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Offset \'options\' does not exist on string\\.$#',
@@ -2172,18 +2040,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/in-app-communication/src/Filament/Pages/UserChat.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Unable to resolve the template type TKey in call to function collect$#',
-    'identifier' => 'argument.templateType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/in-app-communication/src/Filament/Pages/UserChat.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Unable to resolve the template type TValue in call to function collect$#',
-    'identifier' => 'argument.templateType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/in-app-communication/src/Filament/Pages/UserChat.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Parameter \\#1 \\$components of method Filament\\\\Panel\\:\\:livewireComponents\\(\\) expects array\\<string, class\\-string\\<Livewire\\\\Component\\>\\>, array\\{\'AidingApp\\\\\\\\InAppCommunication\\\\\\\\Livewire\\\\\\\\ChatNotifications\'\\} given\\.$#',
     'identifier' => 'argument.type',
     'count' => 1,
@@ -2218,18 +2074,6 @@ $ignoreErrors[] = [
     'identifier' => 'missingType.generics',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/in-app-communication/src/Models/TwilioConversation.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\InAppCommunication\\\\Models\\\\TwilioConversationUser\\:\\:conversation\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/in-app-communication/src/Models/TwilioConversationUser.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\InAppCommunication\\\\Models\\\\TwilioConversationUser\\:\\:user\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/in-app-communication/src/Models/TwilioConversationUser.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Property AidingApp\\\\InAppCommunication\\\\Models\\\\IdeHelperTwilioConversationUser\\:\\:\\$last_read_at \\(Carbon\\\\CarbonImmutable\\|null\\) does not accept Illuminate\\\\Support\\\\Carbon\\.$#',
@@ -2316,18 +2160,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/integration-aws-ses-event-handling/src/Http/Controllers/AwsSesInboundWebhookController.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\IntegrationAwsSesEventHandling\\\\Providers\\\\IntegrationAwsSesEventHandlingServiceProvider\\:\\:boot\\(\\) has no return type specified\\.$#',
-    'identifier' => 'missingType.return',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/integration-aws-ses-event-handling/src/Providers/IntegrationAwsSesEventHandlingServiceProvider.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\IntegrationAwsSesEventHandling\\\\Settings\\\\SesSettings\\:\\:encrypted\\(\\) return type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/integration-aws-ses-event-handling/src/Settings/SesSettings.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Access to property \\$mail on an unknown class TenantConfig\\.$#',
     'identifier' => 'class.notFound',
     'count' => 8,
@@ -2352,48 +2184,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/integration-aws-ses-event-handling/tests/Unit/SesConfigurationSetTest.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\IntegrationGoogleAnalytics\\\\Providers\\\\IntegrationGoogleAnalyticsServiceProvider\\:\\:boot\\(\\) has no return type specified\\.$#',
-    'identifier' => 'missingType.return',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/integration-google-analytics/src/Providers/IntegrationGoogleAnalyticsServiceProvider.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\IntegrationGoogleRecaptcha\\\\Providers\\\\IntegrationGoogleRecaptchaServiceProvider\\:\\:boot\\(\\) has no return type specified\\.$#',
-    'identifier' => 'missingType.return',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/integration-google-recaptcha/src/Providers/IntegrationGoogleRecaptchaServiceProvider.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\IntegrationGoogleRecaptcha\\\\Settings\\\\GoogleRecaptchaSettings\\:\\:encrypted\\(\\) return type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/integration-google-recaptcha/src/Settings/GoogleRecaptchaSettings.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\IntegrationMicrosoftClarity\\\\Providers\\\\IntegrationMicrosoftClarityServiceProvider\\:\\:boot\\(\\) has no return type specified\\.$#',
-    'identifier' => 'missingType.return',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/integration-microsoft-clarity/src/Providers/IntegrationMicrosoftClarityServiceProvider.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\IntegrationTwilio\\\\Settings\\\\TwilioSettings\\:\\:encrypted\\(\\) return type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/integration-twilio/src/Settings/TwilioSettings.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Variable \\$senderModel in PHPDoc tag @var does not match assigned variable \\$checkedInFromModel\\.$#',
-    'identifier' => 'varTag.differentVariable',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/database/factories/AssetCheckInFactory.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Variable \\$senderModel in PHPDoc tag @var does not match assigned variable \\$checkedOutToModel\\.$#',
-    'identifier' => 'varTag.differentVariable',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/database/factories/AssetCheckOutFactory.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Call to an undefined method Faker\\\\Generator\\:\\:catchPhrase\\(\\)\\.$#',
     'identifier' => 'method.notFound',
     'count' => 1,
@@ -2412,40 +2202,10 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/inventory-management/database/factories/MaintenanceActivityFactory.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Database\\\\Seeders\\\\AssetSeeder\\:\\:metadataSeeders\\(\\) return type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/database/seeders/AssetSeeder.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Enums\\\\AssetCheckOutStatus\\:\\:getLabel\\(\\) never returns null so it can be removed from the return type\\.$#',
-    'identifier' => 'return.unusedType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/src/Enums/AssetCheckOutStatus.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Enums\\\\MaintenanceActivityStatus\\:\\:getLabel\\(\\) never returns null so it can be removed from the return type\\.$#',
-    'identifier' => 'return.unusedType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/src/Enums/MaintenanceActivityStatus.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Enums\\\\SystemAssetStatusClassification\\:\\:getLabel\\(\\) never returns null so it can be removed from the return type\\.$#',
-    'identifier' => 'return.unusedType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/src/Enums/SystemAssetStatusClassification.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Match expression does not handle remaining value\\: mixed$#',
     'identifier' => 'match.unhandled',
     'count' => 2,
     'path' => __DIR__ . '/app-modules/inventory-management/src/Filament/Actions/CheckOutAssetHeaderAction.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Filament\\\\Resources\\\\AssetCheckInResource\\\\Components\\\\AssetCheckInViewAction\\:\\:renderInfolist\\(\\) return type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/src/Filament/Resources/AssetCheckInResource/Components/AssetCheckInViewAction.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^PHPDoc tag @var for variable \\$resource contains unresolvable type\\.$#',
@@ -2458,18 +2218,6 @@ $ignoreErrors[] = [
     'identifier' => 'varTag.nativeType',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/inventory-management/src/Filament/Resources/AssetCheckInResource/Pages/EditAssetCheckIn.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Filament\\\\Resources\\\\AssetCheckInResource\\\\Pages\\\\ViewAssetCheckIn\\:\\:renderInfolist\\(\\) return type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/src/Filament/Resources/AssetCheckInResource/Pages/ViewAssetCheckIn.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Filament\\\\Resources\\\\AssetCheckOutResource\\\\Components\\\\AssetCheckOutViewAction\\:\\:renderInfolist\\(\\) return type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/src/Filament/Resources/AssetCheckOutResource/Components/AssetCheckOutViewAction.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^PHPDoc tag @var for variable \\$resource contains unresolvable type\\.$#',
@@ -2490,18 +2238,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/inventory-management/src/Filament/Resources/AssetCheckOutResource/Pages/ListAssetCheckOuts.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Filament\\\\Resources\\\\AssetCheckOutResource\\\\Pages\\\\ViewAssetCheckOut\\:\\:renderInfolist\\(\\) return type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/src/Filament/Resources/AssetCheckOutResource/Pages/ViewAssetCheckOut.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Property AidingApp\\\\InventoryManagement\\\\Filament\\\\Resources\\\\AssetResource\\\\Pages\\\\AssetTimeline\\:\\:\\$modelsToTimeline type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/src/Filament/Resources/AssetResource/Pages/AssetTimeline.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Filament\\\\Resources\\\\AssetResource\\\\Pages\\\\ManageAssetMaintenanceActivity\\:\\:managers\\(\\) return type has no value type specified in iterable type array\\.$#',
     'identifier' => 'missingType.iterableValue',
     'count' => 1,
@@ -2514,24 +2250,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/inventory-management/src/Filament/Resources/AssetResource/Pages/ManageAssetMaintenanceActivity.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Filament\\\\Resources\\\\MaintenanceActivityResource\\\\MaintenanceActivityViewAction\\:\\:renderInfolist\\(\\) return type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/src/Filament/Resources/MaintenanceActivityResource/MaintenanceActivityViewAction.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Models\\\\Asset\\:\\:checkIns\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/src/Models/Asset.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Models\\\\Asset\\:\\:checkOuts\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/src/Models/Asset.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Models\\\\Asset\\:\\:latestCheckIn\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasOne does not specify its types\\: TRelatedModel, TDeclaringModel$#',
     'identifier' => 'missingType.generics',
     'count' => 1,
@@ -2539,18 +2257,6 @@ $ignoreErrors[] = [
 ];
 $ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Models\\\\Asset\\:\\:latestCheckOut\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasOne does not specify its types\\: TRelatedModel, TDeclaringModel$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/src/Models/Asset.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Models\\\\Asset\\:\\:location\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/src/Models/Asset.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Models\\\\Asset\\:\\:maintenanceActivities\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#',
     'identifier' => 'missingType.generics',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/inventory-management/src/Models/Asset.php',
@@ -2574,18 +2280,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/inventory-management/src/Models/Asset.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Models\\\\Asset\\:\\:status\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/src/Models/Asset.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Models\\\\Asset\\:\\:type\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/src/Models/Asset.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Using nullsafe property access on non\\-nullable type AidingApp\\\\InventoryManagement\\\\Models\\\\AssetCheckOut\\. Use \\-\\> instead\\.$#',
     'identifier' => 'nullsafe.neverNull',
     'count' => 1,
@@ -2594,18 +2288,6 @@ $ignoreErrors[] = [
 $ignoreErrors[] = [
     'message' => '#^Call to an undefined method Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:checkIns\\(\\)\\.$#',
     'identifier' => 'method.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/src/Models/AssetCheckIn.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Models\\\\AssetCheckIn\\:\\:asset\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/src/Models/AssetCheckIn.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Models\\\\AssetCheckIn\\:\\:checkOut\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasOne does not specify its types\\: TRelatedModel, TDeclaringModel$#',
-    'identifier' => 'missingType.generics',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/inventory-management/src/Models/AssetCheckIn.php',
 ];
@@ -2640,26 +2322,8 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/inventory-management/src/Models/AssetCheckIn.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Models\\\\AssetCheckIn\\:\\:timelineRecord\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\MorphOne does not specify its types\\: TRelatedModel, TDeclaringModel$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/src/Models/AssetCheckIn.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Call to an undefined method Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:checkOuts\\(\\)\\.$#',
     'identifier' => 'method.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/src/Models/AssetCheckOut.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Models\\\\AssetCheckOut\\:\\:asset\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/src/Models/AssetCheckOut.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Models\\\\AssetCheckOut\\:\\:checkIn\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#',
-    'identifier' => 'missingType.generics',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/inventory-management/src/Models/AssetCheckOut.php',
 ];
@@ -2712,18 +2376,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/inventory-management/src/Models/AssetCheckOut.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Models\\\\AssetCheckOut\\:\\:timelineRecord\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\MorphOne does not specify its types\\: TRelatedModel, TDeclaringModel$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/src/Models/AssetCheckOut.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Models\\\\AssetLocation\\:\\:assets\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/src/Models/AssetLocation.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Models\\\\AssetLocation\\:\\:newBelongsToMany\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsToMany\\<TRelatedModel of Illuminate\\\\Database\\\\Eloquent\\\\Model, TDeclaringModel of Illuminate\\\\Database\\\\Eloquent\\\\Model\\> but returns AidingApp\\\\Audit\\\\Overrides\\\\BelongsToMany\\.$#',
     'identifier' => 'return.type',
     'count' => 1,
@@ -2736,12 +2388,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/inventory-management/src/Models/AssetLocation.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Models\\\\AssetStatus\\:\\:assets\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/src/Models/AssetStatus.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Models\\\\AssetStatus\\:\\:newBelongsToMany\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsToMany\\<TRelatedModel of Illuminate\\\\Database\\\\Eloquent\\\\Model, TDeclaringModel of Illuminate\\\\Database\\\\Eloquent\\\\Model\\> but returns AidingApp\\\\Audit\\\\Overrides\\\\BelongsToMany\\.$#',
     'identifier' => 'return.type',
     'count' => 1,
@@ -2752,12 +2398,6 @@ $ignoreErrors[] = [
     'identifier' => 'return.type',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/inventory-management/src/Models/AssetStatus.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Models\\\\AssetType\\:\\:assets\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/src/Models/AssetType.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Models\\\\AssetType\\:\\:newBelongsToMany\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsToMany\\<TRelatedModel of Illuminate\\\\Database\\\\Eloquent\\\\Model, TDeclaringModel of Illuminate\\\\Database\\\\Eloquent\\\\Model\\> but returns AidingApp\\\\Audit\\\\Overrides\\\\BelongsToMany\\.$#',
@@ -2778,19 +2418,7 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/inventory-management/src/Models/MaintenanceActivity.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Models\\\\MaintenanceActivity\\:\\:asset\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/src/Models/MaintenanceActivity.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Models\\\\MaintenanceActivity\\:\\:getTimelineData\\(\\) return type with generic class Illuminate\\\\Support\\\\Collection does not specify its types\\: TKey, TValue$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/src/Models/MaintenanceActivity.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Models\\\\MaintenanceActivity\\:\\:maintenanceProvider\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#',
     'identifier' => 'missingType.generics',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/inventory-management/src/Models/MaintenanceActivity.php',
@@ -2806,18 +2434,6 @@ $ignoreErrors[] = [
     'identifier' => 'return.type',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/inventory-management/src/Models/MaintenanceActivity.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Models\\\\MaintenanceActivity\\:\\:timelineRecord\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\MorphOne does not specify its types\\: TRelatedModel, TDeclaringModel$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/src/Models/MaintenanceActivity.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Models\\\\MaintenanceProvider\\:\\:maintenanceActivities\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/src/Models/MaintenanceProvider.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Models\\\\MaintenanceProvider\\:\\:newBelongsToMany\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsToMany\\<TRelatedModel of Illuminate\\\\Database\\\\Eloquent\\\\Model, TDeclaringModel of Illuminate\\\\Database\\\\Eloquent\\\\Model\\> but returns AidingApp\\\\Audit\\\\Overrides\\\\BelongsToMany\\.$#',
@@ -2836,48 +2452,6 @@ $ignoreErrors[] = [
     'identifier' => 'missingType.generics',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/inventory-management/src/Models/Scopes/ClassifiedAs.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Policies\\\\AssetCheckInPolicy\\:\\:requiredFeatures\\(\\) return type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/src/Policies/AssetCheckInPolicy.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Policies\\\\AssetCheckOutPolicy\\:\\:requiredFeatures\\(\\) return type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/src/Policies/AssetCheckOutPolicy.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Policies\\\\AssetLocationPolicy\\:\\:requiredFeatures\\(\\) return type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/src/Policies/AssetLocationPolicy.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Policies\\\\AssetPolicy\\:\\:requiredFeatures\\(\\) return type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/src/Policies/AssetPolicy.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Policies\\\\AssetStatusPolicy\\:\\:requiredFeatures\\(\\) return type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/src/Policies/AssetStatusPolicy.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Policies\\\\AssetTypePolicy\\:\\:requiredFeatures\\(\\) return type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/src/Policies/AssetTypePolicy.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Providers\\\\InventoryManagementServiceProvider\\:\\:boot\\(\\) has no return type specified\\.$#',
-    'identifier' => 'missingType.return',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/src/Providers/InventoryManagementServiceProvider.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\KnowledgeBase\\\\Database\\\\Factories\\\\KnowledgeBaseCategoryFactory\\:\\:icons\\(\\) return type has no value type specified in iterable type array\\.$#',
@@ -4388,12 +3962,6 @@ $ignoreErrors[] = [
 $ignoreErrors[] = [
     'message' => '#^Access to an undefined property AidingApp\\\\Form\\\\Models\\\\Submissible\\:\\:\\$type\\.$#',
     'identifier' => 'property.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Actions/GenerateServiceRequestFormKitSchema.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\ServiceManagement\\\\Actions\\\\GenerateServiceRequestFormKitSchema\\:\\:__invoke\\(\\) return type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/service-management/src/Actions/GenerateServiceRequestFormKitSchema.php',
 ];
@@ -7314,12 +6882,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app/DataTransferObjects/Casts/DataCast.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Method App\\\\DataTransferObjects\\\\LicenseManagement\\\\LicenseLimitsData\\:\\:getResetWindow\\(\\) return type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app/DataTransferObjects/LicenseManagement/LicenseLimitsData.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Method App\\\\Filament\\\\Forms\\\\Components\\\\EducatableSelect\\:\\:getRelationship\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\MorphTo does not specify its types\\: TRelatedModel, TDeclaringModel$#',
     'identifier' => 'missingType.generics',
     'count' => 1,
@@ -8316,18 +7878,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/database/factories/ProgramFactory.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Parameter \\#2 \\$guardName of method Illuminate\\\\Database\\\\Migrations\\\\Migration@anonymous/database/migrations/2024_05_15_200656_seed_permissions_for_tags\\.php\\:42\\:\\:deletePermissions\\(\\) expects string, array\\<string\\> given\\.$#',
-    'identifier' => 'argument.type',
-    'count' => 1,
-    'path' => __DIR__ . '/database/migrations/2024_05_15_200656_seed_permissions_for_tags.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#2 \\$guardName of method Illuminate\\\\Database\\\\Migrations\\\\Migration@anonymous/database/migrations/2024_06_07_094732_seed_permissions_add_report_library\\.php\\:42\\:\\:deletePermissions\\(\\) expects string, array\\<string\\> given\\.$#',
-    'identifier' => 'argument.type',
-    'count' => 1,
-    'path' => __DIR__ . '/database/migrations/2024_06_07_094732_seed_permissions_add_report_library.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Left side of && is always true\\.$#',
     'identifier' => 'booleanAnd.leftAlwaysTrue',
     'count' => 1,
@@ -8364,100 +7914,10 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/database/migrations/2024_08_01_175631_data_fix_image_ids_in_tiptap_content.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Parameter \\#2 \\$guardName of method Illuminate\\\\Database\\\\Migrations\\\\Migration@anonymous/database/migrations/2024_11_19_165344_seed_permissions_for_product_admin\\.php\\:42\\:\\:deletePermissions\\(\\) expects string, array given\\.$#',
-    'identifier' => 'argument.type',
-    'count' => 1,
-    'path' => __DIR__ . '/database/migrations/2024_11_19_165344_seed_permissions_for_product_admin.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Property Illuminate\\\\Database\\\\Migrations\\\\Migration@anonymous/database/migrations/2024_11_19_165344_seed_permissions_for_product_admin\\.php\\:42\\:\\:\\$guards type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/database/migrations/2024_11_19_165344_seed_permissions_for_product_admin.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Property Illuminate\\\\Database\\\\Migrations\\\\Migration@anonymous/database/migrations/2024_11_19_165344_seed_permissions_for_product_admin\\.php\\:42\\:\\:\\$permissions type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/database/migrations/2024_11_19_165344_seed_permissions_for_product_admin.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Property Illuminate\\\\Database\\\\Migrations\\\\Migration@anonymous/database/migrations/2024_11_21_002436_seed_permissions_remove_assistant_permissions\\.php\\:42\\:\\:\\$guards type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/database/migrations/2024_11_21_002436_seed_permissions_remove_assistant_permissions.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Property Illuminate\\\\Database\\\\Migrations\\\\Migration@anonymous/database/migrations/2024_11_21_002436_seed_permissions_remove_assistant_permissions\\.php\\:42\\:\\:\\$permissions type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/database/migrations/2024_11_21_002436_seed_permissions_remove_assistant_permissions.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Property Illuminate\\\\Database\\\\Migrations\\\\Migration@anonymous/database/migrations/2024_12_03_064748_seed_permissions_remove_specific_global_settings_permissions\\.php\\:40\\:\\:\\$guards type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/database/migrations/2024_12_03_064748_seed_permissions_remove_specific_global_settings_permissions.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Property Illuminate\\\\Database\\\\Migrations\\\\Migration@anonymous/database/migrations/2024_12_03_064748_seed_permissions_remove_specific_global_settings_permissions\\.php\\:40\\:\\:\\$permissions type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/database/migrations/2024_12_03_064748_seed_permissions_remove_specific_global_settings_permissions.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Property Illuminate\\\\Database\\\\Migrations\\\\Migration@anonymous/database/migrations/2024_12_09_162908_seed_permissions_delete_unused_product_administration_permissions\\.php\\:42\\:\\:\\$guards type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/database/migrations/2024_12_09_162908_seed_permissions_delete_unused_product_administration_permissions.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Property Illuminate\\\\Database\\\\Migrations\\\\Migration@anonymous/database/migrations/2024_12_09_162908_seed_permissions_delete_unused_product_administration_permissions\\.php\\:42\\:\\:\\$permissions type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/database/migrations/2024_12_09_162908_seed_permissions_delete_unused_product_administration_permissions.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Property Illuminate\\\\Database\\\\Migrations\\\\Migration@anonymous/database/migrations/2025_01_21_111815_seed_permissions_delete_view_product_health_dashboard_permissions\\.php\\:40\\:\\:\\$guards type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/database/migrations/2025_01_21_111815_seed_permissions_delete_view_product_health_dashboard_permissions.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Property Illuminate\\\\Database\\\\Migrations\\\\Migration@anonymous/database/migrations/2025_01_21_111815_seed_permissions_delete_view_product_health_dashboard_permissions\\.php\\:40\\:\\:\\$permissions type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/database/migrations/2025_01_21_111815_seed_permissions_delete_view_product_health_dashboard_permissions.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Property Illuminate\\\\Database\\\\Migrations\\\\Migration@anonymous/database/migrations/2025_03_19_123414_seed_permission_delete_user_view_email_permission\\.php\\:40\\:\\:\\$guards type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/database/migrations/2025_03_19_123414_seed_permission_delete_user_view_email_permission.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Property Illuminate\\\\Database\\\\Migrations\\\\Migration@anonymous/database/migrations/2025_03_19_123414_seed_permission_delete_user_view_email_permission\\.php\\:40\\:\\:\\$permissions type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/database/migrations/2025_03_19_123414_seed_permission_delete_user_view_email_permission.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Trait Database\\\\Migrations\\\\Concerns\\\\CanModifySettings is used zero times and is not analysed\\.$#',
     'identifier' => 'trait.unused',
     'count' => 1,
     'path' => __DIR__ . '/database/migrations/Concerns/CanModifySettings.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Unable to resolve the template type TKey in call to function collect$#',
-    'identifier' => 'argument.templateType',
-    'count' => 2,
-    'path' => __DIR__ . '/database/seeders/LocalDevelopmentSeeder.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Unable to resolve the template type TValue in call to function collect$#',
-    'identifier' => 'argument.templateType',
-    'count' => 2,
-    'path' => __DIR__ . '/database/seeders/LocalDevelopmentSeeder.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Call to method call\\(\\) on an unknown class static\\.$#',
