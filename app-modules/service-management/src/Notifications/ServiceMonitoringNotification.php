@@ -59,15 +59,16 @@ class ServiceMonitoringNotification extends Notification
 
     public function toMail(User $notifiable): MailMessage
     {
-          return MailMessage::make()
+        return MailMessage::make()
             ->settings(null)
             ->subject('Alert: Service Check Failure for [' . $this->serviceMonitoringTarget->name . '] ([' . $this->serviceMonitoringTarget->domain . '])')
-            ->markdown('service-management::mail.service-monitoring-mail', 
-            [
-              'historicalServiceMonitoring' => $this->historicalServiceMonitoring,
-              'serviceMonitoringTarget' => $this->serviceMonitoringTarget,
-              'user' => $notifiable,
-            ]);
+            ->markdown(
+                'service-management::mail.service-monitoring-mail',
+                [
+                    'historicalServiceMonitoring' => $this->historicalServiceMonitoring,
+                    'serviceMonitoringTarget' => $this->serviceMonitoringTarget,
+                    'user' => $notifiable,
+                ]
+            );
     }
-
 }
