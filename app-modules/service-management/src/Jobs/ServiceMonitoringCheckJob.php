@@ -65,7 +65,7 @@ class ServiceMonitoringCheckJob implements ShouldQueue
         try {
             $response = Http::get($this->serviceMonitoringTarget->domain);
 
-            new HistoricalServiceMonitoring([
+            $historicalServiceMonitoring = new HistoricalServiceMonitoring([
                 'response' => $response->status(),
                 'successful' => $response->status() === 200,
                 'service_monitoring_target_id' => $this->serviceMonitoringTarget->id,
@@ -82,10 +82,10 @@ class ServiceMonitoringCheckJob implements ShouldQueue
                     $recipients->concat($users)->unique();
                 });
 
-                $recipients->each(fn ($user) => $user->notify(new ServiceMonitoringNotification()));
+                $recipients->each(fn ($user) => $user->notify(new ServiceMonitoringNotification($historicalServiceMonitoring, $this->serviceMonitoringTarget)));
             }
         } catch (Exception $e) {
-            // ???
+            report($e);
         }
     }
 }
