@@ -35,19 +35,21 @@
 <x-mail::layout :settings="$settings">
     {{-- Header --}}
     <x-slot:header>
-        <x-mail::header :url="config('app.url')" :settings="$settings">
+        <x-mail::header
+            :url="config('app.url')"
+            :settings="$settings"
+        >
             {{ config('app.name') }}
         </x-mail::header>
     </x-slot:header>
 
     {{-- Body --}}
-    
-
 
     {{-- Footer --}}
     <x-slot:footer>
         <x-mail::footer>
-            This email was sent using Aiding App™. <br /> <br /> © 2016-{{ date('Y') }} Canyon GBS LLC. All Rights Reserved. Canyon GBS™ and Aiding App™ are trademarks of Canyon GBS LLC.
+            This email was sent using Aiding App™. <br /> <br /> © 2016-{{ date('Y') }} Canyon GBS LLC. All Rights
+            Reserved. Canyon GBS™ and Aiding App™ are trademarks of Canyon GBS LLC.
         </x-mail::footer>
     </x-slot:footer>
 </x-mail::layout>
