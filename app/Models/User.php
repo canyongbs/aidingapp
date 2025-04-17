@@ -275,12 +275,9 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
         return $this->locale;
     }
 
-    public function teams(): BelongsToMany
+    public function teams(): BelongsTo
     {
-        return $this
-            ->belongsToMany(Team::class, 'team_user', 'user_id', 'team_id')
-            ->using(TeamUser::class)
-            ->withTimestamps();
+        return $this->belongsTo(Team::class);
     }
 
     public function serviceRequestTypeIndividualAssignment(): HasMany
