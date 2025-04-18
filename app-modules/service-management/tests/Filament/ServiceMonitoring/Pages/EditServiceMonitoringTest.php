@@ -35,6 +35,7 @@
 */
 
 use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Pages\EditServiceMonitoring;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
@@ -81,10 +82,20 @@ test('EditServiceMonitoring is gated with proper access control', function () {
         ->call('save')
         ->assertHasNoFormErrors();
 
+        /** @var string $description */
+        $description = $serviceMonitoringTarget->fresh()->description;
+
+        /** @var string $domain */
+        $domain = $serviceMonitoringTarget->fresh()->domain;
+
+        /** @var ServiceMonitoringFrequency $frequency */
+        $frequency = $serviceMonitoringTarget->fresh()->frequency;
+        
+
     expect($serviceMonitoringTarget->fresh()->name)->toEqual($request->get('name'))
-        ->and($serviceMonitoringTarget->fresh()->description)->toEqual($request->get('description'))
-        ->and($serviceMonitoringTarget->fresh()->domain)->toEqual($request->get('domain'))
-        ->and($serviceMonitoringTarget->fresh()->frequency)->toEqual($request->get('frequency'));
+        ->and($description)->toEqual($request->get('description'))
+        ->and($domain)->toEqual($request->get('domain'))
+        ->and($frequency)->toEqual($request->get('frequency'));
 });
 
 test('EditServiceMonitoring validates the inputs', function ($data, $errors) {
