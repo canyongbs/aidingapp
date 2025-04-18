@@ -54,7 +54,7 @@ This is an automated alert from Aiding App.
 <li><b>Domain:</b> {{ $serviceMonitoringTarget->domain }}</li>
 <li><b>Expected HTTP Status:</b> 200</li>
 <li><b>Actual HTTP Status:</b> {{ $historicalServiceMonitoring->response }}</li>
-<li><b>Response Time:</b> {{ $historicalServiceMonitoring->response_time }}</li>
+<li><b>Response Time:</b> {{ $historicalServiceMonitoring->response_time }} seconds</li>
 <li><b>Time of Incident:</b> {{ $historicalServiceMonitoring->created_at }}</li>
 </ul>
 
