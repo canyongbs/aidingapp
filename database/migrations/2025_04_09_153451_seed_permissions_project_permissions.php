@@ -34,39 +34,44 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Models;
+use Database\Migrations\Concerns\CanModifyPermissions;
+use Illuminate\Database\Migrations\Migration;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use App\Models\BaseModel;
-use DateTimeInterface;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use OwenIt\Auditing\Contracts\Auditable;
+return new class () extends Migration {
+    use CanModifyPermissions;
 
-/**
- * @mixin IdeHelperContactSource
- */
-class ContactSource extends BaseModel implements Auditable
-{
-    use HasUuids;
-    use SoftDeletes;
-    use AuditableTrait;
-
-    protected $fillable = [
-        'name',
+    /**
+    * @var array<string, string>
+    */
+    private array $permissions = [
+        'project.view-any' => 'Project',
+        'project.create' => 'Project',
+        'project.*.view' => 'Project',
+        'project.*.update' => 'Project',
+        'project.*.delete' => 'Project',
+        'project.*.restore' => 'Project',
+        'project.*.force-delete' => 'Project',
     ];
 
     /**
-     * @return HasMany<Contact, $this>
-     */
-    public function contacts(): HasMany
+    * @var array<string>
+    */
+    private array $guards = [
+        'web',
+        'api',
+    ];
+
+    public function up(): void
     {
-        return $this->hasMany(Contact::class, 'source_id');
+        collect($this->guards)
+            ->each(function (string $guard) {
+                $this->createPermissions($this->permissions, $guard);
+            });
     }
 
-    protected function serializeDate(DateTimeInterface $date): string
+    public function down(): void
     {
-        return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
+        collect($this->guards)
+            ->each(fn (string $guard) => $this->deletePermissions(array_keys($this->permissions), $guard));
     }
-}
+};

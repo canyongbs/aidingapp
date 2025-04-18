@@ -37,6 +37,7 @@
 namespace AidingApp\Contact\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Contact\Database\Factories\OrganizationIndustryFactory;
 use AidingApp\Contact\Observers\OrganizationIndustryObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -52,7 +53,9 @@ use OwenIt\Auditing\Contracts\Auditable;
 #[ObservedBy([OrganizationIndustryObserver::class])]
 class OrganizationIndustry extends Model implements Auditable
 {
+    /** @use HasFactory<OrganizationIndustryFactory> */
     use HasFactory;
+
     use HasUuids;
     use SoftDeletes;
     use AuditableTrait;
@@ -62,6 +65,9 @@ class OrganizationIndustry extends Model implements Auditable
         'is_default',
     ];
 
+    /**
+     * @return HasMany<Organization, $this>
+     */
     public function organizations(): HasMany
     {
         return $this->hasMany(Organization::class, 'industry_id');

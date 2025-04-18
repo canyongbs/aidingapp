@@ -72,31 +72,49 @@ class Asset extends BaseModel implements Auditable
         'purchase_date' => 'datetime',
     ];
 
+    /**
+     * @return BelongsTo<AssetType, $this>
+     */
     public function type(): BelongsTo
     {
         return $this->belongsTo(AssetType::class, 'type_id');
     }
 
+    /**
+     * @return BelongsTo<AssetLocation, $this>
+     */
     public function location(): BelongsTo
     {
         return $this->belongsTo(AssetLocation::class, 'location_id');
     }
 
+    /**
+     * @return BelongsTo<AssetStatus, $this>
+     */
     public function status(): BelongsTo
     {
         return $this->belongsTo(AssetStatus::class, 'status_id');
     }
 
+    /**
+     * @return HasMany<MaintenanceActivity, $this>
+     */
     public function maintenanceActivities(): HasMany
     {
         return $this->hasMany(MaintenanceActivity::class, 'asset_id');
     }
 
+    /**
+     * @return HasMany<AssetCheckOut, $this>
+     */
     public function checkOuts(): HasMany
     {
         return $this->hasMany(AssetCheckOut::class, 'asset_id');
     }
 
+    /**
+     * @return HasMany<AssetCheckIn, $this>
+     */
     public function checkIns(): HasMany
     {
         return $this->hasMany(AssetCheckIn::class, 'asset_id');

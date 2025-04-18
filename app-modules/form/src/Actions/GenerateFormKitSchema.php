@@ -42,6 +42,9 @@ use Illuminate\Database\Eloquent\Collection;
 
 class GenerateFormKitSchema
 {
+    /**
+     * @return array<string, mixed>
+     */
     public function __invoke(Submissible $submissible): array
     {
         return [

@@ -37,6 +37,7 @@
 namespace AidingApp\Form\Filament\Blocks;
 
 use AidingApp\Form\Models\SubmissibleField;
+use Filament\Forms\Components\Component;
 use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\TextInput;
 
@@ -51,6 +52,9 @@ class SelectFormFieldBlock extends FormFieldBlock
         return 'select';
     }
 
+    /**
+     * @return array<Component>
+     */
     public function fields(): array
     {
         return [
@@ -63,6 +67,9 @@ class SelectFormFieldBlock extends FormFieldBlock
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public static function getFormKitSchema(SubmissibleField $field): array
     {
         return [
@@ -75,11 +82,14 @@ class SelectFormFieldBlock extends FormFieldBlock
         ];
     }
 
+    /**
+     * @return array<string>
+     */
     public static function getValidationRules(SubmissibleField $field): array
     {
         return [
             'string',
-            'in:' . collect($field->config['options'])->keys()->join(','),
+            'in:' . collect((array) $field->config['options'])->keys()->join(','),
         ];
     }
 }

@@ -41,15 +41,23 @@ use AidingApp\Alert\Notifications\AlertCreatedNotification;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Notification\Models\Subscription;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Support\Collection;
 
 class NotifySubscribersOfAlertCreated implements ShouldQueue
 {
     public function handle(AlertCreated $event): void
     {
-        /** @var Contact $concern */
+        /** @var ?Contact $concern */
         $concern = $event->alert->concern;
 
-        $concern->subscriptions?->each(function (Subscription $subscription) use ($event) {
+        if (is_null($concern)) {
+            return;
+        }
+
+        /** @var Collection<int, Subscription> $subscriptions */
+        $subscriptions = $concern->subscriptions;
+
+        $subscriptions->each(function (Subscription $subscription) use ($event) {
             $subscription->user->notify(new AlertCreatedNotification($event->alert));
         });
     }

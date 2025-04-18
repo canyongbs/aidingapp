@@ -51,7 +51,7 @@ enum Rounding: string implements HasLabel
 
     case Full = 'full';
 
-    public function getLabel(): ?string
+    public function getLabel(): string
     {
         return Str::title($this->name);
     }

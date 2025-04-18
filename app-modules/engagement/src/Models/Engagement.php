@@ -50,6 +50,7 @@ use AidingApp\Timeline\Models\Timeline;
 use AidingApp\Timeline\Timelines\EngagementTimeline;
 use App\Models\BaseModel;
 use App\Models\Concerns\BelongsToEducatable;
+use App\Models\Contracts\Educatable;
 use App\Models\Scopes\LicensedToEducatable;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
@@ -98,6 +99,9 @@ class Engagement extends BaseModel implements Auditable, CanTriggerAutoSubscript
         'channel' => NotificationChannel::class,
     ];
 
+    /**
+     * @return MorphOne<Timeline, $this>
+     */
     public function timelineRecord(): MorphOne
     {
         return $this->morphOne(Timeline::class, 'timelineable');
@@ -108,21 +112,33 @@ class Engagement extends BaseModel implements Auditable, CanTriggerAutoSubscript
         return new EngagementTimeline($this);
     }
 
+    /**
+     * @return Collection<int, $this>
+     */
     public static function getTimelineData(Model $forModel): Collection
     {
         return $forModel->orderedEngagements()->with(['latestEmailMessage', 'batch'])->get();
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function createdBy(): BelongsTo
     {
         return $this->user();
     }
 
+    /**
+     * @return MorphMany<EmailMessage, $this>
+     */
     public function emailMessages(): MorphMany
     {
         return $this->morphMany(
@@ -134,11 +150,17 @@ class Engagement extends BaseModel implements Auditable, CanTriggerAutoSubscript
         );
     }
 
+    /**
+     * @return MorphOne<EmailMessage, $this>
+     */
     public function latestEmailMessage(): MorphOne
     {
         return $this->morphOne(EmailMessage::class, 'related')->latestOfMany();
     }
 
+    /**
+     * @return MorphTo<Model, $this>
+     */
     public function recipient(): MorphTo
     {
         return $this->morphTo(
@@ -148,21 +170,37 @@ class Engagement extends BaseModel implements Auditable, CanTriggerAutoSubscript
         );
     }
 
+    /**
+     * @return BelongsTo<EngagementBatch, $this>
+     */
     public function engagementBatch(): BelongsTo
     {
         return $this->belongsTo(EngagementBatch::class);
     }
 
+    /**
+     * @return BelongsTo<EngagementBatch, $this>
+     */
     public function batch(): BelongsTo
     {
         return $this->engagementBatch();
     }
 
+    /**
+     * @param Builder<$this> $query
+     *
+     * @return void
+     */
     public function scopeIsNotPartOfABatch(Builder $query): void
     {
         $query->whereNull('engagement_batch_id');
     }
 
+    /**
+     * @param Builder<$this> $query
+     *
+     * @return void
+     */
     public function scopeSentToContact(Builder $query): void
     {
         $query->where('recipient_type', resolve(Contact::class)->getMorphClass());
@@ -183,16 +221,24 @@ class Engagement extends BaseModel implements Auditable, CanTriggerAutoSubscript
         );
     }
 
+    /**
+     * @return array<string, string>
+     */
     public function getMergeData(): array
     {
+        /** @var Contact $contact */
+        $contact = $this->recipient;
+
         return [
-            'contact full name' => $this->recipient->getAttribute($this->recipient->displayNameKey()),
-            'contact email' => $this->recipient->getAttribute($this->recipient->displayEmailKey()),
+            'contact full name' => $contact->getAttribute($contact->displayNameKey()),
+            'contact email' => $contact->getAttribute($contact->displayEmailKey()),
         ];
     }
 
     /**
      * @param class-string $type
+     *
+     * @return array<string>
      */
     public static function getMergeTags(string $type): array
     {

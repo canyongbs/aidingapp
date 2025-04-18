@@ -42,7 +42,7 @@ use Cknow\Money\Money;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends Contract>
+ * @extends Factory<Contract>
  */
 class ContractFactory extends Factory
 {
@@ -63,7 +63,7 @@ class ContractFactory extends Factory
                 (clone $attributes['start_date'])->modify('+1 day'),
                 (clone $attributes['start_date'])->modify('+1 year')
             ),
-            'contract_value' => Money::parseByDecimal(fake()->randomNumber(), config('money.defaultCurrency')),
+            'contract_value' => Money::parseByDecimal((string) fake()->randomNumber(), config('money.defaultCurrency')),
         ];
     }
 }

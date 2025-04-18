@@ -60,7 +60,7 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class BulkEngagementAction
 {
-    public static function make(string $context)
+    public static function make(string $context): BulkAction
     {
         return BulkAction::make('engage')
             ->icon('heroicon-o-chat-bubble-bottom-center-text')

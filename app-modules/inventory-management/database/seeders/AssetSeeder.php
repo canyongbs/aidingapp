@@ -59,6 +59,9 @@ class AssetSeeder extends Seeder
             });
     }
 
+    /**
+     * @return array<class-string>
+     */
     public static function metadataSeeders(): array
     {
         return [

@@ -54,6 +54,9 @@ class AssetType extends BaseModel implements Auditable
         'name',
     ];
 
+    /**
+     * @return HasMany<Asset, $this>
+     */
     public function assets(): HasMany
     {
         return $this->hasMany(Asset::class, 'type_id');

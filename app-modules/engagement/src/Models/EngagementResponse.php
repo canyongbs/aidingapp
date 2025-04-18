@@ -90,6 +90,9 @@ class EngagementResponse extends BaseModel implements Auditable, ProvidesATimeli
         $this->addMediaCollection('attachments');
     }
 
+    /**
+     * @return MorphOne<Timeline, $this>
+     */
     public function timelineRecord(): MorphOne
     {
         return $this->morphOne(Timeline::class, 'timelineable');

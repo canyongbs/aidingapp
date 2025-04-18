@@ -49,6 +49,9 @@ class ContactGrowthChart extends ChartWidget
 
     protected int | string | array $columnSpan = 'full';
 
+    /**
+     * @return array<string,array<string,mixed>>
+     */
     protected function getOptions(): array
     {
         return [

@@ -45,7 +45,7 @@ enum FormSubmissionStatus: string implements HasColor, HasLabel
     case Submitted = 'submitted';
     case Canceled = 'canceled';
 
-    public function getLabel(): ?string
+    public function getLabel(): string
     {
         return $this->name;
     }

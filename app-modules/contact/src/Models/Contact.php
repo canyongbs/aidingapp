@@ -39,6 +39,7 @@ namespace AidingApp\Contact\Models;
 use AidingApp\Alert\Models\Alert;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\Contact\Database\Factories\ContactFactory;
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Observers\ContactObserver;
 use AidingApp\Engagement\Models\Concerns\HasManyMorphedEngagementResponses;
@@ -88,7 +89,10 @@ use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 class Contact extends Authenticatable implements Auditable, Subscribable, Educatable, HasFilamentResource, CanBeNotified
 {
     use AuditableTrait;
+
+    /** @use HasFactory<ContactFactory> */
     use HasFactory;
+
     use HasManyMorphedEngagementResponses;
     use HasManyMorphedEngagements;
     use HasSubscriptions;
@@ -147,11 +151,17 @@ class Contact extends Authenticatable implements Auditable, Subscribable, Educat
         return filled($this->mobile);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function assignedTo(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * @return MorphMany<ServiceRequest, $this>
+     */
     public function serviceRequests(): MorphMany
     {
         return $this->morphMany(
@@ -163,26 +173,41 @@ class Contact extends Authenticatable implements Auditable, Subscribable, Educat
         );
     }
 
+    /**
+     * @return MorphOne<Timeline, $this>
+     */
     public function timeline(): MorphOne
     {
         return $this->morphOne(Timeline::class, 'entity');
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * @return BelongsTo<ContactStatus, $this>
+     */
     public function status(): BelongsTo
     {
         return $this->belongsTo(ContactStatus::class);
     }
 
+    /**
+     * @return BelongsTo<ContactSource, $this>
+     */
     public function source(): BelongsTo
     {
         return $this->belongsTo(ContactSource::class);
     }
 
+    /**
+     * @return MorphToMany<EngagementFile, $this>
+     */
     public function engagementFiles(): MorphToMany
     {
         return $this->morphToMany(
@@ -197,11 +222,17 @@ class Contact extends Authenticatable implements Auditable, Subscribable, Educat
             ->withTimestamps();
     }
 
+    /**
+     * @return HasMany<Task, $this>
+     */
     public function tasks(): HasMany
     {
         return $this->hasMany(Task::class, 'concern_id');
     }
 
+    /**
+     * @return MorphMany<Alert, $this>
+     */
     public function alerts(): MorphMany
     {
         return $this->morphMany(Alert::class, 'concern');
@@ -222,6 +253,9 @@ class Contact extends Authenticatable implements Auditable, Subscribable, Educat
         return ContactResource::class;
     }
 
+    /**
+     * @return MorphToMany<User, $this>
+     */
     public function subscribedUsers(): MorphToMany
     {
         return $this->morphToMany(
@@ -235,6 +269,9 @@ class Contact extends Authenticatable implements Auditable, Subscribable, Educat
             ->tap(new HasLicense($this->getLicenseType()));
     }
 
+    /**
+     * @return MorphMany<AssetCheckIn, $this>
+     */
     public function assetCheckIns(): MorphMany
     {
         return $this->morphMany(
@@ -246,6 +283,9 @@ class Contact extends Authenticatable implements Auditable, Subscribable, Educat
         );
     }
 
+    /**
+     * @return MorphMany<AssetCheckOut, $this>
+     */
     public function assetCheckOuts(): MorphMany
     {
         return $this->morphMany(
@@ -262,16 +302,25 @@ class Contact extends Authenticatable implements Auditable, Subscribable, Educat
         return LicenseType::RecruitmentCrm;
     }
 
+    /**
+     * @return BelongsTo<Organization, $this>
+     */
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class, 'organization_id', 'id');
     }
 
+    /**
+     * @return MorphMany<KnowledgeBaseArticleVote, $this>
+     */
     public function knowledgeBaseArticleVotes(): MorphMany
     {
         return $this->morphMany(KnowledgeBaseArticleVote::class, 'voter');
     }
 
+    /**
+     * @return HasMany<ProductLicense, $this>
+     */
     public function productLicenses(): HasMany
     {
         return $this->hasMany(ProductLicense::class, 'assigned_to');
@@ -298,6 +347,9 @@ class Contact extends Authenticatable implements Auditable, Subscribable, Educat
         return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
     }
 
+    /**
+     * @return Attribute<string, never>
+     */
     protected function displayName(): Attribute
     {
         return Attribute::make(

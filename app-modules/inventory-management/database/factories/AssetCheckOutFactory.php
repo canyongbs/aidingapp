@@ -63,7 +63,7 @@ class AssetCheckOutFactory extends Factory
             'checked_out_to_id' => function (array $attributes) {
                 $checkedOutToClass = Relation::getMorphedModel($attributes['checked_out_to_type']);
 
-                /** @var Contact $senderModel */
+                /** @var Contact $checkedOutToModel */
                 $checkedOutToModel = new $checkedOutToClass();
 
                 $checkedOutToModel = $checkedOutToModel::factory()->create();

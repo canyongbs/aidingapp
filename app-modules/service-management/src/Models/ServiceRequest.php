@@ -41,6 +41,7 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Division\Models\Division;
 use AidingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
 use AidingApp\Notification\Models\Contracts\Subscribable;
+use AidingApp\ServiceManagement\Database\Factories\ServiceRequestFactory;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateDirection;
 use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
@@ -85,6 +86,8 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
     use AuditableTrait;
     use HasRelationships;
     use InteractsWithMedia;
+
+    /** @use HasFactory<ServiceRequestFactory> */
     use HasFactory;
 
     protected $fillable = [
@@ -176,36 +179,57 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
         );
     }
 
+    /**
+     * @return BelongsTo<Division, $this>
+     */
     public function division(): BelongsTo
     {
         return $this->belongsTo(Division::class, 'division_id');
     }
 
+    /**
+     * @return HasMany<ServiceRequestUpdate, $this>
+     */
     public function serviceRequestUpdates(): HasMany
     {
         return $this->hasMany(ServiceRequestUpdate::class, 'service_request_id');
     }
 
+    /**
+     * @return BelongsTo<ServiceRequestStatus, $this>
+     */
     public function status(): BelongsTo
     {
         return $this->belongsTo(ServiceRequestStatus::class)->withTrashed();
     }
 
+    /**
+     * @return BelongsTo<ServiceRequestPriority, $this>
+     */
     public function priority(): BelongsTo
     {
         return $this->belongsTo(ServiceRequestPriority::class);
     }
 
+    /**
+     * @return BelongsTo<ServiceRequestFormSubmission, $this>
+     */
     public function serviceRequestFormSubmission(): BelongsTo
     {
         return $this->belongsTo(ServiceRequestFormSubmission::class, 'service_request_form_submission_id');
     }
 
+    /**
+     * @return HasMany<ServiceRequestAssignment, $this>
+     */
     public function assignments(): HasMany
     {
         return $this->hasMany(ServiceRequestAssignment::class);
     }
 
+    /**
+     * @return HasOne<ServiceRequestAssignment, $this>
+     */
     public function assignedTo(): HasOne
     {
         return $this->hasOne(ServiceRequestAssignment::class)
@@ -213,22 +237,34 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
             ->where('status', ServiceRequestAssignmentStatus::Active);
     }
 
+    /**
+     * @return HasOne<ServiceRequestAssignment, $this>
+     */
     public function initialAssignment(): HasOne
     {
         return $this->hasOne(ServiceRequestAssignment::class)
             ->oldest('assigned_at');
     }
 
+    /**
+     * @return HasMany<ServiceRequestHistory, $this>
+     */
     public function histories(): HasMany
     {
         return $this->hasMany(ServiceRequestHistory::class);
     }
 
+    /**
+     * @return HasOne<ServiceRequestFeedback, $this>
+     */
     public function feedback(): HasOne
     {
         return $this->hasOne(ServiceRequestFeedback::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -242,6 +278,9 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
         );
     }
 
+    /**
+     * @return HasOne<ServiceRequestUpdate, $this>
+     */
     public function latestInboundServiceRequestUpdate(): HasOne
     {
         return $this->hasOne(ServiceRequestUpdate::class, 'service_request_id')
@@ -254,6 +293,9 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
             });
     }
 
+    /**
+     * @return HasOne<ServiceRequestUpdate, $this>
+     */
     public function latestOutboundServiceRequestUpdate(): HasOne
     {
         return $this->hasOne(ServiceRequestUpdate::class, 'service_request_id')
@@ -269,14 +311,14 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
     public function getLatestResponseSeconds(): int
     {
         if (! $this->latestInboundServiceRequestUpdate) {
-            return round($this->created_at->diffInSeconds(now()));
+            return (int) round($this->created_at->diffInSeconds(now()));
         }
 
         if (
             $this->isResolved() &&
             ($resolvedAt = $this->getResolvedAt())->isAfter($this->latestInboundServiceRequestUpdate->created_at)
         ) {
-            return round($resolvedAt->diffInSeconds($this->latestInboundServiceRequestUpdate->created_at));
+            return (int) round($resolvedAt->diffInSeconds($this->latestInboundServiceRequestUpdate->created_at));
         }
 
         if (
@@ -285,21 +327,21 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
                 $this->latestInboundServiceRequestUpdate->created_at,
             )
         ) {
-            return round($this->latestOutboundServiceRequestUpdate->created_at->diffInSeconds(
+            return (int) round($this->latestOutboundServiceRequestUpdate->created_at->diffInSeconds(
                 $this->latestInboundServiceRequestUpdate->created_at,
             ));
         }
 
-        return round($this->latestInboundServiceRequestUpdate->created_at->diffInSeconds());
+        return (int) round($this->latestInboundServiceRequestUpdate->created_at->diffInSeconds());
     }
 
     public function getResolutionSeconds(): int
     {
         if (! $this->isResolved()) {
-            return round($this->created_at->diffInSeconds());
+            return (int) round($this->created_at->diffInSeconds());
         }
 
-        return round($this->created_at->diffInSeconds($this->getResolvedAt()));
+        return (int) round($this->created_at->diffInSeconds($this->getResolvedAt()));
     }
 
     public function getSlaResponseSeconds(): ?int

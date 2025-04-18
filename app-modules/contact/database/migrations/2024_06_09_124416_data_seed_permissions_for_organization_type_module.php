@@ -42,6 +42,9 @@ use Illuminate\Support\Facades\DB;
 return new class () extends Migration {
     use CanModifyPermissions;
 
+    /**
+     * @var array<string, string>
+     */
     private array $permissions = [
         'organization_type.view-any' => 'Organization Type',
         'organization_type.create' => 'Organization Type',
@@ -52,6 +55,9 @@ return new class () extends Migration {
         'organization_type.*.force-delete' => 'Organization Type',
     ];
 
+    /**
+     * @var array<string>
+     */
     private array $guards = [
         'web',
         'api',
@@ -72,6 +78,7 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        $this->deletePermissions(array_keys($this->permissions), $this->guards);
+        collect($this->guards)
+            ->each(fn (string $guard) => $this->deletePermissions(array_keys($this->permissions), $guard));
     }
 };

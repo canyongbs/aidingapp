@@ -37,6 +37,7 @@
 namespace AidingApp\Contact\Observers;
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\ContactSource;
 use App\Models\User;
 use Illuminate\Support\Facades\Cache;
 
@@ -46,7 +47,10 @@ class ContactObserver
     {
         $user = auth()->user();
 
-        if ($user instanceof User && ! $contact->createdBy && $contact->source?->name !== 'Portal Generated') {
+        /** @var ContactSource|null $contactSource */
+        $contactSource = $contact->source;
+
+        if ($user instanceof User && ! $contact->createdBy && $contactSource?->name !== 'Portal Generated') {
             $contact->createdBy()->associate($user);
         }
     }

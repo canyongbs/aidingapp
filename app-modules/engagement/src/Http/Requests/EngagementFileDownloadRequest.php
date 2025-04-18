@@ -48,6 +48,9 @@ class EngagementFileDownloadRequest extends FormRequest
         return $this->user()->can('view', $this->route('file'));
     }
 
+    /**
+     * @return array<string, array<string>>
+     */
     public function rules(): array
     {
         return [];

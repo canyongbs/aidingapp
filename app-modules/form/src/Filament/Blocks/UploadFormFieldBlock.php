@@ -55,6 +55,9 @@ class UploadFormFieldBlock extends FormFieldBlock
         return [];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public static function getFormKitSchema(SubmissibleField $field): array
     {
         return [
@@ -70,6 +73,9 @@ class UploadFormFieldBlock extends FormFieldBlock
         ];
     }
 
+    /**
+     * @return array<string>
+     */
     public static function getValidationRules(SubmissibleField $field): array
     {
         return [];

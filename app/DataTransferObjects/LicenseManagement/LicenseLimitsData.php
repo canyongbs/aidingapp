@@ -51,6 +51,9 @@ class LicenseLimitsData extends Data
         public string $resetDate,
     ) {}
 
+    /**
+     * @return array<string, string>
+     */
     public function getResetWindow(): array
     {
         $resetDateCurrentYear = Carbon::createFromFormat('m-d-Y', $this->resetDate . '-' . now()->year);

@@ -34,39 +34,26 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Models;
+namespace App\Filament\Pages;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use App\Models\BaseModel;
-use DateTimeInterface;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use OwenIt\Auditing\Contracts\Auditable;
+use App\Models\User;
+use Filament\Pages\Page;
 
-/**
- * @mixin IdeHelperContactSource
- */
-class ContactSource extends BaseModel implements Auditable
+class Projects extends Page
 {
-    use HasUuids;
-    use SoftDeletes;
-    use AuditableTrait;
+    protected static string $view = 'filament.pages.coming-soon';
 
-    protected $fillable = [
-        'name',
-    ];
+    protected static ?string $navigationLabel = 'Projects';
 
-    /**
-     * @return HasMany<Contact, $this>
-     */
-    public function contacts(): HasMany
+    protected static ?string $navigationGroup = 'Project Management';
+
+    protected static ?int $navigationSort = 10;
+
+    public static function canAccess(): bool
     {
-        return $this->hasMany(Contact::class, 'source_id');
-    }
+        /** @var User $user */
+        $user = auth()->user();
 
-    protected function serializeDate(DateTimeInterface $date): string
-    {
-        return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
+        return $user->can(['project.view-any', 'project.*.view']) && parent::canAccess();
     }
 }

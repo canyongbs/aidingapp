@@ -62,7 +62,10 @@ class AlertPolicy
 
     public function view(Authenticatable $authenticatable, Alert $alert): Response
     {
-        if (! $authenticatable->hasLicense($alert->concern?->getLicenseType())) {
+        /** @var Contact|null $contact */
+        $contact = $alert->concern;
+
+        if (! $authenticatable->hasLicense($contact?->getLicenseType())) {
             return Response::deny('You do not have permission to view this alert.');
         }
 
@@ -82,7 +85,10 @@ class AlertPolicy
 
     public function update(Authenticatable $authenticatable, Alert $alert): Response
     {
-        if (! $authenticatable->hasLicense($alert->concern?->getLicenseType())) {
+        /** @var Contact|null $contact */
+        $contact = $alert->concern;
+
+        if (! $authenticatable->hasLicense($contact?->getLicenseType())) {
             return Response::deny('You do not have permission to update this alert.');
         }
 
@@ -94,7 +100,10 @@ class AlertPolicy
 
     public function delete(Authenticatable $authenticatable, Alert $alert): Response
     {
-        if (! $authenticatable->hasLicense($alert->concern?->getLicenseType())) {
+        /** @var Contact|null $contact */
+        $contact = $alert->concern;
+
+        if (! $authenticatable->hasLicense($contact?->getLicenseType())) {
             return Response::deny('You do not have permission to delete this alert.');
         }
 
@@ -106,7 +115,10 @@ class AlertPolicy
 
     public function restore(Authenticatable $authenticatable, Alert $alert): Response
     {
-        if (! $authenticatable->hasLicense($alert->concern?->getLicenseType())) {
+        /** @var Contact|null $contact */
+        $contact = $alert->concern;
+
+        if (! $authenticatable->hasLicense($contact?->getLicenseType())) {
             return Response::deny('You do not have permission to restore this alert.');
         }
 
@@ -118,7 +130,10 @@ class AlertPolicy
 
     public function forceDelete(Authenticatable $authenticatable, Alert $alert): Response
     {
-        if (! $authenticatable->hasLicense($alert->concern?->getLicenseType())) {
+        /** @var Contact|null $contact */
+        $contact = $alert->concern;
+
+        if (! $authenticatable->hasLicense($contact?->getLicenseType())) {
             return Response::deny('You do not have permission to permanently delete this alert.');
         }
 

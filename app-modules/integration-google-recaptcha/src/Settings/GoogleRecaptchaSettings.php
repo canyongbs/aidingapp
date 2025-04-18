@@ -51,6 +51,9 @@ class GoogleRecaptchaSettings extends Settings
         return 'google-recaptcha';
     }
 
+    /**
+     * @return array<string>
+     */
     public static function encrypted(): array
     {
         return [

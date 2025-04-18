@@ -51,6 +51,9 @@ class GoogleSsoSettings extends Settings
         return 'google_sso';
     }
 
+    /**
+     * @return array<string>
+     */
     public static function encrypted(): array
     {
         return [

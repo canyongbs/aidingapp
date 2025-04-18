@@ -44,7 +44,7 @@ enum AssetCheckOutStatus: string implements HasLabel
     case Active = 'active';
     case PastDue = 'past_due';
 
-    public function getLabel(): ?string
+    public function getLabel(): string
     {
         return match ($this) {
             self::Active => 'Active',
