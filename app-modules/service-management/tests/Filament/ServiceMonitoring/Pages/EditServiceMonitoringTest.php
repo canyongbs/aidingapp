@@ -82,15 +82,14 @@ test('EditServiceMonitoring is gated with proper access control', function () {
         ->call('save')
         ->assertHasNoFormErrors();
 
-        /** @var string $description */
-        $description = $serviceMonitoringTarget->fresh()->description;
+    /** @var string $description */
+    $description = $serviceMonitoringTarget->fresh()->description;
 
-        /** @var string $domain */
-        $domain = $serviceMonitoringTarget->fresh()->domain;
+    /** @var string $domain */
+    $domain = $serviceMonitoringTarget->fresh()->domain;
 
-        /** @var ServiceMonitoringFrequency $frequency */
-        $frequency = $serviceMonitoringTarget->fresh()->frequency;
-        
+    /** @var ServiceMonitoringFrequency $frequency */
+    $frequency = $serviceMonitoringTarget->fresh()->frequency;
 
     expect($serviceMonitoringTarget->fresh()->name)->toEqual($request->get('name'))
         ->and($description)->toEqual($request->get('description'))
