@@ -57,7 +57,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\Task\Models\Task;
 use AidingApp\Team\Models\Team;
-use AidingApp\Team\Models\TeamUser;
 use AidingApp\Timeline\Models\Contracts\HasFilamentResource;
 use App\Filament\Resources\UserResource;
 use App\Support\HasAdvancedFilter;

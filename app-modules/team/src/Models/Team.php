@@ -45,8 +45,8 @@ use AidingApp\ServiceManagement\Models\ServiceRequestTypeManager;
 use App\Models\BaseModel;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @mixin IdeHelperTeam
@@ -58,7 +58,7 @@ class Team extends BaseModel
         'description',
     ];
 
-    public function users(): hasMany
+    public function users(): HasMany
     {
         return $this->hasMany(User::class);
     }
