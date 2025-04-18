@@ -44,21 +44,21 @@
     </x-slot:header>
 
     {{-- Body --}}
-    Hello {{ $user->name }},
+Hello {{ $user->name }},
 
-    This is an automated alert from Aiding App.
+This is an automated alert from Aiding App.
 
-    <b>Issue Details:</b>
-    <ul>
-        <li><b>Service Name:</b> {{ $serviceMonitoringTarget->name }}</li>
-        <li><b>Domain:</b> {{ $serviceMonitoringTarget->domain }}</li>
-        <li><b>Expected HTTP Status:</b> 200</li>
-        <li><b>Actual HTTP Status:</b> {{ $historicalServiceMonitoring->response }}</li>
-        <li><b>Response Time:</b> {{ $historicalServiceMonitoring->response_time }}</li>
-        <li><b>Time of Incident:</b> {{ $historicalServiceMonitoring->created_at }}</li>
-    </ul>
+<b>Issue Details:</b>
+<ul>
+<li><b>Service Name:</b> {{ $serviceMonitoringTarget->name }}</li>
+<li><b>Domain:</b> {{ $serviceMonitoringTarget->domain }}</li>
+<li><b>Expected HTTP Status:</b> 200</li>
+<li><b>Actual HTTP Status:</b> {{ $historicalServiceMonitoring->response }}</li>
+<li><b>Response Time:</b> {{ $historicalServiceMonitoring->response_time }}</li>
+<li><b>Time of Incident:</b> {{ $historicalServiceMonitoring->created_at }}</li>
+</ul>
 
-    Our system detected that the service did not return the expected response during its latest check.
+Our system detected that the service did not return the expected response during its latest check.
 
     {{-- Footer --}}
     <x-slot:footer>
