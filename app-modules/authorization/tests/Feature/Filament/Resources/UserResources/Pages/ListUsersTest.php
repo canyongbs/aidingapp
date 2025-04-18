@@ -164,7 +164,7 @@ it('can filter users by teams', function () {
 
     $userWithTeam2 = User::factory()
         ->count(5)
-        ->hasAttached($team2, [], 'teams')
+        ->for($team2)
         ->create();
 
     livewire(ListUsers::class)
