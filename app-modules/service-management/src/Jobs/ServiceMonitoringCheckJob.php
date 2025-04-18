@@ -69,7 +69,7 @@ class ServiceMonitoringCheckJob implements ShouldQueue
             $historicalServiceMonitoring = new HistoricalServiceMonitoring([
                 'response' => $response->status(),
                 'response_time' => $response->transferStats->getTransferTime(),
-                'successful' => $response->status() === 200,
+                'succeeded' => $response->status() === 200,
                 'service_monitoring_target_id' => $this->serviceMonitoringTarget->id,
             ]);
 

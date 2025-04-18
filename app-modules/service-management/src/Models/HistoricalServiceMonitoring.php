@@ -50,7 +50,7 @@ class HistoricalServiceMonitoring extends BaseModel implements Auditable
     protected $fillable = [
         'response',
         'response_time',
-        'successful',
+        'succeeded',
         'service_monitoring_target_id',
     ];
 
