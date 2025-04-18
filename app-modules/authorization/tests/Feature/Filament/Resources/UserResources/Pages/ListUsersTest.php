@@ -159,7 +159,7 @@ it('can filter users by teams', function () {
 
     $userWithTeam1 = User::factory()
         ->count(5)
-        ->hasAttached($team1, [], 'teams')
+        ->for($team1)
         ->create();
 
     $userWithTeam2 = User::factory()
