@@ -49,6 +49,7 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Notification;
 
 class ServiceMonitoringCheckJob implements ShouldQueue
 {
@@ -82,7 +83,7 @@ class ServiceMonitoringCheckJob implements ShouldQueue
                     $recipients->concat($users)->unique();
                 });
 
-                $recipients->each(fn ($user) => $user->notify(new ServiceMonitoringNotification($historicalServiceMonitoring, $this->serviceMonitoringTarget)));
+                Notification::send($recipients, new ServiceMonitoringNotification($historicalServiceMonitoring, $this->serviceMonitoringTarget));
             }
         } catch (Exception $e) {
             report($e);
