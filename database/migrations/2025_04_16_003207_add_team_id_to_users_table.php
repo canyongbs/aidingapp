@@ -15,8 +15,6 @@ return new class extends Migration
                 ->constrained('teams')
                 ->cascadeOnDelete();
         });
-
-        // Schema::dropIfExists('team_user');
     }
 
     public function down(): void
