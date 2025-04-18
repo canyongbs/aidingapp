@@ -40,12 +40,15 @@ use AidingApp\Audit\Models\Audit;
 use AidingApp\Engagement\Jobs\DeliverEngagements;
 use AidingApp\Engagement\Jobs\GatherAndDispatchSesS3InboundEmails;
 use AidingApp\Engagement\Models\EngagementFile;
+use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
+use AidingApp\ServiceManagement\Jobs\ServiceMonitoringJob;
 use App\Models\HealthCheckResultHistoryItem;
 use App\Models\Scopes\SetupIsComplete;
 use App\Models\Tenant;
 use Filament\Actions\Imports\Models\FailedImportRow;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
@@ -75,6 +78,20 @@ class Kernel extends ConsoleKernel
                         ->name("Dispatch DeliverEngagements | Tenant {$tenant->domain}")
                         ->onOneServer()
                         ->withoutOverlapping(15);
+
+                    $schedule->call(function () use ($tenant) {
+                        $tenant->execute(function () {
+                            Bus::batch([new ServiceMonitoringJob(ServiceMonitoringFrequency::OneHour)])->dispatch();
+                        });
+                    })
+                        ->hourly();
+
+                    $schedule->call(function () use ($tenant) {
+                        $tenant->execute(function () {
+                            Bus::batch([new ServiceMonitoringJob(ServiceMonitoringFrequency::TwentyFourHours)])->dispatch();
+                        });
+                    })
+                        ->daily();
 
                     $schedule->command("tenants:artisan \"cache:prune-stale-tags\" --tenant={$tenant->id}")
                         ->hourly()

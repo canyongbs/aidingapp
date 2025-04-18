@@ -34,60 +34,36 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Audit\Models\Concerns;
+use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
+use AidingApp\ServiceManagement\Jobs\ServiceMonitoringCheckJob;
+use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+use AidingApp\ServiceManagement\Notifications\ServiceMonitoringNotification;
+use App\Models\User;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Notification;
 
-use AidingApp\Audit\Overrides\BelongsToMany;
-use AidingApp\Audit\Overrides\MorphToMany;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
+it('sends a notification if the response is not 200', function ($frequency) {
+    Http::fake(function () {
+        return Http::response('Test', 500);
+    });
+    Notification::fake();
 
-trait AuditableManyToMany
-{
-    protected function newBelongsToMany(
-        Builder $query,
-        Model $parent,
-        $table,
-        $foreignPivotKey,
-        $relatedPivotKey,
-        $parentKey,
-        $relatedKey,
-        $relationName = null
-    ): BelongsToMany {
-        return new BelongsToMany(
-            $query,
-            $parent,
-            $table,
-            $foreignPivotKey,
-            $relatedPivotKey,
-            $parentKey,
-            $relatedKey,
-            $relationName
-        );
-    }
+    $user = User::factory()->create();
 
-    protected function newMorphToMany(
-        Builder $query,
-        Model $parent,
-        $name,
-        $table,
-        $foreignPivotKey,
-        $relatedPivotKey,
-        $parentKey,
-        $relatedKey,
-        $relationName = null,
-        $inverse = false
-    ): MorphToMany {
-        return new MorphToMany(
-            $query,
-            $parent,
-            $name,
-            $table,
-            $foreignPivotKey,
-            $relatedPivotKey,
-            $parentKey,
-            $relatedKey,
-            $relationName,
-            $inverse
-        );
-    }
-}
+    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+        ->hasAttached($user)
+        ->create(['frequency' => $frequency]);
+
+    (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
+
+    Notification::assertSentTo(
+        $user,
+        ServiceMonitoringNotification::class
+    );
+})
+    ->with(
+        [
+            fn () => ServiceMonitoringFrequency::OneHour,
+            fn () => ServiceMonitoringFrequency::TwentyFourHours,
+        ]
+    );

@@ -34,60 +34,31 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Audit\Models\Concerns;
+namespace AidingApp\ServiceManagement\Models;
 
-use AidingApp\Audit\Overrides\BelongsToMany;
-use AidingApp\Audit\Overrides\MorphToMany;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use App\Models\BaseModel;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use OwenIt\Auditing\Contracts\Auditable;
 
-trait AuditableManyToMany
+class HistoricalServiceMonitoring extends BaseModel implements Auditable
 {
-    protected function newBelongsToMany(
-        Builder $query,
-        Model $parent,
-        $table,
-        $foreignPivotKey,
-        $relatedPivotKey,
-        $parentKey,
-        $relatedKey,
-        $relationName = null
-    ): BelongsToMany {
-        return new BelongsToMany(
-            $query,
-            $parent,
-            $table,
-            $foreignPivotKey,
-            $relatedPivotKey,
-            $parentKey,
-            $relatedKey,
-            $relationName
-        );
-    }
+    use AuditableTrait;
+    use SoftDeletes;
 
-    protected function newMorphToMany(
-        Builder $query,
-        Model $parent,
-        $name,
-        $table,
-        $foreignPivotKey,
-        $relatedPivotKey,
-        $parentKey,
-        $relatedKey,
-        $relationName = null,
-        $inverse = false
-    ): MorphToMany {
-        return new MorphToMany(
-            $query,
-            $parent,
-            $name,
-            $table,
-            $foreignPivotKey,
-            $relatedPivotKey,
-            $parentKey,
-            $relatedKey,
-            $relationName,
-            $inverse
-        );
+    protected $fillable = [
+        'response',
+        'response_time',
+        'succeeded',
+        'service_monitoring_target_id',
+    ];
+
+    /**
+     * @return HasOne<ServiceMonitoringTarget, $this>
+     */
+    public function serviceMonitoringTarget(): HasOne
+    {
+        return $this->hasOne(ServiceMonitoringTarget::class);
     }
 }

@@ -47,6 +47,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
 
+/**
+ * @property string $name
+ * @property string $domain
+ */
 class ServiceMonitoringTarget extends BaseModel implements Auditable
 {
     /** @use HasFactory<ServiceMonitoringTargetFactory> */

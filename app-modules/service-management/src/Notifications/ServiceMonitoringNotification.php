@@ -34,60 +34,41 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Audit\Models\Concerns;
+namespace AidingApp\ServiceManagement\Notifications;
 
-use AidingApp\Audit\Overrides\BelongsToMany;
-use AidingApp\Audit\Overrides\MorphToMany;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
+use AidingApp\Notification\Notifications\Messages\MailMessage;
+use AidingApp\ServiceManagement\Models\HistoricalServiceMonitoring;
+use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+use App\Models\User;
+use Illuminate\Bus\Queueable;
+use Illuminate\Notifications\Notification;
 
-trait AuditableManyToMany
+class ServiceMonitoringNotification extends Notification
 {
-    protected function newBelongsToMany(
-        Builder $query,
-        Model $parent,
-        $table,
-        $foreignPivotKey,
-        $relatedPivotKey,
-        $parentKey,
-        $relatedKey,
-        $relationName = null
-    ): BelongsToMany {
-        return new BelongsToMany(
-            $query,
-            $parent,
-            $table,
-            $foreignPivotKey,
-            $relatedPivotKey,
-            $parentKey,
-            $relatedKey,
-            $relationName
-        );
+    use Queueable;
+
+    public function __construct(public HistoricalServiceMonitoring $historicalServiceMonitoring, public ServiceMonitoringTarget $serviceMonitoringTarget) {}
+
+    /**
+     * @return array<int, string>
+     */
+    public function via(User $notifiable): array
+    {
+        return ['mail'];
     }
 
-    protected function newMorphToMany(
-        Builder $query,
-        Model $parent,
-        $name,
-        $table,
-        $foreignPivotKey,
-        $relatedPivotKey,
-        $parentKey,
-        $relatedKey,
-        $relationName = null,
-        $inverse = false
-    ): MorphToMany {
-        return new MorphToMany(
-            $query,
-            $parent,
-            $name,
-            $table,
-            $foreignPivotKey,
-            $relatedPivotKey,
-            $parentKey,
-            $relatedKey,
-            $relationName,
-            $inverse
-        );
+    public function toMail(User $notifiable): MailMessage
+    {
+        return MailMessage::make()
+            ->settings(null)
+            ->subject('Alert: Service Check Failure for [' . $this->serviceMonitoringTarget->name . '] ([' . $this->serviceMonitoringTarget->domain . '])')
+            ->markdown(
+                'service-management::mail.service-monitoring-mail',
+                [
+                    'historicalServiceMonitoring' => $this->historicalServiceMonitoring,
+                    'serviceMonitoringTarget' => $this->serviceMonitoringTarget,
+                    'user' => $notifiable,
+                ]
+            );
     }
 }

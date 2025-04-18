@@ -34,60 +34,35 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Audit\Models\Concerns;
+namespace AidingApp\ServiceManagement\Jobs;
 
-use AidingApp\Audit\Overrides\BelongsToMany;
-use AidingApp\Audit\Overrides\MorphToMany;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
+use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
+use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+use Illuminate\Bus\Batchable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
 
-trait AuditableManyToMany
+class ServiceMonitoringJob implements ShouldQueue
 {
-    protected function newBelongsToMany(
-        Builder $query,
-        Model $parent,
-        $table,
-        $foreignPivotKey,
-        $relatedPivotKey,
-        $parentKey,
-        $relatedKey,
-        $relationName = null
-    ): BelongsToMany {
-        return new BelongsToMany(
-            $query,
-            $parent,
-            $table,
-            $foreignPivotKey,
-            $relatedPivotKey,
-            $parentKey,
-            $relatedKey,
-            $relationName
-        );
-    }
+    use Batchable;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
 
-    protected function newMorphToMany(
-        Builder $query,
-        Model $parent,
-        $name,
-        $table,
-        $foreignPivotKey,
-        $relatedPivotKey,
-        $parentKey,
-        $relatedKey,
-        $relationName = null,
-        $inverse = false
-    ): MorphToMany {
-        return new MorphToMany(
-            $query,
-            $parent,
-            $name,
-            $table,
-            $foreignPivotKey,
-            $relatedPivotKey,
-            $parentKey,
-            $relatedKey,
-            $relationName,
-            $inverse
-        );
+    public function __construct(public ServiceMonitoringFrequency $interval) {}
+
+    public function handle(): void
+    {
+        ServiceMonitoringTarget::where('frequency', $this->interval)
+            ->chunkById(100, function (Collection $serviceMonitoringTargets) {
+                foreach ($serviceMonitoringTargets as $serviceMonitoringTarget) {
+                    dispatch(new ServiceMonitoringCheckJob($serviceMonitoringTarget));
+                }
+            });
     }
 }
