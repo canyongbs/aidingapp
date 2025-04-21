@@ -41,13 +41,14 @@ use AidingApp\ServiceManagement\Models\HistoricalServiceMonitoring;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 
-class ServiceMonitoringNotification extends Notification
+class ServiceMonitoringNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public function __construct(public HistoricalServiceMonitoring $historicalServiceMonitoring, public ServiceMonitoringTarget $serviceMonitoringTarget) {}
+    public function __construct(public HistoricalServiceMonitoring $historicalServiceMonitoring) {}
 
     /**
      * @return array<int, string>
@@ -59,14 +60,15 @@ class ServiceMonitoringNotification extends Notification
 
     public function toMail(User $notifiable): MailMessage
     {
+        $this->historicalServiceMonitoring->loadMissing('serviceMonitoringTarget');
+
         return MailMessage::make()
             ->settings(null)
-            ->subject('Alert: Service Check Failure for [' . $this->serviceMonitoringTarget->name . '] ([' . $this->serviceMonitoringTarget->domain . '])')
+            ->subject('Alert: Service Check Failure for [' . $this->historicalServiceMonitoring->serviceMonitoringTarget->name . '] ([' . $this->historicalServiceMonitoring->serviceMonitoringTarget->domain . '])')
             ->markdown(
                 'service-management::mail.service-monitoring-mail',
                 [
                     'historicalServiceMonitoring' => $this->historicalServiceMonitoring,
-                    'serviceMonitoringTarget' => $this->serviceMonitoringTarget,
                     'user' => $notifiable,
                 ]
             );

@@ -36,12 +36,12 @@
 
 namespace AidingApp\ServiceManagement\Jobs;
 
-use AidingApp\ServiceManagement\Models\HistoricalServiceMonitoring;
+use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Notifications\ServiceMonitoringNotification;
 use App\Models\User;
 use Exception;
-use Illuminate\Bus\Batchable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -51,9 +51,8 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
 
-class ServiceMonitoringCheckJob implements ShouldQueue
+class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
 {
-    use Batchable;
     use Dispatchable;
     use InteractsWithQueue;
     use Queueable;
@@ -61,16 +60,33 @@ class ServiceMonitoringCheckJob implements ShouldQueue
 
     public function __construct(public ServiceMonitoringTarget $serviceMonitoringTarget) {}
 
+    public function uniqueId(): string
+    {
+        return $this->serviceMonitoringTarget->getKey();
+    }
+
+    /**
+     * Return the period for which this job should be unique for, its interval plus half an hour, in seconds
+     */
+    public function uniqueFor(): int
+    {
+        $seconds = match ($this->serviceMonitoringTarget->frequency) {
+            ServiceMonitoringFrequency::OneHour => 60 * 60,
+            ServiceMonitoringFrequency::TwentyFourHours => 24 * 60 * 60,
+        };
+
+        return $seconds + (30 * 60);
+    }
+
     public function handle(): void
     {
         try {
             $response = Http::get($this->serviceMonitoringTarget->domain);
 
-            $historicalServiceMonitoring = new HistoricalServiceMonitoring([
+            $historicalServiceMonitor = $this->serviceMonitoringTarget->history()->create([
                 'response' => $response->status(),
                 'response_time' => $response->transferStats->getTransferTime(),
                 'succeeded' => $response->status() === 200,
-                'service_monitoring_target_id' => $this->serviceMonitoringTarget->id,
             ]);
 
             if ($response->status() !== 200) {
@@ -84,7 +100,7 @@ class ServiceMonitoringCheckJob implements ShouldQueue
                     $recipients->concat($users)->unique();
                 });
 
-                Notification::send($recipients, new ServiceMonitoringNotification($historicalServiceMonitoring, $this->serviceMonitoringTarget));
+                Notification::send($recipients, new ServiceMonitoringNotification($historicalServiceMonitor));
             }
         } catch (Exception $e) {
             report($e);

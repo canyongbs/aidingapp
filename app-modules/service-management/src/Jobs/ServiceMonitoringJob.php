@@ -38,7 +38,7 @@ namespace AidingApp\ServiceManagement\Jobs;
 
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
-use Illuminate\Bus\Batchable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -46,15 +46,32 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class ServiceMonitoringJob implements ShouldQueue
+class ServiceMonitoringJob implements ShouldQueue, ShouldBeUnique
 {
-    use Batchable;
     use Dispatchable;
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
 
     public function __construct(public ServiceMonitoringFrequency $interval) {}
+
+    public function uniqueId(): string
+    {
+        return $this->interval->getLabel();
+    }
+
+    /**
+     * Return the period for which this job should be unique for, its interval plus half an hour, in seconds
+     */
+    public function uniqueFor(): int
+    {
+        $seconds = match ($this->interval) {
+            ServiceMonitoringFrequency::OneHour => 60 * 60,
+            ServiceMonitoringFrequency::TwentyFourHours => 24 * 60 * 60,
+        };
+
+        return $seconds + (30 * 60);
+    }
 
     public function handle(): void
     {

@@ -36,11 +36,14 @@
 
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Jobs\ServiceMonitoringCheckJob;
+use AidingApp\ServiceManagement\Models\HistoricalServiceMonitoring;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Notifications\ServiceMonitoringNotification;
 use App\Models\User;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
+
+use function Pest\Laravel\assertDatabaseHas;
 
 it('sends a notification if the response is not 200', function ($frequency) {
     Http::fake(function () {
@@ -60,8 +63,33 @@ it('sends a notification if the response is not 200', function ($frequency) {
         $user,
         ServiceMonitoringNotification::class
     );
+
+    assertDatabaseHas(HistoricalServiceMonitoring::class, ['response' => 500, 'succeeded' => false, 'service_monitoring_target_id' => $serviceMonitorTarget->getKey()]);
 })
     ->with(
+        [
+            fn () => ServiceMonitoringFrequency::OneHour,
+            fn () => ServiceMonitoringFrequency::TwentyFourHours,
+        ]
+    );
+
+it('does not send a notification if the response is 200', function ($frequency) {
+  Http::fake(function () {
+        return Http::response('Test', 200);
+    });
+    Notification::fake();
+
+    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+        ->hasAttached(User::factory()->create())
+        ->create(['frequency' => $frequency]);
+
+    (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
+
+    Notification::assertNothingSent();
+
+    assertDatabaseHas(HistoricalServiceMonitoring::class, ['response' => 200, 'succeeded' => true, 'service_monitoring_target_id' => $serviceMonitorTarget->getKey()]);
+})
+  ->with(
         [
             fn () => ServiceMonitoringFrequency::OneHour,
             fn () => ServiceMonitoringFrequency::TwentyFourHours,

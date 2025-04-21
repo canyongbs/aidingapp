@@ -1,39 +1,5 @@
 <?php
 
-/*
-<COPYRIGHT>
-
-    Copyright © 2016-2025, Canyon GBS LLC. All rights reserved.
-
-    Aiding App™ is licensed under the Elastic License 2.0. For more details,
-    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
-
-    Notice:
-
-    - You may not provide the software to third parties as a hosted or managed
-      service, where the service provides users with access to any substantial set of
-      the features or functionality of the software.
-    - You may not move, change, disable, or circumvent the license key functionality
-      in the software, and you may not remove or obscure any functionality in the
-      software that is protected by the license key.
-    - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
-      to applicable law.
-    - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
-      Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
-      vigorously.
-    - The software solution, including services, infrastructure, and code, is offered as a
-      Software as a Service (SaaS) by Canyon GBS LLC.
-    - Use of this software implies agreement to the license terms and conditions as stated
-      in the Elastic License 2.0.
-
-    For more information or inquiries please visit our website at
-    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
-
-</COPYRIGHT>
-*/
-
 // @formatter:off
 // phpcs:ignoreFile
 /**
@@ -481,6 +447,9 @@ namespace App\Models{
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property string|null $work_number
+ * @property int|null $work_extension
+ * @property string|null $mobile
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Task\Models\Task> $assignedTasks
  * @property-read int|null $assigned_tasks_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
@@ -491,7 +460,7 @@ namespace App\Models{
  * @property-read int|null $change_request_types_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\ServiceManagement\Models\ChangeRequest> $changeRequests
  * @property-read int|null $change_requests_count
- * @property-read \AidingApp\Team\Models\TeamUser|\AidingApp\Notification\Models\Subscription|null $pivot
+ * @property-read \AidingApp\Team\Models\TeamUser|\AidingApp\ServiceManagement\Models\ServiceMonitoringTargetUser|\AidingApp\Notification\Models\Subscription|null $pivot
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Contact\Models\Contact> $contactSubscriptions
  * @property-read int|null $contact_subscriptions_count
  * @property-read \AidingApp\InAppCommunication\Models\TwilioConversationUser|null $participant
@@ -512,6 +481,8 @@ namespace App\Models{
  * @property-read \App\Models\Pronouns|null $pronouns
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Authorization\Models\Role> $roles
  * @property-read int|null $roles_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\ServiceManagement\Models\ServiceMonitoringTarget> $serviceMonitoringTargets
+ * @property-read int|null $service_monitoring_targets_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\ServiceManagement\Models\ServiceRequestAssignment> $serviceRequestAssignments
  * @property-read int|null $service_request_assignments_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\ServiceManagement\Models\ServiceRequestType> $serviceRequestTypeIndividualAssignment
@@ -553,6 +524,7 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereIsPhoneNumberVisibleOnProfile($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereJobTitle($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereLocale($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereMobile($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereOfficeHours($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereOfficeHoursAreEnabled($value)
@@ -567,6 +539,8 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereTimezone($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereType($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereWorkExtension($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereWorkNumber($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereWorkingHours($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereWorkingHoursAreEnabled($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User withTrashed()
@@ -860,8 +834,12 @@ namespace AidingApp\Contact\Models{
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Engagement\Models\Engagement> $orderedEngagements
  * @property-read int|null $ordered_engagements_count
  * @property-read \AidingApp\Contact\Models\Organization|null $organization
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Authorization\Models\Permission> $permissions
+ * @property-read int|null $permissions_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\LicenseManagement\Models\ProductLicense> $productLicenses
  * @property-read int|null $product_licenses_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Authorization\Models\Role> $roles
+ * @property-read int|null $roles_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\ServiceManagement\Models\ServiceRequest> $serviceRequests
  * @property-read int|null $service_requests_count
  * @property-read \AidingApp\Contact\Models\ContactSource $source
@@ -879,7 +857,9 @@ namespace AidingApp\Contact\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Contact newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Contact newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Contact onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Contact permission($permissions, $without = false)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Contact query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Contact role($roles, $guard = null, $without = false)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Contact whereAddress($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Contact whereAddress2($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Contact whereAddress3($value)
@@ -906,6 +886,8 @@ namespace AidingApp\Contact\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Contact whereStatusId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Contact whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Contact withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Contact withoutPermission($permissions)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Contact withoutRole($roles, $guard = null)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Contact withoutTrashed()
  * @mixin \Eloquent
  */
@@ -2083,6 +2065,7 @@ namespace AidingApp\LicenseManagement\Models{
 /**
  * 
  *
+ * @property string $formatted_expiration_date
  * @property string $id
  * @property string $product_id
  * @property mixed $license
@@ -2232,54 +2215,22 @@ namespace AidingApp\Notification\Models{
  * 
  *
  * @property string $id
- * @property \AidingApp\Notification\Enums\NotificationChannel $channel
- * @property string $notification_class
- * @property string|null $external_reference_id
- * @property string|null $external_status
- * @property array<array-key, mixed>|null $content
- * @property \AidingApp\Notification\Enums\NotificationDeliveryStatus $delivery_status
- * @property string|null $delivery_response
- * @property int $quota_usage
- * @property string|null $related_id
- * @property string|null $related_type
- * @property string|null $recipient_id
- * @property string|null $recipient_type
- * @property \Illuminate\Support\Carbon|null $delivered_at
- * @property \Illuminate\Support\Carbon|null $last_delivery_attempt
+ * @property \AidingApp\Notification\Enums\NotificationChannel $type
+ * @property string $route
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent|null $recipient
- * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent|null $related
- * @method static \AidingApp\Notification\Database\Factories\OutboundDeliverableFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder<static>|OutboundDeliverable newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|OutboundDeliverable newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|OutboundDeliverable onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|OutboundDeliverable query()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|OutboundDeliverable whereChannel($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|OutboundDeliverable whereContent($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|OutboundDeliverable whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|OutboundDeliverable whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|OutboundDeliverable whereDeliveredAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|OutboundDeliverable whereDeliveryResponse($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|OutboundDeliverable whereDeliveryStatus($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|OutboundDeliverable whereExternalReferenceId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|OutboundDeliverable whereExternalStatus($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|OutboundDeliverable whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|OutboundDeliverable whereLastDeliveryAttempt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|OutboundDeliverable whereNotificationClass($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|OutboundDeliverable whereQuotaUsage($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|OutboundDeliverable whereRecipientId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|OutboundDeliverable whereRecipientType($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|OutboundDeliverable whereRelatedId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|OutboundDeliverable whereRelatedType($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|OutboundDeliverable whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|OutboundDeliverable withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|OutboundDeliverable withoutTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|StoredAnonymousNotifiable newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|StoredAnonymousNotifiable newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|StoredAnonymousNotifiable query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|StoredAnonymousNotifiable whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|StoredAnonymousNotifiable whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|StoredAnonymousNotifiable whereRoute($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|StoredAnonymousNotifiable whereType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|StoredAnonymousNotifiable whereUpdatedAt($value)
  * @mixin \Eloquent
  */
 	#[\AllowDynamicProperties]
-	class IdeHelperOutboundDeliverable {}
+	class IdeHelperStoredAnonymousNotifiable {}
 }
 
 namespace AidingApp\Notification\Models{
@@ -2557,6 +2508,37 @@ namespace AidingApp\ServiceManagement\Models{
  * 
  *
  * @property string $id
+ * @property int $response
+ * @property float $response_time
+ * @property string $service_monitoring_target_id
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \AidingApp\ServiceManagement\Models\ServiceMonitoringTarget $serviceMonitoringTarget
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HistoricalServiceMonitoring newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HistoricalServiceMonitoring newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HistoricalServiceMonitoring onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HistoricalServiceMonitoring query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HistoricalServiceMonitoring whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HistoricalServiceMonitoring whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HistoricalServiceMonitoring whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HistoricalServiceMonitoring whereResponse($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HistoricalServiceMonitoring whereResponseTime($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HistoricalServiceMonitoring whereServiceMonitoringTargetId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HistoricalServiceMonitoring whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HistoricalServiceMonitoring withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HistoricalServiceMonitoring withoutTrashed()
+ * @mixin \Eloquent
+ */
+	#[\AllowDynamicProperties]
+	class IdeHelperHistoricalServiceMonitoring {}
+}
+
+namespace AidingApp\ServiceManagement\Models{
+/**
+ * 
+ *
+ * @property string $id
  * @property string $title
  * @property string $description
  * @property string $severity_id
@@ -2696,6 +2678,99 @@ namespace AidingApp\ServiceManagement\Models{
 /**
  * 
  *
+ * @property string $id
+ * @property string $name
+ * @property string|null $description
+ * @property string $domain
+ * @property \AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency $frequency
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
+ * @property-read int|null $audits_count
+ * @property-read \AidingApp\ServiceManagement\Models\HistoricalServiceMonitoring|null $history
+ * @property-read \AidingApp\ServiceManagement\Models\ServiceMonitoringTargetUser|\AidingApp\ServiceManagement\Models\ServiceMonitoringTargetTeam|null $pivot
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Team\Models\Team> $teams
+ * @property-read int|null $teams_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $users
+ * @property-read int|null $users_count
+ * @method static \AidingApp\ServiceManagement\Database\Factories\ServiceMonitoringTargetFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceMonitoringTarget newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceMonitoringTarget newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceMonitoringTarget onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceMonitoringTarget query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceMonitoringTarget whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceMonitoringTarget whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceMonitoringTarget whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceMonitoringTarget whereDomain($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceMonitoringTarget whereFrequency($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceMonitoringTarget whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceMonitoringTarget whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceMonitoringTarget whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceMonitoringTarget withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceMonitoringTarget withoutTrashed()
+ * @mixin \Eloquent
+ */
+	#[\AllowDynamicProperties]
+	class IdeHelperServiceMonitoringTarget {}
+}
+
+namespace AidingApp\ServiceManagement\Models{
+/**
+ * 
+ *
+ * @property string $id
+ * @property string $service_monitoring_target_id
+ * @property string $team_id
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \AidingApp\ServiceManagement\Models\ServiceMonitoringTarget $serviceMonitoringTarget
+ * @property-read \AidingApp\Team\Models\Team $team
+ * @method static \AidingApp\ServiceManagement\Database\Factories\ServiceMonitoringTargetTeamFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceMonitoringTargetTeam newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceMonitoringTargetTeam newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceMonitoringTargetTeam query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceMonitoringTargetTeam whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceMonitoringTargetTeam whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceMonitoringTargetTeam whereServiceMonitoringTargetId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceMonitoringTargetTeam whereTeamId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceMonitoringTargetTeam whereUpdatedAt($value)
+ * @mixin \Eloquent
+ */
+	#[\AllowDynamicProperties]
+	class IdeHelperServiceMonitoringTargetTeam {}
+}
+
+namespace AidingApp\ServiceManagement\Models{
+/**
+ * 
+ *
+ * @property string $id
+ * @property string $service_monitoring_target_id
+ * @property string $user_id
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \AidingApp\ServiceManagement\Models\ServiceMonitoringTarget $serviceMonitoringTarget
+ * @property-read \App\Models\User $user
+ * @method static \AidingApp\ServiceManagement\Database\Factories\ServiceMonitoringTargetUserFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceMonitoringTargetUser newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceMonitoringTargetUser newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceMonitoringTargetUser query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceMonitoringTargetUser whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceMonitoringTargetUser whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceMonitoringTargetUser whereServiceMonitoringTargetId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceMonitoringTargetUser whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceMonitoringTargetUser whereUserId($value)
+ * @mixin \Eloquent
+ */
+	#[\AllowDynamicProperties]
+	class IdeHelperServiceMonitoringTargetUser {}
+}
+
+namespace AidingApp\ServiceManagement\Models{
+/**
+ * 
+ *
  * @property-read Contact $respondent
  * @property string $id
  * @property string $service_request_number
@@ -2720,8 +2795,6 @@ namespace AidingApp\ServiceManagement\Models{
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
  * @property-read int|null $audits_count
  * @property-read \App\Models\User|null $createdBy
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Notification\Models\OutboundDeliverable> $deliverables
- * @property-read int|null $deliverables_count
  * @property-read \AidingApp\Division\Models\Division|null $division
  * @property-read \AidingApp\ServiceManagement\Models\ServiceRequestFeedback|null $feedback
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\ServiceManagement\Models\ServiceRequestHistory> $histories
@@ -3128,7 +3201,7 @@ namespace AidingApp\ServiceManagement\Models{
  * @property string $id
  * @property \AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification $classification
  * @property string $name
- * @property \AidingApp\ServiceManagement\Enums\ColumnColorOptions $color
+ * @property \CanyonGBS\Common\Enums\Color $color
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
@@ -3491,12 +3564,14 @@ namespace AidingApp\Team\Models{
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property string|null $deleted_at
- * @property-read \AidingApp\Team\Models\TeamUser|\AidingApp\ServiceManagement\Models\ServiceRequestTypeManager|\AidingApp\ServiceManagement\Models\ServiceRequestTypeAuditor|null $pivot
+ * @property-read \AidingApp\Team\Models\TeamUser|\AidingApp\ServiceManagement\Models\ServiceMonitoringTargetTeam|\AidingApp\ServiceManagement\Models\ServiceRequestTypeManager|\AidingApp\ServiceManagement\Models\ServiceRequestTypeAuditor|null $pivot
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\ServiceManagement\Models\ServiceRequestType> $auditableServiceRequestTypes
  * @property-read int|null $auditable_service_request_types_count
  * @property-read \AidingApp\Division\Models\Division|null $division
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\ServiceManagement\Models\ServiceRequestType> $manageableServiceRequestTypes
  * @property-read int|null $manageable_service_request_types_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\ServiceManagement\Models\ServiceMonitoringTarget> $serviceMonitoringTargets
+ * @property-read int|null $service_monitoring_targets_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $users
  * @property-read int|null $users_count
  * @method static \AidingApp\Team\Database\Factories\TeamFactory factory($count = null, $state = [])
@@ -3610,10 +3685,25 @@ namespace AidingApp\Webhook\Models{
 /**
  * 
  *
+ * @property string $id
  * @property \AidingApp\Webhook\Enums\InboundWebhookSource $source
+ * @property string $event
+ * @property string $url
+ * @property string $payload
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property string|null $deleted_at
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LandlordInboundWebhook newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LandlordInboundWebhook newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LandlordInboundWebhook query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LandlordInboundWebhook whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LandlordInboundWebhook whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LandlordInboundWebhook whereEvent($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LandlordInboundWebhook whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LandlordInboundWebhook wherePayload($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LandlordInboundWebhook whereSource($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LandlordInboundWebhook whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LandlordInboundWebhook whereUrl($value)
  * @mixin \Eloquent
  */
 	#[\AllowDynamicProperties]

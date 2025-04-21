@@ -81,14 +81,14 @@ class Kernel extends ConsoleKernel
 
                     $schedule->call(function () use ($tenant) {
                         $tenant->execute(function () {
-                            Bus::batch([new ServiceMonitoringJob(ServiceMonitoringFrequency::OneHour)])->dispatch();
+                            (new ServiceMonitoringJob(ServiceMonitoringFrequency::OneHour))->dispatch();
                         });
                     })
                         ->hourly();
 
                     $schedule->call(function () use ($tenant) {
                         $tenant->execute(function () {
-                            Bus::batch([new ServiceMonitoringJob(ServiceMonitoringFrequency::TwentyFourHours)])->dispatch();
+                            (new ServiceMonitoringJob(ServiceMonitoringFrequency::TwentyFourHours))->dispatch();
                         });
                     })
                         ->daily();

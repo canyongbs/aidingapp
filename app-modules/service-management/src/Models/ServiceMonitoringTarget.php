@@ -44,12 +44,12 @@ use App\Models\BaseModel;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
 
 /**
- * @property string $name
- * @property string $domain
+ * @mixin IdeHelperServiceMonitoringTarget
  */
 class ServiceMonitoringTarget extends BaseModel implements Auditable
 {
@@ -69,6 +69,14 @@ class ServiceMonitoringTarget extends BaseModel implements Auditable
     protected $casts = [
         'frequency' => ServiceMonitoringFrequency::class,
     ];
+
+    /**
+     * @return HasOne<HistoricalServiceMonitoring, $this>
+     */
+    public function history(): HasOne
+    {
+        return $this->hasOne(HistoricalServiceMonitoring::class);
+    }
 
     public function teams(): BelongsToMany
     {

@@ -36,29 +36,22 @@
 
 namespace AidingApp\ServiceManagement\Models;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use App\Models\BaseModel;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use OwenIt\Auditing\Contracts\Auditable;
 
-class HistoricalServiceMonitoring extends BaseModel implements Auditable
+/**
+ * @mixin IdeHelperHistoricalServiceMonitoring
+ */
+class HistoricalServiceMonitoring extends BaseModel
 {
-    use AuditableTrait;
     use SoftDeletes;
 
-    protected $fillable = [
-        'response',
-        'response_time',
-        'succeeded',
-        'service_monitoring_target_id',
-    ];
-
     /**
-     * @return HasOne<ServiceMonitoringTarget, $this>
+     * @return BelongsTo<ServiceMonitoringTarget, $this>
      */
-    public function serviceMonitoringTarget(): HasOne
+    public function serviceMonitoringTarget(): BelongsTo
     {
-        return $this->hasOne(ServiceMonitoringTarget::class);
+        return $this->belongsTo(ServiceMonitoringTarget::class);
     }
 }

@@ -50,8 +50,8 @@ This is an automated alert from Aiding App.
 
 <b>Issue Details:</b>
 <ul>
-<li><b>Service Name:</b> {{ $serviceMonitoringTarget->name }}</li>
-<li><b>Domain:</b> {{ $serviceMonitoringTarget->domain }}</li>
+<li><b>Service Name:</b> {{ $historicalServiceMonitoring->serviceMonitoringTarget->name }}</li>
+<li><b>Domain:</b> {{ $historicalServiceMonitoring->serviceMonitoringTarget->domain }}</li>
 <li><b>Expected HTTP Status:</b> 200</li>
 <li><b>Actual HTTP Status:</b> {{ $historicalServiceMonitoring->response }}</li>
 <li><b>Response Time:</b> {{ $historicalServiceMonitoring->response_time }} seconds</li>
