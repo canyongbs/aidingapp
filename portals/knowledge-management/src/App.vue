@@ -45,6 +45,33 @@
     import { useFeatureStore } from './Stores/feature.js';
     import { useTokenStore } from './Stores/token.js';
 
+    const props = defineProps({
+        url: {
+            type: String,
+            required: true,
+        },
+        searchUrl: {
+            type: String,
+            required: true,
+        },
+        apiUrl: {
+            type: String,
+            required: true,
+        },
+        accessUrl: {
+            type: String,
+            required: true,
+        },
+        userAuthenticationUrl: {
+            type: String,
+            required: true,
+        },
+        appUrl: {
+            type: String,
+            required: true,
+        },
+    });
+
     const errorLoading = ref(false);
     const loading = ref(true);
     const userIsAuthenticated = ref(false);
@@ -75,12 +102,16 @@
         registrationAllowed: false,
     });
 
-    const hostUrl = window.portalConfig.hostUrl;
+    const scriptUrl = new URL(document.currentScript.getAttribute('src'));
+    const protocol = scriptUrl.protocol;
+    const scriptHostname = scriptUrl.hostname;
+
+    const hostUrl = `${protocol}//${scriptHostname}`;
 
     const route = useRoute();
 
     onMounted(async () => {
-        await determineIfUserIsAuthenticated(window.portalConfig.userAuthenticationUrl).then((response) => {
+        await determineIfUserIsAuthenticated(props.userAuthenticationUrl).then((response) => {
             userIsAuthenticated.value = response;
         });
         document.title = 'Help Center';
@@ -118,7 +149,7 @@
 
     async function getKnowledgeManagementPortal() {
         await axios
-            .get(window.portalConfig.url)
+            .get(props.url)
             .then((response) => {
                 errorLoading.value = false;
 
@@ -237,7 +268,7 @@
     async function getKnowledgeManagementPortalCategories() {
         const { get } = consumer();
 
-        return get(`${window.portalConfig.apiUrl}/categories`).then((response) => {
+        return get(`${props.apiUrl}/categories`).then((response) => {
             if (response.error) {
                 throw new Error(response.error);
             }
@@ -249,7 +280,7 @@
     async function getServiceRequests() {
         const { get } = consumer();
 
-        return get(`${window.portalConfig.apiUrl}/service-requests`).then((response) => {
+        return get(`${props.apiUrl}/service-requests`).then((response) => {
             if (response.error) {
                 throw new Error(response.error);
             }
@@ -261,7 +292,7 @@
     async function getTags() {
         const { get } = consumer();
 
-        return get(`${window.portalConfig.apiUrl}/tags`).then((response) => {
+        return get(`${props.apiUrl}/tags`).then((response) => {
             if (response.error) {
                 throw new Error(response.error);
             }

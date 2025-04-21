@@ -28,19 +28,25 @@
     </style>
 
     @filamentStyles
+
     @vite('resources/css/app.css')
 </head>
 
 <body class="antialiased">
-    <div id="app"></div>
-
-    @include('cookie-consent::index')
+    <div class="flex items-center justify-center">
+        <div
+            class="w-full max-w-7xl"
+            id="app"
+        >
+        </div>
+        @include('cookie-consent::index')
+    </div>
 
     @filamentScripts
     @vite('resources/js/app.js')
 </body>
 <script>
-    window.portalConfig = {
+    props = {
         accessUrl: "{{ route('portal.show') }}",
         userAuthenticationUrl: "{{ route('api.user.auth-check') }}",
         url: "{{ URL::to(URL::signedRoute('api.portal.define', [], false)) }}",
@@ -51,7 +57,6 @@
     };
 </script>
 <script
-    type="module"
     src="{{ url('js/portals/knowledge-management/aiding-app-knowledge-management-portal.js?v=' . app('current-commit')) }}"
 ></script>
 

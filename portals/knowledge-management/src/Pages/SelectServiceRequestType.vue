@@ -77,7 +77,7 @@
 
         const { get } = consumer();
 
-        get(window.portalConfig.apiUrl + '/service-request-type/select').then((response) => {
+        get(props.apiUrl + '/service-request-type/select').then((response) => {
             types.value = response.data.types;
             loadingResults.value = false;
         });

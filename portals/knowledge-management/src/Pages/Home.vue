@@ -106,7 +106,7 @@
 
         loadingResults.value = true;
 
-        post(window.portalConfig.searchUrl, {
+        post(props.searchUrl, {
             search: JSON.stringify(value),
             tags: selectedTags.value.join(','),
             filter: filter.value || route.query.filter || undefined,
@@ -134,12 +134,20 @@
 
     watch(
         () => route.query,
-        (newParam, OldParam) => {
-            if (Object.keys(newParam).length === 0) {
+        (newQuery) => {
+            const tags = newQuery.tags ? newQuery.tags.split(',') : [];
+
+            if (Object.keys(newQuery).length === 0) {
                 filter.value = '';
                 searchQuery.value = '';
                 selectedTags.value = [];
             }
+
+            if (!newQuery.tags || tags.length === 0) {
+                selectedTags.value = [];
+            }
+
+            handleInitialQuery();
         },
     );
 
@@ -147,14 +155,9 @@
         handleInitialQuery({ setFocus: true });
     });
 
-    watch(
-        () => route.query,
-        () => {
-            handleInitialQuery();
-        },
-    );
-
     function handleInitialQuery({ setFocus = false } = {}) {
+        console.log('deadeer');
+
         const search = route.query.search;
         const tags = route.query.tags ? route.query.tags.split(',') : [];
 
@@ -300,7 +303,9 @@
                     v-if="tags.length > 0"
                     class="rounded rounded-t-none bg-white py-3 p-4 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-brand-2-- sm:text-sm sm:leading-6"
                 >
-                    <summary v-if="selectedTags.length > 0">Tags ({{ selectedTags.length }} selected)</summary>
+                    <summary v-if="selectedTags.length > 0">
+                        Tags ({{ selectedTags.length }} selected {{ selectedTags }})
+                    </summary>
                     <summary v-else>Tags</summary>
                     <div class="flex flex-wrap gap-2">
                         <Badge

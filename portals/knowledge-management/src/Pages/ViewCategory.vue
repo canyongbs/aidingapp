@@ -68,7 +68,7 @@
         },
     });
 
-    console.log('props', window.portalConfig.apiUrl);
+    console.log('props', props.apiUrl);
 
     const loadingResults = ref(true);
     const loadingeSearchResults = ref(true);
@@ -100,7 +100,7 @@
 
         loadingeSearchResults.value = true;
 
-        post(window.portalConfig.searchUrl, {
+        post(props.searchUrl, {
             search: JSON.stringify(value),
             tags: selectedTags.value.join(','),
             filter: filter.value,
@@ -272,7 +272,7 @@
 
         const { get } = consumer();
 
-        await get(window.portalConfig.apiUrl + '/categories/' + route.params.categorySlug, {
+        await get(props.apiUrl + '/categories/' + route.params.categorySlug, {
             page: page,
             filter: filter.value,
         }).then((response) => {

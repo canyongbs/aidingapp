@@ -68,7 +68,7 @@
     const logout = () => {
         const { post } = consumer();
 
-        post(window.portalConfig.apiUrl + '/logout').then((response) => {
+        post(props.apiUrl + '/logout').then((response) => {
             if (!response.data.success) {
                 return;
             }
