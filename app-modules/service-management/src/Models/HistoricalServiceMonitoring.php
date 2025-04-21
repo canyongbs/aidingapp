@@ -47,6 +47,13 @@ class HistoricalServiceMonitoring extends BaseModel
 {
     use SoftDeletes;
 
+    protected $fillable = [
+      'response',
+      'response_time',
+      'succeeded',
+      'service_monitoring_target_id',
+  ];
+
     /**
      * @return BelongsTo<ServiceMonitoringTarget, $this>
      */
