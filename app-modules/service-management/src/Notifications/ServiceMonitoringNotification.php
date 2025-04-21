@@ -38,7 +38,6 @@ namespace AidingApp\ServiceManagement\Notifications;
 
 use AidingApp\Notification\Notifications\Messages\MailMessage;
 use AidingApp\ServiceManagement\Models\HistoricalServiceMonitoring;
-use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;

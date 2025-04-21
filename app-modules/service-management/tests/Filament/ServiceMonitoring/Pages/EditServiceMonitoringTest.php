@@ -35,7 +35,6 @@
 */
 
 use AidingApp\Authorization\Enums\LicenseType;
-use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Pages\EditServiceMonitoring;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;

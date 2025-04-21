@@ -48,7 +48,6 @@ use App\Models\Tenant;
 use Filament\Actions\Imports\Models\FailedImportRow;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
-use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 

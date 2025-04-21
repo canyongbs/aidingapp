@@ -74,7 +74,7 @@ it('sends a notification if the response is not 200', function ($frequency) {
     );
 
 it('does not send a notification if the response is 200', function ($frequency) {
-  Http::fake(function () {
+    Http::fake(function () {
         return Http::response('Test', 200);
     });
     Notification::fake();
@@ -89,7 +89,7 @@ it('does not send a notification if the response is 200', function ($frequency) 
 
     assertDatabaseHas(HistoricalServiceMonitoring::class, ['response' => 200, 'succeeded' => true, 'service_monitoring_target_id' => $serviceMonitorTarget->getKey()]);
 })
-  ->with(
+    ->with(
         [
             fn () => ServiceMonitoringFrequency::OneHour,
             fn () => ServiceMonitoringFrequency::TwentyFourHours,
