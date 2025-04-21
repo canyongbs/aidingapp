@@ -61,6 +61,7 @@ class ServiceRequestTypeEmailTemplate extends Model implements Auditable
         'type',
         'subject',
         'body',
+        'role',
     ];
 
     protected $casts = [
