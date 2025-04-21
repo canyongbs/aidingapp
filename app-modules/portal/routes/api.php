@@ -75,7 +75,7 @@ Route::prefix('api')
             ->name('portal.')
             ->group(function () {
                 Route::get('/', [KnowledgeManagementPortalController::class, 'show'])
-                    // ->middleware(['signed:relative'])
+                    ->middleware(['signed:relative'])
                     ->name('define');
 
                 Route::post('/authenticate/request', KnowledgeManagementPortalRequestAuthenticationController::class)
@@ -94,7 +94,7 @@ Route::prefix('api')
                     ->name('logout');
 
                 Route::post('/search', [KnowledgeManagementPortalSearchController::class, 'get'])
-                    // ->middleware(['signed:relative'])
+                    ->middleware(['signed:relative'])
                     ->name('search');
 
                 Route::get('/categories', [KnowledgeManagementPortalCategoryController::class, 'index'])
