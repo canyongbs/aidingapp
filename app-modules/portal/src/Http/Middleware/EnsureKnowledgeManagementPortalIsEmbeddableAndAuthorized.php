@@ -58,9 +58,7 @@ class EnsureKnowledgeManagementPortalIsEmbeddableAndAuthorized
         $referer = parse_url($referer)['host'];
 
         if ($referer != parse_url(config('app.url'))['host']) {
-            // if (parse_url($settings->knowledge_management_portal_authorized_domain)['host'] !== $referer) {
             return response()->json(['error' => 'Referer not allowed'], 403);
-            // }
         }
 
         return $next($request);

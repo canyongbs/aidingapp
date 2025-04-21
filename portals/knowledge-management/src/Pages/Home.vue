@@ -156,8 +156,6 @@
     });
 
     function handleInitialQuery({ setFocus = false } = {}) {
-        console.log('deadeer');
-
         const search = route.query.search;
         const tags = route.query.tags ? route.query.tags.split(',') : [];
 
@@ -187,7 +185,6 @@
             const areTagsEmpty = newTags.length === 0;
 
             if (isSearchEmpty && areTagsEmpty) {
-                console.log('Route searchQuery && selectedTags watcher run');
                 router.push({
                     name: route.name,
                     params: route.params,
@@ -303,9 +300,7 @@
                     v-if="tags.length > 0"
                     class="rounded rounded-t-none bg-white py-3 p-4 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-brand-2-- sm:text-sm sm:leading-6"
                 >
-                    <summary v-if="selectedTags.length > 0">
-                        Tags ({{ selectedTags.length }} selected {{ selectedTags }})
-                    </summary>
+                    <summary v-if="selectedTags.length > 0">Tags ({{ selectedTags.length }} selected)</summary>
                     <summary v-else>Tags</summary>
                     <div class="flex flex-wrap gap-2">
                         <Badge
