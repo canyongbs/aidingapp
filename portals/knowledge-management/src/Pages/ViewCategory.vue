@@ -68,8 +68,6 @@
         },
     });
 
-    console.log('props', props.apiUrl);
-
     const loadingResults = ref(true);
     const loadingeSearchResults = ref(true);
     const category = ref(null);

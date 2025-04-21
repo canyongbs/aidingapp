@@ -384,7 +384,6 @@
         axios
             .post(authentication.value.requestUrl, {
                 email: formData.email,
-                isSpa: isEmbeddedInAidingApp,
             })
             .then((response) => {
                 if (!response.data.authentication_url) {
