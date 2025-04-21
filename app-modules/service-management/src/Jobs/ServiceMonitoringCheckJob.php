@@ -83,9 +83,9 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
         try {
             $response = Http::get($this->serviceMonitoringTarget->domain);
 
-            $historicalServiceMonitor = $this->serviceMonitoringTarget->history()->create([
+            $this->serviceMonitoringTarget->history()->create([
                 'response' => $response->status(),
-                'response_time' => $response->transferStats->getTransferTime(),
+                'response_time' => $response->transferStats->getTransferTime() ?? 0,
                 'succeeded' => $response->status() === 200,
             ]);
 
@@ -100,7 +100,7 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
                     $recipients->concat($users)->unique();
                 });
 
-                Notification::send($recipients, new ServiceMonitoringNotification($historicalServiceMonitor));
+                Notification::send($recipients, new ServiceMonitoringNotification($this->serviceMonitoringTarget->history));
             }
         } catch (Exception $e) {
             report($e);
