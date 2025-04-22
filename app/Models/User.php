@@ -318,6 +318,11 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
         return $this->belongsTo(Team::class, 'team_id');
     }
 
+    public function team(): BelongsTo
+    {
+        return $this->belongsTo(Team::class, 'team_id');
+    }
+
     /**
      * @return HasMany<ServiceRequestType, $this>
      */
