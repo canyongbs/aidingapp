@@ -36,16 +36,18 @@
 
 namespace AidingApp\Team\Filament\Resources\TeamResource\RelationManagers;
 
-use App\Filament\Tables\Columns\IdColumn;
-use App\Models\User;
 use Closure;
-use Filament\Forms\Components\TextInput;
+use App\Models\User;
 use Filament\Forms\Form;
-use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Tables\Table;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\TextInput;
+use App\Filament\Tables\Columns\IdColumn;
 use Filament\Tables\Actions\AttachAction;
 use Filament\Tables\Actions\DetachAction;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
+use Filament\Tables\Actions\AssociateAction;
+use Filament\Tables\Actions\DissociateAction;
+use Filament\Resources\RelationManagers\RelationManager;
 
 class UsersRelationManager extends RelationManager
 {
@@ -72,10 +74,9 @@ class UsersRelationManager extends RelationManager
                 TextColumn::make('email'),
             ])
             ->headerActions([
-                AttachAction::make()
+                AssociateAction::make()
                     ->label('Add user to this team')
-                    //TODO: remove this if we support multiple teams
-                    ->form(fn (AttachAction $action): array => [
+                    ->form(fn (AssociateAction $action): array => [
                         $action->getRecordSelect()
                             ->rules([
                                 fn (): Closure => function (string $attribute, $value, Closure $fail) {
@@ -87,7 +88,7 @@ class UsersRelationManager extends RelationManager
                     ]),
             ])
             ->actions([
-                DetachAction::make()
+                DissociateAction::make()
                     ->label('Remove from this team'),
             ])
             ->bulkActions([

@@ -456,9 +456,9 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
 
     public function assignTeam($teamId): void
     {
-        $this->teams()->detach();
+        $this->team()->dissociate();
 
-        $this->teams()->attach($teamId);
+        $this->team()->associate($teamId);
     }
 
     /**
