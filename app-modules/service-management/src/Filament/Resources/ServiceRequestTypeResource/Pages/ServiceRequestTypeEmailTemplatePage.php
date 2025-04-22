@@ -39,14 +39,18 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResou
 use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use App\Concerns\EditPageRedirection;
+use App\Features\ServiceRequestTypeEmailTemplateTabs;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Tabs\Tab;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Resources\Pages\EditRecord;
 use FilamentTiptapEditor\TiptapEditor;
+use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 
@@ -70,60 +74,117 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
 
     public function form(Form $form): Form
     {
+        if (ServiceRequestTypeEmailTemplateTabs::active()) {
+            return $form
+                ->schema([
+                    Tabs::make('EmailTemplateRoles')
+                        ->statePath('activeEmailTemplateRole')
+                        ->persistTab()
+                        ->id('email-template-role-tabs')
+                        ->tabs(array_map(
+                            fn (ServiceRequestTypeEmailTemplateRole $role) => Tab::make($role->getLabel())
+                                ->schema($this->emailTemplateSchema($role->value))
+                                ->statePath($role->value),
+                            ServiceRequestTypeEmailTemplateRole::cases()
+                        ))
+                        ->columnSpanFull(),
+                ]);
+        }
+
         return $form
             ->schema([
-                Tabs::make('Roles')
-                    ->statePath('activeRole')
-                    ->persistTab()
-                    ->id('role-tabs')
-                    ->tabs(array_map(
-                        fn (ServiceRequestTypeEmailTemplateRole $role) => Tab::make($role->getLabel())
-                            ->schema($this->emailTemplateSchema($role->value))
-                            ->statePath($role->value),
-                        ServiceRequestTypeEmailTemplateRole::cases()
-                    ))
-                    ->columnSpanFull(),
+                Section::make()
+                    ->columns()
+                    ->schema([
+                        TiptapEditor::make('subject')
+                            ->label('Subject')
+                            ->placeholder('Enter the email subject here...')
+                            ->rules(['required'])
+                            ->extraInputAttributes(['style' => 'min-height: 2rem; overflow-y:none;'])
+                            ->disableToolbarMenus()
+                            ->mergeTags([
+                                'created',
+                                'updated',
+                                'status',
+                                'assigned to',
+                                'title',
+                                'type',
+                            ])
+                            ->showMergeTagsInBlocksPanel(false)
+                            ->helperText('You may use “merge tags” to substitute information about a service request into your subject line. Insert a “{{“ in the subject line field to see a list of available merge tags')
+                            ->columnSpanFull(),
+                        TiptapEditor::make('body')
+                            ->label('Body')
+                            ->placeholder('Enter the email body here...')
+                            ->rules(['required'])
+                            ->extraInputAttributes(['style' => 'min-height: 12rem;'])
+                            ->mergeTags([
+                                'created',
+                                'updated',
+                                'status',
+                                'assigned to',
+                                'title',
+                                'type',
+                            ])
+                            ->columnSpanFull(),
+                    ]),
             ]);
     }
 
     public function save(bool $shouldRedirect = true, bool $shouldSendSavedNotification = true): void
     {
         $data = $this->form->getState();
+        /** @var ServiceRequestType $record */
+        $record = $this->getRecord();
 
-        $filtered = array_filter(
-            $data['activeRole'] ?? [],
-            fn ($templateData) => ! is_null($templateData['subject']) && ! is_null($templateData['body'])
-        );
+        if (! ServiceRequestTypeEmailTemplateTabs::active()) {
+            if ($this->template) {
+                $this->template->update($data);
+            } else {
+                $data['service_request_type_id'] = $record->getKey();
+                $data['type'] = $this->type;
 
-        foreach (ServiceRequestTypeEmailTemplateRole::cases() as $role) {
-            if (! array_key_exists($role->value, $filtered)) {
-                continue;
+                $record->templates()->create($data);
+
+                unset($this->template);
             }
+        } else {
+            $filtered = array_filter(
+                $data['activeEmailTemplateRole'] ?? [],
+                fn ($templateData) => ! is_null($templateData['subject']) && ! is_null($templateData['body'])
+            );
 
-            $templateData = $filtered[$role->value];
+            foreach (ServiceRequestTypeEmailTemplateRole::cases() as $role) {
+                if (! array_key_exists($role->value, $filtered)) {
+                    continue;
+                }
 
-            if ($templateData) {
-                ServiceRequestTypeEmailTemplate::updateOrCreate(
-                    [
-                        'service_request_type_id' => $this->getRecord()->id,
-                        'type' => $this->type,
-                        'role' => $role,
-                    ],
-                    $templateData,
-                );
+                $templateData = $filtered[$role->value];
+
+                if ($templateData) {
+                    ServiceRequestTypeEmailTemplate::updateOrCreate(
+                        [
+                            'service_request_type_id' => $record->getKey(),
+                            'type' => $this->type,
+                            'role' => $role,
+                        ],
+                        $templateData,
+                    );
+                }
             }
         }
 
         $this->getSavedNotification()->send();
     }
 
+    /** @return array<int, TiptapEditor> */
     protected function emailTemplateSchema(string $role): array
     {
         return [
             TiptapEditor::make('subject')
                 ->label('Subject')
                 ->placeholder('Enter the email subject here...')
-                ->required(fn (Get $get) => $get('activeRole') === $role)
+                ->required(fn (Get $get) => $get('activeEmailTemplateRole') === $role)
                 ->extraInputAttributes(['style' => 'min-height: 2rem; overflow-y:none;'])
                 ->disableToolbarMenus()
                 ->mergeTags(['created', 'updated', 'status', 'assigned to', 'title', 'type'])
@@ -133,7 +194,7 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
             TiptapEditor::make('body')
                 ->label('Body')
                 ->placeholder('Enter the email body here...')
-                ->required(fn (Get $get) => $get('activeRole') === $role)
+                ->required(fn (Get $get) => $get('activeEmailTemplateRole') === $role)
                 ->extraInputAttributes(['style' => 'min-height: 12rem;'])
                 ->mergeTags(['created', 'updated', 'status', 'assigned to', 'title', 'type'])
                 ->columnSpanFull(),
@@ -142,26 +203,39 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
 
     protected function fillForm(): void
     {
-        $templates = $this->getRecord()
-            ?->templates()
-            ->where('type', $this->type)
-            ->get()
-            ->keyBy(fn ($template) => $template->role);
+        if (! ServiceRequestTypeEmailTemplateTabs::active()) {
+            $this->form->fill($this->template?->only(['subject', 'body']));
+        } else {
+            /** @var ServiceRequestType $record */
+            $record = $this->getRecord();
 
-        $state = [];
+            /** @var Collection<int, ServiceRequestTypeEmailTemplate> $templates */
+            $templates = $record
+                ->templates()
+                ->where('type', $this->type)
+                ->get();
 
-        foreach (ServiceRequestTypeEmailTemplateRole::cases() as $role) {
-            if ($template = $templates[$role->value] ?? null) {
-                $state['activeRole'][$role->value] = $template->only(['subject', 'body']);
+            /** @var Collection<string, ServiceRequestTypeEmailTemplate> $templates */
+            $templates = $templates->keyBy(fn (ServiceRequestTypeEmailTemplate $template) => $template->role->value);
+
+            $state = [];
+
+            foreach (ServiceRequestTypeEmailTemplateRole::cases() as $role) {
+                if ($template = $templates[$role->value] ?? null) {
+                    $state['activeEmailTemplateRole'][$role->value] = $template->only(['subject', 'body']);
+                }
             }
-        }
 
-        $this->form->fill($state);
+            $this->form->fill($state);
+        }
     }
 
     #[Computed]
-    protected function template(): ?ServiceRequestTypeEmailTemplate
+    protected function template(): ServiceRequestTypeEmailTemplate
     {
-        return $this->getRecord()?->templates()->where('type', $this->type)->first();
+        /** @var ServiceRequestType $record */
+        $record = $this->getRecord();
+
+        return $record->templates()->where('type', $this->type)->first();
     }
 }

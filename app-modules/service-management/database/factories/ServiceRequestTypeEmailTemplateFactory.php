@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Database\Factories;
 
 use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
+use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -58,6 +59,7 @@ class ServiceRequestTypeEmailTemplateFactory extends Factory
             'type' => fake()->randomElement(collect(ServiceRequestEmailTemplateType::cases())->values()->toArray()),
             'subject' => ['type' => 'doc', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => fake()->sentence()]]]]],
             'body' => ['type' => 'doc', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => fake()->sentence()]]]]],
+            'role' => fake()->randomElement(ServiceRequestTypeEmailTemplateRole::cases()),
         ];
     }
 }
