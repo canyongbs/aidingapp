@@ -53,7 +53,7 @@ class NotifyServiceRequestUsers
             ->where(function (Builder $query) use ($serviceRequest, $shouldSendToManagers, $shouldSendToAuditors) {
                 if ($shouldSendToManagers) {
                     $query->whereHas(
-                        'teams',
+                        'team',
                         fn (Builder $query) => $query->whereHas(
                             'manageableServiceRequestTypes',
                             fn (Builder $query) => $query->whereHas(

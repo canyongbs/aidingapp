@@ -117,6 +117,6 @@ class EngagementNotification extends Notification implements ShouldQueue, HasBef
 
     private function resolveNotificationSetting(User $notifiable): ?NotificationSetting
     {
-        return $notifiable->teams()->first()?->division?->notificationSetting?->setting;
+        return $notifiable->team()->first()?->division?->notificationSetting?->setting;
     }
 }
