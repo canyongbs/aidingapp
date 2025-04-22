@@ -80,9 +80,9 @@ it('can notify a user if they belong to a team managing a service request type',
         false,
     );
 
-    Notification::assertSentTo($users->get(0), ServiceRequestCreated::class);
-    Notification::assertSentTo($users->get(1), ServiceRequestCreated::class);
-    Notification::assertNotSentTo($users->get(2), ServiceRequestCreated::class);
+    Notification::assertSentTo(User::first(), ServiceRequestCreated::class);
+    Notification::assertSentTo(User::skip(1)->first(), ServiceRequestCreated::class);
+    Notification::assertNotSentTo(User::skip(2)->first(), ServiceRequestCreated::class);
 });
 
 it('can notify a user if they belong to a team auditing a service request type', function () {
