@@ -58,6 +58,9 @@ class Team extends BaseModel
         'description',
     ];
 
+    /**
+     * @return HasMany<User, $this>
+     */
     public function users(): HasMany
     {
         return $this->hasMany(User::class);
