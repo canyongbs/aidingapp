@@ -76,7 +76,6 @@
             const breadcrumbsList = [];
 
             if (parentCategory.value) {
-                console.log('parentCategory', parentCategory.value);
                 breadcrumbsList.push({
                     name: parentCategory.value.name,
                     route: 'view-category',

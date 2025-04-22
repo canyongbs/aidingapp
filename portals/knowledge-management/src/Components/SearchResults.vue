@@ -41,7 +41,7 @@
 
     const emit = defineEmits(['fetchNextPage', 'fetchPreviousPage', 'fetchPage', 'change-filter']);
 
-    const props = defineProps({
+    defineProps({
         searchQuery: {
             type: String,
             required: true,
