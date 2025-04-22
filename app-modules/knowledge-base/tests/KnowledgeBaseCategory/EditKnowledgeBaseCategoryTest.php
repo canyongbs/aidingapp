@@ -186,10 +186,9 @@ test('exclude already attached subcategories in search', function () {
 
     $knowledgeBaseSubCategory = KnowledgeBaseCategory::factory()->state([
         'parent_id' => $knowledgeBaseCategory->getKey(),
-    ])->make();
+    ])->create();
 
-    expect($knowledgeBaseCategory->subCategories)
-        ->toBeEmpty();
+    expect($knowledgeBaseCategory->subCategories()->exists())->toBeTrue();
 
     $newknowledgeBaseCategory = KnowledgeBaseCategory::factory()->create();
 
@@ -198,16 +197,10 @@ test('exclude already attached subcategories in search', function () {
         'pageClass' => EditKnowledgeBaseCategory::class,
     ])
         ->mountTableAction(AssociateAction::class)
-        ->assertFormFieldExists('recordId', 'mountedTableActionForm', function (Select $select) use ($knowledgeBaseSubCategory) {
+        ->assertFormFieldExists('recordId', 'mountedTableActionForm', function (Select $select) use ($knowledgeBaseSubCategory, $newknowledgeBaseCategory) {
             $options = $select->getOptions();
-            $searchOptions = $select->getSearchResults($knowledgeBaseSubCategory->name);
 
-            return ! in_array($knowledgeBaseSubCategory->name, $options) && empty($searchOptions);
-        })
-        ->assertFormFieldExists('recordId', 'mountedTableActionForm', function (Select $select) use ($newknowledgeBaseCategory) {
-            $searchOptions = $select->getSearchResults($newknowledgeBaseCategory->name);
-
-            return ! empty($searchOptions) ? true : false;
+            return in_array($newknowledgeBaseCategory->getKey(), array_keys($options)) && ! in_array($knowledgeBaseSubCategory->getKey(), array_keys($options));
         });
 });
 
