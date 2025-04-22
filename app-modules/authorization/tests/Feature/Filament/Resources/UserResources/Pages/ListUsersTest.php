@@ -173,10 +173,10 @@ it('can filter users by teams', function () {
         ->filterTable('team', [$team1->getKey()])
         ->assertCanSeeTableRecords($userWithTeam1)
         ->assertCanNotSeeTableRecords($userWithoutTeam->merge($userWithTeam2))
-        ->filterTable('teams', [$team2->getKey()])
+        ->filterTable('team', [$team2->getKey()])
         ->assertCanSeeTableRecords($userWithTeam2)
         ->assertCanNotSeeTableRecords($userWithoutTeam->merge($userWithTeam1))
-        ->filterTable('teams', [$team2->getKey(), $team1->getKey()])
+        ->filterTable('team', [$team2->getKey(), $team1->getKey()])
         ->assertCanSeeTableRecords($userWithTeam1->merge($userWithTeam2))
         ->assertCanNotSeeTableRecords($userWithoutTeam);
 });
