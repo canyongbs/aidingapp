@@ -202,7 +202,7 @@ test('EditServiceRequest is gated with proper access control', function () {
 
     $team = Team::factory()->create();
 
-    $user->teams()->attach($team);
+    $user->team()->associate($team);
 
     $user->refresh();
 
@@ -286,7 +286,7 @@ test('EditServiceRequest is gated with proper feature access control', function 
 
     $team = Team::factory()->create();
 
-    $user->teams()->attach($team);
+    $user->team()->associate($team);
 
     $user->refresh();
 
@@ -356,7 +356,7 @@ test('send feedback email if service request is closed', function () {
 
     $team = Team::factory()->create();
 
-    $user->teams()->attach($team);
+    $user->team()->associate($team);
 
     $user->refresh();
 
@@ -436,7 +436,7 @@ test('service requests not authorized if user is not manager of the service requ
 
     $team = Team::factory()->create();
 
-    $user->teams()->attach($team);
+    $user->team()->associate($team);
 
     $user->refresh();
 
@@ -467,7 +467,7 @@ test('service requests not authorized if user is auditor of the service request 
 
     $team = Team::factory()->create();
 
-    $user->teams()->attach($team);
+    $user->team()->associate($team);
 
     $user->refresh();
 

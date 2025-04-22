@@ -212,9 +212,9 @@ it('does not notify a user if they belong to a team auditing a service request t
         false,
     );
 
-    Notification::assertNotSentTo(User::get(0), ServiceRequestCreated::class);
-    Notification::assertNotSentTo(User::get(1), ServiceRequestCreated::class);
-    Notification::assertNotSentTo(User::get(2), ServiceRequestCreated::class);
+    Notification::assertNotSentTo(User::first(), ServiceRequestCreated::class);
+    Notification::assertNotSentTo(User::skip(1)->first(), ServiceRequestCreated::class);
+    Notification::assertNotSentTo(User::skip(2)->first(), ServiceRequestCreated::class);
 });
 
 it('does not notify a user twice if they belong to a team managing and auditing a service request type', function () {

@@ -90,7 +90,7 @@ class ChangeRequestAwaitingApprovalNotification extends BaseNotification impleme
     private function resolveNotificationSetting(object $notifiable): ?NotificationSetting
     {
         return $notifiable instanceof User
-            ? $notifiable->teams()->first()?->division?->notificationSetting?->setting
+            ? $notifiable->team()->first()?->division?->notificationSetting?->setting
             : null;
     }
 }

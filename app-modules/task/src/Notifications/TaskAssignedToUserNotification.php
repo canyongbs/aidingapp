@@ -97,6 +97,6 @@ class TaskAssignedToUserNotification extends Notification implements ShouldQueue
 
     private function resolveNotificationSetting(User $notifiable): ?NotificationSetting
     {
-        return $this->task->createdBy->teams()->first()?->division?->notificationSetting?->setting;
+        return $this->task->createdBy->team()->first()?->division?->notificationSetting?->setting;
     }
 }
