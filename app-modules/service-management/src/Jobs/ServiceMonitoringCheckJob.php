@@ -40,7 +40,6 @@ use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Notifications\ServiceMonitoringNotification;
 use App\Models\User;
-use Exception;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Collection;
@@ -80,26 +79,26 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
 
     public function handle(): void
     {
-      $response = Http::get($this->serviceMonitoringTarget->domain);
+        $response = Http::get($this->serviceMonitoringTarget->domain);
 
-      $this->serviceMonitoringTarget->history()->create([
-          'response' => $response->status(),
-          'response_time' => $response->transferStats->getTransferTime() ?? 0,
-          'succeeded' => $response->status() === 200,
-      ]);
+        $this->serviceMonitoringTarget->history()->create([
+            'response' => $response->status(),
+            'response_time' => $response->transferStats->getTransferTime() ?? 0,
+            'succeeded' => $response->status() === 200,
+        ]);
 
-      if ($response->status() !== 200) {
-          /** @var Collection<int, User> $recipients */
-          $recipients = $this->serviceMonitoringTarget->users()->get();
+        if ($response->status() !== 200) {
+            /** @var Collection<int, User> $recipients */
+            $recipients = $this->serviceMonitoringTarget->users()->get();
 
-          $this->serviceMonitoringTarget->teams()->each(function ($team) use ($recipients) {
-              /** @var Collection<int, User> $users */
-              $users = $team->users()->get();
+            $this->serviceMonitoringTarget->teams()->each(function ($team) use ($recipients) {
+                /** @var Collection<int, User> $users */
+                $users = $team->users()->get();
 
-              $recipients->concat($users)->unique();
-          });
+                $recipients->concat($users)->unique();
+            });
 
-          Notification::send($recipients, new ServiceMonitoringNotification($this->serviceMonitoringTarget->history));
-      }
+            Notification::send($recipients, new ServiceMonitoringNotification($this->serviceMonitoringTarget->history));
+        }
     }
 }
