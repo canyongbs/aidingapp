@@ -51,7 +51,6 @@ class HistoricalServiceMonitoring extends BaseModel
         'response',
         'response_time',
         'succeeded',
-        'service_monitoring_target_id',
     ];
 
     /**
