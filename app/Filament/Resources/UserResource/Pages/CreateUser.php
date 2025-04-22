@@ -98,9 +98,9 @@ class CreateUser extends CreateRecord
                     ]),
                 Section::make('Team')
                     ->schema([
-                        Select::make('teams')
+                        Select::make('team_id')
                             ->label('')
-                            ->relationship('teams', 'name'),
+                            ->relationship('team', 'name'),
                     ])
                     ->hidden(fn (?User $record) => (bool) $record?->hasRole(Authenticatable::SUPER_ADMIN_ROLE)),
                 Licenses::make()
