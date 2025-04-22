@@ -202,7 +202,7 @@ test('exclude already attached subcategories in search', function () {
 
             return in_array($newknowledgeBaseCategory->getKey(), array_keys($options)) && ! in_array($knowledgeBaseSubCategory->getKey(), array_keys($options));
         });
-})->only()->repeat(500);
+});
 
 test('can attach subcategories into categories', function () {
     $user = User::factory()->licensed(LicenseType::cases())->create();
