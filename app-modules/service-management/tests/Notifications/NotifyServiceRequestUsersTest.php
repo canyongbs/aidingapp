@@ -88,9 +88,6 @@ it('can notify a user if they belong to a team managing a service request type',
 it('can notify a user if they belong to a team auditing a service request type', function () {
     Notification::fake();
 
-    $users = User::factory(3)
-        ->create();
-
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     Team::factory()
