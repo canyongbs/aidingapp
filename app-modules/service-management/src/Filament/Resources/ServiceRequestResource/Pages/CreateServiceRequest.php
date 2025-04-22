@@ -93,7 +93,7 @@ class CreateServiceRequest extends CreateRecord
                         Select::make('type_id')
                             ->options(ServiceRequestType::when(! auth()->user()->isSuperAdmin(), function (Builder $query) {
                                 $query->whereHas('managers', function (Builder $query): void {
-                                    $query->where('teams.id', auth()->user()->teams()->first()?->getKey());
+                                    $query->where('teams.id', auth()->user()->team()->first()?->getKey());
                                 });
                             })
                                 ->pluck('name', 'id'))

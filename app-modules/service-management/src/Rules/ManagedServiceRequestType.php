@@ -54,7 +54,7 @@ class ManagedServiceRequestType implements ValidationRule
             return;
         }
 
-        $team = auth()->user()->teams()->first();
+        $team = auth()->user()->team()->first();
 
         $isManager = ServiceRequestType::where('id', $value)
             ->whereHas('managers', function ($query) use ($team) {

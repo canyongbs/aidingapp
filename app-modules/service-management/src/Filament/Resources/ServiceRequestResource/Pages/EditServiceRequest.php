@@ -111,7 +111,7 @@ class EditServiceRequest extends EditRecord
                                             ->orWhereNull('deleted_at')
                                             ->when(! auth()->user()->isSuperAdmin(), function (Builder $query) {
                                                 $query->whereHas('managers', function (Builder $query): void {
-                                                    $query->where('teams.id', auth()->user()->teams()->first()?->getKey());
+                                                    $query->where('teams.id', auth()->user()->team()->first()?->getKey());
                                                 });
                                             })
                                             ->orderBy('name')
