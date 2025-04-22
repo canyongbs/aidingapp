@@ -87,6 +87,7 @@ class ListUsers extends ListRecords
                 SelectFilter::make('team')
                     ->label('Team')
                     ->relationship('team', 'name')
+                    ->multiple()
                     ->searchable()
                     ->preload(),
                 SelectFilter::make('licenses')
