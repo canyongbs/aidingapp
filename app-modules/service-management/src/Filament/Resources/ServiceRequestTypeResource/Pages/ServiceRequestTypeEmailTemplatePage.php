@@ -47,7 +47,6 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Tabs\Tab;
 use Filament\Forms\Form;
-use Filament\Forms\Get;
 use Filament\Resources\Pages\EditRecord;
 use FilamentTiptapEditor\TiptapEditor;
 use Illuminate\Database\Eloquent\Collection;
@@ -184,7 +183,7 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
             TiptapEditor::make('subject')
                 ->label('Subject')
                 ->placeholder('Enter the email subject here...')
-                ->required(fn (Get $get) => $get('activeEmailTemplateRole') === $role)
+                ->required()
                 ->extraInputAttributes(['style' => 'min-height: 2rem; overflow-y:none;'])
                 ->disableToolbarMenus()
                 ->mergeTags(['created', 'updated', 'status', 'assigned to', 'title', 'type'])
@@ -194,7 +193,7 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
             TiptapEditor::make('body')
                 ->label('Body')
                 ->placeholder('Enter the email body here...')
-                ->required(fn (Get $get) => $get('activeEmailTemplateRole') === $role)
+                ->required()
                 ->extraInputAttributes(['style' => 'min-height: 12rem;'])
                 ->mergeTags(['created', 'updated', 'status', 'assigned to', 'title', 'type'])
                 ->columnSpanFull(),
@@ -231,7 +230,7 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
     }
 
     #[Computed]
-    protected function template(): ServiceRequestTypeEmailTemplate
+    protected function template(): ?ServiceRequestTypeEmailTemplate
     {
         /** @var ServiceRequestType $record */
         $record = $this->getRecord();
