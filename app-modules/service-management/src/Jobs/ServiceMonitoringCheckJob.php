@@ -80,30 +80,26 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
 
     public function handle(): void
     {
-        try {
-            $response = Http::get($this->serviceMonitoringTarget->domain);
+      $response = Http::get($this->serviceMonitoringTarget->domain);
 
-            $this->serviceMonitoringTarget->history()->create([
-                'response' => $response->status(),
-                'response_time' => $response->transferStats->getTransferTime() ?? 0,
-                'succeeded' => $response->status() === 200,
-            ]);
+      $this->serviceMonitoringTarget->history()->create([
+          'response' => $response->status(),
+          'response_time' => $response->transferStats->getTransferTime() ?? 0,
+          'succeeded' => $response->status() === 200,
+      ]);
 
-            if ($response->status() !== 200) {
-                /** @var Collection<int, User> $recipients */
-                $recipients = $this->serviceMonitoringTarget->users()->get();
+      if ($response->status() !== 200) {
+          /** @var Collection<int, User> $recipients */
+          $recipients = $this->serviceMonitoringTarget->users()->get();
 
-                $this->serviceMonitoringTarget->teams()->each(function ($team) use ($recipients) {
-                    /** @var Collection<int, User> $users */
-                    $users = $team->users()->get();
+          $this->serviceMonitoringTarget->teams()->each(function ($team) use ($recipients) {
+              /** @var Collection<int, User> $users */
+              $users = $team->users()->get();
 
-                    $recipients->concat($users)->unique();
-                });
+              $recipients->concat($users)->unique();
+          });
 
-                Notification::send($recipients, new ServiceMonitoringNotification($this->serviceMonitoringTarget->history));
-            }
-        } catch (Exception $e) {
-            report($e);
-        }
+          Notification::send($recipients, new ServiceMonitoringNotification($this->serviceMonitoringTarget->history));
+      }
     }
 }

@@ -57,7 +57,7 @@ class ServiceMonitoringJob implements ShouldQueue, ShouldBeUnique
 
     public function uniqueId(): string
     {
-        return $this->interval->getLabel();
+        return $this->interval->value;
     }
 
     /**

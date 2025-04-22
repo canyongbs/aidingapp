@@ -62,7 +62,6 @@ class ServiceMonitoringNotification extends Notification implements ShouldQueue
         $this->historicalServiceMonitoring->loadMissing('serviceMonitoringTarget');
 
         return MailMessage::make()
-            ->settings(null)
             ->subject('Alert: Service Check Failure for [' . $this->historicalServiceMonitoring->serviceMonitoringTarget->name . '] ([' . $this->historicalServiceMonitoring->serviceMonitoringTarget->domain . '])')
             ->markdown(
                 'service-management::mail.service-monitoring-mail',
