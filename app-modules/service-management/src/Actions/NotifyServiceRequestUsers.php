@@ -66,7 +66,7 @@ class NotifyServiceRequestUsers
 
                 if ($shouldSendToAuditors) {
                     $query->{$shouldSendToManagers ? 'orWhereHas' : 'whereHas'}(
-                        'teams',
+                        'team',
                         fn (Builder $query) => $query->whereHas(
                             'auditableServiceRequestTypes',
                             fn (Builder $query) => $query->whereHas(
