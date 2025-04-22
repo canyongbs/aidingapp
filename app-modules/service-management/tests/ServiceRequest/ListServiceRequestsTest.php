@@ -205,7 +205,7 @@ test('service requests only visible to service request type managers', function 
 
     $team = Team::factory()->create();
 
-    $user->team()->associtate($team);
+    $user->team()->associate($team);
 
     $user->refresh();
 
