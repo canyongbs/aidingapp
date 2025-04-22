@@ -84,10 +84,9 @@ class ListUsers extends ListRecords
                     ->sortable(),
             ])
             ->filters([
-                SelectFilter::make('teams')
+                SelectFilter::make('team')
                     ->label('Team')
-                    ->relationship('teams', 'name')
-                    ->multiple()
+                    ->relationship('team', 'name')
                     ->searchable()
                     ->preload(),
                 SelectFilter::make('licenses')
