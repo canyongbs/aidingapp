@@ -34,62 +34,52 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Models;
+namespace AidingApp\ServiceManagement\Jobs;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\ServiceManagement\Database\Factories\ServiceMonitoringTargetFactory;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
-use AidingApp\Team\Models\Team;
-use App\Models\BaseModel;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use OwenIt\Auditing\Contracts\Auditable;
+use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
 
-/**
- * @mixin IdeHelperServiceMonitoringTarget
- */
-class ServiceMonitoringTarget extends BaseModel implements Auditable
+class ServiceMonitoringJob implements ShouldQueue, ShouldBeUnique
 {
-    /** @use HasFactory<ServiceMonitoringTargetFactory> */
-    use HasFactory;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
 
-    use AuditableTrait;
-    use SoftDeletes;
+    public function __construct(public ServiceMonitoringFrequency $interval) {}
 
-    protected $fillable = [
-        'name',
-        'description',
-        'domain',
-        'frequency',
-    ];
-
-    protected $casts = [
-        'frequency' => ServiceMonitoringFrequency::class,
-    ];
+    public function uniqueId(): string
+    {
+        return $this->interval->value;
+    }
 
     /**
-     * @return HasMany<HistoricalServiceMonitoring, $this>
+     * Return the period for which this job should be unique for, its interval plus half an hour, in seconds
      */
-    public function histories(): HasMany
+    public function uniqueFor(): int
     {
-        return $this->hasMany(HistoricalServiceMonitoring::class);
+        $seconds = match ($this->interval) {
+            ServiceMonitoringFrequency::OneHour => 60 * 60,
+            ServiceMonitoringFrequency::TwentyFourHours => 24 * 60 * 60,
+        };
+
+        return $seconds + (30 * 60);
     }
 
-    public function teams(): BelongsToMany
+    public function handle(): void
     {
-        return $this->belongsToMany(Team::class)
-            ->using(ServiceMonitoringTargetTeam::class)
-            ->withTimestamps();
-    }
-
-    public function users(): BelongsToMany
-    {
-        return $this
-            ->belongsToMany(User::class)
-            ->using(ServiceMonitoringTargetUser::class)
-            ->withTimestamps();
+        ServiceMonitoringTarget::where('frequency', $this->interval)
+            ->chunkById(100, function (Collection $serviceMonitoringTargets) {
+                foreach ($serviceMonitoringTargets as $serviceMonitoringTarget) {
+                    dispatch(new ServiceMonitoringCheckJob($serviceMonitoringTarget));
+                }
+            });
     }
 }

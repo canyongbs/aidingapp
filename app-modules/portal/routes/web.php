@@ -85,8 +85,6 @@ Route::prefix('portal')
                 ->name('services');
             Route::get('/incidents', RenderKnowledgeManagementPortal::class)
                 ->name('incidents');
-            Route::get('/knowledge-base', RenderKnowledgeManagementPortal::class)
-                ->name('knowledge-base');
             Route::get('/assets', RenderKnowledgeManagementPortal::class)
                 ->name('assets');
             Route::get('/licenses', RenderKnowledgeManagementPortal::class)

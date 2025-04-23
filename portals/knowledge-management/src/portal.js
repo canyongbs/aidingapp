@@ -118,11 +118,6 @@ customElements.define(
                         meta: { requiresAuth: true },
                     },
                     {
-                        path: baseUrl + '/knowledge-base',
-                        name: 'knowledge-base',
-                        component: ComingSoon,
-                    },
-                    {
                         path: baseUrl + '/assets',
                         name: 'assets',
                         component: ComingSoon,

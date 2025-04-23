@@ -34,62 +34,26 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Models;
-
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\ServiceManagement\Database\Factories\ServiceMonitoringTargetFactory;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
-use AidingApp\Team\Models\Team;
-use App\Models\BaseModel;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use OwenIt\Auditing\Contracts\Auditable;
+use AidingApp\ServiceManagement\Jobs\ServiceMonitoringCheckJob;
+use AidingApp\ServiceManagement\Jobs\ServiceMonitoringJob;
+use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+use Illuminate\Support\Facades\Queue;
 
-/**
- * @mixin IdeHelperServiceMonitoringTarget
- */
-class ServiceMonitoringTarget extends BaseModel implements Auditable
-{
-    /** @use HasFactory<ServiceMonitoringTargetFactory> */
-    use HasFactory;
+it('successfully dispatches', function ($frequency) {
+    Queue::fake();
 
-    use AuditableTrait;
-    use SoftDeletes;
+    $numJobs = rand(1, 10);
 
-    protected $fillable = [
-        'name',
-        'description',
-        'domain',
-        'frequency',
-    ];
+    ServiceMonitoringTarget::factory()->count($numJobs)->create(['frequency' => $frequency]);
 
-    protected $casts = [
-        'frequency' => ServiceMonitoringFrequency::class,
-    ];
+    (new ServiceMonitoringJob($frequency))->handle();
 
-    /**
-     * @return HasMany<HistoricalServiceMonitoring, $this>
-     */
-    public function histories(): HasMany
-    {
-        return $this->hasMany(HistoricalServiceMonitoring::class);
-    }
-
-    public function teams(): BelongsToMany
-    {
-        return $this->belongsToMany(Team::class)
-            ->using(ServiceMonitoringTargetTeam::class)
-            ->withTimestamps();
-    }
-
-    public function users(): BelongsToMany
-    {
-        return $this
-            ->belongsToMany(User::class)
-            ->using(ServiceMonitoringTargetUser::class)
-            ->withTimestamps();
-    }
-}
+    Queue::assertPushed(ServiceMonitoringCheckJob::class, $numJobs);
+})
+    ->with(
+        [
+            fn () => ServiceMonitoringFrequency::OneHour,
+            fn () => ServiceMonitoringFrequency::TwentyFourHours,
+        ]
+    );

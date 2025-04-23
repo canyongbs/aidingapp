@@ -97,11 +97,6 @@
             command: () => router.push({ name: 'incidents' }),
         },
         {
-            label: 'Knowledge Base',
-            routeName: 'knowledge-base',
-            command: () => router.push({ name: 'knowledge-base' }),
-        },
-        {
             label: 'Assets',
             routeName: 'assets',
             visible: hasAssets,
