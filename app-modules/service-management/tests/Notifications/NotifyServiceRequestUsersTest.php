@@ -248,5 +248,5 @@ it('does not notify a user twice if they belong to a team managing and auditing 
 
     Notification::assertSentToTimes(User::first(), ServiceRequestCreated::class, 1);
     Notification::assertSentToTimes(User::skip(1)->first(), ServiceRequestCreated::class, 1);
-    Notification::assertNotSentTo(User::skip(2)->first(2), ServiceRequestCreated::class);
+    Notification::assertNotSentTo(User::skip(2)->first(), ServiceRequestCreated::class);
 });
