@@ -133,7 +133,7 @@ it('does not notify a user if they belong to a team managing a service request t
 
     Team::factory()
         ->hasAttached($serviceRequestType, [], 'manageableServiceRequestTypes')
-        ->for(User::factory()->create(), 'users')
+        ->for(User::factory(), 'users')
         ->create();
 
     $serviceRequestPriority = ServiceRequestPriority::factory()
@@ -144,7 +144,7 @@ it('does not notify a user if they belong to a team managing a service request t
 
     Team::factory()
         ->hasAttached($anotherServiceRequestType, [], 'manageableServiceRequestTypes')
-        ->for(User::factory()->create())
+        ->for(User::factory())
         ->create();
 
     ServiceRequestPriority::factory()
@@ -246,7 +246,7 @@ it('does not notify a user twice if they belong to a team managing and auditing 
         true,
     );
 
-    Notification::assertSentToTimes(User::first(0), ServiceRequestCreated::class, 1);
+    Notification::assertSentToTimes(User::first(), ServiceRequestCreated::class, 1);
     Notification::assertSentToTimes(User::skip(1)->first(), ServiceRequestCreated::class, 1);
     Notification::assertNotSentTo(User::skip(2)->first(2), ServiceRequestCreated::class);
 });
