@@ -36,7 +36,6 @@
 
 namespace AidingApp\Team\Models;
 
-use AidingApp\Team\Observers\TeamUserObserver;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -46,7 +45,6 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
 /**
  * @mixin IdeHelperTeamUser
  */
-#[ObservedBy([TeamUserObserver::class])]
 class TeamUser extends Pivot
 {
     use HasUuids;
