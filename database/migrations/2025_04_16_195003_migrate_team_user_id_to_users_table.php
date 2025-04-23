@@ -50,9 +50,11 @@ return new class () extends Migration {
     public function down(): void
     {
         DB::table('users')->get()->each(function ($teamUser) {
-            DB::table('team_user')->create([
+            DB::table('team_user')->insert([
                 'team_id' => $teamUser->team_id,
                 'user_id' => $teamUser->user_id,
+                'updated_at' => $teamUser->updated_at,
+                'created_at' => $teamUser->created_at,
             ]);
         });
     }

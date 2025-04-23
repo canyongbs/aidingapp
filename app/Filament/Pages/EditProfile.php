@@ -160,12 +160,12 @@ class EditProfile extends Page
                         Placeholder::make('teams')
                             ->label(str('Team')->plural($user->team->count()))
                             ->content($user->team->pluck('name')->join(', ', ' and '))
-                            ->hidden($user->team->isEmpty())
+                            ->hidden(blank($user->team))
                             ->hint(fn (Get $get): string => $get('are_teams_visible_on_profile') ? 'Visible on profile' : 'Not visible on profile'),
                         //TODO: Right now this is not passed to the frontend
                         Checkbox::make('are_teams_visible_on_profile')
                             ->label('Show ' . str('team')->plural($user->team->count())->ucfirst() . ' on profile')
-                            ->hidden($user->team->isEmpty())
+                            ->hidden(blank($user->team))
                             ->live(),
                         Placeholder::make('division')
                             ->content($user->team->first()?->division?->name)
