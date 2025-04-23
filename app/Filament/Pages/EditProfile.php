@@ -164,7 +164,7 @@ class EditProfile extends Page
                             ->hint(fn (Get $get): string => $get('are_teams_visible_on_profile') ? 'Visible on profile' : 'Not visible on profile'),
                         //TODO: Right now this is not passed to the frontend
                         Checkbox::make('are_teams_visible_on_profile')
-                            ->label('Show ' . str('team')->plural($user->team->count())->ucfirst() . ' on profile')
+                            ->label('Show ' . str('team')->ucfirst() . ' on profile')
                             ->hidden(blank($user->team))
                             ->live(),
                         Placeholder::make('division')
