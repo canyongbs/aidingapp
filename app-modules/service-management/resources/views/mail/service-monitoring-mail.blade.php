@@ -1,6 +1,4 @@
-<?php
-
-/*
+{{--
 <COPYRIGHT>
 
     Copyright © 2016-2025, Canyon GBS LLC. All rights reserved.
@@ -32,62 +30,41 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
+--}}
+@props(['settings' => null])
+<x-mail::layout :settings="$settings">
+    {{-- Header --}}
+    <x-slot:header>
+        <x-mail::header
+            :url="config('app.url')"
+            :settings="$settings"
+        >
+            {{ config('app.name') }}
+        </x-mail::header>
+    </x-slot:header>
 
-namespace AidingApp\Audit\Models\Concerns;
+    {{-- Body --}}
+Hello {{ $user->name }},
 
-use AidingApp\Audit\Overrides\BelongsToMany;
-use AidingApp\Audit\Overrides\MorphToMany;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
+This is an automated alert from Aiding App.
 
-trait AuditableManyToMany
-{
-    protected function newBelongsToMany(
-        Builder $query,
-        Model $parent,
-        $table,
-        $foreignPivotKey,
-        $relatedPivotKey,
-        $parentKey,
-        $relatedKey,
-        $relationName = null
-    ): BelongsToMany {
-        return new BelongsToMany(
-            $query,
-            $parent,
-            $table,
-            $foreignPivotKey,
-            $relatedPivotKey,
-            $parentKey,
-            $relatedKey,
-            $relationName
-        );
-    }
+<b>Issue Details:</b>
+<ul>
+<li><b>Service Name:</b> {{ $historicalServiceMonitoring->serviceMonitoringTarget->name }}</li>
+<li><b>Domain:</b> {{ $historicalServiceMonitoring->serviceMonitoringTarget->domain }}</li>
+<li><b>Expected HTTP Status:</b> 200</li>
+<li><b>Actual HTTP Status:</b> {{ $historicalServiceMonitoring->response }}</li>
+<li><b>Response Time:</b> {{ $historicalServiceMonitoring->response_time }} seconds</li>
+<li><b>Time of Incident:</b> {{ $historicalServiceMonitoring->created_at }}</li>
+</ul>
 
-    protected function newMorphToMany(
-        Builder $query,
-        Model $parent,
-        $name,
-        $table,
-        $foreignPivotKey,
-        $relatedPivotKey,
-        $parentKey,
-        $relatedKey,
-        $relationName = null,
-        $inverse = false
-    ): MorphToMany {
-        return new MorphToMany(
-            $query,
-            $parent,
-            $name,
-            $table,
-            $foreignPivotKey,
-            $relatedPivotKey,
-            $parentKey,
-            $relatedKey,
-            $relationName,
-            $inverse
-        );
-    }
-}
+Our system detected that the service did not return the expected response during its latest check.
+
+    {{-- Footer --}}
+    <x-slot:footer>
+        <x-mail::footer>
+            This email was sent using Aiding App™. <br /> <br /> © 2016-{{ date('Y') }} Canyon GBS LLC. All Rights
+            Reserved. Canyon GBS™ and Aiding App™ are trademarks of Canyon GBS LLC.
+        </x-mail::footer>
+    </x-slot:footer>
+</x-mail::layout>

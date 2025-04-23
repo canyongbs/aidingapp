@@ -36,60 +36,28 @@
 
 namespace AidingApp\ServiceManagement\Models;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\ServiceManagement\Database\Factories\ServiceMonitoringTargetFactory;
-use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
-use AidingApp\Team\Models\Team;
 use App\Models\BaseModel;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use OwenIt\Auditing\Contracts\Auditable;
 
 /**
- * @mixin IdeHelperServiceMonitoringTarget
+ * @mixin IdeHelperHistoricalServiceMonitoring
  */
-class ServiceMonitoringTarget extends BaseModel implements Auditable
+class HistoricalServiceMonitoring extends BaseModel
 {
-    /** @use HasFactory<ServiceMonitoringTargetFactory> */
-    use HasFactory;
-
-    use AuditableTrait;
     use SoftDeletes;
 
     protected $fillable = [
-        'name',
-        'description',
-        'domain',
-        'frequency',
-    ];
-
-    protected $casts = [
-        'frequency' => ServiceMonitoringFrequency::class,
+        'response',
+        'response_time',
+        'succeeded',
     ];
 
     /**
-     * @return HasMany<HistoricalServiceMonitoring, $this>
+     * @return BelongsTo<ServiceMonitoringTarget, $this>
      */
-    public function histories(): HasMany
+    public function serviceMonitoringTarget(): BelongsTo
     {
-        return $this->hasMany(HistoricalServiceMonitoring::class);
-    }
-
-    public function teams(): BelongsToMany
-    {
-        return $this->belongsToMany(Team::class)
-            ->using(ServiceMonitoringTargetTeam::class)
-            ->withTimestamps();
-    }
-
-    public function users(): BelongsToMany
-    {
-        return $this
-            ->belongsToMany(User::class)
-            ->using(ServiceMonitoringTargetUser::class)
-            ->withTimestamps();
+        return $this->belongsTo(ServiceMonitoringTarget::class);
     }
 }
