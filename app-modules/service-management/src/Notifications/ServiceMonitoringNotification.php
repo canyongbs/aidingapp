@@ -34,62 +34,41 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Models;
+namespace AidingApp\ServiceManagement\Notifications;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\ServiceManagement\Database\Factories\ServiceMonitoringTargetFactory;
-use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
-use AidingApp\Team\Models\Team;
-use App\Models\BaseModel;
+use AidingApp\Notification\Notifications\Messages\MailMessage;
+use AidingApp\ServiceManagement\Models\HistoricalServiceMonitoring;
 use App\Models\User;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use OwenIt\Auditing\Contracts\Auditable;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Notification;
 
-/**
- * @mixin IdeHelperServiceMonitoringTarget
- */
-class ServiceMonitoringTarget extends BaseModel implements Auditable
+class ServiceMonitoringNotification extends Notification implements ShouldQueue
 {
-    /** @use HasFactory<ServiceMonitoringTargetFactory> */
-    use HasFactory;
+    use Queueable;
 
-    use AuditableTrait;
-    use SoftDeletes;
-
-    protected $fillable = [
-        'name',
-        'description',
-        'domain',
-        'frequency',
-    ];
-
-    protected $casts = [
-        'frequency' => ServiceMonitoringFrequency::class,
-    ];
+    public function __construct(public HistoricalServiceMonitoring $historicalServiceMonitoring) {}
 
     /**
-     * @return HasMany<HistoricalServiceMonitoring, $this>
+     * @return array<int, string>
      */
-    public function histories(): HasMany
+    public function via(User $notifiable): array
     {
-        return $this->hasMany(HistoricalServiceMonitoring::class);
+        return ['mail'];
     }
 
-    public function teams(): BelongsToMany
+    public function toMail(User $notifiable): MailMessage
     {
-        return $this->belongsToMany(Team::class)
-            ->using(ServiceMonitoringTargetTeam::class)
-            ->withTimestamps();
-    }
+        $this->historicalServiceMonitoring->loadMissing('serviceMonitoringTarget');
 
-    public function users(): BelongsToMany
-    {
-        return $this
-            ->belongsToMany(User::class)
-            ->using(ServiceMonitoringTargetUser::class)
-            ->withTimestamps();
+        return MailMessage::make()
+            ->subject('Alert: Service Check Failure for [' . $this->historicalServiceMonitoring->serviceMonitoringTarget->name . '] ([' . $this->historicalServiceMonitoring->serviceMonitoringTarget->domain . '])')
+            ->markdown(
+                'service-management::mail.service-monitoring-mail',
+                [
+                    'historicalServiceMonitoring' => $this->historicalServiceMonitoring,
+                    'user' => $notifiable,
+                ]
+            );
     }
 }
