@@ -487,9 +487,9 @@ test('assignment type individual manager will auto assign to new service request
 
 test('assignment type round robin will auto-assign to new service requests', function () {
     asSuperAdmin();
-    $factoryUsers = User::factory()->licensed(LicenseType::cases())->count(3)->create();
+
     $team = Team::factory()
-        ->hasAttached($factoryUsers, [], 'users')->create();
+        ->has(User::factory()->licensed(LicenseType::cases())->count(3), 'users')->create();
 
     $serviceRequestTypeWithManager = ServiceRequestType::factory()
         ->hasAttached(
