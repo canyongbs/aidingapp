@@ -554,10 +554,12 @@ test('assignment type round robin will auto-assign to new service requests', fun
 
 test('assignment type workload will auto-assign to new service requests', function () {
     asSuperAdmin();
-    $factoryUsers = User::factory()->licensed(LicenseType::cases())->count(5)->create();
-    $factoryUsers->each(fn ($user) => $user->givePermissionTo('service_request.*.update'));
+
     $team = Team::factory()
-        ->hasAttached($factoryUsers, [], 'users')->create();
+        ->has(User::factory()->licensed(LicenseType::cases())->count(5), 'users')->create();
+
+    $factoryUsers = $team->users;
+    $factoryUsers->each(fn ($user) => $user->givePermissionTo('service_request.*.update'));
 
     $serviceRequestTypeWithManager = ServiceRequestType::factory()
         ->hasAttached(
