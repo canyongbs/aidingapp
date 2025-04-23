@@ -75,7 +75,7 @@ class ServiceRequestsRelationManager extends RelationManager
                         $query->where('teams.id', auth()->user()->team?->getKey());
                     })
                         ->orWhereHas('priority.type.auditors', function (Builder $query): void {
-                            $query->where('teams.id', auth()->user()->team()?->getKey());
+                            $query->where('teams.id', auth()->user()->team?->getKey());
                         })
                         ->whereHas('respondent', function (Builder $query) {
                             $query
