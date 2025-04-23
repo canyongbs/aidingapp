@@ -158,7 +158,7 @@ class EditProfile extends Page
                             ->live()
                             ->lockedWithoutAnyLicenses(user: auth()->user(), licenses: [LicenseType::RecruitmentCrm]),
                         Placeholder::make('teams')
-                            ->label(str('Team')->plural($user->team->count()))
+                            ->label(str('Team'))
                             ->content($user->team?->name->join(', ', ' and '))
                             ->hidden(blank($user->team))
                             ->hint(fn (Get $get): string => $get('are_teams_visible_on_profile') ? 'Visible on profile' : 'Not visible on profile'),
