@@ -72,10 +72,10 @@ class ServiceRequestsRelationManager extends RelationManager
             ->modifyQueryUsing(function ($query) {
                 $query->when(! auth()->user()->isSuperAdmin(), function (Builder $q) {
                     return $q->whereHas('priority.type.managers', function (Builder $query): void {
-                        $query->where('teams.id', auth()->user()->team()->first()?->getKey());
+                        $query->where('teams.id', auth()->user()->team?->getKey());
                     })
                         ->orWhereHas('priority.type.auditors', function (Builder $query): void {
-                            $query->where('teams.id', auth()->user()->team()->first()?->getKey());
+                            $query->where('teams.id', auth()->user()->team()?->getKey());
                         })
                         ->whereHas('respondent', function (Builder $query) {
                             $query
