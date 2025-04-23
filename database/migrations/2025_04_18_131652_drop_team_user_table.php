@@ -49,11 +49,9 @@ return new class () extends Migration {
         Schema::create('team_user', function (Blueprint $table) {
             $table->id();
             $table->foreignUuid('team_id')
-                ->constrained('teams')
-                ->cascadeOnDelete();
+                ->constrained('teams');
             $table->foreignUuid('user_id')
-                ->constrained('users')
-                ->cascadeOnDelete();
+                ->constrained('users');
             $table->timestamps();
         });
     }
