@@ -91,26 +91,31 @@ customElements.define(
                         path: baseUrl + '/service-request-type/select',
                         name: 'create-service-request',
                         component: SelectServiceRequestType,
+                        meta: { requiresAuth: true },
                     },
                     {
                         path: baseUrl + '/service-request/create/:typeId',
                         name: 'create-service-request-from-type',
                         component: CreateServiceRequest,
+                        meta: { requiresAuth: true },
                     },
                     {
                         path: baseUrl + '/service-request/:serviceRequestId',
                         name: 'view-service-request',
                         component: ViewServiceRequest,
+                        meta: { requiresAuth: true },
                     },
                     {
                         path: baseUrl + '/services',
                         name: 'services',
                         component: Services,
+                        meta: { requiresAuth: true },
                     },
                     {
                         path: baseUrl + '/incidents',
                         name: 'incidents',
                         component: ComingSoon,
+                        meta: { requiresAuth: true },
                     },
                     {
                         path: baseUrl + '/assets',
