@@ -183,7 +183,6 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
             TiptapEditor::make('subject')
                 ->label('Subject')
                 ->placeholder('Enter the email subject here...')
-                ->required()
                 ->extraInputAttributes(['style' => 'min-height: 2rem; overflow-y:none;'])
                 ->disableToolbarMenus()
                 ->mergeTags(['created', 'updated', 'status', 'assigned to', 'title', 'type'])
@@ -193,7 +192,6 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
             TiptapEditor::make('body')
                 ->label('Body')
                 ->placeholder('Enter the email body here...')
-                ->required()
                 ->extraInputAttributes(['style' => 'min-height: 12rem;'])
                 ->mergeTags(['created', 'updated', 'status', 'assigned to', 'title', 'type'])
                 ->columnSpanFull(),
