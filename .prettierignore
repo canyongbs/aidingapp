@@ -3,3 +3,4 @@ resources/views/mail/**/*.blade.php
 resources/lang/**/*.php
 **/vendor
 app-modules/notifications/graphql/notifications.graphql
+app-modules/service-management/resources/views/mail/service-monitoring-mail.blade.php

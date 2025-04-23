@@ -34,62 +34,28 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Models;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\ServiceManagement\Database\Factories\ServiceMonitoringTargetFactory;
-use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
-use AidingApp\Team\Models\Team;
-use App\Models\BaseModel;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use OwenIt\Auditing\Contracts\Auditable;
-
-/**
- * @mixin IdeHelperServiceMonitoringTarget
- */
-class ServiceMonitoringTarget extends BaseModel implements Auditable
-{
-    /** @use HasFactory<ServiceMonitoringTargetFactory> */
-    use HasFactory;
-
-    use AuditableTrait;
-    use SoftDeletes;
-
-    protected $fillable = [
-        'name',
-        'description',
-        'domain',
-        'frequency',
-    ];
-
-    protected $casts = [
-        'frequency' => ServiceMonitoringFrequency::class,
-    ];
-
-    /**
-     * @return HasMany<HistoricalServiceMonitoring, $this>
-     */
-    public function histories(): HasMany
+return new class () extends Migration {
+    public function up(): void
     {
-        return $this->hasMany(HistoricalServiceMonitoring::class);
+        Schema::create('historical_service_monitorings', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+
+            $table->integer('response');
+            $table->float('response_time');
+            $table->boolean('succeeded');
+            $table->foreignUuid('service_monitoring_target_id')->constrained()->cascadeOnDelete();
+
+            $table->timestamps();
+            $table->softDeletes();
+        });
     }
 
-    public function teams(): BelongsToMany
+    public function down(): void
     {
-        return $this->belongsToMany(Team::class)
-            ->using(ServiceMonitoringTargetTeam::class)
-            ->withTimestamps();
+        Schema::dropIfExists('historical_service_monitorings');
     }
-
-    public function users(): BelongsToMany
-    {
-        return $this
-            ->belongsToMany(User::class)
-            ->using(ServiceMonitoringTargetUser::class)
-            ->withTimestamps();
-    }
-}
+};
