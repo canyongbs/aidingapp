@@ -175,7 +175,7 @@ test('Assign To Me action visible when the Service Request is unassigned and the
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    $serviceRequestType->managers()->associate($team);
+    $serviceRequestType->managers()->attach($team);
 
     actingAs($user);
 
