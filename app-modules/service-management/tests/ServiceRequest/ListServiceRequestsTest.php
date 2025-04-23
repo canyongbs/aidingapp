@@ -332,7 +332,7 @@ it('can filter service requests by assigned to with unassigned option', function
 
     $user->team()->associate($team)->save();
 
-    $secondUser->team()->associate($team);
+    $secondUser->team()->associate($team)->save();
 
     $user->refresh();
 
@@ -376,7 +376,7 @@ it('can filter service requests by assigned to with unassigned option', function
         ])
         ->create();
 
-    $changeAssignmentToSecondUser = ServiceRequestAssignment::factory()->state([
+    ServiceRequestAssignment::factory()->state([
         'service_request_id' => $assignedSecondRequest->getKey(),
         'user_id' => $secondUser->getKey(),
     ])

@@ -69,9 +69,9 @@ class EditServiceRequestTypeAssignmentsRequestFactory extends RequestFactory
         $userFactory = User::factory();
 
         if ($team) {
-            $userFactory = $userFactory->hasAttached(
+            $userFactory = $userFactory->for(
                 factory: $team,
-                relationship: 'teams'
+                relationship: 'team'
             );
         }
 

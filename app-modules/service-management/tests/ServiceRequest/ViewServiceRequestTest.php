@@ -191,7 +191,7 @@ test('view service request page visible if the user is an auditor of the service
 
     $team = Team::factory()->create();
 
-    $user->teams()->attach($team);
+    $user->team()->associate($team)->save();
 
     $user->refresh();
 
@@ -228,7 +228,7 @@ test('view service request page visible if the user is a manager of the service 
 
     $team = Team::factory()->create();
 
-    $user->teams()->attach($team);
+    $user->team()->associate($team)->save();
 
     $user->refresh();
 
