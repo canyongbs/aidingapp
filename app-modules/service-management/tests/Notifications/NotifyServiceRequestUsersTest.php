@@ -133,7 +133,7 @@ it('does not notify a user if they belong to a team managing a service request t
 
     Team::factory()
         ->hasAttached($serviceRequestType, [], 'manageableServiceRequestTypes')
-        ->for(User::factory(), 'users')
+        ->has(User::factory(), 'users')
         ->create();
 
     $serviceRequestPriority = ServiceRequestPriority::factory()
@@ -144,7 +144,7 @@ it('does not notify a user if they belong to a team managing a service request t
 
     Team::factory()
         ->hasAttached($anotherServiceRequestType, [], 'manageableServiceRequestTypes')
-        ->for(User::factory())
+        ->has(User::factory())
         ->create();
 
     ServiceRequestPriority::factory()
