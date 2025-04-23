@@ -93,6 +93,7 @@
         {
             label: 'Incidents',
             routeName: 'incidents',
+            visible: user !== null,
             command: () => router.push({ name: 'incidents' }),
         },
         {
