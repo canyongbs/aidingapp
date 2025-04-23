@@ -459,7 +459,7 @@
 
         <div class="bg-white" v-else>
             <div
-                v-if="!userIsAuthenticated && (requiresAuthentication || showLogin)"
+                v-if="!userIsAuthenticated && (requiresAuthentication || showLogin || route.meta.requiresAuth)"
                 class="bg-gradient flex flex-col items-center justify-start min-h-screen"
             >
                 <div
