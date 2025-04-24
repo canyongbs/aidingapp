@@ -159,7 +159,7 @@ class EditProfile extends Page
                             ->lockedWithoutAnyLicenses(user: auth()->user(), licenses: [LicenseType::RecruitmentCrm]),
                         Placeholder::make('teams')
                             ->label(str('Team'))
-                            ->content($user->team?->name->join(', ', ' and '))
+                            ->content($user->team?->name)
                             ->hidden(blank($user->team))
                             ->hint(fn (Get $get): string => $get('are_teams_visible_on_profile') ? 'Visible on profile' : 'Not visible on profile'),
                         //TODO: Right now this is not passed to the frontend
