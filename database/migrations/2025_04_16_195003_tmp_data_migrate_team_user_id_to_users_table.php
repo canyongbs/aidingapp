@@ -34,16 +34,17 @@
 </COPYRIGHT>
 */
 
-use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
+use AidingApp\Team\Models\TeamUser;
+use Illuminate\Database\Migrations\Migration;
 
 return new class () extends Migration {
     public function up(): void
     {
-        DB::table('team_user')->chunkById(100, function ($teamUser) {
+        DB::table('team_user')->chunkById(100, function ( $teamUser) {
             DB::table('users')
-                ->where('id', $teamUser->user_id)
-                ->update(['team_id' => $teamUser->team_id]);
+                ->where('id', $teamUser->user_id)  // @phpstan-ignore-line
+                ->update(['team_id' => $teamUser->team_id]);  // @phpstan-ignore-line
         });
     }
 
@@ -51,10 +52,10 @@ return new class () extends Migration {
     {
         DB::table('users')->chunkById(100, function ($teamUser) {
             DB::table('team_user')->insert([
-                'team_id' => $teamUser->team_id,
-                'user_id' => $teamUser->user_id,
-                'updated_at' => $teamUser->updated_at,
-                'created_at' => $teamUser->created_at,
+                'team_id' => $teamUser->team_id,  // @phpstan-ignore-line
+                'user_id' => $teamUser->user_id,  // @phpstan-ignore-line
+                'updated_at' => $teamUser->updated_at,  // @phpstan-ignore-line
+                'created_at' => $teamUser->created_at,  // @phpstan-ignore-line
             ]);
         });
     }
