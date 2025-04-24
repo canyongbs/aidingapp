@@ -34,14 +34,13 @@
 </COPYRIGHT>
 */
 
-use Illuminate\Support\Facades\DB;
-use AidingApp\Team\Models\TeamUser;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
 
 return new class () extends Migration {
     public function up(): void
     {
-        DB::table('team_user')->chunkById(100, function ( $teamUser) {
+        DB::table('team_user')->chunkById(100, function ($teamUser) {
             DB::table('users')
                 ->where('id', $teamUser->user_id)  // @phpstan-ignore-line
                 ->update(['team_id' => $teamUser->team_id]);  // @phpstan-ignore-line
