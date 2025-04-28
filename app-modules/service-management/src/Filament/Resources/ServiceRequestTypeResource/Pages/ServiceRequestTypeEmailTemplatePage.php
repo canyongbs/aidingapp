@@ -187,15 +187,16 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
                 ->placeholder('Enter the email subject here...')
                 ->extraInputAttributes(['style' => 'min-height: 2rem; overflow-y:none;'])
                 ->disableToolbarMenus()
-                ->mergeTags(['created', 'updated', 'status', 'assigned to', 'title', 'type'])
+                ->mergeTags(['service request number', 'created', 'updated', 'status', 'assigned to', 'title', 'type'])
                 ->showMergeTagsInBlocksPanel(false)
                 ->helperText('You may use “merge tags” to substitute information about a service request into your subject line. Insert a “{{“ in the subject line field to see a list of available merge tags'),
 
             TiptapEditor::make('body')
                 ->label('Body')
+                ->profile('email_template')
                 ->placeholder('Enter the email body here...')
                 ->extraInputAttributes(['style' => 'min-height: 12rem;'])
-                ->mergeTags(['created', 'updated', 'status', 'assigned to', 'title', 'type'])
+                ->mergeTags(['service request number', 'created', 'updated', 'status', 'assigned to', 'title', 'type'])
                 ->columnSpanFull(),
         ];
     }

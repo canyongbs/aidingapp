@@ -36,16 +36,22 @@
 
 namespace AidingApp\ServiceManagement\Notifications;
 
+use AidingApp\Engagement\Actions\GenerateEngagementBodyContent;
 use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
 use AidingApp\Notification\Notifications\Channels\MailChannel;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
+use AidingApp\ServiceManagement\Actions\GenerateServiceRequestTypeEmailTemplateContent;
+use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use App\Models\NotificationSetting;
 use Filament\Notifications\Notification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification as BaseNotification;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\HtmlString;
 
 class ServiceRequestCreated extends BaseNotification implements ShouldQueue
 {
@@ -72,11 +78,27 @@ class ServiceRequestCreated extends BaseNotification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
+        $template = ServiceRequestTypeEmailTemplate::query()
+            ->where('service_request_type_id', $this->serviceRequest->priority->type->id)
+            ->where('type', ServiceRequestEmailTemplateType::Created)
+            ->first();
+
+        if (! $template) {
+          return MailMessage::make()
+              ->settings($this->resolveNotificationSetting($notifiable))
+              ->subject("Service request {$this->serviceRequest->service_request_number} created")
+              ->line("The service request {$this->serviceRequest->service_request_number} has been created.")
+              ->action('View Service Request', ServiceRequestResource::getUrl('view', ['record' => $this->serviceRequest]));
+        }
+
+        $subject = $this->getSubject($template->subject);
+
+        $body = $this->getBody($template->body);
+
         return MailMessage::make()
             ->settings($this->resolveNotificationSetting($notifiable))
-            ->subject("Service request {$this->serviceRequest->service_request_number} created")
-            ->line("The service request {$this->serviceRequest->service_request_number} has been created.")
-            ->action('View Service Request', ServiceRequestResource::getUrl('view', ['record' => $this->serviceRequest]));
+            ->subject(strip_tags($subject))
+            ->content($body);
     }
 
     public function toDatabase(object $notifiable): array
@@ -90,5 +112,38 @@ class ServiceRequestCreated extends BaseNotification implements ShouldQueue
     private function resolveNotificationSetting(object $notifiable): ?NotificationSetting
     {
         return $this->serviceRequest->division?->notificationSetting?->setting;
+    }
+
+    public function getBody($body): HtmlString
+    {
+        return app(GenerateServiceRequestTypeEmailTemplateContent::class)(
+            $body,
+            $this->getMergeData(),
+            $this->serviceRequest,
+            'body',
+        );
+    }
+
+    public function getSubject($subject): HtmlString
+    {
+        return app(GenerateServiceRequestTypeEmailTemplateContent::class)(
+            $subject,
+            $this->getMergeData(),
+            $this->serviceRequest,
+            'subject',
+        );
+    }
+
+    public function getMergeData(): array
+    {
+        return [
+            'service request number' => $this->serviceRequest->service_request_number,
+            'created' => $this->serviceRequest->created_at,
+            'updated' => $this->serviceRequest->updated_at,
+            'assigned to' => $this->serviceRequest->respondent->full_name,
+            'status' => $this->serviceRequest->status->name,
+            'title' => $this->serviceRequest->title,
+            'type' => $this->serviceRequest->priority->type->name,
+        ];
     }
 }
