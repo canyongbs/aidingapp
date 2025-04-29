@@ -101,6 +101,31 @@ class ServiceRequestCreated extends BaseNotification implements ShouldQueue
             ->content($body);
     }
 
+    protected function injectButtonUrlIntoTiptapContent(array $content): array
+    {
+        if (!isset($content['content']) || !is_array($content['content'])) {
+            return $content;
+        }
+
+        $content['content'] = array_map(function ($block) {
+            if ($block['type'] === 'tiptapBlock' &&
+                ($block['attrs']['type'] ?? null) === 'serviceRequestTypeEmailTemplateButtonBlock') {
+                
+                $block['attrs']['data']['url'] = ServiceRequestResource::getUrl('view', [
+                    'record' => $this->serviceRequest,
+                ]);
+            }
+
+            if (isset($block['content']) && is_array($block['content'])) {
+                $block = $this->injectButtonUrlIntoTiptapContent($block);
+            }
+
+            return $block;
+        }, $content['content']);
+
+        return $content;
+    }
+
     public function toDatabase(object $notifiable): array
     {
         return Notification::make()
@@ -116,6 +141,10 @@ class ServiceRequestCreated extends BaseNotification implements ShouldQueue
 
     public function getBody($body): HtmlString
     {
+        if (is_array($body)) {
+            $body = $this->injectButtonUrlIntoTiptapContent($body);
+        }
+
         return app(GenerateServiceRequestTypeEmailTemplateContent::class)(
             $body,
             $this->getMergeData(),

@@ -1,6 +1,19 @@
-<div class="text-{{ $button_position }}">
+<div style="text-align: {{ $button_position }}">
     <a
-        class="inline-block rounded-md border-8 border-blue-600 bg-blue-600 px-6 py-3 text-center text-sm font-bold text-white transition-colors hover:border-blue-700 hover:bg-blue-700 dark:border-blue-500 dark:bg-blue-500 dark:hover:border-blue-600 dark:hover:bg-blue-600"
+        href="{{ $url ?? '#' }}"
+        style="display: inline-block; 
+               border-width: 8px; 
+               border-color: #3B82F6; 
+               background-color: #3B82F6; 
+               padding: 0.50rem 1rem;
+               font-size: 0.875rem; 
+               font-weight: 700; 
+               color: white; 
+               transition: border-color 0.3s ease, background-color 0.3s ease; 
+               text-decoration: none; 
+               border-radius: 0.375rem; 
+               cursor: pointer; 
+               box-sizing: border-box;"
         target="_blank"
     >
         {{ $button_text }}
