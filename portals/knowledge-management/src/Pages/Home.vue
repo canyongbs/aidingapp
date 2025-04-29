@@ -33,8 +33,8 @@
 -->
 <script setup>
     import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline';
-    import { defineProps, onMounted, ref, watch } from 'vue';
-    import { useRoute } from 'vue-router';
+    import { defineProps, nextTick, onMounted, ref, watch } from 'vue';
+    import { useRoute, useRouter } from 'vue-router';
     import Badge from '../Components/Badge.vue';
     import HelpCenter from '../Components/HelpCenter.vue';
     import SearchResults from '../Components/SearchResults.vue';
@@ -71,6 +71,7 @@
     const searchResults = ref(null);
     const selectedTags = ref([]);
     const route = useRoute();
+    const router = useRouter();
     const globalSearchInput = ref(null);
     const filter = ref('');
     const currentPage = ref(1);
@@ -80,6 +81,20 @@
     const totalArticles = ref(0);
     const fromArticle = ref(0);
     const toArticle = ref(0);
+
+    const filterRouteChange = (page = currentPage.value || 1) => {
+        router.push({
+            name: route.name,
+            params: route.params,
+            query: {
+                ...route.query,
+                page: page,
+                search: searchQuery.value || undefined,
+                tags: selectedTags.value.join(',') || undefined,
+                filter: filter.value || route.query.filter || undefined,
+            },
+        });
+    };
 
     const debounceSearch = debounce((value, page = 1) => {
         const { post } = consumer();
@@ -94,7 +109,7 @@
         post(props.searchUrl, {
             search: JSON.stringify(value),
             tags: selectedTags.value.join(','),
-            filter: filter.value,
+            filter: filter.value || route.query.filter || undefined,
             page: page,
         }).then((response) => {
             searchResults.value = response.data;
@@ -117,26 +132,93 @@
         toArticle.value = pagination.to;
     };
 
-    onMounted(function () {
-        if (route.query.search !== undefined) {
-            globalSearch(route.query.search);
-        }
-    });
-
     watch(
-        () => route.query.search,
-        (newVal, oldVal) => {
-            globalSearch(newVal);
+        () => route.query,
+        (newQuery) => {
+            const tags = newQuery.tags ? newQuery.tags.split(',') : [];
+
+            if (Object.keys(newQuery).length === 0) {
+                filter.value = '';
+                searchQuery.value = '';
+                selectedTags.value = [];
+            }
+
+            if (!newQuery.tags || tags.length === 0) {
+                selectedTags.value = [];
+            }
+
+            handleInitialQuery();
         },
     );
 
-    watch(searchQuery, (value) => {
-        debounceSearch(value);
+    onMounted(() => {
+        handleInitialQuery({ setFocus: true });
     });
 
-    watch(selectedTags, () => {
-        debounceSearch(searchQuery.value);
-    });
+    function handleInitialQuery({ setFocus = false } = {}) {
+        const search = route.query.search;
+        const tags = route.query.tags ? route.query.tags.split(',') : [];
+
+        if (search) {
+            currentPage.value = parseInt(route.query.page) || 1;
+            searchQuery.value = search;
+
+            if (setFocus) {
+                nextTick(() => {
+                    globalSearchInput.value?.focus();
+                });
+            }
+
+            debounceSearch(search, currentPage.value);
+        }
+
+        if (tags.length > 0) {
+            selectedTags.value = tags;
+            currentPage.value = parseInt(route.query.page) || 1;
+        }
+    }
+
+    watch(
+        () => [searchQuery.value, [...selectedTags.value]],
+        ([newSearch, newTags]) => {
+            const isSearchEmpty = !newSearch || newSearch.trim() === '';
+            const areTagsEmpty = newTags.length === 0;
+
+            if (isSearchEmpty && areTagsEmpty) {
+                router.push({
+                    name: route.name,
+                    params: route.params,
+                    query: {},
+                });
+                return;
+            }
+
+            const urlSearch = route.query.search || '';
+            const urlTags = route.query.tags ? route.query.tags.split(',') : [];
+
+            const isSearchChanged = newSearch !== urlSearch;
+            const isTagsChanged = newTags.length !== urlTags.length || newTags.some((tag, i) => tag !== urlTags[i]);
+            filter.value = route.query.filter || '';
+            if (isSearchChanged || isTagsChanged) {
+                router.push({
+                    name: route.name,
+                    params: route.params,
+                    query: {
+                        ...route.query,
+                        page: 1,
+                        search: newSearch || undefined,
+                        tags: newTags.join(',') || undefined,
+                        filter: filter.value || undefined,
+                    },
+                });
+
+                debounceSearch(newSearch, 1);
+            } else {
+                debounceSearch(searchQuery.value, route.query.page);
+            }
+        },
+        { immediate: false },
+    );
 
     function debounce(func, delay) {
         let timerId;
@@ -158,29 +240,25 @@
         }
     }
 
-    function globalSearch(value) {
-        searchQuery.value = value;
-        globalSearchInput.value.focus();
-    }
-
     const changeSearchFilter = (value) => {
         filter.value = value;
-        debounceSearch(searchQuery.value);
+        filterRouteChange(1);
+        debounceSearch(searchQuery.value, 1);
     };
 
     const fetchNextPage = () => {
         currentPage.value = currentPage.value !== lastPage.value ? currentPage.value + 1 : lastPage.value;
-        debounceSearch(searchQuery.value, currentPage.value);
+        fetchPage(currentPage.value);
     };
 
     const fetchPreviousPage = () => {
         currentPage.value = currentPage.value !== 1 ? currentPage.value - 1 : 1;
-        debounceSearch(searchQuery.value, currentPage.value);
+        fetchPage(currentPage.value);
     };
 
     const fetchPage = (page) => {
-        currentPage.value = page;
-        debounceSearch(searchQuery.value, currentPage.value);
+        filterRouteChange(page);
+        debounceSearch(searchQuery.value, page);
     };
 </script>
 
