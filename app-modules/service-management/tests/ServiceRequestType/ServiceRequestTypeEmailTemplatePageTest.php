@@ -64,8 +64,8 @@ test('it creates a ServiceRequestTypeEmailTemplate if it did not already exist',
         'type' => $type,
     ])
         ->fillForm([
-            "activeEmailTemplateRole.{$role->value}.subject" => $request['subject'],
-            "activeEmailTemplateRole.{$role->value}.body" => $request['body'],
+            "{$role->value}.subject" => $request['subject'],
+            "{$role->value}.body" => $request['body'],
         ])
         ->call('save')
         ->assertHasNoFormErrors();
@@ -94,8 +94,8 @@ test('it updates a ServiceRequestTypeEmailTemplate if it already exists', functi
         'type' => $emailTemplate->type,
     ])
         ->fillForm([
-            "activeEmailTemplateRole.{$emailTemplate->role->value}.subject" => $request['subject'],
-            "activeEmailTemplateRole.{$emailTemplate->role->value}.body" => $request['body'],
+            "{$emailTemplate->role->value}.subject" => $request['subject'],
+            "{$emailTemplate->role->value}.body" => $request['body'],
         ])
         ->call('save')
         ->assertHasNoFormErrors();

@@ -76,13 +76,12 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
         if (ServiceRequestTypeEmailTemplateTabs::active()) {
             return $form
                 ->schema([
-                    Tabs::make('EmailTemplateRoles')
-                        ->statePath('activeEmailTemplateRole')
+                    Tabs::make('Email template roles')
                         ->persistTab()
                         ->id('email-template-role-tabs')
                         ->tabs(array_map(
                             fn (ServiceRequestTypeEmailTemplateRole $role) => Tab::make($role->getLabel())
-                                ->schema($this->emailTemplateSchema($role->value))
+                                ->schema($this->getEmailTemplateFormSchemaForRole($role->value))
                                 ->statePath($role->value),
                             ServiceRequestTypeEmailTemplateRole::cases()
                         ))
@@ -133,6 +132,7 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
     public function save(bool $shouldRedirect = true, bool $shouldSendSavedNotification = true): void
     {
         $data = $this->form->getState();
+
         /** @var ServiceRequestType $record */
         $record = $this->getRecord();
 
@@ -148,36 +148,39 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
                 unset($this->template);
             }
         } else {
-            $filtered = array_filter(
-                $data['activeEmailTemplateRole'] ?? [],
-                fn ($templateData) => ! is_null($templateData['subject']) && ! is_null($templateData['body'])
-            );
-
             foreach (ServiceRequestTypeEmailTemplateRole::cases() as $role) {
-                if (! array_key_exists($role->value, $filtered)) {
+                $templateData = $data[$role->value] ?? null;
+            
+                if (
+                    ! $templateData ||
+                    (is_null($templateData['subject']) && is_null($templateData['body']))
+                ) {
                     continue;
                 }
-
-                $templateData = $filtered[$role->value];
-
-                if ($templateData) {
-                    ServiceRequestTypeEmailTemplate::updateOrCreate(
-                        [
-                            'service_request_type_id' => $record->getKey(),
-                            'type' => $this->type,
-                            'role' => $role,
-                        ],
-                        $templateData,
-                    );
+            
+                $template = ServiceRequestTypeEmailTemplate::firstOrNew([
+                    'service_request_type_id' => $record->getKey(),
+                    'type' => $this->type,
+                    'role' => $role,
+                ]);
+            
+                if (! $template->exists && (is_null($templateData['subject']) || is_null($templateData['body']))) {
+                    continue;
                 }
+            
+                $template->subject = $templateData['subject'] ?? $template->subject;
+                $template->body = $templateData['body'] ?? $template->body;
+            
+                $template->save();
             }
+            
         }
 
         $this->getSavedNotification()->send();
     }
 
     /** @return array<int, TiptapEditor> */
-    protected function emailTemplateSchema(string $role): array
+    protected function getEmailTemplateFormSchemaForRole(string $role): array
     {
         return [
             TiptapEditor::make('subject')
@@ -219,7 +222,7 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
 
             foreach (ServiceRequestTypeEmailTemplateRole::cases() as $role) {
                 if ($template = $templates[$role->value] ?? null) {
-                    $state['activeEmailTemplateRole'][$role->value] = $template->only(['subject', 'body']);
+                    $state[$role->value] = $template->only(['subject', 'body']);
                 }
             }
 
