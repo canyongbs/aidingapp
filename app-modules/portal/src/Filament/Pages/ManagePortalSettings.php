@@ -37,9 +37,7 @@
 namespace AidingApp\Portal\Filament\Pages;
 
 use AidingApp\Form\Enums\Rounding;
-use AidingApp\Portal\Actions\GeneratePortalEmbedCode;
 use AidingApp\Portal\Enums\GdprBannerButtonLabel;
-use AidingApp\Portal\Enums\PortalType;
 use AidingApp\Portal\Settings\PortalSettings;
 use App\Enums\Feature;
 use App\Filament\Forms\Components\ColorSelect;
@@ -49,11 +47,9 @@ use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
-use Filament\Infolists\Components\TextEntry;
 use Filament\Pages\SettingsPage;
 use FilamentTiptapEditor\TiptapEditor;
 use Illuminate\Support\Facades\Gate;
@@ -108,14 +104,6 @@ class ManagePortalSettings extends SettingsPage
                             ->hintIcon(fn (Select $component) => $component->isDisabled() ? 'heroicon-m-lock-closed' : null)
                             ->hintIconTooltip('Knowledge Management is not a part of your current subscription.')
                             ->columnSpan(1),
-                        TextInput::make('knowledge_management_portal_authorized_domain')
-                            ->label('Authorized Domain')
-                            ->url()
-                            ->visible(fn (Get $get) => $get('knowledge_management_portal_enabled'))
-                            ->disabled(! Gate::check(Feature::KnowledgeManagement->getGateName()))
-                            ->hintIcon(fn (TextInput $component) => $component->isDisabled() ? 'heroicon-m-lock-closed' : null)
-                            ->hintIconTooltip('Knowledge Management is not a part of your current subscription.')
-                            ->columnSpanFull(),
                         Toggle::make('knowledge_management_portal_requires_authentication')
                             ->label('Require Authentication')
                             ->visible(fn (Get $get) => $get('knowledge_management_portal_enabled'))
@@ -157,33 +145,6 @@ class ManagePortalSettings extends SettingsPage
                                 ->icon('heroicon-m-arrow-top-right-on-square')
                                 ->disabled(! Gate::check(Feature::KnowledgeManagement->getGateName()))
                                 ->openUrlInNewTab(),
-                            Action::make('embed_snippet')
-                                ->label('Embed Snippet')
-                                ->disabled(! Gate::check(Feature::KnowledgeManagement->getGateName()))
-                                ->infolist(
-                                    [
-                                        TextEntry::make('snippet')
-                                            ->label('Click to Copy')
-                                            ->state(function () {
-                                                $code = resolve(GeneratePortalEmbedCode::class)->handle(PortalType::KnowledgeManagement);
-
-                                                $state = <<<EOD
-                                                ```
-                                                {$code}
-                                                ```
-                                                EOD;
-
-                                                return str($state)->markdown()->toHtmlString();
-                                            })
-                                            ->copyable()
-                                            ->copyableState(fn () => resolve(GeneratePortalEmbedCode::class)->handle(PortalType::KnowledgeManagement))
-                                            ->copyMessage('Copied!')
-                                            ->copyMessageDuration(1500)
-                                            ->extraAttributes(['class' => 'embed-code-snippet']),
-                                    ]
-                                )
-                                ->modalSubmitAction(false)
-                                ->modalCancelActionLabel('Close'),
                         ])
                             ->visible(
                                 fn (Get $get) => $get('knowledge_management_portal_enabled') &&

@@ -122,7 +122,7 @@
 <template>
     <Menubar class="border border-none md:px-1.5 xl:px-0">
         <template #start>
-            <router-link :to="{ name: 'home' }" class="flex items-center">
+            <router-link :to="{ name: 'home', query: {} }" class="flex items-center">
                 <img :src="headerLogo" :alt="appName" class="h-12 m-0" />
             </router-link>
         </template>

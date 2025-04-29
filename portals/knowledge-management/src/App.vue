@@ -32,15 +32,15 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { defineProps, onMounted, ref, watch } from 'vue';
-    import { useRoute } from 'vue-router';
+    import { FormKit } from '@formkit/vue';
+    import { onMounted, ref, watch } from 'vue';
+    import { RouterView, useRoute } from 'vue-router';
     import AppLoading from './Components/AppLoading.vue';
     import Footer from './Components/Footer.vue';
     import Header from './Components/Header.vue';
     import axios from './Globals/Axios.js';
     import { consumer } from './Services/Consumer.js';
     import determineIfUserIsAuthenticated from './Services/DetermineIfUserIsAuthenticated.js';
-    import getAppContext from './Services/GetAppContext.js';
     import { useAuthStore } from './Stores/auth.js';
     import { useFeatureStore } from './Stores/feature.js';
     import { useTokenStore } from './Stores/token.js';
@@ -111,12 +111,6 @@
     const route = useRoute();
 
     onMounted(async () => {
-        const { isEmbeddedInAidingApp } = getAppContext(props.accessUrl);
-
-        if (isEmbeddedInAidingApp) {
-            await axios.get(props.appUrl + '/sanctum/csrf-cookie');
-        }
-
         await determineIfUserIsAuthenticated(props.userAuthenticationUrl).then((response) => {
             userIsAuthenticated.value = response;
         });
@@ -315,12 +309,6 @@
 
         const { setHasServiceManagement, setHasAssets, setHasLicense, setHasTasks } = useFeatureStore();
 
-        const { isEmbeddedInAidingApp } = getAppContext(props.accessUrl);
-
-        if (isEmbeddedInAidingApp) {
-            await axios.get(props.appUrl + '/sanctum/csrf-cookie');
-        }
-
         if (authentication.value.isRequested) {
             $data = {
                 code: formData.code,
@@ -396,7 +384,6 @@
         axios
             .post(authentication.value.requestUrl, {
                 email: formData.email,
-                isSpa: isEmbeddedInAidingApp,
             })
             .then((response) => {
                 if (!response.data.authentication_url) {
@@ -452,7 +439,6 @@
         <div>
             <link rel="stylesheet" v-bind:href="hostUrl + '/js/portals/knowledge-management/style.css'" />
         </div>
-
         <div v-if="loading">
             <AppLoading />
         </div>
