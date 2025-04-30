@@ -183,3 +183,54 @@ ARG TOTAL_QUEUE_WORKERS=3
 COPY ./docker/generate-queues.sh /generate-queues.sh
 COPY ./docker/templates/ /tmp/s6-overlay-templates
 RUN chmod +x /generate-queues.sh
+
+FROM base AS development
+
+# Fix permission issues in development by setting the "webuser"
+# user to the same user and group that is running docker.
+COPY ./docker/set-id /set-id
+
+ARG USER_ID
+ARG GROUP_ID
+RUN set-id webuser ${USER_ID} ${GROUP_ID} ; \
+    rm /set-id
+
+RUN if [[ -z "$MULTIPLE_DEVELOPMENT_QUEUES" ]] ; then \
+    /generate-queues.sh "default" "\$SQS_QUEUE" \
+    && /generate-queues.sh "landlord" "\$LANDLORD_SQS_QUEUE" \
+    && /generate-queues.sh "outbound-communication" "\$OUTBOUND_COMMUNICATION_QUEUE" \
+    && /generate-queues.sh "audit" "\$AUDIT_QUEUE_QUEUE" \
+    && /generate-queues.sh "import-export" "\$IMPORT_EXPORT_QUEUE" \
+    ; else \
+    /generate-queues.sh "default" "\$SQS_QUEUE" \
+    ; fi
+
+RUN rm /generate-queues.sh
+
+RUN chown -R "$PUID":"$PGID" /var/www/html \
+    && chmod g+s -R /var/www/html
+
+FROM base AS deploy
+
+RUN /generate-queues.sh "default" "\$SQS_QUEUE" \
+    && /generate-queues.sh "landlord" "\$LANDLORD_SQS_QUEUE" \
+    && /generate-queues.sh "outbound-communication" "\$OUTBOUND_COMMUNICATION_QUEUE" \
+    && /generate-queues.sh "audit" "\$AUDIT_QUEUE_QUEUE" \
+    && /generate-queues.sh "import-export" "\$IMPORT_EXPORT_QUEUE" 
+
+RUN rm /generate-queues.sh
+
+COPY --chown=$PUID:$PGID . /var/www/html
+
+RUN npm ci --ignore-scripts \
+    && rm -rf /var/www/html/vendor \
+    && composer install --no-dev --no-interaction --no-progress --no-suggest --no-scripts --optimize-autoloader --apcu-autoloader \
+    && npm run build \
+    && npm ci --ignore-scripts --omit=dev
+
+RUN chown -R "$PUID":"$PGID" /var/www/html \
+    && chgrp "$PGID" /var/www/html/storage/logs \
+    && chmod g+s /var/www/html/storage/logs \
+    && find /var/www/html -type d -print0 | xargs -0 chmod 755 \
+    && find /var/www/html \( -path /var/www/html/docker -o -path /var/www/html/node_modules -o -path /var/www/html/vendor \) -prune -o -type f -print0 | xargs -0 chmod 644 \
+    && chmod -R ug+rwx /var/www/html/storage /var/www/html/bootstrap/cache
