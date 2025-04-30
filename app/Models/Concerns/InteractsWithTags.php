@@ -51,6 +51,9 @@ trait InteractsWithTags
         return str((new self())->getMorphClass())->classBasename()->headline();
     }
 
+    /**
+     * @return MorphToMany<Tag, $this>
+     */
     public function tags(): MorphToMany
     {
         return $this->morphToMany(Tag::class, 'taggable');

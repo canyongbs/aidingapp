@@ -36,6 +36,9 @@
 
 namespace AidingApp\Audit\Overrides;
 
+use \Illuminate\Database\Eloquent\Collection;
+use \Illuminate\Database\Eloquent\Model;
+use \Illuminate\Database\Eloquent\Relations\Relation;
 use AidingApp\Audit\Overrides\Concerns\AttachOverrides;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany as IlluminateBelongsToMany;
 

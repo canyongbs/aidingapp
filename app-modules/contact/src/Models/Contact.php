@@ -206,7 +206,7 @@ class Contact extends Authenticatable implements Auditable, Subscribable, Educat
     }
 
     /**
-     * @return MorphToMany<EngagementFile, $this>
+     * @return MorphToMany<EngagementFile, $this, covariant EngagementFileEntities>
      */
     public function engagementFiles(): MorphToMany
     {
@@ -254,7 +254,7 @@ class Contact extends Authenticatable implements Auditable, Subscribable, Educat
     }
 
     /**
-     * @return MorphToMany<User, $this>
+     * @return MorphToMany<User, $this, covariant Subscription>
      */
     public function subscribedUsers(): MorphToMany
     {

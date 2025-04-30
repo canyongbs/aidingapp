@@ -53,7 +53,7 @@ class ServiceRequestTypeFeedbackIsOn
         $serviceRequest = $request->route('serviceRequest');
 
         if (app(LicenseSettings::class)->data->addons->feedbackManagement) {
-            if ($serviceRequest && $serviceRequest?->priority?->type?->has_enabled_feedback_collection) {
+            if ($serviceRequest && $serviceRequest->priority?->type?->has_enabled_feedback_collection) {
                 return $next($request);
             }
         }

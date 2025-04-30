@@ -57,6 +57,9 @@ class ChangeRequestType extends BaseModel implements Auditable
         'number_of_required_approvals',
     ];
 
+    /**
+     * @return BelongsToMany<User, $this>
+     */
     public function userApprovers(): BelongsToMany
     {
         return $this->belongsToMany(User::class);
