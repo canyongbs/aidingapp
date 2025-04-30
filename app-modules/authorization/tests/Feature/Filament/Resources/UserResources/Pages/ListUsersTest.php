@@ -159,24 +159,24 @@ it('can filter users by teams', function () {
 
     $userWithTeam1 = User::factory()
         ->count(5)
-        ->hasAttached($team1, [], 'teams')
+        ->for($team1)
         ->create();
 
     $userWithTeam2 = User::factory()
         ->count(5)
-        ->hasAttached($team2, [], 'teams')
+        ->for($team2)
         ->create();
 
     livewire(ListUsers::class)
         ->set('tableRecordsPerPage', 16)
         ->assertCanSeeTableRecords($userWithoutTeam->merge($userWithTeam1)->merge($userWithTeam2))
-        ->filterTable('teams', [$team1->getKey()])
+        ->filterTable('team', [$team1->getKey()])
         ->assertCanSeeTableRecords($userWithTeam1)
         ->assertCanNotSeeTableRecords($userWithoutTeam->merge($userWithTeam2))
-        ->filterTable('teams', [$team2->getKey()])
+        ->filterTable('team', [$team2->getKey()])
         ->assertCanSeeTableRecords($userWithTeam2)
         ->assertCanNotSeeTableRecords($userWithoutTeam->merge($userWithTeam1))
-        ->filterTable('teams', [$team2->getKey(), $team1->getKey()])
+        ->filterTable('team', [$team2->getKey(), $team1->getKey()])
         ->assertCanSeeTableRecords($userWithTeam1->merge($userWithTeam2))
         ->assertCanNotSeeTableRecords($userWithoutTeam);
 });

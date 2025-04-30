@@ -57,7 +57,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\Task\Models\Task;
 use AidingApp\Team\Models\Team;
-use AidingApp\Team\Models\TeamUser;
 use AidingApp\Timeline\Models\Contracts\HasFilamentResource;
 use App\Filament\Resources\UserResource;
 use App\Support\HasAdvancedFilter;
@@ -315,14 +314,11 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
     }
 
     /**
-     * @return BelongsToMany<Team, $this>
+     * @return BelongsTo<Team, $this>
      */
-    public function teams(): BelongsToMany
+    public function team(): BelongsTo
     {
-        return $this
-            ->belongsToMany(Team::class, 'team_user', 'user_id', 'team_id')
-            ->using(TeamUser::class)
-            ->withTimestamps();
+        return $this->belongsTo(Team::class, 'team_id');
     }
 
     /**
@@ -455,9 +451,7 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
 
     public function assignTeam($teamId): void
     {
-        $this->teams()->detach();
-
-        $this->teams()->attach($teamId);
+        $this->team()->associate($teamId)->save();
     }
 
     /**

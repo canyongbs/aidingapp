@@ -34,47 +34,28 @@
 </COPYRIGHT>
 */
 
-namespace App\Notifications;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
 
-use AidingApp\Notification\Notifications\Attributes\SystemNotification;
-use AidingApp\Notification\Notifications\Messages\MailMessage;
-use App\Models\NotificationSetting;
-use App\Models\User;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Notification;
-use Illuminate\Support\Facades\URL;
-
-#[SystemNotification]
-class SetPasswordNotification extends Notification implements ShouldQueue
-{
-    use Queueable;
-
-    /**
-     * @return array<int, string>
-     */
-    public function via(object $notifiable): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return ['mail'];
+        DB::table('team_user')->chunkById(100, function ($teamUser) {
+            DB::table('users')
+                ->where('id', $teamUser->user_id)  // @phpstan-ignore-line
+                ->update(['team_id' => $teamUser->team_id]);  // @phpstan-ignore-line
+        });
     }
 
-    public function toMail(object $notifiable): MailMessage
+    public function down(): void
     {
-        return MailMessage::make()
-            ->settings($this->resolveNotificationSetting($notifiable))
-            ->line('A new account has been created for you.')
-            ->action('Set up your password', url(URL::temporarySignedRoute(
-                name: 'login.one-time',
-                expiration: now()->addDay(),
-                parameters: ['user' => $notifiable],
-                absolute: false,
-            )))
-            ->line('For security reasons, this link will expire in 24 hours.')
-            ->line('Please contact support if you need a new link or have any issues setting up your account.');
+        DB::table('users')->chunkById(100, function ($teamUser) {
+            DB::table('team_user')->insert([
+                'team_id' => $teamUser->team_id,  // @phpstan-ignore-line
+                'user_id' => $teamUser->user_id,  // @phpstan-ignore-line
+                'updated_at' => $teamUser->updated_at,  // @phpstan-ignore-line
+                'created_at' => $teamUser->created_at,  // @phpstan-ignore-line
+            ]);
+        });
     }
-
-    private function resolveNotificationSetting(User $notifiable): ?NotificationSetting
-    {
-        return $notifiable->team?->division?->notificationSetting?->setting;
-    }
-}
+};

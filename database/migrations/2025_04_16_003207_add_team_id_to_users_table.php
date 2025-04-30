@@ -34,30 +34,25 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Team\Models;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\Team\Observers\TeamUserObserver;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\Pivot;
-
-/**
- * @mixin IdeHelperTeamUser
- */
-#[ObservedBy([TeamUserObserver::class])]
-class TeamUser extends Pivot
-{
-    use HasUuids;
-
-    public function team(): BelongsTo
+return new class () extends Migration {
+    public function up(): void
     {
-        return $this->BelongsTo(Team::class);
+        Schema::table('users', function (Blueprint $table) {
+            $table->foreignUuid('team_id')
+                ->nullable()
+                ->constrained('teams');
+        });
     }
 
-    public function user(): BelongsTo
+    public function down(): void
     {
-        return $this->belongsTo(User::class);
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropForeign(['team_id']);
+            $table->dropColumn('team_id');
+        });
     }
-}
+};

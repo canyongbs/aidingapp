@@ -158,7 +158,7 @@ test('CreateServiceRequest is gated with proper access control', function () {
 
     $team = Team::factory()->create();
 
-    $user->teams()->attach($team);
+    $user->team()->associate($team)->save();
 
     $user->refresh();
 
@@ -223,7 +223,7 @@ test('CreateServiceRequest is gated with proper feature access control', functio
 
     $team = Team::factory()->create();
 
-    $user->teams()->attach($team);
+    $user->team()->associate($team)->save();
 
     $user->refresh();
 
@@ -293,7 +293,7 @@ test('cannot create service requests if user is manager of any service request t
 
     $team = Team::factory()->create();
 
-    $user->teams()->attach($team);
+    $user->team()->associate($team)->save();
 
     $user->refresh();
 
@@ -321,7 +321,7 @@ test('displays only service request types managed by the current user', function
 
     $team = Team::factory()->create();
 
-    $user->teams()->attach($team);
+    $user->team()->associate($team)->save();
 
     $user->refresh();
 
@@ -356,7 +356,7 @@ test('create service requests if user is manager of any service request type', f
 
     $team = Team::factory()->create();
 
-    $user->teams()->attach($team);
+    $user->team()->associate($team)->save();
 
     $user->refresh();
 
@@ -405,7 +405,7 @@ test('validate service requests type if user is manager of any service request t
 
     $team = Team::factory()->create();
 
-    $user->teams()->attach($team);
+    $user->team()->associate($team)->save();
 
     $user->refresh();
 
@@ -447,7 +447,7 @@ test('assignment type individual manager will auto assign to new service request
 
     $team = Team::factory()->create();
 
-    $user->teams()->attach($team);
+    $user->team()->associate($team)->save();
 
     $user->refresh();
 
@@ -487,9 +487,9 @@ test('assignment type individual manager will auto assign to new service request
 
 test('assignment type round robin will auto-assign to new service requests', function () {
     asSuperAdmin();
-    $factoryUsers = User::factory()->licensed(LicenseType::cases())->count(3)->create();
+
     $team = Team::factory()
-        ->hasAttached($factoryUsers, [], 'users')->create();
+        ->has(User::factory()->licensed(LicenseType::cases())->count(3), 'users')->create();
 
     $serviceRequestTypeWithManager = ServiceRequestType::factory()
         ->hasAttached(
@@ -554,10 +554,12 @@ test('assignment type round robin will auto-assign to new service requests', fun
 
 test('assignment type workload will auto-assign to new service requests', function () {
     asSuperAdmin();
-    $factoryUsers = User::factory()->licensed(LicenseType::cases())->count(5)->create();
-    $factoryUsers->each(fn ($user) => $user->givePermissionTo('service_request.*.update'));
+
     $team = Team::factory()
-        ->hasAttached($factoryUsers, [], 'users')->create();
+        ->has(User::factory()->licensed(LicenseType::cases())->count(5), 'users')->create();
+
+    $factoryUsers = $team->users;
+    $factoryUsers->each(fn ($user) => $user->givePermissionTo('service_request.*.update'));
 
     $serviceRequestTypeWithManager = ServiceRequestType::factory()
         ->hasAttached(

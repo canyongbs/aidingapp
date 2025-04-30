@@ -46,6 +46,7 @@ use App\Models\BaseModel;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @mixin IdeHelperTeam
@@ -57,12 +58,12 @@ class Team extends BaseModel
         'description',
     ];
 
-    public function users(): BelongsToMany
+    /**
+     * @return HasMany<User, $this>
+     */
+    public function users(): HasMany
     {
-        return $this
-            ->belongsToMany(User::class)
-            ->using(TeamUser::class)
-            ->withTimestamps();
+        return $this->hasMany(User::class);
     }
 
     public function serviceMonitoringTargets(): BelongsToMany

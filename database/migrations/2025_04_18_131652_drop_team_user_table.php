@@ -34,17 +34,25 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Team\Observers;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\Team\Models\TeamUser;
-
-class TeamUserObserver
-{
-    //TODO: remove this if we support multiple teams
-    public function creating(TeamUser $teamUser)
+return new class () extends Migration {
+    public function up(): void
     {
-        if ($teamUser->user->teams()->count() > 0) {
-            return false;
-        }
+        Schema::dropIfExists('team_user');
     }
-}
+
+    public function down(): void
+    {
+        Schema::create('team_user', function (Blueprint $table) {
+            $table->id();
+            $table->foreignUuid('team_id')
+                ->constrained('teams');
+            $table->foreignUuid('user_id')
+                ->constrained('users');
+            $table->timestamps();
+        });
+    }
+};

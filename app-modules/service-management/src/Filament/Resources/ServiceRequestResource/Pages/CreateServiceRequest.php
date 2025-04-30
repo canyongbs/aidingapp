@@ -72,7 +72,7 @@ class CreateServiceRequest extends CreateRecord
                     ->label('Division')
                     ->required()
                     ->exists((new Division())->getTable(), 'id')
-                    ->default(auth()->user()->teams()->count() ? auth()->user()?->teams()->first()?->division?->id : ''),
+                    ->default(auth()->user()->team()->count() ? auth()->user()?->team?->division?->id : ''),
                 Select::make('status_id')
                     ->relationship('status', 'name')
                     ->label('Status')
@@ -93,7 +93,7 @@ class CreateServiceRequest extends CreateRecord
                         Select::make('type_id')
                             ->options(ServiceRequestType::when(! auth()->user()->isSuperAdmin(), function (Builder $query) {
                                 $query->whereHas('managers', function (Builder $query): void {
-                                    $query->where('teams.id', auth()->user()->teams()->first()?->getKey());
+                                    $query->where('teams.id', auth()->user()->team?->getKey());
                                 });
                             })
                                 ->pluck('name', 'id'))
