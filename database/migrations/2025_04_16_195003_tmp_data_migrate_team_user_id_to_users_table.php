@@ -41,9 +41,11 @@ return new class () extends Migration {
     public function up(): void
     {
         DB::table('team_user')->chunkById(100, function ($teamUser) {
-            DB::table('users')
-                ->where('id', $teamUser->user_id)  // @phpstan-ignore-line
-                ->update(['team_id' => $teamUser->team_id]);  // @phpstan-ignore-line
+            $teamUser->each(function ($teamUser) {
+                DB::table('users')
+                    ->where('id', $teamUser->user_id)  // @phpstan-ignore-line
+                    ->update(['team_id' => $teamUser->team_id]);  // @phpstan-ignore-line
+            });
         });
     }
 
