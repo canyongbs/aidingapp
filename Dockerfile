@@ -140,24 +140,9 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/* /var/www/html/* \
     && rm -f /etc/nginx/sites-enabled/default
 
-COPY docker/etc/nginx/ /etc/nginx/
-
-COPY --chmod=644 ./docker/cron.d/ /etc/cron.d/
-
-COPY --chmod=755 docker/etc/s6-overlay/ /etc/s6-overlay/
-COPY ./docker/templates/ /tmp/s6-overlay-templates
-
 COPY --chmod=755 docker/etc/php/8.4/cli/php.ini /etc/php/8.4/cli/php.ini
 
-COPY --from=ghcr.io/roadrunner-server/roadrunner:2024.3.5 --chown=$PUID:$PGID --chmod=0755 /usr/bin/rr /usr/local/bin/rr
-
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
-
-ARG TOTAL_QUEUE_WORKERS=3
-
-COPY ./docker/generate-queues.sh /generate-queues.sh
-COPY ./docker/templates/ /tmp/s6-overlay-templates
-RUN chmod +x /generate-queues.sh
 
 WORKDIR /var/www/html
 
@@ -179,11 +164,28 @@ RUN echo "source $NVM_DIR/nvm.sh \
     && nvm use default \
     && npm install -g npm@$NPM_VERSION" | bash
 
-EXPOSE 80 443
-
 ENTRYPOINT ["/init"]
 
-FROM base AS development
+FROM base AS base-setup
+
+ARG TOTAL_QUEUE_WORKERS=3
+
+COPY ./docker/generate-queues.sh /generate-queues.sh
+COPY ./docker/templates/ /tmp/s6-overlay-templates
+RUN chmod +x /generate-queues.sh
+
+COPY docker/etc/nginx/ /etc/nginx/
+
+COPY --chmod=644 ./docker/cron.d/ /etc/cron.d/
+
+COPY --chmod=755 docker/etc/s6-overlay/ /etc/s6-overlay/
+COPY ./docker/templates/ /tmp/s6-overlay-templates
+
+COPY --from=ghcr.io/roadrunner-server/roadrunner:2024.3.5 --chown=$PUID:$PGID --chmod=0755 /usr/bin/rr /usr/local/bin/rr
+
+EXPOSE 80 443
+
+FROM base-setup AS development
 
 # Fix permission issues in development by setting the "webuser"
 # user to the same user and group that is running docker.
@@ -209,7 +211,7 @@ RUN rm /generate-queues.sh
 RUN chown -R "$PUID":"$PGID" /var/www/html \
     && chmod g+s -R /var/www/html
 
-FROM base AS deploy
+FROM base-setup AS deploy
 
 RUN /generate-queues.sh "default" "\$SQS_QUEUE" \
     && /generate-queues.sh "landlord" "\$LANDLORD_SQS_QUEUE" \
@@ -233,3 +235,5 @@ RUN chown -R "$PUID":"$PGID" /var/www/html \
     && find /var/www/html -type d -print0 | xargs -0 chmod 755 \
     && find /var/www/html \( -path /var/www/html/docker -o -path /var/www/html/node_modules -o -path /var/www/html/vendor \) -prune -o -type f -print0 | xargs -0 chmod 644 \
     && chmod -R ug+rwx /var/www/html/storage /var/www/html/bootstrap/cache
+
+FROM base AS cli-local-tooling
