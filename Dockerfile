@@ -144,6 +144,8 @@ COPY --chmod=755 docker/etc/php/8.4/cli/php.ini /etc/php/8.4/cli/php.ini
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
+COPY --chmod=755 docker/etc/s6-overlay/ /etc/s6-overlay/
+
 WORKDIR /var/www/html
 
 # Install JS package management
@@ -178,8 +180,8 @@ COPY docker/etc/nginx/ /etc/nginx/
 
 COPY --chmod=644 ./docker/cron.d/ /etc/cron.d/
 
-COPY --chmod=755 docker/etc/s6-overlay/ /etc/s6-overlay/
-COPY ./docker/templates/ /tmp/s6-overlay-templates
+COPY --chmod=755 docker/web/etc/s6-overlay/ /etc/s6-overlay/
+COPY --chmod=755 docker/scheduler/etc/s6-overlay/ /etc/s6-overlay/
 
 COPY --from=ghcr.io/roadrunner-server/roadrunner:2024.3.5 --chown=$PUID:$PGID --chmod=0755 /usr/bin/rr /usr/local/bin/rr
 
