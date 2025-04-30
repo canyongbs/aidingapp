@@ -4,9 +4,6 @@
 * [Docker](https://docs.docker.com/get-docker/) version `26.0.0` or higher
 * [Docker Compose](https://docs.docker.com/compose/install/) version `2.25.0` or higher (It is most likely that the way you installed Docker already came with Docker Compose, so on most systems you probably need not install this)
 * [NVM (Node Version Manager)](https://github.com/nvm-sh/nvm) (Optional, but recommended)
-* Spin CLI
-* [Spin MacOS](https://serversideup.net/open-source/spin/docs/installation/install-macos#install-docker-desktop)
-* [Spin Linux](https://serversideup.net/open-source/spin/docs/installation/install-linux)
 
 ### Pre-Setup
 
@@ -38,9 +35,6 @@ In order to access the application in a web browser either in local or remote de
 127.0.0.1 aidingapp.local
 127.0.0.1 mail.tools.aidingapp.local
 127.0.0.1 redis.tools.aidingapp.local
-127.0.0.1 storage.tools.aidingapp.local
-127.0.0.1 media.tools.aidingapp.local
-127.0.0.1 aidingapp-minio
 127.0.0.1 test.aidingapp.local
 ```
 
@@ -48,74 +42,89 @@ In order to access the application in a web browser either in local or remote de
 
 ### Setup
 
-#### 1. Set up the `.env` file
-First, create an `.env` file based on `.env.example`
+Going forward this document will make reference to the `pls` command.
+
+The `pls` command is a custom made script that acts as a tool to run our sometimes complex `docker compose` and other related commands. It is located in the root directory of the project and can be run by using `./pls`.
+
+It comes with an install command `./pls install` that will "install" the current version into your home directory `bin` folder so that it can be used like a regular command `pls`. This documentation will assume you have done so.
+
+#### 1. Initial setup
+
+The following instructions use a combination of commands run on the host and commands run in helper containers to faciliate the initial setup of the project.
+
+Typically these commands only need to be run when first setting up the project. All further work can be done while within a shell of the `app` container.
+
+> Note: The commands run in helper containers, like `pls composersetup`, are done in containers to prevent the need to have OS dependancies installed on the host. They also run processes to ensure file permissions and further setup are correct.
+>
+> As mentioned above, typically you only need run these commands when first setting up the project. Further composer installs, npm installs, and other commands can typically be done from within a shell of the `app` container. But sometimes if something gets broken with dependancies the respective `composersetup` and `npmsetup` commands can be used to re-install while the `app` contaner is shutdown.
+
+##### 1.1 Create a `.env`
+
+Create an `.env` file based on `.env.example`
 ```bash
 cp .env.example .env
 ```
 
----
-
-#### 2. Install NPM Dependencies
+##### 1.2 Install Composer Dependencies
 
 ```bash
-npm ci
-npm run build
+pls composersetup
 ```
 
-#### 3. Install Composer Dependencies
+##### 1.3 JS Dependencies Installation and Build
 
 ```bash
-docker run --rm \
-    -u "$(id -u):$(id -g)" \
-    -v "$(pwd):/var/www/html" \
-    -w /var/www/html \
-    laravelsail/php82-composer:latest \
-    composer install --ignore-platform-reqs
+pls npmsetup
+```
+
+##### 1.4 Generate an Encryption Key
+
+```bash
+pls ih php artisan key:generate
 ```
 
 ---
 
-#### 4. Start the containers and open a shell into the main PHP container
+#### 2. Start the containers and open a shell into the main PHP container
 
 Run the following command to start the containers:
 
 ```bash
-spin up -d
+pls up -d
 ```
 
 Once the containers are started you can now start a shell into the main PHP container by running the following command:
 
 ```bash
-spin exec -it -u webuser aidingapp.local bash
+pls shell
 ```
 
 All following commands will and should be run from within the PHP container.
 
 ---
 
-#### 5. Set up the application
+#### 4. Set up the application
 
 We will set up the application by running the following commands:
 ```bash
 php artisan migrate:landlord:fresh
-php artisan key:generate
-php artisan queue:restart
-php artisan schedule:interrupt
-npm run build
 ```
 
 The above commands will set up the application for the "landlord" database. The landlord database is in charge of holding all information on tenants. Next we will set up a tenant.
+
+> Note: This command above actually in most cases is not needed since the Landlord is migrated on initial startup of the web service in local development
 
 ```bash
 php artisan tenants:create [A Name for the Tenant] [A domain for the tenant]
 ```
 
+Example : `php artisan tenants:create test test.aidingapp.local`
+
 These commands will create a new tenant with the name and domain you supplied and then refresh and seed the tenant's database.
 
 After this the application should be accessible at the domain you supplied.
 
-Spin can be stopped by running `spin stop` and turning back on by running `spin up -d`
+The containers can be stopped by running `pls stop` and turned back on by running `pls up -d`
 
 Setup is now complete.
 
@@ -126,53 +135,59 @@ Setup is now complete.
 Within the `.env.example` (and within the `.env` after you copy it) should exist the following variables:
 
 ```dotenv
-FORWARD_DB_PORT=5434
-FORWARD_REDIS_PORT=63793
+FORWARD_DB_PORT=3306
+FORWARD_DB_PORT_TEST=3309
+FORWARD_REDIS_PORT=6379
+FORWARD_MEILISEARCH_PORT=7700
+FORWARD_MAILPIT_PORT=1025
+FORWARD_MAILPIT_DASHBOARD_PORT=8025
 ```
 
-Those variable will allow you to edit particular settings and forwarding ports for your local containers. A great example of this usage is within the database section below.
+Those variables will allow you to edit particular settings and forwarding ports for your local containers. A great example of this usage is within the database section below.
 
 ### Accessing the Database
-Within the containers, Postgres lives on port 5432. And by default it can be accessed outside of the containers on the port set with `FORWARD_DB_PORT`.
+Within the containers, MySQL lives on port 3306. And by default it can be accessed outside of the containers on port 3308 as well.
 
-If the port set with FORWARD_DB_PORT is already in use on your system or you prefer to use another port,
-you can set the `FORWARD_DB_PORT` in your `.env` file to whatever available port you want.
+If port 3308 is already in use on your system or you prefer to use another port,
+you can set the `FORWARD_DB_PORT` in your `.env` file to whatever available
+port you want.
 
-### Minio (S3 Compatible Storage)
-Minio is a S3 compatible storage solution that is used for storing files locally.
-
-When first setting up you will need to create a bucket. This can be done by going to `storage.tools.aidingapp.local` in your browser and logging in with `aidingapp` as the username and `password` as the password. Once logged in, you can create a bucket.
-
-By default, the application is set up in the `.env.example` to reference a bucket named `local`. Create a bucket with this name in Minio. Then change its access policy to "Custom" with the following policy configuration:
+### Storage
+This application makes use of S3 for storage. If you would like to use local storage. In order to do so, create a new public s3 bucket with the following policy:
 
 ```json
 {
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Sid": "AllowPublicRead",
-            "Effect": "Allow",
-            "Principal": {
-                "AWS": [
-                    "*"
-                ]
-            },
-            "Action": [
-                "s3:GetObject"
-            ],
-            "Resource": [
-                "arn:aws:s3:::local/PUBLIC/*"
-            ]
-        }
-    ]
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowPublicRead",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "*"
+      },
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::[YOUR_S3_BUCKET_NAME]/PUBLIC/*"
+    }
+  ]
 }
+```
+
+After creating the bucket, you can set the following variables in your `.env` file:
+
+```dotenv
+AWS_S3_ACCESS_KEY_ID=
+AWS_S3_SECRET_ACCESS_KEY=
+AWS_S3_DEFAULT_REGION=
+AWS_S3_BUCKET=
+AWS_S3_ROOT=
 ```
 
 ### Queue and Scheduler
 
-The application should automatically start a queue worker and scheduler when you run `spin up -d`. If you preferred to not have these running. You can see the corresponding `env` variables to false like so:
+`pls up -d` will automatically start the app, worker, and scheduler services.
 
-```dotenv
-LARAVEL_SCHEDULER_ENABLED=false
-LARAVEL_QUEUE_ENABLED=false
-```
+As the names suggest, the worker and scheduler service are dedicated services for the running of a queue worker and an on-going schedule run process.
+
+Having this working is useful in most use-cases. But if you want more control over when / how the queue or scheduler is run then you can specify which services you want to turn on in the `pls up` command.
+
+For example, if you just wanted the app service you could run `pls up app -d`. Or if you wanted the app and the scheduler service you could run `pls up app scheduler -d`
