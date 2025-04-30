@@ -145,7 +145,7 @@ COPY docker/etc/nginx/ /etc/nginx/
 COPY --chmod=644 ./docker/cron.d/ /etc/cron.d/
 
 COPY --chmod=755 docker/etc/s6-overlay/ /etc/s6-overlay/
-COPY ./docker/s6-overlay/templates/ /tmp/s6-overlay-templates
+COPY ./docker/templates/ /tmp/s6-overlay-templates
 
 COPY --chmod=755 docker/etc/php/8.4/cli/php.ini /etc/php/8.4/cli/php.ini
 
@@ -189,9 +189,9 @@ FROM base AS development
 # user to the same user and group that is running docker.
 COPY ./docker/set-id /set-id
 
-ARG USER_ID
-ARG GROUP_ID
-RUN set-id webuser ${USER_ID} ${GROUP_ID} ; \
+ARG PUID
+ARG PGID
+RUN set-id webuser ${PUID} ${PGID} ; \
     rm /set-id
 
 RUN if [[ -z "$MULTIPLE_DEVELOPMENT_QUEUES" ]] ; then \
