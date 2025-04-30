@@ -52,12 +52,14 @@ return new class () extends Migration {
     public function down(): void
     {
         DB::table('users')->chunkById(100, function ($teamUser) {
-            DB::table('team_user')->insert([
-                'team_id' => $teamUser->team_id,  // @phpstan-ignore-line
-                'user_id' => $teamUser->user_id,  // @phpstan-ignore-line
-                'updated_at' => $teamUser->updated_at,  // @phpstan-ignore-line
-                'created_at' => $teamUser->created_at,  // @phpstan-ignore-line
-            ]);
+            $teamUser->each(function ($teamUser) {
+                DB::table('team_user')->insert([
+                    'team_id' => $teamUser->team_id,  // @phpstan-ignore-line
+                    'user_id' => $teamUser->user_id,  // @phpstan-ignore-line
+                    'updated_at' => $teamUser->updated_at,  // @phpstan-ignore-line
+                    'created_at' => $teamUser->created_at,  // @phpstan-ignore-line
+                ]);
+            });
         });
     }
 };
