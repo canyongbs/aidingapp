@@ -36,32 +36,32 @@
 
 namespace AidingApp\ServiceManagement\Notifications;
 
-use AidingApp\Engagement\Actions\GenerateEngagementBodyContent;
 use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
 use AidingApp\Notification\Notifications\Channels\MailChannel;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
-use AidingApp\ServiceManagement\Actions\GenerateServiceRequestTypeEmailTemplateContent;
 use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
+use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
+use AidingApp\ServiceManagement\Notifications\Concerns\HandlesServiceRequestTemplateContent;
 use App\Models\NotificationSetting;
 use Filament\Notifications\Notification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification as BaseNotification;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\HtmlString;
 
 class ServiceRequestCreated extends BaseNotification implements ShouldQueue
 {
     use Queueable;
+    use HandlesServiceRequestTemplateContent;
 
     /**
      * @param class-string $channel
      */
     public function __construct(
         public ServiceRequest $serviceRequest,
+        public ServiceRequestTypeEmailTemplateRole $role,
         public string $channel,
     ) {}
 
@@ -81,6 +81,7 @@ class ServiceRequestCreated extends BaseNotification implements ShouldQueue
         $template = ServiceRequestTypeEmailTemplate::query()
             ->where('service_request_type_id', $this->serviceRequest->priority->type->id)
             ->where('type', ServiceRequestEmailTemplateType::Created)
+            ->where('role', $this->role->value)
             ->first();
 
         if (! $template) {
@@ -101,31 +102,6 @@ class ServiceRequestCreated extends BaseNotification implements ShouldQueue
             ->content($body);
     }
 
-    protected function injectButtonUrlIntoTiptapContent(array $content): array
-    {
-        if (!isset($content['content']) || !is_array($content['content'])) {
-            return $content;
-        }
-
-        $content['content'] = array_map(function ($block) {
-            if ($block['type'] === 'tiptapBlock' &&
-                ($block['attrs']['type'] ?? null) === 'serviceRequestTypeEmailTemplateButtonBlock') {
-                
-                $block['attrs']['data']['url'] = ServiceRequestResource::getUrl('view', [
-                    'record' => $this->serviceRequest,
-                ]);
-            }
-
-            if (isset($block['content']) && is_array($block['content'])) {
-                $block = $this->injectButtonUrlIntoTiptapContent($block);
-            }
-
-            return $block;
-        }, $content['content']);
-
-        return $content;
-    }
-
     public function toDatabase(object $notifiable): array
     {
         return Notification::make()
@@ -137,42 +113,5 @@ class ServiceRequestCreated extends BaseNotification implements ShouldQueue
     private function resolveNotificationSetting(object $notifiable): ?NotificationSetting
     {
         return $this->serviceRequest->division?->notificationSetting?->setting;
-    }
-
-    public function getBody($body): HtmlString
-    {
-        if (is_array($body)) {
-            $body = $this->injectButtonUrlIntoTiptapContent($body);
-        }
-
-        return app(GenerateServiceRequestTypeEmailTemplateContent::class)(
-            $body,
-            $this->getMergeData(),
-            $this->serviceRequest,
-            'body',
-        );
-    }
-
-    public function getSubject($subject): HtmlString
-    {
-        return app(GenerateServiceRequestTypeEmailTemplateContent::class)(
-            $subject,
-            $this->getMergeData(),
-            $this->serviceRequest,
-            'subject',
-        );
-    }
-
-    public function getMergeData(): array
-    {
-        return [
-            'service request number' => $this->serviceRequest->service_request_number,
-            'created' => $this->serviceRequest->created_at,
-            'updated' => $this->serviceRequest->updated_at,
-            'assigned to' => $this->serviceRequest->respondent->full_name,
-            'status' => $this->serviceRequest->status->name,
-            'title' => $this->serviceRequest->title,
-            'type' => $this->serviceRequest->priority->type->name,
-        ];
     }
 }

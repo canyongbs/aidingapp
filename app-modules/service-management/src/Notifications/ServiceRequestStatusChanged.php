@@ -39,8 +39,12 @@ namespace AidingApp\ServiceManagement\Notifications;
 use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
 use AidingApp\Notification\Notifications\Channels\MailChannel;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
+use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
+use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
+use AidingApp\ServiceManagement\Notifications\Concerns\HandlesServiceRequestTemplateContent;
 use App\Models\NotificationSetting;
 use Filament\Notifications\Notification;
 use Illuminate\Bus\Queueable;
@@ -50,12 +54,14 @@ use Illuminate\Notifications\Notification as BaseNotification;
 class ServiceRequestStatusChanged extends BaseNotification implements ShouldQueue
 {
     use Queueable;
+    use HandlesServiceRequestTemplateContent;
 
     /**
      * @param class-string $channel
      */
     public function __construct(
         public ServiceRequest $serviceRequest,
+        public ServiceRequestTypeEmailTemplateRole $role,
         public string $channel,
     ) {}
 
@@ -72,11 +78,28 @@ class ServiceRequestStatusChanged extends BaseNotification implements ShouldQueu
 
     public function toMail(object $notifiable): MailMessage
     {
+        $template = ServiceRequestTypeEmailTemplate::query()
+                ->where('service_request_type_id', $this->serviceRequest->priority->type->id)
+                ->where('type', ServiceRequestEmailTemplateType::StatusChange)
+                ->where('role', $this->role->value)
+                ->first();
+
+        if (! $template) {      
+            return MailMessage::make()
+                ->settings($this->resolveNotificationSetting($notifiable))
+                ->subject("Service request {$this->serviceRequest->service_request_number} status changed to {$this->serviceRequest->status?->name}")
+                ->line("The service request {$this->serviceRequest->service_request_number} status has changed to {$this->serviceRequest->status?->name}.")
+                ->action('View Service Request', ServiceRequestResource::getUrl('view', ['record' => $this->serviceRequest]));
+        }
+
+        $subject = $this->getSubject($template->subject);
+
+        $body = $this->getBody($template->body);
+
         return MailMessage::make()
             ->settings($this->resolveNotificationSetting($notifiable))
-            ->subject("Service request {$this->serviceRequest->service_request_number} status changed to {$this->serviceRequest->status?->name}")
-            ->line("The service request {$this->serviceRequest->service_request_number} status has changed to {$this->serviceRequest->status?->name}.")
-            ->action('View Service Request', ServiceRequestResource::getUrl('view', ['record' => $this->serviceRequest]));
+            ->subject(strip_tags($subject))
+            ->content($body);
     }
 
     public function toDatabase(object $notifiable): array

@@ -16,6 +16,6 @@
                box-sizing: border-box;"
         target="_blank"
     >
-        {{ $button_text }}
+        View Service Request
     </a>
 </div>

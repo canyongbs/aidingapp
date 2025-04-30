@@ -40,7 +40,9 @@ use AidingApp\Notification\Events\TriggeredAutoSubscription;
 use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
 use AidingApp\Notification\Notifications\Channels\MailChannel;
 use AidingApp\ServiceManagement\Actions\NotifyServiceRequestUsers;
+use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestUpdatedNotification;
 use AidingApp\ServiceManagement\Notifications\ServiceRequestUpdated;
 use AidingApp\Timeline\Events\TimelineableRecordCreated;
 use AidingApp\Timeline\Events\TimelineableRecordDeleted;
@@ -58,17 +60,33 @@ class ServiceRequestUpdateObserver
 
         TimelineableRecordCreated::dispatch($serviceRequestUpdate->serviceRequest, $serviceRequestUpdate);
 
+        $serviceRequestUpdate->serviceRequest->respondent->notify(new SendEducatableServiceRequestUpdatedNotification($serviceRequestUpdate->serviceRequest));
+
         app(NotifyServiceRequestUsers::class)->execute(
             $serviceRequestUpdate->serviceRequest,
-            new ServiceRequestUpdated($serviceRequestUpdate, MailChannel::class),
+            new ServiceRequestUpdated($serviceRequestUpdate, ServiceRequestTypeEmailTemplateRole::Manager, MailChannel::class),
             $serviceRequestUpdate->serviceRequest->priority?->type->is_managers_service_request_update_email_enabled ?? false,
+            false,
+        );
+
+        app(NotifyServiceRequestUsers::class)->execute(
+            $serviceRequestUpdate->serviceRequest,
+            new ServiceRequestUpdated($serviceRequestUpdate, ServiceRequestTypeEmailTemplateRole::Auditor, MailChannel::class),
+            false,
             $serviceRequestUpdate->serviceRequest->priority?->type->is_auditors_service_request_update_email_enabled ?? false,
         );
 
         app(NotifyServiceRequestUsers::class)->execute(
             $serviceRequestUpdate->serviceRequest,
-            new ServiceRequestUpdated($serviceRequestUpdate, DatabaseChannel::class),
+            new ServiceRequestUpdated($serviceRequestUpdate, ServiceRequestTypeEmailTemplateRole::Manager, DatabaseChannel::class),
             $serviceRequestUpdate->serviceRequest->priority?->type->is_managers_service_request_update_notification_enabled ?? false,
+            false,
+        );
+
+        app(NotifyServiceRequestUsers::class)->execute(
+            $serviceRequestUpdate->serviceRequest,
+            new ServiceRequestUpdated($serviceRequestUpdate, ServiceRequestTypeEmailTemplateRole::Auditor, DatabaseChannel::class),
+            false,
             $serviceRequestUpdate->serviceRequest->priority?->type->is_auditors_service_request_update_notification_enabled ?? false,
         );
     }
