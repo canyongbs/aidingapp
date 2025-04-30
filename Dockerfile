@@ -146,10 +146,18 @@ COPY --from=ghcr.io/roadrunner-server/roadrunner:2024.3.5 --chown=$PUID:$PGID --
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# TODO: Move all s6-overlay tasks to work with this structure
 COPY --chmod=755 docker/etc/s6-overlay/ /etc/s6-overlay/
 
 COPY --chmod=755 docker/etc/php/8.4/cli/php.ini /etc/php/8.4/cli/php.ini
+
+COPY --chmod=644 ./docker/cron.d/ /etc/cron.d/
+COPY ./docker/s6-overlay/templates/ /tmp/s6-overlay-templates
+
+ARG TOTAL_QUEUE_WORKERS=3
+
+COPY ./docker/generate-queues.sh /generate-queues.sh
+COPY ./docker/templates/ /tmp/s6-overlay-templates
+RUN chmod +x /generate-queues.sh
 
 WORKDIR /var/www/html
 
@@ -171,18 +179,9 @@ RUN echo "source $NVM_DIR/nvm.sh \
     && nvm use default \
     && npm install -g npm@$NPM_VERSION" | bash
 
-COPY --chmod=644 ./docker/cron.d/ /etc/cron.d/
-COPY ./docker/s6-overlay/templates/ /tmp/s6-overlay-templates
-
 EXPOSE 80 443
 
 ENTRYPOINT ["/init"]
-
-ARG TOTAL_QUEUE_WORKERS=3
-
-COPY ./docker/generate-queues.sh /generate-queues.sh
-COPY ./docker/templates/ /tmp/s6-overlay-templates
-RUN chmod +x /generate-queues.sh
 
 FROM base AS development
 
