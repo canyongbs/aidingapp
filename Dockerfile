@@ -146,6 +146,7 @@ COPY --from=ghcr.io/roadrunner-server/roadrunner:2024.3.5 --chown=$PUID:$PGID --
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
+# TODO: Finish copying over s6-overlay tasks like runas-user
 COPY --chmod=755 docker/etc/s6-overlay/ /etc/s6-overlay/
 
 COPY --chmod=755 docker/etc/php/8.4/cli/php.ini /etc/php/8.4/cli/php.ini
