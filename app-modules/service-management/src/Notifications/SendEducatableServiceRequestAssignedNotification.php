@@ -40,12 +40,12 @@ class SendEducatableServiceRequestAssignedNotification extends Notification impl
 
     public function toMail(object $notifiable): MailMessage
     {
-        // /** @var Educatable $educatable */
-        // $educatable = $notifiable;
+        /** @var Educatable $educatable */
+        $educatable = $notifiable;
 
-        // $name = match ($notifiable::class) {
-        //     Contact::class => $educatable->first_name,
-        // };
+        $name = match ($notifiable::class) {
+            Contact::class => $educatable->first_name,
+        };
 
         $template = ServiceRequestTypeEmailTemplate::query()
             ->where('service_request_type_id', $this->serviceRequest->priority->type->id)
@@ -53,14 +53,14 @@ class SendEducatableServiceRequestAssignedNotification extends Notification impl
             ->where('role', ServiceRequestTypeEmailTemplateRole::Customer->value)
             ->first();
 
-        // if (! $template) {
-        //     return MailMessage::make()
-        //         ->settings($this->resolveNotificationSetting($notifiable))
-        //         ->subject("Your service request {$this->serviceRequest->service_request_number} has been assigned to agent")
-        //         ->greeting("Hello {$name},")
-        //         ->line("We’ve assigned an agent to your service request {$this->serviceRequest->service_request_number}. They will review it and follow up shortly.")
-        //         ->action('View Service Request', ServiceRequestResource::getUrl('view', ['record' => $this->serviceRequest]));
-        // }
+        if (! $template) {
+            return MailMessage::make()
+                ->settings($this->resolveNotificationSetting($notifiable))
+                ->subject("Your service request {$this->serviceRequest->service_request_number} has been assigned to agent")
+                ->greeting("Hello {$name},")
+                ->line("We’ve assigned an agent to your service request {$this->serviceRequest->service_request_number}. They will review it and follow up shortly.")
+                ->action('View Service Request', ServiceRequestResource::getUrl('view', ['record' => $this->serviceRequest]));
+        }
 
         $subject = $this->getSubject($template->subject);
 
