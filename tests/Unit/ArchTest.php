@@ -42,8 +42,6 @@ use InterNACHI\Modular\Support\ModuleConfig;
 use InterNACHI\Modular\Support\ModuleRegistry;
 use PHPUnit\Framework\Assert;
 
-
-
 arch('All Core Settings classes should have defaults for all properties')
     ->expect('App\Settings')
     ->toHaveDefaultsForAllProperties();
