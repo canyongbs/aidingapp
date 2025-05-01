@@ -88,18 +88,18 @@
         "spatie/laravel-settings": "^3.3",
         "spiral/roadrunner-cli": "^2.6",
         "spiral/roadrunner-http": "^3.5",
-        "sqids/sqids": "^0.4.1",
+        "sqids/sqids": "^0.5.0",
         "staudenmeir/eloquent-has-many-deep": "^1.19",
         "stechstudio/filament-impersonate": "^3.5",
         "tapp/filament-timezone-field": "^3.0",
-        "tpetry/laravel-postgresql-enhanced": "^2.0",
-        "twilio/sdk": "^7.15",
+        "tpetry/laravel-postgresql-enhanced": "^3.0",
+        "twilio/sdk": "^8.5.0",
         "ysfkaya/filament-phone-input": "^3.1"
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^3.5",
         "brianium/paratest": "^7.2",
-        "doctrine/dbal": "^3.6",
+        "doctrine/dbal": "^4.2.3",
         "friendsofphp/php-cs-fixer": "^3.60",
         "larastan/larastan": "^3.0",
         "mockery/mockery": "^1.4.4",
@@ -112,7 +112,7 @@
         "phpunit/phpunit": "^11.0",
         "rector/rector": "^2.0",
         "spatie/laravel-ignition": "^2.0",
-        "spatie/laravel-ray": "1.39.1",
+        "spatie/laravel-ray": "^1.40.2",
         "worksome/request-factories": "^3.2"
     },
     "autoload": {
