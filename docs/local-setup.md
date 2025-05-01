@@ -135,10 +135,8 @@ Setup is now complete.
 Within the `.env.example` (and within the `.env` after you copy it) should exist the following variables:
 
 ```dotenv
-FORWARD_DB_PORT=3306
-FORWARD_DB_PORT_TEST=3309
+FORWARD_DB_PORT=5434
 FORWARD_REDIS_PORT=6379
-FORWARD_MEILISEARCH_PORT=7700
 FORWARD_MAILPIT_PORT=1025
 FORWARD_MAILPIT_DASHBOARD_PORT=8025
 ```
@@ -146,9 +144,9 @@ FORWARD_MAILPIT_DASHBOARD_PORT=8025
 Those variables will allow you to edit particular settings and forwarding ports for your local containers. A great example of this usage is within the database section below.
 
 ### Accessing the Database
-Within the containers, MySQL lives on port 3306. And by default it can be accessed outside of the containers on port 3308 as well.
+Within the containers, Postgres lives on port 5432. And by default it can be accessed outside of the containers on port 5434 as well.
 
-If port 3308 is already in use on your system or you prefer to use another port,
+If port 5434 is already in use on your system or you prefer to use another port,
 you can set the `FORWARD_DB_PORT` in your `.env` file to whatever available
 port you want.
 
