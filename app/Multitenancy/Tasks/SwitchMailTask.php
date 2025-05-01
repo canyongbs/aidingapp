@@ -45,7 +45,6 @@ use Illuminate\Mail\MailManager;
 use Illuminate\Notifications\ChannelManager as BaseChannelManager;
 use Illuminate\Notifications\Channels\MailChannel as BaseMailChannel;
 use Spatie\Multitenancy\Contracts\IsTenant;
-use Spatie\Multitenancy\Models\Tenant;
 use Spatie\Multitenancy\Tasks\SwitchTenantTask;
 
 class SwitchMailTask implements SwitchTenantTask

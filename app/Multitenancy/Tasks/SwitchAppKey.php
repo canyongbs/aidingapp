@@ -38,7 +38,6 @@ namespace App\Multitenancy\Tasks;
 
 use App\Actions\ChangeAppKey;
 use Spatie\Multitenancy\Contracts\IsTenant;
-use Spatie\Multitenancy\Models\Tenant;
 use Spatie\Multitenancy\Tasks\SwitchTenantTask;
 
 class SwitchAppKey implements SwitchTenantTask

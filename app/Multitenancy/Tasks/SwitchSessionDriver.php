@@ -37,7 +37,6 @@
 namespace App\Multitenancy\Tasks;
 
 use Spatie\Multitenancy\Contracts\IsTenant;
-use Spatie\Multitenancy\Models\Tenant;
 use Spatie\Multitenancy\Tasks\SwitchTenantTask;
 
 class SwitchSessionDriver implements SwitchTenantTask

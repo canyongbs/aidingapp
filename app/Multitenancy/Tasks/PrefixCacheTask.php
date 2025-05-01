@@ -39,7 +39,6 @@ namespace App\Multitenancy\Tasks;
 use Illuminate\Cache\Repository;
 use Illuminate\Support\Facades\Cache;
 use Spatie\Multitenancy\Contracts\IsTenant;
-use Spatie\Multitenancy\Models\Tenant;
 use Spatie\Multitenancy\Tasks\SwitchTenantTask;
 
 class PrefixCacheTask implements SwitchTenantTask
