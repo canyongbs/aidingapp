@@ -38,6 +38,8 @@ namespace App\Multitenancy\Tasks;
 
 use AidingApp\Notification\Notifications\ChannelManager;
 use AidingApp\Notification\Notifications\Channels\MailChannel;
+use App\Models\Tenant;
+use Exception;
 use Illuminate\Contracts\Mail\Factory;
 use Illuminate\Contracts\Mail\Mailer;
 use Illuminate\Mail\Mailer as MailMailer;
@@ -75,7 +77,11 @@ class SwitchMailTask implements SwitchTenantTask
 
     public function makeCurrent(IsTenant $tenant): void
     {
-        /** @var TenantMailConfig $config */
+        throw_if(
+            ! $tenant instanceof Tenant,
+            new Exception('Tenant is not an instance of Tenant')
+        );
+
         $config = $tenant->config->mail;
 
         preg_match('/^(.+)\.[^.]+\.[^.]+$/', $tenant->domain, $matches);

@@ -36,6 +36,8 @@
 
 namespace App\Multitenancy\Tasks;
 
+use App\Models\Tenant;
+use Exception;
 use Illuminate\Cache\Repository;
 use Illuminate\Support\Facades\Cache;
 use Spatie\Multitenancy\Contracts\IsTenant;
@@ -58,7 +60,12 @@ class PrefixCacheTask implements SwitchTenantTask
 
     public function makeCurrent(IsTenant $tenant): void
     {
-        $this->setCachePrefix("{{$this->cacheKeyBase}{$tenant->id}}");
+        throw_if(
+            ! $tenant instanceof Tenant,
+            new Exception('Tenant is not an instance of Tenant')
+        );
+
+        $this->setCachePrefix("{{$this->cacheKeyBase}{$tenant->getKey()}}");
     }
 
     public function forgetCurrent(): void

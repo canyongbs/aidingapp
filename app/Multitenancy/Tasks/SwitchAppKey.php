@@ -37,6 +37,8 @@
 namespace App\Multitenancy\Tasks;
 
 use App\Actions\ChangeAppKey;
+use App\Models\Tenant;
+use Exception;
 use Spatie\Multitenancy\Contracts\IsTenant;
 use Spatie\Multitenancy\Tasks\SwitchTenantTask;
 
@@ -50,6 +52,11 @@ class SwitchAppKey implements SwitchTenantTask
 
     public function makeCurrent(IsTenant $tenant): void
     {
+        throw_if(
+            ! $tenant instanceof Tenant,
+            new Exception('Tenant is not an instance of Tenant')
+        );
+
         $this->setAppKey($tenant->key);
     }
 
