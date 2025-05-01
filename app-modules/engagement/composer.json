@@ -5,8 +5,7 @@
     "version": "1.0",
     "license": "proprietary",
     "require": {
-        "filament/filament": "^3.2",
-        "spatie/laravel-data": "^3.7"
+        "filament/filament": "^3.2"
     },
     "autoload": {
         "psr-4": {

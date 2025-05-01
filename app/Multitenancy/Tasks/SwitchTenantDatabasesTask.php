@@ -41,6 +41,7 @@ use Illuminate\Bus\DatabaseBatchRepository;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Spatie\Multitenancy\Concerns\UsesMultitenancyConfig;
+use Spatie\Multitenancy\Contracts\IsTenant;
 use Spatie\Multitenancy\Exceptions\InvalidConfiguration;
 use Spatie\Multitenancy\Models\Tenant;
 use Spatie\Multitenancy\Tasks\SwitchTenantTask;
@@ -72,7 +73,7 @@ class SwitchTenantDatabasesTask implements SwitchTenantTask
         $this->originalDbPassword ??= config("database.connections.{$this->tenantConnectionName}.password");
     }
 
-    public function makeCurrent(Tenant $tenant): void
+    public function makeCurrent(IsTenant $tenant): void
     {
         $config = $tenant->config;
 

@@ -69,7 +69,7 @@ class GetServiceRequestsController extends Controller
         ];
 
         return response()->json(
-            ServiceRequestData::collection(
+            ServiceRequestData::collect(
                 $contact->serviceRequests()
                     ->with('serviceRequestFormSubmission')
                     ->latest()

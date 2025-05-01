@@ -36,6 +36,7 @@
 
 namespace App\Multitenancy\Tasks;
 
+use Spatie\Multitenancy\Contracts\IsTenant;
 use Spatie\Multitenancy\Models\Tenant;
 use Spatie\Multitenancy\Tasks\SwitchTenantTask;
 
@@ -51,7 +52,7 @@ class SwitchSessionDriver implements SwitchTenantTask
         $this->originalSessionDomain ??= config('session.domain');
     }
 
-    public function makeCurrent(Tenant $tenant): void
+    public function makeCurrent(IsTenant $tenant): void
     {
         // Not going to switch the session driver in testing, stick with the default array driver
         if (app()->runningUnitTests()) {

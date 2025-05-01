@@ -48,7 +48,7 @@ class KnowledgeManagementPortalCategoryController extends Controller
     public function index(): JsonResponse
     {
         return response()->json(
-            KnowledgeBaseCategoryData::collection(
+            KnowledgeBaseCategoryData::collect(
                 KnowledgeBaseCategory::query()
                     ->where('parent_id', null)
                     ->orderBy('name')

@@ -38,6 +38,7 @@ namespace App\Multitenancy\Tasks;
 
 use App\Multitenancy\DataTransferObjects\TenantConfig;
 use Illuminate\Support\Facades\Storage;
+use Spatie\Multitenancy\Contracts\IsTenant;
 use Spatie\Multitenancy\Models\Tenant;
 use Spatie\Multitenancy\Tasks\SwitchTenantTask;
 
@@ -69,7 +70,7 @@ class SwitchS3PublicFilesystemTask implements SwitchTenantTask
         $this->originalRoot ??= config('filesystems.disks.s3-public.root');
     }
 
-    public function makeCurrent(Tenant $tenant): void
+    public function makeCurrent(IsTenant $tenant): void
     {
         /** @var TenantConfig $config */
         $config = $tenant->config;

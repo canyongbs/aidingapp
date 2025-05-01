@@ -37,6 +37,7 @@
 namespace App\Multitenancy\Tasks;
 
 use Illuminate\Support\Facades\URL;
+use Spatie\Multitenancy\Contracts\IsTenant;
 use Spatie\Multitenancy\Models\Tenant;
 use Spatie\Multitenancy\Tasks\SwitchTenantTask;
 
@@ -48,7 +49,7 @@ class SwitchAppUrl implements SwitchTenantTask
         $this->originalUrl ??= config('app.url');
     }
 
-    public function makeCurrent(Tenant $tenant): void
+    public function makeCurrent(IsTenant $tenant): void
     {
         // We may want to look into defining whether we want to use https at the tenant level
         $scheme = parse_url($this->originalUrl)['scheme'];

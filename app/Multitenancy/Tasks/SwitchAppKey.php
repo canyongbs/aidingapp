@@ -37,6 +37,7 @@
 namespace App\Multitenancy\Tasks;
 
 use App\Actions\ChangeAppKey;
+use Spatie\Multitenancy\Contracts\IsTenant;
 use Spatie\Multitenancy\Models\Tenant;
 use Spatie\Multitenancy\Tasks\SwitchTenantTask;
 
@@ -48,7 +49,7 @@ class SwitchAppKey implements SwitchTenantTask
         $this->originalAppKey ??= config('app.key');
     }
 
-    public function makeCurrent(Tenant $tenant): void
+    public function makeCurrent(IsTenant $tenant): void
     {
         $this->setAppKey($tenant->key);
     }
