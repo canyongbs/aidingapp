@@ -36,6 +36,8 @@
 
 namespace App\Multitenancy\Tasks;
 
+use App\Models\Tenant;
+use Exception;
 use Spatie\Multitenancy\Contracts\IsTenant;
 use Spatie\Multitenancy\Tasks\SwitchTenantTask;
 
@@ -53,6 +55,11 @@ class SwitchSessionDriver implements SwitchTenantTask
 
     public function makeCurrent(IsTenant $tenant): void
     {
+        throw_if(
+            ! $tenant instanceof Tenant,
+            new Exception('Tenant is not an instance of Tenant')
+        );
+
         // Not going to switch the session driver in testing, stick with the default array driver
         if (app()->runningUnitTests()) {
             return;

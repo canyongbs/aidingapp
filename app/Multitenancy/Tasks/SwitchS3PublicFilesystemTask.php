@@ -36,7 +36,8 @@
 
 namespace App\Multitenancy\Tasks;
 
-use App\Multitenancy\DataTransferObjects\TenantConfig;
+use App\Models\Tenant;
+use Exception;
 use Illuminate\Support\Facades\Storage;
 use Spatie\Multitenancy\Contracts\IsTenant;
 use Spatie\Multitenancy\Tasks\SwitchTenantTask;
@@ -71,7 +72,11 @@ class SwitchS3PublicFilesystemTask implements SwitchTenantTask
 
     public function makeCurrent(IsTenant $tenant): void
     {
-        /** @var TenantConfig $config */
+        throw_if(
+            ! $tenant instanceof Tenant,
+            new Exception('Tenant is not an instance of Tenant')
+        );
+
         $config = $tenant->config;
 
         $this->setFilesystemConfig(

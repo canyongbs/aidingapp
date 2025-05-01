@@ -36,6 +36,8 @@
 
 namespace App\Multitenancy\Tasks;
 
+use App\Models\Tenant;
+use Exception;
 use Illuminate\Bus\BatchRepository;
 use Illuminate\Bus\DatabaseBatchRepository;
 use Illuminate\Database\Eloquent\Model;
@@ -74,6 +76,11 @@ class SwitchTenantDatabasesTask implements SwitchTenantTask
 
     public function makeCurrent(IsTenant $tenant): void
     {
+        throw_if(
+            ! $tenant instanceof Tenant,
+            new Exception('Tenant is not an instance of Tenant')
+        );
+
         $config = $tenant->config;
 
         $this->setTenantDatabase(
