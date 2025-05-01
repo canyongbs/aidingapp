@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ac41df850f4732ea8e52d15bf0d60d6d",
+    "content-hash": "e27efd32ba43fe08cbfd69c35daee68f",
     "packages": [
         {
             "name": "amphp/amp",
@@ -3506,16 +3506,16 @@
         },
         {
             "name": "defectivecode/laravel-sqs-extended",
-            "version": "dev-l12-compatibility",
+            "version": "1.1.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/laravel-shift/laravel-sqs-extended.git",
-                "reference": "7a5a8888e6a006a5e844fae3eb6c8f31232241e3"
+                "url": "https://github.com/DefectiveCode/laravel-sqs-extended.git",
+                "reference": "da585c15744f1e43cc4556c62e0153144ddf94de"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel-shift/laravel-sqs-extended/zipball/7a5a8888e6a006a5e844fae3eb6c8f31232241e3",
-                "reference": "7a5a8888e6a006a5e844fae3eb6c8f31232241e3",
+                "url": "https://api.github.com/repos/DefectiveCode/laravel-sqs-extended/zipball/da585c15744f1e43cc4556c62e0153144ddf94de",
+                "reference": "da585c15744f1e43cc4556c62e0153144ddf94de",
                 "shasum": ""
             },
             "require": {
@@ -3551,16 +3551,7 @@
                     "DefectiveCode\\LaravelSqsExtended\\": "src"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "DefectiveCode\\LaravelSqsExtended\\Tests\\": "tests"
-                }
-            },
-            "scripts": {
-                "post-autoload-dump": [
-                    "@php vendor/bin/testbench package:discover --ansi"
-                ]
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -3571,9 +3562,10 @@
                 }
             ],
             "support": {
-                "source": "https://github.com/laravel-shift/laravel-sqs-extended/tree/l12-compatibility"
+                "issues": "https://github.com/DefectiveCode/laravel-sqs-extended/issues",
+                "source": "https://github.com/DefectiveCode/laravel-sqs-extended/tree/1.1.0"
             },
-            "time": "2025-03-03T19:16:35+00:00"
+            "time": "2025-05-01T12:01:38+00:00"
         },
         {
             "name": "dflydev/dot-access-data",
@@ -23935,9 +23927,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "defectivecode/laravel-sqs-extended": 20
-    },
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
