@@ -9,6 +9,12 @@ use Illuminate\Support\HtmlString;
 
 trait HandlesServiceRequestTemplateContent
 {
+    // /** @var ServiceRequest */
+    // protected ServiceRequest $serviceRequest;
+
+    /**
+     * @param string|array<string, mixed> $body
+     */
     public function getBody($body): HtmlString
     {
         if (is_array($body)) {
@@ -23,6 +29,9 @@ trait HandlesServiceRequestTemplateContent
         );
     }
 
+    /**
+     * @param string|array<string, mixed> $subject
+     */
     public function getSubject($subject): HtmlString
     {
         return app(GenerateServiceRequestTypeEmailTemplateContent::class)(
@@ -33,6 +42,9 @@ trait HandlesServiceRequestTemplateContent
         );
     }
 
+    /**
+     * @return array<string, string>
+     */
     public function getMergeData(): array
     {
         return [
@@ -47,16 +59,20 @@ trait HandlesServiceRequestTemplateContent
         ];
     }
 
+    /**
+     * @param array<string, mixed> $content
+     *
+     * @return array<string, mixed>
+     */
     protected function injectButtonUrlIntoTiptapContent(array $content): array
     {
-        if (!isset($content['content']) || !is_array($content['content'])) {
+        if (! isset($content['content']) || ! is_array($content['content'])) {
             return $content;
         }
 
         $content['content'] = array_map(function ($block) {
             if ($block['type'] === 'tiptapBlock' &&
                 ($block['attrs']['type'] ?? null) === 'serviceRequestTypeEmailTemplateButtonBlock') {
-                
                 $block['attrs']['data']['url'] = ServiceRequestResource::getUrl('view', [
                     'record' => $this->serviceRequest,
                 ]);

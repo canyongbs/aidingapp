@@ -2,6 +2,7 @@
 
 namespace AidingApp\ServiceManagement\Filament\Blocks;
 
+use Filament\Forms\Components\Component;
 use Filament\Forms\Components\Select;
 use FilamentTiptapEditor\TiptapBlock;
 
@@ -17,6 +18,9 @@ class ServiceRequestTypeEmailTemplateButtonBlock extends TiptapBlock
 
     public string $width = 'md';
 
+    /**
+     * @return array<int, Component>
+     */
     public function getFormSchema(): array
     {
         return [

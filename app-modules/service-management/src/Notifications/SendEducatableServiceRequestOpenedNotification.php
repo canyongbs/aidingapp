@@ -91,12 +91,12 @@ class SendEducatableServiceRequestOpenedNotification extends Notification implem
 
         if (! $template) {
             return MailMessage::make()
-              ->settings($this->resolveNotificationSetting($notifiable))
-              ->subject("{$this->serviceRequest->service_request_number} - is now {$status->name}")
-              ->greeting("Hello {$name},")
-              ->line("A new {$type->name} service request has been created and is now in a {$status->name} status. Your new ticket number is: {$this->serviceRequest->service_request_number}.")
-              ->line('The details of your service request are shown below:')
-              ->lines(str(nl2br($this->serviceRequest->close_details))->explode('<br />'));
+                ->settings($this->resolveNotificationSetting($notifiable))
+                ->subject("{$this->serviceRequest->service_request_number} - is now {$status->name}")
+                ->greeting("Hello {$name},")
+                ->line("A new {$type->name} service request has been created and is now in a {$status->name} status. Your new ticket number is: {$this->serviceRequest->service_request_number}.")
+                ->line('The details of your service request are shown below:')
+                ->lines(str(nl2br($this->serviceRequest->close_details))->explode('<br />'));
         }
 
         $subject = $this->getSubject($template->subject);

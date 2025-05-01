@@ -41,10 +41,12 @@ use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
 use AidingApp\Notification\Notifications\Channels\MailChannel;
 use AidingApp\ServiceManagement\Actions\CreateServiceRequestHistory;
 use AidingApp\ServiceManagement\Actions\NotifyServiceRequestUsers;
+use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Exceptions\ServiceRequestNumberUpdateAttemptException;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Notifications\Concerns\FetchServiceRequestTemplate;
 use AidingApp\ServiceManagement\Notifications\SendClosedServiceFeedbackNotification;
 use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestClosedNotification;
 use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestOpenedNotification;
@@ -60,6 +62,8 @@ use Illuminate\Support\Facades\Gate;
 
 class ServiceRequestObserver
 {
+    use FetchServiceRequestTemplate;
+
     public function creating(ServiceRequest $serviceRequest): void
     {
         $serviceRequest->service_request_number ??= app(ServiceRequestNumberGenerator::class)->generate();
@@ -77,33 +81,49 @@ class ServiceRequestObserver
             $serviceRequest->respondent->notify(new SendEducatableServiceRequestOpenedNotification($serviceRequest));
         }
 
-        app(NotifyServiceRequestUsers::class)->execute(
-            $serviceRequest,
-            new ServiceRequestCreated($serviceRequest, ServiceRequestTypeEmailTemplateRole::Manager ,MailChannel::class),
-            $serviceRequest->priority?->type->is_managers_service_request_created_email_enabled ?? false,
-            false,
+        $managerEmailTemplate = $this->fetchTemplate(
+            $serviceRequest->priority->type,
+            ServiceRequestEmailTemplateType::Created,
+            ServiceRequestTypeEmailTemplateRole::Manager
         );
 
-        app(NotifyServiceRequestUsers::class)->execute(
-            $serviceRequest,
-            new ServiceRequestCreated($serviceRequest, ServiceRequestTypeEmailTemplateRole::Auditor, MailChannel::class),
-            false,
-            $serviceRequest->priority?->type->is_auditors_service_request_created_email_enabled ?? false,
+        $auditorEmailTemplate = $this->fetchTemplate(
+            $serviceRequest->priority->type,
+            ServiceRequestEmailTemplateType::Created,
+            ServiceRequestTypeEmailTemplateRole::Auditor
         );
 
-        app(NotifyServiceRequestUsers::class)->execute(
-            $serviceRequest,
-            new ServiceRequestCreated($serviceRequest, ServiceRequestTypeEmailTemplateRole::Manager, DatabaseChannel::class),
-            $serviceRequest->priority?->type->is_managers_service_request_created_notification_enabled ?? false,
-            false,
-        );
+        if ($managerEmailTemplate) {
+            app(NotifyServiceRequestUsers::class)->execute(
+                $serviceRequest,
+                new ServiceRequestCreated($serviceRequest, $managerEmailTemplate, MailChannel::class),
+                $serviceRequest->priority?->type->is_managers_service_request_created_email_enabled ?? false,
+                false,
+            );
 
-        app(NotifyServiceRequestUsers::class)->execute(
-            $serviceRequest,
-            new ServiceRequestCreated($serviceRequest, ServiceRequestTypeEmailTemplateRole::Auditor, DatabaseChannel::class),
-            false,
-            $serviceRequest->priority?->type->is_auditors_service_request_created_notification_enabled ?? false,
-        );
+            app(NotifyServiceRequestUsers::class)->execute(
+                $serviceRequest,
+                new ServiceRequestCreated($serviceRequest, $managerEmailTemplate, DatabaseChannel::class),
+                $serviceRequest->priority?->type->is_managers_service_request_created_notification_enabled ?? false,
+                false,
+            );
+        }
+
+        if ($auditorEmailTemplate) {
+            app(NotifyServiceRequestUsers::class)->execute(
+                $serviceRequest,
+                new ServiceRequestCreated($serviceRequest, $auditorEmailTemplate, MailChannel::class),
+                false,
+                $serviceRequest->priority?->type->is_auditors_service_request_created_email_enabled ?? false,
+            );
+
+            app(NotifyServiceRequestUsers::class)->execute(
+                $serviceRequest,
+                new ServiceRequestCreated($serviceRequest, $auditorEmailTemplate, DatabaseChannel::class),
+                false,
+                $serviceRequest->priority?->type->is_auditors_service_request_created_notification_enabled ?? false,
+            );
+        }
     }
 
     public function saving(ServiceRequest $serviceRequest): void
@@ -171,33 +191,49 @@ class ServiceRequestObserver
             } elseif ($serviceRequest->status) {
                 $serviceRequest->respondent->notify(new SendEducatableServiceRequestStatusChangeNotification($serviceRequest));
 
-                app(NotifyServiceRequestUsers::class)->execute(
-                    $serviceRequest,
-                    new ServiceRequestStatusChanged($serviceRequest, ServiceRequestTypeEmailTemplateRole::Manager, MailChannel::class),
-                    $serviceRequest->priority?->type->is_managers_service_request_status_change_email_enabled ?? false,
-                    false,
+                $managerEmailTemplate = $this->fetchTemplate(
+                    $serviceRequest->priority->type,
+                    ServiceRequestEmailTemplateType::Created,
+                    ServiceRequestTypeEmailTemplateRole::Manager
                 );
 
-                app(NotifyServiceRequestUsers::class)->execute(
-                    $serviceRequest,
-                    new ServiceRequestStatusChanged($serviceRequest, ServiceRequestTypeEmailTemplateRole::Auditor, MailChannel::class),
-                    false,
-                    $serviceRequest->priority?->type->is_auditors_service_request_status_change_email_enabled ?? false,
+                $auditorEmailTemplate = $this->fetchTemplate(
+                    $serviceRequest->priority->type,
+                    ServiceRequestEmailTemplateType::Created,
+                    ServiceRequestTypeEmailTemplateRole::Auditor
                 );
 
-                app(NotifyServiceRequestUsers::class)->execute(
-                    $serviceRequest,
-                    new ServiceRequestStatusChanged($serviceRequest, ServiceRequestTypeEmailTemplateRole::Manager, DatabaseChannel::class),
-                    $serviceRequest->priority?->type->is_managers_service_request_status_change_notification_enabled ?? false,
-                    false,
-                );
+                if ($managerEmailTemplate) {
+                    app(NotifyServiceRequestUsers::class)->execute(
+                        $serviceRequest,
+                        new ServiceRequestStatusChanged($serviceRequest, $managerEmailTemplate, MailChannel::class),
+                        $serviceRequest->priority?->type->is_managers_service_request_status_change_email_enabled ?? false,
+                        false,
+                    );
 
-                app(NotifyServiceRequestUsers::class)->execute(
-                    $serviceRequest,
-                    new ServiceRequestStatusChanged($serviceRequest, ServiceRequestTypeEmailTemplateRole::Auditor, DatabaseChannel::class),
-                    false,
-                    $serviceRequest->priority?->type->is_auditors_service_request_status_change_notification_enabled ?? false,
-                );
+                    app(NotifyServiceRequestUsers::class)->execute(
+                        $serviceRequest,
+                        new ServiceRequestStatusChanged($serviceRequest, $managerEmailTemplate, DatabaseChannel::class),
+                        $serviceRequest->priority?->type->is_managers_service_request_status_change_notification_enabled ?? false,
+                        false,
+                    );
+                }
+
+                if ($auditorEmailTemplate) {
+                    app(NotifyServiceRequestUsers::class)->execute(
+                        $serviceRequest,
+                        new ServiceRequestStatusChanged($serviceRequest, $auditorEmailTemplate, MailChannel::class),
+                        false,
+                        $serviceRequest->priority?->type->is_auditors_service_request_status_change_email_enabled ?? false,
+                    );
+
+                    app(NotifyServiceRequestUsers::class)->execute(
+                        $serviceRequest,
+                        new ServiceRequestStatusChanged($serviceRequest, $auditorEmailTemplate, DatabaseChannel::class),
+                        false,
+                        $serviceRequest->priority?->type->is_auditors_service_request_status_change_notification_enabled ?? false,
+                    );
+                }
             }
         }
     }

@@ -39,8 +39,6 @@ namespace AidingApp\ServiceManagement\Notifications;
 use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
 use AidingApp\Notification\Notifications\Channels\MailChannel;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
-use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
-use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
@@ -61,7 +59,7 @@ class ServiceRequestStatusChanged extends BaseNotification implements ShouldQueu
      */
     public function __construct(
         public ServiceRequest $serviceRequest,
-        public ServiceRequestTypeEmailTemplateRole $role,
+        public ?ServiceRequestTypeEmailTemplate $emailTemplate,
         public string $channel,
     ) {}
 
@@ -78,13 +76,9 @@ class ServiceRequestStatusChanged extends BaseNotification implements ShouldQueu
 
     public function toMail(object $notifiable): MailMessage
     {
-        $template = ServiceRequestTypeEmailTemplate::query()
-                ->where('service_request_type_id', $this->serviceRequest->priority->type->id)
-                ->where('type', ServiceRequestEmailTemplateType::StatusChange)
-                ->where('role', $this->role->value)
-                ->first();
+        $template = $this->emailTemplate;
 
-        if (! $template) {      
+        if (! $template) {
             return MailMessage::make()
                 ->settings($this->resolveNotificationSetting($notifiable))
                 ->subject("Service request {$this->serviceRequest->service_request_number} status changed to {$this->serviceRequest->status?->name}")

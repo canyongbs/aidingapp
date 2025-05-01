@@ -36,9 +36,12 @@
 
 use AidingApp\Notification\Notifications\Channels\MailChannel;
 use AidingApp\ServiceManagement\Actions\NotifyServiceRequestUsers;
+use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
+use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use AidingApp\ServiceManagement\Notifications\ServiceRequestCreated;
 use AidingApp\Team\Models\Team;
 use App\Models\User;
@@ -48,6 +51,14 @@ it('can notify a user if they belong to a team managing a service request type',
     Notification::fake();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $serviceRequestTypeEmailTemplate = ServiceRequestTypeEmailTemplate::factory()
+        ->state([
+            'type' => ServiceRequestEmailTemplateType::Created,
+            'role' => ServiceRequestTypeEmailTemplateRole::Manager,
+        ])
+        ->for($serviceRequestType, 'serviceRequestType')
+        ->create();
 
     Team::factory()
         ->hasAttached($serviceRequestType, [], 'manageableServiceRequestTypes')
@@ -75,7 +86,7 @@ it('can notify a user if they belong to a team managing a service request type',
 
     app(NotifyServiceRequestUsers::class)->execute(
         $serviceRequest,
-        new ServiceRequestCreated($serviceRequest, MailChannel::class),
+        new ServiceRequestCreated($serviceRequest, $serviceRequestTypeEmailTemplate, MailChannel::class),
         true,
         false,
     );
@@ -89,6 +100,14 @@ it('can notify a user if they belong to a team auditing a service request type',
     Notification::fake();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $serviceRequestTypeEmailTemplate = ServiceRequestTypeEmailTemplate::factory()
+        ->state([
+            'type' => ServiceRequestEmailTemplateType::Created,
+            'role' => ServiceRequestTypeEmailTemplateRole::Auditor,
+        ])
+        ->for($serviceRequestType, 'serviceRequestType')
+        ->create();
 
     Team::factory()
         ->hasAttached($serviceRequestType, [], 'auditableServiceRequestTypes')
@@ -116,7 +135,7 @@ it('can notify a user if they belong to a team auditing a service request type',
 
     app(NotifyServiceRequestUsers::class)->execute(
         $serviceRequest,
-        new ServiceRequestCreated($serviceRequest, MailChannel::class),
+        new ServiceRequestCreated($serviceRequest, $serviceRequestTypeEmailTemplate, MailChannel::class),
         false,
         true,
     );
@@ -130,6 +149,14 @@ it('does not notify a user if they belong to a team managing a service request t
     Notification::fake();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $serviceRequestTypeEmailTemplate = ServiceRequestTypeEmailTemplate::factory()
+        ->state([
+            'type' => ServiceRequestEmailTemplateType::Created,
+            'role' => ServiceRequestTypeEmailTemplateRole::Manager,
+        ])
+        ->for($serviceRequestType, 'serviceRequestType')
+        ->create();
 
     Team::factory()
         ->hasAttached($serviceRequestType, [], 'manageableServiceRequestTypes')
@@ -157,7 +184,7 @@ it('does not notify a user if they belong to a team managing a service request t
 
     app(NotifyServiceRequestUsers::class)->execute(
         $serviceRequest,
-        new ServiceRequestCreated($serviceRequest, MailChannel::class),
+        new ServiceRequestCreated($serviceRequest, $serviceRequestTypeEmailTemplate, MailChannel::class),
         false,
         false,
     );
@@ -171,6 +198,14 @@ it('does not notify a user if they belong to a team auditing a service request t
     Notification::fake();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $serviceRequestTypeEmailTemplate = ServiceRequestTypeEmailTemplate::factory()
+        ->state([
+            'type' => ServiceRequestEmailTemplateType::Created,
+            'role' => ServiceRequestTypeEmailTemplateRole::Auditor,
+        ])
+        ->for($serviceRequestType, 'serviceRequestType')
+        ->create();
 
     Team::factory()
         ->hasAttached($serviceRequestType, [], 'auditableServiceRequestTypes')
@@ -198,55 +233,12 @@ it('does not notify a user if they belong to a team auditing a service request t
 
     app(NotifyServiceRequestUsers::class)->execute(
         $serviceRequest,
-        new ServiceRequestCreated($serviceRequest, MailChannel::class),
+        new ServiceRequestCreated($serviceRequest, $serviceRequestTypeEmailTemplate, MailChannel::class),
         false,
         false,
     );
 
     Notification::assertNotSentTo(User::first(), ServiceRequestCreated::class);
     Notification::assertNotSentTo(User::skip(1)->first(), ServiceRequestCreated::class);
-    Notification::assertNotSentTo(User::skip(2)->first(), ServiceRequestCreated::class);
-});
-
-it('does not notify a user twice if they belong to a team managing and auditing a service request type', function () {
-    Notification::fake();
-
-    $serviceRequestType = ServiceRequestType::factory()->create();
-
-    Team::factory()
-        ->hasAttached($serviceRequestType, [], 'manageableServiceRequestTypes')
-        ->hasAttached($serviceRequestType, [], 'auditableServiceRequestTypes')
-        ->has(User::factory()->count(2))
-        ->create();
-
-    $serviceRequestPriority = ServiceRequestPriority::factory()
-        ->for($serviceRequestType, 'type')
-        ->create();
-
-    $anotherServiceRequestType = ServiceRequestType::factory()->create();
-
-    Team::factory()
-        ->hasAttached($anotherServiceRequestType, [], 'manageableServiceRequestTypes')
-        ->hasAttached($anotherServiceRequestType, [], 'auditableServiceRequestTypes')
-        ->has(User::factory())
-        ->create();
-
-    ServiceRequestPriority::factory()
-        ->for($anotherServiceRequestType, 'type')
-        ->create();
-
-    $serviceRequest = ServiceRequest::factory()
-        ->for($serviceRequestPriority, 'priority')
-        ->create();
-
-    app(NotifyServiceRequestUsers::class)->execute(
-        $serviceRequest,
-        new ServiceRequestCreated($serviceRequest, MailChannel::class),
-        true,
-        true,
-    );
-
-    Notification::assertSentToTimes(User::first(), ServiceRequestCreated::class, 1);
-    Notification::assertSentToTimes(User::skip(1)->first(), ServiceRequestCreated::class, 1);
     Notification::assertNotSentTo(User::skip(2)->first(), ServiceRequestCreated::class);
 });

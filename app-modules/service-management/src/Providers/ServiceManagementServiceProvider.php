@@ -78,11 +78,11 @@ class ServiceManagementServiceProvider extends ServiceProvider
         Panel::configureUsing(fn (Panel $panel) => ($panel->getId() !== 'admin') || $panel->plugin(new ServiceManagementPlugin()));
 
         TiptapEditor::configureUsing(function (TiptapEditor $component) {
-          $component
-              ->blocks([
-                ServiceRequestTypeEmailTemplateButtonBlock::class,
-              ]);
-      });
+            $component
+                ->blocks([
+                    ServiceRequestTypeEmailTemplateButtonBlock::class,
+                ]);
+        });
 
         $this->app->bind(ServiceRequestNumberGenerator::class, SqidPlusSixServiceRequestNumberGenerator::class);
     }

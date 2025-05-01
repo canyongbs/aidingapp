@@ -2,154 +2,151 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
-use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
-use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
-return new class extends Migration
-{
+return new class () extends Migration {
     public function up(): void
     {
         DB::transaction(function () {
             DB::table('service_request_type_email_templates')->truncate();
-            
+
             $types = [
                 'created' => [
                     'subject' => [
-                        "type" => "doc",
-                        "content" => [[
-                            "type" => "paragraph",
-                            "attrs" => ["class" => null, "style" => null, "textAlign" => "start"],
-                            "content" => [
-                                ["text" => "Service request ", "type" => "text"],
-                                ["type" => "mergeTag", "attrs" => ["id" => "service request number"]],
-                                ["text" => " ", "type" => "text"],
-                                ["type" => "mergeTag", "attrs" => ["id" => "created"]],
-                            ]
-                        ]]
+                        'type' => 'doc',
+                        'content' => [[
+                            'type' => 'paragraph',
+                            'attrs' => ['class' => null, 'style' => null, 'textAlign' => 'start'],
+                            'content' => [
+                                ['text' => 'Service request ', 'type' => 'text'],
+                                ['type' => 'mergeTag', 'attrs' => ['id' => 'service request number']],
+                                ['text' => ' ', 'type' => 'text'],
+                                ['type' => 'mergeTag', 'attrs' => ['id' => 'created']],
+                            ],
+                        ]],
                     ],
                     'body' => [
-                        "type" => "doc",
-                        "content" => [
-                            ["type" => "paragraph", "attrs" => ["class" => null, "style" => null, "textAlign" => "start"], "content" => [["text" => "Hello!", "type" => "text", "marks" => [["type" => "bold"]]]]],
-                            ["type" => "paragraph", "attrs" => ["class" => null, "style" => null, "textAlign" => "start"], "content" => [
-                                ["text" => "The Service request ", "type" => "text"],
-                                ["type" => "mergeTag", "attrs" => ["id" => "service request number"]],
-                                ["text" => " has been created.", "type" => "text"]
+                        'type' => 'doc',
+                        'content' => [
+                            ['type' => 'paragraph', 'attrs' => ['class' => null, 'style' => null, 'textAlign' => 'start'], 'content' => [['text' => 'Hello!', 'type' => 'text', 'marks' => [['type' => 'bold']]]]],
+                            ['type' => 'paragraph', 'attrs' => ['class' => null, 'style' => null, 'textAlign' => 'start'], 'content' => [
+                                ['text' => 'The Service request ', 'type' => 'text'],
+                                ['type' => 'mergeTag', 'attrs' => ['id' => 'service request number']],
+                                ['text' => ' has been created.', 'type' => 'text'],
                             ]],
-                        ]
-                    ]
+                        ],
+                    ],
                 ],
                 'assigned' => [
                     'subject' => [
-                        "type" => "doc",
-                        "content" => [[
-                            "type" => "paragraph",
-                            "attrs" => ["class" => null, "style" => null, "textAlign" => "start"],
-                            "content" => [
-                                ["text" => "Service Request ", "type" => "text"],
-                                ["type" => "mergeTag", "attrs" => ["id" => "service request number"]],
-                                ["text" => " ", "type" => "text"],
-                                ["type" => "mergeTag", "attrs" => ["id" => "assigned to"]],
-                                ["text" => " agent", "type" => "text"]
-                            ]
-                        ]]
+                        'type' => 'doc',
+                        'content' => [[
+                            'type' => 'paragraph',
+                            'attrs' => ['class' => null, 'style' => null, 'textAlign' => 'start'],
+                            'content' => [
+                                ['text' => 'Service Request ', 'type' => 'text'],
+                                ['type' => 'mergeTag', 'attrs' => ['id' => 'service request number']],
+                                ['text' => ' ', 'type' => 'text'],
+                                ['type' => 'mergeTag', 'attrs' => ['id' => 'assigned to']],
+                                ['text' => ' agent', 'type' => 'text'],
+                            ],
+                        ]],
                     ],
                     'body' => [
-                        "type" => "doc",
-                        "content" => [
-                            ["type" => "paragraph", "attrs" => ["class" => null, "style" => null, "textAlign" => "start"], "content" => [["text" => "Hello!", "type" => "text"]]],
-                            ["type" => "paragraph", "attrs" => ["class" => null, "style" => null, "textAlign" => "start"], "content" => [
-                                ["text" => "The service request ", "type" => "text"],
-                                ["type" => "mergeTag", "attrs" => ["id" => "service request number"]],
-                                ["text" => " has been ", "type" => "text"],
-                                ["type" => "mergeTag", "attrs" => ["id" => "assigned to"]],
-                                ["text" => " an agent.", "type" => "text"]
+                        'type' => 'doc',
+                        'content' => [
+                            ['type' => 'paragraph', 'attrs' => ['class' => null, 'style' => null, 'textAlign' => 'start'], 'content' => [['text' => 'Hello!', 'type' => 'text']]],
+                            ['type' => 'paragraph', 'attrs' => ['class' => null, 'style' => null, 'textAlign' => 'start'], 'content' => [
+                                ['text' => 'The service request ', 'type' => 'text'],
+                                ['type' => 'mergeTag', 'attrs' => ['id' => 'service request number']],
+                                ['text' => ' has been ', 'type' => 'text'],
+                                ['type' => 'mergeTag', 'attrs' => ['id' => 'assigned to']],
+                                ['text' => ' an agent.', 'type' => 'text'],
                             ]],
-                        ]
-                    ]
+                        ],
+                    ],
                 ],
                 'update' => [
                     'subject' => [
-                        "type" => "doc",
-                        "content" => [[
-                            "type" => "paragraph",
-                            "attrs" => ["class" => null, "style" => null, "textAlign" => "start"],
-                            "content" => [
-                                ["text" => "New ", "type" => "text"],
-                                ["type" => "mergeTag", "attrs" => ["id" => "updated"]],
-                                ["text" => " on service request ", "type" => "text"],
-                                ["type" => "mergeTag", "attrs" => ["id" => "service request number"]],
-                                ["text" => " ", "type" => "text"]
-                            ]
-                        ]]
+                        'type' => 'doc',
+                        'content' => [[
+                            'type' => 'paragraph',
+                            'attrs' => ['class' => null, 'style' => null, 'textAlign' => 'start'],
+                            'content' => [
+                                ['text' => 'New ', 'type' => 'text'],
+                                ['type' => 'mergeTag', 'attrs' => ['id' => 'updated']],
+                                ['text' => ' on service request ', 'type' => 'text'],
+                                ['type' => 'mergeTag', 'attrs' => ['id' => 'service request number']],
+                                ['text' => ' ', 'type' => 'text'],
+                            ],
+                        ]],
                     ],
                     'body' => [
-                        "type" => "doc",
-                        "content" => [
-                            ["type" => "paragraph", "attrs" => ["class" => null, "style" => null, "textAlign" => "start"], "content" => [["text" => "Hello!", "type" => "text", "marks" => [["type" => "bold"]]]]],
-                            ["type" => "paragraph", "attrs" => ["class" => null, "style" => null, "textAlign" => "start"], "content" => [
-                                ["text" => "The service request ", "type" => "text"],
-                                ["type" => "mergeTag", "attrs" => ["id" => "service request number"]],
-                                ["text" => " has a new ", "type" => "text"],
-                                ["type" => "mergeTag", "attrs" => ["id" => "updated"]],
-                                ["text" => ".", "type" => "text"]
+                        'type' => 'doc',
+                        'content' => [
+                            ['type' => 'paragraph', 'attrs' => ['class' => null, 'style' => null, 'textAlign' => 'start'], 'content' => [['text' => 'Hello!', 'type' => 'text', 'marks' => [['type' => 'bold']]]]],
+                            ['type' => 'paragraph', 'attrs' => ['class' => null, 'style' => null, 'textAlign' => 'start'], 'content' => [
+                                ['text' => 'The service request ', 'type' => 'text'],
+                                ['type' => 'mergeTag', 'attrs' => ['id' => 'service request number']],
+                                ['text' => ' has a new ', 'type' => 'text'],
+                                ['type' => 'mergeTag', 'attrs' => ['id' => 'updated']],
+                                ['text' => '.', 'type' => 'text'],
                             ]],
-                        ]
-                    ]
+                        ],
+                    ],
                 ],
                 'status_change' => [
                     'subject' => [
-                        "type" => "doc",
-                        "content" => [[
-                            "type" => "paragraph",
-                            "attrs" => ["class" => null, "style" => null, "textAlign" => "start"],
-                            "content" => [
-                                ["text" => "Service request ", "type" => "text"],
-                                ["type" => "mergeTag", "attrs" => ["id" => "service request number"]],
-                                ["text" => " status changed to ", "type" => "text"],
-                                ["type" => "mergeTag", "attrs" => ["id" => "status"]]
-                            ]
-                        ]]
+                        'type' => 'doc',
+                        'content' => [[
+                            'type' => 'paragraph',
+                            'attrs' => ['class' => null, 'style' => null, 'textAlign' => 'start'],
+                            'content' => [
+                                ['text' => 'Service request ', 'type' => 'text'],
+                                ['type' => 'mergeTag', 'attrs' => ['id' => 'service request number']],
+                                ['text' => ' status changed to ', 'type' => 'text'],
+                                ['type' => 'mergeTag', 'attrs' => ['id' => 'status']],
+                            ],
+                        ]],
                     ],
                     'body' => [
-                        "type" => "doc",
-                        "content" => [
-                            ["type" => "paragraph", "attrs" => ["class" => null, "style" => null, "textAlign" => "start"], "content" => [["text" => "Hello!", "type" => "text", "marks" => [["type" => "bold"]]]]],
-                            ["type" => "paragraph", "attrs" => ["class" => null, "style" => null, "textAlign" => "start"], "content" => [
-                                ["text" => "The service request ", "type" => "text"],
-                                ["type" => "mergeTag", "attrs" => ["id" => "service request number"]],
-                                ["text" => " status has changed to ", "type" => "text"],
-                                ["type" => "mergeTag", "attrs" => ["id" => "status"]],
-                                ["text" => ".", "type" => "text"]
+                        'type' => 'doc',
+                        'content' => [
+                            ['type' => 'paragraph', 'attrs' => ['class' => null, 'style' => null, 'textAlign' => 'start'], 'content' => [['text' => 'Hello!', 'type' => 'text', 'marks' => [['type' => 'bold']]]]],
+                            ['type' => 'paragraph', 'attrs' => ['class' => null, 'style' => null, 'textAlign' => 'start'], 'content' => [
+                                ['text' => 'The service request ', 'type' => 'text'],
+                                ['type' => 'mergeTag', 'attrs' => ['id' => 'service request number']],
+                                ['text' => ' status has changed to ', 'type' => 'text'],
+                                ['type' => 'mergeTag', 'attrs' => ['id' => 'status']],
+                                ['text' => '.', 'type' => 'text'],
                             ]],
-                        ]
-                    ]
+                        ],
+                    ],
                 ],
                 'closed' => [
                     'subject' => [
-                        "type" => "doc",
-                        "content" => [[
-                            "type" => "paragraph",
-                            "attrs" => ["class" => null, "style" => null, "textAlign" => "start"],
-                            "content" => [
-                                ["text" => "Service request ", "type" => "text"],
-                                ["type" => "mergeTag", "attrs" => ["id" => "service request number"]],
-                                ["text" => " closed", "type" => "text"]
-                            ]
-                        ]]
+                        'type' => 'doc',
+                        'content' => [[
+                            'type' => 'paragraph',
+                            'attrs' => ['class' => null, 'style' => null, 'textAlign' => 'start'],
+                            'content' => [
+                                ['text' => 'Service request ', 'type' => 'text'],
+                                ['type' => 'mergeTag', 'attrs' => ['id' => 'service request number']],
+                                ['text' => ' closed', 'type' => 'text'],
+                            ],
+                        ]],
                     ],
                     'body' => [
-                        "type" => "doc",
-                        "content" => [
-                            ["type" => "paragraph", "attrs" => ["class" => null, "style" => null, "textAlign" => "start"], "content" => [["text" => "Hello!", "type" => "text", "marks" => [["type" => "bold"]]]]],
-                            ["type" => "paragraph", "attrs" => ["class" => null, "style" => null, "textAlign" => "start"], "content" => [
-                                ["text" => "The service request ", "type" => "text"],
-                                ["type" => "mergeTag", "attrs" => ["id" => "service request number"]],
-                                ["text" => " has been closed.", "type" => "text"]
+                        'type' => 'doc',
+                        'content' => [
+                            ['type' => 'paragraph', 'attrs' => ['class' => null, 'style' => null, 'textAlign' => 'start'], 'content' => [['text' => 'Hello!', 'type' => 'text', 'marks' => [['type' => 'bold']]]]],
+                            ['type' => 'paragraph', 'attrs' => ['class' => null, 'style' => null, 'textAlign' => 'start'], 'content' => [
+                                ['text' => 'The service request ', 'type' => 'text'],
+                                ['type' => 'mergeTag', 'attrs' => ['id' => 'service request number']],
+                                ['text' => ' has been closed.', 'type' => 'text'],
                             ]],
-                        ]
-                    ]
+                        ],
+                    ],
                 ],
             ];
 
@@ -179,7 +176,6 @@ return new class extends Migration
                     }
                 });
         });
-
     }
 
     public function down(): void

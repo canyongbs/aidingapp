@@ -39,8 +39,6 @@ namespace AidingApp\ServiceManagement\Notifications;
 use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
 use AidingApp\Notification\Notifications\Channels\MailChannel;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
-use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
-use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
@@ -61,7 +59,7 @@ class ServiceRequestAssigned extends BaseNotification implements ShouldQueue
      */
     public function __construct(
         public ServiceRequest $serviceRequest,
-        public ServiceRequestTypeEmailTemplateRole $role,
+        public ?ServiceRequestTypeEmailTemplate $emailTemplate,
         public string $channel,
     ) {}
 
@@ -78,18 +76,14 @@ class ServiceRequestAssigned extends BaseNotification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
-        $template = ServiceRequestTypeEmailTemplate::query()
-          ->where('service_request_type_id', $this->serviceRequest->priority->type->id)
-          ->where('type', ServiceRequestEmailTemplateType::Assigned)
-          ->where('role', $this->role->value)
-          ->first();
-        
+        $template = $this->emailTemplate;
+
         if (! $template) {
             return MailMessage::make()
-            ->settings($this->resolveNotificationSetting($notifiable))
-            ->subject("Service request {$this->serviceRequest->service_request_number} assigned to agent")
-            ->line("The service request {$this->serviceRequest->service_request_number} has been assigned to an agent.")
-            ->action('View Service Request', ServiceRequestResource::getUrl('view', ['record' => $this->serviceRequest]));
+                ->settings($this->resolveNotificationSetting($notifiable))
+                ->subject("Service request {$this->serviceRequest->service_request_number} assigned to agent")
+                ->line("The service request {$this->serviceRequest->service_request_number} has been assigned to an agent.")
+                ->action('View Service Request', ServiceRequestResource::getUrl('view', ['record' => $this->serviceRequest]));
         }
 
         $subject = $this->getSubject($template->subject);

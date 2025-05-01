@@ -20,7 +20,6 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Notifications\Notification;
-use Illuminate\Support\Facades\Log;
 
 class SendEducatableServiceRequestStatusChangeNotification extends Notification implements ShouldQueue, HasBeforeSendHook
 {
@@ -53,7 +52,7 @@ class SendEducatableServiceRequestStatusChangeNotification extends Notification 
             ->where('type', ServiceRequestEmailTemplateType::StatusChange)
             ->where('role', ServiceRequestTypeEmailTemplateRole::Customer->value)
             ->first();
-        
+
         // if (! $template) {
         //     return MailMessage::make()
         //         ->settings($this->resolveNotificationSetting($notifiable))
