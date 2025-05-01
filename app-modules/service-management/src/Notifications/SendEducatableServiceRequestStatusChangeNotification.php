@@ -40,12 +40,12 @@ class SendEducatableServiceRequestStatusChangeNotification extends Notification 
 
     public function toMail(object $notifiable): MailMessage
     {
-        // /** @var Educatable $educatable */
-        // $educatable = $notifiable;
+        /** @var Educatable $educatable */
+        $educatable = $notifiable;
 
-        // $name = match ($notifiable::class) {
-        //     Contact::class => $educatable->first_name,
-        // };
+        $name = match ($notifiable::class) {
+            Contact::class => $educatable->first_name,
+        };
 
         $template = ServiceRequestTypeEmailTemplate::query()
             ->where('service_request_type_id', $this->serviceRequest->priority->type->id)
@@ -53,14 +53,14 @@ class SendEducatableServiceRequestStatusChangeNotification extends Notification 
             ->where('role', ServiceRequestTypeEmailTemplateRole::Customer->value)
             ->first();
 
-        // if (! $template) {
-        //     return MailMessage::make()
-        //         ->settings($this->resolveNotificationSetting($notifiable))
-        //         ->subject("Status update: Service request {$this->serviceRequest->service_request_number} is now {$this->serviceRequest->status?->name}")
-        //         ->greeting("Hello {$name},")
-        //         ->line("The status of your service request {$this->serviceRequest->service_request_number} has been updated to: {$this->serviceRequest->status?->name}.")
-        //         ->action('View Service Request', ServiceRequestResource::getUrl('view', ['record' => $this->serviceRequest]));
-        // }
+        if (! $template) {
+            return MailMessage::make()
+                ->settings($this->resolveNotificationSetting($notifiable))
+                ->subject("Status update: Service request {$this->serviceRequest->service_request_number} is now {$this->serviceRequest->status?->name}")
+                ->greeting("Hello {$name},")
+                ->line("The status of your service request {$this->serviceRequest->service_request_number} has been updated to: {$this->serviceRequest->status?->name}.")
+                ->action('View Service Request', ServiceRequestResource::getUrl('view', ['record' => $this->serviceRequest]));
+        }
 
         $subject = $this->getSubject($template->subject);
 

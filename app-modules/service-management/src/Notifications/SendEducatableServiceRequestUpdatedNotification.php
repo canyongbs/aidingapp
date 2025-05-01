@@ -40,12 +40,12 @@ class SendEducatableServiceRequestUpdatedNotification extends Notification imple
 
     public function toMail(object $notifiable): MailMessage
     {
-        // /** @var Educatable $educatable */
-        // $educatable = $notifiable;
+        /** @var Educatable $educatable */
+        $educatable = $notifiable;
 
-        // $name = match ($notifiable::class) {
-        //     Contact::class => $educatable->first_name,
-        // };
+        $name = match ($notifiable::class) {
+            Contact::class => $educatable->first_name,
+        };
 
         $template = ServiceRequestTypeEmailTemplate::query()
             ->where('service_request_type_id', $this->serviceRequest->priority->type->id)
@@ -53,14 +53,14 @@ class SendEducatableServiceRequestUpdatedNotification extends Notification imple
             ->where('role', ServiceRequestTypeEmailTemplateRole::Customer->value)
             ->first();
 
-        // if (! $template) {
-        //     return MailMessage::make()
-        //         ->settings($this->resolveNotificationSetting($notifiable))
-        //         ->subject("There’s an update on your service request {$this->serviceRequest->service_request_number}")
-        //         ->greeting("Hello {$name},")
-        //         ->line("There’s been a new update to your service request {$this->serviceRequest->service_request_number}. Please check the latest details.")
-        //         ->action('View Service Request', ServiceRequestResource::getUrl('view', ['record' => $this->serviceRequest]));
-        // }
+        if (! $template) {
+            return MailMessage::make()
+                ->settings($this->resolveNotificationSetting($notifiable))
+                ->subject("There’s an update on your service request {$this->serviceRequest->service_request_number}")
+                ->greeting("Hello {$name},")
+                ->line("There’s been a new update to your service request {$this->serviceRequest->service_request_number}. Please check the latest details.")
+                ->action('View Service Request', ServiceRequestResource::getUrl('view', ['record' => $this->serviceRequest]));
+        }
 
         $subject = $this->getSubject($template->subject);
 
