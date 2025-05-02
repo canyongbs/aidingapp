@@ -63,7 +63,7 @@ class KnowledgeManagementPortalSearchController extends Controller
                 fn (Stringable $string) => $string->explode(',')
             );
 
-        $itemData = KnowledgeBaseArticleData::collection(
+        $itemData = KnowledgeBaseArticleData::collect(
             KnowledgeBaseItem::query()
                 ->public()
                 ->with('tags')
@@ -93,7 +93,7 @@ class KnowledgeManagementPortalSearchController extends Controller
                     ];
                 })
         );
-        $categoryData = KnowledgeBaseCategoryData::collection(
+        $categoryData = KnowledgeBaseCategoryData::collect(
             KnowledgeBaseCategory::query()
                 ->tap(new SearchBy('name', $search))
                 ->get()

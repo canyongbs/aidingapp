@@ -36,6 +36,9 @@
 
 namespace App\Multitenancy\Listeners;
 
+use App\Models\Tenant;
+use Exception;
+
 use function Sentry\configureScope;
 
 use Sentry\State\Scope;
@@ -46,6 +49,11 @@ class SetSentryTenantTag
     public function handle(MakingTenantCurrentEvent $event): void
     {
         configureScope(function (Scope $scope) use ($event): void {
+            throw_if(
+                ! $event->tenant instanceof Tenant,
+                new Exception('Tenant is not an instance of Tenant')
+            );
+
             $scope->setTags([
                 'tenant.id' => $event->tenant->getKey(),
                 'tenant.name' => $event->tenant->name,
