@@ -66,7 +66,6 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
-use Kirschbaum\PowerJoins\PowerJoins;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -82,7 +81,6 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
 {
     use BelongsToEducatable;
     use SoftDeletes;
-    use PowerJoins;
     use AuditableTrait;
     use HasRelationships;
     use InteractsWithMedia;

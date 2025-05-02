@@ -1,6 +1,5 @@
 runas-user
 fix-permissions
 startup-caching
-build-assets
 initial-migration
 symlink-roadrunner

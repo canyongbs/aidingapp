@@ -70,6 +70,9 @@ class TwilioConversation extends Model
         'is_private_channel',
     ];
 
+    /**
+     * @return BelongsToMany<User, $this, covariant TwilioConversationUser, 'participant'>
+     */
     public function participants(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'twilio_conversation_user', 'conversation_sid', 'user_id')
@@ -89,6 +92,9 @@ class TwilioConversation extends Model
             ->using(TwilioConversationUser::class);
     }
 
+    /**
+     * @return BelongsToMany<User, $this, covariant TwilioConversationUser, 'participant'>
+     */
     public function managers(): BelongsToMany
     {
         return $this->participants()->wherePivot('is_channel_manager', true);

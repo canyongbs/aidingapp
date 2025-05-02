@@ -192,7 +192,7 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
     }
 
     /**
-     * @return BelongsToMany<TwilioConversation, $this>
+     * @return BelongsToMany<TwilioConversation, $this, covariant TwilioConversationUser, 'participant'>
      */
     public function conversations(): BelongsToMany
     {
@@ -230,7 +230,7 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
     }
 
     /**
-     * @return MorphToMany<Contact, $this>
+     * @return MorphToMany<Contact, $this, covariant Subscription>
      */
     public function contactSubscriptions(): MorphToMany
     {
@@ -355,7 +355,7 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
             ->singleFile();
     }
 
-    public function registerMediaConversions(Media $media = null): void
+    public function registerMediaConversions(?Media $media = null): void
     {
         $this->addMediaConversion('avatar-height-250px')
             ->performOnCollections('avatar')
@@ -455,7 +455,7 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
     }
 
     /**
-     * @return BelongsToMany<ServiceMonitoringTarget, $this>
+     * @return BelongsToMany<ServiceMonitoringTarget, $this, covariant ServiceMonitoringTargetUser>
      */
     public function serviceMonitoringTargets(): BelongsToMany
     {

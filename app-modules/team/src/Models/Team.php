@@ -66,6 +66,9 @@ class Team extends BaseModel
         return $this->hasMany(User::class);
     }
 
+    /**
+     * @return BelongsToMany<ServiceMonitoringTarget, $this, covariant ServiceMonitoringTargetTeam>
+     */
     public function serviceMonitoringTargets(): BelongsToMany
     {
         return $this->belongsToMany(ServiceMonitoringTarget::class)
@@ -73,6 +76,9 @@ class Team extends BaseModel
             ->withTimestamps();
     }
 
+    /**
+     * @return BelongsToMany<ServiceRequestType, $this, covariant ServiceRequestTypeManager>
+     */
     public function manageableServiceRequestTypes(): BelongsToMany
     {
         return $this->belongsToMany(ServiceRequestType::class, 'service_request_type_managers')
@@ -80,6 +86,9 @@ class Team extends BaseModel
             ->withTimestamps();
     }
 
+    /**
+     * @return BelongsToMany<ServiceRequestType, $this, covariant ServiceRequestTypeAuditor>
+     */
     public function auditableServiceRequestTypes(): BelongsToMany
     {
         return $this->belongsToMany(ServiceRequestType::class, 'service_request_type_auditors')

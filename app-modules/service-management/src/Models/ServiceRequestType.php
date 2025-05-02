@@ -156,6 +156,9 @@ class ServiceRequestType extends BaseModel implements Auditable
         return $this->hasOne(ServiceRequestForm::class, 'service_request_type_id');
     }
 
+    /**
+     * @return BelongsToMany<Team, $this, covariant ServiceRequestTypeManager>
+     */
     public function managers(): BelongsToMany
     {
         return $this->belongsToMany(Team::class, 'service_request_type_managers')
@@ -163,6 +166,9 @@ class ServiceRequestType extends BaseModel implements Auditable
             ->withTimestamps();
     }
 
+    /**
+     * @return BelongsToMany<Team, $this, covariant ServiceRequestTypeAuditor>
+     */
     public function auditors(): BelongsToMany
     {
         return $this->belongsToMany(Team::class, 'service_request_type_auditors')

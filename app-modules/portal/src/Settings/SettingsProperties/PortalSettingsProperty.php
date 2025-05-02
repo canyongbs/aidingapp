@@ -41,7 +41,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class PortalSettingsProperty extends SettingsPropertyWithMedia
 {
-    public function registerMediaConversions(Media $media = null): void
+    public function registerMediaConversions(?Media $media = null): void
     {
         $this->addMediaConversion('portal_favicon')
             ->format('png')

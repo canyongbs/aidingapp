@@ -10,7 +10,7 @@
     ],
     "license": "Elastic-2.0",
     "require": {
-        "php": "8.2.*",
+        "php": "8.4.*",
         "ext-gd": "*",
         "ext-pdo": "*",
         "aws/aws-php-sns-message-validator": "^1.9",
@@ -57,7 +57,7 @@
         "google/apiclient": "^2.17",
         "guzzlehttp/guzzle": "^7.2",
         "internachi/modular": "^2.2",
-        "kirschbaum-development/eloquent-power-joins": "^3.5",
+        "kirschbaum-development/eloquent-power-joins": "^4.0",
         "laravel/framework": "^11.44.1",
         "laravel/octane": "^2.8.3",
         "laravel/pennant": "^1.10",
@@ -111,7 +111,6 @@
         "phpstan/phpstan": "^2.0",
         "phpunit/phpunit": "^10.1",
         "rector/rector": "^2.0",
-        "serversideup/spin": "v2.0.0-beta-3",
         "spatie/laravel-ignition": "^2.0",
         "spatie/laravel-ray": "1.39.1",
         "worksome/request-factories": "^3.2"
@@ -149,7 +148,7 @@
             "@php artisan tenants:artisan \"db:seed --database=tenant\""
         ],
         "php-cs-format": [
-            "./vendor/friendsofphp/php-cs-fixer/php-cs-fixer fix -v --config=./php-cs-fixer.php"
+            "export PHP_CS_FIXER_IGNORE_ENV=1 ; ./vendor/friendsofphp/php-cs-fixer/php-cs-fixer fix -v --config=./php-cs-fixer.php"
         ],
         "php-cs-format-dryrun": [
             "@php-cs-format --dry-run --stop-on-violation"

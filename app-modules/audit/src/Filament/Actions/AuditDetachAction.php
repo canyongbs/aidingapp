@@ -36,6 +36,7 @@
 
 namespace AidingApp\Audit\Filament\Actions;
 
+use AidingApp\Audit\Models\Audit;
 use Filament\Tables\Actions\DetachAction;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
@@ -49,7 +50,7 @@ class AuditDetachAction extends DetachAction
         parent::setUp();
 
         $this->using(function (Model $record, Table $table) {
-            /** @var BelongsToMany $relationship */
+            /** @var BelongsToMany<Model, Audit> $relationship */
             $relationship = $table->getRelationship();
 
             /** @var Auditable $parent */
