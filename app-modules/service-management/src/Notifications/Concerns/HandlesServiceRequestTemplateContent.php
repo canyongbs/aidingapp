@@ -3,22 +3,20 @@
 namespace AidingApp\ServiceManagement\Notifications\Concerns;
 
 use AidingApp\ServiceManagement\Actions\GenerateServiceRequestTypeEmailTemplateContent;
+use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
 use Illuminate\Support\HtmlString;
 
 trait HandlesServiceRequestTemplateContent
 {
-    // /** @var ServiceRequest */
-    // protected ServiceRequest $serviceRequest;
-
     /**
      * @param string|array<string, mixed> $body
+     * @param ?ServiceRequestTypeEmailTemplateRole $urlType
      */
-    public function getBody($body): HtmlString
+    public function getBody($body, ?ServiceRequestTypeEmailTemplateRole $urlType = null): HtmlString
     {
         if (is_array($body)) {
-            $body = $this->injectButtonUrlIntoTiptapContent($body);
+            $body = $this->injectButtonUrlIntoTiptapContent($body, $urlType);
         }
 
         return app(GenerateServiceRequestTypeEmailTemplateContent::class)(
@@ -61,19 +59,20 @@ trait HandlesServiceRequestTemplateContent
 
     /**
      * @param array<string, mixed> $content
+     * @param ?ServiceRequestTypeEmailTemplateRole $urlType
      *
      * @return array<string, mixed>
      */
-    protected function injectButtonUrlIntoTiptapContent(array $content): array
+    protected function injectButtonUrlIntoTiptapContent(array $content, ?ServiceRequestTypeEmailTemplateRole $urlType = null): array
     {
         if (! isset($content['content']) || ! is_array($content['content'])) {
             return $content;
         }
 
-        $content['content'] = array_map(function ($block) {
+        $content['content'] = array_map(function ($block) use ($urlType) {
             if ($block['type'] === 'tiptapBlock' &&
                 ($block['attrs']['type'] ?? null) === 'serviceRequestTypeEmailTemplateButtonBlock') {
-                $block['attrs']['data']['url'] = ServiceRequestResource::getUrl('view', [
+                $block['attrs']['data']['url'] = $urlType == ServiceRequestTypeEmailTemplateRole::Customer ? route('portal.service-request.show', $this->serviceRequest) : ServiceRequestResource::getUrl('view', [
                     'record' => $this->serviceRequest,
                 ]);
             }

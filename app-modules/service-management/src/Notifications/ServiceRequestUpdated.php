@@ -44,6 +44,7 @@ use AidingApp\Notification\Notifications\Channels\MailChannel;
 use AidingApp\Notification\Notifications\Contracts\HasBeforeSendHook;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use AidingApp\ServiceManagement\Notifications\Concerns\HandlesServiceRequestTemplateContent;
@@ -59,6 +60,9 @@ class ServiceRequestUpdated extends BaseNotification implements ShouldQueue, Has
     use Queueable;
     use HandlesServiceRequestTemplateContent;
 
+    /** @var ServiceRequest */
+    public ServiceRequest $serviceRequest;
+
     /**
      * @param class-string $channel
      */
@@ -66,7 +70,9 @@ class ServiceRequestUpdated extends BaseNotification implements ShouldQueue, Has
         public ServiceRequestUpdate $serviceRequestUpdate,
         public ?ServiceRequestTypeEmailTemplate $emailTemplate,
         public string $channel,
-    ) {}
+    ) {
+        $this->serviceRequest = $serviceRequestUpdate->serviceRequest;
+    }
 
     /**
      * @return array<int, string>

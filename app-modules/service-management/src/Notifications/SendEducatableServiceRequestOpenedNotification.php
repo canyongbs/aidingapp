@@ -42,8 +42,6 @@ use AidingApp\Notification\Models\Contracts\CanBeNotified;
 use AidingApp\Notification\Models\Contracts\Message;
 use AidingApp\Notification\Notifications\Contracts\HasBeforeSendHook;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
-use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
-use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use AidingApp\ServiceManagement\Notifications\Concerns\HandlesServiceRequestTemplateContent;
@@ -61,6 +59,7 @@ class SendEducatableServiceRequestOpenedNotification extends Notification implem
 
     public function __construct(
         protected ServiceRequest $serviceRequest,
+        protected ?ServiceRequestTypeEmailTemplate $emailTemplate,
     ) {}
 
     /**
@@ -83,11 +82,7 @@ class SendEducatableServiceRequestOpenedNotification extends Notification implem
         $status = $this->serviceRequest->status;
         $type = $this->serviceRequest->priority->type;
 
-        $template = ServiceRequestTypeEmailTemplate::query()
-            ->where('service_request_type_id', $this->serviceRequest->priority->type->id)
-            ->where('type', ServiceRequestEmailTemplateType::Created)
-            ->where('role', ServiceRequestTypeEmailTemplateRole::Customer->value)
-            ->first();
+        $template = $this->emailTemplate;
 
         if (! $template) {
             return MailMessage::make()

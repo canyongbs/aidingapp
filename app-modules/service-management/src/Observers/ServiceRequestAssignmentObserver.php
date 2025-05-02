@@ -78,9 +78,17 @@ class ServiceRequestAssignmentObserver
 
         TimelineableRecordCreated::dispatch($serviceRequestAssignment->serviceRequest, $serviceRequestAssignment);
 
-        $serviceRequestAssignment->serviceRequest->respondent->notify(
-            new SendEducatableServiceRequestAssignedNotification($serviceRequestAssignment->serviceRequest)
+        $customerEmailTemplate = $this->fetchTemplate(
+            $serviceRequestAssignment->serviceRequest->priority->type,
+            ServiceRequestEmailTemplateType::Assigned,
+            ServiceRequestTypeEmailTemplateRole::Customer
         );
+
+        if ($serviceRequestAssignment->serviceRequest->priority?->type->is_customers_service_request_assigned_email_enabled) {
+            $serviceRequestAssignment->serviceRequest->respondent->notify(
+                new SendEducatableServiceRequestAssignedNotification($serviceRequestAssignment->serviceRequest, $customerEmailTemplate)
+            );
+        }
 
         $managerEmailTemplate = $this->fetchTemplate(
             $serviceRequestAssignment->serviceRequest->priority->type,
@@ -94,37 +102,33 @@ class ServiceRequestAssignmentObserver
             ServiceRequestTypeEmailTemplateRole::Auditor
         );
 
-        if ($managerEmailTemplate) {
-            app(NotifyServiceRequestUsers::class)->execute(
-                $serviceRequestAssignment->serviceRequest,
-                new ServiceRequestAssigned($serviceRequestAssignment->serviceRequest, $managerEmailTemplate, MailChannel::class),
-                $serviceRequestAssignment->serviceRequest->priority?->type->is_managers_service_request_assigned_email_enabled ?? false,
-                false,
-            );
+        app(NotifyServiceRequestUsers::class)->execute(
+            $serviceRequestAssignment->serviceRequest,
+            new ServiceRequestAssigned($serviceRequestAssignment->serviceRequest, $managerEmailTemplate, MailChannel::class),
+            $serviceRequestAssignment->serviceRequest->priority?->type->is_managers_service_request_assigned_email_enabled ?? false,
+            false,
+        );
 
-            app(NotifyServiceRequestUsers::class)->execute(
-                $serviceRequestAssignment->serviceRequest,
-                new ServiceRequestAssigned($serviceRequestAssignment->serviceRequest, $managerEmailTemplate, DatabaseChannel::class),
-                $serviceRequestAssignment->serviceRequest->priority?->type->is_managers_service_request_assigned_notification_enabled ?? false,
-                false,
-            );
-        }
+        app(NotifyServiceRequestUsers::class)->execute(
+            $serviceRequestAssignment->serviceRequest,
+            new ServiceRequestAssigned($serviceRequestAssignment->serviceRequest, $managerEmailTemplate, DatabaseChannel::class),
+            $serviceRequestAssignment->serviceRequest->priority?->type->is_managers_service_request_assigned_notification_enabled ?? false,
+            false,
+        );
 
-        if ($auditorEmailTemplate) {
-            app(NotifyServiceRequestUsers::class)->execute(
-                $serviceRequestAssignment->serviceRequest,
-                new ServiceRequestAssigned($serviceRequestAssignment->serviceRequest, $auditorEmailTemplate, MailChannel::class),
-                false,
-                $serviceRequestAssignment->serviceRequest->priority?->type->is_auditors_service_request_assigned_email_enabled ?? false,
-            );
+        app(NotifyServiceRequestUsers::class)->execute(
+            $serviceRequestAssignment->serviceRequest,
+            new ServiceRequestAssigned($serviceRequestAssignment->serviceRequest, $auditorEmailTemplate, MailChannel::class),
+            false,
+            $serviceRequestAssignment->serviceRequest->priority?->type->is_auditors_service_request_assigned_email_enabled ?? false,
+        );
 
-            app(NotifyServiceRequestUsers::class)->execute(
-                $serviceRequestAssignment->serviceRequest,
-                new ServiceRequestAssigned($serviceRequestAssignment->serviceRequest, $auditorEmailTemplate, DatabaseChannel::class),
-                false,
-                $serviceRequestAssignment->serviceRequest->priority?->type->is_auditors_service_request_assigned_notification_enabled ?? false,
-            );
-        }
+        app(NotifyServiceRequestUsers::class)->execute(
+            $serviceRequestAssignment->serviceRequest,
+            new ServiceRequestAssigned($serviceRequestAssignment->serviceRequest, $auditorEmailTemplate, DatabaseChannel::class),
+            false,
+            $serviceRequestAssignment->serviceRequest->priority?->type->is_auditors_service_request_assigned_notification_enabled ?? false,
+        );
     }
 
     public function deleted(ServiceRequestAssignment $serviceRequestAssignment): void

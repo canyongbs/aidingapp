@@ -8,14 +8,13 @@ use AidingApp\Notification\Models\Contracts\CanBeNotified;
 use AidingApp\Notification\Models\Contracts\Message;
 use AidingApp\Notification\Notifications\Contracts\HasBeforeSendHook;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
-use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use AidingApp\ServiceManagement\Notifications\Concerns\HandlesServiceRequestTemplateContent;
 use App\Models\Contracts\Educatable;
 use App\Models\NotificationSetting;
+use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\AnonymousNotifiable;
@@ -28,6 +27,7 @@ class SendEducatableServiceRequestStatusChangeNotification extends Notification 
 
     public function __construct(
         protected ServiceRequest $serviceRequest,
+        protected ?ServiceRequestTypeEmailTemplate $emailTemplate,
     ) {}
 
     /**
@@ -43,15 +43,13 @@ class SendEducatableServiceRequestStatusChangeNotification extends Notification 
         /** @var Educatable $educatable */
         $educatable = $notifiable;
 
-        $name = match ($notifiable::class) {
-            Contact::class => $educatable->first_name,
-        };
+        if ($educatable instanceof Contact) {
+            $name = $educatable->first_name;
+        } else {
+            throw new Exception('Unhandled notifiable type');
+        }
 
-        $template = ServiceRequestTypeEmailTemplate::query()
-            ->where('service_request_type_id', $this->serviceRequest->priority->type->id)
-            ->where('type', ServiceRequestEmailTemplateType::StatusChange)
-            ->where('role', ServiceRequestTypeEmailTemplateRole::Customer->value)
-            ->first();
+        $template = $this->emailTemplate;
 
         if (! $template) {
             return MailMessage::make()
@@ -59,12 +57,12 @@ class SendEducatableServiceRequestStatusChangeNotification extends Notification 
                 ->subject("Status update: Service request {$this->serviceRequest->service_request_number} is now {$this->serviceRequest->status?->name}")
                 ->greeting("Hello {$name},")
                 ->line("The status of your service request {$this->serviceRequest->service_request_number} has been updated to: {$this->serviceRequest->status?->name}.")
-                ->action('View Service Request', ServiceRequestResource::getUrl('view', ['record' => $this->serviceRequest]));
+                ->action('View Service Request', route('portal.service-request.show', $this->serviceRequest));
         }
 
         $subject = $this->getSubject($template->subject);
 
-        $body = $this->getBody($template->body);
+        $body = $this->getBody($template->body, ServiceRequestTypeEmailTemplateRole::Customer);
 
         return MailMessage::make()
             ->settings($this->resolveNotificationSetting($notifiable))
