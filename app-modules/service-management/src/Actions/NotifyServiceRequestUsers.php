@@ -56,7 +56,7 @@ class NotifyServiceRequestUsers
                         'team',
                         fn (Builder $query) => $query->whereHas(
                             'manageableServiceRequestTypes',
-                            fn (Builder $query) => $query->where('service_request_type_id', $serviceRequest->priority->type->id)->whereHas(
+                            fn (Builder $query) => $query->where('service_request_type_id', $serviceRequest->priority->type->getKey())->whereHas(
                                 'serviceRequests',
                                 fn (Builder $query) => $query->whereKey($serviceRequest),
                             ),
@@ -69,13 +69,13 @@ class NotifyServiceRequestUsers
                         'team',
                         fn (Builder $query) => $query->whereHas(
                             'auditableServiceRequestTypes',
-                            fn (Builder $query) => $query->where('service_request_type_id', $serviceRequest->priority->type->id)->whereHas(
+                            fn (Builder $query) => $query->where('service_request_type_id', $serviceRequest->priority->type->getKey())->whereHas(
                                 'serviceRequests',
                                 fn (Builder $query) => $query->whereKey($serviceRequest),
                             ),
                         )->whereDoesntHave(
                             'manageableServiceRequestTypes',
-                            fn (Builder $query) => $query->where('service_request_type_id', $serviceRequest->priority->type->id)->whereHas(
+                            fn (Builder $query) => $query->where('service_request_type_id', $serviceRequest->priority->type->getKey())->whereHas(
                                 'serviceRequests',
                                 fn (Builder $query) => $query->whereKey($serviceRequest),
                             ),
