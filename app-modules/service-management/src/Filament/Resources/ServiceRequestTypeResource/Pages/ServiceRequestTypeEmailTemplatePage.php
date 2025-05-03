@@ -81,7 +81,7 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
                         ->id('email-template-role-tabs')
                         ->tabs(array_map(
                             fn (ServiceRequestTypeEmailTemplateRole $role) => Tab::make($role->getLabel())
-                                ->schema($this->getEmailTemplateFormSchemaForRole($role->value))
+                                ->schema($this->getEmailTemplateFormSchema())
                                 ->statePath($role->value),
                             ServiceRequestTypeEmailTemplateRole::cases()
                         ))
@@ -150,37 +150,36 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
         } else {
             foreach (ServiceRequestTypeEmailTemplateRole::cases() as $role) {
                 $templateData = $data[$role->value] ?? null;
-            
+
                 if (
                     ! $templateData ||
-                    (is_null($templateData['subject']) && is_null($templateData['body']))
+                    (blank($templateData['subject']) && blank($templateData['body']))
                 ) {
                     continue;
                 }
-            
+
                 $template = ServiceRequestTypeEmailTemplate::firstOrNew([
                     'service_request_type_id' => $record->getKey(),
                     'type' => $this->type,
                     'role' => $role,
                 ]);
-            
-                if (! $template->exists && (is_null($templateData['subject']) || is_null($templateData['body']))) {
+
+                if (! $template->exists && (blank($templateData['subject']) || blank($templateData['body']))) {
                     continue;
                 }
-            
+
                 $template->subject = $templateData['subject'] ?? $template->subject;
                 $template->body = $templateData['body'] ?? $template->body;
-            
+
                 $template->save();
             }
-            
         }
 
         $this->getSavedNotification()->send();
     }
 
     /** @return array<int, TiptapEditor> */
-    protected function getEmailTemplateFormSchemaForRole(string $role): array
+    protected function getEmailTemplateFormSchema(): array
     {
         return [
             TiptapEditor::make('subject')

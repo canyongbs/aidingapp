@@ -3666,10 +3666,25 @@ namespace AidingApp\Webhook\Models{
 /**
  * 
  *
+ * @property string $id
  * @property \AidingApp\Webhook\Enums\InboundWebhookSource $source
+ * @property string $event
+ * @property string $url
+ * @property string $payload
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property string|null $deleted_at
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LandlordInboundWebhook newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LandlordInboundWebhook newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LandlordInboundWebhook query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LandlordInboundWebhook whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LandlordInboundWebhook whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LandlordInboundWebhook whereEvent($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LandlordInboundWebhook whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LandlordInboundWebhook wherePayload($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LandlordInboundWebhook whereSource($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LandlordInboundWebhook whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|LandlordInboundWebhook whereUrl($value)
  * @mixin \Eloquent
  */
 	#[\AllowDynamicProperties]
