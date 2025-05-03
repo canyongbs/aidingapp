@@ -3,6 +3,7 @@
 namespace AidingApp\ServiceManagement\Notifications\Concerns;
 
 use AidingApp\ServiceManagement\Actions\GenerateServiceRequestTypeEmailTemplateContent;
+use AidingApp\ServiceManagement\Actions\GenerateServiceRequestTypeEmailTemplateSubject;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use Illuminate\Support\HtmlString;
@@ -32,7 +33,7 @@ trait HandlesServiceRequestTemplateContent
      */
     public function getSubject($subject): HtmlString
     {
-        return app(GenerateServiceRequestTypeEmailTemplateContent::class)(
+        return app(GenerateServiceRequestTypeEmailTemplateSubject::class)(
             $subject,
             $this->getMergeData(),
             $this->serviceRequest,
