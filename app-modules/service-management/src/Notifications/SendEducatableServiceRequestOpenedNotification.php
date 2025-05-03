@@ -72,13 +72,6 @@ class SendEducatableServiceRequestOpenedNotification extends Notification implem
 
     public function toMail(object $notifiable): MailMessage
     {
-        // /** @var Educatable $educatable */
-        // $educatable = $notifiable;
-
-        // $name = match ($notifiable::class) {
-        //     Contact::class => $educatable->first_name,
-        // };
-
         $name = $notifiable->first_name;
 
         $status = $this->serviceRequest->status;

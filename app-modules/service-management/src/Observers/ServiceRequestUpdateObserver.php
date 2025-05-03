@@ -97,16 +97,16 @@ class ServiceRequestUpdateObserver
 
         app(NotifyServiceRequestUsers::class)->execute(
             $serviceRequestUpdate->serviceRequest,
-            new ServiceRequestUpdated($serviceRequestUpdate, $managerEmailTemplate, DatabaseChannel::class),
-            $serviceRequestUpdate->serviceRequest->priority?->type->is_managers_service_request_update_notification_enabled ?? false,
+            new ServiceRequestUpdated($serviceRequestUpdate, $auditorEmailTemplate, MailChannel::class),
             false,
+            $serviceRequestUpdate->serviceRequest->priority?->type->is_auditors_service_request_update_email_enabled ?? false,
         );
 
         app(NotifyServiceRequestUsers::class)->execute(
             $serviceRequestUpdate->serviceRequest,
-            new ServiceRequestUpdated($serviceRequestUpdate, $auditorEmailTemplate, MailChannel::class),
+            new ServiceRequestUpdated($serviceRequestUpdate, $managerEmailTemplate, DatabaseChannel::class),
+            $serviceRequestUpdate->serviceRequest->priority?->type->is_managers_service_request_update_notification_enabled ?? false,
             false,
-            $serviceRequestUpdate->serviceRequest->priority?->type->is_auditors_service_request_update_email_enabled ?? false,
         );
 
         app(NotifyServiceRequestUsers::class)->execute(
