@@ -36,7 +36,6 @@
 
 namespace AidingApp\ServiceManagement\Notifications;
 
-use AidingApp\Contact\Models\Contact;
 use AidingApp\Notification\Enums\NotificationChannel;
 use AidingApp\Notification\Models\Contracts\CanBeNotified;
 use AidingApp\Notification\Models\Contracts\Message;
@@ -45,7 +44,6 @@ use AidingApp\Notification\Notifications\Messages\MailMessage;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use AidingApp\ServiceManagement\Notifications\Concerns\HandlesServiceRequestTemplateContent;
-use App\Models\Contracts\Educatable;
 use App\Models\NotificationSetting;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
