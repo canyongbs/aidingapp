@@ -41,7 +41,10 @@ use AidingApp\Notification\Models\Contracts\CanBeNotified;
 use AidingApp\Notification\Models\Contracts\Message;
 use AidingApp\Notification\Notifications\Contracts\HasBeforeSendHook;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
+use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
+use AidingApp\ServiceManagement\Notifications\Concerns\HandlesServiceRequestTemplateContent;
 use App\Models\NotificationSetting;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -52,9 +55,11 @@ use Illuminate\Support\Str;
 class SendEducatableServiceRequestClosedNotification extends Notification implements ShouldQueue, HasBeforeSendHook
 {
     use Queueable;
+    use HandlesServiceRequestTemplateContent;
 
     public function __construct(
         protected ServiceRequest $serviceRequest,
+        protected ?ServiceRequestTypeEmailTemplate $emailTemplate,
     ) {}
 
     /**
@@ -71,17 +76,30 @@ class SendEducatableServiceRequestClosedNotification extends Notification implem
 
         $status = $this->serviceRequest->status;
 
+        $template = $this->emailTemplate;
+
+        if (! $template) {
+            return MailMessage::make()
+                ->settings($this->resolveNotificationSetting($notifiable))
+                ->subject(__('[Ticket #:ticketno]: Your Issue Has Been Resolved', ['ticketno' => $this->serviceRequest->service_request_number]))
+                ->greeting("Dear {$name},")
+                ->line(__('We wanted to update you that the issue you reported in Ticket #:ticketNo regarding :shortDescription has been :status.', [
+                    'ticketNo' => $this->serviceRequest->service_request_number,
+                    'status' => $status->name,
+                    'shortDescription' => Str::limit($this->serviceRequest->res_details, 10, '...'),
+                ]))
+                ->line('If you experience any further issues or have additional questions, please do not hesitate to open a new ticket.')
+                ->salutation('Thank you for giving us a chance to help you with your issue.');
+        }
+
+        $subject = $this->getSubject($template->subject);
+
+        $body = $this->getBody($template->body, ServiceRequestTypeEmailTemplateRole::Customer);
+
         return MailMessage::make()
             ->settings($this->resolveNotificationSetting($notifiable))
-            ->subject(__('[Ticket #:ticketno]: Your Issue Has Been Resolved', ['ticketno' => $this->serviceRequest->service_request_number]))
-            ->greeting("Dear {$name},")
-            ->line(__('We wanted to update you that the issue you reported in Ticket #:ticketNo regarding :shortDescription has been :status.', [
-                'ticketNo' => $this->serviceRequest->service_request_number,
-                'status' => $status->name,
-                'shortDescription' => Str::limit($this->serviceRequest->res_details, 10, '...'),
-            ]))
-            ->line('If you experience any further issues or have additional questions, please do not hesitate to open a new ticket.')
-            ->salutation('Thank you for giving us a chance to help you with your issue.');
+            ->subject(strip_tags($subject))
+            ->content($body);
     }
 
     public function beforeSend(AnonymousNotifiable|CanBeNotified $notifiable, Message $message, NotificationChannel $channel): void

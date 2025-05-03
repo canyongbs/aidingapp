@@ -83,8 +83,11 @@ class ServiceRequestObserver
             ServiceRequestTypeEmailTemplateRole::Customer
         );
 
-        if ($serviceRequest->status?->classification === SystemServiceRequestClassification::Open && $serviceRequest->priority?->type->is_customers_service_request_created_email_enabled) {
-            $serviceRequest->respondent->notify(new SendEducatableServiceRequestOpenedNotification($serviceRequest, $customerEmailTemplate));
+        if ($serviceRequest->status?->classification === SystemServiceRequestClassification::Open
+            && $serviceRequest->priority?->type->is_customers_service_request_created_email_enabled) {
+            $serviceRequest->respondent->notify(
+                new SendEducatableServiceRequestOpenedNotification($serviceRequest, $customerEmailTemplate)
+            );
         }
 
         $managerEmailTemplate = $this->fetchTemplate(
@@ -151,11 +154,18 @@ class ServiceRequestObserver
     {
         CreateServiceRequestHistory::dispatch($serviceRequest, $serviceRequest->getChanges(), $serviceRequest->getOriginal());
 
+        $customerEmailTemplate = $this->fetchTemplate(
+            $serviceRequest->priority->type,
+            ServiceRequestEmailTemplateType::Closed,
+            ServiceRequestTypeEmailTemplateRole::Customer
+        );
+
         if (
             $serviceRequest->wasChanged('status_id')
             && $serviceRequest->status?->classification === SystemServiceRequestClassification::Closed
+            && $serviceRequest->priority?->type->is_customers_service_request_closed_email_enabled
         ) {
-            $serviceRequest->respondent->notify(new SendEducatableServiceRequestClosedNotification($serviceRequest));
+            $serviceRequest->respondent->notify(new SendEducatableServiceRequestClosedNotification($serviceRequest, $customerEmailTemplate));
         }
 
         if (
@@ -177,17 +187,43 @@ class ServiceRequestObserver
     {
         if ($serviceRequest->wasChanged('status_id')) {
             if ($serviceRequest->status?->classification === SystemServiceRequestClassification::Closed) {
+                $managerEmailTemplate = $this->fetchTemplate(
+                    $serviceRequest->priority->type,
+                    ServiceRequestEmailTemplateType::Closed,
+                    ServiceRequestTypeEmailTemplateRole::Manager
+                );
+
+                $auditorEmailTemplate = $this->fetchTemplate(
+                    $serviceRequest->priority->type,
+                    ServiceRequestEmailTemplateType::Closed,
+                    ServiceRequestTypeEmailTemplateRole::Auditor
+                );
+
                 app(NotifyServiceRequestUsers::class)->execute(
                     $serviceRequest,
-                    new ServiceRequestClosed($serviceRequest, MailChannel::class),
+                    new ServiceRequestClosed($serviceRequest, $managerEmailTemplate, MailChannel::class),
                     $serviceRequest->priority?->type->is_managers_service_request_closed_email_enabled ?? false,
+                    false,
+                );
+
+                app(NotifyServiceRequestUsers::class)->execute(
+                    $serviceRequest,
+                    new ServiceRequestClosed($serviceRequest, $auditorEmailTemplate, MailChannel::class),
+                    false,
                     $serviceRequest->priority?->type->is_auditors_service_request_closed_email_enabled ?? false,
                 );
 
                 app(NotifyServiceRequestUsers::class)->execute(
                     $serviceRequest,
-                    new ServiceRequestClosed($serviceRequest, DatabaseChannel::class),
+                    new ServiceRequestClosed($serviceRequest, $managerEmailTemplate, DatabaseChannel::class),
                     $serviceRequest->priority?->type->is_managers_service_request_closed_notification_enabled ?? false,
+                    false,
+                );
+
+                app(NotifyServiceRequestUsers::class)->execute(
+                    $serviceRequest,
+                    new ServiceRequestClosed($serviceRequest, $auditorEmailTemplate, DatabaseChannel::class),
+                    false,
                     $serviceRequest->priority?->type->is_auditors_service_request_closed_notification_enabled ?? false,
                 );
             } elseif ($serviceRequest->status) {

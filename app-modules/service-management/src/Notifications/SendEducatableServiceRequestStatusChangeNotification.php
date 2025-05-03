@@ -40,14 +40,16 @@ class SendEducatableServiceRequestStatusChangeNotification extends Notification 
 
     public function toMail(object $notifiable): MailMessage
     {
-        /** @var Educatable $educatable */
-        $educatable = $notifiable;
+        // /** @var Educatable $educatable */
+        // $educatable = $notifiable;
 
-        if ($educatable instanceof Contact) {
-            $name = $educatable->first_name;
-        } else {
-            throw new Exception('Unhandled notifiable type');
-        }
+        // if ($educatable instanceof Contact) {
+        //     $name = $educatable->first_name;
+        // } else {
+        //     throw new Exception('Unhandled notifiable type');
+        // }
+
+        $name = $notifiable->first_name;
 
         $template = $this->emailTemplate;
 

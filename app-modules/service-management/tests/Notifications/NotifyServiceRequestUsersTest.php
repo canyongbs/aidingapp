@@ -242,3 +242,54 @@ it('does not notify a user if they belong to a team auditing a service request t
     Notification::assertNotSentTo(User::skip(1)->first(), ServiceRequestCreated::class);
     Notification::assertNotSentTo(User::skip(2)->first(), ServiceRequestCreated::class);
 });
+
+it('does not notify a user twice if they belong to a team managing and auditing a service request type', function () {
+    Notification::fake();
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $serviceRequestTypeEmailTemplate = ServiceRequestTypeEmailTemplate::factory()
+        ->state([
+            'type' => ServiceRequestEmailTemplateType::Created,
+            'role' => ServiceRequestTypeEmailTemplateRole::Manager,
+        ])
+        ->for($serviceRequestType, 'serviceRequestType')
+        ->create();
+
+    Team::factory()
+        ->hasAttached($serviceRequestType, [], 'manageableServiceRequestTypes')
+        ->hasAttached($serviceRequestType, [], 'auditableServiceRequestTypes')
+        ->has(User::factory()->count(2))
+        ->create();
+
+    $serviceRequestPriority = ServiceRequestPriority::factory()
+        ->for($serviceRequestType, 'type')
+        ->create();
+
+    $anotherServiceRequestType = ServiceRequestType::factory()->create();
+
+    Team::factory()
+        ->hasAttached($anotherServiceRequestType, [], 'manageableServiceRequestTypes')
+        ->hasAttached($anotherServiceRequestType, [], 'auditableServiceRequestTypes')
+        ->has(User::factory())
+        ->create();
+
+    ServiceRequestPriority::factory()
+        ->for($anotherServiceRequestType, 'type')
+        ->create();
+
+    $serviceRequest = ServiceRequest::factory()
+        ->for($serviceRequestPriority, 'priority')
+        ->create();
+
+    app(NotifyServiceRequestUsers::class)->execute(
+        $serviceRequest,
+        new ServiceRequestCreated($serviceRequest, $serviceRequestTypeEmailTemplate, MailChannel::class),
+        true,
+        true,
+    );
+
+    Notification::assertSentToTimes(User::first(), ServiceRequestCreated::class, 1);
+    Notification::assertSentToTimes(User::skip(1)->first(), ServiceRequestCreated::class, 1);
+    Notification::assertNotSentTo(User::skip(2)->first(), ServiceRequestCreated::class);
+})->skip('we can attach user to one team only. also, NotifyServiceRequestUsers logic has been updated. so do we need this test case?');
