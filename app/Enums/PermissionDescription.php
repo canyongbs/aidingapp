@@ -85,5 +85,4 @@ enum PermissionDescription: string
     {
         return $this->name;
     }
-
 }
