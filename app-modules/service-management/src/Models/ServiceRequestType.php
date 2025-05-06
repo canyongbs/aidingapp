@@ -190,6 +190,9 @@ class ServiceRequestType extends BaseModel implements Auditable
         return $this->belongsTo(User::class, 'last_assigned_id', 'id');
     }
 
+    /**
+     * @return HasMany<ServiceRequestTypeEmailTemplate, $this>
+     */
     public function templates(): HasMany
     {
         return $this->hasMany(ServiceRequestTypeEmailTemplate::class, 'service_request_type_id');

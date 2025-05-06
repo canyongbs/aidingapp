@@ -34,49 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Models;
+namespace App\Features;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\ServiceManagement\Database\Factories\ServiceRequestTypeEmailTemplateFactory;
-use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
-use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use OwenIt\Auditing\Contracts\Auditable;
+use App\Support\AbstractFeatureFlag;
 
-/**
- * @mixin IdeHelperServiceRequestTypeEmailTemplate
- */
-class ServiceRequestTypeEmailTemplate extends Model implements Auditable
+class ServiceRequestTypeEmailTemplateTabs extends AbstractFeatureFlag
 {
-    /** @use HasFactory<ServiceRequestTypeEmailTemplateFactory> */
-    use HasFactory;
-
-    use HasUuids;
-    use AuditableTrait;
-
-    protected $fillable = [
-        'service_request_type_id',
-        'type',
-        'subject',
-        'body',
-        'role',
-    ];
-
-    protected $casts = [
-        'subject' => 'array',
-        'body' => 'array',
-        'type' => ServiceRequestEmailTemplateType::class,
-        'role' => ServiceRequestTypeEmailTemplateRole::class,
-    ];
-
-    /**
-     * @return BelongsTo<ServiceRequestType, $this>
-     */
-    public function serviceRequestType(): BelongsTo
+    public function resolve(mixed $scope): mixed
     {
-        return $this->belongsTo(ServiceRequestType::class);
+        return false;
     }
 }

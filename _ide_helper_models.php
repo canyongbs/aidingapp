@@ -3425,6 +3425,7 @@ namespace AidingApp\ServiceManagement\Models{
  * @property array<array-key, mixed> $body
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole|null $role
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
  * @property-read int|null $audits_count
  * @property-read \AidingApp\ServiceManagement\Models\ServiceRequestType $serviceRequestType
@@ -3435,6 +3436,7 @@ namespace AidingApp\ServiceManagement\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestTypeEmailTemplate whereBody($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestTypeEmailTemplate whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestTypeEmailTemplate whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestTypeEmailTemplate whereRole($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestTypeEmailTemplate whereServiceRequestTypeId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestTypeEmailTemplate whereSubject($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestTypeEmailTemplate whereType($value)

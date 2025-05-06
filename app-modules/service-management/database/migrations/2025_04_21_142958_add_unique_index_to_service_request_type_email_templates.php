@@ -34,49 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Models;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\ServiceManagement\Database\Factories\ServiceRequestTypeEmailTemplateFactory;
-use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
-use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use OwenIt\Auditing\Contracts\Auditable;
-
-/**
- * @mixin IdeHelperServiceRequestTypeEmailTemplate
- */
-class ServiceRequestTypeEmailTemplate extends Model implements Auditable
-{
-    /** @use HasFactory<ServiceRequestTypeEmailTemplateFactory> */
-    use HasFactory;
-
-    use HasUuids;
-    use AuditableTrait;
-
-    protected $fillable = [
-        'service_request_type_id',
-        'type',
-        'subject',
-        'body',
-        'role',
-    ];
-
-    protected $casts = [
-        'subject' => 'array',
-        'body' => 'array',
-        'type' => ServiceRequestEmailTemplateType::class,
-        'role' => ServiceRequestTypeEmailTemplateRole::class,
-    ];
-
-    /**
-     * @return BelongsTo<ServiceRequestType, $this>
-     */
-    public function serviceRequestType(): BelongsTo
+return new class () extends Migration {
+    public function up(): void
     {
-        return $this->belongsTo(ServiceRequestType::class);
+        Schema::table('service_request_type_email_templates', function (Blueprint $table) {
+            $table->unique(['service_request_type_id', 'type', 'role']);
+        });
     }
-}
+
+    public function down(): void
+    {
+        Schema::table('service_request_type_email_templates', function (Blueprint $table) {
+            $table->dropUnique('service_request_type_email_templates_service_request_type_id_ty');
+        });
+    }
+};
