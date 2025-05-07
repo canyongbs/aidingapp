@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResou
 
 use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
+use AidingApp\ServiceManagement\Filament\Blocks\ServiceRequestTypeEmailTemplateButtonBlock;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
@@ -123,6 +124,9 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
                                 'assigned to',
                                 'title',
                                 'type',
+                            ])
+                            ->blocks([
+                                ServiceRequestTypeEmailTemplateButtonBlock::class,
                             ])
                             ->columnSpanFull(),
                     ]),
