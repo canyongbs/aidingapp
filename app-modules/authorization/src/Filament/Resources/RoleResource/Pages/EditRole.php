@@ -36,6 +36,7 @@
 
 namespace AidingApp\Authorization\Filament\Resources\RoleResource\Pages;
 
+use AidingApp\Authorization\Enums\PermissionDescription;
 use AidingApp\Authorization\Filament\Resources\RoleResource;
 use AidingApp\Authorization\Models\PermissionGroup;
 use AidingApp\Authorization\Models\Role;
@@ -88,7 +89,8 @@ class EditRole extends EditRecord
                 PermissionsMatrix::make('permissions')
                     ->columnSpanFull()
                     ->guard(fn (Get $get): string => $get('guard_name'))
-                    ->permissionGroupModel(PermissionGroup::class),
+                    ->permissionGroupModel(PermissionGroup::class)
+                    ->descriptions(PermissionDescription::cases()),
             ]);
     }
 
