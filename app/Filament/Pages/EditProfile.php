@@ -168,8 +168,8 @@ class EditProfile extends Page
                             ->hidden(blank($user->team))
                             ->live(),
                         Placeholder::make('division')
-                            ->content($user->team->first()?->division?->name)
-                            ->hidden(! $user->team?->first()?->division()->exists())
+                            ->content($user->team?->division?->name)
+                            ->hidden(! $user->team?->division()->exists())
                             ->hint(fn (Get $get): string => $get('is_division_visible_on_profile') ? 'Visible on profile' : 'Not visible on profile'),
                         //TODO: Right now this is not passed to the frontend
                         Checkbox::make('is_division_visible_on_profile')

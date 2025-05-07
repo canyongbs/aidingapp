@@ -105,7 +105,7 @@ class ChangeServiceRequestStatusBulkAction
                             return null;
                         }
 
-                        $team = $user->team->first();
+                        $team = $user->team;
 
                         if ($serviceRequest?->priority?->type?->managers?->contains('id', $team?->getKey())) {
                             return null;
