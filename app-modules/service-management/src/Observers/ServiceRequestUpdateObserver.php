@@ -70,7 +70,10 @@ class ServiceRequestUpdateObserver
             ServiceRequestTypeEmailTemplateRole::Customer
         );
 
-        if ($serviceRequestUpdate->serviceRequest->priority?->type->is_customers_service_request_update_email_enabled) {
+        if (
+            ! $serviceRequestUpdate->internal
+            && $serviceRequestUpdate->serviceRequest->priority?->type->is_customers_service_request_update_email_enabled
+        ) {
             $serviceRequestUpdate->serviceRequest->respondent->notify(
                 new SendEducatableServiceRequestUpdatedNotification($serviceRequestUpdate->serviceRequest, $customerEmailTemplate)
             );
