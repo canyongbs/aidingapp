@@ -38,6 +38,7 @@ namespace AidingApp\Authorization\Filament\Resources\RoleResource\Pages;
 
 use AidingApp\Authorization\Filament\Resources\RoleResource;
 use AidingApp\Authorization\Models\PermissionGroup;
+use App\Enums\PermissionDescription;
 use CanyonGBS\Common\Filament\Forms\Components\PermissionsMatrix;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -83,7 +84,8 @@ class CreateRole extends CreateRecord
                     ->columnSpanFull()
                     ->guard(fn (Get $get): string => $get('guard_name'))
                     ->visible(fn (Get $get): bool => filled($get('guard_name')))
-                    ->permissionGroupModel(PermissionGroup::class),
+                    ->permissionGroupModel(PermissionGroup::class)
+                    ->descriptions(PermissionDescription::cases()),
             ]);
     }
 }
