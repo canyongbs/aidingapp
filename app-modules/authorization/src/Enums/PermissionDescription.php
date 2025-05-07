@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace App\Enums;
+namespace AidingApp\Authorization\Enums;
 
 enum PermissionDescription: string
 {

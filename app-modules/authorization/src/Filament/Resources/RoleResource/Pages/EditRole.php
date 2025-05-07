@@ -36,11 +36,11 @@
 
 namespace AidingApp\Authorization\Filament\Resources\RoleResource\Pages;
 
+use AidingApp\Authorization\Enums\PermissionDescription;
 use AidingApp\Authorization\Filament\Resources\RoleResource;
 use AidingApp\Authorization\Models\PermissionGroup;
 use AidingApp\Authorization\Models\Role;
 use App\Concerns\EditPageRedirection;
-use App\Enums\PermissionDescription;
 use CanyonGBS\Common\Filament\Forms\Components\PermissionsMatrix;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Select;
