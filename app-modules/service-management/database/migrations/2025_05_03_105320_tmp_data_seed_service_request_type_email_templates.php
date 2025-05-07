@@ -331,7 +331,7 @@ return new class () extends Migration {
                         [
                             'type' => 'tiptapBlock',
                             'attrs' => [
-                                'data' => ['button_position' => 'center'],
+                                'data' => ['alignment' => 'center'],
                                 'type' => 'serviceRequestTypeEmailTemplateButtonBlock',
                             ],
                         ],
@@ -357,7 +357,7 @@ return new class () extends Migration {
                         [
                             'type' => 'tiptapBlock',
                             'attrs' => [
-                                'data' => ['button_position' => 'center'],
+                                'data' => ['alignment' => 'center'],
                                 'type' => 'serviceRequestTypeEmailTemplateButtonBlock',
                             ],
                         ],
@@ -424,7 +424,7 @@ return new class () extends Migration {
                         [
                             'type' => 'tiptapBlock',
                             'attrs' => [
-                                'data' => ['button_position' => 'center'],
+                                'data' => ['alignment' => 'center'],
                                 'type' => 'serviceRequestTypeEmailTemplateButtonBlock',
                             ],
                         ],
@@ -450,7 +450,7 @@ return new class () extends Migration {
                         [
                             'type' => 'tiptapBlock',
                             'attrs' => [
-                                'data' => ['button_position' => 'center'],
+                                'data' => ['alignment' => 'center'],
                                 'type' => 'serviceRequestTypeEmailTemplateButtonBlock',
                             ],
                         ],
@@ -480,7 +480,7 @@ return new class () extends Migration {
                         [
                             'type' => 'tiptapBlock',
                             'attrs' => [
-                                'data' => ['button_position' => 'center'],
+                                'data' => ['alignment' => 'center'],
                                 'type' => 'serviceRequestTypeEmailTemplateButtonBlock',
                             ],
                         ],
@@ -508,7 +508,7 @@ return new class () extends Migration {
                         [
                             'type' => 'tiptapBlock',
                             'attrs' => [
-                                'data' => ['button_position' => 'center'],
+                                'data' => ['alignment' => 'center'],
                                 'type' => 'serviceRequestTypeEmailTemplateButtonBlock',
                             ],
                         ],
@@ -534,7 +534,7 @@ return new class () extends Migration {
                         [
                             'type' => 'tiptapBlock',
                             'attrs' => [
-                                'data' => ['button_position' => 'center'],
+                                'data' => ['alignment' => 'center'],
                                 'type' => 'serviceRequestTypeEmailTemplateButtonBlock',
                             ],
                         ],
@@ -568,7 +568,7 @@ return new class () extends Migration {
                         [
                             'type' => 'tiptapBlock',
                             'attrs' => [
-                                'data' => ['button_position' => 'center'],
+                                'data' => ['alignment' => 'center'],
                                 'type' => 'serviceRequestTypeEmailTemplateButtonBlock',
                             ],
                         ],
@@ -598,7 +598,7 @@ return new class () extends Migration {
                         [
                             'type' => 'tiptapBlock',
                             'attrs' => [
-                                'data' => ['button_position' => 'center'],
+                                'data' => ['alignment' => 'center'],
                                 'type' => 'serviceRequestTypeEmailTemplateButtonBlock',
                             ],
                         ],
@@ -626,7 +626,7 @@ return new class () extends Migration {
                         [
                             'type' => 'tiptapBlock',
                             'attrs' => [
-                                'data' => ['button_position' => 'center'],
+                                'data' => ['alignment' => 'center'],
                                 'type' => 'serviceRequestTypeEmailTemplateButtonBlock',
                             ],
                         ],
@@ -663,7 +663,7 @@ return new class () extends Migration {
                         [
                             'type' => 'tiptapBlock',
                             'attrs' => [
-                                'data' => ['button_position' => 'center'],
+                                'data' => ['alignment' => 'center'],
                                 'type' => 'serviceRequestTypeEmailTemplateButtonBlock',
                             ],
                         ],
@@ -691,7 +691,7 @@ return new class () extends Migration {
                         [
                             'type' => 'tiptapBlock',
                             'attrs' => [
-                                'data' => ['button_position' => 'center'],
+                                'data' => ['alignment' => 'center'],
                                 'type' => 'serviceRequestTypeEmailTemplateButtonBlock',
                             ],
                         ],
@@ -717,7 +717,7 @@ return new class () extends Migration {
                         [
                             'type' => 'tiptapBlock',
                             'attrs' => [
-                                'data' => ['button_position' => 'center'],
+                                'data' => ['alignment' => 'center'],
                                 'type' => 'serviceRequestTypeEmailTemplateButtonBlock',
                             ],
                         ],

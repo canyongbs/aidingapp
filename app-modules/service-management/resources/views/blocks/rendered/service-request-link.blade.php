@@ -31,7 +31,7 @@
 
 </COPYRIGHT>
 --}}
-<div style="text-align: {{ $button_position }}">
+<div style="text-align: {{ $alignment }}">
     <a
         href="{{ $url ?? '#' }}"
         style="display: inline-block; 

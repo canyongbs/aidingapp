@@ -58,8 +58,8 @@ class ServiceRequestTypeEmailTemplateButtonBlock extends TiptapBlock
     public function getFormSchema(): array
     {
         return [
-            Select::make('button_position')
-                ->label('Button Position')
+            Select::make('alignment')
+                ->label('Alignment')
                 ->options([
                     'left' => 'Left',
                     'right' => 'Right',
@@ -67,7 +67,7 @@ class ServiceRequestTypeEmailTemplateButtonBlock extends TiptapBlock
                 ])
                 ->default('center')
                 ->required()
-                ->placeholder('Enter the button position (e.g. left, right, center)'),
+                ->placeholder('Enter the button alignment (e.g. left, right, center)'),
         ];
     }
 }
