@@ -48,7 +48,7 @@ class ServiceRequestTypeEmailTemplateButtonBlock extends TiptapBlock
 
     public ?string $icon = null;
 
-    public ?string $label = 'Button';
+    public ?string $label = 'Service Request Link Button';
 
     public string $width = 'md';
 

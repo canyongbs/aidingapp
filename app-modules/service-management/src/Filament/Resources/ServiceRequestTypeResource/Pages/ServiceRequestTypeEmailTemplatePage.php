@@ -201,6 +201,9 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
                 ->placeholder('Enter the email body here...')
                 ->extraInputAttributes(['style' => 'min-height: 12rem;'])
                 ->mergeTags(['service request number', 'created date', 'updated date', 'status', 'assigned to', 'title', 'description', 'type'])
+                ->blocks([
+                    ServiceRequestTypeEmailTemplateButtonBlock::class,
+                ])
                 ->columnSpanFull(),
         ];
     }
