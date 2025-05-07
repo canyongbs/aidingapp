@@ -44,7 +44,7 @@
         "canyon-gbs/license-management": "*",
         "canyon-gbs/purchasing": "*",
         "canyon-gbs/report": "*",
-        "canyongbs/common": "^1.1.1",
+        "canyongbs/common": "^1.4.0",
         "canyongbs/filament-tiptap-editor": "^1.2.3",
         "canyongbs/model-state-machine": "^1.0",
         "cknow/laravel-money": "^8.1",

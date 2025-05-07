@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1be9c2975aea06b966904b4b0ff97883",
+    "content-hash": "eeb16579812c2d4f5cec48ab3a52e5ad",
     "packages": [
         {
             "name": "amphp/amp",
@@ -2379,21 +2379,21 @@
         },
         {
             "name": "canyongbs/common",
-            "version": "1.1.1",
+            "version": "1.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/canyongbs/common.git",
-                "reference": "fe23d3c4b5e2f18c1df0c377cf11a86c12969928"
+                "reference": "5406db39fed3691eb6c61911249f9f898d22e51f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/canyongbs/common/zipball/fe23d3c4b5e2f18c1df0c377cf11a86c12969928",
-                "reference": "fe23d3c4b5e2f18c1df0c377cf11a86c12969928",
+                "url": "https://api.github.com/repos/canyongbs/common/zipball/5406db39fed3691eb6c61911249f9f898d22e51f",
+                "reference": "5406db39fed3691eb6c61911249f9f898d22e51f",
                 "shasum": ""
             },
             "require": {
                 "filament/filament": "^3.0",
-                "laravel/framework": "^11.0"
+                "laravel/framework": "^11.0|^12.0"
             },
             "require-dev": {
                 "friendsofphp/php-cs-fixer": "^3.60",
@@ -2423,9 +2423,9 @@
             ],
             "support": {
                 "issues": "https://github.com/canyongbs/common/issues",
-                "source": "https://github.com/canyongbs/common/tree/1.1.1"
+                "source": "https://github.com/canyongbs/common/tree/1.4.0"
             },
-            "time": "2025-04-08T02:09:03+00:00"
+            "time": "2025-05-07T18:01:45+00:00"
         },
         {
             "name": "canyongbs/filament-tiptap-editor",
@@ -23730,6 +23730,6 @@
         "ext-gd": "*",
         "ext-pdo": "*"
     },
-    "platform-dev": [],
+    "platform-dev": {},
     "plugin-api-version": "2.6.0"
 }
