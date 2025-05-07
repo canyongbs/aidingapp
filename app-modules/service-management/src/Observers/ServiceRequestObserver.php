@@ -41,12 +41,16 @@ use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
 use AidingApp\Notification\Notifications\Channels\MailChannel;
 use AidingApp\ServiceManagement\Actions\CreateServiceRequestHistory;
 use AidingApp\ServiceManagement\Actions\NotifyServiceRequestUsers;
+use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
+use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Exceptions\ServiceRequestNumberUpdateAttemptException;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Notifications\Concerns\FetchServiceRequestTemplate;
 use AidingApp\ServiceManagement\Notifications\SendClosedServiceFeedbackNotification;
 use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestClosedNotification;
 use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestOpenedNotification;
+use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestStatusChangeNotification;
 use AidingApp\ServiceManagement\Notifications\ServiceRequestClosed;
 use AidingApp\ServiceManagement\Notifications\ServiceRequestCreated;
 use AidingApp\ServiceManagement\Notifications\ServiceRequestStatusChanged;
@@ -58,6 +62,8 @@ use Illuminate\Support\Facades\Gate;
 
 class ServiceRequestObserver
 {
+    use FetchServiceRequestTemplate;
+
     public function creating(ServiceRequest $serviceRequest): void
     {
         $serviceRequest->service_request_number ??= app(ServiceRequestNumberGenerator::class)->generate();
@@ -71,21 +77,56 @@ class ServiceRequestObserver
             TriggeredAutoSubscription::dispatch($user, $serviceRequest);
         }
 
-        if ($serviceRequest->status?->classification === SystemServiceRequestClassification::Open) {
-            $serviceRequest->respondent->notify(new SendEducatableServiceRequestOpenedNotification($serviceRequest));
+        $customerEmailTemplate = $this->fetchTemplate(
+            $serviceRequest->priority->type,
+            ServiceRequestEmailTemplateType::Created,
+            ServiceRequestTypeEmailTemplateRole::Customer
+        );
+
+        if ($serviceRequest->status?->classification === SystemServiceRequestClassification::Open
+            && $serviceRequest->priority?->type->is_customers_service_request_created_email_enabled) {
+            $serviceRequest->respondent->notify(
+                new SendEducatableServiceRequestOpenedNotification($serviceRequest, $customerEmailTemplate)
+            );
         }
+
+        $managerEmailTemplate = $this->fetchTemplate(
+            $serviceRequest->priority->type,
+            ServiceRequestEmailTemplateType::Created,
+            ServiceRequestTypeEmailTemplateRole::Manager
+        );
+
+        $auditorEmailTemplate = $this->fetchTemplate(
+            $serviceRequest->priority->type,
+            ServiceRequestEmailTemplateType::Created,
+            ServiceRequestTypeEmailTemplateRole::Auditor
+        );
 
         app(NotifyServiceRequestUsers::class)->execute(
             $serviceRequest,
-            new ServiceRequestCreated($serviceRequest, MailChannel::class),
+            new ServiceRequestCreated($serviceRequest, $managerEmailTemplate, MailChannel::class),
             $serviceRequest->priority?->type->is_managers_service_request_created_email_enabled ?? false,
+            false,
+        );
+
+        app(NotifyServiceRequestUsers::class)->execute(
+            $serviceRequest,
+            new ServiceRequestCreated($serviceRequest, $auditorEmailTemplate, MailChannel::class),
+            false,
             $serviceRequest->priority?->type->is_auditors_service_request_created_email_enabled ?? false,
         );
 
         app(NotifyServiceRequestUsers::class)->execute(
             $serviceRequest,
-            new ServiceRequestCreated($serviceRequest, DatabaseChannel::class),
+            new ServiceRequestCreated($serviceRequest, $managerEmailTemplate, DatabaseChannel::class),
             $serviceRequest->priority?->type->is_managers_service_request_created_notification_enabled ?? false,
+            false,
+        );
+
+        app(NotifyServiceRequestUsers::class)->execute(
+            $serviceRequest,
+            new ServiceRequestCreated($serviceRequest, $auditorEmailTemplate, DatabaseChannel::class),
+            false,
             $serviceRequest->priority?->type->is_auditors_service_request_created_notification_enabled ?? false,
         );
     }
@@ -113,11 +154,18 @@ class ServiceRequestObserver
     {
         CreateServiceRequestHistory::dispatch($serviceRequest, $serviceRequest->getChanges(), $serviceRequest->getOriginal());
 
+        $customerEmailTemplate = $this->fetchTemplate(
+            $serviceRequest->priority->type,
+            ServiceRequestEmailTemplateType::Closed,
+            ServiceRequestTypeEmailTemplateRole::Customer
+        );
+
         if (
             $serviceRequest->wasChanged('status_id')
             && $serviceRequest->status?->classification === SystemServiceRequestClassification::Closed
+            && $serviceRequest->priority?->type->is_customers_service_request_closed_email_enabled
         ) {
-            $serviceRequest->respondent->notify(new SendEducatableServiceRequestClosedNotification($serviceRequest));
+            $serviceRequest->respondent->notify(new SendEducatableServiceRequestClosedNotification($serviceRequest, $customerEmailTemplate));
         }
 
         if (
@@ -139,31 +187,93 @@ class ServiceRequestObserver
     {
         if ($serviceRequest->wasChanged('status_id')) {
             if ($serviceRequest->status?->classification === SystemServiceRequestClassification::Closed) {
+                $managerEmailTemplate = $this->fetchTemplate(
+                    $serviceRequest->priority->type,
+                    ServiceRequestEmailTemplateType::Closed,
+                    ServiceRequestTypeEmailTemplateRole::Manager
+                );
+
+                $auditorEmailTemplate = $this->fetchTemplate(
+                    $serviceRequest->priority->type,
+                    ServiceRequestEmailTemplateType::Closed,
+                    ServiceRequestTypeEmailTemplateRole::Auditor
+                );
+
                 app(NotifyServiceRequestUsers::class)->execute(
                     $serviceRequest,
-                    new ServiceRequestClosed($serviceRequest, MailChannel::class),
+                    new ServiceRequestClosed($serviceRequest, $managerEmailTemplate, MailChannel::class),
                     $serviceRequest->priority?->type->is_managers_service_request_closed_email_enabled ?? false,
+                    false,
+                );
+
+                app(NotifyServiceRequestUsers::class)->execute(
+                    $serviceRequest,
+                    new ServiceRequestClosed($serviceRequest, $auditorEmailTemplate, MailChannel::class),
+                    false,
                     $serviceRequest->priority?->type->is_auditors_service_request_closed_email_enabled ?? false,
                 );
 
                 app(NotifyServiceRequestUsers::class)->execute(
                     $serviceRequest,
-                    new ServiceRequestClosed($serviceRequest, DatabaseChannel::class),
+                    new ServiceRequestClosed($serviceRequest, $managerEmailTemplate, DatabaseChannel::class),
                     $serviceRequest->priority?->type->is_managers_service_request_closed_notification_enabled ?? false,
+                    false,
+                );
+
+                app(NotifyServiceRequestUsers::class)->execute(
+                    $serviceRequest,
+                    new ServiceRequestClosed($serviceRequest, $auditorEmailTemplate, DatabaseChannel::class),
+                    false,
                     $serviceRequest->priority?->type->is_auditors_service_request_closed_notification_enabled ?? false,
                 );
             } elseif ($serviceRequest->status) {
+                $customerEmailTemplate = $this->fetchTemplate(
+                    $serviceRequest->priority->type,
+                    ServiceRequestEmailTemplateType::StatusChange,
+                    ServiceRequestTypeEmailTemplateRole::Customer
+                );
+
+                if ($serviceRequest->priority?->type->is_customers_service_request_status_change_email_enabled) {
+                    $serviceRequest->respondent->notify(new SendEducatableServiceRequestStatusChangeNotification($serviceRequest, $customerEmailTemplate));
+                }
+
+                $managerEmailTemplate = $this->fetchTemplate(
+                    $serviceRequest->priority->type,
+                    ServiceRequestEmailTemplateType::StatusChange,
+                    ServiceRequestTypeEmailTemplateRole::Manager
+                );
+
+                $auditorEmailTemplate = $this->fetchTemplate(
+                    $serviceRequest->priority->type,
+                    ServiceRequestEmailTemplateType::StatusChange,
+                    ServiceRequestTypeEmailTemplateRole::Auditor
+                );
+
                 app(NotifyServiceRequestUsers::class)->execute(
                     $serviceRequest,
-                    new ServiceRequestStatusChanged($serviceRequest, MailChannel::class),
+                    new ServiceRequestStatusChanged($serviceRequest, $managerEmailTemplate, MailChannel::class),
                     $serviceRequest->priority?->type->is_managers_service_request_status_change_email_enabled ?? false,
+                    false,
+                );
+
+                app(NotifyServiceRequestUsers::class)->execute(
+                    $serviceRequest,
+                    new ServiceRequestStatusChanged($serviceRequest, $auditorEmailTemplate, MailChannel::class),
+                    false,
                     $serviceRequest->priority?->type->is_auditors_service_request_status_change_email_enabled ?? false,
                 );
 
                 app(NotifyServiceRequestUsers::class)->execute(
                     $serviceRequest,
-                    new ServiceRequestStatusChanged($serviceRequest, DatabaseChannel::class),
+                    new ServiceRequestStatusChanged($serviceRequest, $managerEmailTemplate, DatabaseChannel::class),
                     $serviceRequest->priority?->type->is_managers_service_request_status_change_notification_enabled ?? false,
+                    false,
+                );
+
+                app(NotifyServiceRequestUsers::class)->execute(
+                    $serviceRequest,
+                    new ServiceRequestStatusChanged($serviceRequest, $auditorEmailTemplate, DatabaseChannel::class),
+                    false,
                     $serviceRequest->priority?->type->is_auditors_service_request_status_change_notification_enabled ?? false,
                 );
             }

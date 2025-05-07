@@ -44,7 +44,10 @@ use AidingApp\Notification\Notifications\Channels\MailChannel;
 use AidingApp\Notification\Notifications\Contracts\HasBeforeSendHook;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use AidingApp\ServiceManagement\Notifications\Concerns\HandlesServiceRequestTemplateContent;
 use App\Models\NotificationSetting;
 use Filament\Notifications\Notification;
 use Illuminate\Bus\Queueable;
@@ -55,14 +58,21 @@ use Illuminate\Notifications\Notification as BaseNotification;
 class ServiceRequestUpdated extends BaseNotification implements ShouldQueue, HasBeforeSendHook
 {
     use Queueable;
+    use HandlesServiceRequestTemplateContent;
+
+    /** @var ServiceRequest */
+    public ServiceRequest $serviceRequest;
 
     /**
      * @param class-string $channel
      */
     public function __construct(
         public ServiceRequestUpdate $serviceRequestUpdate,
+        public ?ServiceRequestTypeEmailTemplate $emailTemplate,
         public string $channel,
-    ) {}
+    ) {
+        $this->serviceRequest = $serviceRequestUpdate->serviceRequest;
+    }
 
     /**
      * @return array<int, string>
@@ -77,11 +87,24 @@ class ServiceRequestUpdated extends BaseNotification implements ShouldQueue, Has
 
     public function toMail(object $notifiable): MailMessage
     {
+        $template = $this->emailTemplate;
+
+        if (! $template) {
+            return MailMessage::make()
+                ->settings($this->resolveNotificationSetting($notifiable))
+                ->subject("New update on service request {$this->serviceRequestUpdate->serviceRequest->service_request_number}")
+                ->line("The service request {$this->serviceRequestUpdate->serviceRequest->service_request_number} has a new update.")
+                ->action('View Service Request', ServiceRequestResource::getUrl('view', ['record' => $this->serviceRequestUpdate->serviceRequest]));
+        }
+
+        $subject = $this->getSubject($template->subject);
+
+        $body = $this->getBody($template->body);
+
         return MailMessage::make()
             ->settings($this->resolveNotificationSetting($notifiable))
-            ->subject("New update on service request {$this->serviceRequestUpdate->serviceRequest->service_request_number}")
-            ->line("The service request {$this->serviceRequestUpdate->serviceRequest->service_request_number} has a new update.")
-            ->action('View Service Request', ServiceRequestResource::getUrl('view', ['record' => $this->serviceRequestUpdate->serviceRequest]));
+            ->subject(strip_tags($subject))
+            ->content($body);
     }
 
     public function toDatabase(object $notifiable): array

@@ -36,14 +36,14 @@
 
 namespace AidingApp\ServiceManagement\Notifications;
 
-use AidingApp\Contact\Models\Contact;
 use AidingApp\Notification\Enums\NotificationChannel;
 use AidingApp\Notification\Models\Contracts\CanBeNotified;
 use AidingApp\Notification\Models\Contracts\Message;
 use AidingApp\Notification\Notifications\Contracts\HasBeforeSendHook;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
-use App\Models\Contracts\Educatable;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
+use AidingApp\ServiceManagement\Notifications\Concerns\HandlesServiceRequestTemplateContent;
 use App\Models\NotificationSetting;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -53,9 +53,11 @@ use Illuminate\Notifications\Notification;
 class SendEducatableServiceRequestOpenedNotification extends Notification implements ShouldQueue, HasBeforeSendHook
 {
     use Queueable;
+    use HandlesServiceRequestTemplateContent;
 
     public function __construct(
         protected ServiceRequest $serviceRequest,
+        protected ?ServiceRequestTypeEmailTemplate $emailTemplate,
     ) {}
 
     /**
@@ -68,23 +70,31 @@ class SendEducatableServiceRequestOpenedNotification extends Notification implem
 
     public function toMail(object $notifiable): MailMessage
     {
-        /** @var Educatable $educatable */
-        $educatable = $notifiable;
-
-        $name = match ($notifiable::class) {
-            Contact::class => $educatable->first_name,
-        };
+        $name = $notifiable->first_name;
 
         $status = $this->serviceRequest->status;
         $type = $this->serviceRequest->priority->type;
 
+        $template = $this->emailTemplate;
+
+        if (! $template) {
+            return MailMessage::make()
+                ->settings($this->resolveNotificationSetting($notifiable))
+                ->subject("{$this->serviceRequest->service_request_number} - is now {$status->name}")
+                ->greeting("Hello {$name},")
+                ->line("A new {$type->name} service request has been created and is now in a {$status->name} status. Your new ticket number is: {$this->serviceRequest->service_request_number}.")
+                ->line('The details of your service request are shown below:')
+                ->lines(str(nl2br($this->serviceRequest->close_details))->explode('<br />'));
+        }
+
+        $subject = $this->getSubject($template->subject);
+
+        $body = $this->getBody($template->body);
+
         return MailMessage::make()
             ->settings($this->resolveNotificationSetting($notifiable))
-            ->subject("{$this->serviceRequest->service_request_number} - is now {$status->name}")
-            ->greeting("Hello {$name},")
-            ->line("A new {$type->name} service request has been created and is now in a {$status->name} status. Your new ticket number is: {$this->serviceRequest->service_request_number}.")
-            ->line('The details of your service request are shown below:')
-            ->lines(str(nl2br($this->serviceRequest->close_details))->explode('<br />'));
+            ->subject(strip_tags($subject))
+            ->content($body);
     }
 
     public function beforeSend(AnonymousNotifiable|CanBeNotified $notifiable, Message $message, NotificationChannel $channel): void

@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResou
 
 use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
+use AidingApp\ServiceManagement\Filament\Blocks\ServiceRequestTypeEmailTemplateButtonBlock;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
@@ -124,6 +125,9 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
                                 'title',
                                 'type',
                             ])
+                            ->blocks([
+                                ServiceRequestTypeEmailTemplateButtonBlock::class,
+                            ])
                             ->columnSpanFull(),
                     ]),
             ]);
@@ -187,15 +191,19 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
                 ->placeholder('Enter the email subject here...')
                 ->extraInputAttributes(['style' => 'min-height: 2rem; overflow-y:none;'])
                 ->disableToolbarMenus()
-                ->mergeTags(['created', 'updated', 'status', 'assigned to', 'title', 'type'])
+                ->mergeTags(['service request number', 'created date', 'updated date', 'status', 'assigned to', 'title', 'type'])
                 ->showMergeTagsInBlocksPanel(false)
                 ->helperText('You may use “merge tags” to substitute information about a service request into your subject line. Insert a “{{“ in the subject line field to see a list of available merge tags'),
 
             TiptapEditor::make('body')
                 ->label('Body')
+                ->profile('email_template')
                 ->placeholder('Enter the email body here...')
                 ->extraInputAttributes(['style' => 'min-height: 12rem;'])
-                ->mergeTags(['created', 'updated', 'status', 'assigned to', 'title', 'type'])
+                ->mergeTags(['service request number', 'created date', 'updated date', 'status', 'assigned to', 'title', 'description', 'type'])
+                ->blocks([
+                    ServiceRequestTypeEmailTemplateButtonBlock::class,
+                ])
                 ->columnSpanFull(),
         ];
     }

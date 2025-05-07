@@ -40,7 +40,11 @@ use AidingApp\Notification\Events\TriggeredAutoSubscription;
 use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
 use AidingApp\Notification\Notifications\Channels\MailChannel;
 use AidingApp\ServiceManagement\Actions\NotifyServiceRequestUsers;
+use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
+use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use AidingApp\ServiceManagement\Notifications\Concerns\FetchServiceRequestTemplate;
+use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestUpdatedNotification;
 use AidingApp\ServiceManagement\Notifications\ServiceRequestUpdated;
 use AidingApp\Timeline\Events\TimelineableRecordCreated;
 use AidingApp\Timeline\Events\TimelineableRecordDeleted;
@@ -48,6 +52,8 @@ use App\Models\User;
 
 class ServiceRequestUpdateObserver
 {
+    use FetchServiceRequestTemplate;
+
     public function created(ServiceRequestUpdate $serviceRequestUpdate): void
     {
         $user = auth()->user();
@@ -58,17 +64,58 @@ class ServiceRequestUpdateObserver
 
         TimelineableRecordCreated::dispatch($serviceRequestUpdate->serviceRequest, $serviceRequestUpdate);
 
+        $customerEmailTemplate = $this->fetchTemplate(
+            $serviceRequestUpdate->serviceRequest->priority->type,
+            ServiceRequestEmailTemplateType::Update,
+            ServiceRequestTypeEmailTemplateRole::Customer
+        );
+
+        if (
+            ! $serviceRequestUpdate->internal
+            && $serviceRequestUpdate->serviceRequest->priority?->type->is_customers_service_request_update_email_enabled
+        ) {
+            $serviceRequestUpdate->serviceRequest->respondent->notify(
+                new SendEducatableServiceRequestUpdatedNotification($serviceRequestUpdate->serviceRequest, $customerEmailTemplate)
+            );
+        }
+
+        $managerEmailTemplate = $this->fetchTemplate(
+            $serviceRequestUpdate->serviceRequest->priority->type,
+            ServiceRequestEmailTemplateType::Update,
+            ServiceRequestTypeEmailTemplateRole::Manager
+        );
+
+        $auditorEmailTemplate = $this->fetchTemplate(
+            $serviceRequestUpdate->serviceRequest->priority->type,
+            ServiceRequestEmailTemplateType::Update,
+            ServiceRequestTypeEmailTemplateRole::Auditor
+        );
+
         app(NotifyServiceRequestUsers::class)->execute(
             $serviceRequestUpdate->serviceRequest,
-            new ServiceRequestUpdated($serviceRequestUpdate, MailChannel::class),
+            new ServiceRequestUpdated($serviceRequestUpdate, $managerEmailTemplate, MailChannel::class),
             $serviceRequestUpdate->serviceRequest->priority?->type->is_managers_service_request_update_email_enabled ?? false,
+            false,
+        );
+
+        app(NotifyServiceRequestUsers::class)->execute(
+            $serviceRequestUpdate->serviceRequest,
+            new ServiceRequestUpdated($serviceRequestUpdate, $auditorEmailTemplate, MailChannel::class),
+            false,
             $serviceRequestUpdate->serviceRequest->priority?->type->is_auditors_service_request_update_email_enabled ?? false,
         );
 
         app(NotifyServiceRequestUsers::class)->execute(
             $serviceRequestUpdate->serviceRequest,
-            new ServiceRequestUpdated($serviceRequestUpdate, DatabaseChannel::class),
+            new ServiceRequestUpdated($serviceRequestUpdate, $managerEmailTemplate, DatabaseChannel::class),
             $serviceRequestUpdate->serviceRequest->priority?->type->is_managers_service_request_update_notification_enabled ?? false,
+            false,
+        );
+
+        app(NotifyServiceRequestUsers::class)->execute(
+            $serviceRequestUpdate->serviceRequest,
+            new ServiceRequestUpdated($serviceRequestUpdate, $auditorEmailTemplate, DatabaseChannel::class),
+            false,
             $serviceRequestUpdate->serviceRequest->priority?->type->is_auditors_service_request_update_notification_enabled ?? false,
         );
     }
