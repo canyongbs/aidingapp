@@ -57,7 +57,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\Task\Models\Task;
 use AidingApp\Team\Models\Team;
-use AidingApp\Team\Models\TeamUser;
 use AidingApp\Timeline\Models\Contracts\HasFilamentResource;
 use App\Filament\Resources\UserResource;
 use App\Support\HasAdvancedFilter;
@@ -67,7 +66,7 @@ use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
 use Filament\Panel;
 use Illuminate\Contracts\Translation\HasLocalePreference;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -193,7 +192,7 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
     }
 
     /**
-     * @return BelongsToMany<TwilioConversation, $this>
+     * @return BelongsToMany<TwilioConversation, $this, covariant TwilioConversationUser, 'participant'>
      */
     public function conversations(): BelongsToMany
     {
@@ -231,7 +230,7 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
     }
 
     /**
-     * @return MorphToMany<Contact, $this>
+     * @return MorphToMany<Contact, $this, covariant Subscription>
      */
     public function contactSubscriptions(): MorphToMany
     {
@@ -315,14 +314,11 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
     }
 
     /**
-     * @return BelongsToMany<Team, $this>
+     * @return BelongsTo<Team, $this>
      */
-    public function teams(): BelongsToMany
+    public function team(): BelongsTo
     {
-        return $this
-            ->belongsToMany(Team::class, 'team_user', 'user_id', 'team_id')
-            ->using(TeamUser::class)
-            ->withTimestamps();
+        return $this->belongsTo(Team::class, 'team_id');
     }
 
     /**
@@ -359,7 +355,7 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
             ->singleFile();
     }
 
-    public function registerMediaConversions(Media $media = null): void
+    public function registerMediaConversions(?Media $media = null): void
     {
         $this->addMediaConversion('avatar-height-250px')
             ->performOnCollections('avatar')
@@ -455,13 +451,11 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
 
     public function assignTeam($teamId): void
     {
-        $this->teams()->detach();
-
-        $this->teams()->attach($teamId);
+        $this->team()->associate($teamId)->save();
     }
 
     /**
-     * @return BelongsToMany<ServiceMonitoringTarget, $this>
+     * @return BelongsToMany<ServiceMonitoringTarget, $this, covariant ServiceMonitoringTargetUser>
      */
     public function serviceMonitoringTargets(): BelongsToMany
     {

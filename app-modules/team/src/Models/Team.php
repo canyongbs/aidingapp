@@ -46,6 +46,7 @@ use App\Models\BaseModel;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @mixin IdeHelperTeam
@@ -57,14 +58,17 @@ class Team extends BaseModel
         'description',
     ];
 
-    public function users(): BelongsToMany
+    /**
+     * @return HasMany<User, $this>
+     */
+    public function users(): HasMany
     {
-        return $this
-            ->belongsToMany(User::class)
-            ->using(TeamUser::class)
-            ->withTimestamps();
+        return $this->hasMany(User::class);
     }
 
+    /**
+     * @return BelongsToMany<ServiceMonitoringTarget, $this, covariant ServiceMonitoringTargetTeam>
+     */
     public function serviceMonitoringTargets(): BelongsToMany
     {
         return $this->belongsToMany(ServiceMonitoringTarget::class)
@@ -72,6 +76,9 @@ class Team extends BaseModel
             ->withTimestamps();
     }
 
+    /**
+     * @return BelongsToMany<ServiceRequestType, $this, covariant ServiceRequestTypeManager>
+     */
     public function manageableServiceRequestTypes(): BelongsToMany
     {
         return $this->belongsToMany(ServiceRequestType::class, 'service_request_type_managers')
@@ -79,6 +86,9 @@ class Team extends BaseModel
             ->withTimestamps();
     }
 
+    /**
+     * @return BelongsToMany<ServiceRequestType, $this, covariant ServiceRequestTypeAuditor>
+     */
     public function auditableServiceRequestTypes(): BelongsToMany
     {
         return $this->belongsToMany(ServiceRequestType::class, 'service_request_type_auditors')

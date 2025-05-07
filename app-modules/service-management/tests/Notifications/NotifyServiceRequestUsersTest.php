@@ -47,14 +47,11 @@ use Illuminate\Support\Facades\Notification;
 it('can notify a user if they belong to a team managing a service request type', function () {
     Notification::fake();
 
-    $users = User::factory(3)
-        ->create();
-
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     Team::factory()
         ->hasAttached($serviceRequestType, [], 'manageableServiceRequestTypes')
-        ->hasAttached($users->take(2))
+        ->has(User::factory()->count(2))
         ->create();
 
     $serviceRequestPriority = ServiceRequestPriority::factory()
@@ -65,7 +62,7 @@ it('can notify a user if they belong to a team managing a service request type',
 
     Team::factory()
         ->hasAttached($anotherServiceRequestType, [], 'manageableServiceRequestTypes')
-        ->hasAttached($users->last())
+        ->has(User::factory())
         ->create();
 
     ServiceRequestPriority::factory()
@@ -83,22 +80,19 @@ it('can notify a user if they belong to a team managing a service request type',
         false,
     );
 
-    Notification::assertSentTo($users->get(0), ServiceRequestCreated::class);
-    Notification::assertSentTo($users->get(1), ServiceRequestCreated::class);
-    Notification::assertNotSentTo($users->get(2), ServiceRequestCreated::class);
+    Notification::assertSentTo(User::first(), ServiceRequestCreated::class);
+    Notification::assertSentTo(User::skip(1)->first(), ServiceRequestCreated::class);
+    Notification::assertNotSentTo(User::skip(2)->first(), ServiceRequestCreated::class);
 });
 
 it('can notify a user if they belong to a team auditing a service request type', function () {
     Notification::fake();
 
-    $users = User::factory(3)
-        ->create();
-
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     Team::factory()
         ->hasAttached($serviceRequestType, [], 'auditableServiceRequestTypes')
-        ->hasAttached($users->take(2))
+        ->has(User::factory()->count(2))
         ->create();
 
     $serviceRequestPriority = ServiceRequestPriority::factory()
@@ -109,7 +103,7 @@ it('can notify a user if they belong to a team auditing a service request type',
 
     Team::factory()
         ->hasAttached($anotherServiceRequestType, [], 'auditableServiceRequestTypes')
-        ->hasAttached($users->last())
+        ->has(User::factory())
         ->create();
 
     ServiceRequestPriority::factory()
@@ -127,22 +121,19 @@ it('can notify a user if they belong to a team auditing a service request type',
         true,
     );
 
-    Notification::assertSentTo($users->get(0), ServiceRequestCreated::class);
-    Notification::assertSentTo($users->get(1), ServiceRequestCreated::class);
-    Notification::assertNotSentTo($users->get(2), ServiceRequestCreated::class);
+    Notification::assertSentTo(User::first(), ServiceRequestCreated::class);
+    Notification::assertSentTo(User::skip(1)->first(), ServiceRequestCreated::class);
+    Notification::assertNotSentTo(User::skip(2)->first(), ServiceRequestCreated::class);
 });
 
 it('does not notify a user if they belong to a team managing a service request type but teams do not recieve notifications', function () {
     Notification::fake();
 
-    $users = User::factory(3)
-        ->create();
-
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     Team::factory()
         ->hasAttached($serviceRequestType, [], 'manageableServiceRequestTypes')
-        ->hasAttached($users->take(2))
+        ->has(User::factory(), 'users')
         ->create();
 
     $serviceRequestPriority = ServiceRequestPriority::factory()
@@ -153,7 +144,7 @@ it('does not notify a user if they belong to a team managing a service request t
 
     Team::factory()
         ->hasAttached($anotherServiceRequestType, [], 'manageableServiceRequestTypes')
-        ->hasAttached($users->last())
+        ->has(User::factory())
         ->create();
 
     ServiceRequestPriority::factory()
@@ -171,22 +162,19 @@ it('does not notify a user if they belong to a team managing a service request t
         false,
     );
 
-    Notification::assertNotSentTo($users->get(0), ServiceRequestCreated::class);
-    Notification::assertNotSentTo($users->get(1), ServiceRequestCreated::class);
-    Notification::assertNotSentTo($users->get(2), ServiceRequestCreated::class);
+    Notification::assertNotSentTo(User::first(), ServiceRequestCreated::class);
+    Notification::assertNotSentTo(User::skip(1)->first(), ServiceRequestCreated::class);
+    Notification::assertNotSentTo(User::skip(2)->first(), ServiceRequestCreated::class);
 });
 
 it('does not notify a user if they belong to a team auditing a service request type but teams do not recieve notifications', function () {
     Notification::fake();
 
-    $users = User::factory(3)
-        ->create();
-
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     Team::factory()
         ->hasAttached($serviceRequestType, [], 'auditableServiceRequestTypes')
-        ->hasAttached($users->take(2))
+        ->has(User::factory()->count(2))
         ->create();
 
     $serviceRequestPriority = ServiceRequestPriority::factory()
@@ -197,7 +185,7 @@ it('does not notify a user if they belong to a team auditing a service request t
 
     Team::factory()
         ->hasAttached($anotherServiceRequestType, [], 'auditableServiceRequestTypes')
-        ->hasAttached($users->last())
+        ->has(User::factory()->count(1))
         ->create();
 
     ServiceRequestPriority::factory()
@@ -215,23 +203,20 @@ it('does not notify a user if they belong to a team auditing a service request t
         false,
     );
 
-    Notification::assertNotSentTo($users->get(0), ServiceRequestCreated::class);
-    Notification::assertNotSentTo($users->get(1), ServiceRequestCreated::class);
-    Notification::assertNotSentTo($users->get(2), ServiceRequestCreated::class);
+    Notification::assertNotSentTo(User::first(), ServiceRequestCreated::class);
+    Notification::assertNotSentTo(User::skip(1)->first(), ServiceRequestCreated::class);
+    Notification::assertNotSentTo(User::skip(2)->first(), ServiceRequestCreated::class);
 });
 
 it('does not notify a user twice if they belong to a team managing and auditing a service request type', function () {
     Notification::fake();
-
-    $users = User::factory(3)
-        ->create();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     Team::factory()
         ->hasAttached($serviceRequestType, [], 'manageableServiceRequestTypes')
         ->hasAttached($serviceRequestType, [], 'auditableServiceRequestTypes')
-        ->hasAttached($users->take(2))
+        ->has(User::factory()->count(2))
         ->create();
 
     $serviceRequestPriority = ServiceRequestPriority::factory()
@@ -243,7 +228,7 @@ it('does not notify a user twice if they belong to a team managing and auditing 
     Team::factory()
         ->hasAttached($anotherServiceRequestType, [], 'manageableServiceRequestTypes')
         ->hasAttached($anotherServiceRequestType, [], 'auditableServiceRequestTypes')
-        ->hasAttached($users->last())
+        ->has(User::factory())
         ->create();
 
     ServiceRequestPriority::factory()
@@ -261,7 +246,7 @@ it('does not notify a user twice if they belong to a team managing and auditing 
         true,
     );
 
-    Notification::assertSentToTimes($users->get(0), ServiceRequestCreated::class, 1);
-    Notification::assertSentToTimes($users->get(1), ServiceRequestCreated::class, 1);
-    Notification::assertNotSentTo($users->get(2), ServiceRequestCreated::class);
+    Notification::assertSentToTimes(User::first(), ServiceRequestCreated::class, 1);
+    Notification::assertSentToTimes(User::skip(1)->first(), ServiceRequestCreated::class, 1);
+    Notification::assertNotSentTo(User::skip(2)->first(), ServiceRequestCreated::class);
 });

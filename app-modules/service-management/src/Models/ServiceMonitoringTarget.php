@@ -78,6 +78,9 @@ class ServiceMonitoringTarget extends BaseModel implements Auditable
         return $this->hasMany(HistoricalServiceMonitoring::class);
     }
 
+    /**
+     * @return BelongsToMany<Team, $this, covariant ServiceMonitoringTargetTeam>
+     */
     public function teams(): BelongsToMany
     {
         return $this->belongsToMany(Team::class)
@@ -85,6 +88,9 @@ class ServiceMonitoringTarget extends BaseModel implements Auditable
             ->withTimestamps();
     }
 
+    /**
+     * @return BelongsToMany<User, $this, covariant ServiceMonitoringTargetUser>
+     */
     public function users(): BelongsToMany
     {
         return $this

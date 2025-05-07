@@ -42,8 +42,8 @@ use Closure;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables\Actions\AttachAction;
-use Filament\Tables\Actions\DetachAction;
+use Filament\Tables\Actions\AssociateAction;
+use Filament\Tables\Actions\DissociateAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -72,14 +72,13 @@ class UsersRelationManager extends RelationManager
                 TextColumn::make('email'),
             ])
             ->headerActions([
-                AttachAction::make()
+                AssociateAction::make()
                     ->label('Add user to this team')
-                    //TODO: remove this if we support multiple teams
-                    ->form(fn (AttachAction $action): array => [
+                    ->form(fn (AssociateAction $action): array => [
                         $action->getRecordSelect()
                             ->rules([
                                 fn (): Closure => function (string $attribute, $value, Closure $fail) {
-                                    if (User::findOrFail($value)->teams()->count() > 0) {
+                                    if (User::findOrFail($value)->team()->count() > 0) {
                                         $fail('This user already belongs to a team.');
                                     }
                                 },
@@ -87,7 +86,7 @@ class UsersRelationManager extends RelationManager
                     ]),
             ])
             ->actions([
-                DetachAction::make()
+                DissociateAction::make()
                     ->label('Remove from this team'),
             ])
             ->bulkActions([

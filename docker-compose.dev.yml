@@ -1,12 +1,14 @@
 services:
-  aidingapp.local:
+  app:
     build:
+      context: .
+      dockerfile: Dockerfile
       target: development
       args:
+        PUID: '${PLS_USER_ID:-9999}'
+        PGID: '${PLS_GROUP_ID:-9999}'
         TOTAL_QUEUE_WORKERS: '${TOTAL_QUEUE_WORKERS:-1}'
         MULTIPLE_DEVELOPMENT_QUEUES: '${MULTIPLE_DEVELOPMENT_QUEUES:-false}'
-        USER_ID: '${SPIN_USER_ID:-9999}'
-        GROUP_ID: '${SPIN_GROUP_ID:-9999}'
     environment:
       SSL_MODE: "mixed"
       LANDLORD_MIGRATE: '${LANDLORD_MIGRATE:-true}'
@@ -21,8 +23,8 @@ services:
       CACHE_EVENTS: '${CACHE_EVENTS:-false}'
       CACHE_ICONS: '${CACHE_ICONS:-false}'
       CACHE_FILAMENT_COMPONENTS: '${CACHE_FILAMENT_COMPONENTS:-false}'
-      PUID: '${SPIN_USER_ID:-9999}'
-      PGID: '${SPIN_GROUP_ID:-9999}'
+      PUID: '${PLS_USER_ID:-9999}'
+      PGID: '${PLS_GROUP_ID:-9999}'
       SQS_QUEUE: '${SQS_QUEUE:-default}'
       LANDLORD_SQS_QUEUE: '${LANDLORD_SQS_QUEUE:-landlord}'
       OUTBOUND_COMMUNICATION_QUEUE: '${OUTBOUND_COMMUNICATION_QUEUE:-outbound-communication}'
@@ -30,6 +32,7 @@ services:
       IMPORT_EXPORT_QUEUE: '${IMPORT_EXPORT_QUEUE:-import-export}'
       BUILD_ASSETS: '${BUILD_ASSETS:-false}'
       FIX_PERMISSIONS: '${FIX_PERMISSIONS:-true}'
+      PHP_MEMORY_LIMIT: '${PHP_MEMORY_LIMIT:-512M}'
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.aidingapp-app.rule=HostRegexp(`aidingapp.local`, `{subdomain:[a-z0-9]+}.aidingapp.local`)"
@@ -45,11 +48,12 @@ services:
     networks:
       cgbs-development:
         ipv4_address: 172.16.1.4
+        aliases:
+          - aidingapp.local
     dns:
       - 172.16.1.1
     depends_on:
       - aidingapp-redis
-      - aidingapp-minio
       - aidingapp-mailpit
       - aidingapp-pgsql
 
@@ -65,37 +69,6 @@ services:
       test: [ "CMD", "redis-cli", "ping" ]
       retries: 3
       timeout: 5s
-
-  aidingapp-minio:
-    image: 'minio/minio:RELEASE.2023-07-07T07-13-57Z'
-    environment:
-      MINIO_ROOT_USER: aidingapp
-      MINIO_ROOT_PASSWORD: password
-    volumes:
-      - 'aidingapp-minio:/data/minio'
-    networks:
-      - cgbs-development
-    command: 'minio server /data/minio --console-address ":8900"'
-    healthcheck:
-      test: [ 'CMD', 'curl', '-f', 'http://localhost:9000/minio/health/live' ]
-      retries: 3
-      timeout: 5s
-    labels:
-      - "traefik.enable=true"
-
-      - "traefik.http.routers.aidingapp-minio-console.rule=Host(`storage.tools.aidingapp.local`)"
-      - "traefik.http.routers.aidingapp-minio-console.entrypoints=websecure"
-      - "traefik.http.routers.aidingapp-minio-console.tls=true"
-      - "traefik.http.routers.aidingapp-minio-console.service=aidingapp-minio-console-service"
-      - "traefik.http.services.aidingapp-minio-console-service.loadbalancer.server.port=8900"
-      - "traefik.http.services.aidingapp-minio-console-service.loadbalancer.server.scheme=http"
-
-      - "traefik.http.routers.aidingapp-minio.rule=Host(`media.tools.aidingapp.local`, `aidingapp-minio`)"
-      - "traefik.http.routers.aidingapp-minio.entrypoints=websecure"
-      - "traefik.http.routers.aidingapp-minio.tls=true"
-      - "traefik.http.routers.aidingapp-minio.service=aidingapp-minio-service"
-      - "traefik.http.services.aidingapp-minio-service.loadbalancer.server.port=9000"
-      - "traefik.http.services.aidingapp-minio-service.loadbalancer.server.scheme=http"
 
   aidingapp-mailpit:
     image: 'axllent/mailpit:latest'
@@ -134,8 +107,6 @@ networks:
 
 volumes:
   aidingapp-redis:
-    driver: local
-  aidingapp-minio:
     driver: local
   aidingapp-pgsql:
     driver: local

@@ -87,7 +87,9 @@
 
     const debounceSearch = debounce((value, page = 1) => {
         const { post } = consumer();
+
         fromSearch.value = true;
+
         if (!value && selectedTags.value.length < 1) {
             searchQuery.value = null;
             searchResults.value = null;
@@ -118,19 +120,35 @@
         toArticle.value = pagination.to;
     };
 
-    watch(searchQuery, (value) => {
-        if (value == null) {
-            fromSearch.value = false;
-            getData(1);
+    watch(
+        () => [searchQuery.value, [...selectedTags.value]],
+        ([newSearch, newTags]) => {
+            const urlSearch = route.query.search || '';
+            const urlTags = route.query.tags ? route.query.tags.split(',') : [];
 
-            return;
-        }
-        debounceSearch(value);
-    });
+            const isSearchChanged = newSearch !== urlSearch;
+            const isTagsChanged = newTags.length !== urlTags.length || newTags.some((tag, i) => tag !== urlTags[i]);
 
-    watch(selectedTags, () => {
-        debounceSearch(searchQuery.value);
-    });
+            if (isSearchChanged || isTagsChanged) {
+                fromSearch.value = !!(newSearch || newTags.length);
+
+                router.push({
+                    name: route.name,
+                    params: route.params,
+                    query: {
+                        ...route.query,
+                        page: 1,
+                        search: newSearch || undefined,
+                        tags: newTags.join(',') || undefined,
+                        filter: filter.value || undefined,
+                    },
+                });
+
+                debounceSearch(newSearch, 1);
+            }
+        },
+        { immediate: false },
+    );
 
     function debounce(func, delay) {
         let timerId;
@@ -153,28 +171,57 @@
     }
 
     const fetchNextPage = () => {
-        currentPage.value = currentPage.value !== lastPage.value ? currentPage.value + 1 : lastPage.value;
-        getData(currentPage.value);
+        if (currentPage.value < lastPage.value) {
+            const newPage = currentPage.value + 1;
+            fetchPage(newPage);
+        }
     };
 
     const fetchPreviousPage = () => {
-        currentPage.value = currentPage.value !== 1 ? currentPage.value - 1 : 1;
-        getData(currentPage.value);
+        if (currentPage.value > 1) {
+            const newPage = currentPage.value - 1;
+            fetchPage(newPage);
+        }
     };
 
     const fetchPage = (page) => {
-        currentPage.value = page;
-        getData(currentPage.value);
+        if (page === currentPage.value) return;
+
+        router.push({
+            name: route.name,
+            params: route.params,
+            query: {
+                ...route.query,
+                page,
+                search: searchQuery.value || undefined,
+                tags: selectedTags.value.join(',') || undefined,
+                filter: filter.value || undefined,
+            },
+        });
     };
 
     const changeFilter = (value) => {
         filter.value = value;
-        getData(1);
+
+        filterRouteChange();
     };
 
     const changeSearchFilter = (value) => {
         filter.value = value;
+        filterRouteChange();
         debounceSearch(searchQuery.value);
+    };
+
+    const filterRouteChange = () => {
+        router.push({
+            name: route.name,
+            params: route.params,
+            query: {
+                ...route.query,
+                page: 1,
+                filter: filter.value,
+            },
+        });
     };
 
     const breadcrumbs = computed(() => {
@@ -193,18 +240,28 @@
 
     watch(
         route,
-        async function (newRouteValue) {
-            searchQuery.value = '';
-            fromSearch.value = false;
-            await getData();
+        async (newRoute) => {
+            const page = parseInt(newRoute.query.page) || 1;
+            const search = newRoute.query.search || '';
+            const tags = newRoute.query.tags ? newRoute.query.tags.split(',') : [];
+            const appliedFilter = newRoute.query.filter || '';
+            const isSearchMode = !!search || tags.length > 0;
+
+            currentPage.value = page;
+            searchQuery.value = search;
+
+            selectedTags.value.splice(0, selectedTags.value.length, ...tags);
+
+            filter.value = appliedFilter;
+            fromSearch.value = isSearchMode;
+            await getData(page);
         },
-        {
-            immediate: true,
-        },
+        { immediate: true },
     );
 
     async function getData(page = 1) {
         if (fromSearch.value) {
+            loadingResults.value = false;
             debounceSearch(searchQuery.value, page);
             return;
         }
@@ -213,26 +270,32 @@
 
         const { get } = consumer();
 
-        await get(props.apiUrl + '/categories/' + route.params.categorySlug, { page: page, filter: filter.value }).then(
-            (response) => {
-                if (route.params.categorySlug && route.params.parentCategorySlug) {
-                    router.replace({
-                        name: 'view-subcategory',
-                        params: {
-                            parentCategorySlug: response.data.category.parentCategory.slug,
-                            categorySlug: response.data.category.slug,
-                        },
-                    });
-                } else if (route.params.categorySlug) {
-                    router.replace({ name: 'view-category', params: { categorySlug: response.data.category.slug } });
-                }
+        await get(props.apiUrl + '/categories/' + route.params.categorySlug, {
+            page: page,
+            filter: filter.value,
+        }).then((response) => {
+            if (route.params.categorySlug && route.params.parentCategorySlug) {
+                router.replace({
+                    name: 'view-subcategory',
+                    params: {
+                        parentCategorySlug: response.data.category.parentCategory.slug,
+                        categorySlug: response.data.category.slug,
+                    },
+                    query: { ...route.query },
+                });
+            } else if (route.params.categorySlug) {
+                router.replace({
+                    name: 'view-category',
+                    params: { categorySlug: response.data.category.slug },
+                    query: { ...route.query },
+                });
+            }
 
-                category.value = response.data.category;
-                articles.value = response.data.articles.data;
-                setPagination(response.data.articles);
-                loadingResults.value = false;
-            },
-        );
+            category.value = response.data.category;
+            articles.value = response.data.articles.data;
+            setPagination(response.data.articles);
+            loadingResults.value = false;
+        });
     }
 </script>
 

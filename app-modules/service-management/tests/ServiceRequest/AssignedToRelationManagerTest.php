@@ -66,7 +66,7 @@ test('During assignment only Users that are on a Team that is Manager of the Typ
 
     $team = Team::factory()->create();
 
-    $user->teams()->attach($team);
+    $user->team()->associate($team)->save();
 
     $user->refresh();
 
@@ -114,9 +114,9 @@ test('During reassignment current assigned user should not be in options', funct
 
     $team = Team::factory()->create();
 
-    $user->teams()->attach($team);
+    $user->team()->associate($team)->save();
 
-    $secondUser->teams()->attach($team);
+    $secondUser->team()->associate($team)->save();
 
     $user->refresh();
 
@@ -169,7 +169,7 @@ test('Assign To Me action visible when the Service Request is unassigned and the
 
     $team = Team::factory()->create();
 
-    $user->teams()->attach($team);
+    $user->team()->associate($team)->save();
 
     $user->refresh();
 
@@ -211,7 +211,7 @@ test('Assign To Me action is not visible when the Service Request is already ass
 
     $team = Team::factory()->create();
 
-    $user->teams()->attach($team);
+    $user->team()->associate($team)->save();
 
     $user->refresh();
 
@@ -285,7 +285,7 @@ test('Assign Service Request action visible when the Service Request is unassign
 
     $team = Team::factory()->create();
 
-    $user->teams()->attach($team);
+    $user->team()->associate($team)->save();
 
     $user->refresh();
 
@@ -356,7 +356,7 @@ test('Assign To Me action is not visible when the Service Request is Closed and 
 
     $team = Team::factory()->create();
 
-    $user->teams()->attach($team);
+    $user->team()->associate($team)->save();
 
     $user->refresh();
 
@@ -392,7 +392,7 @@ test('Assign Service Request action is not visible when the Service Request is C
 
     $team = Team::factory()->create();
 
-    $user->teams()->attach($team);
+    $user->team()->associate($team)->save();
 
     $user->refresh();
 

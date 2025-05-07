@@ -35,6 +35,7 @@
 */
 
 use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
+use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\ServiceRequestTypeEmailTemplatePage;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
@@ -56,13 +57,15 @@ test('it creates a ServiceRequestTypeEmailTemplate if it did not already exist',
 
     $type = collect(ServiceRequestEmailTemplateType::cases())->random();
 
+    $role = collect(ServiceRequestTypeEmailTemplateRole::cases())->random();
+
     livewire(ServiceRequestTypeEmailTemplatePage::class, [
         'record' => $serviceRequestType->getKey(),
         'type' => $type,
     ])
         ->fillForm([
-            'subject' => $request['subject'],
-            'body' => $request['body'],
+            "{$role->value}.subject" => $request['subject'],
+            "{$role->value}.body" => $request['body'],
         ])
         ->call('save')
         ->assertHasNoFormErrors();
@@ -72,6 +75,7 @@ test('it creates a ServiceRequestTypeEmailTemplate if it did not already exist',
         'type' => $type,
         'subject' => json_encode($request['subject']),
         'body' => json_encode($request['body']),
+        'role' => $role,
     ]);
 });
 
@@ -90,8 +94,8 @@ test('it updates a ServiceRequestTypeEmailTemplate if it already exists', functi
         'type' => $emailTemplate->type,
     ])
         ->fillForm([
-            'subject' => $request['subject'],
-            'body' => $request['body'],
+            "{$emailTemplate->role->value}.subject" => $request['subject'],
+            "{$emailTemplate->role->value}.body" => $request['body'],
         ])
         ->call('save')
         ->assertHasNoFormErrors();

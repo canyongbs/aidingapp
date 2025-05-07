@@ -36,6 +36,8 @@
 
 namespace App\Concerns;
 
+use Filament\Resources\Resource;
+
 trait EditPageRedirection
 {
     public function getRedirectUrl(): ?string

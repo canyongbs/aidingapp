@@ -36,9 +36,10 @@
 
 namespace App\Multitenancy\Tasks;
 
-use App\Multitenancy\DataTransferObjects\TenantConfig;
+use App\Models\Tenant;
+use Exception;
 use Illuminate\Support\Facades\Storage;
-use Spatie\Multitenancy\Models\Tenant;
+use Spatie\Multitenancy\Contracts\IsTenant;
 use Spatie\Multitenancy\Tasks\SwitchTenantTask;
 
 class SwitchS3PublicFilesystemTask implements SwitchTenantTask
@@ -60,14 +61,22 @@ class SwitchS3PublicFilesystemTask implements SwitchTenantTask
         $this->originalBucket ??= config('filesystems.disks.s3-public.bucket');
         $this->originalUrl ??= config('filesystems.disks.s3-public.url');
         $this->originalEndpoint ??= config('filesystems.disks.s3-public.endpoint');
-        $this->originalUsePathStyleEndpoint ??= config('filesystems.disks.s3-public.use_path_style_endpoint');
-        $this->originalThrow ??= config('filesystems.disks.s3-public.throw');
+        $this->originalUsePathStyleEndpoint = ! is_null(config('filesystems.disks.s3-public.use_path_style_endpoint'))
+            ? config('filesystems.disks.s3-public.use_path_style_endpoint')
+            : false;
+        $this->originalThrow = ! is_null(config('filesystems.disks.s3-public.throw'))
+            ? config('filesystems.disks.s3-public.throw')
+            : false;
         $this->originalRoot ??= config('filesystems.disks.s3-public.root');
     }
 
-    public function makeCurrent(Tenant $tenant): void
+    public function makeCurrent(IsTenant $tenant): void
     {
-        /** @var TenantConfig $config */
+        throw_if(
+            ! $tenant instanceof Tenant,
+            new Exception('Tenant is not an instance of Tenant')
+        );
+
         $config = $tenant->config;
 
         $this->setFilesystemConfig(

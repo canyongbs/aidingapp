@@ -69,7 +69,7 @@ class EngagementFile extends BaseModel implements HasMedia, Auditable
     }
 
     /**
-     * @return MorphToMany<Contact, $this>
+     * @return MorphToMany<Contact, $this, covariant EngagementFileEntities>
      */
     public function contacts(): MorphToMany
     {

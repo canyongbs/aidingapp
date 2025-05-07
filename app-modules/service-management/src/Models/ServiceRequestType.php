@@ -45,7 +45,7 @@ use App\Models\BaseModel;
 use App\Models\User;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
@@ -156,6 +156,9 @@ class ServiceRequestType extends BaseModel implements Auditable
         return $this->hasOne(ServiceRequestForm::class, 'service_request_type_id');
     }
 
+    /**
+     * @return BelongsToMany<Team, $this, covariant ServiceRequestTypeManager>
+     */
     public function managers(): BelongsToMany
     {
         return $this->belongsToMany(Team::class, 'service_request_type_managers')
@@ -163,6 +166,9 @@ class ServiceRequestType extends BaseModel implements Auditable
             ->withTimestamps();
     }
 
+    /**
+     * @return BelongsToMany<Team, $this, covariant ServiceRequestTypeAuditor>
+     */
     public function auditors(): BelongsToMany
     {
         return $this->belongsToMany(Team::class, 'service_request_type_auditors')
@@ -184,6 +190,9 @@ class ServiceRequestType extends BaseModel implements Auditable
         return $this->belongsTo(User::class, 'last_assigned_id', 'id');
     }
 
+    /**
+     * @return HasMany<ServiceRequestTypeEmailTemplate, $this>
+     */
     public function templates(): HasMany
     {
         return $this->hasMany(ServiceRequestTypeEmailTemplate::class, 'service_request_type_id');

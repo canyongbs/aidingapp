@@ -64,7 +64,7 @@ test('The correct details are displayed on the ListServiceRequests page', functi
 
     $team = Team::factory()->create();
 
-    $user->teams()->attach($team);
+    $user->team()->associate($team)->save();
 
     $user->refresh();
 
@@ -205,7 +205,7 @@ test('service requests only visible to service request type managers', function 
 
     $team = Team::factory()->create();
 
-    $user->teams()->attach($team);
+    $user->team()->associate($team)->save();
 
     $user->refresh();
 
@@ -247,7 +247,7 @@ test('service requests only visible to service request type auditors', function 
 
     $team = Team::factory()->create();
 
-    $user->teams()->attach($team);
+    $user->team()->associate($team)->save();
 
     $user->refresh();
 
@@ -279,7 +279,7 @@ test('service requests only visible to service request type auditors', function 
 test('can list audit member to service request type', function () {
     $user = User::factory()->licensed([Contact::getLicenseType()])->create();
     $team = Team::factory()->create();
-    $user->teams()->attach($team);
+    $user->team()->associate($team)->save();
     $user->refresh();
 
     $contact = Contact::factory()->create();
@@ -330,9 +330,9 @@ it('can filter service requests by assigned to with unassigned option', function
 
     $team = Team::factory()->create();
 
-    $user->teams()->attach($team);
+    $user->team()->associate($team)->save();
 
-    $secondUser->teams()->attach($team);
+    $secondUser->team()->associate($team)->save();
 
     $user->refresh();
 
@@ -376,7 +376,7 @@ it('can filter service requests by assigned to with unassigned option', function
         ])
         ->create();
 
-    $changeAssignmentToSecondUser = ServiceRequestAssignment::factory()->state([
+    ServiceRequestAssignment::factory()->state([
         'service_request_id' => $assignedSecondRequest->getKey(),
         'user_id' => $secondUser->getKey(),
     ])

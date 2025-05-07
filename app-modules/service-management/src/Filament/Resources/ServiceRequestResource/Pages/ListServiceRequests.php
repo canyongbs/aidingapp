@@ -85,9 +85,9 @@ class ListServiceRequests extends ListRecords
             ])
                 ->when(! auth()->user()->isSuperAdmin(), function (Builder $q) {
                     return $q->whereHas('priority.type.managers', function (Builder $query): void {
-                        $query->where('teams.id', auth()->user()->teams()->first()?->getKey());
+                        $query->where('teams.id', auth()->user()->team?->getKey());
                     })->orWhereHas('priority.type.auditors', function (Builder $query): void {
-                        $query->where('teams.id', auth()->user()->teams()->first()?->getKey());
+                        $query->where('teams.id', auth()->user()->team?->getKey());
                     });
                 }))
             ->columns([
@@ -211,7 +211,7 @@ class ListServiceRequests extends ListRecords
                                 ->whereKey($records)
                                 ->when(! auth()->user()->isSuperAdmin(), function (Builder $query) {
                                     $query->whereHas('priority.type.managers', function (Builder $query): void {
-                                        $query->where('teams.id', auth()->user()->teams()->first()?->getKey());
+                                        $query->where('teams.id', auth()->user()->team?->getKey());
                                     });
                                 })
                                 ->delete();

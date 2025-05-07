@@ -110,7 +110,7 @@ class AssignedToRelationManager extends RelationManager
                             ->getSearchResultsUsing(fn (string $search): array => User::query()
                                 ->tap(new HasLicense($this->getOwnerRecord()->respondent->getLicenseType()))
                                 ->where(new Expression('lower(name)'), 'like', '%' . str($search)->lower() . '%')
-                                ->whereHas('teams.manageableServiceRequestTypes', function ($query) {
+                                ->whereHas('team.manageableServiceRequestTypes', function ($query) {
                                     $query->where('service_request_type_id', $this->getOwnerRecord()?->priority?->type_id ?? null);
                                 })
                                 ->where('id', '!=', $this->getOwnerRecord()->assignedTo?->user_id)

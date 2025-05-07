@@ -484,6 +484,7 @@ namespace App\Models{
  * @property string|null $work_number
  * @property int|null $work_extension
  * @property string|null $mobile
+ * @property string|null $team_id
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Task\Models\Task> $assignedTasks
  * @property-read int|null $assigned_tasks_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
@@ -494,7 +495,7 @@ namespace App\Models{
  * @property-read int|null $change_request_types_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\ServiceManagement\Models\ChangeRequest> $changeRequests
  * @property-read int|null $change_requests_count
- * @property-read \AidingApp\Team\Models\TeamUser|\AidingApp\ServiceManagement\Models\ServiceMonitoringTargetUser|\AidingApp\Notification\Models\Subscription|null $pivot
+ * @property-read \AidingApp\ServiceManagement\Models\ServiceMonitoringTargetUser|\AidingApp\Notification\Models\Subscription|null $pivot
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Contact\Models\Contact> $contactSubscriptions
  * @property-read int|null $contact_subscriptions_count
  * @property-read \AidingApp\InAppCommunication\Models\TwilioConversationUser|null $participant
@@ -523,8 +524,7 @@ namespace App\Models{
  * @property-read int|null $service_request_type_individual_assignment_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Notification\Models\Subscription> $subscriptions
  * @property-read int|null $subscriptions_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Team\Models\Team> $teams
- * @property-read int|null $teams_count
+ * @property-read \AidingApp\Team\Models\Team|null $team
  * @property-read \Illuminate\Database\Eloquent\Collection|\AidingApp\Alert\Models\Alert[] $contactAlerts
  * @property-read int|null $contact_alerts_count
  * @property-read \Illuminate\Database\Eloquent\Collection|\AidingApp\Authorization\Models\Permission[] $permissionsFromRoles
@@ -570,6 +570,7 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User wherePronounsId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User wherePublicProfileSlug($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereRememberToken($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereTeamId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereTimezone($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereType($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereUpdatedAt($value)
@@ -2544,6 +2545,7 @@ namespace AidingApp\ServiceManagement\Models{
  * @property string $id
  * @property int $response
  * @property float $response_time
+ * @property bool $succeeded
  * @property string $service_monitoring_target_id
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
@@ -2559,6 +2561,7 @@ namespace AidingApp\ServiceManagement\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HistoricalServiceMonitoring whereResponse($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HistoricalServiceMonitoring whereResponseTime($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HistoricalServiceMonitoring whereServiceMonitoringTargetId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|HistoricalServiceMonitoring whereSucceeded($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HistoricalServiceMonitoring whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HistoricalServiceMonitoring withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|HistoricalServiceMonitoring withoutTrashed()
@@ -2722,7 +2725,8 @@ namespace AidingApp\ServiceManagement\Models{
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
  * @property-read int|null $audits_count
- * @property-read \AidingApp\ServiceManagement\Models\HistoricalServiceMonitoring|null $history
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\ServiceManagement\Models\HistoricalServiceMonitoring> $histories
+ * @property-read int|null $histories_count
  * @property-read \AidingApp\ServiceManagement\Models\ServiceMonitoringTargetUser|\AidingApp\ServiceManagement\Models\ServiceMonitoringTargetTeam|null $pivot
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Team\Models\Team> $teams
  * @property-read int|null $teams_count
@@ -3421,6 +3425,7 @@ namespace AidingApp\ServiceManagement\Models{
  * @property array<array-key, mixed> $body
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole|null $role
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
  * @property-read int|null $audits_count
  * @property-read \AidingApp\ServiceManagement\Models\ServiceRequestType $serviceRequestType
@@ -3431,6 +3436,7 @@ namespace AidingApp\ServiceManagement\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestTypeEmailTemplate whereBody($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestTypeEmailTemplate whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestTypeEmailTemplate whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestTypeEmailTemplate whereRole($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestTypeEmailTemplate whereServiceRequestTypeId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestTypeEmailTemplate whereSubject($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestTypeEmailTemplate whereType($value)
@@ -3598,7 +3604,7 @@ namespace AidingApp\Team\Models{
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property string|null $deleted_at
- * @property-read \AidingApp\Team\Models\TeamUser|\AidingApp\ServiceManagement\Models\ServiceMonitoringTargetTeam|\AidingApp\ServiceManagement\Models\ServiceRequestTypeManager|\AidingApp\ServiceManagement\Models\ServiceRequestTypeAuditor|null $pivot
+ * @property-read \AidingApp\ServiceManagement\Models\ServiceMonitoringTargetTeam|\AidingApp\ServiceManagement\Models\ServiceRequestTypeManager|\AidingApp\ServiceManagement\Models\ServiceRequestTypeAuditor|null $pivot
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\ServiceManagement\Models\ServiceRequestType> $auditableServiceRequestTypes
  * @property-read int|null $auditable_service_request_types_count
  * @property-read \AidingApp\Division\Models\Division|null $division
@@ -3623,31 +3629,6 @@ namespace AidingApp\Team\Models{
  */
 	#[\AllowDynamicProperties]
 	class IdeHelperTeam {}
-}
-
-namespace AidingApp\Team\Models{
-/**
- * 
- *
- * @property string $id
- * @property string $team_id
- * @property string $user_id
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \AidingApp\Team\Models\Team $team
- * @property-read \App\Models\User $user
- * @method static \Illuminate\Database\Eloquent\Builder<static>|TeamUser newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|TeamUser newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|TeamUser query()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|TeamUser whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|TeamUser whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|TeamUser whereTeamId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|TeamUser whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|TeamUser whereUserId($value)
- * @mixin \Eloquent
- */
-	#[\AllowDynamicProperties]
-	class IdeHelperTeamUser {}
 }
 
 namespace AidingApp\Timeline\Models{

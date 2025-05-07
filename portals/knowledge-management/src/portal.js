@@ -35,7 +35,7 @@ import { defaultConfig, plugin } from '@formkit/vue';
 import { createPinia } from 'pinia';
 import PrimeVue from 'primevue/config';
 import { createApp, defineCustomElement, getCurrentInstance, h } from 'vue';
-import { createMemoryHistory, createRouter, createWebHistory } from 'vue-router';
+import { createRouter, createWebHistory } from 'vue-router';
 import App from './App.vue';
 import ComingSoon from './Components/ComingSoon.vue';
 import Services from './Components/Services.vue';
@@ -62,10 +62,10 @@ customElements.define(
                 theme: 'none',
             });
 
-            const { isEmbeddedInAidingApp, baseUrl } = getAppContext(props.accessUrl);
+            const { baseUrl } = getAppContext(props.accessUrl);
 
             const router = createRouter({
-                history: isEmbeddedInAidingApp ? createWebHistory() : createMemoryHistory(),
+                history: createWebHistory(),
                 routes: [
                     {
                         path: baseUrl + '/',

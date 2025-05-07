@@ -101,9 +101,9 @@ class ViewUser extends ViewRecord
                     ->disabled(),
                 Section::make('Team')
                     ->schema([
-                        Select::make('teams')
+                        Select::make('team_id')
                             ->label('')
-                            ->relationship('teams', 'name')
+                            ->relationship('team', 'name')
                             ->disabled(),
                     ])
                     ->hidden(fn (?User $record) => (bool) $record?->hasRole(Authenticatable::SUPER_ADMIN_ROLE)),
