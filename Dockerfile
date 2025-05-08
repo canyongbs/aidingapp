@@ -223,11 +223,13 @@ RUN /generate-queues.sh "default" "\$SQS_QUEUE" \
 
 RUN rm /generate-queues.sh
 
-COPY --chown=$PUID:$PGID . /var/www/html
+COPY . /var/www/html
+
+RUN chown -R $(id -un):$(id -gn) /var/www/html
 
 RUN npm ci --ignore-scripts \
     && rm -rf /var/www/html/vendor \
-    && composer install --no-dev --no-interaction --no-progress --no-suggest --no-scripts --optimize-autoloader --apcu-autoloader \
+    && composer install --no-dev --no-interaction --no-progress --optimize-autoloader --apcu-autoloader \
     && npm run build \
     && npm ci --ignore-scripts --omit=dev
 
