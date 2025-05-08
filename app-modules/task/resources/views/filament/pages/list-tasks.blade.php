@@ -33,7 +33,6 @@
 --}}
 @php
     use Filament\Support\Facades\FilamentView;
-    use Filament\Support\Facades\FilamentAsset;
 @endphp
 <x-filament-panels::page @class([
     'fi-resource-list-records-page',
@@ -115,5 +114,5 @@
         @livewire('task-kanban', $this->getWidgetData())
         <x-filament-actions::modals />
     @endif
-    <script src="{{ FilamentAsset::getScriptSrc('kanban', 'canyon-gbs/task') }}"></script>
+    <script src="{{ url('js/canyon-gbs/task/kanban.js') }}"></script>
 </x-filament-panels::page>

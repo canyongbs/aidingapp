@@ -35,7 +35,6 @@
     use AidingApp\InAppCommunication\Enums\ConversationType;
     use AidingApp\InAppCommunication\Models\TwilioConversation;
     use AidingApp\InAppCommunication\Models\TwilioConversationUser;
-    use Filament\Support\Facades\FilamentAsset;
 
     $conversationGroups = $this->conversations->reduce(
         function (array $carry, TwilioConversation $conversation): array {
@@ -592,7 +591,7 @@
                 </div>
             @endif
         </div>
-        <script src="{{ FilamentAsset::getScriptSrc('userToUserChat', 'canyon-gbs/in-app-communication') }}"></script>
+        <script src="{{ url('js/canyon-gbs/in-app-communication/userToUserChat.js') }}"></script>
         <style>
             .tiptap .is-editor-empty:first-child::before {
                 color: #adb5bd;

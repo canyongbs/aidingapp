@@ -39,8 +39,6 @@ namespace AidingApp\Task\Providers;
 use AidingApp\Task\Models\Task;
 use AidingApp\Task\TaskPlugin;
 use Filament\Panel;
-use Filament\Support\Assets\Js;
-use Filament\Support\Facades\FilamentAsset;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 
@@ -58,12 +56,5 @@ class TaskServiceProvider extends ServiceProvider
                 'task' => Task::class,
             ]
         );
-
-        $this->registerAssets();
-    }
-
-    protected function registerAssets(): void
-    {
-        FilamentAsset::register([Js::make('kanban', __DIR__ . '/../../resources/js/kanban.js')->loadedOnRequest()], 'canyon-gbs/task');
     }
 }
