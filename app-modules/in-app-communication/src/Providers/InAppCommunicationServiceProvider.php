@@ -39,8 +39,6 @@ namespace AidingApp\InAppCommunication\Providers;
 use AidingApp\InAppCommunication\InAppCommunicationPlugin;
 use AidingApp\InAppCommunication\Models\TwilioConversation;
 use Filament\Panel;
-use Filament\Support\Assets\Js;
-use Filament\Support\Facades\FilamentAsset;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 
@@ -58,14 +56,5 @@ class InAppCommunicationServiceProvider extends ServiceProvider
                 'twilio_conversation' => TwilioConversation::class,
             ]
         );
-
-        $this->registerAssets();
-    }
-
-    public function registerAssets(): void
-    {
-        FilamentAsset::register([
-            Js::make('userToUserChat', __DIR__ . '/../../resources/js/dist/userToUserChat.js')->loadedOnRequest(),
-        ], 'canyon-gbs/in-app-communication');
     }
 }
