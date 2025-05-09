@@ -87,6 +87,7 @@ class EditServiceRequestTypeNotifications extends EditRecord
                     'service_request_update',
                     'service_request_status_change',
                     'service_request_closed',
+                    'survey_response',
                 ] as $event
             ) {
                 $attributes[] = "is_{$role}_{$event}_email_enabled";
