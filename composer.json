@@ -111,7 +111,6 @@
         "phpstan/phpstan": "^2.0",
         "phpunit/phpunit": "^11.0",
         "rector/rector": "^2.0",
-        "spatie/laravel-ignition": "^2.0",
         "spatie/laravel-ray": "^1.40.2",
         "worksome/request-factories": "^3.2"
     },
