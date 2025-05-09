@@ -59,7 +59,6 @@ use App\Enums\Feature;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Log;
 
 class ServiceRequestObserver
 {

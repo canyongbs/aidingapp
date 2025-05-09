@@ -40,8 +40,6 @@ use AidingApp\ServiceManagement\Actions\GenerateServiceRequestTypeEmailTemplateC
 use AidingApp\ServiceManagement\Actions\GenerateServiceRequestTypeEmailTemplateSubject;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
-use Exception;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\HtmlString;
 
 trait HandlesServiceRequestTemplateContent
@@ -125,7 +123,7 @@ trait HandlesServiceRequestTemplateContent
 
             return $block;
         }, $content['content']);
-        
+
         return $content;
     }
 }
