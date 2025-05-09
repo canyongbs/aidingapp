@@ -39,6 +39,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResou
 use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Filament\Blocks\ServiceRequestTypeEmailTemplateButtonBlock;
+use AidingApp\ServiceManagement\Filament\Blocks\SurveyResponseEmailTemplateTakeSurveyButtonBlock;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
@@ -72,6 +73,12 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
 
     public function form(Form $form): Form
     {
+        $roles = ServiceRequestTypeEmailTemplateRole::cases();
+
+        if ($this->type === ServiceRequestEmailTemplateType::SurveyResponse) {
+            $roles = [ServiceRequestTypeEmailTemplateRole::Customer];
+        }
+
         return $form
             ->schema([
                 Tabs::make('Email template roles')
@@ -81,7 +88,7 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
                         fn (ServiceRequestTypeEmailTemplateRole $role) => Tab::make($role->getLabel())
                             ->schema($this->getEmailTemplateFormSchema())
                             ->statePath($role->value),
-                        ServiceRequestTypeEmailTemplateRole::cases()
+                        $roles
                     ))
                     ->columnSpanFull(),
             ]);
@@ -142,9 +149,10 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
                 ->placeholder('Enter the email body here...')
                 ->extraInputAttributes(['style' => 'min-height: 12rem;'])
                 ->mergeTags(['service request number', 'created date', 'updated date', 'status', 'assigned to', 'title', 'description', 'type'])
-                ->blocks([
-                    ServiceRequestTypeEmailTemplateButtonBlock::class,
-                ])
+                // ->blocks([
+                //     ServiceRequestTypeEmailTemplateButtonBlock::class,
+                //     SurveyResponseEmailTemplateTakeSurveyButtonBlock::class,
+                // ])
                 ->columnSpanFull(),
         ];
     }

@@ -36,6 +36,8 @@
 
 namespace AidingApp\ServiceManagement\Providers;
 
+use AidingApp\ServiceManagement\Filament\Blocks\ServiceRequestTypeEmailTemplateButtonBlock;
+use AidingApp\ServiceManagement\Filament\Blocks\SurveyResponseEmailTemplateTakeSurveyButtonBlock;
 use AidingApp\ServiceManagement\Models\ChangeRequest;
 use AidingApp\ServiceManagement\Models\ChangeRequestResponse;
 use AidingApp\ServiceManagement\Models\ChangeRequestStatus;
@@ -64,6 +66,7 @@ use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceR
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\SqidPlusSixServiceRequestNumberGenerator;
 use App\Concerns\ImplementsGraphQL;
 use Filament\Panel;
+use FilamentTiptapEditor\TiptapEditor;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 
@@ -74,6 +77,14 @@ class ServiceManagementServiceProvider extends ServiceProvider
     public function register(): void
     {
         Panel::configureUsing(fn (Panel $panel) => ($panel->getId() !== 'admin') || $panel->plugin(new ServiceManagementPlugin()));
+
+        TiptapEditor::configureUsing(function (TiptapEditor $component) {
+            $component
+                ->blocks([
+                    ServiceRequestTypeEmailTemplateButtonBlock::class,
+                    SurveyResponseEmailTemplateTakeSurveyButtonBlock::class,
+                ]);
+        });
 
         $this->app->bind(ServiceRequestNumberGenerator::class, SqidPlusSixServiceRequestNumberGenerator::class);
     }

@@ -73,6 +73,7 @@
         'service_request_update' => 'Service Request Update',
         'service_request_status_change' => 'Service Request Status Change',
         'service_request_closed' => 'Service Request Closed',
+        'survey_response' => 'Survey Response',
     ] as $eventSlug => $event)
             <div
                 class="flex flex-col divide-y divide-gray-950/5 dark:divide-white/10 xl:flex-row xl:divide-x xl:divide-y-0">
@@ -94,18 +95,29 @@
                             <div
                                 class="grid h-full grid-cols-2 gap-1 divide-gray-950/5 dark:divide-white/10 xl:gap-0 xl:divide-x">
                                 @foreach (['email' => 'Email', 'notification' => 'App'] as $typeSlug => $type)
-                                    <label
-                                        class="flex items-center gap-2 xl:flex xl:w-16 xl:justify-center xl:px-3 xl:py-2"
-                                    >
-                                        <x-filament::input.checkbox
-                                            :disabled="$isDisabled"
-                                            :wire:model="$statePath . '.is_' . $roleSlug . '_' . $eventSlug . '_' . $typeSlug . '_enabled'"
-                                        />
+                                    @php
+                                        $isSurveyResponse = $eventSlug === 'survey_response';
+                                        $shouldShow = !(($isSurveyResponse && in_array($roleSlug, ['managers', 'auditors'])) || ($isSurveyResponse && $roleSlug === 'customers' && $typeSlug === 'notification'));
+                                    @endphp
 
-                                        <span class="xl:sr-only">
-                                            {{ $type }}
-                                        </span>
-                                    </label>
+                                    @if ($shouldShow)
+                                        <label
+                                            class="flex items-center gap-2 xl:flex xl:w-16 xl:justify-center xl:px-3 xl:py-2"
+                                        >
+                                            <x-filament::input.checkbox
+                                                :disabled="$isDisabled"
+                                                :wire:model="$statePath . '.is_' . $roleSlug . '_' . $eventSlug . '_' . $typeSlug . '_enabled'"
+                                            />
+                                            <span class="xl:sr-only">{{ $type }}</span>
+                                        </label>
+                                    @else
+                                        <div class="xl:flex xl:w-16 xl:justify-center xl:px-3 xl:py-2">
+                                            <input
+                                                type="hidden"
+                                                wire:model="{{ $statePath . '.is_' . $roleSlug . '_' . $eventSlug . '_' . $typeSlug . '_enabled' }}"
+                                            />
+                                        </div>
+                                    @endif
                                 @endforeach
                             </div>
                         </div>
