@@ -43,6 +43,8 @@ use AidingApp\Notification\Models\Contracts\Message;
 use AidingApp\Notification\Notifications\Contracts\HasBeforeSendHook;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
+use AidingApp\ServiceManagement\Notifications\Concerns\HandlesServiceRequestTemplateContent;
 use App\Models\Contracts\Educatable;
 use App\Models\NotificationSetting;
 use Illuminate\Bus\Queueable;
@@ -53,9 +55,11 @@ use Illuminate\Notifications\Notification;
 class SendClosedServiceFeedbackNotification extends Notification implements ShouldQueue, HasBeforeSendHook
 {
     use Queueable;
+    use HandlesServiceRequestTemplateContent;
 
     public function __construct(
         protected ServiceRequest $serviceRequest,
+        public ?ServiceRequestTypeEmailTemplate $emailTemplate,
     ) {}
 
     /**
@@ -68,6 +72,8 @@ class SendClosedServiceFeedbackNotification extends Notification implements Shou
 
     public function toMail(object $notifiable): MailMessage
     {
+        $template = $this->emailTemplate;
+        
         /** @var Educatable $educatable */
         $educatable = $notifiable;
 
@@ -75,7 +81,8 @@ class SendClosedServiceFeedbackNotification extends Notification implements Shou
             Contact::class => $educatable->first_name,
         };
 
-        return MailMessage::make()
+        if (! $template) {
+          return MailMessage::make()
             ->settings($this->resolveNotificationSetting($notifiable))
             ->subject("Feedback survey for {$this->serviceRequest->service_request_number}")
             ->greeting("Hi {$name},")
@@ -83,6 +90,18 @@ class SendClosedServiceFeedbackNotification extends Notification implements Shou
             ->action('Rate Service', route('feedback.service.request', $this->serviceRequest->id))
             ->line('We appreciate your time and we value your feedback!')
             ->salutation('Thank you.');
+        }
+
+        $subject = $this->getSubject($template->subject);
+
+        $body = $this->getBody($template->body);
+
+        $test = MailMessage::make()
+            ->settings($this->resolveNotificationSetting($notifiable))
+            ->subject(strip_tags($subject))
+            ->content($body);
+
+        return $test;
     }
 
     public function beforeSend(AnonymousNotifiable|CanBeNotified $notifiable, Message $message, NotificationChannel $channel): void
