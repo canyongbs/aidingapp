@@ -50,6 +50,7 @@ class FilterQueryBuilder
     /**
      * @param Builder<Model> $query
      * @param array<string, mixed> $data
+     *
      * @return Builder<Model>
     */
     public function apply(Builder $query, array $data): Builder
@@ -72,6 +73,7 @@ class FilterQueryBuilder
     /**
      * @param array<string, mixed> $filter
      * @param Builder<Model> $query
+     *
      * @return Builder<Model>
     */
     public function contains($filter, $query): Builder

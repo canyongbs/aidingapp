@@ -36,7 +36,6 @@
 
 namespace App\Support;
 
-use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\ValidationException;
@@ -46,6 +45,7 @@ trait HasAdvancedFilter
     /**
      * @param Builder<Model> $query
      * @param array<string, mixed> $data
+     *
      * @return Builder<Model>
     */
     public function scopeAdvancedFilter(Builder $query, array $data): Builder
@@ -56,6 +56,7 @@ trait HasAdvancedFilter
     /**
      * @param Builder<Model> $query
      * @param array<string, mixed> $data
+     *
      * @return Builder<Model>
     */
     public function processQuery(Builder $query, array $data): Builder
@@ -105,6 +106,7 @@ trait HasAdvancedFilter
 
     /**
      * @param array<string, mixed> $data
+     *
      * @return array<string, mixed>
     */
     protected function processGlobalSearch(array $data): array

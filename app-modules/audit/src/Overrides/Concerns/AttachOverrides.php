@@ -45,6 +45,8 @@ trait AttachOverrides
 {
     /**
      * @param array<string, mixed> $attributes
+    * @param mixed $id
+    * @param mixed $touch
     */
     public function attach($id, array $attributes = [], $touch = true)
     {
@@ -104,6 +106,8 @@ trait AttachOverrides
 
     /**
      * @param array<string, mixed> $ids
+    * @param mixed $detaching
+    *
      * @return array<string, int[]>
     */
     public function sync($ids, $detaching = true): array
@@ -140,10 +144,11 @@ trait AttachOverrides
 
         return $changes;
     }
-    
+
     /**
      *
      * @param string $class
+     *
      * @return bool
     */
     private function isAuditable(string $class): bool
