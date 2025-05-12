@@ -3282,10 +3282,6 @@ namespace AidingApp\ServiceManagement\Models{
  * @property bool $is_customers_service_request_status_change_notification_enabled
  * @property bool $is_customers_service_request_closed_email_enabled
  * @property bool $is_customers_service_request_closed_notification_enabled
- * @property bool $is_managers_survey_response_email_enabled
- * @property bool $is_managers_survey_response_notification_enabled
- * @property bool $is_auditors_survey_response_email_enabled
- * @property bool $is_auditors_survey_response_notification_enabled
  * @property bool $is_customers_survey_response_email_enabled
  * @property-read \App\Models\User|null $assignmentTypeIndividual
  * @property-read \AidingApp\ServiceManagement\Models\ServiceRequestTypeManager|\AidingApp\ServiceManagement\Models\ServiceRequestTypeAuditor|null $pivot
@@ -3328,8 +3324,6 @@ namespace AidingApp\ServiceManagement\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereIsAuditorsServiceRequestStatusChangeNotificationEnabled($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereIsAuditorsServiceRequestUpdateEmailEnabled($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereIsAuditorsServiceRequestUpdateNotificationEnabled($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereIsAuditorsSurveyResponseEmailEnabled($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereIsAuditorsSurveyResponseNotificationEnabled($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereIsCustomersServiceRequestAssignedEmailEnabled($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereIsCustomersServiceRequestAssignedNotificationEnabled($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereIsCustomersServiceRequestClosedEmailEnabled($value)
@@ -3351,8 +3345,6 @@ namespace AidingApp\ServiceManagement\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereIsManagersServiceRequestStatusChangeNotificationEnabled($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereIsManagersServiceRequestUpdateEmailEnabled($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereIsManagersServiceRequestUpdateNotificationEnabled($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereIsManagersSurveyResponseEmailEnabled($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereIsManagersSurveyResponseNotificationEnabled($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereLastAssignedId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereUpdatedAt($value)
