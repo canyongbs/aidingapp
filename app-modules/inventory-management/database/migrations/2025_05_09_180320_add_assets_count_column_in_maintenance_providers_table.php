@@ -42,14 +42,14 @@ return new class () extends Migration {
     public function up(): void
     {
         Schema::table('maintenance_providers', function (Blueprint $table) {
-            $table->integer('asset_count')->default(0);
+            $table->integer('assets_count')->default(0);
         });
     }
 
     public function down(): void
     {
         Schema::table('maintenance_providers', function (Blueprint $table) {
-            $table->dropColumn('asset_count');
+            $table->dropColumn('assets_count');
         });
     }
 };

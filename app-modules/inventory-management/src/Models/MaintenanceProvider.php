@@ -52,7 +52,7 @@ class MaintenanceProvider extends BaseModel implements Auditable
 
     protected $fillable = [
         'name',
-        'asset_count',
+        'assets_count',
     ];
 
     /**

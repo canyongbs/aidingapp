@@ -58,7 +58,7 @@ class MaintenanceActivityObserver
             $provider = MaintenanceProvider::find($maintenanceActivity->maintenance_provider_id);
 
             if ($provider) {
-                $provider->increment('asset_count');
+                $provider->increment('assets_count');
             }
         }
 
@@ -78,11 +78,11 @@ class MaintenanceActivityObserver
                 $newProvider = MaintenanceProvider::find($newProviderId);
 
                 if ($originalProvider) {
-                    $originalProvider->decrement('asset_count');
+                    $originalProvider->decrement('assets_count');
                 }
 
                 if ($newProvider) {
-                    $newProvider->increment('asset_count');
+                    $newProvider->increment('assets_count');
                 }
             }
         }
