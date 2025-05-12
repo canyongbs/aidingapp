@@ -66,6 +66,7 @@ class AlertCreatedNotification extends Notification
 
         $target = match ($concern::class) {
             Contact::class => ContactResource::class,
+            default => null,
         };
 
         $alertUrl = $target::getUrl('manage-alerts', ['record' => $concern]);

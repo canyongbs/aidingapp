@@ -48,6 +48,7 @@ use App\Models\Concerns\BelongsToEducatable;
 use App\Models\Scopes\LicensedToEducatable;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
@@ -78,6 +79,9 @@ class Alert extends BaseModel implements Auditable, CanTriggerAutoSubscription
         'status' => AlertStatus::class,
     ];
 
+    /**
+     * @return MorphTo<Model, $this>
+     */
     public function concern(): MorphTo
     {
         return $this->morphTo();
@@ -85,7 +89,7 @@ class Alert extends BaseModel implements Auditable, CanTriggerAutoSubscription
 
     public function getSubscribable(): ?Subscribable
     {
-        return $this->concern instanceof Subscribable ? $this->concern : null;
+        return $this->concern;
     }
 
     /**

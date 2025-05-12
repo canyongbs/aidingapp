@@ -36,30 +36,29 @@
 
 namespace App\View\Components;
 
+use Closure;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 
 class SelectList extends Component
 {
-    public $options;
+    /** @var array<int, string> */
+    public array $options;
 
-    /**
-     * Create a new component instance.
-     *
-     * @param mixed $options
-     * @param mixed $id
-     */
-    public function __construct($options)
+   /**
+    * @param array<int, string> $options
+   */
+    public function __construct(array $options)
     {
         $this->options = $options;
     }
 
     /**
-     * Get the view / contents that represent the component.
      *
-     * @return View|string
-     */
-    public function render()
+     * @return View|Htmlable|Closure|string
+    */
+    public function render(): View|Htmlable|Closure|string
     {
         return view('components.select-list');
     }

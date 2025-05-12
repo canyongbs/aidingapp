@@ -72,8 +72,8 @@ class ListAlerts extends ListRecords
             ->schema([
                 TextEntry::make('concern.display_name')
                     ->label('Related To')
-                    ->getStateUsing(fn (Alert $record): ?string => $record->concern?->{$record->concern::displayNameKey()})
-                    ->url(fn (Alert $record) => match ($record->concern ? $record->concern::class : null) {
+                    ->getStateUsing(fn (Alert $record): string => $record->concern->{$record->concern::displayNameKey()})
+                    ->url(fn (Alert $record) => match ($record->concern::class) {
                         Contact::class => ManageContactAlerts::getUrl(['record' => $record->concern]),
                         default => null,
                     }),
@@ -91,8 +91,8 @@ class ListAlerts extends ListRecords
                 IdColumn::make(),
                 TextColumn::make('concern.display_name')
                     ->label('Related To')
-                    ->getStateUsing(fn (Alert $record): ?string => $record->concern?->{$record->concern::displayNameKey()})
-                    ->url(fn (Alert $record) => match ($record->concern ? $record->concern::class : null) {
+                    ->getStateUsing(fn (Alert $record): string => $record->concern->{$record->concern::displayNameKey()})
+                    ->url(fn (Alert $record) => match ($record->concern::class) {
                         Contact::class => ManageContactAlerts::getUrl(['record' => $record->concern]),
                         default => null,
                     })

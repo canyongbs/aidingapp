@@ -43,6 +43,9 @@ use ReflectionClass;
 
 trait AttachOverrides
 {
+    /**
+     * @param array<string, mixed> $attributes
+    */
     public function attach($id, array $attributes = [], $touch = true)
     {
         /** @var Auditable $parentModel */
@@ -99,7 +102,11 @@ trait AttachOverrides
         return empty($results) ? 0 : $results;
     }
 
-    public function sync($ids, $detaching = true)
+    /**
+     * @param array<string, mixed> $ids
+     * @return array<string, int[]>
+    */
+    public function sync($ids, $detaching = true): array
     {
         /** @var Auditable $parentModel */
         $parentModel = $this->getParent();
@@ -133,8 +140,13 @@ trait AttachOverrides
 
         return $changes;
     }
-
-    private function isAuditable(string $class)
+    
+    /**
+     *
+     * @param string $class
+     * @return bool
+    */
+    private function isAuditable(string $class): bool
     {
         $reflection = new ReflectionClass($class);
 

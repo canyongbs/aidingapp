@@ -42,6 +42,7 @@ class AuditSettings extends Settings
 {
     public int $retention_duration_in_days = 90;
 
+    /** @var array<string, string> */
     public array $audited_models_exclude = [];
 
     public static function group(): string

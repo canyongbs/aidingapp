@@ -55,6 +55,7 @@ class AlertObserver
 
             Cache::tags([match ($alert->concern_type) {
                 app(Contact::class)->getMorphClass() => "user-{$user->getKey()}-contact-alerts",
+                default => null,
             }])->flush();
         }
 
@@ -76,6 +77,7 @@ class AlertObserver
         if ($user) {
             Cache::tags([match ($alert->concern_type) {
                 app(Contact::class)->getMorphClass() => "user-{$user->getKey()}-contact-alerts",
+                default => null,
             }])->flush();
         }
     }
