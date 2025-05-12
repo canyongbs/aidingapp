@@ -37,7 +37,6 @@
 namespace AidingApp\InventoryManagement\Filament\Resources\MaintenanceProviderResource\Pages;
 
 use AidingApp\InventoryManagement\Filament\Resources\MaintenanceProviderResource;
-use Barryvdh\Reflection\DocBlock\Type\Collection;
 use Filament\Actions\CreateAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
@@ -47,6 +46,7 @@ use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Collection;
 
 class ListMaintenanceProviders extends ListRecords
 {
