@@ -364,6 +364,7 @@ test('send feedback email if service request is closed', function () {
         'has_enabled_feedback_collection' => true,
         'has_enabled_csat' => true,
         'has_enabled_nps' => true,
+        'is_customers_survey_response_email_enabled' => true,
     ]);
 
     $serviceRequestType->managers()->attach($team);

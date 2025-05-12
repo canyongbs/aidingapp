@@ -73,7 +73,7 @@ class SendClosedServiceFeedbackNotification extends Notification implements Shou
     public function toMail(object $notifiable): MailMessage
     {
         $template = $this->emailTemplate;
-        
+
         /** @var Educatable $educatable */
         $educatable = $notifiable;
 
@@ -82,14 +82,14 @@ class SendClosedServiceFeedbackNotification extends Notification implements Shou
         };
 
         if (! $template) {
-          return MailMessage::make()
-            ->settings($this->resolveNotificationSetting($notifiable))
-            ->subject("Feedback survey for {$this->serviceRequest->service_request_number}")
-            ->greeting("Hi {$name},")
-            ->line('To help us serve you better in the future, we’d love to hear about your experience with our support team.')
-            ->action('Rate Service', route('feedback.service.request', $this->serviceRequest->id))
-            ->line('We appreciate your time and we value your feedback!')
-            ->salutation('Thank you.');
+            return MailMessage::make()
+                ->settings($this->resolveNotificationSetting($notifiable))
+                ->subject("Feedback survey for {$this->serviceRequest->service_request_number}")
+                ->greeting("Hi {$name},")
+                ->line('To help us serve you better in the future, we’d love to hear about your experience with our support team.')
+                ->action('Rate Service', route('feedback.service.request', $this->serviceRequest->id))
+                ->line('We appreciate your time and we value your feedback!')
+                ->salutation('Thank you.');
         }
 
         $subject = $this->getSubject($template->subject);

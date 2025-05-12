@@ -59,7 +59,6 @@ use App\Enums\Feature;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Log;
 
 class ServiceRequestObserver
 {
@@ -179,7 +178,7 @@ class ServiceRequestObserver
             Gate::check(Feature::FeedbackManagement->getGateName()) &&
             $serviceRequest?->priority?->type?->has_enabled_feedback_collection &&
             $serviceRequest?->status?->classification == SystemServiceRequestClassification::Closed &&
-            $serviceRequest->priority?->type->is_customers_survey_response_email_enabled &&
+            $serviceRequest->priority->type->is_customers_survey_response_email_enabled &&
             ! $serviceRequest?->feedback()->count()
         ) {
             $serviceRequest->respondent->notify(new SendClosedServiceFeedbackNotification($serviceRequest, $customerEmailTemplateForSurveyResponse));
