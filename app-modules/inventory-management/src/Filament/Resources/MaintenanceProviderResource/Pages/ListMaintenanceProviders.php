@@ -37,7 +37,9 @@
 namespace AidingApp\InventoryManagement\Filament\Resources\MaintenanceProviderResource\Pages;
 
 use AidingApp\InventoryManagement\Filament\Resources\MaintenanceProviderResource;
+use Barryvdh\Reflection\DocBlock\Type\Collection;
 use Filament\Actions\CreateAction;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteAction;
@@ -60,11 +62,39 @@ class ListMaintenanceProviders extends ListRecords
             ])
             ->actions([
                 EditAction::make(),
-                DeleteAction::make(),
+                DeleteAction::make()
+                    ->visible(fn ($record) => $record->asset_count > 0),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->action(function (Collection $records) {
+                            $successfullyDeleted = 0;
+                            $unsuccessfullyDeleted = 0;
+
+                            foreach ($records as $record) {
+                                if ($record->asset_count > 0) {
+                                    $record->delete();
+                                    $successfullyDeleted++;
+                                } else {
+                                    $unsuccessfullyDeleted++;
+                                }
+                            }
+
+                            if ($successfullyDeleted > 0) {
+                                Notification::make()
+                                    ->title(__(':count maintenance providers has been deleted.', ['count' => $successfullyDeleted]))
+                                    ->success()
+                                    ->send();
+                            }
+
+                            if ($unsuccessfullyDeleted > 0) {
+                                Notification::make()
+                                    ->title(__(':count maintenance providers cannot be deleted due to linked with assets.', ['count' => $unsuccessfullyDeleted]))
+                                    ->danger()
+                                    ->send();
+                            }
+                        }),
                 ]),
             ]);
     }

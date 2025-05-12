@@ -34,32 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\InventoryManagement\Models;
+namespace App\Features;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use App\Models\BaseModel;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use OwenIt\Auditing\Contracts\Auditable;
+use App\Support\AbstractFeatureFlag;
 
-/**
- * @mixin IdeHelperMaintenanceProvider
- */
-class MaintenanceProvider extends BaseModel implements Auditable
+class AssetCount extends AbstractFeatureFlag
 {
-    use AuditableTrait;
-    use SoftDeletes;
-
-    protected $fillable = [
-        'name',
-        'asset_count',
-    ];
-
-    /**
-     * @return HasMany<MaintenanceActivity, $this>
-     */
-    public function maintenanceActivities(): HasMany
+    public function resolve(mixed $scope): mixed
     {
-        return $this->hasMany(MaintenanceActivity::class, 'asset_id');
+        return false;
     }
 }

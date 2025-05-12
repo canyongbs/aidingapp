@@ -38,8 +38,10 @@ namespace AidingApp\InventoryManagement\Observers;
 
 use AidingApp\InventoryManagement\Actions\UpdateAssetStatusBasedOnMaintenanceActivity;
 use AidingApp\InventoryManagement\Models\MaintenanceActivity;
+use AidingApp\InventoryManagement\Models\MaintenanceProvider;
 use AidingApp\Timeline\Events\TimelineableRecordCreated;
 use AidingApp\Timeline\Events\TimelineableRecordDeleted;
+use App\Features\AssetCount;
 
 class MaintenanceActivityObserver
 {
@@ -52,6 +54,14 @@ class MaintenanceActivityObserver
 
     public function created(MaintenanceActivity $maintenanceActivity): void
     {
+        if (AssetCount::active()) {
+            $provider = MaintenanceProvider::find($maintenanceActivity->maintenance_provider_id);
+
+            if ($provider) {
+                $provider->increment('asset_count');
+            }
+        }
+
         TimelineableRecordCreated::dispatch($maintenanceActivity->asset, $maintenanceActivity);
 
         resolve(UpdateAssetStatusBasedOnMaintenanceActivity::class)->handle($maintenanceActivity);
@@ -59,6 +69,24 @@ class MaintenanceActivityObserver
 
     public function updated(MaintenanceActivity $maintenanceActivity): void
     {
+        if (AssetCount::active()) {
+            $originalProviderId = $maintenanceActivity->getOriginal('maintenance_provider_id');
+            $newProviderId = $maintenanceActivity->maintenance_provider_id;
+
+            if ($originalProviderId !== $newProviderId) {
+                $originalProvider = MaintenanceProvider::find($originalProviderId);
+                $newProvider = MaintenanceProvider::find($newProviderId);
+
+                if ($originalProvider) {
+                    $originalProvider->decrement('asset_count');
+                }
+
+                if ($newProvider) {
+                    $newProvider->increment('asset_count');
+                }
+            }
+        }
+
         resolve(UpdateAssetStatusBasedOnMaintenanceActivity::class)->handle($maintenanceActivity);
     }
 
