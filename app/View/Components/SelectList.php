@@ -46,9 +46,9 @@ class SelectList extends Component
     /** @var array<int, string> */
     public array $options;
 
-   /**
-    * @param array<int, string> $options
-   */
+    /**
+      * @param array<int, string> $options
+    */
     public function __construct(array $options)
     {
         $this->options = $options;
