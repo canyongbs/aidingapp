@@ -44,6 +44,8 @@ use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * @mixin IdeHelperMaintenanceProvider
+ *
+ *  @property-read int $assets_count
  */
 class MaintenanceProvider extends BaseModel implements Auditable
 {

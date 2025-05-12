@@ -63,7 +63,7 @@ class ListMaintenanceProviders extends ListRecords
             ->actions([
                 EditAction::make(),
                 DeleteAction::make()
-                    ->visible(fn ($record) => $record->assets_count > 0),
+                    ->hidden(fn ($record) => $record->assets_count > 0),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
@@ -74,10 +74,10 @@ class ListMaintenanceProviders extends ListRecords
 
                             foreach ($records as $record) {
                                 if ($record->assets_count > 0) {
+                                    $unsuccessfullyDeleted++;
+                                } else {
                                     $record->delete();
                                     $successfullyDeleted++;
-                                } else {
-                                    $unsuccessfullyDeleted++;
                                 }
                             }
 
