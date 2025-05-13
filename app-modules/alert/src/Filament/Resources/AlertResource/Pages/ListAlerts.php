@@ -73,10 +73,7 @@ class ListAlerts extends ListRecords
                 TextEntry::make('concern.display_name')
                     ->label('Related To')
                     ->getStateUsing(fn (Alert $record): string => $record->concern->{$record->concern::displayNameKey()})
-                    ->url(fn (Alert $record) => match ($record->concern::class) {
-                        Contact::class => ManageContactAlerts::getUrl(['record' => $record->concern]),
-                        default => null,
-                    }),
+                    ->url(fn (Alert $record) => ManageContactAlerts::getUrl(['record' => $record->concern])),
                 TextEntry::make('description'),
                 TextEntry::make('severity'),
                 TextEntry::make('suggested_intervention'),
@@ -92,10 +89,7 @@ class ListAlerts extends ListRecords
                 TextColumn::make('concern.display_name')
                     ->label('Related To')
                     ->getStateUsing(fn (Alert $record): string => $record->concern->{$record->concern::displayNameKey()})
-                    ->url(fn (Alert $record) => match ($record->concern::class) {
-                        Contact::class => ManageContactAlerts::getUrl(['record' => $record->concern]),
-                        default => null,
-                    })
+                    ->url(fn (Alert $record) => ManageContactAlerts::getUrl(['record' => $record->concern]))
                     ->searchable(query: fn (Builder $query, $search) => $query->tap(new EducatableSearch(relationship: 'concern', search: $search)))
                     ->forceSearchCaseInsensitive()
                     ->sortable(),
