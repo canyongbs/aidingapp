@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Filament\Blocks;
 
 use Filament\Forms\Components\Component;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use FilamentTiptapEditor\TiptapBlock;
 
 class ServiceRequestTypeEmailTemplateButtonBlock extends TiptapBlock
@@ -58,6 +59,12 @@ class ServiceRequestTypeEmailTemplateButtonBlock extends TiptapBlock
     public function getFormSchema(): array
     {
         return [
+            TextInput::make('view_service_request')
+                ->label('Button Label')
+                ->required()
+                ->default('View Service Request')
+                ->placeholder('Enter the button text (e.g. View Service Request)'),
+                
             Select::make('alignment')
                 ->label('Alignment')
                 ->options([
