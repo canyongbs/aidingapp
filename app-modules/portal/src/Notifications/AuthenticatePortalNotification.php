@@ -42,7 +42,6 @@ use AidingApp\Notification\Notifications\Attributes\SystemNotification;
 use AidingApp\Notification\Notifications\Contracts\OnDemandNotification;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
 use AidingApp\Portal\Models\PortalAuthentication;
-use App\Features\StoreAnonymousNotifiableInformationFeature;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
@@ -80,15 +79,13 @@ class AuthenticatePortalNotification extends Notification implements ShouldQueue
         $contact = $this->authentication->educatable;
 
         if (! $contact) {
-            return StoreAnonymousNotifiableInformationFeature::active()
-                ? [
-                    StoredAnonymousNotifiable::query()->createOrFirst([
-                        'type' => NotificationChannel::Email,
-                        'route' => $notifiable->routeNotificationFor('mail', $this),
-                    ])->getKey(),
-                    (new StoredAnonymousNotifiable())->getMorphClass(),
-                ]
-                : [null, 'anonymous'];
+            return [
+                StoredAnonymousNotifiable::query()->createOrFirst([
+                    'type' => NotificationChannel::Email,
+                    'route' => $notifiable->routeNotificationFor('mail', $this),
+                ])->getKey(),
+                (new StoredAnonymousNotifiable())->getMorphClass(),
+            ];
         }
 
         return [
