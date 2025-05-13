@@ -37,6 +37,7 @@
 namespace AidingApp\InventoryManagement\Filament\Resources\MaintenanceProviderResource\Pages;
 
 use AidingApp\InventoryManagement\Filament\Resources\MaintenanceProviderResource;
+use AidingApp\InventoryManagement\Models\MaintenanceProvider;
 use Filament\Actions\CreateAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
@@ -73,6 +74,7 @@ class ListMaintenanceProviders extends ListRecords
                             $unsuccessfullyDeleted = 0;
 
                             foreach ($records as $record) {
+                                /** @var MaintenanceProvider $record */
                                 if ($record->assets_count > 0) {
                                     $unsuccessfullyDeleted++;
                                 } else {
