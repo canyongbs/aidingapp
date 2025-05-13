@@ -92,7 +92,6 @@ class CheckInAssetHeaderAction extends Action
                 'checked_in_by_id' => auth()->user()?->id,
                 // TODO Should this always simply be the latest check out, or do we want to support
                 // The possibility that the person checking in is different than whoever checked out?
-                'checked_in_from_type' => $asset->latestCheckOut->checked_out_to_type,
                 'checked_in_from_id' => $asset->latestCheckOut->checked_out_to_id,
                 'notes' => $data['notes'],
                 'checked_in_at' => $data['checked_in_at'] ?? now(),

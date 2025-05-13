@@ -37,6 +37,7 @@
 namespace AidingApp\InventoryManagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Contact\Models\Contact;
 use AidingApp\InventoryManagement\Observers\AssetCheckInObserver;
 use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
 use AidingApp\Timeline\Models\Timeline;
@@ -65,7 +66,6 @@ class AssetCheckIn extends BaseModel implements Auditable, ProvidesATimeline
         'asset_id',
         'checked_in_by_type',
         'checked_in_by_id',
-        'checked_in_from_type',
         'checked_in_from_id',
         'checked_in_at',
         'notes',
@@ -92,13 +92,12 @@ class AssetCheckIn extends BaseModel implements Auditable, ProvidesATimeline
         );
     }
 
-    public function checkedInFrom(): MorphTo
+    /**
+     * @return BelongsTo<Contact, $this>
+     */
+    public function checkedInFrom(): BelongsTo
     {
-        return $this->morphTo(
-            name: 'checked_in_from',
-            type: 'checked_in_from_type',
-            id: 'checked_in_from_id',
-        );
+        return $this->belongsTo(Contact::class, 'checked_in_from_id');
     }
 
     /**

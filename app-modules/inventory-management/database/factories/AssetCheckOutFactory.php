@@ -57,20 +57,8 @@ class AssetCheckOutFactory extends Factory
             'asset_check_in_id' => null,
             'checked_out_by_type' => $checkedOutBy->getMorphClass(),
             'checked_out_by_id' => $checkedOutBy->getKey(),
-            'checked_out_to_type' => $this->faker->randomElement([
-                (new Contact())->getMorphClass(),
-            ]),
-            'checked_out_to_id' => function (array $attributes) {
-                $checkedOutToClass = Relation::getMorphedModel($attributes['checked_out_to_type']);
-
-                /** @var Contact $checkedOutToModel */
-                $checkedOutToModel = new $checkedOutToClass();
-
-                $checkedOutToModel = $checkedOutToModel::factory()->create();
-
-                return $checkedOutToModel->getKey();
-            },
-            'checked_out_at' => $this->faker->dateTimeBetween('-1 year', 'now'),
+            'checked_out_to_id' => Contact::factory()->create()->getKey(),
+            'checked_out_at' => fake()->dateTimeBetween('-1 year', 'now'),
             'expected_check_in_at' => function (array $attributes) {
                 $checkedOutAt = Carbon::parse($attributes['checked_out_at']);
 

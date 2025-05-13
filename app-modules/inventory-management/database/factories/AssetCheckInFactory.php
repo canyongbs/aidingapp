@@ -55,21 +55,9 @@ class AssetCheckInFactory extends Factory
             'asset_id' => Asset::factory(),
             'checked_in_by_type' => $checkedInBy->getMorphClass(),
             'checked_in_by_id' => $checkedInBy->getKey(),
-            'checked_in_from_type' => $this->faker->randomElement([
-                (new Contact())->getMorphClass(),
-            ]),
-            'checked_in_from_id' => function (array $attributes) {
-                $checkedInFromClass = Relation::getMorphedModel($attributes['checked_in_from_type']);
-
-                /** @var Contact $checkedInFromModel */
-                $checkedInFromModel = new $checkedInFromClass();
-
-                $checkedInFromModel = $checkedInFromModel::factory()->create();
-
-                return $checkedInFromModel->getKey();
-            },
-            'checked_in_at' => $this->faker->dateTimeBetween('-1 year', 'now'),
-            'notes' => $this->faker->paragraph(),
+            'checked_in_from_id' => Contact::factory()->create()->getKey(),
+            'checked_in_at' => fake()->dateTimeBetween('-1 year', 'now'),
+            'notes' => fake()->paragraph(),
         ];
     }
 }
