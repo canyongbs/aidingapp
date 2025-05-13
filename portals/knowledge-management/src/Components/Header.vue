@@ -91,6 +91,12 @@
             command: () => router.push({ name: 'services' }),
         },
         {
+            label: 'Status',
+            routeName: 'status',
+            visible: user !== null,
+            command: () => router.push({ name: 'status' }),
+        },
+        {
             label: 'Incidents',
             routeName: 'incidents',
             visible: user !== null,
