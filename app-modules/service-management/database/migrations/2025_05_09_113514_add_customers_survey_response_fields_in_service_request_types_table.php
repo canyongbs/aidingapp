@@ -15,9 +15,7 @@ return new class () extends Migration {
     public function down(): void
     {
         Schema::table('service_request_types', function (Blueprint $table) {
-            $table->dropColumn([
-                'is_customers_survey_response_email_enabled',
-            ]);
+            $table->dropColumn('is_customers_survey_response_email_enabled');
         });
     }
 };
