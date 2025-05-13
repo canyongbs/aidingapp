@@ -60,7 +60,7 @@ class SurveyResponseEmailTemplateTakeSurveyButtonBlock extends TiptapBlock
     {
         return [
             TextInput::make('take_survey')
-                ->label('Take Survey')
+                ->label('Button Label')
                 ->required()
                 ->default('Take Survey')
                 ->placeholder('Enter the button text (e.g. Take Survey)'),
