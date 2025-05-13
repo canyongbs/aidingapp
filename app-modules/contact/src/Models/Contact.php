@@ -251,29 +251,17 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
     /**
      * @return MorphMany<AssetCheckIn, $this>
      */
-    public function assetCheckIns(): MorphMany
+    public function assetCheckIns(): HasMany
     {
-        return $this->morphMany(
-            related: AssetCheckIn::class,
-            name: 'checked_in_from',
-            type: 'checked_in_from_type',
-            id: 'checked_in_from_id',
-            localKey: 'id'
-        );
+        return $this->hasMany(AssetCheckIn::class, 'checked_in_from_id');
     }
 
     /**
-     * @return MorphMany<AssetCheckOut, $this>
+     * @return HasMany<AssetCheckOut, $this>
      */
-    public function assetCheckOuts(): MorphMany
+    public function assetCheckOuts(): HasMany
     {
-        return $this->morphMany(
-            related: AssetCheckOut::class,
-            name: 'checked_out_to',
-            type: 'checked_out_to_type',
-            id: 'checked_out_to_id',
-            localKey: 'id'
-        );
+        return $this->hasMany(AssetCheckOut::class, 'checked_out_to_id');
     }
 
     public static function getLicenseType(): LicenseType

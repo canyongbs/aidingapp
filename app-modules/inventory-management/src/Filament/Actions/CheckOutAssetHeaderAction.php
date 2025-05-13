@@ -43,7 +43,6 @@ use AidingApp\InventoryManagement\Models\AssetStatus;
 use AidingApp\InventoryManagement\Models\Scopes\ClassifiedAs;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Get;
@@ -68,24 +67,9 @@ class CheckOutAssetHeaderAction extends Action
         $this->successNotificationTitle(__("Successfully checked out {$asset->name}"));
 
         $this->form([
-            Radio::make('checked_out_to_type')
-                ->label('Check out to')
-                ->options([
-                    Contact::class => 'Contact',
-                ])
-                ->default(Contact::class)
-                ->required()
-                ->live(),
             Select::make('checked_out_to_id')
-                ->label(fn (Get $get): string => match ($get('checked_out_to_type')) {
-                    Contact::class => 'Select Contact',
-                })
-                ->visible(fn (Get $get): bool => filled($get('checked_out_to_type')))
-                ->getSearchResultsUsing(function (string $search, Get $get) {
-                    return match ($get('checked_out_to_type')) {
-                        Contact::class => Contact::where('full_name', 'like', "%{$search}%")->orWhere('first_name', 'like', "{$search}")->orWhere('last_name', 'like', "{$search}")->pluck('full_name', 'id')->toArray(),
-                    };
-                })
+                ->label('Select Contact')
+                ->options(Contact::all()->pluck('full_name','id'))
                 ->searchable()
                 ->required(),
             Textarea::make('notes')
@@ -105,7 +89,6 @@ class CheckOutAssetHeaderAction extends Action
             $asset->checkOuts()->create([
                 'checked_out_by_type' => auth()->user()?->getMorphClass(),
                 'checked_out_by_id' => auth()->user()?->id,
-                'checked_out_to_type' => (new $data['checked_out_to_type']())->getMorphClass(),
                 'checked_out_to_id' => $data['checked_out_to_id'],
                 'notes' => $data['notes'],
                 'checked_out_at' => now(),
