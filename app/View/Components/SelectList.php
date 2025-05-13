@@ -54,10 +54,6 @@ class SelectList extends Component
         $this->options = $options;
     }
 
-    /**
-     *
-     * @return View|Htmlable|Closure|string
-    */
     public function render(): View|Htmlable|Closure|string
     {
         return view('components.select-list');

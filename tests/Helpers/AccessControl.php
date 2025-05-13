@@ -45,7 +45,7 @@ use function Pest\Laravel\actingAs;
 
 /**
  *
- * @param  array<string, mixed>  $permissions
+ * @param array<string, mixed> $permissions
  */
 function testResourceRequiresPermissionForAccess(string $resource, string|array $permissions, string $method, ?string $feature = null): void
 {

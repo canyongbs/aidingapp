@@ -220,10 +220,7 @@ abstract class TestCase extends BaseTestCase
     }
 
     /**
-     *
      * @param array<string> $paths
-     *
-     * @return string
     */
     protected function calculateMigrationChecksum(array $paths): string
     {
