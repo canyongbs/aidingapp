@@ -45,7 +45,6 @@ use Filament\Actions\Action;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
-use Filament\Forms\Get;
 
 class CheckOutAssetHeaderAction extends Action
 {
@@ -69,7 +68,7 @@ class CheckOutAssetHeaderAction extends Action
         $this->form([
             Select::make('checked_out_to_id')
                 ->label('Select Contact')
-                ->options(Contact::all()->pluck('full_name','id'))
+                ->options(Contact::all()->pluck('full_name', 'id'))
                 ->searchable()
                 ->required(),
             Textarea::make('notes')
