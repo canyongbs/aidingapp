@@ -34,6 +34,7 @@
 
 @php
     use Illuminate\Support\HtmlString;
+    use App\Features\SurveyResponseTemplate;
 
     $isDisabled = $isDisabled();
     $statePath = $getStatePath();
@@ -73,7 +74,11 @@
         'service_request_update' => 'Service Request Update',
         'service_request_status_change' => 'Service Request Status Change',
         'service_request_closed' => 'Service Request Closed',
-        'survey_response' => 'Survey Response',
+
+        /** TODO: Remove this condition and inline 'survey_response' in $events when the SurveyResponseTemplate feature flag is removed. **/
+        if (SurveyResponseTemplate::active()) {
+            $events['survey_response'] = 'Survey Response';
+        }
     ] as $eventSlug => $event)
             <div
                 class="flex flex-col divide-y divide-gray-950/5 dark:divide-white/10 xl:flex-row xl:divide-x xl:divide-y-0">
