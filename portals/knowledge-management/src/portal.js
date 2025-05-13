@@ -112,6 +112,12 @@ customElements.define(
                         meta: { requiresAuth: true },
                     },
                     {
+                        path: baseUrl + '/status',
+                        name: 'status',
+                        component: ComingSoon,
+                        meta: { requiresAuth: true },
+                    },
+                    {
                         path: baseUrl + '/incidents',
                         name: 'incidents',
                         component: ComingSoon,
