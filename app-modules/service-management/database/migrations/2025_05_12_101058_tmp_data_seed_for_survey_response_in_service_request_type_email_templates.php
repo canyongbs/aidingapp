@@ -7,6 +7,20 @@ use Illuminate\Support\Str;
 return new class () extends Migration {
     public function up(): void
     {
+        DB::transaction(function () {
+            $table = 'service_request_type_email_templates';
+            $chunkSize = 100;
+            DB::table($table)
+                ->where('type', 'survey_response')
+                ->whereIn('role', ['auditor', 'manager'])
+                ->orderBy('id')
+                ->chunkById($chunkSize, function ($records) use ($table) {
+                    foreach ($records as $record) {
+                        DB::table($table)->where('id', $record->id)->delete();
+                    }
+                });
+        });
+
         $subject = [
             'type' => 'doc',
             'content' => [

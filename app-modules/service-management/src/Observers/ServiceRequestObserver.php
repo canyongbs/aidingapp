@@ -56,6 +56,7 @@ use AidingApp\ServiceManagement\Notifications\ServiceRequestCreated;
 use AidingApp\ServiceManagement\Notifications\ServiceRequestStatusChanged;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
 use App\Enums\Feature;
+use App\Features\SurveyResponseTemplate;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Gate;
@@ -178,10 +179,13 @@ class ServiceRequestObserver
             Gate::check(Feature::FeedbackManagement->getGateName()) &&
             $serviceRequest?->priority?->type?->has_enabled_feedback_collection &&
             $serviceRequest?->status?->classification == SystemServiceRequestClassification::Closed &&
-            $serviceRequest->priority->type->is_customers_survey_response_email_enabled &&
             ! $serviceRequest?->feedback()->count()
         ) {
-            $serviceRequest->respondent->notify(new SendClosedServiceFeedbackNotification($serviceRequest, $customerEmailTemplateForSurveyResponse));
+            if(SurveyResponseTemplate::active() && $serviceRequest->priority->type->is_customers_survey_response_email_enabled) {
+                $serviceRequest->respondent->notify(new SendClosedServiceFeedbackNotification($serviceRequest, $customerEmailTemplateForSurveyResponse));
+            } else {
+                $serviceRequest->respondent->notify(new SendClosedServiceFeedbackNotification($serviceRequest));
+            }
         }
     }
 

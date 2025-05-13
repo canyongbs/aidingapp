@@ -38,7 +38,6 @@ namespace AidingApp\ServiceManagement\Actions;
 
 use AidingApp\ServiceManagement\Filament\Blocks\ServiceRequestTypeEmailTemplateButtonBlock;
 use AidingApp\ServiceManagement\Filament\Blocks\SurveyResponseEmailTemplateTakeSurveyButtonBlock;
-use App\Features\SurveyResponseTemplate;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\HtmlString;
 
@@ -50,26 +49,13 @@ class GenerateServiceRequestTypeEmailTemplateContent
      */
     public function __invoke(string|array $content, array $mergeData, Model $record, string $recordAttribute): HtmlString
     {
-
-        /** TODO: When the SurveyResponseTemplate feature flag is removed, directly chain the full blocks array like below:
-        ->blocks([
-          ServiceRequestTypeEmailTemplateButtonBlock::class,
-          SurveyResponseEmailTemplateTakeSurveyButtonBlock::class,
-        ])
-        and remove the conditional logic below. **/
-        $blocks = [
-          ServiceRequestTypeEmailTemplateButtonBlock::class,
-          ...(
-              SurveyResponseTemplate::active()
-                  ? [SurveyResponseEmailTemplateTakeSurveyButtonBlock::class]
-                  : []
-          ),
-        ];
-
         $content = tiptap_converter()
             ->mergeTagsMap($mergeData)
             ->record($record, $recordAttribute)
-            ->blocks($blocks)
+            ->blocks([
+                ServiceRequestTypeEmailTemplateButtonBlock::class,
+                SurveyResponseEmailTemplateTakeSurveyButtonBlock::class,
+            ])
             ->asHTML($content);
 
         return str($content)->sanitizeHtml()->toHtmlString();

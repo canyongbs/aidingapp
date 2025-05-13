@@ -59,7 +59,7 @@ class SendClosedServiceFeedbackNotification extends Notification implements Shou
 
     public function __construct(
         protected ServiceRequest $serviceRequest,
-        public ?ServiceRequestTypeEmailTemplate $emailTemplate,
+        public ?ServiceRequestTypeEmailTemplate $emailTemplate = null, // TODO: When the SurveyResponseTemplate feature flag is removed, then remove the `= null` default.
     ) {}
 
     /**
