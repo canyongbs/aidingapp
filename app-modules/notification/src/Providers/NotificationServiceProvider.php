@@ -36,17 +36,10 @@
 
 namespace AidingApp\Notification\Providers;
 
-use AidingApp\Notification\Events\SubscriptionCreated;
-use AidingApp\Notification\Events\SubscriptionDeleted;
-use AidingApp\Notification\Events\TriggeredAutoSubscription;
-use AidingApp\Notification\Listeners\CreateAutoSubscription;
-use AidingApp\Notification\Listeners\NotifyUserOfSubscriptionCreated;
-use AidingApp\Notification\Listeners\NotifyUserOfSubscriptionDeleted;
 use AidingApp\Notification\Models\DatabaseMessage;
 use AidingApp\Notification\Models\EmailMessage;
 use AidingApp\Notification\Models\EmailMessageEvent;
 use AidingApp\Notification\Models\StoredAnonymousNotifiable;
-use AidingApp\Notification\Models\Subscription;
 use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
 use AidingApp\Notification\Notifications\Channels\MailChannel;
 use App\Concerns\ImplementsGraphQL;
@@ -70,7 +63,6 @@ class NotificationServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Relation::morphMap([
-            'subscription' => Subscription::class,
             'email_message' => EmailMessage::class,
             'email_message_event' => EmailMessageEvent::class,
             'database_message' => DatabaseMessage::class,
@@ -78,25 +70,5 @@ class NotificationServiceProvider extends ServiceProvider
         ]);
 
         $this->registerEvents();
-
-        $this->discoverSchema(__DIR__ . '/../../graphql/subscription.graphql');
-    }
-
-    protected function registerEvents(): void
-    {
-        Event::listen(
-            SubscriptionCreated::class,
-            NotifyUserOfSubscriptionCreated::class
-        );
-
-        Event::listen(
-            SubscriptionDeleted::class,
-            NotifyUserOfSubscriptionDeleted::class
-        );
-
-        Event::listen(
-            TriggeredAutoSubscription::class,
-            CreateAutoSubscription::class,
-        );
     }
 }
