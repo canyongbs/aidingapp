@@ -81,7 +81,7 @@ class Alert extends BaseModel implements Auditable, CanTriggerAutoSubscription
 
     /**
      * @return MorphTo<Model, $this>
-     */
+    */
     public function concern(): MorphTo
     {
         return $this->morphTo();
@@ -94,7 +94,7 @@ class Alert extends BaseModel implements Auditable, CanTriggerAutoSubscription
 
     /**
      * @param Builder<$this> $query
-     */
+    */
     public function scopeStatus(Builder $query, AlertStatus $status): void
     {
         $query->where('status', $status);
