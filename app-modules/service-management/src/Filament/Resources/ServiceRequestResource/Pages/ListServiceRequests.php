@@ -106,7 +106,7 @@ class ListServiceRequests extends ListRecords
                 TextColumn::make('respondent.display_name')
                     ->label('Related To')
                     ->getStateUsing(fn (ServiceRequest $record) => $record->respondent->{$record->respondent::displayNameKey()})
-                    ->searchable(query: fn (Builder $query, $search) => $query->tap(new EducatableSearch(relationship: 'respondent', search: $search)))
+                    ->searchable()
                     ->sortable(query: fn (Builder $query, string $direction): Builder => $query->tap(new EducatableSort($direction)))
                     ->toggleable(),
                 TextColumn::make('division.name')
@@ -156,9 +156,8 @@ class ListServiceRequests extends ListRecords
                     ->options(Organization::pluck('name', 'id')->toArray())
                     ->modifyQueryUsing(fn (Builder $query, $state): Builder => $query->when(
                         ! empty($state['value']),
-                        fn (Builder $query) => $query->whereHasMorph(
+                        fn (Builder $query) => $query->whereHas(
                             'respondent',
-                            [Contact::class],
                             fn (Builder $query): Builder => $query->whereRelation(
                                 'organization',
                                 (new Organization())->getKeyName(),

@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages;
 
+use AidingApp\Contact\Models\Contact;
 use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
@@ -45,7 +46,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Rules\ManagedServiceRequestType;
 use App\Concerns\EditPageRedirection;
-use App\Filament\Forms\Components\EducatableSelect;
 use Filament\Actions;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Section;
@@ -150,9 +150,11 @@ class EditServiceRequest extends EditRecord
                             ->nullable()
                             ->string()
                             ->columnSpan(1),
-                        EducatableSelect::make('respondent')
+                        Select::make('respondent_id')
+                            ->relationship('respondent', 'full_name')
                             ->label('Related To')
-                            ->required(),
+                            ->required()
+                            ->exists((new Contact())->getTable(), 'id'),
                     ]),
                 Section::make('Uploads')
                     ->schema([
