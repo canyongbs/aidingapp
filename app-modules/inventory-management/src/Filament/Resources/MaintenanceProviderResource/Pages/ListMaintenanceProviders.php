@@ -60,12 +60,10 @@ class ListMaintenanceProviders extends ListRecords
                 TextColumn::make('name')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('maintenanceActivities')
-                    ->label('Assets Count')
+                TextColumn::make('maintenance_activities_count')
+                    ->label('Activities Count')
                     ->default('0')
-                    ->formatStateUsing(function ($record) {
-                        return $record->maintenanceActivities()->count();
-                    }),
+                    ->counts('maintenanceActivities'),
             ])
             ->actions([
                 EditAction::make(),

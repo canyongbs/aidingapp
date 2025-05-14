@@ -52,7 +52,7 @@ class MaintenanceProviderResource extends Resource
 
     protected static ?string $navigationLabel = 'Maintenance Providers';
 
-    protected static ?int $navigationSort = 4;
+    protected static ?int $navigationSort = 40;
 
     protected static ?string $cluster = AssetManagement::class;
 

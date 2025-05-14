@@ -1,39 +1,5 @@
 <?php
 
-/*
-<COPYRIGHT>
-
-    Copyright © 2016-2025, Canyon GBS LLC. All rights reserved.
-
-    Aiding App™ is licensed under the Elastic License 2.0. For more details,
-    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
-
-    Notice:
-
-    - You may not provide the software to third parties as a hosted or managed
-      service, where the service provides users with access to any substantial set of
-      the features or functionality of the software.
-    - You may not move, change, disable, or circumvent the license key functionality
-      in the software, and you may not remove or obscure any functionality in the
-      software that is protected by the license key.
-    - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
-      to applicable law.
-    - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
-      Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
-      vigorously.
-    - The software solution, including services, infrastructure, and code, is offered as a
-      Software as a Service (SaaS) by Canyon GBS LLC.
-    - Use of this software implies agreement to the license terms and conditions as stated
-      in the Elastic License 2.0.
-
-    For more information or inquiries please visit our website at
-    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
-
-</COPYRIGHT>
-*/
-
 // @formatter:off
 // phpcs:ignoreFile
 /**
@@ -1872,7 +1838,6 @@ namespace AidingApp\InventoryManagement\Models{
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property int $assets_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
  * @property-read int|null $audits_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\InventoryManagement\Models\MaintenanceActivity> $maintenanceActivities
@@ -1882,7 +1847,6 @@ namespace AidingApp\InventoryManagement\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|MaintenanceProvider newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|MaintenanceProvider onlyTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|MaintenanceProvider query()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|MaintenanceProvider whereAssetsCount($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|MaintenanceProvider whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|MaintenanceProvider whereDeletedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|MaintenanceProvider whereId($value)
@@ -3318,7 +3282,6 @@ namespace AidingApp\ServiceManagement\Models{
  * @property bool $is_customers_service_request_status_change_notification_enabled
  * @property bool $is_customers_service_request_closed_email_enabled
  * @property bool $is_customers_service_request_closed_notification_enabled
- * @property bool $is_customers_survey_response_email_enabled
  * @property-read \App\Models\User|null $assignmentTypeIndividual
  * @property-read \AidingApp\ServiceManagement\Models\ServiceRequestTypeManager|\AidingApp\ServiceManagement\Models\ServiceRequestTypeAuditor|null $pivot
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Team\Models\Team> $auditors
@@ -3370,7 +3333,6 @@ namespace AidingApp\ServiceManagement\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereIsCustomersServiceRequestStatusChangeNotificationEnabled($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereIsCustomersServiceRequestUpdateEmailEnabled($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereIsCustomersServiceRequestUpdateNotificationEnabled($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereIsCustomersSurveyResponseEmailEnabled($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereIsManagersServiceRequestAssignedEmailEnabled($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereIsManagersServiceRequestAssignedNotificationEnabled($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereIsManagersServiceRequestClosedEmailEnabled($value)
