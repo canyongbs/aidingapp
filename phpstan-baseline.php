@@ -36,30 +36,6 @@
 
 $ignoreErrors = [];
 $ignoreErrors[] = [
-    'message' => '#^Ternary operator condition is always true\\.$#',
-    'identifier' => 'ternary.alwaysTrue',
-    'count' => 2,
-    'path' => __DIR__ . '/app-modules/alert/src/Filament/Resources/AlertResource/Pages/ListAlerts.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Using nullsafe property access on non\\-nullable type AidingApp\\\\Contact\\\\Models\\\\Contact\\. Use \\-\\> instead\\.$#',
-    'identifier' => 'nullsafe.neverNull',
-    'count' => 2,
-    'path' => __DIR__ . '/app-modules/alert/src/Filament/Resources/AlertResource/Pages/ListAlerts.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Instanceof between AidingApp\\\\Contact\\\\Models\\\\Contact and AidingApp\\\\Notification\\\\Models\\\\Contracts\\\\Subscribable will always evaluate to true\\.$#',
-    'identifier' => 'instanceof.alwaysTrue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/alert/src/Models/Alert.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\Alert\\\\Models\\\\Alert\\:\\:concern\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\MorphTo does not specify its types\\: TRelatedModel, TDeclaringModel$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/alert/src/Models/Alert.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\Alert\\\\Models\\\\Alert\\:\\:scopeLicensedToEducatable\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#',
     'identifier' => 'missingType.generics',
     'count' => 1,
@@ -70,36 +46,6 @@ $ignoreErrors[] = [
     'identifier' => 'missingType.generics',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/alert/src/Models/Alert.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Match expression does not handle remaining value\\: class\\-string\\<AidingApp\\\\Contact\\\\Models\\\\Contact\\>&literal\\-string$#',
-    'identifier' => 'match.unhandled',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/alert/src/Notifications/AlertCreatedNotification.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Match expression does not handle remaining value\\: string$#',
-    'identifier' => 'match.unhandled',
-    'count' => 2,
-    'path' => __DIR__ . '/app-modules/alert/src/Observers/AlertObserver.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\Alert\\\\Rules\\\\ConcernIdExistsRule\\:\\:setData\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/alert/src/Rules/ConcernIdExistsRule.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Property AidingApp\\\\Alert\\\\Rules\\\\ConcernIdExistsRule\\:\\:\\$data has no type specified\\.$#',
-    'identifier' => 'missingType.property',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/alert/src/Rules/ConcernIdExistsRule.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\Audit\\\\Actions\\\\Finders\\\\AuditableModels\\:\\:all\\(\\) return type with generic class Illuminate\\\\Support\\\\Collection does not specify its types\\: TKey, TValue$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/audit/src/Actions/Finders/AuditableModels.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Call to an undefined method OwenIt\\\\Auditing\\\\Contracts\\\\Auditable\\:\\:auditAttach\\(\\)\\.$#',
@@ -144,36 +90,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/audit/src/Overrides/BelongsToMany.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\Audit\\\\Overrides\\\\BelongsToMany\\:\\:attach\\(\\) has parameter \\$attributes with no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/audit/src/Overrides/BelongsToMany.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\Audit\\\\Overrides\\\\BelongsToMany\\:\\:isAuditable\\(\\) has no return type specified\\.$#',
-    'identifier' => 'missingType.return',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/audit/src/Overrides/BelongsToMany.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\Audit\\\\Overrides\\\\BelongsToMany\\:\\:sync\\(\\) has parameter \\$ids with generic class Illuminate\\\\Support\\\\Collection but does not specify its types\\: TKey, TValue$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/audit/src/Overrides/BelongsToMany.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\Audit\\\\Overrides\\\\BelongsToMany\\:\\:sync\\(\\) has parameter \\$ids with no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/audit/src/Overrides/BelongsToMany.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\Audit\\\\Overrides\\\\BelongsToMany\\:\\:sync\\(\\) return type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 3,
-    'path' => __DIR__ . '/app-modules/audit/src/Overrides/BelongsToMany.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Access to an undefined property OwenIt\\\\Auditing\\\\Contracts\\\\Auditable\\:\\:\\$auditCustomNew\\.$#',
     'identifier' => 'property.notFound',
     'count' => 4,
@@ -204,40 +120,10 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/audit/src/Overrides/MorphToMany.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\Audit\\\\Overrides\\\\MorphToMany\\:\\:attach\\(\\) has parameter \\$attributes with no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
+    'message' => '#^Property AidingApp\\\\Audit\\\\Settings\\\\AuditSettings\\:\\:\\$audited_models_exclude \\(array\\<string, string\\>\\) does not accept array\\<int, string\\>\\.$#',
+    'identifier' => 'assign.propertyType',
     'count' => 1,
-    'path' => __DIR__ . '/app-modules/audit/src/Overrides/MorphToMany.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\Audit\\\\Overrides\\\\MorphToMany\\:\\:isAuditable\\(\\) has no return type specified\\.$#',
-    'identifier' => 'missingType.return',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/audit/src/Overrides/MorphToMany.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\Audit\\\\Overrides\\\\MorphToMany\\:\\:sync\\(\\) has parameter \\$ids with generic class Illuminate\\\\Support\\\\Collection but does not specify its types\\: TKey, TValue$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/audit/src/Overrides/MorphToMany.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\Audit\\\\Overrides\\\\MorphToMany\\:\\:sync\\(\\) has parameter \\$ids with no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/audit/src/Overrides/MorphToMany.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\Audit\\\\Overrides\\\\MorphToMany\\:\\:sync\\(\\) return type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 3,
-    'path' => __DIR__ . '/app-modules/audit/src/Overrides/MorphToMany.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Property AidingApp\\\\Audit\\\\Settings\\\\AuditSettings\\:\\:\\$audited_models_exclude type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/audit/src/Settings/AuditSettings.php',
+    'path' => __DIR__ . '/app-modules/audit/tests/AuditListenerTest.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Call to an undefined method Pest\\\\PendingCalls\\\\TestCall\\|Pest\\\\Support\\\\HigherOrderTapProxy\\:\\:expect\\(\\)\\.$#',
@@ -286,18 +172,6 @@ $ignoreErrors[] = [
     'identifier' => 'method.notFound',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/authorization/src/Filament/Resources/PermissionResource/Pages/ListPermissions.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var for variable \\$resource contains unresolvable type\\.$#',
-    'identifier' => 'varTag.unresolvableType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/authorization/src/Filament/Resources/RoleResource/Pages/EditRole.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var with type mixed is not subtype of native type string\\.$#',
-    'identifier' => 'varTag.nativeType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/authorization/src/Filament/Resources/RoleResource/Pages/EditRole.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Call to an undefined method Illuminate\\\\Contracts\\\\Database\\\\Eloquent\\\\Builder\\:\\:api\\(\\)\\.$#',
@@ -534,18 +408,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/contact/src/Filament/Resources/ContactResource/Pages/ContactServiceManagement.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var for variable \\$resource contains unresolvable type\\.$#',
-    'identifier' => 'varTag.unresolvableType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contact/src/Filament/Resources/ContactResource/Pages/EditContact.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var with type mixed is not subtype of native type string\\.$#',
-    'identifier' => 'varTag.nativeType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contact/src/Filament/Resources/ContactResource/Pages/EditContact.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Parameter \\#1 \\$callback of method Illuminate\\\\Support\\\\Collection\\<\\(int\\|string\\),Illuminate\\\\Database\\\\Eloquent\\\\Model\\>\\:\\:each\\(\\) expects callable\\(Illuminate\\\\Database\\\\Eloquent\\\\Model, int\\|string\\)\\: mixed, Closure\\(AidingApp\\\\Contact\\\\Models\\\\Contact\\)\\: bool given\\.$#',
     'identifier' => 'argument.type',
     'count' => 1,
@@ -636,66 +498,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/contact/src/Filament/Resources/ContactResource/RelationManagers/EngagementsRelationManager.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var for variable \\$resource contains unresolvable type\\.$#',
-    'identifier' => 'varTag.unresolvableType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contact/src/Filament/Resources/ContactSourceResource/Pages/EditContactSource.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var with type mixed is not subtype of native type string\\.$#',
-    'identifier' => 'varTag.nativeType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contact/src/Filament/Resources/ContactSourceResource/Pages/EditContactSource.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var for variable \\$resource contains unresolvable type\\.$#',
-    'identifier' => 'varTag.unresolvableType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contact/src/Filament/Resources/ContactStatusResource/Pages/EditContactStatus.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var with type mixed is not subtype of native type string\\.$#',
-    'identifier' => 'varTag.nativeType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contact/src/Filament/Resources/ContactStatusResource/Pages/EditContactStatus.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var for variable \\$resource contains unresolvable type\\.$#',
-    'identifier' => 'varTag.unresolvableType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contact/src/Filament/Resources/OrganizationIndustryResource/Pages/EditOrganizationIndustry.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var with type mixed is not subtype of native type string\\.$#',
-    'identifier' => 'varTag.nativeType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contact/src/Filament/Resources/OrganizationIndustryResource/Pages/EditOrganizationIndustry.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var for variable \\$resource contains unresolvable type\\.$#',
-    'identifier' => 'varTag.unresolvableType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contact/src/Filament/Resources/OrganizationResource/Pages/EditOrganization.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var with type mixed is not subtype of native type string\\.$#',
-    'identifier' => 'varTag.nativeType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contact/src/Filament/Resources/OrganizationResource/Pages/EditOrganization.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var for variable \\$resource contains unresolvable type\\.$#',
-    'identifier' => 'varTag.unresolvableType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contact/src/Filament/Resources/OrganizationTypeResource/Pages/EditOrganizationType.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var with type mixed is not subtype of native type string\\.$#',
-    'identifier' => 'varTag.nativeType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contact/src/Filament/Resources/OrganizationTypeResource/Pages/EditOrganizationType.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Call to an undefined method Staudenmeir\\\\EloquentHasManyDeep\\\\HasManyDeep\\:\\:status\\(\\)\\.$#',
     'identifier' => 'method.notFound',
     'count' => 1,
@@ -780,30 +582,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/contract-management/src/Filament/Resources/ContractResource/Pages/EditContract.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var for variable \\$resource contains unresolvable type\\.$#',
-    'identifier' => 'varTag.unresolvableType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contract-management/src/Filament/Resources/ContractResource/Pages/EditContract.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var with type mixed is not subtype of native type string\\.$#',
-    'identifier' => 'varTag.nativeType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contract-management/src/Filament/Resources/ContractResource/Pages/EditContract.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var for variable \\$resource contains unresolvable type\\.$#',
-    'identifier' => 'varTag.unresolvableType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contract-management/src/Filament/Resources/ContractTypeResource/Pages/EditContractType.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var with type mixed is not subtype of native type string\\.$#',
-    'identifier' => 'varTag.nativeType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contract-management/src/Filament/Resources/ContractTypeResource/Pages/EditContractType.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Property AidingApp\\\\ContractManagement\\\\Models\\\\Contract\\:\\:\\$append has no type specified\\.$#',
     'identifier' => 'missingType.property',
     'count' => 1,
@@ -814,18 +592,6 @@ $ignoreErrors[] = [
     'identifier' => 'missingType.generics',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/division/database/factories/DivisionFactory.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var for variable \\$resource contains unresolvable type\\.$#',
-    'identifier' => 'varTag.unresolvableType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/division/src/Filament/Resources/DivisionResource/Pages/EditDivision.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var with type mixed is not subtype of native type string\\.$#',
-    'identifier' => 'varTag.nativeType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/division/src/Filament/Resources/DivisionResource/Pages/EditDivision.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Call to an undefined method App\\\\Models\\\\Contracts\\\\Educatable\\:\\:notify\\(\\)\\.$#',
@@ -946,30 +712,6 @@ $ignoreErrors[] = [
     'identifier' => 'argument.type',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/engagement/src/Filament/Actions/RelationManagerSendEngagementAction.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var for variable \\$resource contains unresolvable type\\.$#',
-    'identifier' => 'varTag.unresolvableType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/engagement/src/Filament/Resources/EmailTemplateResource/Pages/EditEmailTemplate.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var with type mixed is not subtype of native type string\\.$#',
-    'identifier' => 'varTag.nativeType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/engagement/src/Filament/Resources/EmailTemplateResource/Pages/EditEmailTemplate.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var for variable \\$resource contains unresolvable type\\.$#',
-    'identifier' => 'varTag.unresolvableType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/engagement/src/Filament/Resources/EngagementFileResource/Pages/EditEngagementFile.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var with type mixed is not subtype of native type string\\.$#',
-    'identifier' => 'varTag.nativeType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/engagement/src/Filament/Resources/EngagementFileResource/Pages/EditEngagementFile.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Access to an undefined property AidingApp\\\\Contact\\\\Models\\\\Contact\\:\\:\\$full\\.$#',
@@ -1794,46 +1536,10 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/inventory-management/database/factories/AssetFactory.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Database\\\\Factories\\\\MaintenanceActivityFactory\\:\\:getStates\\(\\) return type with generic class Illuminate\\\\Support\\\\Collection does not specify its types\\: TKey, TValue$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/database/factories/MaintenanceActivityFactory.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Database\\\\Factories\\\\MaintenanceActivityFactory\\:\\:randomizeState\\(\\) has parameter \\$states with no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/database/factories/MaintenanceActivityFactory.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Match expression does not handle remaining value\\: mixed$#',
     'identifier' => 'match.unhandled',
     'count' => 2,
     'path' => __DIR__ . '/app-modules/inventory-management/src/Filament/Actions/CheckOutAssetHeaderAction.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var for variable \\$resource contains unresolvable type\\.$#',
-    'identifier' => 'varTag.unresolvableType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/src/Filament/Resources/AssetCheckInResource/Pages/EditAssetCheckIn.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var with type mixed is not subtype of native type string\\.$#',
-    'identifier' => 'varTag.nativeType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/src/Filament/Resources/AssetCheckInResource/Pages/EditAssetCheckIn.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var for variable \\$resource contains unresolvable type\\.$#',
-    'identifier' => 'varTag.unresolvableType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/src/Filament/Resources/AssetCheckOutResource/Pages/EditAssetCheckOut.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var with type mixed is not subtype of native type string\\.$#',
-    'identifier' => 'varTag.nativeType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/src/Filament/Resources/AssetCheckOutResource/Pages/EditAssetCheckOut.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Call to an undefined method Illuminate\\\\Database\\\\Eloquent\\\\Builder\\:\\:withoutReturned\\(\\)\\.$#',
@@ -1974,18 +1680,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/knowledge-base/database/factories/KnowledgeBaseItemFactory.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var for variable \\$resource contains unresolvable type\\.$#',
-    'identifier' => 'varTag.unresolvableType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/knowledge-base/src/Filament/Resources/KnowledgeBaseCategoryResource/Pages/EditKnowledgeBaseCategory.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var with type mixed is not subtype of native type string\\.$#',
-    'identifier' => 'varTag.nativeType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/knowledge-base/src/Filament/Resources/KnowledgeBaseCategoryResource/Pages/EditKnowledgeBaseCategory.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Access to an undefined property Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:\\$category\\.$#',
     'identifier' => 'property.notFound',
     'count' => 1,
@@ -2022,18 +1716,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/knowledge-base/src/Filament/Resources/KnowledgeBaseItemResource/Pages/EditKnowledgeBaseItem.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var for variable \\$resource contains unresolvable type\\.$#',
-    'identifier' => 'varTag.unresolvableType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/knowledge-base/src/Filament/Resources/KnowledgeBaseItemResource/Pages/EditKnowledgeBaseItem.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var with type mixed is not subtype of native type string\\.$#',
-    'identifier' => 'varTag.nativeType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/knowledge-base/src/Filament/Resources/KnowledgeBaseItemResource/Pages/EditKnowledgeBaseItem.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\KnowledgeBase\\\\Filament\\\\Resources\\\\KnowledgeBaseItemResource\\\\Pages\\\\EditKnowledgeBaseItemMetadata\\:\\:form\\(\\) return type has no value type specified in iterable type array\\.$#',
     'identifier' => 'missingType.iterableValue',
     'count' => 1,
@@ -2062,30 +1744,6 @@ $ignoreErrors[] = [
     'identifier' => 'property.notFound',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/knowledge-base/src/Filament/Resources/KnowledgeBaseItemResource/Pages/ListKnowledgeBaseItems.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var for variable \\$resource contains unresolvable type\\.$#',
-    'identifier' => 'varTag.unresolvableType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/knowledge-base/src/Filament/Resources/KnowledgeBaseQualityResource/Pages/EditKnowledgeBaseQuality.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var with type mixed is not subtype of native type string\\.$#',
-    'identifier' => 'varTag.nativeType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/knowledge-base/src/Filament/Resources/KnowledgeBaseQualityResource/Pages/EditKnowledgeBaseQuality.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var for variable \\$resource contains unresolvable type\\.$#',
-    'identifier' => 'varTag.unresolvableType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/knowledge-base/src/Filament/Resources/KnowledgeBaseStatusResource/Pages/EditKnowledgeBaseStatus.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var with type mixed is not subtype of native type string\\.$#',
-    'identifier' => 'varTag.nativeType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/knowledge-base/src/Filament/Resources/KnowledgeBaseStatusResource/Pages/EditKnowledgeBaseStatus.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\KnowledgeBase\\\\Jobs\\\\KnowledgeBaseItemDownloadExternalMedia\\:\\:processContentItem\\(\\) has parameter \\$content with no value type specified in iterable type array\\.$#',
@@ -2218,18 +1876,6 @@ $ignoreErrors[] = [
     'identifier' => 'return.unusedType',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/license-management/src/Enums/ProductLicenseStatus.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var for variable \\$resource contains unresolvable type\\.$#',
-    'identifier' => 'varTag.unresolvableType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/license-management/src/Filament/Resources/ProductResource/Pages/EditProduct.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var with type mixed is not subtype of native type string\\.$#',
-    'identifier' => 'varTag.nativeType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/license-management/src/Filament/Resources/ProductResource/Pages/EditProduct.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\LicenseManagement\\\\Models\\\\Product\\:\\:productLicenses\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#',
@@ -3390,18 +3036,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ChangeRequestResource/Pages/EditChangeRequest.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var for variable \\$resource contains unresolvable type\\.$#',
-    'identifier' => 'varTag.unresolvableType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ChangeRequestResource/Pages/EditChangeRequest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var with type mixed is not subtype of native type string\\.$#',
-    'identifier' => 'varTag.nativeType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ChangeRequestResource/Pages/EditChangeRequest.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Call to an undefined method Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo\\:\\:withTrashed\\(\\)\\.$#',
     'identifier' => 'method.notFound',
     'count' => 2,
@@ -3420,46 +3054,10 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ChangeRequestStatusResource.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var for variable \\$resource contains unresolvable type\\.$#',
-    'identifier' => 'varTag.unresolvableType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ChangeRequestStatusResource/Pages/EditChangeRequestStatus.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var with type mixed is not subtype of native type string\\.$#',
-    'identifier' => 'varTag.nativeType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ChangeRequestStatusResource/Pages/EditChangeRequestStatus.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\ServiceManagement\\\\Filament\\\\Resources\\\\ChangeRequestTypeResource\\:\\:getEloquentQuery\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#',
     'identifier' => 'missingType.generics',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ChangeRequestTypeResource.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var for variable \\$resource contains unresolvable type\\.$#',
-    'identifier' => 'varTag.unresolvableType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ChangeRequestTypeResource/Pages/EditChangeRequestType.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var with type mixed is not subtype of native type string\\.$#',
-    'identifier' => 'varTag.nativeType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ChangeRequestTypeResource/Pages/EditChangeRequestType.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var for variable \\$resource contains unresolvable type\\.$#',
-    'identifier' => 'varTag.unresolvableType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/IncidentResource/Pages/EditIncident.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var with type mixed is not subtype of native type string\\.$#',
-    'identifier' => 'varTag.nativeType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/IncidentResource/Pages/EditIncident.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Access to an undefined property Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:\\$status\\.$#',
@@ -3480,34 +3078,10 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/IncidentResource/Pages/ManageIncidentUpdate.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var for variable \\$resource contains unresolvable type\\.$#',
-    'identifier' => 'varTag.unresolvableType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/IncidentSeverityResource/Pages/EditIncidentSeverity.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var with type mixed is not subtype of native type string\\.$#',
-    'identifier' => 'varTag.nativeType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/IncidentSeverityResource/Pages/EditIncidentSeverity.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Parameter \\#1 \\$length of method Filament\\\\Forms\\\\Components\\\\TextInput\\:\\:maxLength\\(\\) expects Closure\\|int\\|null, \'255\' given\\.$#',
     'identifier' => 'argument.type',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/IncidentStatusResource/Pages/CreateIncidentStatus.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var for variable \\$resource contains unresolvable type\\.$#',
-    'identifier' => 'varTag.unresolvableType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/IncidentStatusResource/Pages/EditIncidentStatus.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var with type mixed is not subtype of native type string\\.$#',
-    'identifier' => 'varTag.nativeType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/IncidentStatusResource/Pages/EditIncidentStatus.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Parameter \\#1 \\$length of method Filament\\\\Forms\\\\Components\\\\TextInput\\:\\:maxLength\\(\\) expects Closure\\|int\\|null, \'255\' given\\.$#',
@@ -3532,30 +3106,6 @@ $ignoreErrors[] = [
     'identifier' => 'varTag.nativeType',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/IncidentStatusResource/Pages/ViewIncidentStatus.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var for variable \\$resource contains unresolvable type\\.$#',
-    'identifier' => 'varTag.unresolvableType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/IncidentUpdateResource/Pages/EditIncidentUpdate.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var with type mixed is not subtype of native type string\\.$#',
-    'identifier' => 'varTag.nativeType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/IncidentUpdateResource/Pages/EditIncidentUpdate.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var for variable \\$resource contains unresolvable type\\.$#',
-    'identifier' => 'varTag.unresolvableType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceMonitoringResource/Pages/EditServiceMonitoring.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var with type mixed is not subtype of native type string\\.$#',
-    'identifier' => 'varTag.nativeType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceMonitoringResource/Pages/EditServiceMonitoring.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Call to an undefined method Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:teams\\(\\)\\.$#',
@@ -3660,18 +3210,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestFormResource/Pages/EditServiceRequestForm.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var for variable \\$resource contains unresolvable type\\.$#',
-    'identifier' => 'varTag.unresolvableType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestFormResource/Pages/EditServiceRequestForm.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var with type mixed is not subtype of native type string\\.$#',
-    'identifier' => 'varTag.nativeType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestFormResource/Pages/EditServiceRequestForm.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Parameter \\#1 \\$serviceRequestForm of method AidingApp\\\\ServiceManagement\\\\Filament\\\\Resources\\\\ServiceRequestFormResource\\\\Pages\\\\EditServiceRequestForm\\:\\:saveFieldsFromComponents\\(\\) expects AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestForm, AidingApp\\\\Form\\\\Models\\\\Submissible given\\.$#',
     'identifier' => 'argument.type',
     'count' => 1,
@@ -3726,12 +3264,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestResource/Actions/AddServiceRequestUpdateBulkAction.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Access to an undefined property AidingApp\\\\Contact\\\\Models\\\\Contact\\|App\\\\Models\\\\SystemUser\\|App\\\\Models\\\\User\\:\\:\\$teams\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestResource/Actions/ChangeServiceRequestStatusBulkAction.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Using nullsafe property access on non\\-nullable type AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequest\\. Use \\-\\> instead\\.$#',
     'identifier' => 'nullsafe.neverNull',
     'count' => 2,
@@ -3746,18 +3278,6 @@ $ignoreErrors[] = [
 $ignoreErrors[] = [
     'message' => '#^Access to an undefined property Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:\\$priority\\.$#',
     'identifier' => 'property.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestResource/Pages/EditServiceRequest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var for variable \\$resource contains unresolvable type\\.$#',
-    'identifier' => 'varTag.unresolvableType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestResource/Pages/EditServiceRequest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var with type mixed is not subtype of native type string\\.$#',
-    'identifier' => 'varTag.nativeType',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestResource/Pages/EditServiceRequest.php',
 ];
@@ -3888,18 +3408,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestStatusResource.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var for variable \\$resource contains unresolvable type\\.$#',
-    'identifier' => 'varTag.unresolvableType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestStatusResource/Pages/EditServiceRequestStatus.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var with type mixed is not subtype of native type string\\.$#',
-    'identifier' => 'varTag.nativeType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestStatusResource/Pages/EditServiceRequestStatus.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Dead catch \\- Illuminate\\\\Database\\\\QueryException is never thrown in the try block\\.$#',
     'identifier' => 'catch.neverThrown',
     'count' => 1,
@@ -3928,42 +3436,6 @@ $ignoreErrors[] = [
     'identifier' => 'method.notFound',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestTypeResource/Pages/CreateServiceRequestType.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var for variable \\$resource contains unresolvable type\\.$#',
-    'identifier' => 'varTag.unresolvableType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestTypeResource/Pages/EditServiceRequestType.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var with type mixed is not subtype of native type string\\.$#',
-    'identifier' => 'varTag.nativeType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestTypeResource/Pages/EditServiceRequestType.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var for variable \\$resource contains unresolvable type\\.$#',
-    'identifier' => 'varTag.unresolvableType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestTypeResource/Pages/EditServiceRequestTypeAssignments.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var with type mixed is not subtype of native type string\\.$#',
-    'identifier' => 'varTag.nativeType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestTypeResource/Pages/EditServiceRequestTypeAssignments.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var for variable \\$resource contains unresolvable type\\.$#',
-    'identifier' => 'varTag.unresolvableType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestTypeResource/Pages/EditServiceRequestTypeNotifications.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var with type mixed is not subtype of native type string\\.$#',
-    'identifier' => 'varTag.nativeType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestTypeResource/Pages/EditServiceRequestTypeNotifications.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Unable to resolve the template type TKey in call to function collect$#',
@@ -4000,30 +3472,6 @@ $ignoreErrors[] = [
     'identifier' => 'missingType.iterableValue',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestUpdateResource/Components/ServiceRequestUpdateViewAction.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var for variable \\$resource contains unresolvable type\\.$#',
-    'identifier' => 'varTag.unresolvableType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestUpdateResource/Pages/EditServiceRequestUpdate.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var with type mixed is not subtype of native type string\\.$#',
-    'identifier' => 'varTag.nativeType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestUpdateResource/Pages/EditServiceRequestUpdate.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var for variable \\$resource contains unresolvable type\\.$#',
-    'identifier' => 'varTag.unresolvableType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/SlaResource/Pages/EditSla.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var with type mixed is not subtype of native type string\\.$#',
-    'identifier' => 'varTag.nativeType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/SlaResource/Pages/EditSla.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Using nullsafe method call on non\\-nullable type AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequest\\. Use \\-\\> instead\\.$#',
@@ -4632,12 +4080,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/src/Models/ServiceRequestType.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestType\\:\\:templates\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Models/ServiceRequestType.php',
-];
-$ignoreErrors[] = [
     'message' => '#^PHPDoc tag @return contains generic type AidingApp\\\\Audit\\\\Overrides\\\\BelongsToMany\\<AidingApp\\\\Team\\\\Models\\\\Team, \\$this\\(AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestType\\), covariant AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestTypeAuditor\\> but class AidingApp\\\\Audit\\\\Overrides\\\\BelongsToMany is not generic\\.$#',
     'identifier' => 'generics.notGeneric',
     'count' => 1,
@@ -4690,18 +4132,6 @@ $ignoreErrors[] = [
     'identifier' => 'match.unhandled',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/service-management/src/Notifications/SendClosedServiceFeedbackNotification.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to an undefined property App\\\\Models\\\\Contracts\\\\Educatable\\:\\:\\$first_name\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Notifications/SendEducatableServiceRequestOpenedNotification.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Match expression does not handle remaining value\\: class\\-string&literal\\-string$#',
-    'identifier' => 'match.unhandled',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Notifications/SendEducatableServiceRequestOpenedNotification.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Match expression does not handle remaining value\\: class\\-string$#',
@@ -5178,18 +4608,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/task/src/Filament/Resources/TaskResource/Pages/EditTask.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var for variable \\$resource contains unresolvable type\\.$#',
-    'identifier' => 'varTag.unresolvableType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/task/src/Filament/Resources/TaskResource/Pages/EditTask.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var with type mixed is not subtype of native type string\\.$#',
-    'identifier' => 'varTag.nativeType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/task/src/Filament/Resources/TaskResource/Pages/EditTask.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Ternary operator condition is always true\\.$#',
     'identifier' => 'ternary.alwaysTrue',
     'count' => 1,
@@ -5278,18 +4696,6 @@ $ignoreErrors[] = [
     'identifier' => 'method.notFound',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/team/database/factories/TeamFactory.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var for variable \\$resource contains unresolvable type\\.$#',
-    'identifier' => 'varTag.unresolvableType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/team/src/Filament/Resources/TeamResource/Pages/EditTeam.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var with type mixed is not subtype of native type string\\.$#',
-    'identifier' => 'varTag.nativeType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/team/src/Filament/Resources/TeamResource/Pages/EditTeam.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\Team\\\\Models\\\\Team\\:\\:division\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#',
@@ -5610,42 +5016,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app/Filament/Pages/ProductHealth.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var for variable \\$resource contains unresolvable type\\.$#',
-    'identifier' => 'varTag.unresolvableType',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Filament/Resources/NotificationSettingResource/Pages/EditNotificationSetting.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var with type mixed is not subtype of native type string\\.$#',
-    'identifier' => 'varTag.nativeType',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Filament/Resources/NotificationSettingResource/Pages/EditNotificationSetting.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var for variable \\$resource contains unresolvable type\\.$#',
-    'identifier' => 'varTag.unresolvableType',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Filament/Resources/SystemUserResource/Pages/EditSystemUser.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var with type mixed is not subtype of native type string\\.$#',
-    'identifier' => 'varTag.nativeType',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Filament/Resources/SystemUserResource/Pages/EditSystemUser.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var for variable \\$resource contains unresolvable type\\.$#',
-    'identifier' => 'varTag.unresolvableType',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Filament/Resources/TagResource/Pages/EditTag.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var with type mixed is not subtype of native type string\\.$#',
-    'identifier' => 'varTag.nativeType',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Filament/Resources/TagResource/Pages/EditTag.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Negated boolean expression is always true\\.$#',
     'identifier' => 'booleanNot.alwaysTrue',
     'count' => 1,
@@ -5674,18 +5044,6 @@ $ignoreErrors[] = [
     'identifier' => 'argument.type',
     'count' => 1,
     'path' => __DIR__ . '/app/Filament/Resources/UserResource/Actions/AssignTeamBulkAction.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var for variable \\$resource contains unresolvable type\\.$#',
-    'identifier' => 'varTag.unresolvableType',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Filament/Resources/UserResource/Pages/EditUser.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var with type mixed is not subtype of native type string\\.$#',
-    'identifier' => 'varTag.nativeType',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Filament/Resources/UserResource/Pages/EditUser.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Access to an undefined property AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequest\\:\\:\\$service_request_id\\.$#',
@@ -6096,12 +5454,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app/Models/SystemUser.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Method App\\\\Models\\\\User\\:\\:allowedOperators\\(\\) has no return type specified\\.$#',
-    'identifier' => 'missingType.return',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Models/User.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Method App\\\\Models\\\\User\\:\\:assignTeam\\(\\) has parameter \\$teamId with no type specified\\.$#',
     'identifier' => 'missingType.parameter',
     'count' => 1,
@@ -6114,74 +5466,14 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app/Models/User.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Method App\\\\Models\\\\User\\:\\:orderableColumns\\(\\) has no return type specified\\.$#',
-    'identifier' => 'missingType.return',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Models/User.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Method App\\\\Models\\\\User\\:\\:permissionsFromRoles\\(\\) return type with generic class Staudenmeir\\\\EloquentHasManyDeep\\\\HasManyDeep does not specify its types\\: TRelatedModel, TDeclaringModel$#',
     'identifier' => 'missingType.generics',
     'count' => 1,
     'path' => __DIR__ . '/app/Models/User.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Method App\\\\Models\\\\User\\:\\:processGlobalSearch\\(\\) has no return type specified\\.$#',
-    'identifier' => 'missingType.return',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Models/User.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method App\\\\Models\\\\User\\:\\:processGlobalSearch\\(\\) has parameter \\$data with no type specified\\.$#',
-    'identifier' => 'missingType.parameter',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Models/User.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method App\\\\Models\\\\User\\:\\:processQuery\\(\\) has no return type specified\\.$#',
-    'identifier' => 'missingType.return',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Models/User.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method App\\\\Models\\\\User\\:\\:processQuery\\(\\) has parameter \\$data with no type specified\\.$#',
-    'identifier' => 'missingType.parameter',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Models/User.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method App\\\\Models\\\\User\\:\\:processQuery\\(\\) has parameter \\$query with no type specified\\.$#',
-    'identifier' => 'missingType.parameter',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Models/User.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method App\\\\Models\\\\User\\:\\:scopeAdvancedFilter\\(\\) has no return type specified\\.$#',
-    'identifier' => 'missingType.return',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Models/User.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method App\\\\Models\\\\User\\:\\:scopeAdvancedFilter\\(\\) has parameter \\$data with no type specified\\.$#',
-    'identifier' => 'missingType.parameter',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Models/User.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method App\\\\Models\\\\User\\:\\:scopeAdvancedFilter\\(\\) has parameter \\$query with no type specified\\.$#',
-    'identifier' => 'missingType.parameter',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Models/User.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Method App\\\\Models\\\\User\\:\\:serviceRequests\\(\\) return type with generic class Staudenmeir\\\\EloquentHasManyDeep\\\\HasManyDeep does not specify its types\\: TRelatedModel, TDeclaringModel$#',
     'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Models/User.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method App\\\\Models\\\\User\\:\\:whiteListColumns\\(\\) has no return type specified\\.$#',
-    'identifier' => 'missingType.return',
     'count' => 1,
     'path' => __DIR__ . '/app/Models/User.php',
 ];
@@ -6258,156 +5550,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app/Support/BulkProcessingMachine.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Method App\\\\Support\\\\FilterQueryBuilder\\:\\:apply\\(\\) has no return type specified\\.$#',
-    'identifier' => 'missingType.return',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Support/FilterQueryBuilder.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method App\\\\Support\\\\FilterQueryBuilder\\:\\:apply\\(\\) has parameter \\$data with no type specified\\.$#',
-    'identifier' => 'missingType.parameter',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Support/FilterQueryBuilder.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method App\\\\Support\\\\FilterQueryBuilder\\:\\:apply\\(\\) has parameter \\$query with no type specified\\.$#',
-    'identifier' => 'missingType.parameter',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Support/FilterQueryBuilder.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method App\\\\Support\\\\FilterQueryBuilder\\:\\:contains\\(\\) has no return type specified\\.$#',
-    'identifier' => 'missingType.return',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Support/FilterQueryBuilder.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method App\\\\Support\\\\FilterQueryBuilder\\:\\:contains\\(\\) has parameter \\$filter with no type specified\\.$#',
-    'identifier' => 'missingType.parameter',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Support/FilterQueryBuilder.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method App\\\\Support\\\\FilterQueryBuilder\\:\\:contains\\(\\) has parameter \\$query with no type specified\\.$#',
-    'identifier' => 'missingType.parameter',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Support/FilterQueryBuilder.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method App\\\\Support\\\\FilterQueryBuilder\\:\\:isNestedColumn\\(\\) has no return type specified\\.$#',
-    'identifier' => 'missingType.return',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Support/FilterQueryBuilder.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method App\\\\Support\\\\FilterQueryBuilder\\:\\:isNestedColumn\\(\\) has parameter \\$column with no type specified\\.$#',
-    'identifier' => 'missingType.parameter',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Support/FilterQueryBuilder.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method App\\\\Support\\\\FilterQueryBuilder\\:\\:makeFilter\\(\\) has no return type specified\\.$#',
-    'identifier' => 'missingType.return',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Support/FilterQueryBuilder.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method App\\\\Support\\\\FilterQueryBuilder\\:\\:makeFilter\\(\\) has parameter \\$filter with no type specified\\.$#',
-    'identifier' => 'missingType.parameter',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Support/FilterQueryBuilder.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method App\\\\Support\\\\FilterQueryBuilder\\:\\:makeFilter\\(\\) has parameter \\$query with no type specified\\.$#',
-    'identifier' => 'missingType.parameter',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Support/FilterQueryBuilder.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method App\\\\Support\\\\FilterQueryBuilder\\:\\:makeOrder\\(\\) has no return type specified\\.$#',
-    'identifier' => 'missingType.return',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Support/FilterQueryBuilder.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method App\\\\Support\\\\FilterQueryBuilder\\:\\:makeOrder\\(\\) has parameter \\$data with no type specified\\.$#',
-    'identifier' => 'missingType.parameter',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Support/FilterQueryBuilder.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method App\\\\Support\\\\FilterQueryBuilder\\:\\:makeOrder\\(\\) has parameter \\$query with no type specified\\.$#',
-    'identifier' => 'missingType.parameter',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Support/FilterQueryBuilder.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Property App\\\\Support\\\\FilterQueryBuilder\\:\\:\\$model has no type specified\\.$#',
-    'identifier' => 'missingType.property',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Support/FilterQueryBuilder.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Property App\\\\Support\\\\FilterQueryBuilder\\:\\:\\$table has no type specified\\.$#',
-    'identifier' => 'missingType.property',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Support/FilterQueryBuilder.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$view of function view expects view\\-string\\|null, string given\\.$#',
-    'identifier' => 'argument.type',
-    'count' => 1,
-    'path' => __DIR__ . '/app/View/Components/DatePicker.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$view of function view expects view\\-string\\|null, string given\\.$#',
-    'identifier' => 'argument.type',
-    'count' => 1,
-    'path' => __DIR__ . '/app/View/Components/Dropzone.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @param references unknown parameter\\: \\$id$#',
-    'identifier' => 'parameter.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app/View/Components/SelectList.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$view of function view expects view\\-string\\|null, string given\\.$#',
-    'identifier' => 'argument.type',
-    'count' => 1,
-    'path' => __DIR__ . '/app/View/Components/SelectList.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Property App\\\\View\\\\Components\\\\SelectList\\:\\:\\$options has no type specified\\.$#',
-    'identifier' => 'missingType.property',
-    'count' => 1,
-    'path' => __DIR__ . '/app/View/Components/SelectList.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @extends has invalid type App\\\\Models\\\\Enrollment\\.$#',
-    'identifier' => 'class.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/database/factories/EnrollmentFactory.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Type App\\\\Models\\\\Enrollment in generic type Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\Factory\\<App\\\\Models\\\\Enrollment\\> in PHPDoc tag @extends is not subtype of template type TModel of Illuminate\\\\Database\\\\Eloquent\\\\Model of class Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\Factory\\.$#',
-    'identifier' => 'generics.notSubtype',
-    'count' => 1,
-    'path' => __DIR__ . '/database/factories/EnrollmentFactory.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @extends has invalid type App\\\\Models\\\\Program\\.$#',
-    'identifier' => 'class.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/database/factories/ProgramFactory.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Type App\\\\Models\\\\Program in generic type Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\Factory\\<App\\\\Models\\\\Program\\> in PHPDoc tag @extends is not subtype of template type TModel of Illuminate\\\\Database\\\\Eloquent\\\\Model of class Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\Factory\\.$#',
-    'identifier' => 'generics.notSubtype',
-    'count' => 1,
-    'path' => __DIR__ . '/database/factories/ProgramFactory.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Left side of && is always true\\.$#',
     'identifier' => 'booleanAnd.leftAlwaysTrue',
     'count' => 1,
@@ -6454,84 +5596,6 @@ $ignoreErrors[] = [
     'identifier' => 'method.notFound',
     'count' => 1,
     'path' => __DIR__ . '/tests/Helpers.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Function Tests\\\\Helpers\\\\testResourceRequiresPermissionForAccess\\(\\) has no return type specified\\.$#',
-    'identifier' => 'missingType.return',
-    'count' => 1,
-    'path' => __DIR__ . '/tests/Helpers/AccessControl.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Function Tests\\\\Helpers\\\\testResourceRequiresPermissionForAccess\\(\\) has parameter \\$feature with no type specified\\.$#',
-    'identifier' => 'missingType.parameter',
-    'count' => 1,
-    'path' => __DIR__ . '/tests/Helpers/AccessControl.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Function Tests\\\\Helpers\\\\testResourceRequiresPermissionForAccess\\(\\) has parameter \\$permissions with no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/tests/Helpers/AccessControl.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Function Tests\\\\Helpers\\\\Events\\\\testEventIsBeingListenedTo\\(\\) has no return type specified\\.$#',
-    'identifier' => 'missingType.return',
-    'count' => 1,
-    'path' => __DIR__ . '/tests/Helpers/Events/EventListener.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Function user\\(\\) has parameter \\$licenses with no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/tests/Pest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Function user\\(\\) has parameter \\$permissions with no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/tests/Pest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Function user\\(\\) has parameter \\$roles with no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/tests/Pest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method Tests\\\\TestCase\\:\\:beginDatabaseTransactionOnConnection\\(\\) has no return type specified\\.$#',
-    'identifier' => 'missingType.return',
-    'count' => 1,
-    'path' => __DIR__ . '/tests/TestCase.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method Tests\\\\TestCase\\:\\:calculateMigrationChecksum\\(\\) has parameter \\$paths with no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/tests/TestCase.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method Tests\\\\TestCase\\:\\:refreshTestDatabase\\(\\) has no return type specified\\.$#',
-    'identifier' => 'missingType.return',
-    'count' => 1,
-    'path' => __DIR__ . '/tests/TestCase.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertContains\\(\\) invoked with named argument \\$haystack, but it\'s not allowed because of @no\\-named\\-arguments\\.$#',
-    'identifier' => 'argument.named',
-    'count' => 1,
-    'path' => __DIR__ . '/tests/Unit/ArchTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertContains\\(\\) invoked with named argument \\$message, but it\'s not allowed because of @no\\-named\\-arguments\\.$#',
-    'identifier' => 'argument.named',
-    'count' => 1,
-    'path' => __DIR__ . '/tests/Unit/ArchTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertContains\\(\\) invoked with named argument \\$needle, but it\'s not allowed because of @no\\-named\\-arguments\\.$#',
-    'identifier' => 'argument.named',
-    'count' => 1,
-    'path' => __DIR__ . '/tests/Unit/ArchTest.php',
 ];
 
 return ['parameters' => ['ignoreErrors' => $ignoreErrors]];

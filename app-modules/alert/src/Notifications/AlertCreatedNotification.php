@@ -38,7 +38,6 @@ namespace AidingApp\Alert\Notifications;
 
 use AidingApp\Alert\Models\Alert;
 use AidingApp\Contact\Filament\Resources\ContactResource;
-use AidingApp\Contact\Models\Contact;
 use Filament\Notifications\Notification as FilamentNotification;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\HtmlString;
@@ -64,17 +63,13 @@ class AlertCreatedNotification extends Notification
 
         $name = $concern->{$concern->displayNameKey()};
 
-        $target = match ($concern::class) {
-            Contact::class => ContactResource::class,
-        };
-
-        $alertUrl = $target::getUrl('manage-alerts', ['record' => $concern]);
+        $alertUrl = ContactResource::getUrl('manage-alerts', ['record' => $concern]);
 
         $alertLink = new HtmlString("<a href='{$alertUrl}' target='_blank' class='underline'>alert</a>");
 
         $morph = str($concern->getMorphClass());
 
-        $morphUrl = $target::getUrl('view', ['record' => $concern]);
+        $morphUrl = ContactResource::getUrl('view', ['record' => $concern]);
 
         $morphLink = new HtmlString("<a href='{$morphUrl}' target='_blank' class='underline'>{$name}</a>");
 

@@ -80,8 +80,9 @@ uses(TestCase::class)->in('../tests', '../app-modules/*/tests');
 */
 
 /**
- * @param LicenseType|array|null $licenses
- * @param array|string|null $roles
+ * @param LicenseType|array<LicenseType>|null $licenses
+ * @param array<string>|string|null $roles
+ * @param array<string>|string|null $permissions
  * @param string $guard
  *
  * @return User

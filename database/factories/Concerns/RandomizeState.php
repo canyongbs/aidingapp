@@ -44,6 +44,9 @@ use ReflectionNamedType;
 
 trait RandomizeState
 {
+    /**
+     * @param string[] $states
+     */
     public function randomizeState(array $states = []): self
     {
         $states = empty($states) ? $this->getStates() : collect($states);
@@ -53,6 +56,9 @@ trait RandomizeState
         return call_user_func([$this, $randomState]);
     }
 
+    /**
+     * @return Collection<int|string, non-empty-string>
+     */
     protected function getStates(): Collection
     {
         $class = new ReflectionClass($this);

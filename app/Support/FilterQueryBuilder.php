@@ -36,16 +36,24 @@
 
 namespace App\Support;
 
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 
 class FilterQueryBuilder
 {
-    protected $model;
+    protected Model $model;
 
-    protected $table;
+    protected string $table;
 
-    public function apply($query, $data)
+    /**
+     * @param Builder<Model> $query
+     * @param array<string, mixed> $data
+     *
+     * @return Builder<Model>
+     */
+    public function apply(Builder $query, array $data): Builder
     {
         $this->model = $query->getModel();
         $this->table = $this->model->getTable();
@@ -62,14 +70,24 @@ class FilterQueryBuilder
         return $query;
     }
 
-    public function contains($filter, $query)
+    /**
+     * @param array<string, mixed> $filter
+     * @param Builder<Model> $query
+     *
+     * @return Builder<Model>
+     */
+    public function contains($filter, $query): Builder
     {
         $filter['query_1'] = addslashes($filter['query_1']);
 
         return $query->where($filter['column'], 'like', '%' . $filter['query_1'] . '%', $filter['match']);
     }
 
-    protected function makeOrder($query, $data)
+    /**
+     * @param Builder<Model> $query
+     * @param array<string, mixed> $data
+     */
+    protected function makeOrder(Builder $query, array $data): void
     {
         if ($this->isNestedColumn($data['order_column'])) {
             [$relationship, $column] = explode('.', $data['order_column']);
@@ -99,7 +117,11 @@ class FilterQueryBuilder
             ->select("{$this->table}.*");
     }
 
-    protected function makeFilter($query, $filter)
+    /**
+     * @param Builder<Model> $query
+     * @param array<string, mixed> $filter
+     */
+    protected function makeFilter(Builder $query, $filter): void
     {
         if ($this->isNestedColumn($filter['column'])) {
             [$relation, $filter['column']] = explode('.', $filter['column']);
@@ -121,7 +143,7 @@ class FilterQueryBuilder
         }
     }
 
-    protected function isNestedColumn($column)
+    protected function isNestedColumn(string $column): bool
     {
         return strpos($column, '.') !== false;
     }

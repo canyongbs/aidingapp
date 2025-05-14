@@ -41,7 +41,6 @@ use AidingApp\Alert\Enums\AlertStatus;
 use AidingApp\Alert\Filament\Resources\AlertResource;
 use AidingApp\Alert\Models\Alert;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactAlerts;
-use AidingApp\Contact\Models\Contact;
 use App\Filament\Forms\Components\EducatableSelect;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Scopes\EducatableSearch;
@@ -72,11 +71,8 @@ class ListAlerts extends ListRecords
             ->schema([
                 TextEntry::make('concern.display_name')
                     ->label('Related To')
-                    ->getStateUsing(fn (Alert $record): ?string => $record->concern?->{$record->concern::displayNameKey()})
-                    ->url(fn (Alert $record) => match ($record->concern ? $record->concern::class : null) {
-                        Contact::class => ManageContactAlerts::getUrl(['record' => $record->concern]),
-                        default => null,
-                    }),
+                    ->getStateUsing(fn (Alert $record): string => $record->concern->{$record->concern::displayNameKey()})
+                    ->url(fn (Alert $record) => ManageContactAlerts::getUrl(['record' => $record->concern])),
                 TextEntry::make('description'),
                 TextEntry::make('severity'),
                 TextEntry::make('suggested_intervention'),
@@ -91,11 +87,8 @@ class ListAlerts extends ListRecords
                 IdColumn::make(),
                 TextColumn::make('concern.display_name')
                     ->label('Related To')
-                    ->getStateUsing(fn (Alert $record): ?string => $record->concern?->{$record->concern::displayNameKey()})
-                    ->url(fn (Alert $record) => match ($record->concern ? $record->concern::class : null) {
-                        Contact::class => ManageContactAlerts::getUrl(['record' => $record->concern]),
-                        default => null,
-                    })
+                    ->getStateUsing(fn (Alert $record): string => $record->concern->{$record->concern::displayNameKey()})
+                    ->url(fn (Alert $record) => ManageContactAlerts::getUrl(['record' => $record->concern]))
                     ->searchable(query: fn (Builder $query, $search) => $query->tap(new EducatableSearch(relationship: 'concern', search: $search)))
                     ->forceSearchCaseInsensitive()
                     ->sortable(),

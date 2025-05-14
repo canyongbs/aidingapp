@@ -44,7 +44,8 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 
 class ConcernIdExistsRule implements DataAwareRule, ValidationRule
 {
-    protected $data = [];
+    /** @var array<string, mixed> */
+    protected array $data = [];
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
@@ -60,6 +61,9 @@ class ConcernIdExistsRule implements DataAwareRule, ValidationRule
         }
     }
 
+    /**
+     * @param array<string> $data
+     */
     public function setData(array $data): static
     {
         $this->data = $data;

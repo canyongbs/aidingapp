@@ -38,7 +38,6 @@ namespace AidingApp\Alert\Observers;
 
 use AidingApp\Alert\Events\AlertCreated;
 use AidingApp\Alert\Models\Alert;
-use AidingApp\Contact\Models\Contact;
 use AidingApp\Notification\Actions\SubscriptionCreate;
 use App\Models\User;
 use Illuminate\Support\Facades\Cache;
@@ -52,10 +51,7 @@ class AlertObserver
         if ($user instanceof User) {
             // Creating the subscription directly so that the alert can be sent to this User as well
             resolve(SubscriptionCreate::class)->handle($user, $alert->getSubscribable(), false);
-
-            Cache::tags([match ($alert->concern_type) {
-                app(Contact::class)->getMorphClass() => "user-{$user->getKey()}-contact-alerts",
-            }])->flush();
+            Cache::tags(["{user-{$user->getKey()}-contact-alerts}"])->flush();
         }
 
         AlertCreated::dispatch($alert);
@@ -74,9 +70,7 @@ class AlertObserver
         $user = auth()->user();
 
         if ($user) {
-            Cache::tags([match ($alert->concern_type) {
-                app(Contact::class)->getMorphClass() => "user-{$user->getKey()}-contact-alerts",
-            }])->flush();
+            Cache::tags(["{user-{$user->getKey()}-contact-alerts}"])->flush();
         }
     }
 }

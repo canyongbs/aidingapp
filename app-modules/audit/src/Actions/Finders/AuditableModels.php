@@ -43,10 +43,16 @@ use ReflectionClass;
 
 class AuditableModels
 {
+    /**
+     * @return Collection<string, string>
+     */
     public static function all(): Collection
     {
-        return collect(Relation::morphMap())
+        /** @var Collection<string, string> $collection */
+        $collection = collect(Relation::morphMap())
             ->filter(fn (string $class) => (new ReflectionClass($class))->implementsInterface(Auditable::class))
             ->transform(fn (string $class) => (new ReflectionClass($class))->getShortName());
+
+        return $collection;
     }
 }

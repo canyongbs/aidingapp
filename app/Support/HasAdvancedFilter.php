@@ -36,16 +36,30 @@
 
 namespace App\Support;
 
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\ValidationException;
 
 trait HasAdvancedFilter
 {
-    public function scopeAdvancedFilter($query, $data)
+    /**
+     * @param Builder<Model> $query
+     * @param array<string, mixed> $data
+     *
+     * @return Builder<Model>
+     */
+    public function scopeAdvancedFilter(Builder $query, array $data): Builder
     {
         return $this->processQuery($query, $data);
     }
 
-    public function processQuery($query, $data)
+    /**
+     * @param Builder<Model> $query
+     * @param array<string, mixed> $data
+     *
+     * @return Builder<Model>
+     */
+    public function processQuery(Builder $query, array $data): Builder
     {
         $data = $this->processGlobalSearch($data);
 
@@ -73,24 +87,29 @@ trait HasAdvancedFilter
         return (new FilterQueryBuilder())->apply($query, $data);
     }
 
-    protected function orderableColumns()
+    protected function orderableColumns(): string
     {
         return implode(',', $this->orderable);
     }
 
-    protected function whiteListColumns()
+    protected function whiteListColumns(): string
     {
         return implode(',', $this->filterable);
     }
 
-    protected function allowedOperators()
+    protected function allowedOperators(): string
     {
         return implode(',', [
             'contains',
         ]);
     }
 
-    protected function processGlobalSearch($data)
+    /**
+     * @param array<string, mixed> $data
+     *
+     * @return array<string, mixed>
+     */
+    protected function processGlobalSearch(array $data): array
     {
         if (isset($data['f']) || ! isset($data['s'])) {
             return $data;

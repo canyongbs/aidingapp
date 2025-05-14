@@ -123,7 +123,7 @@ abstract class TestCase extends BaseTestCase
         Tenant::forgetCurrent();
     }
 
-    public function beginDatabaseTransactionOnConnection(string $name)
+    public function beginDatabaseTransactionOnConnection(string $name): void
     {
         $database = $this->app->make('db');
 
@@ -204,7 +204,7 @@ abstract class TestCase extends BaseTestCase
         );
     }
 
-    protected function refreshTestDatabase()
+    protected function refreshTestDatabase(): void
     {
         if (! RefreshDatabaseState::$migrated) {
             $this->createLandlordTestingEnvironment();
@@ -219,6 +219,9 @@ abstract class TestCase extends BaseTestCase
         $this->beginDatabaseTransactionOnConnection($this->landlordDatabaseConnectionName());
     }
 
+    /**
+     * @param array<string> $paths
+     */
     protected function calculateMigrationChecksum(array $paths): string
     {
         $finder = Finder::create()
