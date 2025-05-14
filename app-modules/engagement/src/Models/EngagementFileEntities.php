@@ -37,7 +37,6 @@
 namespace AidingApp\Engagement\Models;
 
 use AidingApp\Engagement\Observers\EngagementFileEntitiesObserver;
-use AidingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
 use AidingApp\Notification\Models\Contracts\Subscribable;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -48,7 +47,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @mixin IdeHelperEngagementFileEntities
  */
 #[ObservedBy([EngagementFileEntitiesObserver::class])]
-class EngagementFileEntities extends MorphPivot implements CanTriggerAutoSubscription
+class EngagementFileEntities extends MorphPivot
 {
     protected $table = 'engagement_file_entities';
 

@@ -41,7 +41,6 @@ use AidingApp\Alert\Enums\AlertStatus;
 use AidingApp\Alert\Observers\AlertObserver;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
 use AidingApp\Notification\Models\Contracts\Subscribable;
 use App\Models\BaseModel;
 use App\Models\Concerns\BelongsToEducatable;
@@ -59,7 +58,7 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @mixin IdeHelperAlert
  */
 #[ObservedBy([AlertObserver::class])]
-class Alert extends BaseModel implements Auditable, CanTriggerAutoSubscription
+class Alert extends BaseModel implements Auditable
 {
     use SoftDeletes;
     use AuditableTrait;

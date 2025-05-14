@@ -42,7 +42,6 @@ use AidingApp\Engagement\Actions\GenerateEngagementBodyContent;
 use AidingApp\Engagement\Models\Contracts\HasDeliveryMethod;
 use AidingApp\Engagement\Observers\EngagementObserver;
 use AidingApp\Notification\Enums\NotificationChannel;
-use AidingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
 use AidingApp\Notification\Models\Contracts\Subscribable;
 use AidingApp\Notification\Models\EmailMessage;
 use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
@@ -73,7 +72,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  * @mixin IdeHelperEngagement
  */
 #[ObservedBy([EngagementObserver::class])]
-class Engagement extends BaseModel implements Auditable, CanTriggerAutoSubscription, ProvidesATimeline, HasDeliveryMethod, HasMedia
+class Engagement extends BaseModel implements Auditable, ProvidesATimeline, HasDeliveryMethod, HasMedia
 {
     use AuditableTrait;
     use BelongsToEducatable;
