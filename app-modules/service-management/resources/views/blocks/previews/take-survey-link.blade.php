@@ -1,6 +1,4 @@
-<?php
-
-/*
+{{--
 <COPYRIGHT>
 
     Copyright © 2016-2025, Canyon GBS LLC. All rights reserved.
@@ -32,36 +30,25 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
-
-namespace AidingApp\ServiceManagement\Database\Factories;
-
-use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
-use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
-use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
-use Illuminate\Database\Eloquent\Factories\Factory;
-
-/**
- * @extends Factory<ServiceRequestTypeEmailTemplate>
- */
-class ServiceRequestTypeEmailTemplateFactory extends Factory
-{
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
-    {
-        return [
-            'service_request_type_id' => ServiceRequestType::factory(),
-            'type' => fake()->randomElement(collect(ServiceRequestEmailTemplateType::cases())->values()->toArray()),
-            'subject' => ['type' => 'doc', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => fake()->sentence()]]]]],
-            'body' => ['type' => 'doc', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => fake()->sentence()]]]]],
-            'role' => fn (array $attributes) => $attributes['type'] === ServiceRequestEmailTemplateType::SurveyResponse
-              ? ServiceRequestTypeEmailTemplateRole::Customer
-              : fake()->randomElement(ServiceRequestTypeEmailTemplateRole::cases()),
-        ];
-    }
-}
+--}}
+<div style="text-align: {{ $alignment }}">
+    <a
+        href="{{ $url ?? '#' }}"
+        style="display: inline-block; 
+               border-width: 8px; 
+               border-color: #3B82F6; 
+               background-color: #3B82F6; 
+               padding: 0.50rem 1rem;
+               font-size: 0.875rem; 
+               font-weight: 700; 
+               color: white; 
+               transition: border-color 0.3s ease, background-color 0.3s ease; 
+               text-decoration: none; 
+               border-radius: 0.375rem; 
+               cursor: pointer; 
+               box-sizing: border-box;"
+        target="_blank"
+    >
+        {{ $label ?? 'Take Survey' }}
+    </a>
+</div>

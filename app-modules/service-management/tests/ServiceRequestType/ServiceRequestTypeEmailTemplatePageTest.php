@@ -57,7 +57,9 @@ test('it creates a ServiceRequestTypeEmailTemplate if it did not already exist',
 
     $type = collect(ServiceRequestEmailTemplateType::cases())->random();
 
-    $role = collect(ServiceRequestTypeEmailTemplateRole::cases())->random();
+    $role = $type === ServiceRequestEmailTemplateType::SurveyResponse
+              ? ServiceRequestTypeEmailTemplateRole::Customer
+              : collect(ServiceRequestTypeEmailTemplateRole::cases())->random();
 
     livewire(ServiceRequestTypeEmailTemplatePage::class, [
         'record' => $serviceRequestType->getKey(),
@@ -85,7 +87,6 @@ test('it updates a ServiceRequestTypeEmailTemplate if it already exists', functi
     asSuperAdmin();
 
     $request = ServiceRequestTypeEmailTemplateRequestFactory::new()->create();
-
     expect($emailTemplate->subject)->not->toEqualCanonicalizing($request['subject'])
         ->and($emailTemplate->body)->not->toEqualCanonicalizing($request['body']);
 
@@ -101,7 +102,6 @@ test('it updates a ServiceRequestTypeEmailTemplate if it already exists', functi
         ->assertHasNoFormErrors();
 
     $emailTemplate->refresh();
-
     expect($emailTemplate->subject)->toEqualCanonicalizing($request['subject'])
         ->and($emailTemplate->body)->toEqualCanonicalizing($request['body']);
 });

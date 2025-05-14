@@ -34,34 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Database\Factories;
+namespace App\Features;
 
-use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
-use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
-use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
-use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Support\AbstractFeatureFlag;
 
-/**
- * @extends Factory<ServiceRequestTypeEmailTemplate>
- */
-class ServiceRequestTypeEmailTemplateFactory extends Factory
+class SurveyResponseTemplate extends AbstractFeatureFlag
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+    public function resolve(mixed $scope): mixed
     {
-        return [
-            'service_request_type_id' => ServiceRequestType::factory(),
-            'type' => fake()->randomElement(collect(ServiceRequestEmailTemplateType::cases())->values()->toArray()),
-            'subject' => ['type' => 'doc', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => fake()->sentence()]]]]],
-            'body' => ['type' => 'doc', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => fake()->sentence()]]]]],
-            'role' => fn (array $attributes) => $attributes['type'] === ServiceRequestEmailTemplateType::SurveyResponse
-              ? ServiceRequestTypeEmailTemplateRole::Customer
-              : fake()->randomElement(ServiceRequestTypeEmailTemplateRole::cases()),
-        ];
+        return false;
     }
 }

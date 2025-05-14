@@ -102,6 +102,8 @@ class ServiceRequestType extends BaseModel implements Auditable
         'is_customers_service_request_status_change_notification_enabled',
         'is_customers_service_request_closed_email_enabled',
         'is_customers_service_request_closed_notification_enabled',
+        'is_customers_service_request_closed_notification_enabled',
+        'is_customers_survey_response_email_enabled',
     ];
 
     protected $casts = [
@@ -139,6 +141,7 @@ class ServiceRequestType extends BaseModel implements Auditable
         'is_customers_service_request_status_change_notification_enabled' => 'boolean',
         'is_customers_service_request_closed_email_enabled' => 'boolean',
         'is_customers_service_request_closed_notification_enabled' => 'boolean',
+        'is_customers_survey_response_email_enabled' => 'boolean',
     ];
 
     public function serviceRequests(): HasManyThrough

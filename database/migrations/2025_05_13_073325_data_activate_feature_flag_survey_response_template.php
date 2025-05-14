@@ -34,34 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Database\Factories;
+use App\Features\SurveyResponseTemplate;
+use Illuminate\Database\Migrations\Migration;
 
-use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
-use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
-use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
-use Illuminate\Database\Eloquent\Factories\Factory;
-
-/**
- * @extends Factory<ServiceRequestTypeEmailTemplate>
- */
-class ServiceRequestTypeEmailTemplateFactory extends Factory
-{
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            'service_request_type_id' => ServiceRequestType::factory(),
-            'type' => fake()->randomElement(collect(ServiceRequestEmailTemplateType::cases())->values()->toArray()),
-            'subject' => ['type' => 'doc', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => fake()->sentence()]]]]],
-            'body' => ['type' => 'doc', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => fake()->sentence()]]]]],
-            'role' => fn (array $attributes) => $attributes['type'] === ServiceRequestEmailTemplateType::SurveyResponse
-              ? ServiceRequestTypeEmailTemplateRole::Customer
-              : fake()->randomElement(ServiceRequestTypeEmailTemplateRole::cases()),
-        ];
+        SurveyResponseTemplate::activate();
     }
-}
+
+    public function down(): void
+    {
+        SurveyResponseTemplate::deactivate();
+    }
+};

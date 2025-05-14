@@ -34,34 +34,47 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Database\Factories;
+namespace AidingApp\ServiceManagement\Filament\Blocks;
 
-use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
-use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
-use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
-use Illuminate\Database\Eloquent\Factories\Factory;
+use Filament\Forms\Components\Component;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use FilamentTiptapEditor\TiptapBlock;
 
-/**
- * @extends Factory<ServiceRequestTypeEmailTemplate>
- */
-class ServiceRequestTypeEmailTemplateFactory extends Factory
+class SurveyResponseEmailTemplateTakeSurveyButtonBlock extends TiptapBlock
 {
+    public string $preview = 'service-management::blocks.previews.take-survey-link';
+
+    public string $rendered = 'service-management::blocks.rendered.take-survey-link';
+
+    public ?string $icon = null;
+
+    public ?string $label = 'Take Survey';
+
+    public string $width = 'md';
+
     /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
+     * @return array<int, Component>
      */
-    public function definition(): array
+    public function getFormSchema(): array
     {
         return [
-            'service_request_type_id' => ServiceRequestType::factory(),
-            'type' => fake()->randomElement(collect(ServiceRequestEmailTemplateType::cases())->values()->toArray()),
-            'subject' => ['type' => 'doc', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => fake()->sentence()]]]]],
-            'body' => ['type' => 'doc', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => fake()->sentence()]]]]],
-            'role' => fn (array $attributes) => $attributes['type'] === ServiceRequestEmailTemplateType::SurveyResponse
-              ? ServiceRequestTypeEmailTemplateRole::Customer
-              : fake()->randomElement(ServiceRequestTypeEmailTemplateRole::cases()),
+            TextInput::make('label')
+                ->label('Button Label')
+                ->required()
+                ->default('Take Survey')
+                ->placeholder('Enter the button text (e.g. Take Survey)'),
+
+            Select::make('alignment')
+                ->label('Alignment')
+                ->options([
+                    'left' => 'Left',
+                    'right' => 'Right',
+                    'center' => 'Center',
+                ])
+                ->default('center')
+                ->required()
+                ->placeholder('Enter the button alignment (e.g. left, right, center)'),
         ];
     }
 }

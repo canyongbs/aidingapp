@@ -36,6 +36,8 @@
 
 namespace AidingApp\ServiceManagement\Actions;
 
+use AidingApp\ServiceManagement\Filament\Blocks\ServiceRequestTypeEmailTemplateButtonBlock;
+use AidingApp\ServiceManagement\Filament\Blocks\SurveyResponseEmailTemplateTakeSurveyButtonBlock;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\HtmlString;
 
@@ -50,6 +52,10 @@ class GenerateServiceRequestTypeEmailTemplateContent
         $content = tiptap_converter()
             ->mergeTagsMap($mergeData)
             ->record($record, $recordAttribute)
+            ->blocks([
+                ServiceRequestTypeEmailTemplateButtonBlock::class,
+                SurveyResponseEmailTemplateTakeSurveyButtonBlock::class,
+            ])
             ->asHTML($content);
 
         return str($content)->sanitizeHtml()->toHtmlString();
