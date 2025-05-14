@@ -49,6 +49,6 @@
                box-sizing: border-box;"
         target="_blank"
     >
-        View Service Request
+        {{ $label ?? 'View Service Request' }}
     </a>
 </div>
