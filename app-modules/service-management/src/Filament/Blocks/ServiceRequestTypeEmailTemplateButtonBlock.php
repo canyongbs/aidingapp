@@ -59,7 +59,7 @@ class ServiceRequestTypeEmailTemplateButtonBlock extends TiptapBlock
     public function getFormSchema(): array
     {
         return [
-            TextInput::make('view_service_request')
+            TextInput::make('label')
                 ->label('Button Label')
                 ->required()
                 ->default('View Service Request')
