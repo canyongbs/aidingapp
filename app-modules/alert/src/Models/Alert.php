@@ -41,7 +41,6 @@ use AidingApp\Alert\Enums\AlertStatus;
 use AidingApp\Alert\Observers\AlertObserver;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Notification\Models\Contracts\Subscribable;
 use App\Models\BaseModel;
 use App\Models\Concerns\BelongsToEducatable;
 use App\Models\Scopes\LicensedToEducatable;
@@ -84,11 +83,6 @@ class Alert extends BaseModel implements Auditable
     public function concern(): MorphTo
     {
         return $this->morphTo();
-    }
-
-    public function getSubscribable(): ?Subscribable
-    {
-        return $this->concern;
     }
 
     /**

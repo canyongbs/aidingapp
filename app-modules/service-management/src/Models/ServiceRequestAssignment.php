@@ -37,7 +37,6 @@
 namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\Notification\Models\Contracts\Subscribable;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Observers\ServiceRequestAssignmentObserver;
 use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
@@ -95,15 +94,5 @@ class ServiceRequestAssignment extends BaseModel implements Auditable, ProvidesA
     public static function getTimelineData(Model $forModel): Collection
     {
         return $forModel->assignments()->get();
-    }
-
-    public function getSubscribable(): ?Subscribable
-    {
-        /** @var Subscribable|Model $respondent */
-        $respondent = $this->serviceRequest->respondent;
-
-        return $respondent instanceof Subscribable
-            ? $respondent
-            : null;
     }
 }

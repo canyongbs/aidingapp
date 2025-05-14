@@ -38,7 +38,6 @@ namespace AidingApp\Task\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Notification\Models\Contracts\Subscribable;
 use AidingApp\Task\Database\Factories\TaskFactory;
 use AidingApp\Task\Enums\TaskStatus;
 use AidingApp\Task\Observers\TaskObserver;
@@ -113,11 +112,6 @@ class Task extends BaseModel implements Auditable
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
-    }
-
-    public function getSubscribable(): ?Subscribable
-    {
-        return $this->concern instanceof Subscribable ? $this->concern : null;
     }
 
     /**
