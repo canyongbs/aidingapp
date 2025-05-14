@@ -49,7 +49,6 @@ class ServiceRequestDataObject extends Data
         public string|Optional $title,
         public string|Optional $close_details,
         public string|Optional $res_details,
-        public string $respondent_type,
         public string $respondent_id,
     ) {}
 
@@ -63,7 +62,6 @@ class ServiceRequestDataObject extends Data
             title: $data['title'] ?? Optional::create(),
             close_details: $data['close_details'] ?? Optional::create(),
             res_details: $data['res_details'] ?? Optional::create(),
-            respondent_type: $data['respondent_type'],
             respondent_id: $data['respondent_id'],
         );
     }

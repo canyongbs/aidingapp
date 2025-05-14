@@ -78,9 +78,7 @@ class ServiceRequestsRelationManager extends RelationManager
                             $query->where('teams.id', auth()->user()->team?->getKey());
                         })
                         ->whereHas('respondent', function (Builder $query) {
-                            $query
-                                ->where('respondent_id', $this->getOwnerRecord()->getKey())
-                                ->where('respondent_type', $this->getOwnerRecord()->getMorphClass());
+                            $query->where('respondent_id', $this->getOwnerRecord()->getKey());
                         });
                 });
             })
