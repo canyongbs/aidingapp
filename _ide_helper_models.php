@@ -3316,6 +3316,7 @@ namespace AidingApp\ServiceManagement\Models{
  * @property bool $is_customers_service_request_status_change_notification_enabled
  * @property bool $is_customers_service_request_closed_email_enabled
  * @property bool $is_customers_service_request_closed_notification_enabled
+ * @property bool $is_customers_survey_response_email_enabled
  * @property-read \App\Models\User|null $assignmentTypeIndividual
  * @property-read \AidingApp\ServiceManagement\Models\ServiceRequestTypeManager|\AidingApp\ServiceManagement\Models\ServiceRequestTypeAuditor|null $pivot
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Team\Models\Team> $auditors
@@ -3367,6 +3368,7 @@ namespace AidingApp\ServiceManagement\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereIsCustomersServiceRequestStatusChangeNotificationEnabled($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereIsCustomersServiceRequestUpdateEmailEnabled($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereIsCustomersServiceRequestUpdateNotificationEnabled($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereIsCustomersSurveyResponseEmailEnabled($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereIsManagersServiceRequestAssignedEmailEnabled($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereIsManagersServiceRequestAssignedNotificationEnabled($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereIsManagersServiceRequestClosedEmailEnabled($value)
@@ -3724,4 +3726,3 @@ namespace AidingApp\Webhook\Models{
 	#[\AllowDynamicProperties]
 	class IdeHelperLandlordInboundWebhook {}
 }
-
