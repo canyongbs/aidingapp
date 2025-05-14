@@ -45,7 +45,7 @@ use ReflectionNamedType;
 trait RandomizeState
 {
     /**
-      * @param string[] $states
+     * @param string[] $states
     */
     public function randomizeState(array $states = []): self
     {

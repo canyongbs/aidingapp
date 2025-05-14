@@ -44,7 +44,7 @@ use ReflectionClass;
 class AuditableModels
 {
     /**
-    * @return Collection<string, string>
+     * @return Collection<string, string>
     */
     public static function all(): Collection
     {
