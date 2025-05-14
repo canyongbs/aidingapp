@@ -169,12 +169,6 @@ class ServiceRequestObserver
             $serviceRequest->respondent->notify(new SendEducatableServiceRequestClosedNotification($serviceRequest, $customerEmailTemplate));
         }
 
-        $customerEmailTemplateForSurveyResponse = $this->fetchTemplate(
-            $serviceRequest->priority->type,
-            ServiceRequestEmailTemplateType::SurveyResponse,
-            ServiceRequestTypeEmailTemplateRole::Customer
-        );
-
         if (
             Gate::check(Feature::FeedbackManagement->getGateName()) &&
             $serviceRequest?->priority?->type?->has_enabled_feedback_collection &&
@@ -182,6 +176,12 @@ class ServiceRequestObserver
             ! $serviceRequest?->feedback()->count()
         ) {
             if(SurveyResponseTemplate::active() && $serviceRequest->priority->type->is_customers_survey_response_email_enabled) {
+                $customerEmailTemplateForSurveyResponse = $this->fetchTemplate(
+                    $serviceRequest->priority->type,
+                    ServiceRequestEmailTemplateType::SurveyResponse,
+                    ServiceRequestTypeEmailTemplateRole::Customer
+                );
+                
                 $serviceRequest->respondent->notify(new SendClosedServiceFeedbackNotification($serviceRequest, $customerEmailTemplateForSurveyResponse));
             } else {
                 $serviceRequest->respondent->notify(new SendClosedServiceFeedbackNotification($serviceRequest));

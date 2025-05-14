@@ -12,118 +12,116 @@ return new class () extends Migration {
                 ->where('type', 'survey_response')
                 ->whereIn('role', ['auditor', 'manager'])
                 ->delete();
-        });
 
-        $subject = [
-            'type' => 'doc',
-            'content' => [
-                [
-                    'type' => 'paragraph',
-                    'attrs' => [
-                        'class' => null,
-                        'style' => null,
-                        'textAlign' => 'start',
-                    ],
-                    'content' => [
-                        [
-                            'text' => 'Feedback survey for ',
-                            'type' => 'text',
+            $subject = [
+                'type' => 'doc',
+                'content' => [
+                    [
+                        'type' => 'paragraph',
+                        'attrs' => [
+                            'class' => null,
+                            'style' => null,
+                            'textAlign' => 'start',
                         ],
-                        [
-                            'type' => 'mergeTag',
-                            'attrs' => ['id' => 'service request number'],
-                        ],
-                    ],
-                ],
-            ],
-        ];
-
-        $body = [
-            'type' => 'doc',
-            'content' => [
-                [
-                    'type' => 'paragraph',
-                    'attrs' => [
-                        'class' => null,
-                        'style' => null,
-                        'textAlign' => 'start',
-                    ],
-                    'content' => [
-                        [
-                            'text' => 'Hi ',
-                            'type' => 'text',
-                            'marks' => [
-                                ['type' => 'bold'],
+                        'content' => [
+                            [
+                                'text' => 'Feedback survey for ',
+                                'type' => 'text',
                             ],
-                        ],
-                        [
-                            'type' => 'mergeTag',
-                            'attrs' => ['id' => 'assigned to'],
-                            'marks' => [
-                                ['type' => 'bold'],
-                            ],
-                        ],
-                        [
-                            'text' => ',',
-                            'type' => 'text',
-                            'marks' => [
-                                ['type' => 'bold'],
+                            [
+                                'type' => 'mergeTag',
+                                'attrs' => ['id' => 'service request number'],
                             ],
                         ],
                     ],
                 ],
-                [
-                    'type' => 'paragraph',
-                    'attrs' => [
-                        'class' => null,
-                        'style' => null,
-                        'textAlign' => 'start',
-                    ],
-                    'content' => [
-                        [
-                            'text' => "To help us serve you better in the future, we'd love to hear about your experience with our support team.",
-                            'type' => 'text',
-                        ],
-                    ],
-                ],
-                [
-                    'type' => 'tiptapBlock',
-                    'attrs' => [
-                        'data' => [
-                            'alignment' => 'center',
-                            'take_survey' => 'Take Survey',
-                        ],
-                        'type' => 'surveyResponseEmailTemplateTakeSurveyButtonBlock',
-                    ],
-                ],
-                [
-                    'type' => 'paragraph',
-                    'attrs' => [
-                        'class' => null,
-                        'style' => null,
-                        'textAlign' => 'start',
-                    ],
-                    'content' => [
-                        ['type' => 'hardBreak'],
-                        [
-                            'text' => 'We appreciate your time and we value your feedback!',
-                            'type' => 'text',
-                        ],
-                        ['type' => 'hardBreak'],
-                        [
-                            'text' => 'Thank You.',
-                            'type' => 'text',
-                        ],
-                        ['type' => 'hardBreak'],
-                    ],
-                ],
-            ],
-        ];
+            ];
 
-        $subjectJson = json_encode($subject);
-        $bodyJson = json_encode($body);
+            $body = [
+                'type' => 'doc',
+                'content' => [
+                    [
+                        'type' => 'paragraph',
+                        'attrs' => [
+                            'class' => null,
+                            'style' => null,
+                            'textAlign' => 'start',
+                        ],
+                        'content' => [
+                            [
+                                'text' => 'Hi ',
+                                'type' => 'text',
+                                'marks' => [
+                                    ['type' => 'bold'],
+                                ],
+                            ],
+                            [
+                                'type' => 'mergeTag',
+                                'attrs' => ['id' => 'assigned to'],
+                                'marks' => [
+                                    ['type' => 'bold'],
+                                ],
+                            ],
+                            [
+                                'text' => ',',
+                                'type' => 'text',
+                                'marks' => [
+                                    ['type' => 'bold'],
+                                ],
+                            ],
+                        ],
+                    ],
+                    [
+                        'type' => 'paragraph',
+                        'attrs' => [
+                            'class' => null,
+                            'style' => null,
+                            'textAlign' => 'start',
+                        ],
+                        'content' => [
+                            [
+                                'text' => "To help us serve you better in the future, we'd love to hear about your experience with our support team.",
+                                'type' => 'text',
+                            ],
+                        ],
+                    ],
+                    [
+                        'type' => 'tiptapBlock',
+                        'attrs' => [
+                            'data' => [
+                                'alignment' => 'center',
+                                'take_survey' => 'Take Survey',
+                            ],
+                            'type' => 'surveyResponseEmailTemplateTakeSurveyButtonBlock',
+                        ],
+                    ],
+                    [
+                        'type' => 'paragraph',
+                        'attrs' => [
+                            'class' => null,
+                            'style' => null,
+                            'textAlign' => 'start',
+                        ],
+                        'content' => [
+                            ['type' => 'hardBreak'],
+                            [
+                                'text' => 'We appreciate your time and we value your feedback!',
+                                'type' => 'text',
+                            ],
+                            ['type' => 'hardBreak'],
+                            [
+                                'text' => 'Thank You.',
+                                'type' => 'text',
+                            ],
+                            ['type' => 'hardBreak'],
+                        ],
+                    ],
+                ],
+            ];
 
-        DB::transaction(function () use ($subjectJson, $bodyJson) {
+            $subjectJson = json_encode($subject);
+            $bodyJson = json_encode($body);
+
             DB::table('service_request_types')->orderBy('id')->chunkById(100, function ($types) use ($subjectJson, $bodyJson) {
                 foreach ($types as $type) {
                     $existing = DB::table('service_request_type_email_templates')->where([

@@ -16,6 +16,6 @@
                box-sizing: border-box;"
         target="_blank"
     >
-        {{ $label }}
+        {{ $label ?? 'Take Survey' }}
     </a>
 </div>
