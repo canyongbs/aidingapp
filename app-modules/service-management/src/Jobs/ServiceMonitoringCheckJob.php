@@ -79,7 +79,12 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
 
     public function handle(): void
     {
-        $response = Http::get($this->serviceMonitoringTarget->domain);
+        $response = Http::withOptions([
+                            'allow_redirects' => [
+                              'max' => 15,
+                            ],
+                          ])
+                          ->get($this->serviceMonitoringTarget->domain);
 
         $history = $this->serviceMonitoringTarget->histories()->create([
             'response' => $response->status(),
