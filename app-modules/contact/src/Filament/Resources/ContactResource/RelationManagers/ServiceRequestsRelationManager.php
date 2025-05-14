@@ -80,7 +80,7 @@ class ServiceRequestsRelationManager extends RelationManager
                         })
                         ->whereHas('respondent', function (Builder $query) {
                             MakeContactNotPolymorphicFeature::active() ?
-                                $query->where('respondent_id', $this->getOwnerRecord()->getKey()) : 
+                                $query->where('respondent_id', $this->getOwnerRecord()->getKey()) :
                                 $query->where('respondent_id', $this->getOwnerRecord()->getKey())
                                     ->where('respondent_type', $this->getOwnerRecord()->getMorphClass());
                         });
