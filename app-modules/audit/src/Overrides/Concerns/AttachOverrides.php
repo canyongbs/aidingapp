@@ -146,7 +146,6 @@ trait AttachOverrides
     }
 
     /**
-     *
      * @param string $class
     */
     private function isAuditable(string $class): bool
