@@ -47,7 +47,7 @@ trait HasAdvancedFilter
      * @param array<string, mixed> $data
      *
      * @return Builder<Model>
-    */
+     */
     public function scopeAdvancedFilter(Builder $query, array $data): Builder
     {
         return $this->processQuery($query, $data);
@@ -58,7 +58,7 @@ trait HasAdvancedFilter
      * @param array<string, mixed> $data
      *
      * @return Builder<Model>
-    */
+     */
     public function processQuery(Builder $query, array $data): Builder
     {
         $data = $this->processGlobalSearch($data);
@@ -108,7 +108,7 @@ trait HasAdvancedFilter
      * @param array<string, mixed> $data
      *
      * @return array<string, mixed>
-    */
+     */
     protected function processGlobalSearch(array $data): array
     {
         if (isset($data['f']) || ! isset($data['s'])) {

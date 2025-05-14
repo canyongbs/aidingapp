@@ -45,7 +45,7 @@ class AuditableModels
 {
     /**
      * @return Collection<string, string>
-    */
+     */
     public static function all(): Collection
     {
         /** @var Collection<string, string> $collection */

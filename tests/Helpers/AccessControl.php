@@ -46,7 +46,7 @@ use function Pest\Laravel\actingAs;
 /**
  *
  * @param array<string, mixed> $permissions
-*/
+ */
 function testResourceRequiresPermissionForAccess(string $resource, string|array $permissions, string $method, ?string $feature = null): void
 {
     test("{$resource} {$method} is gated with proper access control", function () use ($permissions, $resource, $method, $feature) {

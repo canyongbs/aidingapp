@@ -221,7 +221,7 @@ abstract class TestCase extends BaseTestCase
 
     /**
      * @param array<string> $paths
-    */
+     */
     protected function calculateMigrationChecksum(array $paths): string
     {
         $finder = Finder::create()

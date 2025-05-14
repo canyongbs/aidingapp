@@ -52,7 +52,7 @@ class FilterQueryBuilder
      * @param array<string, mixed> $data
      *
      * @return Builder<Model>
-    */
+     */
     public function apply(Builder $query, array $data): Builder
     {
         $this->model = $query->getModel();
@@ -75,7 +75,7 @@ class FilterQueryBuilder
      * @param Builder<Model> $query
      *
      * @return Builder<Model>
-    */
+     */
     public function contains($filter, $query): Builder
     {
         $filter['query_1'] = addslashes($filter['query_1']);
@@ -86,7 +86,7 @@ class FilterQueryBuilder
     /**
      * @param Builder<Model> $query
      * @param array<string, mixed> $data
-    */
+     */
     protected function makeOrder(Builder $query, array $data): void
     {
         if ($this->isNestedColumn($data['order_column'])) {
@@ -120,7 +120,7 @@ class FilterQueryBuilder
     /**
      * @param Builder<Model> $query
      * @param array<string, mixed> $filter
-    */
+     */
     protected function makeFilter(Builder $query, $filter): void
     {
         if ($this->isNestedColumn($filter['column'])) {

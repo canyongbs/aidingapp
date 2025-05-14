@@ -46,7 +46,7 @@ trait RandomizeState
 {
     /**
      * @param string[] $states
-    */
+     */
     public function randomizeState(array $states = []): self
     {
         $states = empty($states) ? $this->getStates() : collect($states);
@@ -58,7 +58,7 @@ trait RandomizeState
 
     /**
      * @return Collection<int|string, non-empty-string>
-    */
+     */
     protected function getStates(): Collection
     {
         $class = new ReflectionClass($this);
