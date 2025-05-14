@@ -59,7 +59,7 @@ class SurveyResponseEmailTemplateTakeSurveyButtonBlock extends TiptapBlock
     public function getFormSchema(): array
     {
         return [
-            TextInput::make('take_survey')
+            TextInput::make('label')
                 ->label('Button Label')
                 ->required()
                 ->default('Take Survey')

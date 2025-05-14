@@ -16,6 +16,6 @@
                box-sizing: border-box;"
         target="_blank"
     >
-        {{ $take_survey }}
+        {{ $label }}
     </a>
 </div>

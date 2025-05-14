@@ -116,12 +116,7 @@
                                             <span class="xl:sr-only">{{ $type }}</span>
                                         </label>
                                     @else
-                                        <div class="xl:flex xl:w-16 xl:justify-center xl:px-3 xl:py-2">
-                                            <input
-                                                type="hidden"
-                                                wire:model="{{ $statePath . '.is_' . $roleSlug . '_' . $eventSlug . '_' . $typeSlug . '_enabled' }}"
-                                            />
-                                        </div>
+                                        <div class="xl:flex xl:w-16 xl:justify-center xl:px-3 xl:py-2"></div>
                                     @endif
                                 @endforeach
                             </div>
