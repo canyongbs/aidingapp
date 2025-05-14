@@ -39,7 +39,6 @@ namespace AidingApp\ServiceManagement\Models;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Division\Models\Division;
-use AidingApp\Notification\Models\Contracts\Subscribable;
 use AidingApp\ServiceManagement\Database\Factories\ServiceRequestFactory;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateDirection;
@@ -159,11 +158,6 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
         } while (! $save && $attempts < 3);
 
         return $save;
-    }
-
-    public function getSubscribable(): ?Subscribable
-    {
-        return $this->respondent instanceof Subscribable ? $this->respondent : null;
     }
 
     /** @return MorphTo<Contact> */

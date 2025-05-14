@@ -68,7 +68,5 @@ class NotificationServiceProvider extends ServiceProvider
             'database_message' => DatabaseMessage::class,
             'stored_anonymous_notifiable' => StoredAnonymousNotifiable::class,
         ]);
-
-        $this->registerEvents();
     }
 }

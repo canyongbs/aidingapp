@@ -37,7 +37,6 @@
 namespace AidingApp\Engagement\Models;
 
 use AidingApp\Engagement\Observers\EngagementFileEntitiesObserver;
-use AidingApp\Notification\Models\Contracts\Subscribable;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphPivot;
@@ -50,11 +49,6 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 class EngagementFileEntities extends MorphPivot
 {
     protected $table = 'engagement_file_entities';
-
-    public function getSubscribable(): ?Subscribable
-    {
-        return $this->entity instanceof Subscribable ? $this->entity : null;
-    }
 
     public function entity(): MorphTo
     {

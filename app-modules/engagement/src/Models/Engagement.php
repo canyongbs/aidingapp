@@ -42,7 +42,6 @@ use AidingApp\Engagement\Actions\GenerateEngagementBodyContent;
 use AidingApp\Engagement\Models\Contracts\HasDeliveryMethod;
 use AidingApp\Engagement\Observers\EngagementObserver;
 use AidingApp\Notification\Enums\NotificationChannel;
-use AidingApp\Notification\Models\Contracts\Subscribable;
 use AidingApp\Notification\Models\EmailMessage;
 use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
 use AidingApp\Timeline\Models\Timeline;
@@ -203,11 +202,6 @@ class Engagement extends BaseModel implements Auditable, ProvidesATimeline, HasD
     public function scopeSentToContact(Builder $query): void
     {
         $query->where('recipient_type', resolve(Contact::class)->getMorphClass());
-    }
-
-    public function getSubscribable(): ?Subscribable
-    {
-        return $this->recipient instanceof Subscribable ? $this->recipient : null;
     }
 
     public function getBody(): HtmlString
