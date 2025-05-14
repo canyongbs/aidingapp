@@ -53,9 +53,6 @@ class ServiceRequestFactory extends Factory
     {
         return [
             'respondent_id' => Contact::factory(),
-            'respondent_type' => function (array $attributes) {
-                return Contact::find($attributes['respondent_id'])->getMorphClass();
-            },
             'title' => str(fake()->words(asText: true))->headline()->toString(),
             'close_details' => fake()->sentence(),
             'res_details' => fake()->sentence(),

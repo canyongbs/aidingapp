@@ -160,17 +160,11 @@ class Contact extends Authenticatable implements Auditable, Subscribable, Educat
     }
 
     /**
-     * @return MorphMany<ServiceRequest, $this>
+     * @return HasMany<ServiceRequest, $this>
      */
-    public function serviceRequests(): MorphMany
+    public function serviceRequests(): HasMany
     {
-        return $this->morphMany(
-            related: ServiceRequest::class,
-            name: 'respondent',
-            type: 'respondent_type',
-            id: 'respondent_id',
-            localKey: 'id'
-        );
+        return $this->hasMany(ServiceRequest::class, 'respondent_id');
     }
 
     /**

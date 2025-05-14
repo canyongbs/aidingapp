@@ -89,7 +89,6 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
     use HasFactory;
 
     protected $fillable = [
-        'respondent_type',
         'respondent_id',
         'division_id',
         'status_id',
@@ -167,14 +166,10 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
         return $this->respondent instanceof Subscribable ? $this->respondent : null;
     }
 
-    /** @return MorphTo<Contact> */
-    public function respondent(): MorphTo
+    /** @return BelongsTo<Contact, $this> */
+    public function respondent(): BelongsTo
     {
-        return $this->morphTo(
-            name: 'respondent',
-            type: 'respondent_type',
-            id: 'respondent_id',
-        );
+        return $this->belongsTo(Contact::class, 'respondent_id');
     }
 
     /**
@@ -392,10 +387,26 @@ class ServiceRequest extends BaseModel implements Auditable, CanTriggerAutoSubsc
         return $this->status->classification === SystemServiceRequestClassification::Closed;
     }
 
+    // protected static function booted(): void
+    // {
+    //     static::addGlobalScope('licensed', function (Builder $builder) {
+    //         $builder->tap(new LicensedToEducatable('respondent'));
+    //     });
+    // }
+
     protected static function booted(): void
     {
         static::addGlobalScope('licensed', function (Builder $builder) {
-            $builder->tap(new LicensedToEducatable('respondent'));
+            if (! auth()->check()) {
+                return;
+            }
+
+            /** @var Authenticatable $user */
+            $user = auth()->user();
+
+            if (! $user->hasLicense(Contact::getLicenseType())) {
+                $builder->whereRaw('1 = 0');
+            }
         });
     }
 
