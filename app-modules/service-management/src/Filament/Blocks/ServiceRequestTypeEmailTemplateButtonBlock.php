@@ -64,7 +64,7 @@ class ServiceRequestTypeEmailTemplateButtonBlock extends TiptapBlock
                 ->required()
                 ->default('View Service Request')
                 ->placeholder('Enter the button text (e.g. View Service Request)'),
-                
+
             Select::make('alignment')
                 ->label('Alignment')
                 ->options([
