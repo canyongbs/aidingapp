@@ -35,21 +35,28 @@
 */
 
 use Illuminate\Database\Migrations\Migration;
-use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
-use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class () extends Migration {
     public function up(): void
     {
-        // Schema::table('asset_check_ins', function (Blueprint $table) {
-        //     $table->foreignUuid('checked_in_from_id')->constrained('contacts')->change();
-        // });
+        DB::beginTransaction();
+
+        DB::statement('ALTER TABLE asset_check_ins ALTER COLUMN checked_in_from_id SET DATA TYPE UUID USING checked_in_from_id::uuid');
+
+        DB::statement('ALTER TABLE asset_check_ins ADD CONSTRAINT contacts_id_checked_in_from_id FOREIGN KEY (checked_in_from_id) REFERENCES contacts (id) ON UPDATE CASCADE ON DELETE CASCADE;');
+
+        DB::commit();
     }
 
     public function down(): void
     {
-        // Schema::table('asset_check_ins', function (Blueprint $table) {
-        //     $table->string('checked_in_from_id')->change();
-        // });
+        DB::beginTransaction();
+
+        DB::statement('ALTER TABLE asset_check_ins ALTER COLUMN checked_in_from_id SET DATA TYPE varchar(255)');
+
+        DB::statement('ALTER TABLE asset_check_ins DROP CONSTRAINT contacts_id_checked_in_from_id;');
+
+        DB::commit();
     }
 };
