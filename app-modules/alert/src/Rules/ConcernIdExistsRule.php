@@ -62,7 +62,6 @@ class ConcernIdExistsRule implements DataAwareRule, ValidationRule
     }
 
     /**
-     *
      * @param array<string> $data
     */
     public function setData(array $data): static
