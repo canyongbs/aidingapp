@@ -37,8 +37,7 @@
 use App\Features\MakeContactNotPolymorphicFeature;
 use Illuminate\Database\Migrations\Migration;
 
-return new class extends Migration
-{
+return new class () extends Migration {
     public function up(): void
     {
         MakeContactNotPolymorphicFeature::activate();
