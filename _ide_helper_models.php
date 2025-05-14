@@ -3726,4 +3726,3 @@ namespace AidingApp\Webhook\Models{
 	#[\AllowDynamicProperties]
 	class IdeHelperLandlordInboundWebhook {}
 }
-

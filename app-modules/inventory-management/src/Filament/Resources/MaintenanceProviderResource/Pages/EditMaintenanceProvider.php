@@ -34,45 +34,37 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\InventoryManagement\Filament\Resources;
+namespace AidingApp\InventoryManagement\Filament\Resources\MaintenanceProviderResource\Pages;
 
-use AidingApp\InventoryManagement\Filament\Resources\AssetStatusResource\Pages\CreateAssetStatus;
-use AidingApp\InventoryManagement\Filament\Resources\AssetStatusResource\Pages\ListAssetStatuses;
-use AidingApp\InventoryManagement\Filament\Resources\AssetStatusResource\Pages\ViewAssetStatus;
-use AidingApp\InventoryManagement\Models\AssetStatus;
-use App\Filament\Clusters\AssetManagement;
+use AidingApp\InventoryManagement\Filament\Resources\MaintenanceProviderResource;
+use App\Concerns\EditPageRedirection;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
-use Filament\Resources\Resource;
+use Filament\Resources\Pages\EditRecord;
 
-class AssetStatusResource extends Resource
+class EditMaintenanceProvider extends EditRecord
 {
-    protected static ?string $model = AssetStatus::class;
+    use EditPageRedirection;
 
-    protected static ?string $navigationIcon = 'heroicon-o-tag';
+    protected static string $resource = MaintenanceProviderResource::class;
 
-    protected static ?string $navigationLabel = 'Statuses';
-
-    protected static ?int $navigationSort = 20;
-
-    protected static ?string $cluster = AssetManagement::class;
-
-    public static function form(Form $form): Form
+    public function form(Form $form): Form
     {
         return $form
             ->schema([
                 TextInput::make('name')
-                    ->autofocus()
+                    ->autoFocus()
+                    ->string()
+                    ->maxLength(255)
                     ->required(),
             ]);
     }
 
-    public static function getPages(): array
+    protected function getHeaderActions(): array
     {
         return [
-            'index' => ListAssetStatuses::route('/'),
-            'create' => CreateAssetStatus::route('/create'),
-            'view' => ViewAssetStatus::route('/{record}'),
+            ViewAction::make(),
         ];
     }
 }

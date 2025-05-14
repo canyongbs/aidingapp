@@ -34,45 +34,34 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\InventoryManagement\Filament\Resources;
+namespace AidingApp\InventoryManagement\Filament\Resources\MaintenanceProviderResource\Pages;
 
-use AidingApp\InventoryManagement\Filament\Resources\AssetStatusResource\Pages\CreateAssetStatus;
-use AidingApp\InventoryManagement\Filament\Resources\AssetStatusResource\Pages\ListAssetStatuses;
-use AidingApp\InventoryManagement\Filament\Resources\AssetStatusResource\Pages\ViewAssetStatus;
-use AidingApp\InventoryManagement\Models\AssetStatus;
-use App\Filament\Clusters\AssetManagement;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
+use AidingApp\InventoryManagement\Filament\Resources\MaintenanceProviderResource;
+use Filament\Actions\EditAction;
+use Filament\Infolists\Components\Section;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Infolist;
+use Filament\Resources\Pages\ViewRecord;
 
-class AssetStatusResource extends Resource
+class ViewMaintenanceProvider extends ViewRecord
 {
-    protected static ?string $model = AssetStatus::class;
+    protected static string $resource = MaintenanceProviderResource::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-tag';
-
-    protected static ?string $navigationLabel = 'Statuses';
-
-    protected static ?int $navigationSort = 20;
-
-    protected static ?string $cluster = AssetManagement::class;
-
-    public static function form(Form $form): Form
+    public function infolist(Infolist $infolist): Infolist
     {
-        return $form
+        return $infolist
             ->schema([
-                TextInput::make('name')
-                    ->autofocus()
-                    ->required(),
+                Section::make()
+                    ->schema([
+                        TextEntry::make('name'),
+                    ]),
             ]);
     }
 
-    public static function getPages(): array
+    protected function getHeaderActions(): array
     {
         return [
-            'index' => ListAssetStatuses::route('/'),
-            'create' => CreateAssetStatus::route('/create'),
-            'view' => ViewAssetStatus::route('/{record}'),
+            EditAction::make(),
         ];
     }
 }
