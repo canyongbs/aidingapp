@@ -53,10 +53,8 @@ class AlertObserver
             // Creating the subscription directly so that the alert can be sent to this User as well
             resolve(SubscriptionCreate::class)->handle($user, $alert->getSubscribable(), false);
 
-            Cache::tags([match ($alert->concern_type) {
-                app(Contact::class)->getMorphClass() => "user-{$user->getKey()}-contact-alerts",
-                default => null,
-            }])->flush();
+            Cache::tags(["user-{$user->getKey()}-contact-alerts"])->flush();
+
         }
 
         AlertCreated::dispatch($alert);
