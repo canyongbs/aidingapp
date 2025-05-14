@@ -34,17 +34,37 @@
 </COPYRIGHT>
 */
 
-use App\Features\AssetCount;
-use Illuminate\Database\Migrations\Migration;
+namespace AidingApp\InventoryManagement\Filament\Resources\MaintenanceProviderResource\Pages;
 
-return new class () extends Migration {
-    public function up(): void
+use AidingApp\InventoryManagement\Filament\Resources\MaintenanceProviderResource;
+use App\Concerns\EditPageRedirection;
+use Filament\Actions\ViewAction;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
+use Filament\Resources\Pages\EditRecord;
+
+class EditMaintenanceProvider extends EditRecord
+{
+    use EditPageRedirection;
+
+    protected static string $resource = MaintenanceProviderResource::class;
+
+    public function form(Form $form): Form
     {
-        AssetCount::activate();
+        return $form
+            ->schema([
+                TextInput::make('name')
+                    ->autoFocus()
+                    ->string()
+                    ->maxLength(255)
+                    ->required(),
+            ]);
     }
 
-    public function down(): void
+    protected function getHeaderActions(): array
     {
-        AssetCount::deactivate();
+        return [
+            ViewAction::make(),
+        ];
     }
-};
+}

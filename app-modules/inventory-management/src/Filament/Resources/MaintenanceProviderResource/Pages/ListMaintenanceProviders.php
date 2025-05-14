@@ -60,11 +60,17 @@ class ListMaintenanceProviders extends ListRecords
                 TextColumn::make('name')
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('maintenanceActivities')
+                    ->label('Assets Count')
+                    ->default('0')
+                    ->formatStateUsing(function ($record) {
+                        return $record->maintenanceActivities()->count();
+                    }),
             ])
             ->actions([
                 EditAction::make(),
                 DeleteAction::make()
-                    ->hidden(fn ($record) => $record->assets_count > 0),
+                    ->hidden(fn ($record) => $record->maintenanceActivities()->exists()),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
@@ -75,7 +81,9 @@ class ListMaintenanceProviders extends ListRecords
 
                             foreach ($records as $record) {
                                 /** @var MaintenanceProvider $record */
-                                if ($record->assets_count > 0) {
+                                if (
+                                    $record->maintenanceActivities()->exists()
+                                ) {
                                     $unsuccessfullyDeleted++;
                                 } else {
                                     $record->delete();
@@ -92,7 +100,7 @@ class ListMaintenanceProviders extends ListRecords
 
                             if ($unsuccessfullyDeleted > 0) {
                                 Notification::make()
-                                    ->title(__(':count maintenance providers cannot be deleted due to linked with assets.', ['count' => $unsuccessfullyDeleted]))
+                                    ->title(__(':count maintenance providers cannot be deleted as they are currently associated with assets.', ['count' => $unsuccessfullyDeleted]))
                                     ->danger()
                                     ->send();
                             }

@@ -50,7 +50,9 @@ class CreateMaintenanceProvider extends CreateRecord
         return $form
             ->schema([
                 TextInput::make('name')
-                    ->required(),
+                    ->required()
+                    ->string()
+                    ->maxLength(255),
             ]);
     }
 }

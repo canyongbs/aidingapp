@@ -52,7 +52,6 @@ class MaintenanceProvider extends BaseModel implements Auditable
 
     protected $fillable = [
         'name',
-        'assets_count',
     ];
 
     /**
@@ -60,6 +59,6 @@ class MaintenanceProvider extends BaseModel implements Auditable
      */
     public function maintenanceActivities(): HasMany
     {
-        return $this->hasMany(MaintenanceActivity::class, 'asset_id');
+        return $this->hasMany(MaintenanceActivity::class);
     }
 }
