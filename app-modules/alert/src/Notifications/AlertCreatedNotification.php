@@ -38,7 +38,6 @@ namespace AidingApp\Alert\Notifications;
 
 use AidingApp\Alert\Models\Alert;
 use AidingApp\Contact\Filament\Resources\ContactResource;
-use AidingApp\Contact\Models\Contact;
 use Filament\Notifications\Notification as FilamentNotification;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\HtmlString;

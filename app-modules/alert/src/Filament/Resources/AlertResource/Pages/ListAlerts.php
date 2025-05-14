@@ -41,7 +41,6 @@ use AidingApp\Alert\Enums\AlertStatus;
 use AidingApp\Alert\Filament\Resources\AlertResource;
 use AidingApp\Alert\Models\Alert;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactAlerts;
-use AidingApp\Contact\Models\Contact;
 use App\Filament\Forms\Components\EducatableSelect;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Scopes\EducatableSearch;
