@@ -175,13 +175,13 @@ class ServiceRequestObserver
             $serviceRequest?->status?->classification == SystemServiceRequestClassification::Closed &&
             ! $serviceRequest?->feedback()->count()
         ) {
-            if(SurveyResponseTemplate::active() && $serviceRequest->priority->type->is_customers_survey_response_email_enabled) {
+            if (SurveyResponseTemplate::active() && $serviceRequest->priority->type->is_customers_survey_response_email_enabled) {
                 $customerEmailTemplateForSurveyResponse = $this->fetchTemplate(
                     $serviceRequest->priority->type,
                     ServiceRequestEmailTemplateType::SurveyResponse,
                     ServiceRequestTypeEmailTemplateRole::Customer
                 );
-                
+
                 $serviceRequest->respondent->notify(new SendClosedServiceFeedbackNotification($serviceRequest, $customerEmailTemplateForSurveyResponse));
             } else {
                 $serviceRequest->respondent->notify(new SendClosedServiceFeedbackNotification($serviceRequest));
