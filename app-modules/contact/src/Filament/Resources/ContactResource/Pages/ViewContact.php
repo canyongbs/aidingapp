@@ -38,7 +38,6 @@ namespace AidingApp\Contact\Filament\Resources\ContactResource\Pages;
 
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Notification\Filament\Actions\SubscribeHeaderAction;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\Section;
@@ -129,7 +128,6 @@ class ViewContact extends ViewRecord
     {
         return [
             EditAction::make(),
-            SubscribeHeaderAction::make(),
         ];
     }
 }

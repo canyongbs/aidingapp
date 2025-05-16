@@ -42,8 +42,6 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactSource;
 use AidingApp\Contact\Models\ContactStatus;
 use AidingApp\Engagement\Filament\Actions\BulkEngagementAction;
-use AidingApp\Notification\Filament\Actions\SubscribeBulkAction;
-use AidingApp\Notification\Filament\Actions\SubscribeTableAction;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\User;
 use Filament\Actions\CreateAction;
@@ -120,11 +118,9 @@ class ListContacts extends ListRecords
             ->actions([
                 ViewAction::make(),
                 EditAction::make(),
-                SubscribeTableAction::make(),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
-                    SubscribeBulkAction::make(),
                     BulkEngagementAction::make(context: 'contacts'),
                     DeleteBulkAction::make(),
                     BulkAction::make('bulk_update')

@@ -36,11 +36,9 @@
 
 namespace AidingApp\Task\Observers;
 
-use AidingApp\Notification\Events\TriggeredAutoSubscription;
 use AidingApp\Task\Models\Task;
 use AidingApp\Task\Notifications\TaskAssignedToUserNotification;
 use App\Models\User;
-use Exception;
 use Illuminate\Support\Facades\DB;
 
 class TaskObserver
@@ -62,25 +60,12 @@ class TaskObserver
         }
     }
 
-    public function created(Task $task): void
-    {
-        try {
-            TriggeredAutoSubscription::dispatchIf(! empty($task->createdBy), $task->createdBy, $task);
-        } catch (Exception $e) {
-            DB::rollBack();
-
-            throw $e;
-        }
-    }
-
     public function saved(Task $task): void
     {
         DB::commit();
 
         if (! empty($task->assignedTo) && ($task->wasChanged('assigned_to') || ($task->wasRecentlyCreated))) {
             $task->assignedTo->notify(new TaskAssignedToUserNotification($task));
-
-            TriggeredAutoSubscription::dispatch($task->assignedTo, $task);
         }
     }
 }
