@@ -249,22 +249,6 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
         return ContactResource::class;
     }
 
-    // /**
-    //  * @return MorphToMany<User, $this, covariant Subscription>
-    //  */
-    // public function subscribedUsers(): MorphToMany
-    // {
-    //     return $this->morphToMany(
-    //         related: User::class,
-    //         name: 'subscribable',
-    //         table: 'subscriptions',
-    //     )
-    //         ->using(Subscription::class)
-    //         ->withPivot('id')
-    //         ->withTimestamps()
-    //         ->tap(new HasLicense($this->getLicenseType()));
-    // }
-
     /**
      * @return MorphMany<AssetCheckIn, $this>
      */
