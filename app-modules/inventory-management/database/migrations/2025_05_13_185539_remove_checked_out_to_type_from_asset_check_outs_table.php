@@ -34,32 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Database\Factories;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Division\Models\Division;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
-use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
-use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Factories\Factory;
-
-/**
- * @extends Factory<ServiceRequest>
- */
-class ServiceRequestFactory extends Factory
-{
-    public function definition(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            'respondent_id' => Contact::factory(),
-            'title' => str(fake()->words(asText: true))->headline()->toString(),
-            'close_details' => fake()->sentence(),
-            'res_details' => fake()->sentence(),
-            'division_id' => Division::inRandomOrder()->first()?->id ?? Division::factory(),
-            'status_id' => ServiceRequestStatus::inRandomOrder()->first() ?? ServiceRequestStatus::factory(),
-            'priority_id' => ServiceRequestPriority::inRandomOrder()->first() ?? ServiceRequestPriority::factory(),
-            'created_by_id' => User::factory(),
-        ];
+        Schema::table('asset_check_outs', function (Blueprint $table) {
+            $table->dropColumn('checked_out_to_type');
+        });
     }
-}
+
+    public function down(): void
+    {
+        Schema::table('asset_check_outs', function (Blueprint $table) {
+            $table->string('checked_out_to_type');
+        });
+    }
+};

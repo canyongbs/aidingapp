@@ -34,32 +34,29 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Database\Factories;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
 
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Division\Models\Division;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
-use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
-use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Factories\Factory;
-
-/**
- * @extends Factory<ServiceRequest>
- */
-class ServiceRequestFactory extends Factory
-{
-    public function definition(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            'respondent_id' => Contact::factory(),
-            'title' => str(fake()->words(asText: true))->headline()->toString(),
-            'close_details' => fake()->sentence(),
-            'res_details' => fake()->sentence(),
-            'division_id' => Division::inRandomOrder()->first()?->id ?? Division::factory(),
-            'status_id' => ServiceRequestStatus::inRandomOrder()->first() ?? ServiceRequestStatus::factory(),
-            'priority_id' => ServiceRequestPriority::inRandomOrder()->first() ?? ServiceRequestPriority::factory(),
-            'created_by_id' => User::factory(),
-        ];
+        DB::beginTransaction();
+
+        DB::statement('ALTER TABLE asset_check_ins ALTER COLUMN checked_in_from_id SET DATA TYPE UUID USING checked_in_from_id::uuid');
+
+        DB::statement('ALTER TABLE asset_check_ins ADD CONSTRAINT contacts_id_checked_in_from_id FOREIGN KEY (checked_in_from_id) REFERENCES contacts (id) ON UPDATE CASCADE ON DELETE CASCADE;');
+
+        DB::commit();
     }
-}
+
+    public function down(): void
+    {
+        DB::beginTransaction();
+
+        DB::statement('ALTER TABLE asset_check_ins ALTER COLUMN checked_in_from_id SET DATA TYPE varchar(255)');
+
+        DB::statement('ALTER TABLE asset_check_ins DROP CONSTRAINT contacts_id_checked_in_from_id;');
+
+        DB::commit();
+    }
+};
