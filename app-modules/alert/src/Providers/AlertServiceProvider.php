@@ -62,16 +62,7 @@ class AlertServiceProvider extends ServiceProvider
             'alert' => Alert::class,
         ]);
 
-        $this->registerEvents();
-
         $this->registerGraphQL();
-    }
-
-    protected function registerEvents(): void
-    {
-        Event::listen(
-            AlertCreated::class,
-        );
     }
 
     protected function registerGraphQL(): void
