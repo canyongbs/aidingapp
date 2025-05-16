@@ -58,7 +58,6 @@ use AidingApp\Timeline\Models\Contracts\HasFilamentResource;
 use AidingApp\Timeline\Models\Timeline;
 use App\Models\Authenticatable;
 use App\Models\Contracts\Educatable;
-use App\Models\Scopes\HasLicense;
 use App\Models\User;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
