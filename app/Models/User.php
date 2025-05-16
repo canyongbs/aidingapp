@@ -40,7 +40,6 @@ use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Authorization\Models\License;
 use AidingApp\Authorization\Models\Role;
-use AidingApp\Contact\Models\Contact;
 use AidingApp\Engagement\Models\Concerns\HasManyEngagementBatches;
 use AidingApp\Engagement\Models\Concerns\HasManyEngagements;
 use AidingApp\InAppCommunication\Models\TwilioConversation;
@@ -70,7 +69,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Arr;
@@ -218,11 +216,6 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
     public function licenses(): HasMany
     {
         return $this->hasMany(License::class, 'user_id');
-    }
-
-    public function contactAlerts(): HasManyDeep
-    {
-        return $this->hasManyDeepFromRelations($this->contactSubscriptions(), (new Contact())->alerts());
     }
 
     public function permissionsFromRoles(): HasManyDeep

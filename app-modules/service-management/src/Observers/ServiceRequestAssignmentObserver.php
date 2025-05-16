@@ -36,7 +36,6 @@
 
 namespace AidingApp\ServiceManagement\Observers;
 
-use AidingApp\Notification\Events\TriggeredAutoSubscription;
 use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
 use AidingApp\Notification\Notifications\Channels\MailChannel;
 use AidingApp\ServiceManagement\Actions\NotifyServiceRequestUsers;
@@ -50,7 +49,6 @@ use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestAssign
 use AidingApp\ServiceManagement\Notifications\ServiceRequestAssigned;
 use AidingApp\Timeline\Events\TimelineableRecordCreated;
 use AidingApp\Timeline\Events\TimelineableRecordDeleted;
-use App\Models\User;
 
 class ServiceRequestAssignmentObserver
 {
@@ -66,12 +64,6 @@ class ServiceRequestAssignmentObserver
 
     public function created(ServiceRequestAssignment $serviceRequestAssignment): void
     {
-        $user = auth()->user();
-
-        if ($user instanceof User) {
-            TriggeredAutoSubscription::dispatch($user, $serviceRequestAssignment);
-        }
-
         $serviceRequestAssignment->serviceRequest->assignments()->where('id', '!=', $serviceRequestAssignment->id)->update([
             'status' => ServiceRequestAssignmentStatus::Inactive,
         ]);

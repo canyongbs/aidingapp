@@ -36,7 +36,6 @@
 
 namespace AidingApp\ServiceManagement\Observers;
 
-use AidingApp\Notification\Events\TriggeredAutoSubscription;
 use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
 use AidingApp\Notification\Notifications\Channels\MailChannel;
 use AidingApp\ServiceManagement\Actions\NotifyServiceRequestUsers;
@@ -48,7 +47,6 @@ use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestUpdate
 use AidingApp\ServiceManagement\Notifications\ServiceRequestUpdated;
 use AidingApp\Timeline\Events\TimelineableRecordCreated;
 use AidingApp\Timeline\Events\TimelineableRecordDeleted;
-use App\Models\User;
 
 class ServiceRequestUpdateObserver
 {
@@ -56,12 +54,6 @@ class ServiceRequestUpdateObserver
 
     public function created(ServiceRequestUpdate $serviceRequestUpdate): void
     {
-        $user = auth()->user();
-
-        if ($user instanceof User) {
-            TriggeredAutoSubscription::dispatch($user, $serviceRequestUpdate);
-        }
-
         TimelineableRecordCreated::dispatch($serviceRequestUpdate->serviceRequest, $serviceRequestUpdate);
 
         $customerEmailTemplate = $this->fetchTemplate(

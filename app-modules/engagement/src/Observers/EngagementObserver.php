@@ -37,10 +37,8 @@
 namespace AidingApp\Engagement\Observers;
 
 use AidingApp\Engagement\Models\Engagement;
-use AidingApp\Notification\Events\TriggeredAutoSubscription;
 use AidingApp\Timeline\Events\TimelineableRecordCreated;
 use AidingApp\Timeline\Events\TimelineableRecordDeleted;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 
 class EngagementObserver
@@ -54,12 +52,6 @@ class EngagementObserver
 
     public function created(Engagement $engagement): void
     {
-        $user = auth()->user();
-
-        if ($user instanceof User) {
-            TriggeredAutoSubscription::dispatch($user, $engagement);
-        }
-
         /** @var Model $entity */
         $entity = $engagement->recipient;
 

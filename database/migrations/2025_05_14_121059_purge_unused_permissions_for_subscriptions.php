@@ -2,13 +2,10 @@
 
 use Database\Migrations\Concerns\CanModifyPermissions;
 use Illuminate\Database\Migrations\Migration;
-use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
-use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
-return new class extends Migration
-{
+return new class () extends Migration {
     use CanModifyPermissions;
 
     /**
@@ -31,7 +28,7 @@ return new class extends Migration
         'web',
         'api',
     ];
-    
+
     public function up(): void
     {
         collect($this->guards)

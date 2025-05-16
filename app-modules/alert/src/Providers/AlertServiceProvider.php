@@ -40,7 +40,6 @@ use AidingApp\Alert\AlertPlugin;
 use AidingApp\Alert\Enums\AlertSeverity;
 use AidingApp\Alert\Enums\AlertStatus;
 use AidingApp\Alert\Events\AlertCreated;
-use AidingApp\Alert\Listeners\NotifySubscribersOfAlertCreated;
 use AidingApp\Alert\Models\Alert;
 use App\Concerns\ImplementsGraphQL;
 use Filament\Panel;
@@ -72,7 +71,6 @@ class AlertServiceProvider extends ServiceProvider
     {
         Event::listen(
             AlertCreated::class,
-            NotifySubscribersOfAlertCreated::class
         );
     }
 

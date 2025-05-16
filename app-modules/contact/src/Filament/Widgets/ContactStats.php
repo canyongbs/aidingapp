@@ -36,7 +36,6 @@
 
 namespace AidingApp\Contact\Filament\Widgets;
 
-use AidingApp\Alert\Enums\AlertStatus;
 use AidingApp\Contact\Models\Contact;
 use App\Models\User;
 use Filament\Widgets\StatsOverviewWidget;
@@ -59,14 +58,6 @@ class ContactStats extends StatsOverviewWidget
                     }),
                 maxPrecision: 2,
             )),
-            Stat::make('Subscriptions', Cache::tags(['contacts', "user-{$user->getKey()}-contact-subscriptions"])
-                ->remember("user-{$user->getKey()}-contact-subscriptions-count", now()->addHour(), function () use ($user): int {
-                    return $user->contactSubscriptions()->count();
-                })),
-            Stat::make('Alerts', Cache::tags(['contacts', "user-{$user->getKey()}-contact-alerts"])
-                ->remember("user-{$user->getKey()}-contact-alerts-count", now()->addHour(), function () use ($user): int {
-                    return $user->contactAlerts()->status(AlertStatus::Active)->count();
-                })),
         ];
     }
 }

@@ -46,7 +46,6 @@ use App\Concerns\ImplementsGraphQL;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Notifications\Channels\DatabaseChannel as BaseDatabaseChannel;
 use Illuminate\Notifications\Channels\MailChannel as BaseMailChannel;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
 class NotificationServiceProvider extends ServiceProvider
