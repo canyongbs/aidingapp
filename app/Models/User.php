@@ -46,7 +46,6 @@ use AidingApp\Engagement\Models\Concerns\HasManyEngagements;
 use AidingApp\InAppCommunication\Models\TwilioConversation;
 use AidingApp\InAppCommunication\Models\TwilioConversationUser;
 use AidingApp\Notification\Models\Contracts\CanBeNotified;
-use AidingApp\Notification\Models\Subscription;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Models\ChangeRequest;
 use AidingApp\ServiceManagement\Models\ChangeRequestResponse;
@@ -219,29 +218,6 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
     public function licenses(): HasMany
     {
         return $this->hasMany(License::class, 'user_id');
-    }
-
-    /**
-     * @return HasMany<Subscription, $this>
-     */
-    public function subscriptions(): HasMany
-    {
-        return $this->hasMany(Subscription::class);
-    }
-
-    /**
-     * @return MorphToMany<Contact, $this, covariant Subscription>
-     */
-    public function contactSubscriptions(): MorphToMany
-    {
-        return $this->morphedByMany(
-            related: Contact::class,
-            name: 'subscribable',
-            table: 'subscriptions'
-        )
-            ->using(Subscription::class)
-            ->withPivot('id')
-            ->withTimestamps();
     }
 
     public function contactAlerts(): HasManyDeep
