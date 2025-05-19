@@ -40,7 +40,6 @@ use AidingApp\ServiceManagement\Actions\GenerateServiceRequestTypeEmailTemplateC
 use AidingApp\ServiceManagement\Actions\GenerateServiceRequestTypeEmailTemplateSubject;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
-use App\Features\SurveyResponseTemplate;
 use Illuminate\Support\HtmlString;
 
 trait HandlesServiceRequestTemplateContent
@@ -113,8 +112,7 @@ trait HandlesServiceRequestTemplateContent
                 ]);
             }
 
-            if (SurveyResponseTemplate::active() &&
-                $block['type'] === 'tiptapBlock' &&
+            if ($block['type'] === 'tiptapBlock' &&
                 ($block['attrs']['type'] ?? null) === 'surveyResponseEmailTemplateTakeSurveyButtonBlock') {
                 $block['attrs']['data']['url'] = route('feedback.service.request', $this->serviceRequest);
             }

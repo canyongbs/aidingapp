@@ -44,7 +44,6 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use App\Concerns\EditPageRedirection;
-use App\Features\SurveyResponseTemplate;
 use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Tabs\Tab;
 use Filament\Forms\Form;
@@ -76,7 +75,7 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
     {
         $roles = ServiceRequestTypeEmailTemplateRole::cases();
 
-        if (SurveyResponseTemplate::active() && $this->type === ServiceRequestEmailTemplateType::SurveyResponse) {
+        if ($this->type === ServiceRequestEmailTemplateType::SurveyResponse) {
             $roles = [ServiceRequestTypeEmailTemplateRole::Customer];
         }
 
