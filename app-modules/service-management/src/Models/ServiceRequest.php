@@ -159,8 +159,8 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
         return $save;
     }
 
-    /** @return MorphTo<Contact> */
-    public function respondent(): MorphTo
+    /** @return BelongsTo<Contact, $this> */
+    public function respondent(): BelongsTo
     {
         return $this->belongsTo(Contact::class, 'respondent_id');
     }
