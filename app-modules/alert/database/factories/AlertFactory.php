@@ -41,7 +41,6 @@ use AidingApp\Alert\Enums\AlertStatus;
 use AidingApp\Alert\Models\Alert;
 use AidingApp\Contact\Models\Contact;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Database\Eloquent\Relations\Relation;
 
 /**
  * @extends Factory<Alert>
