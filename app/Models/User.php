@@ -36,9 +36,11 @@
 
 namespace App\Models;
 
+use AidingApp\Alert\Models\Alert;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Authorization\Models\License;
+use AidingApp\Authorization\Models\Permission;
 use AidingApp\Authorization\Models\Role;
 use AidingApp\Engagement\Models\Concerns\HasManyEngagementBatches;
 use AidingApp\Engagement\Models\Concerns\HasManyEngagements;
@@ -66,6 +68,7 @@ use Filament\Panel;
 use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -232,6 +235,9 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
             ->where('status', ServiceRequestAssignmentStatus::Active);
     }
 
+    /**
+     * @return HasManyDeep<Model, $this>
+     */
     public function serviceRequests(): HasManyDeep
     {
         return $this->hasManyDeepFromRelations($this->serviceRequestAssignments(), (new ServiceRequestAssignment())->serviceRequest());
@@ -418,7 +424,7 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
         return "{$context}. When you respond please use this information about me to tailor your response.";
     }
 
-    public function assignTeam($teamId): void
+    public function assignTeam(string $teamId): void
     {
         $this->team()->associate($teamId)->save();
     }

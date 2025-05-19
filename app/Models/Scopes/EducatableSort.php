@@ -37,6 +37,7 @@
 namespace App\Models\Scopes;
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
@@ -46,6 +47,9 @@ class EducatableSort
         protected string $direction
     ) {}
 
+    /**
+     * @param Builder<ServiceRequest> $query
+     */
     public function __invoke(Builder $query): void
     {
         $prospectNameColumn = Contact::displayNameKey();

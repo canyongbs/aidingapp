@@ -50,7 +50,6 @@ use OwenIt\Auditing\Contracts\Auditable;
  */
 class SystemUser extends Authenticatable implements Auditable
 {
-    use HasFactory;
     use SoftDeletes;
     use HasUuids;
     use AuditableTrait;

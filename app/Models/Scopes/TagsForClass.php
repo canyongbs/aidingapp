@@ -37,6 +37,7 @@
 namespace App\Models\Scopes;
 
 use App\Models\Contracts\HasTags;
+use App\Models\Tag;
 use Illuminate\Database\Eloquent\Builder;
 
 class TagsForClass
@@ -45,6 +46,9 @@ class TagsForClass
         protected HasTags $class
     ) {}
 
+    /**
+     * @param Builder<Tag> $query
+     */
     public function __invoke(Builder $query): void
     {
         $query->tap(new TagsForType($this->class::getTagType()));

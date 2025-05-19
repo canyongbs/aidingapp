@@ -37,6 +37,7 @@
 namespace App\Providers;
 
 use App\Enums\Feature;
+use App\Models\Authenticatable;
 use App\Support\FeatureAccessResponse;
 use Illuminate\Auth\Access\Response;
 use Illuminate\Foundation\Auth\User as BaseAuthenticatable;
@@ -59,7 +60,7 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
-        Gate::after(function (BaseAuthenticatable $authenticatable, string $ability, bool|null|Response $result, mixed $arguments) {
+        Gate::after(function (Authenticatable $authenticatable, string $ability, bool|null|Response $result, mixed $arguments) {
             return $authenticatable->isSuperAdmin() && ! $result instanceof FeatureAccessResponse
               ? true
               : $result;

@@ -58,6 +58,7 @@ class MultiConnectionParallelTestingServiceProvider extends ServiceProvider
 {
     use TestDatabases;
 
+    /** @var array<string> */
     protected array $parallelConnections = ['tenant'];
 
     /**

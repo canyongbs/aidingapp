@@ -37,6 +37,7 @@
 namespace App\Models\Scopes;
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
@@ -47,6 +48,9 @@ class EducatableSearch
         protected string $search
     ) {}
 
+    /**
+     * @param Builder<ServiceRequest> $query
+     */
     public function __invoke(Builder $query): void
     {
         $search = strtolower($this->search);
