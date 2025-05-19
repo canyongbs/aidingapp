@@ -51,17 +51,7 @@ class AlertFactory extends Factory
     public function definition(): array
     {
         return [
-            'concern_type' => $this->faker->randomElement([(new Contact())->getMorphClass()]),
-            'concern_id' => function (array $attributes) {
-                $concernClass = Relation::getMorphedModel($attributes['concern_type']);
-
-                /** @var Contact $concernModel */
-                $concernModel = new $concernClass();
-
-                $concern = $concernModel::factory()->create();
-
-                return $concern->getKey();
-            },
+            'concern_id' => Contact::factory()->create()->getKey(),
             'description' => $this->faker->sentence(),
             'severity' => $this->faker->randomElement(AlertSeverity::cases()),
             'status' => $this->faker->randomElement(AlertStatus::cases()),

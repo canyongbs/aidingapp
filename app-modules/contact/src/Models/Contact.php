@@ -220,11 +220,11 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
     }
 
     /**
-     * @return MorphMany<Alert, $this>
+     * @return HasMany<Alert, $this>
      */
-    public function alerts(): MorphMany
+    public function alerts(): HasMany
     {
-        return $this->morphMany(Alert::class, 'concern');
+        return $this->hasMany(Alert::class, 'concern_id');
     }
 
     public static function displayNameKey(): string
