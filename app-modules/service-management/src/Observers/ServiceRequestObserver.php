@@ -36,7 +36,6 @@
 
 namespace AidingApp\ServiceManagement\Observers;
 
-use AidingApp\Notification\Events\TriggeredAutoSubscription;
 use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
 use AidingApp\Notification\Notifications\Channels\MailChannel;
 use AidingApp\ServiceManagement\Actions\CreateServiceRequestHistory;
@@ -56,7 +55,6 @@ use AidingApp\ServiceManagement\Notifications\ServiceRequestCreated;
 use AidingApp\ServiceManagement\Notifications\ServiceRequestStatusChanged;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
 use App\Enums\Feature;
-use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Gate;
 
@@ -71,12 +69,6 @@ class ServiceRequestObserver
 
     public function created(ServiceRequest $serviceRequest): void
     {
-        $user = auth()->user();
-
-        if ($user instanceof User) {
-            TriggeredAutoSubscription::dispatch($user, $serviceRequest);
-        }
-
         $customerEmailTemplate = $this->fetchTemplate(
             $serviceRequest->priority->type,
             ServiceRequestEmailTemplateType::Created,

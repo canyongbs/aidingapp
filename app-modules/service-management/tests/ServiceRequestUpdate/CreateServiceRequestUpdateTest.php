@@ -35,14 +35,12 @@
 */
 
 use AidingApp\Authorization\Enums\LicenseType;
-use AidingApp\Notification\Events\TriggeredAutoSubscription;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource\Pages\CreateServiceRequestUpdate;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use AidingApp\ServiceManagement\Tests\RequestFactories\CreateServiceRequestUpdateRequestFactory;
 use App\Models\User;
 use App\Settings\LicenseSettings;
-use Illuminate\Support\Facades\Event;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
@@ -56,7 +54,6 @@ test('A successful action on the CreateServiceRequestUpdate page', function () {
     // This causes an issue during SubscriptionCreate as a unique constraint is violated.
     // Postgres prevents any further actions from happening during a transaction when there is an error like this
     // Preventing the Subscription creation for now
-    Event::fake([TriggeredAutoSubscription::class]);
 
     asSuperAdmin()
         ->get(
@@ -106,7 +103,6 @@ test('CreateServiceRequestUpdate is gated with proper access control', function 
     // This causes an issue during SubscriptionCreate as a unique constraint is violated.
     // Postgres prevents any further actions from happening during a transaction when there is an error like this
     // Preventing the Subscription creation for now
-    Event::fake([TriggeredAutoSubscription::class]);
 
     $user = User::factory()->licensed(LicenseType::cases())->create();
 

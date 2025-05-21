@@ -37,8 +37,6 @@
 namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\Notification\Models\Contracts\CanTriggerAutoSubscription;
-use AidingApp\Notification\Models\Contracts\Subscribable;
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateDirection;
 use AidingApp\ServiceManagement\Observers\ServiceRequestUpdateObserver;
 use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
@@ -57,7 +55,7 @@ use OwenIt\Auditing\Contracts\Auditable;
  * @mixin IdeHelperServiceRequestUpdate
  */
 #[ObservedBy([ServiceRequestUpdateObserver::class])]
-class ServiceRequestUpdate extends BaseModel implements Auditable, CanTriggerAutoSubscription, ProvidesATimeline
+class ServiceRequestUpdate extends BaseModel implements Auditable, ProvidesATimeline
 {
     use SoftDeletes;
     use HasUuids;
@@ -78,16 +76,6 @@ class ServiceRequestUpdate extends BaseModel implements Auditable, CanTriggerAut
     public function serviceRequest(): BelongsTo
     {
         return $this->belongsTo(ServiceRequest::class);
-    }
-
-    public function getSubscribable(): ?Subscribable
-    {
-        /** @var Subscribable|Model $respondent */
-        $respondent = $this->serviceRequest->respondent;
-
-        return $respondent instanceof Subscribable
-            ? $respondent
-            : null;
     }
 
     public function timeline(): ServiceRequestUpdateTimeline

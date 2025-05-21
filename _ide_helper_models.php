@@ -495,9 +495,6 @@ namespace App\Models{
  * @property-read int|null $change_request_types_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\ServiceManagement\Models\ChangeRequest> $changeRequests
  * @property-read int|null $change_requests_count
- * @property-read \AidingApp\ServiceManagement\Models\ServiceMonitoringTargetUser|\AidingApp\Notification\Models\Subscription|null $pivot
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Contact\Models\Contact> $contactSubscriptions
- * @property-read int|null $contact_subscriptions_count
  * @property-read \AidingApp\InAppCommunication\Models\TwilioConversationUser|null $participant
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\InAppCommunication\Models\TwilioConversation> $conversations
  * @property-read int|null $conversations_count
@@ -516,22 +513,19 @@ namespace App\Models{
  * @property-read \App\Models\Pronouns|null $pronouns
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Authorization\Models\Role> $roles
  * @property-read int|null $roles_count
+ * @property-read \AidingApp\ServiceManagement\Models\ServiceMonitoringTargetUser|null $pivot
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\ServiceManagement\Models\ServiceMonitoringTarget> $serviceMonitoringTargets
  * @property-read int|null $service_monitoring_targets_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\ServiceManagement\Models\ServiceRequestAssignment> $serviceRequestAssignments
  * @property-read int|null $service_request_assignments_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\ServiceManagement\Models\ServiceRequestType> $serviceRequestTypeIndividualAssignment
  * @property-read int|null $service_request_type_individual_assignment_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Notification\Models\Subscription> $subscriptions
- * @property-read int|null $subscriptions_count
  * @property-read \AidingApp\Team\Models\Team|null $team
- * @property-read \Illuminate\Database\Eloquent\Collection|\AidingApp\Alert\Models\Alert[] $contactAlerts
- * @property-read int|null $contact_alerts_count
  * @property-read \Illuminate\Database\Eloquent\Collection|\AidingApp\Authorization\Models\Permission[] $permissionsFromRoles
  * @property-read int|null $permissions_from_roles_count
  * @property-read \Illuminate\Database\Eloquent\Collection|\AidingApp\ServiceManagement\Models\ServiceRequest[] $serviceRequests
  * @property-read int|null $service_requests_count
- * @method static \Illuminate\Database\Eloquent\Builder<static>|User advancedFilter($data)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User advancedFilter(array $data)
  * @method static \Database\Factories\UserFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User newQuery()
@@ -853,7 +847,7 @@ namespace AidingApp\Contact\Models{
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
  * @property-read int|null $audits_count
  * @property-read \App\Models\User|null $createdBy
- * @property-read \AidingApp\Notification\Models\Subscription|\AidingApp\Engagement\Models\EngagementFileEntities|null $pivot
+ * @property-read \AidingApp\Engagement\Models\EngagementFileEntities|null $pivot
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Engagement\Models\EngagementFile> $engagementFiles
  * @property-read int|null $engagement_files_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Engagement\Models\EngagementResponse> $engagementResponses
@@ -879,10 +873,6 @@ namespace AidingApp\Contact\Models{
  * @property-read int|null $service_requests_count
  * @property-read \AidingApp\Contact\Models\ContactSource $source
  * @property-read \AidingApp\Contact\Models\ContactStatus $status
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $subscribedUsers
- * @property-read int|null $subscribed_users_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Notification\Models\Subscription> $subscriptions
- * @property-read int|null $subscriptions_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Task\Models\Task> $tasks
  * @property-read int|null $tasks_count
  * @property-read \AidingApp\Timeline\Models\Timeline|null $timeline
@@ -2268,35 +2258,6 @@ namespace AidingApp\Notification\Models{
 	class IdeHelperStoredAnonymousNotifiable {}
 }
 
-namespace AidingApp\Notification\Models{
-/**
- * 
- *
- * @property string $id
- * @property string $user_id
- * @property string $subscribable_id
- * @property string $subscribable_type
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $subscribable
- * @property-read \App\Models\User $user
- * @method static \AidingApp\Notification\Database\Factories\SubscriptionFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Subscription licensedToEducatable(string $relationship)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Subscription newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Subscription newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Subscription query()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Subscription whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Subscription whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Subscription whereSubscribableId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Subscription whereSubscribableType($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Subscription whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Subscription whereUserId($value)
- * @mixin \Eloquent
- */
-	#[\AllowDynamicProperties]
-	class IdeHelperSubscription {}
-}
-
 namespace AidingApp\Portal\Models{
 /**
  * 
@@ -3316,6 +3277,10 @@ namespace AidingApp\ServiceManagement\Models{
  * @property bool $is_customers_service_request_status_change_notification_enabled
  * @property bool $is_customers_service_request_closed_email_enabled
  * @property bool $is_customers_service_request_closed_notification_enabled
+ * @property bool $is_managers_survey_response_email_enabled
+ * @property bool $is_managers_survey_response_notification_enabled
+ * @property bool $is_auditors_survey_response_email_enabled
+ * @property bool $is_auditors_survey_response_notification_enabled
  * @property bool $is_customers_survey_response_email_enabled
  * @property-read \App\Models\User|null $assignmentTypeIndividual
  * @property-read \AidingApp\ServiceManagement\Models\ServiceRequestTypeManager|\AidingApp\ServiceManagement\Models\ServiceRequestTypeAuditor|null $pivot
@@ -3358,6 +3323,8 @@ namespace AidingApp\ServiceManagement\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereIsAuditorsServiceRequestStatusChangeNotificationEnabled($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereIsAuditorsServiceRequestUpdateEmailEnabled($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereIsAuditorsServiceRequestUpdateNotificationEnabled($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereIsAuditorsSurveyResponseEmailEnabled($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereIsAuditorsSurveyResponseNotificationEnabled($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereIsCustomersServiceRequestAssignedEmailEnabled($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereIsCustomersServiceRequestAssignedNotificationEnabled($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereIsCustomersServiceRequestClosedEmailEnabled($value)
@@ -3379,6 +3346,8 @@ namespace AidingApp\ServiceManagement\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereIsManagersServiceRequestStatusChangeNotificationEnabled($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereIsManagersServiceRequestUpdateEmailEnabled($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereIsManagersServiceRequestUpdateNotificationEnabled($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereIsManagersSurveyResponseEmailEnabled($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereIsManagersSurveyResponseNotificationEnabled($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereLastAssignedId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereUpdatedAt($value)
@@ -3726,3 +3695,4 @@ namespace AidingApp\Webhook\Models{
 	#[\AllowDynamicProperties]
 	class IdeHelperLandlordInboundWebhook {}
 }
+

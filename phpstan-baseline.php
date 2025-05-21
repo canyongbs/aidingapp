@@ -1932,24 +1932,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/license-management/src/Providers/LicenseManagementServiceProvider.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Class AidingApp\\\\Notification\\\\Database\\\\Factories\\\\SubscriptionFactory extends generic class Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\Factory but does not specify its types\\: TModel$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/notification/database/factories/SubscriptionFactory.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @extends has invalid value \\(Subscription\\>\\)\\: Unexpected token "\\>", expected \'\\<\' at offset 28 on line 2$#',
-    'identifier' => 'phpDoc.parseError',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/notification/database/factories/SubscriptionFactory.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\Notification\\\\Actions\\\\SubscriptionToggle\\:\\:handle\\(\\) has no return type specified\\.$#',
-    'identifier' => 'missingType.return',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/notification/src/Actions/SubscriptionToggle.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\Notification\\\\DataTransferObjects\\\\EmailChannelResultData\\:\\:__construct\\(\\) has parameter \\$recipients with no value type specified in iterable type array\\.$#',
     'identifier' => 'missingType.iterableValue',
     'count' => 1,
@@ -1990,42 +1972,6 @@ $ignoreErrors[] = [
     'identifier' => 'missingType.property',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/notification/src/Exceptions/NotificationQuotaExceeded.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Property AidingApp\\\\Notification\\\\Exceptions\\\\SubscriptionAlreadyExistsException\\:\\:\\$message has no type specified\\.$#',
-    'identifier' => 'missingType.property',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/notification/src/Exceptions/SubscriptionAlreadyExistsException.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$callback of method Illuminate\\\\Support\\\\Collection\\<\\(int\\|string\\),Illuminate\\\\Database\\\\Eloquent\\\\Model\\>\\:\\:each\\(\\) expects callable\\(Illuminate\\\\Database\\\\Eloquent\\\\Model, int\\|string\\)\\: mixed, Closure\\(AidingApp\\\\Notification\\\\Models\\\\Contracts\\\\Subscribable\\)\\: void given\\.$#',
-    'identifier' => 'argument.type',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/notification/src/Filament/Actions/SubscribeBulkAction.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Call to an undefined method Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:displayNameKey\\(\\)\\.$#',
-    'identifier' => 'method.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/notification/src/Listeners/NotifyUserOfSubscriptionCreated.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Match expression does not handle remaining value\\: class\\-string\\<Illuminate\\\\Database\\\\Eloquent\\\\Model\\>&literal\\-string$#',
-    'identifier' => 'match.unhandled',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/notification/src/Listeners/NotifyUserOfSubscriptionCreated.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Call to an undefined method Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:displayNameKey\\(\\)\\.$#',
-    'identifier' => 'method.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/notification/src/Listeners/NotifyUserOfSubscriptionDeleted.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Match expression does not handle remaining value\\: class\\-string\\<Illuminate\\\\Database\\\\Eloquent\\\\Model\\>&literal\\-string$#',
-    'identifier' => 'match.unhandled',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/notification/src/Listeners/NotifyUserOfSubscriptionDeleted.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\Notification\\\\Models\\\\Contracts\\\\CanBeNotified\\:\\:notifications\\(\\) has no return type specified\\.$#',
@@ -2106,12 +2052,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/notification/src/Models/Contracts/Message.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\Notification\\\\Models\\\\Contracts\\\\Subscribable\\:\\:subscriptions\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\MorphMany does not specify its types\\: TRelatedModel, TDeclaringModel$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/notification/src/Models/Contracts/Subscribable.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\Notification\\\\Models\\\\DatabaseMessage\\:\\:recipient\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\MorphTo does not specify its types\\: TRelatedModel, TDeclaringModel$#',
     'identifier' => 'missingType.generics',
     'count' => 1,
@@ -2146,30 +2086,6 @@ $ignoreErrors[] = [
     'identifier' => 'missingType.generics',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/notification/src/Models/EmailMessageEvent.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\Notification\\\\Models\\\\Subscription\\:\\:scopeLicensedToEducatable\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/notification/src/Models/Subscription.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\Notification\\\\Models\\\\Subscription\\:\\:scopeLicensedToEducatable\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/notification/src/Models/Subscription.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\Notification\\\\Models\\\\Subscription\\:\\:subscribable\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\MorphTo does not specify its types\\: TRelatedModel, TDeclaringModel$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/notification/src/Models/Subscription.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\Notification\\\\Models\\\\Subscription\\:\\:user\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/notification/src/Models/Subscription.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Call to an undefined method Illuminate\\\\Notifications\\\\Notification\\:\\:toDatabase\\(\\)\\.$#',
@@ -2242,48 +2158,6 @@ $ignoreErrors[] = [
     'identifier' => 'missingType.iterableValue',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/notification/src/Notifications/Messages/TwilioMessage.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Match expression does not handle remaining value\\: string$#',
-    'identifier' => 'match.unhandled',
-    'count' => 2,
-    'path' => __DIR__ . '/app-modules/notification/src/Observers/SubscriptionObserver.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Call to an undefined method Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:getLicenseType\\(\\)\\.$#',
-    'identifier' => 'method.notFound',
-    'count' => 5,
-    'path' => __DIR__ . '/app-modules/notification/src/Policies/SubscriptionPolicy.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Using nullsafe method call on non\\-nullable type Illuminate\\\\Database\\\\Eloquent\\\\Model\\. Use \\-\\> instead\\.$#',
-    'identifier' => 'nullsafe.neverNull',
-    'count' => 5,
-    'path' => __DIR__ . '/app-modules/notification/src/Policies/SubscriptionPolicy.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\Notification\\\\Rules\\\\SubscribableIdExistsRule\\:\\:setData\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/notification/src/Rules/SubscribableIdExistsRule.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Property AidingApp\\\\Notification\\\\Rules\\\\SubscribableIdExistsRule\\:\\:\\$data has no type specified\\.$#',
-    'identifier' => 'missingType.property',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/notification/src/Rules/SubscribableIdExistsRule.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\Notification\\\\Rules\\\\UniqueSubscriptionRule\\:\\:setData\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/notification/src/Rules/UniqueSubscriptionRule.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Property AidingApp\\\\Notification\\\\Rules\\\\UniqueSubscriptionRule\\:\\:\\$data has no type specified\\.$#',
-    'identifier' => 'missingType.property',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/notification/src/Rules/UniqueSubscriptionRule.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\Notification\\\\Tests\\\\Fixtures\\\\TestDatabaseNotification\\:\\:toDatabase\\(\\) return type has no value type specified in iterable type array\\.$#',
@@ -3750,12 +3624,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/src/Models/ServiceRequest.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Instanceof between AidingApp\\\\Contact\\\\Models\\\\Contact and AidingApp\\\\Notification\\\\Models\\\\Contracts\\\\Subscribable will always evaluate to true\\.$#',
-    'identifier' => 'instanceof.alwaysTrue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Models/ServiceRequest.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequest\\:\\:respondent\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\MorphTo\\<AidingApp\\\\Contact\\\\Models\\\\Contact\\> but returns Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\MorphTo\\<Illuminate\\\\Database\\\\Eloquent\\\\Model, \\$this\\(AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequest\\)\\>\\.$#',
     'identifier' => 'return.type',
     'count' => 1,
@@ -4632,12 +4500,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/task/src/Imports/TaskImporter.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Instanceof between AidingApp\\\\Contact\\\\Models\\\\Contact and AidingApp\\\\Notification\\\\Models\\\\Contracts\\\\Subscribable will always evaluate to true\\.$#',
-    'identifier' => 'instanceof.alwaysTrue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/task/src/Models/Task.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Call to function is_null\\(\\) with AidingApp\\\\Contact\\\\Models\\\\Contact will always evaluate to false\\.$#',
     'identifier' => 'function.impossibleType',
     'count' => 1,
@@ -5456,12 +5318,6 @@ $ignoreErrors[] = [
 $ignoreErrors[] = [
     'message' => '#^Method App\\\\Models\\\\User\\:\\:assignTeam\\(\\) has parameter \\$teamId with no type specified\\.$#',
     'identifier' => 'missingType.parameter',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Models/User.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method App\\\\Models\\\\User\\:\\:contactAlerts\\(\\) return type with generic class Staudenmeir\\\\EloquentHasManyDeep\\\\HasManyDeep does not specify its types\\: TRelatedModel, TDeclaringModel$#',
-    'identifier' => 'missingType.generics',
     'count' => 1,
     'path' => __DIR__ . '/app/Models/User.php',
 ];

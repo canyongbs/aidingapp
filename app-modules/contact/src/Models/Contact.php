@@ -49,11 +49,8 @@ use AidingApp\Engagement\Models\EngagementFileEntities;
 use AidingApp\InventoryManagement\Models\AssetCheckIn;
 use AidingApp\InventoryManagement\Models\AssetCheckOut;
 use AidingApp\LicenseManagement\Models\ProductLicense;
-use AidingApp\Notification\Models\Concerns\HasSubscriptions;
 use AidingApp\Notification\Models\Concerns\NotifiableViaSms;
 use AidingApp\Notification\Models\Contracts\CanBeNotified;
-use AidingApp\Notification\Models\Contracts\Subscribable;
-use AidingApp\Notification\Models\Subscription;
 use AidingApp\Portal\Models\KnowledgeBaseArticleVote;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\Task\Models\Task;
@@ -61,7 +58,6 @@ use AidingApp\Timeline\Models\Contracts\HasFilamentResource;
 use AidingApp\Timeline\Models\Timeline;
 use App\Models\Authenticatable;
 use App\Models\Contracts\Educatable;
-use App\Models\Scopes\HasLicense;
 use App\Models\User;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
@@ -86,7 +82,7 @@ use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
  * @mixin IdeHelperContact
  */
 #[ObservedBy([ContactObserver::class])]
-class Contact extends Authenticatable implements Auditable, Subscribable, Educatable, HasFilamentResource, CanBeNotified
+class Contact extends Authenticatable implements Auditable, Educatable, HasFilamentResource, CanBeNotified
 {
     use AuditableTrait;
 
@@ -95,7 +91,6 @@ class Contact extends Authenticatable implements Auditable, Subscribable, Educat
 
     use HasManyMorphedEngagementResponses;
     use HasManyMorphedEngagements;
-    use HasSubscriptions;
     use HasUuids;
     use Notifiable;
     use NotifiableViaSms;
@@ -251,22 +246,6 @@ class Contact extends Authenticatable implements Auditable, Subscribable, Educat
     public static function filamentResource(): string
     {
         return ContactResource::class;
-    }
-
-    /**
-     * @return MorphToMany<User, $this, covariant Subscription>
-     */
-    public function subscribedUsers(): MorphToMany
-    {
-        return $this->morphToMany(
-            related: User::class,
-            name: 'subscribable',
-            table: 'subscriptions',
-        )
-            ->using(Subscription::class)
-            ->withPivot('id')
-            ->withTimestamps()
-            ->tap(new HasLicense($this->getLicenseType()));
     }
 
     /**
