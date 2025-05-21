@@ -46,8 +46,8 @@ class ChangeRequestTypeFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->word(),
-            'number_of_required_approvals' => fake()->numberBetween(0, 2),
+            'name' => $this->faker->word(),
+            'number_of_required_approvals' => $this->faker->numberBetween(0, 2),
         ];
     }
 }

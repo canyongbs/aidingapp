@@ -52,11 +52,11 @@ class ProductFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->word(),
-            'url' => fake()->url(),
-            'description' => fake()->paragraph(),
-            'version' => fake()->numerify('#.#.#'),
-            'additional_notes' => fake()->paragraph(),
+            'name' => $this->faker->word(),
+            'url' => $this->faker->url(),
+            'description' => $this->faker->paragraph(),
+            'version' => $this->faker->numerify('#.#.#'),
+            'additional_notes' => $this->faker->paragraph(),
         ];
     }
 }
