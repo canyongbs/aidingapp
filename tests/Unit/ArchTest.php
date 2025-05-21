@@ -50,6 +50,10 @@ arch('All Core Models should not use HasUuids trait')
     ->extending(Model::class)
     ->not->toUseTrait('Illuminate\Database\Eloquent\Concerns\HasUuids');
 
+arch('All Core Factories should not use the fake global function')
+    ->expect('Database\Factories')
+    ->not->toUse('fake');
+
 app(ModuleRegistry::class, [
     'modules_path' => 'app-modules',
     'cache_path' => 'cache/modules.php',
@@ -62,6 +66,10 @@ app(ModuleRegistry::class, [
         ->expect($module->namespace() . 'Models')
         ->extending(Model::class)
         ->not->toUseTrait('Illuminate\Database\Eloquent\Concerns\HasUuids');
+
+    arch("All {$module->name} Factories should not use the fake global function")
+        ->expect($module->namespace() . 'Database\Factories')
+        ->not->toUse('fake');
 });
 
 test('pages extending EditRecord have the EditPageRedirection test', function () {
