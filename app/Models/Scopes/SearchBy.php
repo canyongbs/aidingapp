@@ -37,6 +37,7 @@
 namespace App\Models\Scopes;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Expression;
 
 class SearchBy
@@ -46,6 +47,9 @@ class SearchBy
         protected string $argument
     ) {}
 
+    /**
+     * @param Builder<Model> $query
+     */
     public function __invoke(Builder $query): void
     {
         $query->where(new Expression('lower(' . $this->column . ')'), 'like', '%' . $this->argument . '%');

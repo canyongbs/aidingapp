@@ -56,6 +56,9 @@ class BulkProcessingMachine
     /** @var array<string> */
     protected array $failureMessages = [];
 
+    /**
+     * @param array<Model> $records
+     */
     public static function make(array $records): static
     {
         $static = app(static::class);
@@ -71,6 +74,9 @@ class BulkProcessingMachine
         return $this;
     }
 
+    /**
+     * @param array<Model> $records
+     */
     public function records(array $records): static
     {
         $this->records = $records;
@@ -111,9 +117,7 @@ class BulkProcessingMachine
         }
 
         $this->failureMessages = array_map(
-            fn (array $failure): string => ($failure['failureMessageCallback'] instanceof Closure)
-                ? $failure['failureMessageCallback']($failure['count'])
-                : $failure['failureMessageCallback'],
+            fn (array $failure): string => $failure['failureMessageCallback']($failure['count']),
             $checkFailures,
         );
 

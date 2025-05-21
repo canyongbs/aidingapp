@@ -57,11 +57,17 @@ class StateMachine
         $this->config = ConfigLoader::load($enumClass);
     }
 
+    /**
+     * @return Collection<int, string>
+     */
     public function getAllStates(): Collection
     {
         return $this->config->states->keys();
     }
 
+    /**
+     * @return Collection<int, string>
+     */
     public function getStateTransitions(BackedEnum|string|null $state = null): Collection
     {
         $state ??= $this->currentState();
@@ -83,6 +89,9 @@ class StateMachine
             ->pluck('to');
     }
 
+    /**
+     * @param array<string, mixed> $additionalData
+     */
     public function transitionTo(Model $relatedModel, BackedEnum|string $newState, array $additionalData = []): void
     {
         $newStateVal = $newState;

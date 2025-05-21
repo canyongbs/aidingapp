@@ -40,6 +40,7 @@ use AidingApp\Contact\Models\Contact;
 use App\Models\Authenticatable;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class LicensedToEducatable
@@ -48,6 +49,9 @@ class LicensedToEducatable
         protected string $relationship,
     ) {}
 
+    /**
+     * @param Builder<Model> $query
+     */
     public function __invoke(Builder $query): void
     {
         /** @var ?Authenticatable $user */

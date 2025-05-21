@@ -63,6 +63,9 @@ return new class () extends Migration {
             });
     }
 
+    /**
+     * @param  array<int, string> $mediaUuidMap
+     */
     protected function fixTipTapContent(string $content, array $mediaUuidMap): string
     {
         $content = json_decode($content, associative: true);
@@ -74,6 +77,12 @@ return new class () extends Migration {
         return json_encode($content);
     }
 
+    /**
+     * @param  array<string, mixed> $block
+     * @param  array<int, string> $mediaUuidMap
+     *
+     * @return array<string, mixed>
+     */
     protected function fixTipTapBlock(array $block, array $mediaUuidMap): array
     {
         foreach (($block['content'] ?? []) as $blockIndex => $nestedBlock) {
@@ -89,7 +98,7 @@ return new class () extends Migration {
         }
 
         $id = (int) str_replace(['{{media|id:', ';}}'], '', $block['attrs']['src']);
-        $uuid = $mediaUuidMap[$id] ?? null;
+        $uuid = $mediaUuidMap[$id];
 
         if (blank($uuid)) {
             return $block;

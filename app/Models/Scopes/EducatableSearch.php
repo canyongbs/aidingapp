@@ -47,6 +47,9 @@ class EducatableSearch
         protected string $search
     ) {}
 
+    /**
+     * @param Builder<Contact> $query
+     */
     public function __invoke(Builder $query): void
     {
         $search = strtolower($this->search);

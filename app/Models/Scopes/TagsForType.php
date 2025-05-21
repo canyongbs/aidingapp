@@ -36,6 +36,7 @@
 
 namespace App\Models\Scopes;
 
+use App\Models\Tag;
 use Illuminate\Database\Eloquent\Builder;
 
 class TagsForType
@@ -44,6 +45,9 @@ class TagsForType
         protected string $type
     ) {}
 
+    /**
+     * @param Builder<Tag> $query
+     */
     public function __invoke(Builder $query): void
     {
         $query->where('type', $this->type);

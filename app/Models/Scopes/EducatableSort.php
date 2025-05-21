@@ -46,6 +46,9 @@ class EducatableSort
         protected string $direction
     ) {}
 
+    /**
+     * @param Builder<Contact> $query
+     */
     public function __invoke(Builder $query): void
     {
         $prospectNameColumn = Contact::displayNameKey();

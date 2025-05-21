@@ -40,5 +40,8 @@ use Exception;
 
 class UnableToResolveTenantForEncryptionKey extends Exception
 {
-    protected $message = 'Unable to resolve tenant for encryption key';
+    public function __construct()
+    {
+        parent::__construct('Unable to resolve tenant for encryption key');
+    }
 }
