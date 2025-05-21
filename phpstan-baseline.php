@@ -470,18 +470,6 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/app-modules/contact/src/Filament/Resources/ContactResource/RelationManagers/EngagementsRelationManager.php',
 ];
 $ignoreErrors[] = [
-	'message' => '#^Call to an undefined method Staudenmeir\\\\EloquentHasManyDeep\\\\HasManyDeep\\<Illuminate\\\\Database\\\\Eloquent\\\\Model, App\\\\Models\\\\User\\>\\:\\:status\\(\\)\\.$#',
-	'identifier' => 'method.notFound',
-	'count' => 1,
-	'path' => __DIR__ . '/app-modules/contact/src/Filament/Widgets/ContactStats.php',
-];
-$ignoreErrors[] = [
-	'message' => '#^Method AidingApp\\\\Contact\\\\Models\\\\Contact\\:\\:subscriptions\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\MorphMany does not specify its types\\: TRelatedModel, TDeclaringModel$#',
-	'identifier' => 'missingType.generics',
-	'count' => 1,
-	'path' => __DIR__ . '/app-modules/contact/src/Models/Contact.php',
-];
-$ignoreErrors[] = [
 	'message' => '#^Parameter \\#1 \\$entity of class AidingApp\\\\Timeline\\\\Events\\\\TimelineableRecordCreated constructor expects Illuminate\\\\Database\\\\Eloquent\\\\Model, App\\\\Models\\\\Contracts\\\\Educatable given\\.$#',
 	'identifier' => 'argument.type',
 	'count' => 2,
@@ -4550,18 +4538,6 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/app-modules/task/src/Policies/TaskPolicy.php',
 ];
 $ignoreErrors[] = [
-	'message' => '#^Access to an undefined property Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:\\$id\\.$#',
-	'identifier' => 'property.notFound',
-	'count' => 5,
-	'path' => __DIR__ . '/app-modules/task/tests/TaskAssignmentTest.php',
-];
-$ignoreErrors[] = [
-	'message' => '#^Unable to resolve the template type TAndValue in call to method Pest\\\\Expectation\\<int\\<0, max\\>\\|null\\>\\:\\:and\\(\\)$#',
-	'identifier' => 'argument.templateType',
-	'count' => 5,
-	'path' => __DIR__ . '/app-modules/task/tests/TaskAssignmentTest.php',
-];
-$ignoreErrors[] = [
 	'message' => '#^Call to an undefined method Faker\\\\Generator\\:\\:catchPhrase\\(\\)\\.$#',
 	'identifier' => 'method.notFound',
 	'count' => 1,
@@ -5232,60 +5208,6 @@ $ignoreErrors[] = [
 	'identifier' => 'missingType.iterableValue',
 	'count' => 1,
 	'path' => __DIR__ . '/app/Models/States/StateMachine.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method App\\\\Models\\\\States\\\\StateMachine\\:\\:getAllStates\\(\\) return type with generic class Illuminate\\\\Support\\\\Collection does not specify its types\\: TKey, TValue$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Models/States/StateMachine.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method App\\\\Models\\\\States\\\\StateMachine\\:\\:getStateTransitions\\(\\) return type with generic class Illuminate\\\\Support\\\\Collection does not specify its types\\: TKey, TValue$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Models/States/StateMachine.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method App\\\\Models\\\\States\\\\StateMachine\\:\\:transitionTo\\(\\) has parameter \\$additionalData with no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Models/States/StateMachine.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Class App\\\\Models\\\\SystemUser uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Models/SystemUser.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method App\\\\Models\\\\User\\:\\:assignTeam\\(\\) has parameter \\$teamId with no type specified\\.$#',
-    'identifier' => 'missingType.parameter',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Models/User.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method App\\\\Models\\\\User\\:\\:permissionsFromRoles\\(\\) return type with generic class Staudenmeir\\\\EloquentHasManyDeep\\\\HasManyDeep does not specify its types\\: TRelatedModel, TDeclaringModel$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Models/User.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method App\\\\Models\\\\User\\:\\:serviceRequests\\(\\) return type with generic class Staudenmeir\\\\EloquentHasManyDeep\\\\HasManyDeep does not specify its types\\: TRelatedModel, TDeclaringModel$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Models/User.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Property App\\\\Multitenancy\\\\Exceptions\\\\UnableToResolveTenantForEncryptionKey\\:\\:\\$message has no type specified\\.$#',
-    'identifier' => 'missingType.property',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Multitenancy/Exceptions/UnableToResolveTenantForEncryptionKey.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Call to an undefined method Illuminate\\\\Foundation\\\\Auth\\\\User\\:\\:isSuperAdmin\\(\\)\\.$#',
-    'identifier' => 'method.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Providers/AuthServiceProvider.php',
 ];
 $ignoreErrors[] = [
 	'message' => '#^PHPDoc tag @var with type Filament\\\\Forms\\\\Components\\\\Checkbox is not subtype of native type \\$this\\(App\\\\Providers\\\\FilamentServiceProvider\\)\\.$#',

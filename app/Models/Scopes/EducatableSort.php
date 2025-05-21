@@ -48,7 +48,7 @@ class EducatableSort
     ) {}
 
     /**
-     * @param Builder<ServiceRequest> $query
+     * @param Builder<Contact> $query
      */
     public function __invoke(Builder $query): void
     {
