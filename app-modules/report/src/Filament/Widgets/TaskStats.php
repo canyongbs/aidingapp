@@ -57,13 +57,13 @@ class TaskStats extends StatsOverviewReportWidget
     {
         return [
             Stat::make('Total Tasks', Number::abbreviate(
-                Cache::tags([$this->cacheTag])->remember('tasks-count', now()->addHours(24), function (): int {
+                Cache::tags(["{{$this->cacheTag}}"])->remember('tasks-count', now()->addHours(24), function (): int {
                     return Task::count();
                 }),
                 maxPrecision: 2,
             )),
             Stat::make('Staff with Open Tasks', Number::abbreviate(
-                Cache::tags([$this->cacheTag])->remember('users-with-open-tasks-count', now()->addHours(24), function (): int {
+                Cache::tags(["{{$this->cacheTag}}"])->remember('users-with-open-tasks-count', now()->addHours(24), function (): int {
                     return User::query()->whereHas('assignedTasks', function (Builder $query) {
                         $query->whereIn('status', [TaskStatus::Pending, TaskStatus::InProgress]);
                     })->count();
@@ -71,7 +71,7 @@ class TaskStats extends StatsOverviewReportWidget
                 maxPrecision: 2,
             )),
             Stat::make('Contacts with Open Tasks', Number::abbreviate(
-                Cache::tags([$this->cacheTag])->remember('students-with-open-tasks-count', now()->addHours(24), function (): int {
+                Cache::tags(["{{$this->cacheTag}}"])->remember('students-with-open-tasks-count', now()->addHours(24), function (): int {
                     return Contact::query()->whereHas('tasks', function (Builder $query) {
                         $query->whereIn('status', [TaskStatus::Pending, TaskStatus::InProgress]);
                     })->count();
