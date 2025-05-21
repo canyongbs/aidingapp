@@ -48,7 +48,7 @@ interface HasTags
     public static function getTagLabel(): string;
 
     /**
-     * @return MorphToMany<Tag, Model, \Illuminate\Database\Eloquent\Relations\Pivot, string>
+     * @return MorphToMany<Tag, Model, Pivot, string>
      */
     public function tags(): MorphToMany;
 }

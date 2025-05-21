@@ -41,9 +41,9 @@ use Illuminate\Database\Eloquent\Builder;
 
 class SetupIsComplete
 {
-   /**
-    * @param Builder<Tenant> $query
-    */
+    /**
+     * @param Builder<Tenant> $query
+     */
     public function __invoke(Builder $query): void
     {
         $query->where('setup_complete', true);

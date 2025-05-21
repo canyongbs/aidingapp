@@ -80,6 +80,7 @@ return new class () extends Migration {
     /**
      * @param  array<string, mixed> $block
      * @param  array<int, string> $mediaUuidMap
+     *
      * @return array<string, mixed>
      */
     protected function fixTipTapBlock(array $block, array $mediaUuidMap): array

@@ -44,7 +44,6 @@ use Illuminate\Foundation\Testing\TestCase;
 
 use function Pest\Laravel\actingAs;
 
-
 function asSuperAdmin(?User $user = null): TestCase
 {
     $superAdmin = $user ?? User::factory()
@@ -54,7 +53,7 @@ function asSuperAdmin(?User $user = null): TestCase
     $superAdminRoles = Role::superAdmin()->get();
 
     $superAdmin->assignRole($superAdminRoles);
-    
+
     return actingAs($superAdmin);
 }
 

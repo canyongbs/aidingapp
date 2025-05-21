@@ -36,11 +36,9 @@
 
 namespace App\Models;
 
-use AidingApp\Alert\Models\Alert;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Authorization\Models\License;
-use AidingApp\Authorization\Models\Permission;
 use AidingApp\Authorization\Models\Role;
 use AidingApp\Engagement\Models\Concerns\HasManyEngagementBatches;
 use AidingApp\Engagement\Models\Concerns\HasManyEngagements;
