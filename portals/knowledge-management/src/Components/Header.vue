@@ -126,66 +126,70 @@
 </script>
 
 <template>
-    <Menubar class="border border-none md:px-1.5 xl:px-0">
-        <template #start>
-            <router-link :to="{ name: 'home', query: {} }" class="flex items-center">
-                <img :src="headerLogo" :alt="appName" class="h-12 m-0" />
-            </router-link>
-        </template>
+    <div class="max-w-screen-xl flex flex-col gap-y-6 mx-auto">
+        <Menubar class="border border-none md:px-1.5 xl:px-0">
+            <template #start>
+                <router-link :to="{ name: 'home', query: {} }" class="flex items-center">
+                    <img :src="headerLogo" :alt="appName" class="h-12 m-0" />
+                </router-link>
+            </template>
 
-        <template #end>
-            <div class="flex items-center gap-6 ml-auto">
-                <div class="flex items-center gap-10 hidden lg:flex">
-                    <template v-for="item in visibleMenuItems" :key="item.label">
-                        <router-link
-                            :to="{ name: item.routeName }"
-                            custom
-                            v-slot="{ navigate, isActive, isExactActive }"
-                        >
-                            <a
-                                @click="navigate"
-                                class="cursor-pointer flex items-center font-medium text-sm"
-                                :class="[
-                                    isActive || isExactActive ? 'text-brand-500' : 'text-gray-700',
-                                    'hover:text-brand-500',
-                                ]"
+            <template #end>
+                <div class="flex items-center gap-6 ml-auto">
+                    <div class="flex items-center gap-10 hidden lg:flex">
+                        <template v-for="item in visibleMenuItems" :key="item.label">
+                            <router-link
+                                :to="{ name: item.routeName }"
+                                custom
+                                v-slot="{ navigate, isActive, isExactActive }"
                             >
-                                {{ item.label }}
-                            </a>
-                        </router-link>
-                    </template>
-                </div>
-
-                <div class="flex items-center gap-4">
-                    <GlobalSearchBar
-                        v-if="route.name === 'view-article' || route.name === 'services' || route.name === 'licenses'"
-                    ></GlobalSearchBar>
-
-                    <div v-if="requiresAuthentication || hasServiceManagement">
-                        <button
-                            v-if="user"
-                            @click="logout"
-                            type="button"
-                            class="flex items-center bg-gradient-to-br from-brand-500 to-brand-800 text-white text-sm font-medium px-3 py-2 rounded"
-                        >
-                            <ArrowRightStartOnRectangleIcon class="h-5 w-5 mr-1" />
-                            <span class="mr-2">Sign out</span>
-                        </button>
-                        <button
-                            v-else
-                            @click="$emit('showLogin')"
-                            type="button"
-                            class="flex items-center bg-gradient-to-br from-brand-500 to-brand-800 text-white text-sm font-medium px-3 py-2 rounded"
-                        >
-                            <ArrowRightEndOnRectangleIcon class="h-5 w-5 mr-1" />
-                            <span>Sign in</span>
-                        </button>
+                                <a
+                                    @click="navigate"
+                                    class="cursor-pointer flex items-center font-medium text-sm"
+                                    :class="[
+                                        isActive || isExactActive ? 'text-brand-500' : 'text-gray-700',
+                                        'hover:text-brand-500',
+                                    ]"
+                                >
+                                    {{ item.label }}
+                                </a>
+                            </router-link>
+                        </template>
                     </div>
-                    <MobileMenu class="relative lg:hidden" :visibleMenuItems="visibleMenuItems" />
+
+                    <div class="flex items-center gap-4">
+                        <GlobalSearchBar
+                            v-if="
+                                route.name === 'view-article' || route.name === 'services' || route.name === 'licenses'
+                            "
+                        ></GlobalSearchBar>
+
+                        <div v-if="requiresAuthentication || hasServiceManagement">
+                            <button
+                                v-if="user"
+                                @click="logout"
+                                type="button"
+                                class="flex items-center bg-gradient-to-br from-brand-500 to-brand-800 text-white text-sm font-medium px-3 py-2 rounded"
+                            >
+                                <ArrowRightStartOnRectangleIcon class="h-5 w-5 mr-1" />
+                                <span class="mr-2">Sign out</span>
+                            </button>
+                            <button
+                                v-else
+                                @click="$emit('showLogin')"
+                                type="button"
+                                class="flex items-center bg-gradient-to-br from-brand-500 to-brand-800 text-white text-sm font-medium px-3 py-2 rounded"
+                            >
+                                <ArrowRightEndOnRectangleIcon class="h-5 w-5 mr-1" />
+                                <span>Sign in</span>
+                            </button>
+                        </div>
+                        <MobileMenu class="relative lg:hidden" :visibleMenuItems="visibleMenuItems" />
+                    </div>
                 </div>
-            </div>
-        </template>
-    </Menubar>
+            </template>
+        </Menubar>
+    </div>
 </template>
 
 <style scoped>
