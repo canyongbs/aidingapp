@@ -49,9 +49,9 @@ class ContactFactory extends Factory
 {
     public function definition(): array
     {
-        $firstName = fake()->firstName();
-        $lastName = fake()->lastName();
-        $address3 = fake()->optional()->words(asText: true);
+        $firstName = $this->faker->firstName();
+        $lastName = $this->faker->lastName();
+        $address3 = $this->faker->optional()->words(asText: true);
 
         return [
             'status_id' => ContactStatus::inRandomOrder()->first() ?? ContactStatus::factory(),
@@ -59,19 +59,19 @@ class ContactFactory extends Factory
             'first_name' => $firstName,
             'last_name' => $lastName,
             'full_name' => "{$firstName} {$lastName}",
-            'preferred' => fake()->firstName(),
-            'description' => fake()->paragraph(),
-            'email' => fake()->unique()->email(),
-            'mobile' => fake()->e164PhoneNumber(),
-            'sms_opt_out' => fake()->boolean(),
-            'email_bounce' => fake()->boolean(),
-            'phone' => fake()->e164PhoneNumber(),
-            'address' => fake()->streetAddress(),
-            'address_2' => fake()->secondaryAddress(),
+            'preferred' => $this->faker->firstName(),
+            'description' => $this->faker->paragraph(),
+            'email' => $this->faker->unique()->email(),
+            'mobile' => $this->faker->e164PhoneNumber(),
+            'sms_opt_out' => $this->faker->boolean(),
+            'email_bounce' => $this->faker->boolean(),
+            'phone' => $this->faker->e164PhoneNumber(),
+            'address' => $this->faker->streetAddress(),
+            'address_2' => $this->faker->secondaryAddress(),
             'address_3' => $address3 ? str($address3)->headline()->toString() : null,
-            'city' => fake()->city(),
-            'state' => fake()->stateAbbr(),
-            'postal' => str(fake()->postcode())->before('-')->toString(),
+            'city' => $this->faker->city(),
+            'state' => $this->faker->stateAbbr(),
+            'postal' => str($this->faker->postcode())->before('-')->toString(),
             'assigned_to_id' => User::factory(),
             'created_by_id' => User::factory(),
         ];

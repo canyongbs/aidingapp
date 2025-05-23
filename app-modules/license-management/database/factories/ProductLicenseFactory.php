@@ -54,11 +54,11 @@ class ProductLicenseFactory extends Factory
     public function definition(): array
     {
         return [
-            'license' => fake()->uuid(),
+            'license' => $this->faker->uuid(),
             'product_id' => Product::factory(),
             'assigned_to' => Contact::factory(),
-            'start_date' => fake()->dateTimeBetween('-1 year', '+1 year'),
-            'expiration_date' => fn (array $attributes) => fake()->dateTimeBetween(
+            'start_date' => $this->faker->dateTimeBetween('-1 year', '+1 year'),
+            'expiration_date' => fn (array $attributes) => $this->faker->dateTimeBetween(
                 (clone $attributes['start_date'])->modify('+1 day'),
                 (clone $attributes['start_date'])->modify('+1 year')
             ),

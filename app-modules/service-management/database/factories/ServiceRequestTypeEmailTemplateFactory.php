@@ -56,12 +56,12 @@ class ServiceRequestTypeEmailTemplateFactory extends Factory
     {
         return [
             'service_request_type_id' => ServiceRequestType::factory(),
-            'type' => fake()->randomElement(collect(ServiceRequestEmailTemplateType::cases())->values()->toArray()),
-            'subject' => ['type' => 'doc', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => fake()->sentence()]]]]],
-            'body' => ['type' => 'doc', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => fake()->sentence()]]]]],
+            'type' => $this->faker->randomElement(collect(ServiceRequestEmailTemplateType::cases())->values()->toArray()),
+            'subject' => ['type' => 'doc', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => $this->faker->sentence()]]]]],
+            'body' => ['type' => 'doc', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => $this->faker->sentence()]]]]],
             'role' => fn (array $attributes) => $attributes['type'] === ServiceRequestEmailTemplateType::SurveyResponse
               ? ServiceRequestTypeEmailTemplateRole::Customer
-              : fake()->randomElement(ServiceRequestTypeEmailTemplateRole::cases()),
+              : $this->faker->randomElement(ServiceRequestTypeEmailTemplateRole::cases()),
         ];
     }
 }

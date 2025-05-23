@@ -51,14 +51,14 @@ class MaintenanceActivityFactory extends Factory
 
     public function definition(): array
     {
-        $date = fake()->date();
+        $date = $this->faker->date();
 
         return [
             'asset_id' => Asset::factory(),
             'completed_date' => $date,
-            'details' => fake()->sentence(),
+            'details' => $this->faker->sentence(),
             'maintenance_provider_id' => MaintenanceProvider::factory(),
-            'notes' => fake()->paragraph(),
+            'notes' => $this->faker->paragraph(),
             'scheduled_date' => $date,
         ];
     }

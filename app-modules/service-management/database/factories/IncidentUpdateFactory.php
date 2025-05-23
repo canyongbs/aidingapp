@@ -49,8 +49,8 @@ class IncidentUpdateFactory extends Factory
     {
         return [
             'incident_id' => Incident::factory(),
-            'update' => fake()->sentence(),
-            'internal' => fake()->boolean(),
+            'update' => $this->faker->sentence(),
+            'internal' => $this->faker->boolean(),
         ];
     }
 }

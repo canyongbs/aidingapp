@@ -53,16 +53,16 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
+            'name' => $this->faker->name(),
+            'email' => $this->faker->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
             'remember_token' => Str::random(10),
             'is_external' => false,
-            'job_title' => fake()->jobTitle(),
-            'work_number' => fake()->numerify('+1 ### ### ####'),
-            'work_extension' => fake()->randomNumber(4),
-            'mobile' => fake()->numerify('+1 ### ### ####'),
+            'job_title' => $this->faker->jobTitle(),
+            'work_number' => $this->faker->numerify('+1 ### ### ####'),
+            'work_extension' => $this->faker->randomNumber(4),
+            'mobile' => $this->faker->numerify('+1 ### ### ####'),
         ];
     }
 

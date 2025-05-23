@@ -49,10 +49,10 @@ class KnowledgeBaseCategoryFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => str(fake()->word())->ucfirst()->toString(),
-            'description' => fake()->optional()->sentences(2, true),
-            'icon' => fake()->optional()->randomElement($this->icons()),
-            'slug' => fake()->slug(),
+            'name' => str($this->faker->word())->ucfirst()->toString(),
+            'description' => $this->faker->optional()->sentences(2, true),
+            'icon' => $this->faker->optional()->randomElement($this->icons()),
+            'slug' => $this->faker->slug(),
         ];
     }
 

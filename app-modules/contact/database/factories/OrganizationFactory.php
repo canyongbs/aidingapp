@@ -53,23 +53,23 @@ class OrganizationFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->company(),
-            'email' => fake()->companyEmail(),
-            'domains' => array_map(fn () => ['domain' => fake()->domainName()], range(1, 3)),
-            'phone_number' => fake()->e164PhoneNumber(),
-            'website' => fake()->url(),
+            'name' => $this->faker->company(),
+            'email' => $this->faker->companyEmail(),
+            'domains' => array_map(fn () => ['domain' => $this->faker->domainName()], range(1, 3)),
+            'phone_number' => $this->faker->e164PhoneNumber(),
+            'website' => $this->faker->url(),
             'industry_id' => OrganizationIndustry::factory(),
             'type_id' => OrganizationType::factory(),
-            'description' => fake()->text(),
-            'number_of_employees' => fake()->randomNumber(),
-            'address' => fake()->address(),
-            'city' => fake()->city(),
-            'state' => fake()->state(),
-            'postalcode' => fake()->postcode(),
-            'country' => fake()->country(),
-            'linkedin_url' => fake()->url(),
-            'facebook_url' => fake()->url(),
-            'twitter_url' => fake()->url(),
+            'description' => $this->faker->text(),
+            'number_of_employees' => $this->faker->randomNumber(),
+            'address' => $this->faker->address(),
+            'city' => $this->faker->city(),
+            'state' => $this->faker->state(),
+            'postalcode' => $this->faker->postcode(),
+            'country' => $this->faker->country(),
+            'linkedin_url' => $this->faker->url(),
+            'facebook_url' => $this->faker->url(),
+            'twitter_url' => $this->faker->url(),
         ];
     }
 }

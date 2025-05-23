@@ -52,14 +52,14 @@ class ChangeRequestFactory extends Factory
             'created_by' => User::factory(),
             'change_request_type_id' => ChangeRequestType::factory(),
             'change_request_status_id' => ChangeRequestStatus::factory(),
-            'title' => fake()->sentence(),
-            'description' => fake()->text(),
-            'reason' => fake()->paragraphs(1, true),
-            'backout_strategy' => fake()->paragraphs(1, true),
-            'impact' => fake()->numberBetween(1, 5),
-            'likelihood' => fake()->numberBetween(1, 5),
-            'start_time' => fake()->dateTime(),
-            'end_time' => fake()->dateTime(),
+            'title' => $this->faker->sentence(),
+            'description' => $this->faker->text(),
+            'reason' => $this->faker->paragraphs(1, true),
+            'backout_strategy' => $this->faker->paragraphs(1, true),
+            'impact' => $this->faker->numberBetween(1, 5),
+            'likelihood' => $this->faker->numberBetween(1, 5),
+            'start_time' => $this->faker->dateTime(),
+            'end_time' => $this->faker->dateTime(),
         ];
     }
 }

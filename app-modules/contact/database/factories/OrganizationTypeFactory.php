@@ -51,7 +51,7 @@ class OrganizationTypeFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->unique()->word(),
+            'name' => $this->faker->unique()->word(),
         ];
     }
 }

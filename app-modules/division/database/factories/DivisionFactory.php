@@ -50,9 +50,9 @@ class DivisionFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->unique()->company(),
-            'code' => fake()->unique()->word(),
-            'description' => fake()->optional()->sentences(asText: true),
+            'name' => $this->faker->unique()->company(),
+            'code' => $this->faker->unique()->word(),
+            'description' => $this->faker->optional()->sentences(asText: true),
             'is_default' => false,
         ];
     }

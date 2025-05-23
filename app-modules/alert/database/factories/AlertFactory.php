@@ -51,7 +51,7 @@ class AlertFactory extends Factory
     public function definition(): array
     {
         return [
-            'concern_type' => fake()->randomElement([(new Contact())->getMorphClass()]),
+            'concern_type' => $this->faker->randomElement([(new Contact())->getMorphClass()]),
             'concern_id' => function (array $attributes) {
                 $concernClass = Relation::getMorphedModel($attributes['concern_type']);
 
@@ -62,10 +62,10 @@ class AlertFactory extends Factory
 
                 return $concern->getKey();
             },
-            'description' => fake()->sentence(),
-            'severity' => fake()->randomElement(AlertSeverity::cases()),
-            'status' => fake()->randomElement(AlertStatus::cases()),
-            'suggested_intervention' => fake()->sentence(),
+            'description' => $this->faker->sentence(),
+            'severity' => $this->faker->randomElement(AlertSeverity::cases()),
+            'status' => $this->faker->randomElement(AlertStatus::cases()),
+            'suggested_intervention' => $this->faker->sentence(),
         ];
     }
 }
