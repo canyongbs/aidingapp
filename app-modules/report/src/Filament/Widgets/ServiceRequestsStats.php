@@ -52,15 +52,15 @@ class ServiceRequestsStats extends StatsOverviewReportWidget
     {
         $intervalStart = now()->subDays($this->daysAgo);
 
-        [$currentAllServiceRequests, $allServiceRequestsPercentageChange, $allServiceRequestsIcon, $allServiceRequestsColor] = Cache::tags([$this->cacheTag])->remember('all-service-requests_count', now()->addHours(24), function () use ($intervalStart): array {
+        [$currentAllServiceRequests, $allServiceRequestsPercentageChange, $allServiceRequestsIcon, $allServiceRequestsColor] = Cache::tags(["{{$this->cacheTag}}"])->remember('all-service-requests_count', now()->addHours(24), function () use ($intervalStart): array {
             return $this->calculateAllServiceRequestStats($intervalStart);
         });
 
-        [$currentOpenServiceRequests, $openServiceRequestsPercentageChange, $openServiceRequestsIcon, $openServiceRequestsColor] = Cache::tags([$this->cacheTag])->remember('open-service-requests_count', now()->addHours(24), function () use ($intervalStart): array {
+        [$currentOpenServiceRequests, $openServiceRequestsPercentageChange, $openServiceRequestsIcon, $openServiceRequestsColor] = Cache::tags(["{{$this->cacheTag}}"])->remember('open-service-requests_count', now()->addHours(24), function () use ($intervalStart): array {
             return $this->calculateOpenServiceRequestStats($intervalStart);
         });
 
-        [$averageServiceResolutionTime, $averageServiceResolutionTimePercentageChange, $averageServiceResolutionTimeIcon, $averageServiceResolutionTimeColor] = Cache::tags([$this->cacheTag])->remember('average-service-resolution-time', now()->addHours(24), function () use ($intervalStart): array {
+        [$averageServiceResolutionTime, $averageServiceResolutionTimePercentageChange, $averageServiceResolutionTimeIcon, $averageServiceResolutionTimeColor] = Cache::tags(["{{$this->cacheTag}}"])->remember('average-service-resolution-time', now()->addHours(24), function () use ($intervalStart): array {
             return $this->calculateAverageServiceResolutionTime($intervalStart);
         });
 
@@ -176,8 +176,8 @@ class ServiceRequestsStats extends StatsOverviewReportWidget
     private function getPercentageChange(int $oldValue, int $newValue): int
     {
         return $oldValue > 0
-                        ? (($newValue - $oldValue) / $oldValue) * 100
-                        : ($newValue > 0 ? 100 : 0);
+            ? (($newValue - $oldValue) / $oldValue) * 100
+            : ($newValue > 0 ? 100 : 0);
     }
 
     private function getFormattedPercentageChangeDetails(int $percentageChange): array

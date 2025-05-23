@@ -70,7 +70,7 @@ class ServiceRequestStatusDistributionDonutChart extends ChartReportWidget
 
     protected function getData(): array
     {
-        $serviceRequestByStatus = Cache::tags([$this->cacheTag])->remember('service-request-status-distribution', now()->addHours(24), function (): Collection {
+        $serviceRequestByStatus = Cache::tags(["{{$this->cacheTag}}"])->remember('service-request-status-distribution', now()->addHours(24), function (): Collection {
             $serviceRequestByStatusData = ServiceRequestStatus::withCount(['serviceRequests'])->get(['id', 'name']);
 
             $serviceRequestByStatusData = $serviceRequestByStatusData->map(function (ServiceRequestStatus $status) {

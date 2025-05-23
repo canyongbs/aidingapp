@@ -64,7 +64,7 @@ class ServiceRequestsOverTimeLineChart extends LineChartReportWidget
 
     protected function getData(): array
     {
-        $serviceRequestTotalPerMonth = Cache::tags([$this->cacheTag])->remember('service-requests-over-time-line-chart', now()->addHours(24), function (): array {
+        $serviceRequestTotalPerMonth = Cache::tags(["{{$this->cacheTag}}"])->remember('service-requests-over-time-line-chart', now()->addHours(24), function (): array {
             $serviceRequestTotalPerMonthData = ServiceRequest::query()
                 ->toBase()
                 ->selectRaw('date_trunc(\'month\', created_at) as month')

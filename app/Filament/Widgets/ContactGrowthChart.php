@@ -70,7 +70,7 @@ class ContactGrowthChart extends ChartWidget
 
     protected function getData(): array
     {
-        $runningTotalPerMonth = Cache::tags(['contacts'])
+        $runningTotalPerMonth = Cache::tags(['{contacts}'])
             ->remember('contact-growth-chart-data', now()->addHour(), function (): array {
                 $totalCreatedPerMonth = Contact::query()
                     ->toBase()
