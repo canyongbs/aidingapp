@@ -55,7 +55,6 @@ class CreateServiceRequestRequestFactory extends RequestFactory
             },
             'priority_id' => ServiceRequestPriority::factory()->create()->getKey(),
             'respondent_id' => Contact::factory()->create()->getKey(),
-            'respondent_type' => app(Contact::class)->getMorphClass(),
             'close_details' => fake()->sentence(),
             'res_details' => fake()->sentence(),
         ];

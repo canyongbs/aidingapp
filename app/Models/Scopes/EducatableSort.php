@@ -55,8 +55,7 @@ class EducatableSort
 
         $query
             ->leftJoin('contacts', function ($join) {
-                $join->on('service_requests.respondent_type', '=', DB::raw("'contact'"))
-                    ->on(DB::raw('CAST(service_requests.respondent_id AS VARCHAR)'), '=', DB::raw('CAST(contacts.id AS VARCHAR)'));
+                $join->on(DB::raw('CAST(service_requests.respondent_id AS VARCHAR)'), '=', DB::raw('CAST(contacts.id AS VARCHAR)'));
             })
             ->select('service_requests.*', DB::raw("COALESCE(contacts.{$prospectNameColumn}) as respondent_name"))
             ->orderBy('respondent_name', $this->direction);

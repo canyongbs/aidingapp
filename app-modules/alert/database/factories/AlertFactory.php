@@ -41,7 +41,6 @@ use AidingApp\Alert\Enums\AlertStatus;
 use AidingApp\Alert\Models\Alert;
 use AidingApp\Contact\Models\Contact;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Database\Eloquent\Relations\Relation;
 
 /**
  * @extends Factory<Alert>
@@ -51,17 +50,7 @@ class AlertFactory extends Factory
     public function definition(): array
     {
         return [
-            'concern_type' => fake()->randomElement([(new Contact())->getMorphClass()]),
-            'concern_id' => function (array $attributes) {
-                $concernClass = Relation::getMorphedModel($attributes['concern_type']);
-
-                /** @var Contact $concernModel */
-                $concernModel = new $concernClass();
-
-                $concern = $concernModel::factory()->create();
-
-                return $concern->getKey();
-            },
+            'concern_id' => Contact::factory()->create()->getKey(),
             'description' => fake()->sentence(),
             'severity' => fake()->randomElement(AlertSeverity::cases()),
             'status' => fake()->randomElement(AlertStatus::cases()),
