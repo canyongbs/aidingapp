@@ -57,11 +57,11 @@ class ContactObserver
 
     public function created(): void
     {
-        Cache::tags('{{contacts}}')->flush();
+        Cache::tags('{contacts}')->flush();
     }
 
     public function deleted(): void
     {
-        Cache::tags('{{contacts}}')->flush();
+        Cache::tags('{contacts}')->flush();
     }
 }
