@@ -67,7 +67,12 @@ class KnowledgeManagementPortalSearchController extends Controller
             KnowledgeBaseItem::query()
                 ->public()
                 ->with('tags')
-                ->when($search->isNotEmpty(), fn (Builder $query) => $query->tap(new SearchBy('title', $search)))
+                ->when($search->isNotEmpty(), fn (Builder $query) => 
+                    $query->whereFullText('search_vector', $search, [
+                            'mode' => 'plain',
+                            'config' => 'english'
+                        ])
+                )
                 ->when($tags->isNotEmpty(), fn (Builder $query) => $query->whereHas('tags', fn (Builder $query) => $query->whereIn('id', $tags)))
                 ->when($request->get('filter') === 'featured', function (Builder $query) {
                     $query->where('is_featured', true);
