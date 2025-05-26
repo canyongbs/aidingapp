@@ -139,3 +139,39 @@ test('CreateServiceMonitor with notification group User or Team', function () {
     expect($serviceMonitoringTarget->teams())->exists()->toBeTrue();
     expect($serviceMonitoringTarget->users())->exists()->toBeTrue();
 });
+
+test('create service monitoring with validate the domain url', function () {
+    asSuperAdmin();
+
+    $validUrls = [
+        'http://example.com',
+        'http://192.168.0.1',
+        'http://192.168.0.1:8000',
+    ];
+
+    foreach ($validUrls as $url) {
+        $request = ServiceMonitoringTarget::factory()->create(['domain' => $url])->toArray();
+
+        livewire(CreateServiceMonitoring::class)
+            ->fillForm($request)
+            ->call('create')
+            ->assertHasNoFormErrors();
+    }
+
+    $invalidUrls = [
+        'ftp://example.com',
+        'example..com',
+        '://missing.scheme.com',
+        '[]',
+        'http://example',
+    ];
+
+    foreach ($invalidUrls as $url) {
+        $request = ServiceMonitoringTarget::factory()->create(['domain' => $url])->toArray();
+
+        livewire(CreateServiceMonitoring::class)
+            ->fillForm($request)
+            ->call('create')
+            ->assertHasFormErrors(['domain']);
+    }
+});
