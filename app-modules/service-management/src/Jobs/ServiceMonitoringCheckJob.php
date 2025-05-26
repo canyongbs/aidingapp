@@ -45,6 +45,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Http;
@@ -79,24 +80,41 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
 
     public function handle(): void
     {
-        $response = Http::maxRedirects(15)
-            ->get($this->serviceMonitoringTarget->domain);
+        try {
+            $response = Http::maxRedirects(15)
+                ->get($this->serviceMonitoringTarget->domain);
 
-        $history = $this->serviceMonitoringTarget->histories()->create([
-            'response' => $response->status(),
-            'response_time' => $response->transferStats->getTransferTime() ?? 0,
-            'succeeded' => $response->status() === 200,
-        ]);
+            $history = $this->serviceMonitoringTarget->histories()->create([
+                'response' => $response->status(),
+                'response_time' => $response->transferStats->getTransferTime() ?? 0,
+                'succeeded' => $response->status() === 200,
+            ]);
 
-        if ($response->status() !== 200) {
-            /** @var Collection<int, User> $recipients */
+            if ($response->status() !== 200) {
+                /** @var Collection<int, User> $recipients */
+                $recipients = $this->serviceMonitoringTarget->users()->get();
+
+                $this->serviceMonitoringTarget->teams()->each(function ($team) use ($recipients) {
+                    /** @var Collection<int, User> $users */
+                    $users = $team->users()->get();
+
+                    $recipients->concat($users)->unique();
+                });
+
+                Notification::send($recipients, new ServiceMonitoringNotification($history));
+            }
+        } catch (ConnectionException $e) {
+            $history = $this->serviceMonitoringTarget->histories()->create([
+                'response' => 523,
+                'response_time' => 0,
+                'succeeded' => false,
+            ]);
+
             $recipients = $this->serviceMonitoringTarget->users()->get();
 
-            $this->serviceMonitoringTarget->teams()->each(function ($team) use ($recipients) {
-                /** @var Collection<int, User> $users */
+            $this->serviceMonitoringTarget->teams()->each(function ($team) use (&$recipients) {
                 $users = $team->users()->get();
-
-                $recipients->concat($users)->unique();
+                $recipients = $recipients->merge($users)->unique('id');
             });
 
             Notification::send($recipients, new ServiceMonitoringNotification($history));
