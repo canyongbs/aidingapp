@@ -49,13 +49,13 @@ class AssetFactory extends Factory
     public function definition(): array
     {
         return [
-            'serial_number' => fake()->isbn13(),
-            'name' => fake()->catchPhrase(),
-            'description' => fake()->paragraph(),
+            'serial_number' => $this->faker->isbn13(),
+            'name' => $this->faker->catchPhrase(),
+            'description' => $this->faker->paragraph(),
             'type_id' => AssetType::inRandomOrder()->first() ?? AssetType::factory()->create(),
             'status_id' => AssetStatus::inRandomOrder()->first() ?? AssetStatus::factory()->create(),
             'location_id' => AssetLocation::inRandomOrder()->first() ?? AssetLocation::factory()->create(),
-            'purchase_date' => fake()->dateTime(),
+            'purchase_date' => $this->faker->dateTime(),
         ];
     }
 

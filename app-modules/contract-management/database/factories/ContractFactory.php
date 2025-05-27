@@ -54,16 +54,16 @@ class ContractFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->sentence(),
-            'description' => fake()->paragraph(),
+            'name' => $this->faker->sentence(),
+            'description' => $this->faker->paragraph(),
             'contract_type_id' => ContractType::factory(),
-            'vendor_name' => fake()->name(),
-            'start_date' => fake()->dateTimeBetween('-1 year', '+1 year'),
-            'end_date' => fn (array $attributes) => fake()->dateTimeBetween(
+            'vendor_name' => $this->faker->name(),
+            'start_date' => $this->faker->dateTimeBetween('-1 year', '+1 year'),
+            'end_date' => fn (array $attributes) => $this->faker->dateTimeBetween(
                 (clone $attributes['start_date'])->modify('+1 day'),
                 (clone $attributes['start_date'])->modify('+1 year')
             ),
-            'contract_value' => Money::parseByDecimal((string) fake()->randomNumber(), config('money.defaultCurrency')),
+            'contract_value' => Money::parseByDecimal((string) $this->faker->randomNumber(), config('money.defaultCurrency')),
         ];
     }
 }

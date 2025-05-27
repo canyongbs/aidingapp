@@ -53,10 +53,10 @@ class ServiceMonitoringTargetFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->word(10),
-            'description' => fake()->paragraph(),
-            'domain' => fake()->url(),
-            'frequency' => fake()->randomElement(ServiceMonitoringFrequency::cases()),
+            'name' => $this->faker->word(10),
+            'description' => $this->faker->paragraph(),
+            'domain' => $this->faker->url(),
+            'frequency' => $this->faker->randomElement(ServiceMonitoringFrequency::cases()),
         ];
     }
 }

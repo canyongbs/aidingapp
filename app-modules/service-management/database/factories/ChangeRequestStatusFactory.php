@@ -47,8 +47,8 @@ class ChangeRequestStatusFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->word(),
-            'classification' => fake()->randomElement(SystemChangeRequestClassification::cases()),
+            'name' => $this->faker->word(),
+            'classification' => $this->faker->randomElement(SystemChangeRequestClassification::cases()),
         ];
     }
 }
