@@ -110,6 +110,7 @@ class CreateKnowledgeBaseItem extends CreateRecord
                             ->exists((new KnowledgeBaseStatus())->getTable(), (new KnowledgeBaseStatus())->getKeyName()),
                         Select::make('category_id')
                             ->label('Category')
+                            ->required()
                             ->relationship('category', 'name')
                             ->searchable()
                             ->preload()
