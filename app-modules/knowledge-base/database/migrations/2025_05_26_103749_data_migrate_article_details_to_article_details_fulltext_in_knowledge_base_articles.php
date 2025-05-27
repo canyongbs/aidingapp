@@ -74,7 +74,6 @@ return new class () extends Migration {
 
                     break;
                 case 'checkedList':
-                    // Render as ul with checkbox (simulate with class)
                     $style = self::buildStyle($attrs);
                     $html .= "<ul class='checked-list'{$style}>" . self::convertToHtml($children) . '</ul> ';
 
@@ -121,7 +120,6 @@ return new class () extends Migration {
 
                     break;
                 case 'grid':
-                    // Render grid as div with CSS grid, cols attribute can be used for style
                     $cols = $attrs['cols'] ?? 1;
                     $type = $attrs['type'] ?? 'default';
                     $html .= "<div class='grid grid-{$type}' style='grid-template-columns: repeat({$cols}, 1fr);'>" . self::convertToHtml($children) . '</div>';
@@ -163,7 +161,6 @@ return new class () extends Migration {
                     break;
 
                 default:
-                    // Unknown node: just process children recursively
                     if (! empty($children)) {
                         $html .= self::convertToHtml($children);
                     }
@@ -193,7 +190,6 @@ return new class () extends Migration {
             $classString = ' class="' . e($attrs['class']) . '"';
         }
 
-        // Text alignment handling
         if (isset($attrs['textAlign'])) {
             $align = $attrs['textAlign'];
 
