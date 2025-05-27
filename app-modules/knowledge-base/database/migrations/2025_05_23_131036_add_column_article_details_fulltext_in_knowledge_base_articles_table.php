@@ -15,6 +15,9 @@ return new class () extends Migration {
         });
 
         DB::statement('CREATE INDEX knowledge_base_articles_search_vector_idx ON knowledge_base_articles USING GIN(search_vector)');
+
+        DB::statement('DROP FUNCTION IF EXISTS update_knowledge_base_articles_search_vector');
+
         DB::statement("
             CREATE FUNCTION update_knowledge_base_articles_search_vector() RETURNS trigger AS \$\$
             BEGIN
