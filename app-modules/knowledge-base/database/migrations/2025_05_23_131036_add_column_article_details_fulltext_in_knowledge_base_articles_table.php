@@ -26,10 +26,10 @@ return new class () extends Migration {
             \$\$ LANGUAGE plpgsql;
         ");
 
-        DB::statement("
+        DB::statement('
             CREATE TRIGGER tsvectorupdate BEFORE INSERT OR UPDATE
             ON knowledge_base_articles FOR EACH ROW EXECUTE FUNCTION update_knowledge_base_articles_search_vector();
-        ");
+        ');
 
         DB::statement("
             UPDATE knowledge_base_articles SET search_vector =
