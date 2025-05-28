@@ -11,7 +11,6 @@ return new class () extends Migration {
         Schema::table('knowledge_base_articles', function (Blueprint $table) {
             $table->text('article_details_fulltext')->nullable();
 
-            // Add generated search_vector column
             $table->tsVector('search_vector')->storedAs("
                 setweight(to_tsvector('english', coalesce(title, '')), 'A') ||
                 setweight(to_tsvector('english', coalesce(article_details_fulltext, '')), 'B')
