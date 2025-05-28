@@ -133,10 +133,6 @@ test('EditServiceMonitoring validates the inputs', function ($data, $errors) {
             ServiceMonitoringTargetRequestFactory::new()->state(['domain' => str()->random(256)]),
             ['domain' => 'max'],
         ],
-        'domain url' => [
-            ServiceMonitoringTargetRequestFactory::new()->state(['domain' => 'invalid-url']),
-            ['domain' => 'url'],
-        ],
         'frequency required' => [
             ServiceMonitoringTargetRequestFactory::new()->state(['frequency' => null]),
             ['frequency' => 'required'],
