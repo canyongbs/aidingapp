@@ -39,10 +39,8 @@ namespace AidingApp\ServiceManagement\Jobs;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Notifications\ServiceMonitoringNotification;
-use App\Models\User;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Http\Client\ConnectionException;
@@ -99,9 +97,7 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
             'succeeded' => $success,
         ]);
 
-
         if ($status !== 200) {
-
             $recipients = $this->serviceMonitoringTarget->users()->get();
 
             $this->serviceMonitoringTarget->teams()->each(function ($team) use (&$recipients) {
