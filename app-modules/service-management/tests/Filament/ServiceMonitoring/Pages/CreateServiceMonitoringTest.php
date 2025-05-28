@@ -140,7 +140,7 @@ test('CreateServiceMonitor with notification group User or Team', function () {
     expect($serviceMonitoringTarget->users())->exists()->toBeTrue();
 });
 
-test('create service monitoring with validate the domain url', function (array $validUrls, array $invalidUrls) {
+test('it will validate multiple valid forms of URL and IP Address', function (array $validUrls, array $invalidUrls) {
     asSuperAdmin();
 
     foreach ($validUrls as $url) {
