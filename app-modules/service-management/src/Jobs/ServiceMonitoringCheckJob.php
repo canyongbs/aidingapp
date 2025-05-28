@@ -39,16 +39,16 @@ namespace AidingApp\ServiceManagement\Jobs;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Notifications\ServiceMonitoringNotification;
-use App\Models\User;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Str;
 
 class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
 {
@@ -79,26 +79,34 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
 
     public function handle(): void
     {
-        $response = Http::maxRedirects(15)
-            ->get($this->serviceMonitoringTarget->domain);
+        try {
+            $response = Http::maxRedirects(15)
+                ->get($this->serviceMonitoringTarget->domain);
 
+            $this->handleResponses($response->status(), $response->transferStats->getTransferTime() ?? 0, $response->status() === 200);
+        } catch (ConnectionException $e) {
+            if (Str::doesntContain($e->getMessage(), 'Could not resolve host')) {
+                report($e);
+            }
+            $this->handleResponses(523, 0, false);
+        }
+    }
+
+    public function handleResponses(int $status, float $responseTime, bool $success): void
+    {
         $history = $this->serviceMonitoringTarget->histories()->create([
-            'response' => $response->status(),
-            'response_time' => $response->transferStats->getTransferTime() ?? 0,
-            'succeeded' => $response->status() === 200,
+            'response' => $status,
+            'response_time' => $responseTime,
+            'succeeded' => $success,
         ]);
 
-        if ($response->status() !== 200) {
-            /** @var Collection<int, User> $recipients */
+        if (! $success) {
             $recipients = $this->serviceMonitoringTarget->users()->get();
 
-            $this->serviceMonitoringTarget->teams()->each(function ($team) use ($recipients) {
-                /** @var Collection<int, User> $users */
+            $this->serviceMonitoringTarget->teams()->each(function ($team) use (&$recipients) {
                 $users = $team->users()->get();
-
-                $recipients->concat($users)->unique();
+                $recipients = $recipients->merge($users)->unique('id');
             });
-
             Notification::send($recipients, new ServiceMonitoringNotification($history));
         }
     }

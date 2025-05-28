@@ -40,6 +40,7 @@ use AidingApp\ServiceManagement\Models\HistoricalServiceMonitoring;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Notifications\ServiceMonitoringNotification;
 use App\Models\User;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
 
@@ -88,6 +89,34 @@ it('does not send a notification if the response is 200', function ($frequency) 
     Notification::assertNothingSent();
 
     assertDatabaseHas(HistoricalServiceMonitoring::class, ['response' => 200, 'succeeded' => true, 'service_monitoring_target_id' => $serviceMonitorTarget->getKey()]);
+})
+    ->with(
+        [
+            fn () => ServiceMonitoringFrequency::OneHour,
+            fn () => ServiceMonitoringFrequency::TwentyFourHours,
+        ]
+    );
+
+it('handles unresolvable host errors gracefully', function ($frequency) {
+    Http::fake(function () {
+        throw new ConnectionException('Could not resolve host');
+    });
+    Notification::fake();
+
+    $user = User::factory()->create();
+
+    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+        ->hasAttached($user)
+        ->create(['frequency' => $frequency]);
+
+    (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
+
+    Notification::assertSentTo(
+        $user,
+        ServiceMonitoringNotification::class
+    );
+
+    assertDatabaseHas(HistoricalServiceMonitoring::class, ['response' => 523, 'succeeded' => false, 'service_monitoring_target_id' => $serviceMonitorTarget->getKey()]);
 })
     ->with(
         [
