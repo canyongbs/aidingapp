@@ -114,10 +114,7 @@ test('CreateServiceMonitoring validates the inputs', function ($data, $errors) {
             ServiceMonitoringTargetRequestFactory::new()->state(['domain' => str()->random(256)]),
             ['domain' => 'max'],
         ],
-        'domain url' => [
-            ServiceMonitoringTargetRequestFactory::new()->state(['domain' => 'invalid-url']),
-            ['domain' => 'url'],
-        ],
+        // The domain url test is more extensively handle in saperate test below
         'frequency required' => [
             ServiceMonitoringTargetRequestFactory::new()->without('frequency'),
             ['frequency' => 'required'],
@@ -138,4 +135,49 @@ test('CreateServiceMonitor with notification group User or Team', function () {
 
     expect($serviceMonitoringTarget->teams())->exists()->toBeTrue();
     expect($serviceMonitoringTarget->users())->exists()->toBeTrue();
+});
+
+test('it will validate multiple valid forms of URL and IP Address', function () {
+    asSuperAdmin();
+
+    $validUrls = [
+        'http://example.com',
+        'https://test.com',
+        'example.com',
+        '192.168.0.1',
+        '127.0.0.1',
+        '192.0.2.10',
+        '098.51.100.252',
+        'http://[2001:db8::1]',
+        'https://[fe80::1ff:fe23:4567:890a]:443',
+        '2001:0db8:0000:0000:0000:0000:1234:5678',
+    ];
+
+    $invalidUrls = [
+        'ftp://example.com',
+        'example..com',
+        '://missing.scheme.com',
+        'http://example',
+        '[2001:db8::1',
+        '2001:db8::1]',
+        '[gggg::1]',
+    ];
+
+    foreach ($validUrls as $url) {
+        $request = ServiceMonitoringTarget::factory()->make(['domain' => $url])->toArray();
+
+        livewire(CreateServiceMonitoring::class)
+            ->fillForm($request)
+            ->call('create')
+            ->assertHasNoFormErrors();
+    }
+
+    foreach ($invalidUrls as $url) {
+        $request = ServiceMonitoringTarget::factory()->make(['domain' => $url])->toArray();
+
+        livewire(CreateServiceMonitoring::class)
+            ->fillForm($request)
+            ->call('create')
+            ->assertHasFormErrors(['domain']);
+    }
 });
