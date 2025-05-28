@@ -45,11 +45,15 @@ return new class () extends Migration {
         DB::table('knowledge_base_articles')->chunkById(100, function ($articles) {
             foreach ($articles as $article) {
                 if (! blank($article->article_details)) {
-                    $articleDetails = strip_tags(tiptap_converter()->asHTML($article->article_details));
+                    try {
+                        $articleDetails = strip_tags(tiptap_converter()->asHTML($article->article_details));
 
-                    DB::table('knowledge_base_articles')
-                        ->where('id', $article->id)
-                        ->update(['article_details_fulltext' => $articleDetails]);
+                        DB::table('knowledge_base_articles')
+                            ->where('id', $article->id)
+                            ->update(['article_details_fulltext' => $articleDetails]);
+                    } catch (Throwable $e) {
+                        report($e);
+                    }
                 }
             }
         });
