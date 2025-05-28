@@ -41,6 +41,7 @@ use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\Portal\DataTransferObjects\KnowledgeBaseArticleData;
 use AidingApp\Portal\DataTransferObjects\KnowledgeBaseCategoryData;
 use AidingApp\Portal\DataTransferObjects\KnowledgeManagementSearchData;
+use App\Features\ArticleFullTextSearch;
 use App\Http\Controllers\Controller;
 use App\Models\Scopes\SearchBy;
 use Illuminate\Database\Eloquent\Builder;
@@ -67,7 +68,19 @@ class KnowledgeManagementPortalSearchController extends Controller
             KnowledgeBaseItem::query()
                 ->public()
                 ->with('tags')
-                ->when($search->isNotEmpty(), fn (Builder $query) => $query->tap(new SearchBy('title', $search)))
+                ->when(
+                    ArticleFullTextSearch::active() && $search->isNotEmpty(),
+                    fn (Builder $query) => $query
+                        ->whereRaw(
+                            "search_vector @@ websearch_to_tsquery('english', ?)",
+                            [$search]
+                        )
+                        ->orderByRaw(
+                            "ts_rank_cd(search_vector, websearch_to_tsquery('english', ?)) DESC",
+                            [$search]
+                        )
+                )
+                ->when(! ArticleFullTextSearch::active() && $search->isNotEmpty(), fn (Builder $query) => $query->tap(new SearchBy('title', $search)))
                 ->when($tags->isNotEmpty(), fn (Builder $query) => $query->whereHas('tags', fn (Builder $query) => $query->whereIn('id', $tags)))
                 ->when($request->get('filter') === 'featured', function (Builder $query) {
                     $query->where('is_featured', true);

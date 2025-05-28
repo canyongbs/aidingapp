@@ -38,11 +38,13 @@ namespace AidingApp\KnowledgeBase\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Division\Models\Division;
+use AidingApp\KnowledgeBase\Observers\KnowledgeBaseItemObserver;
 use AidingApp\Portal\Models\KnowledgeBaseArticleVote;
 use App\Models\BaseModel;
 use App\Models\Concerns\InteractsWithTags;
 use App\Models\Contracts\HasTags;
 use DateTimeInterface;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -55,6 +57,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 /**
  * @mixin IdeHelperKnowledgeBaseItem
  */
+#[ObservedBy([KnowledgeBaseItemObserver::class])]
 class KnowledgeBaseItem extends BaseModel implements Auditable, HasMedia, HasTags
 {
     use AuditableTrait;
