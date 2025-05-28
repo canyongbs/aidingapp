@@ -48,6 +48,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Str;
 
 class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
 {
@@ -84,7 +85,9 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
 
             $this->handleResponses($response->status(), $response->transferStats->getTransferTime() ?? 0, $response->status() === 200);
         } catch (ConnectionException $e) {
-            report($e);
+            if (Str::doesntContain($e->getMessage(), 'Could not resolve host')) {
+                report($e);
+            }
             $this->handleResponses(523, 0, false);
         }
     }
@@ -97,7 +100,7 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
             'succeeded' => $success,
         ]);
 
-        if ($status !== 200) {
+        if (! $success) {
             $recipients = $this->serviceMonitoringTarget->users()->get();
 
             $this->serviceMonitoringTarget->teams()->each(function ($team) use (&$recipients) {

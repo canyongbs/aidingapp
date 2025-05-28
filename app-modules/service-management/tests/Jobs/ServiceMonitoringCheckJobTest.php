@@ -97,9 +97,9 @@ it('does not send a notification if the response is 200', function ($frequency) 
         ]
     );
 
-it('Handle unresolvable host errors gracefully', function ($frequency) {
+it('handles unresolvable host errors gracefully', function ($frequency) {
     Http::fake(function () {
-        throw new ConnectionException('Connection failed');
+        throw new ConnectionException('Could not resolve host');
     });
     Notification::fake();
 
