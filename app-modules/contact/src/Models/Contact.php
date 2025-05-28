@@ -272,11 +272,11 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
     }
 
     /**
-     * @return MorphMany<KnowledgeBaseArticleVote, $this>
+     * @return HasMany<KnowledgeBaseArticleVote, $this>
      */
-    public function knowledgeBaseArticleVotes(): MorphMany
+    public function knowledgeBaseArticleVotes(): HasMany
     {
-        return $this->morphMany(KnowledgeBaseArticleVote::class, 'voter');
+        return $this->hasMany(KnowledgeBaseArticleVote::class, 'voter_id');
     }
 
     /**

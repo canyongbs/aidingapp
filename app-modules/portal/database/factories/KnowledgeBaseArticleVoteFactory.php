@@ -56,7 +56,6 @@ class KnowledgeBaseArticleVoteFactory extends Factory
         return [
             'is_helpful' => $this->faker->boolean(),
             'voter_id' => Contact::factory(),
-            'voter_type' => (new Contact())->getMorphClass(),
             'article_id' => KnowledgeBaseItem::factory(),
         ];
     }

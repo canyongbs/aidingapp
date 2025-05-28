@@ -36,6 +36,7 @@
 
 namespace AidingApp\Portal\Models;
 
+use AidingApp\Contact\Models\Contact;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\Portal\Database\Factories\KnowledgeBaseArticleVoteFactory;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
@@ -63,9 +64,12 @@ class KnowledgeBaseArticleVote extends Pivot
         'is_helpful',
     ];
 
-    public function voter()
+    /**
+     * @return BelongsTo<Contact, $this>
+     */
+    public function voter(): BelongsTo
     {
-        return $this->morphTo();
+        return $this->belongsTo(Contact::class, 'voter_id');
     }
 
     public function knowledgeBaseArticle(): BelongsTo

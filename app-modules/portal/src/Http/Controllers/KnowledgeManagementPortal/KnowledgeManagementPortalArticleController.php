@@ -54,7 +54,6 @@ class KnowledgeManagementPortalArticleController extends Controller
             session()->put('guest_id', $portalGuest->getKey());
         }
         $article->increment('portal_view_count');
-        $voterType = session()->has('guest_id') ? (new PortalGuest())->getMorphClass() : (new Contact())->getMorphClass();
         $voterId = session()->has('guest_id') ? session('guest_id') : auth('contact')->user()?->getKey();
 
         $totalVotes = $article->votes->count();
@@ -98,7 +97,6 @@ class KnowledgeManagementPortalArticleController extends Controller
                 'vote' => optional(
                     $article->votes()
                         ->where('voter_id', $voterId)
-                        ->where('voter_type', $voterType)
                         ->select([
                             'id',
                             'is_helpful',
