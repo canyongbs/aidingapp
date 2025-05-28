@@ -133,6 +133,7 @@ test('EditServiceMonitoring validates the inputs', function ($data, $errors) {
             ServiceMonitoringTargetRequestFactory::new()->state(['domain' => str()->random(256)]),
             ['domain' => 'max'],
         ],
+        // The domain url test is more extensively handle in saperate test below
         'frequency required' => [
             ServiceMonitoringTargetRequestFactory::new()->state(['frequency' => null]),
             ['frequency' => 'required'],
@@ -161,4 +162,60 @@ test('delete action visible with proper access control', function () {
         'record' => $serviceMonitoringTarget->getRouteKey(),
     ])
         ->assertActionVisible(DeleteAction::class);
+});
+
+test('it will validate multiple valid forms of URL and IP Address', function () {
+    $user = User::factory()->licensed(LicenseType::cases())->create();
+
+    actingAs($user);
+
+    $user->givePermissionTo('service_monitoring.view-any');
+    $user->givePermissionTo('service_monitoring.*.update');
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
+
+    $validUrls = [
+        'http://example.com',
+        'https://test.com',
+        'example.com',
+        '192.168.0.1',
+        '127.0.0.1',
+        '192.0.2.10',
+        '098.51.100.252',
+        'http://[2001:db8::1]',
+        'https://[fe80::1ff:fe23:4567:890a]:443',
+        '2001:0db8:0000:0000:0000:0000:1234:5678',
+    ];
+
+    $invalidUrls = [
+        'ftp://example.com',
+        'example..com',
+        '://missing.scheme.com',
+        'http://example',
+        '[2001:db8::1',
+        '2001:db8::1]',
+        '[gggg::1]',
+    ];
+
+    foreach ($validUrls as $url) {
+        $request = ServiceMonitoringTarget::factory()->make(['domain' => $url])->toArray();
+
+        livewire(EditServiceMonitoring::class, [
+            'record' => $serviceMonitoringTarget->getRouteKey(),
+        ])
+            ->fillForm($request)
+            ->call('save')
+            ->assertHasNoFormErrors();
+    }
+
+    foreach ($invalidUrls as $url) {
+        $request = ServiceMonitoringTarget::factory()->make(['domain' => $url])->toArray();
+
+        livewire(EditServiceMonitoring::class, [
+            'record' => $serviceMonitoringTarget->getRouteKey(),
+        ])
+            ->fillForm($request)
+            ->call('save')
+            ->assertHasFormErrors(['domain']);
+    }
 });
