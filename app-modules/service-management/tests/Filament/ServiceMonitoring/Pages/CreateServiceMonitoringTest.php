@@ -180,4 +180,4 @@ test('it will validate multiple valid forms of URL and IP Address', function (ar
                 '[gggg::1]',
             ],
         ],
-    ])->only();
+    ]);
