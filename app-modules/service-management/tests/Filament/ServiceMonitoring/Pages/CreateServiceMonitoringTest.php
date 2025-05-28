@@ -140,17 +140,11 @@ test('CreateServiceMonitor with notification group User or Team', function () {
     expect($serviceMonitoringTarget->users())->exists()->toBeTrue();
 });
 
-test('create service monitoring with validate the domain url', function () {
+test('create service monitoring with validate the domain url', function (array $validUrls, array $invalidUrls) {
     asSuperAdmin();
 
-    $validUrls = [
-        'http://example.com',
-        'http://192.168.0.1',
-        'http://192.168.0.1:8000',
-    ];
-
     foreach ($validUrls as $url) {
-        $request = ServiceMonitoringTarget::factory()->create(['domain' => $url])->toArray();
+        $request = ServiceMonitoringTarget::factory()->make(['domain' => $url])->toArray();
 
         livewire(CreateServiceMonitoring::class)
             ->fillForm($request)
@@ -158,20 +152,32 @@ test('create service monitoring with validate the domain url', function () {
             ->assertHasNoFormErrors();
     }
 
-    $invalidUrls = [
-        'ftp://example.com',
-        'example..com',
-        '://missing.scheme.com',
-        '[]',
-        'http://example',
-    ];
-
     foreach ($invalidUrls as $url) {
-        $request = ServiceMonitoringTarget::factory()->create(['domain' => $url])->toArray();
+        $request = ServiceMonitoringTarget::factory()->make(['domain' => $url])->toArray();
 
         livewire(CreateServiceMonitoring::class)
             ->fillForm($request)
             ->call('create')
             ->assertHasFormErrors(['domain']);
     }
-});
+})
+    ->with([
+        [
+            'validUrls' => [
+                'http://example.com',
+                'https://test.com',
+                'http://192.168.0.1',
+                'http://[2001:db8::1]',
+                'https://[fe80::1ff:fe23:4567:890a]:443',
+            ],
+            'invalidUrls' => [
+                'ftp://example.com',
+                'example..com',
+                '://missing.scheme.com',
+                'http://example',
+                '[2001:db8::1',
+                '2001:db8::1]',
+                '[gggg::1]',
+            ],
+        ],
+    ])->only();
