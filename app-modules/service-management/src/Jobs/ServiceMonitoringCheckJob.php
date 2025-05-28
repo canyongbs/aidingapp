@@ -84,31 +84,23 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
             $response = Http::maxRedirects(15)
                 ->get($this->serviceMonitoringTarget->domain);
 
-            $history = $this->serviceMonitoringTarget->histories()->create([
-                'response' => $response->status(),
-                'response_time' => $response->transferStats->getTransferTime() ?? 0,
-                'succeeded' => $response->status() === 200,
-            ]);
-
-            if ($response->status() !== 200) {
-                /** @var Collection<int, User> $recipients */
-                $recipients = $this->serviceMonitoringTarget->users()->get();
-
-                $this->serviceMonitoringTarget->teams()->each(function ($team) use ($recipients) {
-                    /** @var Collection<int, User> $users */
-                    $users = $team->users()->get();
-
-                    $recipients->concat($users)->unique();
-                });
-
-                Notification::send($recipients, new ServiceMonitoringNotification($history));
-            }
+            $this->handleResponses($response->status(), $response->transferStats->getTransferTime() ?? 0, $response->status() === 200);
         } catch (ConnectionException $e) {
-            $history = $this->serviceMonitoringTarget->histories()->create([
-                'response' => 523,
-                'response_time' => 0,
-                'succeeded' => false,
-            ]);
+            report($e);
+            $this->handleResponses(523, 0, false);
+        }
+    }
+
+    public function handleResponses(int $status, float $responseTime, bool $success): void
+    {
+        $history = $this->serviceMonitoringTarget->histories()->create([
+            'response' => $status,
+            'response_time' => $responseTime,
+            'succeeded' => $success,
+        ]);
+
+
+        if ($status !== 200) {
 
             $recipients = $this->serviceMonitoringTarget->users()->get();
 
@@ -116,7 +108,6 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
                 $users = $team->users()->get();
                 $recipients = $recipients->merge($users)->unique('id');
             });
-
             Notification::send($recipients, new ServiceMonitoringNotification($history));
         }
     }
