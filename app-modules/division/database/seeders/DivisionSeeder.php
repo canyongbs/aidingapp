@@ -50,6 +50,7 @@ class DivisionSeeder extends Seeder
                         'name' => 'Home',
                         'code' => 'home',
                         'description' => 'Home Division',
+                        'is_default' => true,
                     ],
                 ]
             );
