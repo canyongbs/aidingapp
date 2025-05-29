@@ -49,7 +49,6 @@ class EngagementResponseFactory extends Factory
     public function definition(): array
     {
         return [
-            'sender_type' => (new Contact())->getMorphClass(),
             'sender_id' => Contact::factory(),
             'content' => $this->faker->sentence(),
             'sent_at' => $this->faker->dateTimeBetween('-1 year', '-1 day'),

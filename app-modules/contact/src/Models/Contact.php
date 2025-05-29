@@ -194,20 +194,11 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
     }
 
     /**
-     * @return MorphToMany<EngagementFile, $this, covariant EngagementFileEntities>
+     * @return HasMany<EngagementFile, $this>
      */
-    public function engagementFiles(): MorphToMany
+    public function engagementFiles(): HasMany
     {
-        return $this->morphToMany(
-            related: EngagementFile::class,
-            name: 'entity',
-            table: 'engagement_file_entities',
-            foreignPivotKey: 'entity_id',
-            relatedPivotKey: 'engagement_file_id',
-            relation: 'engagementFiles',
-        )
-            ->using(EngagementFileEntities::class)
-            ->withTimestamps();
+        return $this->hasMany(EngagementFile::class, 'entity_id');
     }
 
     /**

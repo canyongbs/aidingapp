@@ -161,13 +161,11 @@ test('can list records of engagements timelineable', function () {
     $engagements = Engagement::factory()->count(1)
         ->state([
             'recipient_id' => $contact->getKey(),
-            'recipient_type' => $contact->getMorphClass(),
         ])->createQuietly();
 
     $engagementResponses = EngagementResponse::factory()->count(5)
         ->state([
             'sender_id' => $contact->getKey(),
-            'sender_type' => $contact->getMorphClass(),
         ])->createQuietly();
 
     $engagements->each(function ($response) {
@@ -213,13 +211,11 @@ test('can filter engagements timelineable', function () {
     $engagements = Engagement::factory()->count(1)
         ->state([
             'recipient_id' => $contact->getKey(),
-            'recipient_type' => $contact->getMorphClass(),
         ])->createQuietly();
 
     $engagementResponses = EngagementResponse::factory()->count(5)
         ->state([
             'sender_id' => $contact->getKey(),
-            'sender_type' => $contact->getMorphClass(),
         ])->createQuietly();
 
     $engagements->each(function ($response) {

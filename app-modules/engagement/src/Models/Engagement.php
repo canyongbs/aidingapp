@@ -57,7 +57,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
 use Illuminate\Support\HtmlString;
@@ -84,7 +83,6 @@ class Engagement extends BaseModel implements Auditable, ProvidesATimeline, HasD
         'subject',
         'body',
         'recipient_id',
-        'recipient_type',
         'scheduled_at',
         'dispatched_at',
         'channel',
@@ -157,15 +155,11 @@ class Engagement extends BaseModel implements Auditable, ProvidesATimeline, HasD
     }
 
     /**
-     * @return MorphTo<Model, $this>
+     * @return BelongsTo<Contact, $this>
      */
-    public function recipient(): MorphTo
+    public function recipient(): BelongsTo
     {
-        return $this->morphTo(
-            name: 'recipient',
-            type: 'recipient_type',
-            id: 'recipient_id',
-        );
+        return $this->belongsTo(Contact::class, 'recipient_id');
     }
 
     /**
@@ -192,16 +186,6 @@ class Engagement extends BaseModel implements Auditable, ProvidesATimeline, HasD
     public function scopeIsNotPartOfABatch(Builder $query): void
     {
         $query->whereNull('engagement_batch_id');
-    }
-
-    /**
-     * @param Builder<$this> $query
-     *
-     * @return void
-     */
-    public function scopeSentToContact(Builder $query): void
-    {
-        $query->where('recipient_type', resolve(Contact::class)->getMorphClass());
     }
 
     public function getBody(): HtmlString

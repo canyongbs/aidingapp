@@ -41,6 +41,7 @@ use AidingApp\Contact\Models\Contact;
 use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Prunable;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\MediaLibrary\HasMedia;
@@ -69,20 +70,11 @@ class EngagementFile extends BaseModel implements HasMedia, Auditable
     }
 
     /**
-     * @return MorphToMany<Contact, $this, covariant EngagementFileEntities>
+     * @return BelongsTo<Contact, $this>
      */
-    public function contacts(): MorphToMany
+    public function contacts(): BelongsTo
     {
-        return $this->morphedByMany(
-            related: Contact::class,
-            name: 'entity',
-            table: 'engagement_file_entities',
-            foreignPivotKey: 'engagement_file_id',
-            relatedPivotKey: 'entity_id',
-            relation: 'contacts',
-        )
-            ->using(EngagementFileEntities::class)
-            ->withTimestamps();
+        return $this->belongsTo(Contact::class, 'entity_id');
     }
 
     public function prunable(): Builder
