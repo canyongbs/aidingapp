@@ -45,6 +45,7 @@ use AidingApp\Contact\Observers\ContactObserver;
 use AidingApp\Engagement\Models\Concerns\HasManyMorphedEngagementResponses;
 use AidingApp\Engagement\Models\Concerns\HasManyMorphedEngagements;
 use AidingApp\Engagement\Models\EngagementFile;
+use AidingApp\Engagement\Models\EngagementFileEntities;
 use AidingApp\InventoryManagement\Models\AssetCheckIn;
 use AidingApp\InventoryManagement\Models\AssetCheckOut;
 use AidingApp\LicenseManagement\Models\ProductLicense;
@@ -66,6 +67,7 @@ use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
@@ -192,11 +194,16 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
     }
 
     /**
-     * @return HasMany<EngagementFile, $this>
+     * @return HasManyThrough<EngagementFile, EngagementFileEntities, $this>
      */
-    public function engagementFiles(): HasMany
+    public function engagementFiles(): HasManyThrough
     {
-        return $this->hasMany(EngagementFile::class, 'entity_id');
+        return $this->hasManyThrough(
+            related: EngagementFile::class,
+            through: EngagementFileEntities::class,
+            firstKey: 'entity_id',
+            secondKey: 'engagement_file_id'
+        );
     }
 
     /**

@@ -233,10 +233,26 @@ class Engagement extends BaseModel implements Auditable, ProvidesATimeline, HasD
         return $this->channel;
     }
 
+    // protected static function booted(): void
+    // {
+    //     static::addGlobalScope('licensed', function (Builder $builder) {
+    //         $builder->tap(new LicensedToEducatable('recipient'));
+    //     });
+    // }
+
     protected static function booted(): void
     {
         static::addGlobalScope('licensed', function (Builder $builder) {
-            $builder->tap(new LicensedToEducatable('recipient'));
+            if (! auth()->check()) {
+                return;
+            }
+
+            /** @var Authenticatable $user */
+            $user = auth()->user();
+
+            if (! $user->hasLicense(Contact::getLicenseType())) {
+                $builder->whereRaw('1 = 0');
+            }
         });
     }
 }
