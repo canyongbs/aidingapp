@@ -34,54 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Models;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\Contact\Models\Contact;
-use App\Models\BaseModel;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Prunable;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use OwenIt\Auditing\Contracts\Auditable;
-use Spatie\MediaLibrary\HasMedia;
-use Spatie\MediaLibrary\InteractsWithMedia;
-
-/**
- * @mixin IdeHelperEngagementFile
- */
-class EngagementFile extends BaseModel implements HasMedia, Auditable
-{
-    use InteractsWithMedia;
-    use AuditableTrait;
-    use Prunable;
-
-    protected $fillable = [
-        'description',
-        'retention_date',
-    ];
-
-    public function registerMediaCollections(): void
+return new class () extends Migration {
+    public function up(): void
     {
-        $this
-            ->addMediaCollection('file')
-            ->useDisk('s3')
-            ->singleFile();
+        Schema::table('knowledge_base_article_votes', function (Blueprint $table) {
+            $table->dropColumn('voter_type');
+        });
     }
 
-    /**
-     * @return BelongsTo<Contact, $this>
-     */
-    public function contacts(): BelongsTo
+    public function down(): void
     {
-        return $this->belongsTo(Contact::class, 'entity_id');
+        Schema::table('knowledge_base_article_votes', function (Blueprint $table) {
+            $table->string('voter_type');
+        });
     }
-
-    public function prunable(): Builder
-    {
-        return static::where(
-            'retention_date',
-            '<',
-            now()->startOfDay(),
-        );
-    }
-}
+};

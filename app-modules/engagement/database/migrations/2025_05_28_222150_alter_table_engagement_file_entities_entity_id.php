@@ -34,54 +34,29 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Models;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\Contact\Models\Contact;
-use App\Models\BaseModel;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Prunable;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use OwenIt\Auditing\Contracts\Auditable;
-use Spatie\MediaLibrary\HasMedia;
-use Spatie\MediaLibrary\InteractsWithMedia;
-
-/**
- * @mixin IdeHelperEngagementFile
- */
-class EngagementFile extends BaseModel implements HasMedia, Auditable
-{
-    use InteractsWithMedia;
-    use AuditableTrait;
-    use Prunable;
-
-    protected $fillable = [
-        'description',
-        'retention_date',
-    ];
-
-    public function registerMediaCollections(): void
+return new class () extends Migration {
+    public function up(): void
     {
-        $this
-            ->addMediaCollection('file')
-            ->useDisk('s3')
-            ->singleFile();
+        DB::beginTransaction();
+
+        DB::statement('ALTER TABLE engagement_file_entities ALTER COLUMN entity_id SET DATA TYPE UUID USING entity_id::uuid');
+
+        DB::statement('ALTER TABLE engagement_file_entities ADD CONSTRAINT contacts_id_entity_id FOREIGN KEY (entity_id) REFERENCES contacts (id) ON UPDATE CASCADE ON DELETE CASCADE;');
+
+        DB::commit();
     }
 
-    /**
-     * @return BelongsTo<Contact, $this>
-     */
-    public function contacts(): BelongsTo
+    public function down(): void
     {
-        return $this->belongsTo(Contact::class, 'entity_id');
-    }
+        DB::beginTransaction();
 
-    public function prunable(): Builder
-    {
-        return static::where(
-            'retention_date',
-            '<',
-            now()->startOfDay(),
-        );
+        DB::statement('ALTER TABLE engagement_file_entities ALTER COLUMN entity_id SET DATA TYPE varchar(255)');
+
+        DB::statement('ALTER TABLE engagement_file_entities DROP CONSTRAINT contacts_id_entity_id;');
+
+        DB::commit();
     }
-}
+};

@@ -34,54 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Models;
+namespace App\Features;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\Contact\Models\Contact;
-use App\Models\BaseModel;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Prunable;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use OwenIt\Auditing\Contracts\Auditable;
-use Spatie\MediaLibrary\HasMedia;
-use Spatie\MediaLibrary\InteractsWithMedia;
+use App\Support\AbstractFeatureFlag;
 
-/**
- * @mixin IdeHelperEngagementFile
- */
-class EngagementFile extends BaseModel implements HasMedia, Auditable
+class MakeContactNotPolymorphicFeature extends AbstractFeatureFlag
 {
-    use InteractsWithMedia;
-    use AuditableTrait;
-    use Prunable;
-
-    protected $fillable = [
-        'description',
-        'retention_date',
-    ];
-
-    public function registerMediaCollections(): void
+    public function resolve(mixed $scope): mixed
     {
-        $this
-            ->addMediaCollection('file')
-            ->useDisk('s3')
-            ->singleFile();
-    }
-
-    /**
-     * @return BelongsTo<Contact, $this>
-     */
-    public function contacts(): BelongsTo
-    {
-        return $this->belongsTo(Contact::class, 'entity_id');
-    }
-
-    public function prunable(): Builder
-    {
-        return static::where(
-            'retention_date',
-            '<',
-            now()->startOfDay(),
-        );
+        return false;
     }
 }

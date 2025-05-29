@@ -41,13 +41,13 @@ use AidingApp\Alert\Enums\AlertStatus;
 use AidingApp\Alert\Observers\AlertObserver;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Models\Contact;
+use App\Models\Authenticatable;
 use App\Models\BaseModel;
 use App\Models\Concerns\BelongsToEducatable;
 use App\Models\Scopes\LicensedToEducatable;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
 
@@ -65,7 +65,6 @@ class Alert extends BaseModel implements Auditable
 
     protected $fillable = [
         'concern_id',
-        'concern_type',
         'description',
         'severity',
         'status',
@@ -78,11 +77,11 @@ class Alert extends BaseModel implements Auditable
     ];
 
     /**
-     * @return MorphTo<Model, $this>
+     * @return BelongsTo<Contact, $this>
      */
-    public function concern(): MorphTo
+    public function concern(): BelongsTo
     {
-        return $this->morphTo();
+        return $this->belongsTo(Contact::class, 'concern_id');
     }
 
     /**
@@ -93,10 +92,26 @@ class Alert extends BaseModel implements Auditable
         $query->where('status', $status);
     }
 
+    // protected static function booted(): void
+    // {
+    //     static::addGlobalScope('licensed', function (Builder $builder) {
+    //         $builder->tap(new LicensedToEducatable('concern'));
+    //     });
+    // }
+
     protected static function booted(): void
     {
         static::addGlobalScope('licensed', function (Builder $builder) {
-            $builder->tap(new LicensedToEducatable('concern'));
+            if (! auth()->check()) {
+                return;
+            }
+
+            /** @var Authenticatable $user */
+            $user = auth()->user();
+
+            if (! $user->hasLicense(Contact::getLicenseType())) {
+                $builder->whereRaw('1 = 0');
+            }
         });
     }
 }

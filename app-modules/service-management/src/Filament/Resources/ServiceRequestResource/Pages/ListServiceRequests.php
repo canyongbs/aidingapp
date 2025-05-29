@@ -36,7 +36,6 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages;
 
-use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
@@ -48,7 +47,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use App\Filament\Tables\Columns\IdColumn;
-use App\Models\Scopes\EducatableSearch;
 use App\Models\Scopes\EducatableSort;
 use App\Models\User;
 use Filament\Actions\CreateAction;
@@ -106,7 +104,7 @@ class ListServiceRequests extends ListRecords
                 TextColumn::make('respondent.display_name')
                     ->label('Related To')
                     ->getStateUsing(fn (ServiceRequest $record) => $record->respondent->{$record->respondent::displayNameKey()})
-                    ->searchable(query: fn (Builder $query, $search) => $query->tap(new EducatableSearch(relationship: 'respondent', search: $search)))
+                    ->searchable()
                     ->sortable(query: fn (Builder $query, string $direction): Builder => $query->tap(new EducatableSort($direction)))
                     ->toggleable(),
                 TextColumn::make('division.name')
@@ -156,9 +154,8 @@ class ListServiceRequests extends ListRecords
                     ->options(Organization::pluck('name', 'id')->toArray())
                     ->modifyQueryUsing(fn (Builder $query, $state): Builder => $query->when(
                         ! empty($state['value']),
-                        fn (Builder $query) => $query->whereHasMorph(
+                        fn (Builder $query) => $query->whereHas(
                             'respondent',
-                            [Contact::class],
                             fn (Builder $query): Builder => $query->whereRelation(
                                 'organization',
                                 (new Organization())->getKeyName(),
