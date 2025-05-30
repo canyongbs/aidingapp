@@ -50,6 +50,7 @@ use Filament\Infolists\Components\Actions\Action as InfolistAction;
 use Filament\Infolists\Components\Group;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\IconEntry\IconEntrySize;
+use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\ViewEntry;
@@ -127,41 +128,69 @@ class ViewServiceRequest extends ViewRecord
                                 return "{$days}d {$hours}h {$minutes}m";
                             })
                             ->columnSpan(1),
+                        ImageEntry::make('test_image')
+                            // ->state('https://images.pexels.com/photos/276267/pexels-photo-276267.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2')
+                            ->simpleLightbox('https://images.pexels.com/photos/276267/pexels-photo-276267.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'),
+                        ImageEntry::make('test_file')
+                            // ->state('https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf')
+                            ->simpleLightbox('https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'),
                     ])
                     ->columns(),
+                // Section::make('Uploads')
+                //     ->visible(fn (ServiceRequest $record): bool => $record->hasMedia($uploadsMediaCollection->getName()))
+                //     ->schema(
+                //         fn (ServiceRequest $record) => $record
+                //             ->getMedia($uploadsMediaCollection->getName())
+                //             ->map(
+                //                 fn (Media $media) => IconEntry::make($media->getKey())
+                //                     ->label($media->name)
+                //                     ->state($media->mime_type)
+                //                     ->icon(fn (string $state): string => match ($media->mime_type) {
+                //                         'application/pdf',
+                //                         'application/vnd.ms-word',
+                //                         'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                //                         'image/pdf',
+                //                         'text/markdown',
+                //                         'text/plain' => 'heroicon-o-document-text',
+                //                         'application/vnd.ms-excel',
+                //                         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                //                         'text/csv' => 'heroicon-o-table-cells',
+                //                         'application/vnd.ms-powerpoint',
+                //                         'application/vnd.openxmlformats-officedocument.presentationml.presentation' => 'heroicon-o-presentation-chart-bar',
+                //                         'image/jpeg' => 'heroicon-o-camera',
+                //                         'image/png' => 'heroicon-o-photo',
+                //                         default => 'heroicon-o-paper-clip',
+                //                     })
+                //                     ->size(IconEntrySize::TwoExtraLarge)
+                //                     ->hintAction(
+                //                         InfolistAction::make('download')
+                //                             ->label('Download')
+                //                             ->icon('heroicon-m-arrow-down-tray')
+                //                             ->color('primary')
+                //                             ->url($media->getTemporaryUrl(now()->addMinute()), true)
+                //                     )
+                //             )
+                //             ->toArray()
+                //     ),
                 Section::make('Uploads')
                     ->visible(fn (ServiceRequest $record): bool => $record->hasMedia($uploadsMediaCollection->getName()))
                     ->schema(
                         fn (ServiceRequest $record) => $record
                             ->getMedia($uploadsMediaCollection->getName())
                             ->map(
-                                fn (Media $media) => IconEntry::make($media->getKey())
+                                fn (Media $media) => ImageEntry::make($media->getKey())
                                     ->label($media->name)
-                                    ->state($media->mime_type)
-                                    ->icon(fn (string $state): string => match ($media->mime_type) {
-                                        'application/pdf',
-                                        'application/vnd.ms-word',
-                                        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                                        'image/pdf',
-                                        'text/markdown',
-                                        'text/plain' => 'heroicon-o-document-text',
-                                        'application/vnd.ms-excel',
-                                        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                                        'text/csv' => 'heroicon-o-table-cells',
-                                        'application/vnd.ms-powerpoint',
-                                        'application/vnd.openxmlformats-officedocument.presentationml.presentation' => 'heroicon-o-presentation-chart-bar',
-                                        'image/jpeg' => 'heroicon-o-camera',
-                                        'image/png' => 'heroicon-o-photo',
-                                        default => 'heroicon-o-paper-clip',
-                                    })
-                                    ->size(IconEntrySize::TwoExtraLarge)
+                                    // ->disk('s3')
+                                    // ->visibility('private')
+                                    ->state($mediaUrl = $media->getTemporaryUrl(now()->addHour()))
                                     ->hintAction(
                                         InfolistAction::make('download')
                                             ->label('Download')
                                             ->icon('heroicon-m-arrow-down-tray')
                                             ->color('primary')
-                                            ->url($media->getTemporaryUrl(now()->addMinute()), true)
+                                            ->url($mediaUrl, true)
                                     )
+                                    ->simpleLightbox($mediaUrl, true)
                             )
                             ->toArray()
                     ),
