@@ -43,6 +43,7 @@ use AidingApp\Report\Filament\Widgets\ServiceRequestsStats;
 use AidingApp\Report\Filament\Widgets\ServiceRequestStatusDistributionDonutChart;
 use AidingApp\Report\Filament\Widgets\TopServiceRequestTypesTable;
 use App\Filament\Clusters\ReportLibrary;
+use App\Models\User;
 use Filament\Pages\Dashboard;
 
 class ServiceRequests extends Dashboard
