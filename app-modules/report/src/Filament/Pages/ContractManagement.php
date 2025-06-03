@@ -44,7 +44,7 @@ class ContractManagement extends Dashboard
 {
     protected static ?string $cluster = ReportLibrary::class;
 
-    protected static ?string $navigationGroup = 'Purchasing Management';
+    protected static ?string $navigationGroup = 'Purchasing';
 
     protected static ?string $navigationLabel = 'Contract Management';
 
