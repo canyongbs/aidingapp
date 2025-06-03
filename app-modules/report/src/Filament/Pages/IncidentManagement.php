@@ -36,31 +36,25 @@
 
 namespace AidingApp\Report\Filament\Pages;
 
-use AidingApp\Report\Filament\Widgets\RecentServiceRequestsTable;
-use AidingApp\Report\Filament\Widgets\RefreshWidget;
-use AidingApp\Report\Filament\Widgets\ServiceRequestsOverTimeLineChart;
-use AidingApp\Report\Filament\Widgets\ServiceRequestsStats;
-use AidingApp\Report\Filament\Widgets\ServiceRequestStatusDistributionDonutChart;
-use AidingApp\Report\Filament\Widgets\TopServiceRequestTypesTable;
 use App\Filament\Clusters\ReportLibrary;
 use App\Models\User;
 use Filament\Pages\Dashboard;
 
-class ServiceRequests extends Dashboard
+class IncidentManagement extends Dashboard
 {
     protected static ?string $cluster = ReportLibrary::class;
 
     protected static ?string $navigationGroup = 'Service Management';
 
-    protected static ?string $navigationLabel = 'Service Requests';
+    protected static ?string $navigationLabel = 'Incident Management';
 
-    protected static ?string $title = 'Service Requests';
+    protected static ?string $title = 'Incident Management';
 
-    protected static string $routePath = 'service-requests';
+    protected static string $routePath = 'incident-management';
 
-    protected static ?int $navigationSort = 10;
+    protected static string $view = 'filament.pages.coming-soon';
 
-    protected $cacheTag = 'report-service-requests';
+    protected static ?int $navigationSort = 40;
 
     public static function canAccess(): bool
     {
@@ -68,26 +62,5 @@ class ServiceRequests extends Dashboard
         $user = auth()->user();
 
         return $user->can('report-library.view-any');
-    }
-
-    public function getWidgets(): array
-    {
-        return [
-            RefreshWidget::make(['cacheTag' => $this->cacheTag]),
-            ServiceRequestsStats::make(['cacheTag' => $this->cacheTag]),
-            ServiceRequestStatusDistributionDonutChart::make(['cacheTag' => $this->cacheTag]),
-            ServiceRequestsOverTimeLineChart::make(['cacheTag' => $this->cacheTag]),
-            RecentServiceRequestsTable::make(['cacheTag' => $this->cacheTag]),
-            TopServiceRequestTypesTable::make(['cacheTag' => $this->cacheTag]),
-        ];
-    }
-
-    public function getColumns(): int | string | array
-    {
-        return [
-            'sm' => 2,
-            'md' => 4,
-            'lg' => 4,
-        ];
     }
 }
