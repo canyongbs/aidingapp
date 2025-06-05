@@ -41,7 +41,6 @@ use AidingApp\Contact\Models\Contact;
 use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Prunable;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\MediaLibrary\HasMedia;
@@ -75,7 +74,7 @@ class EngagementFile extends BaseModel implements HasMedia, Auditable
     public function contacts(): BelongsToMany
     {
         return $this->belongsToMany(Contact::class, 'engagement_file_entities', 'engagement_file_id', 'entity_id')
-          ->using(EngagementFileEntities::class);
+            ->using(EngagementFileEntities::class);
     }
 
     public function prunable(): Builder
