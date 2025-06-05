@@ -52,6 +52,7 @@ class EngagementFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
+            'recipient_type' => (new Contact())->getMorphClass(),
             'recipient_id' => Contact::factory(),
             'subject' => $this->faker->sentence,
             'body' => ['type' => 'doc', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => $this->faker->paragraph]]]]],

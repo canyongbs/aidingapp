@@ -66,6 +66,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
@@ -194,16 +195,12 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
     }
 
     /**
-     * @return HasManyThrough<EngagementFile, EngagementFileEntities, $this>
+     * @return BelongsToMany<EngagementFile, $this, covariant EngagementFileEntities>
      */
-    public function engagementFiles(): HasManyThrough
+    public function engagementFiles(): BelongsToMany
     {
-        return $this->hasManyThrough(
-            related: EngagementFile::class,
-            through: EngagementFileEntities::class,
-            firstKey: 'entity_id',
-            secondKey: 'engagement_file_id'
-        );
+        return $this->belongsToMany(EngagementFile::class, 'engagement_file_entities', 'entity_id', 'engagement_file_id')
+            ->using(EngagementFileEntities::class);
     }
 
     /**

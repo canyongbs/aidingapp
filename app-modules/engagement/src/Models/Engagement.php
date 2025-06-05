@@ -46,6 +46,7 @@ use AidingApp\Notification\Models\EmailMessage;
 use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
 use AidingApp\Timeline\Models\Timeline;
 use AidingApp\Timeline\Timelines\EngagementTimeline;
+use App\Models\Authenticatable;
 use App\Models\BaseModel;
 use App\Models\Concerns\BelongsToEducatable;
 use App\Models\Contracts\Educatable;
@@ -57,6 +58,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
 use Illuminate\Support\HtmlString;
@@ -83,6 +85,7 @@ class Engagement extends BaseModel implements Auditable, ProvidesATimeline, HasD
         'subject',
         'body',
         'recipient_id',
+        'recipient_type',
         'scheduled_at',
         'dispatched_at',
         'channel',
@@ -155,11 +158,16 @@ class Engagement extends BaseModel implements Auditable, ProvidesATimeline, HasD
     }
 
     /**
-     * @return BelongsTo<Contact, $this>
+     * @return MorphTo<Model, $this>
      */
-    public function recipient(): BelongsTo
+    public function recipient(): MorphTo
     {
-        return $this->belongsTo(Contact::class, 'recipient_id');
+        //return $this->belongsTo(Contact::class, 'recipient_id');
+        return $this->morphTo(
+            name: 'recipient',
+            type: 'recipient_type',
+            id: 'recipient_id',
+        );
     }
 
     /**
