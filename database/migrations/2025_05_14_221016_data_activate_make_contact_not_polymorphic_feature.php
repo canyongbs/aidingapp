@@ -34,28 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Database\Factories;
+use App\Features\MakeContactNotPolymorphicFeature;
+use Illuminate\Database\Migrations\Migration;
 
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Engagement\Enums\EngagementResponseType;
-use AidingApp\Engagement\Models\EngagementResponse;
-use Illuminate\Database\Eloquent\Factories\Factory;
-
-/**
- * @extends Factory<EngagementResponse>
- */
-class EngagementResponseFactory extends Factory
-{
-    public function definition(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            'sender_id' => Contact::factory(),
-            'content' => $this->faker->sentence(),
-            'sent_at' => $this->faker->dateTimeBetween('-1 year', '-1 day'),
-            'type' => $this->faker->randomElement(EngagementResponseType::cases()),
-            'subject' => $this->faker->sentence(),
-            // Bring in a raw value here for testing later
-            'raw' => null,
-        ];
+        MakeContactNotPolymorphicFeature::activate();
     }
-}
+
+    public function down(): void
+    {
+        MakeContactNotPolymorphicFeature::deactivate();
+    }
+};

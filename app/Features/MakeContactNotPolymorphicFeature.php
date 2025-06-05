@@ -34,28 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Database\Factories;
+namespace App\Features;
 
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Engagement\Enums\EngagementResponseType;
-use AidingApp\Engagement\Models\EngagementResponse;
-use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Support\AbstractFeatureFlag;
 
-/**
- * @extends Factory<EngagementResponse>
- */
-class EngagementResponseFactory extends Factory
+class MakeContactNotPolymorphicFeature extends AbstractFeatureFlag
 {
-    public function definition(): array
+    public function resolve(mixed $scope): mixed
     {
-        return [
-            'sender_id' => Contact::factory(),
-            'content' => $this->faker->sentence(),
-            'sent_at' => $this->faker->dateTimeBetween('-1 year', '-1 day'),
-            'type' => $this->faker->randomElement(EngagementResponseType::cases()),
-            'subject' => $this->faker->sentence(),
-            // Bring in a raw value here for testing later
-            'raw' => null,
-        ];
+        return false;
     }
 }

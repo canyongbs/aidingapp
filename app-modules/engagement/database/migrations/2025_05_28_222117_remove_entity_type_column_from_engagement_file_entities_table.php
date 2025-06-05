@@ -34,28 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Database\Factories;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Engagement\Enums\EngagementResponseType;
-use AidingApp\Engagement\Models\EngagementResponse;
-use Illuminate\Database\Eloquent\Factories\Factory;
-
-/**
- * @extends Factory<EngagementResponse>
- */
-class EngagementResponseFactory extends Factory
-{
-    public function definition(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            'sender_id' => Contact::factory(),
-            'content' => $this->faker->sentence(),
-            'sent_at' => $this->faker->dateTimeBetween('-1 year', '-1 day'),
-            'type' => $this->faker->randomElement(EngagementResponseType::cases()),
-            'subject' => $this->faker->sentence(),
-            // Bring in a raw value here for testing later
-            'raw' => null,
-        ];
+        Schema::table('engagement_file_entities', function (Blueprint $table) {
+            $table->dropColumn('entity_type');
+        });
     }
-}
+
+    public function down(): void
+    {
+        Schema::table('engagement_file_entities', function (Blueprint $table) {
+            $table->string('entity_type');
+        });
+    }
+};

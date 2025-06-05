@@ -48,6 +48,7 @@ use AidingApp\ServiceManagement\Exceptions\ServiceRequestNumberExceededReRollsEx
 use AidingApp\ServiceManagement\Models\MediaCollections\UploadsMediaCollection;
 use AidingApp\ServiceManagement\Observers\ServiceRequestObserver;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
+use App\Models\Authenticatable;
 use App\Models\BaseModel;
 use App\Models\Concerns\BelongsToEducatable;
 use App\Models\Scopes\LicensedToEducatable;
@@ -60,7 +61,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
@@ -87,7 +87,6 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
     use HasFactory;
 
     protected $fillable = [
-        'respondent_type',
         'respondent_id',
         'division_id',
         'status_id',
@@ -160,14 +159,10 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
         return $save;
     }
 
-    /** @return MorphTo<Contact> */
-    public function respondent(): MorphTo
+    /** @return BelongsTo<Contact, $this> */
+    public function respondent(): BelongsTo
     {
-        return $this->morphTo(
-            name: 'respondent',
-            type: 'respondent_type',
-            id: 'respondent_id',
-        );
+        return $this->belongsTo(Contact::class, 'respondent_id');
     }
 
     /**
@@ -385,10 +380,26 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
         return $this->status->classification === SystemServiceRequestClassification::Closed;
     }
 
+    // protected static function booted(): void
+    // {
+    //     static::addGlobalScope('licensed', function (Builder $builder) {
+    //         $builder->tap(new LicensedToEducatable('respondent'));
+    //     });
+    // }
+
     protected static function booted(): void
     {
         static::addGlobalScope('licensed', function (Builder $builder) {
-            $builder->tap(new LicensedToEducatable('respondent'));
+            if (! auth()->check()) {
+                return;
+            }
+
+            /** @var Authenticatable $user */
+            $user = auth()->user();
+
+            if (! $user->hasLicense(Contact::getLicenseType())) {
+                $builder->whereRaw('1 = 0');
+            }
         });
     }
 
