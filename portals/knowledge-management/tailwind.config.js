@@ -123,7 +123,7 @@ export default {
                 DEFAULT: 'var(--rounding)',
                 md: 'var(--rounding-md)',
                 lg: 'var(--rounding-lg)',
-                full: 'var(--rounding-sm)',
+                full: 'var(--rounding-full)',
             },
             fontFamily: {
                 signature: ['Satisfy', 'cursive'],

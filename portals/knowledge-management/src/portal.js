@@ -49,6 +49,7 @@ import ViewCategory from './Pages/ViewCategory.vue';
 import ViewServiceRequest from './Pages/ViewServiceRequest.vue';
 import './portal.css';
 import getAppContext from './Services/GetAppContext.js';
+import ServiceMonitorStatus from './Pages/ServiceMonitorStatus.vue';
 
 customElements.define(
     'knowledge-management-portal-embed',
@@ -114,7 +115,7 @@ customElements.define(
                     {
                         path: baseUrl + '/status',
                         name: 'status',
-                        component: ComingSoon,
+                        component: ServiceMonitorStatus,
                         meta: { requiresAuth: true },
                     },
                     {
