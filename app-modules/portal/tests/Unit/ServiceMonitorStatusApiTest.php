@@ -55,7 +55,7 @@ test('returns all service monitoring targets with latest history when portal is 
     $targets = ServiceMonitoringTarget::factory()
         ->count(1)
         ->sequence(
-            ['id' => '9f18838a-051d-441a-afc8-ded84bb070be','name' => 'Google', 'domain' => 'https://google.com'],
+            ['id' => '9f18838a-051d-441a-afc8-ded84bb070be', 'name' => 'Google', 'domain' => 'https://google.com'],
         )
         ->create();
 
