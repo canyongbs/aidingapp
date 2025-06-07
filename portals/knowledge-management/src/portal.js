@@ -44,12 +44,12 @@ import CreateServiceRequest from './Pages/CreateServiceRequest.vue';
 import Home from './Pages/Home.vue';
 import Licenses from './Pages/Licenses.vue';
 import SelectServiceRequestType from './Pages/SelectServiceRequestType.vue';
+import ServiceMonitorStatus from './Pages/ServiceMonitorStatus.vue';
 import ViewArticle from './Pages/ViewArticle.vue';
 import ViewCategory from './Pages/ViewCategory.vue';
 import ViewServiceRequest from './Pages/ViewServiceRequest.vue';
 import './portal.css';
 import getAppContext from './Services/GetAppContext.js';
-import ServiceMonitorStatus from './Pages/ServiceMonitorStatus.vue';
 
 customElements.define(
     'knowledge-management-portal-embed',

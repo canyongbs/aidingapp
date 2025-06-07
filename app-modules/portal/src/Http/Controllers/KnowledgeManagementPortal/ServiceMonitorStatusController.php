@@ -2,13 +2,13 @@
 
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
-use Illuminate\Support\Str;
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Http\Client\ConnectionException;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 class ServiceMonitorStatusController extends Controller
 {
@@ -19,12 +19,35 @@ class ServiceMonitorStatusController extends Controller
      */
     public function __invoke(Request $request): JsonResponse
     {
-        $perPage = $request->get('per_page', 5);
+        $perPage = $request->get('per_page', 15);
 
-        $paginated = ServiceMonitoringTarget::query()->paginate($perPage);
+        $paginated = ServiceMonitoringTarget::query()
+            ->with(['latestHistory:id,response_time,succeeded,response,historical_service_monitorings.service_monitoring_target_id'])
+            ->select('id', 'name', 'domain')
+            ->orderBy('created_at', 'ASC')
+            ->paginate($perPage);
 
-        $paginated->through(function ($target) {
-            return $this->checkDomain($target);
+        $paginated->through(function (ServiceMonitoringTarget $target) {
+            $latestHistory = $target->latestHistory;
+
+            if ($latestHistory) {
+                $statusMessage = match ($latestHistory->succeeded) {
+                    true => 'No known issues at this time',
+                    false => '1 unknown issue reported',
+                };
+
+                $latestHistoryArray = [
+                    ...$latestHistory->toArray(),
+                    'status_message' => $statusMessage,
+                ];
+            } else {
+                $latestHistoryArray = null;
+            }
+
+            return [
+                ...$target->toArray(),
+                'latest_history' => $latestHistoryArray,
+            ];
         });
 
         return response()->json([
@@ -42,7 +65,7 @@ class ServiceMonitorStatusController extends Controller
                 'next_page_url' => $paginated->nextPageUrl(),
                 'prev_page_url' => $paginated->previousPageUrl(),
                 'links' => $paginated->linkCollection(),
-            ]
+            ],
         ]);
     }
 
@@ -52,7 +75,6 @@ class ServiceMonitorStatusController extends Controller
     protected function checkDomain(ServiceMonitoringTarget $target): array
     {
         try {
-
             $response = Http::maxRedirects(15)->get($target->domain);
             $statusCode = $response->status();
 
@@ -75,10 +97,8 @@ class ServiceMonitorStatusController extends Controller
                 'message' => $message,
                 'http_status' => $statusCode,
             ];
-
         } catch (ConnectionException $e) {
-
-            if (!Str::contains($e->getMessage(), 'Could not resolve host')) {
+            if (! Str::contains($e->getMessage(), 'Could not resolve host')) {
                 report($e);
             }
 
@@ -91,5 +111,4 @@ class ServiceMonitorStatusController extends Controller
             ];
         }
     }
-
 }

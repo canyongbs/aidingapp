@@ -10,7 +10,7 @@
         },
         status: {
             type: String,
-            validator: (value) => ['ok', 'warning', 'down'].includes(value),
+            validator: (value) => [null, true, false].includes(value),
         },
     });
 </script>
@@ -18,7 +18,7 @@
     <div class="flex items-center justify-between p-5 bg-white border border-gray-200 rounded-lg shadow">
         <div class="flex items-center">
             <svg
-                v-if="status === 'ok'"
+                v-if="status === true"
                 class="w-[28px] h-[28px] text-green-700"
                 aria-hidden="true"
                 xmlns="http://www.w3.org/2000/svg"
@@ -34,7 +34,7 @@
                 />
             </svg>
             <svg
-                v-if="status === 'warning'"
+                v-if="status === null"
                 class="w-[28px] h-[28px] text-yellow-600"
                 aria-hidden="true"
                 xmlns="http://www.w3.org/2000/svg"
@@ -50,7 +50,7 @@
                 />
             </svg>
             <svg
-                v-if="status === 'down'"
+                v-if="status === false"
                 class="w-[28px] h-[28px] text-red-600"
                 aria-hidden="true"
                 xmlns="http://www.w3.org/2000/svg"

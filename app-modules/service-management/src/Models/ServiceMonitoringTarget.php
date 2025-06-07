@@ -45,6 +45,7 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
 
@@ -76,6 +77,14 @@ class ServiceMonitoringTarget extends BaseModel implements Auditable
     public function histories(): HasMany
     {
         return $this->hasMany(HistoricalServiceMonitoring::class);
+    }
+
+    /**
+     * @return HasOne<HistoricalServiceMonitoring, $this>
+     */
+    public function latestHistory(): HasOne
+    {
+        return $this->hasOne(HistoricalServiceMonitoring::class)->latestOfMany();
     }
 
     /**
