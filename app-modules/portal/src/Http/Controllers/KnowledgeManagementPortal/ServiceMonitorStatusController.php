@@ -4,11 +4,8 @@ namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Str;
 
 class ServiceMonitorStatusController extends Controller
 {
@@ -67,48 +64,5 @@ class ServiceMonitorStatusController extends Controller
                 'links' => $paginated->linkCollection(),
             ],
         ]);
-    }
-
-    /**
-     * @return array<string, string|int>
-     */
-    protected function checkDomain(ServiceMonitoringTarget $target): array
-    {
-        try {
-            $response = Http::maxRedirects(15)->get($target->domain);
-            $statusCode = $response->status();
-
-            $status = match (true) {
-                $statusCode >= 200 && $statusCode < 300 => 'ok',
-                $statusCode >= 300 && $statusCode < 500 => 'warning',
-                default => 'down',
-            };
-
-            $message = match ($status) {
-                'ok' => 'No known issues at this time',
-                'warning' => '1 known issues reported',
-                'down' => '1 unknown issues reported',
-            };
-
-            return [
-                'name' => $target->name,
-                'domain' => $target->domain,
-                'status' => $status,
-                'message' => $message,
-                'http_status' => $statusCode,
-            ];
-        } catch (ConnectionException $e) {
-            if (! Str::contains($e->getMessage(), 'Could not resolve host')) {
-                report($e);
-            }
-
-            return [
-                'name' => $target->name,
-                'domain' => $target->domain,
-                'status' => 'down',
-                'message' => '1 known issues reported',
-                'http_status' => 523,
-            ];
-        }
     }
 }
