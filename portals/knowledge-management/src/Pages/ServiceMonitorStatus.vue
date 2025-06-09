@@ -135,7 +135,7 @@
 </script>
 
 <template>
-    <main class="px-6 bg-gray-50 min-h-screen">
+    <div class="px-6 bg-gray-50">
         <div class="max-w-screen-xl flex flex-col gap-y-6 mx-auto py-8">
             <Breadcrumbs :currentCrumb="'Status'"></Breadcrumbs>
             <div class="ring-1 ring-black/5 shadow-sm px-3 pt-3 pb-1 rounded bg-white">
@@ -207,5 +207,5 @@
                 </template>
             </div>
         </div>
-    </main>
+    </div>
 </template>
