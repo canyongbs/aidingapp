@@ -38,6 +38,7 @@ use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\CreateServiceReq
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\GetKnowledgeManagementPortalTagsController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\GetServiceRequestsController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\GetServiceRequestUploadUrl;
+use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\IncidentController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalArticleController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalAuthenticateController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalCategoryController;
@@ -137,5 +138,9 @@ Route::prefix('api')
                 Route::get('/product-licenses', LicenseManagementPortalController::class)
                     ->middleware(['auth:sanctum'])
                     ->name('product.licenses');
+
+                Route::get('/incidents', IncidentController::class)
+                    ->middleware(['auth:sanctum'])
+                    ->name('incidents.index');
             });
     });

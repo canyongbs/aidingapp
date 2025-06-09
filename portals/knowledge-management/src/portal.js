@@ -49,6 +49,7 @@ import ViewCategory from './Pages/ViewCategory.vue';
 import ViewServiceRequest from './Pages/ViewServiceRequest.vue';
 import './portal.css';
 import getAppContext from './Services/GetAppContext.js';
+import Incidents from './Pages/Incidents.vue';
 
 customElements.define(
     'knowledge-management-portal-embed',
@@ -120,7 +121,7 @@ customElements.define(
                     {
                         path: baseUrl + '/incidents',
                         name: 'incidents',
-                        component: ComingSoon,
+                        component: Incidents,
                         meta: { requiresAuth: true },
                     },
                     {
