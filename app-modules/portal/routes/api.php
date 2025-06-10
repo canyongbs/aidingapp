@@ -140,7 +140,7 @@ Route::prefix('api')
                     ->name('product.licenses');
 
                 Route::get('/status', ServiceMonitorStatusController::class)
-                    // ->middleware(['auth:sanctum'])
+                    ->middleware(['auth:sanctum'])
                     ->name('status');
             });
     });
