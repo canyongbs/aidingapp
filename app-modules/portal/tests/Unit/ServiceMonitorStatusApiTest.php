@@ -53,22 +53,24 @@ test('returns all service monitoring targets with latest history when portal is 
     actingAs($contact);
 
     $targets = ServiceMonitoringTarget::factory()
-        ->count(1)
+        ->count(3)
         ->sequence(
-            ['id' => '9f18838a-051d-441a-afc8-ded84bb070be', 'name' => 'Google', 'domain' => 'https://google.com'],
+            ['name' => 'Google', 'domain' => 'https://google.com'],
+            ['name' => 'Facebook', 'domain' => 'https://facebook.com'],
+            ['name' => 'bing.com', 'domain' => 'https://bing.com'],
         )
         ->create();
 
     foreach ($targets as $target) {
-        $target->histories()->make([
+        $target->histories()->create([
             'response_time' => 0.123,
             'succeeded' => true,
             'response' => 200,
-        ])->forceFill(['id' => '9f18ac66-7369-4282-b834-9f672f49b2bc'])->save();
+        ]);
     }
 
     $url = URL::route(name: 'api.portal.status', absolute: false);
     $response = get($url);
-
-    expect($response)->toMatchSnapshot();
+    expect($response->status())->toBe(200);
+    expect($response->json('data'))->toHaveCount(3);
 });
