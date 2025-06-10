@@ -45,14 +45,16 @@ class IncidentController
     public function __invoke(Request $request): JsonResponse
     {
         $perPage = $request->get('per_page', 15);
-        $paginated = Incident::with('severity')->orderBy('created_at', 'desc')->paginate($perPage);
+        $paginatedIncidents = Incident::with('severity')->orderBy('created_at', 'desc')->paginate($perPage);
 
-        $grouped = $paginated->getCollection()->groupBy(function ($incident) {
+        $incidents = $paginatedIncidents->getCollection();
+        $incidents = $incidents->groupBy(function ($incident) {
             return $incident->created_at->format('F Y');
         });
 
-        $paginated->setCollection($grouped);
+        $incidentsArray = $paginatedIncidents->toArray();
+        $incidentsArray['data'] = $incidents;
 
-        return response()->json(['data' => $paginated]);
+        return response()->json(['data' => $incidentsArray]);
     }
 }

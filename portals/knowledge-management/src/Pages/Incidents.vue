@@ -33,9 +33,10 @@
 -->
 <script setup>
     import { onMounted, ref } from 'vue';
+    import Loader from '../Components/Loader.vue';
     import { consumer } from '../Services/Consumer';
 
-    const incidents = ref([]);
+    const incidents = ref({});
     const { get } = consumer();
     const loading = ref(true);
     const currentPage = ref(1);
@@ -43,6 +44,7 @@
     const prevPageUrl = ref(null);
     const lastPage = ref(null);
     const perPage = ref(10);
+    const hasMore = ref(false);
 
     const props = defineProps({
         apiUrl: {
@@ -63,24 +65,61 @@
         });
     };
 
-    const severityTextColor = (severity) => {
-        if (!severity || !severity.color) {
-            return 'text-gray-600';
+    const loadMore = () => {
+        if (nextPageUrl.value) {
+            currentPage.value++;
+            fetchIncidents();
         }
-        return `text-${severity.color}-600`;
+    };
+
+    const severityTextColor = (severity) => {
+        const allowedColors = {
+            slate: 'text-slate-600',
+            gray: 'text-gray-600',
+            zinc: 'text-zinc-600',
+            neutral: 'text-neutral-600',
+            stone: 'text-stone-600',
+            red: 'text-red-600',
+            orange: 'text-orange-600',
+            amber: 'text-amber-600',
+            yellow: 'text-yellow-600',
+            lime: 'text-lime-600',
+            green: 'text-green-600',
+            emerald: 'text-emerald-600',
+            teal: 'text-teal-600',
+            cyan: 'text-cyan-600',
+            sky: 'text-sky-600',
+            blue: 'text-blue-600',
+            indigo: 'text-indigo-600',
+            violet: 'text-violet-600',
+            purple: 'text-purple-600',
+            fuchsia: 'text-fuchsia-600',
+            pink: 'text-pink-600',
+            rose: 'text-rose-600',
+        };
+
+        return allowedColors[severity?.color] || 'text-gray-600';
     };
 
     const fetchIncidents = async () => {
         loading.value = true;
         try {
-            const response = await get(`${props.apiUrl}/incidents`);
+            const response = await get(`${props.apiUrl}/incidents?page=${currentPage.value}&per_page=${perPage.value}`);
 
-            incidents.value = response.data.data.data;
-            currentPage.value = response.data.current_page;
-            nextPageUrl.value = response.data.next_page_url;
-            prevPageUrl.value = response.data.prev_page_url;
-            lastPage.value = response.data.last_page;
-            perPage.value = response.data.per_page;
+            let data = response.data.data;
+            for (const [monthYear, newIncidents] of Object.entries(data.data)) {
+                if (!incidents.value[monthYear]) {
+                    incidents.value[monthYear] = [];
+                }
+                incidents.value[monthYear].push(...newIncidents);
+            }
+            currentPage.value = data.current_page;
+            nextPageUrl.value = data.next_page_url;
+            prevPageUrl.value = data.prev_page_url;
+            lastPage.value = data.last_page;
+            perPage.value = data.per_page;
+            hasMore.value = nextPageUrl.value !== null;
+            loading.value = false;
         } catch (error) {
             incidents.value = [];
             loading.value = false;
@@ -94,14 +133,18 @@
             <h2 class="text-lg font-medium mb-4">{{ index }}</h2>
             <hr class="my-4" />
             <ol class="relative border-s border-gray-200 dark:border-gray-700">
-                <li class="mb-8 ms-4" v-for="(incident, index) in data" :key="index">
+                <li class="mb-8 ms-4" v-for="incident in data" :key="incident.id">
                     <div
                         class="absolute w-3 h-3 bg-gray-200 rounded-lg mt-1.5 -start-1.5 border border-white dark:border-gray-900 dark:bg-gray-700"
                     ></div>
                     <time class="mb-1 text-sm font-normal leading-none text-gray-400 dark:text-gray-500">{{
                         formatDate(incident.created_at)
                     }}</time>
-                    <h3 class="text-lg font-semibold dark:text-white" :class="severityTextColor(incident.severity)">
+                    <h3
+                        v-if="incident.severity"
+                        class="text-lg font-semibold dark:text-white"
+                        :class="severityTextColor(incident.severity)"
+                    >
                         {{ incident.title }}
                     </h3>
                     <p>
@@ -109,6 +152,16 @@
                     </p>
                 </li>
             </ol>
+        </div>
+        <Loader :loading="loading" />
+        <div class="flex justify-center mt-6" v-if="hasMore && !loading">
+            <button
+                type="button"
+                @click="loadMore"
+                class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+            >
+                Load More
+            </button>
         </div>
     </div>
 </template>
