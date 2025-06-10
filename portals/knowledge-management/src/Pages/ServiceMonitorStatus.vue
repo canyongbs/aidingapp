@@ -69,10 +69,7 @@
     const issueMessage = 'One or more services are currently experiencing disruptions or downtime.';
 
     const hasIssues = computed(() =>
-        result.value.some(
-            (serviceMonitor) =>
-                serviceMonitor.latest_history !== null && serviceMonitor.latest_history.succeeded !== true,
-        ),
+        result.value.some((serviceMonitor) => serviceMonitor.latest_history?.succeeded === false),
     );
 
     const hasAnyHistory = computed(() => result.value.some((serviceMonitor) => serviceMonitor.latest_history !== null));
@@ -162,8 +159,11 @@
                         <div v-for="(serviceMonitor, index) in result" :key="index">
                             <ServiceMonitorCard
                                 :name="serviceMonitor.name"
-                                :status="serviceMonitor.latest_history?.succeeded ?? null"
-                                :message="serviceMonitor.latest_history?.status_message ?? 'No status checked yet'"
+                                :status="serviceMonitor.latest_history?.succeeded ?? true"
+                                :message="
+                                    serviceMonitor.latest_history?.status_message ??
+                                    'No known issues (monitoring not yet started).'
+                                "
                             />
                         </div>
                     </div>

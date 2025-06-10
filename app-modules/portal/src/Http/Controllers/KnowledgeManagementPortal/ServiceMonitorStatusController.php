@@ -63,8 +63,8 @@ class ServiceMonitorStatusController extends Controller
 
             if ($latestHistory) {
                 $statusMessage = match ($latestHistory->succeeded) {
-                    true => 'No known issues at this time',
-                    false => '1 unknown issue reported',
+                    true => 'No known issues at this time.',
+                    false => "Unable to reach service, status code: {$latestHistory->response}",
                 };
 
                 $latestHistoryArray = [
