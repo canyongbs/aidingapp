@@ -44,6 +44,7 @@ import CreateServiceRequest from './Pages/CreateServiceRequest.vue';
 import Home from './Pages/Home.vue';
 import Licenses from './Pages/Licenses.vue';
 import SelectServiceRequestType from './Pages/SelectServiceRequestType.vue';
+import ServiceMonitorStatus from './Pages/ServiceMonitorStatus.vue';
 import ViewArticle from './Pages/ViewArticle.vue';
 import ViewCategory from './Pages/ViewCategory.vue';
 import ViewServiceRequest from './Pages/ViewServiceRequest.vue';
@@ -114,7 +115,7 @@ customElements.define(
                     {
                         path: baseUrl + '/status',
                         name: 'status',
-                        component: ComingSoon,
+                        component: ServiceMonitorStatus,
                         meta: { requiresAuth: true },
                     },
                     {
