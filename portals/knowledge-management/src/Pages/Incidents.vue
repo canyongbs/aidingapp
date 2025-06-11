@@ -139,6 +139,11 @@
             <p class="text-sm text-gray-500 dark:text-gray-400">
                 {{ incident.description }}
             </p>
+            <span
+                class="bg-blue-100 text-blue-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded-sm dark:bg-blue-900 dark:text-blue-300 mb-5"
+                v-if="incident.status"
+                >{{ incident.status.name }}</span
+            >
             <hr class="my-4" />
             <ol class="relative border-s border-gray-200 dark:border-gray-700" v-if="incident.incident_updates?.length">
                 <li class="mb-8 ms-4" v-for="updateData in incident.incident_updates" :key="updateData.id">
