@@ -34,44 +34,43 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\Settings;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Portal\Settings\PortalSettings;
+use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+use Illuminate\Support\Facades\URL;
 
-use AidingApp\Portal\Enums\GdprBannerButtonLabel;
-use AidingApp\Portal\Settings\SettingsProperties\PortalSettingsProperty;
-use App\Settings\SettingsWithMedia;
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\get;
 
-class PortalSettings extends SettingsWithMedia
-{
-    public null $logo = null;
+test('returns all service monitoring targets with latest history when portal is enabled', function () {
+    $settings = app(PortalSettings::class);
 
-    public null $favicon = null;
+    $settings->knowledge_management_portal_enabled = true;
+    $settings->save();
 
-    /**
-    * Knowledge Base Portal
-    */
-    public bool $knowledge_management_portal_enabled = false;
+    $contact = Contact::factory()->create();
 
-    public bool $knowledge_management_portal_service_management = false;
+    actingAs($contact);
 
-    public bool $knowledge_management_portal_requires_authentication = false;
+    $targets = ServiceMonitoringTarget::factory()
+        ->count(3)
+        ->sequence(
+            ['name' => 'Google', 'domain' => 'https://google.com'],
+            ['name' => 'Facebook', 'domain' => 'https://facebook.com'],
+            ['name' => 'bing.com', 'domain' => 'https://bing.com'],
+        )
+        ->create();
 
-    public ?string $knowledge_management_portal_primary_color = null;
-
-    public ?string $knowledge_management_portal_rounding = null;
-
-    public string|array $gdpr_banner_text = "We use cookies to personalize content, to provide social media features, and to analyze our traffic. We also share information about your use of our site with our partners who may combine it with other information that you've provided to them or that they've collected from your use of their services.";
-
-    public GdprBannerButtonLabel $gdpr_banner_button_label = GdprBannerButtonLabel::AllowCookies;
-
-    public string $page_title = 'Help Center';
-
-    public static function getSettingsPropertyModelClass(): string
-    {
-        return PortalSettingsProperty::class;
+    foreach ($targets as $target) {
+        $target->histories()->create([
+            'response_time' => 0.123,
+            'succeeded' => true,
+            'response' => 200,
+        ]);
     }
 
-    public static function group(): string
-    {
-        return 'portal';
-    }
-}
+    $url = URL::route(name: 'api.portal.status', absolute: false);
+    $response = get($url);
+    expect($response->status())->toBe(200);
+    expect($response->json('data'))->toHaveCount(3);
+});
