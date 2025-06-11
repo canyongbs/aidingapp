@@ -120,6 +120,7 @@ class ManagePortalSettings extends SettingsPage
                             ->columnSpanFull(),
                         TextInput::make('page_title')
                             ->label('Page Title')
+                            ->maxLength(255)
                             ->required()
                             ->visible(fn (Get $get) => PortalPageTitle::active() && $get('knowledge_management_portal_enabled'))
                             ->disabled(! Gate::check(Feature::KnowledgeManagement->getGateName()))
