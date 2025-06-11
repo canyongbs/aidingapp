@@ -121,13 +121,13 @@ class ManagePortalSettings extends SettingsPage
                             ->columnSpanFull(),
                         Grid::make()->schema([
                             TextInput::make('page_title')
-                            ->label('Page Title')
-                            ->maxLength(255)
-                            ->columns(1)
-                            ->required()
-                            ->visible(fn (Get $get) => PortalPageTitle::active() && $get('knowledge_management_portal_enabled'))
-                            ->disabled(! Gate::check(Feature::KnowledgeManagement->getGateName()))
-                            ->hintIcon(fn (TextInput $component) => $component->isDisabled() ? 'heroicon-m-lock-closed' : null),
+                                ->label('Page Title')
+                                ->maxLength(255)
+                                ->columns(1)
+                                ->required()
+                                ->visible(fn (Get $get) => PortalPageTitle::active() && $get('knowledge_management_portal_enabled'))
+                                ->disabled(! Gate::check(Feature::KnowledgeManagement->getGateName()))
+                                ->hintIcon(fn (TextInput $component) => $component->isDisabled() ? 'heroicon-m-lock-closed' : null),
                         ])->columns(2),
                         SpatieMediaLibraryFileUpload::make('favicon')
                             ->collection('portal_favicon')
