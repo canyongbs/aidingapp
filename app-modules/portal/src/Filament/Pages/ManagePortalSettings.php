@@ -45,6 +45,7 @@ use App\Filament\Forms\Components\ColorSelect;
 use App\Models\User;
 use Filament\Forms\Components\Actions;
 use Filament\Forms\Components\Actions\Action;
+use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
@@ -118,14 +119,16 @@ class ManagePortalSettings extends SettingsPage
                             ->disabled(! Gate::check(Feature::ServiceManagement->getGateName()))
                             ->hintIcon(fn (Toggle $component) => $component->isDisabled() ? 'heroicon-m-lock-closed' : null)
                             ->columnSpanFull(),
-                        TextInput::make('page_title')
+                        Grid::make()->schema([
+                            TextInput::make('page_title')
                             ->label('Page Title')
                             ->maxLength(255)
+                            ->columns(1)
                             ->required()
                             ->visible(fn (Get $get) => PortalPageTitle::active() && $get('knowledge_management_portal_enabled'))
                             ->disabled(! Gate::check(Feature::KnowledgeManagement->getGateName()))
-                            ->hintIcon(fn (TextInput $component) => $component->isDisabled() ? 'heroicon-m-lock-closed' : null)
-                            ->columnSpanFull(),
+                            ->hintIcon(fn (TextInput $component) => $component->isDisabled() ? 'heroicon-m-lock-closed' : null),
+                        ])->columns(2),
                         SpatieMediaLibraryFileUpload::make('favicon')
                             ->collection('portal_favicon')
                             ->visibility('private')
