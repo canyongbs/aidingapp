@@ -34,6 +34,7 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\AssetManagementPortalController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\CreateServiceRequestController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\GetKnowledgeManagementPortalTagsController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\GetServiceRequestsController;
@@ -69,7 +70,7 @@ Route::prefix('api')
     ])
     ->group(function () {
         Route::middleware(['auth:sanctum'])->group(function () {
-            Route::get('/user', fn () => auth('contact')->user() ?? response()->json(status: Response::HTTP_UNAUTHORIZED))
+            Route::get('/user', fn() => auth('contact')->user() ?? response()->json(status: Response::HTTP_UNAUTHORIZED))
                 ->name('user.auth-check');
         });
 
@@ -146,5 +147,8 @@ Route::prefix('api')
                 Route::get('/status', ServiceMonitorStatusController::class)
                     ->middleware(['auth:sanctum'])
                     ->name('status');
+                Route::get('/assets', AssetManagementPortalController::class)
+                    ->middleware(['auth:sanctum'])
+                    ->name('assets.index');
             });
     });
