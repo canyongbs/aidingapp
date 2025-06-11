@@ -141,6 +141,6 @@ Route::prefix('api')
 
                 Route::get('/incidents', IncidentController::class)
                     ->middleware(['auth:sanctum'])
-                    ->name('incidents.index');
+                    ->name('incidents');
             });
     });
