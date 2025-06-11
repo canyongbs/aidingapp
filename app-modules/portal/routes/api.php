@@ -70,7 +70,7 @@ Route::prefix('api')
     ])
     ->group(function () {
         Route::middleware(['auth:sanctum'])->group(function () {
-            Route::get('/user', fn() => auth('contact')->user() ?? response()->json(status: Response::HTTP_UNAUTHORIZED))
+            Route::get('/user', fn () => auth('contact')->user() ?? response()->json(status: Response::HTTP_UNAUTHORIZED))
                 ->name('user.auth-check');
         });
 
