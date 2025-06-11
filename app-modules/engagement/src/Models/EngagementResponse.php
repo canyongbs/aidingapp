@@ -46,10 +46,12 @@ use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
 use AidingApp\Timeline\Models\Timeline;
 use AidingApp\Timeline\Timelines\EngagementResponseTimeline;
 use App\Models\BaseModel;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
 use Illuminate\Support\HtmlString;
@@ -71,6 +73,7 @@ class EngagementResponse extends BaseModel implements Auditable, ProvidesATimeli
 
     protected $fillable = [
         'sender_id',
+        'sender_type',
         'content',
         'sent_at',
         'subject',
@@ -106,12 +109,18 @@ class EngagementResponse extends BaseModel implements Auditable, ProvidesATimeli
         return $forModel->orderedEngagementResponses()->get();
     }
 
-    /**
-     * @return BelongsTo<Contact, $this>
-     */
-    public function sender(): BelongsTo
+    public function sender(): MorphTo
     {
-        return $this->belongsTo(Contact::class, 'sender_id');
+        return $this->morphTo(
+            name: 'sender',
+            type: 'sender_type',
+            id: 'sender_id',
+        );
+    }
+
+    public function scopeSentByContact(Builder $query): void
+    {
+        $query->where('sender_type', resolve(Contact::class)->getMorphClass());
     }
 
     public function getBody(): HtmlString

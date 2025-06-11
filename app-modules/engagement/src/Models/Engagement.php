@@ -46,7 +46,6 @@ use AidingApp\Notification\Models\EmailMessage;
 use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
 use AidingApp\Timeline\Models\Timeline;
 use AidingApp\Timeline\Timelines\EngagementTimeline;
-use App\Models\Authenticatable;
 use App\Models\BaseModel;
 use App\Models\Concerns\BelongsToEducatable;
 use App\Models\Contracts\Educatable;
@@ -162,7 +161,6 @@ class Engagement extends BaseModel implements Auditable, ProvidesATimeline, HasD
      */
     public function recipient(): MorphTo
     {
-        //return $this->belongsTo(Contact::class, 'recipient_id');
         return $this->morphTo(
             name: 'recipient',
             type: 'recipient_type',
@@ -194,6 +192,16 @@ class Engagement extends BaseModel implements Auditable, ProvidesATimeline, HasD
     public function scopeIsNotPartOfABatch(Builder $query): void
     {
         $query->whereNull('engagement_batch_id');
+    }
+
+    /**
+     * @param Builder<$this> $query
+     *
+     * @return void
+     */
+    public function scopeSentToContact(Builder $query): void
+    {
+        $query->where('recipient_type', resolve(Contact::class)->getMorphClass());
     }
 
     public function getBody(): HtmlString
@@ -241,26 +249,10 @@ class Engagement extends BaseModel implements Auditable, ProvidesATimeline, HasD
         return $this->channel;
     }
 
-    // protected static function booted(): void
-    // {
-    //     static::addGlobalScope('licensed', function (Builder $builder) {
-    //         $builder->tap(new LicensedToEducatable('recipient'));
-    //     });
-    // }
-
     protected static function booted(): void
     {
         static::addGlobalScope('licensed', function (Builder $builder) {
-            if (! auth()->check()) {
-                return;
-            }
-
-            /** @var Authenticatable $user */
-            $user = auth()->user();
-
-            if (! $user->hasLicense(Contact::getLicenseType())) {
-                $builder->whereRaw('1 = 0');
-            }
+            $builder->tap(new LicensedToEducatable('recipient'));
         });
     }
 }

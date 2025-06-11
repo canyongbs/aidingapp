@@ -68,7 +68,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -194,12 +197,20 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
     }
 
     /**
-     * @return BelongsToMany<EngagementFile, $this, covariant EngagementFileEntities>
+     * @return MorphToMany<EngagementFile, $this, covariant EngagementFileEntities>
      */
-    public function engagementFiles(): BelongsToMany
+    public function engagementFiles(): MorphToMany
     {
-        return $this->belongsToMany(EngagementFile::class, 'engagement_file_entities', 'entity_id', 'engagement_file_id')
-            ->using(EngagementFileEntities::class);
+        return $this->morphToMany(
+            related: EngagementFile::class,
+            name: 'entity',
+            table: 'engagement_file_entities',
+            foreignPivotKey: 'entity_id',
+            relatedPivotKey: 'engagement_file_id',
+            relation: 'engagementFiles',
+        )
+            ->using(EngagementFileEntities::class)
+            ->withTimestamps();
     }
 
     /**

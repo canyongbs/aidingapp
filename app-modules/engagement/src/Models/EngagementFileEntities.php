@@ -36,23 +36,20 @@
 
 namespace AidingApp\Engagement\Models;
 
-use AidingApp\Contact\Models\Contact;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\Pivot;
+use Illuminate\Database\Eloquent\Relations\MorphPivot;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 /**
  * @mixin IdeHelperEngagementFileEntities
  */
-class EngagementFileEntities extends Pivot
+class EngagementFileEntities extends MorphPivot
 {
     protected $table = 'engagement_file_entities';
 
-    /**
-     * @return BelongsTo<Contact, $this>
-     */
-    public function entity(): BelongsTo
+    public function entity(): MorphTo
     {
-        return $this->belongsTo(Contact::class, 'entity_id');
+        return $this->morphTo();
     }
 
     /**
