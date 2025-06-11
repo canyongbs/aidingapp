@@ -40,6 +40,7 @@ use AidingApp\Form\Enums\Rounding;
 use AidingApp\Portal\Enums\GdprBannerButtonLabel;
 use AidingApp\Portal\Settings\PortalSettings;
 use App\Enums\Feature;
+use App\Features\PortalPageTitle;
 use App\Filament\Forms\Components\ColorSelect;
 use App\Models\User;
 use Filament\Forms\Components\Actions;
@@ -47,6 +48,7 @@ use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
@@ -115,6 +117,13 @@ class ManagePortalSettings extends SettingsPage
                             ->visible(fn (Get $get) => $get('knowledge_management_portal_enabled'))
                             ->disabled(! Gate::check(Feature::ServiceManagement->getGateName()))
                             ->hintIcon(fn (Toggle $component) => $component->isDisabled() ? 'heroicon-m-lock-closed' : null)
+                            ->columnSpanFull(),
+                        TextInput::make('page_title')
+                            ->label('Page Title')
+                            ->required()
+                            ->visible(fn (Get $get) => PortalPageTitle::active() && $get('knowledge_management_portal_enabled'))
+                            ->disabled(! Gate::check(Feature::KnowledgeManagement->getGateName()))
+                            ->hintIcon(fn (TextInput $component) => $component->isDisabled() ? 'heroicon-m-lock-closed' : null)
                             ->columnSpanFull(),
                         SpatieMediaLibraryFileUpload::make('favicon')
                             ->collection('portal_favicon')
