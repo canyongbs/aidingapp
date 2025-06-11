@@ -147,9 +147,24 @@
                     >
                         {{ incident.title }}
                     </h3>
-                    <p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
                         {{ incident.description }}
                     </p>
+                    <span
+                        class="bg-blue-100 text-blue-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded-sm dark:bg-blue-900 dark:text-blue-300 mb-5"
+                        v-if="incident.status"
+                        >{{ incident.status.name }}</span
+                    >
+                    <div v-if="incident.incident_updates?.length" class="pt-4 space-y-3">
+                        <div
+                            v-for="(updateData, index) in incident.incident_updates"
+                            :key="index"
+                            class="bg-gray-50 rounded p-3"
+                        >
+                            <p class="text-xs text-gray-400">{{ formatDate(updateData.created_at) }}</p>
+                            <p class="text-sm text-gray-700 mt-1">{{ updateData.update }}</p>
+                        </div>
+                    </div>
                 </li>
             </ol>
         </div>

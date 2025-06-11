@@ -45,7 +45,7 @@ class IncidentController
     public function __invoke(Request $request): JsonResponse
     {
         $perPage = $request->get('per_page', 15);
-        $paginatedIncidents = Incident::with('severity')->orderBy('created_at', 'desc')->paginate($perPage);
+        $paginatedIncidents = Incident::with(['severity', 'incidentUpdates', 'status'])->whereHas('incidentUpdates')->orderBy('created_at', 'desc')->paginate($perPage);
 
         $incidents = $paginatedIncidents->getCollection();
         $incidents = $incidents->groupBy(function ($incident) {
