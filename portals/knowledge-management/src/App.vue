@@ -70,6 +70,10 @@
             type: String,
             required: true,
         },
+        appTitle: {
+            type: String,
+            required: true,
+        },
     });
 
     const errorLoading = ref(false);
@@ -114,7 +118,7 @@
         await determineIfUserIsAuthenticated(props.userAuthenticationUrl).then((response) => {
             userIsAuthenticated.value = response;
         });
-        document.title = 'Help Center';
+        document.title = props.appTitle;
     });
 
     watch(

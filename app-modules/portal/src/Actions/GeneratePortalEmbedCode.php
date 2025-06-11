@@ -37,6 +37,8 @@
 namespace AidingApp\Portal\Actions;
 
 use AidingApp\Portal\Enums\PortalType;
+use AidingApp\Portal\Settings\PortalSettings;
+use App\Features\PortalPageTitle;
 use Exception;
 use Illuminate\Support\Facades\URL;
 
@@ -70,8 +72,12 @@ class GeneratePortalEmbedCode
 
                 $apiUrl = route('api.portal.define');
 
+                $appTitle = PortalPageTitle::active() ? app(PortalSettings::class)->page_title : 'Help Center';
+
+                $appTitle = $appTitle . ' - ' . config('app.name');
+
                 return <<<EOD
-                <knowledge-management-portal-embed url="{$portalDefinitionUrl}" user-authentication-url={$userAuthenticationUrl} access-url={$portalAccessUrl} search-url="{$portalSearchUrl}" app-url="{$appUrl}" api-url="{$apiUrl}"></knowledge-management-portal-embed>
+                <knowledge-management-portal-embed app-title="{$appTitle}" url="{$portalDefinitionUrl}" user-authentication-url={$userAuthenticationUrl} access-url={$portalAccessUrl} search-url="{$portalSearchUrl}" app-url="{$appUrl}" api-url="{$apiUrl}"></knowledge-management-portal-embed>
                 <script src="{$scriptUrl}"></script>
                 EOD;
             })(),

@@ -34,44 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\Settings;
+use App\Features\PortalPageTitle;
+use Illuminate\Database\Migrations\Migration;
 
-use AidingApp\Portal\Enums\GdprBannerButtonLabel;
-use AidingApp\Portal\Settings\SettingsProperties\PortalSettingsProperty;
-use App\Settings\SettingsWithMedia;
-
-class PortalSettings extends SettingsWithMedia
-{
-    public null $logo = null;
-
-    public null $favicon = null;
-
-    /**
-    * Knowledge Base Portal
-    */
-    public bool $knowledge_management_portal_enabled = false;
-
-    public bool $knowledge_management_portal_service_management = false;
-
-    public bool $knowledge_management_portal_requires_authentication = false;
-
-    public ?string $knowledge_management_portal_primary_color = null;
-
-    public ?string $knowledge_management_portal_rounding = null;
-
-    public string|array $gdpr_banner_text = "We use cookies to personalize content, to provide social media features, and to analyze our traffic. We also share information about your use of our site with our partners who may combine it with other information that you've provided to them or that they've collected from your use of their services.";
-
-    public GdprBannerButtonLabel $gdpr_banner_button_label = GdprBannerButtonLabel::AllowCookies;
-
-    public string $page_title = 'Help Center';
-
-    public static function getSettingsPropertyModelClass(): string
+return new class () extends Migration {
+    public function up(): void
     {
-        return PortalSettingsProperty::class;
+        PortalPageTitle::activate();
     }
 
-    public static function group(): string
+    public function down(): void
     {
-        return 'portal';
+        PortalPageTitle::deactivate();
     }
-}
+};
