@@ -42,6 +42,7 @@ import Services from './Components/Services.vue';
 import config from './formkit.config.js';
 import CreateServiceRequest from './Pages/CreateServiceRequest.vue';
 import Home from './Pages/Home.vue';
+import Incidents from './Pages/Incidents.vue';
 import Licenses from './Pages/Licenses.vue';
 import SelectServiceRequestType from './Pages/SelectServiceRequestType.vue';
 import ServiceMonitorStatus from './Pages/ServiceMonitorStatus.vue';
@@ -121,7 +122,7 @@ customElements.define(
                     {
                         path: baseUrl + '/incidents',
                         name: 'incidents',
-                        component: ComingSoon,
+                        component: Incidents,
                         meta: { requiresAuth: true },
                     },
                     {
