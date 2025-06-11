@@ -129,10 +129,7 @@
             <time class="mb-1 text-lg font-semibold leading-none text-black dark:text-white">{{
                 formatDate(incident.created_at)
             }}</time>
-            <h3
-                class="text-lg font-semibold dark:text-white"
-                :class="severityTextColor(incident.severity)"
-            >
+            <h3 class="text-lg font-semibold dark:text-white" :class="severityTextColor(incident.severity)">
                 {{ incident.title }}
             </h3>
             <p class="text-sm text-gray-500 dark:text-gray-400">
