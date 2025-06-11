@@ -130,7 +130,6 @@
                 formatDate(incident.created_at)
             }}</time>
             <h3
-                v-if="incident.severity"
                 class="text-lg font-semibold dark:text-white"
                 :class="severityTextColor(incident.severity)"
             >
