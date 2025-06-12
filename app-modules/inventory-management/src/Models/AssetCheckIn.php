@@ -67,6 +67,7 @@ class AssetCheckIn extends BaseModel implements Auditable, ProvidesATimeline
         'checked_in_by_type',
         'checked_in_by_id',
         'checked_in_from_id',
+        'checked_in_from_type', //remove during MakeContactNotPolymorphicFeature cleanup
         'checked_in_at',
         'notes',
     ];
