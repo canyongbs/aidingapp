@@ -34,18 +34,19 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\Livewire;
+namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
-use AidingApp\Portal\Settings\PortalSettings;
-use App\Features\PortalPageTitle;
-use Illuminate\Contracts\View\View;
-use Livewire\Component;
+use AidingApp\ServiceManagement\Models\Incident;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
-class RenderKnowledgeManagementPortal extends Component
+class IncidentController
 {
-    public function render(): View
+    public function __invoke(Request $request): JsonResponse
     {
-        return view('portal::livewire.render-knowledge-management-portal')
-            ->title(PortalPageTitle::active() ? app(PortalSettings::class)->page_title : 'Help Center');
+        $perPage = $request->get('per_page', 15);
+        $incidents = Incident::with(['severity', 'incidentUpdates', 'status'])->orderBy('created_at', 'desc')->paginate($perPage);
+
+        return response()->json(['data' => $incidents]);
     }
 }

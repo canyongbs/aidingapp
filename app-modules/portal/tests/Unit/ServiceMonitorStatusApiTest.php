@@ -34,18 +34,43 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\Livewire;
-
+use AidingApp\Contact\Models\Contact;
 use AidingApp\Portal\Settings\PortalSettings;
-use App\Features\PortalPageTitle;
-use Illuminate\Contracts\View\View;
-use Livewire\Component;
+use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+use Illuminate\Support\Facades\URL;
 
-class RenderKnowledgeManagementPortal extends Component
-{
-    public function render(): View
-    {
-        return view('portal::livewire.render-knowledge-management-portal')
-            ->title(PortalPageTitle::active() ? app(PortalSettings::class)->page_title : 'Help Center');
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\get;
+
+test('returns all service monitoring targets with latest history when portal is enabled', function () {
+    $settings = app(PortalSettings::class);
+
+    $settings->knowledge_management_portal_enabled = true;
+    $settings->save();
+
+    $contact = Contact::factory()->create();
+
+    actingAs($contact);
+
+    $targets = ServiceMonitoringTarget::factory()
+        ->count(3)
+        ->sequence(
+            ['name' => 'Google', 'domain' => 'https://google.com'],
+            ['name' => 'Facebook', 'domain' => 'https://facebook.com'],
+            ['name' => 'bing.com', 'domain' => 'https://bing.com'],
+        )
+        ->create();
+
+    foreach ($targets as $target) {
+        $target->histories()->create([
+            'response_time' => 0.123,
+            'succeeded' => true,
+            'response' => 200,
+        ]);
     }
-}
+
+    $url = URL::route(name: 'api.portal.status', absolute: false);
+    $response = get($url);
+    expect($response->status())->toBe(200);
+    expect($response->json('data'))->toHaveCount(3);
+});

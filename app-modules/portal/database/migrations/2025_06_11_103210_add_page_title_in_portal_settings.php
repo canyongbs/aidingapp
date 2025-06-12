@@ -34,18 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\Livewire;
+use Spatie\LaravelSettings\Migrations\SettingsMigration;
 
-use AidingApp\Portal\Settings\PortalSettings;
-use App\Features\PortalPageTitle;
-use Illuminate\Contracts\View\View;
-use Livewire\Component;
-
-class RenderKnowledgeManagementPortal extends Component
-{
-    public function render(): View
+return new class () extends SettingsMigration {
+    public function up(): void
     {
-        return view('portal::livewire.render-knowledge-management-portal')
-            ->title(PortalPageTitle::active() ? app(PortalSettings::class)->page_title : 'Help Center');
+        $this->migrator->add('portal.page_title', 'Help Center');
     }
-}
+
+    public function down(): void
+    {
+        $this->migrator->delete('portal.page_title');
+    }
+};

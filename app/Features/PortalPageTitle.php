@@ -34,18 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\Livewire;
+namespace App\Features;
 
-use AidingApp\Portal\Settings\PortalSettings;
-use App\Features\PortalPageTitle;
-use Illuminate\Contracts\View\View;
-use Livewire\Component;
+use App\Support\AbstractFeatureFlag;
 
-class RenderKnowledgeManagementPortal extends Component
+class PortalPageTitle extends AbstractFeatureFlag
 {
-    public function render(): View
+    public function resolve(mixed $scope): mixed
     {
-        return view('portal::livewire.render-knowledge-management-portal')
-            ->title(PortalPageTitle::active() ? app(PortalSettings::class)->page_title : 'Help Center');
+        return false;
     }
 }

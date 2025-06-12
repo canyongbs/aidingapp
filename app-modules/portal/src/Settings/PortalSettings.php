@@ -64,6 +64,8 @@ class PortalSettings extends SettingsWithMedia
 
     public GdprBannerButtonLabel $gdpr_banner_button_label = GdprBannerButtonLabel::AllowCookies;
 
+    public string $page_title = 'Help Center';
+
     public bool $gdpr_privacy_policy = false;
 
     public ?string $gdpr_privacy_policy_url = null;
