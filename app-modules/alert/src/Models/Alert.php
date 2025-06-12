@@ -92,13 +92,6 @@ class Alert extends BaseModel implements Auditable
         $query->where('status', $status);
     }
 
-    // protected static function booted(): void
-    // {
-    //     static::addGlobalScope('licensed', function (Builder $builder) {
-    //         $builder->tap(new LicensedToEducatable('concern'));
-    //     });
-    // }
-
     protected static function booted(): void
     {
         static::addGlobalScope('licensed', function (Builder $builder) {

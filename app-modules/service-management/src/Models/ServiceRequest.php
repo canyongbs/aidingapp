@@ -380,13 +380,6 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
         return $this->status->classification === SystemServiceRequestClassification::Closed;
     }
 
-    // protected static function booted(): void
-    // {
-    //     static::addGlobalScope('licensed', function (Builder $builder) {
-    //         $builder->tap(new LicensedToEducatable('respondent'));
-    //     });
-    // }
-
     protected static function booted(): void
     {
         static::addGlobalScope('licensed', function (Builder $builder) {
