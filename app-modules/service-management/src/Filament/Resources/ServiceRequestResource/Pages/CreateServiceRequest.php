@@ -138,7 +138,7 @@ class CreateServiceRequest extends CreateRecord
 
     protected function handleRecordCreation(array $data): Model
     {
-        if(! MakeContactNotPolymorphicFeature::active()) {
+        if (! MakeContactNotPolymorphicFeature::active()) {
             $data['respondent_type'] = (new Contact())->getMorphClass();
         }
 
@@ -146,5 +146,4 @@ class CreateServiceRequest extends CreateRecord
 
         return app(CreateServiceRequestAction::class)->execute($serviceRequestDataObject);
     }
-
 }

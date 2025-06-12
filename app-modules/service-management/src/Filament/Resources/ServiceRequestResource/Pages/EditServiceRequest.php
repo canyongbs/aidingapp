@@ -181,10 +181,10 @@ class EditServiceRequest extends EditRecord
 
     protected function mutateFormDataBeforeFill(array $data): array
     {
-        if(! MakeContactNotPolymorphicFeature::active()) {
+        if (! MakeContactNotPolymorphicFeature::active()) {
             $data['respondent_type'] = (new Contact())->getMorphClass();
         }
-        
+
         $data['type_id'] = $this->getRecord()->priority->type_id;
 
         return $data;
