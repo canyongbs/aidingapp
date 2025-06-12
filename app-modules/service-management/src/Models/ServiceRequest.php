@@ -51,7 +51,6 @@ use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceR
 use App\Models\Authenticatable;
 use App\Models\BaseModel;
 use App\Models\Concerns\BelongsToEducatable;
-use App\Models\Scopes\LicensedToEducatable;
 use App\Models\User;
 use Carbon\CarbonInterface;
 use DateTimeInterface;

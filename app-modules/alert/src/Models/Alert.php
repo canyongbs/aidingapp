@@ -44,7 +44,6 @@ use AidingApp\Contact\Models\Contact;
 use App\Models\Authenticatable;
 use App\Models\BaseModel;
 use App\Models\Concerns\BelongsToEducatable;
-use App\Models\Scopes\LicensedToEducatable;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
