@@ -45,6 +45,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Rules\ManagedServiceRequestType;
+use App\Features\MakeContactNotPolymorphicFeature;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -137,8 +138,13 @@ class CreateServiceRequest extends CreateRecord
 
     protected function handleRecordCreation(array $data): Model
     {
+        if(! MakeContactNotPolymorphicFeature::active()) {
+            $data['respondent_type'] = (new Contact())->getMorphClass();
+        }
+
         $serviceRequestDataObject = ServiceRequestDataObject::fromData($data);
 
         return app(CreateServiceRequestAction::class)->execute($serviceRequestDataObject);
     }
+
 }

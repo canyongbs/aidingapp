@@ -86,6 +86,7 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
     use HasFactory;
 
     protected $fillable = [
+        'respondent_type', //remove during MakeContactNotPolymorphicFeature cleanup
         'respondent_id',
         'division_id',
         'status_id',
