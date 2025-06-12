@@ -90,21 +90,21 @@ class CheckOutAssetHeaderAction extends Action
             //When this feature flag is cleaned up, it can return to being like that (i.e., replace $createArray with lines 92-99)
             $createArray = MakeContactNotPolymorphicFeature::active() ?
               [
-                'checked_out_by_type' => auth()->user()?->getMorphClass(),
-                'checked_out_by_id' => auth()->user()?->id,
-                'checked_out_to_id' => $data['checked_out_to_id'],
-                'notes' => $data['notes'],
-                'checked_out_at' => now(),
-                'expected_check_in_at' => $data['expected_check_in_at'],
+                  'checked_out_by_type' => auth()->user()?->getMorphClass(),
+                  'checked_out_by_id' => auth()->user()?->id,
+                  'checked_out_to_id' => $data['checked_out_to_id'],
+                  'notes' => $data['notes'],
+                  'checked_out_at' => now(),
+                  'expected_check_in_at' => $data['expected_check_in_at'],
               ] :
               [
-                'checked_out_by_type' => auth()->user()?->getMorphClass(),
-                'checked_out_by_id' => auth()->user()?->id,
-                'checked_out_to_id' => $data['checked_out_to_id'],
-                'checked_out_to_type' => (new Contact())->getMorphClass(),
-                'notes' => $data['notes'],
-                'checked_out_at' => now(),
-                'expected_check_in_at' => $data['expected_check_in_at'],
+                  'checked_out_by_type' => auth()->user()?->getMorphClass(),
+                  'checked_out_by_id' => auth()->user()?->id,
+                  'checked_out_to_id' => $data['checked_out_to_id'],
+                  'checked_out_to_type' => (new Contact())->getMorphClass(),
+                  'notes' => $data['notes'],
+                  'checked_out_at' => now(),
+                  'expected_check_in_at' => $data['expected_check_in_at'],
               ];
 
             $asset->checkOuts()->create($createArray);
