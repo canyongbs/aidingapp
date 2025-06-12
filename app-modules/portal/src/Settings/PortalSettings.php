@@ -37,6 +37,7 @@
 namespace AidingApp\Portal\Settings;
 
 use AidingApp\Portal\Enums\GdprBannerButtonLabel;
+use AidingApp\Portal\Enums\GdprDeclineOptions;
 use AidingApp\Portal\Settings\SettingsProperties\PortalSettingsProperty;
 use App\Settings\SettingsWithMedia;
 
@@ -62,6 +63,18 @@ class PortalSettings extends SettingsWithMedia
     public string|array $gdpr_banner_text = "We use cookies to personalize content, to provide social media features, and to analyze our traffic. We also share information about your use of our site with our partners who may combine it with other information that you've provided to them or that they've collected from your use of their services.";
 
     public GdprBannerButtonLabel $gdpr_banner_button_label = GdprBannerButtonLabel::AllowCookies;
+
+    public bool $gdpr_privacy_policy = false;
+
+    public ?string $gdpr_privacy_policy_url = null;
+
+    public bool $gdpr_terms_of_use = false;
+
+    public ?string $gdpr_terms_of_use_url = null;
+
+    public bool $gdpr_decline = false;
+
+    public GdprDeclineOptions $gdpr_decline_value = GdprDeclineOptions::Decline;
 
     public static function getSettingsPropertyModelClass(): string
     {
