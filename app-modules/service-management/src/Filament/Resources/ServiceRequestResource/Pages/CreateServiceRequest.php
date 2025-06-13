@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages;
 
+use AidingApp\Contact\Models\Contact;
 use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Actions\CreateServiceRequestAction;
 use AidingApp\ServiceManagement\DataTransferObjects\ServiceRequestDataObject;
@@ -44,7 +45,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Rules\ManagedServiceRequestType;
-use App\Filament\Forms\Components\EducatableSelect;
+use App\Features\MakeContactNotPolymorphicFeature;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -53,8 +54,6 @@ use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Resources\Pages\CreateRecord;
-use Filament\Resources\Pages\ManageRelatedRecords;
-use Filament\Resources\RelationManagers\RelationManager;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
@@ -129,15 +128,20 @@ class CreateServiceRequest extends CreateRecord
                     ->nullable()
                     ->string()
                     ->columnSpan(1),
-                EducatableSelect::make('respondent')
+                Select::make('respondent_id')
+                    ->relationship('respondent', 'full_name')
                     ->label('Related To')
                     ->required()
-                    ->hiddenOn([RelationManager::class, ManageRelatedRecords::class]),
+                    ->exists((new Contact())->getTable(), 'id'),
             ]);
     }
 
     protected function handleRecordCreation(array $data): Model
     {
+        if (! MakeContactNotPolymorphicFeature::active()) {
+            $data['respondent_type'] = (new Contact())->getMorphClass();
+        }
+
         $serviceRequestDataObject = ServiceRequestDataObject::fromData($data);
 
         return app(CreateServiceRequestAction::class)->execute($serviceRequestDataObject);
