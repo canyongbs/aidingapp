@@ -126,28 +126,26 @@
     <div class="p-6 max-w-6xl mx-auto">
         <h1 class="text-2xl font-semibold mb-6">Incident History</h1>
         <div class="mb-6 bg-white shadow rounded-lg p-4" v-for="(incident, index) in incidents" :key="index">
-            <time class="mb-1 text-lg font-semibold leading-none text-black dark:text-white">{{
+            <time class="mb-1 text-lg font-semibold leading-none text-black">{{
                 formatDate(incident.created_at)
             }}</time>
-            <h3 class="text-lg font-semibold dark:text-white" :class="severityTextColor(incident.severity)">
+            <h3 class="text-lg font-semibold" :class="severityTextColor(incident.severity)">
                 {{ incident.title }}
             </h3>
-            <p class="text-sm text-gray-500 dark:text-gray-400">
+            <p class="text-sm text-gray-500">
                 {{ incident.description }}
             </p>
             <span
-                class="bg-blue-100 text-blue-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded-sm dark:bg-blue-900 dark:text-blue-300 mb-5"
+                class="bg-blue-100 text-blue-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded-sm mb-5"
                 v-if="incident.status"
                 >{{ incident.status.name }}</span
             >
-            <hr class="my-4" />
-            <ol class="relative border-s border-gray-200 dark:border-gray-700" v-if="incident.incident_updates?.length">
+            <hr class="my-4" v-if="incident.incident_updates?.length" />
+            <ol class="relative border-s border-gray-200" v-if="incident.incident_updates?.length">
                 <li class="mb-8 ms-4" v-for="updateData in incident.incident_updates" :key="updateData.id">
-                    <div
-                        class="absolute w-3 h-3 bg-gray-200 rounded-lg mt-1.5 -start-1.5 border border-white dark:border-gray-900 dark:bg-gray-700"
-                    ></div>
+                    <div class="absolute w-3 h-3 bg-gray-200 rounded-lg mt-1.5 -start-1.5 border border-white"></div>
 
-                    <time class="mb-1 text-sm font-normal leading-none text-gray-400 dark:text-gray-500">{{
+                    <time class="mb-1 text-sm font-normal leading-none text-gray-400">{{
                         formatDate(updateData.created_at)
                     }}</time>
                     <p class="text-sm text-gray-700 mt-1">{{ updateData.update }}</p>
