@@ -42,7 +42,6 @@
     const checkedOutAssets = ref({});
     const { get } = consumer();
     const loading = ref(true);
-    // const showLicenseKeys = ref({});
 
     const props = defineProps({
         apiUrl: {
@@ -68,9 +67,6 @@
                 checkedInAssets.value = response.checkedInAssets;
                 checkedOutAssets.value = response.checkedOutAssets;
                 loading.value = false;
-                console.log('Assets fetched successfully:', checkedOutAssets.value);
-                console.log('Assets fetched successfully:', checkedOutAssets.value.id);
-                console.log('Assets fetched successfully:', checkedOutAssets.asset);
             })
             .catch((error) => {
                 if (error.response && (error.response.status === 401 || error.response.status === 404)) {
