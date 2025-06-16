@@ -53,6 +53,8 @@ use Illuminate\Support\Collection;
 use OwenIt\Auditing\Contracts\Auditable;
 
 /**
+ * @property string $formatted_checked_in_at
+ *
  * @mixin IdeHelperAssetCheckIn
  */
 #[ObservedBy([AssetCheckInObserver::class])]

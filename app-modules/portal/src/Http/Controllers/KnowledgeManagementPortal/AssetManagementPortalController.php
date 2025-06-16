@@ -36,6 +36,8 @@
 
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
+use AidingApp\InventoryManagement\Models\AssetCheckIn;
+use AidingApp\InventoryManagement\Models\AssetCheckOut;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -45,17 +47,36 @@ class AssetManagementPortalController extends Controller
     public function __invoke(Request $request): JsonResponse
     {
         $checkedInAssets = auth('contact')->user()->assetCheckIns()
-            ->withWhereHas('asset:id,name,serial_number,description,type_id')
-            ->get();
+            ->with(
+                'asset:id,name,serial_number,description,type_id',
+                'asset.type:id,name'
+            )
+            ->get()
+            ->map(function ($checkIn) {
+                /** @var AssetCheckIn $checkIn */
+                $checkIn->formatted_checked_in_at = $checkIn->checked_in_at->format('g:ia - M j, Y');
+
+                return $checkIn;
+            });
 
         $checkedOutAssets = auth('contact')->user()->assetCheckOuts()
-            ->withWhereHas('asset:id,name,serial_number,description,type_id')
-            ->get();
+            ->whereNull('asset_check_in_id')
+            ->with([
+                'asset:id,name,serial_number,description,type_id',
+                'asset.type:id,name',
+            ])
+            ->get()
+            ->map(function ($checkOut) {
+                /** @var AssetCheckOut $checkOut */
+                $checkOut->formatted_checked_out_at = $checkOut->checked_out_at->format('g:ia - M j, Y');
+
+                return $checkOut;
+            });
 
         return response()->json([
             'success' => true,
-            'checkedInAssets' => $checkedInAssets->values(),
-            'checkedOutAssets' => $checkedOutAssets->values(),
+            'checkedInAssets' => $checkedInAssets,
+            'checkedOutAssets' => $checkedOutAssets,
         ]);
     }
 }

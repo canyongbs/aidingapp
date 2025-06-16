@@ -34,13 +34,14 @@
 <script setup>
     import { XMarkIcon } from '@heroicons/vue/24/outline';
     import { onMounted, ref } from 'vue';
+    import AppLoading from '../Components/AppLoading.vue';
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import { consumer } from '../Services/Consumer';
 
     const checkedInAssets = ref({});
     const checkedOutAssets = ref({});
     const { get } = consumer();
-    // const loading = ref(true);
+    const loading = ref(true);
     // const showLicenseKeys = ref({});
 
     const props = defineProps({
@@ -51,6 +52,7 @@
     });
 
     async function getAssets() {
+        loading.value = true;
         const response = await get(`${props.apiUrl}/assets`);
 
         if (response.error) {
@@ -65,141 +67,98 @@
             .then((response) => {
                 checkedInAssets.value = response.checkedInAssets;
                 checkedOutAssets.value = response.checkedOutAssets;
+                loading.value = false;
+                console.log('Assets fetched successfully:', checkedOutAssets.value);
+                console.log('Assets fetched successfully:', checkedOutAssets.value.id);
                 console.log('Assets fetched successfully:', checkedOutAssets.asset);
             })
             .catch((error) => {
-                console.error('Error fetching assets:', error);
+                if (error.response && (error.response.status === 401 || error.response.status === 404)) {
+                    loading.value = false;
+                } else {
+                    console.error('Error fetching assets:', error);
+                }
             });
     });
 </script>
 
 <template>
-    <main class="px-6 bg-gray-50 min-h-screen">
-        <div class="max-w-screen-xl flex flex-col gap-y-6 mx-auto py-8">
-            <Breadcrumbs :currentCrumb="'Assets'"></Breadcrumbs>
-            <div class="grid gap-4">
-                <div v-if="checkedInAssets?.length > 0">
-                    <h3 class="text-xl">Checked In Assets</h3>
-                    <div
-                        class="mt-4 overflow-hidden rounded bg-gray-200 shadow-sm ring-1 ring-black/5 grid gap-px divide-y-0 lg:grid-cols-2"
-                    >
+    <div v-if="loading">
+        <AppLoading />
+    </div>
+    <div v-else>
+        <main class="px-6 bg-gray-50 min-h-screen">
+            <div class="max-w-screen-xl flex flex-col gap-y-6 mx-auto py-8">
+                <Breadcrumbs :currentCrumb="'Assets'"></Breadcrumbs>
+                <div class="grid gap-4">
+                    <div v-if="checkedOutAssets?.length > 0">
+                        <h3 class="text-xl">Assets</h3>
                         <div
-                            v-for="checkedInAsset in checkedInAssets"
-                            :key="checkedInAsset.id"
-                            class="group relative bg-white p-6 focus-within:bg-gray-50"
+                            class="mt-4 overflow-hidden rounded bg-gray-200 shadow-sm ring-1 ring-black/5 grid gap-px divide-y-0 lg:grid-cols-2"
                         >
-                            <div class="grid">
-                                <div class="flex" :class="[checkedInAsset.icon ? 'justify-between' : 'justify-end']">
-                                    <div
-                                        v-if="checkedInAsset.icon"
-                                        v-html="checkedInAsset.icon"
-                                        class="pointer-events-none absolute top-6 text-brand-700"
-                                        aria-hidden="true"
-                                    ></div>
-
-                                    <div
-                                        class="pointer-events-none absolute right-6 top-6 text-gray-300 transition group-hover:text-brand-500"
-                                        aria-hidden="true"
-                                    >
-                                        <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                                            <path
-                                                d="M20 4h1a1 1 0 00-1-1v1zm-1 12a1 1 0 102 0h-2zM8 3a1 1 0 000 2V3zM3.293 19.293a1 1 0 101.414 1.414l-1.414-1.414zM19 4v12h2V4h-2zm1-1H8v2h12V3zm-.707.293l-16 16 1.414 1.414 16-16-1.414-1.414z"
-                                            />
-                                        </svg>
-                                    </div>
-                                </div>
-
-                                <div class="w-full mt-8">
-                                    <h3 class="text-base font-semibold leading-6 text-gray-900">
-                                        <router-link
-                                            :to="{
-                                                name: 'view-service-request',
-                                                params: { checkedInAssetId: checkedInAsset.id },
-                                            }"
-                                        >
+                            <div
+                                v-for="checkedOutAsset in checkedOutAssets"
+                                :key="checkedOutAsset?.id"
+                                class="group relative bg-white p-6 focus-within:bg-gray-50"
+                            >
+                                <div class="grid">
+                                    <div class="w-full">
+                                        <h3 class="text-base font-semibold leading-6 text-gray-900">
                                             <span class="absolute inset-0" aria-hidden="true" />
-                                            {{ checkedInAsset.title }}
-                                        </router-link>
-                                    </h3>
-                                    <div class="mt-2">
-                                        <span
-                                            class="px-2 py-1 text-sm font-bold text-white rounded"
-                                            :style="'background-color: rgb(' + checkedInAsset.status_color + ')'"
-                                        >
-                                            Status: {{ checkedInAsset.status_name }}
-                                        </span>
+                                            {{ checkedOutAsset.asset?.name }}
+                                        </h3>
+                                        <div class="mt-2">
+                                            <span class="py-1 text-sm rounded">
+                                                Description: {{ checkedOutAsset.asset?.description }}<br />
+                                                Serial Number: {{ checkedOutAsset.asset?.serial_number }}<br />
+                                                Type: {{ checkedOutAsset.asset?.type?.name }}<br />
+                                                Date Checked Out: {{ checkedOutAsset.formatted_checked_out_at }}<br />
+                                            </span>
+                                        </div>
                                     </div>
-                                    <p class="mt-2 text-xs text-gray-500">
-                                        Last Updated: {{ checkedInAsset.updated_at }}
-                                    </p>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div v-else class="p-3 flex items-start gap-2">
-                    <XMarkIcon class="h-5 w-5 text-gray-400" />
+                    <div v-else class="p-3 flex items-start gap-2">
+                        <XMarkIcon class="h-5 w-5 text-gray-400" />
+                        <p class="text-gray-600 text-sm font-medium">No Checked Out Assets found.</p>
+                    </div>
 
-                    <p class="text-gray-600 text-sm font-medium">No Checked In Assets found.</p>
-                </div>
-
-                <div v-if="checkedOutAssets?.length > 0">
-                    <h3 class="text-xl">Checked Out Assets</h3>
-                    <div
-                        class="mt-4 overflow-hidden rounded bg-gray-200 shadow-sm ring-1 ring-black/5 grid gap-px divide-y-0 lg:grid-cols-2"
-                    >
+                    <div v-if="checkedInAssets?.length > 0">
+                        <h3 class="text-xl">Returned Assets</h3>
                         <div
-                            v-for="checkedOutAsset in checkedOutAssets"
-                            :key="checkedOutAsset.id"
-                            class="group relative bg-white p-6 focus-within:bg-gray-50"
+                            class="mt-4 overflow-hidden rounded bg-gray-200 shadow-sm ring-1 ring-black/5 grid gap-px divide-y-0 lg:grid-cols-2"
                         >
-                            <div class="grid">
-                                <!-- <div class="flex" :class="[checkedOutAsset.icon ? 'justify-between' : 'justify-end']">
-                                    <div
-                                        v-if="checkedOutAsset.icon"
-                                        v-html="checkedOutAsset.icon"
-                                        class="pointer-events-none absolute top-6 text-brand-700"
-                                        aria-hidden="true"
-                                    ></div>
-
-                                    <div
-                                        class="pointer-events-none absolute right-6 top-6 text-gray-300 transition group-hover:text-brand-500"
-                                        aria-hidden="true"
-                                    >
-                                        <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                                            <path
-                                                d="M20 4h1a1 1 0 00-1-1v1zm-1 12a1 1 0 102 0h-2zM8 3a1 1 0 000 2V3zM3.293 19.293a1 1 0 101.414 1.414l-1.414-1.414zM19 4v12h2V4h-2zm1-1H8v2h12V3zm-.707.293l-16 16 1.414 1.414 16-16-1.414-1.414z"
-                                            />
-                                        </svg>
+                            <div
+                                v-for="checkedInAsset in checkedInAssets"
+                                :key="checkedInAsset.id"
+                                class="group relative bg-white p-6 focus-within:bg-gray-50"
+                            >
+                                <div class="grid">
+                                    <div class="w-full">
+                                        <h3 class="text-base font-semibold leading-6 text-gray-900">
+                                            {{ checkedInAsset.asset?.name }}
+                                        </h3>
+                                        <div class="mt-2">
+                                            <span class="py-1 text-sm rounded">
+                                                Description: {{ checkedInAsset.asset?.description }}<br />
+                                                Serial Number: {{ checkedInAsset.asset?.serial_number }}<br />
+                                                Type: {{ checkedInAsset.asset?.type?.name }}<br />
+                                                Date Returned: {{ checkedInAsset.formatted_checked_in_at }}<br />
+                                            </span>
+                                        </div>
                                     </div>
-                                </div> -->
-
-                                <div class="w-full mt-8">
-                                    <h3 class="text-base font-semibold leading-6 text-gray-900">
-                                        <span class="absolute inset-0" aria-hidden="true" />
-                                        {{ checkedOutAsset.asset.name }}
-                                        {{ checkedOutAsset.asset.serial_number }}
-                                    </h3>
-                                    <div class="mt-2">
-                                        <span class="px-2 py-1 text-sm font-bold text-white rounded">
-                                            {{ checkedOutAsset.asset.description }}
-                                            {{ checkedOutAsset.asset.type.name }}
-                                        </span>
-                                    </div>
-                                    <p class="mt-2 text-xs text-gray-500">
-                                        Checked Out At: {{ checkedOutAsset.checked_out_at }}
-                                    </p>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div v-else class="p-3 flex items-start gap-2">
-                    <XMarkIcon class="h-5 w-5 text-gray-400" />
-
-                    <p class="text-gray-600 text-sm font-medium">No Checked Out Assets found.</p>
+                    <div v-else class="p-3 flex items-start gap-2">
+                        <XMarkIcon class="h-5 w-5 text-gray-400" />
+                        <p class="text-gray-600 text-sm font-medium">No Checked In Assets found.</p>
+                    </div>
                 </div>
             </div>
-        </div>
-    </main>
+        </main>
+    </div>
 </template>

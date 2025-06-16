@@ -55,6 +55,8 @@ use Illuminate\Support\Collection;
 use OwenIt\Auditing\Contracts\Auditable;
 
 /**
+ * @property string $formatted_checked_out_at
+ *
  * @mixin IdeHelperAssetCheckOut
  */
 #[ObservedBy([AssetCheckOutObserver::class])]
@@ -144,7 +146,7 @@ class AssetCheckOut extends BaseModel implements Auditable, ProvidesATimeline
                 return AssetCheckOutStatus::Returned;
             }
 
-            if ($this->expected_check_in_at->isPast()) {
+            if ($this->expected_check_in_at?->isPast()) {
                 return AssetCheckOutStatus::PastDue;
             }
 
