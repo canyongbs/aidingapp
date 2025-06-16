@@ -37,7 +37,6 @@
 namespace AidingApp\Portal\Livewire;
 
 use AidingApp\Portal\Settings\PortalSettings;
-use App\Features\PortalPageTitle;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
@@ -46,6 +45,6 @@ class RenderKnowledgeManagementPortal extends Component
     public function render(): View
     {
         return view('portal::livewire.render-knowledge-management-portal')
-            ->title(PortalPageTitle::active() ? app(PortalSettings::class)->page_title : 'Help Center');
+            ->title(app(PortalSettings::class)->page_title);
     }
 }
