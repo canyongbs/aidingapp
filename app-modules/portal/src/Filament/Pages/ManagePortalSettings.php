@@ -42,7 +42,6 @@ use AidingApp\Portal\Enums\GdprDeclineOptions;
 use AidingApp\Portal\Settings\PortalSettings;
 use App\Enums\Feature;
 use App\Features\AdditionalInfomationInPortalSettings;
-use App\Features\PortalPageTitle;
 use App\Filament\Forms\Components\ColorSelect;
 use App\Models\User;
 use App\Rules\ValidUrl;
@@ -128,7 +127,7 @@ class ManagePortalSettings extends SettingsPage
                                 ->maxLength(255)
                                 ->columns(1)
                                 ->required()
-                                ->visible(fn (Get $get) => PortalPageTitle::active() && $get('knowledge_management_portal_enabled'))
+                                ->visible(fn (Get $get) => $get('knowledge_management_portal_enabled'))
                                 ->disabled(! Gate::check(Feature::KnowledgeManagement->getGateName()))
                                 ->hintIcon(fn (TextInput $component) => $component->isDisabled() ? 'heroicon-m-lock-closed' : null),
                         ])->columns(2),
