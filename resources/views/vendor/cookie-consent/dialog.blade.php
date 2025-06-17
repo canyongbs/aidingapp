@@ -56,7 +56,7 @@
                 </div>
                 
             </div>
-            <div class="ml-3 mt-2 flex-shrink-0 w-full sm:mt-0 sm:w-auto">
+            <div class="ml-3 pt-3 flex-shrink-0 w-full sm:mt-0 sm:w-auto">
                     <x-filament::button class="js-cookie-consent-agree cookie-consent__agree">
                         @if(! empty(app(PortalSettings::class)->gdpr_banner_button_label))
                             {{ str(app(PortalSettings::class)->gdpr_banner_button_label->getLabel()) }}
