@@ -45,6 +45,7 @@ use App\Features\AdditionalInfomationInPortalSettings;
 use App\Features\PortalPageTitle;
 use App\Filament\Forms\Components\ColorSelect;
 use App\Models\User;
+use App\Rules\ValidUrl;
 use Filament\Forms\Components\Actions;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\Grid;
@@ -184,7 +185,7 @@ class ManagePortalSettings extends SettingsPage
                             ->label('Privacy Policy URL')
                             ->visible(fn (Get $get) => AdditionalInfomationInPortalSettings::active() && $get('gdpr_privacy_policy'))
                             ->maxLength(255)
-                            ->regex('/^(https?:\/\/)?((([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,})|(((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))|(\[[A-Fa-f0-9:]+\])|([0-9a-fA-F]{1,4}(:[0-9a-fA-F]{1,4}){7}))(:\d+)?(\/.*)?$/'),
+                            ->rules([new ValidUrl()]),
                         Toggle::make('gdpr_terms_of_use')
                             ->label('Terms of Use')
                             ->live()
@@ -194,7 +195,7 @@ class ManagePortalSettings extends SettingsPage
                             ->label('Terms of Use URL')
                             ->visible(fn (Get $get) => AdditionalInfomationInPortalSettings::active() && $get('gdpr_terms_of_use'))
                             ->maxLength(255)
-                            ->regex('/^(https?:\/\/)?((([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,})|(((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))|(\[[A-Fa-f0-9:]+\])|([0-9a-fA-F]{1,4}(:[0-9a-fA-F]{1,4}){7}))(:\d+)?(\/.*)?$/'),
+                            ->rules([new ValidUrl()]),
                         Select::make('gdpr_banner_button_label')
                             ->options(GdprBannerButtonLabel::class)
                             ->enum(GdprBannerButtonLabel::class)

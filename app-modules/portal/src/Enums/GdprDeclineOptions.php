@@ -40,12 +40,12 @@ use Filament\Support\Contracts\HasLabel;
 
 enum GdprDeclineOptions: string implements HasLabel
 {
-    case Decline = 'Decline';
+    case Decline = 'decline';
 
-    case Cancel = 'Cancel';
+    case Cancel = 'cancel';
 
     public function getLabel(): string
     {
-        return $this->value;
+        return $this->name;
     }
 }

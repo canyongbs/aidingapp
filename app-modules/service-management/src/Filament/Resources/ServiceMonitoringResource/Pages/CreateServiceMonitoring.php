@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResour
 
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource;
+use App\Rules\ValidUrl;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -66,7 +67,7 @@ class CreateServiceMonitoring extends CreateRecord
                     ->label('URL')
                     ->required()
                     ->maxLength(255)
-                    ->regex('/^(https?:\/\/)?((([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,})|(((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))|(\[[A-Fa-f0-9:]+\])|([0-9a-fA-F]{1,4}(:[0-9a-fA-F]{1,4}){7}))(:\d+)?(\/.*)?$/'),
+                    ->rules([new ValidUrl()]),
                 Select::make('frequency')
                     ->label('Frequency')
                     ->searchable()
