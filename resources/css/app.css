@@ -36,5 +36,5 @@
 @tailwind utilities;
 
 .js-cookie-consent-agree {
-  @apply text-base;
+    @apply text-base;
 }
