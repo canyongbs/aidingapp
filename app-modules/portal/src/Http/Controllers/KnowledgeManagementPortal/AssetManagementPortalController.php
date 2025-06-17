@@ -36,8 +36,6 @@
 
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
-use AidingApp\InventoryManagement\Models\AssetCheckIn;
-use AidingApp\InventoryManagement\Models\AssetCheckOut;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -51,13 +49,7 @@ class AssetManagementPortalController extends Controller
                 'asset:id,name,serial_number,description,type_id',
                 'asset.type:id,name'
             )
-            ->get()
-            ->map(function ($checkIn) {
-                /** @var AssetCheckIn $checkIn */
-                $checkIn->formatted_checked_in_at = $checkIn->checked_in_at->format('g:ia - M j, Y');
-
-                return $checkIn;
-            });
+            ->get();
 
         $checkedOutAssets = auth('contact')->user()->assetCheckOuts()
             ->whereNull('asset_check_in_id')
@@ -65,13 +57,7 @@ class AssetManagementPortalController extends Controller
                 'asset:id,name,serial_number,description,type_id',
                 'asset.type:id,name',
             ])
-            ->get()
-            ->map(function ($checkOut) {
-                /** @var AssetCheckOut $checkOut */
-                $checkOut->formatted_checked_out_at = $checkOut->checked_out_at->format('g:ia - M j, Y');
-
-                return $checkOut;
-            });
+            ->get();
 
         return response()->json([
             'success' => true,

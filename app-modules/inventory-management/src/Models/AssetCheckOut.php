@@ -51,12 +51,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use OwenIt\Auditing\Contracts\Auditable;
 
 /**
- * @property string $formatted_checked_out_at
- *
  * @mixin IdeHelperAssetCheckOut
  */
 #[ObservedBy([AssetCheckOutObserver::class])]
@@ -80,6 +79,10 @@ class AssetCheckOut extends BaseModel implements Auditable, ProvidesATimeline
     protected $casts = [
         'checked_out_at' => 'datetime',
         'expected_check_in_at' => 'datetime',
+    ];
+
+    protected $appends = [
+        'formatted_checked_out_at',
     ];
 
     /**
@@ -152,5 +155,15 @@ class AssetCheckOut extends BaseModel implements Auditable, ProvidesATimeline
 
             return AssetCheckOutStatus::Active;
         });
+    }
+
+    /**
+     * @return Attribute<string, never>
+     */
+    protected function formattedCheckedOutAt(): Attribute
+    {
+        return Attribute::make(
+            get: fn (?string $value, array $attributes) => Carbon::parse($attributes['checked_out_at'])->format('g:ia - M j, Y'),
+        );
     }
 }

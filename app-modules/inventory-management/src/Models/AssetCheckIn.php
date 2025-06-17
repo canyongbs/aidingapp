@@ -43,18 +43,18 @@ use AidingApp\Timeline\Models\Timeline;
 use AidingApp\Timeline\Timelines\AssetCheckInTimeline;
 use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use OwenIt\Auditing\Contracts\Auditable;
 
 /**
- * @property string $formatted_checked_in_at
- *
  * @mixin IdeHelperAssetCheckIn
  */
 #[ObservedBy([AssetCheckInObserver::class])]
@@ -75,6 +75,10 @@ class AssetCheckIn extends BaseModel implements Auditable, ProvidesATimeline
 
     protected $casts = [
         'checked_in_at' => 'datetime',
+    ];
+
+    protected $appends = [
+        'formatted_checked_in_at',
     ];
 
     /**
@@ -127,5 +131,15 @@ class AssetCheckIn extends BaseModel implements Auditable, ProvidesATimeline
     public static function getTimelineData(Model $forModel): Collection
     {
         return $forModel->checkIns()->get();
+    }
+
+    /**
+     * @return Attribute<string, never>
+     */
+    protected function formattedCheckedInAt(): Attribute
+    {
+        return Attribute::make(
+            get: fn (?string $value, array $attributes) => Carbon::parse($attributes['checked_in_at'])->format('g:ia - M j, Y'),
+        );
     }
 }
