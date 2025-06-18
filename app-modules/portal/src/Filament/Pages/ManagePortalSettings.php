@@ -38,10 +38,13 @@ namespace AidingApp\Portal\Filament\Pages;
 
 use AidingApp\Form\Enums\Rounding;
 use AidingApp\Portal\Enums\GdprBannerButtonLabel;
+use AidingApp\Portal\Enums\GdprDeclineOptions;
 use AidingApp\Portal\Settings\PortalSettings;
 use App\Enums\Feature;
+use App\Features\AdditionalInfomationInPortalSettings;
 use App\Filament\Forms\Components\ColorSelect;
 use App\Models\User;
+use App\Rules\ValidUrl;
 use Filament\Forms\Components\Actions;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\Grid;
@@ -172,11 +175,41 @@ class ManagePortalSettings extends SettingsPage
                             ->required()
                             ->tools(['link'])
                             ->columnSpanFull(),
+                        Toggle::make('gdpr_privacy_policy')
+                            ->label('Privacy Policy')
+                            ->live()
+                            ->columnSpanFull()
+                            ->visible(AdditionalInfomationInPortalSettings::active()),
+                        TextInput::make('gdpr_privacy_policy_url')
+                            ->label('Privacy Policy URL')
+                            ->visible(fn (Get $get) => AdditionalInfomationInPortalSettings::active() && $get('gdpr_privacy_policy'))
+                            ->maxLength(255)
+                            ->rules([new ValidUrl()]),
+                        Toggle::make('gdpr_terms_of_use')
+                            ->label('Terms of Use')
+                            ->live()
+                            ->columnSpanFull()
+                            ->visible(AdditionalInfomationInPortalSettings::active()),
+                        TextInput::make('gdpr_terms_of_use_url')
+                            ->label('Terms of Use URL')
+                            ->visible(fn (Get $get) => AdditionalInfomationInPortalSettings::active() && $get('gdpr_terms_of_use'))
+                            ->maxLength(255)
+                            ->rules([new ValidUrl()]),
                         Select::make('gdpr_banner_button_label')
                             ->options(GdprBannerButtonLabel::class)
                             ->enum(GdprBannerButtonLabel::class)
                             ->required()
                             ->label('GDPR Button Label'),
+                        Toggle::make('gdpr_decline')
+                            ->label('GDPR Decline')
+                            ->live()
+                            ->columnSpanFull()
+                            ->visible(AdditionalInfomationInPortalSettings::active()),
+                        Select::make('gdpr_decline_value')
+                            ->options(GdprDeclineOptions::class)
+                            ->enum(GdprDeclineOptions::class)
+                            ->visible(fn (Get $get) => AdditionalInfomationInPortalSettings::active() && $get('gdpr_decline'))
+                            ->label('GDPR Decline Option'),
                     ])
                     ->visible(fn (Get $get) => $get('knowledge_management_portal_enabled')),
             ])

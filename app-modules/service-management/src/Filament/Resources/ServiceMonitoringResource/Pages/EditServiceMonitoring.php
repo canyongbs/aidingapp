@@ -40,6 +40,7 @@ use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use App\Concerns\EditPageRedirection;
+use App\Rules\ValidUrl;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Section;
@@ -73,7 +74,7 @@ class EditServiceMonitoring extends EditRecord
                     ->label('URL')
                     ->required()
                     ->maxLength(255)
-                    ->regex('/^(https?:\/\/)?((([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,})|(((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))|(\[[A-Fa-f0-9:]+\])|([0-9a-fA-F]{1,4}(:[0-9a-fA-F]{1,4}){7}))(:\d+)?(\/.*)?$/'),
+                    ->rules([new ValidUrl()]),
                 Select::make('frequency')
                     ->label('Frequency')
                     ->searchable()

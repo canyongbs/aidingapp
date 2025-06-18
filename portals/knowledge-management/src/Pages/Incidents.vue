@@ -59,10 +59,16 @@
 
     const formatDate = (date) => {
         const d = new Date(date);
-        return d.toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-        });
+        return d
+            .toLocaleString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true,
+            })
+            .replace(' at', '');
     };
 
     const loadMore = () => {

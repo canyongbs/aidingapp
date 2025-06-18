@@ -40,6 +40,7 @@ import App from './App.vue';
 import ComingSoon from './Components/ComingSoon.vue';
 import Services from './Components/Services.vue';
 import config from './formkit.config.js';
+import Assets from './Pages/Assets.vue';
 import CreateServiceRequest from './Pages/CreateServiceRequest.vue';
 import Home from './Pages/Home.vue';
 import Incidents from './Pages/Incidents.vue';
@@ -128,7 +129,7 @@ customElements.define(
                     {
                         path: baseUrl + '/assets',
                         name: 'assets',
-                        component: ComingSoon,
+                        component: Assets,
                     },
                     {
                         path: baseUrl + '/licenses',
