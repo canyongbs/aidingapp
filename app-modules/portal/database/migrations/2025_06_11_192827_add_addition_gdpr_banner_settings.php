@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Portal\Enums\GdprDeclineOptions;
 use Spatie\LaravelSettings\Migrations\SettingsMigration;
 
 return new class () extends SettingsMigration {
