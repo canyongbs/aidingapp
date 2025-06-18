@@ -10,7 +10,7 @@
         "build:widgets": "npm run build:service-request-form && npm run build:service-request-feedback-form",
         "build:knowledge-management": "(cd portals/knowledge-management && vite build)",
         "build:portals": "npm run build:knowledge-management",
-        "build": "npm run build:js-compile && npm run build:vite && npm run build:widgets && npm run build:portals",
+        "build": "npm run build:vite && npm run build:widgets && npm run build:portals",
         "api-docs:generate": "export NODE_OPTIONS=--max_old_space_size=4096 && env-cmd spectaql spectaql.yml"
     },
     "devDependencies": {
