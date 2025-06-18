@@ -4,7 +4,6 @@
     "scripts": {
         "dev": "vite",
         "dev:form": "(cd widgets/form && vite)",
-        "build:js-compile": "node ./bin/build.js",
         "build:vite": "vite build",
         "build:service-request-form": "(cd widgets/service-request-form && vite build)",
         "build:service-request-feedback-form": "(cd widgets/service-request-feedback-form && vite build)",
