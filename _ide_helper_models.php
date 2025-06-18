@@ -1637,6 +1637,7 @@ namespace AidingApp\InventoryManagement\Models{
  * @property-read \AidingApp\InventoryManagement\Models\AssetCheckOut|null $checkOut
  * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent|null $checkedInBy
  * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $checkedInFrom
+ * @property-read mixed $formatted_checked_in_at
  * @property-read \AidingApp\Timeline\Models\Timeline|null $timelineRecord
  * @method static \AidingApp\InventoryManagement\Database\Factories\AssetCheckInFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AssetCheckIn newModelQuery()
@@ -1685,6 +1686,7 @@ namespace AidingApp\InventoryManagement\Models{
  * @property-read \AidingApp\InventoryManagement\Models\AssetCheckIn|null $checkIn
  * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent|null $checkedOutBy
  * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $checkedOutTo
+ * @property-read mixed $formatted_checked_out_at
  * @property-read mixed $status
  * @property-read \AidingApp\Timeline\Models\Timeline|null $timelineRecord
  * @method static \AidingApp\InventoryManagement\Database\Factories\AssetCheckOutFactory factory($count = null, $state = [])
@@ -1944,7 +1946,7 @@ namespace AidingApp\KnowledgeBase\Models{
  * @property int $portal_view_count
  * @property bool $is_featured
  * @property string|null $article_details_fulltext
- * @property string|null $search_vector
+ * @property string $search_vector
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
  * @property-read int|null $audits_count
  * @property-read \AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory|null $category
@@ -2692,6 +2694,7 @@ namespace AidingApp\ServiceManagement\Models{
  * @property-read int|null $audits_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\ServiceManagement\Models\HistoricalServiceMonitoring> $histories
  * @property-read int|null $histories_count
+ * @property-read \AidingApp\ServiceManagement\Models\HistoricalServiceMonitoring|null $latestHistory
  * @property-read \AidingApp\ServiceManagement\Models\ServiceMonitoringTargetUser|\AidingApp\ServiceManagement\Models\ServiceMonitoringTargetTeam|null $pivot
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Team\Models\Team> $teams
  * @property-read int|null $teams_count
