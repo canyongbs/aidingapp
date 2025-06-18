@@ -235,7 +235,7 @@ class ListKnowledgeBaseItems extends ListRecords
                             ->copyImagesToNewRecord($replica->article_details, $replica, disk: 's3-public');
                         $replica->save();
                     })
-                    ->excludeAttributes(['views_count', 'upvotes_count', 'my_upvotes_count'])
+                    ->excludeAttributes(['views_count', 'upvotes_count', 'my_upvotes_count','search_vector'])
                     ->successNotificationTitle('Article duplicated successfully!'),
             ])
             ->bulkActions([
