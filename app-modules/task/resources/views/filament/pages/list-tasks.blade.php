@@ -114,5 +114,5 @@
         @livewire('task-kanban', $this->getWidgetData())
         <x-filament-actions::modals />
     @endif
-    <script src="{{ url('js/canyon-gbs/task/kanban.js') }}"></script>
+    @vite('app-modules/task/resources/js/kanban.js')
 </x-filament-panels::page>
