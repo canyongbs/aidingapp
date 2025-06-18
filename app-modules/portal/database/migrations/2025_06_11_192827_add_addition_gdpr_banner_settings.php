@@ -45,7 +45,7 @@ return new class () extends SettingsMigration {
         $this->migrator->add('portal.gdpr_terms_of_use', false);
         $this->migrator->add('portal.gdpr_terms_of_use_url');
         $this->migrator->add('portal.gdpr_decline', false);
-        $this->migrator->add('portal.gdpr_decline_value', GdprDeclineOptions::Decline->value);
+        $this->migrator->add('portal.gdpr_decline_value', 'decline');
     }
 
     public function down(): void
