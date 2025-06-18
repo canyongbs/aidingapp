@@ -93,5 +93,5 @@
         @livewire('task-kanban', $this->getWidgetData())
         <x-filament-actions::modals />
     @endif
-    @vite('app-modules/task/resources/js/task.js')
+    @vite('app-modules/task/resources/js/kanban.js')
 </x-filament-panels::page>

@@ -42,7 +42,7 @@ export default defineConfig({
                 'resources/js/app.js',
                 'resources/css/filament/admin/theme.css',
                 'app-modules/in-app-communication/resources/js/userToUserChat.js',
-                'app-modules/task/resources/js/task.js',
+                'app-modules/task/resources/js/kanban.js',
             ],
             refresh: [
                 ...refreshPaths,
