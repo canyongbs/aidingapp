@@ -54,7 +54,7 @@ class AssetCheckInFactory extends Factory
             'asset_id' => Asset::factory(),
             'checked_in_by_type' => $checkedInBy->getMorphClass(),
             'checked_in_by_id' => $checkedInBy->getKey(),
-            'checked_in_from_id' => Contact::factory()->create()->getKey(),
+            'checked_in_from_id' => Contact::factory(),
             'checked_in_at' => $this->faker->dateTimeBetween('-1 year', 'now'),
             'notes' => $this->faker->paragraph(),
         ];

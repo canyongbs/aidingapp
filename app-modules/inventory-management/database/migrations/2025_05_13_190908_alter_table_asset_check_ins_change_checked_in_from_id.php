@@ -44,7 +44,7 @@ return new class () extends Migration {
 
         DB::statement('ALTER TABLE asset_check_ins ALTER COLUMN checked_in_from_id SET DATA TYPE UUID USING checked_in_from_id::uuid');
 
-        DB::statement('ALTER TABLE asset_check_ins ADD CONSTRAINT contacts_id_checked_in_from_id FOREIGN KEY (checked_in_from_id) REFERENCES contacts (id) ON UPDATE CASCADE ON DELETE CASCADE;');
+        DB::statement('ALTER TABLE asset_check_ins ADD CONSTRAINT contacts_id_checked_in_from_id FOREIGN KEY (checked_in_from_id) REFERENCES contacts (id);');
 
         DB::commit();
     }

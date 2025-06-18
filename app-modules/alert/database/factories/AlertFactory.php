@@ -50,7 +50,7 @@ class AlertFactory extends Factory
     public function definition(): array
     {
         return [
-            'concern_id' => Contact::factory()->create()->getKey(),
+            'concern_id' => Contact::factory(),
             'description' => $this->faker->sentence(),
             'severity' => $this->faker->randomElement(AlertSeverity::cases()),
             'status' => $this->faker->randomElement(AlertStatus::cases()),

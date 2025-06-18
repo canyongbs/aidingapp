@@ -44,7 +44,7 @@ return new class () extends Migration {
 
         DB::statement('ALTER TABLE service_requests ALTER COLUMN respondent_id SET DATA TYPE UUID USING respondent_id::uuid');
 
-        DB::statement('ALTER TABLE service_requests ADD CONSTRAINT contacts_id_respondent_id FOREIGN KEY (respondent_id) REFERENCES contacts (id) ON UPDATE CASCADE ON DELETE CASCADE;');
+        DB::statement('ALTER TABLE service_requests ADD CONSTRAINT contacts_id_respondent_id FOREIGN KEY (respondent_id) REFERENCES contacts (id);');
 
         DB::commit();
     }
