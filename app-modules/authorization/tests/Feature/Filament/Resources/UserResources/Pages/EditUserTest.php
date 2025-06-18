@@ -43,6 +43,7 @@ use App\Models\User;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Select;
 use Filament\Tables\Actions\AttachAction;
+use Illuminate\Support\Collection;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -181,7 +182,7 @@ test('EditUser is gated with proper access control', function () {
             ])
         )->assertSuccessful();
 
-    $request = collect(User::factory()->make());
+    $request = new Collection(User::factory()->make());
 
     livewire(EditUser::class, [
         'record' => $anotherUser->getRouteKey(),
