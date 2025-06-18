@@ -37,6 +37,7 @@
 namespace AidingApp\InventoryManagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Contact\Models\Contact;
 use AidingApp\InventoryManagement\Enums\AssetCheckOutStatus;
 use AidingApp\InventoryManagement\Observers\AssetCheckOutObserver;
 use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
@@ -69,7 +70,7 @@ class AssetCheckOut extends BaseModel implements Auditable, ProvidesATimeline
         'asset_check_in_id',
         'checked_out_by_type',
         'checked_out_by_id',
-        'checked_out_to_type',
+        'checked_out_to_type', //remove during MakeContactNotPolymorphicFeature cleanup
         'checked_out_to_id',
         'checked_out_at',
         'expected_check_in_at',
@@ -102,13 +103,12 @@ class AssetCheckOut extends BaseModel implements Auditable, ProvidesATimeline
         );
     }
 
-    public function checkedOutTo(): MorphTo
+    /**
+     * @return BelongsTo<Contact, $this>
+     */
+    public function checkedOutTo(): BelongsTo
     {
-        return $this->morphTo(
-            name: 'checked_out_to',
-            type: 'checked_out_to_type',
-            id: 'checked_out_to_id',
-        );
+        return $this->belongsTo(Contact::class, 'checked_out_to_id');
     }
 
     /**

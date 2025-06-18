@@ -40,7 +40,6 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\InventoryManagement\Models\Asset;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Database\Eloquent\Relations\Relation;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AidingApp\InventoryManagement\Models\AssetCheckIn>
@@ -55,19 +54,7 @@ class AssetCheckInFactory extends Factory
             'asset_id' => Asset::factory(),
             'checked_in_by_type' => $checkedInBy->getMorphClass(),
             'checked_in_by_id' => $checkedInBy->getKey(),
-            'checked_in_from_type' => $this->faker->randomElement([
-                (new Contact())->getMorphClass(),
-            ]),
-            'checked_in_from_id' => function (array $attributes) {
-                $checkedInFromClass = Relation::getMorphedModel($attributes['checked_in_from_type']);
-
-                /** @var Contact $checkedInFromModel */
-                $checkedInFromModel = new $checkedInFromClass();
-
-                $checkedInFromModel = $checkedInFromModel::factory()->create();
-
-                return $checkedInFromModel->getKey();
-            },
+            'checked_in_from_id' => Contact::factory(),
             'checked_in_at' => $this->faker->dateTimeBetween('-1 year', 'now'),
             'notes' => $this->faker->paragraph(),
         ];

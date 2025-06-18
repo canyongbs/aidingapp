@@ -67,7 +67,6 @@ use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -155,17 +154,11 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
     }
 
     /**
-     * @return MorphMany<ServiceRequest, $this>
+     * @return HasMany<ServiceRequest, $this>
      */
-    public function serviceRequests(): MorphMany
+    public function serviceRequests(): HasMany
     {
-        return $this->morphMany(
-            related: ServiceRequest::class,
-            name: 'respondent',
-            type: 'respondent_type',
-            id: 'respondent_id',
-            localKey: 'id'
-        );
+        return $this->hasMany(ServiceRequest::class, 'respondent_id');
     }
 
     /**
@@ -226,11 +219,11 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
     }
 
     /**
-     * @return MorphMany<Alert, $this>
+     * @return HasMany<Alert, $this>
      */
-    public function alerts(): MorphMany
+    public function alerts(): HasMany
     {
-        return $this->morphMany(Alert::class, 'concern');
+        return $this->hasMany(Alert::class, 'concern_id');
     }
 
     public static function displayNameKey(): string
@@ -249,31 +242,19 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
     }
 
     /**
-     * @return MorphMany<AssetCheckIn, $this>
+     * @return HasMany<AssetCheckIn, $this>
      */
-    public function assetCheckIns(): MorphMany
+    public function assetCheckIns(): HasMany
     {
-        return $this->morphMany(
-            related: AssetCheckIn::class,
-            name: 'checked_in_from',
-            type: 'checked_in_from_type',
-            id: 'checked_in_from_id',
-            localKey: 'id'
-        );
+        return $this->hasMany(AssetCheckIn::class, 'checked_in_from_id');
     }
 
     /**
-     * @return MorphMany<AssetCheckOut, $this>
+     * @return HasMany<AssetCheckOut, $this>
      */
-    public function assetCheckOuts(): MorphMany
+    public function assetCheckOuts(): HasMany
     {
-        return $this->morphMany(
-            related: AssetCheckOut::class,
-            name: 'checked_out_to',
-            type: 'checked_out_to_type',
-            id: 'checked_out_to_id',
-            localKey: 'id'
-        );
+        return $this->hasMany(AssetCheckOut::class, 'checked_out_to_id');
     }
 
     public static function getLicenseType(): LicenseType
@@ -290,11 +271,11 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
     }
 
     /**
-     * @return MorphMany<KnowledgeBaseArticleVote, $this>
+     * @return HasMany<KnowledgeBaseArticleVote, $this>
      */
-    public function knowledgeBaseArticleVotes(): MorphMany
+    public function knowledgeBaseArticleVotes(): HasMany
     {
-        return $this->morphMany(KnowledgeBaseArticleVote::class, 'voter');
+        return $this->hasMany(KnowledgeBaseArticleVote::class, 'voter_id');
     }
 
     /**
