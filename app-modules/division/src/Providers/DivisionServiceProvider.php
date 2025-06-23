@@ -38,15 +38,12 @@ namespace AidingApp\Division\Providers;
 
 use AidingApp\Division\DivisionPlugin;
 use AidingApp\Division\Models\Division;
-use App\Concerns\ImplementsGraphQL;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 
 class DivisionServiceProvider extends ServiceProvider
 {
-    use ImplementsGraphQL;
-
     public function register(): void
     {
         Panel::configureUsing(fn (Panel $panel) => ($panel->getId() !== 'admin') || $panel->plugin(new DivisionPlugin()));
@@ -57,7 +54,5 @@ class DivisionServiceProvider extends ServiceProvider
         Relation::morphMap([
             'division' => Division::class,
         ]);
-
-        $this->discoverSchema(__DIR__ . '/../../graphql/division.graphql');
     }
 }
