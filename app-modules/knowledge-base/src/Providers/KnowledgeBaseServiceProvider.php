@@ -41,15 +41,12 @@ use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
-use App\Concerns\ImplementsGraphQL;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 
 class KnowledgeBaseServiceProvider extends ServiceProvider
 {
-    use ImplementsGraphQL;
-
     public function register(): void
     {
         Panel::configureUsing(fn (Panel $panel) => ($panel->getId() !== 'admin') || $panel->plugin(new KnowledgeBasePlugin()));
@@ -63,7 +60,5 @@ class KnowledgeBaseServiceProvider extends ServiceProvider
             'knowledge_base_quality' => KnowledgeBaseQuality::class,
             'knowledge_base_status' => KnowledgeBaseStatus::class,
         ]);
-
-        $this->discoverSchema(__DIR__ . '/../../graphql/knowledge-base-item.graphql');
     }
 }
