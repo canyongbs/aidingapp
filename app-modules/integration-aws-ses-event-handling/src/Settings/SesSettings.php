@@ -42,6 +42,8 @@ class SesSettings extends Settings
 {
     public ?string $configuration_set = null;
 
+    public bool $dynamic_engagements = false;
+
     public static function group(): string
     {
         return 'ses';

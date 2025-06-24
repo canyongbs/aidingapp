@@ -91,8 +91,10 @@ class ManageAmazonSesSettings extends SettingsPage
                     ->schema([
                         TextInput::make('configuration_set')
                             ->label('Configuration Set'),
+                        Toggle::make('dynamic_engagements')
+                            ->label('Dynamic Engagements'),
                         TextInput::make('fromName')
-                            ->label('From Name')
+                            ->label('Fallback From Name')
                             ->string()
                             ->maxLength(150)
                             ->required(),
