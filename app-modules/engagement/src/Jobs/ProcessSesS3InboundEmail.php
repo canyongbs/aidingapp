@@ -42,6 +42,8 @@ use AidingApp\Engagement\Exceptions\SesS3InboundSpamOrVirusDetected;
 use AidingApp\Engagement\Exceptions\UnableToDetectAnyMatchingContactsFromSesS3EmailPayload;
 use AidingApp\Engagement\Exceptions\UnableToDetectTenantFromSesS3EmailPayload;
 use AidingApp\Engagement\Exceptions\UnableToRetrieveContentFromSesS3EmailPayload;
+use AidingApp\Engagement\Models\UnmatchedInboundCommunication;
+use App\Features\UnMatchInboundCommunicationFeature;
 use App\Models\Tenant;
 use Aws\Crypto\KmsMaterialsProviderV2;
 use Aws\Kms\KmsClient;
@@ -168,10 +170,28 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                         ->where('email', $sender)
                         ->get();
 
-                    throw_if(
-                        $contacts->isEmpty(),
-                        new UnableToDetectAnyMatchingContactsFromSesS3EmailPayload($this->emailFilePath),
-                    );
+                    if (! UnMatchInboundCommunicationFeature::active()) {
+                        throw_if(
+                            $contacts->isEmpty(),
+                            new UnableToDetectAnyMatchingContactsFromSesS3EmailPayload($this->emailFilePath),
+                        );
+                    }
+
+                    if (UnMatchInboundCommunicationFeature::active() && $contacts->isEmpty()) {
+                        UnmatchedInboundCommunication::create([
+                            'type' => EngagementResponseType::Email,
+                            'subject' => $parser->getHeader('subject'),
+                            'body' => $parser->getMessageBody('htmlEmbedded'),
+                            'occurred_at' => $parser->getHeader('date'),
+                            'sender' => $sender,
+                        ]);
+
+                        Storage::disk('s3-inbound-email')->delete($this->emailFilePath);
+
+                        DB::commit();
+
+                        return;
+                    }
 
                     $contacts->each(function (Contact $contact) use ($parser, $content) {
                         /** @var EngagementResponse $engagementResponse */

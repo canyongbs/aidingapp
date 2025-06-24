@@ -1,39 +1,5 @@
 <?php
 
-/*
-<COPYRIGHT>
-
-    Copyright © 2016-2025, Canyon GBS LLC. All rights reserved.
-
-    Aiding App™ is licensed under the Elastic License 2.0. For more details,
-    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
-
-    Notice:
-
-    - You may not provide the software to third parties as a hosted or managed
-      service, where the service provides users with access to any substantial set of
-      the features or functionality of the software.
-    - You may not move, change, disable, or circumvent the license key functionality
-      in the software, and you may not remove or obscure any functionality in the
-      software that is protected by the license key.
-    - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
-      to applicable law.
-    - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
-      Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
-      vigorously.
-    - The software solution, including services, infrastructure, and code, is offered as a
-      Software as a Service (SaaS) by Canyon GBS LLC.
-    - Use of this software implies agreement to the license terms and conditions as stated
-      in the Elastic License 2.0.
-
-    For more information or inquiries please visit our website at
-    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
-
-</COPYRIGHT>
-*/
-
 // @formatter:off
 // phpcs:ignoreFile
 /**
@@ -47,7 +13,7 @@
 
 namespace App\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property int|null $completed_at
@@ -88,7 +54,7 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property array<array-key, mixed> $data
@@ -119,7 +85,7 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
+ *
  *
  * @property int $id
  * @property string $check_name
@@ -154,7 +120,7 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property int|null $completed_at
@@ -197,7 +163,7 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $group
@@ -224,7 +190,7 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $name
@@ -263,7 +229,7 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $notification_setting_id
@@ -290,7 +256,7 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $label
@@ -319,7 +285,7 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $group
@@ -346,7 +312,7 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $name
@@ -384,7 +350,7 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $name
@@ -408,7 +374,7 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $name
@@ -444,7 +410,7 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string|null $emplid
@@ -584,7 +550,7 @@ namespace App\Models{
 
 namespace AidingApp\Alert\Models{
 /**
- * 
+ *
  *
  * @property-read Contact $concern
  * @property string $id
@@ -624,7 +590,7 @@ namespace AidingApp\Alert\Models{
 
 namespace AidingApp\Audit\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string|null $change_agent_type
@@ -668,7 +634,7 @@ namespace AidingApp\Audit\Models{
 
 namespace AidingApp\Authorization\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $user_id
@@ -699,7 +665,7 @@ namespace AidingApp\Authorization\Models{
 
 namespace AidingApp\Authorization\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $name
@@ -742,7 +708,7 @@ namespace AidingApp\Authorization\Models{
 
 namespace AidingApp\Authorization\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $name
@@ -770,7 +736,7 @@ namespace AidingApp\Authorization\Models{
 
 namespace AidingApp\Authorization\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $name
@@ -807,7 +773,7 @@ namespace AidingApp\Authorization\Models{
 
 namespace AidingApp\Contact\Models{
 /**
- * 
+ *
  *
  * @property string $display_name
  * @property string $id
@@ -920,7 +886,7 @@ namespace AidingApp\Contact\Models{
 
 namespace AidingApp\Contact\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $name
@@ -951,7 +917,7 @@ namespace AidingApp\Contact\Models{
 
 namespace AidingApp\Contact\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property \AidingApp\Contact\Enums\SystemContactClassification $classification
@@ -986,7 +952,7 @@ namespace AidingApp\Contact\Models{
 
 namespace AidingApp\Contact\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $name
@@ -1055,7 +1021,7 @@ namespace AidingApp\Contact\Models{
 
 namespace AidingApp\Contact\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $name
@@ -1088,7 +1054,7 @@ namespace AidingApp\Contact\Models{
 
 namespace AidingApp\Contact\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $name
@@ -1121,7 +1087,7 @@ namespace AidingApp\Contact\Models{
 
 namespace AidingApp\ContractManagement\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $name
@@ -1166,7 +1132,7 @@ namespace AidingApp\ContractManagement\Models{
 
 namespace AidingApp\ContractManagement\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $name
@@ -1201,7 +1167,7 @@ namespace AidingApp\ContractManagement\Models{
 
 namespace AidingApp\Division\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $name
@@ -1245,7 +1211,7 @@ namespace AidingApp\Division\Models{
 
 namespace AidingApp\Engagement\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $name
@@ -1281,7 +1247,7 @@ namespace AidingApp\Engagement\Models{
 
 namespace AidingApp\Engagement\Models{
 /**
- * 
+ *
  *
  * @property-read Educatable $recipient
  * @property string $id
@@ -1340,7 +1306,7 @@ namespace AidingApp\Engagement\Models{
 
 namespace AidingApp\Engagement\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string|null $identifier
@@ -1383,7 +1349,7 @@ namespace AidingApp\Engagement\Models{
 
 namespace AidingApp\Engagement\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $description
@@ -1414,7 +1380,6 @@ namespace AidingApp\Engagement\Models{
 
 namespace AidingApp\Engagement\Models{
 /**
- * 
  *
  * @property string $engagement_file_id
  * @property string $entity_id
@@ -1439,7 +1404,7 @@ namespace AidingApp\Engagement\Models{
 
 namespace AidingApp\Engagement\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string|null $sender_id
@@ -1483,9 +1448,30 @@ namespace AidingApp\Engagement\Models{
 	class IdeHelperEngagementResponse {}
 }
 
+namespace AidingApp\Engagement\Models{
+/**
+ *
+ * @property string $id
+ * @property string|null $subject
+ * @property string $body
+ * @property \Illuminate\Support\Carbon $occurred_at
+ * @property string $sender
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \AidingApp\Engagement\Enums\EngagementResponseType $type
+ * @method static \AidingApp\Engagement\Database\Factories\UnmatchedInboundCommunicationFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|UnmatchedInboundCommunication newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|UnmatchedInboundCommunication newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|UnmatchedInboundCommunication query()
+ * @mixin \Eloquent
+ */
+	#[\AllowDynamicProperties]
+	class IdeHelperUnmatchedInboundCommunication {}
+}
+
 namespace AidingApp\InAppCommunication\Models{
 /**
- * 
+ *
  *
  * @property string $sid
  * @property string|null $friendly_name
@@ -1522,7 +1508,7 @@ namespace AidingApp\InAppCommunication\Models{
 
 namespace AidingApp\InAppCommunication\Models{
 /**
- * 
+ *
  *
  * @property string $conversation_sid
  * @property string $user_id
@@ -1563,7 +1549,7 @@ namespace AidingApp\InAppCommunication\Models{
 
 namespace AidingApp\InventoryManagement\Models{
 /**
- * 
+ *
  *
  * @property-read string $purchase_age
  * @property string $id
@@ -1616,7 +1602,7 @@ namespace AidingApp\InventoryManagement\Models{
 
 namespace AidingApp\InventoryManagement\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $asset_id
@@ -1661,7 +1647,7 @@ namespace AidingApp\InventoryManagement\Models{
 
 namespace AidingApp\InventoryManagement\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $asset_id
@@ -1712,7 +1698,7 @@ namespace AidingApp\InventoryManagement\Models{
 
 namespace AidingApp\InventoryManagement\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $name
@@ -1743,7 +1729,7 @@ namespace AidingApp\InventoryManagement\Models{
 
 namespace AidingApp\InventoryManagement\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property \AidingApp\InventoryManagement\Enums\SystemAssetStatusClassification $classification
@@ -1776,7 +1762,7 @@ namespace AidingApp\InventoryManagement\Models{
 
 namespace AidingApp\InventoryManagement\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $name
@@ -1807,7 +1793,7 @@ namespace AidingApp\InventoryManagement\Models{
 
 namespace AidingApp\InventoryManagement\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $asset_id
@@ -1851,7 +1837,7 @@ namespace AidingApp\InventoryManagement\Models{
 
 namespace AidingApp\InventoryManagement\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $name
@@ -1882,7 +1868,7 @@ namespace AidingApp\InventoryManagement\Models{
 
 namespace AidingApp\KnowledgeBase\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $name
@@ -1924,7 +1910,7 @@ namespace AidingApp\KnowledgeBase\Models{
 
 namespace AidingApp\KnowledgeBase\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property bool $public
@@ -1985,7 +1971,7 @@ namespace AidingApp\KnowledgeBase\Models{
 
 namespace AidingApp\KnowledgeBase\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $name
@@ -2016,7 +2002,7 @@ namespace AidingApp\KnowledgeBase\Models{
 
 namespace AidingApp\KnowledgeBase\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $name
@@ -2047,7 +2033,7 @@ namespace AidingApp\KnowledgeBase\Models{
 
 namespace AidingApp\LicenseManagement\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $name
@@ -2088,7 +2074,7 @@ namespace AidingApp\LicenseManagement\Models{
 
 namespace AidingApp\LicenseManagement\Models{
 /**
- * 
+ *
  *
  * @property string $formatted_expiration_date
  * @property string $id
@@ -2133,7 +2119,7 @@ namespace AidingApp\LicenseManagement\Models{
 
 namespace AidingApp\Notification\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $notification_class
@@ -2169,7 +2155,7 @@ namespace AidingApp\Notification\Models{
 
 namespace AidingApp\Notification\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $notification_class
@@ -2209,7 +2195,7 @@ namespace AidingApp\Notification\Models{
 
 namespace AidingApp\Notification\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $email_message_id
@@ -2237,7 +2223,7 @@ namespace AidingApp\Notification\Models{
 
 namespace AidingApp\Notification\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property \AidingApp\Notification\Enums\NotificationChannel $type
@@ -2260,7 +2246,7 @@ namespace AidingApp\Notification\Models{
 
 namespace AidingApp\Portal\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property bool $is_helpful
@@ -2288,7 +2274,7 @@ namespace AidingApp\Portal\Models{
 
 namespace AidingApp\Portal\Models{
 /**
- * 
+ *
  *
  * @property Carbon|null $created_at
  * @property string $id
@@ -2317,7 +2303,7 @@ namespace AidingApp\Portal\Models{
 
 namespace AidingApp\Portal\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property \Illuminate\Support\Carbon|null $created_at
@@ -2344,7 +2330,7 @@ namespace AidingApp\Portal\Models{
 
 namespace AidingApp\ServiceManagement\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string|null $created_by
@@ -2399,7 +2385,7 @@ namespace AidingApp\ServiceManagement\Models{
 
 namespace AidingApp\ServiceManagement\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $change_request_id
@@ -2431,7 +2417,7 @@ namespace AidingApp\ServiceManagement\Models{
 
 namespace AidingApp\ServiceManagement\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $name
@@ -2464,7 +2450,7 @@ namespace AidingApp\ServiceManagement\Models{
 
 namespace AidingApp\ServiceManagement\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $name
@@ -2499,7 +2485,7 @@ namespace AidingApp\ServiceManagement\Models{
 
 namespace AidingApp\ServiceManagement\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property int $response
@@ -2532,7 +2518,7 @@ namespace AidingApp\ServiceManagement\Models{
 
 namespace AidingApp\ServiceManagement\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $title
@@ -2574,7 +2560,7 @@ namespace AidingApp\ServiceManagement\Models{
 
 namespace AidingApp\ServiceManagement\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $name
@@ -2608,7 +2594,7 @@ namespace AidingApp\ServiceManagement\Models{
 
 namespace AidingApp\ServiceManagement\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $name
@@ -2641,7 +2627,7 @@ namespace AidingApp\ServiceManagement\Models{
 
 namespace AidingApp\ServiceManagement\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string|null $incident_id
@@ -2672,7 +2658,7 @@ namespace AidingApp\ServiceManagement\Models{
 
 namespace AidingApp\ServiceManagement\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $name
@@ -2715,7 +2701,7 @@ namespace AidingApp\ServiceManagement\Models{
 
 namespace AidingApp\ServiceManagement\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $service_monitoring_target_id
@@ -2741,7 +2727,7 @@ namespace AidingApp\ServiceManagement\Models{
 
 namespace AidingApp\ServiceManagement\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $service_monitoring_target_id
@@ -2767,7 +2753,7 @@ namespace AidingApp\ServiceManagement\Models{
 
 namespace AidingApp\ServiceManagement\Models{
 /**
- * 
+ *
  *
  * @property-read Contact $respondent
  * @property string $id
@@ -2839,7 +2825,7 @@ namespace AidingApp\ServiceManagement\Models{
 
 namespace AidingApp\ServiceManagement\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $service_request_id
@@ -2879,7 +2865,7 @@ namespace AidingApp\ServiceManagement\Models{
 
 namespace AidingApp\ServiceManagement\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $service_request_id
@@ -2913,7 +2899,7 @@ namespace AidingApp\ServiceManagement\Models{
 
 namespace AidingApp\ServiceManagement\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string|null $service_request_type_id
@@ -2963,7 +2949,7 @@ namespace AidingApp\ServiceManagement\Models{
 
 namespace AidingApp\ServiceManagement\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string|null $author_id
@@ -2992,7 +2978,7 @@ namespace AidingApp\ServiceManagement\Models{
 
 namespace AidingApp\ServiceManagement\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $label
@@ -3030,7 +3016,7 @@ namespace AidingApp\ServiceManagement\Models{
 
 namespace AidingApp\ServiceManagement\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $label
@@ -3065,7 +3051,7 @@ namespace AidingApp\ServiceManagement\Models{
 
 namespace AidingApp\ServiceManagement\Models{
 /**
- * 
+ *
  *
  * @property Contact|null $author
  * @property string $id
@@ -3119,7 +3105,7 @@ namespace AidingApp\ServiceManagement\Models{
 
 namespace AidingApp\ServiceManagement\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $service_request_id
@@ -3153,7 +3139,7 @@ namespace AidingApp\ServiceManagement\Models{
 
 namespace AidingApp\ServiceManagement\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $name
@@ -3192,7 +3178,7 @@ namespace AidingApp\ServiceManagement\Models{
 
 namespace AidingApp\ServiceManagement\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property \AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification $classification
@@ -3229,7 +3215,7 @@ namespace AidingApp\ServiceManagement\Models{
 
 namespace AidingApp\ServiceManagement\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $name
@@ -3350,7 +3336,7 @@ namespace AidingApp\ServiceManagement\Models{
 
 namespace AidingApp\ServiceManagement\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $service_request_type_id
@@ -3376,7 +3362,7 @@ namespace AidingApp\ServiceManagement\Models{
 
 namespace AidingApp\ServiceManagement\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $service_request_type_id
@@ -3409,7 +3395,7 @@ namespace AidingApp\ServiceManagement\Models{
 
 namespace AidingApp\ServiceManagement\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $service_request_type_id
@@ -3435,7 +3421,7 @@ namespace AidingApp\ServiceManagement\Models{
 
 namespace AidingApp\ServiceManagement\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string|null $service_request_id
@@ -3471,7 +3457,7 @@ namespace AidingApp\ServiceManagement\Models{
 
 namespace AidingApp\ServiceManagement\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $name
@@ -3509,7 +3495,7 @@ namespace AidingApp\ServiceManagement\Models{
 
 namespace AidingApp\Task\Models{
 /**
- * 
+ *
  *
  * @property-read Contact $concern
  * @property string $id
@@ -3555,7 +3541,7 @@ namespace AidingApp\Task\Models{
 
 namespace AidingApp\Team\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $name
@@ -3593,7 +3579,7 @@ namespace AidingApp\Team\Models{
 
 namespace AidingApp\Timeline\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property string $entity_type
@@ -3629,7 +3615,7 @@ namespace AidingApp\Timeline\Models{
 
 namespace AidingApp\Webhook\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property \AidingApp\Webhook\Enums\InboundWebhookSource $source
@@ -3658,7 +3644,7 @@ namespace AidingApp\Webhook\Models{
 
 namespace AidingApp\Webhook\Models{
 /**
- * 
+ *
  *
  * @property string $id
  * @property \AidingApp\Webhook\Enums\InboundWebhookSource $source
