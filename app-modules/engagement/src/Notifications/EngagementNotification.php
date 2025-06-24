@@ -82,7 +82,7 @@ class EngagementNotification extends Notification implements ShouldQueue, HasBef
             ->greeting("Hello {$this->engagement->recipient->display_name}!")
             ->content($this->engagement->getBody());
 
-        if(app(SesSettings::class)->dynamic_engagements === true) {
+        if (app(SesSettings::class)->dynamic_engagements === true) {
             $mail->from(config('mail.from.address'), $this->engagement->user->name);
         }
 
