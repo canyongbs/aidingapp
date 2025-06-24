@@ -48,12 +48,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/alert/src/Models/Alert.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$callback of method Illuminate\\\\Database\\\\Eloquent\\\\Builder\\<static\\(AidingApp\\\\Alert\\\\Models\\\\Alert\\)\\>\\:\\:tap\\(\\) expects callable\\(Illuminate\\\\Database\\\\Eloquent\\\\Builder\\<static\\>\\)\\: mixed, App\\\\Models\\\\Scopes\\\\LicensedToEducatable given\\.$#',
-    'identifier' => 'argument.type',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/alert/src/Models/Alert.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Call to an undefined method OwenIt\\\\Auditing\\\\Contracts\\\\Auditable\\:\\:auditAttach\\(\\)\\.$#',
     'identifier' => 'method.notFound',
     'count' => 1,
@@ -262,24 +256,6 @@ $ignoreErrors[] = [
     'identifier' => 'property.notFound',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/authorization/tests/Feature/Filament/Pages/SetPasswordTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$key of method Illuminate\\\\Support\\\\Collection\\<string,mixed\\>\\:\\:get\\(\\) expects "\\\\000\\*\\\\000appends"\\|"\\\\000\\*…"\\|"\\\\000\\*\\\\000attributes"\\|"\\\\000\\*\\\\000authPasswordName"\\|"\\\\000\\*\\\\000casts"\\|"\\\\000\\*\\\\000changes"\\|"\\\\000\\*\\\\000classCastCache"\\|"\\\\000\\*\\\\000connection"\\|"\\\\000\\*\\\\000dateFormat"\\|"\\\\000\\*\\\\000dispatchesEvents"\\|"\\\\000\\*\\\\000fillable"\\|"\\\\000\\*\\\\000forceDeleting"\\|"\\\\000\\*\\\\000guarded"\\|"\\\\000\\*\\\\000hidden"\\|"\\\\000\\*\\\\000keyType"\\|"\\\\000\\*\\\\000observables"\\|"\\\\000\\*\\\\000original"\\|"\\\\000\\*\\\\000perPage"\\|"\\\\000\\*\\\\000primaryKey"\\|"\\\\000\\*\\\\000relations"\\|"\\\\000\\*\\\\000rememberTokenName"\\|"\\\\000\\*\\\\000table"\\|"\\\\000\\*\\\\000touches"\\|"\\\\000\\*\\\\000visible"\\|"\\\\000\\*\\\\000with"\\|"\\\\000\\*\\\\000withCount"\\|"\\\\000App\\\\\\\\Models…"\\|\'auditCustomNew\'\\|\'auditCustomOld\'\\|\'auditEvent\'\\|\'exists\'\\|\'filterable\'\\|\'incrementing\'\\|\'isCustomEvent\'\\|\'mediaCollections\'\\|\'mediaConversions\'\\|\'orderable\'\\|\'preloadedResolverDa…\'\\|\'preventsLazyLoading\'\\|\'timestamps\'\\|\'usesUniqueIds\'\\|\'wasRecentlyCreated\', \'email\' given\\.$#',
-    'identifier' => 'argument.type',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/authorization/tests/Feature/Filament/Resources/UserResources/Pages/EditUserTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$key of method Illuminate\\\\Support\\\\Collection\\<string,mixed\\>\\:\\:get\\(\\) expects "\\\\000\\*\\\\000appends"\\|"\\\\000\\*…"\\|"\\\\000\\*\\\\000attributes"\\|"\\\\000\\*\\\\000authPasswordName"\\|"\\\\000\\*\\\\000casts"\\|"\\\\000\\*\\\\000changes"\\|"\\\\000\\*\\\\000classCastCache"\\|"\\\\000\\*\\\\000connection"\\|"\\\\000\\*\\\\000dateFormat"\\|"\\\\000\\*\\\\000dispatchesEvents"\\|"\\\\000\\*\\\\000fillable"\\|"\\\\000\\*\\\\000forceDeleting"\\|"\\\\000\\*\\\\000guarded"\\|"\\\\000\\*\\\\000hidden"\\|"\\\\000\\*\\\\000keyType"\\|"\\\\000\\*\\\\000observables"\\|"\\\\000\\*\\\\000original"\\|"\\\\000\\*\\\\000perPage"\\|"\\\\000\\*\\\\000primaryKey"\\|"\\\\000\\*\\\\000relations"\\|"\\\\000\\*\\\\000rememberTokenName"\\|"\\\\000\\*\\\\000table"\\|"\\\\000\\*\\\\000touches"\\|"\\\\000\\*\\\\000visible"\\|"\\\\000\\*\\\\000with"\\|"\\\\000\\*\\\\000withCount"\\|"\\\\000App\\\\\\\\Models…"\\|\'auditCustomNew\'\\|\'auditCustomOld\'\\|\'auditEvent\'\\|\'exists\'\\|\'filterable\'\\|\'incrementing\'\\|\'isCustomEvent\'\\|\'mediaCollections\'\\|\'mediaConversions\'\\|\'orderable\'\\|\'preloadedResolverDa…\'\\|\'preventsLazyLoading\'\\|\'timestamps\'\\|\'usesUniqueIds\'\\|\'wasRecentlyCreated\', \'is_external\' given\\.$#',
-    'identifier' => 'argument.type',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/authorization/tests/Feature/Filament/Resources/UserResources/Pages/EditUserTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$key of method Illuminate\\\\Support\\\\Collection\\<string,mixed\\>\\:\\:get\\(\\) expects "\\\\000\\*\\\\000appends"\\|"\\\\000\\*…"\\|"\\\\000\\*\\\\000attributes"\\|"\\\\000\\*\\\\000authPasswordName"\\|"\\\\000\\*\\\\000casts"\\|"\\\\000\\*\\\\000changes"\\|"\\\\000\\*\\\\000classCastCache"\\|"\\\\000\\*\\\\000connection"\\|"\\\\000\\*\\\\000dateFormat"\\|"\\\\000\\*\\\\000dispatchesEvents"\\|"\\\\000\\*\\\\000fillable"\\|"\\\\000\\*\\\\000forceDeleting"\\|"\\\\000\\*\\\\000guarded"\\|"\\\\000\\*\\\\000hidden"\\|"\\\\000\\*\\\\000keyType"\\|"\\\\000\\*\\\\000observables"\\|"\\\\000\\*\\\\000original"\\|"\\\\000\\*\\\\000perPage"\\|"\\\\000\\*\\\\000primaryKey"\\|"\\\\000\\*\\\\000relations"\\|"\\\\000\\*\\\\000rememberTokenName"\\|"\\\\000\\*\\\\000table"\\|"\\\\000\\*\\\\000touches"\\|"\\\\000\\*\\\\000visible"\\|"\\\\000\\*\\\\000with"\\|"\\\\000\\*\\\\000withCount"\\|"\\\\000App\\\\\\\\Models…"\\|\'auditCustomNew\'\\|\'auditCustomOld\'\\|\'auditEvent\'\\|\'exists\'\\|\'filterable\'\\|\'incrementing\'\\|\'isCustomEvent\'\\|\'mediaCollections\'\\|\'mediaConversions\'\\|\'orderable\'\\|\'preloadedResolverDa…\'\\|\'preventsLazyLoading\'\\|\'timestamps\'\\|\'usesUniqueIds\'\\|\'wasRecentlyCreated\', \'name\' given\\.$#',
-    'identifier' => 'argument.type',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/authorization/tests/Feature/Filament/Resources/UserResources/Pages/EditUserTest.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Function something\\(\\) has no return type specified\\.$#',
@@ -1536,12 +1512,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/inventory-management/database/factories/AssetFactory.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Match expression does not handle remaining value\\: mixed$#',
-    'identifier' => 'match.unhandled',
-    'count' => 2,
-    'path' => __DIR__ . '/app-modules/inventory-management/src/Filament/Actions/CheckOutAssetHeaderAction.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Call to an undefined method Illuminate\\\\Database\\\\Eloquent\\\\Builder\\:\\:withoutReturned\\(\\)\\.$#',
     'identifier' => 'method.notFound',
     'count' => 1,
@@ -1596,12 +1566,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/inventory-management/src/Models/AssetCheckIn.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Models\\\\AssetCheckIn\\:\\:checkedInFrom\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\MorphTo does not specify its types\\: TRelatedModel, TDeclaringModel$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/src/Models/AssetCheckIn.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Models\\\\AssetCheckIn\\:\\:getTimelineData\\(\\) return type with generic class Illuminate\\\\Support\\\\Collection does not specify its types\\: TKey, TValue$#',
     'identifier' => 'missingType.generics',
     'count' => 1,
@@ -1615,12 +1579,6 @@ $ignoreErrors[] = [
 ];
 $ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Models\\\\AssetCheckOut\\:\\:checkedOutBy\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\MorphTo does not specify its types\\: TRelatedModel, TDeclaringModel$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/src/Models/AssetCheckOut.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Models\\\\AssetCheckOut\\:\\:checkedOutTo\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\MorphTo does not specify its types\\: TRelatedModel, TDeclaringModel$#',
     'identifier' => 'missingType.generics',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/inventory-management/src/Models/AssetCheckOut.php',
@@ -1918,12 +1876,6 @@ $ignoreErrors[] = [
     'identifier' => 'missingType.iterableValue',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/license-management/src/Models/ProductLicense.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\LicenseManagement\\\\Models\\\\Scopes\\\\AuthorizeLicensesScope\\:\\:apply\\(\\) has parameter \\$builder with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/license-management/src/Models/Scopes/AuthorizeLicensesScope.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Access to an undefined property AidingApp\\\\LicenseManagement\\\\Models\\\\Product\\:\\:\\$created_by_id\\.$#',
@@ -2346,12 +2298,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/portal/src/Http/Controllers/KnowledgeManagementPortal/KnowledgeManagementPortalSearchController.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$callback of method Illuminate\\\\Database\\\\Eloquent\\\\Builder\\<AidingApp\\\\KnowledgeBase\\\\Models\\\\KnowledgeBaseItem\\>\\:\\:tap\\(\\) expects callable\\(Illuminate\\\\Database\\\\Eloquent\\\\Builder\\<AidingApp\\\\KnowledgeBase\\\\Models\\\\KnowledgeBaseItem\\>\\)\\: mixed, App\\\\Models\\\\Scopes\\\\SearchBy given\\.$#',
-    'identifier' => 'argument.type',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/portal/src/Http/Controllers/KnowledgeManagementPortal/KnowledgeManagementPortalSearchController.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Access to an undefined property AidingApp\\\\KnowledgeBase\\\\Models\\\\KnowledgeBaseItem\\|Illuminate\\\\Database\\\\Eloquent\\\\Collection\\<int, AidingApp\\\\KnowledgeBase\\\\Models\\\\KnowledgeBaseItem\\>\\:\\:\\$helpful_votes_count\\.$#',
     'identifier' => 'property.notFound',
     'count' => 1,
@@ -2408,12 +2354,6 @@ $ignoreErrors[] = [
 $ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\Portal\\\\Models\\\\KnowledgeBaseArticleVote\\:\\:knowledgeBaseArticle\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#',
     'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/portal/src/Models/KnowledgeBaseArticleVote.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\Portal\\\\Models\\\\KnowledgeBaseArticleVote\\:\\:voter\\(\\) has no return type specified\\.$#',
-    'identifier' => 'missingType.return',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/portal/src/Models/KnowledgeBaseArticleVote.php',
 ];
@@ -2488,18 +2428,6 @@ $ignoreErrors[] = [
     'identifier' => 'class.notFound',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/report/src/Abstract/EngagementReport.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Call to method can\\(\\) on an unknown class AidingApp\\\\Report\\\\Filament\\\\Pages\\\\User\\.$#',
-    'identifier' => 'class.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/report/src/Filament/Pages/ServiceRequests.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var for variable \\$user contains unknown class AidingApp\\\\Report\\\\Filament\\\\Pages\\\\User\\.$#',
-    'identifier' => 'class.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/report/src/Filament/Pages/ServiceRequests.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Property AidingApp\\\\Report\\\\Filament\\\\Pages\\\\ServiceRequests\\:\\:\\$cacheTag has no type specified\\.$#',
@@ -3636,18 +3564,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/src/Models/Scopes/ClassifiedIn.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Generic type Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\MorphTo\\<AidingApp\\\\Contact\\\\Models\\\\Contact\\> in PHPDoc tag @return does not specify all template types of class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\MorphTo\\: TRelatedModel, TDeclaringModel$#',
-    'identifier' => 'generics.lessTypes',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Models/ServiceRequest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequest\\:\\:respondent\\(\\) should return Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\MorphTo\\<AidingApp\\\\Contact\\\\Models\\\\Contact\\> but returns Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\MorphTo\\<Illuminate\\\\Database\\\\Eloquent\\\\Model, \\$this\\(AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequest\\)\\>\\.$#',
-    'identifier' => 'return.type',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Models/ServiceRequest.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequest\\:\\:scopeLicensedToEducatable\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#',
     'identifier' => 'missingType.generics',
     'count' => 1,
@@ -3668,12 +3584,6 @@ $ignoreErrors[] = [
 $ignoreErrors[] = [
     'message' => '#^Negated boolean expression is always true\\.$#',
     'identifier' => 'booleanNot.alwaysTrue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Models/ServiceRequest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$callback of method Illuminate\\\\Database\\\\Eloquent\\\\Builder\\<static\\(AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequest\\)\\>\\:\\:tap\\(\\) expects callable\\(Illuminate\\\\Database\\\\Eloquent\\\\Builder\\<static\\>\\)\\: mixed, App\\\\Models\\\\Scopes\\\\LicensedToEducatable given\\.$#',
-    'identifier' => 'argument.type',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/service-management/src/Models/ServiceRequest.php',
 ];
@@ -4776,36 +4686,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app/Console/Commands/GenerateLandlordApiKey.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Method App\\\\Console\\\\Commands\\\\ValidateGraphQL\\:\\:checkModel\\(\\) has parameter \\$fail with no type specified\\.$#',
-    'identifier' => 'missingType.parameter',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Console/Commands/ValidateGraphQL.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method App\\\\Console\\\\Commands\\\\ValidateGraphQL\\:\\:checkModel\\(\\) has parameter \\$models with generic class Illuminate\\\\Support\\\\Collection but does not specify its types\\: TKey, TValue$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Console/Commands/ValidateGraphQL.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method App\\\\Console\\\\Commands\\\\ValidateGraphQL\\:\\:checkModel\\(\\) has parameter \\$types with generic class Illuminate\\\\Support\\\\Collection but does not specify its types\\: TKey, TValue$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Console/Commands/ValidateGraphQL.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Unable to resolve the template type TKey in call to function collect$#',
-    'identifier' => 'argument.templateType',
-    'count' => 2,
-    'path' => __DIR__ . '/app/Console/Commands/ValidateGraphQL.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Unable to resolve the template type TValue in call to function collect$#',
-    'identifier' => 'argument.templateType',
-    'count' => 2,
-    'path' => __DIR__ . '/app/Console/Commands/ValidateGraphQL.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Method App\\\\DataTransferObjects\\\\Casts\\\\DataCast\\:\\:get\\(\\) has parameter \\$payload with no type specified\\.$#',
     'identifier' => 'missingType.parameter',
     'count' => 1,
@@ -5032,78 +4912,6 @@ $ignoreErrors[] = [
     'identifier' => 'deadCode.unreachable',
     'count' => 1,
     'path' => __DIR__ . '/app/Filament/Widgets/ServiceRequestWidget.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to an undefined property GraphQL\\\\Language\\\\AST\\\\TypeExtensionNode\\:\\:\\$directives\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app/GraphQL/Directives/FeatureDirective.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to an undefined property GraphQL\\\\Language\\\\AST\\\\TypeExtensionNode\\:\\:\\$fields\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app/GraphQL/Directives/FeatureDirective.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to an undefined property GraphQL\\\\Language\\\\AST\\\\TypeExtensionNode\\:\\:\\$interfaces\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app/GraphQL/Directives/FeatureDirective.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to an undefined property GraphQL\\\\Language\\\\AST\\\\TypeExtensionNode\\:\\:\\$name\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 2,
-    'path' => __DIR__ . '/app/GraphQL/Directives/FeatureDirective.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#2 \\$typeWithFields of static method Nuwave\\\\Lighthouse\\\\Schema\\\\AST\\\\ASTHelper\\:\\:addDirectiveToFields\\(\\) expects GraphQL\\\\Language\\\\AST\\\\InterfaceTypeDefinitionNode\\|GraphQL\\\\Language\\\\AST\\\\InterfaceTypeExtensionNode\\|GraphQL\\\\Language\\\\AST\\\\ObjectTypeDefinitionNode\\|GraphQL\\\\Language\\\\AST\\\\ObjectTypeExtensionNode, GraphQL\\\\Language\\\\AST\\\\Node&GraphQL\\\\Language\\\\AST\\\\TypeDefinitionNode given\\.$#',
-    'identifier' => 'argument.type',
-    'count' => 1,
-    'path' => __DIR__ . '/app/GraphQL/Directives/FeatureDirective.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Property GraphQL\\\\Language\\\\AST\\\\FieldDefinitionNode\\:\\:\\$directives \\(GraphQL\\\\Language\\\\AST\\\\NodeList\\<GraphQL\\\\Language\\\\AST\\\\DirectiveNode\\>\\) does not accept GraphQL\\\\Language\\\\AST\\\\NodeList\\<GraphQL\\\\Language\\\\AST\\\\Node\\>\\.$#',
-    'identifier' => 'assign.propertyType',
-    'count' => 1,
-    'path' => __DIR__ . '/app/GraphQL/Directives/FeatureDirective.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Argument of an invalid type Nuwave\\\\Lighthouse\\\\Execution\\\\Arguments\\\\Argument supplied for foreach, only iterables are supported\\.$#',
-    'identifier' => 'foreach.nonIterable',
-    'count' => 1,
-    'path' => __DIR__ . '/app/GraphQL/Directives/MorphToRelationDirective.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method App\\\\GraphQL\\\\Directives\\\\MorphToRelationDirective\\:\\:build\\(\\) has parameter \\$builder with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app/GraphQL/Directives/MorphToRelationDirective.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method App\\\\GraphQL\\\\Directives\\\\MorphToRelationDirective\\:\\:build\\(\\) has parameter \\$relationshipTypes with no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app/GraphQL/Directives/MorphToRelationDirective.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method App\\\\GraphQL\\\\Scalars\\\\UUID\\:\\:getTypeDefinition\\(\\) should return class\\-string\\<\\(GraphQL\\\\Type\\\\Definition\\\\NamedType&GraphQL\\\\Type\\\\Definition\\\\Type\\)\\|UnitEnum\\>\\|\\(GraphQL\\\\Language\\\\AST\\\\Node&GraphQL\\\\Language\\\\AST\\\\TypeDefinitionNode\\)\\|null but returns \\$this\\(App\\\\GraphQL\\\\Scalars\\\\UUID\\)\\.$#',
-    'identifier' => 'return.type',
-    'count' => 1,
-    'path' => __DIR__ . '/app/GraphQL/Scalars/UUID.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method App\\\\GraphQL\\\\Scalars\\\\UUID\\:\\:validateUUID\\(\\) has parameter \\$value with no type specified\\.$#',
-    'identifier' => 'missingType.parameter',
-    'count' => 1,
-    'path' => __DIR__ . '/app/GraphQL/Scalars/UUID.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to an undefined property GraphQL\\\\Language\\\\AST\\\\Node&GraphQL\\\\Language\\\\AST\\\\ValueNode\\:\\:\\$value\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app/GraphQL/Scalars/Year.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Method App\\\\Http\\\\Controllers\\\\ViewPublicUserProfileController\\:\\:formatHours\\(\\) has parameter \\$hours with no value type specified in iterable type array\\.$#',

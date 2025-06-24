@@ -588,7 +588,6 @@ namespace AidingApp\Alert\Models{
  *
  * @property-read Contact $concern
  * @property string $id
- * @property string $concern_type
  * @property string $concern_id
  * @property string $description
  * @property \AidingApp\Alert\Enums\AlertSeverity $severity
@@ -607,7 +606,6 @@ namespace AidingApp\Alert\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Alert query()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Alert status(\AidingApp\Alert\Enums\AlertStatus $status)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Alert whereConcernId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Alert whereConcernType($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Alert whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Alert whereDeletedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Alert whereDescription($value)
@@ -1624,7 +1622,6 @@ namespace AidingApp\InventoryManagement\Models{
  * @property string $asset_id
  * @property string|null $checked_in_by_type
  * @property string|null $checked_in_by_id
- * @property string $checked_in_from_type
  * @property string $checked_in_from_id
  * @property \Illuminate\Support\Carbon $checked_in_at
  * @property string|null $notes
@@ -1636,7 +1633,7 @@ namespace AidingApp\InventoryManagement\Models{
  * @property-read int|null $audits_count
  * @property-read \AidingApp\InventoryManagement\Models\AssetCheckOut|null $checkOut
  * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent|null $checkedInBy
- * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $checkedInFrom
+ * @property-read \AidingApp\Contact\Models\Contact $checkedInFrom
  * @property-read mixed $formatted_checked_in_at
  * @property-read \AidingApp\Timeline\Models\Timeline|null $timelineRecord
  * @method static \AidingApp\InventoryManagement\Database\Factories\AssetCheckInFactory factory($count = null, $state = [])
@@ -1649,7 +1646,6 @@ namespace AidingApp\InventoryManagement\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AssetCheckIn whereCheckedInById($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AssetCheckIn whereCheckedInByType($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AssetCheckIn whereCheckedInFromId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|AssetCheckIn whereCheckedInFromType($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AssetCheckIn whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AssetCheckIn whereDeletedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AssetCheckIn whereId($value)
@@ -1672,7 +1668,6 @@ namespace AidingApp\InventoryManagement\Models{
  * @property string|null $asset_check_in_id
  * @property string|null $checked_out_by_type
  * @property string|null $checked_out_by_id
- * @property string $checked_out_to_type
  * @property string $checked_out_to_id
  * @property \Illuminate\Support\Carbon $checked_out_at
  * @property \Illuminate\Support\Carbon|null $expected_check_in_at
@@ -1685,7 +1680,7 @@ namespace AidingApp\InventoryManagement\Models{
  * @property-read int|null $audits_count
  * @property-read \AidingApp\InventoryManagement\Models\AssetCheckIn|null $checkIn
  * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent|null $checkedOutBy
- * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $checkedOutTo
+ * @property-read \AidingApp\Contact\Models\Contact $checkedOutTo
  * @property-read mixed $formatted_checked_out_at
  * @property-read mixed $status
  * @property-read \AidingApp\Timeline\Models\Timeline|null $timelineRecord
@@ -1700,7 +1695,6 @@ namespace AidingApp\InventoryManagement\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AssetCheckOut whereCheckedOutById($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AssetCheckOut whereCheckedOutByType($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AssetCheckOut whereCheckedOutToId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|AssetCheckOut whereCheckedOutToType($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AssetCheckOut whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AssetCheckOut whereDeletedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AssetCheckOut whereExpectedCheckInAt($value)
@@ -2270,13 +2264,12 @@ namespace AidingApp\Portal\Models{
  *
  * @property string $id
  * @property bool $is_helpful
- * @property string $voter_type
  * @property string $voter_id
  * @property string $article_id
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \AidingApp\KnowledgeBase\Models\KnowledgeBaseItem $knowledgeBaseArticle
- * @property-read \Illuminate\Database\Eloquent\Model|\Eloquent $voter
+ * @property-read \AidingApp\Contact\Models\Contact $voter
  * @method static \AidingApp\Portal\Database\Factories\KnowledgeBaseArticleVoteFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|KnowledgeBaseArticleVote newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|KnowledgeBaseArticleVote newQuery()
@@ -2287,7 +2280,6 @@ namespace AidingApp\Portal\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|KnowledgeBaseArticleVote whereIsHelpful($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|KnowledgeBaseArticleVote whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|KnowledgeBaseArticleVote whereVoterId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|KnowledgeBaseArticleVote whereVoterType($value)
  * @mixin \Eloquent
  */
 	#[\AllowDynamicProperties]
@@ -2781,7 +2773,6 @@ namespace AidingApp\ServiceManagement\Models{
  * @property string $id
  * @property string $service_request_number
  * @property string|null $title
- * @property string $respondent_type
  * @property string $respondent_id
  * @property string|null $close_details
  * @property string|null $res_details
@@ -2831,7 +2822,6 @@ namespace AidingApp\ServiceManagement\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequest wherePriorityId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequest whereResDetails($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequest whereRespondentId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequest whereRespondentType($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequest whereServiceRequestFormSubmissionId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequest whereServiceRequestNumber($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequest whereStatusId($value)

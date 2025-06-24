@@ -37,23 +37,18 @@
 namespace AidingApp\Contact\Providers;
 
 use AidingApp\Contact\ContactPlugin;
-use AidingApp\Contact\Enums\ContactStatusColorOptions;
-use AidingApp\Contact\Enums\SystemContactClassification;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactSource;
 use AidingApp\Contact\Models\ContactStatus;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Models\OrganizationIndustry;
 use AidingApp\Contact\Models\OrganizationType;
-use App\Concerns\ImplementsGraphQL;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 
 class ContactServiceProvider extends ServiceProvider
 {
-    use ImplementsGraphQL;
-
     public function register(): void
     {
         Panel::configureUsing(fn (Panel $panel) => ($panel->getId() !== 'admin') || $panel->plugin(new ContactPlugin()));
@@ -69,9 +64,5 @@ class ContactServiceProvider extends ServiceProvider
             'organization_industry' => OrganizationIndustry::class,
             'organization_type' => OrganizationType::class,
         ]);
-
-        $this->discoverSchema(__DIR__ . '/../../graphql/*');
-        $this->registerEnum(ContactStatusColorOptions::class);
-        $this->registerEnum(SystemContactClassification::class);
     }
 }

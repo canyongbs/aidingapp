@@ -10,8 +10,7 @@
         "build:widgets": "npm run build:service-request-form && npm run build:service-request-feedback-form",
         "build:knowledge-management": "(cd portals/knowledge-management && vite build)",
         "build:portals": "npm run build:knowledge-management",
-        "build": "npm run build:vite && npm run build:widgets && npm run build:portals",
-        "api-docs:generate": "export NODE_OPTIONS=--max_old_space_size=4096 && env-cmd spectaql spectaql.yml"
+        "build": "npm run build:vite && npm run build:widgets && npm run build:portals"
     },
     "devDependencies": {
         "@headlessui/vue": "^1.7.16",
@@ -71,7 +70,6 @@
         "primevue": "^4.3.2",
         "showdown": "^2.1.0",
         "sortablejs": "^1.15.0",
-        "spectaql": "^3.0.0",
         "tailwindcss-primeui": "^0.5.1",
         "tippy.js": "^6.3.7",
         "vite": "^6.3.4",

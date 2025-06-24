@@ -62,15 +62,12 @@ use AidingApp\ServiceManagement\Models\Sla;
 use AidingApp\ServiceManagement\ServiceManagementPlugin;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\SqidPlusSixServiceRequestNumberGenerator;
-use App\Concerns\ImplementsGraphQL;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 
 class ServiceManagementServiceProvider extends ServiceProvider
 {
-    use ImplementsGraphQL;
-
     public function register(): void
     {
         Panel::configureUsing(fn (Panel $panel) => ($panel->getId() !== 'admin') || $panel->plugin(new ServiceManagementPlugin()));
@@ -105,7 +102,5 @@ class ServiceManagementServiceProvider extends ServiceProvider
             'incident_update' => IncidentUpdate::class,
             'service_monitoring_target' => ServiceMonitoringTarget::class,
         ]);
-
-        $this->discoverSchema(__DIR__ . '/../../graphql/service-management.graphql');
     }
 }

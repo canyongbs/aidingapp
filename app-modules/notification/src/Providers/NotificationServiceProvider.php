@@ -42,7 +42,6 @@ use AidingApp\Notification\Models\EmailMessageEvent;
 use AidingApp\Notification\Models\StoredAnonymousNotifiable;
 use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
 use AidingApp\Notification\Notifications\Channels\MailChannel;
-use App\Concerns\ImplementsGraphQL;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Notifications\Channels\DatabaseChannel as BaseDatabaseChannel;
 use Illuminate\Notifications\Channels\MailChannel as BaseMailChannel;
@@ -50,8 +49,6 @@ use Illuminate\Support\ServiceProvider;
 
 class NotificationServiceProvider extends ServiceProvider
 {
-    use ImplementsGraphQL;
-
     public function register(): void
     {
         // Note: Email and Database can be changed to regular binds just passing in the contrete class in the cleanup ticket

@@ -41,8 +41,6 @@ use App\Models\Tenant;
 use App\Overrides\Filament\Actions\Imports\Jobs\ImportCsvOverride;
 use App\Overrides\Filament\Actions\Imports\Jobs\PrepareCsvExportOverride;
 use App\Overrides\Laravel\PermissionMigrationCreator;
-use App\Overrides\LastDragon_ru\LaraASP\GraphQL\SearchBy\Definitions\SearchByDirective as GraphQLSearchByDirectiveOverride;
-use App\Overrides\LastDragon_ru\LaraASP\GraphQL\SearchBy\Types\Condition as GraphQLSearchByTypesConditionOverride;
 use Filament\Actions\Exports\Jobs\PrepareCsvExport;
 use Filament\Actions\Imports\Jobs\ImportCsv;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -51,8 +49,6 @@ use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Pennant\Feature;
-use LastDragon_ru\LaraASP\GraphQL\SearchBy\Definitions\SearchByDirective as GraphQLSearchByDirectiveAlias;
-use LastDragon_ru\LaraASP\GraphQL\SearchBy\Types\Condition\Condition as GraphQLSearchByTypesCondition;
 
 use function Sentry\configureScope;
 
@@ -67,8 +63,6 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->singleton('originalAppKey', fn () => config('app.key'));
 
-        $this->app->bind(GraphQLSearchByTypesCondition::class, GraphQLSearchByTypesConditionOverride::class);
-        $this->app->bind(GraphQLSearchByDirectiveAlias::class, GraphQLSearchByDirectiveOverride::class);
         $this->app->bind(ImportCsv::class, ImportCsvOverride::class);
         $this->app->bind(PrepareCsvExport::class, PrepareCsvExportOverride::class);
     }

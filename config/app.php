@@ -66,7 +66,6 @@ use Illuminate\Support\Facades\Facade;
 use Illuminate\Translation\TranslationServiceProvider;
 use Illuminate\Validation\ValidationServiceProvider;
 use Illuminate\View\ViewServiceProvider;
-use Nuwave\Lighthouse\WhereConditions\WhereConditionsServiceProvider;
 
 return [
     /*
@@ -256,7 +255,6 @@ return [
         HealthServiceProvider::class,
         FilamentServiceProvider::class,
         MultiConnectionParallelTestingServiceProvider::class,
-        WhereConditionsServiceProvider::class,
     ],
 
     /*

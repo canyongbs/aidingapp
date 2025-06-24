@@ -37,18 +37,13 @@
 namespace AidingApp\Alert\Providers;
 
 use AidingApp\Alert\AlertPlugin;
-use AidingApp\Alert\Enums\AlertSeverity;
-use AidingApp\Alert\Enums\AlertStatus;
 use AidingApp\Alert\Models\Alert;
-use App\Concerns\ImplementsGraphQL;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 
 class AlertServiceProvider extends ServiceProvider
 {
-    use ImplementsGraphQL;
-
     public function register(): void
     {
         Panel::configureUsing(fn (Panel $panel) => ($panel->getId() !== 'admin') || $panel->plugin(new AlertPlugin()));
@@ -59,15 +54,5 @@ class AlertServiceProvider extends ServiceProvider
         Relation::morphMap([
             'alert' => Alert::class,
         ]);
-
-        $this->registerGraphQL();
-    }
-
-    protected function registerGraphQL(): void
-    {
-        $this->discoverSchema(__DIR__ . '/../../graphql/alert.graphql');
-
-        $this->registerEnum(AlertSeverity::class);
-        $this->registerEnum(AlertStatus::class);
     }
 }
