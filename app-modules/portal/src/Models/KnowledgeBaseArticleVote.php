@@ -36,12 +36,13 @@
 
 namespace AidingApp\Portal\Models;
 
-use AidingApp\Contact\Models\Contact;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\Portal\Database\Factories\KnowledgeBaseArticleVoteFactory;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
 /**
@@ -65,11 +66,11 @@ class KnowledgeBaseArticleVote extends Pivot
     ];
 
     /**
-     * @return BelongsTo<Contact, $this>
+     * @return MorphTo<Model, $this>
      */
-    public function voter(): BelongsTo
+    public function voter(): MorphTo
     {
-        return $this->belongsTo(Contact::class, 'voter_id');
+        return $this->morphTo();
     }
 
     public function knowledgeBaseArticle(): BelongsTo
