@@ -39,6 +39,7 @@ namespace App\Console;
 use AidingApp\Audit\Models\Audit;
 use AidingApp\Engagement\Jobs\DeliverEngagements;
 use AidingApp\Engagement\Jobs\GatherAndDispatchSesS3InboundEmails;
+use AidingApp\Engagement\Jobs\UnmatchedInboundCommunicationsJob;
 use AidingApp\Engagement\Models\EngagementFile;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Jobs\ServiceMonitoringJob;
@@ -96,6 +97,10 @@ class Kernel extends ConsoleKernel
                         ->hourly()
                         ->onOneServer()
                         ->withoutOverlapping(15);
+
+                    $schedule->job(new UnmatchedInboundCommunicationsJob())
+                        ->daily()
+                        ->name('Process Unmatched Inbound Communications');
 
                     $schedule->command("tenants:artisan \"health:check\" --tenant={$tenant->id}")
                         ->everyMinute()
