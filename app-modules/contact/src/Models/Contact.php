@@ -67,6 +67,7 @@ use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -271,11 +272,11 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
     }
 
     /**
-     * @return HasMany<KnowledgeBaseArticleVote, $this>
+     * @return MorphMany<KnowledgeBaseArticleVote, $this>
      */
-    public function knowledgeBaseArticleVotes(): HasMany
+    public function knowledgeBaseArticleVotes(): MorphMany
     {
-        return $this->hasMany(KnowledgeBaseArticleVote::class, 'voter_id');
+        return $this->morphMany(KnowledgeBaseArticleVote::class, 'voter');
     }
 
     /**
