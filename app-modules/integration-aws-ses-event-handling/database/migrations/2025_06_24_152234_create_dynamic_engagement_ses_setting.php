@@ -34,28 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\IntegrationAwsSesEventHandling\Settings;
+use Spatie\LaravelSettings\Migrations\SettingsBlueprint;
+use Spatie\LaravelSettings\Migrations\SettingsMigration;
 
-use Spatie\LaravelSettings\Settings;
-
-class SesSettings extends Settings
-{
-    public ?string $configuration_set = null;
-
-    public bool $dynamic_engagements = false;
-
-    public static function group(): string
+return new class () extends SettingsMigration {
+    public function up(): void
     {
-        return 'ses';
+        $this->migrator->inGroup('ses', function (SettingsBlueprint $blueprint): void {
+            $blueprint->add('dynamic_engagements', false);
+        });
     }
-
-    /**
-     * @return array<string>
-     */
-    public static function encrypted(): array
-    {
-        return [
-            'configuration_set',
-        ];
-    }
-}
+};

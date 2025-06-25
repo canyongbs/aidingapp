@@ -38,6 +38,7 @@ namespace AidingApp\Engagement\Notifications;
 
 use AidingApp\Engagement\Models\Engagement;
 use AidingApp\Engagement\Models\EngagementBatch;
+use AidingApp\IntegrationAwsSesEventHandling\Settings\SesSettings;
 use AidingApp\Notification\DataTransferObjects\NotificationResultData;
 use AidingApp\Notification\Enums\NotificationChannel;
 use AidingApp\Notification\Models\Contracts\CanBeNotified;
@@ -75,11 +76,17 @@ class EngagementNotification extends Notification implements ShouldQueue, HasBef
 
     public function toMail(object $notifiable): MailMessage
     {
-        return MailMessage::make()
+        $mail = MailMessage::make()
             ->settings($this->resolveNotificationSetting($this->engagement->user))
             ->subject($this->engagement->subject)
             ->greeting("Hello {$this->engagement->recipient->display_name}!")
             ->content($this->engagement->getBody());
+
+        if (app(SesSettings::class)->dynamic_engagements === true) {
+            $mail->from(config('mail.from.address'), $this->engagement->user->name);
+        }
+
+        return $mail;
     }
 
     public function toSms(object $notifiable): TwilioMessage
