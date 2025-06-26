@@ -81,6 +81,16 @@ class Kernel extends ConsoleKernel
 
                     $schedule->call(function () use ($tenant) {
                         $tenant->execute(function () {
+                            dispatch(new UnmatchedInboundCommunicationsJob());
+                        });
+                    })
+                        ->daily()
+                        ->name("Process Unmatched Inbound Communications | Tenant {$tenant->domain}")
+                        ->onOneServer()
+                        ->withoutOverlapping(720);
+
+                    $schedule->call(function () use ($tenant) {
+                        $tenant->execute(function () {
                             dispatch(new ServiceMonitoringJob(ServiceMonitoringFrequency::OneHour));
                         });
                     })
@@ -97,10 +107,6 @@ class Kernel extends ConsoleKernel
                         ->hourly()
                         ->onOneServer()
                         ->withoutOverlapping(15);
-
-                    $schedule->job(new UnmatchedInboundCommunicationsJob())
-                        ->daily()
-                        ->name('Process Unmatched Inbound Communications');
 
                     $schedule->command("tenants:artisan \"health:check\" --tenant={$tenant->id}")
                         ->everyMinute()
