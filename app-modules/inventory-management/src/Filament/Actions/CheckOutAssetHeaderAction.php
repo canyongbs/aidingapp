@@ -86,13 +86,13 @@ class CheckOutAssetHeaderAction extends Action
             }
 
             $asset->checkOuts()->create([
-                  'checked_out_by_type' => auth()->user()?->getMorphClass(),
-                  'checked_out_by_id' => auth()->user()?->id,
-                  'checked_out_to_id' => $data['checked_out_to_id'],
-                  'notes' => $data['notes'],
-                  'checked_out_at' => now(),
-                  'expected_check_in_at' => $data['expected_check_in_at'],
-              ]);
+                'checked_out_by_type' => auth()->user()?->getMorphClass(),
+                'checked_out_by_id' => auth()->user()?->id,
+                'checked_out_to_id' => $data['checked_out_to_id'],
+                'notes' => $data['notes'],
+                'checked_out_at' => now(),
+                'expected_check_in_at' => $data['expected_check_in_at'],
+            ]);
 
             $asset->status()->associate(AssetStatus::tap(new ClassifiedAs(SystemAssetStatusClassification::CheckedOut))->first());
             $asset->save();
