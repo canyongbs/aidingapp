@@ -32,7 +32,9 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/ declare(strict_types = 1);
+*/
+
+declare(strict_types = 1);
 
 $ignoreErrors = [];
 $ignoreErrors[] = [
@@ -50,6 +52,18 @@ $ignoreErrors[] = [
 $ignoreErrors[] = [
     'message' => '#^Call to an undefined method OwenIt\\\\Auditing\\\\Contracts\\\\Auditable\\:\\:auditAttach\\(\\)\\.$#',
     'identifier' => 'method.notFound',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/audit/src/Filament/Actions/AuditAttachAction.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/audit/src/Filament/Actions/AuditAttachAction.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#2 \\$record of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/audit/src/Filament/Actions/AuditAttachAction.php',
 ];
@@ -246,6 +260,12 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/authorization/src/Models/Role.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$app of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/authorization/src/Providers/AuthorizationServiceProvider.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Parameter \\#1 \\$view of function view expects view\\-string\\|null, string given\\.$#',
     'identifier' => 'argument.type',
     'count' => 1,
@@ -256,6 +276,24 @@ $ignoreErrors[] = [
     'identifier' => 'property.notFound',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/authorization/tests/Feature/Filament/Pages/SetPasswordTest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/authorization/tests/Feature/Filament/Resources/UserResources/Pages/EditUserTest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/authorization/tests/Feature/Filament/Resources/UserResources/Pages/EditUserTest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$user of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/authorization/tests/Feature/Filament/Resources/UserResources/Pages/ListUsersTest.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Function something\\(\\) has no return type specified\\.$#',
@@ -480,9 +518,51 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/contact/src/Filament/Resources/ContactResource/RelationManagers/EngagementsRelationManager.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$query of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/contact/src/Filament/Resources/ContactResource/RelationManagers/ServiceRequestsRelationManager.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#2 \\$record of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/contact/src/Filament/Resources/ContactResource/RelationManagers/ServiceRequestsRelationManager.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#2 \\$state of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/contact/src/Filament/Resources/OrganizationIndustryResource/Pages/CreateOrganizationIndustry.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#2 \\$state of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/contact/src/Filament/Resources/OrganizationIndustryResource/Pages/EditOrganizationIndustry.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#2 \\$state of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/contact/src/Filament/Resources/OrganizationTypeResource/Pages/CreateOrganizationType.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#2 \\$state of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/contact/src/Filament/Resources/OrganizationTypeResource/Pages/EditOrganizationType.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Parameter \\#1 \\$entity of class AidingApp\\\\Timeline\\\\Events\\\\TimelineableRecordCreated constructor expects Illuminate\\\\Database\\\\Eloquent\\\\Model, App\\\\Models\\\\Contracts\\\\Educatable given\\.$#',
     'identifier' => 'argument.type',
     'count' => 2,
+    'path' => __DIR__ . '/app-modules/contact/tests/Contact/ListContactTest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$response of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 4,
     'path' => __DIR__ . '/app-modules/contact/tests/Contact/ListContactTest.php',
 ];
 $ignoreErrors[] = [
@@ -498,10 +578,58 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/contact/tests/ContactSource/CreateContactSourceTest.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/contact/tests/ContactSource/CreateContactSourceTest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/contact/tests/ContactSource/CreateContactSourceTest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/contact/tests/ContactSource/EditContactSourceTest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/contact/tests/ContactSource/EditContactSourceTest.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Call to function PHPUnit\\\\Framework\\\\assertEmpty\\(\\) with Illuminate\\\\Database\\\\Eloquent\\\\Collection\\<int, AidingApp\\\\Contact\\\\Models\\\\ContactStatus\\> will always evaluate to false\\.$#',
     'identifier' => 'function.impossibleType',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/contact/tests/ContactStatus/CreateContactStatusTest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/contact/tests/ContactStatus/CreateContactStatusTest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/contact/tests/ContactStatus/CreateContactStatusTest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/contact/tests/ContactStatus/EditContactStatusTest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/contact/tests/ContactStatus/EditContactStatusTest.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Call to an undefined method Faker\\\\Generator\\:\\:state\\(\\)\\.$#',
@@ -552,6 +680,24 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/contract-management/src/Filament/Resources/ContractResource/Pages/EditContract.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Parameter \\#2 \\$state of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/contract-management/src/Filament/Resources/ContractResource/Pages/ListContracts.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#2 \\$state of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/contract-management/src/Filament/Resources/ContractTypeResource/Pages/CreateContractType.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#2 \\$state of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/contract-management/src/Filament/Resources/ContractTypeResource/Pages/EditContractType.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Property AidingApp\\\\ContractManagement\\\\Models\\\\Contract\\:\\:\\$append has no type specified\\.$#',
     'identifier' => 'missingType.property',
     'count' => 1,
@@ -562,6 +708,30 @@ $ignoreErrors[] = [
     'identifier' => 'missingType.generics',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/division/database/factories/DivisionFactory.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#2 \\$state of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/division/src/Filament/Resources/DivisionResource/Pages/CreateDivision.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#2 \\$state of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/division/src/Filament/Resources/DivisionResource/Pages/EditDivision.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$attributes of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 2,
+    'path' => __DIR__ . '/app-modules/engagement/database/factories/UnmatchedInboundCommunicationFactory.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$deliverables of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/engagement/database/migrations/2025_01_13_153104_data_remove_sms_data_from_engagement.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Call to an undefined method App\\\\Models\\\\Contracts\\\\Educatable\\:\\:notify\\(\\)\\.$#',
@@ -626,6 +796,12 @@ $ignoreErrors[] = [
 $ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\Engagement\\\\Actions\\\\GenerateTipTapBodyJson\\:\\:text\\(\\) return type has no value type specified in iterable type array\\.$#',
     'identifier' => 'missingType.iterableValue',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/engagement/src/Actions/GenerateTipTapBodyJson.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$node of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/engagement/src/Actions/GenerateTipTapBodyJson.php',
 ];
@@ -730,6 +906,12 @@ $ignoreErrors[] = [
     'identifier' => 'class.notFound',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/engagement/src/Jobs/ProcessSesS3InboundEmail.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$communications of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/engagement/src/Jobs/UnmatchedInboundCommunicationsJob.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Call to an undefined method Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:orderedEngagements\\(\\)\\.$#',
@@ -1512,6 +1694,12 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/inventory-management/database/factories/AssetFactory.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$method of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 2,
+    'path' => __DIR__ . '/app-modules/inventory-management/database/factories/MaintenanceActivityFactory.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Call to an undefined method Illuminate\\\\Database\\\\Eloquent\\\\Builder\\:\\:withoutReturned\\(\\)\\.$#',
     'identifier' => 'method.notFound',
     'count' => 1,
@@ -1638,6 +1826,12 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/knowledge-base/database/factories/KnowledgeBaseItemFactory.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$articles of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/knowledge-base/database/migrations/2025_05_26_103749_data_migrate_article_details_to_article_details_fulltext_in_knowledge_base_articles.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Access to an undefined property Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:\\$category\\.$#',
     'identifier' => 'property.notFound',
     'count' => 1,
@@ -1671,6 +1865,18 @@ $ignoreErrors[] = [
     'message' => '#^Access to an undefined property Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:\\$title\\.$#',
     'identifier' => 'property.notFound',
     'count' => 2,
+    'path' => __DIR__ . '/app-modules/knowledge-base/src/Filament/Resources/KnowledgeBaseItemResource/Pages/EditKnowledgeBaseItem.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$breadcrumb of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/knowledge-base/src/Filament/Resources/KnowledgeBaseItemResource/Pages/EditKnowledgeBaseItem.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#2 \\$state of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
     'path' => __DIR__ . '/app-modules/knowledge-base/src/Filament/Resources/KnowledgeBaseItemResource/Pages/EditKnowledgeBaseItem.php',
 ];
 $ignoreErrors[] = [
@@ -1712,6 +1918,12 @@ $ignoreErrors[] = [
 $ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\KnowledgeBase\\\\Jobs\\\\KnowledgeBaseItemDownloadExternalMedia\\:\\:processContentItem\\(\\) return type has no value type specified in iterable type array\\.$#',
     'identifier' => 'missingType.iterableValue',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/knowledge-base/src/Jobs/KnowledgeBaseItemDownloadExternalMedia.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$item of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/knowledge-base/src/Jobs/KnowledgeBaseItemDownloadExternalMedia.php',
 ];
@@ -1840,6 +2052,18 @@ $ignoreErrors[] = [
     'identifier' => 'return.unusedType',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/license-management/src/Enums/ProductLicenseStatus.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#2 \\$state of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/license-management/src/Filament/Resources/ProductResource/Pages/ManageProductLicenses.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#3 \\$record of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/license-management/src/Filament/Resources/ProductResource/Pages/ManageProductLicenses.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\LicenseManagement\\\\Models\\\\Product\\:\\:productLicenses\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#',
@@ -2130,6 +2354,12 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/notification/tests/Notifications/Channels/MailChannelEmailMessageTest.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$any of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/portal/routes/web.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Match arm comparison between AidingApp\\\\Portal\\\\Enums\\\\PortalType\\:\\:KnowledgeManagement and AidingApp\\\\Portal\\\\Enums\\\\PortalType\\:\\:KnowledgeManagement is always true\\.$#',
     'identifier' => 'match.alwaysTrue',
     'count' => 1,
@@ -2220,6 +2450,12 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/portal/src/Http/Controllers/KnowledgeManagementPortal/CreateServiceRequestController.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$file of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/portal/src/Http/Controllers/KnowledgeManagementPortal/CreateServiceRequestController.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Parameter \\#1 \\$submission of method AidingApp\\\\Portal\\\\Http\\\\Controllers\\\\KnowledgeManagementPortal\\\\CreateServiceRequestController\\:\\:processSubmissionField\\(\\) expects AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestFormSubmission, Illuminate\\\\Database\\\\Eloquent\\\\Model given\\.$#',
     'identifier' => 'argument.type',
     'count' => 1,
@@ -2298,6 +2534,12 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/portal/src/Http/Controllers/KnowledgeManagementPortal/KnowledgeManagementPortalSearchController.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$license of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/portal/src/Http/Controllers/KnowledgeManagementPortal/LicenseManagementPortalController.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Access to an undefined property AidingApp\\\\KnowledgeBase\\\\Models\\\\KnowledgeBaseItem\\|Illuminate\\\\Database\\\\Eloquent\\\\Collection\\<int, AidingApp\\\\KnowledgeBase\\\\Models\\\\KnowledgeBaseItem\\>\\:\\:\\$helpful_votes_count\\.$#',
     'identifier' => 'property.notFound',
     'count' => 1,
@@ -2306,6 +2548,12 @@ $ignoreErrors[] = [
 $ignoreErrors[] = [
     'message' => '#^If condition is always true\\.$#',
     'identifier' => 'if.alwaysTrue',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/portal/src/Http/Controllers/KnowledgeManagementPortal/StoreKnowledgeBaseArticleVoteController.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$query of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/portal/src/Http/Controllers/KnowledgeManagementPortal/StoreKnowledgeBaseArticleVoteController.php',
 ];
@@ -2580,6 +2828,12 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/report/src/Filament/Widgets/ServiceRequestsStats.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$query of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/report/src/Filament/Widgets/ServiceRequestsStats.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Unreachable statement \\- code above always terminates\\.$#',
     'identifier' => 'deadCode.unreachable',
     'count' => 1,
@@ -2602,6 +2856,12 @@ $ignoreErrors[] = [
     'identifier' => 'missingType.iterableValue',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/report/src/Filament/Widgets/TaskCumulativeCountLineChart.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$state of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/report/src/Filament/Widgets/TopServiceRequestTypesTable.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\Report\\\\Providers\\\\ReportServiceProvider\\:\\:boot\\(\\) has no return type specified\\.$#',
@@ -2784,6 +3044,12 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/src/Actions/GenerateServiceRequestFormKitSchema.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$priority of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/GenerateServiceRequestFormKitSchema.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\ServiceManagement\\\\Actions\\\\ResolveUploadsMediaCollectionForServiceRequest\\:\\:__invoke\\(\\) should return AidingApp\\\\ServiceManagement\\\\Models\\\\MediaCollections\\\\UploadsMediaCollection but returns Spatie\\\\MediaLibrary\\\\MediaCollections\\\\MediaCollection\\|null\\.$#',
     'identifier' => 'return.type',
     'count' => 1,
@@ -2886,6 +3152,12 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/IncidentResource/Pages/ManageIncidentUpdate.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/IncidentResource/Pages/ManageIncidentUpdate.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Unable to resolve the template type TGroupKey in call to method Illuminate\\\\Support\\\\Collection\\<int,AidingApp\\\\ServiceManagement\\\\Models\\\\IncidentStatus\\>\\:\\:groupBy\\(\\)$#',
     'identifier' => 'argument.templateType',
     'count' => 1,
@@ -2898,6 +3170,12 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/IncidentResource/Pages/ManageIncidentUpdate.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$records of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/IncidentSeverityResource/Pages/ListIncidentSeverities.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Parameter \\#1 \\$length of method Filament\\\\Forms\\\\Components\\\\TextInput\\:\\:maxLength\\(\\) expects Closure\\|int\\|null, \'255\' given\\.$#',
     'identifier' => 'argument.type',
     'count' => 1,
@@ -2908,6 +3186,12 @@ $ignoreErrors[] = [
     'identifier' => 'argument.type',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/IncidentStatusResource/Pages/EditIncidentStatus.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$records of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/IncidentStatusResource/Pages/ListIncidentStatuses.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Access to property \\$name on an unknown class AidingApp\\\\ServiceManagement\\\\Filament\\\\Resources\\\\IncidentStatusResource\\\\Pages\\\\IncidentStatus\\.$#',
@@ -3108,6 +3392,12 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestResource/Pages/EditServiceRequest.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$records of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestResource/Pages/ListServiceRequests.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\ServiceManagement\\\\Filament\\\\Resources\\\\ServiceRequestResource\\\\Pages\\\\ManageAssignments\\:\\:bootServiceRequestLocked\\(\\) has no return type specified\\.$#',
     'identifier' => 'missingType.return',
     'count' => 1,
@@ -3186,6 +3476,18 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestResource/Pages/ViewServiceRequest.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$state of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestResource/Pages/ViewServiceRequest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$query of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestResource/RelationManagers/AssignedToRelationManager.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Using nullsafe property access "\\?\\-\\>type_id" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#',
     'identifier' => 'nullsafe.neverNull',
     'count' => 1,
@@ -3207,6 +3509,12 @@ $ignoreErrors[] = [
     'message' => '#^Access to an undefined property Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:\\$status\\.$#',
     'identifier' => 'property.notFound',
     'count' => 2,
+    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestResource/RelationManagers/ServiceRequestUpdatesRelationManager.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
     'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestResource/RelationManagers/ServiceRequestUpdatesRelationManager.php',
 ];
 $ignoreErrors[] = [
@@ -3274,6 +3582,18 @@ $ignoreErrors[] = [
     'identifier' => 'nullsafe.neverNull',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestTypeResource/Pages/ViewServiceRequestType.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$join of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestUpdateResource.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#3 \\$record of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestUpdateResource.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\ServiceManagement\\\\Filament\\\\Resources\\\\ServiceRequestUpdateResource\\\\Components\\\\ServiceRequestAssignmentViewAction\\:\\:serviceRequestAssignmentInfolist\\(\\) return type has no value type specified in iterable type array\\.$#',
@@ -3352,6 +3672,12 @@ $ignoreErrors[] = [
     'identifier' => 'argument.type',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/service-management/src/Http/Controllers/ServiceRequestFormWidgetController.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$team of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Jobs/ServiceMonitoringCheckJob.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Property AidingApp\\\\ServiceManagement\\\\Livewire\\\\RenderServiceRequestFeedbackForm\\:\\:\\$data type has no value type specified in iterable type array\\.$#',
@@ -3942,6 +4268,42 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/src/Notifications/SendClosedServiceFeedbackNotification.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$block of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Notifications/SendClosedServiceFeedbackNotification.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$block of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Notifications/SendEducatableServiceRequestAssignedNotification.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$block of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Notifications/SendEducatableServiceRequestClosedNotification.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$block of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Notifications/SendEducatableServiceRequestOpenedNotification.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$block of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Notifications/SendEducatableServiceRequestStatusChangeNotification.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$block of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Notifications/SendEducatableServiceRequestUpdatedNotification.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Match expression does not handle remaining value\\: class\\-string$#',
     'identifier' => 'match.unhandled',
     'count' => 1,
@@ -3950,6 +4312,12 @@ $ignoreErrors[] = [
 $ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\ServiceManagement\\\\Notifications\\\\ServiceRequestAssigned\\:\\:toDatabase\\(\\) return type has no value type specified in iterable type array\\.$#',
     'identifier' => 'missingType.iterableValue',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Notifications/ServiceRequestAssigned.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$block of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/service-management/src/Notifications/ServiceRequestAssigned.php',
 ];
@@ -3966,6 +4334,12 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/src/Notifications/ServiceRequestClosed.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$block of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Notifications/ServiceRequestClosed.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Match expression does not handle remaining value\\: class\\-string$#',
     'identifier' => 'match.unhandled',
     'count' => 1,
@@ -3974,6 +4348,12 @@ $ignoreErrors[] = [
 $ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\ServiceManagement\\\\Notifications\\\\ServiceRequestCreated\\:\\:toDatabase\\(\\) return type has no value type specified in iterable type array\\.$#',
     'identifier' => 'missingType.iterableValue',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Notifications/ServiceRequestCreated.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$block of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/service-management/src/Notifications/ServiceRequestCreated.php',
 ];
@@ -3990,6 +4370,12 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/src/Notifications/ServiceRequestStatusChanged.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$block of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Notifications/ServiceRequestStatusChanged.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Match expression does not handle remaining value\\: class\\-string$#',
     'identifier' => 'match.unhandled',
     'count' => 1,
@@ -3998,6 +4384,12 @@ $ignoreErrors[] = [
 $ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\ServiceManagement\\\\Notifications\\\\ServiceRequestUpdated\\:\\:toDatabase\\(\\) return type has no value type specified in iterable type array\\.$#',
     'identifier' => 'missingType.iterableValue',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Notifications/ServiceRequestUpdated.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$block of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/service-management/src/Notifications/ServiceRequestUpdated.php',
 ];
@@ -4158,6 +4550,12 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/src/Rules/ManagedServiceRequestType.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$query of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Rules/ManagedServiceRequestType.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Call to private method whereRelation\\(\\) of parent class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsToMany\\<Illuminate\\\\Database\\\\Eloquent\\\\Model,Illuminate\\\\Database\\\\Eloquent\\\\Model,Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\Pivot,string\\>\\.$#',
     'identifier' => 'method.private',
     'count' => 1,
@@ -4212,10 +4610,142 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/tests/Filament/ServiceMonitoring/Pages/CreateServiceMonitoringTest.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/tests/Filament/ServiceMonitoring/Pages/CreateServiceMonitoringTest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/tests/Filament/ServiceMonitoring/Pages/CreateServiceMonitoringTest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/tests/Filament/ServiceMonitoring/Pages/EditServiceMonitoringTest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/tests/Filament/ServiceMonitoring/Pages/EditServiceMonitoringTest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/tests/Incident/CreateIncidentTest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/tests/Incident/CreateIncidentTest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/tests/Incident/EditIncidentTest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/tests/Incident/EditIncidentTest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/tests/IncidentSeverity/CreateIncidentSeverityTest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/tests/IncidentSeverity/CreateIncidentSeverityTest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/tests/IncidentSeverity/EditIncidentSeverityTest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/tests/IncidentSeverity/EditIncidentSeverityTest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/tests/IncidentStatus/CreateIncidentStatusTest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/tests/IncidentStatus/CreateIncidentStatusTest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/tests/IncidentStatus/EditIncidentStatusTest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/tests/IncidentStatus/EditIncidentStatusTest.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Call to function PHPUnit\\\\Framework\\\\assertEmpty\\(\\) with Illuminate\\\\Database\\\\Eloquent\\\\Collection\\<int, AidingApp\\\\ServiceManagement\\\\Models\\\\IncidentUpdate\\> will always evaluate to false\\.$#',
     'identifier' => 'function.impossibleType',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/service-management/tests/IncidentUpdate/CreateIncidentUpdateTest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/tests/IncidentUpdate/CreateIncidentUpdateTest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/tests/IncidentUpdate/CreateIncidentUpdateTest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/tests/IncidentUpdate/EditIncidentUpdateTest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/tests/IncidentUpdate/EditIncidentUpdateTest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$frequency of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 3,
+    'path' => __DIR__ . '/app-modules/service-management/tests/Jobs/ServiceMonitoringCheckJobTest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$frequency of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/tests/Jobs/ServiceMonitoringJobTest.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Expression on left side of \\?\\? is not nullable\\.$#',
@@ -4266,16 +4796,106 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/tests/ServiceRequest/CreateServiceRequestTest.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/tests/ServiceRequest/CreateServiceRequestTest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$serviceRequest of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/tests/ServiceRequest/CreateServiceRequestTest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/tests/ServiceRequest/CreateServiceRequestTest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#3 \\$setup of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/tests/ServiceRequest/CreateServiceRequestTest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/tests/ServiceRequest/EditServiceRequestTest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/tests/ServiceRequest/EditServiceRequestTest.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Call to an undefined method Mockery\\\\ExpectationInterface\\|Mockery\\\\HigherOrderMessage\\:\\:twice\\(\\)\\.$#',
     'identifier' => 'method.notFound',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/service-management/tests/ServiceRequest/ServiceRequestNumberTest.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/tests/ServiceRequestStatus/CreateServiceRequestStatusTest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/tests/ServiceRequestStatus/CreateServiceRequestStatusTest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/tests/ServiceRequestStatus/EditServiceRequestStatusTest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/tests/ServiceRequestStatus/EditServiceRequestStatusTest.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Call to function PHPUnit\\\\Framework\\\\assertEmpty\\(\\) with Illuminate\\\\Database\\\\Eloquent\\\\Collection\\<int, AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestType\\> will always evaluate to false\\.$#',
     'identifier' => 'function.impossibleType',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/service-management/tests/ServiceRequestType/CreateServiceRequestTypeTest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/tests/ServiceRequestType/CreateServiceRequestTypeTest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/tests/ServiceRequestType/CreateServiceRequestTypeTest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/tests/ServiceRequestType/EditServiceRequestTypeAssignmentsTest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/tests/ServiceRequestType/EditServiceRequestTypeTest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/tests/ServiceRequestType/EditServiceRequestTypeTest.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Access to an undefined property Pest\\\\Expectation\\<AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestType\\|null\\>\\:\\:\\$auditors\\.$#',
@@ -4294,6 +4914,30 @@ $ignoreErrors[] = [
     'identifier' => 'function.impossibleType',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/service-management/tests/ServiceRequestUpdate/CreateServiceRequestUpdateTest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/tests/ServiceRequestUpdate/CreateServiceRequestUpdateTest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/tests/ServiceRequestUpdate/CreateServiceRequestUpdateTest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/tests/ServiceRequestUpdate/EditServiceRequestUpdateTest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/tests/ServiceRequestUpdate/EditServiceRequestUpdateTest.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Access to an undefined property AidingApp\\\\Contact\\\\Models\\\\Contact\\:\\:\\$full\\.$#',
@@ -4374,6 +5018,12 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/task/src/Filament/Resources/TaskResource/Components/TaskViewHeaderAction.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$action of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/task/src/Filament/Resources/TaskResource/Components/TaskViewHeaderAction.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Ternary operator condition is always true\\.$#',
     'identifier' => 'ternary.alwaysTrue',
     'count' => 1,
@@ -4414,6 +5064,12 @@ $ignoreErrors[] = [
     'identifier' => 'match.unhandled',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/task/src/Filament/Resources/TaskResource/Pages/EditTask.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#2 \\$state of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/task/src/Filament/Resources/TaskResource/Pages/ListTasks.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Ternary operator condition is always true\\.$#',
@@ -4488,6 +5144,12 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/team/database/factories/TeamFactory.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Parameter \\#2 \\$value of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/team/src/Filament/Resources/TeamResource/RelationManagers/UsersRelationManager.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\Team\\\\Models\\\\Team\\:\\:division\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#',
     'identifier' => 'missingType.generics',
     'count' => 1,
@@ -4518,6 +5180,12 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/timeline/src/Actions/AggregatesTimelineRecordsForModel.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$record of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/timeline/src/Actions/AggregatesTimelineRecordsForModel.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Property AidingApp\\\\Timeline\\\\Actions\\\\AggregatesTimelineRecordsForModel\\:\\:\\$aggregateRecords with generic class Illuminate\\\\Support\\\\Collection does not specify its types\\: TKey, TValue$#',
     'identifier' => 'missingType.generics',
     'count' => 1,
@@ -4527,6 +5195,12 @@ $ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\Timeline\\\\Actions\\\\SyncTimelineData\\:\\:now\\(\\) has parameter \\$modelsToTimeline with no type specified\\.$#',
     'identifier' => 'missingType.parameter',
     'count' => 1,
+    'path' => __DIR__ . '/app-modules/timeline/src/Actions/SyncTimelineData.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$record of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 2,
     'path' => __DIR__ . '/app-modules/timeline/src/Actions/SyncTimelineData.php',
 ];
 $ignoreErrors[] = [
@@ -4638,6 +5312,18 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/webhook/src/Http/Middleware/HandleAwsSnsRequest.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$service of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app/Actions/ChangeAppKey.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#2 \\$app of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app/Actions/ChangeAppKey.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Call to an undefined method Illuminate\\\\Container\\\\Container\\:\\:getNamespace\\(\\)\\.$#',
     'identifier' => 'method.notFound',
     'count' => 1,
@@ -4646,6 +5332,18 @@ $ignoreErrors[] = [
 $ignoreErrors[] = [
     'message' => '#^Method App\\\\Actions\\\\Finders\\\\ApplicationModels\\:\\:all\\(\\) return type with generic class Illuminate\\\\Support\\\\Collection does not specify its types\\: TKey, TValue$#',
     'identifier' => 'missingType.generics',
+    'count' => 1,
+    'path' => __DIR__ . '/app/Actions/Finders/ApplicationModels.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$class of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app/Actions/Finders/ApplicationModels.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$item of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
     'count' => 1,
     'path' => __DIR__ . '/app/Actions/Finders/ApplicationModels.php',
 ];
@@ -4788,6 +5486,12 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app/Filament/Resources/UserResource/Actions/AssignLicensesBulkAction.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Parameter \\#2 \\$value of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app/Filament/Resources/UserResource/Actions/AssignLicensesBulkAction.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Property App\\\\Filament\\\\Resources\\\\UserResource\\\\Actions\\\\AssignLicensesBulkAction\\:\\:\\$licenseTypes type has no value type specified in iterable type array\\.$#',
     'identifier' => 'missingType.iterableValue',
     'count' => 1,
@@ -4804,6 +5508,12 @@ $ignoreErrors[] = [
     'identifier' => 'argument.type',
     'count' => 1,
     'path' => __DIR__ . '/app/Filament/Resources/UserResource/Actions/AssignTeamBulkAction.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$query of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 2,
+    'path' => __DIR__ . '/app/Filament/Resources/UserResource/Pages/ListUsers.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Access to an undefined property AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequest\\:\\:\\$service_request_id\\.$#',
@@ -4905,6 +5615,12 @@ $ignoreErrors[] = [
     'message' => '#^Method App\\\\Filament\\\\Widgets\\\\ServiceRequestWidget\\:\\:wasOpenAtIntervalStart\\(\\) has parameter \\$openStatusIds with no type specified\\.$#',
     'identifier' => 'missingType.parameter',
     'count' => 1,
+    'path' => __DIR__ . '/app/Filament/Widgets/ServiceRequestWidget.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$query of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 2,
     'path' => __DIR__ . '/app/Filament/Widgets/ServiceRequestWidget.php',
 ];
 $ignoreErrors[] = [
@@ -5016,6 +5732,12 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app/Models/Authenticatable.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$q of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app/Models/Authenticatable.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Unable to resolve the template type TRelatedModel in call to method Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:morphToMany\\(\\)$#',
     'identifier' => 'argument.templateType',
     'count' => 1,
@@ -5026,6 +5748,12 @@ $ignoreErrors[] = [
     'identifier' => 'missingType.generics',
     'count' => 1,
     'path' => __DIR__ . '/app/Models/BaseModel.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$join of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app/Models/Scopes/EducatableSort.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Method App\\\\Models\\\\States\\\\StateMachine\\:\\:accessNestedRelations\\(\\) has no return type specified\\.$#',
@@ -5052,6 +5780,18 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app/Models/States/StateMachine.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$column of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app/Models/User.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$app of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 3,
+    'path' => __DIR__ . '/app/Providers/AppServiceProvider.php',
+];
+$ignoreErrors[] = [
     'message' => '#^PHPDoc tag @var with type Filament\\\\Forms\\\\Components\\\\Checkbox is not subtype of native type \\$this\\(App\\\\Providers\\\\FilamentServiceProvider\\)\\.$#',
     'identifier' => 'varTag.nativeType',
     'count' => 1,
@@ -5064,10 +5804,52 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app/Providers/FilamentServiceProvider.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$modelClass of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app/Providers/MorphServiceProvider.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$connection of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app/Providers/MultiConnectionParallelTestingServiceProvider.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$database of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 3,
+    'path' => __DIR__ . '/app/Providers/MultiConnectionParallelTestingServiceProvider.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$q of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app/Support/FilterQueryBuilder.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Trait Database\\\\Migrations\\\\Concerns\\\\CanModifySettings is used zero times and is not analysed\\.$#',
     'identifier' => 'trait.unused',
     'count' => 1,
     'path' => __DIR__ . '/database/migrations/Concerns/CanModifySettings.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$email of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/database/seeders/LocalDevelopmentSeeder.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$user of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/routes/channels.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#2 \\$id of anonymous function has no typehint\\.$#',
+    'identifier' => 'closure.parameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/routes/channels.php',
 ];
 
 return ['parameters' => ['ignoreErrors' => $ignoreErrors]];
