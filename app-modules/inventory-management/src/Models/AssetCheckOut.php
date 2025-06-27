@@ -70,7 +70,6 @@ class AssetCheckOut extends BaseModel implements Auditable, ProvidesATimeline
         'asset_check_in_id',
         'checked_out_by_type',
         'checked_out_by_id',
-        'checked_out_to_type', //remove during MakeContactNotPolymorphicFeature cleanup
         'checked_out_to_id',
         'checked_out_at',
         'expected_check_in_at',

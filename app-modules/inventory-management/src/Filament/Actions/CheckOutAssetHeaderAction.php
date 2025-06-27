@@ -41,7 +41,6 @@ use AidingApp\InventoryManagement\Enums\SystemAssetStatusClassification;
 use AidingApp\InventoryManagement\Models\Asset;
 use AidingApp\InventoryManagement\Models\AssetStatus;
 use AidingApp\InventoryManagement\Models\Scopes\ClassifiedAs;
-use App\Features\MakeContactNotPolymorphicFeature;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
@@ -86,28 +85,14 @@ class CheckOutAssetHeaderAction extends Action
                 $this->failure();
             }
 
-            //Before this change, $createArray was not a varaible but just defined in the $asset->checkOuts()->create() call on line 109
-            //When this feature flag is cleaned up, it can return to being like that (i.e., replace $createArray with lines 92-99)
-            $createArray = MakeContactNotPolymorphicFeature::active() ?
-              [
-                  'checked_out_by_type' => auth()->user()?->getMorphClass(),
-                  'checked_out_by_id' => auth()->user()?->id,
-                  'checked_out_to_id' => $data['checked_out_to_id'],
-                  'notes' => $data['notes'],
-                  'checked_out_at' => now(),
-                  'expected_check_in_at' => $data['expected_check_in_at'],
-              ] :
-              [
-                  'checked_out_by_type' => auth()->user()?->getMorphClass(),
-                  'checked_out_by_id' => auth()->user()?->id,
-                  'checked_out_to_id' => $data['checked_out_to_id'],
-                  'checked_out_to_type' => (new Contact())->getMorphClass(),
-                  'notes' => $data['notes'],
-                  'checked_out_at' => now(),
-                  'expected_check_in_at' => $data['expected_check_in_at'],
-              ];
-
-            $asset->checkOuts()->create($createArray);
+            $asset->checkOuts()->create([
+                'checked_out_by_type' => auth()->user()?->getMorphClass(),
+                'checked_out_by_id' => auth()->user()?->id,
+                'checked_out_to_id' => $data['checked_out_to_id'],
+                'notes' => $data['notes'],
+                'checked_out_at' => now(),
+                'expected_check_in_at' => $data['expected_check_in_at'],
+            ]);
 
             $asset->status()->associate(AssetStatus::tap(new ClassifiedAs(SystemAssetStatusClassification::CheckedOut))->first());
             $asset->save();

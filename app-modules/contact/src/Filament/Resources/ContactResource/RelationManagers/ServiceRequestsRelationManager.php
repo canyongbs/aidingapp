@@ -39,7 +39,6 @@ namespace AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\CreateServiceRequest;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ViewServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
-use App\Features\MakeContactNotPolymorphicFeature;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Forms\Form;
 use Filament\Infolists\Infolist;
@@ -78,12 +77,7 @@ class ServiceRequestsRelationManager extends RelationManager
                         ->orWhereHas('priority.type.auditors', function (Builder $query): void {
                             $query->where('teams.id', auth()->user()->team?->getKey());
                         })
-                        ->whereHas('respondent', function (Builder $query) {
-                            MakeContactNotPolymorphicFeature::active() ?
-                                $query->where('respondent_id', $this->getOwnerRecord()->getKey()) :
-                                $query->where('respondent_id', $this->getOwnerRecord()->getKey())
-                                    ->where('respondent_type', $this->getOwnerRecord()->getMorphClass());
-                        });
+                        ->whereHas('respondent', fn (Builder $query) => $query->where('respondent_id', $this->getOwnerRecord()->getKey()));
                 });
             })
             ->columns([
