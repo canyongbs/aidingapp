@@ -39,7 +39,6 @@ namespace AidingApp\Engagement\Jobs;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Engagement\Enums\EngagementResponseType;
 use AidingApp\Engagement\Models\UnmatchedInboundCommunication;
-use App\Features\UnMatchInboundCommunicationFeature;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Query\Expression;
 use Illuminate\Foundation\Queue\Queueable;
@@ -51,9 +50,6 @@ class UnmatchedInboundCommunicationsJob implements ShouldQueue
 
     public function handle(): void
     {
-        if (! UnMatchInboundCommunicationFeature::active()) {
-            return;
-        }
         UnmatchedInboundCommunication::query()
             ->chunkById(100, function ($communications) {
                 foreach ($communications as $communication) {
