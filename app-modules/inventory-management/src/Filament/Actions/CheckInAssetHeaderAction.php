@@ -36,12 +36,10 @@
 
 namespace AidingApp\InventoryManagement\Filament\Actions;
 
-use AidingApp\Contact\Models\Contact;
 use AidingApp\InventoryManagement\Enums\SystemAssetStatusClassification;
 use AidingApp\InventoryManagement\Models\Asset;
 use AidingApp\InventoryManagement\Models\AssetStatus;
 use AidingApp\InventoryManagement\Models\Scopes\ClassifiedAs;
-use App\Features\MakeContactNotPolymorphicFeature;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
@@ -89,26 +87,13 @@ class CheckInAssetHeaderAction extends Action
                 $this->failure();
             }
 
-            //Before this change, $createArray was not a varaible but just defined in the $asset->checkOuts()->create() call on line 115
-            //When this feature flag is cleaned up, it can return to being like that (i.e., replace $createArray with lines 95-103)
-            $createArray = MakeContactNotPolymorphicFeature::active() ?
-            [
+            $asset->checkIns()->create([
                 'checked_in_by_type' => auth()->user()?->getMorphClass(),
                 'checked_in_by_id' => auth()->user()?->id,
                 'checked_in_from_id' => $asset->latestCheckOut->checked_out_to_id,
                 'notes' => $data['notes'],
                 'checked_in_at' => $data['checked_in_at'] ?? now(),
-            ] :
-            [
-                'checked_in_by_type' => auth()->user()?->getMorphClass(),
-                'checked_in_by_id' => auth()->user()?->id,
-                'checked_in_from_id' => $asset->latestCheckOut->checked_out_to_id,
-                'checked_in_from_type' => (new Contact())->getMorphClass(),
-                'notes' => $data['notes'],
-                'checked_in_at' => $data['checked_in_at'] ?? now(),
-            ];
-
-            $asset->checkIns()->create($createArray);
+            ]);
 
             $asset->update([
                 'status_id' => $data['status_id'],
