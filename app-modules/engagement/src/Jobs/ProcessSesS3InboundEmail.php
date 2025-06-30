@@ -39,11 +39,9 @@ namespace AidingApp\Engagement\Jobs;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Engagement\Enums\EngagementResponseType;
 use AidingApp\Engagement\Exceptions\SesS3InboundSpamOrVirusDetected;
-use AidingApp\Engagement\Exceptions\UnableToDetectAnyMatchingContactsFromSesS3EmailPayload;
 use AidingApp\Engagement\Exceptions\UnableToDetectTenantFromSesS3EmailPayload;
 use AidingApp\Engagement\Exceptions\UnableToRetrieveContentFromSesS3EmailPayload;
 use AidingApp\Engagement\Models\UnmatchedInboundCommunication;
-use App\Features\UnMatchInboundCommunicationFeature;
 use App\Models\Tenant;
 use Aws\Crypto\KmsMaterialsProviderV2;
 use Aws\Kms\KmsClient;
@@ -170,14 +168,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                         ->where('email', $sender)
                         ->get();
 
-                    if (! UnMatchInboundCommunicationFeature::active()) {
-                        throw_if(
-                            $contacts->isEmpty(),
-                            new UnableToDetectAnyMatchingContactsFromSesS3EmailPayload($this->emailFilePath),
-                        );
-                    }
-
-                    if (UnMatchInboundCommunicationFeature::active() && $contacts->isEmpty()) {
+                    if ($contacts->isEmpty()) {
                         UnmatchedInboundCommunication::create([
                             'type' => EngagementResponseType::Email,
                             'subject' => $parser->getHeader('subject'),
@@ -218,7 +209,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                 });
             });
         } catch (
-            UnableToRetrieveContentFromSesS3EmailPayload | SesS3InboundSpamOrVirusDetected | UnableToDetectTenantFromSesS3EmailPayload | UnableToDetectAnyMatchingContactsFromSesS3EmailPayload $e) {
+            UnableToRetrieveContentFromSesS3EmailPayload | SesS3InboundSpamOrVirusDetected | UnableToDetectTenantFromSesS3EmailPayload $e) {
                 DB::rollBack();
 
                 // Instantly fail for this exception
