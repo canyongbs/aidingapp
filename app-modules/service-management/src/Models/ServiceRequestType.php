@@ -105,7 +105,6 @@ class ServiceRequestType extends BaseModel implements Auditable
         'is_customers_service_request_closed_notification_enabled',
         'is_customers_survey_response_email_enabled',
         'is_email_automatic_creation_enabled',
-        'email_automatic_creation_domain',
         'is_email_automatic_creation_contact_create_enabled',
     ];
 

@@ -11,9 +11,6 @@ return new class () extends Migration {
             $table->boolean('is_email_automatic_creation_enabled')
                 ->default(false);
 
-            $table->string('email_automatic_creation_domain')
-                ->nullable();
-
             $table->boolean('is_email_automatic_creation_contact_create_enabled')
                 ->default(false);
         });
@@ -24,7 +21,6 @@ return new class () extends Migration {
         Schema::table('service_request_types', function (Blueprint $table) {
             $table->dropColumn([
                 'is_email_automatic_creation_enabled',
-                'email_automatic_creation_domain',
                 'is_email_automatic_creation_contact_create_enabled',
             ]);
         });
