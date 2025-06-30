@@ -205,6 +205,14 @@ class ServiceRequestType extends BaseModel implements Auditable
         return $this->hasMany(ServiceRequestTypeEmailTemplate::class, 'service_request_type_id');
     }
 
+    /**
+     * @return HasOne<TenantServiceRequestTypeDomain, $this>
+     */
+    public function domain(): HasOne
+    {
+        return $this->hasOne(TenantServiceRequestTypeDomain::class, 'service_request_type_id', 'id');
+    }
+
     protected function serializeDate(DateTimeInterface $date): string
     {
         return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
