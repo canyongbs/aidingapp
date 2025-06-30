@@ -41,6 +41,7 @@ use AidingApp\Engagement\Enums\EngagementResponseType;
 use AidingApp\Engagement\Exceptions\SesS3InboundSpamOrVirusDetected;
 use AidingApp\Engagement\Exceptions\UnableToDetectTenantFromSesS3EmailPayload;
 use AidingApp\Engagement\Exceptions\UnableToRetrieveContentFromSesS3EmailPayload;
+use AidingApp\Engagement\Models\EngagementResponse;
 use AidingApp\Engagement\Models\UnmatchedInboundCommunication;
 use App\Models\Tenant;
 use Aws\Crypto\KmsMaterialsProviderV2;
