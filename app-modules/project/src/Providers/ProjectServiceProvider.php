@@ -34,26 +34,25 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Pages;
+namespace AidingApp\Project\Providers;
 
-use App\Models\User;
-use Filament\Pages\Page;
+use AidingApp\Project\Models\Project;
+use AidingApp\Project\ProjectPlugin;
+use Filament\Panel;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\ServiceProvider;
 
-class Projects extends Page
+class ProjectServiceProvider extends ServiceProvider
 {
-    protected static string $view = 'filament.pages.coming-soon';
-
-    protected static ?string $navigationLabel = 'Projects';
-
-    protected static ?string $navigationGroup = 'Project Management';
-
-    protected static ?int $navigationSort = 10;
-
-    public static function canAccess(): bool
+    public function register()
     {
-        /** @var User $user */
-        $user = auth()->user();
+        Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new ProjectPlugin()));
+    }
 
-        return $user->can(['project.view-any', 'project.*.view']) && parent::canAccess();
+    public function boot(): void
+    {
+        Relation::morphMap([
+            'project' => Project::class,
+        ]);
     }
 }
