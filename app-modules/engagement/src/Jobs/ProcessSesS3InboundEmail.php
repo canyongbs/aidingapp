@@ -51,6 +51,7 @@ use Aws\S3\S3Client;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use PhpMimeMailParser\Attachment;
@@ -79,54 +80,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
         DB::beginTransaction();
 
         try {
-            $encryptionClient = new S3EncryptionClientV2(
-                new S3Client([
-                    'credentials' => [
-                        'key' => config('filesystems.disks.s3.key'),
-                        'secret' => config('filesystems.disks.s3.secret'),
-                    ],
-                    'region' => config('filesystems.disks.s3.region'),
-                ])
-            );
-
-            // Needed to suppress warnings from the SDK. SES encrypts using V1 so we need @SecurityProfile to be V2_AND_LEGACY
-            // But the SDK throws a warning when using V2_AND_LEGACY
-            $errorReportingLevel = error_reporting();
-            error_reporting(E_ERROR & ~E_WARNING);
-
-            try {
-                $result = $encryptionClient->getObject([
-                    '@KmsAllowDecryptWithAnyCmk' => false,
-                    '@SecurityProfile' => 'V2_AND_LEGACY',
-                    '@MaterialsProvider' => new KmsMaterialsProviderV2(
-                        new KmsClient([
-                            'credentials' => [
-                                'key' => config('filesystems.disks.s3.key'),
-                                'secret' => config('filesystems.disks.s3.secret'),
-                            ],
-                            'region' => 'us-west-2',
-                        ]),
-                        config('services.kms.ses_s3_key_id')
-                    ),
-                    '@CipherOptions' => [
-                        'Cipher' => 'gcm',
-                        'KeySize' => 256,
-                    ],
-                    'Bucket' => config('filesystems.disks.s3.bucket'),
-                    'Key' => config('filesystems.disks.s3-inbound-email.root') . '/' . $this->emailFilePath,
-                ]);
-            } finally {
-                // Reset the error reporting level
-                error_reporting($errorReportingLevel);
-            }
-
-            try {
-                $content = $result['Body']?->getContents();
-            } catch (Throwable $e) {
-                throw new UnableToRetrieveContentFromSesS3EmailPayload($this->emailFilePath, $e);
-            }
-
-            throw_if(empty($content), new UnableToRetrieveContentFromSesS3EmailPayload($this->emailFilePath));
+            $content = $this->getContent();
 
             $parser = (new Parser())
                 ->setText($content);
@@ -236,6 +190,61 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
             SesS3InboundSpamOrVirusDetected::class => $this->moveFile('/spam-or-virus-detected'),
             default => $this->moveFile('/failed'),
         };
+    }
+
+    protected function getContent(): string
+    {
+        $encryptionClient = new S3EncryptionClientV2(
+            new S3Client([
+                'credentials' => [
+                    'key' => config('filesystems.disks.s3.key'),
+                    'secret' => config('filesystems.disks.s3.secret'),
+                ],
+                'region' => config('filesystems.disks.s3.region'),
+            ])
+        );
+
+        // Needed to suppress warnings from the SDK. SES encrypts using V1 so we need @SecurityProfile to be V2_AND_LEGACY
+        // But the SDK throws a warning when using V2_AND_LEGACY
+        $errorReportingLevel = error_reporting();
+        error_reporting(E_ERROR & ~E_WARNING);
+
+        try {
+            $result = $encryptionClient->getObject([
+                '@KmsAllowDecryptWithAnyCmk' => false,
+                '@SecurityProfile' => 'V2_AND_LEGACY',
+                '@MaterialsProvider' => new KmsMaterialsProviderV2(
+                    new KmsClient([
+                        'credentials' => [
+                            'key' => config('filesystems.disks.s3.key'),
+                            'secret' => config('filesystems.disks.s3.secret'),
+                        ],
+                        'region' => 'us-west-2',
+                    ]),
+                    Config::string('services.kms.ses_s3_key_id')
+                ),
+                '@CipherOptions' => [
+                    'Cipher' => 'gcm',
+                    'KeySize' => 256,
+                ],
+                'Bucket' => config('filesystems.disks.s3.bucket'),
+                'Key' => Config::string('filesystems.disks.s3-inbound-email.root') . '/' . $this->emailFilePath,
+            ]);
+        } finally {
+            // Reset the error reporting level
+            error_reporting($errorReportingLevel);
+        }
+
+        try {
+            // @phpstan-ignore method.nonObject
+            $content = $result['Body']?->getContents();
+        } catch (Throwable $e) {
+            throw new UnableToRetrieveContentFromSesS3EmailPayload($this->emailFilePath, $e);
+        }
+
+        throw_if(empty($content), new UnableToRetrieveContentFromSesS3EmailPayload($this->emailFilePath));
+
+        return $content;
     }
 
     protected function moveFile(string $destination): void

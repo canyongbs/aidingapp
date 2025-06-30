@@ -19,6 +19,7 @@ parameters:
 
     excludePaths:
         - app-modules/*/vendor/*
+        - app-modules/*/tests/*
 
     scanFiles:
         - ./_ide_helper_models.php
