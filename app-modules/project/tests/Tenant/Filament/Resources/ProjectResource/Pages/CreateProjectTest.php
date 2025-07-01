@@ -69,7 +69,7 @@ it('can render with proper permission.', function () {
         ->assertSuccessful();
 });
 
-it('validates the inputs', function ($data, $errors) {
+it('validates the inputs', function (CreateProjectRequestFactory $data, array $errors) {
     asSuperAdmin();
 
     $request = CreateProjectRequestFactory::new($data)->create();

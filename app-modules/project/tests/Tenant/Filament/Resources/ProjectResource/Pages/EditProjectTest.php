@@ -79,7 +79,7 @@ it('can render with proper permission.', function () {
         ->assertSuccessful();
 });
 
-it('validates the inputs', function ($data, $errors) {
+it('validates the inputs', function (EditProjectRequestFactory $data, array $errors) {
     asSuperAdmin();
 
     $user = User::factory()->create();
@@ -104,7 +104,7 @@ it('validates the inputs', function ($data, $errors) {
 })->with(
     [
         'name required' => [
-            EditProjectRequestFactory::new()->without('name'),
+            EditProjectRequestFactory::new()->state(['name' => null]),
             ['name' => 'required'],
         ],
         'name string' => [
