@@ -36,7 +36,11 @@
 
 namespace AidingApp\Engagement\Jobs;
 
+use AidingApp\Contact\Enums\SystemContactClassification;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\ContactSource;
+use AidingApp\Contact\Models\ContactStatus;
+use AidingApp\Contact\Models\Organization;
 use AidingApp\Engagement\Enums\EngagementResponseType;
 use AidingApp\Engagement\Exceptions\SesS3InboundSpamOrVirusDetected;
 use AidingApp\Engagement\Exceptions\UnableToDetectTenantFromSesS3EmailPayload;
@@ -49,12 +53,14 @@ use Aws\Crypto\KmsMaterialsProviderV2;
 use Aws\Kms\KmsClient;
 use Aws\S3\Crypto\S3EncryptionClientV2;
 use Aws\S3\S3Client;
+use Exception;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use PhpMimeMailParser\Attachment;
 use PhpMimeMailParser\Parser;
 use Spatie\Multitenancy\Jobs\NotTenantAware;
@@ -118,6 +124,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                             DB::raw('LOWER(domain)'),
                             mb_strtolower($localPart)
                         )
+                        ->whereHas('tenant')
                         ->first();
 
                     if ($serviceRequestTypeDomain) {
@@ -181,6 +188,127 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                     DB::commit();
                 });
             });
+
+            $matchedTenants->get('service_request')->each(function (TenantServiceRequestTypeDomain $serviceRequestTypeDomain) use ($parser, $content, $sender) {
+                $serviceRequestTypeDomain->tenant->execute(function () use ($serviceRequestTypeDomain, $parser, $content, $sender) {
+                    $serviceRequestType = $serviceRequestTypeDomain->serviceRequestType;
+
+                    if (is_null($serviceRequestType)) {
+                        // TODO: Test
+                        report(new Exception(
+                            'ServiceRequestType not found for TenantServiceRequestTypeDomain: ' . $serviceRequestTypeDomain->getKey()
+                        ));
+
+                        Storage::disk('s3-inbound-email')->delete($this->emailFilePath);
+
+                        return;
+                    }
+
+                    if (! $serviceRequestType->is_email_automatic_creation_enabled) {
+                        // TODO: Test
+                        Storage::disk('s3-inbound-email')->delete($this->emailFilePath);
+
+                        return;
+                    }
+
+                    $contacts = Contact::query()
+                        ->where('email', $sender)
+                        ->get();
+
+                    if ($contacts->isEmpty()) {
+                        // If no contacts are found, we will try to find an organization with the same domain
+                        $domain = Str::afterLast($sender, '@');
+
+                        $organization = Organization::query()
+                            ->whereRaw('LOWER(?) = ANY (SELECT LOWER(value) FROM jsonb_array_elements_text(domains))', [mb_strtolower($domain)])
+                            ->first();
+
+                        if (! $organization || $serviceRequestType->is_email_automatic_creation_contact_create_enabled === false) {
+                            // TODO: Send ineligible email
+
+                            Storage::disk('s3-inbound-email')->delete($this->emailFilePath);
+
+                            return;
+                        }
+
+                        $senderName = $parser->getAddresses('from')[0]['display'];
+
+                        $firstName = Str::before($senderName, ' ') ?: 'Unknown';
+                        $lastName = Str::after($senderName, ' ') ?: 'Unknown';
+                        $fullName = $firstName . ' ' . $lastName;
+
+                        // If an organization domain is found, we will create a new contact with the email address
+                        $contact = Contact::query()
+                            ->make([
+                                'email' => $sender,
+                                'first_name' => $firstName,
+                                'last_name' => $lastName,
+                                'full_name' => $fullName,
+                            ]);
+
+                        $status = ContactStatus::query()
+                            ->where('classification', SystemContactClassification::New)
+                            ->first();
+
+                        if ($status) {
+                            $contact->status()->associate($status);
+                        }
+
+                        $source = ContactSource::query()
+                            ->where('name', 'Service Request Email Auto Creation')
+                            ->first();
+
+                        if (! $source) {
+                            $source = ContactSource::query()
+                                ->create([
+                                    'name' => 'Service Request Email Auto Creation',
+                                ]);
+                        }
+
+                        $contact->source()->associate($source);
+
+                        $contact->organization()->associate($organization);
+
+                        $contact->save();
+
+                        $contacts = $contacts->add($contact);
+                    }
+
+                    $contacts->each(function (Contact $contact) use ($serviceRequestType, $parser, $content) {
+                        // TODO: Finish making the service request and delete the engagement stuff below it
+                        $serviceRequest = $contact->serviceRequests()
+                            ->create([
+                                'subject' => $parser->getHeader('subject'),
+                                'content' => $parser->getMessageBody('text'),
+                                'occurred_at' => $parser->getHeader('date'),
+                                'type_id' => $serviceRequestType->id,
+                                'priority_id' => $serviceRequestType->emailAutomaticCreationPriority?->id,
+                                'raw' => $content,
+                            ]);
+
+                        /** @var EngagementResponse $engagementResponse */
+                        $engagementResponse = $contact->engagementResponses()
+                            ->create([
+                                'subject' => $parser->getHeader('subject'),
+                                'content' => $parser->getMessageBody('htmlEmbedded'),
+                                'sent_at' => $parser->getHeader('date'),
+                                'type' => EngagementResponseType::Email,
+                                'raw' => $content,
+                            ]);
+
+                        collect($parser->getAttachments())->each(function (Attachment $attachment) use ($engagementResponse) {
+                            $engagementResponse->addMediaFromStream($attachment->getStream())
+                                ->setName($attachment->getFilename())
+                                ->setFileName($attachment->getFilename())
+                                ->toMediaCollection('attachments');
+                        });
+                    });
+
+                    Storage::disk('s3-inbound-email')->delete($this->emailFilePath);
+                });
+            });
+
+            DB::commit();
         } catch (
             UnableToRetrieveContentFromSesS3EmailPayload | SesS3InboundSpamOrVirusDetected | UnableToDetectTenantFromSesS3EmailPayload $e) {
                 DB::rollBack();

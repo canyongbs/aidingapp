@@ -2,6 +2,7 @@
 
 namespace AidingApp\ServiceManagement\Models;
 
+use App\Models\Tenant;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -30,5 +31,13 @@ class TenantServiceRequestTypeDomain extends Model
     public function serviceRequestType(): BelongsTo
     {
         return $this->belongsTo(ServiceRequestType::class, 'service_request_type_id');
+    }
+
+    /**
+     * @return BelongsTo<Tenant, $this>
+     */
+    public function tenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class, 'tenant_id');
     }
 }

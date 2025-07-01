@@ -3275,6 +3275,7 @@ namespace AidingApp\ServiceManagement\Models{
  * @property bool $is_customers_survey_response_email_enabled
  * @property bool $is_email_automatic_creation_enabled
  * @property bool $is_email_automatic_creation_contact_create_enabled
+ * @property string|null $email_automatic_creation_priority_id
  * @property-read \App\Models\User|null $assignmentTypeIndividual
  * @property-read \AidingApp\ServiceManagement\Models\ServiceRequestTypeManager|\AidingApp\ServiceManagement\Models\ServiceRequestTypeAuditor|null $pivot
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Team\Models\Team> $auditors
@@ -3282,6 +3283,7 @@ namespace AidingApp\ServiceManagement\Models{
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
  * @property-read int|null $audits_count
  * @property-read \AidingApp\ServiceManagement\Models\TenantServiceRequestTypeDomain|null $domain
+ * @property-read \AidingApp\ServiceManagement\Models\ServiceRequestPriority|null $emailAutomaticCreationPriority
  * @property-read \AidingApp\ServiceManagement\Models\ServiceRequestForm|null $form
  * @property-read \App\Models\User|null $lastAssignedUser
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Team\Models\Team> $managers
@@ -3302,6 +3304,7 @@ namespace AidingApp\ServiceManagement\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereDeletedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereEmailAutomaticCreationPriorityId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereHasEnabledCsat($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereHasEnabledFeedbackCollection($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereHasEnabledNps($value)
@@ -3521,6 +3524,7 @@ namespace AidingApp\ServiceManagement\Models{
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \AidingApp\ServiceManagement\Models\ServiceRequestType|null $serviceRequestType
+ * @property-read \App\Models\Tenant $tenant
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TenantServiceRequestTypeDomain newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TenantServiceRequestTypeDomain newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TenantServiceRequestTypeDomain query()
