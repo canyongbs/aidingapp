@@ -106,6 +106,7 @@ class ServiceRequestType extends BaseModel implements Auditable
         'is_customers_survey_response_email_enabled',
         'is_email_automatic_creation_enabled',
         'is_email_automatic_creation_contact_create_enabled',
+        'email_automatic_creation_priority_id',
     ];
 
     protected $casts = [
@@ -211,6 +212,14 @@ class ServiceRequestType extends BaseModel implements Auditable
     public function domain(): HasOne
     {
         return $this->hasOne(TenantServiceRequestTypeDomain::class, 'service_request_type_id', 'id');
+    }
+
+    /**
+     * @return BelongsTo<ServiceRequestPriority, $this>
+     */
+    public function emailAutomaticCreationPriority(): BelongsTo
+    {
+        return $this->belongsTo(ServiceRequestPriority::class, 'email_automatic_creation_priority_id', 'id');
     }
 
     protected function serializeDate(DateTimeInterface $date): string

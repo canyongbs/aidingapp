@@ -42,11 +42,13 @@ use App\Concerns\EditPageRedirection;
 use App\Models\Tenant;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Config;
 
@@ -82,6 +84,19 @@ class EditServiceRequestTypeAutomaticEmailCreation extends EditRecord
                             ->required()
                             ->visible(fn (Get $get): bool => $get('is_email_automatic_creation_enabled'))
                             ->columnSpan(1),
+                        Select::make('email_automatic_creation_priority_id')
+                            ->label('Default Inbound Priority')
+                            ->relationship(
+                                name: 'emailAutomaticCreationPriority',
+                                titleAttribute: 'name',
+                                modifyQueryUsing: fn (ServiceRequestType $record, Builder $query) => $query->whereRelation('type', 'id', $record->id)
+                                    ->orderBy('order')
+                            )
+                            ->preload()
+                            ->searchable()
+                            ->required()
+                            ->visible(fn (Get $get): bool => $get('is_email_automatic_creation_enabled'))
+                            ->columnSpanFull(),
                         Checkbox::make('is_email_automatic_creation_contact_create_enabled')
                             ->label('Auto create contact if eligible')
                             ->visible(fn (Get $get): bool => $get('is_email_automatic_creation_enabled')),

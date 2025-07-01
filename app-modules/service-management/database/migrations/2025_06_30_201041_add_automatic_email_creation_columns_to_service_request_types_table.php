@@ -13,6 +13,10 @@ return new class () extends Migration {
 
             $table->boolean('is_email_automatic_creation_contact_create_enabled')
                 ->default(false);
+
+            $table->foreignUuid('email_automatic_creation_priority_id')
+                ->nullable()
+                ->constrained('service_request_priorities');
         });
     }
 
@@ -22,6 +26,7 @@ return new class () extends Migration {
             $table->dropColumn([
                 'is_email_automatic_creation_enabled',
                 'is_email_automatic_creation_contact_create_enabled',
+                'email_automatic_creation_priority_id',
             ]);
         });
     }
