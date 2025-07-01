@@ -42,6 +42,7 @@ use AidingApp\Project\Models\Project;
 use AidingApp\Task\Database\Factories\TaskFactory;
 use AidingApp\Task\Enums\TaskStatus;
 use AidingApp\Task\Observers\TaskObserver;
+use AidingApp\Team\Models\Team;
 use App\Models\BaseModel;
 use App\Models\User;
 use Bvtterfly\ModelStateMachine\HasStateMachine;
@@ -50,6 +51,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
 
@@ -74,11 +76,13 @@ class Task extends BaseModel implements Auditable
         'description',
         'due',
         'concern_id',
+        'is_confidential',
     ];
 
     protected $casts = [
         'status' => TaskStatus::class,
         'due' => 'datetime',
+        'is_confidential' => 'boolean',
     ];
 
     /**
@@ -143,4 +147,27 @@ class Task extends BaseModel implements Auditable
     {
         return $this->belongsTo(Project::class, 'project_id');
     }
+
+    /**
+     * @return BelongsToMany<User, $this, covariant TaskConfidentialUser>
+     */
+    public function confidentialAccessUsers(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'task_confidential_users')
+            ->using(TaskConfidentialUser::class)
+            ->withTimestamps();
+    }
+
+    /**
+     * @return BelongsToMany<Team, $this, covariant TaskConfidentialTeam>
+     */
+    public function confidentialAccessTeams(): BelongsToMany
+    {
+        return $this->belongsToMany(Team::class, 'task_confidential_teams')
+            ->using(TaskConfidentialTeam::class)
+            ->withTimestamps();
+    }
+
+    // public function confidentialAccessProjects(): BelongsToMany
+    // {}
 }
