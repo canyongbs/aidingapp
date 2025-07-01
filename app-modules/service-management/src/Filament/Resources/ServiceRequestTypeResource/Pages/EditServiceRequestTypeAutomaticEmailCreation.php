@@ -49,6 +49,7 @@ use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\Config;
+use Webmozart\Assert\Assert;
 
 class EditServiceRequestTypeAutomaticEmailCreation extends EditRecord
 {
@@ -65,7 +66,6 @@ class EditServiceRequestTypeAutomaticEmailCreation extends EditRecord
         return $form
             ->schema([
                 Section::make()
-                    // ->columns()
                     ->schema([
                         Toggle::make('is_email_automatic_creation_enabled')
                             ->label('Enable Creation by Email')
@@ -75,11 +75,14 @@ class EditServiceRequestTypeAutomaticEmailCreation extends EditRecord
                             ->prefix(function () {
                                 $currentTenantDomain = Tenant::current()?->domain;
 
+                                Assert::notNull($currentTenantDomain);
+
                                 return rtrim($currentTenantDomain, '.' . parse_url(Config::string('app.landlord_url'), PHP_URL_HOST)) . '-';
                             })
                             ->suffix(fn () => '@' . Config::string('mail.from.root_domain'))
                             ->required()
-                            ->visible(fn (Get $get): bool => $get('is_email_automatic_creation_enabled')),
+                            ->visible(fn (Get $get): bool => $get('is_email_automatic_creation_enabled'))
+                            ->columnSpan(1),
                         Checkbox::make('is_email_automatic_creation_contact_create_enabled')
                             ->label('Auto create contact if eligible')
                             ->visible(fn (Get $get): bool => $get('is_email_automatic_creation_enabled')),
