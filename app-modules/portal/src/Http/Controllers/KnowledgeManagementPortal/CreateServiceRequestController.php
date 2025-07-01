@@ -56,6 +56,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestFormSubmission;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Http\Controllers\Controller;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -125,7 +126,19 @@ class CreateServiceRequestController extends Controller
             $serviceRequest->respondent()->associate($contact);
             $serviceRequest->priority()->associate($priority);
 
-            $serviceRequest->save();
+            $saving = $serviceRequest->save();
+
+            if (! $saving) {
+                report(new Exception('Failed to save Service Request: ' . json_encode($serviceRequest->attributesToArray())));
+
+                DB::rollBack();
+
+                return response()->json([
+                    'errors' => ['An error occurred while saving the Service Request.'],
+                ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
+
+            $serviceRequest->refresh();
 
             $assignmentClass = $serviceRequest->priority->type?->assignment_type?->getAssignerClass();
 
