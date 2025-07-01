@@ -2,7 +2,6 @@ includes:
     - ./vendor/larastan/larastan/extension.neon
     - ./vendor/tpetry/laravel-postgresql-enhanced/phpstan-extension.neon
     - ./phpstan-baseline.php
-    - vendor/phpstan/phpstan-webmozart-assert/extension.neon
 
 rules:
     - CanyonGBS\Common\PhpStan\Rules\MissingClosureParameterTypehintRule
