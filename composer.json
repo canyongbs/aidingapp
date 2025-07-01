@@ -108,7 +108,6 @@
         "pestphp/pest-plugin-laravel": "^3.0",
         "pestphp/pest-plugin-livewire": "^3.0",
         "phpstan/phpstan": "^2.0",
-        "phpstan/phpstan-webmozart-assert": "^2.0",
         "phpunit/phpunit": "^11.0",
         "rector/rector": "^2.0",
         "spatie/laravel-ray": "^1.40.2",

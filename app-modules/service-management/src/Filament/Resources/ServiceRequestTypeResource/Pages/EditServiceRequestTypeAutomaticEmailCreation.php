@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages;
 
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Concerns\EditPageRedirection;
 use App\Models\Tenant;
 use Filament\Forms\Components\Checkbox;
@@ -46,8 +47,8 @@ use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Config;
-use Webmozart\Assert\Assert;
 
 class EditServiceRequestTypeAutomaticEmailCreation extends EditRecord
 {
@@ -73,7 +74,7 @@ class EditServiceRequestTypeAutomaticEmailCreation extends EditRecord
                             ->prefix(function () {
                                 $currentTenantDomain = Tenant::current()?->domain;
 
-                                Assert::notNull($currentTenantDomain);
+                                assert(! is_null($currentTenantDomain));
 
                                 return rtrim($currentTenantDomain, '.' . parse_url(Config::string('app.landlord_url'), PHP_URL_HOST)) . '-';
                             })
@@ -92,5 +93,14 @@ class EditServiceRequestTypeAutomaticEmailCreation extends EditRecord
     {
         // Needed to prevent Filament from loading the relation managers on this page.
         return [];
+    }
+
+    protected function handleRecordUpdate(Model $record, array $data): Model
+    {
+        assert($record instanceof ServiceRequestType);
+
+        $record->update($data);
+
+        return $record;
     }
 }
