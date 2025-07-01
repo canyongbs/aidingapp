@@ -126,6 +126,7 @@ class CreateServiceRequestController extends Controller
             $serviceRequest->priority()->associate($priority);
 
             $serviceRequest->save();
+            $serviceRequest->refresh();
 
             $assignmentClass = $serviceRequest->priority->type?->assignment_type?->getAssignerClass();
 
