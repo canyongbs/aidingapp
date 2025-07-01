@@ -136,8 +136,10 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
 
         do {
             try {
-                DB::transaction(function () use ($options) {
-                    return parent::save($options);
+                DB::transaction(function () use (&$save, $options) {
+                    $save = parent::save($options);
+
+                    return $save;
                 });
 
                 break;
