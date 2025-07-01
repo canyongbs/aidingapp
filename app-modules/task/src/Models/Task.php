@@ -38,6 +38,7 @@ namespace AidingApp\Task\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Project\Models\Project;
 use AidingApp\Task\Database\Factories\TaskFactory;
 use AidingApp\Task\Enums\TaskStatus;
 use AidingApp\Task\Observers\TaskObserver;
@@ -133,5 +134,13 @@ class Task extends BaseModel implements Auditable
     {
         $query->where('status', '=', TaskStatus::Pending)
             ->orWhere('status', '=', TaskStatus::InProgress);
+    }
+
+    /**
+     * @return BelongsTo<Project, $this>
+     */
+    public function project(): BelongsTo
+    {
+        return $this->belongsTo(Project::class, 'project_id');
     }
 }
