@@ -43,6 +43,7 @@ use AidingApp\Engagement\Exceptions\UnableToDetectTenantFromSesS3EmailPayload;
 use AidingApp\Engagement\Exceptions\UnableToRetrieveContentFromSesS3EmailPayload;
 use AidingApp\Engagement\Models\EngagementResponse;
 use AidingApp\Engagement\Models\UnmatchedInboundCommunication;
+use AidingApp\ServiceManagement\Models\TenantServiceRequestTypeDomain;
 use App\Models\Tenant;
 use Aws\Crypto\KmsMaterialsProviderV2;
 use Aws\Kms\KmsClient;
@@ -93,24 +94,39 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
 
             $matchedTenants = collect($parser->getAddresses('to'))
                 ->pluck('address')
-                ->map(function (string $address) {
+                ->mapToGroups(function (string $address) {
                     $localPart = filter_var($address, FILTER_VALIDATE_EMAIL) ? explode('@', $address)[0] : null;
 
                     if ($localPart === null) {
                         return null;
                     }
 
-                    return Tenant::query()
+                    $tenant = Tenant::query()
                         ->where(
                             DB::raw('LOWER(domain)'),
                             'like',
                             strtolower("{$localPart}.%")
                         )
                         ->first();
+
+                    if ($tenant) {
+                        return ['engagements' => $tenant];
+                    }
+
+                    $serviceRequestTypeDomain = TenantServiceRequestTypeDomain::query()
+                        ->where(
+                            DB::raw('LOWER(domain)'),
+                            mb_strtolower($localPart)
+                        )
+                        ->first();
+
+                    if ($serviceRequestTypeDomain) {
+                        return ['service_request' => $serviceRequestTypeDomain];
+                    }
+
+                    return null;
                 })
                 ->filter();
-
-            // TODO: If we don't match to a Tenant, then see if we match to a Tenants Service Request Type Domain
 
             throw_if(
                 $matchedTenants->isEmpty(),
@@ -119,7 +135,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
 
             $sender = $parser->getAddresses('from')[0]['address'];
 
-            $matchedTenants->each(function (Tenant $tenant) use ($parser, $content, $sender) {
+            $matchedTenants->get('engagements')->each(function (Tenant $tenant) use ($parser, $content, $sender) {
                 $tenant->execute(function () use ($parser, $content, $sender) {
                     $contacts = Contact::query()
                         ->where('email', $sender)
