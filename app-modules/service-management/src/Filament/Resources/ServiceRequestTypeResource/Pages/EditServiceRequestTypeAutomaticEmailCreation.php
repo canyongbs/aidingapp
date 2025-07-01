@@ -95,9 +95,34 @@ class EditServiceRequestTypeAutomaticEmailCreation extends EditRecord
         return [];
     }
 
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        $record = $this->getRecord();
+
+        assert($record instanceof ServiceRequestType);
+
+        $data['domain'] = $record->domain?->domain;
+
+        return $data;
+    }
+
     protected function handleRecordUpdate(Model $record, array $data): Model
     {
         assert($record instanceof ServiceRequestType);
+
+        if (isset($data['domain'])) {
+            $tenantId = Tenant::current()?->getKey();
+
+            assert(! is_null($tenantId));
+
+            $record->domain()
+                ->updateOrCreate(
+                    ['tenant_id' => $tenantId],
+                    ['domain' => $data['domain']]
+                );
+
+            unset($data['domain']);
+        }
 
         $record->update($data);
 
