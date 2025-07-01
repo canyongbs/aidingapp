@@ -37,10 +37,8 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages;
 
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
-use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Concerns\EditPageRedirection;
 use App\Models\Tenant;
-use Filament\Actions\Action;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
@@ -87,19 +85,12 @@ class EditServiceRequestTypeAutomaticEmailCreation extends EditRecord
                             ->label('Auto create contact if eligible')
                             ->visible(fn (Get $get): bool => $get('is_email_automatic_creation_enabled')),
                     ]),
-            ])
-            ->disabled(fn (ServiceRequestType $record) => $record->trashed());
+            ]);
     }
 
     public function getRelationManagers(): array
     {
         // Needed to prevent Filament from loading the relation managers on this page.
         return [];
-    }
-
-    protected function getSaveFormAction(): Action
-    {
-        return parent::getSaveFormAction()
-            ->hidden(fn (ServiceRequestType $record) => $record->trashed());
     }
 }
