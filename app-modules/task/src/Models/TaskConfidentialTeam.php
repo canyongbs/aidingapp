@@ -4,7 +4,7 @@ namespace AidingApp\Task\Models;
 
 use AidingApp\Task\Database\Factories\TaskConfidentialTeamFactory;
 use AidingApp\Team\Models\Team;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
