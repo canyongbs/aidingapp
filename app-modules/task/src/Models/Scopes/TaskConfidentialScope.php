@@ -13,7 +13,7 @@ class TaskConfidentialScope implements Scope
      */
     public function apply(Builder $builder, Model $model): void
     {
-        if (auth()->user()->is_admin) {
+        if (auth()->user()?->is_admin) {
             return;
         }
 

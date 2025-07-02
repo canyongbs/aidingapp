@@ -468,6 +468,7 @@ namespace App\Models{
  * @property-read int|null $engagement_batches_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Engagement\Models\Engagement> $engagements
  * @property-read int|null $engagements_count
+ * @property-read bool $is_admin
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Authorization\Models\License> $licenses
  * @property-read int|null $licenses_count
  * @property-read \Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection<int, \Spatie\MediaLibrary\MediaCollections\Models\Media> $media
