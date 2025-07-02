@@ -36,13 +36,13 @@
 
 namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\Pages;
 
-use Filament\Forms\Form;
-use Filament\Forms\Components\Textarea;
-use Illuminate\Validation\Rules\Unique;
-use Filament\Forms\Components\TextInput;
-use Filament\Resources\Pages\CreateRecord;
-use App\Filament\Forms\Components\IconSelect;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource;
+use App\Filament\Forms\Components\IconSelect;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
+use Filament\Resources\Pages\CreateRecord;
+use Illuminate\Validation\Rules\Unique;
 
 class CreateKnowledgeBaseCategory extends CreateRecord
 {
@@ -59,7 +59,7 @@ class CreateKnowledgeBaseCategory extends CreateRecord
                 IconSelect::make('icon'),
                 TextInput::make('slug')
                     ->regex('/^[a-zA-Z0-9]+(-[a-zA-Z0-9]+)*$/')
-                    ->unique(modifyRuleUsing: function(Unique $rule) {
+                    ->unique(modifyRuleUsing: function (Unique $rule) {
                         $rule->withoutTrashed();
                     })
                     ->maxLength(255)

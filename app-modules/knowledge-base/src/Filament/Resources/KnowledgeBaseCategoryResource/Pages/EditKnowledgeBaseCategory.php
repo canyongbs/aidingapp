@@ -64,7 +64,7 @@ class EditKnowledgeBaseCategory extends EditRecord
                 IconSelect::make('icon'),
                 TextInput::make('slug')
                     ->regex('/^[a-zA-Z0-9]+(-[a-zA-Z0-9]+)*$/')
-                    ->unique(ignoreRecord: true, modifyRuleUsing: function(Unique $rule) {
+                    ->unique(ignoreRecord: true, modifyRuleUsing: function (Unique $rule) {
                         $rule->withoutTrashed();
                     })
                     ->maxLength(255)
