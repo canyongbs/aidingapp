@@ -49,6 +49,5 @@ php artisan migrate --database=landlord --path=database/landlord
 
 To run migrations on all Tenants:
 
-```bash
-php artisan migrate --database=tenant
+php artisan tenants:artisan "migrate"
 ```

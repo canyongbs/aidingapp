@@ -34,42 +34,33 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\Pages;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Facades\DB;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource;
-use App\Filament\Forms\Components\IconSelect;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
-use Filament\Resources\Pages\CreateRecord;
-use Illuminate\Validation\Rules\Unique;
-
-class CreateKnowledgeBaseCategory extends CreateRecord
-{
-    protected static string $resource = KnowledgeBaseCategoryResource::class;
-
-    public function form(Form $form): Form
+return new class () extends Migration {
+    public function up(): void
     {
-        return $form
-            ->schema([
-                TextInput::make('name')
-                    ->label('Name')
-                    ->required()
-                    ->string(),
-                IconSelect::make('icon'),
-                TextInput::make('slug')
-                    ->regex('/^[a-zA-Z0-9]+(-[a-zA-Z0-9]+)*$/')
-                    ->unique(modifyRuleUsing: function (Unique $rule) {
-                        $rule->withoutTrashed();
-                    })
-                    ->maxLength(255)
-                    ->required()
-                    ->dehydrateStateUsing(fn (string $state): string => strtolower($state)),
-                Textarea::make('description')
-                    ->label('Description')
-                    ->nullable()
-                    ->string()
-                    ->columnSpanFull(),
-            ]);
+        Schema::table('knowledge_base_categories', function (Blueprint $table) {
+            DB::transaction(function () use ($table) {
+                $table->dropUnique('knowledge_base_categories_slug_unique');
+
+                $table->uniqueIndex('slug')
+                    ->where(fn (Builder $condition) => $condition->whereNull('deleted_at'));
+            });
+        });
     }
-}
+
+    public function down(): void
+    {
+        Schema::table('knowledge_base_categories', function (Blueprint $table) {
+            DB::transaction(function () use ($table) {
+                $table->dropIndex('knowledge_base_categories_slug_unique');
+
+                $table->string('slug')->unique()->change();
+            });
+        });
+    }
+};
