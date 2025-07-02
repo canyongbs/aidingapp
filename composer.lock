@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6c02459f81369bea11a6f2442fc45d3b",
+    "content-hash": "f12b49e995daf8973cf6ad4b96ff324d",
     "packages": [
         {
             "name": "amphp/amp",
@@ -2293,6 +2293,41 @@
                     "AidingApp\\LicenseManagement\\Tests\\": "tests/",
                     "AidingApp\\LicenseManagement\\Database\\Factories\\": "database/factories/",
                     "AidingApp\\LicenseManagement\\Database\\Seeders\\": "database/seeders/"
+                }
+            },
+            "license": [
+                "proprietary"
+            ],
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
+            "name": "canyon-gbs/project",
+            "version": "1.0",
+            "dist": {
+                "type": "path",
+                "url": "app-modules/project",
+                "reference": "d3e33583549c7d62f8827c5d536f68e0cb469420"
+            },
+            "require": {
+                "filament/filament": "^3.2"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "AidingApp\\Project\\Providers\\ProjectServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "AidingApp\\Project\\": "src/",
+                    "AidingApp\\Project\\Tests\\": "tests/",
+                    "AidingApp\\Project\\Database\\Factories\\": "database/factories/",
+                    "AidingApp\\Project\\Database\\Seeders\\": "database/seeders/"
                 }
             },
             "license": [
