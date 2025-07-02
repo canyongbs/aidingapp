@@ -89,7 +89,9 @@ class ListTasks extends ListRecords
                 TextColumn::make('title')
                     ->searchable()
                     ->wrap()
-                    ->limit(50),
+                    ->limit(50)
+                    ->icon(fn ($record) => $record->is_confidential ? 'heroicon-m-lock-closed' : null)
+                    ->tooltip(fn ($record) => $record->is_confidential ? 'Confidential' : null),
                 TextColumn::make('status')
                     ->formatStateUsing(fn (TaskStatus $state): string => str($state->value)->title()->headline())
                     ->badge(),

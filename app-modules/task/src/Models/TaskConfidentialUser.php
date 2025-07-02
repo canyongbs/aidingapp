@@ -9,10 +9,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
+/**
+ * @mixin IdeHelperTaskConfidentialUser
+ */
 class TaskConfidentialUser extends Pivot
 {
     /** @use HasFactory<TaskConfidentialUserFactory> */
     use HasFactory;
+
     use HasUuids;
 
     /**
