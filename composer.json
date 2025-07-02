@@ -42,6 +42,7 @@
         "canyon-gbs/aiding-app-webhook": "*",
         "canyon-gbs/contract-management": "*",
         "canyon-gbs/license-management": "*",
+        "canyon-gbs/project": "*",
         "canyon-gbs/purchasing": "*",
         "canyon-gbs/report": "*",
         "canyongbs/common": "^1.7.0",

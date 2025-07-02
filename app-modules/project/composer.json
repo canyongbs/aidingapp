@@ -1,0 +1,26 @@
+{
+    "name": "canyon-gbs/project",
+    "description": "",
+    "type": "library",
+    "version": "1.0",
+    "license": "proprietary",
+    "require": {
+        "filament/filament": "^3.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "AidingApp\\Project\\": "src/",
+            "AidingApp\\Project\\Tests\\": "tests/",
+            "AidingApp\\Project\\Database\\Factories\\": "database/factories/",
+            "AidingApp\\Project\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "minimum-stability": "stable",
+    "extra": {
+        "laravel": {
+            "providers": [
+                "AidingApp\\Project\\Providers\\ProjectServiceProvider"
+            ]
+        }
+    }
+}
