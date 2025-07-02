@@ -37,6 +37,7 @@
 namespace AidingApp\Project\Filament\Resources\ProjectResource\Pages;
 
 use AidingApp\Project\Filament\Resources\ProjectResource;
+use AidingApp\Task\Models\Task;
 use App\Features\ManageTasksFeature;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Tables\Actions\AssociateAction;
@@ -73,20 +74,25 @@ class ManageTasks extends ManageRelatedRecords
                     ->recordSelectOptionsQuery(
                         fn (Builder $query) => $query->whereNull('project_id')
                     )
-                    ->preloadRecordSelect(),
+                    ->preloadRecordSelect()
+                    ->authorize('updateAny', Task::class),
             ])
             ->actions([
-                DissociateAction::make(),
+                DissociateAction::make()
+                    ->authorize('updateAny', Task::class),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
-                    DissociateBulkAction::make(),
+                    DissociateBulkAction::make()
+                        ->authorize('updateAny', Task::class),
                 ]),
             ]);
     }
 
     public static function canAccess(array $arguments = []): bool
     {
-        return ManageTasksFeature::active() && parent::canAccess($arguments);
+        $user = auth()->user();
+
+        return ManageTasksFeature::active() && $user->can(['task.view-any', 'task.*.view']) && parent::canAccess($arguments);
     }
 }
