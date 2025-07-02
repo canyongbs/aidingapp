@@ -135,19 +135,23 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
 
         do {
             try {
-                DB::transaction(function () use ($options) {
-                    return parent::save($options);
+                DB::transaction(function () use (&$save, $options) {
+                    $save = parent::save($options);
+
+                    return $save;
                 });
 
                 break;
-            } catch (UniqueConstraintViolationException $e) {
+            } catch (UniqueConstraintViolationException $exception) {
+                report($exception);
+
                 $attempts++;
 
                 if ($attempts < 3) {
                     $this->service_request_number = app(ServiceRequestNumberGenerator::class)->generate();
                 } else {
                     throw new ServiceRequestNumberExceededReRollsException(
-                        previous: $e,
+                        previous: $exception,
                     );
                 }
 
