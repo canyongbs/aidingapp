@@ -34,21 +34,20 @@
 </COPYRIGHT>
 */
 
-use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Query\Builder;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Facades\DB;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class () extends Migration {
     public function up(): void
     {
-       Schema::table('knowledge_base_categories', function (Blueprint $table) {
+        Schema::table('knowledge_base_categories', function (Blueprint $table) {
             DB::transaction(function () use ($table) {
                 $table->dropUnique('knowledge_base_categories_slug_unique');
 
-                 $table->uniqueIndex('slug')
+                $table->uniqueIndex('slug')
                     ->where(fn (Builder $condition) => $condition->whereNull('deleted_at'));
             });
         });
