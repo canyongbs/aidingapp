@@ -444,4 +444,9 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
     {
         return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
     }
+
+    public function getIsAdminAttribute(): bool
+    {
+        return $this->roles()->where('name', Authenticatable::SUPER_ADMIN_ROLE)->exists();
+    }
 }
