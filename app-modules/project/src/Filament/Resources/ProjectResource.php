@@ -39,6 +39,7 @@ namespace AidingApp\Project\Filament\Resources;
 use AidingApp\Project\Filament\Resources\ProjectResource\Pages\CreateProject;
 use AidingApp\Project\Filament\Resources\ProjectResource\Pages\EditProject;
 use AidingApp\Project\Filament\Resources\ProjectResource\Pages\ListProjects;
+use AidingApp\Project\Filament\Resources\ProjectResource\Pages\ManageTasks;
 use AidingApp\Project\Filament\Resources\ProjectResource\Pages\ViewProject;
 use AidingApp\Project\Models\Project;
 use Filament\Resources\Pages\Page;
@@ -59,6 +60,7 @@ class ProjectResource extends Resource
         return $page->generateNavigationItems([
             ViewProject::class,
             EditProject::class,
+            ManageTasks::class,
         ]);
     }
 
@@ -69,6 +71,7 @@ class ProjectResource extends Resource
             'create' => CreateProject::route('/create'),
             'view' => ViewProject::route('/{record}'),
             'edit' => EditProject::route('/{record}/edit'),
+            'manage-tasks' => ManageTasks::route('/{record}/tasks'),
         ];
     }
 }

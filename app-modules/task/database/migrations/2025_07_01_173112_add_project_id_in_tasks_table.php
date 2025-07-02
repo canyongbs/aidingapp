@@ -34,50 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Models;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\Project\Database\Factories\ProjectFactory;
-use AidingApp\Project\Observers\ProjectObserver;
-use AidingApp\Task\Models\Task;
-use App\Models\BaseModel;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use OwenIt\Auditing\Contracts\Auditable;
-
-#[ObservedBy([ProjectObserver::class])]
-class Project extends BaseModel implements Auditable
-{
-    /** @use HasFactory<ProjectFactory> */
-    use HasFactory;
-
-    use HasUuids;
-    use SoftDeletes;
-    use AuditableTrait;
-
-    protected $fillable = [
-        'name',
-        'description',
-    ];
-
-    /**
-     * @return MorphTo<Model, $this>
-     */
-    public function createdBy(): MorphTo
+return new class () extends Migration {
+    public function up(): void
     {
-        return $this->morphTo();
+        Schema::table('tasks', function (Blueprint $table) {
+            $table->foreignUuid('project_id')->nullable()->constrained('projects');
+        });
     }
 
-    /**
-     * @return HasMany<Task, $this>
-     */
-    public function tasks(): HasMany
+    public function down(): void
     {
-        return $this->hasMany(Task::class, 'project_id');
+        Schema::table('tasks', function (Blueprint $table) {
+            $table->dropConstrainedForeignId('project_id');
+        });
     }
-}
+};

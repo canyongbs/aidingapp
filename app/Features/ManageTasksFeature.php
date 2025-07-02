@@ -34,50 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Models;
+namespace App\Features;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\Project\Database\Factories\ProjectFactory;
-use AidingApp\Project\Observers\ProjectObserver;
-use AidingApp\Task\Models\Task;
-use App\Models\BaseModel;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use OwenIt\Auditing\Contracts\Auditable;
+use App\Support\AbstractFeatureFlag;
 
-#[ObservedBy([ProjectObserver::class])]
-class Project extends BaseModel implements Auditable
+class ManageTasksFeature extends AbstractFeatureFlag
 {
-    /** @use HasFactory<ProjectFactory> */
-    use HasFactory;
-
-    use HasUuids;
-    use SoftDeletes;
-    use AuditableTrait;
-
-    protected $fillable = [
-        'name',
-        'description',
-    ];
-
-    /**
-     * @return MorphTo<Model, $this>
-     */
-    public function createdBy(): MorphTo
+    public function resolve(mixed $scope): mixed
     {
-        return $this->morphTo();
-    }
-
-    /**
-     * @return HasMany<Task, $this>
-     */
-    public function tasks(): HasMany
-    {
-        return $this->hasMany(Task::class, 'project_id');
+        return false;
     }
 }

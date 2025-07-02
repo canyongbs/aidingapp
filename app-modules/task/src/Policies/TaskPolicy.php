@@ -135,4 +135,12 @@ class TaskPolicy implements PerformsChecksBeforeAuthorization
             denyResponse: 'You do not have permission to permanently delete this task.'
         );
     }
+
+    public function updateAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: 'task.*.update',
+            denyResponse: 'You do not have permission to update tasks.'
+        );
+    }
 }
