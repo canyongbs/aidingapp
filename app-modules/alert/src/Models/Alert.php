@@ -94,12 +94,12 @@ class Alert extends BaseModel implements Auditable
     protected static function booted(): void
     {
         static::addGlobalScope('licensed', function (Builder $builder) {
-            if (! auth()->check()) {
+            if (! auth()->guard('web')->check()) {
                 return;
             }
 
             /** @var Authenticatable $user */
-            $user = auth()->user();
+            $user = auth()->guard('web')->user();
 
             if (! $user->hasLicense(Contact::getLicenseType())) {
                 $builder->whereRaw('1 = 0');
