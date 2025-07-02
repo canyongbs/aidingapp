@@ -56,6 +56,8 @@ class ServiceRequestAssignmentObserver
 
     public function creating(ServiceRequestAssignment $serviceRequestAssignment): void
     {
+        $serviceRequestAssignment->loadMissing('serviceRequest');
+
         throw_if(! in_array($serviceRequestAssignment->user_id, $serviceRequestAssignment->serviceRequest->priority->type?->managers
             ->flatMap(fn ($managers) => $managers->users)
             ->pluck('id')
