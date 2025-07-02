@@ -36,11 +36,14 @@
 
 namespace AidingApp\Task\Filament\Concerns;
 
+use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Component;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Get;
 
 trait TaskEditForm
 {
@@ -52,6 +55,27 @@ trait TaskEditForm
     public function editFormFields(): array
     {
         return [
+            Fieldset::make('Confidentiality')
+                ->schema([
+                    Checkbox::make('is_confidential')
+                        ->label('Confidential')
+                        ->live()
+                        ->columnSpanFull(),
+                    Select::make('task_confidential_users')
+                        ->relationship('confidentialAccessUsers', 'name')
+                        ->preload()
+                        ->label('Users')
+                        ->multiple()
+                        ->exists('users', 'id')
+                        ->visible(fn (Get $get) => $get('is_confidential')),
+                    Select::make('task_confidential_teams')
+                        ->relationship('confidentialAccessTeams', 'name')
+                        ->preload()
+                        ->label('Teams')
+                        ->multiple()
+                        ->exists('teams', 'id')
+                        ->visible(fn (Get $get) => $get('is_confidential')),
+                ]),
             TextInput::make('title')
                 ->required()
                 ->maxLength(100)
