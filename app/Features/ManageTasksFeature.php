@@ -38,11 +38,7 @@ namespace App\Features;
 
 use App\Support\AbstractFeatureFlag;
 
-<<<<<<<< HEAD:app/Features/ManageTasksFeature.php
 class ManageTasksFeature extends AbstractFeatureFlag
-========
-class ProjectFeatureFlag extends AbstractFeatureFlag
->>>>>>>> 61efc87b15007acc265f382d53ab4fa6c44ba02f:app/Features/ProjectFeatureFlag.php
 {
     public function resolve(mixed $scope): mixed
     {

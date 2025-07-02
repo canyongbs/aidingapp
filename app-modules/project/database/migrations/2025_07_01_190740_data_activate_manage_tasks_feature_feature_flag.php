@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-<<<<<<<< HEAD:app-modules/project/database/migrations/2025_07_01_190740_data_activate_manage_tasks_feature_feature_flag.php
 use App\Features\ManageTasksFeature;
 use Illuminate\Database\Migrations\Migration;
 
@@ -43,24 +42,9 @@ return new class () extends Migration {
     {
         ManageTasksFeature::activate();
     }
-========
-namespace AidingApp\Project\Observers;
 
-use AidingApp\Project\Models\Project;
-use App\Features\ProjectFeatureFlag;
->>>>>>>> 61efc87b15007acc265f382d53ab4fa6c44ba02f:app-modules/project/src/Observers/ProjectObserver.php
-
-class ProjectObserver
-{
-    public function creating(Project $project): void
+    public function down(): void
     {
-<<<<<<<< HEAD:app-modules/project/database/migrations/2025_07_01_190740_data_activate_manage_tasks_feature_feature_flag.php
         ManageTasksFeature::deactivate();
-========
-        if (ProjectFeatureFlag::active() && is_null($project->createdBy)) {
-            $user = auth()->user();
-            $project->createdBy()->associate($user);
-        }
->>>>>>>> 61efc87b15007acc265f382d53ab4fa6c44ba02f:app-modules/project/src/Observers/ProjectObserver.php
     }
-}
+};
