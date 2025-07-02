@@ -24,7 +24,7 @@ return new class extends Migration
     {
         Schema::table('knowledge_base_categories', function (Blueprint $table) {
             DB::transaction(function () use ($table) {
-                $table->dropUnique('knowledge_base_categories_slug_unique');
+                $table->dropIndex('knowledge_base_categories_slug_unique');
 
                 $table->string('slug')->unique()->change();
             });

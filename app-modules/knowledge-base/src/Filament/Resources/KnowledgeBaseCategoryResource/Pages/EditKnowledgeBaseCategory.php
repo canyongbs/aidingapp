@@ -45,6 +45,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Validation\Rules\Unique;
 
 class EditKnowledgeBaseCategory extends EditRecord
 {
@@ -63,7 +64,9 @@ class EditKnowledgeBaseCategory extends EditRecord
                 IconSelect::make('icon'),
                 TextInput::make('slug')
                     ->regex('/^[a-zA-Z0-9]+(-[a-zA-Z0-9]+)*$/')
-                    ->unique(ignoreRecord: true)
+                    ->unique(ignoreRecord: true, modifyRuleUsing: function(Unique $rule) {
+                        $rule->withoutTrashed();
+                    })
                     ->maxLength(255)
                     ->required()
                     ->dehydrateStateUsing(fn (string $state): string => strtolower($state)),
