@@ -54,7 +54,6 @@ class ViewProject extends ViewRecord
         return $infolist
             ->schema([
                 Section::make()
-                    ->columns()
                     ->schema([
                         TextEntry::make('name'),
                         TextEntry::make('description')
