@@ -63,7 +63,7 @@ class ProjectPolicy
     public function view(Authenticatable $authenticatable, Project $project): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['project.*.view', "project.{$project->id}.view"],
+            abilities: 'project.*.view',
             denyResponse: 'You do not have permission to view this project.'
         );
     }
@@ -87,7 +87,7 @@ class ProjectPolicy
     public function delete(Authenticatable $authenticatable, Project $project): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['project.*.delete', "project.{$project->id}.delete"],
+            abilities: 'project.*.delete',
             denyResponse: 'You do not have permission to delete this project.'
         );
     }
@@ -95,7 +95,7 @@ class ProjectPolicy
     public function restore(Authenticatable $authenticatable, Project $project): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['project.*.restore', "project.{$project->id}.restore"],
+            abilities: 'project.*.restore',
             denyResponse: 'You do not have permission to restore this project.'
         );
     }
@@ -103,7 +103,7 @@ class ProjectPolicy
     public function forceDelete(Authenticatable $authenticatable, Project $project): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['project.*.force-delete', "project.{$project->id}.force-delete"],
+            abilities: 'project.*.force-delete',
             denyResponse: 'You do not have permission to permanently delete this project.'
         );
     }
