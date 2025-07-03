@@ -151,9 +151,9 @@ abstract class TestCase extends BaseTestCase
     public function createTenant(string $name, string $domain, string $database): Tenant
     {
         return app(CreateTenant::class)(
-            name: $name,
-            domain: $domain,
-            config: new TenantConfig(
+            $name,
+            $domain,
+            new TenantConfig(
                 database: new TenantDatabaseConfig(
                     host: config('database.connections.landlord.host'),
                     port: config('database.connections.landlord.port'),
@@ -200,7 +200,9 @@ abstract class TestCase extends BaseTestCase
                     fromName: config('mail.from.name')
                 ),
             ),
-            seedTenantDatabase: false,
+            null,
+            null,
+            false,
         );
     }
 

@@ -63,7 +63,7 @@ trait HasAdvancedFilter
     {
         $data = $this->processGlobalSearch($data);
 
-        $v = validator()->make($data, [
+        $validator = validator()->make($data, [
             's' => 'sometimes|nullable|string',
             'order_column' => 'sometimes|required|in:' . $this->orderableColumns(),
             'order_direction' => 'sometimes|required|in:asc,desc',
@@ -78,11 +78,11 @@ trait HasAdvancedFilter
             'f.*.query_2' => 'required_if:f.*.operator,between,not_between',
         ]);
 
-        if ($v->fails()) {
-            throw new ValidationException($v);
+        if ($validator->fails()) {
+            throw new ValidationException($validator);
         }
 
-        $data = $v->validated();
+        $data = $validator->validated();
 
         return (new FilterQueryBuilder())->apply($query, $data);
     }

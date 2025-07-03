@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+<phpmd-baseline>
+  <violation rule="PHPMD\Rule\Controversial\CamelCaseParameterName" file="app-modules/service-management/src/DataTransferObjects/ServiceRequestDataObject.php" method="__construct"/>
+</phpmd-baseline>

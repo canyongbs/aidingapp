@@ -34,49 +34,42 @@
 </COPYRIGHT>
 */
 
-namespace App\Console\Commands;
+namespace App\PhpMd;
 
-use App\Overrides\Laravel\PermissionMigrationCreator;
-use Illuminate\Database\Console\Migrations\MigrateMakeCommand;
-use Illuminate\Filesystem\Filesystem;
-use Illuminate\Support\Composer;
-use InterNACHI\Modular\Console\Commands\Make\Modularize;
+use PHPMD\AbstractNode;
+use PHPMD\Rule\Controversial\CamelCasePropertyName;
 
-class CreatePermissionMigration extends MigrateMakeCommand
+class CamelCasePropertyNameWithoutSettings extends CamelCasePropertyName
 {
-    use Modularize;
-
-    protected $signature = 'make:permission-migration {name : The name of the migration}
-        {--create= : The table to be created}
-        {--table= : The table to migrate}
-        {--path= : The location where the migration file should be created}
-        {--realpath : Indicate any provided migration file paths are pre-resolved absolute paths}
-        {--fullpath : Output the full path of the migration (Deprecated)}';
-
-    protected $description = 'Creates a permission migration file.';
-
-    public function __construct(PermissionMigrationCreator $creator, Composer $composer)
+    public function apply(AbstractNode $node)
     {
-        parent::__construct($creator, $composer);
-    }
-
-    protected function getMigrationPath()
-    {
-        $path = parent::getMigrationPath();
-
-        if ($module = $this->module()) {
-            $appDirectory = $this->laravel->databasePath('migrations');
-            $moduleDirectory = $module->path('database/migrations');
-
-            $path = str_replace($appDirectory, $moduleDirectory, $path);
-
-            $filesystem = $this->getLaravel()->make(Filesystem::class);
-
-            if (! $filesystem->isDirectory($moduleDirectory)) {
-                $filesystem->makeDirectory($moduleDirectory, 0755, true);
+        // @phpstan-ignore method.notFound
+        foreach ($node->getParentClasses() as $parentClass) {
+            if ($parentClass->getNamespace()->getName() === 'Spatie\LaravelSettings') {
+                return; // Skip if the class extends Spatie\LaravelSettings
             }
         }
 
-        return $path;
+        $allowUnderscore = $this->getBooleanProperty('allow-underscore');
+
+        $pattern = '/^\$[a-z][a-zA-Z0-9]*$/';
+
+        if ($allowUnderscore === true) {
+            $pattern = '/^\$[_]?[a-z][a-zA-Z0-9]*$/';
+        }
+
+        // @phpstan-ignore method.notFound
+        foreach ($node->getProperties() as $property) {
+            $propertyName = $property->getName();
+
+            if (! preg_match($pattern, $propertyName)) {
+                $this->addViolation(
+                    $node,
+                    [
+                        $propertyName,
+                    ]
+                );
+            }
+        }
     }
 }
