@@ -64,9 +64,10 @@ class ManageTasks extends ManageRelatedRecords
             ->recordTitleAttribute('title')
             ->columns([
                 TextColumn::make('title')
-                    ->label('Title')
+                    ->searchable()
                     ->sortable()
-                    ->searchable(),
+                    ->icon(fn ($record) => $record->is_confidential ? 'heroicon-m-lock-closed' : null)
+                    ->tooltip(fn ($record) => $record->is_confidential ? 'Confidential' : null),
             ])
             ->headerActions([
                 AssociateAction::make()

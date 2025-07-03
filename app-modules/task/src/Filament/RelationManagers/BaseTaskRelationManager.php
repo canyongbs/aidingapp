@@ -41,6 +41,7 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Task\Enums\TaskStatus;
 use AidingApp\Task\Filament\Resources\TaskResource\Components\TaskViewAction;
 use AidingApp\Task\Models\Task;
+use App\Features\TaskConfidential;
 use App\Filament\Resources\UserResource;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Scopes\HasLicense;
@@ -71,6 +72,7 @@ abstract class BaseTaskRelationManager extends ManageRelatedRecords
         return $form
             ->schema([
                 Fieldset::make('Confidentiality')
+                    ->visible(TaskConfidential::active())
                     ->schema([
                         Checkbox::make('is_confidential')
                             ->label('Confidential')

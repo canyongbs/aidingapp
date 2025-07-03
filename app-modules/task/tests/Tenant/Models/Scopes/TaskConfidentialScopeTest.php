@@ -1,10 +1,12 @@
 <?php
 
 use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\Project\Models\Project;
 use AidingApp\Task\Models\Scopes\TaskConfidentialScope;
 use AidingApp\Task\Models\Task;
 use AidingApp\Team\Models\Team;
 use App\Models\User;
+use Illuminate\Support\Facades\Event;
 
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
@@ -114,6 +116,46 @@ test('Assigned User Can Only Access Permitted Confidential Tasks', function () {
 
     expect($tasks->where('is_confidential', true)->pluck('created_by'))
         ->not->toContain(...$privateTasks->pluck('created_by'));
+});
+
+test('Project creator Can Only Access Permitted Confidential Tasks', function () {
+
+    $user = User::factory()->licensed(LicenseType::cases())->create();
+
+    actingAs($user);
+
+    $ownedProjectConfidentialTasks = Task::factory()
+                                    ->for(Project::factory()->for($user,'createdBy'))
+                                    ->count(10)
+                                    ->create([
+                                        'is_confidential' => true,
+                                    ]);
+
+    $otherProjectConfidentialTasks = Task::factory()->for(Project::factory()->for(User::factory(),'createdBy'))->count(10)->create([
+        'is_confidential' => true,
+    ]);
+
+    $privateTasks = Task::factory()->count(10)->create([
+        'is_confidential' => true,
+    ]);
+
+    $publicTasks = Task::factory()->count(10)->create([
+        'is_confidential' => false,
+    ]);
+
+    $tasks = Task::query()->get();
+
+    expect($tasks)->toHaveCount(20);
+
+    expect($tasks->pluck('id'))
+        ->toContain(...$publicTasks->pluck('id'))
+        ->toContain(...$ownedProjectConfidentialTasks->pluck('id'));
+
+    expect($tasks->pluck('id'))->not->toContain(...$privateTasks->pluck('id'));
+
+    expect($tasks->where('is_confidential', true)->pluck('created_by'))
+        ->not->toContain(...$privateTasks->pluck('created_by'))
+        ->not->toContain(...$otherProjectConfidentialTasks->pluck('created_by'));
 });
 
 test('SuperAdmin Can Access All Tasks Including Confidential Ones', function () {
