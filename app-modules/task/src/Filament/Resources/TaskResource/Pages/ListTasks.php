@@ -43,6 +43,7 @@ use AidingApp\Task\Filament\Resources\TaskResource;
 use AidingApp\Task\Filament\Resources\TaskResource\Components\TaskViewAction;
 use AidingApp\Task\Imports\TaskImporter;
 use AidingApp\Task\Models\Task;
+use App\Features\ConfidentialTaskFeature;
 use App\Filament\Resources\UserResource;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Scopes\EducatableSearch;
@@ -90,8 +91,8 @@ class ListTasks extends ListRecords
                     ->searchable()
                     ->wrap()
                     ->limit(50)
-                    ->icon(fn ($record) => $record->is_confidential ? 'heroicon-m-lock-closed' : null)
-                    ->tooltip(fn ($record) => $record->is_confidential ? 'Confidential' : null),
+                    ->icon(fn ($record) => ConfidentialTaskFeature::active() && $record->is_confidential ? 'heroicon-m-lock-closed' : null)
+                    ->tooltip(fn ($record) => ConfidentialTaskFeature::active() && $record->is_confidential ? 'Confidential' : null),
                 TextColumn::make('status')
                     ->formatStateUsing(fn (TaskStatus $state): string => str($state->value)->title()->headline())
                     ->badge(),

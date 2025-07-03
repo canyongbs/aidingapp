@@ -1,16 +1,16 @@
 <?php
 
-use App\Features\TaskConfidential;
+use App\Features\ConfidentialTaskFeature;
 use Illuminate\Database\Migrations\Migration;
 
 return new class () extends Migration {
     public function up(): void
     {
-        TaskConfidential::activate();
+        ConfidentialTaskFeature::activate();
     }
 
     public function down(): void
     {
-        TaskConfidential::deactivate();
+        ConfidentialTaskFeature::deactivate();
     }
 };
