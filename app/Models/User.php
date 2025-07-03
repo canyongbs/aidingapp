@@ -64,6 +64,7 @@ use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
 use Filament\Panel;
 use Illuminate\Contracts\Translation\HasLocalePreference;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -438,6 +439,14 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
         return $this->belongsToMany(ServiceMonitoringTarget::class)
             ->using(ServiceMonitoringTargetUser::class)
             ->withTimestamps();
+    }
+
+    /** @return Attribute<bool, never> */
+    protected function isAdmin(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->roles()->where('name', Authenticatable::SUPER_ADMIN_ROLE)->exists(),
+        );
     }
 
     protected function serializeDate(DateTimeInterface $date): string

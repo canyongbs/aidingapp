@@ -38,6 +38,7 @@ namespace AidingApp\Project\Filament\Resources\ProjectResource\Pages;
 
 use AidingApp\Project\Filament\Resources\ProjectResource;
 use AidingApp\Task\Models\Task;
+use App\Features\ConfidentialTaskFeature;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Tables\Actions\AssociateAction;
 use Filament\Tables\Actions\BulkActionGroup;
@@ -64,9 +65,10 @@ class ManageTasks extends ManageRelatedRecords
             ->recordTitleAttribute('title')
             ->columns([
                 TextColumn::make('title')
-                    ->label('Title')
+                    ->searchable()
                     ->sortable()
-                    ->searchable(),
+                    ->icon(fn ($record) => ConfidentialTaskFeature::active() && $record->is_confidential ? 'heroicon-m-lock-closed' : null)
+                    ->tooltip(fn ($record) => ConfidentialTaskFeature::active() && $record->is_confidential ? 'Confidential' : null),
             ])
             ->headerActions([
                 AssociateAction::make()
