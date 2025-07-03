@@ -107,6 +107,7 @@ class ServiceRequestType extends BaseModel implements Auditable
         'is_email_automatic_creation_enabled',
         'is_email_automatic_creation_contact_create_enabled',
         'email_automatic_creation_priority_id',
+        'email_automatic_creation_bcc',
     ];
 
     protected $casts = [

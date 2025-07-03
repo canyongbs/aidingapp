@@ -100,6 +100,15 @@ class EditServiceRequestTypeAutomaticEmailCreation extends EditRecord
                         Checkbox::make('is_email_automatic_creation_contact_create_enabled')
                             ->label('Auto create contact if eligible')
                             ->visible(fn (Get $get): bool => $get('is_email_automatic_creation_enabled')),
+                        Section::make('Ineligible Contacts')
+                            ->schema([
+                                TextInput::make('email_automatic_creation_bcc')
+                                    ->label('Blind Carbon Copy')
+                                    ->email()
+                                    ->maxLength(255)
+                                    ->helperText('If a contact is ineligible for auto creation they will be notified via email. That email will be BCC\'d to this address if provided.'),
+                            ])
+                            ->visible(fn (Get $get): bool => $get('is_email_automatic_creation_enabled')),
                     ]),
             ]);
     }

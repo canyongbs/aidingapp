@@ -17,6 +17,9 @@ return new class () extends Migration {
             $table->foreignUuid('email_automatic_creation_priority_id')
                 ->nullable()
                 ->constrained('service_request_priorities');
+
+            $table->string('email_automatic_creation_bcc')
+                ->nullable();
         });
     }
 
@@ -27,6 +30,7 @@ return new class () extends Migration {
                 'is_email_automatic_creation_enabled',
                 'is_email_automatic_creation_contact_create_enabled',
                 'email_automatic_creation_priority_id',
+                'email_automatic_creation_bcc',
             ]);
         });
     }
