@@ -203,3 +203,14 @@ it('handles exceptions correctly in the failed method', function (?Exception $ex
     'unable to retrieve content exception' => [new UnableToRetrieveContentFromSesS3EmailPayload('s3_email'), '/failed'],
 ]);
 
+it('throws the right exception when unable to find the ServiceRequestType')->todo();
+
+it('handles is_email_automatic_creation_enabled being disabled properly')->todo();
+
+it('sends ineligible email when no contact is found for a service request and we cannot match the email to an organization')->todo();
+
+it('sends ineligible email when no contact is found for a service request and is_email_automatic_creation_contact_create_enabled is disabled')->todo();
+
+it('creates a new contact for a service request when is_email_automatic_creation_contact_create_enabled is enabled')->todo();
+
+it('properly creates a service request for a matching contact')->todo();

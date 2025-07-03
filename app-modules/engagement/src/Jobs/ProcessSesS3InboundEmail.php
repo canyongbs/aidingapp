@@ -197,7 +197,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                     $serviceRequestType = $serviceRequestTypeDomain->serviceRequestType;
 
                     if (is_null($serviceRequestType)) {
-                        // TODO: Test
+                        // TODO: Test "throws the right exception when unable to find the ServiceRequestType"
                         report(new Exception(
                             'ServiceRequestType not found for TenantServiceRequestTypeDomain: ' . $serviceRequestTypeDomain->getKey()
                         ));
@@ -208,7 +208,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                     }
 
                     if (! $serviceRequestType->is_email_automatic_creation_enabled) {
-                        // TODO: Test
+                        // TODO: Test "handles is_email_automatic_creation_enabled being disabled properly"
                         Storage::disk('s3-inbound-email')->delete($this->emailFilePath);
 
                         return;
@@ -228,6 +228,8 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
 
                         if (! $organization || $serviceRequestType->is_email_automatic_creation_contact_create_enabled === false) {
                             // TODO: Send ineligible email
+                            // TODO: Test "sends ineligible email when no contact is found for a service request and we cannot match the email to an organization"
+                            // TODO: Test "sends ineligible email when no contact is found for a service request and is_email_automatic_creation_contact_create_enabled is disabled"
 
                             Storage::disk('s3-inbound-email')->delete($this->emailFilePath);
 
@@ -273,6 +275,8 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
 
                         $contact->organization()->associate($organization);
 
+                        // TODO: Test "creates a new contact for a service request when is_email_automatic_creation_contact_create_enabled is enabled"
+
                         $contact->save();
 
                         $contacts = $contacts->add($contact);
@@ -299,6 +303,8 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                         $serviceRequest->priority()->associate($serviceRequestType->email_automatic_creation_priority_id);
 
                         $serviceRequest->saveOrFail();
+
+                        // TODO: Test "properly creates a service request for a matching contact"
 
                         // TODO: Handle attachments
                     });
