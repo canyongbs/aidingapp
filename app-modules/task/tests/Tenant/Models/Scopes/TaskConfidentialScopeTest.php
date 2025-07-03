@@ -118,7 +118,7 @@ test('Assigned User Can Only Access Permitted Confidential Tasks', function () {
         ->not->toContain(...$privateTasks->pluck('created_by'));
 });
 
-test('Project creator Can Only Access Permitted Confidential Tasks', function () {
+test('it only returns project confidential tasks to the project creator', function () {
 
     $user = User::factory()->licensed(LicenseType::cases())->create();
 
@@ -154,8 +154,9 @@ test('Project creator Can Only Access Permitted Confidential Tasks', function ()
     expect($tasks->pluck('id'))->not->toContain(...$privateTasks->pluck('id'));
 
     expect($tasks->where('is_confidential', true)->pluck('created_by'))
-        ->not->toContain(...$privateTasks->pluck('created_by'))
-        ->not->toContain(...$otherProjectConfidentialTasks->pluck('created_by'));
+        ->not()->toContain(...$privateTasks->pluck('created_by'))
+        ->not()->toContain(...$otherProjectConfidentialTasks->pluck('created_by'));
+
 });
 
 test('SuperAdmin Can Access All Tasks Including Confidential Ones', function () {
