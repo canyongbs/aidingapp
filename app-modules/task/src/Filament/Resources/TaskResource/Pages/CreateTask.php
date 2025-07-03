@@ -39,6 +39,7 @@ namespace AidingApp\Task\Filament\Resources\TaskResource\Pages;
 use AidingApp\Task\Filament\Concerns\TaskForm;
 use AidingApp\Task\Filament\Resources\TaskResource;
 use AidingApp\Task\Models\Task;
+use App\Features\TaskConfidential;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Fieldset;
@@ -62,6 +63,7 @@ class CreateTask extends CreateRecord
         return $form
             ->schema([
                 Fieldset::make('Confidentiality')
+                    ->visible(TaskConfidential::active())
                     ->schema([
                         Checkbox::make('is_confidential')
                             ->label('Confidential')
@@ -80,6 +82,14 @@ class CreateTask extends CreateRecord
                             ->label('Teams')
                             ->multiple()
                             ->exists('teams', 'id')
+                            ->visible(fn (Get $get) => $get('is_confidential')),
+                        Select::make('project_id')
+                            ->relationship('project', 'name')
+                            ->preload()
+                            ->searchable()
+                            ->native(false)
+                            ->label('Project')
+                            ->exists('projects', 'id')
                             ->visible(fn (Get $get) => $get('is_confidential')),
                     ]),
                 TextInput::make('title')
