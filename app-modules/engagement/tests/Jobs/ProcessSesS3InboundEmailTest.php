@@ -96,7 +96,7 @@ it('handles virus verdict failure properly', function () {
     assertDatabaseCount(EngagementResponse::class, 0);
 });
 
-it('properly handles not finding a Contact match', function () {
+it('properly handles not finding a Contact match for emails that should be an EngagementResponse', function () {
     Storage::fake('s3');
     Storage::fake('s3-inbound-email');
 
@@ -202,3 +202,4 @@ it('handles exceptions correctly in the failed method', function (?Exception $ex
     'virus exception' => [new SesS3InboundSpamOrVirusDetected('s3_email', 'PASS', 'FAIL'), '/spam-or-virus-detected'],
     'unable to retrieve content exception' => [new UnableToRetrieveContentFromSesS3EmailPayload('s3_email'), '/failed'],
 ]);
+

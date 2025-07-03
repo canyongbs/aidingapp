@@ -145,7 +145,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
 
             $sender = $parser->getAddresses('from')[0]['address'];
 
-            $matchedTenants->get('engagements')->each(function (Tenant $tenant) use ($parser, $content, $sender) {
+            $matchedTenants->get('engagements')?->each(function (Tenant $tenant) use ($parser, $content, $sender) {
                 $tenant->execute(function () use ($parser, $content, $sender) {
                     $contacts = Contact::query()
                         ->where('email', $sender)
@@ -192,7 +192,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                 });
             });
 
-            $matchedTenants->get('service_request')->each(function (TenantServiceRequestTypeDomain $serviceRequestTypeDomain) use ($parser, $sender) {
+            $matchedTenants->get('service_request')?->each(function (TenantServiceRequestTypeDomain $serviceRequestTypeDomain) use ($parser, $sender) {
                 $serviceRequestTypeDomain->tenant->execute(function () use ($serviceRequestTypeDomain, $parser, $sender) {
                     $serviceRequestType = $serviceRequestTypeDomain->serviceRequestType;
 
