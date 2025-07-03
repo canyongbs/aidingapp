@@ -37,13 +37,12 @@
 namespace AidingApp\Project\Observers;
 
 use AidingApp\Project\Models\Project;
-use App\Features\ProjectFeatureFlag;
 
 class ProjectObserver
 {
     public function creating(Project $project): void
     {
-        if (ProjectFeatureFlag::active() && is_null($project->createdBy)) {
+        if (is_null($project->createdBy)) {
             $user = auth()->user();
             $project->createdBy()->associate($user);
         }
