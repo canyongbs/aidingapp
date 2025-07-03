@@ -61,6 +61,9 @@ class ServiceRequestStatusFactory extends Factory
         return $this->state(fn (): array => ['is_system_protected' => true]);
     }
 
+    /**
+     * @return Factory<ServiceRequestStatus>
+     */
     public function open(): Factory
     {
         return $this->state(function (array $attributes) {
@@ -72,6 +75,9 @@ class ServiceRequestStatusFactory extends Factory
         });
     }
 
+    /**
+     * @return Factory<ServiceRequestStatus>
+     */
     public function inProgress(): Factory
     {
         return $this->state(function (array $attributes) {
@@ -83,6 +89,9 @@ class ServiceRequestStatusFactory extends Factory
         });
     }
 
+    /**
+     * @return Factory<ServiceRequestStatus>
+     */
     public function closed(): Factory
     {
         return $this->state(function (array $attributes) {
