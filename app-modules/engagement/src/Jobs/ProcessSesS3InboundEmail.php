@@ -47,12 +47,15 @@ use AidingApp\Engagement\Exceptions\UnableToDetectTenantFromSesS3EmailPayload;
 use AidingApp\Engagement\Exceptions\UnableToRetrieveContentFromSesS3EmailPayload;
 use AidingApp\Engagement\Models\EngagementResponse;
 use AidingApp\Engagement\Models\UnmatchedInboundCommunication;
+use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
+use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\TenantServiceRequestTypeDomain;
 use App\Models\Tenant;
 use Aws\Crypto\KmsMaterialsProviderV2;
 use Aws\Kms\KmsClient;
 use Aws\S3\Crypto\S3EncryptionClientV2;
 use Aws\S3\S3Client;
+use Carbon\CarbonImmutable;
 use Exception;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -189,8 +192,8 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                 });
             });
 
-            $matchedTenants->get('service_request')->each(function (TenantServiceRequestTypeDomain $serviceRequestTypeDomain) use ($parser, $content, $sender) {
-                $serviceRequestTypeDomain->tenant->execute(function () use ($serviceRequestTypeDomain, $parser, $content, $sender) {
+            $matchedTenants->get('service_request')->each(function (TenantServiceRequestTypeDomain $serviceRequestTypeDomain) use ($parser, $sender) {
+                $serviceRequestTypeDomain->tenant->execute(function () use ($serviceRequestTypeDomain, $parser, $sender) {
                     $serviceRequestType = $serviceRequestTypeDomain->serviceRequestType;
 
                     if (is_null($serviceRequestType)) {
@@ -274,34 +277,29 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                         $contacts = $contacts->add($contact);
                     }
 
-                    $contacts->each(function (Contact $contact) use ($serviceRequestType, $parser, $content) {
-                        // TODO: Finish making the service request and delete the engagement stuff below it
+                    $contacts->each(function (Contact $contact) use ($serviceRequestType, $parser) {
                         $serviceRequest = $contact->serviceRequests()
-                            ->create([
-                                'subject' => $parser->getHeader('subject'),
-                                'content' => $parser->getMessageBody('text'),
-                                'occurred_at' => $parser->getHeader('date'),
-                                'type_id' => $serviceRequestType->id,
-                                'priority_id' => $serviceRequestType->emailAutomaticCreationPriority?->id,
-                                'raw' => $content,
+                            ->make([
+                                'title' => $parser->getHeader('subject'),
+                                'close_details' => $parser->getMessageBody('text'),
                             ]);
 
-                        /** @var EngagementResponse $engagementResponse */
-                        $engagementResponse = $contact->engagementResponses()
-                            ->create([
-                                'subject' => $parser->getHeader('subject'),
-                                'content' => $parser->getMessageBody('htmlEmbedded'),
-                                'sent_at' => $parser->getHeader('date'),
-                                'type' => EngagementResponseType::Email,
-                                'raw' => $content,
-                            ]);
+                        $serviceRequestStatus = ServiceRequestStatus::query()
+                            ->where('classification', SystemServiceRequestClassification::Open)
+                            ->where('name', 'New')
+                            ->where('is_system_protected', true)
+                            ->firstOrFail();
 
-                        collect($parser->getAttachments())->each(function (Attachment $attachment) use ($engagementResponse) {
-                            $engagementResponse->addMediaFromStream($attachment->getStream())
-                                ->setName($attachment->getFilename())
-                                ->setFileName($attachment->getFilename())
-                                ->toMediaCollection('attachments');
-                        });
+                        $serviceRequest->status()->associate($serviceRequestStatus);
+                        $serviceRequest->status_updated_at = CarbonImmutable::now();
+
+                        $serviceRequest->respondent()->associate($contact);
+
+                        $serviceRequest->priority()->associate($serviceRequestType->email_automatic_creation_priority_id);
+
+                        $serviceRequest->saveOrFail();
+
+                        // TODO: Handle attachments
                     });
 
                     Storage::disk('s3-inbound-email')->delete($this->emailFilePath);
