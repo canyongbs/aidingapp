@@ -47,3 +47,8 @@ parameters:
             message: '#Call to an undefined method Pest\\PendingCalls\\TestCall::expect\(\)#'
             identifier: method.notFound
             path: tests/Unit/ArchTest.php
+        -
+            message: '#PHPDoc tag @SuppressWarnings has invalid value \(\(PHPMD.(CamelCasePropertyName|CamelCaseParameterName)\)\)\:.*#'
+            identifier: phpDoc.parseError
+            paths:
+                - app-modules/integration-twilio/src/DataTransferObjects/TwilioApiKey.php
