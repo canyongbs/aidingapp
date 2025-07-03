@@ -158,7 +158,6 @@ class TaskKanban extends Component implements HasForms, HasActions
                     ->nullable(),
             ])
             ->action(function (array $data, array $arguments) {
-                /** @var Task $record */
                 $record = new Task(Arr::except($data, 'assigned_to'));
                 $record->assigned_to = $data['assigned_to'] ?? null;
                 $record->status = $arguments['status'] ?? null;
