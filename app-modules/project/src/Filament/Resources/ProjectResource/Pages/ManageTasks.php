@@ -38,7 +38,6 @@ namespace AidingApp\Project\Filament\Resources\ProjectResource\Pages;
 
 use AidingApp\Project\Filament\Resources\ProjectResource;
 use AidingApp\Task\Models\Task;
-use App\Features\ManageTasksFeature;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Tables\Actions\AssociateAction;
 use Filament\Tables\Actions\BulkActionGroup;
@@ -93,6 +92,6 @@ class ManageTasks extends ManageRelatedRecords
     {
         $user = auth()->user();
 
-        return ManageTasksFeature::active() && $user->can(['task.view-any', 'task.*.view']) && parent::canAccess($arguments);
+        return $user->can(['task.view-any', 'task.*.view']) && parent::canAccess($arguments);
     }
 }
