@@ -2,7 +2,7 @@
 
 namespace AidingApp\Task\Models\Scopes;
 
-use App\Features\TaskConfidential;
+use App\Features\ConfidentialTaskFeature;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
@@ -11,10 +11,10 @@ class TaskConfidentialScope implements Scope
 {
     public function apply(Builder $builder, Model $model): void
     {
-        if(!TaskConfidential::active()){
+        if (! ConfidentialTaskFeature::active()) {
             return;
         }
-        
+
         if (auth()->user()?->is_admin) {
             return;
         }
