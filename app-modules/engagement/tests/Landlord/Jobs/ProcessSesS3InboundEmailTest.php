@@ -19,6 +19,7 @@ use App\Models\Tenant;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Mockery\MockInterface;
 
 use function Pest\Laravel\assertDatabaseCount;
@@ -233,7 +234,70 @@ it('handles exceptions correctly in the failed method', function (?Exception $ex
     'unable to find service request type exception' => [fn () => new SesS3InboundServiceRequestTypeNotFound('s3_email', TenantServiceRequestTypeDomain::factory()->createQuietly(['tenant_id' => Tenant::query()->firstOrFail()])), '/failed'],
 ]);
 
-it('properly handles being unable to find the ServiceRequestType')->todo();
+it('properly handles being unable to find the ServiceRequestType', function () {
+    $tenant = Tenant::query()->firstOrFail();
+
+    assert($tenant instanceof Tenant);
+
+    [$contact, $serviceRequestTypeDomain] = $tenant->execute(function () use ($tenant) {
+        $contact = Contact::factory()->create([
+            'email' => 'kevin.ullyott@canyongbs.com',
+        ]);
+
+        $serviceRequestTypeDomain = TenantServiceRequestTypeDomain::factory()->create([
+            'tenant_id' => $tenant->getKey(),
+            'domain' => 'help',
+            'service_request_type_id' => Str::orderedUuid(),
+        ]);
+
+        return [$contact, $serviceRequestTypeDomain];
+    });
+
+    Storage::fake('s3');
+    $filesystem = Storage::fake('s3-inbound-email');
+
+    assert($filesystem instanceof FilesystemAdapter);
+
+    $modulePath = resolve(ModulePath::class);
+
+    $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_for_service_request'));
+
+    $file = UploadedFile::fake()->createWithContent('s3_email', $content);
+
+    $filesystem->putFileAs('', $file, 's3_email');
+
+    /** @var ProcessSesS3InboundEmail $mock */
+    $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content, $serviceRequestTypeDomain) {
+        $mock
+            ->shouldAllowMockingProtectedMethods()
+            ->shouldReceive('getContent')
+            ->once()
+            ->andReturn($content);
+
+        $mock
+            ->shouldReceive('fail')
+            ->once()
+            ->withArgs(function (Throwable $e) use ($serviceRequestTypeDomain) {
+                $invadedException = invade($e);
+
+                return $e instanceof SesS3InboundServiceRequestTypeNotFound
+                    && $invadedException->file === 's3_email'
+                    && $invadedException->serviceRequestTypeDomain->is($serviceRequestTypeDomain);
+            });
+    });
+
+    invade($mock)->emailFilePath = 's3_email';
+
+    $filesystem->assertExists('s3_email');
+
+    $mock->handle();
+
+    $tenant->makeCurrent();
+
+    assertDatabaseEmpty(EngagementResponse::class);
+
+    assertDatabaseEmpty(ServiceRequest::class);
+});
 
 it('handles is_email_automatic_creation_enabled being disabled properly', function () {
     $tenant = Tenant::query()->firstOrFail();
