@@ -66,10 +66,10 @@ class TeamPolicy
         );
     }
 
-    public function update(Authenticatable $authenticatable, Team $team): Response
+    public function update(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['team.*.update', "team.{$team->id}.update"],
+            abilities: 'team.*.update',
             denyResponse: 'You do not have permission to update this team.'
         );
     }

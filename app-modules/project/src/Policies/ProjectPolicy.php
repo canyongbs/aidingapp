@@ -37,9 +37,12 @@
 namespace AidingApp\Project\Policies;
 
 use AidingApp\Project\Models\Project;
+use AidingApp\Team\Models\Team;
 use App\Features\ProjectFeatureFlag;
+use App\Features\ProjectManagersAuditorsFeature;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
+use Illuminate\Database\Eloquent\Collection;
 
 class ProjectPolicy
 {
@@ -62,6 +65,28 @@ class ProjectPolicy
 
     public function view(Authenticatable $authenticatable, Project $project): Response
     {
+        if (ProjectManagersAuditorsFeature::active() && ! auth()->user()->isSuperAdmin()) {
+            $team = auth()->user()->team;
+            /** @var Collection<int, Team> $managerTeams */
+            $managerTeams = $project->managerTeams;
+            /** @var Collection<int, Team> $managerUsers */
+            $managerUsers = $project->managerUsers;
+            /** @var Collection<int, Team> $auditorTeams */
+            $auditorTeams = $project->auditorTeams;
+            /** @var Collection<int, Team> $auditorUsers */
+            $auditorUsers = $project->auditorUsers;
+
+            if (
+                ! $managerTeams->contains('id', $team?->getKey()) &&
+                ! $auditorTeams->contains('id', $team?->getKey()) &&
+                ! $managerUsers->contains('id', auth()->user()->getKey()) &&
+                ! $auditorUsers->contains('id', auth()->user()->getKey()) &&
+                ! $project->createdBy?->is(auth()->user())
+            ) {
+                return Response::deny("You don't have permission to view this project because you're not an auditor or manager or creator of this project.");
+            }
+        }
+
         return $authenticatable->canOrElse(
             abilities: 'project.*.view',
             denyResponse: 'You do not have permission to view this project.'
@@ -78,14 +103,60 @@ class ProjectPolicy
 
     public function update(Authenticatable $authenticatable, Project $project): Response
     {
+        if (ProjectManagersAuditorsFeature::active() && ! auth()->user()->isSuperAdmin()) {
+            $team = auth()->user()->team;
+
+            /** @var Collection<int, Team> $managerTeams */
+            $managerTeams = $project->managerTeams;
+            /** @var Collection<int, Team> $managerUsers */
+            $managerUsers = $project->managerUsers;
+            /** @var Collection<int, Team> $auditorTeams */
+            $auditorTeams = $project->auditorTeams;
+            /** @var Collection<int, Team> $auditorUsers */
+            $auditorUsers = $project->auditorUsers;
+
+            if (
+                ! $managerTeams->contains('id', $team?->getKey()) &&
+                ! $auditorTeams->contains('id', $team?->getKey()) &&
+                ! $managerUsers->contains('id', auth()->user()->getKey()) &&
+                ! $auditorUsers->contains('id', auth()->user()->getKey()) &&
+                ! $project->createdBy?->is(auth()->user())
+            ) {
+                return Response::deny("You don't have permission to update this project because you're not an auditor or manager or creator of this project.");
+            }
+        }
+
         return $authenticatable->canOrElse(
-            abilities: ['project.*.update'],
+            abilities: 'project.*.update',
             denyResponse: 'You do not have permission to update this project.'
         );
     }
 
     public function delete(Authenticatable $authenticatable, Project $project): Response
     {
+        if (ProjectManagersAuditorsFeature::active() && ! auth()->user()->isSuperAdmin()) {
+            $team = auth()->user()->team;
+
+            /** @var Collection<int, Team> $managerTeams */
+            $managerTeams = $project->managerTeams;
+            /** @var Collection<int, Team> $managerUsers */
+            $managerUsers = $project->managerUsers;
+            /** @var Collection<int, Team> $auditorTeams */
+            $auditorTeams = $project->auditorTeams;
+            /** @var Collection<int, Team> $auditorUsers */
+            $auditorUsers = $project->auditorUsers;
+
+            if (
+                ! $managerTeams->contains('id', $team?->getKey()) &&
+                ! $auditorTeams->contains('id', $team?->getKey()) &&
+                ! $managerUsers->contains('id', auth()->user()->getKey()) &&
+                ! $auditorUsers->contains('id', auth()->user()->getKey()) &&
+                ! $project->createdBy?->is(auth()->user())
+            ) {
+                return Response::deny("You don't have permission to delete this project because you're not an auditor or manager or creator of this project.");
+            }
+        }
+
         return $authenticatable->canOrElse(
             abilities: 'project.*.delete',
             denyResponse: 'You do not have permission to delete this project.'
@@ -102,6 +173,29 @@ class ProjectPolicy
 
     public function forceDelete(Authenticatable $authenticatable, Project $project): Response
     {
+        if (ProjectManagersAuditorsFeature::active() && ! auth()->user()->isSuperAdmin()) {
+            $team = auth()->user()->team;
+
+            /** @var Collection<int, Team> $managerTeams */
+            $managerTeams = $project->managerTeams;
+            /** @var Collection<int, Team> $managerUsers */
+            $managerUsers = $project->managerUsers;
+            /** @var Collection<int, Team> $auditorTeams */
+            $auditorTeams = $project->auditorTeams;
+            /** @var Collection<int, Team> $auditorUsers */
+            $auditorUsers = $project->auditorUsers;
+
+            if (
+                ! $managerTeams->contains('id', $team?->getKey()) &&
+                ! $auditorTeams->contains('id', $team?->getKey()) &&
+                ! $managerUsers->contains('id', auth()->user()->getKey()) &&
+                ! $auditorUsers->contains('id', auth()->user()->getKey()) &&
+                ! $project->createdBy?->is(auth()->user())
+            ) {
+                return Response::deny("You don't have permission to permanently delete this project because you're not an auditor or manager or creator of this project.");
+            }
+        }
+
         return $authenticatable->canOrElse(
             abilities: 'project.*.force-delete',
             denyResponse: 'You do not have permission to permanently delete this project.'
