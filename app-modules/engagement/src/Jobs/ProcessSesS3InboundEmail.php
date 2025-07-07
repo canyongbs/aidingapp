@@ -259,11 +259,9 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
 
                         $status = ContactStatus::query()
                             ->where('classification', SystemContactClassification::New)
-                            ->first();
+                            ->firstOrFail();
 
-                        if ($status) {
-                            $contact->status()->associate($status);
-                        }
+                        $contact->status()->associate($status);
 
                         // TODO: Talk with Product about whether or not this is correct.
                         $source = ContactSource::query()
