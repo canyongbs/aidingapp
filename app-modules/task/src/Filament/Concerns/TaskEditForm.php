@@ -77,14 +77,6 @@ trait TaskEditForm
                         ->multiple()
                         ->exists('teams', 'id')
                         ->visible(fn (Get $get) => $get('is_confidential')),
-                    Select::make('project_id')
-                        ->relationship('project', 'name')
-                        ->preload()
-                        ->searchable()
-                        ->native(false)
-                        ->label('Project')
-                        ->exists('projects', 'id')
-                        ->visible(fn (Get $get) => $get('is_confidential')),
                 ]),
             TextInput::make('title')
                 ->required()

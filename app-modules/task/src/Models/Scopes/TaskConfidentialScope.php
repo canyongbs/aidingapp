@@ -15,7 +15,7 @@ class TaskConfidentialScope implements Scope
             return;
         }
 
-        if (auth()->user()?->is_admin) {
+        if (auth()->user()?->isSuperAdmin()) {
             return;
         }
 
@@ -23,9 +23,6 @@ class TaskConfidentialScope implements Scope
             $query->where('is_confidential', true)
                 ->where(function (Builder $query) {
                     $query->where('created_by', auth()->id())
-                        ->orWhereHas('project', function (Builder $query) {
-                            $query->where('created_by_id', auth()->id());
-                        })
                         ->orWhereHas('confidentialAccessTeams', function (Builder $query) {
                             $query->whereHas('users', function (Builder $query) {
                                 $query->where('users.id', auth()->id());

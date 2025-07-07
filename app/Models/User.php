@@ -80,8 +80,6 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Staudenmeir\EloquentHasManyDeep\HasManyDeep;
 use Staudenmeir\EloquentHasManyDeep\HasRelationships;
-use Illuminate\Database\Eloquent\Casts\Attribute;
-
 
 /**
  * @mixin IdeHelperUser
@@ -440,14 +438,6 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
         return $this->belongsToMany(ServiceMonitoringTarget::class)
             ->using(ServiceMonitoringTargetUser::class)
             ->withTimestamps();
-    }
-
-    /** @return Attribute<bool, never> */
-    protected function isAdmin(): Attribute
-    {
-        return Attribute::make(
-            get: fn () => $this->roles()->where('name', Authenticatable::SUPER_ADMIN_ROLE)->exists(),
-        );
     }
 
     protected function serializeDate(DateTimeInterface $date): string
