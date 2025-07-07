@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Task\Tests\RequestFactories;
+namespace AidingApp\Task\Tests\Tenant\RequestFactories;
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Task\Enums\TaskStatus;

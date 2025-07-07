@@ -38,7 +38,7 @@ use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Task\Filament\Resources\TaskResource;
 use AidingApp\Task\Filament\Resources\TaskResource\Pages\EditTask;
 use AidingApp\Task\Models\Task;
-use AidingApp\Task\Tests\RequestFactories\EditTaskRequestFactory;
+use AidingApp\Task\Tests\Tenant\RequestFactories\EditTaskRequestFactory;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
