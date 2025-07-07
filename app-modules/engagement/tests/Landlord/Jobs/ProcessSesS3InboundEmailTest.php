@@ -13,6 +13,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\TenantServiceRequestTypeDomain;
 use App\Actions\Paths\ModulePath;
 use App\Models\Tenant;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Mockery\MockInterface;
@@ -105,7 +106,9 @@ it('handles virus verdict failure properly', function () {
 
 it('properly handles not finding a Contact match for emails that should be an EngagementResponse', function () {
     Storage::fake('s3');
-    Storage::fake('s3-inbound-email');
+    $filesystem = Storage::fake('s3-inbound-email');
+
+    assert($filesystem instanceof FilesystemAdapter);
 
     $modulePath = resolve(ModulePath::class);
 
@@ -113,7 +116,7 @@ it('properly handles not finding a Contact match for emails that should be an En
 
     $file = UploadedFile::fake()->createWithContent('s3_email', $content);
 
-    Storage::disk('s3-inbound-email')->putFileAs('', $file, 's3_email');
+    $filesystem->putFileAs('', $file, 's3_email');
 
     /** @var ProcessSesS3InboundEmail $mock */
     $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
@@ -136,12 +139,14 @@ it('properly handles not finding a Contact match for emails that should be an En
         'sender' => 'kevin.ullyott@canyongbs.com',
         'type' => EngagementResponseType::Email->value,
     ]);
-    Storage::disk('s3-inbound-email')->assertMissing('s3_email');
+    $filesystem->assertMissing('s3_email');
 });
 
 it('properly creates an EngagementResponse for an inbound email', function () {
     Storage::fake('s3');
     $filesystem = Storage::fake('s3-inbound-email');
+
+    assert($filesystem instanceof FilesystemAdapter);
 
     $tenant = Tenant::query()->first();
 
@@ -198,6 +203,8 @@ it('handles attachements properly', function () {})->todo('Test attachments hand
 it('handles exceptions correctly in the failed method', function (?Exception $exception, string $expectedPath) {
     Storage::fake('s3');
     $filesystem = Storage::fake('s3-inbound-email');
+
+    assert($filesystem instanceof FilesystemAdapter);
 
     $modulePath = resolve(ModulePath::class);
 
@@ -265,6 +272,8 @@ it('properly creates a service request for a matching contact', function () {
 
     Storage::fake('s3');
     $filesystem = Storage::fake('s3-inbound-email');
+
+    assert($filesystem instanceof FilesystemAdapter);
 
     $modulePath = resolve(ModulePath::class);
 
