@@ -308,12 +308,16 @@ it('properly creates a service request for a matching contact', function () {
     $serviceRequests = ServiceRequest::all();
 
     expect($serviceRequests)->toHaveCount(1);
+
     $serviceRequest = $serviceRequests->first();
+
+    assert($serviceRequest instanceof ServiceRequest);
 
     expect($serviceRequest->title)->toBe('This is a test')
         ->and($serviceRequest->close_details)->toContain('Hello there! This should be put in S3!')
         ->and($serviceRequest->respondent->is($contact))->toBeTrue()
-        ->and($serviceRequest->priority->is($assignedPriority))->toBeTrue();
+        ->and($serviceRequest->priority->is($assignedPriority))->toBeTrue()
+        ->and($serviceRequest->priority->type->is($serviceRequestType))->toBeTrue();
 
     $filesystem->assertMissing('s3_email');
 });
