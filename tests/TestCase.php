@@ -119,7 +119,7 @@ abstract class TestCase extends BaseTestCase
 
     protected function createTenant(string $name, string $domain, string $database): Tenant
     {
-        return app(CreateTenant::class)(
+        $tenant = app(CreateTenant::class)(
             $name,
             $domain,
             new TenantConfig(
@@ -200,6 +200,15 @@ abstract class TestCase extends BaseTestCase
             ),
             false,
         );
+
+        $tenant->execute(function () use ($tenant) {
+            Role::query()->firstOrCreate([
+                'name' => Authenticatable::SUPER_ADMIN_ROLE,
+                'guard_name' => 'web',
+            ]);
+        });
+
+        return $tenant;
     }
 
     protected function refreshTenantTestingEnvironment(?Tenant $tenant = null): void
