@@ -2,6 +2,7 @@
 
 namespace AidingApp\ServiceManagement\Models;
 
+use AidingApp\ServiceManagement\Database\Factories\TenantServiceRequestTypeDomainFactory;
 use App\Models\Tenant;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,7 +15,9 @@ use Spatie\Multitenancy\Models\Concerns\UsesLandlordConnection;
  */
 class TenantServiceRequestTypeDomain extends Model
 {
-    // use HasFactory;
+    /** @use HasFactory<TenantServiceRequestTypeDomainFactory> */
+    use HasFactory;
+
     use HasUuids;
     use UsesLandlordConnection;
     // TODO: Add Auditing

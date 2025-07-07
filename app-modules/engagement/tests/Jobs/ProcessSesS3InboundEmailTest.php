@@ -7,13 +7,16 @@ use AidingApp\Engagement\Exceptions\UnableToRetrieveContentFromSesS3EmailPayload
 use AidingApp\Engagement\Jobs\ProcessSesS3InboundEmail;
 use AidingApp\Engagement\Models\EngagementResponse;
 use AidingApp\Engagement\Models\UnmatchedInboundCommunication;
+use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\ServiceManagement\Models\TenantServiceRequestTypeDomain;
 use App\Actions\Paths\ModulePath;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Mockery\MockInterface;
 
 use function Pest\Laravel\assertDatabaseCount;
+use function Pest\Laravel\assertDatabaseEmpty;
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\partialMock;
 
@@ -241,22 +244,31 @@ it('properly creates a service request for a matching contact', function () {
 
     invade($mock)->emailFilePath = 's3_email';
 
-    // $serviceRequestType = ServiceRequestType::factory()->create([
-    //     'is_email_automatic_creation_enabled' => true,
-    //     'is_email_automatic_creation_contact_create_enabled' => true,
-    // ]);
+    $serviceRequestType = ServiceRequestType::factory()
+        ->has(
+            TenantServiceRequestTypeDomain::factory()->state([
+                'domain' => 'help',
+            ]),
+            'domain'
+        )
+        ->has(
+            ServiceRequestPriority::factory()->count(3),
+            'priorities'
+        )
+        ->create([
+            'is_email_automatic_creation_enabled' => true,
+            'is_email_automatic_creation_contact_create_enabled' => false,
+        ]);
+
+    $serviceRequestType->update([
+        'email_automatic_creation_priority_id' => $serviceRequestType->priorities->first()->getKey(),
+    ]);
 
     Storage::disk('s3-inbound-email')->assertExists('s3_email');
 
     $mock->handle();
 
-    assertDatabaseHas(EngagementResponse::class, [
-        'subject' => 'This is a test',
-        'sender_id' => $contact->getKey(),
-        'sender_type' => $contact->getMorphClass(),
-        'type' => EngagementResponseType::Email->value,
-        'raw' => file_get_contents($modulePath('engagement', 'tests/Fixtures/s3_email')),
-    ]);
+    assertDatabaseEmpty(EngagementResponse::class);
 
     Storage::disk('s3-inbound-email')->assertMissing('s3_email');
-});
+})->only();

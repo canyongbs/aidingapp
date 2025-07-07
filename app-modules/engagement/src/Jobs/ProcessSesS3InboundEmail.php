@@ -101,6 +101,9 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                 new SesS3InboundSpamOrVirusDetected($this->emailFilePath, $parser->getHeader('X-SES-Spam-Verdict'), $parser->getHeader('X-SES-Virus-Verdict')),
             );
 
+            // dd(collect($parser->getAddresses('to'))
+            //     ->pluck('address'));
+
             $matchedTenants = collect($parser->getAddresses('to'))
                 ->pluck('address')
                 ->mapToGroups(function (string $address) {
@@ -122,16 +125,23 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                         return ['engagements' => $tenant];
                     }
 
-                    $serviceRequestTypeDomain = TenantServiceRequestTypeDomain::query()
-                        ->where(
-                            DB::raw('LOWER(domain)'),
-                            mb_strtolower($localPart)
-                        )
-                        ->whereHas('tenant')
-                        ->first();
+                    preg_match('/([a-z0-9\-]+)\-([a-z0-9]+)/', $localPart, $matches);
 
-                    if ($serviceRequestTypeDomain) {
-                        return ['service_request' => $serviceRequestTypeDomain];
+                    if (isset($matches[1]) && isset($matches[2])) {
+                        $tenantDomain = mb_strtolower($matches[1]);
+                        $typeDomain = mb_strtolower($matches[2]);
+
+                        $serviceRequestTypeDomain = TenantServiceRequestTypeDomain::query()
+                            ->where(
+                                DB::raw('LOWER(domain)'),
+                                $typeDomain
+                            )
+                            ->whereRelation('tenant', 'domain', 'like', "{$tenantDomain}.%")
+                            ->first();
+
+                        if ($serviceRequestTypeDomain) {
+                            return ['service_request' => $serviceRequestTypeDomain];
+                        }
                     }
 
                     return null;
@@ -300,6 +310,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
 
                         $serviceRequest->respondent()->associate($contact);
 
+                        // TODO: This should not be possible if this ID does not match to anything
                         $serviceRequest->priority()->associate($serviceRequestType->email_automatic_creation_priority_id);
 
                         $serviceRequest->saveOrFail();
