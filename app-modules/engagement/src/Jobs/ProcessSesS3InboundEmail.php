@@ -279,8 +279,6 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
 
                         $contact->organization()->associate($organization);
 
-                        // TODO: Test "creates a new contact for a service request when is_email_automatic_creation_contact_create_enabled is enabled"
-
                         $contact->save();
 
                         $contacts = $contacts->add($contact);
