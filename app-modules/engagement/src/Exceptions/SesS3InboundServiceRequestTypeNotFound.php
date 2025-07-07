@@ -34,24 +34,30 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Database\Factories;
+namespace AidingApp\Engagement\Exceptions;
 
-use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\TenantServiceRequestTypeDomain;
-use App\Models\Tenant;
-use Illuminate\Database\Eloquent\Factories\Factory;
+use Exception;
 
-/**
- * @extends Factory<TenantServiceRequestTypeDomain>
- */
-class TenantServiceRequestTypeDomainFactory extends Factory
+class SesS3InboundServiceRequestTypeNotFound extends Exception
 {
-    public function definition(): array
+    public function __construct(
+        protected string $file,
+        protected TenantServiceRequestTypeDomain $serviceRequestTypeDomain,
+    ) {
+        parent::__construct('ServiceRequestType not found for TenantServiceRequestTypeDomain: ' . $this->serviceRequestTypeDomain->getKey());
+    }
+
+    /**
+     * Get the exception's context information.
+     *
+     * @return array<string, mixed>
+     */
+    public function context(): array
     {
         return [
-            'tenant_id' => Tenant::current()?->getKey() ?? Tenant::query()->firstOrFail()->getKey(),
-            'service_request_type_id' => ServiceRequestType::factory(),
-            'domain' => $this->faker->unique()->word(),
+            'file' => $this->file,
+            'service_request_type_domain' => $this->serviceRequestTypeDomain->getKey(),
         ];
     }
 }

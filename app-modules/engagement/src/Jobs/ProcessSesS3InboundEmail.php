@@ -42,6 +42,7 @@ use AidingApp\Contact\Models\ContactSource;
 use AidingApp\Contact\Models\ContactStatus;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Engagement\Enums\EngagementResponseType;
+use AidingApp\Engagement\Exceptions\SesS3InboundServiceRequestTypeNotFound;
 use AidingApp\Engagement\Exceptions\SesS3InboundSpamOrVirusDetected;
 use AidingApp\Engagement\Exceptions\UnableToDetectTenantFromSesS3EmailPayload;
 use AidingApp\Engagement\Exceptions\UnableToRetrieveContentFromSesS3EmailPayload;
@@ -204,14 +205,10 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                     $serviceRequestType = $serviceRequestTypeDomain->serviceRequestType;
 
                     if (is_null($serviceRequestType)) {
-                        // TODO: Test "throws the right exception when unable to find the ServiceRequestType"
-                        report(new Exception(
-                            'ServiceRequestType not found for TenantServiceRequestTypeDomain: ' . $serviceRequestTypeDomain->getKey()
-                        ));
-
-                        Storage::disk('s3-inbound-email')->delete($this->emailFilePath);
-
-                        return;
+                        throw new SesS3InboundServiceRequestTypeNotFound(
+                            $this->emailFilePath,
+                            $serviceRequestTypeDomain
+                        );
                     }
 
                     if (! $serviceRequestType->is_email_automatic_creation_enabled) {
@@ -316,7 +313,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
 
             DB::commit();
         } catch (
-            UnableToRetrieveContentFromSesS3EmailPayload | SesS3InboundSpamOrVirusDetected | UnableToDetectTenantFromSesS3EmailPayload $e) {
+            UnableToRetrieveContentFromSesS3EmailPayload | SesS3InboundSpamOrVirusDetected | UnableToDetectTenantFromSesS3EmailPayload | SesS3InboundServiceRequestTypeNotFound $e) {
                 DB::rollBack();
 
                 // Instantly fail for this exception

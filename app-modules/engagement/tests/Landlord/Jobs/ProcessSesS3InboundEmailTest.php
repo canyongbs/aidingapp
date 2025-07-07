@@ -4,6 +4,7 @@ use AidingApp\Contact\Database\Seeders\ContactStatusSeeder;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Engagement\Enums\EngagementResponseType;
+use AidingApp\Engagement\Exceptions\SesS3InboundServiceRequestTypeNotFound;
 use AidingApp\Engagement\Exceptions\SesS3InboundSpamOrVirusDetected;
 use AidingApp\Engagement\Exceptions\UnableToRetrieveContentFromSesS3EmailPayload;
 use AidingApp\Engagement\Jobs\ProcessSesS3InboundEmail;
@@ -229,9 +230,10 @@ it('handles exceptions correctly in the failed method', function (?Exception $ex
     'spam exception' => [new SesS3InboundSpamOrVirusDetected('s3_email', 'FAIL', 'PASS'), '/spam-or-virus-detected'],
     'virus exception' => [new SesS3InboundSpamOrVirusDetected('s3_email', 'PASS', 'FAIL'), '/spam-or-virus-detected'],
     'unable to retrieve content exception' => [new UnableToRetrieveContentFromSesS3EmailPayload('s3_email'), '/failed'],
+    'unable to find service request type exception' => [fn () => new SesS3InboundServiceRequestTypeNotFound('s3_email', TenantServiceRequestTypeDomain::factory()->createQuietly(['tenant_id' => Tenant::query()->firstOrFail()])), '/failed'],
 ]);
 
-it('throws the right exception when unable to find the ServiceRequestType')->todo();
+it('properly handles being unable to find the ServiceRequestType')->todo();
 
 it('handles is_email_automatic_creation_enabled being disabled properly', function () {
     $tenant = Tenant::query()->firstOrFail();
