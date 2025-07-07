@@ -34,77 +34,41 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Engagement\Actions\CreateEngagement;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Engagement\Actions\CreateEngagementBatch;
 use AidingApp\Engagement\DataTransferObjects\EngagementCreationData;
-use AidingApp\Engagement\Models\Engagement;
-use AidingApp\Engagement\Notifications\EngagementNotification;
-use AidingApp\Engagement\Tests\RequestFactories\CreateEngagementRequestFactory;
-use Illuminate\Support\Facades\Notification;
+use AidingApp\Engagement\Models\EngagementBatch;
+use AidingApp\Engagement\Tests\Tenant\RequestFactories\CreateEngagementBatchRequestFactory;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Testing\Fakes\PendingBatchFake;
 
 use function Pest\Laravel\assertDatabaseCount;
 
-it('will create and send an engagement immediately', function () {
-    Notification::fake();
+it('will create an engagement batch', function () {
+    Bus::fake();
 
-    assertDatabaseCount(Engagement::class, 0);
+    assertDatabaseCount(EngagementBatch::class, 0);
 
-    $data = CreateEngagementRequestFactory::new()->create();
+    $data = CreateEngagementBatchRequestFactory::new()->create();
 
-    app(CreateEngagement::class)->execute(new EngagementCreationData(
+    app(CreateEngagementBatch::class)->execute(new EngagementCreationData(
         user: $data['user'],
-        recipient: $data['recipient'],
+        recipient: Contact::factory()->count(10)->create(),
         channel: $data['channel'],
         subject: $data['subject'],
         body: $data['body'],
-        scheduledAt: null,
+        scheduledAt: Carbon::parse($data['scheduledAt']),
     ));
 
-    assertDatabaseCount(Engagement::class, 1);
+    assertDatabaseCount(EngagementBatch::class, 1);
 
-    expect(Engagement::first())
+    expect(EngagementBatch::first())
         ->user->is($data['user'])->toBeTrue()
-        ->recipient->is($data['recipient'])->toBeTrue()
         ->channel->toBe($data['channel'])
         ->subject->toBe($data['subject'])
         ->body->toMatchArray($data['body'])
-        ->scheduled_at->toBeNull()
-        ->dispatched_at->not->toBeNull();
+        ->scheduled_at->startOfSecond()->eq(Carbon::parse($data['scheduledAt'])->startOfSecond())->toBeTrue();
 
-    Notification::assertSentTo(
-        $data['recipient'],
-        EngagementNotification::class
-    );
-});
-
-it('will create but not dispatch a scheduled engagement', function () {
-    Notification::fake();
-
-    assertDatabaseCount(Engagement::class, 0);
-
-    $data = CreateEngagementRequestFactory::new()->create();
-
-    app(CreateEngagement::class)->execute(new EngagementCreationData(
-        user: $data['user'],
-        recipient: $data['recipient'],
-        channel: $data['channel'],
-        subject: $data['subject'],
-        body: $data['body'],
-        scheduledAt: $scheduledAt = now()->addMinute(),
-    ));
-
-    assertDatabaseCount(Engagement::class, 1);
-
-    expect(Engagement::first())
-        ->user->is($data['user'])->toBeTrue()
-        ->recipient->is($data['recipient'])->toBeTrue()
-        ->channel->toBe($data['channel'])
-        ->subject->toBe($data['subject'])
-        ->body->toMatchArray($data['body'])
-        ->scheduled_at->startOfSecond()->eq($scheduledAt->startOfSecond())->toBeTrue()
-        ->dispatched_at->toBeNull();
-
-    Notification::assertNotSentTo(
-        $data['recipient'],
-        EngagementNotification::class
-    );
+    Bus::assertBatched(fn (PendingBatchFake $batch): bool => $batch->jobs->count() === 10);
 });

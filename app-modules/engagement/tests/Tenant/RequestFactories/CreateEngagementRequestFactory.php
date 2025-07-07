@@ -34,19 +34,21 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Tests\RequestFactories;
+namespace AidingApp\Engagement\Tests\Tenant\RequestFactories;
 
+use AidingApp\Contact\Models\Contact;
 use AidingApp\Engagement\Models\EngagementBatch;
 use AidingApp\Notification\Enums\NotificationChannel;
 use App\Models\User;
 use Worksome\RequestFactories\RequestFactory;
 
-class CreateEngagementBatchRequestFactory extends RequestFactory
+class CreateEngagementRequestFactory extends RequestFactory
 {
     public function definition(): array
     {
         return [
             'user' => User::factory()->create(),
+            'recipient' => Contact::factory()->create(),
             'subject' => fake()->sentence,
             'body' => ['type' => 'doc', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => fake()->paragraph]]]]],
             'scheduledAt' => fake()->dateTimeBetween('-1 year', '-1 day'),

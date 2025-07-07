@@ -29,7 +29,7 @@ it('handles spam verdict failure properly', function () {
 
     $modulePath = resolve(ModulePath::class);
 
-    $content = file_get_contents($modulePath('engagement', 'tests/Fixtures/s3_email_spam'));
+    $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_spam'));
 
     $file = UploadedFile::fake()->createWithContent('s3_email_spam', $content);
 
@@ -69,7 +69,7 @@ it('handles virus verdict failure properly', function () {
 
     $modulePath = resolve(ModulePath::class);
 
-    $content = file_get_contents($modulePath('engagement', 'tests/Fixtures/s3_email_virus'));
+    $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_virus'));
 
     $file = UploadedFile::fake()->createWithContent('s3_email_virus', $content);
 
@@ -109,7 +109,7 @@ it('properly handles not finding a Contact match for emails that should be an En
 
     $modulePath = resolve(ModulePath::class);
 
-    $content = file_get_contents($modulePath('engagement', 'tests/Fixtures/s3_email'));
+    $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email'));
 
     $file = UploadedFile::fake()->createWithContent('s3_email', $content);
 
@@ -143,13 +143,23 @@ it('properly creates an EngagementResponse for an inbound email', function () {
     Storage::fake('s3');
     $filesystem = Storage::fake('s3-inbound-email');
 
-    $contact = Contact::factory()->create([
-        'email' => 'kevin.ullyott@canyongbs.com',
-    ]);
+    $tenant = Tenant::query()->first();
+
+    assert($tenant instanceof Tenant);
+
+    $contact = null;
+
+    $tenant->execute(function () use (&$contact) {
+        $contact = Contact::factory()->create([
+            'email' => 'kevin.ullyott@canyongbs.com',
+        ]);
+    });
+
+    assert($contact instanceof Contact);
 
     $modulePath = resolve(ModulePath::class);
 
-    $content = file_get_contents($modulePath('engagement', 'tests/Fixtures/s3_email'));
+    $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email'));
 
     $file = UploadedFile::fake()->createWithContent('s3_email', $content);
 
@@ -170,20 +180,17 @@ it('properly creates an EngagementResponse for an inbound email', function () {
 
     $mock->handle();
 
-    assertDatabaseHas(EngagementResponse::class, [
-        'subject' => 'This is a test',
-        'sender_id' => $contact->getKey(),
-        'sender_type' => $contact->getMorphClass(),
-        'type' => EngagementResponseType::Email->value,
-        'raw' => file_get_contents($modulePath('engagement', 'tests/Fixtures/s3_email')),
-    ]);
+    $tenant->execute(function () use ($contact, $modulePath) {
+        assertDatabaseHas(EngagementResponse::class, [
+            'subject' => 'This is a test',
+            'sender_id' => $contact->getKey(),
+            'sender_type' => $contact->getMorphClass(),
+            'type' => EngagementResponseType::Email->value,
+            'raw' => file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email')),
+        ]);
+    });
 
     $filesystem->assertMissing('s3_email');
-
-    forgetMock(ProcessSesS3InboundEmail::class);
-
-    Storage::forgetDisk('s3-inbound-email');
-    Storage::forgetDisk('s3');
 });
 
 it('handles attachements properly', function () {})->todo('Test attachments handling in ProcessSesS3InboundEmail');
@@ -194,7 +201,7 @@ it('handles exceptions correctly in the failed method', function (?Exception $ex
 
     $modulePath = resolve(ModulePath::class);
 
-    $content = file_get_contents($modulePath('engagement', 'tests/Fixtures/s3_email'));
+    $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email'));
 
     $file = UploadedFile::fake()->createWithContent('s3_email', $content);
 
@@ -261,7 +268,7 @@ it('properly creates a service request for a matching contact', function () {
 
     $modulePath = resolve(ModulePath::class);
 
-    $content = file_get_contents($modulePath('engagement', 'tests/Fixtures/s3_email_for_service_request'));
+    $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_for_service_request'));
 
     $file = UploadedFile::fake()->createWithContent('s3_email', $content);
 
