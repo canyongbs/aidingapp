@@ -21,7 +21,6 @@ use Mockery\MockInterface;
 use function Pest\Laravel\assertDatabaseCount;
 use function Pest\Laravel\assertDatabaseEmpty;
 use function Pest\Laravel\assertDatabaseHas;
-use function Pest\Laravel\forgetMock;
 use function Pest\Laravel\partialMock;
 
 it('handles spam verdict failure properly', function () {
@@ -240,35 +239,39 @@ it('sends ineligible email when no contact is found for a service request and is
 it('creates a new contact for a service request when is_email_automatic_creation_contact_create_enabled is enabled')->todo();
 
 it('properly creates a service request for a matching contact', function () {
-    $contact = Contact::factory()->create([
-        'email' => 'kevin.ullyott@canyongbs.com',
-    ]);
+    $tenant = Tenant::query()->firstOrFail();
 
-    $serviceRequestType = ServiceRequestType::factory()
-        ->has(
-            TenantServiceRequestTypeDomain::factory()->state([
-                'domain' => 'help',
-            ]),
-            'domain'
-        )
-        ->has(
-            ServiceRequestPriority::factory()->count(3),
-            'priorities'
-        )
-        ->create([
-            'is_email_automatic_creation_enabled' => true,
-            'is_email_automatic_creation_contact_create_enabled' => false,
+    assert($tenant instanceof Tenant);
+
+    [$contact, $serviceRequestType, $assignedPriority] = $tenant->execute(function () {
+        $contact = Contact::factory()->create([
+            'email' => 'kevin.ullyott@canyongbs.com',
         ]);
 
-    $assignedPriority = $serviceRequestType->priorities->first();
+        $serviceRequestType = ServiceRequestType::factory()
+            ->has(
+                TenantServiceRequestTypeDomain::factory()->state([
+                    'domain' => 'help',
+                ]),
+                'domain'
+            )
+            ->has(
+                ServiceRequestPriority::factory()->count(3),
+                'priorities'
+            )
+            ->create([
+                'is_email_automatic_creation_enabled' => true,
+                'is_email_automatic_creation_contact_create_enabled' => false,
+            ]);
 
-    $serviceRequestType->update([
-        'email_automatic_creation_priority_id' => $assignedPriority->getKey(),
-    ]);
+        $assignedPriority = $serviceRequestType->priorities->first();
 
-    $tenant = Tenant::current();
+        $serviceRequestType->update([
+            'email_automatic_creation_priority_id' => $assignedPriority->getKey(),
+        ]);
 
-    Tenant::forgetCurrent();
+        return [$contact, $serviceRequestType, $assignedPriority];
+    });
 
     Storage::fake('s3');
     $filesystem = Storage::fake('s3-inbound-email');
@@ -282,8 +285,6 @@ it('properly creates a service request for a matching contact', function () {
     $file = UploadedFile::fake()->createWithContent('s3_email', $content);
 
     $filesystem->putFileAs('', $file, 's3_email');
-
-    forgetMock(ProcessSesS3InboundEmail::class);
 
     /** @var ProcessSesS3InboundEmail $mock */
     $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
@@ -300,9 +301,9 @@ it('properly creates a service request for a matching contact', function () {
 
     $mock->handle();
 
-    assertDatabaseEmpty(EngagementResponse::class);
-
     $tenant->makeCurrent();
+
+    assertDatabaseEmpty(EngagementResponse::class);
 
     $serviceRequests = ServiceRequest::all();
 
@@ -315,4 +316,4 @@ it('properly creates a service request for a matching contact', function () {
         ->and($serviceRequest->priority->is($assignedPriority))->toBeTrue();
 
     $filesystem->assertMissing('s3_email');
-})->todo();
+});
