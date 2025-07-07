@@ -34,17 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase\Tests\KnowledgeBaseCategory\RequestFactories;
+namespace AidingApp\KnowledgeBase\Tests\Tenant\KnowledgeBaseQuality\RequestFactories;
 
 use Worksome\RequestFactories\RequestFactory;
 
-class CreateKnowledgeBaseCategoryRequestFactory extends RequestFactory
+class CreateKnowledgeBaseQualityRequestFactory extends RequestFactory
 {
     public function definition(): array
     {
         return [
-            'name' => fake()->word(),
-            'slug' => fake()->slug(),
+            'name' => $this->faker->word(),
         ];
     }
 }

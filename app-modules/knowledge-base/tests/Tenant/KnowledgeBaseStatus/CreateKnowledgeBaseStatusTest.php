@@ -37,61 +37,54 @@
 use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
-use AidingApp\KnowledgeBase\Tests\KnowledgeBaseStatus\RequestFactories\EditKnowledgeBaseStatusRequestFactory;
+use AidingApp\KnowledgeBase\Tests\Tenant\KnowledgeBaseStatus\RequestFactories\CreateKnowledgeBaseStatusRequestFactory;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Livewire\livewire;
-use function PHPUnit\Framework\assertEquals;
+use function PHPUnit\Framework\assertCount;
 
-// TODO: Write EditKnowledgeBaseStatus tests
-//test('A successful action on the EditKnowledgeBaseStatus page', function () {});
+// TODO: Write CreateKnowledgeBaseStatus tests
+//test('A successful action on the CreateKnowledgeBaseStatus page', function () {});
 //
-//test('EditKnowledgeBaseStatus requires valid data', function ($data, $errors) {})->with([]);
+//test('CreateKnowledgeBaseStatus requires valid data', function ($data, $errors) {})->with([]);
 
 // Permission Tests
 
-test('EditKnowledgeBaseStatus is gated with proper access control', function () {
+test('CreateKnowledgeBaseStatus is gated with proper access control', function () {
     $user = User::factory()->licensed(LicenseType::cases())->create();
-
-    $knowledgeBaseStatus = KnowledgeBaseStatus::factory()->create();
 
     actingAs($user)
         ->get(
-            KnowledgeBaseStatusResource::getUrl('edit', [
-                'record' => $knowledgeBaseStatus,
-            ])
+            KnowledgeBaseStatusResource::getUrl('create')
         )->assertForbidden();
 
-    livewire(KnowledgeBaseStatusResource\Pages\EditKnowledgeBaseStatus::class, [
-        'record' => $knowledgeBaseStatus->getRouteKey(),
-    ])
+    livewire(KnowledgeBaseStatusResource\Pages\CreateKnowledgeBaseStatus::class)
         ->assertForbidden();
 
     $user->givePermissionTo('product_admin.view-any');
-    $user->givePermissionTo('product_admin.*.update');
+    $user->givePermissionTo('product_admin.create');
 
     actingAs($user)
         ->get(
-            KnowledgeBaseStatusResource::getUrl('edit', [
-                'record' => $knowledgeBaseStatus,
-            ])
+            KnowledgeBaseStatusResource::getUrl('create')
         )->assertSuccessful();
 
-    $request = collect(EditKnowledgeBaseStatusRequestFactory::new()->create());
+    $request = collect(CreateKnowledgeBaseStatusRequestFactory::new()->create());
 
-    livewire(KnowledgeBaseStatusResource\Pages\EditKnowledgeBaseStatus::class, [
-        'record' => $knowledgeBaseStatus->getRouteKey(),
-    ])
+    livewire(KnowledgeBaseStatusResource\Pages\CreateKnowledgeBaseStatus::class)
         ->fillForm($request->toArray())
-        ->call('save')
+        ->call('create')
         ->assertHasNoFormErrors();
 
-    assertEquals($request['name'], $knowledgeBaseStatus->fresh()->name);
+    assertCount(1, KnowledgeBaseStatus::all());
+
+    assertDatabaseHas(KnowledgeBaseStatus::class, $request->toArray());
 });
 
-test('EditKnowledgeBaseStatus is gated with proper feature access control', function () {
+test('CreateKnowledgeBaseStatus is gated with proper feature access control', function () {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->knowledgeManagement = false;
@@ -101,20 +94,14 @@ test('EditKnowledgeBaseStatus is gated with proper feature access control', func
     $user = User::factory()->licensed(LicenseType::cases())->create();
 
     $user->givePermissionTo('product_admin.view-any');
-    $user->givePermissionTo('product_admin.*.update');
-
-    $knowledgeBaseStatus = KnowledgeBaseStatus::factory()->create();
+    $user->givePermissionTo('product_admin.create');
 
     actingAs($user)
         ->get(
-            KnowledgeBaseStatusResource::getUrl('edit', [
-                'record' => $knowledgeBaseStatus,
-            ])
+            KnowledgeBaseStatusResource::getUrl('create')
         )->assertForbidden();
 
-    livewire(KnowledgeBaseStatusResource\Pages\EditKnowledgeBaseStatus::class, [
-        'record' => $knowledgeBaseStatus->getRouteKey(),
-    ])
+    livewire(KnowledgeBaseStatusResource\Pages\CreateKnowledgeBaseStatus::class)
         ->assertForbidden();
 
     $settings->data->addons->knowledgeManagement = true;
@@ -123,19 +110,17 @@ test('EditKnowledgeBaseStatus is gated with proper feature access control', func
 
     actingAs($user)
         ->get(
-            KnowledgeBaseStatusResource::getUrl('edit', [
-                'record' => $knowledgeBaseStatus,
-            ])
+            KnowledgeBaseStatusResource::getUrl('create')
         )->assertSuccessful();
 
-    $request = collect(EditKnowledgeBaseStatusRequestFactory::new()->create());
+    $request = collect(CreateKnowledgeBaseStatusRequestFactory::new()->create());
 
-    livewire(KnowledgeBaseStatusResource\Pages\EditKnowledgeBaseStatus::class, [
-        'record' => $knowledgeBaseStatus->getRouteKey(),
-    ])
+    livewire(KnowledgeBaseStatusResource\Pages\CreateKnowledgeBaseStatus::class)
         ->fillForm($request->toArray())
-        ->call('save')
+        ->call('create')
         ->assertHasNoFormErrors();
 
-    assertEquals($request['name'], $knowledgeBaseStatus->fresh()->name);
+    assertCount(1, KnowledgeBaseStatus::all());
+
+    assertDatabaseHas(KnowledgeBaseStatus::class, $request->toArray());
 });

@@ -35,9 +35,9 @@
 */
 
 use AidingApp\Authorization\Enums\LicenseType;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualityResource;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
-use AidingApp\KnowledgeBase\Tests\KnowledgeBaseQuality\RequestFactories\CreateKnowledgeBaseQualityRequestFactory;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
+use AidingApp\KnowledgeBase\Tests\Tenant\KnowledgeBaseCategory\RequestFactories\CreateKnowledgeBaseCategoryRequestFactory;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
@@ -46,22 +46,22 @@ use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Livewire\livewire;
 use function PHPUnit\Framework\assertCount;
 
-// TODO: Write CreateKnowledgeBaseQuality tests
-//test('A successful action on the CreateKnowledgeBaseQuality page', function () {});
+// TODO: Write CreateKnowledgeBaseCategory tests
+//test('A successful action on the CreateKnowledgeBaseCategory page', function () {});
 //
-//test('CreateKnowledgeBaseQuality requires valid data', function ($data, $errors) {})->with([]);
+//test('CreateKnowledgeBaseCategory requires valid data', function ($data, $errors) {})->with([]);
 
 // Permission Tests
 
-test('CreateKnowledgeBaseQuality is gated with proper access control', function () {
+test('CreateKnowledgeBaseCategory is gated with proper access control', function () {
     $user = User::factory()->licensed(LicenseType::cases())->create();
 
     actingAs($user)
         ->get(
-            KnowledgeBaseQualityResource::getUrl('create')
+            KnowledgeBaseCategoryResource::getUrl('create')
         )->assertForbidden();
 
-    livewire(KnowledgeBaseQualityResource\Pages\CreateKnowledgeBaseQuality::class)
+    livewire(KnowledgeBaseCategoryResource\Pages\CreateKnowledgeBaseCategory::class)
         ->assertForbidden();
 
     $user->givePermissionTo('product_admin.view-any');
@@ -69,22 +69,22 @@ test('CreateKnowledgeBaseQuality is gated with proper access control', function 
 
     actingAs($user)
         ->get(
-            KnowledgeBaseQualityResource::getUrl('create')
+            KnowledgeBaseCategoryResource::getUrl('create')
         )->assertSuccessful();
 
-    $request = collect(CreateKnowledgeBaseQualityRequestFactory::new()->create());
+    $request = collect(CreateKnowledgeBaseCategoryRequestFactory::new()->create());
 
-    livewire(KnowledgeBaseQualityResource\Pages\CreateKnowledgeBaseQuality::class)
+    livewire(KnowledgeBaseCategoryResource\Pages\CreateKnowledgeBaseCategory::class)
         ->fillForm($request->toArray())
         ->call('create')
         ->assertHasNoFormErrors();
 
-    assertCount(1, KnowledgeBaseQuality::all());
+    assertCount(1, KnowledgeBaseCategory::all());
 
-    assertDatabaseHas(KnowledgeBaseQuality::class, $request->toArray());
+    assertDatabaseHas(KnowledgeBaseCategory::class, $request->toArray());
 });
 
-test('CreateKnowledgeBaseQuality is gated with proper feature ccess control', function () {
+test('CreateKnowledgeBaseCategory is gated with proper feature access control', function () {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->knowledgeManagement = false;
@@ -98,10 +98,10 @@ test('CreateKnowledgeBaseQuality is gated with proper feature ccess control', fu
 
     actingAs($user)
         ->get(
-            KnowledgeBaseQualityResource::getUrl('create')
+            KnowledgeBaseCategoryResource::getUrl('create')
         )->assertForbidden();
 
-    livewire(KnowledgeBaseQualityResource\Pages\CreateKnowledgeBaseQuality::class)
+    livewire(KnowledgeBaseCategoryResource\Pages\CreateKnowledgeBaseCategory::class)
         ->assertForbidden();
 
     $settings->data->addons->knowledgeManagement = true;
@@ -110,17 +110,17 @@ test('CreateKnowledgeBaseQuality is gated with proper feature ccess control', fu
 
     actingAs($user)
         ->get(
-            KnowledgeBaseQualityResource::getUrl('create')
+            KnowledgeBaseCategoryResource::getUrl('create')
         )->assertSuccessful();
 
-    $request = collect(CreateKnowledgeBaseQualityRequestFactory::new()->create());
+    $request = collect(CreateKnowledgeBaseCategoryRequestFactory::new()->create());
 
-    livewire(KnowledgeBaseQualityResource\Pages\CreateKnowledgeBaseQuality::class)
+    livewire(KnowledgeBaseCategoryResource\Pages\CreateKnowledgeBaseCategory::class)
         ->fillForm($request->toArray())
         ->call('create')
         ->assertHasNoFormErrors();
 
-    assertCount(1, KnowledgeBaseQuality::all());
+    assertCount(1, KnowledgeBaseCategory::all());
 
-    assertDatabaseHas(KnowledgeBaseQuality::class, $request->toArray());
+    assertDatabaseHas(KnowledgeBaseCategory::class, $request->toArray());
 });

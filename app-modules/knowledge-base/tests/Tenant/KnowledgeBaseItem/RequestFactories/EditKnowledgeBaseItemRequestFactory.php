@@ -34,26 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase\Tests\KnowledgeBaseItem\RequestFactories;
+namespace AidingApp\KnowledgeBase\Tests\Tenant\KnowledgeBaseItem\RequestFactories;
 
-use AidingApp\Division\Models\Division;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use Worksome\RequestFactories\RequestFactory;
 
-class CreateKnowledgeBaseItemRequestFactory extends RequestFactory
+class EditKnowledgeBaseItemRequestFactory extends RequestFactory
 {
     public function definition(): array
     {
         return [
             'title' => fake()->words(5, true),
-            'public' => fake()->boolean(),
-            'notes' => fake()->paragraph(),
-            'quality_id' => KnowledgeBaseQuality::inRandomOrder()->first()?->id ?? KnowledgeBaseQuality::factory()->create()->id,
-            'status_id' => KnowledgeBaseStatus::inRandomOrder()->first()?->id ?? KnowledgeBaseStatus::factory()->create()->id,
-            'category_id' => KnowledgeBaseCategory::inRandomOrder()->first()?->id ?? KnowledgeBaseCategory::factory()->create()->id,
-            'division' => [Division::inRandomOrder()->first()?->id ?? Division::factory()->create()->id],
+            'article_details' => ['type' => 'doc', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => fake()->paragraph()]]]]],
         ];
     }
 }

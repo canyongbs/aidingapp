@@ -37,7 +37,7 @@
 use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource\Pages\ListKnowledgeBaseItems;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
-use AidingApp\KnowledgeBase\Tests\KnowledgeBaseItem\RequestFactories\CreateKnowledgeBaseItemRequestFactory;
+use AidingApp\KnowledgeBase\Tests\Tenant\KnowledgeBaseItem\RequestFactories\CreateKnowledgeBaseItemRequestFactory;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
