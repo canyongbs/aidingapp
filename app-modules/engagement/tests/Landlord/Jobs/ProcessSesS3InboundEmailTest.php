@@ -235,12 +235,12 @@ it('handles is_email_automatic_creation_enabled being disabled properly', functi
 
     assert($tenant instanceof Tenant);
 
-    [$contact, $serviceRequestType] = $tenant->execute(function () {
-        $contact = Contact::factory()->create([
+    $tenant->execute(function () {
+        Contact::factory()->create([
             'email' => 'kevin.ullyott@canyongbs.com',
         ]);
 
-        $serviceRequestType = ServiceRequestType::factory()
+        ServiceRequestType::factory()
             ->has(
                 TenantServiceRequestTypeDomain::factory()->state([
                     'domain' => 'help',
@@ -254,8 +254,6 @@ it('handles is_email_automatic_creation_enabled being disabled properly', functi
             ->create([
                 'is_email_automatic_creation_enabled' => false,
             ]);
-
-        return [$contact, $serviceRequestType];
     });
 
     Storage::fake('s3');
