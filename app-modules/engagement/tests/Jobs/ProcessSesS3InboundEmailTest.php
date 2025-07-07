@@ -7,6 +7,7 @@ use AidingApp\Engagement\Exceptions\UnableToRetrieveContentFromSesS3EmailPayload
 use AidingApp\Engagement\Jobs\ProcessSesS3InboundEmail;
 use AidingApp\Engagement\Models\EngagementResponse;
 use AidingApp\Engagement\Models\UnmatchedInboundCommunication;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\TenantServiceRequestTypeDomain;
@@ -260,8 +261,10 @@ it('properly creates a service request for a matching contact', function () {
             'is_email_automatic_creation_contact_create_enabled' => false,
         ]);
 
+    $assignedPriority = $serviceRequestType->priorities->first();
+
     $serviceRequestType->update([
-        'email_automatic_creation_priority_id' => $serviceRequestType->priorities->first()->getKey(),
+        'email_automatic_creation_priority_id' => $assignedPriority->getKey(),
     ]);
 
     Storage::disk('s3-inbound-email')->assertExists('s3_email');
@@ -270,5 +273,15 @@ it('properly creates a service request for a matching contact', function () {
 
     assertDatabaseEmpty(EngagementResponse::class);
 
+    $serviceRequests = ServiceRequest::all();
+
+    expect($serviceRequests)->toHaveCount(1);
+    $serviceRequest = $serviceRequests->first();
+
+    expect($serviceRequest->title)->toBe('This is a test')
+        ->and($serviceRequest->close_details)->toContain('Hello there! This should be put in S3!')
+        ->and($serviceRequest->respondent->is($contact))->toBeTrue()
+        ->and($serviceRequest->priority->is($assignedPriority))->toBeTrue();
+
     Storage::disk('s3-inbound-email')->assertMissing('s3_email');
-})->only();
+});

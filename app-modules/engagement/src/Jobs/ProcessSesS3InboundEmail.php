@@ -315,8 +315,6 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
 
                         $serviceRequest->saveOrFail();
 
-                        // TODO: Test "properly creates a service request for a matching contact"
-
                         // TODO: Handle attachments
                     });
 
