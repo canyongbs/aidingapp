@@ -52,6 +52,8 @@ beforeEach(function () {
 it('checks the API returns users', function () {
     $randomRecords = random_int(1, 10);
 
+    User::query()->truncate();
+
     User::factory()->count($randomRecords)->create();
 
     $softDeleteUser = User::factory()->create();
