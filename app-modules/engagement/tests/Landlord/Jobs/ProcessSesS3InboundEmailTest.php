@@ -230,7 +230,70 @@ it('handles exceptions correctly in the failed method', function (?Exception $ex
 
 it('throws the right exception when unable to find the ServiceRequestType')->todo();
 
-it('handles is_email_automatic_creation_enabled being disabled properly')->todo();
+it('handles is_email_automatic_creation_enabled being disabled properly', function () {
+    $tenant = Tenant::query()->firstOrFail();
+
+    assert($tenant instanceof Tenant);
+
+    [$contact, $serviceRequestType] = $tenant->execute(function () {
+        $contact = Contact::factory()->create([
+            'email' => 'kevin.ullyott@canyongbs.com',
+        ]);
+
+        $serviceRequestType = ServiceRequestType::factory()
+            ->has(
+                TenantServiceRequestTypeDomain::factory()->state([
+                    'domain' => 'help',
+                ]),
+                'domain'
+            )
+            ->has(
+                ServiceRequestPriority::factory()->count(3),
+                'priorities'
+            )
+            ->create([
+                'is_email_automatic_creation_enabled' => false,
+            ]);
+
+        return [$contact, $serviceRequestType];
+    });
+
+    Storage::fake('s3');
+    $filesystem = Storage::fake('s3-inbound-email');
+
+    assert($filesystem instanceof FilesystemAdapter);
+
+    $modulePath = resolve(ModulePath::class);
+
+    $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_for_service_request'));
+
+    $file = UploadedFile::fake()->createWithContent('s3_email', $content);
+
+    $filesystem->putFileAs('', $file, 's3_email');
+
+    /** @var ProcessSesS3InboundEmail $mock */
+    $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+        $mock
+            ->shouldAllowMockingProtectedMethods()
+            ->shouldReceive('getContent')
+            ->once()
+            ->andReturn($content);
+    });
+
+    invade($mock)->emailFilePath = 's3_email';
+
+    $filesystem->assertExists('s3_email');
+
+    $mock->handle();
+
+    $tenant->makeCurrent();
+
+    assertDatabaseEmpty(EngagementResponse::class);
+
+    assertDatabaseEmpty(ServiceRequest::class);
+
+    $filesystem->assertMissing('s3_email');
+});
 
 it('sends ineligible email when no contact is found for a service request and we cannot match the email to an organization')->todo();
 

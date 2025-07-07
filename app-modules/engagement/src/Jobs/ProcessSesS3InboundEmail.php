@@ -215,7 +215,6 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                     }
 
                     if (! $serviceRequestType->is_email_automatic_creation_enabled) {
-                        // TODO: Test "handles is_email_automatic_creation_enabled being disabled properly"
                         Storage::disk('s3-inbound-email')->delete($this->emailFilePath);
 
                         return;
