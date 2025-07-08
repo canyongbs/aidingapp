@@ -19,6 +19,7 @@ parameters:
 
     excludePaths:
         - app-modules/*/vendor/*
+        - app-modules/*/tests/*
 
     scanFiles:
         - ./_ide_helper_models.php
@@ -46,7 +47,7 @@ parameters:
         -
             message: '#Call to an undefined method Pest\\PendingCalls\\TestCall::expect\(\)#'
             identifier: method.notFound
-            path: tests/Unit/ArchTest.php
+            path: tests/Tenant/Unit/ArchTest.php
         -
             message: '#PHPDoc tag @SuppressWarnings has invalid value \(\(PHPMD.(CamelCasePropertyName|CamelCaseParameterName)\)\)\:.*#'
             identifier: phpDoc.parseError

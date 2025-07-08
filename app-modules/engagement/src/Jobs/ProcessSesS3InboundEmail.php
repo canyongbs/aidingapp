@@ -36,22 +36,37 @@
 
 namespace AidingApp\Engagement\Jobs;
 
+use AidingApp\Contact\Enums\SystemContactClassification;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\ContactSource;
+use AidingApp\Contact\Models\ContactStatus;
+use AidingApp\Contact\Models\Organization;
 use AidingApp\Engagement\Enums\EngagementResponseType;
+use AidingApp\Engagement\Exceptions\SesS3InboundServiceRequestTypeNotFound;
 use AidingApp\Engagement\Exceptions\SesS3InboundSpamOrVirusDetected;
 use AidingApp\Engagement\Exceptions\UnableToDetectTenantFromSesS3EmailPayload;
 use AidingApp\Engagement\Exceptions\UnableToRetrieveContentFromSesS3EmailPayload;
+use AidingApp\Engagement\Models\EngagementResponse;
 use AidingApp\Engagement\Models\UnmatchedInboundCommunication;
+use AidingApp\Engagement\Notifications\IneligibleContactSesS3InboundEmailServiceRequestNotification;
+use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
+use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use AidingApp\ServiceManagement\Models\TenantServiceRequestTypeDomain;
 use App\Models\Tenant;
 use Aws\Crypto\KmsMaterialsProviderV2;
 use Aws\Kms\KmsClient;
 use Aws\S3\Crypto\S3EncryptionClientV2;
 use Aws\S3\S3Client;
+use Carbon\CarbonImmutable;
+use Exception;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use PhpMimeMailParser\Attachment;
 use PhpMimeMailParser\Parser;
 use Spatie\Multitenancy\Jobs\NotTenantAware;
@@ -78,54 +93,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
         DB::beginTransaction();
 
         try {
-            $encryptionClient = new S3EncryptionClientV2(
-                new S3Client([
-                    'credentials' => [
-                        'key' => config('filesystems.disks.s3.key'),
-                        'secret' => config('filesystems.disks.s3.secret'),
-                    ],
-                    'region' => config('filesystems.disks.s3.region'),
-                ])
-            );
-
-            // Needed to suppress warnings from the SDK. SES encrypts using V1 so we need @SecurityProfile to be V2_AND_LEGACY
-            // But the SDK throws a warning when using V2_AND_LEGACY
-            $errorReportingLevel = error_reporting();
-            error_reporting(E_ERROR & ~E_WARNING);
-
-            try {
-                $result = $encryptionClient->getObject([
-                    '@KmsAllowDecryptWithAnyCmk' => false,
-                    '@SecurityProfile' => 'V2_AND_LEGACY',
-                    '@MaterialsProvider' => new KmsMaterialsProviderV2(
-                        new KmsClient([
-                            'credentials' => [
-                                'key' => config('filesystems.disks.s3.key'),
-                                'secret' => config('filesystems.disks.s3.secret'),
-                            ],
-                            'region' => 'us-west-2',
-                        ]),
-                        config('services.kms.ses_s3_key_id')
-                    ),
-                    '@CipherOptions' => [
-                        'Cipher' => 'gcm',
-                        'KeySize' => 256,
-                    ],
-                    'Bucket' => config('filesystems.disks.s3.bucket'),
-                    'Key' => config('filesystems.disks.s3-inbound-email.root') . '/' . $this->emailFilePath,
-                ]);
-            } finally {
-                // Reset the error reporting level
-                error_reporting($errorReportingLevel);
-            }
-
-            try {
-                $content = $result['Body']?->getContents();
-            } catch (Throwable $e) {
-                throw new UnableToRetrieveContentFromSesS3EmailPayload($this->emailFilePath, $e);
-            }
-
-            throw_if(empty($content), new UnableToRetrieveContentFromSesS3EmailPayload($this->emailFilePath));
+            $content = $this->getContent();
 
             $parser = (new Parser())
                 ->setText($content);
@@ -138,20 +106,45 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
 
             $matchedTenants = collect($parser->getAddresses('to'))
                 ->pluck('address')
-                ->map(function (string $address) {
+                ->mapToGroups(function (string $address) {
                     $localPart = filter_var($address, FILTER_VALIDATE_EMAIL) ? explode('@', $address)[0] : null;
 
                     if ($localPart === null) {
                         return null;
                     }
 
-                    return Tenant::query()
+                    $tenant = Tenant::query()
                         ->where(
                             DB::raw('LOWER(domain)'),
                             'like',
                             strtolower("{$localPart}.%")
                         )
                         ->first();
+
+                    if ($tenant) {
+                        return ['engagements' => $tenant];
+                    }
+
+                    preg_match('/([a-z0-9\-]+)\-([a-z0-9]+)/', $localPart, $matches);
+
+                    if (isset($matches[1]) && isset($matches[2])) {
+                        $tenantDomain = mb_strtolower($matches[1]);
+                        $typeDomain = mb_strtolower($matches[2]);
+
+                        $serviceRequestTypeDomain = TenantServiceRequestTypeDomain::query()
+                            ->where(
+                                DB::raw('LOWER(domain)'),
+                                $typeDomain
+                            )
+                            ->whereRelation('tenant', 'domain', 'like', "{$tenantDomain}.%")
+                            ->first();
+
+                        if ($serviceRequestTypeDomain) {
+                            return ['service_request' => $serviceRequestTypeDomain];
+                        }
+                    }
+
+                    return null;
                 })
                 ->filter();
 
@@ -162,7 +155,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
 
             $sender = $parser->getAddresses('from')[0]['address'];
 
-            $matchedTenants->each(function (Tenant $tenant) use ($parser, $content, $sender) {
+            $matchedTenants->get('engagements')?->each(function (Tenant $tenant) use ($parser, $content, $sender) {
                 $tenant->execute(function () use ($parser, $content, $sender) {
                     $contacts = Contact::query()
                         ->where('email', $sender)
@@ -208,8 +201,126 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                     DB::commit();
                 });
             });
+
+            $matchedTenants->get('service_request')?->each(function (TenantServiceRequestTypeDomain $serviceRequestTypeDomain) use ($parser, $sender) {
+                $serviceRequestTypeDomain->tenant->execute(function () use ($serviceRequestTypeDomain, $parser, $sender) {
+                    $serviceRequestType = $serviceRequestTypeDomain->serviceRequestType;
+
+                    if (is_null($serviceRequestType)) {
+                        throw new SesS3InboundServiceRequestTypeNotFound(
+                            $this->emailFilePath,
+                            $serviceRequestTypeDomain
+                        );
+                    }
+
+                    if (! $serviceRequestType->is_email_automatic_creation_enabled) {
+                        Storage::disk('s3-inbound-email')->delete($this->emailFilePath);
+
+                        return;
+                    }
+
+                    $contacts = Contact::query()
+                        ->where('email', $sender)
+                        ->get();
+
+                    if ($contacts->isEmpty()) {
+                        // If no contacts are found, we will try to find an organization with the same domain
+                        $domain = Str::afterLast($sender, '@');
+
+                        $organization = Organization::query()
+                            ->whereRaw('LOWER(?) = ANY (SELECT LOWER(value) FROM jsonb_array_elements_text(domains))', [mb_strtolower($domain)])
+                            ->first();
+
+                        if (! $organization || $serviceRequestType->is_email_automatic_creation_contact_create_enabled === false) {
+                            Notification::route('mail', $sender)
+                                ->notifyNow(new IneligibleContactSesS3InboundEmailServiceRequestNotification(
+                                    $serviceRequestTypeDomain,
+                                    $parser->getMessageBody('htmlEmbedded')
+                                ));
+
+                            Storage::disk('s3-inbound-email')->delete($this->emailFilePath);
+
+                            return;
+                        }
+
+                        $senderName = $parser->getAddresses('from')[0]['display'];
+
+                        $firstName = Str::before($senderName, ' ') ?: 'Unknown';
+                        $lastName = Str::after($senderName, ' ') ?: 'Unknown';
+                        $fullName = $firstName . ' ' . $lastName;
+
+                        // If an organization domain is found, we will create a new contact with the email address
+                        $contact = Contact::query()
+                            ->make([
+                                'email' => $sender,
+                                'first_name' => $firstName,
+                                'last_name' => $lastName,
+                                'full_name' => $fullName,
+                            ]);
+
+                        $status = ContactStatus::query()
+                            ->where('classification', SystemContactClassification::New)
+                            ->firstOrFail();
+
+                        $contact->status()->associate($status);
+
+                        $source = ContactSource::query()
+                            ->where('name', 'Service Request Email Auto Creation')
+                            ->first();
+
+                        if (! $source) {
+                            $source = ContactSource::query()
+                                ->create([
+                                    'name' => 'Service Request Email Auto Creation',
+                                ]);
+                        }
+
+                        $contact->source()->associate($source);
+
+                        $contact->organization()->associate($organization);
+
+                        $contact->save();
+
+                        $contacts = $contacts->add($contact);
+                    }
+
+                    $contacts->each(function (Contact $contact) use ($serviceRequestType, $parser) {
+                        $serviceRequest = $contact->serviceRequests()
+                            ->make([
+                                'title' => $parser->getHeader('subject'),
+                                'close_details' => $parser->getMessageBody('text'),
+                            ]);
+
+                        $serviceRequestStatus = ServiceRequestStatus::query()
+                            ->where('classification', SystemServiceRequestClassification::Open)
+                            ->where('name', 'New')
+                            ->where('is_system_protected', true)
+                            ->firstOrFail();
+
+                        $serviceRequest->status()->associate($serviceRequestStatus);
+                        $serviceRequest->status_updated_at = CarbonImmutable::now();
+
+                        $serviceRequest->respondent()->associate($contact);
+
+                        $serviceRequest->priority()->associate($serviceRequestType->email_automatic_creation_priority_id);
+
+                        $serviceRequest->saveOrFail();
+
+                        foreach ($parser->getAttachments(false) as $attachment) {
+                            $serviceRequest->addMediaFromStream($attachment->getStream())
+                                ->setName($attachment->getFilename())
+                                ->setFileName($attachment->getFilename())
+                                ->toMediaCollection('uploads');
+                        }
+                    });
+
+                    Storage::disk('s3-inbound-email')->delete($this->emailFilePath);
+                });
+            });
+
+            DB::commit();
         } catch (
-            UnableToRetrieveContentFromSesS3EmailPayload | SesS3InboundSpamOrVirusDetected | UnableToDetectTenantFromSesS3EmailPayload $e) {
+            UnableToRetrieveContentFromSesS3EmailPayload | SesS3InboundSpamOrVirusDetected | UnableToDetectTenantFromSesS3EmailPayload | SesS3InboundServiceRequestTypeNotFound $e) {
                 DB::rollBack();
 
                 // Instantly fail for this exception
@@ -233,6 +344,63 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
             SesS3InboundSpamOrVirusDetected::class => $this->moveFile('/spam-or-virus-detected'),
             default => $this->moveFile('/failed'),
         };
+
+        report($exception);
+    }
+
+    protected function getContent(): string
+    {
+        $encryptionClient = new S3EncryptionClientV2(
+            new S3Client([
+                'credentials' => [
+                    'key' => config('filesystems.disks.s3.key'),
+                    'secret' => config('filesystems.disks.s3.secret'),
+                ],
+                'region' => config('filesystems.disks.s3.region'),
+            ])
+        );
+
+        // Needed to suppress warnings from the SDK. SES encrypts using V1 so we need @SecurityProfile to be V2_AND_LEGACY
+        // But the SDK throws a warning when using V2_AND_LEGACY
+        $errorReportingLevel = error_reporting();
+        error_reporting(E_ERROR & ~E_WARNING);
+
+        try {
+            $result = $encryptionClient->getObject([
+                '@KmsAllowDecryptWithAnyCmk' => false,
+                '@SecurityProfile' => 'V2_AND_LEGACY',
+                '@MaterialsProvider' => new KmsMaterialsProviderV2(
+                    new KmsClient([
+                        'credentials' => [
+                            'key' => config('filesystems.disks.s3.key'),
+                            'secret' => config('filesystems.disks.s3.secret'),
+                        ],
+                        'region' => 'us-west-2',
+                    ]),
+                    Config::string('services.kms.ses_s3_key_id')
+                ),
+                '@CipherOptions' => [
+                    'Cipher' => 'gcm',
+                    'KeySize' => 256,
+                ],
+                'Bucket' => config('filesystems.disks.s3.bucket'),
+                'Key' => Config::string('filesystems.disks.s3-inbound-email.root') . '/' . $this->emailFilePath,
+            ]);
+        } finally {
+            // Reset the error reporting level
+            error_reporting($errorReportingLevel);
+        }
+
+        try {
+            // @phpstan-ignore method.nonObject
+            $content = $result['Body']?->getContents();
+        } catch (Throwable $e) {
+            throw new UnableToRetrieveContentFromSesS3EmailPayload($this->emailFilePath, $e);
+        }
+
+        throw_if(empty($content), new UnableToRetrieveContentFromSesS3EmailPayload($this->emailFilePath));
+
+        return $content;
     }
 
     protected function moveFile(string $destination): void

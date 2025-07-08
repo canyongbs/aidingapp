@@ -2294,11 +2294,11 @@ namespace AidingApp\Portal\Models{
  *
  * @property string $id
  * @property bool $is_helpful
+ * @property string $voter_type
  * @property string $voter_id
  * @property string $article_id
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property string $voter_type
  * @property-read \AidingApp\KnowledgeBase\Models\KnowledgeBaseItem $knowledgeBaseArticle
  * @property-read \Illuminate\Database\Eloquent\Model $voter
  * @method static \AidingApp\Portal\Database\Factories\KnowledgeBaseArticleVoteFactory factory($count = null, $state = [])
@@ -2372,6 +2372,44 @@ namespace AidingApp\Portal\Models{
  */
 	#[\AllowDynamicProperties]
 	class IdeHelperPortalGuest {}
+}
+
+namespace AidingApp\Project\Models{
+/**
+ * 
+ *
+ * @property string $id
+ * @property string $name
+ * @property string|null $description
+ * @property string $created_by_type
+ * @property string $created_by_id
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
+ * @property-read int|null $audits_count
+ * @property-read \Illuminate\Database\Eloquent\Model $createdBy
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Task\Models\Task> $tasks
+ * @property-read int|null $tasks_count
+ * @method static \AidingApp\Project\Database\Factories\ProjectFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Project newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Project newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Project onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Project query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Project whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Project whereCreatedById($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Project whereCreatedByType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Project whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Project whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Project whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Project whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Project whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Project withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Project withoutTrashed()
+ * @mixin \Eloquent
+ */
+	#[\AllowDynamicProperties]
+	class IdeHelperProject {}
 }
 
 namespace AidingApp\ServiceManagement\Models{
@@ -3307,12 +3345,18 @@ namespace AidingApp\ServiceManagement\Models{
  * @property bool $is_customers_service_request_closed_email_enabled
  * @property bool $is_customers_service_request_closed_notification_enabled
  * @property bool $is_customers_survey_response_email_enabled
+ * @property bool $is_email_automatic_creation_enabled
+ * @property bool $is_email_automatic_creation_contact_create_enabled
+ * @property string|null $email_automatic_creation_priority_id
+ * @property string|null $email_automatic_creation_bcc
  * @property-read \App\Models\User|null $assignmentTypeIndividual
  * @property-read \AidingApp\ServiceManagement\Models\ServiceRequestTypeManager|\AidingApp\ServiceManagement\Models\ServiceRequestTypeAuditor|null $pivot
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Team\Models\Team> $auditors
  * @property-read int|null $auditors_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
  * @property-read int|null $audits_count
+ * @property-read \AidingApp\ServiceManagement\Models\TenantServiceRequestTypeDomain|null $domain
+ * @property-read \AidingApp\ServiceManagement\Models\ServiceRequestPriority|null $emailAutomaticCreationPriority
  * @property-read \AidingApp\ServiceManagement\Models\ServiceRequestForm|null $form
  * @property-read \App\Models\User|null $lastAssignedUser
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Team\Models\Team> $managers
@@ -3333,6 +3377,8 @@ namespace AidingApp\ServiceManagement\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereDeletedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereEmailAutomaticCreationBcc($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereEmailAutomaticCreationPriorityId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereHasEnabledCsat($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereHasEnabledFeedbackCollection($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereHasEnabledNps($value)
@@ -3359,6 +3405,8 @@ namespace AidingApp\ServiceManagement\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereIsCustomersServiceRequestUpdateEmailEnabled($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereIsCustomersServiceRequestUpdateNotificationEnabled($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereIsCustomersSurveyResponseEmailEnabled($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereIsEmailAutomaticCreationContactCreateEnabled($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereIsEmailAutomaticCreationEnabled($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereIsManagersServiceRequestAssignedEmailEnabled($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereIsManagersServiceRequestAssignedNotificationEnabled($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ServiceRequestType whereIsManagersServiceRequestClosedEmailEnabled($value)
@@ -3539,6 +3587,34 @@ namespace AidingApp\ServiceManagement\Models{
 	class IdeHelperSla {}
 }
 
+namespace AidingApp\ServiceManagement\Models{
+/**
+ * 
+ *
+ * @property string $id
+ * @property string $tenant_id
+ * @property string $service_request_type_id
+ * @property string $domain
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \AidingApp\ServiceManagement\Models\ServiceRequestType|null $serviceRequestType
+ * @property-read \App\Models\Tenant $tenant
+ * @method static \AidingApp\ServiceManagement\Database\Factories\TenantServiceRequestTypeDomainFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TenantServiceRequestTypeDomain newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TenantServiceRequestTypeDomain newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TenantServiceRequestTypeDomain query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TenantServiceRequestTypeDomain whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TenantServiceRequestTypeDomain whereDomain($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TenantServiceRequestTypeDomain whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TenantServiceRequestTypeDomain whereServiceRequestTypeId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TenantServiceRequestTypeDomain whereTenantId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TenantServiceRequestTypeDomain whereUpdatedAt($value)
+ * @mixin \Eloquent
+ */
+	#[\AllowDynamicProperties]
+	class IdeHelperTenantServiceRequestTypeDomain {}
+}
+
 namespace AidingApp\Task\Models{
 /**
  * 
@@ -3555,10 +3631,12 @@ namespace AidingApp\Task\Models{
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property string|null $project_id
  * @property-read \App\Models\User|null $assignedTo
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
  * @property-read int|null $audits_count
  * @property-read \App\Models\User|null $createdBy
+ * @property-read \AidingApp\Project\Models\Project|null $project
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Task byNextDue()
  * @method static \AidingApp\Task\Database\Factories\TaskFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Task newModelQuery()
@@ -3574,6 +3652,7 @@ namespace AidingApp\Task\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Task whereDescription($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Task whereDue($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Task whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Task whereProjectId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Task whereStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Task whereTitle($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Task whereUpdatedAt($value)

@@ -208,12 +208,13 @@ class MailChannel extends BaseMailChannel
     {
         $usage = ($emailMessage->recipient instanceof User) ? 0 : 1;
 
-        $recipientCcEmails = [
+        $recipientCcEmails = collect([
             ...$message->cc,
             ...$message->bcc,
-        ];
+        ])
+            ->map(fn ($address) => is_array($address) ? $address[0] : $address);
 
-        if ($recipientCcEmails) {
+        if ($recipientCcEmails->isNotEmpty()) {
             $usage += (count($recipientCcEmails) - User::query()
                 ->whereIn('email', $recipientCcEmails)
                 ->count());

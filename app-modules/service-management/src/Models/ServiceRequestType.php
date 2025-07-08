@@ -104,6 +104,10 @@ class ServiceRequestType extends BaseModel implements Auditable
         'is_customers_service_request_closed_notification_enabled',
         'is_customers_service_request_closed_notification_enabled',
         'is_customers_survey_response_email_enabled',
+        'is_email_automatic_creation_enabled',
+        'is_email_automatic_creation_contact_create_enabled',
+        'email_automatic_creation_priority_id',
+        'email_automatic_creation_bcc',
     ];
 
     protected $casts = [
@@ -142,6 +146,8 @@ class ServiceRequestType extends BaseModel implements Auditable
         'is_customers_service_request_closed_email_enabled' => 'boolean',
         'is_customers_service_request_closed_notification_enabled' => 'boolean',
         'is_customers_survey_response_email_enabled' => 'boolean',
+        'is_email_automatic_creation_enabled' => 'boolean',
+        'is_email_automatic_creation_contact_create_enabled' => 'boolean',
     ];
 
     public function serviceRequests(): HasManyThrough
@@ -199,6 +205,22 @@ class ServiceRequestType extends BaseModel implements Auditable
     public function templates(): HasMany
     {
         return $this->hasMany(ServiceRequestTypeEmailTemplate::class, 'service_request_type_id');
+    }
+
+    /**
+     * @return HasOne<TenantServiceRequestTypeDomain, $this>
+     */
+    public function domain(): HasOne
+    {
+        return $this->hasOne(TenantServiceRequestTypeDomain::class, 'service_request_type_id', 'id');
+    }
+
+    /**
+     * @return BelongsTo<ServiceRequestPriority, $this>
+     */
+    public function emailAutomaticCreationPriority(): BelongsTo
+    {
+        return $this->belongsTo(ServiceRequestPriority::class, 'email_automatic_creation_priority_id', 'id');
     }
 
     protected function serializeDate(DateTimeInterface $date): string

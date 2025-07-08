@@ -40,6 +40,7 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\CreateServiceRequestType;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\EditServiceRequestType;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\EditServiceRequestTypeAssignments;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\EditServiceRequestTypeAutomaticEmailCreation;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\EditServiceRequestTypeNotifications;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\ListServiceRequestTypes;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\ManageServiceRequestTypeAuditors;
@@ -94,6 +95,7 @@ class ServiceRequestTypeResource extends Resource
                 ManageServiceRequestTypeAuditors::class,
                 EditServiceRequestTypeAssignments::class,
                 EditServiceRequestTypeNotifications::class,
+                EditServiceRequestTypeAutomaticEmailCreation::class,
             ]),
             ...(array_map(
                 fn (ServiceRequestEmailTemplateType $type): NavigationItem => Arr::first(ServiceRequestTypeEmailTemplatePage::getNavigationItems(['record' => $page->record, 'type' => $type]))
@@ -115,6 +117,7 @@ class ServiceRequestTypeResource extends Resource
             'service-request-type-auditors' => ManageServiceRequestTypeAuditors::route('/{record}/auditors'),
             'service-request-type-assignments' => EditServiceRequestTypeAssignments::route('/{record}/assignments'),
             'service-request-type-notifications' => EditServiceRequestTypeNotifications::route('/{record}/notifications'),
+            'edit-automatic-email-creation' => EditServiceRequestTypeAutomaticEmailCreation::route('/{record}/automatic-email-creation'),
             'service-request-type-email-template' => ServiceRequestTypeEmailTemplatePage::route('/{record}/email-template/{type}'),
         ];
     }
