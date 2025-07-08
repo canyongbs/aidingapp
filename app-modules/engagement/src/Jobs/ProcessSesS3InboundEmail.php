@@ -306,7 +306,12 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
 
                         $serviceRequest->saveOrFail();
 
-                        // TODO: Handle attachments
+                        foreach ($parser->getAttachments(false) as $attachment) {
+                            $serviceRequest->addMediaFromStream($attachment->getStream())
+                                ->setName($attachment->getFilename())
+                                ->setFileName($attachment->getFilename())
+                                ->toMediaCollection('uploads');
+                        }
                     });
 
                     Storage::disk('s3-inbound-email')->delete($this->emailFilePath);
