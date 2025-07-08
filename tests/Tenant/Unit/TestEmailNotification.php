@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace Tests\Unit;
+namespace Tests\Tenant\Unit;
 
 use AidingApp\Notification\Notifications\Messages\MailMessage;
 use Illuminate\Bus\Queueable;

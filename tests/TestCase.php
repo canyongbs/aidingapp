@@ -201,7 +201,7 @@ abstract class TestCase extends BaseTestCase
             false,
         );
 
-        $tenant->execute(function () use ($tenant) {
+        $tenant->execute(function () {
             Role::query()->firstOrCreate([
                 'name' => Authenticatable::SUPER_ADMIN_ROLE,
                 'guard_name' => 'web',
