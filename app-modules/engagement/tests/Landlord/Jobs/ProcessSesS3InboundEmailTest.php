@@ -209,7 +209,68 @@ it('properly creates an EngagementResponse for an inbound email', function () {
     $filesystem->assertMissing('s3_email');
 });
 
-it('handles attachements properly', function () {})->todo('Test attachments handling in ProcessSesS3InboundEmail');
+it('handles attachements properly', function () {
+    Storage::fake('s3');
+    $filesystem = Storage::fake('s3-inbound-email');
+
+    assert($filesystem instanceof FilesystemAdapter);
+
+    $tenant = Tenant::query()->first();
+
+    assert($tenant instanceof Tenant);
+
+    $contact = null;
+
+    $tenant->execute(function () use (&$contact) {
+        $contact = Contact::factory()->create([
+            'email' => 'kevin.ullyott@canyongbs.com',
+        ]);
+    });
+
+    assert($contact instanceof Contact);
+
+    $modulePath = resolve(ModulePath::class);
+
+    $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_with_attachments'));
+
+    $file = UploadedFile::fake()->createWithContent('s3_email', $content);
+
+    $filesystem->putFileAs('', $file, 's3_email');
+
+    /** @var ProcessSesS3InboundEmail $mock */
+    $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+        $mock
+            ->shouldAllowMockingProtectedMethods()
+            ->shouldReceive('getContent')
+            ->once()
+            ->andReturn($content);
+    });
+
+    invade($mock)->emailFilePath = 's3_email';
+
+    $filesystem->assertExists('s3_email');
+
+    $mock->handle();
+
+    $tenant->execute(function () use ($contact, $modulePath) {
+        $engagementResponses = EngagementResponse::all();
+
+        expect($engagementResponses)->toHaveCount(1);
+
+        $engagementResponse = $engagementResponses->first();
+
+        assert($engagementResponse instanceof EngagementResponse);
+
+        expect($engagementResponse->getMedia('attachments'))->toHaveCount(3)
+            ->and($engagementResponse->subject)->toBe('This is a test')
+            ->and($engagementResponse->sender_id)->toBe($contact->getKey())
+            ->and($engagementResponse->sender_type)->toBe($contact->getMorphClass())
+            ->and($engagementResponse->type)->toBe(EngagementResponseType::Email)
+            ->and($engagementResponse->raw)->toBe(file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_with_attachments')));
+    });
+
+    $filesystem->assertMissing('s3_email');
+});
 
 it('handles exceptions correctly in the failed method', function (?Exception $exception, string $expectedPath) {
     Storage::fake('s3');
@@ -713,18 +774,17 @@ it('creates a new contact for a service request when is_email_automatic_creation
 
     assert($serviceRequest instanceof ServiceRequest);
 
-    $contact = $serviceRequest->respondent;
+    $respondent = $serviceRequest->respondent;
 
     expect($serviceRequest->title)->toBe('This is a test')
         ->and($serviceRequest->close_details)->toContain('Hello there! This should be put in S3!')
-        ->and($serviceRequest->respondent->is($contact))->toBeTrue()
         ->and($serviceRequest->priority->is($assignedPriority))->toBeTrue()
         ->and($serviceRequest->priority->type->is($serviceRequestType))->toBeTrue()
-        ->and($contact->email)->toBe('kevin.ullyott@canyongbs.com')
-        ->and($contact->first_name)->toBe('Kevin')
-        ->and($contact->last_name)->toBe('Ullyott')
-        ->and($contact->full_name)->toBe('Kevin Ullyott')
-        ->and($contact->organization->is($organization))->toBeTrue();
+        ->and($respondent->email)->toBe('kevin.ullyott@canyongbs.com')
+        ->and($respondent->first_name)->toBe('Kevin')
+        ->and($respondent->last_name)->toBe('Ullyott')
+        ->and($respondent->full_name)->toBe('Kevin Ullyott')
+        ->and($respondent->organization->is($organization))->toBeTrue();
 
     $filesystem->assertMissing('s3_email');
 });
