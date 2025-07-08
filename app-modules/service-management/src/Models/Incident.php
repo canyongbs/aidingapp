@@ -37,8 +37,10 @@
 namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\ServiceManagement\Database\Factories\IncidentFactory;
 use AidingApp\Team\Models\Team;
 use App\Models\BaseModel;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -51,6 +53,9 @@ class Incident extends BaseModel implements Auditable
 {
     use AuditableTrait;
     use SoftDeletes;
+
+    /** @use HasFactory<IncidentFactory> */
+    use HasFactory;
 
     protected $fillable = [
         'title',

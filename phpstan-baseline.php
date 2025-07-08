@@ -1,39 +1,5 @@
 <?php
 
-/*
-<COPYRIGHT>
-
-    Copyright © 2016-2025, Canyon GBS LLC. All rights reserved.
-
-    Aiding App™ is licensed under the Elastic License 2.0. For more details,
-    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
-
-    Notice:
-
-    - You may not provide the software to third parties as a hosted or managed
-      service, where the service provides users with access to any substantial set of
-      the features or functionality of the software.
-    - You may not move, change, disable, or circumvent the license key functionality
-      in the software, and you may not remove or obscure any functionality in the
-      software that is protected by the license key.
-    - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
-      to applicable law.
-    - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
-      Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
-      vigorously.
-    - The software solution, including services, infrastructure, and code, is offered as a
-      Software as a Service (SaaS) by Canyon GBS LLC.
-    - Use of this software implies agreement to the license terms and conditions as stated
-      in the Elastic License 2.0.
-
-    For more information or inquiries please visit our website at
-    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
-
-</COPYRIGHT>
-*/
-
 declare(strict_types = 1);
 
 $ignoreErrors = [];
@@ -696,12 +662,6 @@ $ignoreErrors[] = [
     'identifier' => 'closure.parameterMissingTypehint',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/contract-management/src/Filament/Resources/ContractTypeResource/Pages/EditContractType.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Property AidingApp\\\\ContractManagement\\\\Models\\\\Contract\\:\\:\\$append has no type specified\\.$#',
-    'identifier' => 'missingType.property',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contract-management/src/Models/Contract.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\Division\\\\Database\\\\Factories\\\\DivisionFactory\\:\\:default\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\Factory does not specify its types\\: TModel$#',
@@ -2066,12 +2026,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/license-management/src/Filament/Resources/ProductResource/Pages/ManageProductLicenses.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\LicenseManagement\\\\Models\\\\Product\\:\\:productLicenses\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/license-management/src/Models/Product.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\LicenseManagement\\\\Models\\\\ProductLicense\\:\\:contact\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#',
     'identifier' => 'missingType.generics',
     'count' => 1,
@@ -2918,24 +2872,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/database/factories/ServiceRequestPriorityFactory.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\ServiceManagement\\\\Database\\\\Factories\\\\ServiceRequestStatusFactory\\:\\:closed\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\Factory does not specify its types\\: TModel$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/database/factories/ServiceRequestStatusFactory.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\ServiceManagement\\\\Database\\\\Factories\\\\ServiceRequestStatusFactory\\:\\:in_progress\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\Factory does not specify its types\\: TModel$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/database/factories/ServiceRequestStatusFactory.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\ServiceManagement\\\\Database\\\\Factories\\\\ServiceRequestStatusFactory\\:\\:open\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\Factory does not specify its types\\: TModel$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/database/factories/ServiceRequestStatusFactory.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\ServiceManagement\\\\Database\\\\Factories\\\\ServiceRequestTypeFactory\\:\\:icons\\(\\) return type has no value type specified in iterable type array\\.$#',
     'identifier' => 'missingType.iterableValue',
     'count' => 1,
@@ -3698,32 +3634,8 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/src/Models/ChangeRequest.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\ServiceManagement\\\\Models\\\\ChangeRequest\\:\\:accessNestedRelations\\(\\) has no return type specified\\.$#',
-    'identifier' => 'missingType.return',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Models/ChangeRequest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\ServiceManagement\\\\Models\\\\ChangeRequest\\:\\:accessNestedRelations\\(\\) has parameter \\$relations with no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Models/ChangeRequest.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\ServiceManagement\\\\Models\\\\ChangeRequest\\:\\:approvals\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#',
     'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Models/ChangeRequest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\ServiceManagement\\\\Models\\\\ChangeRequest\\:\\:dynamicMethodChain\\(\\) has no return type specified\\.$#',
-    'identifier' => 'missingType.return',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Models/ChangeRequest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\ServiceManagement\\\\Models\\\\ChangeRequest\\:\\:dynamicMethodChain\\(\\) has parameter \\$methods with no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/service-management/src/Models/ChangeRequest.php',
 ];
@@ -5630,72 +5542,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app/Filament/Widgets/ServiceRequestWidget.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Method App\\\\Http\\\\Controllers\\\\ViewPublicUserProfileController\\:\\:formatHours\\(\\) has parameter \\$hours with no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Http/Controllers/ViewPublicUserProfileController.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method App\\\\Http\\\\Controllers\\\\ViewPublicUserProfileController\\:\\:formatHours\\(\\) return type with generic class Illuminate\\\\Support\\\\Collection does not specify its types\\: TKey, TValue$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Http/Controllers/ViewPublicUserProfileController.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Empty array passed to foreach\\.$#',
-    'identifier' => 'foreach.emptyArray',
-    'count' => 2,
-    'path' => __DIR__ . '/app/Http/Middleware/AuthGates.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method App\\\\Http\\\\Middleware\\\\AuthGates\\:\\:handle\\(\\) has no return type specified\\.$#',
-    'identifier' => 'missingType.return',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Http/Middleware/AuthGates.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method App\\\\Http\\\\Middleware\\\\AuthGates\\:\\:handle\\(\\) has parameter \\$request with no type specified\\.$#',
-    'identifier' => 'missingType.parameter',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Http/Middleware/AuthGates.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method App\\\\Http\\\\Middleware\\\\SetPreferredLocale\\:\\:handle\\(\\) has no return type specified\\.$#',
-    'identifier' => 'missingType.return',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Http/Middleware/SetPreferredLocale.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method App\\\\Http\\\\Middleware\\\\SetPreferredLocale\\:\\:handle\\(\\) has parameter \\$request with no type specified\\.$#',
-    'identifier' => 'missingType.parameter',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Http/Middleware/SetPreferredLocale.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method App\\\\Jobs\\\\CreateTenantUser\\:\\:middleware\\(\\) return type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Jobs/CreateTenantUser.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method App\\\\Jobs\\\\DispatchTenantSetupCompleteEvent\\:\\:middleware\\(\\) return type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Jobs/DispatchTenantSetupCompleteEvent.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method App\\\\Jobs\\\\MigrateTenantDatabase\\:\\:middleware\\(\\) return type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Jobs/MigrateTenantDatabase.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method App\\\\Jobs\\\\SeedTenantDatabase\\:\\:middleware\\(\\) return type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Jobs/SeedTenantDatabase.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Match arm comparison between true and false is always false\\.$#',
     'identifier' => 'match.alwaysFalse',
     'count' => 2,
@@ -5710,12 +5556,6 @@ $ignoreErrors[] = [
 $ignoreErrors[] = [
     'message' => '#^Method App\\\\Livewire\\\\TaskKanban\\:\\:getTasks\\(\\) return type with generic class Illuminate\\\\Support\\\\Collection does not specify its types\\: TKey, TValue$#',
     'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Livewire/TaskKanban.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Property App\\\\Livewire\\\\TaskKanban\\:\\:\\$statuses type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
     'count' => 1,
     'path' => __DIR__ . '/app/Livewire/TaskKanban.php',
 ];
@@ -5744,52 +5584,10 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app/Models/Authenticatable.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Class App\\\\Models\\\\BaseModel uses generic trait Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\HasFactory but does not specify its types\\: TFactory$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Models/BaseModel.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$join of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Models/Scopes/EducatableSort.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method App\\\\Models\\\\States\\\\StateMachine\\:\\:accessNestedRelations\\(\\) has no return type specified\\.$#',
-    'identifier' => 'missingType.return',
+    'message' => '#^Call to an undefined method Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:associate\\(\\)\\.$#',
+    'identifier' => 'method.notFound',
     'count' => 1,
     'path' => __DIR__ . '/app/Models/States/StateMachine.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method App\\\\Models\\\\States\\\\StateMachine\\:\\:accessNestedRelations\\(\\) has parameter \\$relations with no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Models/States/StateMachine.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method App\\\\Models\\\\States\\\\StateMachine\\:\\:dynamicMethodChain\\(\\) has no return type specified\\.$#',
-    'identifier' => 'missingType.return',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Models/States/StateMachine.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method App\\\\Models\\\\States\\\\StateMachine\\:\\:dynamicMethodChain\\(\\) has parameter \\$methods with no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Models/States/StateMachine.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$column of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Models/User.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$app of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 3,
-    'path' => __DIR__ . '/app/Providers/AppServiceProvider.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^PHPDoc tag @var with type Filament\\\\Forms\\\\Components\\\\Checkbox is not subtype of native type \\$this\\(App\\\\Providers\\\\FilamentServiceProvider\\)\\.$#',
@@ -5804,52 +5602,10 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app/Providers/FilamentServiceProvider.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$modelClass of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Providers/MorphServiceProvider.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$connection of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Providers/MultiConnectionParallelTestingServiceProvider.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$database of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 3,
-    'path' => __DIR__ . '/app/Providers/MultiConnectionParallelTestingServiceProvider.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$q of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Support/FilterQueryBuilder.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Trait Database\\\\Migrations\\\\Concerns\\\\CanModifySettings is used zero times and is not analysed\\.$#',
     'identifier' => 'trait.unused',
     'count' => 1,
     'path' => __DIR__ . '/database/migrations/Concerns/CanModifySettings.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$email of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/database/seeders/LocalDevelopmentSeeder.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$user of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/routes/channels.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#2 \\$id of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/routes/channels.php',
 ];
 
 return ['parameters' => ['ignoreErrors' => $ignoreErrors]];

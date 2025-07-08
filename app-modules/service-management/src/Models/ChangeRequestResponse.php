@@ -37,8 +37,10 @@
 namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\ServiceManagement\Database\Factories\ChangeRequestResponseFactory;
 use App\Models\BaseModel;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use OwenIt\Auditing\Contracts\Auditable;
 
@@ -48,6 +50,9 @@ use OwenIt\Auditing\Contracts\Auditable;
 class ChangeRequestResponse extends BaseModel implements Auditable
 {
     use AuditableTrait;
+
+    /** @use HasFactory<ChangeRequestResponseFactory> */
+    use HasFactory;
 
     protected $fillable = [
         'approved',

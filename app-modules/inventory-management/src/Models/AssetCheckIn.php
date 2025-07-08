@@ -38,6 +38,7 @@ namespace AidingApp\InventoryManagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\InventoryManagement\Database\Factories\AssetCheckInFactory;
 use AidingApp\InventoryManagement\Observers\AssetCheckInObserver;
 use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
 use AidingApp\Timeline\Models\Timeline;
@@ -45,6 +46,7 @@ use AidingApp\Timeline\Timelines\AssetCheckInTimeline;
 use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -63,6 +65,9 @@ class AssetCheckIn extends BaseModel implements Auditable, ProvidesATimeline
 {
     use AuditableTrait;
     use SoftDeletes;
+
+    /** @use HasFactory<AssetCheckInFactory> */
+    use HasFactory;
 
     protected $fillable = [
         'asset_id',

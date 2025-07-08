@@ -37,11 +37,13 @@
 namespace AidingApp\InventoryManagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\InventoryManagement\Database\Factories\AssetFactory;
 use AidingApp\InventoryManagement\Enums\SystemAssetStatusClassification;
 use AidingApp\InventoryManagement\Models\Scopes\ClassifiedAs;
 use App\Models\BaseModel;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -57,6 +59,9 @@ class Asset extends BaseModel implements Auditable
 {
     use AuditableTrait;
     use SoftDeletes;
+
+    /** @use HasFactory<AssetFactory> */
+    use HasFactory;
 
     protected $fillable = [
         'description',

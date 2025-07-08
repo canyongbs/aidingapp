@@ -47,7 +47,17 @@ trait TargetsRelationships
         return Str::contains($state, '.');
     }
 
-    public function accessNestedRelations(Model $model, array $relations)
+    /**
+     *
+     * @param Model $model
+     * @param array<string> $relations
+     *
+     * @throws Exception
+     *
+     * @return Model|null
+     *
+     */
+    public function accessNestedRelations(Model $model, array $relations): ?Model
     {
         $current = $model;
 
@@ -74,7 +84,17 @@ trait TargetsRelationships
         return $current;
     }
 
-    public function dynamicMethodChain(Model $model, array $methods)
+    /**
+     *
+     * @param Model $model
+     * @param array<string> $methods
+     *
+     * @throws Exception
+     *
+     * @return Model|null
+     *
+     */
+    public function dynamicMethodChain(Model $model, array $methods): ?Model
     {
         $current = $model;
 

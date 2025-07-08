@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\ServiceManagement\Database\Factories\ServiceRequestAssignmentFactory;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Observers\ServiceRequestAssignmentObserver;
 use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
@@ -44,6 +45,7 @@ use AidingApp\Timeline\Timelines\ServiceRequestAssignmentTimeline;
 use App\Models\BaseModel;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -58,6 +60,9 @@ class ServiceRequestAssignment extends BaseModel implements Auditable, ProvidesA
 {
     use AuditableTrait;
     use SoftDeletes;
+
+    /** @use HasFactory<ServiceRequestAssignmentFactory> */
+    use HasFactory;
 
     protected $casts = [
         'assigned_at' => 'datetime',

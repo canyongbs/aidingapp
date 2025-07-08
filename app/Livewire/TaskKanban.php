@@ -69,6 +69,7 @@ class TaskKanban extends Component implements HasForms, HasActions
     use TaskEditForm;
     use InteractsWithPageTable;
 
+    /** @var TaskStatus[] */
     public array $statuses = [];
 
     public ?Task $currentTask = null;

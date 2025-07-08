@@ -38,6 +38,7 @@ namespace AidingApp\InventoryManagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\InventoryManagement\Database\Factories\AssetCheckOutFactory;
 use AidingApp\InventoryManagement\Enums\AssetCheckOutStatus;
 use AidingApp\InventoryManagement\Observers\AssetCheckOutObserver;
 use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
@@ -47,6 +48,7 @@ use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
@@ -64,6 +66,9 @@ class AssetCheckOut extends BaseModel implements Auditable, ProvidesATimeline
 {
     use AuditableTrait;
     use SoftDeletes;
+
+    /** @use HasFactory<AssetCheckOutFactory> */
+    use HasFactory;
 
     protected $fillable = [
         'asset_id',

@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\ServiceManagement\Database\Factories\ServiceRequestUpdateFactory;
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateDirection;
 use AidingApp\ServiceManagement\Observers\ServiceRequestUpdateObserver;
 use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
@@ -45,6 +46,7 @@ use App\Models\BaseModel;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -60,6 +62,9 @@ class ServiceRequestUpdate extends BaseModel implements Auditable, ProvidesATime
     use SoftDeletes;
     use HasUuids;
     use AuditableTrait;
+
+    /** @use HasFactory<ServiceRequestUpdateFactory> */
+    use HasFactory;
 
     protected $fillable = [
         'service_request_id',

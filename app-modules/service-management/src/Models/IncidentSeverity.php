@@ -37,9 +37,11 @@
 namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\ServiceManagement\Database\Factories\IncidentSeverityFactory;
 use App\Models\BaseModel;
 use Filament\Support\Colors\Color;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
@@ -51,6 +53,9 @@ class IncidentSeverity extends BaseModel implements Auditable
 {
     use AuditableTrait;
     use SoftDeletes;
+
+    /** @use HasFactory<IncidentSeverityFactory> */
+    use HasFactory;
 
     protected $fillable = [
         'name',

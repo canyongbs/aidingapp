@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Audit\Overrides\BelongsToMany;
+use AidingApp\ServiceManagement\Database\Factories\ServiceRequestTypeFactory;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
 use AidingApp\ServiceManagement\Observers\ServiceRequestTypeObserver;
 use AidingApp\Team\Models\Team;
@@ -46,6 +47,7 @@ use App\Models\User;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
@@ -62,6 +64,9 @@ class ServiceRequestType extends BaseModel implements Auditable
     use SoftDeletes;
     use HasUuids;
     use AuditableTrait;
+
+    /** @use HasFactory<ServiceRequestTypeFactory> */
+    use HasFactory;
 
     protected $fillable = [
         'name',

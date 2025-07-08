@@ -37,6 +37,7 @@
 namespace AidingApp\InventoryManagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\InventoryManagement\Database\Factories\MaintenanceActivityFactory;
 use AidingApp\InventoryManagement\Enums\MaintenanceActivityStatus;
 use AidingApp\InventoryManagement\Observers\MaintenanceActivityObserver;
 use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
@@ -44,6 +45,7 @@ use AidingApp\Timeline\Models\Timeline;
 use AidingApp\Timeline\Timelines\MaintenanceActivityTimeline;
 use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
@@ -59,6 +61,9 @@ class MaintenanceActivity extends BaseModel implements Auditable, ProvidesATimel
 {
     use AuditableTrait;
     use SoftDeletes;
+
+    /** @use HasFactory<MaintenanceActivityFactory> */
+    use HasFactory;
 
     protected $fillable = [
         'asset_id',

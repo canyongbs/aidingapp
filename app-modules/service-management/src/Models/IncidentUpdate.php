@@ -37,7 +37,9 @@
 namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\ServiceManagement\Database\Factories\IncidentUpdateFactory;
 use App\Models\BaseModel;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use OwenIt\Auditing\Contracts\Auditable;
 
@@ -47,6 +49,9 @@ use OwenIt\Auditing\Contracts\Auditable;
 class IncidentUpdate extends BaseModel implements Auditable
 {
     use AuditableTrait;
+
+    /** @use HasFactory<IncidentUpdateFactory> */
+    use HasFactory;
 
     protected $fillable = [
         'incident_id',

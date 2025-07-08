@@ -42,8 +42,10 @@ use AidingApp\ServiceManagement\Models\ServiceMonitoringTargetTeam;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeAuditor;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeManager;
+use AidingApp\Team\Database\Factories\TeamFactory;
 use App\Models\BaseModel;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -53,6 +55,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Team extends BaseModel
 {
+    /** @use HasFactory<TeamFactory> */
+    use HasFactory;
+
     protected $fillable = [
         'name',
         'description',

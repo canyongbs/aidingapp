@@ -36,11 +36,17 @@
 
 namespace App\Models;
 
+use Database\Factories\TagFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
 /**
  * @mixin IdeHelperTag
  */
 class Tag extends BaseModel
 {
+    /** @use HasFactory<TagFactory> */
+    use HasFactory;
+
     protected $fillable = [
         'name',
         'type',
