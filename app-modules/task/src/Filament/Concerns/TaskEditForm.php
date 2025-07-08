@@ -60,17 +60,17 @@ trait TaskEditForm
                 ->visible(ConfidentialTaskFeature::active())
                 ->schema([
                     Checkbox::make('is_confidential')
-                        ->label('Confidential')
-                        ->live()
-                        ->columnSpanFull(),
-                    Select::make('task_confidential_users')
+                            ->label('Confidential')
+                            ->live()
+                            ->columnSpanFull(),
+                    Select::make('confidential_task_users')
                         ->relationship('confidentialAccessUsers', 'name')
                         ->preload()
                         ->label('Users')
                         ->multiple()
                         ->exists('users', 'id')
                         ->visible(fn (Get $get) => $get('is_confidential')),
-                    Select::make('task_confidential_teams')
+                    Select::make('confidential_task_teams')
                         ->relationship('confidentialAccessTeams', 'name')
                         ->preload()
                         ->label('Teams')
