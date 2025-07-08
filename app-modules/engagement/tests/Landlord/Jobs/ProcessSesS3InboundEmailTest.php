@@ -188,8 +188,15 @@ it('properly handles not finding a Contact match for emails that should be an En
 });
 
 it('properly creates an EngagementResponse for an inbound email', function () {
-    Storage::fake('s3');
+    $fakeStorage = Storage::fake('s3');
     $filesystem = Storage::fake('s3-inbound-email');
+
+    Event::listen(
+        MadeTenantCurrentEvent::class,
+        function (MadeTenantCurrentEvent $event) use ($fakeStorage) {
+            Storage::set('s3', $fakeStorage);
+        }
+    );
 
     assert($filesystem instanceof FilesystemAdapter);
 
@@ -243,9 +250,16 @@ it('properly creates an EngagementResponse for an inbound email', function () {
     $filesystem->assertMissing('s3_email');
 });
 
-it('handles attachements properly', function () {
-    Storage::fake('s3');
+it('handles attachments properly', function () {
+    $fakeStorage = Storage::fake('s3');
     $filesystem = Storage::fake('s3-inbound-email');
+
+    Event::listen(
+        MadeTenantCurrentEvent::class,
+        function (MadeTenantCurrentEvent $event) use ($fakeStorage) {
+            Storage::set('s3', $fakeStorage);
+        }
+    );
 
     assert($filesystem instanceof FilesystemAdapter);
 
@@ -942,8 +956,15 @@ it('properly creates a service request for emails with attachments', function ()
         return [$contact, $serviceRequestType, $assignedPriority];
     });
 
-    Storage::fake('s3');
+    $fakeStorage = Storage::fake('s3');
     $filesystem = Storage::fake('s3-inbound-email');
+
+    Event::listen(
+        MadeTenantCurrentEvent::class,
+        function (MadeTenantCurrentEvent $event) use ($fakeStorage) {
+            Storage::set('s3', $fakeStorage);
+        }
+    );
 
     assert($filesystem instanceof FilesystemAdapter);
 
