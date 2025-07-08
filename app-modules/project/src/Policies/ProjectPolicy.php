@@ -38,7 +38,6 @@ namespace AidingApp\Project\Policies;
 
 use AidingApp\Project\Models\Project;
 use AidingApp\Team\Models\Team;
-use App\Features\ProjectFeatureFlag;
 use App\Features\ProjectManagersAuditorsFeature;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
@@ -46,15 +45,6 @@ use Illuminate\Database\Eloquent\Collection;
 
 class ProjectPolicy
 {
-    public function before(Authenticatable $authenticatable): ?Response
-    {
-        if (! ProjectFeatureFlag::active()) {
-            return Response::deny('This feature is not active currently.');
-        }
-
-        return null;
-    }
-
     public function viewAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(

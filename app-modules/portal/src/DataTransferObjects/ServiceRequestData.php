@@ -48,6 +48,7 @@ class ServiceRequestData extends Data
     public function __construct(
         public string $id,
         public string $title,
+        public string $number,
         public ?string $statusName,
         public ?string $statusColor,
         public ?string $icon,
