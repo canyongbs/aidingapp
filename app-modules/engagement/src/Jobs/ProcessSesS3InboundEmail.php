@@ -264,7 +264,6 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
 
                         $contact->status()->associate($status);
 
-                        // TODO: Talk with Product about whether or not this is correct.
                         $source = ContactSource::query()
                             ->where('name', 'Service Request Email Auto Creation')
                             ->first();
@@ -303,7 +302,6 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
 
                         $serviceRequest->respondent()->associate($contact);
 
-                        // TODO: This should not be possible if this ID does not match to anything
                         $serviceRequest->priority()->associate($serviceRequestType->email_automatic_creation_priority_id);
 
                         $serviceRequest->saveOrFail();
