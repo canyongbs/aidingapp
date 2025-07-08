@@ -402,6 +402,7 @@ it('sends ineligible email when no contact is found for a service request and we
 
         $serviceRequestType->update([
             'email_automatic_creation_priority_id' => $assignedPriority->getKey(),
+            'is_email_automatic_creation_contact_create_enabled' => true,
         ]);
     });
 
