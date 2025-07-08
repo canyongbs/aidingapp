@@ -451,7 +451,7 @@ it('sends ineligible email when no contact is found for a service request and we
             return $notifiable->routes['mail'] === 'kevin.ullyott@canyongbs.com';
         }
     );
-})->only();
+});
 
 it('sends ineligible email when no contact is found for a service request and is_email_automatic_creation_contact_create_enabled is disabled')->todo();
 
