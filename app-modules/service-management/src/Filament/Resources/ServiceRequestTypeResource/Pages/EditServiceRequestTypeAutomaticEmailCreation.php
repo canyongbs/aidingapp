@@ -58,7 +58,7 @@ class EditServiceRequestTypeAutomaticEmailCreation extends EditRecord
 
     protected static string $resource = ServiceRequestTypeResource::class;
 
-    protected static ?string $navigationLabel = ' Email Creation';
+    protected static ?string $navigationLabel = 'Email Creation';
 
     protected static ?string $title = 'Automated Email Creation';
 
