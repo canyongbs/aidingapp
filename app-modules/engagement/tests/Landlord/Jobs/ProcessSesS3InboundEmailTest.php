@@ -10,6 +10,7 @@ use AidingApp\Engagement\Exceptions\UnableToRetrieveContentFromSesS3EmailPayload
 use AidingApp\Engagement\Jobs\ProcessSesS3InboundEmail;
 use AidingApp\Engagement\Models\EngagementResponse;
 use AidingApp\Engagement\Models\UnmatchedInboundCommunication;
+use AidingApp\Engagement\Notifications\IneligibleContactSesS3InboundEmailServiceRequestNotification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
@@ -18,6 +19,8 @@ use App\Actions\Paths\ModulePath;
 use App\Models\Tenant;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Mockery\MockInterface;
@@ -27,6 +30,8 @@ use function Pest\Laravel\assertDatabaseEmpty;
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\partialMock;
 use function Pest\Laravel\seed;
+
+use Spatie\Multitenancy\Events\MadeTenantCurrentEvent;
 
 it('handles spam verdict failure properly', function () {
     Storage::fake('s3');
@@ -362,7 +367,91 @@ it('handles is_email_automatic_creation_enabled being disabled properly', functi
     $filesystem->assertMissing('s3_email');
 });
 
-it('sends ineligible email when no contact is found for a service request and we cannot match the email to an organization')->todo();
+it('sends ineligible email when no contact is found for a service request and we cannot match the email to an organization', function () {
+    $notificationFake = Notification::fake();
+
+    Event::listen(
+        MadeTenantCurrentEvent::class,
+        function (MadeTenantCurrentEvent $event) use ($notificationFake) {
+            Notification::swap($notificationFake);
+        }
+    );
+
+    $tenant = Tenant::query()->firstOrFail();
+
+    assert($tenant instanceof Tenant);
+
+    $tenant->execute(function () {
+        $serviceRequestType = ServiceRequestType::factory()
+            ->has(
+                TenantServiceRequestTypeDomain::factory()->state([
+                    'domain' => 'help',
+                ]),
+                'domain'
+            )
+            ->has(
+                ServiceRequestPriority::factory()->count(3),
+                'priorities'
+            )
+            ->create([
+                'is_email_automatic_creation_enabled' => true,
+                'is_email_automatic_creation_contact_create_enabled' => true,
+            ]);
+
+        $assignedPriority = $serviceRequestType->priorities->first();
+
+        $serviceRequestType->update([
+            'email_automatic_creation_priority_id' => $assignedPriority->getKey(),
+        ]);
+    });
+
+    Storage::fake('s3');
+    $filesystem = Storage::fake('s3-inbound-email');
+
+    assert($filesystem instanceof FilesystemAdapter);
+
+    $modulePath = resolve(ModulePath::class);
+
+    $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_for_service_request'));
+
+    $file = UploadedFile::fake()->createWithContent('s3_email', $content);
+
+    $filesystem->putFileAs('', $file, 's3_email');
+
+    /** @var ProcessSesS3InboundEmail $mock */
+    $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+        $mock
+            ->shouldAllowMockingProtectedMethods()
+            ->shouldReceive('getContent')
+            ->once()
+            ->andReturn($content);
+    });
+
+    invade($mock)->emailFilePath = 's3_email';
+
+    $filesystem->assertExists('s3_email');
+
+    assertDatabaseEmpty(Contact::class);
+
+    $mock->handle();
+
+    $tenant->makeCurrent();
+
+    assertDatabaseEmpty(EngagementResponse::class);
+
+    assertDatabaseEmpty(ServiceRequest::class);
+
+    assertDatabaseEmpty(Contact::class);
+
+    $filesystem->assertMissing('s3_email');
+
+    $notificationFake->assertSentOnDemand(
+        IneligibleContactSesS3InboundEmailServiceRequestNotification::class,
+        function (IneligibleContactSesS3InboundEmailServiceRequestNotification $notification, array $channels, object $notifiable) {
+            return $notifiable->routes['mail'] === 'kevin.ullyott@canyongbs.com';
+        }
+    );
+})->only();
 
 it('sends ineligible email when no contact is found for a service request and is_email_automatic_creation_contact_create_enabled is disabled')->todo();
 

@@ -48,6 +48,7 @@ use AidingApp\Engagement\Exceptions\UnableToDetectTenantFromSesS3EmailPayload;
 use AidingApp\Engagement\Exceptions\UnableToRetrieveContentFromSesS3EmailPayload;
 use AidingApp\Engagement\Models\EngagementResponse;
 use AidingApp\Engagement\Models\UnmatchedInboundCommunication;
+use AidingApp\Engagement\Notifications\IneligibleContactSesS3InboundEmailServiceRequestNotification;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\TenantServiceRequestTypeDomain;
@@ -63,6 +64,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use PhpMimeMailParser\Attachment;
@@ -230,9 +232,13 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                             ->first();
 
                         if (! $organization || $serviceRequestType->is_email_automatic_creation_contact_create_enabled === false) {
-                            // TODO: Send ineligible email
                             // TODO: Test "sends ineligible email when no contact is found for a service request and we cannot match the email to an organization"
                             // TODO: Test "sends ineligible email when no contact is found for a service request and is_email_automatic_creation_contact_create_enabled is disabled"
+                            Notification::route('mail', $sender)
+                                ->notifyNow(new IneligibleContactSesS3InboundEmailServiceRequestNotification(
+                                    $serviceRequestTypeDomain,
+                                    $parser->getMessageBody('htmlEmbedded')
+                                ));
 
                             Storage::disk('s3-inbound-email')->delete($this->emailFilePath);
 
