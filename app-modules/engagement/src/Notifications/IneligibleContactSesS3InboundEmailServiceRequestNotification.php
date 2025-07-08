@@ -2,6 +2,7 @@
 
 namespace AidingApp\Engagement\Notifications;
 
+use AidingApp\Notification\Notifications\Attributes\SystemNotification;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
 use AidingApp\ServiceManagement\Models\TenantServiceRequestTypeDomain;
 use Illuminate\Bus\Queueable;
@@ -9,6 +10,7 @@ use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\HtmlString;
 
+#[SystemNotification]
 class IneligibleContactSesS3InboundEmailServiceRequestNotification extends Notification
 {
     use Queueable;
@@ -30,6 +32,7 @@ class IneligibleContactSesS3InboundEmailServiceRequestNotification extends Notif
     {
         return MailMessage::make()
             ->subject('Ineligible for Service Request Creation')
+            ->bcc($this->serviceRequestTypeDomain->serviceRequestType->email_automatic_creation_bcc)
             ->line('Thank you for your service request.')
             ->line('Unfortunately, we were unable to locate your serviceable account in our systems and therefore are unable to automatically open your service request.')
             ->line('Please contact your account manager for additional details.')
