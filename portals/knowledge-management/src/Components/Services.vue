@@ -65,7 +65,7 @@
                         >
                             <div class="grid">
                                 <div class="flex justify-between">
-                                    <div class="flex gap-x">
+                                    <div class="flex gap-x-2">
                                         <div
                                             v-if="serviceRequest.icon"
                                             v-html="serviceRequest.icon"
