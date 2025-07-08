@@ -76,7 +76,6 @@
                                         <p>{{ serviceRequest.number }}</p>
                                     </div>
 
-
                                     <div
                                         class="pointer-events-none absolute right-6 top-6 text-gray-300 transition group-hover:text-brand-500"
                                         aria-hidden="true"
