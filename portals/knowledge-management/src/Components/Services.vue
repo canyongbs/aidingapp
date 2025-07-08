@@ -64,13 +64,17 @@
                             class="group relative bg-white p-6 focus-within:bg-gray-50"
                         >
                             <div class="grid">
-                                <div class="flex" :class="[serviceRequest.icon ? 'justify-between' : 'justify-end']">
-                                    <div
-                                        v-if="serviceRequest.icon"
-                                        v-html="serviceRequest.icon"
-                                        class="pointer-events-none absolute top-6 text-brand-700"
-                                        aria-hidden="true"
-                                    ></div>
+                                <div class="flex justify-between">
+                                    <div class="flex gap-x-2">
+                                        <div
+                                            v-if="serviceRequest.icon"
+                                            v-html="serviceRequest.icon"
+                                            class="pointer-events-none text-brand-700"
+                                            aria-hidden="true"
+                                        ></div>
+
+                                        <p>{{ serviceRequest.number }}</p>
+                                    </div>
 
                                     <div
                                         class="pointer-events-none absolute right-6 top-6 text-gray-300 transition group-hover:text-brand-500"

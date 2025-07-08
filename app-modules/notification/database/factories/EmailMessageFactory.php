@@ -38,7 +38,7 @@ namespace AidingApp\Notification\Database\Factories;
 
 use AidingApp\Notification\Models\EmailMessage;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use TestEmailNotification;
+use Tests\Tenant\Unit\TestEmailNotification;
 
 /**
  * @extends Factory<EmailMessage>

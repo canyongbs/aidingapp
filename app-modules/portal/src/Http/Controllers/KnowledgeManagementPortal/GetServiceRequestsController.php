@@ -77,6 +77,7 @@ class GetServiceRequestsController extends Controller
                     ->map(function (ServiceRequest $serviceRequest) use ($colors) {
                         return ServiceRequestData::from([
                             'id' => $serviceRequest->getKey(),
+                            'number' => $serviceRequest->service_request_number,
                             'title' => $serviceRequest->serviceRequestFormSubmission?->description ?? $serviceRequest->title,
                             'statusName' => $serviceRequest->status?->name,
                             'statusColor' => $serviceRequest->status ? $colors[$serviceRequest->status->color->value][600] : null,

@@ -1,5 +1,38 @@
 <?php
 
+/*
+<COPYRIGHT>
+
+    Copyright © 2016-2025, Canyon GBS LLC. All rights reserved.
+
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
+
+    Notice:
+
+    - You may not provide the software to third parties as a hosted or managed
+      service, where the service provides users with access to any substantial set of
+      the features or functionality of the software.
+    - You may not move, change, disable, or circumvent the license key functionality
+      in the software, and you may not remove or obscure any functionality in the
+      software that is protected by the license key.
+    - You may not alter, remove, or obscure any licensing, copyright, or other notices
+      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      to applicable law.
+    - Canyon GBS LLC respects the intellectual property rights of others and expects the
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
+      Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
+      vigorously.
+    - The software solution, including services, infrastructure, and code, is offered as a
+      Software as a Service (SaaS) by Canyon GBS LLC.
+    - Use of this software implies agreement to the license terms and conditions as stated
+      in the Elastic License 2.0.
+
+    For more information or inquiries please visit our website at
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
+
+</COPYRIGHT>
+*/ 
 declare(strict_types = 1);
 
 $ignoreErrors = [];
@@ -98,18 +131,6 @@ $ignoreErrors[] = [
     'identifier' => 'missingType.generics',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/audit/src/Overrides/MorphToMany.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Property AidingApp\\\\Audit\\\\Settings\\\\AuditSettings\\:\\:\\$audited_models_exclude \\(array\\<string, string\\>\\) does not accept array\\<int, string\\>\\.$#',
-    'identifier' => 'assign.propertyType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/audit/tests/AuditListenerTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Call to an undefined method Pest\\\\PendingCalls\\\\TestCall\\|Pest\\\\Support\\\\HigherOrderTapProxy\\:\\:expect\\(\\)\\.$#',
-    'identifier' => 'method.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/audit/tests/AuditTraitUsageTest.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Call to an undefined method App\\\\Models\\\\User\\:\\:getMail\\(\\)\\.$#',
@@ -236,36 +257,6 @@ $ignoreErrors[] = [
     'identifier' => 'argument.type',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/authorization/src/View/Components/Login.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to an undefined property Pest\\\\Expectation\\<App\\\\Models\\\\User\\|null\\>\\:\\:\\$password\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/authorization/tests/Feature/Filament/Pages/SetPasswordTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/authorization/tests/Feature/Filament/Resources/UserResources/Pages/EditUserTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/authorization/tests/Feature/Filament/Resources/UserResources/Pages/EditUserTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$user of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/authorization/tests/Feature/Filament/Resources/UserResources/Pages/ListUsersTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Function something\\(\\) has no return type specified\\.$#',
-    'identifier' => 'missingType.return',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/authorization/tests/Pest.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Call to an undefined method Faker\\\\Generator\\:\\:secondaryAddress\\(\\)\\.$#',
@@ -520,96 +511,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/contact/src/Filament/Resources/OrganizationTypeResource/Pages/EditOrganizationType.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$entity of class AidingApp\\\\Timeline\\\\Events\\\\TimelineableRecordCreated constructor expects Illuminate\\\\Database\\\\Eloquent\\\\Model, App\\\\Models\\\\Contracts\\\\Educatable given\\.$#',
-    'identifier' => 'argument.type',
-    'count' => 2,
-    'path' => __DIR__ . '/app-modules/contact/tests/Contact/ListContactTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$response of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 4,
-    'path' => __DIR__ . '/app-modules/contact/tests/Contact/ListContactTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Using nullsafe property access "\\?\\-\\>id" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#',
-    'identifier' => 'nullsafe.neverNull',
-    'count' => 2,
-    'path' => __DIR__ . '/app-modules/contact/tests/Contact/RequestFactories/EditContactRequestFactory.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Call to function PHPUnit\\\\Framework\\\\assertEmpty\\(\\) with Illuminate\\\\Database\\\\Eloquent\\\\Collection\\<int, AidingApp\\\\Contact\\\\Models\\\\ContactSource\\> will always evaluate to false\\.$#',
-    'identifier' => 'function.impossibleType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contact/tests/ContactSource/CreateContactSourceTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contact/tests/ContactSource/CreateContactSourceTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contact/tests/ContactSource/CreateContactSourceTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contact/tests/ContactSource/EditContactSourceTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contact/tests/ContactSource/EditContactSourceTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Call to function PHPUnit\\\\Framework\\\\assertEmpty\\(\\) with Illuminate\\\\Database\\\\Eloquent\\\\Collection\\<int, AidingApp\\\\Contact\\\\Models\\\\ContactStatus\\> will always evaluate to false\\.$#',
-    'identifier' => 'function.impossibleType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contact/tests/ContactStatus/CreateContactStatusTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contact/tests/ContactStatus/CreateContactStatusTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contact/tests/ContactStatus/CreateContactStatusTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contact/tests/ContactStatus/EditContactStatusTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contact/tests/ContactStatus/EditContactStatusTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Call to an undefined method Faker\\\\Generator\\:\\:state\\(\\)\\.$#',
-    'identifier' => 'method.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contact/tests/Organization/RequestFactories/CreateOrganizationRequestFactory.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Call to an undefined method Faker\\\\Generator\\:\\:state\\(\\)\\.$#',
-    'identifier' => 'method.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contact/tests/Organization/RequestFactories/EditOrganizationRequestFactory.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Class AidingApp\\\\ContractManagement\\\\Database\\\\Factories\\\\ContractTypeFactory extends generic class Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\Factory but does not specify its types\\: TModel$#',
     'identifier' => 'missingType.generics',
     'count' => 1,
@@ -856,18 +757,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/engagement/src/Jobs/DeliverEngagements.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Call to method addMediaFromStream\\(\\) on an unknown class AidingApp\\\\Engagement\\\\Jobs\\\\EngagementResponse\\.$#',
-    'identifier' => 'class.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/engagement/src/Jobs/ProcessSesS3InboundEmail.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var for variable \\$engagementResponse contains unknown class AidingApp\\\\Engagement\\\\Jobs\\\\EngagementResponse\\.$#',
-    'identifier' => 'class.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/engagement/src/Jobs/ProcessSesS3InboundEmail.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Parameter \\#1 \\$communications of anonymous function has no typehint\\.$#',
     'identifier' => 'closure.parameterMissingTypehint',
     'count' => 1,
@@ -974,24 +863,6 @@ $ignoreErrors[] = [
     'identifier' => 'match.unhandled',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/engagement/src/Notifications/EngagementNotification.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to an undefined property Pest\\\\Expectation\\<AidingApp\\\\Engagement\\\\Models\\\\EngagementBatch\\|null\\>\\:\\:\\$user\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/engagement/tests/Actions/CreateEngagementBatchTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to an undefined property Pest\\\\Expectation\\<AidingApp\\\\Engagement\\\\Models\\\\Engagement\\|null\\>\\:\\:\\$user\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 2,
-    'path' => __DIR__ . '/app-modules/engagement/tests/Actions/CreateEngagementTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to an undefined property Pest\\\\Expectation\\<AidingApp\\\\Engagement\\\\Models\\\\Engagement\\|null\\>\\:\\:\\$engagementBatch\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 2,
-    'path' => __DIR__ . '/app-modules/engagement/tests/Jobs/CreateBatchedEngagementTest.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\Form\\\\Actions\\\\GenerateFormKitSchema\\:\\:content\\(\\) has parameter \\$blocks with no value type specified in iterable type array\\.$#',
@@ -1462,6 +1333,12 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/in-app-communication/src/Filament/Pages/UserChat.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Call to an undefined method Twilio\\\\Rest\\\\Conversations\\\\V1\\:\\:configuration\\(\\)\\.$#',
+    'identifier' => 'method.notFound',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/in-app-communication/src/Filament/Pages/UserChat.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Cannot access property \\$notification_preference on null\\.$#',
     'identifier' => 'property.nonObject',
     'count' => 3,
@@ -1628,24 +1505,6 @@ $ignoreErrors[] = [
     'identifier' => 'missingType.return',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/integration-aws-ses-event-handling/src/Http/Controllers/AwsSesInboundWebhookController.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to property \\$mail on an unknown class TenantConfig\\.$#',
-    'identifier' => 'class.notFound',
-    'count' => 8,
-    'path' => __DIR__ . '/app-modules/integration-aws-ses-event-handling/tests/Feature/Filament/ManageAmazonSesSettingsTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var for variable \\$config contains unknown class TenantConfig\\.$#',
-    'identifier' => 'class.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/integration-aws-ses-event-handling/tests/Feature/Filament/ManageAmazonSesSettingsTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Call to an undefined method Pest\\\\PendingCalls\\\\TestCall\\:\\:expectExceptionMessage\\(\\)\\.$#',
-    'identifier' => 'method.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/integration-aws-ses-event-handling/tests/Unit/SesConfigurationSetTest.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Call to an undefined method Faker\\\\Generator\\:\\:catchPhrase\\(\\)\\.$#',
@@ -1978,18 +1837,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/knowledge-base/src/Policies/KnowledgeBaseStatusPolicy.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Access to an undefined property Pest\\\\Expectation\\<AidingApp\\\\KnowledgeBase\\\\Models\\\\KnowledgeBaseCategory\\|null\\>\\:\\:\\$subCategories\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/knowledge-base/tests/KnowledgeBaseCategory/EditKnowledgeBaseCategoryTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Using nullsafe property access "\\?\\-\\>id" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#',
-    'identifier' => 'nullsafe.neverNull',
-    'count' => 4,
-    'path' => __DIR__ . '/app-modules/knowledge-base/tests/KnowledgeBaseItem/RequestFactories/CreateKnowledgeBaseItemRequestFactory.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Parameter \\#2 \\$guardName of method Illuminate\\\\Database\\\\Migrations\\\\Migration@anonymous/app\\-modules/license\\-management/database/migrations/2024_11_21_194048_data_seed_permissions_for_product_license_module\\.php\\:42\\:\\:deletePermissions\\(\\) expects string, array given\\.$#',
     'identifier' => 'argument.type',
     'count' => 1,
@@ -2294,18 +2141,6 @@ $ignoreErrors[] = [
     'identifier' => 'missingType.iterableValue',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/notification/src/Notifications/Messages/TwilioMessage.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\Notification\\\\Tests\\\\Fixtures\\\\TestDatabaseNotification\\:\\:toDatabase\\(\\) return type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/notification/tests/Fixtures/TestDatabaseNotification.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method TestSystemNotification\\:\\:via\\(\\) return type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/notification/tests/Notifications/Channels/MailChannelEmailMessageTest.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Parameter \\#1 \\$any of anonymous function has no typehint\\.$#',
@@ -3598,6 +3433,24 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/src/Http/Controllers/ServiceRequestFormWidgetController.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Cannot access property \\$author on array\\|Illuminate\\\\Database\\\\Eloquent\\\\Collection\\<int, AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestFormAuthentication\\>\\|string\\.$#',
+    'identifier' => 'property.nonObject',
+    'count' => 2,
+    'path' => __DIR__ . '/app-modules/service-management/src/Http/Controllers/ServiceRequestFormWidgetController.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Cannot call method delete\\(\\) on array\\|Illuminate\\\\Database\\\\Eloquent\\\\Collection\\<int, AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestFormAuthentication\\>\\|string\\.$#',
+    'identifier' => 'method.nonObject',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Http/Controllers/ServiceRequestFormWidgetController.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Cannot call method isExpired\\(\\) on array\\|Illuminate\\\\Database\\\\Eloquent\\\\Collection\\<int, AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestFormAuthentication\\>\\|string\\.$#',
+    'identifier' => 'method.nonObject',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Http/Controllers/ServiceRequestFormWidgetController.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Parameter \\#1 \\$value of static method Illuminate\\\\Support\\\\Facades\\\\Hash\\:\\:check\\(\\) expects string, int given\\.$#',
     'identifier' => 'argument.type',
     'count' => 1,
@@ -4510,354 +4363,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/src/Services/ServiceRequestType/WorkloadAssigner.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Call to an undefined method Pest\\\\Expectation\\<Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsToMany\\<AidingApp\\\\Team\\\\Models\\\\Team, AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceMonitoringTarget, covariant AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceMonitoringTargetTeam, string\\>\\|null\\>\\:\\:exists\\(\\)\\.$#',
-    'identifier' => 'method.notFound',
-    'count' => 2,
-    'path' => __DIR__ . '/app-modules/service-management/tests/Filament/ServiceMonitoring/Pages/CreateServiceMonitoringTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Call to an undefined method Pest\\\\Expectation\\<Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsToMany\\<App\\\\Models\\\\User, AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceMonitoringTarget, covariant AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceMonitoringTargetUser, string\\>\\|null\\>\\:\\:exists\\(\\)\\.$#',
-    'identifier' => 'method.notFound',
-    'count' => 2,
-    'path' => __DIR__ . '/app-modules/service-management/tests/Filament/ServiceMonitoring/Pages/CreateServiceMonitoringTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/Filament/ServiceMonitoring/Pages/CreateServiceMonitoringTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/Filament/ServiceMonitoring/Pages/CreateServiceMonitoringTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/Filament/ServiceMonitoring/Pages/EditServiceMonitoringTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/Filament/ServiceMonitoring/Pages/EditServiceMonitoringTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/Incident/CreateIncidentTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/Incident/CreateIncidentTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/Incident/EditIncidentTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/Incident/EditIncidentTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/IncidentSeverity/CreateIncidentSeverityTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/IncidentSeverity/CreateIncidentSeverityTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/IncidentSeverity/EditIncidentSeverityTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/IncidentSeverity/EditIncidentSeverityTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/IncidentStatus/CreateIncidentStatusTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/IncidentStatus/CreateIncidentStatusTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/IncidentStatus/EditIncidentStatusTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/IncidentStatus/EditIncidentStatusTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Call to function PHPUnit\\\\Framework\\\\assertEmpty\\(\\) with Illuminate\\\\Database\\\\Eloquent\\\\Collection\\<int, AidingApp\\\\ServiceManagement\\\\Models\\\\IncidentUpdate\\> will always evaluate to false\\.$#',
-    'identifier' => 'function.impossibleType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/IncidentUpdate/CreateIncidentUpdateTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/IncidentUpdate/CreateIncidentUpdateTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/IncidentUpdate/CreateIncidentUpdateTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/IncidentUpdate/EditIncidentUpdateTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/IncidentUpdate/EditIncidentUpdateTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$frequency of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 3,
-    'path' => __DIR__ . '/app-modules/service-management/tests/Jobs/ServiceMonitoringCheckJobTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$frequency of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/Jobs/ServiceMonitoringJobTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Expression on left side of \\?\\? is not nullable\\.$#',
-    'identifier' => 'nullCoalesce.expr',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/RequestFactories/CreateServiceRequestPriorityRequestFactory.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Using nullsafe property access "\\?\\-\\>id" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#',
-    'identifier' => 'nullsafe.neverNull',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/RequestFactories/CreateServiceRequestRequestFactory.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Using nullsafe property access "\\?\\-\\>id" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#',
-    'identifier' => 'nullsafe.neverNull',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/RequestFactories/EditServiceRequestRequestFactory.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method Faker\\\\Generator\\:\\:word\\(\\) invoked with 1 parameter, 0 required\\.$#',
-    'identifier' => 'arguments.count',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/RequestFactories/IncidentRequestFactory.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method Faker\\\\Generator\\:\\:word\\(\\) invoked with 1 parameter, 0 required\\.$#',
-    'identifier' => 'arguments.count',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/RequestFactories/IncidentSeverityRequestFactory.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method Faker\\\\Generator\\:\\:word\\(\\) invoked with 1 parameter, 0 required\\.$#',
-    'identifier' => 'arguments.count',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/RequestFactories/IncidentStatusRequestFactory.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method Faker\\\\Generator\\:\\:word\\(\\) invoked with 1 parameter, 0 required\\.$#',
-    'identifier' => 'arguments.count',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/RequestFactories/ServiceMonitoringTargetRequestFactory.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to an undefined property Pest\\\\Expectation\\<AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestAssignment\\|null\\>\\:\\:\\$user\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/ServiceRequest/CreateServiceRequestTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/ServiceRequest/CreateServiceRequestTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$serviceRequest of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/ServiceRequest/CreateServiceRequestTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/ServiceRequest/CreateServiceRequestTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#3 \\$setup of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/ServiceRequest/CreateServiceRequestTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/ServiceRequest/EditServiceRequestTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/ServiceRequest/EditServiceRequestTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Call to an undefined method Mockery\\\\ExpectationInterface\\|Mockery\\\\HigherOrderMessage\\:\\:twice\\(\\)\\.$#',
-    'identifier' => 'method.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/ServiceRequest/ServiceRequestNumberTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/ServiceRequestStatus/CreateServiceRequestStatusTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/ServiceRequestStatus/CreateServiceRequestStatusTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/ServiceRequestStatus/EditServiceRequestStatusTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/ServiceRequestStatus/EditServiceRequestStatusTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Call to function PHPUnit\\\\Framework\\\\assertEmpty\\(\\) with Illuminate\\\\Database\\\\Eloquent\\\\Collection\\<int, AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestType\\> will always evaluate to false\\.$#',
-    'identifier' => 'function.impossibleType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/ServiceRequestType/CreateServiceRequestTypeTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/ServiceRequestType/CreateServiceRequestTypeTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/ServiceRequestType/CreateServiceRequestTypeTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/ServiceRequestType/EditServiceRequestTypeAssignmentsTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/ServiceRequestType/EditServiceRequestTypeTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/ServiceRequestType/EditServiceRequestTypeTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to an undefined property Pest\\\\Expectation\\<AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestType\\|null\\>\\:\\:\\$auditors\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/ServiceRequestType/ServiceRequestTypeAuditorsTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to an undefined property Pest\\\\Expectation\\<AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestType\\|null\\>\\:\\:\\$managers\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/ServiceRequestType/ServiceRequestTypeManagersTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Call to function PHPUnit\\\\Framework\\\\assertEmpty\\(\\) with Illuminate\\\\Database\\\\Eloquent\\\\Collection\\<int, AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestUpdate\\> will always evaluate to false\\.$#',
-    'identifier' => 'function.impossibleType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/ServiceRequestUpdate/CreateServiceRequestUpdateTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/ServiceRequestUpdate/CreateServiceRequestUpdateTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/ServiceRequestUpdate/CreateServiceRequestUpdateTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/ServiceRequestUpdate/EditServiceRequestUpdateTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
-    'identifier' => 'closure.parameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/ServiceRequestUpdate/EditServiceRequestUpdateTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to an undefined property AidingApp\\\\Contact\\\\Models\\\\Contact\\:\\:\\$full\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/ServiceRequestUpdate/ListServiceRequestUpdatesTest.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Using nullsafe property access "\\?\\-\\>id" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#',
     'identifier' => 'nullsafe.neverNull',
     'count' => 2,
@@ -5192,18 +4697,6 @@ $ignoreErrors[] = [
     'identifier' => 'missingType.return',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/timeline/src/Providers/TimelineServiceProvider.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Call to an undefined method Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:engagementResponses\\(\\)\\.$#',
-    'identifier' => 'method.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/timeline/tests/Listeners/AddRecordToTimelineTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Call to an undefined method Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:engagementResponses\\(\\)\\.$#',
-    'identifier' => 'method.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/timeline/tests/Listeners/RemoveRecordFromTimelineTest.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\Webhook\\\\Actions\\\\StoreInboundWebhook\\:\\:handle\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#',

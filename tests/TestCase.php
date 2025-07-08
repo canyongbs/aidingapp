@@ -37,6 +37,11 @@
 namespace Tests;
 
 use AidingApp\Authorization\Models\Role;
+use App\DataTransferObjects\LicenseManagement\LicenseAddonsData;
+use App\DataTransferObjects\LicenseManagement\LicenseData;
+use App\DataTransferObjects\LicenseManagement\LicenseLimitsData;
+use App\DataTransferObjects\LicenseManagement\LicenseSubscriptionData;
+use App\Jobs\UpdateTenantLicenseData;
 use App\Models\Authenticatable;
 use App\Models\Tenant;
 use App\Multitenancy\Actions\CreateTenant;
@@ -46,42 +51,31 @@ use App\Multitenancy\DataTransferObjects\TenantMailConfig;
 use App\Multitenancy\DataTransferObjects\TenantMailersConfig;
 use App\Multitenancy\DataTransferObjects\TenantS3FilesystemConfig;
 use App\Multitenancy\DataTransferObjects\TenantSmtpMailerConfig;
-use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Foundation\Testing\DatabaseTransactionsManager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\RefreshDatabaseState;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Foundation\Testing\Traits\CanConfigureMigrationCommands;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\ParallelTesting;
-use Illuminate\Support\Str;
 use Spatie\Multitenancy\Concerns\UsesMultitenancyConfig;
 use Spatie\Permission\PermissionRegistrar;
-use Symfony\Component\Finder\Finder;
-use Symfony\Component\Finder\SplFileInfo;
-use Symfony\Component\Process\Process;
 use Tests\Concerns\LoadsFixtures;
 
 abstract class TestCase extends BaseTestCase
 {
     use CreatesApplication;
-    use RefreshDatabase;
     use CanConfigureMigrationCommands;
     use LoadsFixtures;
     use UsesMultitenancyConfig;
+    use RefreshDatabase;
 
     protected function setUp(): void
     {
         parent::setUp();
 
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
-
-        Tenant::first()->makeCurrent();
-
-        $this->beginDatabaseTransactionOnConnection($this->tenantDatabaseConnectionName());
     }
 
-    public function createLandlordTestingEnvironment(): void
+    protected function createLandlordTestingEnvironment(): void
     {
         $this->artisan('migrate:fresh', [
             '--database' => $this->landlordDatabaseConnectionName(),
@@ -91,10 +85,6 @@ abstract class TestCase extends BaseTestCase
 
         $tenantDatabase = ParallelTesting::token() ? 'testing_tenant_test_' . ParallelTesting::token() : 'testing_tenant';
 
-        DB::statement("DROP DATABASE IF EXISTS {$tenantDatabase}");
-
-        DB::statement("CREATE DATABASE {$tenantDatabase}");
-
         $this->createTenant(
             name: 'Test Tenant',
             domain: 'test.aidingapp.local',
@@ -102,28 +92,7 @@ abstract class TestCase extends BaseTestCase
         );
     }
 
-    public function createTenantTestingEnvironment(): void
-    {
-        $tenant = Tenant::firstOrFail();
-
-        $tenant->makeCurrent();
-
-        $tenant->execute(function () {
-            $this->artisan('migrate:fresh', [
-                '--database' => $this->tenantDatabaseConnectionName(),
-                ...$this->migrateFreshUsing(),
-            ]);
-        });
-
-        Role::create([
-            'name' => Authenticatable::SUPER_ADMIN_ROLE,
-            'guard_name' => 'web',
-        ]);
-
-        Tenant::forgetCurrent();
-    }
-
-    public function beginDatabaseTransactionOnConnection(string $name): void
+    protected function beginDatabaseTransactionOnConnection(string $name): void
     {
         $database = $this->app->make('db');
 
@@ -148,9 +117,9 @@ abstract class TestCase extends BaseTestCase
         });
     }
 
-    public function createTenant(string $name, string $domain, string $database): Tenant
+    protected function createTenant(string $name, string $domain, string $database): Tenant
     {
-        return app(CreateTenant::class)(
+        $tenant = app(CreateTenant::class)(
             $name,
             $domain,
             new TenantConfig(
@@ -201,74 +170,93 @@ abstract class TestCase extends BaseTestCase
                 ),
             ),
             null,
-            null,
+            new LicenseData(
+                updatedAt: now(),
+                subscription: new LicenseSubscriptionData(
+                    clientName: 'Jane Smith',
+                    partnerName: 'Fake Edu Tech',
+                    clientPo: 'abc123',
+                    partnerPo: 'def456',
+                    startDate: now(),
+                    endDate: now()->addYear(),
+                ),
+                limits: new LicenseLimitsData(
+                    recruitmentCrmSeats: 10,
+                    emails: 1000,
+                    sms: 1000,
+                    resetDate: now()->format('m-d'),
+                ),
+                addons: new LicenseAddonsData(
+                    onlineForms: true,
+                    serviceManagement: true,
+                    knowledgeManagement: true,
+                    realtimeChat: true,
+                    mobileApps: true,
+                    changeManagement: true,
+                    assetManagement: true,
+                    feedbackManagement: true,
+                    experimentalReporting: true,
+                )
+            ),
             false,
         );
+
+        $tenant->execute(function () {
+            Role::query()->firstOrCreate([
+                'name' => Authenticatable::SUPER_ADMIN_ROLE,
+                'guard_name' => 'web',
+            ]);
+        });
+
+        return $tenant;
     }
 
-    protected function refreshTestDatabase(): void
+    protected function refreshTenantTestingEnvironment(?Tenant $tenant = null): void
     {
-        if (! RefreshDatabaseState::$migrated) {
-            $this->createLandlordTestingEnvironment();
+        $tenant ??= Tenant::firstOrFail();
 
-            $this->createTenantTestingEnvironment();
+        $tenant->execute(function () use ($tenant) {
+            $this->artisan('migrate:fresh', [
+                '--database' => $this->tenantDatabaseConnectionName(),
+                ...$this->migrateFreshUsing(),
+            ]);
 
-            $this->app[Kernel::class]->setArtisan(null);
+            Role::query()->firstOrCreate([
+                'name' => Authenticatable::SUPER_ADMIN_ROLE,
+                'guard_name' => 'web',
+            ]);
 
-            RefreshDatabaseState::$migrated = true;
-        }
-
-        $this->beginDatabaseTransactionOnConnection($this->landlordDatabaseConnectionName());
-    }
-
-    /**
-     * @param array<string> $paths
-     */
-    protected function calculateMigrationChecksum(array $paths): string
-    {
-        $finder = Finder::create()
-            ->in($paths)
-            ->name('*.php')
-            ->ignoreDotFiles(true)
-            ->ignoreVCS(true)
-            ->files();
-
-        $migrations = array_map(static function (SplFileInfo $fileInfo) {
-            return [$fileInfo->getMTime(), $fileInfo->getPath()];
-        }, iterator_to_array($finder));
-
-        // Reset the array keys so there is less data
-
-        $migrations = array_values($migrations);
-
-        // Add the current git branch
-
-        $checkBranch = new Process(['git', 'branch', '--show-current']);
-        $checkBranch->run();
-
-        $migrations['gitBranch'] = trim($checkBranch->getOutput());
-
-        // Create a hash
-
-        return hash('sha256', json_encode($migrations, JSON_THROW_ON_ERROR));
-    }
-
-    protected function storeMigrationChecksum(string $connection, string $checksum): void
-    {
-        file_put_contents($this->getMigrationChecksumFile($connection), $checksum);
-    }
-
-    protected function getCachedMigrationChecksum(string $connection): ?string
-    {
-        return rescue(fn () => file_get_contents($this->getMigrationChecksumFile($connection)), null, false);
-    }
-
-    protected function getMigrationChecksumFile(string $connection): string
-    {
-        $database = config("database.connections.{$connection}.database");
-
-        $databaseNameSlug = Str::slug($database);
-
-        return storage_path("app/migration-checksum_{$databaseNameSlug}.txt");
+            dispatch_sync(new UpdateTenantLicenseData(
+                $tenant,
+                new LicenseData(
+                    updatedAt: now(),
+                    subscription: new LicenseSubscriptionData(
+                        clientName: 'Jane Smith',
+                        partnerName: 'Fake Edu Tech',
+                        clientPo: 'abc123',
+                        partnerPo: 'def456',
+                        startDate: now(),
+                        endDate: now()->addYear(),
+                    ),
+                    limits: new LicenseLimitsData(
+                        recruitmentCrmSeats: 10,
+                        emails: 1000,
+                        sms: 1000,
+                        resetDate: now()->format('m-d'),
+                    ),
+                    addons: new LicenseAddonsData(
+                        onlineForms: true,
+                        serviceManagement: true,
+                        knowledgeManagement: true,
+                        realtimeChat: true,
+                        mobileApps: true,
+                        changeManagement: true,
+                        assetManagement: true,
+                        feedbackManagement: true,
+                        experimentalReporting: true,
+                    )
+                )
+            ));
+        });
     }
 }
