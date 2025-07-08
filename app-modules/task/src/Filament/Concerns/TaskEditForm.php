@@ -60,9 +60,9 @@ trait TaskEditForm
                 ->visible(ConfidentialTaskFeature::active())
                 ->schema([
                     Checkbox::make('is_confidential')
-                            ->label('Confidential')
-                            ->live()
-                            ->columnSpanFull(),
+                        ->label('Confidential')
+                        ->live()
+                        ->columnSpanFull(),
                     Select::make('confidential_task_users')
                         ->relationship('confidentialAccessUsers', 'name')
                         ->preload()
