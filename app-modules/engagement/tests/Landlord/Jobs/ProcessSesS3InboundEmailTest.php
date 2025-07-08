@@ -402,7 +402,6 @@ it('sends ineligible email when no contact is found for a service request and we
 
         $serviceRequestType->update([
             'email_automatic_creation_priority_id' => $assignedPriority->getKey(),
-            'is_email_automatic_creation_contact_create_enabled' => true,
         ]);
     });
 
@@ -454,7 +453,95 @@ it('sends ineligible email when no contact is found for a service request and we
     );
 });
 
-it('sends ineligible email when no contact is found for a service request and is_email_automatic_creation_contact_create_enabled is disabled')->todo();
+it('sends ineligible email when no contact is found for a service request and is_email_automatic_creation_contact_create_enabled is disabled', function () {
+    $notificationFake = Notification::fake();
+
+    Event::listen(
+        MadeTenantCurrentEvent::class,
+        function (MadeTenantCurrentEvent $event) use ($notificationFake) {
+            Notification::swap($notificationFake);
+        }
+    );
+
+    $tenant = Tenant::query()->firstOrFail();
+
+    assert($tenant instanceof Tenant);
+
+    $tenant->execute(function () {
+        Organization::factory()->create([
+            'domains' => ['canyongbs.com'],
+        ]);
+
+        $serviceRequestType = ServiceRequestType::factory()
+            ->has(
+                TenantServiceRequestTypeDomain::factory()->state([
+                    'domain' => 'help',
+                ]),
+                'domain'
+            )
+            ->has(
+                ServiceRequestPriority::factory()->count(3),
+                'priorities'
+            )
+            ->create([
+                'is_email_automatic_creation_enabled' => true,
+                'is_email_automatic_creation_contact_create_enabled' => false,
+            ]);
+
+        $assignedPriority = $serviceRequestType->priorities->first();
+
+        $serviceRequestType->update([
+            'email_automatic_creation_priority_id' => $assignedPriority->getKey(),
+        ]);
+    });
+
+    Storage::fake('s3');
+    $filesystem = Storage::fake('s3-inbound-email');
+
+    assert($filesystem instanceof FilesystemAdapter);
+
+    $modulePath = resolve(ModulePath::class);
+
+    $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_for_service_request'));
+
+    $file = UploadedFile::fake()->createWithContent('s3_email', $content);
+
+    $filesystem->putFileAs('', $file, 's3_email');
+
+    /** @var ProcessSesS3InboundEmail $mock */
+    $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+        $mock
+            ->shouldAllowMockingProtectedMethods()
+            ->shouldReceive('getContent')
+            ->once()
+            ->andReturn($content);
+    });
+
+    invade($mock)->emailFilePath = 's3_email';
+
+    $filesystem->assertExists('s3_email');
+
+    assertDatabaseEmpty(Contact::class);
+
+    $mock->handle();
+
+    $tenant->makeCurrent();
+
+    assertDatabaseEmpty(EngagementResponse::class);
+
+    assertDatabaseEmpty(ServiceRequest::class);
+
+    assertDatabaseEmpty(Contact::class);
+
+    $filesystem->assertMissing('s3_email');
+
+    $notificationFake->assertSentOnDemand(
+        IneligibleContactSesS3InboundEmailServiceRequestNotification::class,
+        function (IneligibleContactSesS3InboundEmailServiceRequestNotification $notification, array $channels, object $notifiable) {
+            return $notifiable->routes['mail'] === 'kevin.ullyott@canyongbs.com';
+        }
+    );
+});
 
 it('ineligible email is sent bcc to provided email when set')->todo();
 

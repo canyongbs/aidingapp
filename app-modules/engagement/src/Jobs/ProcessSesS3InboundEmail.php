@@ -232,7 +232,6 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                             ->first();
 
                         if (! $organization || $serviceRequestType->is_email_automatic_creation_contact_create_enabled === false) {
-                            // TODO: Test "sends ineligible email when no contact is found for a service request and is_email_automatic_creation_contact_create_enabled is disabled"
                             Notification::route('mail', $sender)
                                 ->notifyNow(new IneligibleContactSesS3InboundEmailServiceRequestNotification(
                                     $serviceRequestTypeDomain,
