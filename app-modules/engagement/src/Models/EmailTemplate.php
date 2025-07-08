@@ -36,10 +36,12 @@
 
 namespace AidingApp\Engagement\Models;
 
+use AidingApp\Engagement\Database\Factories\EmailTemplateFactory;
 use AidingApp\Engagement\Observers\EmailTemplateObserver;
 use App\Models\BaseModel;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\MediaLibrary\HasMedia;
@@ -53,6 +55,9 @@ class EmailTemplate extends BaseModel implements HasMedia
 {
     use InteractsWithMedia;
     use SoftDeletes;
+
+    /** @use HasFactory<EmailTemplateFactory> */
+    use HasFactory;
 
     protected $fillable = [
         'name',

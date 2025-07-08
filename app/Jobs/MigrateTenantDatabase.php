@@ -57,6 +57,9 @@ class MigrateTenantDatabase implements ShouldQueue, NotTenantAware
 
     public function __construct(public Tenant $tenant) {}
 
+    /**
+     * @return array<int, SkipIfBatchCancelled>
+     */
     public function middleware(): array
     {
         return [new SkipIfBatchCancelled()];

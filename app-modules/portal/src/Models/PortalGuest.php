@@ -36,7 +36,9 @@
 
 namespace AidingApp\Portal\Models;
 
+use AidingApp\Portal\Database\Factories\PortalGuestFactory;
 use App\Models\BaseModel;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -46,6 +48,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class PortalGuest extends BaseModel
 {
     use SoftDeletes;
+
+    /** @use HasFactory<PortalGuestFactory> */
+    use HasFactory;
 
     /**
      * @return MorphMany<KnowledgeBaseArticleVote, $this>

@@ -36,6 +36,7 @@
 
 namespace AidingApp\Alert\Models;
 
+use AidingApp\Alert\Database\Factories\AlertFactory;
 use AidingApp\Alert\Enums\AlertSeverity;
 use AidingApp\Alert\Enums\AlertStatus;
 use AidingApp\Alert\Observers\AlertObserver;
@@ -46,6 +47,7 @@ use App\Models\BaseModel;
 use App\Models\Concerns\BelongsToEducatable;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
@@ -61,6 +63,9 @@ class Alert extends BaseModel implements Auditable
     use SoftDeletes;
     use AuditableTrait;
     use BelongsToEducatable;
+
+    /** @use HasFactory<AlertFactory> */
+    use HasFactory;
 
     protected $fillable = [
         'concern_id',

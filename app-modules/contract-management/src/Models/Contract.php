@@ -37,10 +37,12 @@
 namespace AidingApp\ContractManagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\ContractManagement\Database\Factories\ContractFactory;
 use AidingApp\ContractManagement\Enums\ContractStatus;
 use App\Casts\CurrencyCast;
 use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
@@ -56,7 +58,13 @@ class Contract extends BaseModel implements HasMedia, Auditable
     use AuditableTrait;
     use SoftDeletes;
 
-    protected $append = ['status'];
+    /** @use HasFactory<ContractFactory> */
+    use HasFactory;
+
+    /**
+     * @var array<int, string>
+     */
+    protected array $append = ['status'];
 
     protected $fillable = [
         'name',

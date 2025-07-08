@@ -38,6 +38,7 @@ namespace App\Models\Scopes;
 
 use AidingApp\Contact\Models\Contact;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Facades\DB;
 
 class EducatableSort
@@ -54,7 +55,7 @@ class EducatableSort
         $prospectNameColumn = Contact::displayNameKey();
 
         $query
-            ->leftJoin('contacts', function ($join) {
+            ->leftJoin('contacts', function (JoinClause $join) {
                 $join->on(DB::raw('CAST(service_requests.respondent_id AS VARCHAR)'), '=', DB::raw('CAST(contacts.id AS VARCHAR)'));
             })
             ->select('service_requests.*', DB::raw("COALESCE(contacts.{$prospectNameColumn}) as respondent_name"))

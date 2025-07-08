@@ -36,10 +36,12 @@
 
 namespace AidingApp\Portal\Models;
 
+use AidingApp\Portal\Database\Factories\PortalAuthenticationFactory;
 use AidingApp\Portal\Enums\PortalType;
 use App\Models\Attributes\NoPermissions;
 use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\MassPrunable;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Carbon;
@@ -53,6 +55,9 @@ use Illuminate\Support\Carbon;
 class PortalAuthentication extends BaseModel
 {
     use MassPrunable;
+
+    /** @use HasFactory<PortalAuthenticationFactory> */
+    use HasFactory;
 
     protected $casts = [
         'portal_type' => PortalType::class,

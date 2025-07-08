@@ -37,10 +37,12 @@
 namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\ServiceManagement\Database\Factories\ServiceRequestStatusFactory;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use App\Models\BaseModel;
 use CanyonGBS\Common\Enums\Color;
 use DateTimeInterface;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
@@ -52,6 +54,9 @@ class ServiceRequestStatus extends BaseModel implements Auditable
 {
     use SoftDeletes;
     use AuditableTrait;
+
+    /** @use HasFactory<ServiceRequestStatusFactory> */
+    use HasFactory;
 
     protected $fillable = [
         'classification',

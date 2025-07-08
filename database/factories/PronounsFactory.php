@@ -40,7 +40,7 @@ use App\Models\Pronouns;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Pronouns>
+ * @extends Factory<Pronouns>
  */
 class PronounsFactory extends Factory
 {

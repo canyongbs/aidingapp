@@ -37,9 +37,11 @@
 namespace AidingApp\Contact\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Contact\Database\Factories\ContactSourceFactory;
 use App\Models\BaseModel;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
@@ -52,6 +54,9 @@ class ContactSource extends BaseModel implements Auditable
     use HasUuids;
     use SoftDeletes;
     use AuditableTrait;
+
+    /** @use HasFactory<ContactSourceFactory> */
+    use HasFactory;
 
     protected $fillable = [
         'name',

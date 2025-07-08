@@ -37,9 +37,11 @@
 namespace AidingApp\LicenseManagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\LicenseManagement\Database\Factories\ProductFactory;
 use AidingApp\LicenseManagement\Observers\ProductObserver;
 use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
@@ -53,6 +55,9 @@ class Product extends BaseModel implements Auditable
     use AuditableTrait;
     use SoftDeletes;
 
+    /** @use HasFactory<ProductFactory> */
+    use HasFactory;
+
     protected $fillable = [
         'name',
         'url',
@@ -61,6 +66,9 @@ class Product extends BaseModel implements Auditable
         'additional_notes',
     ];
 
+    /**
+     * @return HasMany<ProductLicense,$this>
+     */
     public function productLicenses(): HasMany
     {
         return $this->hasMany(ProductLicense::class, 'product_id');

@@ -37,7 +37,9 @@
 namespace AidingApp\InventoryManagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\InventoryManagement\Database\Factories\AssetLocationFactory;
 use App\Models\BaseModel;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
@@ -49,6 +51,9 @@ class AssetLocation extends BaseModel implements Auditable
 {
     use AuditableTrait;
     use SoftDeletes;
+
+    /** @use HasFactory<AssetLocationFactory> */
+    use HasFactory;
 
     protected $fillable = [
         'name',

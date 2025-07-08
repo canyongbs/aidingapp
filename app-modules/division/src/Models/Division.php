@@ -37,12 +37,14 @@
 namespace AidingApp\Division\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Division\Database\Factories\DivisionFactory;
 use AidingApp\Division\Observers\DivisionObserver;
 use AidingApp\Team\Models\Team;
 use App\Models\BaseModel;
 use App\Models\NotificationSettingPivot;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
@@ -57,6 +59,9 @@ class Division extends BaseModel implements Auditable
 {
     use AuditableTrait;
     use SoftDeletes;
+
+    /** @use HasFactory<DivisionFactory> */
+    use HasFactory;
 
     protected $fillable = [
         'name',

@@ -36,8 +36,10 @@
 
 namespace AidingApp\Notification\Models;
 
+use AidingApp\Notification\Database\Factories\DatabaseMessageFactory;
 use AidingApp\Notification\Models\Contracts\Message;
 use App\Models\BaseModel;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 /**
@@ -45,6 +47,9 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  */
 class DatabaseMessage extends BaseModel implements Message
 {
+    /** @use HasFactory<DatabaseMessageFactory> */
+    use HasFactory;
+
     protected $fillable = [
         'notification_class',
         'notification_id',

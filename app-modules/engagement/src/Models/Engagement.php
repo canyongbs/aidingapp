@@ -39,6 +39,7 @@ namespace AidingApp\Engagement\Models;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Engagement\Actions\GenerateEngagementBodyContent;
+use AidingApp\Engagement\Database\Factories\EngagementFactory;
 use AidingApp\Engagement\Models\Contracts\HasDeliveryMethod;
 use AidingApp\Engagement\Observers\EngagementObserver;
 use AidingApp\Notification\Enums\NotificationChannel;
@@ -53,6 +54,7 @@ use App\Models\Scopes\LicensedToEducatable;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -77,6 +79,9 @@ class Engagement extends BaseModel implements Auditable, ProvidesATimeline, HasD
     use BelongsToEducatable;
     use InteractsWithMedia;
     use SoftDeletes;
+
+    /** @use HasFactory<EngagementFactory> */
+    use HasFactory;
 
     protected $fillable = [
         'user_id',
