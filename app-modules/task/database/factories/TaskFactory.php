@@ -37,7 +37,6 @@
 namespace AidingApp\Task\Database\Factories;
 
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Project\Models\Project;
 use AidingApp\Task\Enums\TaskStatus;
 use AidingApp\Task\Models\Task;
 use App\Models\User;

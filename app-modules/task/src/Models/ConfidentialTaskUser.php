@@ -2,7 +2,7 @@
 
 namespace AidingApp\Task\Models;
 
-use AidingApp\Task\Database\Factories\TaskConfidentialUserFactory;
+use AidingApp\Task\Database\Factories\ConfidentialTaskUserFactory;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -10,11 +10,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
 /**
- * @mixin IdeHelperTaskConfidentialUser
+ * @mixin IdeHelperConfidentialTaskUser
  */
-class TaskConfidentialUser extends Pivot
+class ConfidentialTaskUser extends Pivot
 {
-    /** @use HasFactory<TaskConfidentialUserFactory> */
+    /** @use HasFactory<ConfidentialTaskUserFactory> */
     use HasFactory;
 
     use HasUuids;

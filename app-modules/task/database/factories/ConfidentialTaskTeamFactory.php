@@ -2,15 +2,15 @@
 
 namespace AidingApp\Task\Database\Factories;
 
+use AidingApp\Task\Models\ConfidentialTaskTeam;
 use AidingApp\Task\Models\Task;
-use AidingApp\Task\Models\TaskConfidentialUser;
-use App\Models\User;
+use AidingApp\Team\Models\Team;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends Factory<TaskConfidentialUser>
+ * @extends Factory<ConfidentialTaskTeam>
  */
-class TaskConfidentialUserFactory extends Factory
+class ConfidentialTaskTeamFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -21,7 +21,7 @@ class TaskConfidentialUserFactory extends Factory
     {
         return [
             'task_id' => Task::factory(),
-            'user_id' => User::factory(),
+            'team_id' => Team::factory(),
         ];
     }
 }

@@ -468,7 +468,6 @@ namespace App\Models{
  * @property-read int|null $engagement_batches_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Engagement\Models\Engagement> $engagements
  * @property-read int|null $engagements_count
- * @property-read bool $is_admin
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Authorization\Models\License> $licenses
  * @property-read int|null $licenses_count
  * @property-read \Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection<int, \Spatie\MediaLibrary\MediaCollections\Models\Media> $media
@@ -3586,6 +3585,38 @@ namespace AidingApp\Task\Models{
 /**
  * 
  *
+ * @property-read \AidingApp\Task\Models\Task|null $task
+ * @property-read \AidingApp\Team\Models\Team|null $team
+ * @method static \AidingApp\Task\Database\Factories\ConfidentialTaskTeamFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ConfidentialTaskTeam newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ConfidentialTaskTeam newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ConfidentialTaskTeam query()
+ * @mixin \Eloquent
+ */
+	#[\AllowDynamicProperties]
+	class IdeHelperConfidentialTaskTeam {}
+}
+
+namespace AidingApp\Task\Models{
+/**
+ * 
+ *
+ * @property-read \AidingApp\Task\Models\Task|null $task
+ * @property-read \App\Models\User|null $user
+ * @method static \AidingApp\Task\Database\Factories\ConfidentialTaskUserFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ConfidentialTaskUser newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ConfidentialTaskUser newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ConfidentialTaskUser query()
+ * @mixin \Eloquent
+ */
+	#[\AllowDynamicProperties]
+	class IdeHelperConfidentialTaskUser {}
+}
+
+namespace AidingApp\Task\Models{
+/**
+ * 
+ *
  * @property-read Contact $concern
  * @property string $id
  * @property string $title
@@ -3598,11 +3629,12 @@ namespace AidingApp\Task\Models{
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property bool $is_confidential
  * @property string|null $project_id
  * @property-read \App\Models\User|null $assignedTo
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
  * @property-read int|null $audits_count
- * @property-read \AidingApp\Task\Models\TaskConfidentialUser|\AidingApp\Task\Models\TaskConfidentialTeam|null $pivot
+ * @property-read \AidingApp\Task\Models\ConfidentialTaskUser|\AidingApp\Task\Models\ConfidentialTaskTeam|null $pivot
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Team\Models\Team> $confidentialAccessTeams
  * @property-read int|null $confidential_access_teams_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $confidentialAccessUsers
@@ -3624,6 +3656,7 @@ namespace AidingApp\Task\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Task whereDescription($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Task whereDue($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Task whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Task whereIsConfidential($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Task whereProjectId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Task whereStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Task whereTitle($value)
@@ -3634,38 +3667,6 @@ namespace AidingApp\Task\Models{
  */
 	#[\AllowDynamicProperties]
 	class IdeHelperTask {}
-}
-
-namespace AidingApp\Task\Models{
-/**
- * 
- *
- * @property-read \AidingApp\Task\Models\Task|null $task
- * @property-read \AidingApp\Team\Models\Team|null $team
- * @method static \AidingApp\Task\Database\Factories\TaskConfidentialTeamFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder<static>|TaskConfidentialTeam newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|TaskConfidentialTeam newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|TaskConfidentialTeam query()
- * @mixin \Eloquent
- */
-	#[\AllowDynamicProperties]
-	class IdeHelperTaskConfidentialTeam {}
-}
-
-namespace AidingApp\Task\Models{
-/**
- * 
- *
- * @property-read \AidingApp\Task\Models\Task|null $task
- * @property-read \App\Models\User|null $user
- * @method static \AidingApp\Task\Database\Factories\TaskConfidentialUserFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder<static>|TaskConfidentialUser newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|TaskConfidentialUser newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|TaskConfidentialUser query()
- * @mixin \Eloquent
- */
-	#[\AllowDynamicProperties]
-	class IdeHelperTaskConfidentialUser {}
 }
 
 namespace AidingApp\Team\Models{

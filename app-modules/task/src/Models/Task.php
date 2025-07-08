@@ -41,7 +41,7 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Project\Models\Project;
 use AidingApp\Task\Database\Factories\TaskFactory;
 use AidingApp\Task\Enums\TaskStatus;
-use AidingApp\Task\Models\Scopes\TaskConfidentialScope;
+use AidingApp\Task\Models\Scopes\ConfidentialTaskScope;
 use AidingApp\Task\Observers\TaskObserver;
 use AidingApp\Team\Models\Team;
 use App\Models\BaseModel;
@@ -62,7 +62,7 @@ use OwenIt\Auditing\Contracts\Auditable;
  *
  * @mixin IdeHelperTask
  */
-#[ObservedBy([TaskObserver::class])] #[ScopedBy([TaskConfidentialScope::class])]
+#[ObservedBy([TaskObserver::class])] #[ScopedBy([ConfidentialTaskScope::class])]
 class Task extends BaseModel implements Auditable
 {
     /** @use HasFactory<TaskFactory> */
@@ -151,22 +151,22 @@ class Task extends BaseModel implements Auditable
     }
 
     /**
-     * @return BelongsToMany<User, $this, covariant TaskConfidentialUser>
+     * @return BelongsToMany<User, $this, covariant ConfidentialTaskUser>
      */
     public function confidentialAccessUsers(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'task_confidential_users')
-            ->using(TaskConfidentialUser::class)
+        return $this->belongsToMany(User::class, 'confidential_task_users')
+            ->using(ConfidentialTaskUser::class)
             ->withTimestamps();
     }
 
     /**
-     * @return BelongsToMany<Team, $this, covariant TaskConfidentialTeam>
+     * @return BelongsToMany<Team, $this, covariant ConfidentialTaskTeam>
      */
     public function confidentialAccessTeams(): BelongsToMany
     {
-        return $this->belongsToMany(Team::class, 'task_confidential_teams')
-            ->using(TaskConfidentialTeam::class)
+        return $this->belongsToMany(Team::class, 'confidential_task_teams')
+            ->using(ConfidentialTaskTeam::class)
             ->withTimestamps();
     }
 }

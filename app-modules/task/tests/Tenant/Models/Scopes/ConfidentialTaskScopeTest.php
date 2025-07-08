@@ -1,23 +1,21 @@
 <?php
 
 use AidingApp\Authorization\Enums\LicenseType;
-use AidingApp\Project\Models\Project;
-use AidingApp\Task\Models\Scopes\TaskConfidentialScope;
+use AidingApp\Task\Models\Scopes\ConfidentialTaskScope;
 use AidingApp\Task\Models\Task;
 use AidingApp\Team\Models\Team;
 use App\Models\User;
-use Illuminate\Support\Facades\Event;
 
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
-test('Interaction model has applied global scope', function () {
+test('is applied as a global scope to the `Task` model', function () {
     Task::bootHasGlobalScopes();
 
-    expect(Task::hasGlobalScope(TaskConfidentialScope::class))->toBeTrue();
+    expect(Task::hasGlobalScope(ConfidentialTaskScope::class))->toBeTrue();
 });
 
-test('User Can Access Public and Self-Created Confidential Tasks', function () {
+test('users can access public tasks and confidential tasks that they have created', function () {
     $user = User::factory()->licensed(LicenseType::cases())->create();
 
     actingAs($user);
@@ -49,7 +47,7 @@ test('User Can Access Public and Self-Created Confidential Tasks', function () {
         ->not->toContain(...$privateTasks->pluck('created_by'));
 });
 
-test('Confidential Tasks Are Visible to Team Members with Access', function () {
+test('users can access confidential tasks if they belong to a team with access', function () {
     $teamUser = User::factory()->licensed(LicenseType::cases())->create();
 
     $team = Team::factory()->create();
@@ -87,7 +85,7 @@ test('Confidential Tasks Are Visible to Team Members with Access', function () {
         ->not->toContain(...$privateTasks->pluck('created_by'));
 });
 
-test('Assigned User Can Only Access Permitted Confidential Tasks', function () {
+test('users can access confidential tasks if they are designated access', function () {
     $user = User::factory()->licensed(LicenseType::cases())->create();
 
     actingAs($user);
@@ -118,7 +116,7 @@ test('Assigned User Can Only Access Permitted Confidential Tasks', function () {
         ->not->toContain(...$privateTasks->pluck('created_by'));
 });
 
-test('SuperAdmin Can Access All Tasks Including Confidential Ones', function () {
+test('super admin users can access all confidential tasks', function () {
     asSuperAdmin();
 
     $privateTasks = Task::factory()->count(10)->create([
