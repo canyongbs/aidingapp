@@ -34,58 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Task\Database\Factories;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Task\Enums\TaskStatus;
-use AidingApp\Task\Models\Task;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Factories\Factory;
-
-/**
- * @extends Factory<Task>
- */
-class TaskFactory extends Factory
-{
-    public function definition(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            'title' => str($this->faker->words(asText: 3))->title()->toString(),
-            'description' => $this->faker->sentence(),
-            'status' => $this->faker->randomElement(TaskStatus::cases())->value,
-            'due' => null,
-            'assigned_to' => null,
-            'created_by' => User::factory(),
-            'concern_id' => null,
-            'project_id' => null,
-        ];
+        Schema::table('tasks', function (Blueprint $table) {
+            $table->boolean('is_confidential')->default(false);
+        });
     }
 
-    public function concerningContact(?Contact $contact = null): self
+    public function down(): void
     {
-        return $this->state([
-            'concern_id' => $contact?->id ?? Contact::factory(),
-        ]);
+        Schema::table('tasks', function (Blueprint $table) {
+            $table->dropColumn('is_confidential');
+        });
     }
-
-    public function assigned(?User $user = null): self
-    {
-        return $this->state([
-            'assigned_to' => $user?->id ?? User::factory(),
-        ]);
-    }
-
-    public function pastDue(): self
-    {
-        return $this->state([
-            'due' => $this->faker->dateTimeBetween('-2 weeks', '-1 week'),
-        ]);
-    }
-
-    public function dueLater(): self
-    {
-        return $this->state([
-            'due' => $this->faker->dateTimeBetween('+1 week', '+2 weeks'),
-        ]);
-    }
-}
+};

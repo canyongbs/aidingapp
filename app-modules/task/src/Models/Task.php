@@ -41,15 +41,19 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Project\Models\Project;
 use AidingApp\Task\Database\Factories\TaskFactory;
 use AidingApp\Task\Enums\TaskStatus;
+use AidingApp\Task\Models\Scopes\ConfidentialTaskScope;
 use AidingApp\Task\Observers\TaskObserver;
+use AidingApp\Team\Models\Team;
 use App\Models\BaseModel;
 use App\Models\User;
 use Bvtterfly\ModelStateMachine\HasStateMachine;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
 
@@ -58,7 +62,7 @@ use OwenIt\Auditing\Contracts\Auditable;
  *
  * @mixin IdeHelperTask
  */
-#[ObservedBy([TaskObserver::class])]
+#[ObservedBy([TaskObserver::class])] #[ScopedBy([ConfidentialTaskScope::class])]
 class Task extends BaseModel implements Auditable
 {
     /** @use HasFactory<TaskFactory> */
@@ -74,11 +78,13 @@ class Task extends BaseModel implements Auditable
         'description',
         'due',
         'concern_id',
+        'is_confidential',
     ];
 
     protected $casts = [
         'status' => TaskStatus::class,
         'due' => 'datetime',
+        'is_confidential' => 'boolean',
     ];
 
     /**
@@ -142,5 +148,25 @@ class Task extends BaseModel implements Auditable
     public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class, 'project_id');
+    }
+
+    /**
+     * @return BelongsToMany<User, $this, covariant ConfidentialTaskUser>
+     */
+    public function confidentialAccessUsers(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'confidential_task_users')
+            ->using(ConfidentialTaskUser::class)
+            ->withTimestamps();
+    }
+
+    /**
+     * @return BelongsToMany<Team, $this, covariant ConfidentialTaskTeam>
+     */
+    public function confidentialAccessTeams(): BelongsToMany
+    {
+        return $this->belongsToMany(Team::class, 'confidential_task_teams')
+            ->using(ConfidentialTaskTeam::class)
+            ->withTimestamps();
     }
 }

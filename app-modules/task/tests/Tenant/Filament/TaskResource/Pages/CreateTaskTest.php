@@ -34,58 +34,36 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Task\Database\Factories;
-
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Task\Enums\TaskStatus;
-use AidingApp\Task\Models\Task;
+use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\Task\Filament\Resources\TaskResource;
 use App\Models\User;
-use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends Factory<Task>
- */
-class TaskFactory extends Factory
-{
-    public function definition(): array
-    {
-        return [
-            'title' => str($this->faker->words(asText: 3))->title()->toString(),
-            'description' => $this->faker->sentence(),
-            'status' => $this->faker->randomElement(TaskStatus::cases())->value,
-            'due' => null,
-            'assigned_to' => null,
-            'created_by' => User::factory(),
-            'concern_id' => null,
-            'project_id' => null,
-        ];
-    }
+use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
 
-    public function concerningContact(?Contact $contact = null): self
-    {
-        return $this->state([
-            'concern_id' => $contact?->id ?? Contact::factory(),
-        ]);
-    }
+// TODO: Write CreateTask page tests
+//test('A successful action on the CreateTask page', function () {});
+//
+//test('CreateTask requires valid data', function ($data, $errors) {})->with([]);
 
-    public function assigned(?User $user = null): self
-    {
-        return $this->state([
-            'assigned_to' => $user?->id ?? User::factory(),
-        ]);
-    }
+// Permission Tests
 
-    public function pastDue(): self
-    {
-        return $this->state([
-            'due' => $this->faker->dateTimeBetween('-2 weeks', '-1 week'),
-        ]);
-    }
+test('CreateTask is gated with proper access control', function () {
+    $user = User::factory()->licensed(LicenseType::cases())->create();
 
-    public function dueLater(): self
-    {
-        return $this->state([
-            'due' => $this->faker->dateTimeBetween('+1 week', '+2 weeks'),
-        ]);
-    }
-}
+    actingAs($user)
+        ->get(
+            TaskResource::getUrl('create')
+        )->assertForbidden();
+
+    livewire(TaskResource\Pages\CreateTask::class)
+        ->assertForbidden();
+
+    $user->givePermissionTo('task.view-any');
+    $user->givePermissionTo('task.create');
+
+    actingAs($user)
+        ->get(
+            TaskResource::getUrl('create')
+        )->assertSuccessful();
+});

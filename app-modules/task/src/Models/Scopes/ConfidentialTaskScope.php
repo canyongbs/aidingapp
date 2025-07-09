@@ -34,58 +34,38 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Task\Database\Factories;
+namespace AidingApp\Task\Models\Scopes;
 
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Task\Enums\TaskStatus;
-use AidingApp\Task\Models\Task;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Features\ConfidentialTaskFeature;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Scope;
 
-/**
- * @extends Factory<Task>
- */
-class TaskFactory extends Factory
+class ConfidentialTaskScope implements Scope
 {
-    public function definition(): array
+    public function apply(Builder $builder, Model $model): void
     {
-        return [
-            'title' => str($this->faker->words(asText: 3))->title()->toString(),
-            'description' => $this->faker->sentence(),
-            'status' => $this->faker->randomElement(TaskStatus::cases())->value,
-            'due' => null,
-            'assigned_to' => null,
-            'created_by' => User::factory(),
-            'concern_id' => null,
-            'project_id' => null,
-        ];
-    }
+        if (! ConfidentialTaskFeature::active()) {
+            return;
+        }
 
-    public function concerningContact(?Contact $contact = null): self
-    {
-        return $this->state([
-            'concern_id' => $contact?->id ?? Contact::factory(),
-        ]);
-    }
+        if (auth()->user()?->isSuperAdmin()) {
+            return;
+        }
 
-    public function assigned(?User $user = null): self
-    {
-        return $this->state([
-            'assigned_to' => $user?->id ?? User::factory(),
-        ]);
-    }
-
-    public function pastDue(): self
-    {
-        return $this->state([
-            'due' => $this->faker->dateTimeBetween('-2 weeks', '-1 week'),
-        ]);
-    }
-
-    public function dueLater(): self
-    {
-        return $this->state([
-            'due' => $this->faker->dateTimeBetween('+1 week', '+2 weeks'),
-        ]);
+        $builder->where('is_confidential', false)->orWhere(function (Builder $query) {
+            $query->where('is_confidential', true)
+                ->where(function (Builder $query) {
+                    $query->where('created_by', auth()->id())
+                        ->orWhereHas('confidentialAccessTeams', function (Builder $query) {
+                            $query->whereHas('users', function (Builder $query) {
+                                $query->where('users.id', auth()->id());
+                            });
+                        })
+                        ->orWhereHas('confidentialAccessUsers', function (Builder $query) {
+                            $query->where('user_id', auth()->id());
+                        });
+                });
+        });
     }
 }

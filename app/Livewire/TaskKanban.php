@@ -177,6 +177,7 @@ class TaskKanban extends Component implements HasForms, HasActions
                 [
                     EditAction::make('edit')
                         ->record($this->currentTask)
+                        ->authorize(fn (Task $record) => auth()->user()->can('update', $record))
                         ->form($this->editFormFields()),
                 ]
             );
