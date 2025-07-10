@@ -24,6 +24,7 @@ class SqsDiskQueue extends BaseSqsDiskQueue
      *
      * @param  string  $payload
      * @param  string|null  $queue
+     * @param  array<string, mixed>  $options
      * @param  mixed  $delay
      *
      * @return mixed
@@ -73,7 +74,7 @@ class SqsDiskQueue extends BaseSqsDiskQueue
             app(IsTenant::class)::forgetCurrent();
 
             if (isset(json_decode($response['Messages'][0]['Body'])->tenantId)) {
-                /** @var Tenant $tenant */
+                /** @var ?Tenant $tenant */
                 $tenant = config('multitenancy.tenant_model')::find(json_decode($response['Messages'][0]['Body'])->tenantId);
 
                 if (! $tenant) {
@@ -92,5 +93,7 @@ class SqsDiskQueue extends BaseSqsDiskQueue
                 $this->diskOptions
             );
         }
+
+        return null;
     }
 }
