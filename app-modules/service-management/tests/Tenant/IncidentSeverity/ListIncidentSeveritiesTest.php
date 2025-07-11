@@ -55,7 +55,7 @@ test('ListIncidentSeverities is gated with proper access control', function () {
             IncidentSeverityResource::getUrl('index')
         )->assertForbidden();
 
-    $user->givePermissionTo('product_admin.view-any');
+    $user->givePermissionTo('settings.view-any');
 
     actingAs($user)
         ->get(
@@ -71,7 +71,7 @@ test('can list records', function () {
             IncidentSeverityResource::getUrl('index')
         )->assertForbidden();
 
-    $user->givePermissionTo('product_admin.view-any');
+    $user->givePermissionTo('settings.view-any');
 
     $records = IncidentSeverity::factory()->count(5)->create();
 
@@ -86,8 +86,8 @@ test('bulk delete IncidentSeverities', function () {
 
     actingAs($user);
 
-    $user->givePermissionTo('product_admin.view-any');
-    $user->givePermissionTo('product_admin.*.delete');
+    $user->givePermissionTo('settings.view-any');
+    $user->givePermissionTo('settings.*.delete');
 
     $incidentSeverities = IncidentSeverity::factory()->count(10)->create();
 
@@ -104,8 +104,8 @@ test('prevent deletion of IncidentSeverity if it has associated Incidents', func
 
     actingAs($user);
 
-    $user->givePermissionTo('product_admin.view-any');
-    $user->givePermissionTo('product_admin.*.delete');
+    $user->givePermissionTo('settings.view-any');
+    $user->givePermissionTo('settings.*.delete');
 
     $incidentSeverities = IncidentSeverity::factory()
         ->has(Incident::factory(), 'incidents')

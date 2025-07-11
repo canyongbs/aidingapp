@@ -64,8 +64,8 @@ test('CreateKnowledgeBaseQuality is gated with proper access control', function 
     livewire(KnowledgeBaseQualityResource\Pages\CreateKnowledgeBaseQuality::class)
         ->assertForbidden();
 
-    $user->givePermissionTo('product_admin.view-any');
-    $user->givePermissionTo('product_admin.create');
+    $user->givePermissionTo('settings.view-any');
+    $user->givePermissionTo('settings.create');
 
     actingAs($user)
         ->get(
@@ -93,8 +93,8 @@ test('CreateKnowledgeBaseQuality is gated with proper feature ccess control', fu
 
     $user = User::factory()->licensed(LicenseType::cases())->create();
 
-    $user->givePermissionTo('product_admin.view-any');
-    $user->givePermissionTo('product_admin.create');
+    $user->givePermissionTo('settings.view-any');
+    $user->givePermissionTo('settings.create');
 
     actingAs($user)
         ->get(

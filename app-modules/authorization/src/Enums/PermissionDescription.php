@@ -64,7 +64,7 @@ enum PermissionDescription: string
     case Organization = 'This permission group enables the display and management of the Organization feature in the primary navigation group Clients. Permission options include create, view, update, and delete organizations.';
     case Permission = 'This permission group enables the display and management of the Permission feature in the primary navigation group User Management. Permission options include view permissions.';
     case Product = 'This permission group enables the display and management of the License Management feature in the primary navigation group Purchasing. Permission options include create, view, update, and delete products.';
-    case ProductAdmin = 'This permission group enables access of the primary navigation group Product Administration.';
+    case ProductAdmin = 'This permission group enables access of the primary navigation group Settings.';
     case ProductLicense = 'This permission group enables the display and management of the Product License feature in the tertiary navigation group View License. Permission options include create, view, update, and delete product licenses.';
     case Project = 'This permission group enables the display of the Project feature in the primary navigation group Projects. It is coming soon. Permission options will include create, view, update, and delete';
     case RealtimeChat = 'This permission group enables the display of the Realtime Chat feature in the primary navigation group Staff Engagement. Permission options include view realtime chat.';

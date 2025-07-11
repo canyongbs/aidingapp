@@ -62,8 +62,8 @@ test('EditIncidentSeverity is gated with proper access control', function () {
     ])
         ->assertForbidden();
 
-    $user->givePermissionTo('product_admin.view-any');
-    $user->givePermissionTo('product_admin.*.update');
+    $user->givePermissionTo('settings.view-any');
+    $user->givePermissionTo('settings.*.update');
 
     actingAs($user)
         ->get(
@@ -89,8 +89,8 @@ test('EditIncidentSeverity validates the inputs', function ($data, $errors) {
 
     actingAs($user);
 
-    $user->givePermissionTo('product_admin.view-any');
-    $user->givePermissionTo('product_admin.*.update');
+    $user->givePermissionTo('settings.view-any');
+    $user->givePermissionTo('settings.*.update');
 
     $incidentSeverity = IncidentSeverity::factory()->create();
 
@@ -130,15 +130,15 @@ test('delete action visible with proper access control', function () {
 
     actingAs($user);
 
-    $user->givePermissionTo('product_admin.view-any');
-    $user->givePermissionTo('product_admin.*.update');
+    $user->givePermissionTo('settings.view-any');
+    $user->givePermissionTo('settings.*.update');
 
     livewire(EditIncidentSeverity::class, [
         'record' => $incidentSeverity->getRouteKey(),
     ])
         ->assertActionHidden(DeleteAction::class);
 
-    $user->givePermissionTo('product_admin.*.delete');
+    $user->givePermissionTo('settings.*.delete');
 
     livewire(EditIncidentSeverity::class, [
         'record' => $incidentSeverity->getRouteKey(),
