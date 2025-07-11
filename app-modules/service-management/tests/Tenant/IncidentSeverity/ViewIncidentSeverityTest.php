@@ -47,8 +47,8 @@ test('The correct details are displayed on the ViewIncidentSeverity page', funct
 
     actingAs($user);
 
-    $user->givePermissionTo('product_admin.view-any');
-    $user->givePermissionTo('product_admin.*.view');
+    $user->givePermissionTo('settings.view-any');
+    $user->givePermissionTo('settings.*.view');
 
     $incidentSeverity = IncidentSeverity::factory()->create();
 

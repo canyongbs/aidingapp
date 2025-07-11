@@ -41,6 +41,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use App\Concerns\PerformsFeatureChecks;
 use App\Concerns\PerformsLicenseChecks;
 use App\Enums\Feature;
+use App\Features\SettingsPermissions;
 use App\Models\Authenticatable;
 use App\Policies\Contracts\PerformsChecksBeforeAuthorization;
 use Illuminate\Auth\Access\Response;
@@ -65,6 +66,13 @@ class ServiceRequestFormPolicy implements PerformsChecksBeforeAuthorization
 
     public function viewAny(Authenticatable $authenticatable): Response
     {
+        if(SettingsPermissions::active()){
+            return $authenticatable->canOrElse(
+                abilities: 'settings.view-any',
+                denyResponse: 'You do not have permission to view service request forms.'
+            );
+        }
+
         return $authenticatable->canOrElse(
             abilities: 'product_admin.view-any',
             denyResponse: 'You do not have permission to view service request forms.'
@@ -73,6 +81,12 @@ class ServiceRequestFormPolicy implements PerformsChecksBeforeAuthorization
 
     public function view(Authenticatable $authenticatable, ServiceRequestForm $serviceRequestForm): Response
     {
+        if(SettingsPermissions::active()){
+            return $authenticatable->canOrElse(
+                abilities: 'settings.*.view',
+                denyResponse: 'You do not have permission to view this service request form.'
+            );
+        }
         return $authenticatable->canOrElse(
             abilities: ["product_admin.{$serviceRequestForm->getKey()}.view"],
             denyResponse: 'You do not have permission to view this service request form.'
@@ -81,6 +95,13 @@ class ServiceRequestFormPolicy implements PerformsChecksBeforeAuthorization
 
     public function create(Authenticatable $authenticatable): Response
     {
+        if(SettingsPermissions::active()){
+            return $authenticatable->canOrElse(
+                abilities: 'settings.create',
+                denyResponse: 'You do not have permission to create service request forms.'
+            );
+        }
+
         return $authenticatable->canOrElse(
             abilities: 'product_admin.create',
             denyResponse: 'You do not have permission to create service request forms.'
@@ -89,6 +110,13 @@ class ServiceRequestFormPolicy implements PerformsChecksBeforeAuthorization
 
     public function update(Authenticatable $authenticatable, ServiceRequestForm $serviceRequestForm): Response
     {
+        if(SettingsPermissions::active()){
+            return $authenticatable->canOrElse(
+                abilities: 'settings.*.update',
+                denyResponse: 'You do not have permission to update this service request form.'
+            );
+        }
+
         return $authenticatable->canOrElse(
             abilities: ["product_admin.{$serviceRequestForm->getKey()}.update"],
             denyResponse: 'You do not have permission to update this service request form.'
@@ -97,6 +125,13 @@ class ServiceRequestFormPolicy implements PerformsChecksBeforeAuthorization
 
     public function delete(Authenticatable $authenticatable, ServiceRequestForm $serviceRequestForm): Response
     {
+        if(SettingsPermissions::active()){
+            return $authenticatable->canOrElse(
+                abilities: 'settings.*.delete',
+                denyResponse: 'You do not have permission to delete this service request form.'
+            );
+        }
+
         return $authenticatable->canOrElse(
             abilities: ["product_admin.{$serviceRequestForm->getKey()}.delete"],
             denyResponse: 'You do not have permission to delete this service request form.'
@@ -105,6 +140,13 @@ class ServiceRequestFormPolicy implements PerformsChecksBeforeAuthorization
 
     public function restore(Authenticatable $authenticatable, ServiceRequestForm $serviceRequestForm): Response
     {
+        if(SettingsPermissions::active()){
+            return $authenticatable->canOrElse(
+                abilities: 'settings.*.restore',
+                denyResponse: 'You do not have permission to restore this service request form.'
+            );
+        }
+
         return $authenticatable->canOrElse(
             abilities: ["product_admin.{$serviceRequestForm->getKey()}.restore"],
             denyResponse: 'You do not have permission to restore this service request form.'
@@ -113,6 +155,13 @@ class ServiceRequestFormPolicy implements PerformsChecksBeforeAuthorization
 
     public function forceDelete(Authenticatable $authenticatable, ServiceRequestForm $serviceRequestForm): Response
     {
+        if(SettingsPermissions::active()){
+            return $authenticatable->canOrElse(
+                abilities: 'settings.*.force-delete',
+                denyResponse: 'You do not have permission to permanently delete this service request form.'
+            );
+        }
+
         return $authenticatable->canOrElse(
             abilities: ["product_admin.{$serviceRequestForm->getKey()}.force-delete"],
             denyResponse: 'You do not have permission to permanently delete this service request form.'

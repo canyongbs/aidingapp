@@ -47,8 +47,8 @@ test('The correct details are displayed on the ViewIncidentStatus page', functio
 
     actingAs($user);
 
-    $user->givePermissionTo('product_admin.view-any');
-    $user->givePermissionTo('product_admin.*.view');
+    $user->givePermissionTo('settings.view-any');
+    $user->givePermissionTo('settings.*.view');
 
     $incidentStatus = IncidentStatus::factory()->create();
 

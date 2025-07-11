@@ -41,6 +41,7 @@ use AidingApp\Portal\Enums\GdprBannerButtonLabel;
 use AidingApp\Portal\Enums\GdprDeclineOptions;
 use AidingApp\Portal\Settings\PortalSettings;
 use App\Enums\Feature;
+use App\Features\SettingsPermissions;
 use App\Filament\Forms\Components\ColorSelect;
 use App\Models\User;
 use App\Rules\ValidUrl;
@@ -70,14 +71,14 @@ class ManagePortalSettings extends SettingsPage
 
     protected static ?string $title = 'Client Portal';
 
-    protected static ?string $navigationGroup = 'Product Administration';
+    protected static ?string $navigationGroup = 'Settings';
 
     public static function canAccess(): bool
     {
         /** @var User $user */
         $user = auth()->user();
 
-        return $user->can(['product_admin.view-any']);
+        return SettingsPermissions::active() ? $user->can(['settings.view-any']) : $user->can(['product_admin.view-any']);
     }
 
     public function form(Form $form): Form
