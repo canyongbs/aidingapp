@@ -37,6 +37,7 @@
 use AidingApp\Project\Filament\Resources\ProjectResource\Pages\EditProject;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Tests\Tenant\Filament\Resources\ProjectResource\RequestFactory\EditProjectRequestFactory;
+use AidingApp\Team\Models\Team;
 use App\Models\User;
 use Olympus\Crm\Models\Contact;
 
@@ -72,6 +73,95 @@ it('can render with proper permission.', function () {
     actingAs($user);
 
     $project = Project::factory()->create();
+
+    get(EditProject::getUrl([
+        'record' => $project->getRouteKey(),
+    ]))
+        ->assertSuccessful();
+});
+
+it('can render if logged in user is superadmin , creator, manager, or auditor of the project.', function () {
+    $user = User::factory()->create();
+    $secondUser = User::factory()->create();
+
+    $user->givePermissionTo('project.view-any');
+    $user->givePermissionTo('project.*.update');
+
+    $user->refresh();
+
+    actingAs($user);
+
+    $project = Project::factory()->create();
+
+    get(EditProject::getUrl([
+        'record' => $project->getRouteKey(),
+    ]))
+        ->assertSuccessful();
+
+    actingAs($secondUser);
+
+    $secondUser->givePermissionTo('project.view-any');
+    $secondUser->givePermissionTo('project.*.update');
+
+    get(EditProject::getUrl([
+        'record' => $project->getRouteKey(),
+    ]))
+        ->assertForbidden();
+
+    $project->managerUsers()->attach($secondUser->getKey());
+
+    get(EditProject::getUrl([
+        'record' => $project->getRouteKey(),
+    ]))
+        ->assertSuccessful();
+
+    $project->managerUsers()->detach($secondUser->getKey());
+
+    get(EditProject::getUrl([
+        'record' => $project->getRouteKey(),
+    ]))
+        ->assertForbidden();
+
+    $project->auditorUsers()->attach($secondUser->getKey());
+
+    get(EditProject::getUrl([
+        'record' => $project->getRouteKey(),
+    ]))
+        ->assertSuccessful();
+
+    $project->auditorUsers()->detach($secondUser->getKey());
+
+    get(EditProject::getUrl([
+        'record' => $project->getRouteKey(),
+    ]))
+        ->assertForbidden();
+
+    $team = Team::factory()->create();
+
+    $secondUser->team()->associate($team)->save();
+
+    $project->managerTeams()->attach($team->getKey());
+
+    get(EditProject::getUrl([
+        'record' => $project->getRouteKey(),
+    ]))
+        ->assertSuccessful();
+
+    $project->managerTeams()->detach($team->getKey());
+
+    get(EditProject::getUrl([
+        'record' => $project->getRouteKey(),
+    ]))
+        ->assertForbidden();
+
+    $project->auditorTeams()->attach($team->getKey());
+
+    get(EditProject::getUrl([
+        'record' => $project->getRouteKey(),
+    ]))
+        ->assertSuccessful();
+
+    asSuperAdmin();
 
     get(EditProject::getUrl([
         'record' => $project->getRouteKey(),
