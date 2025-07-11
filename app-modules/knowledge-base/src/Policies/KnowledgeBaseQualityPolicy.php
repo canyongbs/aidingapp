@@ -68,14 +68,14 @@ class KnowledgeBaseQualityPolicy implements PerformsChecksBeforeAuthorization
     {
         if(SettingsPermissions::active()){
             return $authenticatable->canOrElse(
-                abilities: 'product_admin.view-any',
-                denyResponse: 'You do not have permission to view any knowledge base categories.'
+                abilities: 'settings.view-any',
+                denyResponse: 'You do not have permission to view any knowledge base qualities.'
             );
         }
         
         return $authenticatable->canOrElse(
             abilities: 'product_admin.view-any',
-            denyResponse: 'You do not have permission to view any knowledge base categories.'
+            denyResponse: 'You do not have permission to view any knowledge base qualities.'
         );
     }
 
@@ -84,13 +84,13 @@ class KnowledgeBaseQualityPolicy implements PerformsChecksBeforeAuthorization
         if(SettingsPermissions::active()){
             return $authenticatable->canOrElse(
                 abilities: "settings.*.view",
-                denyResponse: 'You do not have permission to view this knowledge base category.'
+                denyResponse: 'You do not have permission to view this knowledge base quality.'
             );
         }
 
         return $authenticatable->canOrElse(
             abilities: ["product_admin.{$knowledgeBaseQuality->getKey()}.view"],
-            denyResponse: 'You do not have permission to view this knowledge base category.'
+            denyResponse: 'You do not have permission to view this knowledge base quality.'
         );
     }
 
@@ -98,14 +98,14 @@ class KnowledgeBaseQualityPolicy implements PerformsChecksBeforeAuthorization
     {
         if(SettingsPermissions::active()){
             return $authenticatable->canOrElse(
-                abilities: 'settings.*.create',
-                denyResponse: 'You do not have permission to create knowledge base categories.'
+                abilities: 'settings.create',
+                denyResponse: 'You do not have permission to create knowledge base qualities.'
             );
         }
 
         return $authenticatable->canOrElse(
             abilities: 'product_admin.create',
-            denyResponse: 'You do not have permission to create knowledge base categories.'
+            denyResponse: 'You do not have permission to create knowledge base qualities.'
         );
     }
 
@@ -114,13 +114,13 @@ class KnowledgeBaseQualityPolicy implements PerformsChecksBeforeAuthorization
         if(SettingsPermissions::active()){
             return $authenticatable->canOrElse(
                 abilities: "settings.*.update",
-                denyResponse: 'You do not have permission to update this knowledge base category.'
+                denyResponse: 'You do not have permission to update this knowledge base quality.'
             );
         }
 
         return $authenticatable->canOrElse(
             abilities: ["product_admin.{$knowledgeBaseQuality->getKey()}.update"],
-            denyResponse: 'You do not have permission to update this knowledge base category.'
+            denyResponse: 'You do not have permission to update this knowledge base quality.'
         );
     }
 
@@ -129,12 +129,12 @@ class KnowledgeBaseQualityPolicy implements PerformsChecksBeforeAuthorization
         if(SettingsPermissions::active()){
             return $authenticatable->canOrElse(
                 abilities: "settings.*.delete",
-                denyResponse: 'You do not have permission to delete this knowledge base category.'
+                denyResponse: 'You do not have permission to delete this knowledge base quality.'
             );
         }
         return $authenticatable->canOrElse(
             abilities: ["product_admin.{$knowledgeBaseQuality->getKey()}.delete"],
-            denyResponse: 'You do not have permission to delete this knowledge base category.'
+            denyResponse: 'You do not have permission to delete this knowledge base quality.'
         );
     }
 
@@ -143,13 +143,13 @@ class KnowledgeBaseQualityPolicy implements PerformsChecksBeforeAuthorization
         if(SettingsPermissions::active()){
             return $authenticatable->canOrElse(
                 abilities: "settings.*.restore",
-                denyResponse: 'You do not have permission to restore this knowledge base category.'
+                denyResponse: 'You do not have permission to restore this knowledge base quality.'
             );
         }
 
         return $authenticatable->canOrElse(
             abilities: ["product_admin.{$knowledgeBaseQuality->getKey()}.restore"],
-            denyResponse: 'You do not have permission to restore this knowledge base category.'
+            denyResponse: 'You do not have permission to restore this knowledge base quality.'
         );
     }
 
@@ -158,13 +158,13 @@ class KnowledgeBaseQualityPolicy implements PerformsChecksBeforeAuthorization
         if(SettingsPermissions::active()){
             return $authenticatable->canOrElse(
                 abilities: "settings.*.force-delete",
-                denyResponse: 'You do not have permission to permanently delete this knowledge base category.'
+                denyResponse: 'You do not have permission to permanently delete this knowledge base quality.'
             );
         }
         
         return $authenticatable->canOrElse(
             abilities: ["product_admin.{$knowledgeBaseQuality->getKey()}.force-delete"],
-            denyResponse: 'You do not have permission to permanently delete this knowledge base category.'
+            denyResponse: 'You do not have permission to permanently delete this knowledge base quality.'
         );
     }
 
