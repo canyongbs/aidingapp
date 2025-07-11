@@ -41,6 +41,7 @@ use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
 use App\Concerns\PerformsFeatureChecks;
 use App\Concerns\PerformsLicenseChecks;
 use App\Enums\Feature;
+use App\Features\SettingsPermissions;
 use App\Models\Authenticatable;
 use App\Policies\Contracts\PerformsChecksBeforeAuthorization;
 use Illuminate\Auth\Access\Response;
@@ -65,6 +66,13 @@ class KnowledgeBaseQualityPolicy implements PerformsChecksBeforeAuthorization
 
     public function viewAny(Authenticatable $authenticatable): Response
     {
+        if(SettingsPermissions::active()){
+            return $authenticatable->canOrElse(
+                abilities: 'product_admin.view-any',
+                denyResponse: 'You do not have permission to view any knowledge base categories.'
+            );
+        }
+        
         return $authenticatable->canOrElse(
             abilities: 'product_admin.view-any',
             denyResponse: 'You do not have permission to view any knowledge base categories.'
@@ -73,6 +81,13 @@ class KnowledgeBaseQualityPolicy implements PerformsChecksBeforeAuthorization
 
     public function view(Authenticatable $authenticatable, KnowledgeBaseQuality $knowledgeBaseQuality): Response
     {
+        if(SettingsPermissions::active()){
+            return $authenticatable->canOrElse(
+                abilities: "settings.*.view",
+                denyResponse: 'You do not have permission to view this knowledge base category.'
+            );
+        }
+
         return $authenticatable->canOrElse(
             abilities: ["product_admin.{$knowledgeBaseQuality->getKey()}.view"],
             denyResponse: 'You do not have permission to view this knowledge base category.'
@@ -81,6 +96,13 @@ class KnowledgeBaseQualityPolicy implements PerformsChecksBeforeAuthorization
 
     public function create(Authenticatable $authenticatable): Response
     {
+        if(SettingsPermissions::active()){
+            return $authenticatable->canOrElse(
+                abilities: 'settings.*.create',
+                denyResponse: 'You do not have permission to create knowledge base categories.'
+            );
+        }
+
         return $authenticatable->canOrElse(
             abilities: 'product_admin.create',
             denyResponse: 'You do not have permission to create knowledge base categories.'
@@ -89,6 +111,13 @@ class KnowledgeBaseQualityPolicy implements PerformsChecksBeforeAuthorization
 
     public function update(Authenticatable $authenticatable, KnowledgeBaseQuality $knowledgeBaseQuality): Response
     {
+        if(SettingsPermissions::active()){
+            return $authenticatable->canOrElse(
+                abilities: "settings.*.update",
+                denyResponse: 'You do not have permission to update this knowledge base category.'
+            );
+        }
+
         return $authenticatable->canOrElse(
             abilities: ["product_admin.{$knowledgeBaseQuality->getKey()}.update"],
             denyResponse: 'You do not have permission to update this knowledge base category.'
@@ -97,6 +126,12 @@ class KnowledgeBaseQualityPolicy implements PerformsChecksBeforeAuthorization
 
     public function delete(Authenticatable $authenticatable, KnowledgeBaseQuality $knowledgeBaseQuality): Response
     {
+        if(SettingsPermissions::active()){
+            return $authenticatable->canOrElse(
+                abilities: "settings.*.delete",
+                denyResponse: 'You do not have permission to delete this knowledge base category.'
+            );
+        }
         return $authenticatable->canOrElse(
             abilities: ["product_admin.{$knowledgeBaseQuality->getKey()}.delete"],
             denyResponse: 'You do not have permission to delete this knowledge base category.'
@@ -105,6 +140,13 @@ class KnowledgeBaseQualityPolicy implements PerformsChecksBeforeAuthorization
 
     public function restore(Authenticatable $authenticatable, KnowledgeBaseQuality $knowledgeBaseQuality): Response
     {
+        if(SettingsPermissions::active()){
+            return $authenticatable->canOrElse(
+                abilities: "settings.*.restore",
+                denyResponse: 'You do not have permission to restore this knowledge base category.'
+            );
+        }
+
         return $authenticatable->canOrElse(
             abilities: ["product_admin.{$knowledgeBaseQuality->getKey()}.restore"],
             denyResponse: 'You do not have permission to restore this knowledge base category.'
@@ -113,6 +155,13 @@ class KnowledgeBaseQualityPolicy implements PerformsChecksBeforeAuthorization
 
     public function forceDelete(Authenticatable $authenticatable, KnowledgeBaseQuality $knowledgeBaseQuality): Response
     {
+        if(SettingsPermissions::active()){
+            return $authenticatable->canOrElse(
+                abilities: "settings.*.force-delete",
+                denyResponse: 'You do not have permission to permanently delete this knowledge base category.'
+            );
+        }
+        
         return $authenticatable->canOrElse(
             abilities: ["product_admin.{$knowledgeBaseQuality->getKey()}.force-delete"],
             denyResponse: 'You do not have permission to permanently delete this knowledge base category.'

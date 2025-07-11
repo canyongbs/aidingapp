@@ -36,6 +36,7 @@
 
 namespace App\Policies;
 
+use App\Features\SettingsPermissions;
 use App\Models\Authenticatable;
 use App\Models\Pronouns;
 use Illuminate\Auth\Access\Response;
@@ -44,6 +45,13 @@ class PronounsPolicy
 {
     public function viewAny(Authenticatable $authenticatable): Response
     {
+        if(SettingsPermissions::active()){
+            return $authenticatable->canOrElse(
+                abilities: 'settings.view-any',
+                denyResponse: 'You do not have permission to view pronouns.'
+            );
+        }
+        
         return $authenticatable->canOrElse(
             abilities: ['product_admin.view-any'],
             denyResponse: 'You do not have permission to view pronouns.'
@@ -52,6 +60,13 @@ class PronounsPolicy
 
     public function view(Authenticatable $authenticatable, Pronouns $model): Response
     {
+        if(SettingsPermissions::active()){
+            return $authenticatable->canOrElse(
+                abilities: "settings.*.view",
+                denyResponse: 'You do not have permission to view these pronouns.'
+            );
+        }
+
         return $authenticatable->canOrElse(
             abilities: ["product_admin.{$model->getKey()}.view"],
             denyResponse: 'You do not have permission to view these pronouns.'
@@ -60,6 +75,13 @@ class PronounsPolicy
 
     public function create(Authenticatable $authenticatable): Response
     {
+        if(SettingsPermissions::active()){
+            return $authenticatable->canOrElse(
+                abilities: 'settings.create',
+                denyResponse: 'You do not have permission to create pronouns.'
+            );
+        }
+
         return $authenticatable->canOrElse(
             abilities: 'product_admin.create',
             denyResponse: 'You do not have permission to create pronouns.'
@@ -68,6 +90,13 @@ class PronounsPolicy
 
     public function update(Authenticatable $authenticatable, Pronouns $model): Response
     {
+        if(SettingsPermissions::active()){
+            return $authenticatable->canOrElse(
+                abilities: 'settings.*.update',
+                denyResponse: 'You do not have permission to update these pronouns.'
+            );
+        }
+
         return $authenticatable->canOrElse(
             abilities: ["product_admin.{$model->getKey()}.update"],
             denyResponse: 'You do not have permission to update these pronouns.'
@@ -76,6 +105,13 @@ class PronounsPolicy
 
     public function delete(Authenticatable $authenticatable, Pronouns $model): Response
     {
+        if(SettingsPermissions::active()){
+            return $authenticatable->canOrElse(
+                abilities: 'settings.*.delete',
+                denyResponse: 'You do not have permission to delete these pronouns.'
+            );
+        }
+
         return $authenticatable->canOrElse(
             abilities: ["product_admin.{$model->getKey()}.delete"],
             denyResponse: 'You do not have permission to delete these pronouns.'
@@ -84,6 +120,13 @@ class PronounsPolicy
 
     public function restore(Authenticatable $authenticatable, Pronouns $model): Response
     {
+        if(SettingsPermissions::active()){
+            return $authenticatable->canOrElse(
+                abilities: "settings.*.restore",
+                denyResponse: 'You do not have permission to restore these pronouns.'
+            );
+        }
+
         return $authenticatable->canOrElse(
             abilities: ["product_admin.{$model->getKey()}.restore"],
             denyResponse: 'You do not have permission to restore these pronouns.'
@@ -92,6 +135,13 @@ class PronounsPolicy
 
     public function forceDelete(Authenticatable $authenticatable, Pronouns $model): Response
     {
+        if(SettingsPermissions::active()){
+            return $authenticatable->canOrElse(
+                abilities: "settings.*.force-delete",
+                denyResponse: 'You do not have permission to permanently delete these pronouns.'
+            );
+        }
+        
         return $authenticatable->canOrElse(
             abilities: ["product_admin.{$model->getkey()}.force-delete"],
             denyResponse: 'You do not have permission to permanently delete these pronouns.'

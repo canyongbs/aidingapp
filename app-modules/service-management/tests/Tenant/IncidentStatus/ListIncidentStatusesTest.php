@@ -55,7 +55,7 @@ test('ListIncidentStatuses is gated with proper access control', function () {
             IncidentStatusResource::getUrl('index')
         )->assertForbidden();
 
-    $user->givePermissionTo('product_admin.view-any');
+    $user->givePermissionTo('settings.view-any');
 
     actingAs($user)
         ->get(
@@ -71,7 +71,7 @@ test('can list records', function () {
             IncidentStatusResource::getUrl('index')
         )->assertForbidden();
 
-    $user->givePermissionTo('product_admin.view-any');
+    $user->givePermissionTo('settings.view-any');
 
     $records = IncidentStatus::factory()->count(5)->create();
 
@@ -86,8 +86,8 @@ test('bulk delete IncidentStatuses', function () {
 
     actingAs($user);
 
-    $user->givePermissionTo('product_admin.view-any');
-    $user->givePermissionTo('product_admin.*.delete');
+    $user->givePermissionTo('settings.view-any');
+    $user->givePermissionTo('settings.*.delete');
 
     $incidentStatuses = IncidentStatus::factory()->count(10)->create();
 
@@ -104,8 +104,8 @@ test('prevent deletion of IncidentStatus if it has associated Incidents', functi
 
     actingAs($user);
 
-    $user->givePermissionTo('product_admin.view-any');
-    $user->givePermissionTo('product_admin.*.delete');
+    $user->givePermissionTo('settings.view-any');
+    $user->givePermissionTo('settings.*.delete');
 
     $incidentStatuses = IncidentStatus::factory()
         ->has(Incident::factory(), 'incidents')

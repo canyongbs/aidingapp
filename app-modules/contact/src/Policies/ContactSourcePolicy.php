@@ -38,6 +38,7 @@ namespace AidingApp\Contact\Policies;
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactSource;
+use App\Features\SettingsPermissions;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
 
@@ -54,6 +55,12 @@ class ContactSourcePolicy
 
     public function viewAny(Authenticatable $authenticatable): Response
     {
+        if(SettingsPermissions::active()){
+            return $authenticatable->canOrElse(
+                abilities: 'settings.view-any',
+                denyResponse: 'You do not have permission to view contact sources.'
+            );
+        }
         return $authenticatable->canOrElse(
             abilities: 'product_admin.view-any',
             denyResponse: 'You do not have permission to view contact sources.'
@@ -62,6 +69,13 @@ class ContactSourcePolicy
 
     public function view(Authenticatable $authenticatable, ContactSource $contactSource): Response
     {
+        if(SettingsPermissions::active()){
+            return $authenticatable->canOrElse(
+                abilities: 'settings.*.view',
+                denyResponse: 'You do not have permission to view this contact source.'
+            );
+        }
+
         return $authenticatable->canOrElse(
             abilities: ["product_admin.{$contactSource->getKey()}.view"],
             denyResponse: 'You do not have permission to view this contact source.'
@@ -70,6 +84,13 @@ class ContactSourcePolicy
 
     public function create(Authenticatable $authenticatable): Response
     {
+        if(SettingsPermissions::active()){
+            return $authenticatable->canOrElse(
+                abilities: 'settings.create',
+                denyResponse: 'You do not have permission to create contact sources.'
+            );
+        }
+
         return $authenticatable->canOrElse(
             abilities: 'product_admin.create',
             denyResponse: 'You do not have permission to create contact sources.'
@@ -78,6 +99,13 @@ class ContactSourcePolicy
 
     public function update(Authenticatable $authenticatable, ContactSource $contactSource): Response
     {
+        if(SettingsPermissions::active()){
+            return $authenticatable->canOrElse(
+                abilities: 'settings.*.update',
+                denyResponse: 'You do not have permission to update this contact source.'
+            );
+        }
+
         return $authenticatable->canOrElse(
             abilities: ["product_admin.{$contactSource->getKey()}.update"],
             denyResponse: 'You do not have permission to update this contact source.'
@@ -86,6 +114,13 @@ class ContactSourcePolicy
 
     public function delete(Authenticatable $authenticatable, ContactSource $contactSource): Response
     {
+        if(SettingsPermissions::active()){
+            return $authenticatable->canOrElse(
+                abilities: 'settings.*.delete',
+                denyResponse: 'You do not have permission to delete this contact source.'
+            );
+        }
+
         return $authenticatable->canOrElse(
             abilities: ["product_admin.{$contactSource->getKey()}.delete"],
             denyResponse: 'You do not have permission to delete this contact source.'
@@ -94,6 +129,13 @@ class ContactSourcePolicy
 
     public function restore(Authenticatable $authenticatable, ContactSource $contactSource): Response
     {
+        if(SettingsPermissions::active()){
+            return $authenticatable->canOrElse(
+                abilities: 'settings.*.restore',
+                denyResponse: 'You do not have permission to restore this contact source.'
+            );
+        }
+
         return $authenticatable->canOrElse(
             abilities: ["product_admin.{$contactSource->getKey()}.restore"],
             denyResponse: 'You do not have permission to restore this contact source.'
@@ -102,6 +144,13 @@ class ContactSourcePolicy
 
     public function forceDelete(Authenticatable $authenticatable, ContactSource $contactSource): Response
     {
+        if(SettingsPermissions::active()){
+            return $authenticatable->canOrElse(
+                abilities: 'settings.*.force-delete',
+                denyResponse: 'You do not have permission to force delete this contact source.'
+            );
+        }
+
         return $authenticatable->canOrElse(
             abilities: ["product_admin.{$contactSource->getKey()}.force-delete"],
             denyResponse: 'You do not have permission to force delete this contact source.'
