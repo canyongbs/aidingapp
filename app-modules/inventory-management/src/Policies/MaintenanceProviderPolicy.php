@@ -45,7 +45,7 @@ class MaintenanceProviderPolicy
 {
     public function viewAny(Authenticatable $authenticatable): Response
     {
-        if(SettingsPermissions::active()){
+        if (SettingsPermissions::active()) {
             return $authenticatable->canOrElse(
                 abilities: 'settings.view-any',
                 denyResponse: 'You do not have permission to view maintenance providers.'
@@ -60,12 +60,13 @@ class MaintenanceProviderPolicy
 
     public function view(Authenticatable $authenticatable, MaintenanceProvider $maintenanceProvider): Response
     {
-        if(SettingsPermissions::active()){
+        if (SettingsPermissions::active()) {
             return $authenticatable->canOrElse(
                 abilities: 'settings.*.view',
                 denyResponse: 'You do not have permission to view this maintenance provider.'
             );
         }
+
         return $authenticatable->canOrElse(
             abilities: ['maintenance_provider.*.view', "maintenance_provider.{$maintenanceProvider->id}.view"],
             denyResponse: 'You do not have permission to view this maintenance provider.'
@@ -74,12 +75,13 @@ class MaintenanceProviderPolicy
 
     public function create(Authenticatable $authenticatable): Response
     {
-        if(SettingsPermissions::active()){
+        if (SettingsPermissions::active()) {
             return $authenticatable->canOrElse(
                 abilities: 'settings.create',
                 denyResponse: 'You do not have permission to create maintenance providers.'
             );
         }
+
         return $authenticatable->canOrElse(
             abilities: 'maintenance_provider.create',
             denyResponse: 'You do not have permission to create maintenance providers.'
@@ -88,7 +90,7 @@ class MaintenanceProviderPolicy
 
     public function update(Authenticatable $authenticatable, MaintenanceProvider $maintenanceProvider): Response
     {
-        if(SettingsPermissions::active()){
+        if (SettingsPermissions::active()) {
             return $authenticatable->canOrElse(
                 abilities: ['settings.*.update'],
                 denyResponse: 'You do not have permission to update this maintenance provider.'
@@ -103,7 +105,7 @@ class MaintenanceProviderPolicy
 
     public function delete(Authenticatable $authenticatable, MaintenanceProvider $maintenanceProvider): Response
     {
-        if(SettingsPermissions::active()){
+        if (SettingsPermissions::active()) {
             return $authenticatable->canOrElse(
                 abilities: ['settings.*.delete'],
                 denyResponse: 'You do not have permission to delete this maintenance provider.'
@@ -118,7 +120,7 @@ class MaintenanceProviderPolicy
 
     public function restore(Authenticatable $authenticatable, MaintenanceProvider $maintenanceProvider): Response
     {
-        if(SettingsPermissions::active()){
+        if (SettingsPermissions::active()) {
             return $authenticatable->canOrElse(
                 abilities: ['settings.*.restore'],
                 denyResponse: 'You do not have permission to restore this maintenance provider.'
@@ -133,7 +135,7 @@ class MaintenanceProviderPolicy
 
     public function forceDelete(Authenticatable $authenticatable, MaintenanceProvider $maintenanceProvider): Response
     {
-        if(SettingsPermissions::active()){
+        if (SettingsPermissions::active()) {
             return $authenticatable->canOrElse(
                 abilities: ['settings.*.force-delete'],
                 denyResponse: 'You do not have permission to permanently delete this maintenance provider.'

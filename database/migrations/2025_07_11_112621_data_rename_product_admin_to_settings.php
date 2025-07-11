@@ -78,9 +78,8 @@ return new class () extends Migration {
     public function up(): void
     {
         DB::transaction(function () {
-
             collect($this->guards)
-            ->each(fn (string $guard) => $this->deletePermissions(array_keys($this->maintenanceProviderPermissions), $guard));
+                ->each(fn (string $guard) => $this->deletePermissions(array_keys($this->maintenanceProviderPermissions), $guard));
 
             collect($this->guards)->each(function (string $guard) {
                 $this->renamePermissions($this->productAdminToSettingsPermissions, $guard);
@@ -95,11 +94,10 @@ return new class () extends Migration {
     public function down(): void
     {
         DB::transaction(function () {
-            
             collect($this->guards)
-            ->each(function (string $guard) {
-                $this->createPermissions($this->maintenanceProviderPermissions, $guard);
-            });
+                ->each(function (string $guard) {
+                    $this->createPermissions($this->maintenanceProviderPermissions, $guard);
+                });
 
             collect($this->guards)->each(function (string $guard) {
                 $this->renamePermissions(array_flip($this->productAdminToSettingsPermissions), $guard);

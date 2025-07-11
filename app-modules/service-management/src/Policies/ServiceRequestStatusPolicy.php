@@ -64,7 +64,7 @@ class ServiceRequestStatusPolicy
 
     public function viewAny(Authenticatable $authenticatable): Response
     {
-        if(SettingsPermissions::active()){
+        if (SettingsPermissions::active()) {
             return $authenticatable->canOrElse(
                 abilities: 'settings.view-any',
                 denyResponse: 'You do not have permissions to view service request statuses.'
@@ -79,7 +79,7 @@ class ServiceRequestStatusPolicy
 
     public function view(Authenticatable $authenticatable, ServiceRequestStatus $serviceRequestStatus): Response
     {
-        if(SettingsPermissions::active()){
+        if (SettingsPermissions::active()) {
             return $authenticatable->canOrElse(
                 abilities: 'settings.*.view',
                 denyResponse: 'You do not have permissions to view this service request status.'
@@ -94,7 +94,7 @@ class ServiceRequestStatusPolicy
 
     public function create(Authenticatable $authenticatable): Response
     {
-        if(SettingsPermissions::active()){
+        if (SettingsPermissions::active()) {
             return $authenticatable->canOrElse(
                 abilities: 'settings.create',
                 denyResponse: 'You do not have permissions to create service request statuses.'
@@ -113,7 +113,7 @@ class ServiceRequestStatusPolicy
             return Response::deny('You cannot update this service request status because it is system protected.');
         }
 
-        if(SettingsPermissions::active()){
+        if (SettingsPermissions::active()) {
             return $authenticatable->canOrElse(
                 abilities: 'settings.*.update',
                 denyResponse: 'You do not have permissions to update this service request status.'
@@ -132,7 +132,7 @@ class ServiceRequestStatusPolicy
             return Response::deny('You cannot delete this service request status because it is system protected.');
         }
 
-        if(SettingsPermissions::active()){
+        if (SettingsPermissions::active()) {
             return $authenticatable->canOrElse(
                 abilities: 'settings.*.delete',
                 denyResponse: 'You do not have permissions to delete this service request status.'
@@ -147,7 +147,7 @@ class ServiceRequestStatusPolicy
 
     public function restore(Authenticatable $authenticatable, ServiceRequestStatus $serviceRequestStatus): Response
     {
-        if(SettingsPermissions::active()){
+        if (SettingsPermissions::active()) {
             return $authenticatable->canOrElse(
                 abilities: 'settings.*.restore',
                 denyResponse: 'You do not have permissions to restore this service request status.'
@@ -170,7 +170,7 @@ class ServiceRequestStatusPolicy
             return Response::deny('You cannot force delete this service request status because it has associated service requests.');
         }
 
-        if(SettingsPermissions::active()){
+        if (SettingsPermissions::active()) {
             return $authenticatable->canOrElse(
                 abilities: 'settings.*.force-delete',
                 denyResponse: 'You do not have permissions to force delete this service request status.'
