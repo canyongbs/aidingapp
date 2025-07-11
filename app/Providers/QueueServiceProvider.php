@@ -34,34 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\InAppCommunication\Jobs;
+namespace App\Providers;
 
-use AidingApp\InAppCommunication\Events\ConversationMessageSent;
-use App\Models\User;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
+use App\Overrides\LaravelSqsExtended\SqsDiskConnector;
+use Illuminate\Support\ServiceProvider;
 
-class NotifyConversationParticipants implements ShouldQueue
+class QueueServiceProvider extends ServiceProvider
 {
-    use Dispatchable;
-    use InteractsWithQueue;
-    use Queueable;
-    use SerializesModels;
-
-    public function __construct(
-        public readonly ConversationMessageSent $event,
-    ) {}
-
-    public function handle(): void
+    public function boot(): void
     {
-        $this->event->conversation->participants()
-            ->whereKeyNot($this->event->author)
-            ->lazyById(100)
-            ->each(function (User $participant) {
-                dispatch(new NotifyConversationParticipant($this->event, $participant));
-            });
+        $manager = $this->app->make('queue');
+        $manager->addConnector('canyongbs-sqs-disk', fn () => new SqsDiskConnector());
     }
 }

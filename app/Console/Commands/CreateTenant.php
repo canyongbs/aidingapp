@@ -47,6 +47,8 @@ use App\Multitenancy\DataTransferObjects\TenantSmtpMailerConfig;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Sqids\Sqids;
 
 class CreateTenant extends Command
 {
@@ -67,6 +69,7 @@ class CreateTenant extends Command
         $database = str($domain)
             ->replace(['.', '-'], '_')
             ->toString();
+        $rootName = Str::snake($name) . '_' . (new Sqids())->encode([time()]);
 
         DB::connection('landlord')->statement("DROP DATABASE IF EXISTS {$database}");
         DB::connection('landlord')->statement("CREATE DATABASE {$database}");
@@ -93,7 +96,7 @@ class CreateTenant extends Command
                     endpoint: config('filesystems.disks.s3.endpoint'),
                     usePathStyleEndpoint: config('filesystems.disks.s3.use_path_style_endpoint'),
                     throw: config('filesystems.disks.s3.throw'),
-                    root: config('filesystems.disks.s3.root'),
+                    root: trim(rtrim(config('filesystems.disks.s3.root'), '/') . "/{$rootName}", '/'),
                 ),
                 s3PublicFilesystem: new TenantS3FilesystemConfig(
                     key: config('filesystems.disks.s3-public.key'),
@@ -104,7 +107,7 @@ class CreateTenant extends Command
                     endpoint: config('filesystems.disks.s3-public.endpoint'),
                     usePathStyleEndpoint: config('filesystems.disks.s3-public.use_path_style_endpoint'),
                     throw: config('filesystems.disks.s3-public.throw'),
-                    root: config('filesystems.disks.s3-public.root'),
+                    root: trim(rtrim(config('filesystems.disks.s3.root'), '/') . "/{$rootName}/PUBLIC", '/'),
                 ),
                 mail: new TenantMailConfig(
                     mailers: new TenantMailersConfig(

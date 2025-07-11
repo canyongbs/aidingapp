@@ -34,34 +34,43 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\InAppCommunication\Jobs;
+declare(strict_types = 1);
 
-use AidingApp\InAppCommunication\Events\ConversationMessageSent;
-use App\Models\User;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
+namespace App\Overrides\LaravelSqsExtended;
 
-class NotifyConversationParticipants implements ShouldQueue
+use Aws\Sqs\SqsClient;
+use DefectiveCode\LaravelSqsExtended\SqsDiskConnector as BaseSqsDiskConnector;
+use Illuminate\Contracts\Queue\Queue;
+use Illuminate\Support\Arr;
+
+class SqsDiskConnector extends BaseSqsDiskConnector
 {
-    use Dispatchable;
-    use InteractsWithQueue;
-    use Queueable;
-    use SerializesModels;
-
-    public function __construct(
-        public readonly ConversationMessageSent $event,
-    ) {}
-
-    public function handle(): void
+    /**
+     * Establish a queue connection.
+     *
+     *
+     *
+     * @param array<string, mixed> $config
+     *
+     * @return Queue
+     */
+    public function connect(array $config)
     {
-        $this->event->conversation->participants()
-            ->whereKeyNot($this->event->author)
-            ->lazyById(100)
-            ->each(function (User $participant) {
-                dispatch(new NotifyConversationParticipant($this->event, $participant));
-            });
+        $config = $this->getDefaultConfiguration($config);
+
+        if (! empty($config['key']) && ! empty($config['secret'])) {
+            $config['credentials'] = Arr::only($config, ['key', 'secret', 'token']);
+        }
+
+        return new SqsDiskQueue(
+            new SqsClient(
+                Arr::except($config, ['token'])
+            ),
+            $config['queue'],
+            $config['disk_options'],
+            $config['prefix'] ?? '',
+            $config['suffix'] ?? '',
+            $config['after_commit'] ?? null,
+        );
     }
 }

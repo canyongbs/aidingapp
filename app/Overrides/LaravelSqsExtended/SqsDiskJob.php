@@ -34,34 +34,36 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\InAppCommunication\Jobs;
+declare(strict_types = 1);
 
-use AidingApp\InAppCommunication\Events\ConversationMessageSent;
-use App\Models\User;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
+namespace App\Overrides\LaravelSqsExtended;
 
-class NotifyConversationParticipants implements ShouldQueue
+use DefectiveCode\LaravelSqsExtended\SqsDiskJob as PackageSqsDiskJob;
+use Override;
+use TypeError;
+
+class SqsDiskJob extends PackageSqsDiskJob
 {
-    use Dispatchable;
-    use InteractsWithQueue;
-    use Queueable;
-    use SerializesModels;
-
-    public function __construct(
-        public readonly ConversationMessageSent $event,
-    ) {}
-
-    public function handle(): void
+    /**
+     * Get the raw body string for the job.
+     *
+     * @return string
+     */
+    #[Override]
+    public function getRawBody()
     {
-        $this->event->conversation->participants()
-            ->whereKeyNot($this->event->author)
-            ->lazyById(100)
-            ->each(function (User $participant) {
-                dispatch(new NotifyConversationParticipant($this->event, $participant));
-            });
+        try {
+            return parent::getRawBody();
+        } catch (TypeError $error) {
+            report($error);
+
+            /*
+             *  If we are unable to retrieve the raw body with this known error type,
+             *  we should remove the item from the queue.
+             */
+            $this->delete();
+
+            throw $error;
+        }
     }
 }

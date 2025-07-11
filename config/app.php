@@ -42,6 +42,7 @@ use App\Providers\FilamentServiceProvider;
 use App\Providers\HealthServiceProvider;
 use App\Providers\MorphServiceProvider;
 use App\Providers\MultiConnectionParallelTestingServiceProvider;
+use App\Providers\QueueServiceProvider as ProvidersQueueServiceProvider;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Auth\AuthServiceProvider;
 use Illuminate\Auth\Passwords\PasswordResetServiceProvider;
@@ -66,6 +67,7 @@ use Illuminate\Support\Facades\Facade;
 use Illuminate\Translation\TranslationServiceProvider;
 use Illuminate\Validation\ValidationServiceProvider;
 use Illuminate\View\ViewServiceProvider;
+use Spatie\Multitenancy\MultitenancyServiceProvider;
 
 return [
     /*
@@ -239,6 +241,8 @@ return [
         PaginationServiceProvider::class,
         PipelineServiceProvider::class,
         QueueServiceProvider::class,
+        ProvidersQueueServiceProvider::class,
+        MultitenancyServiceProvider::class,
         RedisServiceProvider::class,
         PasswordResetServiceProvider::class,
         SessionServiceProvider::class,

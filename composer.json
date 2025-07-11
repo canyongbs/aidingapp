@@ -198,7 +198,8 @@
         },
         "laravel": {
             "dont-discover": [
-                "nesbot/carbon"
+                "nesbot/carbon",
+                "spatie/laravel-multitenancy"
             ]
         },
         "google/apiclient-services": [
