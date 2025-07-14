@@ -87,7 +87,6 @@ class EditServiceRequest extends EditRecord
                         Select::make('status_id')
                             ->relationship('status', 'name')
                             ->label('Status')
-                            ->native(false)
                             ->allowHtml()
                             ->options(fn (ServiceRequest $record) => ServiceRequestStatus::withTrashed()
                                 ->whereKey($record->status_id)

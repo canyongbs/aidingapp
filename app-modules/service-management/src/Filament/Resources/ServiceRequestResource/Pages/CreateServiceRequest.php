@@ -74,7 +74,6 @@ class CreateServiceRequest extends CreateRecord
                 Select::make('status_id')
                     ->relationship('status', 'name')
                     ->label('Status')
-                    ->native(false)
                     ->allowHtml()
                     ->options(fn () => ServiceRequestStatus::query()
                         ->orderBy('classification')
