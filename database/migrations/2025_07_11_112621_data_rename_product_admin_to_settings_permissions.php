@@ -21,19 +21,6 @@ return new class () extends Migration {
     ];
 
     /**
-     * @var array<string, string> $maintenanceProviderPermissions
-     */
-    private array $maintenanceProviderPermissions = [
-        'maintenance_provider.view-any' => 'Maintenance Provider',
-        'maintenance_provider.create' => 'Maintenance Provider',
-        'maintenance_provider.*.view' => 'Maintenance Provider',
-        'maintenance_provider.*.update' => 'Maintenance Provider',
-        'maintenance_provider.*.delete' => 'Maintenance Provider',
-        'maintenance_provider.*.restore' => 'Maintenance Provider',
-        'maintenance_provider.*.force-delete' => 'Maintenance Provider',
-    ];
-
-    /**
      * @var array<string> $guards
      */
     private array $guards = [
@@ -44,10 +31,6 @@ return new class () extends Migration {
     public function up(): void
     {
         DB::transaction(function () {
-
-            collect($this->guards)
-            ->each(fn (string $guard) => $this->deletePermissions(array_keys($this->maintenanceProviderPermissions), $guard));
-
             collect($this->guards)->each(function (string $guard) {
                 $this->renamePermissions($this->productAdminToSettingsPermissions, $guard);
             });
@@ -61,12 +44,6 @@ return new class () extends Migration {
     public function down(): void
     {
         DB::transaction(function () {
-            
-            collect($this->guards)
-            ->each(function (string $guard) {
-                $this->createPermissions($this->maintenanceProviderPermissions, $guard);
-            });
-
             collect($this->guards)->each(function (string $guard) {
                 $this->renamePermissions(array_flip($this->productAdminToSettingsPermissions), $guard);
             });
