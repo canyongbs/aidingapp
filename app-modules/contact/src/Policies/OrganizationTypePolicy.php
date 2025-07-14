@@ -73,13 +73,13 @@ class OrganizationTypePolicy
         if(SettingsPermissions::active()){
             return $authenticatable->canOrElse(
                 abilities: 'settings.*.view',
-                denyResponse: 'You do not have permission to view this organization types.'
+                denyResponse: 'You do not have permission to view this organization type.'
             );
         }
 
         return $authenticatable->canOrElse(
             abilities: ["product_admin.{$organizationType->getKey()}.view"],
-            denyResponse: 'You do not have permission to view this organization types.'
+            denyResponse: 'You do not have permission to view this organization type.'
         );
     }
 

@@ -47,7 +47,7 @@ class NotificationSettingPolicy
     {
         if(SettingsPermissions::active()){
             return $authenticatable->canOrElse(
-                abilities: 'settings.*.view',
+                abilities: 'settings.view-any',
                 denyResponse: 'You do not have permission to view notification settings.'
             );
         }

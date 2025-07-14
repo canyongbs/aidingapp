@@ -58,7 +58,7 @@ class ContactSourcePolicy
         if(SettingsPermissions::active()){
             return $authenticatable->canOrElse(
                 abilities: 'settings.view-any',
-                denyResponse: 'You do not have permission to view contact sources.'
+                denyResponse: 'You do not have permission to view any contact sources.'
             );
         }
         return $authenticatable->canOrElse(

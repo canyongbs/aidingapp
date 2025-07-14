@@ -63,13 +63,13 @@ class PronounsPolicy
         if(SettingsPermissions::active()){
             return $authenticatable->canOrElse(
                 abilities: "settings.*.view",
-                denyResponse: 'You do not have permission to view these pronouns.'
+                denyResponse: 'You do not have permission to view these pronoun.'
             );
         }
 
         return $authenticatable->canOrElse(
             abilities: ["product_admin.{$model->getKey()}.view"],
-            denyResponse: 'You do not have permission to view these pronouns.'
+            denyResponse: 'You do not have permission to view these pronoun.'
         );
     }
 
@@ -93,13 +93,13 @@ class PronounsPolicy
         if(SettingsPermissions::active()){
             return $authenticatable->canOrElse(
                 abilities: 'settings.*.update',
-                denyResponse: 'You do not have permission to update these pronouns.'
+                denyResponse: 'You do not have permission to update these pronoun.'
             );
         }
 
         return $authenticatable->canOrElse(
             abilities: ["product_admin.{$model->getKey()}.update"],
-            denyResponse: 'You do not have permission to update these pronouns.'
+            denyResponse: 'You do not have permission to update these pronoun.'
         );
     }
 
@@ -108,13 +108,13 @@ class PronounsPolicy
         if(SettingsPermissions::active()){
             return $authenticatable->canOrElse(
                 abilities: 'settings.*.delete',
-                denyResponse: 'You do not have permission to delete these pronouns.'
+                denyResponse: 'You do not have permission to delete these pronoun.'
             );
         }
 
         return $authenticatable->canOrElse(
             abilities: ["product_admin.{$model->getKey()}.delete"],
-            denyResponse: 'You do not have permission to delete these pronouns.'
+            denyResponse: 'You do not have permission to delete these pronoun.'
         );
     }
 
@@ -123,13 +123,13 @@ class PronounsPolicy
         if(SettingsPermissions::active()){
             return $authenticatable->canOrElse(
                 abilities: "settings.*.restore",
-                denyResponse: 'You do not have permission to restore these pronouns.'
+                denyResponse: 'You do not have permission to restore these pronoun.'
             );
         }
 
         return $authenticatable->canOrElse(
             abilities: ["product_admin.{$model->getKey()}.restore"],
-            denyResponse: 'You do not have permission to restore these pronouns.'
+            denyResponse: 'You do not have permission to restore these pronoun.'
         );
     }
 
@@ -138,13 +138,13 @@ class PronounsPolicy
         if(SettingsPermissions::active()){
             return $authenticatable->canOrElse(
                 abilities: "settings.*.force-delete",
-                denyResponse: 'You do not have permission to permanently delete these pronouns.'
+                denyResponse: 'You do not have permission to permanently delete these pronoun.'
             );
         }
         
         return $authenticatable->canOrElse(
             abilities: ["product_admin.{$model->getkey()}.force-delete"],
-            denyResponse: 'You do not have permission to permanently delete these pronouns.'
+            denyResponse: 'You do not have permission to permanently delete these pronoun.'
         );
     }
 }
