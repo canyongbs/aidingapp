@@ -45,13 +45,13 @@ class IncidentStatusPolicy
 {
     public function viewAny(Authenticatable $authenticatable): Response
     {
-        if(SettingsPermissions::active()){
+        if (SettingsPermissions::active()) {
             return $authenticatable->canOrElse(
                 abilities: 'settings.view-any',
                 denyResponse: 'You do not have permission to view any incident statuses.'
             );
         }
-        
+
         return $authenticatable->canOrElse(
             abilities: 'product_admin.view-any',
             denyResponse: 'You do not have permission to view any incident statuses.'
@@ -60,7 +60,7 @@ class IncidentStatusPolicy
 
     public function view(Authenticatable $authenticatable, IncidentStatus $incidentStatus): Response
     {
-        if(SettingsPermissions::active()){
+        if (SettingsPermissions::active()) {
             return $authenticatable->canOrElse(
                 abilities: 'settings.*.view',
                 denyResponse: 'You do not have permission to view this incident status.'
@@ -75,7 +75,7 @@ class IncidentStatusPolicy
 
     public function create(Authenticatable $authenticatable): Response
     {
-        if(SettingsPermissions::active()){
+        if (SettingsPermissions::active()) {
             return $authenticatable->canOrElse(
                 abilities: 'settings.create',
                 denyResponse: 'You do not have permission to create incident statuses.'
@@ -90,7 +90,7 @@ class IncidentStatusPolicy
 
     public function update(Authenticatable $authenticatable, IncidentStatus $incidentStatus): Response
     {
-        if(SettingsPermissions::active()){
+        if (SettingsPermissions::active()) {
             return $authenticatable->canOrElse(
                 abilities: 'settings.*.update',
                 denyResponse: 'You do not have permission to update this incident status.'
@@ -109,7 +109,7 @@ class IncidentStatusPolicy
             return Response::deny('The incident status cannot be deleted because it is associated with a incident.');
         }
 
-        if(SettingsPermissions::active()){
+        if (SettingsPermissions::active()) {
             return $authenticatable->canOrElse(
                 abilities: 'settings.*.delete',
                 denyResponse: 'You do not have permission to delete this incident status.'
@@ -124,7 +124,7 @@ class IncidentStatusPolicy
 
     public function restore(Authenticatable $authenticatable, IncidentStatus $incidentStatus): Response
     {
-        if(SettingsPermissions::active()){
+        if (SettingsPermissions::active()) {
             return $authenticatable->canOrElse(
                 abilities: 'settings.*.restore',
                 denyResponse: 'You do not have permission to restore this incident status.'
@@ -143,7 +143,7 @@ class IncidentStatusPolicy
             return Response::deny('The incident status cannot be deleted because it is associated with a incident.');
         }
 
-        if(SettingsPermissions::active()){
+        if (SettingsPermissions::active()) {
             return $authenticatable->canOrElse(
                 abilities: 'settings.*.force-delete',
                 denyResponse: 'You do not have permission to permanently delete this incident status.'

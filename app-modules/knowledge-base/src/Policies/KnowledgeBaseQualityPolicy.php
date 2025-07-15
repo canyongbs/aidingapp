@@ -66,13 +66,13 @@ class KnowledgeBaseQualityPolicy implements PerformsChecksBeforeAuthorization
 
     public function viewAny(Authenticatable $authenticatable): Response
     {
-        if(SettingsPermissions::active()){
+        if (SettingsPermissions::active()) {
             return $authenticatable->canOrElse(
                 abilities: 'settings.view-any',
                 denyResponse: 'You do not have permission to view any knowledge base qualities.'
             );
         }
-        
+
         return $authenticatable->canOrElse(
             abilities: 'product_admin.view-any',
             denyResponse: 'You do not have permission to view any knowledge base qualities.'
@@ -81,9 +81,9 @@ class KnowledgeBaseQualityPolicy implements PerformsChecksBeforeAuthorization
 
     public function view(Authenticatable $authenticatable, KnowledgeBaseQuality $knowledgeBaseQuality): Response
     {
-        if(SettingsPermissions::active()){
+        if (SettingsPermissions::active()) {
             return $authenticatable->canOrElse(
-                abilities: "settings.*.view",
+                abilities: 'settings.*.view',
                 denyResponse: 'You do not have permission to view this knowledge base quality.'
             );
         }
@@ -96,7 +96,7 @@ class KnowledgeBaseQualityPolicy implements PerformsChecksBeforeAuthorization
 
     public function create(Authenticatable $authenticatable): Response
     {
-        if(SettingsPermissions::active()){
+        if (SettingsPermissions::active()) {
             return $authenticatable->canOrElse(
                 abilities: 'settings.create',
                 denyResponse: 'You do not have permission to create knowledge base qualities.'
@@ -111,9 +111,9 @@ class KnowledgeBaseQualityPolicy implements PerformsChecksBeforeAuthorization
 
     public function update(Authenticatable $authenticatable, KnowledgeBaseQuality $knowledgeBaseQuality): Response
     {
-        if(SettingsPermissions::active()){
+        if (SettingsPermissions::active()) {
             return $authenticatable->canOrElse(
-                abilities: "settings.*.update",
+                abilities: 'settings.*.update',
                 denyResponse: 'You do not have permission to update this knowledge base quality.'
             );
         }
@@ -126,12 +126,13 @@ class KnowledgeBaseQualityPolicy implements PerformsChecksBeforeAuthorization
 
     public function delete(Authenticatable $authenticatable, KnowledgeBaseQuality $knowledgeBaseQuality): Response
     {
-        if(SettingsPermissions::active()){
+        if (SettingsPermissions::active()) {
             return $authenticatable->canOrElse(
-                abilities: "settings.*.delete",
+                abilities: 'settings.*.delete',
                 denyResponse: 'You do not have permission to delete this knowledge base quality.'
             );
         }
+
         return $authenticatable->canOrElse(
             abilities: ["product_admin.{$knowledgeBaseQuality->getKey()}.delete"],
             denyResponse: 'You do not have permission to delete this knowledge base quality.'
@@ -140,9 +141,9 @@ class KnowledgeBaseQualityPolicy implements PerformsChecksBeforeAuthorization
 
     public function restore(Authenticatable $authenticatable, KnowledgeBaseQuality $knowledgeBaseQuality): Response
     {
-        if(SettingsPermissions::active()){
+        if (SettingsPermissions::active()) {
             return $authenticatable->canOrElse(
-                abilities: "settings.*.restore",
+                abilities: 'settings.*.restore',
                 denyResponse: 'You do not have permission to restore this knowledge base quality.'
             );
         }
@@ -155,13 +156,13 @@ class KnowledgeBaseQualityPolicy implements PerformsChecksBeforeAuthorization
 
     public function forceDelete(Authenticatable $authenticatable, KnowledgeBaseQuality $knowledgeBaseQuality): Response
     {
-        if(SettingsPermissions::active()){
+        if (SettingsPermissions::active()) {
             return $authenticatable->canOrElse(
-                abilities: "settings.*.force-delete",
+                abilities: 'settings.*.force-delete',
                 denyResponse: 'You do not have permission to permanently delete this knowledge base quality.'
             );
         }
-        
+
         return $authenticatable->canOrElse(
             abilities: ["product_admin.{$knowledgeBaseQuality->getKey()}.force-delete"],
             denyResponse: 'You do not have permission to permanently delete this knowledge base quality.'

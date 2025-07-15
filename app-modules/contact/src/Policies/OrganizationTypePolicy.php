@@ -55,13 +55,13 @@ class OrganizationTypePolicy
 
     public function viewAny(Authenticatable $authenticatable): Response
     {
-        if(SettingsPermissions::active()){
+        if (SettingsPermissions::active()) {
             return $authenticatable->canOrElse(
                 abilities: 'settings.view-any',
                 denyResponse: 'You do not have permission to view organization types.'
             );
         }
-        
+
         return $authenticatable->canOrElse(
             abilities: 'product_admin.view-any',
             denyResponse: 'You do not have permission to view organization types.'
@@ -70,7 +70,7 @@ class OrganizationTypePolicy
 
     public function view(Authenticatable $authenticatable, OrganizationType $organizationType): Response
     {
-        if(SettingsPermissions::active()){
+        if (SettingsPermissions::active()) {
             return $authenticatable->canOrElse(
                 abilities: 'settings.*.view',
                 denyResponse: 'You do not have permission to view this organization type.'
@@ -85,7 +85,7 @@ class OrganizationTypePolicy
 
     public function create(Authenticatable $authenticatable): Response
     {
-        if(SettingsPermissions::active()){
+        if (SettingsPermissions::active()) {
             return $authenticatable->canOrElse(
                 abilities: 'settings.create',
                 denyResponse: 'You do not have permission to create organization types.'
@@ -100,7 +100,7 @@ class OrganizationTypePolicy
 
     public function update(Authenticatable $authenticatable, OrganizationType $organizationType): Response
     {
-        if(SettingsPermissions::active()){
+        if (SettingsPermissions::active()) {
             return $authenticatable->canOrElse(
                 abilities: 'settings.*.update',
                 denyResponse: 'You do not have permission to update this organization type.'
@@ -115,7 +115,7 @@ class OrganizationTypePolicy
 
     public function delete(Authenticatable $authenticatable, OrganizationType $organizationType): Response
     {
-        if(SettingsPermissions::active()){
+        if (SettingsPermissions::active()) {
             return $authenticatable->canOrElse(
                 abilities: 'settings.*.delete',
                 denyResponse: 'You do not have permission to delete this organization type.'
@@ -130,7 +130,7 @@ class OrganizationTypePolicy
 
     public function restore(Authenticatable $authenticatable, OrganizationType $organizationType): Response
     {
-        if(SettingsPermissions::active()){
+        if (SettingsPermissions::active()) {
             return $authenticatable->canOrElse(
                 abilities: 'settings.*.restore',
                 denyResponse: 'You do not have permission to restore this organization type.'
@@ -145,7 +145,7 @@ class OrganizationTypePolicy
 
     public function forceDelete(Authenticatable $authenticatable, OrganizationType $organizationType): Response
     {
-        if(SettingsPermissions::active()){
+        if (SettingsPermissions::active()) {
             return $authenticatable->canOrElse(
                 abilities: 'settings.*.force-delete',
                 denyResponse: 'You do not have permission to force delete this organization type.'

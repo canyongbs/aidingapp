@@ -45,7 +45,7 @@ class IncidentSeverityPolicy
 {
     public function viewAny(Authenticatable $authenticatable): Response
     {
-        if(SettingsPermissions::active()){
+        if (SettingsPermissions::active()) {
             return $authenticatable->canOrElse(
                 abilities: 'settings.view-any',
                 denyResponse: 'You do not have permission to view any incident severities.'
@@ -60,7 +60,7 @@ class IncidentSeverityPolicy
 
     public function view(Authenticatable $authenticatable, IncidentSeverity $incidentSeverity): Response
     {
-        if(SettingsPermissions::active()){
+        if (SettingsPermissions::active()) {
             return $authenticatable->canOrElse(
                 abilities: 'settings.*.view',
                 denyResponse: 'You do not have permission to view this incident severity.'
@@ -75,7 +75,7 @@ class IncidentSeverityPolicy
 
     public function create(Authenticatable $authenticatable): Response
     {
-        if(SettingsPermissions::active()){
+        if (SettingsPermissions::active()) {
             return $authenticatable->canOrElse(
                 abilities: 'settings.create',
                 denyResponse: 'You do not have permission to create incident severities.'
@@ -90,7 +90,7 @@ class IncidentSeverityPolicy
 
     public function update(Authenticatable $authenticatable, IncidentSeverity $incidentSeverity): Response
     {
-        if(SettingsPermissions::active()){
+        if (SettingsPermissions::active()) {
             return $authenticatable->canOrElse(
                 abilities: 'settings.*.update',
                 denyResponse: 'You do not have permission to update this incident severity.'
@@ -109,7 +109,7 @@ class IncidentSeverityPolicy
             return Response::deny('The incident severity cannot be deleted because it is associated with a incident.');
         }
 
-        if(SettingsPermissions::active()){
+        if (SettingsPermissions::active()) {
             return $authenticatable->canOrElse(
                 abilities: 'settings.*.delete',
                 denyResponse: 'You do not have permission to delete this incident severity.'
@@ -124,7 +124,7 @@ class IncidentSeverityPolicy
 
     public function restore(Authenticatable $authenticatable, IncidentSeverity $incidentSeverity): Response
     {
-        if(SettingsPermissions::active()){
+        if (SettingsPermissions::active()) {
             return $authenticatable->canOrElse(
                 abilities: 'settings.*.restore',
                 denyResponse: 'You do not have permission to restore this incident severity.'
@@ -143,7 +143,7 @@ class IncidentSeverityPolicy
             return Response::deny('The incident severity cannot be deleted because it is associated with a incident.');
         }
 
-        if(SettingsPermissions::active()){
+        if (SettingsPermissions::active()) {
             return $authenticatable->canOrElse(
                 abilities: 'settings.*.force-delete',
                 denyResponse: 'You do not have permission to permanently delete this incident severity.'
