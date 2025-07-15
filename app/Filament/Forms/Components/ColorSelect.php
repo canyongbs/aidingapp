@@ -48,7 +48,6 @@ class ColorSelect extends Select
         parent::setUp();
 
         $this->allowHtml()
-            ->native(false)
             ->shade($this->getShade());
     }
 

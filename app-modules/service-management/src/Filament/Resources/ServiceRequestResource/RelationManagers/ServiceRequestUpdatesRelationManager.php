@@ -84,7 +84,6 @@ class ServiceRequestUpdatesRelationManager extends RelationManager
                     ->default(ServiceRequestUpdateDirection::default()),
                 Select::make('status_id')
                     ->label('Status')
-                    ->native(false)
                     ->allowHtml()
                     ->options(fn () => ServiceRequestStatus::orderBy('classification')
                         ->orderBy('name')

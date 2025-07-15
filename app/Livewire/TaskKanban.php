@@ -143,7 +143,7 @@ class TaskKanban extends Component implements HasForms, HasActions
                 Textarea::make('description')
                     ->required()
                     ->string(),
-                DateTimePicker::make('due')
+                DateTimePicker::make(name: 'due')
                     ->label('Due Date')
                     ->native(false),
                 Select::make('assigned_to')
