@@ -34,15 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Clusters;
+namespace App\Features;
 
-use Filament\Clusters\Cluster;
+use App\Support\AbstractFeatureFlag;
 
-class AssetManagement extends Cluster
+class SettingsPermissions extends AbstractFeatureFlag
 {
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
-
-    protected static ?string $navigationGroup = 'Settings';
-
-    protected static ?int $navigationSort = 10;
+    public function resolve(mixed $scope): mixed
+    {
+        return false;
+    }
 }

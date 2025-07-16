@@ -36,6 +36,7 @@
 
 namespace App\Policies;
 
+use App\Features\SettingsPermissions;
 use App\Models\Authenticatable;
 use App\Models\Tag;
 use Illuminate\Auth\Access\Response;
@@ -44,6 +45,13 @@ class TagPolicy
 {
     public function viewAny(Authenticatable $authenticatable): Response
     {
+        if (SettingsPermissions::active()) {
+            return $authenticatable->canOrElse(
+                abilities: 'settings.view-any',
+                denyResponse: 'You do not have permission to view tags.'
+            );
+        }
+
         return $authenticatable->canOrElse(
             abilities: ['product_admin.view-any'],
             denyResponse: 'You do not have permission to view tags.'
@@ -52,6 +60,13 @@ class TagPolicy
 
     public function view(Authenticatable $authenticatable, Tag $tag): Response
     {
+        if (SettingsPermissions::active()) {
+            return $authenticatable->canOrElse(
+                abilities: 'settings.*.view',
+                denyResponse: 'You do not have permission to view this tag.'
+            );
+        }
+
         return $authenticatable->canOrElse(
             abilities: ["product_admin.{$tag->getKey()}.view"],
             denyResponse: 'You do not have permission to view this tag.'
@@ -60,6 +75,13 @@ class TagPolicy
 
     public function create(Authenticatable $authenticatable): Response
     {
+        if (SettingsPermissions::active()) {
+            return $authenticatable->canOrElse(
+                abilities: 'settings.create',
+                denyResponse: 'You do not have permission to create tags.'
+            );
+        }
+
         return $authenticatable->canOrElse(
             abilities: 'product_admin.create',
             denyResponse: 'You do not have permission to create tags.'
@@ -68,6 +90,13 @@ class TagPolicy
 
     public function update(Authenticatable $authenticatable, Tag $tag): Response
     {
+        if (SettingsPermissions::active()) {
+            return $authenticatable->canOrElse(
+                abilities: 'settings.*.update',
+                denyResponse: 'You do not have permission to update this tag.'
+            );
+        }
+
         return $authenticatable->canOrElse(
             abilities: ["product_admin.{$tag->getKey()}.update"],
             denyResponse: 'You do not have permission to update this tag.'
@@ -76,6 +105,13 @@ class TagPolicy
 
     public function delete(Authenticatable $authenticatable, Tag $tag): Response
     {
+        if (SettingsPermissions::active()) {
+            return $authenticatable->canOrElse(
+                abilities: 'settings.*.delete',
+                denyResponse: 'You do not have permission to delete this tag.'
+            );
+        }
+
         return $authenticatable->canOrElse(
             abilities: ["product_admin.{$tag->getKey()}.delete"],
             denyResponse: 'You do not have permission to delete this tag.'
@@ -84,6 +120,13 @@ class TagPolicy
 
     public function restore(Authenticatable $authenticatable, Tag $tag): Response
     {
+        if (SettingsPermissions::active()) {
+            return $authenticatable->canOrElse(
+                abilities: 'settings.*.restore',
+                denyResponse: 'You do not have permission to restore this tag.'
+            );
+        }
+
         return $authenticatable->canOrElse(
             abilities: ["product_admin.{$tag->getKey()}.restore"],
             denyResponse: 'You do not have permission to restore this tag.'
@@ -92,6 +135,13 @@ class TagPolicy
 
     public function forceDelete(Authenticatable $authenticatable, Tag $tag): Response
     {
+        if (SettingsPermissions::active()) {
+            return $authenticatable->canOrElse(
+                abilities: 'settings.*.force-delete',
+                denyResponse: 'You do not have permission to permanently delete this tag.'
+            );
+        }
+
         return $authenticatable->canOrElse(
             abilities: ["product_admin.{$tag->getKey()}.force-delete"],
             denyResponse: 'You do not have permission to permanently delete this tag.'

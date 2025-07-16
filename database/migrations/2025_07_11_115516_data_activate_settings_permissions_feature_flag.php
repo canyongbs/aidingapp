@@ -34,15 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Clusters;
+use App\Features\SettingsPermissions;
+use Illuminate\Database\Migrations\Migration;
 
-use Filament\Clusters\Cluster;
+return new class () extends Migration {
+    public function up(): void
+    {
+        SettingsPermissions::activate();
+    }
 
-class AssetManagement extends Cluster
-{
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
-
-    protected static ?string $navigationGroup = 'Settings';
-
-    protected static ?int $navigationSort = 10;
-}
+    public function down(): void
+    {
+        SettingsPermissions::deactivate();
+    }
+};
