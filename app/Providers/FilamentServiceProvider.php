@@ -36,24 +36,25 @@
 
 namespace App\Providers;
 
-use App\Models\Export;
-use App\Models\FailedImportRow;
-use App\Models\Import;
 use App\Models\User;
-use Filament\Actions\Exports\Models\Export as BaseExport;
-use Filament\Actions\Imports\Models\FailedImportRow as BaseFailedImportRow;
-use Filament\Actions\Imports\Models\Import as BaseImport;
-use Filament\Forms\Components\Checkbox;
+use App\Models\Export;
+use App\Models\Import;
+use Illuminate\View\View;
+use App\Models\FailedImportRow;
+use Filament\Support\Colors\Color;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
-use Filament\Support\Colors\Color;
-use Filament\Support\Facades\FilamentColor;
-use Filament\Support\Facades\FilamentView;
+use Filament\Forms\Components\Checkbox;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\View\View;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Support\Facades\FilamentView;
+use Filament\Support\Facades\FilamentColor;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 use Ysfkaya\FilamentPhoneInput\Infolists\PhoneEntry;
 use Ysfkaya\FilamentPhoneInput\PhoneInputNumberType;
+use Filament\Actions\Exports\Models\Export as BaseExport;
+use Filament\Actions\Imports\Models\Import as BaseImport;
+use Filament\Actions\Imports\Models\FailedImportRow as BaseFailedImportRow;
 
 class FilamentServiceProvider extends ServiceProvider
 {
@@ -187,6 +188,10 @@ class FilamentServiceProvider extends ServiceProvider
 
         Select::configureUsing(function (Select $select): void {
             $select->native(false);
+        });
+
+        SelectFilter::configureUsing(function (SelectFilter $selectFilter): void {
+            $selectFilter->native(false);
         });
 
         Toggle::macro('lockedWithoutAnyLicenses', function (User $user, array $licenses) {
