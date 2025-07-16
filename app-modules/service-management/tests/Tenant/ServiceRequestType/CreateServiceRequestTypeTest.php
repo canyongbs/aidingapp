@@ -97,8 +97,8 @@ test('CreateServiceRequestType is gated with proper access control', function ()
     livewire(CreateServiceRequestType::class)
         ->assertForbidden();
 
-    $user->givePermissionTo('product_admin.view-any');
-    $user->givePermissionTo('product_admin.create');
+    $user->givePermissionTo('settings.view-any');
+    $user->givePermissionTo('settings.create');
 
     actingAs($user)
         ->get(
@@ -126,8 +126,8 @@ test('CreateServiceRequestType is gated with proper feature access control', fun
 
     $user = User::factory()->licensed([Contact::getLicenseType()])->create();
 
-    $user->givePermissionTo('product_admin.view-any');
-    $user->givePermissionTo('product_admin.create');
+    $user->givePermissionTo('settings.view-any');
+    $user->givePermissionTo('settings.create');
 
     actingAs($user)
         ->get(

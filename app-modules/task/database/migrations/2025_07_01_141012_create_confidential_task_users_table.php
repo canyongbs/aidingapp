@@ -34,38 +34,23 @@
 </COPYRIGHT>
 */
 
-namespace App\Http\Middleware;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use App\Models\Authenticatable;
-use Closure;
-use Illuminate\Support\Facades\Gate;
-
-class AuthGates
-{
-    public function handle($request, Closure $next)
+return new class () extends Migration {
+    public function up(): void
     {
-        $user = auth()->user();
-
-        if (! $user) {
-            return $next($request);
-        }
-
-        //$roles = Role::with('permissions')->get();
-        $roles = [];
-        $permissionsArray = [];
-
-        foreach ($roles as $role) {
-            foreach ($role->permissions as $permissions) {
-                $permissionsArray[$permissions->title][] = $role->id;
-            }
-        }
-
-        foreach ($permissionsArray as $title => $roles) {
-            Gate::define($title, function (Authenticatable $authenticatable) use ($roles) {
-                return count(array_intersect($authenticatable->roles->pluck('id')->toArray(), $roles)) > 0;
-            });
-        }
-
-        return $next($request);
+        Schema::create('confidential_task_users', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->foreignUuid('task_id')->constrained()->cascadeOnDelete();
+            $table->foreignUuid('user_id')->constrained()->cascadeOnDelete();
+            $table->timestamps();
+        });
     }
-}
+
+    public function down(): void
+    {
+        Schema::dropIfExists('confidential_task_users');
+    }
+};

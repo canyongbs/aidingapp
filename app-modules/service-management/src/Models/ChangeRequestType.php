@@ -38,8 +38,10 @@ namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Audit\Overrides\BelongsToMany;
+use AidingApp\ServiceManagement\Database\Factories\ChangeRequestTypeFactory;
 use App\Models\BaseModel;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
@@ -51,6 +53,9 @@ class ChangeRequestType extends BaseModel implements Auditable
 {
     use SoftDeletes;
     use AuditableTrait;
+
+    /** @use HasFactory<ChangeRequestTypeFactory> */
+    use HasFactory;
 
     protected $fillable = [
         'name',

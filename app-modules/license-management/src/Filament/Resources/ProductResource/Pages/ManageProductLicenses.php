@@ -86,7 +86,6 @@ class ManageProductLicenses extends ManageRelatedRecords
                         titleAttribute: 'full_name',
                     )
                     ->label('Assigned To')
-                    ->native(false)
                     ->preload()
                     ->searchable(),
                 Textarea::make('description')

@@ -57,8 +57,8 @@ test('Create Organization Type is gated with proper access control', function ()
     livewire(CreateOrganizationType::class)
         ->assertForbidden();
 
-    $user->givePermissionTo('product_admin.view-any');
-    $user->givePermissionTo('product_admin.create');
+    $user->givePermissionTo('settings.view-any');
+    $user->givePermissionTo('settings.create');
 
     actingAs($user)
         ->get(
@@ -72,8 +72,8 @@ test('Create Organization Type is gated with proper access control', function ()
 test('Create New Organization Type', function () {
     $user = User::factory()->licensed(Contact::getLicenseType())->create();
 
-    $user->givePermissionTo('product_admin.view-any');
-    $user->givePermissionTo('product_admin.create');
+    $user->givePermissionTo('settings.view-any');
+    $user->givePermissionTo('settings.create');
 
     actingAs($user)
         ->get(

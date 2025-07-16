@@ -37,8 +37,10 @@
 namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\ServiceManagement\Database\Factories\IncidentStatusFactory;
 use AidingApp\ServiceManagement\Enums\SystemIncidentStatusClassification;
 use App\Models\BaseModel;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
@@ -50,6 +52,9 @@ class IncidentStatus extends BaseModel implements Auditable
 {
     use AuditableTrait;
     use SoftDeletes;
+
+    /** @use HasFactory<IncidentStatusFactory> */
+    use HasFactory;
 
     protected $fillable = [
         'classification',

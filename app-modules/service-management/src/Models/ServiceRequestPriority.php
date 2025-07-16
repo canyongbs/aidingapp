@@ -37,9 +37,11 @@
 namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\ServiceManagement\Database\Factories\ServiceRequestPriorityFactory;
 use App\Models\BaseModel;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -53,6 +55,9 @@ class ServiceRequestPriority extends BaseModel implements Auditable
     use SoftDeletes;
     use HasUuids;
     use AuditableTrait;
+
+    /** @use HasFactory<ServiceRequestPriorityFactory> */
+    use HasFactory;
 
     protected $fillable = [
         'name',

@@ -79,11 +79,16 @@ class ViewPublicUserProfileController extends Controller
         ]);
     }
 
+    /**
+     * @param array<string, array<string, mixed>>|null $hours
+     *
+     * @return Collection<string, array{starts_at: mixed, ends_at: mixed}>
+     */
     private function formatHours(?array $hours): Collection
     {
         return collect($hours)
-            ->filter(fn ($data, $day) => data_get($data, 'enabled'))
-            ->mapWithKeys(fn ($data, $day) => [
+            ->filter(fn (array $data, string $day) => data_get($data, 'enabled'))
+            ->mapWithKeys(fn (array $data, string $day) => [
                 $day => [
                     'starts_at' => data_get($data, 'starts_at'),
                     'ends_at' => data_get($data, 'ends_at'),

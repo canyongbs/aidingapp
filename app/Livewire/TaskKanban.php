@@ -69,6 +69,7 @@ class TaskKanban extends Component implements HasForms, HasActions
     use TaskEditForm;
     use InteractsWithPageTable;
 
+    /** @var TaskStatus[] */
     public array $statuses = [];
 
     public ?Task $currentTask = null;
@@ -142,7 +143,7 @@ class TaskKanban extends Component implements HasForms, HasActions
                 Textarea::make('description')
                     ->required()
                     ->string(),
-                DateTimePicker::make('due')
+                DateTimePicker::make(name: 'due')
                     ->label('Due Date')
                     ->native(false),
                 Select::make('assigned_to')
@@ -176,6 +177,7 @@ class TaskKanban extends Component implements HasForms, HasActions
                 [
                     EditAction::make('edit')
                         ->record($this->currentTask)
+                        ->authorize(fn (Task $record) => auth()->user()->can('update', $record))
                         ->form($this->editFormFields()),
                 ]
             );

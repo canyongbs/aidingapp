@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Division\Models\Division;
+use AidingApp\ServiceManagement\Database\Factories\ServiceRequestHistoryFactory;
 use AidingApp\ServiceManagement\Observers\ServiceRequestHistoryObserver;
 use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
 use AidingApp\Timeline\Timelines\ServiceRequestHistoryTimeline;
@@ -45,6 +46,7 @@ use App\Models\BaseModel;
 use Exception;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -58,6 +60,9 @@ use Illuminate\Support\Str;
 class ServiceRequestHistory extends BaseModel implements ProvidesATimeline
 {
     use SoftDeletes;
+
+    /** @use HasFactory<ServiceRequestHistoryFactory> */
+    use HasFactory;
 
     protected $casts = [
         'original_values' => 'array',

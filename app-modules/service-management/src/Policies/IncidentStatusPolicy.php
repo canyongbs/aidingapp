@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Policies;
 
 use AidingApp\ServiceManagement\Models\IncidentStatus;
+use App\Features\SettingsPermissions;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
 
@@ -44,6 +45,13 @@ class IncidentStatusPolicy
 {
     public function viewAny(Authenticatable $authenticatable): Response
     {
+        if (SettingsPermissions::active()) {
+            return $authenticatable->canOrElse(
+                abilities: 'settings.view-any',
+                denyResponse: 'You do not have permission to view any incident statuses.'
+            );
+        }
+
         return $authenticatable->canOrElse(
             abilities: 'product_admin.view-any',
             denyResponse: 'You do not have permission to view any incident statuses.'
@@ -52,6 +60,13 @@ class IncidentStatusPolicy
 
     public function view(Authenticatable $authenticatable, IncidentStatus $incidentStatus): Response
     {
+        if (SettingsPermissions::active()) {
+            return $authenticatable->canOrElse(
+                abilities: 'settings.*.view',
+                denyResponse: 'You do not have permission to view this incident status.'
+            );
+        }
+
         return $authenticatable->canOrElse(
             abilities: ["product_admin.{$incidentStatus->getKey()}.view"],
             denyResponse: 'You do not have permission to view this incident status.'
@@ -60,6 +75,13 @@ class IncidentStatusPolicy
 
     public function create(Authenticatable $authenticatable): Response
     {
+        if (SettingsPermissions::active()) {
+            return $authenticatable->canOrElse(
+                abilities: 'settings.create',
+                denyResponse: 'You do not have permission to create incident statuses.'
+            );
+        }
+
         return $authenticatable->canOrElse(
             abilities: 'product_admin.create',
             denyResponse: 'You do not have permission to create incident statuses.'
@@ -68,6 +90,13 @@ class IncidentStatusPolicy
 
     public function update(Authenticatable $authenticatable, IncidentStatus $incidentStatus): Response
     {
+        if (SettingsPermissions::active()) {
+            return $authenticatable->canOrElse(
+                abilities: 'settings.*.update',
+                denyResponse: 'You do not have permission to update this incident status.'
+            );
+        }
+
         return $authenticatable->canOrElse(
             abilities: ["product_admin.{$incidentStatus->getKey()}.update"],
             denyResponse: 'You do not have permission to update this incident status.'
@@ -80,6 +109,13 @@ class IncidentStatusPolicy
             return Response::deny('The incident status cannot be deleted because it is associated with a incident.');
         }
 
+        if (SettingsPermissions::active()) {
+            return $authenticatable->canOrElse(
+                abilities: 'settings.*.delete',
+                denyResponse: 'You do not have permission to delete this incident status.'
+            );
+        }
+
         return $authenticatable->canOrElse(
             abilities: ["product_admin.{$incidentStatus->getKey()}.delete"],
             denyResponse: 'You do not have permission to delete this incident status.'
@@ -88,6 +124,13 @@ class IncidentStatusPolicy
 
     public function restore(Authenticatable $authenticatable, IncidentStatus $incidentStatus): Response
     {
+        if (SettingsPermissions::active()) {
+            return $authenticatable->canOrElse(
+                abilities: 'settings.*.restore',
+                denyResponse: 'You do not have permission to restore this incident status.'
+            );
+        }
+
         return $authenticatable->canOrElse(
             abilities: ["product_admin.{$incidentStatus->getKey()}.restore"],
             denyResponse: 'You do not have permission to restore this incident status.'
@@ -98,6 +141,13 @@ class IncidentStatusPolicy
     {
         if ($incidentStatus->incidents()->exists()) {
             return Response::deny('The incident status cannot be deleted because it is associated with a incident.');
+        }
+
+        if (SettingsPermissions::active()) {
+            return $authenticatable->canOrElse(
+                abilities: 'settings.*.force-delete',
+                denyResponse: 'You do not have permission to permanently delete this incident status.'
+            );
         }
 
         return $authenticatable->canOrElse(

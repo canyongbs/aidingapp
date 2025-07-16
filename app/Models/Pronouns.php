@@ -37,6 +37,8 @@
 namespace App\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use Database\Factories\PronounsFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
 
@@ -47,6 +49,9 @@ class Pronouns extends BaseModel implements Auditable
 {
     use SoftDeletes;
     use AuditableTrait;
+
+    /** @use HasFactory<PronounsFactory> */
+    use HasFactory;
 
     protected $fillable = [
         'label',

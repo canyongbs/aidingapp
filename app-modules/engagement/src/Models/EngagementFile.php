@@ -38,8 +38,10 @@ namespace AidingApp\Engagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Engagement\Database\Factories\EngagementFileFactory;
 use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Prunable;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use OwenIt\Auditing\Contracts\Auditable;
@@ -54,6 +56,9 @@ class EngagementFile extends BaseModel implements HasMedia, Auditable
     use InteractsWithMedia;
     use AuditableTrait;
     use Prunable;
+
+    /** @use HasFactory<EngagementFileFactory> */
+    use HasFactory;
 
     protected $fillable = [
         'description',

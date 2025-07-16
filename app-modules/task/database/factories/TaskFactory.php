@@ -57,6 +57,7 @@ class TaskFactory extends Factory
             'assigned_to' => null,
             'created_by' => User::factory(),
             'concern_id' => null,
+            'project_id' => null,
         ];
     }
 

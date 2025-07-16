@@ -43,6 +43,7 @@ use App\Overrides\Filament\Actions\Imports\Jobs\PrepareCsvExportOverride;
 use App\Overrides\Laravel\PermissionMigrationCreator;
 use Filament\Actions\Exports\Jobs\PrepareCsvExport;
 use Filament\Actions\Imports\Jobs\ImportCsv;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Queue;
@@ -90,11 +91,11 @@ class AppServiceProvider extends ServiceProvider
             });
         });
 
-        $this->app->singleton(PermissionMigrationCreator::class, function ($app) {
+        $this->app->singleton(PermissionMigrationCreator::class, function (Application $app) {
             return new PermissionMigrationCreator($app['files'], $app->basePath('stubs'));
         });
 
-        $this->app->singleton('current-commit', function ($app) {
+        $this->app->singleton('current-commit', function () {
             $commitProcess = Process::run('git log --pretty="%h" -n1 HEAD');
 
             if ($commitProcess->successful()) {
@@ -106,7 +107,7 @@ class AppServiceProvider extends ServiceProvider
             return null;
         });
 
-        $this->app->singleton('current-version', function ($app) {
+        $this->app->singleton('current-version', function () {
             $gitVersion = Process::run('git describe --tags $(git rev-list --tags --max-count=1)');
 
             if ($gitVersion->successful()) {

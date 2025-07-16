@@ -44,6 +44,7 @@ use Filament\Actions\Exports\Models\Export as BaseExport;
 use Filament\Actions\Imports\Models\FailedImportRow as BaseFailedImportRow;
 use Filament\Actions\Imports\Models\Import as BaseImport;
 use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Support\Colors\Color;
 use Filament\Support\Facades\FilamentColor;
@@ -183,6 +184,10 @@ class FilamentServiceProvider extends ServiceProvider
             'panels::footer',
             fn (): View => view('filament.footer'),
         );
+
+        Select::configureUsing(function (Select $select): void {
+            $select->native(false);
+        });
 
         Toggle::macro('lockedWithoutAnyLicenses', function (User $user, array $licenses) {
             /** @var Toggle $this */

@@ -79,8 +79,8 @@ test('ViewServiceRequestStatus is gated with proper access control', function ()
             ])
         )->assertForbidden();
 
-    $user->givePermissionTo('product_admin.view-any');
-    $user->givePermissionTo('product_admin.*.view');
+    $user->givePermissionTo('settings.view-any');
+    $user->givePermissionTo('settings.*.view');
 
     actingAs($user)
         ->get(
@@ -99,8 +99,8 @@ test('ViewServiceRequestStatus is gated with proper feature access control', fun
 
     $user = User::factory()->licensed([Contact::getLicenseType()])->create();
 
-    $user->givePermissionTo('product_admin.view-any');
-    $user->givePermissionTo('product_admin.*.view');
+    $user->givePermissionTo('settings.view-any');
+    $user->givePermissionTo('settings.*.view');
 
     $serviceRequestStatus = ServiceRequestStatus::factory()->create();
 

@@ -36,6 +36,7 @@
 
 namespace AidingApp\Engagement\Models;
 
+use AidingApp\Engagement\Database\Factories\EngagementBatchFactory;
 use AidingApp\Engagement\Models\Concerns\HasManyEngagements;
 use AidingApp\Engagement\Observers\EngagementBatchObserver;
 use AidingApp\Notification\Enums\NotificationChannel;
@@ -44,6 +45,7 @@ use App\Models\User;
 use DOMDocument;
 use DOMXPath;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -56,6 +58,9 @@ class EngagementBatch extends BaseModel implements HasMedia
 {
     use HasManyEngagements;
     use InteractsWithMedia;
+
+    /** @use HasFactory<EngagementBatchFactory> */
+    use HasFactory;
 
     protected $fillable = [
         'user_id',
