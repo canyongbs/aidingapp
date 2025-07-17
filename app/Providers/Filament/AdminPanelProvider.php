@@ -154,7 +154,7 @@ class AdminPanelProvider extends PanelProvider
                     ->icon('heroicon-o-users')
                     ->collapsed(),
                 NavigationGroup::make()
-                    ->label('Report Center')
+                    ->label('Analytics')
                     ->icon('heroicon-o-document-chart-bar')
                     ->collapsed(),
                 NavigationGroup::make()
