@@ -49,6 +49,7 @@ use Filament\Forms\Components\Toggle;
 use Filament\Support\Colors\Color;
 use Filament\Support\Facades\FilamentColor;
 use Filament\Support\Facades\FilamentView;
+use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\View\View;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
@@ -187,6 +188,10 @@ class FilamentServiceProvider extends ServiceProvider
 
         Select::configureUsing(function (Select $select): void {
             $select->native(false);
+        });
+
+        SelectFilter::configureUsing(function (SelectFilter $selectFilter): void {
+            $selectFilter->native(false);
         });
 
         Toggle::macro('lockedWithoutAnyLicenses', function (User $user, array $licenses) {
