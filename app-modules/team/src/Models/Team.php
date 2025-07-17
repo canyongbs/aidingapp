@@ -112,7 +112,7 @@ class Team extends BaseModel
     /**
     * @return BelongsToMany<Project, $this, ProjectManagerTeam>
     */
-    public function manageProjects(): BelongsToMany
+    public function managedProjects(): BelongsToMany
     {
         return $this
             ->belongsToMany(Project::class, 'project_manager_teams', 'team_id', 'project_id')
@@ -123,7 +123,7 @@ class Team extends BaseModel
     /**
      * @return BelongsToMany<Project, $this, ProjectAuditorTeam>
      */
-    public function auditProjects(): BelongsToMany
+    public function auditedProjects(): BelongsToMany
     {
         return $this
             ->belongsToMany(Project::class, 'project_auditor_teams', 'team_id', 'project_id')

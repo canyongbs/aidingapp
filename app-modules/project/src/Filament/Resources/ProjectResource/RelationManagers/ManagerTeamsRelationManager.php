@@ -69,6 +69,6 @@ class ManagerTeamsRelationManager extends RelationManager
                 DetachBulkAction::make()
                     ->authorize('update', Project::class),
             ])
-            ->inverseRelationship('manageProjects');
+            ->inverseRelationship('managedProjects');
     }
 }

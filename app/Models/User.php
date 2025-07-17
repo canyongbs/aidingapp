@@ -446,7 +446,7 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
     /**
      * @return BelongsToMany<Project, $this, ProjectManagerUser>
      */
-    public function manageProjects(): BelongsToMany
+    public function managedProjects(): BelongsToMany
     {
         return $this
             ->belongsToMany(Project::class, 'project_manager_users', 'user_id', 'project_id')
@@ -457,7 +457,7 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
     /**
      * @return BelongsToMany<Project, $this, ProjectAuditorUser>
      */
-    public function auditProjects(): BelongsToMany
+    public function auditedProjects(): BelongsToMany
     {
         return $this
             ->belongsToMany(Project::class, 'project_auditor_users', 'user_id', 'project_id')

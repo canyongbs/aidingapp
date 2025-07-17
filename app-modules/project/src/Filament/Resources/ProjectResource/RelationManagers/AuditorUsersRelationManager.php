@@ -69,6 +69,6 @@ class AuditorUsersRelationManager extends RelationManager
                 DetachBulkAction::make()
                     ->authorize('update', Project::class),
             ])
-            ->inverseRelationship('auditProjects');
+            ->inverseRelationship('auditedProjects');
     }
 }

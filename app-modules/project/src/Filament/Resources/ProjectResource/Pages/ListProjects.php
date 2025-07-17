@@ -38,7 +38,6 @@ namespace AidingApp\Project\Filament\Resources\ProjectResource\Pages;
 
 use AidingApp\Project\Filament\Resources\ProjectResource;
 use App\Filament\Tables\Columns\IdColumn;
-use App\Models\Authenticatable;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Actions\BulkActionGroup;
@@ -47,7 +46,6 @@ use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
 
 class ListProjects extends ListRecords
 {
@@ -56,21 +54,6 @@ class ListProjects extends ListRecords
     public function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(function (Builder $query) {
-                $user = auth()->user();
-
-                if ($user->hasRole(Authenticatable::SUPER_ADMIN_ROLE)) {
-                    return $query;
-                }
-
-                return $query->where(function (Builder $query) use ($user) {
-                    $query->whereMorphedTo('createdBy', $user)
-                        ->orWhereHas('managerTeams.users', fn (Builder $query) => $query->where('id', $user->getKey()))
-                        ->orWhereHas('auditorTeams.users', fn (Builder $query) => $query->where('id', $user->getKey()))
-                        ->orWhereHas('managerUsers', fn (Builder $query) => $query->where('user_id', $user->getKey()))
-                        ->orWhereHas('auditorUsers', fn (Builder $query) => $query->where('user_id', $user->getKey()));
-                });
-            })
             ->columns([
                 IdColumn::make(),
                 TextColumn::make('name')
