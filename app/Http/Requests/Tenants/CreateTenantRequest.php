@@ -46,7 +46,6 @@ class CreateTenantRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
             'domain' => ['required', 'string', 'max:255', 'unique:landlord.tenants,domain', 'regex:/^((?:[a-zA-Z0-9-]*?\.)?[a-zA-Z0-9-]+\.[a-zA-Z]{2,})$/i'],
             'database' => ['required', 'string', 'max:255'],
             'user.name' => ['required', 'string', 'max:255'],
