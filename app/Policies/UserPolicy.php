@@ -66,10 +66,10 @@ class UserPolicy
         );
     }
 
-    public function update(Authenticatable $authenticatable, User $model): Response
+    public function update(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['user.*.update', "user.{$model->id}.update"],
+            abilities: 'user.*.update',
             denyResponse: 'You do not have permission to update this user.'
         );
     }

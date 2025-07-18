@@ -45,6 +45,9 @@ use AidingApp\Engagement\Models\Concerns\HasManyEngagements;
 use AidingApp\InAppCommunication\Models\TwilioConversation;
 use AidingApp\InAppCommunication\Models\TwilioConversationUser;
 use AidingApp\Notification\Models\Contracts\CanBeNotified;
+use AidingApp\Project\Models\Project;
+use AidingApp\Project\Models\ProjectAuditorUser;
+use AidingApp\Project\Models\ProjectManagerUser;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Models\ChangeRequest;
 use AidingApp\ServiceManagement\Models\ChangeRequestResponse;
@@ -437,6 +440,28 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
     {
         return $this->belongsToMany(ServiceMonitoringTarget::class)
             ->using(ServiceMonitoringTargetUser::class)
+            ->withTimestamps();
+    }
+
+    /**
+     * @return BelongsToMany<Project, $this, ProjectManagerUser>
+     */
+    public function managedProjects(): BelongsToMany
+    {
+        return $this
+            ->belongsToMany(Project::class, 'project_manager_users', 'user_id', 'project_id')
+            ->using(ProjectManagerUser::class)
+            ->withTimestamps();
+    }
+
+    /**
+     * @return BelongsToMany<Project, $this, ProjectAuditorUser>
+     */
+    public function auditedProjects(): BelongsToMany
+    {
+        return $this
+            ->belongsToMany(Project::class, 'project_auditor_users', 'user_id', 'project_id')
+            ->using(ProjectAuditorUser::class)
             ->withTimestamps();
     }
 

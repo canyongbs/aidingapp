@@ -36,11 +36,13 @@
 
 use AidingApp\Project\Filament\Resources\ProjectResource\Pages\ListProjects;
 use AidingApp\Project\Models\Project;
+use AidingApp\Team\Models\Team;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 use function Pest\Livewire\livewire;
+use function Tests\asSuperAdmin;
 
 it('cannot render without proper permission.', function () {
     $user = User::factory()->create();
@@ -78,5 +80,84 @@ it('can list records', function () {
     livewire(ListProjects::class)
         ->assertCountTableRecords(5)
         ->assertCanSeeTableRecords($records)
+        ->assertSuccessful();
+});
+
+it('can see project in list if logged in user is superadmin , creator, manager, or auditor of the project.', function () {
+    $user = User::factory()->create();
+    $secondUser = User::factory()->create();
+
+    $user->givePermissionTo('project.view-any');
+    $user->givePermissionTo('project.*.view');
+
+    $user->refresh();
+
+    actingAs($user);
+
+    $project = Project::factory()->create();
+
+    livewire(ListProjects::class)
+        ->assertCanSeeTableRecords([$project])
+        ->assertSuccessful();
+
+    actingAs($secondUser);
+
+    $secondUser->givePermissionTo('project.view-any');
+    $secondUser->givePermissionTo('project.*.view');
+
+    livewire(ListProjects::class)
+        ->assertCanNotSeeTableRecords([$project])
+        ->assertSuccessful();
+
+    $project->managerUsers()->attach($secondUser->getKey());
+
+    livewire(ListProjects::class)
+        ->assertCanSeeTableRecords([$project])
+        ->assertSuccessful();
+
+    $project->managerUsers()->detach($secondUser->getKey());
+
+    livewire(ListProjects::class)
+        ->assertCanNotSeeTableRecords([$project])
+        ->assertSuccessful();
+
+    $project->auditorUsers()->attach($secondUser->getKey());
+
+    livewire(ListProjects::class)
+        ->assertCanSeeTableRecords([$project])
+        ->assertSuccessful();
+
+    $project->auditorUsers()->detach($secondUser->getKey());
+
+    livewire(ListProjects::class)
+        ->assertCanNotSeeTableRecords([$project])
+        ->assertSuccessful();
+
+    $team = Team::factory()->create();
+
+    $secondUser->team()->associate($team)->save();
+
+    $project->managerTeams()->attach($team->getKey());
+
+    livewire(ListProjects::class)
+        ->assertCanSeeTableRecords([$project])
+        ->assertSuccessful();
+
+    $project->managerTeams()->detach($team->getKey());
+
+    livewire(ListProjects::class)
+        ->assertCanNotSeeTableRecords([$project])
+        ->assertSuccessful();
+
+    $project->auditorTeams()->attach($team->getKey());
+
+    livewire(ListProjects::class)
+        ->assertCanSeeTableRecords([$project])
+        ->assertSuccessful();
+
+    asSuperAdmin();
+
+    livewire(ListProjects::class)
+        ->assertCanSeeTableRecords([$project])
         ->assertSuccessful();
 });

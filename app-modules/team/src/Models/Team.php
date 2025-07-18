@@ -37,6 +37,9 @@
 namespace AidingApp\Team\Models;
 
 use AidingApp\Division\Models\Division;
+use AidingApp\Project\Models\Project;
+use AidingApp\Project\Models\ProjectAuditorTeam;
+use AidingApp\Project\Models\ProjectManagerTeam;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTargetTeam;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
@@ -104,5 +107,27 @@ class Team extends BaseModel
     public function division(): BelongsTo
     {
         return $this->belongsTo(Division::class);
+    }
+
+    /**
+    * @return BelongsToMany<Project, $this, ProjectManagerTeam>
+    */
+    public function managedProjects(): BelongsToMany
+    {
+        return $this
+            ->belongsToMany(Project::class, 'project_manager_teams', 'team_id', 'project_id')
+            ->using(ProjectManagerTeam::class)
+            ->withTimestamps();
+    }
+
+    /**
+     * @return BelongsToMany<Project, $this, ProjectAuditorTeam>
+     */
+    public function auditedProjects(): BelongsToMany
+    {
+        return $this
+            ->belongsToMany(Project::class, 'project_auditor_teams', 'team_id', 'project_id')
+            ->using(ProjectAuditorTeam::class)
+            ->withTimestamps();
     }
 }
