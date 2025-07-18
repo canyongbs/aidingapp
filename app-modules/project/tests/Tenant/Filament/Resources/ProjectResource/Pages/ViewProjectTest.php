@@ -102,7 +102,7 @@ it('can render if logged in user is superadmin , creator, manager, or auditor of
     get(ViewProject::getUrl([
         'record' => $project->getRouteKey(),
     ]))
-        ->assertForbidden();
+        ->assertNotFound();
 
     $project->managerUsers()->attach($secondUser->getKey());
 
@@ -116,7 +116,7 @@ it('can render if logged in user is superadmin , creator, manager, or auditor of
     get(ViewProject::getUrl([
         'record' => $project->getRouteKey(),
     ]))
-        ->assertForbidden();
+        ->assertNotFound();
 
     $project->auditorUsers()->attach($secondUser->getKey());
 
@@ -130,7 +130,7 @@ it('can render if logged in user is superadmin , creator, manager, or auditor of
     get(ViewProject::getUrl([
         'record' => $project->getRouteKey(),
     ]))
-        ->assertForbidden();
+        ->assertNotFound();
 
     $team = Team::factory()->create();
 
@@ -148,7 +148,7 @@ it('can render if logged in user is superadmin , creator, manager, or auditor of
     get(ViewProject::getUrl([
         'record' => $project->getRouteKey(),
     ]))
-        ->assertForbidden();
+        ->assertNotFound();
 
     $project->auditorTeams()->attach($team->getKey());
 
