@@ -76,7 +76,7 @@ class ProjectPolicy
             $userExists = $project->managerUsers()->where('users.id', auth()->user()->getKey())->exists();
 
             if (! $teamExists && ! $userExists && ! $project->createdBy?->is(auth()->user())) {
-                return Response::deny("You don't have permission to update this project because you're not an auditor or manager or creator of this project.");
+                return Response::deny("You don't have permission to update this project because you're not manager, or creator of this project.");
             }
         }
 
@@ -95,7 +95,7 @@ class ProjectPolicy
             $userExists = $project->managerUsers()->where('users.id', auth()->user()->getKey())->exists();
 
             if (! $teamExists && ! $userExists && ! $project->createdBy?->is(auth()->user())) {
-                return Response::deny("You don't have permission to delete this project because you're not an auditor or manager or creator of this project.");
+                return Response::deny("You don't have permission to delete this project because you're not manager, or creator of this project.");
             }
         }
 
@@ -107,6 +107,17 @@ class ProjectPolicy
 
     public function restore(Authenticatable $authenticatable, Project $project): Response
     {
+        if (ProjectManagersAuditorsFeature::active() && ! auth()->user()->isSuperAdmin()) {
+            $team = auth()->user()->team;
+
+            $teamExists = $project->managerTeams()->where('teams.id', $team?->getKey())->exists();
+            $userExists = $project->managerUsers()->where('users.id', auth()->user()->getKey())->exists();
+
+            if (! $teamExists && ! $userExists && ! $project->createdBy?->is(auth()->user())) {
+                return Response::deny("You don't have permission to restore this project because you're not manager, or creator of this project.");
+            }
+        }
+
         return $authenticatable->canOrElse(
             abilities: 'project.*.restore',
             denyResponse: 'You do not have permission to restore this project.'
@@ -122,7 +133,7 @@ class ProjectPolicy
             $userExists = $project->managerUsers()->where('users.id', auth()->user()->getKey())->exists();
 
             if (! $teamExists && ! $userExists && ! $project->createdBy?->is(auth()->user())) {
-                return Response::deny("You don't have permission to permanently delete this project because you're not an auditor or manager or creator of this project.");
+                return Response::deny("You don't have permission to permanently delete this project because you're not manager, or creator of this project.");
             }
         }
 

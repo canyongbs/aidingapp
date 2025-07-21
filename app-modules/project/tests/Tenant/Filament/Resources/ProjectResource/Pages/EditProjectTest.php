@@ -80,7 +80,7 @@ it('can render with proper permission.', function () {
         ->assertSuccessful();
 });
 
-it('can render if logged in user is superadmin , creator, manager of the project.', function () {
+it('can render if logged in user is superadmin, creator, or a manager of the project.', function () {
     $user = User::factory()->create();
     $secondUser = User::factory()->create();
 

@@ -83,7 +83,7 @@ it('can list records', function () {
         ->assertSuccessful();
 });
 
-it('can see project in list if logged in user is superadmin , creator, manager, or auditor of the project.', function () {
+it('can see project in list if logged in user is a superadmin, the creator, a manager, or an auditor of the project.', function () {
     $user = User::factory()->create();
     $secondUser = User::factory()->create();
 
