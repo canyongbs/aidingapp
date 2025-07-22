@@ -43,7 +43,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use App\Filament\Tables\Columns\IdColumn;
-use App\Models\Scopes\EducatableSearch;
 use App\Models\Scopes\EducatableSort;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\BulkActionGroup;
@@ -54,6 +53,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Query\Expression;
 use Illuminate\Support\Str;
 
 class ListServiceRequestTableWidgets extends BaseWidget
@@ -91,7 +91,12 @@ class ListServiceRequestTableWidgets extends BaseWidget
                 TextColumn::make('respondent.display_name')
                     ->label('Related To')
                     ->getStateUsing(fn (ServiceRequest $record) => $record->respondent->{$record->respondent::displayNameKey()})
-                    ->searchable(query: fn (Builder $query, $search) => $query->tap(new EducatableSearch(relationship: 'respondent', search: $search)))
+                    ->searchable(
+                        query: fn (Builder $query, $search) => $query->whereHas(
+                            'respondent',
+                            fn ($q) => $q->where(new Expression('lower(full_name)'), 'like', '%' . strtolower($search) . '%')
+                        )
+                    )
                     ->sortable(query: fn (Builder $query, string $direction): Builder => $query->tap(new EducatableSort($direction)))
                     ->toggleable(),
                 TextColumn::make('assignedTo.user.name')

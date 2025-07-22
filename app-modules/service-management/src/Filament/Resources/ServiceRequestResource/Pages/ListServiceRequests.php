@@ -104,7 +104,12 @@ class ListServiceRequests extends ListRecords
                 TextColumn::make('respondent.display_name')
                     ->label('Related To')
                     ->getStateUsing(fn (ServiceRequest $record) => $record->respondent->{$record->respondent::displayNameKey()})
-                    ->searchable()
+                    ->searchable(
+                        query: fn (Builder $query, $search) => $query->whereHas(
+                            'respondent',
+                            fn ($q) => $q->where(new Expression('lower(full_name)'), 'like', '%' . strtolower($search) . '%')
+                        )
+                    )
                     ->sortable(query: fn (Builder $query, string $direction): Builder => $query->tap(new EducatableSort($direction)))
                     ->toggleable(),
                 TextColumn::make('division.name')
