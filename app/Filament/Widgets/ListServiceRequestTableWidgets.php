@@ -53,7 +53,6 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Query\Expression;
 use Illuminate\Support\Str;
 
 class ListServiceRequestTableWidgets extends BaseWidget
@@ -94,7 +93,7 @@ class ListServiceRequestTableWidgets extends BaseWidget
                     ->searchable(
                         query: fn (Builder $query, $search) => $query->whereHas(
                             'respondent',
-                            fn ($q) => $q->whereRaw('LOWER(full_name) LIKE ?', ['%' . strtolower($search) . '%'])
+                            fn ($q) => $q->whereRaw('lower(full_name) LIKE ?', ['%' . strtolower($search) . '%'])
                         )
                     )
                     ->sortable(query: fn (Builder $query, string $direction): Builder => $query->tap(new EducatableSort($direction)))
