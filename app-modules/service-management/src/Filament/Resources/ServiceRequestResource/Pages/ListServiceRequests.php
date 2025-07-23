@@ -107,7 +107,7 @@ class ListServiceRequests extends ListRecords
                     ->searchable(
                         query: fn (Builder $query, $search) => $query->whereHas(
                             'respondent',
-                            fn ($q) => $q->whereRaw('lower(full_name) like ?', ['%' . strtolower($search) . '%'])
+                            fn (Builder $query) => $query->whereRaw('lower(full_name) like ?', ['%' . strtolower($search) . '%'])
                         )
                     )
                     ->sortable(query: fn (Builder $query, string $direction): Builder => $query->tap(new EducatableSort($direction)))

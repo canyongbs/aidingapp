@@ -93,7 +93,7 @@ class ListServiceRequestTableWidgets extends BaseWidget
                     ->searchable(
                         query: fn (Builder $query, $search) => $query->whereHas(
                             'respondent',
-                            fn ($q) => $q->whereRaw('lower(full_name) LIKE ?', ['%' . strtolower($search) . '%'])
+                            fn (Builder $query) => $query->whereRaw('lower(full_name) LIKE ?', ['%' . strtolower($search) . '%'])
                         )
                     )
                     ->sortable(query: fn (Builder $query, string $direction): Builder => $query->tap(new EducatableSort($direction)))
