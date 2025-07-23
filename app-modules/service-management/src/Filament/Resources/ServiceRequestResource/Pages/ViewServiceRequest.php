@@ -70,7 +70,7 @@ class ViewServiceRequest extends ViewRecord
     {
         $formatSecondsAsInterval = fn (?int $state): ?string => $state ? CarbonInterval::seconds($state)->cascade()->forHumans(short: true) : null;
 
-        $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)();
+        $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)->__invoke();
 
         return $infolist
             ->schema([

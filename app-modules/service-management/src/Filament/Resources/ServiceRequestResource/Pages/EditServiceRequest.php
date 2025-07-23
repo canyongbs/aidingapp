@@ -73,7 +73,7 @@ class EditServiceRequest extends EditRecord
         $disabledStatuses = ServiceRequestStatus::onlyTrashed()->pluck('id');
         $disabledTypes = ServiceRequestType::onlyTrashed()->pluck('id');
 
-        $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)();
+        $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)->__invoke();
 
         return $form
             ->schema([
