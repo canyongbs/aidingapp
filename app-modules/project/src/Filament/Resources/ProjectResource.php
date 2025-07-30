@@ -40,6 +40,7 @@ use AidingApp\Project\Filament\Resources\ProjectResource\Pages\CreateProject;
 use AidingApp\Project\Filament\Resources\ProjectResource\Pages\EditProject;
 use AidingApp\Project\Filament\Resources\ProjectResource\Pages\ListProjects;
 use AidingApp\Project\Filament\Resources\ProjectResource\Pages\ManageAuditors;
+use AidingApp\Project\Filament\Resources\ProjectResource\Pages\ManageFiles;
 use AidingApp\Project\Filament\Resources\ProjectResource\Pages\ManageManagers;
 use AidingApp\Project\Filament\Resources\ProjectResource\Pages\ManageTasks;
 use AidingApp\Project\Filament\Resources\ProjectResource\Pages\ViewProject;
@@ -65,6 +66,7 @@ class ProjectResource extends Resource
             ManageTasks::class,
             ManageManagers::class,
             ManageAuditors::class,
+            ManageFiles::class,
         ]);
     }
 
@@ -78,6 +80,7 @@ class ProjectResource extends Resource
             'manage-tasks' => ManageTasks::route('/{record}/tasks'),
             'manage-managers' => ManageManagers::route('/{record}/managers'),
             'manage-auditors' => ManageAuditors::route('/{record}/auditors'),
+            'files' => ManageFiles::route('/{record}/files'),
         ];
     }
 }
