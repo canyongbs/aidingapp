@@ -41,6 +41,7 @@ use AidingApp\Engagement\Jobs\DeliverEngagements;
 use AidingApp\Engagement\Jobs\GatherAndDispatchSesS3InboundEmails;
 use AidingApp\Engagement\Jobs\UnmatchedInboundCommunicationsJob;
 use AidingApp\Engagement\Models\EngagementFile;
+use AidingApp\Project\Models\ProjectFile;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Jobs\ServiceMonitoringJob;
 use App\Models\HealthCheckResultHistoryItem;
@@ -123,6 +124,7 @@ class Kernel extends ConsoleKernel
                         EngagementFile::class,
                         FailedImportRow::class,
                         HealthCheckResultHistoryItem::class,
+                        ProjectFile::class,
                     ])
                         ->each(
                             fn ($model) => $schedule->command("tenants:artisan \"model:prune --model={$model}\" --tenant={$tenant->id}")
