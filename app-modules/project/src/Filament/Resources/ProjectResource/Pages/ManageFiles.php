@@ -38,7 +38,7 @@ namespace AidingApp\Project\Filament\Resources\ProjectResource\Pages;
 
 use AidingApp\Project\Filament\Resources\ProjectResource;
 use AidingApp\Project\Models\ProjectFile;
-use App\Features\ProjectManagersAuditorsFeature;
+use App\Features\ProjectFileFeature;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
@@ -67,12 +67,12 @@ class ManageFiles extends ManageRelatedRecords
         return 'Files';
     }
 
-    // public static function canAccess(array $arguments = []): bool
-    // {
-    //     $user = auth()->user();
+    public static function canAccess(array $arguments = []): bool
+    {
+        $user = auth()->user();
 
-    //     return ProjectManagersAuditorsFeature::active() && $user->can(['project.view-any', 'project.*.view']) && parent::canAccess($arguments);
-    // }
+        return ProjectFileFeature::active() && $user->can(['project.view-any', 'project.*.view']) && parent::canAccess($arguments);
+    }
 
     public function form(Form $form): Form
     {
