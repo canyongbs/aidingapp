@@ -163,15 +163,21 @@ it('can edit files', function () {
 });
 
 it('correctly prunes ProjectFiles based on retention_date', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
     $expiredFile = ProjectFile::factory()->create([
+        'project_id' => $project->id,
         'retention_date' => fake()->dateTimeBetween('-1 year', '-1 day'),
     ]);
 
     $noRetentionDateFile = ProjectFile::factory()->create([
+        'project_id' => $project->id,
         'retention_date' => null,
     ]);
 
     $futureRetentionDateFile = ProjectFile::factory()->create([
+        'project_id' => $project->id,
         'retention_date' => fake()->dateTimeBetween('+1 day', '+ 1 year'),
     ]);
 
@@ -191,7 +197,7 @@ it('is scheduled to prune ProjectFiles daily during scheduler run', function () 
         $projectFileClass = preg_quote(ProjectFile::class);
 
         return preg_match("/model:prune\s--model=.*{$projectFileClass}.*/", $event->command)
-          && $event->expression === '0 0 * * *';
+            && $event->expression === '0 0 * * *';
     });
 
     expect($events)->toHaveCount(1);
