@@ -60,7 +60,7 @@ class ManageFiles extends ManageRelatedRecords
 {
     protected static string $resource = ProjectResource::class;
 
-    protected static string $relationship = 'projectFiles';
+    protected static string $relationship = 'files';
 
     public static function getNavigationLabel(): string
     {

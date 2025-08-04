@@ -89,7 +89,7 @@ it('can list files', function () {
     livewire(ManageFiles::class, [
         'record' => $project->getRouteKey(),
     ])
-        ->assertCanSeeTableRecords($project->projectFiles);
+        ->assertCanSeeTableRecords($project->files);
 });
 
 it('can validate create files inputs', function ($data, $errors) {
@@ -97,17 +97,17 @@ it('can validate create files inputs', function ($data, $errors) {
     Storage::fake('s3');
 
     $project = Project::factory()->create();
-    $projectFile = ProjectFile::factory()->make($data);
+    $file = ProjectFile::factory()->make($data);
 
     livewire(ManageFiles::class, [
         'record' => $project->getKey(),
     ])
-        ->callTableAction('create', data: $projectFile->toArray())
+        ->callTableAction('create', data: $file->toArray())
         ->assertHasTableActionErrors();
 
     assertDatabaseMissing(
         ProjectFile::class,
-        $projectFile->toArray()
+        $file->toArray()
     );
 })->with([
     '`description` is required' => [['description' => null], 'description', 'The description field is required.'],
@@ -139,11 +139,11 @@ it('can edit files', function () {
 
     $project = Project::factory()->create();
     $fakeFile = UploadedFile::fake()->image(fake()->word . '.png');
-    $projectFile = ProjectFile::factory()->state([
+    $file = ProjectFile::factory()->state([
         'project_id' => $project->id,
         'description' => 'Test File',
     ])->create();
-    $projectFile->addMedia($fakeFile)->toMediaCollection('file');
+    $file->addMedia($fakeFile)->toMediaCollection('file');
 
     $request = ProjectFile::factory()->make([
         'description' => 'Changed Test File',
@@ -153,7 +153,7 @@ it('can edit files', function () {
     livewire(ManageFiles::class, [
         'record' => $project->getKey(),
     ])
-        ->callTableAction('edit', record: $projectFile->getKey(), data: $request->toArray())
+        ->callTableAction('edit', record: $file->getKey(), data: $request->toArray())
         ->assertHasNoTableActionErrors();
 
     assertDatabaseHas(
@@ -194,9 +194,9 @@ it('is scheduled to prune ProjectFiles daily during scheduler run', function () 
     $schedule = app()->make(Schedule::class);
 
     $events = (new Collection($schedule->events()))->filter(function (Event $event) {
-        $projectFileClass = preg_quote(ProjectFile::class);
+        $fileClass = preg_quote(ProjectFile::class);
 
-        return preg_match("/model:prune\s--model=.*{$projectFileClass}.*/", $event->command)
+        return preg_match("/model:prune\s--model=.*{$fileClass}.*/", $event->command)
             && $event->expression === '0 0 * * *';
     });
 
