@@ -71,7 +71,7 @@ class ManageFiles extends ManageRelatedRecords
     {
         $user = auth()->user();
 
-        return ProjectFileFeature::active() && parent::canAccess($arguments);
+        return ProjectFileFeature::active() && $user->can('viewAny', [ProjectFile::class, $arguments['record']]);
     }
 
     public function form(Form $form): Form
@@ -171,7 +171,8 @@ class ManageFiles extends ManageRelatedRecords
                     ->sortable(query: fn ($query, $direction) => $query->orderBy('project_files.created_by_id', $direction)),
             ])
             ->headerActions([
-                CreateAction::make(),
+                CreateAction::make()
+                    ->authorize('create', $this->getOwnerRecord()),
             ])
             ->actions([
                 Action::make('download')
