@@ -34,13 +34,12 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Project\Models\ProjectMilestoneStatus;
 use Illuminate\Database\Migrations\Migration;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
-use AidingApp\Project\Models\ProjectMilestoneStatus;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class () extends Migration {
     public function up(): void
     {
         Schema::create('project_milestone_statuses', function (Blueprint $table) {
@@ -64,7 +63,7 @@ return new class extends Migration
             ['name' => 'Cancelled', 'description' => 'The milestone has been officially removed from the plan (e.g., due to scope change).'],
         ];
 
-        foreach($statuses as $status) {
+        foreach ($statuses as $status) {
             ProjectMilestoneStatus::create($status);
         }
     }

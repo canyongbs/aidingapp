@@ -45,6 +45,7 @@ class ProjectMilestoneStatus extends Model
 {
     /** @use HasFactory<\Database\Factories\ProjectMilestoneStatusFactory> */
     use HasFactory;
+
     use HasUuids;
     use SoftDeletes;
 
