@@ -146,6 +146,7 @@ it('can edit files', function () {
     $file->addMedia($fakeFile)->toMediaCollection('file');
 
     $request = ProjectFile::factory()->make([
+        'project_id' => $project->id,
         'description' => 'Changed Test File',
         'retention_date' => now()->addDays(7)->toDateString(),
     ]);

@@ -37,10 +37,11 @@
 namespace AidingApp\Project\Database\Factories;
 
 use AidingApp\Project\Models\Project;
+use AidingApp\Project\Models\ProjectFile;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends Factory<Project>
+ * @extends Factory<ProjectFile>
  */
 class ProjectFileFactory extends Factory
 {
@@ -51,6 +52,7 @@ class ProjectFileFactory extends Factory
     public function definition(): array
     {
         return [
+            'project_id' => Project::factory(),
             'description' => $this->faker->sentence(3),
             'retention_date' => $this->faker->dateTimeBetween('-1 year', '+1 year')->format('Y-m-d'),
         ];

@@ -71,7 +71,7 @@ class ManageFiles extends ManageRelatedRecords
     {
         $user = auth()->user();
 
-        return ProjectFileFeature::active() && $user->can(['project.view-any', 'project.*.view']) && parent::canAccess($arguments);
+        return ProjectFileFeature::active() && parent::canAccess($arguments);
     }
 
     public function form(Form $form): Form
@@ -84,11 +84,10 @@ class ManageFiles extends ManageRelatedRecords
                 DatePicker::make('retention_date')
                     ->label('Retention Date')
                     ->hintIcon('heroicon-m-question-mark-circle', tooltip: 'The file will be deleted automatically after this date. If left blank, the file will be kept indefinitely.')
-                    ->native(false)
                     ->closeOnDateSelection()
-                    ->format('Y-m-d')
                     ->minDate(now()->addDay()),
                 SpatieMediaLibraryFileUpload::make('file')
+                    ->visibility('private')
                     ->label('File')
                     ->disk('s3')
                     ->collection('file')
