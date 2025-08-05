@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages;
 
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
@@ -52,6 +53,9 @@ class Feedback extends ViewRecord
 
     public function infolist(Infolist $infolist): Infolist
     {
+        $serviceRequest = $this->record;
+        assert($serviceRequest instanceof ServiceRequest);
+
         return $infolist
             ->schema([
                 Section::make()
@@ -63,7 +67,17 @@ class Feedback extends ViewRecord
                             ->label('Net Promoter Score (NPS)')
                             ->default('N/A'),
                     ])
+                    ->visible(fn () => ($serviceRequest->feedback?->nps_answer !== null || $serviceRequest->feedback?->csat_answer !== null))
                     ->columns(),
+                Section::make()
+                    ->schema([
+                        TextEntry::make('feedback_notice')
+                            ->color('primary')
+                            ->label('')
+                            ->default("Since this service request is still not closed, we haven't sent out customer surveys yet. As a result, we're currently unable to report on customer feedback for this service request."),
+                    ])
+                    ->hidden(fn () => ($serviceRequest->feedback?->nps_answer !== null || $serviceRequest->feedback?->csat_answer !== null))
+                    ->columns(1),
             ]);
     }
 }
