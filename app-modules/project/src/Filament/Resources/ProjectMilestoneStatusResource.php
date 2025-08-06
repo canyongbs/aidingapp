@@ -36,20 +36,16 @@
 
 namespace AidingApp\Project\Filament\Resources;
 
-use Filament\Forms;
-use Filament\Tables\Columns\TextColumn;
-use Illuminate\Database\Eloquent\Builder;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DeleteBulkAction;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource\Pages;
 use AidingApp\Project\Models\ProjectMilestoneStatus;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Tables\Actions\DeleteBulkAction;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Filament\Tables\Actions\EditAction;
 
 class ProjectMilestoneStatusResource extends Resource
 {
@@ -99,8 +95,7 @@ class ProjectMilestoneStatusResource extends Resource
 
     public static function getRelations(): array
     {
-        return [
-        ];
+        return [];
     }
 
     public static function getPages(): array
