@@ -54,7 +54,7 @@ class KnowledgeBase extends Dashboard
 
     protected static string $view = 'filament.pages.coming-soon';
 
-    protected static ?int $navigationSort = 20;
+    protected static ?int $navigationSort = 30;
 
     public static function canAccess(): bool
     {
