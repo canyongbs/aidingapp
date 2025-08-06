@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources;
 
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\CreateServiceRequest;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\EditServiceRequest;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\Feedback;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ListServiceRequests;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ManageAssignments;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ManageServiceRequestFormSubmission;
@@ -74,6 +75,7 @@ class ServiceRequestResource extends Resource
             EditServiceRequest::class,
             ManageAssignments::class,
             ManageServiceRequestUpdate::class,
+            Feedback::class,
             ServiceRequestTimeline::class,
         ];
 
@@ -94,6 +96,7 @@ class ServiceRequestResource extends Resource
             'create' => CreateServiceRequest::route('/create'),
             'view' => ViewServiceRequest::route('/{record}'),
             'edit' => EditServiceRequest::route('/{record}/edit'),
+            'feedback' => Feedback::route('/{record}/feedback'),
             'timeline' => ServiceRequestTimeline::route('/{record}/timeline'),
         ];
     }
