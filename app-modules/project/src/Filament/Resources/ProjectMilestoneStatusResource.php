@@ -36,6 +36,13 @@
 
 namespace AidingApp\Project\Filament\Resources;
 
+use Filament\Forms;
+use Filament\Actions\EditAction;
+use Filament\Tables\Columns\TextColumn;
+use Illuminate\Database\Eloquent\Builder;
+use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Tables\Actions\DeleteBulkAction;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource\Pages;
 use AidingApp\Project\Models\ProjectMilestoneStatus;
 use Filament\Forms\Components\TextInput;
@@ -49,6 +56,12 @@ class ProjectMilestoneStatusResource extends Resource
     protected static ?string $model = ProjectMilestoneStatus::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+
+    protected static ?string $navigationGroup = 'Project Management';
+
+    protected static ?string $navigationLabel = 'Statuses';
+
+    protected static ?int $navigationSort = 20;
 
     public static function form(Form $form): Form
     {
@@ -67,15 +80,19 @@ class ProjectMilestoneStatusResource extends Resource
     {
         return $table
             ->columns([
-            ])
-            ->filters([
+                TextColumn::make('name')
+                    ->sortable()
+                    ->searchable(),
+
+                TextColumn::make('description')
+                    ->searchable(),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                EditAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
