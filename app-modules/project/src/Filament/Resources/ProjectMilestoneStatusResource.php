@@ -36,17 +36,13 @@
 
 namespace AidingApp\Project\Filament\Resources;
 
-use Filament\Forms;
-use Filament\Tables;
-use Filament\Forms\Form;
-use Filament\Tables\Table;
-use Filament\Resources\Resource;
-use Filament\Forms\Components\TextInput;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource\Pages;
-use AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource\RelationManagers;
 use AidingApp\Project\Models\ProjectMilestoneStatus;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Table;
 
 class ProjectMilestoneStatusResource extends Resource
 {
@@ -71,10 +67,8 @@ class ProjectMilestoneStatusResource extends Resource
     {
         return $table
             ->columns([
-                //
             ])
             ->filters([
-                //
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -89,7 +83,6 @@ class ProjectMilestoneStatusResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
         ];
     }
 
