@@ -67,16 +67,16 @@ class Feedback extends ViewRecord
                             ->label('Net Promoter Score (NPS)')
                             ->default('N/A'),
                     ])
-                    ->visible(fn () => ($serviceRequest->feedback?->nps_answer !== null || $serviceRequest->feedback?->csat_answer !== null))
+                    ->visible(fn () => (filled($serviceRequest->feedback?->nps_answer) || filled($serviceRequest->feedback?->csat_answer)))
                     ->columns(),
                 Section::make()
                     ->schema([
                         TextEntry::make('feedback_notice')
                             ->color('primary')
-                            ->label('')
+                            ->hiddenLabel()
                             ->default("Since this service request is still not closed, we haven't sent out customer surveys yet. As a result, we're currently unable to report on customer feedback for this service request."),
                     ])
-                    ->hidden(fn () => ($serviceRequest->feedback?->nps_answer !== null || $serviceRequest->feedback?->csat_answer !== null))
+                    ->hidden(fn () => (filled($serviceRequest->feedback?->nps_answer) || filled($serviceRequest->feedback?->csat_answer)))
                     ->columns(1),
             ]);
     }
