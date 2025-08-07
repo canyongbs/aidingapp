@@ -54,7 +54,7 @@ class IncidentManagement extends Dashboard
 
     protected static string $view = 'filament.pages.coming-soon';
 
-    protected static ?int $navigationSort = 40;
+    protected static ?int $navigationSort = 50;
 
     public static function canAccess(): bool
     {

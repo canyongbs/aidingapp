@@ -54,7 +54,7 @@ class AssetManagement extends Dashboard
 
     protected static string $view = 'filament.pages.coming-soon';
 
-    protected static ?int $navigationSort = 30;
+    protected static ?int $navigationSort = 40;
 
     public static function canAccess(): bool
     {
