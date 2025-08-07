@@ -71,7 +71,7 @@ class ManageFiles extends ManageRelatedRecords
     {
         $user = auth()->user();
 
-        return ProjectFileFeature::active() && $user->can('viewAny', [ProjectFile::class, $arguments['record']]);
+        return $user->can('viewAny', [ProjectFile::class, $arguments['record']]);
     }
 
     public function form(Form $form): Form
