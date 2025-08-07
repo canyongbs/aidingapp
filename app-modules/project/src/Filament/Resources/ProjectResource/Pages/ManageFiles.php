@@ -38,7 +38,6 @@ namespace AidingApp\Project\Filament\Resources\ProjectResource\Pages;
 
 use AidingApp\Project\Filament\Resources\ProjectResource;
 use AidingApp\Project\Models\ProjectFile;
-use App\Features\ProjectFileFeature;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
