@@ -37,7 +37,6 @@
 namespace AidingApp\Project\Filament\Resources;
 
 use Filament\Forms;
-use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Actions\BulkActionGroup;
@@ -50,6 +49,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Tables\Actions\EditAction;
 
 class ProjectMilestoneStatusResource extends Resource
 {
