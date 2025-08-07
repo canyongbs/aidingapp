@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Project\Models\ProjectMilestoneStatus;
 use Illuminate\Database\Migrations\Migration;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;

@@ -36,9 +36,8 @@
 
 namespace AidingApp\Project\Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use AidingApp\Project\Models\ProjectMilestoneStatus;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
 
 class ProjectMilestoneStatusSeeder extends Seeder
 {
