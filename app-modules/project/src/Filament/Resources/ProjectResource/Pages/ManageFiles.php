@@ -38,7 +38,6 @@ namespace AidingApp\Project\Filament\Resources\ProjectResource\Pages;
 
 use AidingApp\Project\Filament\Resources\ProjectResource;
 use AidingApp\Project\Models\ProjectFile;
-use App\Features\ProjectFileFeature;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
@@ -71,7 +70,7 @@ class ManageFiles extends ManageRelatedRecords
     {
         $user = auth()->user();
 
-        return ProjectFileFeature::active() && $user->can('viewAny', [ProjectFile::class, $arguments['record']]);
+        return $user->can('viewAny', [ProjectFile::class, $arguments['record']]);
     }
 
     public function form(Form $form): Form
