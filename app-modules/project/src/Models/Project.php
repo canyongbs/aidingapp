@@ -62,83 +62,91 @@ use OwenIt\Auditing\Contracts\Auditable;
  */
 class Project extends BaseModel implements Auditable
 {
-    /** @use HasFactory<ProjectFactory> */
-    use HasFactory;
+  /** @use HasFactory<ProjectFactory> */
+  use HasFactory;
 
-    use HasUuids;
-    use SoftDeletes;
-    use AuditableTrait;
+  use HasUuids;
+  use SoftDeletes;
+  use AuditableTrait;
 
-    protected $fillable = [
-        'name',
-        'description',
-    ];
+  protected $fillable = [
+    'name',
+    'description',
+  ];
 
-    /**
-     * @return MorphTo<Model, $this>
-     */
-    public function createdBy(): MorphTo
-    {
-        return $this->morphTo();
-    }
+  /**
+   * @return MorphTo<Model, $this>
+   */
+  public function createdBy(): MorphTo
+  {
+    return $this->morphTo();
+  }
 
-    /**
-     * @return HasMany<Task, $this>
-     */
-    public function tasks(): HasMany
-    {
-        return $this->hasMany(Task::class, 'project_id');
-    }
+  /**
+   * @return HasMany<Task, $this>
+   */
+  public function tasks(): HasMany
+  {
+    return $this->hasMany(Task::class, 'project_id');
+  }
 
-    /**
-     * @return BelongsToMany<User, $this, ProjectManagerUser>
-     */
-    public function managerUsers(): BelongsToMany
-    {
-        return $this
-            ->belongsToMany(User::class, 'project_manager_users', 'project_id', 'user_id')
-            ->using(ProjectManagerUser::class)
-            ->withTimestamps();
-    }
+  /**
+   * @return BelongsToMany<User, $this, ProjectManagerUser>
+   */
+  public function managerUsers(): BelongsToMany
+  {
+    return $this
+      ->belongsToMany(User::class, 'project_manager_users', 'project_id', 'user_id')
+      ->using(ProjectManagerUser::class)
+      ->withTimestamps();
+  }
 
-    /**
-     * @return BelongsToMany<Team, $this, ProjectManagerTeam>
-     */
-    public function managerTeams(): BelongsToMany
-    {
-        return $this
-            ->belongsToMany(Team::class, 'project_manager_teams', 'project_id', 'team_id')
-            ->using(ProjectManagerTeam::class)
-            ->withTimestamps();
-    }
+  /**
+   * @return BelongsToMany<Team, $this, ProjectManagerTeam>
+   */
+  public function managerTeams(): BelongsToMany
+  {
+    return $this
+      ->belongsToMany(Team::class, 'project_manager_teams', 'project_id', 'team_id')
+      ->using(ProjectManagerTeam::class)
+      ->withTimestamps();
+  }
 
-    /**
-     * @return BelongsToMany<User, $this, ProjectAuditorUser>
-     */
-    public function auditorUsers(): BelongsToMany
-    {
-        return $this
-            ->belongsToMany(User::class, 'project_auditor_users', 'project_id', 'user_id')
-            ->using(ProjectAuditorUser::class)
-            ->withTimestamps();
-    }
+  /**
+   * @return BelongsToMany<User, $this, ProjectAuditorUser>
+   */
+  public function auditorUsers(): BelongsToMany
+  {
+    return $this
+      ->belongsToMany(User::class, 'project_auditor_users', 'project_id', 'user_id')
+      ->using(ProjectAuditorUser::class)
+      ->withTimestamps();
+  }
 
-    /**
-     * @return BelongsToMany<Team, $this, ProjectAuditorTeam>
-     */
-    public function auditorTeams(): BelongsToMany
-    {
-        return $this
-            ->belongsToMany(Team::class, 'project_auditor_teams', 'project_id', 'team_id')
-            ->using(ProjectAuditorTeam::class)
-            ->withTimestamps();
-    }
+  /**
+   * @return BelongsToMany<Team, $this, ProjectAuditorTeam>
+   */
+  public function auditorTeams(): BelongsToMany
+  {
+    return $this
+      ->belongsToMany(Team::class, 'project_auditor_teams', 'project_id', 'team_id')
+      ->using(ProjectAuditorTeam::class)
+      ->withTimestamps();
+  }
 
-    /**
-     * @return HasMany<ProjectFile, $this>
-     */
-    public function files(): HasMany
-    {
-        return $this->hasMany(ProjectFile::class, 'project_id');
-    }
+  /**
+   * @return HasMany<ProjectFile, $this>
+   */
+  public function files(): HasMany
+  {
+    return $this->hasMany(ProjectFile::class, 'project_id');
+  }
+
+  /**
+   * @return HasMany<ProjectMilestone, $this>
+   */
+  public function milestones(): HasMany
+  {
+    return $this->hasMany(ProjectMilestone::class, 'project_id');
+  }
 }
