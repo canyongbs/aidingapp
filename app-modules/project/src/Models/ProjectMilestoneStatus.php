@@ -45,23 +45,22 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ProjectMilestoneStatus extends Model
 {
-  /** @use HasFactory<ProjectMilestoneStatusFactory> */
-  use HasFactory;
+    /** @use HasFactory<ProjectMilestoneStatusFactory> */
+    use HasFactory;
 
-  use HasUuids;
-  use SoftDeletes;
+    use HasUuids;
+    use SoftDeletes;
 
-  protected $fillable = [
-    'name',
-    'description',
-  ];
+    protected $fillable = [
+        'name',
+        'description',
+    ];
 
-
-  /**
-   * @return HasMany<ProjectMilestone, $this>
-   */
-  public function projectMilestones(): HasMany
-  {
-    return $this->hasMany(ProjectMilestone::class, 'status_id');
-  }
+    /**
+     * @return HasMany<ProjectMilestone, $this>
+     */
+    public function projectMilestones(): HasMany
+    {
+        return $this->hasMany(ProjectMilestone::class, 'status_id');
+    }
 }

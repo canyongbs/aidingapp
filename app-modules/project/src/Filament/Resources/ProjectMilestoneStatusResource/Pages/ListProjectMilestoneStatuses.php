@@ -49,35 +49,35 @@ use Filament\Tables\Table;
 
 class ListProjectMilestoneStatuses extends ListRecords
 {
-  protected static string $resource = ProjectMilestoneStatusResource::class;
+    protected static string $resource = ProjectMilestoneStatusResource::class;
 
-  public function table(Table $table): Table
-  {
-    return $table
-      ->columns([
-        TextColumn::make('name')
-          ->sortable()
-          ->searchable(),
+    public function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                TextColumn::make('name')
+                    ->sortable()
+                    ->searchable(),
 
-        TextColumn::make('description')
-          ->searchable(),
-      ])
-      ->actions([
-        EditAction::make(),
-        ViewAction::make(),
-        DeleteAction::make(),
-      ])
-      ->bulkActions([
-        BulkActionGroup::make([
-          DeleteBulkAction::make(),
-        ]),
-      ]);
-  }
+                TextColumn::make('description')
+                    ->searchable(),
+            ])
+            ->actions([
+                EditAction::make(),
+                ViewAction::make(),
+                DeleteAction::make(),
+            ])
+            ->bulkActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
+            ]);
+    }
 
-  protected function getHeaderActions(): array
-  {
-    return [
-      CreateAction::make(),
-    ];
-  }
+    protected function getHeaderActions(): array
+    {
+        return [
+            CreateAction::make(),
+        ];
+    }
 }

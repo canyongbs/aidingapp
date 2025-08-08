@@ -38,11 +38,8 @@ namespace AidingApp\Project\Filament\Resources\ProjectResource\Pages;
 
 use AidingApp\Project\Filament\Resources\ProjectResource;
 use AidingApp\Project\Models\ProjectFile;
-use App\Features\ProjectFileFeature;
 use App\Filament\Tables\Columns\IdColumn;
-use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Pages\ManageRelatedRecords;
@@ -52,85 +49,84 @@ use Filament\Tables\Actions\CreateAction;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Storage;
 
 class ManageMilestones extends ManageRelatedRecords
 {
-  protected static string $resource = ProjectResource::class;
+    protected static string $resource = ProjectResource::class;
 
-  protected static string $relationship = 'milestones';
+    protected static string $relationship = 'milestones';
 
-  public static function getNavigationLabel(): string
-  {
-    return 'Milestones';
-  }
+    public static function getNavigationLabel(): string
+    {
+        return 'Milestones';
+    }
 
-  public static function canAccess(array $arguments = []): bool
-  {
-    $user = auth()->user();
+    public static function canAccess(array $arguments = []): bool
+    {
+        $user = auth()->user();
 
-    return $user->can('viewAny', [ProjectFile::class, $arguments['record']]);
-  }
+        return $user->can('viewAny', [ProjectFile::class, $arguments['record']]);
+    }
 
-  public function form(Form $form): Form
-  {
-    return $form
-      ->schema([
-        TextInput::make('title')
-          ->required()
-          ->maxLength(255),
-        TextInput::make('description')
-          ->required()
-          ->maxLength(255),
-        Select::make('status_id')
-          ->required()
-          ->relationship('status', 'name'),
-        Select::make('created_by')
-          ->relationship('createdBy', 'name')
-      ]);
-  }
+    public function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                TextInput::make('title')
+                    ->required()
+                    ->maxLength(255),
+                TextInput::make('description')
+                    ->required()
+                    ->maxLength(255),
+                Select::make('status_id')
+                    ->required()
+                    ->relationship('status', 'name'),
+                Select::make('created_by')
+                    ->relationship('createdBy', 'name'),
+            ]);
+    }
 
-  public function table(Table $table): Table
-  {
-    return $table
-      ->recordTitleAttribute('description')
-      ->columns([
-        IdColumn::make(),
-        TextColumn::make('description'),
-        TextColumn::make('created_at')
-          ->label('Date Created')
-          ->dateTime()
-          ->sortable(query: fn($query, $direction) => $query->orderBy('project_files.created_at', $direction)),
-        TextColumn::make('createdBy.name')
-          ->label('Created By')
-          ->sortable(query: fn($query, $direction) => $query->orderBy('project_files.created_by_id', $direction)),
-      ])
-      ->headerActions([
-        CreateAction::make()
-          ->authorize('create', $this->getOwnerRecord()),
-      ])
-      ->actions([
-        Action::make('download')
-          ->icon('heroicon-o-arrow-down-on-square')
-          ->action(
-            fn(ProjectFile $record) => Storage::disk('s3')
-              ->download(
-                $record
-                  ->getMedia('file')
-                  ->first()
-                  ->getPathRelativeToRoot()
-              )
-          ),
-        EditAction::make(),
-        DeleteAction::make(),
-      ])
-      ->bulkActions([
-        BulkActionGroup::make([
-          DeleteBulkAction::make(),
-        ]),
-      ]);
-  }
+    public function table(Table $table): Table
+    {
+        return $table
+            ->recordTitleAttribute('description')
+            ->columns([
+                IdColumn::make(),
+                TextColumn::make('description'),
+                TextColumn::make('created_at')
+                    ->label('Date Created')
+                    ->dateTime()
+                    ->sortable(query: fn ($query, $direction) => $query->orderBy('project_files.created_at', $direction)),
+                TextColumn::make('createdBy.name')
+                    ->label('Created By')
+                    ->sortable(query: fn ($query, $direction) => $query->orderBy('project_files.created_by_id', $direction)),
+            ])
+            ->headerActions([
+                CreateAction::make()
+                    ->authorize('create', $this->getOwnerRecord()),
+            ])
+            ->actions([
+                Action::make('download')
+                    ->icon('heroicon-o-arrow-down-on-square')
+                    ->action(
+                        fn (ProjectFile $record) => Storage::disk('s3')
+                            ->download(
+                                $record
+                                    ->getMedia('file')
+                                    ->first()
+                                    ->getPathRelativeToRoot()
+                            )
+                    ),
+                EditAction::make(),
+                DeleteAction::make(),
+            ])
+            ->bulkActions([
+            BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+            ]),
+        ]);
+    }
 }

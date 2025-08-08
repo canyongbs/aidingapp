@@ -51,39 +51,39 @@ use Filament\Resources\Resource;
 
 class ProjectResource extends Resource
 {
-  protected static ?string $model = Project::class;
+    protected static ?string $model = Project::class;
 
-  protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-  protected static ?string $navigationGroup = 'Project Management';
+    protected static ?string $navigationGroup = 'Project Management';
 
-  protected static ?int $navigationSort = 10;
+    protected static ?int $navigationSort = 10;
 
-  public static function getRecordSubNavigation(Page $page): array
-  {
-    return $page->generateNavigationItems([
-      ViewProject::class,
-      EditProject::class,
-      ManageTasks::class,
-      ManageManagers::class,
-      ManageAuditors::class,
-      ManageFiles::class,
-      ManageMilestones::class,
-    ]);
-  }
+    public static function getRecordSubNavigation(Page $page): array
+    {
+        return $page->generateNavigationItems([
+            ViewProject::class,
+            EditProject::class,
+            ManageTasks::class,
+            ManageManagers::class,
+            ManageAuditors::class,
+            ManageFiles::class,
+            ManageMilestones::class,
+        ]);
+    }
 
-  public static function getPages(): array
-  {
-    return [
-      'index' => ListProjects::route('/'),
-      'create' => CreateProject::route('/create'),
-      'view' => ViewProject::route('/{record}'),
-      'edit' => EditProject::route('/{record}/edit'),
-      'manage-tasks' => ManageTasks::route('/{record}/tasks'),
-      'manage-managers' => ManageManagers::route('/{record}/managers'),
-      'manage-auditors' => ManageAuditors::route('/{record}/auditors'),
-      'manage-files' => ManageFiles::route('/{record}/files'),
-      'manage-milestones' => ManageMilestones::route('/{record}/milestones'),
-    ];
-  }
+    public static function getPages(): array
+    {
+        return [
+            'index' => ListProjects::route('/'),
+            'create' => CreateProject::route('/create'),
+            'view' => ViewProject::route('/{record}'),
+            'edit' => EditProject::route('/{record}/edit'),
+            'manage-tasks' => ManageTasks::route('/{record}/tasks'),
+            'manage-managers' => ManageManagers::route('/{record}/managers'),
+            'manage-auditors' => ManageAuditors::route('/{record}/auditors'),
+            'manage-files' => ManageFiles::route('/{record}/files'),
+            'manage-milestones' => ManageMilestones::route('/{record}/milestones'),
+        ];
+    }
 }

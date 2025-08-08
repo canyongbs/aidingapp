@@ -37,7 +37,6 @@
 namespace AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource\Pages;
 
 use AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource;
-use Filament\Actions;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -45,24 +44,24 @@ use Filament\Resources\Pages\EditRecord;
 
 class EditProjectMilestoneStatus extends EditRecord
 {
-  protected static string $resource = ProjectMilestoneStatusResource::class;
+    protected static string $resource = ProjectMilestoneStatusResource::class;
 
-  public function form(Form $form): Form
-  {
-    return $form
-      ->schema([
-        TextInput::make('name')
-          ->autofocus()
-          ->required(),
-        TextInput::make('description')
-          ->required(),
-      ]);
-  }
+    public function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                TextInput::make('name')
+                    ->autofocus()
+                    ->required(),
+                TextInput::make('description')
+                    ->required(),
+            ]);
+    }
 
-  protected function getHeaderActions(): array
-  {
-    return [
-      DeleteAction::make(),
-    ];
-  }
+    protected function getHeaderActions(): array
+    {
+        return [
+            DeleteAction::make(),
+        ];
+    }
 }
