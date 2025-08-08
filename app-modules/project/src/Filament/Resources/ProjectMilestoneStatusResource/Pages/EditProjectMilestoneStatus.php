@@ -38,16 +38,31 @@ namespace AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource\Pa
 
 use AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource;
 use Filament\Actions;
+use Filament\Actions\DeleteAction;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
 use Filament\Resources\Pages\EditRecord;
 
 class EditProjectMilestoneStatus extends EditRecord
 {
-    protected static string $resource = ProjectMilestoneStatusResource::class;
+  protected static string $resource = ProjectMilestoneStatusResource::class;
 
-    protected function getHeaderActions(): array
-    {
-        return [
-            Actions\DeleteAction::make(),
-        ];
-    }
+  public function form(Form $form): Form
+  {
+    return $form
+      ->schema([
+        TextInput::make('name')
+          ->autofocus()
+          ->required(),
+        TextInput::make('description')
+          ->required(),
+      ]);
+  }
+
+  protected function getHeaderActions(): array
+  {
+    return [
+      DeleteAction::make(),
+    ];
+  }
 }

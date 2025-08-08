@@ -37,8 +37,13 @@
 namespace AidingApp\Project\Filament\Resources;
 
 use AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource\Pages;
+use AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource\Pages\CreateProjectMilestoneStatus;
+use AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource\Pages\EditProjectMilestoneStatus;
+use AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource\Pages\ListProjectMilestoneStatuses;
+use AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource\Pages\ViewProjectMilestoneStatus;
+use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectMilestoneStatus;
-use Filament\Actions\EditAction;
+use App\Filament\Clusters\ProjectManagement;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -54,45 +59,14 @@ class ProjectMilestoneStatusResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static ?string $navigationGroup = 'Project Management';
-
     protected static ?string $navigationLabel = 'Statuses';
+
+    protected static ?string $cluster = ProjectManagement::class;
 
     protected static ?int $navigationSort = 20;
 
-    public static function form(Form $form): Form
-    {
-        return $form
-            ->schema([
-                TextInput::make('name')
-                    ->autofocus()
-                    ->required(),
 
-                TextInput::make('description')
-                    ->required(),
-            ]);
-    }
 
-    public static function table(Table $table): Table
-    {
-        return $table
-            ->columns([
-                TextColumn::make('name')
-                    ->sortable()
-                    ->searchable(),
-
-                TextColumn::make('description')
-                    ->searchable(),
-            ])
-            ->actions([
-                EditAction::make(),
-            ])
-            ->bulkActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
-            ]);
-    }
 
     public static function getRelations(): array
     {
@@ -102,9 +76,10 @@ class ProjectMilestoneStatusResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListProjectMilestoneStatuses::route('/'),
-            'create' => Pages\CreateProjectMilestoneStatus::route('/create'),
-            'edit' => Pages\EditProjectMilestoneStatus::route('/{record}/edit'),
+            'index' => ListProjectMilestoneStatuses::route('/'),
+            'create' => CreateProjectMilestoneStatus::route('/create'),
+            'edit' => EditProjectMilestoneStatus::route('/{record}/edit'),
+            'view' => ViewProjectMilestoneStatus::route('/{record}'),
         ];
     }
 }

@@ -37,47 +37,34 @@
 namespace AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource\Pages;
 
 use AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource;
-use Filament\Actions\CreateAction;
-use Filament\Resources\Pages\ListRecords;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\DeleteBulkAction;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\ViewAction;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
+use Filament\Actions\EditAction;
+use Filament\Infolists\Components\Section;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Infolist;
+use Filament\Resources\Pages\ViewRecord;
 
-class ListProjectMilestoneStatuses extends ListRecords
+class ViewProjectMilestoneStatus extends ViewRecord
 {
-  protected static string $resource = ProjectMilestoneStatusResource::class;
+    protected static string $resource = ProjectMilestoneStatusResource::class;
 
-  public function table(Table $table): Table
-  {
-    return $table
-      ->columns([
-        TextColumn::make('name')
-          ->sortable()
-          ->searchable(),
+    public function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                Section::make()
+                    ->schema([
+                        TextEntry::make('name')
+                            ->label('Name'),
+                        TextEntry::make('description')
+                            ->label('Description'),
+                    ]),
+            ]);
+    }
 
-        TextColumn::make('description')
-          ->searchable(),
-      ])
-      ->actions([
-        EditAction::make(),
-        ViewAction::make(),
-        DeleteAction::make(),
-      ])
-      ->bulkActions([
-        BulkActionGroup::make([
-          DeleteBulkAction::make(),
-        ]),
-      ]);
-  }
-
-  protected function getHeaderActions(): array
-  {
-    return [
-      CreateAction::make(),
-    ];
-  }
+    protected function getHeaderActions(): array
+    {
+        return [
+            EditAction::make(),
+        ];
+    }
 }
