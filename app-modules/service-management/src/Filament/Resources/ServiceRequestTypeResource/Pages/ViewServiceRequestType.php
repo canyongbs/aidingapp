@@ -89,6 +89,11 @@ class ViewServiceRequestType extends ViewRecord
                                     ->state('NPS')
                                     ->badge()
                                     ->color(fn (ServiceRequestType $record) => $record->has_enabled_nps ? 'success' : 'gray'),
+                                TextEntry::make('has_feedback_reminder')
+                                    ->hiddenLabel()
+                                    ->state('Feedback Reminder')
+                                    ->badge()
+                                    ->color(fn (ServiceRequestType $record) => $record->has_feedback_reminder ? 'success' : 'gray'),
                             ])
                             ->visible(fn (Get $get): bool => Gate::check(Feature::FeedbackManagement->getGateName())),
                         TextEntry::make('description')

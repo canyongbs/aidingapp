@@ -72,11 +72,18 @@ class CreateServiceRequestType extends CreateRecord
                                     ->live(),
                                 Toggle::make('has_enabled_csat')
                                     ->label('CSAT')
+                                    ->live()
                                     ->visible(fn (Get $get) => $get('has_enabled_feedback_collection')),
                                 Toggle::make('has_enabled_nps')
                                     ->label('NPS')
+                                    ->live()
                                     ->visible(fn (Get $get) => $get('has_enabled_feedback_collection')),
+                                Toggle::make('has_feedback_reminder')
+                                    ->label('Feedback Reminder')
+                                    ->helperText('An email reminder will be sent 2 days after the initial feedback survey is delivered if incomplete.')
+                                    ->visible(fn (Get $get) => $get('has_enabled_feedback_collection') && ($get('has_enabled_csat') || $get('has_enabled_nps'))),
                             ])
+                            ->columnSpanFull()
                             ->visible(fn (Get $get): bool => Gate::check(Feature::FeedbackManagement->getGateName())),
                         Textarea::make('description')
                             ->string()
