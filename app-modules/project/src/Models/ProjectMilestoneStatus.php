@@ -36,21 +36,32 @@
 
 namespace AidingApp\Project\Models;
 
+use AidingApp\Project\Database\Factories\ProjectMilestoneStatusFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ProjectMilestoneStatus extends Model
 {
-    /** @use HasFactory<\Database\Factories\ProjectMilestoneStatusFactory> */
-    use HasFactory;
+  /** @use HasFactory<ProjectMilestoneStatusFactory> */
+  use HasFactory;
 
-    use HasUuids;
-    use SoftDeletes;
+  use HasUuids;
+  use SoftDeletes;
 
-    protected $fillable = [
-        'name',
-        'description',
-    ];
+  protected $fillable = [
+    'name',
+    'description',
+  ];
+
+
+  /**
+   * @return HasMany<ProjectMilestone, $this>
+   */
+  public function projectMilestones(): HasMany
+  {
+    return $this->hasMany(ProjectMilestone::class, 'status_id');
+  }
 }
