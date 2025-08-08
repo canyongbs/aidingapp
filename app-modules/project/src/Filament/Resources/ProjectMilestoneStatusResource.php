@@ -36,22 +36,13 @@
 
 namespace AidingApp\Project\Filament\Resources;
 
-use AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource\Pages;
 use AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource\Pages\CreateProjectMilestoneStatus;
 use AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource\Pages\EditProjectMilestoneStatus;
 use AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource\Pages\ListProjectMilestoneStatuses;
 use AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource\Pages\ViewProjectMilestoneStatus;
-use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectMilestoneStatus;
 use App\Filament\Clusters\ProjectManagement;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DeleteBulkAction;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
 
 class ProjectMilestoneStatusResource extends Resource
 {
@@ -64,9 +55,6 @@ class ProjectMilestoneStatusResource extends Resource
     protected static ?string $cluster = ProjectManagement::class;
 
     protected static ?int $navigationSort = 20;
-
-
-
 
     public static function getRelations(): array
     {
