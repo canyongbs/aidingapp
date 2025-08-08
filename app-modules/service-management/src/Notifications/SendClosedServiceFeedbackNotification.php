@@ -37,9 +37,11 @@
 namespace AidingApp\ServiceManagement\Notifications;
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Notification\DataTransferObjects\NotificationResultData;
 use AidingApp\Notification\Enums\NotificationChannel;
 use AidingApp\Notification\Models\Contracts\CanBeNotified;
 use AidingApp\Notification\Models\Contracts\Message;
+use AidingApp\Notification\Notifications\Contracts\HasAfterSendHook;
 use AidingApp\Notification\Notifications\Contracts\HasBeforeSendHook;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
@@ -52,7 +54,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Notifications\Notification;
 
-class SendClosedServiceFeedbackNotification extends Notification implements ShouldQueue, HasBeforeSendHook
+class SendClosedServiceFeedbackNotification extends Notification implements ShouldQueue, HasBeforeSendHook, HasAfterSendHook
 {
     use Queueable;
     use HandlesServiceRequestTemplateContent;
@@ -107,6 +109,18 @@ class SendClosedServiceFeedbackNotification extends Notification implements Shou
     public function beforeSend(AnonymousNotifiable|CanBeNotified $notifiable, Message $message, NotificationChannel $channel): void
     {
         $message->related()->associate($this->serviceRequest);
+    }
+
+    public function afterSend(
+        AnonymousNotifiable|CanBeNotified $notifiable,
+        Message $message,
+        NotificationResultData $result
+    ): void {
+        if ($result->success) {
+            $this->serviceRequest->updateQuietly([
+                'survey_sent_at' => now(),
+            ]);
+        }
     }
 
     private function resolveNotificationSetting(object $notifiable): ?NotificationSetting
