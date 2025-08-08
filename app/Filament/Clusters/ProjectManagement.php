@@ -34,50 +34,15 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource\Pages;
+namespace App\Filament\Clusters;
 
-use AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource;
-use Filament\Actions\CreateAction;
-use Filament\Resources\Pages\ListRecords;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\DeleteBulkAction;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\ViewAction;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
+use Filament\Clusters\Cluster;
 
-class ListProjectMilestoneStatuses extends ListRecords
+class ProjectManagement extends Cluster
 {
-  protected static string $resource = ProjectMilestoneStatusResource::class;
+    protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
-  public function table(Table $table): Table
-  {
-    return $table
-      ->columns([
-        TextColumn::make('name')
-          ->sortable()
-          ->searchable(),
+    protected static ?string $navigationGroup = 'Settings';
 
-        TextColumn::make('description')
-          ->searchable(),
-      ])
-      ->actions([
-        EditAction::make(),
-        ViewAction::make(),
-        DeleteAction::make(),
-      ])
-      ->bulkActions([
-        BulkActionGroup::make([
-          DeleteBulkAction::make(),
-        ]),
-      ]);
-  }
-
-  protected function getHeaderActions(): array
-  {
-    return [
-      CreateAction::make(),
-    ];
-  }
+    protected static ?int $navigationSort = 100;
 }

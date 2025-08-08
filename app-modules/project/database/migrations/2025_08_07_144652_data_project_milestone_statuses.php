@@ -36,13 +36,16 @@
 
 use AidingApp\Project\Database\Seeders\ProjectMilestoneStatusSeeder;
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Artisan;
 
-return new class () extends Migration {
-    public function up(): void
-    {
-        DB::seed(ProjectMilestoneStatusSeeder::class);
-    }
+return new class() extends Migration {
+  public function up(): void
+  {
+    Artisan::call('db:seed', [
+      '--class' => ProjectMilestoneStatusSeeder::class,
+      '--force' => true,
+    ]);
+  }
 
-    public function down(): void {}
+  public function down(): void {}
 };
