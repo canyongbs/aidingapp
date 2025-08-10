@@ -54,7 +54,7 @@ class ChangeManagement extends Dashboard
 
     protected static string $view = 'filament.pages.coming-soon';
 
-    protected static ?int $navigationSort = 50;
+    protected static ?int $navigationSort = 60;
 
     public static function canAccess(): bool
     {
