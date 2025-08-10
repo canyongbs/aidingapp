@@ -36,29 +36,32 @@
 
 namespace AidingApp\Project\Filament\Resources\ProjectResource\Pages;
 
-use AidingApp\Project\Filament\Resources\ProjectResource;
-use AidingApp\Task\Filament\Concerns\TaskForm;
-use AidingApp\Task\Models\Task;
-use App\Features\ConfidentialTaskFeature;
-use Filament\Forms\Components\Checkbox;
-use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\Fieldset;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Get;
-use Filament\Resources\Pages\ManageRelatedRecords;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\CreateAction;
-use Filament\Tables\Actions\DissociateAction;
-use Filament\Tables\Actions\DissociateBulkAction;
+use Filament\Tables\Table;
+use AidingApp\Task\Models\Task;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\Fieldset;
+use Filament\Forms\Components\Textarea;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
+use Filament\Forms\Components\TextInput;
+use App\Features\ConfidentialTaskFeature;
+use Filament\Tables\Actions\CreateAction;
+use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Tables\Actions\DissociateAction;
+use AidingApp\Task\Filament\Concerns\TaskForm;
+use Filament\Tables\Actions\DissociateBulkAction;
+use AidingApp\Task\Filament\Concerns\TaskEditForm;
+use Filament\Resources\Pages\ManageRelatedRecords;
+use AidingApp\Project\Filament\Resources\ProjectResource;
+use AidingApp\Task\Filament\Resources\TaskResource\Pages\EditTask;
 
 class ManageTasks extends ManageRelatedRecords
 {
     use TaskForm;
+    use TaskEditForm;
 
     protected static string $resource = ProjectResource::class;
 
@@ -132,10 +135,9 @@ class ManageTasks extends ManageRelatedRecords
                     ->modalSubmitActionLabel('Create Task'),
             ])
             ->actions([
-                // EditAction::make()
-                //     ->authorize('update', Task::class),
-                DissociateAction::make()
-                    ->authorize('updateAny', Task::class),
+                EditAction::make()
+                    ->form(fn () => $this->editFormFields())
+                    ->authorize('update', Task::class),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
