@@ -36,38 +36,30 @@
 
 namespace AidingApp\Project\Filament\Resources\ProjectResource\Pages;
 
-use AidingApp\Contact\Filament\Resources\ContactResource;
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Task\Enums\TaskStatus;
-use AidingApp\Task\Filament\Concerns\TaskEditForm;
-use AidingApp\Task\Filament\Concerns\TaskViewActionInfoList;
-use AidingApp\Task\Filament\Resources\TaskResource\Components\TaskViewAction;
+use Filament\Forms\Get;
 use Filament\Forms\Form;
+use Filament\Tables\Table;
 use AidingApp\Task\Models\Task;
-use App\Filament\Resources\UserResource;
-use App\Filament\Tables\Columns\IdColumn;
-use App\Models\Scopes\EducatableSearch;
-use App\Models\User;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Fieldset;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Get;
-use Filament\Forms\Set;
+use App\Features\ConfidentialTaskFeature;
+use Filament\Tables\Actions\CreateAction;
+use Illuminate\Database\Eloquent\Builder;
+use Filament\Tables\Actions\AssociateAction;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Tables\Actions\DissociateAction;
+use AidingApp\Task\Filament\Concerns\TaskForm;
+use Filament\Tables\Actions\DissociateBulkAction;
+use AidingApp\Task\Filament\Concerns\TaskEditForm;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use AidingApp\Project\Filament\Resources\ProjectResource;
-use AidingApp\Task\Filament\Concerns\TaskForm;
-use Filament\Tables\Actions\CreateAction;
-use Filament\Tables\Actions\DeleteBulkAction;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\Filter;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
+use AidingApp\Task\Filament\Concerns\TaskViewActionInfoList;
 
 class ManageTasks extends ManageRelatedRecords
 {
@@ -164,49 +156,49 @@ class ManageTasks extends ManageRelatedRecords
                 CreateAction::make()
                     ->authorize('create', Task::class)
                     ->form([
-                          Fieldset::make('Confidentiality')
-                    ->visible(ConfidentialTaskFeature::active())
-                    ->schema([
-                        Checkbox::make('is_confidential')
-                            ->label('Confidential')
-                            ->live()
-                            ->columnSpanFull(),
-                        Select::make('confidential_task_users')
-                            ->relationship('confidentialAccessUsers', 'name')
-                            ->preload()
-                            ->label('Users')
-                            ->multiple()
-                            ->exists('users', 'id')
-                            ->visible(fn (Get $get) => $get('is_confidential')),
-                        Select::make('confidential_task_teams')
-                            ->relationship('confidentialAccessTeams', 'name')
-                            ->preload()
-                            ->label('Teams')
-                            ->multiple()
-                            ->exists('teams', 'id')
-                            ->visible(fn (Get $get) => $get('is_confidential')),
-                    ]),
-                    TextInput::make('title')
-                        ->required()
-                        ->maxLength(100)
-                        ->string(),
-                    Textarea::make('description')
-                        ->required()
-                        ->string(),
-                DateTimePicker::make('due')
-                    ->label('Due Date')
-                    ->native(false),
-                Select::make('assigned_to')
-                    ->label('Assigned To')
-                    ->relationship('assignedTo', 'name', $this->scopeAssignmentRelationshipBasedOnConcern())
-                    ->nullable()
-                    ->searchable(['name', 'email'])
-                    ->default(auth()->id()),
-                Select::make('concern_id')
-                    ->label('Related To')
-                    ->relationship('concern', 'first_name')
-                    ->nullable()
-                    ->afterStateUpdated($this->updateAssignmentAfterConcernSelected()),
+                        Fieldset::make('Confidentiality')
+                            ->visible(ConfidentialTaskFeature::active())
+                            ->schema([
+                                Checkbox::make('is_confidential')
+                                    ->label('Confidential')
+                                    ->live()
+                                    ->columnSpanFull(),
+                                Select::make('confidential_task_users')
+                                    ->relationship('confidentialAccessUsers', 'name')
+                                    ->preload()
+                                    ->label('Users')
+                                    ->multiple()
+                                    ->exists('users', 'id')
+                                    ->visible(fn (Get $get) => $get('is_confidential')),
+                                Select::make('confidential_task_teams')
+                                    ->relationship('confidentialAccessTeams', 'name')
+                                    ->preload()
+                                    ->label('Teams')
+                                    ->multiple()
+                                    ->exists('teams', 'id')
+                                    ->visible(fn (Get $get) => $get('is_confidential')),
+                            ]),
+                        TextInput::make('title')
+                            ->required()
+                            ->maxLength(100)
+                            ->string(),
+                        Textarea::make('description')
+                            ->required()
+                            ->string(),
+                        DateTimePicker::make('due')
+                            ->label('Due Date')
+                            ->native(false),
+                        Select::make('assigned_to')
+                            ->label('Assigned To')
+                            ->relationship('assignedTo', 'name', $this->scopeAssignmentRelationshipBasedOnConcern())
+                            ->nullable()
+                            ->searchable(['name', 'email'])
+                            ->default(auth()->id()),
+                        Select::make('concern_id')
+                            ->label('Related To')
+                            ->relationship('concern', 'first_name')
+                            ->nullable()
+                            ->afterStateUpdated($this->updateAssignmentAfterConcernSelected()),
                     ])
                     ->modalHeading('Create Task')
                     ->modalSubmitActionLabel('Create Task'),
