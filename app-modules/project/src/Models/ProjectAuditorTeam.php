@@ -41,9 +41,6 @@ use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
-/**
- * @mixin IdeHelperProjectAuditorTeam
- */
 class ProjectAuditorTeam extends Pivot
 {
     use HasUuids;
