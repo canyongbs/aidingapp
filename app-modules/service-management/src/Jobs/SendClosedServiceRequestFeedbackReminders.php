@@ -24,7 +24,7 @@ class SendClosedServiceRequestFeedbackReminders implements ShouldQueue, ShouldBe
     {
         $serviceRequests = ServiceRequest::query()
             ->whereHas('priority.type', function (Builder $query) {
-                $query->where('has_feedback_reminder', true);
+                $query->where('is_reminders_enabled', true);
             })
             ->whereHas(
                 'status',
