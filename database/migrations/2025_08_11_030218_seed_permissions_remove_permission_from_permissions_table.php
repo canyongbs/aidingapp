@@ -34,43 +34,45 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Authorization\Filament\Resources\PermissionResource\RelationManagers;
+use Database\Migrations\Concerns\CanModifyPermissions;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 
-use App\Filament\Tables\Columns\IdColumn;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
-use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
+return new class () extends Migration {
+    use CanModifyPermissions;
 
-class RolesRelationManager extends RelationManager
-{
-    protected static string $relationship = 'roles';
+    /**
+     * @var array<string> $permissions
+     */
+    private array $permissions = [
+        'permission.view-any' => 'Permission',
+        'permission.*.view' => 'Permission',
+    ];
 
-    protected static ?string $recordTitleAttribute = 'name';
+    /**
+     * @var array<string> $guards
+     */
+    private array $guards = [
+        'web',
+    ];
 
-    public function form(Form $form): Form
+    public function up(): void
     {
-        return $form
-            ->schema([
-                TextInput::make('name')
-                    ->required()
-                    ->maxLength(255),
-            ]);
+        collect($this->guards)
+            ->each(fn (string $guard) => $this->deletePermissions(array_keys($this->permissions), $guard));
     }
 
-    public function table(Table $table): Table
+    public function down(): void
     {
-        return $table
-            ->columns([
-                IdColumn::make(),
-                TextColumn::make('name'),
-            ])
-            ->headerActions([
-            ])
-            ->actions([
-            ])
-            ->bulkActions([
-            ]);
+        collect($this->guards)
+            ->each(function (string $guard) {
+                $permissions = Arr::except($this->permissions, DB::table('permissions')
+                    ->where('guard_name', $guard)
+                    ->pluck('name')
+                    ->all());
+
+                $this->createPermissions($permissions, $guard);
+            });
     }
-}
+};

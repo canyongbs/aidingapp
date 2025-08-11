@@ -122,8 +122,6 @@ it('allows user with permission to impersonate', function () {
 it('does not allow a user which does not have the SaaS Global Admin role to assign SaaS Global Admin role to other users', function () {
     $user = User::factory()->create();
     $user->givePermissionTo(
-        'permission.view-any',
-        'permission.*.view',
         'role.view-any',
         'role.*.view',
         'user.view-any',
