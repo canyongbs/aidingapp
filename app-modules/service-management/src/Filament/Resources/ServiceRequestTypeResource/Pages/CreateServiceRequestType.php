@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResou
 
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
 use App\Enums\Feature;
+use App\Features\FeedbackReminderFeature;
 use App\Filament\Forms\Components\IconSelect;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Section;
@@ -81,7 +82,7 @@ class CreateServiceRequestType extends CreateRecord
                                 Toggle::make('has_feedback_reminder')
                                     ->label('Feedback Reminder')
                                     ->helperText('An email reminder will be sent 2 days after the initial feedback survey is delivered if incomplete.')
-                                    ->visible(fn (Get $get) => $get('has_enabled_feedback_collection') && ($get('has_enabled_csat') || $get('has_enabled_nps'))),
+                                    ->visible(fn (Get $get) => FeedbackReminderFeature::active() && $get('has_enabled_feedback_collection') && ($get('has_enabled_csat') || $get('has_enabled_nps'))),
                             ])
                             ->columnSpanFull()
                             ->visible(fn (Get $get): bool => Gate::check(Feature::FeedbackManagement->getGateName())),

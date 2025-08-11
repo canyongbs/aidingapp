@@ -105,13 +105,12 @@ class Kernel extends ConsoleKernel
                     })
                         ->daily();
 
-                    // $schedule->call(function () use ($tenant) {
-                    //     $tenant->execute(function () {
-                    //         dispatch(new SendClosedServiceRequestFeedbackReminders());
-                    //     });
-                    // })
-                    //     ->everyMinute();
-                    // ->withoutOverlapping();
+                    $schedule->call(function () use ($tenant) {
+                        $tenant->execute(function () {
+                            dispatch(new SendClosedServiceRequestFeedbackReminders());
+                        });
+                    })
+                        ->hourly();
 
                     $schedule->command("tenants:artisan \"cache:prune-stale-tags\" --tenant={$tenant->id}")
                         ->hourly()

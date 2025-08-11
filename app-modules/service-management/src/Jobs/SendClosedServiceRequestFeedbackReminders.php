@@ -2,7 +2,6 @@
 
 namespace AidingApp\ServiceManagement\Jobs;
 
-use AidingApp\Notification\Notifications\Messages\MailMessage as MessagesMailMessage;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Notifications\SendClosedServiceFeedbackNotification;
@@ -13,8 +12,6 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Notification;
 
 class SendClosedServiceRequestFeedbackReminders implements ShouldQueue, ShouldBeUnique
 {
@@ -25,42 +22,33 @@ class SendClosedServiceRequestFeedbackReminders implements ShouldQueue, ShouldBe
 
     public function handle(): void
     {
-        Log::debug('job is dispatched...');
-        $cutoffTime = now()->subHours(48);
-
         $serviceRequests = ServiceRequest::query()
-            ->where('is_reminders_enabled', true)
+            ->whereHas('priority.type', function (Builder $query) {
+                $query->where('has_feedback_reminder', true);
+            })
+            ->whereHas(
+                'status',
+                fn (Builder $query) => $query->where('classification', SystemServiceRequestClassification::Closed)
+            )
             ->whereNull('reminder_sent_at')
             ->whereNotNull('survey_sent_at')
-            ->where('survey_sent_at', '<=', $cutoffTime)
-            ->whereHas('status', function (Builder $query): void {
-                $query->where(
-                    'classification',
-                    SystemServiceRequestClassification::Closed
-                );
-            })
+            ->where('survey_sent_at', '<=', now()->subHours(48))
             ->get();
-        Log::debug($serviceRequests);
 
         foreach ($serviceRequests as $serviceRequest) {
-            $recipient = $serviceRequest->contact ?? null;
+            $recipient = $serviceRequest->respondent ?? null;
 
             if (! $recipient) {
                 continue;
             }
 
-            $emailTemplate = $serviceRequest->emailTemplate ?? null;
+            $emailTemplate = $serviceRequest->priority?->type?->templates()
+                ->first();
 
-            Notification::route('mail', $recipient->email)
-                ->notify(new class ($serviceRequest, $emailTemplate) extends SendClosedServiceFeedbackNotification {
-                    public function toMail(object $notifiable): MessagesMailMessage
-                    {
-                        $mail = parent::toMail($notifiable);
-                        $mail->subject('Reminder: ' . $mail->subject);
-
-                        return $mail;
-                    }
-                });
+            $recipient->notify(
+                (new SendClosedServiceFeedbackNotification($serviceRequest, $emailTemplate))
+                    ->asReminder()
+            );
 
             $serviceRequest->updateQuietly([
                 'reminder_sent_at' => now(),

@@ -10,14 +10,13 @@ return new class () extends Migration {
         Schema::table('service_requests', function (Blueprint $table) {
             $table->timestamp('survey_sent_at')->nullable();
             $table->timestamp('reminder_sent_at')->nullable();
-            $table->boolean('is_reminders_enabled')->default(false);
         });
     }
 
     public function down(): void
     {
         Schema::table('service_requests', function (Blueprint $table) {
-            $table->dropColumn(['survey_sent_at', 'reminder_sent_at', 'is_reminders_enabled']);
+            $table->dropColumn(['survey_sent_at', 'reminder_sent_at']);
         });
     }
 };
