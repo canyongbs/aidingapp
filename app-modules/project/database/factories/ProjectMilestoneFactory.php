@@ -34,49 +34,30 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource\Pages;
+namespace AidingApp\Project\Database\Factories;
 
-use AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource;
-use Filament\Actions\CreateAction;
-use Filament\Resources\Pages\ListRecords;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\DeleteBulkAction;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\ViewAction;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
+use AidingApp\Project\Models\Project;
+use AidingApp\Project\Models\ProjectMilestone;
+use AidingApp\Project\Models\ProjectMilestoneStatus;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-class ListProjectMilestoneStatuses extends ListRecords
+/**
+ * @extends Factory<ProjectMilestone>
+ */
+class ProjectMilestoneFactory extends Factory
 {
-    protected static string $resource = ProjectMilestoneStatusResource::class;
-
-    public function table(Table $table): Table
-    {
-        return $table
-            ->columns([
-                TextColumn::make('name')
-                    ->sortable()
-                    ->searchable(),
-                TextColumn::make('description')
-                    ->searchable(),
-            ])
-            ->actions([
-                EditAction::make(),
-                ViewAction::make(),
-                DeleteAction::make(),
-            ])
-            ->bulkActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
-            ]);
-    }
-
-    protected function getHeaderActions(): array
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition(): array
     {
         return [
-            CreateAction::make(),
+            'project_id' => Project::factory(),
+            'title' => str($this->faker->words(asText: true))->headline()->toString(),
+            'description' => $this->faker->sentence(3),
+            'status_id' => ProjectMilestoneStatus::inRandomOrder()->first(),
         ];
     }
 }

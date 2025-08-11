@@ -37,13 +37,12 @@
 namespace AidingApp\Project\Filament\Resources\ProjectResource\Pages;
 
 use AidingApp\Project\Filament\Resources\ProjectResource;
-use AidingApp\Project\Models\ProjectFile;
+use AidingApp\Project\Models\ProjectMilestone;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Pages\ManageRelatedRecords;
-use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\CreateAction;
 use Filament\Tables\Actions\DeleteAction;
@@ -51,7 +50,6 @@ use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Support\Facades\Storage;
 
 class ManageMilestones extends ManageRelatedRecords
 {
@@ -68,7 +66,7 @@ class ManageMilestones extends ManageRelatedRecords
     {
         $user = auth()->user();
 
-        return $user->can('viewAny', [ProjectFile::class, $arguments['record']]);
+        return $user->can('viewAny', [ProjectMilestone::class, $arguments['record']]);
     }
 
     public function form(Form $form): Form
@@ -101,6 +99,7 @@ class ManageMilestones extends ManageRelatedRecords
                     ->dateTime()
                     ->sortable(query: fn ($query, $direction) => $query->orderBy('project_files.created_at', $direction)),
                 TextColumn::make('createdBy.name')
+                    ->default('N/A')
                     ->label('Created By')
                     ->sortable(query: fn ($query, $direction) => $query->orderBy('project_files.created_by_id', $direction)),
             ])
@@ -109,24 +108,13 @@ class ManageMilestones extends ManageRelatedRecords
                     ->authorize('create', $this->getOwnerRecord()),
             ])
             ->actions([
-                Action::make('download')
-                    ->icon('heroicon-o-arrow-down-on-square')
-                    ->action(
-                        fn (ProjectFile $record) => Storage::disk('s3')
-                            ->download(
-                                $record
-                                    ->getMedia('file')
-                                    ->first()
-                                    ->getPathRelativeToRoot()
-                            )
-                    ),
                 EditAction::make(),
                 DeleteAction::make(),
             ])
             ->bulkActions([
-            BulkActionGroup::make([
+                BulkActionGroup::make([
                     DeleteBulkAction::make(),
-            ]),
-        ]);
+                ]),
+            ]);
     }
 }

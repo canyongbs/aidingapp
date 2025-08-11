@@ -34,49 +34,27 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource\Pages;
-
+use AidingApp\Project\Database\Factories\ProjectMilestoneStatusFactory;
 use AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource;
-use Filament\Actions\CreateAction;
-use Filament\Resources\Pages\ListRecords;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\DeleteBulkAction;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\ViewAction;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
+use AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource\Pages\CreateProjectMilestoneStatus;
+use AidingApp\Project\Models\ProjectMilestoneStatus;
 
-class ListProjectMilestoneStatuses extends ListRecords
-{
-    protected static string $resource = ProjectMilestoneStatusResource::class;
+use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Livewire\livewire;
+use function Tests\asSuperAdmin;
 
-    public function table(Table $table): Table
-    {
-        return $table
-            ->columns([
-                TextColumn::make('name')
-                    ->sortable()
-                    ->searchable(),
-                TextColumn::make('description')
-                    ->searchable(),
-            ])
-            ->actions([
-                EditAction::make(),
-                ViewAction::make(),
-                DeleteAction::make(),
-            ])
-            ->bulkActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
-            ]);
-    }
+test('can successfully create milsetone status', function () {
+    asSuperAdmin()
+        ->get(
+            ProjectMilestoneStatusResource::getUrl('create')
+        )
+        ->assertSuccessful();
 
-    protected function getHeaderActions(): array
-    {
-        return [
-            CreateAction::make(),
-        ];
-    }
-}
+    $request = ProjectMilestoneStatusFactory::new()->create();
+
+    livewire(CreateProjectMilestoneStatus::class)
+        ->fillForm($request->toArray())
+        ->assertHasNoFormErrors();
+
+    assertDatabaseHas(ProjectMilestoneStatus::class, $request->toArray());
+});

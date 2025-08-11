@@ -36,6 +36,7 @@
 
 namespace AidingApp\Project\Models;
 
+use AidingApp\Project\Database\Factories\ProjectMilestoneFactory;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -46,15 +47,16 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class ProjectMilestone extends Model
 {
     /** @use HasFactory<ProjectMilestoneFactory> */
-    // use HasFactory;
+    use HasFactory;
 
     use HasUuids;
     use SoftDeletes;
-    // use AuditableTrait;
 
     protected $fillable = [
         'title',
         'description',
+        'status_id',
+        'created_by',
     ];
 
     /**

@@ -36,10 +36,11 @@
 
 namespace AidingApp\Project\Database\Factories;
 
+use AidingApp\Project\Models\ProjectMilestoneStatus;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AidingApp\Project\Models\ProjectMilestoneStatus>
+ * @extends Factory<ProjectMilestoneStatus>
  */
 class ProjectMilestoneStatusFactory extends Factory
 {
@@ -51,10 +52,7 @@ class ProjectMilestoneStatusFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->words(
-                $this->faker->numberBetween(1, 4),
-                true
-            ),
+            'name' => $this->faker->unique()->word(),
             'description' => $this->faker->sentence(),
         ];
     }
