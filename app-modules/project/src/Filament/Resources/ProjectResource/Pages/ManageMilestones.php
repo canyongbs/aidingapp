@@ -38,6 +38,7 @@ namespace AidingApp\Project\Filament\Resources\ProjectResource\Pages;
 
 use AidingApp\Project\Filament\Resources\ProjectResource;
 use AidingApp\Project\Models\ProjectMilestone;
+use App\Features\ProjectMilestoneFeature;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -66,7 +67,7 @@ class ManageMilestones extends ManageRelatedRecords
     {
         $user = auth()->user();
 
-        return $user->can('viewAny', [ProjectMilestone::class, $arguments['record']]);
+        return ProjectMilestoneFeature::active() && $user->can('viewAny', [ProjectMilestone::class, $arguments['record']]);
     }
 
     public function form(Form $form): Form

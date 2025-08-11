@@ -34,27 +34,14 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Project\Database\Factories\ProjectMilestoneStatusFactory;
-use AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource;
-use AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource\Pages\CreateProjectMilestoneStatus;
-use AidingApp\Project\Models\ProjectMilestoneStatus;
+namespace App\Features;
 
-use function Pest\Laravel\assertDatabaseHas;
-use function Pest\Livewire\livewire;
-use function Tests\asSuperAdmin;
+use App\Support\AbstractFeatureFlag;
 
-test('can successfully create milsetone status', function () {
-    asSuperAdmin()
-        ->get(
-            ProjectMilestoneStatusResource::getUrl('create')
-        )
-        ->assertSuccessful();
-
-    $request = ProjectMilestoneStatusFactory::new()->create();
-
-    livewire(CreateProjectMilestoneStatus::class)
-        ->fillForm($request->toArray())
-        ->assertHasNoFormErrors();
-
-    assertDatabaseHas(ProjectMilestoneStatus::class, $request->toArray());
-});
+class ProjectMilestoneFeature extends AbstractFeatureFlag
+{
+    public function resolve(mixed $scope): mixed
+    {
+        return false;
+    }
+}
