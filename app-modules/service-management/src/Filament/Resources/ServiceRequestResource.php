@@ -96,7 +96,7 @@ class ServiceRequestResource extends Resource
             'create' => CreateServiceRequest::route('/create'),
             'view' => ViewServiceRequest::route('/{record}'),
             'edit' => EditServiceRequest::route('/{record}/edit'),
-            'feedback' => Feedback::route('/{record}/feedback'),
+            'manage-feedback' => Feedback::route('/{record}/manage-feedback'),
             'timeline' => ServiceRequestTimeline::route('/{record}/timeline'),
         ];
     }
