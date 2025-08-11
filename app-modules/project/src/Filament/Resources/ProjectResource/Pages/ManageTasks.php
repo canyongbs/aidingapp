@@ -213,7 +213,8 @@ class ManageTasks extends ManageRelatedRecords
                     ->modalSubmitActionLabel('Create Task'),
             ])
             ->actions([
-                TaskViewAction::make(),
+                TaskViewAction::make()
+                    ->authorize('view', Task::class),
                 EditAction::make()
                     ->form(fn () => $this->editFormFields())
                     ->authorize('update', Task::class),
