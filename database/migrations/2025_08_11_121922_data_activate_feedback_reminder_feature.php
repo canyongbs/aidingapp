@@ -1,8 +1,6 @@
 <?php
 
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\Feedback;
 use App\Features\FeedbackReminderFeature;
-use Google\Service\Classroom\Feed;
 use Illuminate\Database\Migrations\Migration;
 
 return new class () extends Migration {
@@ -11,7 +9,8 @@ return new class () extends Migration {
         FeedbackReminderFeature::activate();
     }
 
-    public function down(): void {
+    public function down(): void
+    {
         FeedbackReminderFeature::deactivate();
     }
 };
