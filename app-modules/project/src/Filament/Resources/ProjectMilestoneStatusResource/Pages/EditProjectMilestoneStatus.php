@@ -45,8 +45,8 @@ use Filament\Resources\Pages\EditRecord;
 
 class EditProjectMilestoneStatus extends EditRecord
 {
-  use EditPageRedirection;
-  
+    use EditPageRedirection;
+
     protected static string $resource = ProjectMilestoneStatusResource::class;
 
     public function form(Form $form): Form
