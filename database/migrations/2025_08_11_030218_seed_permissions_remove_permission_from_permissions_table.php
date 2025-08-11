@@ -67,12 +67,12 @@ return new class () extends Migration {
     {
         collect($this->guards)
             ->each(function (string $guard) {
-                $permisisons = Arr::except($this->permissions, DB::table('permissions')
+                $permissions = Arr::except($this->permissions, DB::table('permissions')
                     ->where('guard_name', $guard)
                     ->pluck('name')
                     ->all());
 
-                $this->createPermissions($permisisons, $guard);
+                $this->createPermissions($permissions, $guard);
             });
     }
 };
