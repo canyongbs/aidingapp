@@ -37,6 +37,7 @@
 namespace AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource\Pages;
 
 use AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource;
+use App\Concerns\EditPageRedirection;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -44,6 +45,8 @@ use Filament\Resources\Pages\EditRecord;
 
 class EditProjectMilestoneStatus extends EditRecord
 {
+  use EditPageRedirection;
+  
     protected static string $resource = ProjectMilestoneStatusResource::class;
 
     public function form(Form $form): Form
