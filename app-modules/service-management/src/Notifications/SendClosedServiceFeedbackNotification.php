@@ -37,14 +37,17 @@
 namespace AidingApp\ServiceManagement\Notifications;
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Notification\DataTransferObjects\NotificationResultData;
 use AidingApp\Notification\Enums\NotificationChannel;
 use AidingApp\Notification\Models\Contracts\CanBeNotified;
 use AidingApp\Notification\Models\Contracts\Message;
+use AidingApp\Notification\Notifications\Contracts\HasAfterSendHook;
 use AidingApp\Notification\Notifications\Contracts\HasBeforeSendHook;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use AidingApp\ServiceManagement\Notifications\Concerns\HandlesServiceRequestTemplateContent;
+use App\Features\FeedbackReminderFeature;
 use App\Models\Contracts\Educatable;
 use App\Models\NotificationSetting;
 use Illuminate\Bus\Queueable;
@@ -52,15 +55,24 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Notifications\Notification;
 
-class SendClosedServiceFeedbackNotification extends Notification implements ShouldQueue, HasBeforeSendHook
+class SendClosedServiceFeedbackNotification extends Notification implements ShouldQueue, HasBeforeSendHook, HasAfterSendHook
 {
     use Queueable;
     use HandlesServiceRequestTemplateContent;
+
+    protected bool $isReminder = false;
 
     public function __construct(
         protected ServiceRequest $serviceRequest,
         public ?ServiceRequestTypeEmailTemplate $emailTemplate,
     ) {}
+
+    public function asReminder(): self
+    {
+        $this->isReminder = true;
+
+        return $this;
+    }
 
     /**
      * @return array<int, string>
@@ -82,7 +94,7 @@ class SendClosedServiceFeedbackNotification extends Notification implements Shou
         };
 
         if (! $template) {
-            return MailMessage::make()
+            $mail = MailMessage::make()
                 ->settings($this->resolveNotificationSetting($notifiable))
                 ->subject("Feedback survey for {$this->serviceRequest->service_request_number}")
                 ->greeting("Hi {$name},")
@@ -90,18 +102,38 @@ class SendClosedServiceFeedbackNotification extends Notification implements Shou
                 ->action('Rate Service', route('feedback.service.request', $this->serviceRequest->id))
                 ->line('We appreciate your time and we value your feedback!')
                 ->salutation('Thank you.');
+        } else {
+            $subject = $this->getSubject($template->subject);
+
+            $body = $this->getBody($template->body);
+
+            $mail = MailMessage::make()
+                ->settings($this->resolveNotificationSetting($notifiable))
+                ->subject(strip_tags($subject))
+                ->content($body);
         }
 
-        $subject = $this->getSubject($template->subject);
+        if (FeedbackReminderFeature::active() && $this->isReminder) {
+            $mail->subject('Reminder: ' . $mail->subject);
+        }
 
-        $body = $this->getBody($template->body);
+        return $mail;
+    }
 
-        $test = MailMessage::make()
-            ->settings($this->resolveNotificationSetting($notifiable))
-            ->subject(strip_tags($subject))
-            ->content($body);
+    public function afterSend(
+        AnonymousNotifiable|CanBeNotified $notifiable,
+        Message $message,
+        NotificationResultData $result
+    ): void {
+        if (! FeedbackReminderFeature::active()) {
+            return;
+        }
 
-        return $test;
+        if ($result->success) {
+            $this->serviceRequest->updateQuietly([
+                'survey_sent_at' => now(),
+            ]);
+        }
     }
 
     public function beforeSend(AnonymousNotifiable|CanBeNotified $notifiable, Message $message, NotificationChannel $channel): void

@@ -113,6 +113,7 @@ class ServiceRequestType extends BaseModel implements Auditable
         'is_email_automatic_creation_contact_create_enabled',
         'email_automatic_creation_priority_id',
         'email_automatic_creation_bcc',
+        'is_reminders_enabled',
     ];
 
     protected $casts = [
@@ -153,6 +154,7 @@ class ServiceRequestType extends BaseModel implements Auditable
         'is_customers_survey_response_email_enabled' => 'boolean',
         'is_email_automatic_creation_enabled' => 'boolean',
         'is_email_automatic_creation_contact_create_enabled' => 'boolean',
+        'is_reminders_enabled' => 'boolean',
     ];
 
     public function serviceRequests(): HasManyThrough
