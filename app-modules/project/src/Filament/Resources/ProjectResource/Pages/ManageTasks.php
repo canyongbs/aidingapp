@@ -110,12 +110,9 @@ class ManageTasks extends ManageRelatedRecords
                     }),
                 TextColumn::make('concern.display_name')
                     ->label('Related To')
-                    ->getStateUsing(fn (Task $record): ?string => $record->concern?->{$record->concern::displayNameKey()})
+                    ->getStateUsing(fn (Task $record): string => $record->concern->{$record->concern::displayNameKey()})
                     ->searchable(query: fn (Builder $query, $search) => $query->tap(new EducatableSearch(relationship: 'concern', search: $search)))
-                    ->url(fn (Task $record) => match ($record->concern ? $record->concern::class : null) {
-                        Contact::class => ContactResource::getUrl('view', ['record' => $record->concern]),
-                        default => null,
-                    }),
+                    ->url(fn (Task $record) => ContactResource::getUrl('view', ['record' => $record->concern])),
             ])->filters([
                 Filter::make('my_tasks')
                     ->label('My Tasks')
@@ -143,7 +140,7 @@ class ManageTasks extends ManageRelatedRecords
                     ->form([
                         Checkbox::make('isActive')
                             ->label("My Team's Tasks")
-                            ->afterStateUpdated(function (Set $set, $state) {
+                            ->afterStateUpdated(function (Set $set, string $state) {
                                 return $state ? $set('../my_tasks.isActive', false) : null;
                             }),
                     ]),

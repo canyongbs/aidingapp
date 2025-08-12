@@ -39,6 +39,7 @@ namespace AidingApp\Task\Notifications;
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Filament\Resources\OrganizationResource;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
+use AidingApp\Project\Filament\Resources\ProjectResource\Pages\ManageTasks;
 use AidingApp\Task\Filament\Resources\TaskResource\Pages\ListTasks;
 use AidingApp\Task\Models\Task;
 use App\Models\NotificationSetting;
@@ -77,7 +78,7 @@ class TaskAssignedToUserNotification extends Notification implements ShouldQueue
 
     public function toDatabase(object $notifiable): array
     {
-        $url = ListTasks::getUrl(['tableActionRecord' => $this->task, 'tableAction' => 'view']);
+        $url = ManageTasks::getUrl(['tableActionRecord' => $this->task, 'tableAction' => 'view']);
 
         $title = str($this->task->title)->limit();
 
