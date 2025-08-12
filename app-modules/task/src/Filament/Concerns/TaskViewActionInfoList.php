@@ -37,7 +37,6 @@
 namespace AidingApp\Task\Filament\Concerns;
 
 use AidingApp\Contact\Filament\Resources\ContactResource;
-use AidingApp\Contact\Models\Contact;
 use AidingApp\Task\Enums\TaskStatus;
 use AidingApp\Task\Models\Task;
 use App\Features\ConfidentialTaskFeature;
