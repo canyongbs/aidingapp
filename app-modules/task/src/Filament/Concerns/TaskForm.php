@@ -63,13 +63,10 @@ trait TaskForm
             $canAccessContacts = $user->hasLicense(Contact::getLicenseType());
 
             if ($canAccessContacts) {
-                return $query;
+                return $query->tap(new HasLicense(Contact::getLicenseType()));
             }
 
-            return match (true) {
-                $canAccessContacts => $query->tap(new HasLicense(Contact::getLicenseType())),
-                default => $query,
-            };
+            return $query;
         };
     }
 
@@ -97,9 +94,7 @@ trait TaskForm
                 return;
             }
 
-            $concernType = match (true) {
-                $canAccessContacts => Contact::class,
-            };
+            $concernType = Contact::class;
 
             $assignedTo = User::find($assignedTo);
 

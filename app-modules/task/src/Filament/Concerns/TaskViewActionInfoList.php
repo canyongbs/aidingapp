@@ -71,11 +71,8 @@ trait TaskViewActionInfoList
                             ->default('Unassigned'),
                         TextEntry::make('concern.display_name')
                             ->label('Related To')
-                            ->getStateUsing(fn (Task $record): ?string => $record->concern?->{$record->concern::displayNameKey()})
-                            ->url(fn (Task $record) => match ($record->concern ? $record->concern::class : null) {
-                                Contact::class => ContactResource::getUrl('view', ['record' => $record->concern]),
-                                default => null,
-                            })
+                            ->getStateUsing(fn (Task $record): string => $record->concern->{$record->concern::displayNameKey()})
+                            ->url(fn (Task $record) => ContactResource::getUrl('view', ['record' => $record->concern]))
                             ->default('Unrelated'),
                     ]),
                 Fieldset::make('metadata')
