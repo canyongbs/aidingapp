@@ -40,7 +40,6 @@ use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Filament\Resources\OrganizationResource;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
 use AidingApp\Project\Filament\Resources\ProjectResource\Pages\ManageTasks;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\ListTasks;
 use AidingApp\Task\Models\Task;
 use App\Models\NotificationSetting;
 use App\Models\User;

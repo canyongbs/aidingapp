@@ -37,7 +37,6 @@
 namespace AidingApp\Project\Filament\Resources\ProjectResource\Pages;
 
 use AidingApp\Contact\Filament\Resources\ContactResource;
-use AidingApp\Contact\Models\Contact;
 use AidingApp\Project\Filament\Resources\ProjectResource;
 use AidingApp\Task\Enums\TaskStatus;
 use AidingApp\Task\Filament\Concerns\TaskEditForm;
