@@ -50,7 +50,7 @@ use AidingApp\Contact\Filament\Resources\ContactResource;
 trait TaskViewActionInfoList
 {
     /**
-     * @return array<\Filament\Infolists\Components\Component>
+     * @return array<Component>
      */
     public function taskInfoList(): array
     {
