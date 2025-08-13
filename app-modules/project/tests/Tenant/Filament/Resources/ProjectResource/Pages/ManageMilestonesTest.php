@@ -95,7 +95,7 @@ it('can validate create milestone inputs', function ($data, $errors) {
         'record' => $project->getKey(),
     ])
         ->callTableAction('create', data: $milestone->toArray())
-        ->assertHasTableActionErrors();
+        ->assertHasTableActionErrors([$errors]);
 
     assertDatabaseMissing(
         ProjectMilestone::class,
