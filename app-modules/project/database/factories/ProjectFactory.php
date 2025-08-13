@@ -55,7 +55,7 @@ class ProjectFactory extends Factory
             'name' => str($this->faker->unique()->words(3, true))->title()->toString(),
             'description' => $this->faker->sentence(),
             'created_by_type' => app(User::class)->getMorphClass(),
-            'created_by_id' => User::factory()->create()->getKey(),
+            'created_by_id' => User::factory(),
         ];
     }
 }
