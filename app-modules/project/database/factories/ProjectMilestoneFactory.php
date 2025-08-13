@@ -58,7 +58,7 @@ class ProjectMilestoneFactory extends Factory
             'project_id' => Project::factory(),
             'title' => str($this->faker->words(asText: true))->headline()->toString(),
             'description' => $this->faker->sentence(3),
-            'status_id' => ProjectMilestoneStatus::inRandomOrder()->first(),
+            'status_id' => ProjectMilestoneStatus::factory(),
             'created_by_id' => User::factory(),
         ];
     }
