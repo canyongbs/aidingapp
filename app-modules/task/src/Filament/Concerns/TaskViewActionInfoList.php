@@ -48,6 +48,9 @@ use Filament\Infolists\Components\TextEntry;
 
 trait TaskViewActionInfoList
 {
+    /**
+     * @return array<\Filament\Infolists\Components\Component>
+     */
     public function taskInfoList(): array
     {
         return [
