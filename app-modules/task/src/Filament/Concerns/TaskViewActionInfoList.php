@@ -41,6 +41,7 @@ use AidingApp\Task\Enums\TaskStatus;
 use AidingApp\Task\Models\Task;
 use App\Features\ConfidentialTaskFeature;
 use App\Filament\Resources\UserResource;
+use Filament\Infolists\Components\Component;
 use Filament\Infolists\Components\Fieldset;
 use Filament\Infolists\Components\Grid;
 use Filament\Infolists\Components\Split;
@@ -49,7 +50,7 @@ use Filament\Infolists\Components\TextEntry;
 trait TaskViewActionInfoList
 {
     /**
-     * @return array<\Filament\Infolists\Components\Component>
+     * @return array<Component>
      */
     public function taskInfoList(): array
     {
