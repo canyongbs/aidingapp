@@ -49,7 +49,6 @@ use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseCategorySeeder;
 use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseItemSeeder;
 use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseQualitySeeder;
 use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseStatusSeeder;
-use AidingApp\Project\Database\Seeders\ProjectMilestoneStatusSeeder;
 use AidingApp\ServiceManagement\Database\Seeders\ChangeRequestStatusSeeder;
 use AidingApp\ServiceManagement\Database\Seeders\ChangeRequestTypeSeeder;
 use AidingApp\ServiceManagement\Database\Seeders\ServiceRequestSeeder;
@@ -102,8 +101,6 @@ class DatabaseSeeder extends Seeder
             ContactSeeder::class,
             OrganizationTypeSeeder::class,
             OrganizationIndustrySeeder::class,
-
-            ProjectMilestoneStatusSeeder::class,
         ]);
     }
 }
