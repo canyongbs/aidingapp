@@ -65,7 +65,7 @@ class ProjectMilestoneStatus extends Model implements Auditable
     /**
      * @return HasMany<ProjectMilestone, $this>
      */
-    public function projectMilestones(): HasMany
+    public function milestones(): HasMany
     {
         return $this->hasMany(ProjectMilestone::class, 'status_id');
     }

@@ -66,7 +66,7 @@ class ListProjectMilestoneStatuses extends ListRecords
                     ->searchable(),
                 TextColumn::make('project_milestones_count')
                     ->label('Usage Count')
-                    ->counts('projectMilestones')
+                    ->counts('milestones')
                     ->sortable(),
             ])
             ->actions([
@@ -80,7 +80,7 @@ class ListProjectMilestoneStatuses extends ListRecords
                         ->action(function (Collection $records): void {
                             $deletedCount = ProjectMilestoneStatus::query()
                                 ->whereKey($records)
-                                ->whereDoesntHave('projectMilestones')
+                                ->whereDoesntHave('milestones')
                                 ->delete();
 
                             Notification::make()

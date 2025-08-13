@@ -76,7 +76,7 @@ class ProjectMilestoneStatusPolicy
 
     public function delete(Authenticatable $authenticatable, ProjectMilestoneStatus $projectMilestoneStatus): Response
     {
-        if ($projectMilestoneStatus->projectMilestones()->exists()) {
+        if ($projectMilestoneStatus->milestones()->exists()) {
             return Response::deny('You cannot delete this project milestone status because it has associated project milestones.');
         }
 
@@ -96,7 +96,7 @@ class ProjectMilestoneStatusPolicy
 
     public function forceDelete(Authenticatable $authenticatable, ProjectMilestoneStatus $projectMilestoneStatus): Response
     {
-        if ($projectMilestoneStatus->projectMilestones()->exists()) {
+        if ($projectMilestoneStatus->milestones()->exists()) {
             return Response::deny('You cannot force delete this project milestone status because it has associated project milestones.');
         }
 
