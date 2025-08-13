@@ -2371,6 +2371,8 @@ namespace AidingApp\Project\Models{
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
+ * @property-read int|null $audits_count
  * @property-read \App\Models\User|null $createdBy
  * @property-read \AidingApp\Project\Models\Project $project
  * @property-read \AidingApp\Project\Models\ProjectMilestoneStatus $status
@@ -2404,6 +2406,8 @@ namespace AidingApp\Project\Models{
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
+ * @property-read int|null $audits_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Project\Models\ProjectMilestone> $milestones
  * @property-read int|null $milestones_count
  * @method static \AidingApp\Project\Database\Factories\ProjectMilestoneStatusFactory factory($count = null, $state = [])
