@@ -45,9 +45,9 @@ return new class () extends Migration {
             $table->uuid('id')->primary();
             $table->string('title')->unique();
             $table->string('description')->nullable();
-            $table->foreignUuid('project_id')->constrained('projects');
+            $table->foreignUuid('project_id')->constrained('projects')->cascadeOnDelete();
             $table->foreignUuid('status_id')->constrained('project_milestone_statuses');
-            $table->foreignUuid('created_by_id')->nullable()->constrained('users');
+            $table->foreignUuid('created_by_id')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
             $table->softDeletes();
         });
