@@ -41,6 +41,7 @@ use AidingApp\Project\Models\ProjectMilestone;
 use App\Features\ProjectMilestoneFeature;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Pages\ManageRelatedRecords;
@@ -77,13 +78,16 @@ class ManageMilestones extends ManageRelatedRecords
                 TextInput::make('title')
                     ->required()
                     ->maxLength(255),
-                TextInput::make('description')
+                Textarea::make('description')
                     ->required()
-                    ->maxLength(255),
+                    ->maxLength(65535),
                 Select::make('status_id')
+                    ->searchable()
+                    ->preload()
                     ->required()
                     ->relationship('status', 'name'),
-                Select::make('created_by')
+                Select::make('created_by_id')
+                    ->label('Created By')
                     ->relationship('createdBy', 'name'),
             ]);
     }
@@ -94,15 +98,16 @@ class ManageMilestones extends ManageRelatedRecords
             ->recordTitleAttribute('description')
             ->columns([
                 IdColumn::make(),
+                TextColumn::make('title'),
                 TextColumn::make('description'),
+                TextColumn::make('status.name')
+                    ->label('Status'),
                 TextColumn::make('created_at')
-                    ->label('Date Created')
-                    ->dateTime()
-                    ->sortable(query: fn ($query, $direction) => $query->orderBy('project_files.created_at', $direction)),
+                    ->label('Created')
+                    ->dateTime(),
                 TextColumn::make('createdBy.name')
                     ->default('N/A')
-                    ->label('Created By')
-                    ->sortable(query: fn ($query, $direction) => $query->orderBy('project_files.created_by_id', $direction)),
+                    ->label('Created By'),
             ])
             ->headerActions([
                 CreateAction::make()

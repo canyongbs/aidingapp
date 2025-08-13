@@ -37,7 +37,9 @@
 namespace AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource\Pages;
 
 use AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource;
+use AidingApp\Project\Models\ProjectMilestoneStatus;
 use Filament\Actions\CreateAction;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteAction;
@@ -46,6 +48,7 @@ use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\Collection;
 
 class ListProjectMilestoneStatuses extends ListRecords
 {
@@ -59,7 +62,12 @@ class ListProjectMilestoneStatuses extends ListRecords
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('description')
+                    ->limit(50)
                     ->searchable(),
+                TextColumn::make('project_milestones_count')
+                    ->label('Usage Count')
+                    ->counts('projectMilestones')
+                    ->sortable(),
             ])
             ->actions([
                 EditAction::make(),
@@ -68,7 +76,24 @@ class ListProjectMilestoneStatuses extends ListRecords
             ])
             ->bulkActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->action(function (Collection $records): void {
+                            $deletedCount = ProjectMilestoneStatus::query()
+                                ->whereKey($records)
+                                ->whereDoesntHave('projectMilestones')
+                                ->delete();
+
+                            Notification::make()
+                                ->title('Deleted ' . $deletedCount . ' statuses')
+                                ->body(
+                                    $deletedCount < $records->count()
+                                            ? ($records->count() - $deletedCount) . ' statuses were not deleted because they have associated project milestones.'
+                                            : null
+                                )
+                                ->success()
+                                ->send();
+                        })
+                        ->fetchSelectedRecords(false),
                 ]),
             ]);
     }

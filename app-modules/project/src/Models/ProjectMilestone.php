@@ -56,7 +56,7 @@ class ProjectMilestone extends Model
         'title',
         'description',
         'status_id',
-        'created_by',
+        'created_by_id',
     ];
 
     /**
@@ -64,7 +64,7 @@ class ProjectMilestone extends Model
      */
     public function createdBy(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'created_by');
+        return $this->belongsTo(User::class, 'created_by_id');
     }
 
     /**

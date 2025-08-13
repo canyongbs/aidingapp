@@ -39,6 +39,8 @@ namespace AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource\Pa
 use AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource;
 use App\Concerns\EditPageRedirection;
 use Filament\Actions\DeleteAction;
+use Filament\Actions\ViewAction;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Pages\EditRecord;
@@ -54,9 +56,13 @@ class EditProjectMilestoneStatus extends EditRecord
         return $form
             ->schema([
                 TextInput::make('name')
+                    ->label('Name')
+                    ->maxLength(255)
                     ->autofocus()
                     ->required(),
-                TextInput::make('description')
+                Textarea::make('description')
+                    ->label('Description')
+                    ->maxLength(65535)
                     ->required(),
             ]);
     }
@@ -64,6 +70,7 @@ class EditProjectMilestoneStatus extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            ViewAction::make(),
             DeleteAction::make(),
         ];
     }

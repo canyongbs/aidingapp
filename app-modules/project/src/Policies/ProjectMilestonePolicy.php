@@ -55,7 +55,7 @@ class ProjectMilestonePolicy
     public function view(Authenticatable $authenticatable, ProjectMilestone $projectMilestone): Response
     {
         if ($authenticatable->cannot('view', $projectMilestone->project)) {
-            return Response::deny('You do not have permission to view milestone.');
+            return Response::deny('You do not have permission to view this milestone.');
         }
 
         return Response::allow();
@@ -64,7 +64,7 @@ class ProjectMilestonePolicy
     public function create(Authenticatable $authenticatable, Project $project): Response
     {
         if ($authenticatable->cannot('update', $project)) {
-            return Response::deny('You do not have permission to create milestone.');
+            return Response::deny('You do not have permission to create milestones.');
         }
 
         return Response::allow();

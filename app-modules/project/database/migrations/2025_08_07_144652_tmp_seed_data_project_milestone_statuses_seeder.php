@@ -46,6 +46,4 @@ return new class () extends Migration {
             '--force' => true,
         ]);
     }
-
-    public function down(): void {}
 };

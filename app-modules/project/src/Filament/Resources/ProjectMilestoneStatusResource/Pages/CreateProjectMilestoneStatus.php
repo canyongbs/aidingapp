@@ -37,6 +37,7 @@
 namespace AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource\Pages;
 
 use AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Pages\CreateRecord;
@@ -50,9 +51,13 @@ class CreateProjectMilestoneStatus extends CreateRecord
         return $form
             ->schema([
                 TextInput::make('name')
+                    ->label('Name')
+                    ->maxLength(255)
                     ->autofocus()
                     ->required(),
-                TextInput::make('description')
+                Textarea::make('description')
+                    ->label('Description')
+                    ->maxLength(65535)
                     ->required(),
             ]);
     }
