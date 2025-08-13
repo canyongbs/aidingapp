@@ -37,13 +37,19 @@
 namespace AidingApp\Project\Models;
 
 use AidingApp\Project\Database\Factories\ProjectMilestoneFactory;
+use AidingApp\Project\Observers\ProjectMilestoneObserver;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @mixin IdeHelperProjectMilestone
+ */
+#[ObservedBy(ProjectMilestoneObserver::class)]
 class ProjectMilestone extends Model
 {
     /** @use HasFactory<ProjectMilestoneFactory> */
@@ -56,7 +62,6 @@ class ProjectMilestone extends Model
         'title',
         'description',
         'status_id',
-        'created_by_id',
     ];
 
     /**

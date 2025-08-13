@@ -86,9 +86,6 @@ class ManageMilestones extends ManageRelatedRecords
                     ->preload()
                     ->required()
                     ->relationship('status', 'name'),
-                Select::make('created_by_id')
-                    ->label('Created By')
-                    ->relationship('createdBy', 'name'),
             ]);
     }
 
