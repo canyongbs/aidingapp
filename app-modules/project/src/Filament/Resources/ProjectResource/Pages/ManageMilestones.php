@@ -92,7 +92,7 @@ class ManageMilestones extends ManageRelatedRecords
     public function table(Table $table): Table
     {
         return $table
-            ->recordTitleAttribute('description')
+            ->recordTitleAttribute('title')
             ->columns([
                 IdColumn::make(),
                 TextColumn::make('title'),
