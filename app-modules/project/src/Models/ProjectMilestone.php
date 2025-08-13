@@ -36,6 +36,7 @@
 
 namespace AidingApp\Project\Models;
 
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Project\Database\Factories\ProjectMilestoneFactory;
 use AidingApp\Project\Observers\ProjectMilestoneObserver;
 use App\Models\User;
@@ -45,18 +46,20 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * @mixin IdeHelperProjectMilestone
  */
 #[ObservedBy(ProjectMilestoneObserver::class)]
-class ProjectMilestone extends Model
+class ProjectMilestone extends Model implements Auditable
 {
     /** @use HasFactory<ProjectMilestoneFactory> */
     use HasFactory;
 
     use HasUuids;
     use SoftDeletes;
+    use AuditableTrait;
 
     protected $fillable = [
         'title',
