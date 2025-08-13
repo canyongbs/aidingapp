@@ -54,7 +54,9 @@ class CreateProjectMilestoneStatus extends CreateRecord
                     ->label('Name')
                     ->maxLength(255)
                     ->autofocus()
-                    ->required(),
+                    ->required()
+                    ->string()
+                    ->unique(),
                 Textarea::make('description')
                     ->label('Description')
                     ->maxLength(65535)

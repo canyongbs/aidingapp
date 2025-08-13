@@ -59,7 +59,9 @@ class EditProjectMilestoneStatus extends EditRecord
                     ->label('Name')
                     ->maxLength(255)
                     ->autofocus()
-                    ->required(),
+                    ->required()
+                    ->string()
+                    ->unique(ignoreRecord: true),
                 Textarea::make('description')
                     ->label('Description')
                     ->maxLength(65535)
