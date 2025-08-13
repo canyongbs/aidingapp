@@ -138,12 +138,14 @@ it('can edit milestones', function () {
         'project_id' => $project->id,
         'description' => 'Test project milestone',
         'status_id' => $plannedStatus->id,
+        'created_by_id' => auth()->id(),
     ])->create();
 
     $request = ProjectMilestone::factory()->make([
         'project_id' => $project->id,
         'description' => 'Changed Test project milestone',
         'status_id' => $delayedStatus->id,
+        'created_by_id' => auth()->id(),
     ]);
 
     livewire(ManageMilestones::class, [
