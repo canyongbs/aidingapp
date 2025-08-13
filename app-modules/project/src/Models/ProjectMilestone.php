@@ -36,31 +36,58 @@
 
 namespace AidingApp\Project\Models;
 
-use AidingApp\Team\Models\Team;
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Project\Database\Factories\ProjectMilestoneFactory;
+use AidingApp\Project\Observers\ProjectMilestoneObserver;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\Pivot;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use OwenIt\Auditing\Contracts\Auditable;
 
 /**
- * @mixin IdeHelperProjectManagerTeam
+ * @mixin IdeHelperProjectMilestone
  */
-class ProjectManagerTeam extends Pivot
+#[ObservedBy(ProjectMilestoneObserver::class)]
+class ProjectMilestone extends Model implements Auditable
 {
+    /** @use HasFactory<ProjectMilestoneFactory> */
+    use HasFactory;
+
     use HasUuids;
+    use SoftDeletes;
+    use AuditableTrait;
+
+    protected $fillable = [
+        'title',
+        'description',
+        'status_id',
+    ];
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function createdBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by_id');
+    }
+
+    /**
+     * @return BelongsTo<ProjectMilestoneStatus, $this>
+     */
+    public function status(): BelongsTo
+    {
+        return $this->belongsTo(ProjectMilestoneStatus::class, 'status_id');
+    }
 
     /**
      * @return BelongsTo<Project, $this>
      */
     public function project(): BelongsTo
     {
-        return $this->belongsTo(Project::class, 'project_id', 'id', 'project');
-    }
-
-    /**
-     * @return BelongsTo<Team, $this>
-     */
-    public function team(): BelongsTo
-    {
-        return $this->belongsTo(Team::class, 'team_id', 'id', 'team');
+        return $this->belongsTo(Project::class);
     }
 }

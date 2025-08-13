@@ -34,33 +34,41 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Models;
+namespace AidingApp\Project\Filament\Resources;
 
-use AidingApp\Team\Models\Team;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\Pivot;
+use AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource\Pages\CreateProjectMilestoneStatus;
+use AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource\Pages\EditProjectMilestoneStatus;
+use AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource\Pages\ListProjectMilestoneStatuses;
+use AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource\Pages\ViewProjectMilestoneStatus;
+use AidingApp\Project\Models\ProjectMilestoneStatus;
+use App\Features\ProjectMilestoneFeature;
+use App\Filament\Clusters\ProjectManagement;
+use Filament\Resources\Resource;
 
-/**
- * @mixin IdeHelperProjectManagerTeam
- */
-class ProjectManagerTeam extends Pivot
+class ProjectMilestoneStatusResource extends Resource
 {
-    use HasUuids;
+    protected static ?string $model = ProjectMilestoneStatus::class;
 
-    /**
-     * @return BelongsTo<Project, $this>
-     */
-    public function project(): BelongsTo
+    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+
+    protected static ?string $navigationLabel = 'Statuses';
+
+    protected static ?string $cluster = ProjectManagement::class;
+
+    protected static ?int $navigationSort = 20;
+
+    public static function canAccess(): bool
     {
-        return $this->belongsTo(Project::class, 'project_id', 'id', 'project');
+        return ProjectMilestoneFeature::active() && parent::canAccess();
     }
 
-    /**
-     * @return BelongsTo<Team, $this>
-     */
-    public function team(): BelongsTo
+    public static function getPages(): array
     {
-        return $this->belongsTo(Team::class, 'team_id', 'id', 'team');
+        return [
+            'index' => ListProjectMilestoneStatuses::route('/'),
+            'create' => CreateProjectMilestoneStatus::route('/create'),
+            'edit' => EditProjectMilestoneStatus::route('/{record}/edit'),
+            'view' => ViewProjectMilestoneStatus::route('/{record}'),
+        ];
     }
 }

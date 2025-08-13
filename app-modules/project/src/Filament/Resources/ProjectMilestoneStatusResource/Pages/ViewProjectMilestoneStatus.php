@@ -34,33 +34,37 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Models;
+namespace AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource\Pages;
 
-use AidingApp\Team\Models\Team;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\Pivot;
+use AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource;
+use Filament\Actions\EditAction;
+use Filament\Infolists\Components\Section;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Infolist;
+use Filament\Resources\Pages\ViewRecord;
 
-/**
- * @mixin IdeHelperProjectManagerTeam
- */
-class ProjectManagerTeam extends Pivot
+class ViewProjectMilestoneStatus extends ViewRecord
 {
-    use HasUuids;
+    protected static string $resource = ProjectMilestoneStatusResource::class;
 
-    /**
-     * @return BelongsTo<Project, $this>
-     */
-    public function project(): BelongsTo
+    public function infolist(Infolist $infolist): Infolist
     {
-        return $this->belongsTo(Project::class, 'project_id', 'id', 'project');
+        return $infolist
+            ->schema([
+                Section::make()
+                    ->schema([
+                        TextEntry::make('name')
+                            ->label('Name'),
+                        TextEntry::make('description')
+                            ->label('Description'),
+                    ]),
+            ]);
     }
 
-    /**
-     * @return BelongsTo<Team, $this>
-     */
-    public function team(): BelongsTo
+    protected function getHeaderActions(): array
     {
-        return $this->belongsTo(Team::class, 'team_id', 'id', 'team');
+        return [
+            EditAction::make(),
+        ];
     }
 }

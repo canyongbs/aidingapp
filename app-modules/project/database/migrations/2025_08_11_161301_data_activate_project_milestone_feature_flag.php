@@ -34,33 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Models;
+use App\Features\ProjectMilestoneFeature;
+use Illuminate\Database\Migrations\Migration;
 
-use AidingApp\Team\Models\Team;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\Pivot;
-
-/**
- * @mixin IdeHelperProjectManagerTeam
- */
-class ProjectManagerTeam extends Pivot
-{
-    use HasUuids;
-
-    /**
-     * @return BelongsTo<Project, $this>
-     */
-    public function project(): BelongsTo
+return new class () extends Migration {
+    public function up(): void
     {
-        return $this->belongsTo(Project::class, 'project_id', 'id', 'project');
+        ProjectMilestoneFeature::activate();
     }
 
-    /**
-     * @return BelongsTo<Team, $this>
-     */
-    public function team(): BelongsTo
+    public function down(): void
     {
-        return $this->belongsTo(Team::class, 'team_id', 'id', 'team');
+        ProjectMilestoneFeature::deactivate();
     }
-}
+};

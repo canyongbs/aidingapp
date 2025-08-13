@@ -36,31 +36,37 @@
 
 namespace AidingApp\Project\Models;
 
-use AidingApp\Team\Models\Team;
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Project\Database\Factories\ProjectMilestoneStatusFactory;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\Pivot;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use OwenIt\Auditing\Contracts\Auditable;
 
 /**
- * @mixin IdeHelperProjectManagerTeam
+ * @mixin IdeHelperProjectMilestoneStatus
  */
-class ProjectManagerTeam extends Pivot
+class ProjectMilestoneStatus extends Model implements Auditable
 {
+    /** @use HasFactory<ProjectMilestoneStatusFactory> */
+    use HasFactory;
+
     use HasUuids;
+    use SoftDeletes;
+    use AuditableTrait;
+
+    protected $fillable = [
+        'name',
+        'description',
+    ];
 
     /**
-     * @return BelongsTo<Project, $this>
+     * @return HasMany<ProjectMilestone, $this>
      */
-    public function project(): BelongsTo
+    public function milestones(): HasMany
     {
-        return $this->belongsTo(Project::class, 'project_id', 'id', 'project');
-    }
-
-    /**
-     * @return BelongsTo<Team, $this>
-     */
-    public function team(): BelongsTo
-    {
-        return $this->belongsTo(Team::class, 'team_id', 'id', 'team');
+        return $this->hasMany(ProjectMilestone::class, 'status_id');
     }
 }

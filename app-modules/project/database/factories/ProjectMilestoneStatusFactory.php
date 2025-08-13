@@ -34,33 +34,26 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Models;
+namespace AidingApp\Project\Database\Factories;
 
-use AidingApp\Team\Models\Team;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\Pivot;
+use AidingApp\Project\Models\ProjectMilestoneStatus;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @mixin IdeHelperProjectManagerTeam
+ * @extends Factory<ProjectMilestoneStatus>
  */
-class ProjectManagerTeam extends Pivot
+class ProjectMilestoneStatusFactory extends Factory
 {
-    use HasUuids;
-
     /**
-     * @return BelongsTo<Project, $this>
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
      */
-    public function project(): BelongsTo
+    public function definition(): array
     {
-        return $this->belongsTo(Project::class, 'project_id', 'id', 'project');
-    }
-
-    /**
-     * @return BelongsTo<Team, $this>
-     */
-    public function team(): BelongsTo
-    {
-        return $this->belongsTo(Team::class, 'team_id', 'id', 'team');
+        return [
+            'name' => $this->faker->unique()->word(),
+            'description' => $this->faker->sentence(),
+        ];
     }
 }

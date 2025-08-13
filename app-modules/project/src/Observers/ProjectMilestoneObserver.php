@@ -34,33 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Models;
+namespace AidingApp\Project\Observers;
 
-use AidingApp\Team\Models\Team;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\Pivot;
+use AidingApp\Project\Models\ProjectMilestone;
 
-/**
- * @mixin IdeHelperProjectManagerTeam
- */
-class ProjectManagerTeam extends Pivot
+class ProjectMilestoneObserver
 {
-    use HasUuids;
-
-    /**
-     * @return BelongsTo<Project, $this>
-     */
-    public function project(): BelongsTo
+    public function creating(ProjectMilestone $projectMilestone): void
     {
-        return $this->belongsTo(Project::class, 'project_id', 'id', 'project');
-    }
-
-    /**
-     * @return BelongsTo<Team, $this>
-     */
-    public function team(): BelongsTo
-    {
-        return $this->belongsTo(Team::class, 'team_id', 'id', 'team');
+        if (blank($projectMilestone->created_by_id)) {
+            $projectMilestone->created_by_id = auth()->id();
+        }
     }
 }

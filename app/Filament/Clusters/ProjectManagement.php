@@ -34,33 +34,15 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Models;
+namespace App\Filament\Clusters;
 
-use AidingApp\Team\Models\Team;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\Pivot;
+use Filament\Clusters\Cluster;
 
-/**
- * @mixin IdeHelperProjectManagerTeam
- */
-class ProjectManagerTeam extends Pivot
+class ProjectManagement extends Cluster
 {
-    use HasUuids;
+    protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
-    /**
-     * @return BelongsTo<Project, $this>
-     */
-    public function project(): BelongsTo
-    {
-        return $this->belongsTo(Project::class, 'project_id', 'id', 'project');
-    }
+    protected static ?string $navigationGroup = 'Settings';
 
-    /**
-     * @return BelongsTo<Team, $this>
-     */
-    public function team(): BelongsTo
-    {
-        return $this->belongsTo(Team::class, 'team_id', 'id', 'team');
-    }
+    protected static ?int $navigationSort = 100;
 }

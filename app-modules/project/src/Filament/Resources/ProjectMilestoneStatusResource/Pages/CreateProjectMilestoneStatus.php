@@ -34,33 +34,33 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Models;
+namespace AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource\Pages;
 
-use AidingApp\Team\Models\Team;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\Pivot;
+use AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
+use Filament\Resources\Pages\CreateRecord;
 
-/**
- * @mixin IdeHelperProjectManagerTeam
- */
-class ProjectManagerTeam extends Pivot
+class CreateProjectMilestoneStatus extends CreateRecord
 {
-    use HasUuids;
+    protected static string $resource = ProjectMilestoneStatusResource::class;
 
-    /**
-     * @return BelongsTo<Project, $this>
-     */
-    public function project(): BelongsTo
+    public function form(Form $form): Form
     {
-        return $this->belongsTo(Project::class, 'project_id', 'id', 'project');
-    }
-
-    /**
-     * @return BelongsTo<Team, $this>
-     */
-    public function team(): BelongsTo
-    {
-        return $this->belongsTo(Team::class, 'team_id', 'id', 'team');
+        return $form
+            ->schema([
+                TextInput::make('name')
+                    ->label('Name')
+                    ->maxLength(255)
+                    ->autofocus()
+                    ->required()
+                    ->string()
+                    ->unique(),
+                Textarea::make('description')
+                    ->label('Description')
+                    ->maxLength(65535)
+                    ->required(),
+            ]);
     }
 }

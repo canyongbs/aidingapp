@@ -34,33 +34,27 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Models;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\Team\Models\Team;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\Pivot;
-
-/**
- * @mixin IdeHelperProjectManagerTeam
- */
-class ProjectManagerTeam extends Pivot
-{
-    use HasUuids;
-
-    /**
-     * @return BelongsTo<Project, $this>
-     */
-    public function project(): BelongsTo
+return new class () extends Migration {
+    public function up(): void
     {
-        return $this->belongsTo(Project::class, 'project_id', 'id', 'project');
+        Schema::create('project_milestones', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->string('title')->unique();
+            $table->string('description')->nullable();
+            $table->foreignUuid('project_id')->constrained('projects')->cascadeOnDelete();
+            $table->foreignUuid('status_id')->constrained('project_milestone_statuses');
+            $table->foreignUuid('created_by_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->timestamps();
+            $table->softDeletes();
+        });
     }
 
-    /**
-     * @return BelongsTo<Team, $this>
-     */
-    public function team(): BelongsTo
+    public function down(): void
     {
-        return $this->belongsTo(Team::class, 'team_id', 'id', 'team');
+        Schema::dropIfExists('project_milestones');
     }
-}
+};

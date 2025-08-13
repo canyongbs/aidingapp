@@ -34,33 +34,46 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Models;
+namespace AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource\Pages;
 
-use AidingApp\Team\Models\Team;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\Pivot;
+use AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource;
+use App\Concerns\EditPageRedirection;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\ViewAction;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
+use Filament\Resources\Pages\EditRecord;
 
-/**
- * @mixin IdeHelperProjectManagerTeam
- */
-class ProjectManagerTeam extends Pivot
+class EditProjectMilestoneStatus extends EditRecord
 {
-    use HasUuids;
+    use EditPageRedirection;
 
-    /**
-     * @return BelongsTo<Project, $this>
-     */
-    public function project(): BelongsTo
+    protected static string $resource = ProjectMilestoneStatusResource::class;
+
+    public function form(Form $form): Form
     {
-        return $this->belongsTo(Project::class, 'project_id', 'id', 'project');
+        return $form
+            ->schema([
+                TextInput::make('name')
+                    ->label('Name')
+                    ->maxLength(255)
+                    ->autofocus()
+                    ->required()
+                    ->string()
+                    ->unique(ignoreRecord: true),
+                Textarea::make('description')
+                    ->label('Description')
+                    ->maxLength(65535)
+                    ->required(),
+            ]);
     }
 
-    /**
-     * @return BelongsTo<Team, $this>
-     */
-    public function team(): BelongsTo
+    protected function getHeaderActions(): array
     {
-        return $this->belongsTo(Team::class, 'team_id', 'id', 'team');
+        return [
+            ViewAction::make(),
+            DeleteAction::make(),
+        ];
     }
 }

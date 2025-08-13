@@ -34,33 +34,32 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Models;
+namespace AidingApp\Project\Database\Factories;
 
-use AidingApp\Team\Models\Team;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\Pivot;
+use AidingApp\Project\Models\Project;
+use AidingApp\Project\Models\ProjectMilestone;
+use AidingApp\Project\Models\ProjectMilestoneStatus;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @mixin IdeHelperProjectManagerTeam
+ * @extends Factory<ProjectMilestone>
  */
-class ProjectManagerTeam extends Pivot
+class ProjectMilestoneFactory extends Factory
 {
-    use HasUuids;
-
     /**
-     * @return BelongsTo<Project, $this>
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
      */
-    public function project(): BelongsTo
+    public function definition(): array
     {
-        return $this->belongsTo(Project::class, 'project_id', 'id', 'project');
-    }
-
-    /**
-     * @return BelongsTo<Team, $this>
-     */
-    public function team(): BelongsTo
-    {
-        return $this->belongsTo(Team::class, 'team_id', 'id', 'team');
+        return [
+            'project_id' => Project::factory(),
+            'title' => str($this->faker->words(asText: true))->headline()->toString(),
+            'description' => $this->faker->sentence(3),
+            'status_id' => ProjectMilestoneStatus::factory(),
+            'created_by_id' => User::factory(),
+        ];
     }
 }
