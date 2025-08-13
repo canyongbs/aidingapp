@@ -105,7 +105,7 @@ it('can validate create milestone inputs', function ($data, $errors) {
     '`title` is required' => [['title' => null], 'title', 'The title field is required.'],
     '`title` is max 255 characters' => [['title' => str_repeat('a', 256)], 'title', 'The title may not be greater than 255 characters.'],
     '`description` is required' => [['description' => null], 'description', 'The description field is required.'],
-    '`description` is max 255 characters' => [['description' => str_repeat('a', 256)], 'description', 'The description may not be greater than 255 characters.'],
+    '`description` is max 65535 characters' => [['description' => str_repeat('a', 65536)], 'description', 'The description may not be greater than 65535 characters.'],
     '`status_id` is required' => [['status_id' => null], 'status_id', 'The status field is required.'],
 ]);
 
