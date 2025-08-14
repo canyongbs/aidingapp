@@ -36,37 +36,38 @@
 
 namespace AidingApp\Project\Filament\Resources\ProjectResource\Pages;
 
-use AidingApp\Contact\Filament\Resources\ContactResource;
-use AidingApp\Project\Filament\Resources\ProjectResource;
-use AidingApp\Task\Enums\TaskStatus;
-use AidingApp\Task\Filament\Concerns\TaskEditForm;
-use AidingApp\Task\Filament\Concerns\TaskForm;
-use AidingApp\Task\Filament\Concerns\TaskViewActionInfoList;
-use AidingApp\Task\Filament\Resources\TaskResource\Components\TaskViewAction;
-use AidingApp\Task\Models\Task;
-use App\Features\ConfidentialTaskFeature;
-use App\Filament\Resources\UserResource;
-use App\Filament\Tables\Columns\IdColumn;
-use App\Models\Scopes\EducatableSearch;
 use App\Models\User;
-use Filament\Forms\Components\Checkbox;
-use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\Fieldset;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
-use Filament\Resources\Pages\ManageRelatedRecords;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\CreateAction;
-use Filament\Tables\Actions\DeleteBulkAction;
+use Filament\Tables\Table;
+use AidingApp\Task\Models\Task;
+use Filament\Tables\Filters\Filter;
+use AidingApp\Task\Enums\TaskStatus;
+use AidingApp\Contact\Models\Contact;
+use Filament\Forms\Components\Select;
+use App\Models\Scopes\EducatableSearch;
+use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\Fieldset;
+use Filament\Forms\Components\Textarea;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\Filter;
+use App\Filament\Resources\UserResource;
+use Filament\Forms\Components\TextInput;
+use App\Features\ConfidentialTaskFeature;
+use App\Filament\Tables\Columns\IdColumn;
+use Filament\Tables\Actions\CreateAction;
 use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Tables\Actions\DeleteBulkAction;
+use AidingApp\Task\Filament\Concerns\TaskForm;
+use AidingApp\Task\Filament\Concerns\TaskEditForm;
+use Filament\Resources\Pages\ManageRelatedRecords;
+use AidingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Project\Filament\Resources\ProjectResource;
+use AidingApp\Task\Filament\Concerns\TaskViewActionInfoList;
+use AidingApp\Task\Filament\Resources\TaskResource\Components\TaskViewAction;
 
 class ManageTasks extends ManageRelatedRecords
 {
@@ -109,9 +110,12 @@ class ManageTasks extends ManageRelatedRecords
                     }),
                 TextColumn::make('concern.display_name')
                     ->label('Related To')
-                    ->getStateUsing(fn (Task $record): string => $record->concern->{$record->concern::displayNameKey()})
+                    ->getStateUsing(fn (Task $record): ?string => $record->concern?->{$record->concern::displayNameKey()})
                     ->searchable(query: fn (Builder $query, $search) => $query->tap(new EducatableSearch(relationship: 'concern', search: $search)))
-                    ->url(fn (Task $record) => ContactResource::getUrl('view', ['record' => $record->concern])),
+                    ->url(fn (Task $record) => match ($record->concern ? $record->concern::class : null) {
+                        Contact::class => ContactResource::getUrl('view', ['record' => $record->concern]),
+                        default => null,
+                    }),
             ])->filters([
                 Filter::make('my_tasks')
                     ->label('My Tasks')
