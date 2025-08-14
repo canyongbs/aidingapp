@@ -43,7 +43,6 @@ use Filament\Infolists\Components\Grid;
 use App\Filament\Resources\UserResource;
 use Filament\Infolists\Components\Split;
 use App\Features\ConfidentialTaskFeature;
-use App\Filament\Resources\UserResource;
 use Filament\Infolists\Components\Component;
 use Filament\Infolists\Components\Fieldset;
 use Filament\Infolists\Components\TextEntry;
