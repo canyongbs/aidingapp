@@ -43,6 +43,7 @@ use Filament\Infolists\Components\Grid;
 use App\Filament\Resources\UserResource;
 use Filament\Infolists\Components\Split;
 use App\Features\ConfidentialTaskFeature;
+use Filament\Infolists\Components\Component;
 use Filament\Infolists\Components\Fieldset;
 use Filament\Infolists\Components\TextEntry;
 use AidingApp\Contact\Filament\Resources\ContactResource;
@@ -50,7 +51,7 @@ use AidingApp\Contact\Filament\Resources\ContactResource;
 trait TaskViewActionInfoList
 {
     /**
-     * @return array<\Filament\Infolists\Components\Component>
+     * @return array<Component>
      */
     public function taskInfoList(): array
     {
