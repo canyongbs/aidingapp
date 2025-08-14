@@ -36,11 +36,8 @@
 
 namespace AidingApp\Project\Filament\Resources\ProjectResource\Pages;
 
-use Filament\Forms\Get;
-use Filament\Forms\Set;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
-use Filament\Tables\Filters\Filter;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Task\Enums\TaskStatus;
 use AidingApp\Task\Models\Task;
@@ -48,11 +45,8 @@ use App\Features\ConfidentialTaskFeature;
 use App\Filament\Resources\UserResource;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Scopes\EducatableSearch;
-use App\Models\User;
 use Filament\Forms\Components\Checkbox;
-use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Fieldset;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Actions\CreateAction;
@@ -114,9 +108,12 @@ class ManageTasks extends ManageRelatedRecords
                     }),
                 TextColumn::make('concern.display_name')
                     ->label('Related To')
-                    ->getStateUsing(fn (Task $record): string => $record->concern->{$record->concern::displayNameKey()})
+                    ->getStateUsing(fn (Task $record): ?string => $record->concern?->{$record->concern::displayNameKey()})
                     ->searchable(query: fn (Builder $query, $search) => $query->tap(new EducatableSearch(relationship: 'concern', search: $search)))
-                    ->url(fn (Task $record) => ContactResource::getUrl('view', ['record' => $record->concern])),
+                    ->url(fn (Task $record) => match ($record->concern ? $record->concern::class : null) {
+                        Contact::class => ContactResource::getUrl('view', ['record' => $record->concern]),
+                        default => null,
+                    }),
             ])->filters([
                 Filter::make('my_tasks')
                     ->label('My Tasks')
