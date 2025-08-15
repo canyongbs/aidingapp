@@ -34,46 +34,57 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Authorization\Policies;
+namespace AidingApp\Project\Policies;
 
-use AidingApp\Authorization\Models\Permission;
+use AidingApp\Project\Models\Project;
+use AidingApp\Project\Models\ProjectMilestone;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
 
-class PermissionPolicy
+class ProjectMilestonePolicy
 {
-    public function viewAny(Authenticatable $authenticatable): Response
+    public function viewAny(Authenticatable $authenticatable, Project $project): Response
     {
+        if ($authenticatable->cannot('view', $project)) {
+            return Response::deny('You do not have permission to view milestones.');
+        }
+
         return Response::allow();
     }
 
-    public function view(Authenticatable $authenticatable, Permission $permission): Response
+    public function view(Authenticatable $authenticatable, ProjectMilestone $projectMilestone): Response
     {
+        if ($authenticatable->cannot('view', $projectMilestone->project)) {
+            return Response::deny('You do not have permission to view this milestone.');
+        }
+
         return Response::allow();
     }
 
-    public function create(Authenticatable $authenticatable): Response
+    public function create(Authenticatable $authenticatable, Project $project): Response
     {
-        return Response::deny('Permissions cannot be created.');
+        if ($authenticatable->cannot('update', $project)) {
+            return Response::deny('You do not have permission to create milestones.');
+        }
+
+        return Response::allow();
     }
 
-    public function update(Authenticatable $authenticatable, Permission $permission): Response
+    public function update(Authenticatable $authenticatable, ProjectMilestone $projectMilestone): Response
     {
-        return Response::deny('Permissions cannot be updated.');
+        if ($authenticatable->cannot('update', $projectMilestone->project)) {
+            return Response::deny('You do not have permission to update this milestone.');
+        }
+
+        return Response::allow();
     }
 
-    public function delete(Authenticatable $authenticatable, Permission $permission): Response
+    public function delete(Authenticatable $authenticatable, ProjectMilestone $projectMilestone): Response
     {
-        return Response::deny('Permissions cannot be deleted.');
-    }
+        if ($authenticatable->cannot('update', $projectMilestone->project)) {
+            return Response::deny('You do not have permission to delete this milestone.');
+        }
 
-    public function restore(Authenticatable $authenticatable, Permission $permission): Response
-    {
-        return Response::deny('Permissions cannot be restored.');
-    }
-
-    public function forceDelete(Authenticatable $authenticatable, Permission $permission): Response
-    {
-        return Response::deny('Permissions cannot be force deleted.');
+        return Response::allow();
     }
 }

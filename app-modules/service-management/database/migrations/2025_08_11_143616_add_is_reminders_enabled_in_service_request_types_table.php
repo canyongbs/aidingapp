@@ -34,29 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Authorization\Filament\Resources\PermissionResource\Pages;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\Authorization\Filament\Resources\PermissionResource;
-use Filament\Resources\Components\Tab;
-use Filament\Resources\Pages\ListRecords;
-use Illuminate\Database\Eloquent\Builder;
-
-class ListPermissions extends ListRecords
-{
-    protected static string $resource = PermissionResource::class;
-
-    public function getTabs(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            'web' => Tab::make('Web')
-                ->modifyQueryUsing(fn (Builder $query) => $query->web()),
-            'api' => Tab::make('Api')
-                ->modifyQueryUsing(fn (Builder $query) => $query->api()),
-        ];
+        Schema::table('service_request_types', function (Blueprint $table) {
+            $table->boolean('is_reminders_enabled')->default(false);
+        });
     }
 
-    protected function getHeaderActions(): array
+    public function down(): void
     {
-        return [];
+        Schema::table('service_request_types', function (Blueprint $table) {
+            $table->dropColumn('is_reminders_enabled');
+        });
     }
-}
+};

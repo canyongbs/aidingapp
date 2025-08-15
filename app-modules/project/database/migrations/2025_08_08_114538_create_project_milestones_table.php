@@ -34,38 +34,27 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Division\Filament\Resources;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\Division\Filament\Resources\DivisionResource\Pages\CreateDivision;
-use AidingApp\Division\Filament\Resources\DivisionResource\Pages\EditDivision;
-use AidingApp\Division\Filament\Resources\DivisionResource\Pages\ListDivisions;
-use AidingApp\Division\Filament\Resources\DivisionResource\Pages\ViewDivision;
-use AidingApp\Division\Filament\Resources\DivisionResource\RelationManagers\TeamsRelationManager;
-use AidingApp\Division\Models\Division;
-use Filament\Resources\Resource;
-
-class DivisionResource extends Resource
-{
-    protected static ?string $model = Division::class;
-
-    protected static ?string $navigationGroup = 'User Management';
-
-    protected static ?int $navigationSort = 50;
-
-    public static function getRelations(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            TeamsRelationManager::make(),
-        ];
+        Schema::create('project_milestones', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->string('title')->unique();
+            $table->string('description')->nullable();
+            $table->foreignUuid('project_id')->constrained('projects')->cascadeOnDelete();
+            $table->foreignUuid('status_id')->constrained('project_milestone_statuses');
+            $table->foreignUuid('created_by_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->timestamps();
+            $table->softDeletes();
+        });
     }
 
-    public static function getPages(): array
+    public function down(): void
     {
-        return [
-            'index' => ListDivisions::route('/'),
-            'create' => CreateDivision::route('/create'),
-            'view' => ViewDivision::route('/{record}'),
-            'edit' => EditDivision::route('/{record}/edit'),
-        ];
+        Schema::dropIfExists('project_milestones');
     }
-}
+};

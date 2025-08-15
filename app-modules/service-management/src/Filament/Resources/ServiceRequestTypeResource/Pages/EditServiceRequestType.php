@@ -40,6 +40,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Concerns\EditPageRedirection;
 use App\Enums\Feature;
+use App\Features\FeedbackReminderFeature;
 use App\Filament\Forms\Components\IconSelect;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
@@ -96,7 +97,12 @@ class EditServiceRequestType extends EditRecord
                                     ])
                                     ->accepted(fn (Get $get) => ! $get('has_enabled_csat') ? true : false)
                                     ->visible(fn (Get $get) => $get('has_enabled_feedback_collection')),
+                                Toggle::make('is_reminders_enabled')
+                                    ->label('Feedback Reminder')
+                                    ->helperText('An email reminder will be sent 2 days after the initial feedback survey is delivered if incomplete.')
+                                    ->visible(fn (Get $get) => FeedbackReminderFeature::active() && $get('has_enabled_feedback_collection') && ($get('has_enabled_csat') || $get('has_enabled_nps'))),
                             ])
+                            ->columnSpanFull()
                             ->visible(fn (Get $get): bool => Gate::check(Feature::FeedbackManagement->getGateName())),
                         Textarea::make('description')
                             ->string()

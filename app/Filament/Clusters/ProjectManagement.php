@@ -34,38 +34,15 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Division\Filament\Resources;
+namespace App\Filament\Clusters;
 
-use AidingApp\Division\Filament\Resources\DivisionResource\Pages\CreateDivision;
-use AidingApp\Division\Filament\Resources\DivisionResource\Pages\EditDivision;
-use AidingApp\Division\Filament\Resources\DivisionResource\Pages\ListDivisions;
-use AidingApp\Division\Filament\Resources\DivisionResource\Pages\ViewDivision;
-use AidingApp\Division\Filament\Resources\DivisionResource\RelationManagers\TeamsRelationManager;
-use AidingApp\Division\Models\Division;
-use Filament\Resources\Resource;
+use Filament\Clusters\Cluster;
 
-class DivisionResource extends Resource
+class ProjectManagement extends Cluster
 {
-    protected static ?string $model = Division::class;
+    protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
-    protected static ?string $navigationGroup = 'User Management';
+    protected static ?string $navigationGroup = 'Settings';
 
-    protected static ?int $navigationSort = 50;
-
-    public static function getRelations(): array
-    {
-        return [
-            TeamsRelationManager::make(),
-        ];
-    }
-
-    public static function getPages(): array
-    {
-        return [
-            'index' => ListDivisions::route('/'),
-            'create' => CreateDivision::route('/create'),
-            'view' => ViewDivision::route('/{record}'),
-            'edit' => EditDivision::route('/{record}/edit'),
-        ];
-    }
+    protected static ?int $navigationSort = 100;
 }

@@ -34,38 +34,41 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Division\Filament\Resources;
+namespace AidingApp\Project\Filament\Resources;
 
-use AidingApp\Division\Filament\Resources\DivisionResource\Pages\CreateDivision;
-use AidingApp\Division\Filament\Resources\DivisionResource\Pages\EditDivision;
-use AidingApp\Division\Filament\Resources\DivisionResource\Pages\ListDivisions;
-use AidingApp\Division\Filament\Resources\DivisionResource\Pages\ViewDivision;
-use AidingApp\Division\Filament\Resources\DivisionResource\RelationManagers\TeamsRelationManager;
-use AidingApp\Division\Models\Division;
+use AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource\Pages\CreateProjectMilestoneStatus;
+use AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource\Pages\EditProjectMilestoneStatus;
+use AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource\Pages\ListProjectMilestoneStatuses;
+use AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource\Pages\ViewProjectMilestoneStatus;
+use AidingApp\Project\Models\ProjectMilestoneStatus;
+use App\Features\ProjectMilestoneFeature;
+use App\Filament\Clusters\ProjectManagement;
 use Filament\Resources\Resource;
 
-class DivisionResource extends Resource
+class ProjectMilestoneStatusResource extends Resource
 {
-    protected static ?string $model = Division::class;
+    protected static ?string $model = ProjectMilestoneStatus::class;
 
-    protected static ?string $navigationGroup = 'User Management';
+    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static ?int $navigationSort = 50;
+    protected static ?string $navigationLabel = 'Statuses';
 
-    public static function getRelations(): array
+    protected static ?string $cluster = ProjectManagement::class;
+
+    protected static ?int $navigationSort = 20;
+
+    public static function canAccess(): bool
     {
-        return [
-            TeamsRelationManager::make(),
-        ];
+        return ProjectMilestoneFeature::active() && parent::canAccess();
     }
 
     public static function getPages(): array
     {
         return [
-            'index' => ListDivisions::route('/'),
-            'create' => CreateDivision::route('/create'),
-            'view' => ViewDivision::route('/{record}'),
-            'edit' => EditDivision::route('/{record}/edit'),
+            'index' => ListProjectMilestoneStatuses::route('/'),
+            'create' => CreateProjectMilestoneStatus::route('/create'),
+            'edit' => EditProjectMilestoneStatus::route('/{record}/edit'),
+            'view' => ViewProjectMilestoneStatus::route('/{record}'),
         ];
     }
 }

@@ -34,38 +34,60 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Division\Filament\Resources;
+namespace AidingApp\Project\Models;
 
-use AidingApp\Division\Filament\Resources\DivisionResource\Pages\CreateDivision;
-use AidingApp\Division\Filament\Resources\DivisionResource\Pages\EditDivision;
-use AidingApp\Division\Filament\Resources\DivisionResource\Pages\ListDivisions;
-use AidingApp\Division\Filament\Resources\DivisionResource\Pages\ViewDivision;
-use AidingApp\Division\Filament\Resources\DivisionResource\RelationManagers\TeamsRelationManager;
-use AidingApp\Division\Models\Division;
-use Filament\Resources\Resource;
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Project\Database\Factories\ProjectMilestoneFactory;
+use AidingApp\Project\Observers\ProjectMilestoneObserver;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class DivisionResource extends Resource
+/**
+ * @mixin IdeHelperProjectMilestone
+ */
+#[ObservedBy(ProjectMilestoneObserver::class)]
+class ProjectMilestone extends Model implements Auditable
 {
-    protected static ?string $model = Division::class;
+    /** @use HasFactory<ProjectMilestoneFactory> */
+    use HasFactory;
 
-    protected static ?string $navigationGroup = 'User Management';
+    use HasUuids;
+    use SoftDeletes;
+    use AuditableTrait;
 
-    protected static ?int $navigationSort = 50;
+    protected $fillable = [
+        'title',
+        'description',
+        'status_id',
+    ];
 
-    public static function getRelations(): array
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function createdBy(): BelongsTo
     {
-        return [
-            TeamsRelationManager::make(),
-        ];
+        return $this->belongsTo(User::class, 'created_by_id');
     }
 
-    public static function getPages(): array
+    /**
+     * @return BelongsTo<ProjectMilestoneStatus, $this>
+     */
+    public function status(): BelongsTo
     {
-        return [
-            'index' => ListDivisions::route('/'),
-            'create' => CreateDivision::route('/create'),
-            'view' => ViewDivision::route('/{record}'),
-            'edit' => EditDivision::route('/{record}/edit'),
-        ];
+        return $this->belongsTo(ProjectMilestoneStatus::class, 'status_id');
+    }
+
+    /**
+     * @return BelongsTo<Project, $this>
+     */
+    public function project(): BelongsTo
+    {
+        return $this->belongsTo(Project::class);
     }
 }

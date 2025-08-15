@@ -34,38 +34,26 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Division\Filament\Resources;
+namespace AidingApp\Project\Database\Factories;
 
-use AidingApp\Division\Filament\Resources\DivisionResource\Pages\CreateDivision;
-use AidingApp\Division\Filament\Resources\DivisionResource\Pages\EditDivision;
-use AidingApp\Division\Filament\Resources\DivisionResource\Pages\ListDivisions;
-use AidingApp\Division\Filament\Resources\DivisionResource\Pages\ViewDivision;
-use AidingApp\Division\Filament\Resources\DivisionResource\RelationManagers\TeamsRelationManager;
-use AidingApp\Division\Models\Division;
-use Filament\Resources\Resource;
+use AidingApp\Project\Models\ProjectMilestoneStatus;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-class DivisionResource extends Resource
+/**
+ * @extends Factory<ProjectMilestoneStatus>
+ */
+class ProjectMilestoneStatusFactory extends Factory
 {
-    protected static ?string $model = Division::class;
-
-    protected static ?string $navigationGroup = 'User Management';
-
-    protected static ?int $navigationSort = 50;
-
-    public static function getRelations(): array
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition(): array
     {
         return [
-            TeamsRelationManager::make(),
-        ];
-    }
-
-    public static function getPages(): array
-    {
-        return [
-            'index' => ListDivisions::route('/'),
-            'create' => CreateDivision::route('/create'),
-            'view' => ViewDivision::route('/{record}'),
-            'edit' => EditDivision::route('/{record}/edit'),
+            'name' => $this->faker->unique()->word(),
+            'description' => $this->faker->sentence(),
         ];
     }
 }

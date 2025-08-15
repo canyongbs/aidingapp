@@ -34,38 +34,37 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Division\Filament\Resources;
+namespace AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource\Pages;
 
-use AidingApp\Division\Filament\Resources\DivisionResource\Pages\CreateDivision;
-use AidingApp\Division\Filament\Resources\DivisionResource\Pages\EditDivision;
-use AidingApp\Division\Filament\Resources\DivisionResource\Pages\ListDivisions;
-use AidingApp\Division\Filament\Resources\DivisionResource\Pages\ViewDivision;
-use AidingApp\Division\Filament\Resources\DivisionResource\RelationManagers\TeamsRelationManager;
-use AidingApp\Division\Models\Division;
-use Filament\Resources\Resource;
+use AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource;
+use Filament\Actions\EditAction;
+use Filament\Infolists\Components\Section;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Infolist;
+use Filament\Resources\Pages\ViewRecord;
 
-class DivisionResource extends Resource
+class ViewProjectMilestoneStatus extends ViewRecord
 {
-    protected static ?string $model = Division::class;
+    protected static string $resource = ProjectMilestoneStatusResource::class;
 
-    protected static ?string $navigationGroup = 'User Management';
-
-    protected static ?int $navigationSort = 50;
-
-    public static function getRelations(): array
+    public function infolist(Infolist $infolist): Infolist
     {
-        return [
-            TeamsRelationManager::make(),
-        ];
+        return $infolist
+            ->schema([
+                Section::make()
+                    ->schema([
+                        TextEntry::make('name')
+                            ->label('Name'),
+                        TextEntry::make('description')
+                            ->label('Description'),
+                    ]),
+            ]);
     }
 
-    public static function getPages(): array
+    protected function getHeaderActions(): array
     {
         return [
-            'index' => ListDivisions::route('/'),
-            'create' => CreateDivision::route('/create'),
-            'view' => ViewDivision::route('/{record}'),
-            'edit' => EditDivision::route('/{record}/edit'),
+            EditAction::make(),
         ];
     }
 }

@@ -34,43 +34,39 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Authorization\Filament\Resources\PermissionResource\RelationManagers;
+namespace AidingApp\Project\Models;
 
-use App\Filament\Tables\Columns\IdColumn;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
-use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Project\Database\Factories\ProjectMilestoneStatusFactory;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class RolesRelationManager extends RelationManager
+/**
+ * @mixin IdeHelperProjectMilestoneStatus
+ */
+class ProjectMilestoneStatus extends Model implements Auditable
 {
-    protected static string $relationship = 'roles';
+    /** @use HasFactory<ProjectMilestoneStatusFactory> */
+    use HasFactory;
 
-    protected static ?string $recordTitleAttribute = 'name';
+    use HasUuids;
+    use SoftDeletes;
+    use AuditableTrait;
 
-    public function form(Form $form): Form
+    protected $fillable = [
+        'name',
+        'description',
+    ];
+
+    /**
+     * @return HasMany<ProjectMilestone, $this>
+     */
+    public function milestones(): HasMany
     {
-        return $form
-            ->schema([
-                TextInput::make('name')
-                    ->required()
-                    ->maxLength(255),
-            ]);
-    }
-
-    public function table(Table $table): Table
-    {
-        return $table
-            ->columns([
-                IdColumn::make(),
-                TextColumn::make('name'),
-            ])
-            ->headerActions([
-            ])
-            ->actions([
-            ])
-            ->bulkActions([
-            ]);
+        return $this->hasMany(ProjectMilestone::class, 'status_id');
     }
 }

@@ -38,6 +38,8 @@ namespace AidingApp\Project\Providers;
 
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectFile;
+use AidingApp\Project\Models\ProjectMilestone;
+use AidingApp\Project\Models\ProjectMilestoneStatus;
 use AidingApp\Project\ProjectPlugin;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -55,6 +57,8 @@ class ProjectServiceProvider extends ServiceProvider
         Relation::morphMap([
             'project' => Project::class,
             'project_file' => ProjectFile::class,
+            'project_milestone' => ProjectMilestone::class,
+            'project_milestone_status' => ProjectMilestoneStatus::class,
         ]);
     }
 }

@@ -34,18 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Authorization\Filament\Resources\PermissionResource\Pages;
+use App\Features\ProjectMilestoneFeature;
+use Illuminate\Database\Migrations\Migration;
 
-use AidingApp\Authorization\Filament\Resources\PermissionResource;
-use Filament\Resources\Pages\ViewRecord;
-
-class ViewPermission extends ViewRecord
-{
-    protected static string $resource = PermissionResource::class;
-
-    protected function getHeaderActions(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-        ];
+        ProjectMilestoneFeature::activate();
     }
-}
+
+    public function down(): void
+    {
+        ProjectMilestoneFeature::deactivate();
+    }
+};

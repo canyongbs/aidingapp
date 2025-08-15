@@ -34,38 +34,23 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Division\Filament\Resources;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\Division\Filament\Resources\DivisionResource\Pages\CreateDivision;
-use AidingApp\Division\Filament\Resources\DivisionResource\Pages\EditDivision;
-use AidingApp\Division\Filament\Resources\DivisionResource\Pages\ListDivisions;
-use AidingApp\Division\Filament\Resources\DivisionResource\Pages\ViewDivision;
-use AidingApp\Division\Filament\Resources\DivisionResource\RelationManagers\TeamsRelationManager;
-use AidingApp\Division\Models\Division;
-use Filament\Resources\Resource;
-
-class DivisionResource extends Resource
-{
-    protected static ?string $model = Division::class;
-
-    protected static ?string $navigationGroup = 'User Management';
-
-    protected static ?int $navigationSort = 50;
-
-    public static function getRelations(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            TeamsRelationManager::make(),
-        ];
+        Schema::table('service_requests', function (Blueprint $table) {
+            $table->timestamp('survey_sent_at')->nullable();
+            $table->timestamp('reminder_sent_at')->nullable();
+        });
     }
 
-    public static function getPages(): array
+    public function down(): void
     {
-        return [
-            'index' => ListDivisions::route('/'),
-            'create' => CreateDivision::route('/create'),
-            'view' => ViewDivision::route('/{record}'),
-            'edit' => EditDivision::route('/{record}/edit'),
-        ];
+        Schema::table('service_requests', function (Blueprint $table) {
+            $table->dropColumn(['survey_sent_at', 'reminder_sent_at']);
+        });
     }
-}
+};

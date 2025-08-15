@@ -34,38 +34,45 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Division\Filament\Resources;
+use Database\Migrations\Concerns\CanModifyPermissions;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 
-use AidingApp\Division\Filament\Resources\DivisionResource\Pages\CreateDivision;
-use AidingApp\Division\Filament\Resources\DivisionResource\Pages\EditDivision;
-use AidingApp\Division\Filament\Resources\DivisionResource\Pages\ListDivisions;
-use AidingApp\Division\Filament\Resources\DivisionResource\Pages\ViewDivision;
-use AidingApp\Division\Filament\Resources\DivisionResource\RelationManagers\TeamsRelationManager;
-use AidingApp\Division\Models\Division;
-use Filament\Resources\Resource;
+return new class () extends Migration {
+    use CanModifyPermissions;
 
-class DivisionResource extends Resource
-{
-    protected static ?string $model = Division::class;
+    /**
+     * @var array<string> $permissions
+     */
+    private array $permissions = [
+        'permission.view-any' => 'Permission',
+        'permission.*.view' => 'Permission',
+    ];
 
-    protected static ?string $navigationGroup = 'User Management';
+    /**
+     * @var array<string> $guards
+     */
+    private array $guards = [
+        'web',
+    ];
 
-    protected static ?int $navigationSort = 50;
-
-    public static function getRelations(): array
+    public function up(): void
     {
-        return [
-            TeamsRelationManager::make(),
-        ];
+        collect($this->guards)
+            ->each(fn (string $guard) => $this->deletePermissions(array_keys($this->permissions), $guard));
     }
 
-    public static function getPages(): array
+    public function down(): void
     {
-        return [
-            'index' => ListDivisions::route('/'),
-            'create' => CreateDivision::route('/create'),
-            'view' => ViewDivision::route('/{record}'),
-            'edit' => EditDivision::route('/{record}/edit'),
-        ];
+        collect($this->guards)
+            ->each(function (string $guard) {
+                $permissions = Arr::except($this->permissions, DB::table('permissions')
+                    ->where('guard_name', $guard)
+                    ->pluck('name')
+                    ->all());
+
+                $this->createPermissions($permissions, $guard);
+            });
     }
-}
+};
