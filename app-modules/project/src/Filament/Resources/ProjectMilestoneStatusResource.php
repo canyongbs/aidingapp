@@ -41,7 +41,6 @@ use AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource\Pages\Ed
 use AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource\Pages\ListProjectMilestoneStatuses;
 use AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource\Pages\ViewProjectMilestoneStatus;
 use AidingApp\Project\Models\ProjectMilestoneStatus;
-use App\Features\ProjectMilestoneFeature;
 use App\Filament\Clusters\ProjectManagement;
 use Filament\Resources\Resource;
 
@@ -56,11 +55,6 @@ class ProjectMilestoneStatusResource extends Resource
     protected static ?string $cluster = ProjectManagement::class;
 
     protected static ?int $navigationSort = 20;
-
-    public static function canAccess(): bool
-    {
-        return ProjectMilestoneFeature::active() && parent::canAccess();
-    }
 
     public static function getPages(): array
     {
