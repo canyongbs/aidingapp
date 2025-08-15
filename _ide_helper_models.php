@@ -1,39 +1,5 @@
 <?php
 
-/*
-<COPYRIGHT>
-
-    Copyright © 2016-2025, Canyon GBS LLC. All rights reserved.
-
-    Aiding App™ is licensed under the Elastic License 2.0. For more details,
-    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
-
-    Notice:
-
-    - You may not provide the software to third parties as a hosted or managed
-      service, where the service provides users with access to any substantial set of
-      the features or functionality of the software.
-    - You may not move, change, disable, or circumvent the license key functionality
-      in the software, and you may not remove or obscure any functionality in the
-      software that is protected by the license key.
-    - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
-      to applicable law.
-    - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
-      Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
-      vigorously.
-    - The software solution, including services, infrastructure, and code, is offered as a
-      Software as a Service (SaaS) by Canyon GBS LLC.
-    - Use of this software implies agreement to the license terms and conditions as stated
-      in the Elastic License 2.0.
-
-    For more information or inquiries please visit our website at
-    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
-
-</COPYRIGHT>
-*/
-
 // @formatter:off
 // phpcs:ignoreFile
 /**
@@ -487,6 +453,9 @@ namespace App\Models{
  * @property string|null $team_id
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Task\Models\Task> $assignedTasks
  * @property-read int|null $assigned_tasks_count
+ * @property-read \AidingApp\ServiceManagement\Models\ServiceMonitoringTargetUser|\AidingApp\Project\Models\ProjectManagerUser|\AidingApp\Project\Models\ProjectAuditorUser|null $pivot
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Project\Models\Project> $auditedProjects
+ * @property-read int|null $audited_projects_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
  * @property-read int|null $audits_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\ServiceManagement\Models\ChangeRequestResponse> $changeRequestResponses
@@ -504,6 +473,8 @@ namespace App\Models{
  * @property-read int|null $engagements_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Authorization\Models\License> $licenses
  * @property-read int|null $licenses_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Project\Models\Project> $managedProjects
+ * @property-read int|null $managed_projects_count
  * @property-read \Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection<int, \Spatie\MediaLibrary\MediaCollections\Models\Media> $media
  * @property-read int|null $media_count
  * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<int, \Illuminate\Notifications\DatabaseNotification> $notifications
@@ -513,7 +484,6 @@ namespace App\Models{
  * @property-read \App\Models\Pronouns|null $pronouns
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Authorization\Models\Role> $roles
  * @property-read int|null $roles_count
- * @property-read \AidingApp\ServiceManagement\Models\ServiceMonitoringTargetUser|null $pivot
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\ServiceManagement\Models\ServiceMonitoringTarget> $serviceMonitoringTargets
  * @property-read int|null $service_monitoring_targets_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\ServiceManagement\Models\ServiceRequestAssignment> $serviceRequestAssignments
@@ -2386,9 +2356,20 @@ namespace AidingApp\Project\Models{
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \AidingApp\Project\Models\ProjectManagerUser|\AidingApp\Project\Models\ProjectManagerTeam|\AidingApp\Project\Models\ProjectAuditorUser|\AidingApp\Project\Models\ProjectAuditorTeam|null $pivot
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Team\Models\Team> $auditorTeams
+ * @property-read int|null $auditor_teams_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $auditorUsers
+ * @property-read int|null $auditor_users_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
  * @property-read int|null $audits_count
  * @property-read \Illuminate\Database\Eloquent\Model $createdBy
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Project\Models\ProjectFile> $files
+ * @property-read int|null $files_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Team\Models\Team> $managerTeams
+ * @property-read int|null $manager_teams_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $managerUsers
+ * @property-read int|null $manager_users_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Task\Models\Task> $tasks
  * @property-read int|null $tasks_count
  * @method static \AidingApp\Project\Database\Factories\ProjectFactory factory($count = null, $state = [])
@@ -2410,6 +2391,85 @@ namespace AidingApp\Project\Models{
  */
 	#[\AllowDynamicProperties]
 	class IdeHelperProject {}
+}
+
+namespace AidingApp\Project\Models{
+/**
+ * 
+ *
+ * @property-read \AidingApp\Project\Models\Project|null $project
+ * @property-read \AidingApp\Team\Models\Team|null $team
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProjectAuditorTeam newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProjectAuditorTeam newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProjectAuditorTeam query()
+ * @mixin \Eloquent
+ */
+	#[\AllowDynamicProperties]
+	class IdeHelperProjectAuditorTeam {}
+}
+
+namespace AidingApp\Project\Models{
+/**
+ * 
+ *
+ * @property-read \AidingApp\Project\Models\Project|null $project
+ * @property-read \App\Models\User|null $user
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProjectAuditorUser newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProjectAuditorUser newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProjectAuditorUser query()
+ * @mixin \Eloquent
+ */
+	#[\AllowDynamicProperties]
+	class IdeHelperProjectAuditorUser {}
+}
+
+namespace AidingApp\Project\Models{
+/**
+ * 
+ *
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
+ * @property-read int|null $audits_count
+ * @property-read \Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection<int, \Spatie\MediaLibrary\MediaCollections\Models\Media> $media
+ * @property-read int|null $media_count
+ * @property-read \AidingApp\Project\Models\Project|null $project
+ * @method static \AidingApp\Project\Database\Factories\ProjectFileFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProjectFile newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProjectFile newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProjectFile query()
+ * @mixin \Eloquent
+ */
+	#[\AllowDynamicProperties]
+	class IdeHelperProjectFile {}
+}
+
+namespace AidingApp\Project\Models{
+/**
+ * 
+ *
+ * @property-read \AidingApp\Project\Models\Project|null $project
+ * @property-read \AidingApp\Team\Models\Team|null $team
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProjectManagerTeam newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProjectManagerTeam newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProjectManagerTeam query()
+ * @mixin \Eloquent
+ */
+	#[\AllowDynamicProperties]
+	class IdeHelperProjectManagerTeam {}
+}
+
+namespace AidingApp\Project\Models{
+/**
+ * 
+ *
+ * @property-read \AidingApp\Project\Models\Project|null $project
+ * @property-read \App\Models\User|null $user
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProjectManagerUser newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProjectManagerUser newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|ProjectManagerUser query()
+ * @mixin \Eloquent
+ */
+	#[\AllowDynamicProperties]
+	class IdeHelperProjectManagerUser {}
 }
 
 namespace AidingApp\ServiceManagement\Models{
@@ -3591,24 +3651,12 @@ namespace AidingApp\ServiceManagement\Models{
 /**
  * 
  *
- * @property string $id
- * @property string $tenant_id
- * @property string $service_request_type_id
- * @property string $domain
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \AidingApp\ServiceManagement\Models\ServiceRequestType|null $serviceRequestType
- * @property-read \App\Models\Tenant $tenant
+ * @property-read \App\Models\Tenant|null $tenant
  * @method static \AidingApp\ServiceManagement\Database\Factories\TenantServiceRequestTypeDomainFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TenantServiceRequestTypeDomain newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TenantServiceRequestTypeDomain newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TenantServiceRequestTypeDomain query()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|TenantServiceRequestTypeDomain whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|TenantServiceRequestTypeDomain whereDomain($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|TenantServiceRequestTypeDomain whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|TenantServiceRequestTypeDomain whereServiceRequestTypeId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|TenantServiceRequestTypeDomain whereTenantId($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|TenantServiceRequestTypeDomain whereUpdatedAt($value)
  * @mixin \Eloquent
  */
 	#[\AllowDynamicProperties]
@@ -3714,12 +3762,16 @@ namespace AidingApp\Team\Models{
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property string|null $deleted_at
- * @property-read \AidingApp\ServiceManagement\Models\ServiceMonitoringTargetTeam|\AidingApp\ServiceManagement\Models\ServiceRequestTypeManager|\AidingApp\ServiceManagement\Models\ServiceRequestTypeAuditor|null $pivot
+ * @property-read \AidingApp\ServiceManagement\Models\ServiceMonitoringTargetTeam|\AidingApp\Project\Models\ProjectManagerTeam|\AidingApp\ServiceManagement\Models\ServiceRequestTypeManager|\AidingApp\Project\Models\ProjectAuditorTeam|\AidingApp\ServiceManagement\Models\ServiceRequestTypeAuditor|null $pivot
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\ServiceManagement\Models\ServiceRequestType> $auditableServiceRequestTypes
  * @property-read int|null $auditable_service_request_types_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Project\Models\Project> $auditedProjects
+ * @property-read int|null $audited_projects_count
  * @property-read \AidingApp\Division\Models\Division|null $division
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\ServiceManagement\Models\ServiceRequestType> $manageableServiceRequestTypes
  * @property-read int|null $manageable_service_request_types_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Project\Models\Project> $managedProjects
+ * @property-read int|null $managed_projects_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\ServiceManagement\Models\ServiceMonitoringTarget> $serviceMonitoringTargets
  * @property-read int|null $service_monitoring_targets_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $users
