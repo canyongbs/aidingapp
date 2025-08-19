@@ -37,7 +37,9 @@
 namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\ServiceManagement\Database\Factories\ServiceRequestFeedbackFactory;
 use App\Models\BaseModel;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -47,6 +49,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class ServiceRequestFeedback extends BaseModel
 {
     use SoftDeletes;
+
+    /** @use HasFactory<ServiceRequestFeedbackFactory> */
+    use HasFactory;
 
     protected $fillable = [
         'csat_answer',

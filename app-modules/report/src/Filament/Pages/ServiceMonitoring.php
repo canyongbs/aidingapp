@@ -54,7 +54,7 @@ class ServiceMonitoring extends Dashboard
 
     protected static string $view = 'filament.pages.coming-soon';
 
-    protected static ?int $navigationSort = 60;
+    protected static ?int $navigationSort = 70;
 
     public static function canAccess(): bool
     {
