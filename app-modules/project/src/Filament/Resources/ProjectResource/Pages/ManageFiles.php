@@ -161,6 +161,11 @@ class ManageFiles extends ManageRelatedRecords
                         'video/mp4' => 'heroicon-o-video-camera',
                         'application/zip' => 'heroicon-o-archive-box'
                     }),
+                TextColumn::make('retention_date')
+                    ->label('Retention Date')
+                    ->placeholder('N/A')
+                    ->dateTime()
+                    ->sortable(query: fn ($query, $direction) => $query->orderBy('project_files.retention_date', $direction)),
                 TextColumn::make('created_at')
                     ->label('Date Created')
                     ->dateTime()
