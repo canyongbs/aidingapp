@@ -98,7 +98,7 @@ class ServiceRequestFeedbackTable extends BaseWidget
                     ),
                 TextColumn::make('created_at')
                     ->label('Created')
-                    ->dateTime('M d, Y H:i'),
+                    ->dateTime('m-d-Y h:i a'),
             ])->paginated([5, 10, 15, 20, 25]);
     }
 }
