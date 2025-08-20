@@ -41,7 +41,6 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Project\Filament\Resources\ProjectResource;
 use AidingApp\Task\Enums\TaskStatus;
 use AidingApp\Task\Filament\Concerns\TaskEditForm;
-use AidingApp\Task\Filament\Concerns\TaskForm;
 use AidingApp\Task\Filament\Concerns\TaskViewActionInfoList;
 use AidingApp\Task\Filament\Resources\TaskResource\Components\TaskViewAction;
 use AidingApp\Task\Models\Task;
@@ -71,7 +70,6 @@ use Illuminate\Database\Eloquent\Builder;
 
 class ManageTasks extends ManageRelatedRecords
 {
-    use TaskForm;
     use TaskEditForm;
     use TaskViewActionInfoList;
 
