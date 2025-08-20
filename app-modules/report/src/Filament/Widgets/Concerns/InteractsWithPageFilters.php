@@ -22,12 +22,4 @@ trait InteractsWithPageFilters
 
         return filled($endDate) ? Carbon::parse($endDate)->endOfDay() : null;
     }
-
-    /** @return list<string>|null */
-    public function getServiceRequestTypes(): ?array
-    {
-        $types = $this->filters['serviceRequestTypes'] ?? null;
-
-        return filled($types) ? (array) $types : null;
-    }
 }

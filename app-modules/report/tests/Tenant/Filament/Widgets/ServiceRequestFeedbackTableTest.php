@@ -12,28 +12,28 @@ it('returns service request feedbacks within the given date range', function () 
     $startDate = now()->subDays(10);
     $endDate = now()->subDays(5);
 
-    $type1 = ServiceRequestType::factory()->create();
-    $type2 = ServiceRequestType::factory()->create();
+    $typeOne = ServiceRequestType::factory()->create();
+    $typeTwo = ServiceRequestType::factory()->create();
 
-    $priority1 = ServiceRequestPriority::factory()->state(['type_id' => $type1->id])->create();
-    $priority2 = ServiceRequestPriority::factory()->state(['type_id' => $type2->id])->create();
+    $priorityOne = ServiceRequestPriority::factory()->state(['type_id' => $typeOne->id])->create();
+    $priorityTwo = ServiceRequestPriority::factory()->state(['type_id' => $typeTwo->id])->create();
 
-    $request1 = ServiceRequest::factory()->state(['priority_id' => $priority1->id, 'created_at' => $startDate])->create();
-    $request2 = ServiceRequest::factory()->state(['priority_id' => $priority2->id, 'created_at' => $endDate])->create();
-    $request3 = ServiceRequest::factory()->state(['priority_id' => $priority1->id, 'created_at' => now()->subDays(20)])->create();
+    $requestOne = ServiceRequest::factory()->state(['priority_id' => $priorityOne->id, 'created_at' => $startDate])->create();
+    $requestTwo = ServiceRequest::factory()->state(['priority_id' => $priorityTwo->id, 'created_at' => $endDate])->create();
+    $requestThree = ServiceRequest::factory()->state(['priority_id' => $priorityOne->id, 'created_at' => now()->subDays(20)])->create();
 
-    $feedback1 = ServiceRequestFeedback::factory()->state([
-        'service_request_id' => $request1->id,
+    $feedbackOne = ServiceRequestFeedback::factory()->state([
+        'service_request_id' => $requestOne->id,
         'created_at' => $startDate,
     ])->create();
 
-    $feedback2 = ServiceRequestFeedback::factory()->state([
-        'service_request_id' => $request2->id,
+    $feedbackTwo = ServiceRequestFeedback::factory()->state([
+        'service_request_id' => $requestTwo->id,
         'created_at' => $endDate,
     ])->create();
 
-    $feedback3 = ServiceRequestFeedback::factory()->state([
-        'service_request_id' => $request3->id,
+    $feedbackThree = ServiceRequestFeedback::factory()->state([
+        'service_request_id' => $requestThree->id,
         'created_at' => now()->subDays(20),
     ])->create();
 
@@ -47,11 +47,11 @@ it('returns service request feedbacks within the given date range', function () 
         'filters' => $filters,
     ])
         ->assertCanSeeTableRecords(collect([
-            $feedback1,
-            $feedback2,
+            $feedbackOne,
+            $feedbackTwo,
         ]))
         ->assertCanNotSeeTableRecords(collect([
-            $feedback3,
+            $feedbackThree,
         ]));
 });
 
@@ -65,33 +65,33 @@ it('filters service request feedbacks by date and type', function () {
     $priorityA = ServiceRequestPriority::factory()->state(['type_id' => $typeA->id])->create();
     $priorityB = ServiceRequestPriority::factory()->state(['type_id' => $typeB->id])->create();
 
-    $request1 = ServiceRequest::factory()->state([
+    $requestOne = ServiceRequest::factory()->state([
         'priority_id' => $priorityA->id,
         'created_at' => $startDate,
     ])->create();
 
-    $request2 = ServiceRequest::factory()->state([
+    $requestTwo = ServiceRequest::factory()->state([
         'priority_id' => $priorityB->id,
         'created_at' => $endDate,
     ])->create();
 
-    $request3 = ServiceRequest::factory()->state([
+    $requestThree = ServiceRequest::factory()->state([
         'priority_id' => $priorityA->id,
         'created_at' => now()->subDays(20),
     ])->create();
 
-    $feedback1 = ServiceRequestFeedback::factory()->state([
-        'service_request_id' => $request1->id,
+    $feedbackOne = ServiceRequestFeedback::factory()->state([
+        'service_request_id' => $requestOne->id,
         'created_at' => $startDate,
     ])->create();
 
-    $feedback2 = ServiceRequestFeedback::factory()->state([
-        'service_request_id' => $request2->id,
+    $feedbackTwo = ServiceRequestFeedback::factory()->state([
+        'service_request_id' => $requestTwo->id,
         'created_at' => $endDate,
     ])->create();
 
-    $feedback3 = ServiceRequestFeedback::factory()->state([
-        'service_request_id' => $request3->id,
+    $feedbackThree = ServiceRequestFeedback::factory()->state([
+        'service_request_id' => $requestThree->id,
         'created_at' => now()->subDays(20),
     ])->create();
 
@@ -105,9 +105,9 @@ it('filters service request feedbacks by date and type', function () {
         'cacheTag' => 'report-service-request-feedback',
         'filters' => $filters,
     ])
-        ->assertSee($feedback1->serviceRequest->service_request_number)
-        ->assertDontSee($feedback2->serviceRequest->service_request_number)
-        ->assertDontSee($feedback3->serviceRequest->service_request_number);
+        ->assertSee($feedbackOne->serviceRequest->service_request_number)
+        ->assertDontSee($feedbackTwo->serviceRequest->service_request_number)
+        ->assertDontSee($feedbackThree->serviceRequest->service_request_number);
 
     $filters = [
         'startDate' => $startDate->toDateString(),
@@ -118,15 +118,15 @@ it('filters service request feedbacks by date and type', function () {
         'cacheTag' => 'report-service-request-feedback',
         'filters' => $filters,
     ])
-        ->assertSee($feedback1->serviceRequest->service_request_number)
-        ->assertSee($feedback2->serviceRequest->service_request_number)
-        ->assertDontSee($feedback3->serviceRequest->service_request_number);
+        ->assertSee($feedbackOne->serviceRequest->service_request_number)
+        ->assertSee($feedbackTwo->serviceRequest->service_request_number)
+        ->assertDontSee($feedbackThree->serviceRequest->service_request_number);
 
     livewire(ServiceRequestFeedbackTable::class, [
         'cacheTag' => 'report-service-request-feedback',
         'filters' => [],
     ])
-        ->assertSee($feedback1->serviceRequest->service_request_number)
-        ->assertSee($feedback2->serviceRequest->service_request_number)
-        ->assertSee($feedback3->serviceRequest->service_request_number);
+        ->assertSee($feedbackOne->serviceRequest->service_request_number)
+        ->assertSee($feedbackTwo->serviceRequest->service_request_number)
+        ->assertSee($feedbackThree->serviceRequest->service_request_number);
 });

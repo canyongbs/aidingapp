@@ -17,6 +17,14 @@ class ServiceRequestFeedbackStats extends StatsOverviewReportWidget
         'lg' => 4,
     ];
 
+    /** @return list<string>|null */
+    public function getServiceRequestTypes(): ?array
+    {
+        $types = $this->filters['serviceRequestTypes'] ?? null;
+
+        return filled($types) ? (array) $types : null;
+    }
+
     public function getStats(): array
     {
         $startDate = $this->getStartDate();

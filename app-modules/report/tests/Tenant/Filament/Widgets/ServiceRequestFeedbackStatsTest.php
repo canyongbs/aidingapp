@@ -10,32 +10,32 @@ it('returns correct service request statistics within the given date range', fun
     $startDate = now()->subDays(10);
     $endDate = now()->subDays(5);
 
-    $type1 = ServiceRequestType::factory()->create();
-    $type2 = ServiceRequestType::factory()->create();
+    $typeOne = ServiceRequestType::factory()->create();
+    $typeTwo = ServiceRequestType::factory()->create();
 
-    $priority1 = ServiceRequestPriority::factory()->state(['type_id' => $type1->id])->create();
-    $priority2 = ServiceRequestPriority::factory()->state(['type_id' => $type2->id])->create();
+    $priorityOne = ServiceRequestPriority::factory()->state(['type_id' => $typeOne->id])->create();
+    $priorityTwo = ServiceRequestPriority::factory()->state(['type_id' => $typeTwo->id])->create();
 
-    $request1 = ServiceRequest::factory()->state(['priority_id' => $priority1->id, 'created_at' => $startDate])->create();
-    $request2 = ServiceRequest::factory()->state(['priority_id' => $priority2->id, 'created_at' => $endDate])->create();
-    $request3 = ServiceRequest::factory()->state(['priority_id' => $priority1->id, 'created_at' => now()->subDays(20)])->create();
+    $requestOne = ServiceRequest::factory()->state(['priority_id' => $priorityOne->id, 'created_at' => $startDate])->create();
+    $requestTwo = ServiceRequest::factory()->state(['priority_id' => $priorityTwo->id, 'created_at' => $endDate])->create();
+    $requestThree = ServiceRequest::factory()->state(['priority_id' => $priorityOne->id, 'created_at' => now()->subDays(20)])->create();
 
     ServiceRequestFeedback::factory()->state([
-        'service_request_id' => $request1->id,
+        'service_request_id' => $requestOne->id,
         'created_at' => $startDate,
         'csat_answer' => 4,
         'nps_answer' => 8,
     ])->create();
 
     ServiceRequestFeedback::factory()->state([
-        'service_request_id' => $request2->id,
+        'service_request_id' => $requestTwo->id,
         'created_at' => $endDate,
         'csat_answer' => 5,
         'nps_answer' => 9,
     ])->create();
 
     ServiceRequestFeedback::factory()->state([
-        'service_request_id' => $request3->id,
+        'service_request_id' => $requestThree->id,
         'created_at' => now()->subDays(20),
         'csat_answer' => 3,
         'nps_answer' => 6,
@@ -67,37 +67,37 @@ it('returns correct statistics filtered by date range and service request types'
     $priorityA = ServiceRequestPriority::factory()->state(['type_id' => $typeA->id])->create();
     $priorityB = ServiceRequestPriority::factory()->state(['type_id' => $typeB->id])->create();
 
-    $request1 = ServiceRequest::factory()->state([
+    $requestOne = ServiceRequest::factory()->state([
         'priority_id' => $priorityA->id,
         'created_at' => $startDate,
     ])->create();
 
-    $request2 = ServiceRequest::factory()->state([
+    $requestTwo = ServiceRequest::factory()->state([
         'priority_id' => $priorityB->id,
         'created_at' => $endDate,
     ])->create();
 
-    $request3 = ServiceRequest::factory()->state([
+    $requestThree = ServiceRequest::factory()->state([
         'priority_id' => $priorityA->id,
         'created_at' => now()->subDays(20),
     ])->create();
 
     ServiceRequestFeedback::factory()->state([
-        'service_request_id' => $request1->id,
+        'service_request_id' => $requestOne->id,
         'created_at' => $startDate,
         'csat_answer' => 4,
         'nps_answer' => 7,
     ])->create();
 
     ServiceRequestFeedback::factory()->state([
-        'service_request_id' => $request2->id,
+        'service_request_id' => $requestTwo->id,
         'created_at' => $endDate,
         'csat_answer' => 3,
         'nps_answer' => 6,
     ])->create();
 
     ServiceRequestFeedback::factory()->state([
-        'service_request_id' => $request3->id,
+        'service_request_id' => $requestThree->id,
         'created_at' => now()->subDays(20),
         'csat_answer' => 5,
         'nps_answer' => 9,
@@ -119,14 +119,14 @@ it('returns correct statistics filtered by date range and service request types'
         ->and($stats[2]->getValue())->toEqual('4')
         ->and($stats[3]->getValue())->toEqual('7');
 
-    $widget2 = new ServiceRequestFeedbackStats();
-    $widget2->cacheTag = 'test-service-request-feedback-stats-2';
-    $widget2->filters = [
+    $widgetTwo = new ServiceRequestFeedbackStats();
+    $widgetTwo->cacheTag = 'test-service-request-feedback-stats-2';
+    $widgetTwo->filters = [
         'startDate' => $startDate->toDateString(),
         'endDate' => $endDate->toDateString(),
     ];
 
-    $stats2 = $widget2->getStats();
+    $stats2 = $widgetTwo->getStats();
 
     expect($stats2)->toHaveCount(4)
         ->and($stats2[0]->getValue())->toEqual('2')
@@ -134,11 +134,11 @@ it('returns correct statistics filtered by date range and service request types'
         ->and($stats2[2]->getValue())->toEqual('3.5')
         ->and($stats2[3]->getValue())->toEqual('6.5');
 
-    $widget3 = new ServiceRequestFeedbackStats();
-    $widget3->cacheTag = 'test-service-request-feedback-stats-3';
-    $widget3->filters = [];
+    $widgetThree = new ServiceRequestFeedbackStats();
+    $widgetThree->cacheTag = 'test-service-request-feedback-stats-3';
+    $widgetThree->filters = [];
 
-    $stats3 = $widget3->getStats();
+    $stats3 = $widgetThree->getStats();
 
     expect($stats3)->toHaveCount(4)
         ->and($stats3[0]->getValue())->toEqual('3')

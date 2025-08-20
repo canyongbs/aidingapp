@@ -38,6 +38,14 @@ class ServiceRequestFeedbackTable extends BaseWidget
     #[On('refresh-widgets')]
     public function refreshWidget(): void {}
 
+    /** @return list<string>|null */
+    public function getServiceRequestTypes(): ?array
+    {
+        $types = $this->filters['serviceRequestTypes'] ?? null;
+
+        return filled($types) ? (array) $types : null;
+    }
+
     public function table(Table $table): Table
     {
         $startDate = $this->getStartDate();
