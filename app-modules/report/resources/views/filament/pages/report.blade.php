@@ -1,6 +1,4 @@
-<?php
-
-/*
+{{--
 <COPYRIGHT>
 
     Copyright © 2016-2025, Canyon GBS LLC. All rights reserved.
@@ -32,35 +30,25 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
+--}}
+@php
+    use AidingApp\Report\Filament\Widgets\RefreshWidget;
 
-namespace AidingApp\Report\Filament\Pages;
+    $visibleWidgets = collect($this->getVisibleWidgets())
+        ->reject(fn($widget) => $widget->widget === RefreshWidget::class)
+        ->all();
+@endphp
 
-use App\Filament\Clusters\ReportLibrary;
-use App\Models\User;
-use Filament\Pages\Dashboard;
+<x-filament-panels::page class="fi-dashboard-page">
+    <div>
+        @livewire(RefreshWidget::class, ['cacheTag' => $this->cacheTag])
+    </div>
 
-class ServiceMonitoring extends Dashboard
-{
-    protected static ?string $cluster = ReportLibrary::class;
+    {{ $this->filtersForm }}
 
-    protected static ?string $navigationGroup = 'Service Management';
-
-    protected static ?string $navigationLabel = 'Service Monitoring';
-
-    protected static ?string $title = 'Service Monitoring';
-
-    protected static string $routePath = 'service-monitoring';
-
-    protected static string $view = 'filament.pages.coming-soon';
-
-    protected static ?int $navigationSort = 70;
-
-    public static function canAccess(): bool
-    {
-        /** @var User $user */
-        $user = auth()->user();
-
-        return $user->can('report-library.view-any');
-    }
-}
+    <x-filament-widgets::widgets
+        :columns="$this->getColumns()"
+        :data="$this->getWidgetData()"
+        :widgets="$visibleWidgets"
+    />
+</x-filament-panels::page>
