@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
+use App\Features\ProjectMilestoneTargetDateFeature;
 use Illuminate\Database\Migrations\Migration;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
-use App\Features\ProjectMilestoneTargetDateFeature;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
 return new class () extends Migration {
