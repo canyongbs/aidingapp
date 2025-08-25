@@ -42,6 +42,7 @@ use AidingApp\Task\Enums\TaskStatus;
 use AidingApp\Task\Models\Task;
 use App\Features\ConfidentialTaskFeature;
 use App\Filament\Resources\UserResource;
+use Filament\Infolists\Components\Component;
 use Filament\Infolists\Components\Fieldset;
 use Filament\Infolists\Components\Grid;
 use Filament\Infolists\Components\Split;
@@ -49,6 +50,9 @@ use Filament\Infolists\Components\TextEntry;
 
 trait TaskViewActionInfoList
 {
+    /**
+     * @return array<Component>
+     */
     public function taskInfoList(): array
     {
         return [
@@ -67,12 +71,16 @@ trait TaskViewActionInfoList
                             ->columnSpanFull(),
                         TextEntry::make('assignedTo.name')
                             ->label('Assigned To')
-                            ->url(fn (Task $record) => $record->assignedTo ? UserResource::getUrl('view', ['record' => $record->assignedTo]) : null)
+                            ->url(
+                                fn (Task $record) => $record->assignedTo
+                                ? UserResource::getUrl('view', ['record' => $record->assignedTo])
+                                : null
+                            )
                             ->default('Unassigned'),
                         TextEntry::make('concern.display_name')
                             ->label('Related To')
                             ->getStateUsing(fn (Task $record): ?string => $record->concern?->{$record->concern::displayNameKey()})
-                            ->url(fn (Task $record) => match ($record->concern ? $record->concern::class : null) {
+                            ->url(fn (Task $record): string|null => match ($record->concern ? $record->concern::class : null) {
                                 Contact::class => ContactResource::getUrl('view', ['record' => $record->concern]),
                                 default => null,
                             })
@@ -90,7 +98,11 @@ trait TaskViewActionInfoList
                         TextEntry::make('createdBy.name')
                             ->label('Created By')
                             ->default('N/A')
-                            ->url(fn (Task $record) => $record->createdBy ? UserResource::getUrl('view', ['record' => $record->createdBy]) : null),
+                            ->url(
+                                fn (Task $record) => $record->createdBy
+                                ? UserResource::getUrl('view', ['record' => $record->createdBy])
+                                : null
+                            ),
                     ]),
             ])->from('md'),
         ];

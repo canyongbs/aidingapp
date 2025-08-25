@@ -58,8 +58,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
 
 /**
- * @property-read Contact $concern
- *
  * @mixin IdeHelperTask
  */
 #[ObservedBy([TaskObserver::class])] #[ScopedBy([ConfidentialTaskScope::class])]

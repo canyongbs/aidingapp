@@ -34,30 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Task\Filament\Resources;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\CreateTask;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\EditTask;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\ListTasks;
-use AidingApp\Task\Models\Task;
-use Filament\Resources\Resource;
-
-class TaskResource extends Resource
-{
-    protected static ?string $model = Task::class;
-
-    protected static ?string $navigationGroup = 'Project Management';
-
-    protected static ?int $navigationSort = 20;
-
-    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
-
-    public static function getPages(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            'index' => ListTasks::route('/'),
-            'create' => CreateTask::route('/create'),
-            'edit' => EditTask::route('/{record}/edit'),
-        ];
+        Schema::table('project_milestones', function (Blueprint $table) {
+            $table->date('target_date')->nullable();
+        });
     }
-}
+
+    public function down(): void
+    {
+        Schema::table('project_milestones', function (Blueprint $table) {
+            $table->dropColumn('target_date');
+        });
+    }
+};

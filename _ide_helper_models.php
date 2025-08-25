@@ -3642,7 +3642,6 @@ namespace AidingApp\Task\Models{
 
 namespace AidingApp\Task\Models{
 /**
- * @property-read Contact $concern
  * @property string $id
  * @property string $title
  * @property string $description
@@ -3654,11 +3653,12 @@ namespace AidingApp\Task\Models{
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property string|null $project_id
  * @property bool $is_confidential
+ * @property string|null $project_id
  * @property-read \App\Models\User|null $assignedTo
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Audit\Models\Audit> $audits
  * @property-read int|null $audits_count
+ * @property-read \AidingApp\Contact\Models\Contact|null $concern
  * @property-read \AidingApp\Task\Models\ConfidentialTaskUser|\AidingApp\Task\Models\ConfidentialTaskTeam|null $pivot
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \AidingApp\Team\Models\Team> $confidentialAccessTeams
  * @property-read int|null $confidential_access_teams_count
