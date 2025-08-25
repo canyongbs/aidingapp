@@ -36,19 +36,20 @@
 
 namespace AidingApp\Project\Filament\Resources\ProjectResource\Pages;
 
-use AidingApp\Project\Filament\Resources\ProjectResource;
-use AidingApp\Project\Models\ProjectMilestone;
-use App\Filament\Tables\Columns\IdColumn;
+use Filament\Forms\Form;
+use Filament\Tables\Table;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
-use Filament\Resources\Pages\ManageRelatedRecords;
-use Filament\Tables\Actions\CreateAction;
-use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
+use Filament\Forms\Components\TextInput;
+use App\Filament\Tables\Columns\IdColumn;
+use Filament\Forms\Components\DatePicker;
+use Filament\Tables\Actions\CreateAction;
+use Filament\Tables\Actions\DeleteAction;
+use AidingApp\Project\Models\ProjectMilestone;
+use Filament\Resources\Pages\ManageRelatedRecords;
+use AidingApp\Project\Filament\Resources\ProjectResource;
 
 class ManageMilestones extends ManageRelatedRecords
 {
@@ -83,6 +84,7 @@ class ManageMilestones extends ManageRelatedRecords
                     ->preload()
                     ->required()
                     ->relationship('status', 'name'),
+                DatePicker::make('target_date'),
             ]);
     }
 
