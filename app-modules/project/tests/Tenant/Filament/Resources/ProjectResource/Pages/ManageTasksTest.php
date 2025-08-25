@@ -44,7 +44,6 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
-use function Pest\Faker\fake;
 
 it('cannot render without proper permission.', function () {
     $user = User::factory()->create();
@@ -109,8 +108,9 @@ it('can list pending/in_progress tasks', function () {
     livewire(ManageTasks::class, [
         'record' => $project->getRouteKey(),
     ])
-        ->assertCanSeeTableRecords($project->tasks
-            ->whereIn('status', ['pending', 'in_progress'])
+        ->assertCanSeeTableRecords(
+            $project->tasks
+                ->whereIn('status', ['pending', 'in_progress'])
         )
         ->assertCanNotSeeTableRecords($project->tasks
             ->whereIn('status', ['completed', 'canceled']));
