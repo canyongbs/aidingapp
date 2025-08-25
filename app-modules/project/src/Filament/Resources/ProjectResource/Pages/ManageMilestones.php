@@ -50,6 +50,7 @@ use Filament\Tables\Actions\DeleteAction;
 use AidingApp\Project\Models\ProjectMilestone;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use AidingApp\Project\Filament\Resources\ProjectResource;
+use App\Features\ProjectMilestoneTargetDateFeature;
 
 class ManageMilestones extends ManageRelatedRecords
 {
@@ -84,7 +85,8 @@ class ManageMilestones extends ManageRelatedRecords
                     ->preload()
                     ->required()
                     ->relationship('status', 'name'),
-                DatePicker::make('target_date'),
+                DatePicker::make('target_date')
+                    ->visable(ProjectMilestoneTargetDateFeature::active()),
             ]);
     }
 
