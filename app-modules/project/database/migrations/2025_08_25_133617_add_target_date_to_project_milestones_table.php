@@ -34,33 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Report\Filament\Pages;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use App\Filament\Clusters\ReportLibrary;
-use App\Models\User;
-use Filament\Pages\Dashboard;
-
-class ServiceMonitoring extends Dashboard
-{
-    protected static ?string $cluster = ReportLibrary::class;
-
-    protected static ?string $navigationGroup = 'Service Management';
-
-    protected static ?string $navigationLabel = 'Service Monitoring';
-
-    protected static ?string $title = 'Service Monitoring';
-
-    protected static string $routePath = 'service-monitoring';
-
-    protected static string $view = 'filament.pages.coming-soon';
-
-    protected static ?int $navigationSort = 70;
-
-    public static function canAccess(): bool
+return new class () extends Migration {
+    public function up(): void
     {
-        /** @var User $user */
-        $user = auth()->user();
-
-        return $user->can('report-library.view-any');
+        Schema::table('project_milestones', function (Blueprint $table) {
+            $table->date('target_date')->nullable();
+        });
     }
-}
+
+    public function down(): void
+    {
+        Schema::table('project_milestones', function (Blueprint $table) {
+            $table->dropColumn('target_date');
+        });
+    }
+};

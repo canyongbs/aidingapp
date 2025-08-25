@@ -34,33 +34,26 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Report\Filament\Pages;
+namespace AidingApp\Report\Filament\Widgets\Concerns;
 
-use App\Filament\Clusters\ReportLibrary;
-use App\Models\User;
-use Filament\Pages\Dashboard;
+use Carbon\Carbon;
+use Filament\Widgets\Concerns\InteractsWithPageFilters as InteractsWithPageFiltersBase;
 
-class ServiceMonitoring extends Dashboard
+trait InteractsWithPageFilters
 {
-    protected static ?string $cluster = ReportLibrary::class;
+    use InteractsWithPageFiltersBase;
 
-    protected static ?string $navigationGroup = 'Service Management';
-
-    protected static ?string $navigationLabel = 'Service Monitoring';
-
-    protected static ?string $title = 'Service Monitoring';
-
-    protected static string $routePath = 'service-monitoring';
-
-    protected static string $view = 'filament.pages.coming-soon';
-
-    protected static ?int $navigationSort = 70;
-
-    public static function canAccess(): bool
+    public function getStartDate(): ?Carbon
     {
-        /** @var User $user */
-        $user = auth()->user();
+        $startDate = $this->filters['startDate'] ?? null;
 
-        return $user->can('report-library.view-any');
+        return filled($startDate) ? Carbon::parse($startDate)->startOfDay() : null;
+    }
+
+    public function getEndDate(): ?Carbon
+    {
+        $endDate = $this->filters['endDate'] ?? null;
+
+        return filled($endDate) ? Carbon::parse($endDate)->endOfDay() : null;
     }
 }

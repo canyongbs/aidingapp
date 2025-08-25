@@ -34,33 +34,25 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Report\Filament\Pages;
+namespace AidingApp\ServiceManagement\Database\Factories;
 
-use App\Filament\Clusters\ReportLibrary;
-use App\Models\User;
-use Filament\Pages\Dashboard;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestFeedback;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-class ServiceMonitoring extends Dashboard
+/**
+ * @extends Factory<ServiceRequestFeedback>
+ */
+class ServiceRequestFeedbackFactory extends Factory
 {
-    protected static ?string $cluster = ReportLibrary::class;
-
-    protected static ?string $navigationGroup = 'Service Management';
-
-    protected static ?string $navigationLabel = 'Service Monitoring';
-
-    protected static ?string $title = 'Service Monitoring';
-
-    protected static string $routePath = 'service-monitoring';
-
-    protected static string $view = 'filament.pages.coming-soon';
-
-    protected static ?int $navigationSort = 70;
-
-    public static function canAccess(): bool
+    public function definition(): array
     {
-        /** @var User $user */
-        $user = auth()->user();
-
-        return $user->can('report-library.view-any');
+        return [
+            'csat_answer' => $this->faker->numberBetween(1, 5),
+            'nps_answer' => $this->faker->numberBetween(1, 5),
+            'service_request_id' => ServiceRequest::factory(),
+            'contact_id' => Contact::factory(),
+        ];
     }
 }

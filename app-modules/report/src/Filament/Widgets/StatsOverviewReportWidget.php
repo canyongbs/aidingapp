@@ -36,12 +36,15 @@
 
 namespace AidingApp\Report\Filament\Widgets;
 
+use AidingApp\Report\Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Filament\Widgets\StatsOverviewWidget;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 
 abstract class StatsOverviewReportWidget extends StatsOverviewWidget
 {
+    use InteractsWithPageFilters;
+
     #[Locked]
     public string $cacheTag;
 
