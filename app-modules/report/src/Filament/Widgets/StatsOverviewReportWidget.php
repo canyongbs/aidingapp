@@ -36,10 +36,10 @@
 
 namespace AidingApp\Report\Filament\Widgets;
 
-use AidingApp\Report\Filament\Widgets\Concerns\InteractsWithPageFilters;
-use Filament\Widgets\StatsOverviewWidget;
-use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
+use Livewire\Attributes\Locked;
+use Filament\Widgets\StatsOverviewWidget;
+use Filament\Widgets\Concerns\InteractsWithPageFilters;
 
 abstract class StatsOverviewReportWidget extends StatsOverviewWidget
 {
