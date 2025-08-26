@@ -2,7 +2,7 @@ name: Deploy to Dev Environment
 
 on:
   release:
-    types: [prereleased]
+    types: [ prereleased ]
 
 env:
   AWS_REGION: "us-west-2"
@@ -16,15 +16,14 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 #5.0.0
         with:
           submodules: true
           ref: ${{ github.head_ref }}
           token: ${{ secrets.PAT }}
 
       - name: Configure AWS credentials
-        # SHA of release v4.0.2
-        uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502
+        uses: aws-actions/configure-aws-credentials@7474bc4690e29a8392af63c5b98e7449536d5c3a #4.3.1
         with:
           aws-access-key-id: ${{ secrets.DEV_AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.DEV_AWS_SECRET_ACCESS_KEY }}
@@ -32,8 +31,7 @@ jobs:
 
       - name: Login to Amazon ECR
         id: login-ecr
-        # SHA of release v2.0.1
-        uses: aws-actions/amazon-ecr-login@062b18b96a7aff071d4dc91bc00c4c1a7945b076
+        uses: aws-actions/amazon-ecr-login@062b18b96a7aff071d4dc91bc00c4c1a7945b076 #2.0.1
 
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
@@ -50,16 +48,14 @@ jobs:
 
       - name: Fill in the new image ID in the Amazon ECS task definition
         id: task-def
-        # SHA of release v1.5.0
-        uses: aws-actions/amazon-ecs-render-task-definition@9933bf0d77b7f6d52e3886fbb8aae95a677db1ab
+        uses: aws-actions/amazon-ecs-render-task-definition@5cb8c74c1b1ecaec4c8ea82eff82c009333509ce #1.8.0
         with:
           task-definition: "docker/devops/ecs/aidingapp/aidingapp-dev-task-definition.json"
           container-name: "app"
           image: ${{ steps.build-image.outputs.image }}
 
       - name: Deploy Amazon ECS task definition
-        # SHA of release v2.0.0
-        uses: aws-actions/amazon-ecs-deploy-task-definition@0a9a8fb7b39516cf53cc01d453b05c67c6fc7a2c
+        uses: aws-actions/amazon-ecs-deploy-task-definition@4b08990e8909cf36bc2ca95f994312f090c41865 #2.3.4
         with:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
           service: "aidingapp-dev-service"
