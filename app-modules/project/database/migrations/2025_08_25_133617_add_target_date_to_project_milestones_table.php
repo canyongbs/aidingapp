@@ -34,65 +34,27 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Models;
+use App\Features\ProjectMilestoneTargetDateFeature;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\Project\Database\Factories\ProjectMilestoneFactory;
-use AidingApp\Project\Observers\ProjectMilestoneObserver;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use OwenIt\Auditing\Contracts\Auditable;
-
-/**
- * @mixin IdeHelperProjectMilestone
- */
-#[ObservedBy(ProjectMilestoneObserver::class)]
-class ProjectMilestone extends Model implements Auditable
-{
-    /** @use HasFactory<ProjectMilestoneFactory> */
-    use HasFactory;
-
-    use HasUuids;
-    use SoftDeletes;
-    use AuditableTrait;
-
-    protected $fillable = [
-        'title',
-        'description',
-        'status_id',
-        'target_date',
-    ];
-
-    protected $casts = [
-        'target_date' => 'date',
-    ];
-
-    /**
-     * @return BelongsTo<User, $this>
-     */
-    public function createdBy(): BelongsTo
+return new class () extends Migration {
+    public function up(): void
     {
-        return $this->belongsTo(User::class, 'created_by_id');
+        Schema::table('project_milestones', function (Blueprint $table) {
+            $table->date('target_date')->nullable();
+        });
+
+        ProjectMilestoneTargetDateFeature::activate();
     }
 
-    /**
-     * @return BelongsTo<ProjectMilestoneStatus, $this>
-     */
-    public function status(): BelongsTo
+    public function down(): void
     {
-        return $this->belongsTo(ProjectMilestoneStatus::class, 'status_id');
-    }
+        ProjectMilestoneTargetDateFeature::purge();
 
-    /**
-     * @return BelongsTo<Project, $this>
-     */
-    public function project(): BelongsTo
-    {
-        return $this->belongsTo(Project::class);
+        Schema::table('project_milestones', function (Blueprint $table) {
+            $table->dropColumn('target_date');
+        });
     }
-}
+};
