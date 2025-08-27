@@ -36,18 +36,18 @@
 
 namespace AidingApp\Task\Notifications;
 
-use App\Models\User;
-use Illuminate\Bus\Queueable;
-use AidingApp\Task\Models\Task;
-use App\Models\NotificationSetting;
-use Illuminate\Notifications\Notification;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use AidingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactTasks;
 use AidingApp\Contact\Filament\Resources\OrganizationResource;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
-use Filament\Notifications\Notification as FilamentNotification;
 use AidingApp\Project\Filament\Resources\ProjectResource\Pages\ManageTasks;
-use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactTasks;
+use AidingApp\Task\Models\Task;
+use App\Models\NotificationSetting;
+use App\Models\User;
+use Filament\Notifications\Notification as FilamentNotification;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Notification;
 
 class TaskAssignedToUserNotification extends Notification implements ShouldQueue
 {
