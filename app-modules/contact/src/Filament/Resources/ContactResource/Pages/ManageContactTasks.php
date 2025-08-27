@@ -36,26 +36,25 @@
 
 namespace AidingApp\Contact\Filament\Resources\ContactResource\Pages;
 
-use App\Models\User;
-use Filament\Tables\Table;
+use AidingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Task\Enums\TaskStatus;
+use AidingApp\Task\Filament\RelationManagers\BaseTaskRelationManager;
+use AidingApp\Task\Filament\Resources\TaskResource\Components\TaskViewAction;
 use AidingApp\Task\Models\Task;
 use App\Models\Scopes\HasLicense;
-use Filament\Tables\Filters\Filter;
-use AidingApp\Task\Enums\TaskStatus;
-use AidingApp\Contact\Models\Contact;
+use App\Models\User;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
-use Illuminate\Database\Eloquent\Model;
 use App\Filament\Resources\UserResource;
 use App\Features\ConfidentialTaskFeature;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Tables\Actions\CreateAction;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
 use Illuminate\Contracts\Database\Query\Builder;
-use AidingApp\Contact\Filament\Resources\ContactResource;
-use AidingApp\Task\Filament\RelationManagers\BaseTaskRelationManager;
-use AidingApp\Task\Filament\Resources\TaskResource\Components\TaskViewAction;
+use Illuminate\Database\Eloquent\Model;
 
 class ManageContactTasks extends BaseTaskRelationManager
 {
@@ -108,8 +107,10 @@ class ManageContactTasks extends BaseTaskRelationManager
                     ->relationship(
                         'assignedTo',
                         'name',
-                        fn (Builder $query) => $query->tap(new HasLicense(
-                            assert($this->getOwnerRecord() instanceOf User) ? $this->getOwnerRecord()->getLicenseType() : null)
+                        fn (Builder $query) => $query->tap(
+                            new HasLicense(
+                                assert($this->getOwnerRecord() instanceof User) ? $this->getOwnerRecord()->getLicenseType() : null
+                            )
                         ),
                     )
                     ->searchable()
