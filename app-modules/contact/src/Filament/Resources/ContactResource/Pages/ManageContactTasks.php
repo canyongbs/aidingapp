@@ -46,7 +46,6 @@ use App\Features\ConfidentialTaskFeature;
 use App\Filament\Resources\UserResource;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Scopes\HasLicense;
-use App\Models\User;
 use Filament\Tables\Actions\CreateAction;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\EditAction;
@@ -110,7 +109,7 @@ class ManageContactTasks extends BaseTaskRelationManager
                         'name',
                         fn (Builder $query) => $query->tap(
                             new HasLicense(
-                                assert($this->getOwnerRecord() instanceof User) ? $this->getOwnerRecord()->getLicenseType() : null
+                                assert($this->getOwnerRecord() instanceof Contact) ? $this->getOwnerRecord()->getLicenseType() : null
                             )
                         ),
                     )
