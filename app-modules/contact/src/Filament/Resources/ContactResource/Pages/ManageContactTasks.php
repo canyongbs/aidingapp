@@ -44,7 +44,6 @@ use Filament\Tables\Filters\Filter;
 use AidingApp\Task\Enums\TaskStatus;
 use AidingApp\Contact\Models\Contact;
 use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Model;
 use App\Filament\Resources\UserResource;
@@ -53,8 +52,6 @@ use App\Filament\Tables\Columns\IdColumn;
 use Filament\Tables\Actions\CreateAction;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DetachBulkAction;
 use Illuminate\Contracts\Database\Query\Builder;
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Task\Filament\RelationManagers\BaseTaskRelationManager;
@@ -72,7 +69,7 @@ class ManageContactTasks extends BaseTaskRelationManager
     // TODO: Automatically set from Filament based on relationship name
     protected static ?string $breadcrumb = 'Tasks';
 
-      public function table(Table $table): Table
+    public function table(Table $table): Table
     {
         return $table
             ->recordTitleAttribute('description')
@@ -148,5 +145,5 @@ class ManageContactTasks extends BaseTaskRelationManager
                 EditAction::make(),
             ])
             ->recordUrl(null);
-        }
+    }
 }
