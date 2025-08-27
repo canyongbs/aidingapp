@@ -36,28 +36,25 @@
 
 namespace AidingApp\Contact\Filament\Resources\ContactResource\Pages;
 
-use Filament\Tables\Table;
-use AidingApp\Task\Models\Task;
-use App\Models\Scopes\HasLicense;
-use Filament\Tables\Filters\Filter;
-use AidingApp\Task\Enums\TaskStatus;
-use AidingApp\Contact\Models\Contact;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\ViewAction;
-use Filament\Tables\Columns\TextColumn;
-use Illuminate\Database\Eloquent\Model;
-use App\Filament\Resources\UserResource;
-use App\Features\ConfidentialTaskFeature;
-use App\Filament\Tables\Columns\IdColumn;
-use Filament\Tables\Actions\CreateAction;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DetachBulkAction;
-use Illuminate\Contracts\Database\Query\Builder;
 use AidingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Task\Enums\TaskStatus;
 use AidingApp\Task\Filament\RelationManagers\BaseTaskRelationManager;
 use AidingApp\Task\Filament\Resources\TaskResource\Components\TaskViewAction;
+use AidingApp\Task\Models\Task;
+use App\Features\ConfidentialTaskFeature;
+use App\Filament\Resources\UserResource;
+use App\Filament\Tables\Columns\IdColumn;
+use App\Models\Scopes\HasLicense;
+use Filament\Tables\Actions\CreateAction;
+use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
+use Illuminate\Contracts\Database\Query\Builder;
+use Illuminate\Database\Eloquent\Model;
 
 class ManageContactTasks extends BaseTaskRelationManager
 {
@@ -71,7 +68,7 @@ class ManageContactTasks extends BaseTaskRelationManager
     // TODO: Automatically set from Filament based on relationship name
     protected static ?string $breadcrumb = 'Tasks';
 
-      public function table(Table $table): Table
+    public function table(Table $table): Table
     {
         return $table
             ->recordTitleAttribute('description')
@@ -148,5 +145,5 @@ class ManageContactTasks extends BaseTaskRelationManager
                 DeleteAction::make(),
             ])
             ->recordUrl(null);
-        }
+    }
 }
