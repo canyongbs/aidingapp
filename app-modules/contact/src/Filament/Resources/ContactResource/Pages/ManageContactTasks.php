@@ -36,6 +36,7 @@
 
 namespace AidingApp\Contact\Filament\Resources\ContactResource\Pages;
 
+use Livewire\str;
 use Filament\Tables\Table;
 use AidingApp\Task\Models\Task;
 use App\Models\Scopes\HasLicense;
@@ -116,7 +117,7 @@ class ManageContactTasks extends BaseTaskRelationManager
                     ->multiple(),
                 SelectFilter::make('status')
                     ->label('Status')
-                    ->options(collect(TaskStatus::cases())->mapWithKeys(fn (TaskStatus $direction) => [$direction->value => \Livewire\str($direction->name)->title()->headline()]))
+                    ->options(collect(TaskStatus::cases())->mapWithKeys(fn (TaskStatus $direction) => [$direction->value => str($direction->name)->title()->headline()]))
                     ->multiple()
                     ->default(
                         [
@@ -145,7 +146,6 @@ class ManageContactTasks extends BaseTaskRelationManager
             ->actions([
                 TaskViewAction::make(),
                 EditAction::make(),
-                DeleteAction::make(),
             ])
             ->recordUrl(null);
         }
