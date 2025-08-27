@@ -143,6 +143,7 @@ class ManageContactTasks extends BaseTaskRelationManager
             ->actions([
                 TaskViewAction::make(),
                 EditAction::make(),
+                DeleteAction::make(),
             ])
             ->recordUrl(null);
     }
