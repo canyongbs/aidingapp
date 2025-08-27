@@ -52,7 +52,7 @@ jobs:
           key: ${{ runner.os }}-phpext-${{ env.php-version }}-${{ env.php-extensions-key }}
           restore-keys: ${{ runner.os }}-phpext-${{ env.php-version }}
 
-      - uses: shivammathur/setup-php@20529878ed81ef8e78ddf08b480401e6101a850f #2.35.3
+      - uses: shivammathur/setup-php@ec406be512d7077f68eed36e63f4d91bc006edc4 #2.35.4
         with:
           php-version: ${{ env.php-version }}
           coverage: none
@@ -179,7 +179,7 @@ jobs:
           key: ${{ runner.os }}-phpext-${{ needs.prep-and-code-consistency.outputs.php-version }}-${{ needs.prep-and-code-consistency.outputs.php-extensions-key }}
           restore-keys: ${{ runner.os }}-phpext-${{ needs.prep-and-code-consistency.outputs.php-version }}
 
-      - uses: shivammathur/setup-php@20529878ed81ef8e78ddf08b480401e6101a850f #2.35.3
+      - uses: shivammathur/setup-php@ec406be512d7077f68eed36e63f4d91bc006edc4 #2.35.4
         with:
           php-version: ${{ needs.prep-and-code-consistency.outputs.php-version }}
           coverage: none
@@ -295,7 +295,7 @@ jobs:
           key: ${{ runner.os }}-phpext-${{ needs.prep-and-code-consistency.outputs.php-version }}-${{ needs.prep-and-code-consistency.outputs.php-extensions-key }}
           restore-keys: ${{ runner.os }}-phpext-${{ needs.prep-and-code-consistency.outputs.php-version }}
 
-      - uses: shivammathur/setup-php@20529878ed81ef8e78ddf08b480401e6101a850f #2.35.3
+      - uses: shivammathur/setup-php@ec406be512d7077f68eed36e63f4d91bc006edc4 #2.35.4
         with:
           php-version: ${{ needs.prep-and-code-consistency.outputs.php-version }}
           coverage: none
