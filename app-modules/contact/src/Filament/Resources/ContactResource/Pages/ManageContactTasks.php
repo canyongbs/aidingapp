@@ -50,6 +50,7 @@ use App\Filament\Resources\UserResource;
 use App\Features\ConfidentialTaskFeature;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Tables\Actions\CreateAction;
+use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Contracts\Database\Query\Builder;
 use AidingApp\Contact\Filament\Resources\ContactResource;
