@@ -36,20 +36,44 @@
 
 namespace AidingApp\Project\Filament\Resources\ProjectResource\Pages;
 
+use AidingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Contact\Models\Contact;
 use AidingApp\Project\Filament\Resources\ProjectResource;
+use AidingApp\Task\Enums\TaskStatus;
+use AidingApp\Task\Filament\Concerns\TaskEditForm;
+use AidingApp\Task\Filament\Concerns\TaskViewActionInfoList;
+use AidingApp\Task\Filament\Resources\TaskResource\Components\TaskViewAction;
 use AidingApp\Task\Models\Task;
 use App\Features\ConfidentialTaskFeature;
+use App\Filament\Resources\UserResource;
+use App\Filament\Tables\Columns\IdColumn;
+use App\Models\Scopes\EducatableSearch;
+use App\Models\User;
+use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Fieldset;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
 use Filament\Resources\Pages\ManageRelatedRecords;
-use Filament\Tables\Actions\AssociateAction;
 use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DissociateAction;
-use Filament\Tables\Actions\DissociateBulkAction;
+use Filament\Tables\Actions\CreateAction;
+use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\DeleteBulkAction;
+use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
 class ManageTasks extends ManageRelatedRecords
 {
+    use TaskEditForm;
+    use TaskViewActionInfoList;
+
     protected static string $resource = ProjectResource::class;
 
     protected static string $relationship = 'tasks';
@@ -64,28 +88,141 @@ class ManageTasks extends ManageRelatedRecords
         return $table
             ->recordTitleAttribute('title')
             ->columns([
+                IdColumn::make(),
                 TextColumn::make('title')
                     ->searchable()
-                    ->sortable()
+                    ->wrap()
+                    ->limit(50)
                     ->icon(fn ($record) => ConfidentialTaskFeature::active() && $record->is_confidential ? 'heroicon-m-lock-closed' : null)
                     ->tooltip(fn ($record) => ConfidentialTaskFeature::active() && $record->is_confidential ? 'Confidential' : null),
+                TextColumn::make('status')
+                    ->formatStateUsing(fn (TaskStatus $state): string => str($state->value)->title()->headline())
+                    ->badge(),
+                TextColumn::make('due')
+                    ->label('Due Date')
+                    ->sortable(),
+                TextColumn::make('assignedTo.name')
+                    ->label('Assigned To')
+                    ->url(fn (Task $record) => $record->assignedTo ? UserResource::getUrl('view', ['record' => $record->assignedTo]) : null)
+                    ->hidden(function (Table $table) {
+                        return $table->getFilter('my_tasks')->getState()['isActive'] ?? false;
+                    }),
+                TextColumn::make('concern.display_name')
+                    ->label('Related To')
+                    ->getStateUsing(fn (Task $record): ?string => $record->concern?->{$record->concern::displayNameKey()})
+                    ->searchable(query: fn (Builder $query, $search) => $query->tap(new EducatableSearch(relationship: 'concern', search: $search)))
+                    ->url(fn (Task $record) => match ($record->concern ? $record->concern::class : null) {
+                        Contact::class => ContactResource::getUrl('view', ['record' => $record->concern]),
+                        default => null,
+                    }),
+            ])->filters([
+                Filter::make('my_tasks')
+                    ->label('My Tasks')
+                    ->query(
+                        fn (Builder $query) => $query->where('assigned_to', auth()->id())
+                    )
+                    ->form([
+                        Checkbox::make('isActive')
+                            ->label('My Tasks')
+                            ->afterStateUpdated(fn (Set $set, $state) => $state ? $set('../my_teams_tasks.isActive', false) : null)
+                            ->default(true),
+                    ]),
+                Filter::make('my_teams_tasks')
+                    ->label("My Team's Tasks")
+                    ->query(
+                        function (Builder $query) {
+                            /** @var User $user */
+                            $user = auth()->user();
+
+                            $teamUserIds = $user->team->users()->get()->pluck('id');
+
+                            return $query->whereIn('assigned_to', $teamUserIds)->get();
+                        }
+                    )
+                    ->form([
+                        Checkbox::make('isActive')
+                            ->label("My Team's Tasks")
+                            ->afterStateUpdated(function (Set $set, string $state) {
+                                return $state ? $set('../my_tasks.isActive', false) : null;
+                            }),
+                    ]),
+                SelectFilter::make('assignedTo')
+                    ->label('Assigned To')
+                    ->relationship('assignedTo', 'name')
+                    ->searchable()
+                    ->multiple(),
+                SelectFilter::make('status')
+                    ->label('Status')
+                    ->options(collect(TaskStatus::cases())->mapWithKeys(fn (TaskStatus $direction) => [$direction->value => str($direction->name)->title()->headline()]))
+                    ->multiple()
+                    ->default([
+                        TaskStatus::Pending->value,
+                        TaskStatus::InProgress->value,
+                    ]),
             ])
             ->headerActions([
-                AssociateAction::make()
-                    ->recordSelectOptionsQuery(
-                        fn (Builder $query) => $query->whereNull('project_id')
-                    )
-                    ->preloadRecordSelect()
-                    ->authorize('updateAny', Task::class),
+                CreateAction::make()
+                    ->authorize('create', Task::class)
+                    ->form([
+                        Fieldset::make('Confidentiality')
+                            ->visible(ConfidentialTaskFeature::active())
+                            ->schema([
+                                Checkbox::make('is_confidential')
+                                    ->label('Confidential')
+                                    ->live()
+                                    ->columnSpanFull(),
+                                Select::make('confidential_task_users')
+                                    ->relationship('confidentialAccessUsers', 'name')
+                                    ->preload()
+                                    ->label('Users')
+                                    ->multiple()
+                                    ->exists('users', 'id')
+                                    ->visible(fn (Get $get) => $get('is_confidential')),
+                                Select::make('confidential_task_teams')
+                                    ->relationship('confidentialAccessTeams', 'name')
+                                    ->preload()
+                                    ->label('Teams')
+                                    ->multiple()
+                                    ->exists('teams', 'id')
+                                    ->visible(fn (Get $get) => $get('is_confidential')),
+                            ]),
+                        TextInput::make('title')
+                            ->required()
+                            ->maxLength(100)
+                            ->string(),
+                        Textarea::make('description')
+                            ->required()
+                            ->string(),
+                        DateTimePicker::make('due')
+                            ->label('Due Date')
+                            ->native(false),
+                        Select::make('assigned_to')
+                            ->label('Assigned To')
+                            ->relationship('assignedTo', 'name', $this->scopeAssignmentRelationshipBasedOnConcern())
+                            ->nullable()
+                            ->searchable(['name', 'email'])
+                            ->default(auth()->id()),
+                        Select::make('concern_id')
+                            ->label('Related To')
+                            ->relationship('concern', 'first_name')
+                            ->nullable()
+                            ->afterStateUpdated($this->updateAssignmentAfterConcernSelected()),
+                    ])
+                    ->modalHeading('Create Task')
+                    ->modalSubmitActionLabel('Create Task'),
             ])
             ->actions([
-                DissociateAction::make()
-                    ->authorize('updateAny', Task::class),
+                TaskViewAction::make()
+                    ->authorize('view', Task::class),
+                EditAction::make()
+                    ->form(fn () => $this->editFormFields())
+                    ->authorize('update', Task::class),
+                DeleteAction::make()
+                    ->authorize('delete', Task::class),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
-                    DissociateBulkAction::make()
-                        ->authorize('updateAny', Task::class),
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }

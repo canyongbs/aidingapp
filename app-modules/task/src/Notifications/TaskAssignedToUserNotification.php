@@ -37,9 +37,10 @@
 namespace AidingApp\Task\Notifications;
 
 use AidingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactTasks;
 use AidingApp\Contact\Filament\Resources\OrganizationResource;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
-use AidingApp\Task\Filament\Resources\TaskResource\Pages\ListTasks;
+use AidingApp\Project\Filament\Resources\ProjectResource\Pages\ManageTasks;
 use AidingApp\Task\Models\Task;
 use App\Models\NotificationSetting;
 use App\Models\User;
@@ -61,7 +62,7 @@ class TaskAssignedToUserNotification extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['mail', 'database'];
     }
 
     public function toMail(object $notifiable): MailMessage
@@ -77,16 +78,24 @@ class TaskAssignedToUserNotification extends Notification implements ShouldQueue
 
     public function toDatabase(object $notifiable): array
     {
-        $url = ListTasks::getUrl(['tableActionRecord' => $this->task, 'tableAction' => 'view']);
+        $url = match (true) {
+            filled($this->task->project) => ManageTasks::getUrl(['record' => $this->task->project_id, 'tableActionRecord' => $this->task, 'tableAction' => 'view']),
+            filled($this->task->concern) => ManageContactTasks::getUrl(['record' => $this->task->concern_id, 'tableActionRecord' => $this->task, 'tableAction' => 'view']),
+            default => null,
+        };
 
         $title = str($this->task->title)->limit();
 
+        $baseMessage = filled($url)
+            ? "You have been assigned a new Task: <a href='{$url}' target='_blank' class='underline'>{$title}</a>"
+            : "You have been assigned a new Task: {$title}";
+
         $message = match (true) {
-            is_null($this->task->concern) => "You have been assigned a new Task: <a href='{$url}' target='_blank' class='underline'>{$title}</a>",
+            is_null($this->task->concern) => $baseMessage,
 
-            is_null($this->task->concern->organization) => "You have been assigned a new Task: <a href='{$url}' target='_blank' class='underline'>{$title}</a> related to Contact <a href='" . ContactResource::getUrl('view', ['record' => $this->task->concern]) . "' target='_blank' class='underline'>{$this->task->concern?->full_name}</a>",
+            is_null($this->task->concern->organization) => "{$baseMessage} related to Contact <a href='" . ContactResource::getUrl('view', ['record' => $this->task->concern]) . "' target='_blank' class='underline'>{$this->task->concern?->full_name}</a>",
 
-            ! is_null($this->task->concern->organization) => "You have been assigned a new Task: <a href='{$url}' target='_blank' class='underline'>{$title}</a> related to Contact <a href='" . ContactResource::getUrl('view', ['record' => $this->task->concern]) . "' target='_blank' class='underline'>{$this->task->concern?->full_name}</a><a href='" . OrganizationResource::getUrl('view', ['record' => $this->task->concern->organization]) . "' target='_blank' class='underline'>({$this->task->concern->organization?->name})</a>",
+            ! is_null($this->task->concern->organization) => "{$baseMessage} related to Contact <a href='" . ContactResource::getUrl('view', ['record' => $this->task->concern]) . "' target='_blank' class='underline'>{$this->task->concern?->full_name}</a><a href='" . OrganizationResource::getUrl('view', ['record' => $this->task->concern->organization]) . "' target='_blank' class='underline'>({$this->task->concern->organization?->name})</a>",
         };
 
         return FilamentNotification::make()
