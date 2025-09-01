@@ -81,6 +81,7 @@ trait HandlesServiceRequestTemplateContent
     public function getMergeData(): array
     {
         return [
+            'contact name' => $this->serviceRequest->respondent->{$this->serviceRequest->respondent::displayNameKey()},
             'service request number' => $this->serviceRequest->service_request_number,
             'created date' => $this->serviceRequest->created_at->format('d-m-Y H:i'),
             'updated date' => $this->serviceRequest->updated_at->format('d-m-Y H:i'),
@@ -105,15 +106,19 @@ trait HandlesServiceRequestTemplateContent
         }
 
         $content['content'] = array_map(function ($block) use ($urlType) {
-            if ($block['type'] === 'tiptapBlock' &&
-                ($block['attrs']['type'] ?? null) === 'serviceRequestTypeEmailTemplateButtonBlock') {
+            if (
+                $block['type'] === 'tiptapBlock' &&
+                ($block['attrs']['type'] ?? null) === 'serviceRequestTypeEmailTemplateButtonBlock'
+            ) {
                 $block['attrs']['data']['url'] = $urlType == ServiceRequestTypeEmailTemplateRole::Customer ? route('portal.service-request.show', $this->serviceRequest) : ServiceRequestResource::getUrl('view', [
                     'record' => $this->serviceRequest,
                 ]);
             }
 
-            if ($block['type'] === 'tiptapBlock' &&
-                ($block['attrs']['type'] ?? null) === 'surveyResponseEmailTemplateTakeSurveyButtonBlock') {
+            if (
+                $block['type'] === 'tiptapBlock' &&
+                ($block['attrs']['type'] ?? null) === 'surveyResponseEmailTemplateTakeSurveyButtonBlock'
+            ) {
                 $block['attrs']['data']['url'] = route('feedback.service.request', $this->serviceRequest);
             }
 
