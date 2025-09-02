@@ -83,17 +83,6 @@ trait HandlesServiceRequestTemplateContent
     {
         $assignedToKey = AssignedToMergeTagRenameFeatureFlag::active() ? 'assigned staff name' : 'assigned to';
 
-        // return [
-        //     'service request number' => $this->serviceRequest->service_request_number,
-        //     'created date' => $this->serviceRequest->created_at->format('d-m-Y H:i'),
-        //     'updated date' => $this->serviceRequest->updated_at->format('d-m-Y H:i'),
-        //     'assigned to' => $this->serviceRequest->respondent->full_name,
-        //     'status' => $this->serviceRequest->status->name,
-        //     'title' => $this->serviceRequest->title,
-        //     'type' => $this->serviceRequest->priority->type->name,
-        //     'description' => $this->serviceRequest->close_details,
-        // ];
-
         return [
             'contact name' => $this->serviceRequest->respondent->{$this->serviceRequest->respondent::displayNameKey()},
             'service request number' => $this->serviceRequest->service_request_number,
