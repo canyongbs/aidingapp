@@ -44,6 +44,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use App\Concerns\EditPageRedirection;
+use App\Features\AssignedToMergeTagRenameFeatureFlag;
 use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Tabs\Tab;
 use Filament\Forms\Form;
@@ -139,7 +140,16 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
                 ->placeholder('Enter the email subject here...')
                 ->extraInputAttributes(['style' => 'min-height: 2rem; overflow-y:none;'])
                 ->disableToolbarMenus()
-                ->mergeTags(['contact name', 'service request number', 'created date', 'updated date', 'status', 'assigned to', 'title', 'type'])
+                ->mergeTags([
+                    'contact name',
+                    'service request number',
+                    'created date',
+                    'updated date',
+                    'status',
+                    AssignedToMergeTagRenameFeatureFlag::active() ? 'assigned staff name' : 'assigned to',
+                    'title',
+                    'type',
+                ])
                 ->showMergeTagsInBlocksPanel(false)
                 ->helperText('You may use “merge tags” to substitute information about a service request into your subject line. Insert a “{{“ in the subject line field to see a list of available merge tags'),
 
@@ -148,7 +158,17 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
                 ->profile('email_template')
                 ->placeholder('Enter the email body here...')
                 ->extraInputAttributes(['style' => 'min-height: 12rem;'])
-                ->mergeTags(['contact name', 'service request number', 'created date', 'updated date', 'status', 'assigned to', 'title', 'description', 'type'])
+                ->mergeTags([
+                    'contact name',
+                    'service request number',
+                    'created date',
+                    'updated date',
+                    'status',
+                    AssignedToMergeTagRenameFeatureFlag::active() ? 'assigned staff name' : 'assigned to',
+                    'title',
+                    'description',
+                    'type',
+                ])
                 ->blocks([
                     ServiceRequestTypeEmailTemplateButtonBlock::class,
                     SurveyResponseEmailTemplateTakeSurveyButtonBlock::class,
