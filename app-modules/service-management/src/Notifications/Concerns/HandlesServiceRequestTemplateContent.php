@@ -88,7 +88,7 @@ trait HandlesServiceRequestTemplateContent
             'service request number' => $this->serviceRequest->service_request_number,
             'created date' => $this->serviceRequest->created_at->format('d-m-Y H:i'),
             'updated date' => $this->serviceRequest->updated_at->format('d-m-Y H:i'),
-            'assigned to' => $this->serviceRequest->respondent->full_name,
+            ...[$assignedToKey => $this->serviceRequest->assignedTo->user->name ?? 'Unassigned'],
             'status' => $this->serviceRequest->status->name,
             'title' => $this->serviceRequest->title,
             'type' => $this->serviceRequest->priority->type->name,
@@ -100,6 +100,7 @@ trait HandlesServiceRequestTemplateContent
         // Then uncomment and use the return block below.
 
         // return [
+        //     'contact name' => $this->serviceRequest->respondent->{$this->serviceRequest->respondent::displayNameKey()},
         //     'service request number' => $this->serviceRequest->service_request_number,
         //     'created date' => $this->serviceRequest->created_at->format('d-m-Y H:i'),
         //     'updated date' => $this->serviceRequest->updated_at->format('d-m-Y H:i'),
