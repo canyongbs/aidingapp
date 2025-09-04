@@ -78,7 +78,7 @@ class EditServiceRequestTypeAutomaticEmailCreation extends EditRecord
 
                                 assert(! is_null($currentTenantDomain));
 
-                                return rtrim($currentTenantDomain, '.' . parse_url(Config::string('app.landlord_url'), PHP_URL_HOST)) . '-';
+                                return explode('.', $currentTenantDomain)[0] . '-';
                             })
                             ->suffix(fn () => '@' . Config::string('mail.from.root_domain'))
                             ->required()
