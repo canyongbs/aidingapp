@@ -44,7 +44,6 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use App\Concerns\EditPageRedirection;
-use App\Features\AssignedToMergeTagRenameFeatureFlag;
 use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Tabs\Tab;
 use Filament\Forms\Form;
@@ -146,7 +145,7 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
                     'created date',
                     'updated date',
                     'status',
-                    AssignedToMergeTagRenameFeatureFlag::active() ? 'assigned staff name' : 'assigned to',
+                    'assigned staff name',
                     'title',
                     'type',
                 ])
@@ -164,7 +163,7 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
                     'created date',
                     'updated date',
                     'status',
-                    AssignedToMergeTagRenameFeatureFlag::active() ? 'assigned staff name' : 'assigned to',
+                    'assigned staff name',
                     'title',
                     'description',
                     'type',
