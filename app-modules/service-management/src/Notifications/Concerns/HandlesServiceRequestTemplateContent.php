@@ -40,7 +40,6 @@ use AidingApp\ServiceManagement\Actions\GenerateServiceRequestTypeEmailTemplateC
 use AidingApp\ServiceManagement\Actions\GenerateServiceRequestTypeEmailTemplateSubject;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
-use App\Features\AssignedToMergeTagRenameFeatureFlag;
 use Illuminate\Support\HtmlString;
 
 trait HandlesServiceRequestTemplateContent
@@ -81,35 +80,17 @@ trait HandlesServiceRequestTemplateContent
      */
     public function getMergeData(): array
     {
-        $assignedToKey = AssignedToMergeTagRenameFeatureFlag::active() ? 'assigned staff name' : 'assigned to';
-
         return [
             'contact name' => $this->serviceRequest->respondent->{$this->serviceRequest->respondent::displayNameKey()},
             'service request number' => $this->serviceRequest->service_request_number,
             'created date' => $this->serviceRequest->created_at->format('d-m-Y H:i'),
             'updated date' => $this->serviceRequest->updated_at->format('d-m-Y H:i'),
-            ...[$assignedToKey => $this->serviceRequest->assignedTo->user->name ?? 'Unassigned'],
+            'assigned staff name' => $this->serviceRequest->assignedTo->user->name ?? 'Unassigned',
             'status' => $this->serviceRequest->status->name,
             'title' => $this->serviceRequest->title,
             'type' => $this->serviceRequest->priority->type->name,
             'description' => $this->serviceRequest->close_details,
         ];
-
-        // @todo AssignedToMergeTagRenameFeatureFlag:
-        // Once this feature flag is removed, delete the $assignedToKey line and the current return block.
-        // Then uncomment and use the return block below.
-
-        // return [
-        //     'contact name' => $this->serviceRequest->respondent->{$this->serviceRequest->respondent::displayNameKey()},
-        //     'service request number' => $this->serviceRequest->service_request_number,
-        //     'created date' => $this->serviceRequest->created_at->format('d-m-Y H:i'),
-        //     'updated date' => $this->serviceRequest->updated_at->format('d-m-Y H:i'),
-        //     'assigned staff name' => $this->serviceRequest->assignedTo->user->name ?? 'Unassigned',
-        //     'status' => $this->serviceRequest->status->name,
-        //     'title' => $this->serviceRequest->title,
-        //     'type' => $this->serviceRequest->priority->type->name,
-        //     'description' => $this->serviceRequest->close_details,
-        // ];
     }
 
     /**
