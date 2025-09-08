@@ -46,8 +46,11 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ServiceRequestTimeline;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ViewServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Models\User;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
 class ServiceRequestResource extends Resource
 {
@@ -58,6 +61,62 @@ class ServiceRequestResource extends Resource
     protected static ?string $navigationGroup = 'Service Management';
 
     protected static ?int $navigationSort = 10;
+
+    protected static ?string $recordTitleAttribute = 'service_request_number';
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['service_request_number', 'title'];
+    }
+
+    /**
+     * @return Builder<ServiceRequest>
+     */
+    public static function getGlobalSearchEloquentQuery(): Builder
+    {
+        $user = auth()->user();
+
+        return parent::getGlobalSearchEloquentQuery()
+            ->with(['status', 'priority.type', 'respondent'])
+            ->when(! $user instanceof User || ! $user->isSuperAdmin(), function (Builder $query) use ($user) {
+                if (! $user instanceof User) {
+                    return $query->whereRaw('0 = 1');
+                }
+
+                $userTeamId = $user->team?->getKey();
+
+                if (! $userTeamId) {
+                    return $query->whereRaw('0 = 1');
+                }
+
+                return $query->where(function (Builder $q) use ($userTeamId) {
+                    $q->whereHas('priority.type.managers', function (Builder $query) use ($userTeamId) {
+                        $query->where('teams.id', $userTeamId);
+                    })->orWhereHas('priority.type.auditors', function (Builder $query) use ($userTeamId) {
+                        $query->where('teams.id', $userTeamId);
+                    });
+                });
+            });
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        assert($record instanceof ServiceRequest);
+
+        return array_filter([
+            'Service Request Number' => $record->service_request_number,
+            'Title' => $record->title,
+            'Status' => $record->status?->name,
+            'Type' => $record->priority?->type?->name,
+            'Priority' => $record->priority?->name,
+            'Related To' => $record->respondent->display_name,
+        ], fn (mixed $value): bool => filled($value));
+    }
+
+    public static function getGlobalSearchResultUrl(Model $record): ?string
+    {
+        return static::getUrl('view', ['record' => $record]);
+    }
 
     public static function shouldShowFormSubmission(Page $page): bool
     {
