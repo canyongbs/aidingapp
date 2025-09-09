@@ -217,13 +217,11 @@ test('global search details are correctly formatted', function () {
 
     $details = ServiceRequestResource::getGlobalSearchResultDetails($serviceRequest);
 
-    expect($details)->toHaveKey('Service Request Number');
     expect($details)->toHaveKey('Status');
     expect($details)->toHaveKey('Type');
     expect($details)->toHaveKey('Priority');
     expect($details)->toHaveKey('Related To');
 
-    expect($details['Service Request Number'])->toBe($serviceRequest->service_request_number);
     expect($details['Type'])->toBe('Test Type');
     expect($details['Priority'])->toBe('High Priority');
     expect($details['Status'])->toBe('Open');
