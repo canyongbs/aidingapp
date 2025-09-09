@@ -75,22 +75,19 @@ class ServiceRequestResource extends Resource
     public static function getGlobalSearchEloquentQuery(): Builder
     {
         $user = auth()->user();
+        assert($user instanceof User);
 
         return parent::getGlobalSearchEloquentQuery()
             ->with(['status', 'priority.type', 'respondent'])
-            ->when(! $user instanceof User || ! $user->isSuperAdmin(), function (Builder $query) use ($user) {
-                if (! $user instanceof User) {
-                    return $query->whereRaw('0 = 1');
-                }
-
+            ->when(! $user->isSuperAdmin(), function (Builder $query) use ($user) {
                 $userTeamId = $user->team?->getKey();
 
                 if (! $userTeamId) {
                     return $query->whereRaw('0 = 1');
                 }
 
-                return $query->where(function (Builder $q) use ($userTeamId) {
-                    $q->whereHas('priority.type.managers', function (Builder $query) use ($userTeamId) {
+                return $query->where(function (Builder $query) use ($userTeamId) {
+                    $query->whereHas('priority.type.managers', function (Builder $query) use ($userTeamId) {
                         $query->where('teams.id', $userTeamId);
                     })->orWhereHas('priority.type.auditors', function (Builder $query) use ($userTeamId) {
                         $query->where('teams.id', $userTeamId);
