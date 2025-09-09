@@ -101,7 +101,6 @@ class ServiceRequestResource extends Resource
         assert($record instanceof ServiceRequest);
 
         return array_filter([
-            'Service Request Number' => $record->service_request_number,
             'Title' => $record->title,
             'Status' => $record->status?->name,
             'Type' => $record->priority?->type?->name,
