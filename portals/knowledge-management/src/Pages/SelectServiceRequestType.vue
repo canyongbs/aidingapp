@@ -127,7 +127,10 @@
                                 <div class="w-full">
                                     <h3 class="text-base font-semibold leading-6 text-gray-900">
                                         <router-link
-                                            :to="{ name: 'create-service-request-from-type', params: { typeId: type.id } }"
+                                            :to="{
+                                                name: 'create-service-request-from-type',
+                                                params: { typeId: type.id },
+                                            }"
                                         >
                                             <span class="absolute inset-0" aria-hidden="true" />
                                             {{ type.name }}
