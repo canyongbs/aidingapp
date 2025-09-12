@@ -104,61 +104,63 @@
                 </div>
             </div>
 
-            <Breadcrumbs
-                class="px-6 py-8"
-                currentCrumb="New Request"
-                :breadcrumbs="[{ name: 'Help Center', route: 'home' }]"
-            ></Breadcrumbs>
+            <div class="max-w-7xl mx-auto">
+                <Breadcrumbs
+                    class="py-8"
+                    currentCrumb="New Request"
+                    :breadcrumbs="[{ name: 'Help Center', route: 'home' }]"
+                ></Breadcrumbs>
 
-            <main class="px-6">
-                <h3 class="text-xl">Select Category</h3>
+                <main>
+                    <h3 class="text-xl">Select Category</h3>
 
-                <div class="my-4 grid gap-y-4">
-                    <div v-for="type in types" :key="type.id" class="group relative bg-white p-6 rounded shadow">
-                        <div class="flex items-center gap-x-3">
-                            <span
-                                v-if="type.icon"
-                                v-html="type.icon"
-                                class="pointer-events-none text-brand-600 dark:text-brand-400"
-                                aria-hidden="true"
-                            >
-                            </span>
-                            <div class="w-full">
-                                <h3 class="text-base font-semibold leading-6 text-gray-900">
-                                    <router-link
-                                        :to="{ name: 'create-service-request-from-type', params: { typeId: type.id } }"
-                                    >
-                                        <span class="absolute inset-0" aria-hidden="true" />
-                                        {{ type.name }}
-                                    </router-link>
-                                </h3>
-                                <p class="mt-2 text-sm text-gray-500">
-                                    {{ type.description }}
-                                </p>
-                            </div>
-                            <span
-                                class="pointer-events-none text-gray-300 group-hover:text-brand-600 group-hover:dark:text-brand-400"
-                                aria-hidden="true"
-                            >
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke-width="1.5"
-                                    stroke="currentColor"
-                                    class="w-6 h-6"
+                    <div class="my-4 grid gap-y-4">
+                        <div v-for="type in types" :key="type.id" class="group relative bg-white p-6 rounded shadow">
+                            <div class="flex items-center gap-x-3">
+                                <span
+                                    v-if="type.icon"
+                                    v-html="type.icon"
+                                    class="pointer-events-none text-brand-600 dark:text-brand-400"
+                                    aria-hidden="true"
                                 >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="m8.25 4.5 7.5 7.5-7.5 7.5"
-                                    />
-                                </svg>
-                            </span>
+                                </span>
+                                <div class="w-full">
+                                    <h3 class="text-base font-semibold leading-6 text-gray-900">
+                                        <router-link
+                                            :to="{ name: 'create-service-request-from-type', params: { typeId: type.id } }"
+                                        >
+                                            <span class="absolute inset-0" aria-hidden="true" />
+                                            {{ type.name }}
+                                        </router-link>
+                                    </h3>
+                                    <p class="mt-2 text-sm text-gray-500">
+                                        {{ type.description }}
+                                    </p>
+                                </div>
+                                <span
+                                    class="pointer-events-none text-gray-300 group-hover:text-brand-600 group-hover:dark:text-brand-400"
+                                    aria-hidden="true"
+                                >
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke-width="1.5"
+                                        stroke="currentColor"
+                                        class="w-6 h-6"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="m8.25 4.5 7.5 7.5-7.5 7.5"
+                                        />
+                                    </svg>
+                                </span>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </main>
+                </main>
+            </div>
         </div>
     </div>
 </template>
