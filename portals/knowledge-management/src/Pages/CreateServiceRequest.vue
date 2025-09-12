@@ -160,21 +160,22 @@
                     </div>
                 </div>
             </div>
+            <div class="max-w-7xl mx-auto">
+                <Breadcrumbs
+                    class="py-8"
+                    currentCrumb="Submit Form"
+                    :breadcrumbs="[
+                        { name: 'Help Center', route: 'home' },
+                        { name: 'New Request', route: 'create-service-request' },
+                    ]"
+                >
+                </Breadcrumbs>
 
-            <Breadcrumbs
-                class="px-6 py-8"
-                currentCrumb="Submit Form"
-                :breadcrumbs="[
-                    { name: 'Help Center', route: 'home' },
-                    { name: 'New Request', route: 'create-service-request' },
-                ]"
-            >
-            </Breadcrumbs>
-
-            <main class="grid px-6 gap-4" v-if="submittedSuccess">Thank you. Your request has been submitted.</main>
-            <main class="grid px-6 gap-4" v-else>
-                <FormKitSchema :schema="schema" :data="data" />
-            </main>
+                <main class="grid gap-4" v-if="submittedSuccess">Thank you. Your request has been submitted.</main>
+                <main class="grid gap-4" v-else>
+                    <FormKitSchema :schema="schema" :data="data" />
+                </main>
+            </div>
         </div>
     </div>
 </template>
