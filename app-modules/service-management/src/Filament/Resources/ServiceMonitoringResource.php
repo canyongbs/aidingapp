@@ -40,6 +40,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Pag
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Pages\EditServiceMonitoring;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Pages\ListServiceMonitorings;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Pages\ViewServiceMonitoring;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Widgets\ServiceUptimeWidget;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use Filament\Resources\Resource;
 
@@ -65,5 +66,12 @@ class ServiceMonitoringResource extends Resource
             'view' => ViewServiceMonitoring::route('/{record}'),
             'edit' => EditServiceMonitoring::route('/{record}/edit'),
         ];
+    }
+
+    public static function getWidgets(): array
+    {
+      return [
+        ServiceUptimeWidget::class
+      ];
     }
 }
