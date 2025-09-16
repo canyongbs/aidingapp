@@ -37,7 +37,6 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Widgets;
 
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
-use Carbon\Carbon;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
@@ -65,15 +64,15 @@ class ServiceUptimeWidget extends BaseWidget
     {
         $serviceChecks = $this->record->histories()->where('created_at', '>=', now()->subDays($days))->orderBy('created_at')->get();
 
-        if(now()->subDays($days)->diffInDays($serviceChecks->first()->created_at) > 1) {
+        if (now()->subDays($days)->diffInDays($serviceChecks->first()->created_at) > 1) {
             return 'N/A';
         }
 
         $successes = $serviceChecks->where('succeeded', true);
 
         $percentage = ($successes->count() / $serviceChecks->count()) * 100;
-        
-        if((int) $percentage === $percentage) {
+
+        if ((int) $percentage === $percentage) {
             return (int) $percentage . '%';
         }
 
