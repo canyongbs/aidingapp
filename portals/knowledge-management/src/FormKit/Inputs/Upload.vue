@@ -181,6 +181,7 @@
         :server="serverOptions"
         @addfile="handleFileAdd"
         :credits="false"
+        fileValidateTypeLabelExpectedTypes="The file type that you are attempting to upload is not supported."
     />
 </template>
 
