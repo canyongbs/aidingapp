@@ -133,7 +133,7 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
                 'video/webm' => ['webm'],
                 'video/ogg' => ['ogg'],
                 'video/quicktime' => ['quicktime'],
-                'video/x-msvideo' => ['x-msvideo']
+                'video/x-msvideo' => ['x-msvideo'],
             ]);
     }
 
