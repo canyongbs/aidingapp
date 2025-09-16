@@ -70,8 +70,8 @@ class ServiceMonitoringResource extends Resource
 
     public static function getWidgets(): array
     {
-      return [
-        ServiceUptimeWidget::class
-      ];
+        return [
+            ServiceUptimeWidget::class,
+        ];
     }
 }
