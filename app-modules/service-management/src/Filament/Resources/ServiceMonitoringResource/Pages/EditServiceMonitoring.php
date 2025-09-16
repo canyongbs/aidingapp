@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Pages;
 
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
+use AidingApp\ServiceManagement\Filament\Actions\ResetAction;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use App\Concerns\EditPageRedirection;
@@ -127,6 +128,7 @@ class EditServiceMonitoring extends EditRecord
     {
         return [
             ViewAction::make(),
+            ResetAction::make(),
             DeleteAction::make(),
         ];
     }
