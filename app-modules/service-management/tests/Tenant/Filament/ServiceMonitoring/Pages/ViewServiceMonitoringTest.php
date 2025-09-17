@@ -119,4 +119,4 @@ test('Reset Monitoring button resets monitoring', function () {
 
     expect($serviceMonitoringTarget->histories()->count())
         ->toBe(0);
-})->only();
+});

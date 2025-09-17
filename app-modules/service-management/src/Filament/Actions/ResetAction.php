@@ -48,7 +48,7 @@ class ResetAction extends Action
 
         $this->form([])
             ->label('Reset Monitoring')
-            ->action(fn (ServiceMonitoringTarget $record) => ResetMonitoringAction::execute($record))
+            ->action(fn (ServiceMonitoringTarget $record, ResetMonitoringAction $resetMonitoringAction) => $resetMonitoringAction::execute($record))
             ->requiresConfirmation()
             ->modalDescription('Are you sure you wish to reset monitoring, the data loss is irreversible.');
     }
