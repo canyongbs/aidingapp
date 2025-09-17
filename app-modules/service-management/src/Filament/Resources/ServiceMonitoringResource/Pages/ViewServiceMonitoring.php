@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Pages;
 
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Widgets\ServiceUptimeWidget;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\Section;
@@ -114,6 +115,13 @@ class ViewServiceMonitoring extends ViewRecord
     {
         return [
             EditAction::make(),
+        ];
+    }
+
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            ServiceUptimeWidget::class,
         ];
     }
 }
