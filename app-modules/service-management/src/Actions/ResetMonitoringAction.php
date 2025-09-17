@@ -34,27 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Actions;
+namespace AidingApp\ServiceManagement\Actions;
 
-use AidingApp\ServiceManagement\Actions\ResetMonitoringAction;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
-use Filament\Actions\Action;
 
-class ResetAction extends Action
+class ResetMonitoringAction
 {
-    protected function setup(): void
+    public static function execute(ServiceMonitoringTarget $serviceMonitor): void
     {
-        parent::setup();
-
-        $this->form([])
-            ->label('Reset Monitoring')
-            ->action(fn (ServiceMonitoringTarget $record) => ResetMonitoringAction::execute($record))
-            ->requiresConfirmation()
-            ->modalDescription('Are you sure you wish to reset monitoring, the data loss is irreversible.');
-    }
-
-    public static function getDefaultName(): string
-    {
-        return 'reset';
+        $serviceMonitor->histories()->delete();
     }
 }
