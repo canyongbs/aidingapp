@@ -36,10 +36,12 @@
 
 use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Pages\ViewServiceMonitoring;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 test('The correct details are displayed on the ViewServiceMonitoring page', function () {
@@ -90,4 +92,31 @@ test('ViewServiceMonitoring is gated with proper access control', function () {
                 'record' => $serviceMonitoringTarget,
             ])
         )->assertSuccessful();
+});
+
+test('Reset Monitoring button resets monitoring', function () {
+    $user = User::factory()->licensed(LicenseType::cases())->create();
+
+    asSuperAdmin($user);
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
+
+    $serviceMonitoringTarget->histories()->create([
+        'response' => 200,
+        'response_time' => 0.138348,
+        'succeeded' => 1,
+    ]);
+
+    expect($serviceMonitoringTarget->histories()->count())
+        ->toBe(1);
+
+    livewire(ViewServiceMonitoring::class, [
+        'record' => $serviceMonitoringTarget->getRouteKey(),
+    ])
+        ->assertSuccessful()
+        ->assertSee('Reset Monitoring')
+        ->callAction('reset');
+
+    expect($serviceMonitoringTarget->histories()->count())
+        ->toBe(0);
 });

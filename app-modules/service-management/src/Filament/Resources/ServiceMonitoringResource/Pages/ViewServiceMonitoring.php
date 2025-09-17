@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Pages;
 
+use AidingApp\ServiceManagement\Filament\Actions\ResetAction;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Widgets\ServiceUptimeWidget;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
@@ -114,6 +115,7 @@ class ViewServiceMonitoring extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
+            ResetAction::make(),
             EditAction::make(),
         ];
     }
