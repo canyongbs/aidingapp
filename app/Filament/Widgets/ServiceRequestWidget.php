@@ -43,6 +43,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use Carbon\Carbon;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Cache;
 
 class ServiceRequestWidget extends BaseWidget
@@ -78,6 +79,9 @@ class ServiceRequestWidget extends BaseWidget
         ];
     }
 
+    /**
+     * @return array{int, string, ?string, ?string}
+     */
     private function calculateOpenServiceRequestStats(Carbon $intervalStart): array
     {
         $openStatusIds = ServiceRequestStatus::tap(new ClassifiedIn(SystemServiceRequestClassification::getUnclosedClassifications()))->pluck('id');
@@ -134,7 +138,7 @@ class ServiceRequestWidget extends BaseWidget
 
         $unassignedServiceRequestsAtIntervalCount = Cache::remember("unassigned_service_requests_{$intervalStart->year}_{$intervalStart->month}_{$intervalStart->day}", $this->secondsToCache, function () use ($intervalStart) {
             return ServiceRequest::query()
-                ->whereDoesntHave('assignments', function ($query) use ($intervalStart) {
+                ->whereDoesntHave('assignments', function (Builder $query) use ($intervalStart) {
                     $query->where('assigned_at', '<=', $intervalStart);
                 })
                 ->where('created_at', '<=', $intervalStart)
@@ -153,13 +157,16 @@ class ServiceRequestWidget extends BaseWidget
         ];
     }
 
-    private function getPercentageChange($oldValue, $newValue): int
+    private function getPercentageChange(int $oldValue, int $newValue): int
     {
         return $oldValue > 0
-                        ? (($newValue - $oldValue) / $oldValue) * 100
-                        : ($newValue > 0 ? 100 : 0);
+            ? (($newValue - $oldValue) / $oldValue) * 100
+            : ($newValue > 0 ? 100 : 0);
     }
 
+    /**
+     * @return array{string, ?string, ?string}
+     */
     private function getFormattedPercentageChangeDetails(int $percentageChange): array
     {
         if ($percentageChange > 0) {

@@ -50,6 +50,9 @@ class ServiceRequestLineChart extends ChartWidget
         'sm' => 2,
     ];
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function getOptions(): array
     {
         return [

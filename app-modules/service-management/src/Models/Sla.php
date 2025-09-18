@@ -65,6 +65,9 @@ class Sla extends BaseModel implements Auditable
         'resolution_seconds' => 'integer',
     ];
 
+    /**
+     * @return HasMany<ServiceRequestPriority, $this>
+     */
     public function serviceRequestPriorities(): HasMany
     {
         return $this->hasMany(ServiceRequestPriority::class);
