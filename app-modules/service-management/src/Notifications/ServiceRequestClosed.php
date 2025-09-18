@@ -96,6 +96,9 @@ class ServiceRequestClosed extends BaseNotification implements ShouldQueue
             ->content($body);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toDatabase(object $notifiable): array
     {
         return Notification::make()

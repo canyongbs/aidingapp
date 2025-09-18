@@ -64,11 +64,11 @@ trait RandomizeState
         $class = new ReflectionClass($this);
 
         return collect($class->getMethods(ReflectionMethod::IS_PUBLIC))
-            ->reject(function ($method) use ($class) {
+            ->reject(function (ReflectionMethod $method) use ($class) {
                 return $method->getName() === 'randomizeState' ||
-                       $method->getDeclaringClass()->getName() !== $class->getName();
+                  $method->getDeclaringClass()->getName() !== $class->getName();
             })
-            ->filter(function ($method) {
+            ->filter(function (ReflectionMethod $method) {
                 if (! $method->hasReturnType()) {
                     return false;
                 }
@@ -76,8 +76,8 @@ trait RandomizeState
                 $returnType = $method->getReturnType();
 
                 return $returnType instanceof ReflectionNamedType &&
-                       ($returnType->getName() === 'self' ||
-                        is_subclass_of($returnType->getName(), Factory::class));
+                  ($returnType->getName() === 'self' ||
+                    is_subclass_of($returnType->getName(), Factory::class));
             })
             ->map
             ->getName();

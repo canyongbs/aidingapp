@@ -75,6 +75,9 @@ class ChangeRequestAwaitingApprovalNotification extends BaseNotification impleme
             ->action('View Change Request', url(ChangeRequestResource::getUrl('view', ['record' => $this->changeRequest])));
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toDatabase(object $notifiable): array
     {
         return Notification::make()
@@ -90,7 +93,7 @@ class ChangeRequestAwaitingApprovalNotification extends BaseNotification impleme
     private function resolveNotificationSetting(object $notifiable): ?NotificationSetting
     {
         return $notifiable instanceof User
-            ? $notifiable->team?->division?->notificationSetting?->setting
-            : null;
+          ? $notifiable->team?->division?->notificationSetting?->setting
+          : null;
     }
 }
