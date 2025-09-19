@@ -40,7 +40,7 @@ use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 
 class ResetMonitoringAction
 {
-    public static function execute(ServiceMonitoringTarget $serviceMonitor): void
+    public function execute(ServiceMonitoringTarget $serviceMonitor): void
     {
         $serviceMonitor->histories()->delete();
     }
