@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources;
+namespace AidingApp\ServiceManagement\Filament\Resources\SequenceResource\Pages;
 
 use AidingApp\ServiceManagement\Filament\Resources\SequenceResource;
 use Filament\Resources\Pages\CreateRecord;
