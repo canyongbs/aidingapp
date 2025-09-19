@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Filament\Clusters\ServiceManagementAdministration\Resources;
+namespace AidingApp\ServiceManagement\Filament\Resources;
 
+use AidingApp\ServiceManagement\Filament\Resources\SequenceResource\Pages\CreateSequence;
+use AidingApp\ServiceManagement\Filament\Resources\SequenceResource\Pages\EditSequence;
+use AidingApp\ServiceManagement\Filament\Resources\SequenceResource\Pages\ListSequences;
 use AidingApp\ServiceManagement\Models\Sequence;
 use App\Filament\Clusters\ServiceManagementAdministration;
-use App\Filament\Clusters\ServiceManagementAdministration\Resources\SequenceResource\Pages\CreateSequence;
-use App\Filament\Clusters\ServiceManagementAdministration\Resources\SequenceResource\Pages\EditSequence;
-use App\Filament\Clusters\ServiceManagementAdministration\Resources\SequenceResource\Pages\ListSequences;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables\Actions\BulkActionGroup;

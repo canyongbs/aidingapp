@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Clusters\ServiceManagementAdministration\Resources\SequenceResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\SequenceResource\Pages;
 
-use App\Filament\Clusters\ServiceManagementAdministration\Resources\SequenceResource;
+use AidingApp\ServiceManagement\Filament\Resources\SequenceResource;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 
