@@ -39,7 +39,6 @@ namespace AidingApp\Form\Actions;
 use AidingApp\Form\Models\Submissible;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use Exception;
-use Illuminate\Support\Facades\URL;
 
 class GenerateSubmissibleEmbedCode
 {
@@ -49,12 +48,9 @@ class GenerateSubmissibleEmbedCode
             ServiceRequestForm::class => (function () use ($submissible) {
                 /** @var ServiceRequestForm $submissible */
                 $scriptUrl = url('js/widgets/service-request-form/aiding-app-service-request-form-widget.js?v=' . app('current-commit'));
-                $formDefinitionUrl = URL::to(
-                    URL::signedRoute(
-                        name: 'service-request-forms.define',
-                        parameters: ['serviceRequestForm' => $submissible],
-                        absolute: false,
-                    )
+                $formDefinitionUrl = route(
+                    name: 'service-request-forms.define',
+                    parameters: ['serviceRequestForm' => $submissible],
                 );
 
                 return <<<EOD
