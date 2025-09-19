@@ -44,21 +44,21 @@ class EnsureKnowledgeManagementPortalIsEmbeddableAndAuthorized
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $referer = $request->headers->get('referer');
+        $origin = $request->headers->get('origin');
 
         // If we are on the root domain
         if (parse_url($request->url())['host'] === parse_url(config('app.url'))['host']) {
             return $next($request);
         }
 
-        if (! $referer) {
-            return response()->json(['error' => 'Missing referer header.'], 400);
+        if (! $origin) {
+            return response()->json(['error' => 'Missing origin header.'], 400);
         }
 
-        $referer = parse_url($referer)['host'];
+        $origin = parse_url($origin)['host'];
 
-        if ($referer != parse_url(config('app.url'))['host']) {
-            return response()->json(['error' => 'Referer not allowed'], 403);
+        if ($origin != parse_url(config('app.url'))['host']) {
+            return response()->json(['error' => 'Origin not allowed'], 403);
         }
 
         return $next($request);
