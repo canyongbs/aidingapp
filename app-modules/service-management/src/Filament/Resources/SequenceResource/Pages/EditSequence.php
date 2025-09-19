@@ -37,11 +37,14 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\SequenceResource\Pages;
 
 use AidingApp\ServiceManagement\Filament\Resources\SequenceResource;
+use App\Concerns\EditPageRedirection;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Tables\Actions\DeleteAction;
 
 class EditSequence extends EditRecord
 {
+    use EditPageRedirection;
+
     protected static string $resource = SequenceResource::class;
 
     // protected function getHeaderActions(): array
