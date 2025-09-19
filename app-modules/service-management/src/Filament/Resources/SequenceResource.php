@@ -56,7 +56,7 @@ class SequenceResource extends Resource
 
     protected static ?string $navigationGroup = 'Service Requests';
 
-    protected static ?int $navigationSort = 50;
+    protected static ?int $navigationSort = 40;
 
     protected static ?string $cluster = ServiceManagementAdministration::class;
 
