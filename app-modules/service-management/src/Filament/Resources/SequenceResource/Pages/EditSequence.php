@@ -44,10 +44,10 @@ class EditSequence extends EditRecord
 {
     protected static string $resource = SequenceResource::class;
 
-    protected function getHeaderActions(): array
-    {
-        return [
-            DeleteAction::make(),
-        ];
-    }
+    // protected function getHeaderActions(): array
+    // {
+    //     return [
+    //         DeleteAction::make(),
+    //     ];
+    // }
 }
