@@ -55,7 +55,6 @@ Route::prefix('api')
             ])
             ->group(function () {
                 Route::get('/{serviceRequestForm}', [ServiceRequestFormWidgetController::class, 'view'])
-                    ->middleware(['signed:relative'])
                     ->name('define');
                 Route::post('/{serviceRequestForm}/authenticate/request', [ServiceRequestFormWidgetController::class, 'requestAuthentication'])
                     ->middleware(['signed:relative'])
