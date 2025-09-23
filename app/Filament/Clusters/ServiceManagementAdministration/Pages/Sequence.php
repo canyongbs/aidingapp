@@ -53,6 +53,6 @@ class Sequence extends Page
 
     public static function canAccess(): bool
     {
-        return auth()->user()?->can('settings.view-any') ?? false;
+        return auth()->user()?->can('settings.view-any');
     }
 }
