@@ -45,7 +45,9 @@ class CheckOlympusKey
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if ($request->bearerToken() !== app(OlympusSettings::class)->key) {
+        $key = app(OlympusSettings::class)->key;
+
+        if (is_null($key) || $request->bearerToken() !== $key) {
             if ($request->expectsJson()) {
                 return response()->json([
                     'message' => 'Invalid Olympus key',
