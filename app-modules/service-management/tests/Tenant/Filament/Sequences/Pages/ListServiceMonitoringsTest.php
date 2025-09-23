@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 use AidingApp\Authorization\Enums\LicenseType;
-use AidingApp\ServiceManagement\Filament\Resources\SequenceResource;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
@@ -43,9 +42,8 @@ test('the sequences list page can not be rendered without permissions', function
     $user = User::factory()->licensed(LicenseType::cases())->create();
 
     actingAs($user)
-        ->get(
-            SequenceResource::getUrl('index')
-        )->assertForbidden();
+        ->get('service-management-administration/sequence')
+        ->assertForbidden();
 });
 
 test('the sequences list page can be rendered with auth', function () {
@@ -54,9 +52,7 @@ test('the sequences list page can be rendered with auth', function () {
     $user->givePermissionTo('settings.view-any');
 
     actingAs($user)
-        ->get(
-            SequenceResource::getUrl('index')
-        )
+        ->get('service-management-administration/sequence')
         ->assertOk()
         ->assertSee('Coming Soon!');
 });

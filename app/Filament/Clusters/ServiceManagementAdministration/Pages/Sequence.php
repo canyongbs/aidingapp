@@ -50,4 +50,9 @@ class Sequence extends Page
     protected static ?string $cluster = ServiceManagementAdministration::class;
 
     protected static string $view = 'filament.pages.coming-soon';
+
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('settings.view-any') ?? false;
+    }
 }
