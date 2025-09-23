@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Clusters\ServiceManagement\Pages;
+namespace App\Filament\Clusters\ServiceManagementAdministration\Pages;
 
 use App\Filament\Clusters\ServiceManagementAdministration;
 use Filament\Pages\Page;
