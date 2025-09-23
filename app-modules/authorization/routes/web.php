@@ -35,6 +35,7 @@
 */
 
 use AidingApp\Authorization\Http\Controllers\Auth\OneTimeLoginController;
+use AidingApp\Authorization\Http\Controllers\MagicLinkLoginController;
 use AidingApp\Authorization\Http\Controllers\SocialiteController;
 
 Route::middleware('web')->group(function () {
@@ -49,4 +50,8 @@ Route::middleware('web')->group(function () {
     Route::get('/auth/login/{user}', OneTimeLoginController::class)
         ->name('login.one-time')
         ->middleware('signed:relative');
+
+    Route::get('/magic-link/{magicLink}', MagicLinkLoginController::class)
+        ->name('magic-link.login')
+        ->middleware('signed');
 });
