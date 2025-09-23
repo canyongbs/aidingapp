@@ -72,7 +72,8 @@ class EditUser extends EditRecord
                     ->schema([
                         TextInput::make('name')
                             ->required()
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->disabled(fn (User $record) => $record->hasRole(Authenticatable::SUPER_ADMIN_ROLE)),
                         TextInput::make('email')
                             ->label('Email address')
                             ->email()
@@ -80,10 +81,12 @@ class EditUser extends EditRecord
                             ->maxLength(255)
                             ->rules([
                                 new EmailNotInUseOrSoftDeleted($this->getRecord()->getKey()),
-                            ]),
+                            ])
+                            ->disabled(fn (User $record) => $record->hasRole(Authenticatable::SUPER_ADMIN_ROLE)),
                         TextInput::make('job_title')
                             ->string()
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->disabled(fn (User $record) => $record->hasRole(Authenticatable::SUPER_ADMIN_ROLE)),
                         PhoneInput::make('work_number')
                             ->label('Work Number')
                             ->nullable(),
@@ -95,7 +98,8 @@ class EditUser extends EditRecord
                             ->nullable(),
                         Toggle::make('is_external')
                             ->label('User can only log in via a social provider.')
-                            ->columnSpanFull(),
+                            ->columnSpanFull()
+                            ->disabled(fn (User $record) => $record->hasRole(Authenticatable::SUPER_ADMIN_ROLE)),
                         TextInput::make('created_at')
                             ->formatStateUsing(fn ($state) => Carbon::parse($state)->format(config('project.datetime_format') ?? 'Y-m-d H:i:s'))
                             ->disabled(),
