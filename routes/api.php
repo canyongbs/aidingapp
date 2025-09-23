@@ -34,6 +34,7 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Authorization\Http\Controllers\GenerateLoginMagicLinkController;
 use App\Http\Controllers\SetAzureSsoSettingController;
 use App\Http\Controllers\UtilizationMetricsApiController;
 use App\Multitenancy\Http\Middleware\CheckOlympusKey;
@@ -49,4 +50,6 @@ Route::middleware([
 
     Route::get('/utilization-metrics', UtilizationMetricsApiController::class)
         ->name('utilization-metrics');
+
+    Route::post('/magic-link', GenerateLoginMagicLinkController::class)->name('magic-link.generate');
 });
