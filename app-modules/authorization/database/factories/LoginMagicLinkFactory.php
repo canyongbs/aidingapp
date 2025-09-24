@@ -34,22 +34,52 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Http\Controllers\GenerateLoginMagicLinkController;
-use App\Http\Controllers\SetAzureSsoSettingController;
-use App\Http\Controllers\UtilizationMetricsApiController;
-use App\Multitenancy\Http\Middleware\CheckOlympusKey;
-use Illuminate\Support\Facades\Route;
+namespace AidingApp\Authorization\Database\Factories;
 
-Route::group(['prefix' => 'v1', 'as' => 'api.', 'middleware' => ['auth:sanctum']], function () {});
+use AidingApp\Authorization\Models\LoginMagicLink;
+use App\Models\User;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
-Route::middleware([
-    CheckOlympusKey::class,
-])->group(function () {
-    Route::post('/azure-sso/update', SetAzureSsoSettingController::class)
-        ->name('azure-sso.update');
+/**
+ * @extends Factory<LoginMagicLink>
+ */
+class LoginMagicLinkFactory extends Factory
+{
+    /**
+     * @return array<string, mixed>
+     */
+    public function definition(): array
+    {
+        return [
+            'code' => Hash::make(Str::random()),
+            'user_id' => User::factory(),
+        ];
+    }
 
-    Route::get('/utilization-metrics', UtilizationMetricsApiController::class)
-        ->name('utilization-metrics');
+    /**
+     * @return Factory<LoginMagicLink>
+     */
+    public function withCode(string $code): Factory
+    {
+        return $this->state(function (array $attributes) use ($code) {
+            return [
+                'code' => Hash::make($code),
+            ];
+        });
+    }
 
-    Route::post('/magic-link', GenerateLoginMagicLinkController::class)->name('magic-link.generate');
-});
+    /**
+     * @return Factory<LoginMagicLink>
+     */
+    public function used(?Carbon $when = null): Factory
+    {
+        return $this->state(function (array $attributes) use ($when) {
+            return [
+                'used_at' => $when ?? now(),
+            ];
+        });
+    }
+}
