@@ -42,12 +42,9 @@
     fetch(resourcesUrl)
         .then(response => response.json())
         .then(resources => {
-            // Load the CSS
+            // Apply the CSS URL as an attribute to the portal embed
             if (resources.css) {
-                const linkElement = document.createElement('link');
-                linkElement.rel = 'stylesheet';
-                linkElement.href = resources.css;
-                document.head.appendChild(linkElement);
+                portalEmbedElement.setAttribute('css-url', resources.css);
             }
 
             // Load the JS

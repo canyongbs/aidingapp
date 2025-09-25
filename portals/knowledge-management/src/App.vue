@@ -74,6 +74,11 @@
             type: String,
             required: true,
         },
+        cssUrl: {
+            type: String,
+            required: true,
+            default: null,
+        },
     });
 
     const errorLoading = ref(false);
@@ -440,9 +445,9 @@
             '--rounding-full': portalRounding.full,
         }"
     >
-        <!-- <div>
-            <link rel="stylesheet" v-bind:href="hostUrl + '/js/portals/knowledge-management/style.css'" />
-        </div> -->
+        <div>
+            <link rel="stylesheet" v-bind:href="cssUrl" />
+        </div>
         <div v-if="loading">
             <AppLoading />
         </div>
