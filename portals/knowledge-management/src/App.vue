@@ -111,12 +111,6 @@
         registrationAllowed: false,
     });
 
-    const scriptUrl = new URL(document.currentScript.getAttribute('src'));
-    const protocol = scriptUrl.protocol;
-    const scriptHostname = scriptUrl.hostname;
-
-    const hostUrl = `${protocol}//${scriptHostname}`;
-
     const route = useRoute();
 
     onMounted(async () => {
