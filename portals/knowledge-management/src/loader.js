@@ -51,6 +51,7 @@
             if (resources.js) {
                 const scriptElement = document.createElement('script');
                 scriptElement.src = resources.js;
+                scriptElement.type = 'module';
                 document.body.appendChild(scriptElement);
             }
         })
