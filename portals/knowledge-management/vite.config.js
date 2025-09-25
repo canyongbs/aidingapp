@@ -34,35 +34,10 @@
 import vue from '@vitejs/plugin-vue';
 import { resolve } from 'path';
 import { defineConfig } from 'vite';
-import { writeFileSync, mkdirSync, renameSync, existsSync } from 'fs';
 
 export default defineConfig({
     plugins: [
         vue(),
-        // {
-        //     name: 'move-manifest',
-        //     writeBundle() {
-        //         const outDir = resolve(__dirname, '../../public/js/portals/knowledge-management');
-        //         const viteManifestPath = resolve(outDir, '.vite/manifest.json');
-        //         const targetManifestPath = resolve(outDir, 'manifest.json');
-
-        //         if (existsSync(viteManifestPath)) {
-        //             // Ensure target directory exists
-        //             mkdirSync(outDir, { recursive: true });
-
-        //             // Move manifest to root of outDir
-        //             renameSync(viteManifestPath, targetManifestPath);
-
-        //             // Remove the .vite directory
-        //             try {
-        //                 const { rmSync } = require('fs');
-        //                 rmSync(resolve(outDir, '.vite'), { recursive: true, force: true });
-        //             } catch (e) {
-        //                 // Ignore errors if .vite directory doesn't exist or can't be removed
-        //             }
-        //         }
-        //     }
-        // }
     ],
     build: {
         manifest: true,
@@ -74,8 +49,8 @@ export default defineConfig({
             output: {
                 entryFileNames: (chunkInfo) => {
                     return chunkInfo.name === 'loader'
-                        ? 'aiding-app-knowledge-management-loader.js'
-                        : 'aiding-app-knowledge-management-portal-[hash].js';
+                        ? 'aiding-app-knowledge-management-portal.js'
+                        : 'aiding-app-knowledge-management-portal-app-[hash].js';
                 },
                 assetFileNames: 'aiding-app-knowledge-management-portal-[hash].css'
             }
