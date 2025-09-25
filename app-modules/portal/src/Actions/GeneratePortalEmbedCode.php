@@ -39,8 +39,8 @@ namespace AidingApp\Portal\Actions;
 use AidingApp\Portal\Enums\PortalType;
 use AidingApp\Portal\Settings\PortalSettings;
 use Exception;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\URL;
-use Illuminate\Support\Facades\Vite;
 
 class GeneratePortalEmbedCode
 {
@@ -48,7 +48,11 @@ class GeneratePortalEmbedCode
     {
         return match ($portal) {
             PortalType::KnowledgeManagement => (function () {
-                $loaderScriptUrl = Vite::asset('src/loader.js', 'js/portals/knowledge-management');
+                // Read the Vite manifest for portal assets to get cache-busted URLs
+                $manifestPath = public_path('js/portals/knowledge-management/.vite/manifest.json');
+                $manifest = json_decode(File::get($manifestPath), true);
+
+                $loaderScriptUrl = url("js/portals/knowledge-management/{$manifest['src/loader.js']['file']}");
 
                 $portalAccessUrl = route('portal.show');
 

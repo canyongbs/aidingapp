@@ -46,7 +46,7 @@ class KnowledgeManagementPortalResourcesController extends Controller
     public function __invoke(): JsonResponse
     {
         // Read the Vite manifest for portal assets
-        $manifestPath = public_path('js/portals/knowledge-management/manifest.json');
+        $manifestPath = public_path('js/portals/knowledge-management/.vite/manifest.json');
         $manifest = json_decode(File::get($manifestPath), true);
 
         $portalEntry = $manifest['src/portal.js'];
