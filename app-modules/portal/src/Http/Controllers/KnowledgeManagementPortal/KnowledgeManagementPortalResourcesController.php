@@ -1,3 +1,5 @@
+<?php
+
 /*
 <COPYRIGHT>
 
@@ -31,36 +33,27 @@
 
 </COPYRIGHT>
 */
-import vue from '@vitejs/plugin-vue';
-import { resolve } from 'path';
-import { defineConfig } from 'vite';
 
-export default defineConfig({
-    plugins: [vue()],
-    build: {
-        manifest: true,
-        rollupOptions: {
-            input: {
-                portal: resolve(__dirname, './src/portal.js'),
-                loader: resolve(__dirname, './src/loader.js')
-            },
-            output: {
-                entryFileNames: (chunkInfo) => {
-                    return chunkInfo.name === 'loader'
-                        ? 'aiding-app-knowledge-management-loader.js'
-                        : 'aiding-app-knowledge-management-portal.js';
-                },
-                assetFileNames: 'aiding-app-knowledge-management-portal.css'
-            }
-        },
-        outDir: resolve(__dirname, '../../public/js/portals/knowledge-management'),
-        emptyOutDir: true,
-        sourcemap: true,
-    },
-    resolve: {
-        alias: {
-            '@': resolve(__dirname, 'src'),
-        },
-    },
-    define: { 'process.env.NODE_ENV': '"production"' },
-});
+namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
+
+use Illuminate\Http\JsonResponse;
+use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Vite;
+
+class KnowledgeManagementPortalResourcesController extends Controller
+{
+    public function __invoke(): JsonResponse
+    {
+        // Read the Vite manifest for portal assets
+        $manifestPath = public_path('js/portals/knowledge-management/.vite/manifest.json');
+        $manifest = json_decode(File::get($manifestPath), true);
+
+        $portalEntry = $manifest['src/portal.js'];
+
+        return response()->json([
+            'js' => url("js/portals/knowledge-management/{$portalEntry['file']}"),
+            'css' => url("js/portals/knowledge-management/{$portalEntry['css'][0]}"),
+        ]);
+    }
+}

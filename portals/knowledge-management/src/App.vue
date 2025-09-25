@@ -440,9 +440,9 @@
             '--rounding-full': portalRounding.full,
         }"
     >
-        <div>
+        <!-- <div>
             <link rel="stylesheet" v-bind:href="hostUrl + '/js/portals/knowledge-management/style.css'" />
-        </div>
+        </div> -->
         <div v-if="loading">
             <AppLoading />
         </div>

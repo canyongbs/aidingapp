@@ -11,9 +11,6 @@
     - You may not provide the software to third parties as a hosted or managed
       service, where the service provides users with access to any substantial set of
       the features or functionality of the software.
-    - You may not move, change, disable, or circumvent the license key functionality
-      in the software, and you may not remove or obscure any functionality in the
-      software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
@@ -31,36 +28,36 @@
 
 </COPYRIGHT>
 */
-import vue from '@vitejs/plugin-vue';
-import { resolve } from 'path';
-import { defineConfig } from 'vite';
 
-export default defineConfig({
-    plugins: [vue()],
-    build: {
-        manifest: true,
-        rollupOptions: {
-            input: {
-                portal: resolve(__dirname, './src/portal.js'),
-                loader: resolve(__dirname, './src/loader.js')
-            },
-            output: {
-                entryFileNames: (chunkInfo) => {
-                    return chunkInfo.name === 'loader'
-                        ? 'aiding-app-knowledge-management-loader.js'
-                        : 'aiding-app-knowledge-management-portal.js';
-                },
-                assetFileNames: 'aiding-app-knowledge-management-portal.css'
+(function () {
+    // Get the portal embed element
+    const portalEmbedElement = document.querySelector('knowledge-management-portal-embed');
+    if (!portalEmbedElement) return;
+
+    // Get the resources URL from the element
+    const resourcesUrl = portalEmbedElement.getAttribute('resources-url');
+    if (!resourcesUrl) return;
+
+    // Fetch the latest resource URLs
+    fetch(resourcesUrl)
+        .then(response => response.json())
+        .then(resources => {
+            // Load the CSS
+            if (resources.css) {
+                const linkElement = document.createElement('link');
+                linkElement.rel = 'stylesheet';
+                linkElement.href = resources.css;
+                document.head.appendChild(linkElement);
             }
-        },
-        outDir: resolve(__dirname, '../../public/js/portals/knowledge-management'),
-        emptyOutDir: true,
-        sourcemap: true,
-    },
-    resolve: {
-        alias: {
-            '@': resolve(__dirname, 'src'),
-        },
-    },
-    define: { 'process.env.NODE_ENV': '"production"' },
-});
+
+            // Load the JS
+            if (resources.js) {
+                const scriptElement = document.createElement('script');
+                scriptElement.src = resources.js;
+                document.body.appendChild(scriptElement);
+            }
+        })
+        .catch(error => {
+            console.error('Failed to load portal resources:', error);
+        });
+})();
