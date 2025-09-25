@@ -48,6 +48,16 @@ export default defineConfig({
                 loader: resolve(__dirname, './src/loader.js')
             },
             output: {
+                manualChunks: {
+                    // Vue ecosystem
+                    'vue-vendor': ['vue', 'vue-router', 'pinia'],
+                    // FormKit
+                    'formkit': ['@formkit/vue', '@formkit/icons', '@formkit/themes'],
+                    // PrimeVue
+                    'primevue': ['primevue/config'],
+                    // Axios and other utilities
+                    'utils': ['axios'],
+                },
                 entryFileNames: (chunkInfo) => {
                     return chunkInfo.name === 'loader'
                         ? 'aiding-app-knowledge-management-portal.js'
