@@ -39,6 +39,7 @@ export default defineConfig({
     plugins: [
         vue(),
     ],
+    base: '/js/portals/knowledge-management/',
     build: {
         manifest: true,
         rollupOptions: {
