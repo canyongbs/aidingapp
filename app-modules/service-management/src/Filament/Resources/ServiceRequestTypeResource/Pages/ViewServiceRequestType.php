@@ -40,7 +40,6 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestFormResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Enums\Feature;
-use App\Features\FeedbackReminderFeature;
 use Filament\Actions\EditAction;
 use Filament\Forms\Get;
 use Filament\Infolists\Components\Group;
@@ -94,8 +93,7 @@ class ViewServiceRequestType extends ViewRecord
                                     ->hiddenLabel()
                                     ->state('Feedback Reminder')
                                     ->badge()
-                                    ->color(fn (ServiceRequestType $record) => (bool) $record->getAttribute('is_reminders_enabled') ? 'success' : 'gray')
-                                    ->visible(FeedbackReminderFeature::active()),
+                                    ->color(fn (ServiceRequestType $record) => (bool) $record->getAttribute('is_reminders_enabled') ? 'success' : 'gray'),
                             ])
                             ->visible(fn (Get $get): bool => Gate::check(Feature::FeedbackManagement->getGateName())),
                         TextEntry::make('description')

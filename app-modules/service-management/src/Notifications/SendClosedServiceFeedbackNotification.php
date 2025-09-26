@@ -47,7 +47,6 @@ use AidingApp\Notification\Notifications\Messages\MailMessage;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use AidingApp\ServiceManagement\Notifications\Concerns\HandlesServiceRequestTemplateContent;
-use App\Features\FeedbackReminderFeature;
 use App\Models\Contracts\Educatable;
 use App\Models\NotificationSetting;
 use Illuminate\Bus\Queueable;
@@ -114,7 +113,7 @@ class SendClosedServiceFeedbackNotification extends Notification implements Shou
                 ->content($body);
         }
 
-        if (FeedbackReminderFeature::active() && $this->isReminder) {
+        if ($this->isReminder) {
             $mail->subject('Reminder: ' . $mail->subject);
         }
 
@@ -126,10 +125,6 @@ class SendClosedServiceFeedbackNotification extends Notification implements Shou
         Message $message,
         NotificationResultData $result
     ): void {
-        if (! FeedbackReminderFeature::active()) {
-            return;
-        }
-
         if ($result->success) {
             $this->serviceRequest->updateQuietly([
                 'survey_sent_at' => now(),
