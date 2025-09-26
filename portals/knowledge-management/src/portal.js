@@ -37,19 +37,7 @@ import PrimeVue from 'primevue/config';
 import { createApp, defineCustomElement, getCurrentInstance, h } from 'vue';
 import { createRouter, createWebHistory } from 'vue-router';
 import App from './App.vue';
-import ComingSoon from './Components/ComingSoon.vue';
-import Services from './Components/Services.vue';
 import config from './formkit.config.js';
-import Assets from './Pages/Assets.vue';
-import CreateServiceRequest from './Pages/CreateServiceRequest.vue';
-import Home from './Pages/Home.vue';
-import Incidents from './Pages/Incidents.vue';
-import Licenses from './Pages/Licenses.vue';
-import SelectServiceRequestType from './Pages/SelectServiceRequestType.vue';
-import ServiceMonitorStatus from './Pages/ServiceMonitorStatus.vue';
-import ViewArticle from './Pages/ViewArticle.vue';
-import ViewCategory from './Pages/ViewCategory.vue';
-import ViewServiceRequest from './Pages/ViewServiceRequest.vue';
 import './portal.css';
 import getAppContext from './Services/GetAppContext.js';
 
@@ -73,73 +61,73 @@ customElements.define(
                     {
                         path: baseUrl + '/',
                         name: 'home',
-                        component: Home,
+                        component: () => import('./Pages/Home.vue'),
                     },
                     {
                         path: baseUrl + '/categories/:categorySlug',
                         name: 'view-category',
-                        component: ViewCategory,
+                        component: () => import('./Pages/ViewCategory.vue'),
                     },
                     {
                         path: baseUrl + '/categories/:parentCategorySlug/:categorySlug',
                         name: 'view-subcategory',
-                        component: ViewCategory,
+                        component: () => import('./Pages/ViewCategory.vue'),
                     },
                     {
                         path: baseUrl + '/categories/:categorySlug/articles/:articleId',
                         name: 'view-article',
-                        component: ViewArticle,
+                        component: () => import('./Pages/ViewArticle.vue'),
                     },
                     {
                         path: baseUrl + '/service-request-type/select',
                         name: 'create-service-request',
-                        component: SelectServiceRequestType,
+                        component: () => import('./Pages/SelectServiceRequestType.vue'),
                         meta: { requiresAuth: true },
                     },
                     {
                         path: baseUrl + '/service-request/create/:typeId',
                         name: 'create-service-request-from-type',
-                        component: CreateServiceRequest,
+                        component: () => import('./Pages/CreateServiceRequest.vue'),
                         meta: { requiresAuth: true },
                     },
                     {
                         path: baseUrl + '/service-request/:serviceRequestId',
                         name: 'view-service-request',
-                        component: ViewServiceRequest,
+                        component: () => import('./Pages/ViewServiceRequest.vue'),
                         meta: { requiresAuth: true },
                     },
                     {
                         path: baseUrl + '/services',
                         name: 'services',
-                        component: Services,
+                        component: () => import('./Components/Services.vue'),
                         meta: { requiresAuth: true },
                     },
                     {
                         path: baseUrl + '/status',
                         name: 'status',
-                        component: ServiceMonitorStatus,
+                        component: () => import('./Pages/ServiceMonitorStatus.vue'),
                         meta: { requiresAuth: true },
                     },
                     {
                         path: baseUrl + '/incidents',
                         name: 'incidents',
-                        component: Incidents,
+                        component: () => import('./Pages/Incidents.vue'),
                         meta: { requiresAuth: true },
                     },
                     {
                         path: baseUrl + '/assets',
                         name: 'assets',
-                        component: Assets,
+                        component: () => import('./Pages/Assets.vue'),
                     },
                     {
                         path: baseUrl + '/licenses',
                         name: 'licenses',
-                        component: Licenses,
+                        component: () => import('./Pages/Licenses.vue'),
                     },
                     {
                         path: baseUrl + '/tasks',
                         name: 'tasks',
-                        component: ComingSoon,
+                        component: () => import('./Components/ComingSoon.vue'),
                     },
                 ],
             });

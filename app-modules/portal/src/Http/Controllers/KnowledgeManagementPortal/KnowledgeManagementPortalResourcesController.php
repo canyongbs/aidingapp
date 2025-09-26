@@ -33,3 +33,27 @@
 
 </COPYRIGHT>
 */
+
+namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
+
+use Illuminate\Http\JsonResponse;
+use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Vite;
+
+class KnowledgeManagementPortalResourcesController extends Controller
+{
+    public function __invoke(): JsonResponse
+    {
+        // Read the Vite manifest for portal assets
+        $manifestPath = public_path('js/portals/knowledge-management/.vite/manifest.json');
+        $manifest = json_decode(File::get($manifestPath), true);
+
+        $portalEntry = $manifest['src/portal.js'];
+
+        return response()->json([
+            'js' => url("js/portals/knowledge-management/{$portalEntry['file']}"),
+            'css' => url("js/portals/knowledge-management/{$portalEntry['css'][0]}"),
+        ]);
+    }
+}

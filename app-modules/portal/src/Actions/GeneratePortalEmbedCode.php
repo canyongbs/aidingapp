@@ -39,7 +39,7 @@ namespace AidingApp\Portal\Actions;
 use AidingApp\Portal\Enums\PortalType;
 use AidingApp\Portal\Settings\PortalSettings;
 use Exception;
-use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\File;
 
 class GeneratePortalEmbedCode
 {
@@ -47,25 +47,21 @@ class GeneratePortalEmbedCode
     {
         return match ($portal) {
             PortalType::KnowledgeManagement => (function () {
-                $scriptUrl = url('js/portals/knowledge-management/aiding-app-knowledge-management-portal.js?v=' . app('current-commit'));
+                // Read the Vite manifest for portal assets to get cache-busted URLs
+                $manifestPath = public_path('js/portals/knowledge-management/.vite/manifest.json');
+                $manifest = json_decode(File::get($manifestPath), true);
+
+                $loaderScriptUrl = url("js/portals/knowledge-management/{$manifest['src/loader.js']['file']}");
 
                 $portalAccessUrl = route('portal.show');
 
                 $userAuthenticationUrl = route('api.user.auth-check');
 
-                $portalDefinitionUrl = URL::to(
-                    URL::signedRoute(
-                        name: 'api.portal.define',
-                        absolute: false,
-                    )
-                );
+                $portalDefinitionUrl = route('api.portal.define');
 
-                $portalSearchUrl = URL::to(
-                    URL::signedRoute(
-                        name: 'api.portal.search',
-                        absolute: false,
-                    )
-                );
+                $portalSearchUrl = route('api.portal.search');
+
+                $portalResourcesUrl = route('api.portal.resources');
 
                 $appUrl = config('app.url');
 
@@ -76,8 +72,18 @@ class GeneratePortalEmbedCode
                 $appTitle = $appTitle . ' - ' . config('app.name');
 
                 return <<<EOD
-                <knowledge-management-portal-embed app-title="{$appTitle}" url="{$portalDefinitionUrl}" user-authentication-url={$userAuthenticationUrl} access-url={$portalAccessUrl} search-url="{$portalSearchUrl}" app-url="{$appUrl}" api-url="{$apiUrl}"></knowledge-management-portal-embed>
-                <script src="{$scriptUrl}"></script>
+                <knowledge-management-portal-embed
+                    app-title="{$appTitle}"
+                    url="{$portalDefinitionUrl}"
+                    user-authentication-url="{$userAuthenticationUrl}"
+                    access-url="{$portalAccessUrl}"
+                    search-url="{$portalSearchUrl}"
+                    resources-url="{$portalResourcesUrl}"
+                    app-url="{$appUrl}"
+                    api-url="{$apiUrl}"
+                >
+                </knowledge-management-portal-embed>
+                <script src="{$loaderScriptUrl}"></script>
                 EOD;
             })(),
             default => throw new Exception('Unsupported Portal.'),

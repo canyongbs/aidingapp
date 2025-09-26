@@ -31,47 +31,34 @@
 
 </COPYRIGHT>
 */
-import vue from '@vitejs/plugin-vue';
-import { resolve } from 'path';
-import { defineConfig } from 'vite';
 
-export default defineConfig({
-    plugins: [vue()],
-    base: '/js/portals/knowledge-management/',
-    build: {
-        manifest: true,
-        rollupOptions: {
-            input: {
-                portal: resolve(__dirname, './src/portal.js'),
-                loader: resolve(__dirname, './src/loader.js'),
-            },
-            output: {
-                manualChunks: {
-                    // Vue ecosystem
-                    'vue-vendor': ['vue', 'vue-router', 'pinia'],
-                    // FormKit
-                    formkit: ['@formkit/vue', '@formkit/icons', '@formkit/themes'],
-                    // PrimeVue
-                    primevue: ['primevue/config'],
-                    // Axios and other utilities
-                    utils: ['axios'],
-                },
-                entryFileNames: (chunkInfo) => {
-                    return chunkInfo.name === 'loader'
-                        ? 'aiding-app-knowledge-management-portal.js'
-                        : 'aiding-app-knowledge-management-portal-app-[hash].js';
-                },
-                assetFileNames: 'aiding-app-knowledge-management-portal-[hash].css',
-            },
-        },
-        outDir: resolve(__dirname, '../../public/js/portals/knowledge-management'),
-        emptyOutDir: true,
-        sourcemap: true,
-    },
-    resolve: {
-        alias: {
-            '@': resolve(__dirname, 'src'),
-        },
-    },
-    define: { 'process.env.NODE_ENV': '"production"' },
-});
+(function () {
+    // Get the portal embed element
+    const portalEmbedElement = document.querySelector('knowledge-management-portal-embed');
+    if (!portalEmbedElement) return;
+
+    // Get the resources URL from the element
+    const resourcesUrl = portalEmbedElement.getAttribute('resources-url');
+    if (!resourcesUrl) return;
+
+    // Fetch the latest resource URLs
+    fetch(resourcesUrl)
+        .then((response) => response.json())
+        .then((resources) => {
+            // Apply the CSS URL as an attribute to the portal embed
+            if (resources.css) {
+                portalEmbedElement.setAttribute('css-url', resources.css);
+            }
+
+            // Load the JS
+            if (resources.js) {
+                const scriptElement = document.createElement('script');
+                scriptElement.src = resources.js;
+                scriptElement.type = 'module';
+                document.body.appendChild(scriptElement);
+            }
+        })
+        .catch((error) => {
+            console.error('Failed to load portal resources:', error);
+        });
+})();

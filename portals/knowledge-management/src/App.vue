@@ -74,6 +74,11 @@
             type: String,
             required: true,
         },
+        cssUrl: {
+            type: String,
+            required: true,
+            default: null,
+        },
     });
 
     const errorLoading = ref(false);
@@ -105,12 +110,6 @@
         url: null,
         registrationAllowed: false,
     });
-
-    const scriptUrl = new URL(document.currentScript.getAttribute('src'));
-    const protocol = scriptUrl.protocol;
-    const scriptHostname = scriptUrl.hostname;
-
-    const hostUrl = `${protocol}//${scriptHostname}`;
 
     const route = useRoute();
 
@@ -441,7 +440,7 @@
         }"
     >
         <div>
-            <link rel="stylesheet" v-bind:href="hostUrl + '/js/portals/knowledge-management/style.css'" />
+            <link rel="stylesheet" v-bind:href="cssUrl" />
         </div>
         <div v-if="loading">
             <AppLoading />
