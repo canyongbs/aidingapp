@@ -12,7 +12,23 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 
 describe('2025_09_26_183417_tmp_data_backfill_service_request_update_created_by', function () {
-    it('can set createdBy for inbound direction', function () {})->todo();
+    it('can set createdBy for inbound direction', function () {
+        isolatedMigration(
+            '2025_09_26_183417_tmp_data_backfill_service_request_update_created_by',
+            function () {
+                $serviceRequestUpdate = ServiceRequestUpdate::factory()
+                    ->create(['direction' => ServiceRequestUpdateDirection::Inbound]);
+
+                expect($serviceRequestUpdate->createdBy)->toBeNull();
+
+                $migrate = Artisan::call('migrate', ['--path' => 'app-modules/service-management/database/migrations/2025_09_26_183417_tmp_data_backfill_service_request_update_created_by.php']);
+
+                expect($migrate)->toBe(Command::SUCCESS);
+
+                expect($serviceRequestUpdate->refresh()->createdBy->is($serviceRequestUpdate->serviceRequest->respondent))->toBeTrue();
+            }
+        );
+    });
 
     it('can set createdBy for a outbound direction when there is an assigned User', function () {
         isolatedMigration(
