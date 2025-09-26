@@ -12,6 +12,8 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 
 describe('2025_09_26_183417_tmp_data_backfill_service_request_update_created_by', function () {
+    it('can set createdBy for inbound direction', function () {})->todo();
+
     it('can set createdBy for a outbound direction when there is an assigned User', function () {
         isolatedMigration(
             '2025_09_26_183417_tmp_data_backfill_service_request_update_created_by',
@@ -59,4 +61,7 @@ describe('2025_09_26_183417_tmp_data_backfill_service_request_update_created_by'
             }
         );
     });
+
+    it('can set createdBy for outbound direction when there is no assigned user', function () {})->todo();
+    it('can set createdBy for outbound direction when there is no assigned user AND no manager', function () {})->todo();
 });
