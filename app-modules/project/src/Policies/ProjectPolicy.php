@@ -37,7 +37,6 @@
 namespace AidingApp\Project\Policies;
 
 use AidingApp\Project\Models\Project;
-use App\Features\ProjectManagersAuditorsFeature;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
 
@@ -69,7 +68,7 @@ class ProjectPolicy
 
     public function update(Authenticatable $authenticatable, Project $project): Response
     {
-        if (ProjectManagersAuditorsFeature::active() && ! auth()->user()->isSuperAdmin()) {
+        if (! auth()->user()->isSuperAdmin()) {
             $team = auth()->user()->team;
 
             $teamExists = $project->managerTeams()->where('teams.id', $team?->getKey())->exists();
@@ -88,7 +87,7 @@ class ProjectPolicy
 
     public function delete(Authenticatable $authenticatable, Project $project): Response
     {
-        if (ProjectManagersAuditorsFeature::active() && ! auth()->user()->isSuperAdmin()) {
+        if (! auth()->user()->isSuperAdmin()) {
             $team = auth()->user()->team;
 
             $teamExists = $project->managerTeams()->where('teams.id', $team?->getKey())->exists();
@@ -107,7 +106,7 @@ class ProjectPolicy
 
     public function restore(Authenticatable $authenticatable, Project $project): Response
     {
-        if (ProjectManagersAuditorsFeature::active() && ! auth()->user()->isSuperAdmin()) {
+        if (! auth()->user()->isSuperAdmin()) {
             $team = auth()->user()->team;
 
             $teamExists = $project->managerTeams()->where('teams.id', $team?->getKey())->exists();
@@ -126,7 +125,7 @@ class ProjectPolicy
 
     public function forceDelete(Authenticatable $authenticatable, Project $project): Response
     {
-        if (ProjectManagersAuditorsFeature::active() && ! auth()->user()->isSuperAdmin()) {
+        if (! auth()->user()->isSuperAdmin()) {
             $team = auth()->user()->team;
 
             $teamExists = $project->managerTeams()->where('teams.id', $team?->getKey())->exists();
