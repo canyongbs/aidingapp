@@ -37,7 +37,6 @@
 namespace AidingApp\ServiceManagement\Policies;
 
 use AidingApp\ServiceManagement\Models\IncidentSeverity;
-use App\Features\SettingsPermissions;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
 
@@ -45,60 +44,32 @@ class IncidentSeverityPolicy
 {
     public function viewAny(Authenticatable $authenticatable): Response
     {
-        if (SettingsPermissions::active()) {
-            return $authenticatable->canOrElse(
-                abilities: 'settings.view-any',
-                denyResponse: 'You do not have permission to view any incident severities.'
-            );
-        }
-
         return $authenticatable->canOrElse(
-            abilities: 'product_admin.view-any',
+            abilities: 'settings.view-any',
             denyResponse: 'You do not have permission to view any incident severities.'
         );
     }
 
     public function view(Authenticatable $authenticatable, IncidentSeverity $incidentSeverity): Response
     {
-        if (SettingsPermissions::active()) {
-            return $authenticatable->canOrElse(
-                abilities: 'settings.*.view',
-                denyResponse: 'You do not have permission to view this incident severity.'
-            );
-        }
-
         return $authenticatable->canOrElse(
-            abilities: ["product_admin.{$incidentSeverity->getKey()}.view"],
+            abilities: 'settings.*.view',
             denyResponse: 'You do not have permission to view this incident severity.'
         );
     }
 
     public function create(Authenticatable $authenticatable): Response
     {
-        if (SettingsPermissions::active()) {
-            return $authenticatable->canOrElse(
-                abilities: 'settings.create',
-                denyResponse: 'You do not have permission to create incident severities.'
-            );
-        }
-
         return $authenticatable->canOrElse(
-            abilities: 'product_admin.create',
+            abilities: 'settings.create',
             denyResponse: 'You do not have permission to create incident severities.'
         );
     }
 
     public function update(Authenticatable $authenticatable, IncidentSeverity $incidentSeverity): Response
     {
-        if (SettingsPermissions::active()) {
-            return $authenticatable->canOrElse(
-                abilities: 'settings.*.update',
-                denyResponse: 'You do not have permission to update this incident severity.'
-            );
-        }
-
         return $authenticatable->canOrElse(
-            abilities: ["product_admin.{$incidentSeverity->getKey()}.update"],
+            abilities: 'settings.*.update',
             denyResponse: 'You do not have permission to update this incident severity.'
         );
     }
@@ -109,30 +80,16 @@ class IncidentSeverityPolicy
             return Response::deny('The incident severity cannot be deleted because it is associated with a incident.');
         }
 
-        if (SettingsPermissions::active()) {
-            return $authenticatable->canOrElse(
-                abilities: 'settings.*.delete',
-                denyResponse: 'You do not have permission to delete this incident severity.'
-            );
-        }
-
         return $authenticatable->canOrElse(
-            abilities: ["product_admin.{$incidentSeverity->getKey()}.delete"],
+            abilities: 'settings.*.delete',
             denyResponse: 'You do not have permission to delete this incident severity.'
         );
     }
 
     public function restore(Authenticatable $authenticatable, IncidentSeverity $incidentSeverity): Response
     {
-        if (SettingsPermissions::active()) {
-            return $authenticatable->canOrElse(
-                abilities: 'settings.*.restore',
-                denyResponse: 'You do not have permission to restore this incident severity.'
-            );
-        }
-
         return $authenticatable->canOrElse(
-            abilities: ["product_admin.{$incidentSeverity->getKey()}.restore"],
+            abilities: 'settings.*.restore',
             denyResponse: 'You do not have permission to restore this incident severity.'
         );
     }
@@ -143,15 +100,8 @@ class IncidentSeverityPolicy
             return Response::deny('The incident severity cannot be deleted because it is associated with a incident.');
         }
 
-        if (SettingsPermissions::active()) {
-            return $authenticatable->canOrElse(
-                abilities: 'settings.*.force-delete',
-                denyResponse: 'You do not have permission to permanently delete this incident severity.'
-            );
-        }
-
         return $authenticatable->canOrElse(
-            abilities: ["product_admin.{$incidentSeverity->getKey()}.force-delete"],
+            abilities: 'settings.*.force-delete',
             denyResponse: 'You do not have permission to permanently delete this incident severity.'
         );
     }

@@ -38,7 +38,6 @@ namespace AidingApp\Contact\Policies;
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\OrganizationIndustry;
-use App\Features\SettingsPermissions;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
 
@@ -55,105 +54,56 @@ class OrganizationIndustryPolicy
 
     public function viewAny(Authenticatable $authenticatable): Response
     {
-        if (SettingsPermissions::active()) {
-            return $authenticatable->canOrElse(
-                abilities: 'settings.view-any',
-                denyResponse: 'You do not have permission to view organization industries.'
-            );
-        }
-
         return $authenticatable->canOrElse(
-            abilities: 'product_admin.view-any',
+            abilities: 'settings.view-any',
             denyResponse: 'You do not have permission to view organization industries.'
         );
     }
 
     public function view(Authenticatable $authenticatable, OrganizationIndustry $organizationIndustry): Response
     {
-        if (SettingsPermissions::active()) {
-            return $authenticatable->canOrElse(
-                abilities: 'settings.*.view',
-                denyResponse: 'You do not have permission to view this organization industry.'
-            );
-        }
-
         return $authenticatable->canOrElse(
-            abilities: ["product_admin.{$organizationIndustry->getKey()}.view"],
+            abilities: 'settings.*.view',
             denyResponse: 'You do not have permission to view this organization industry.'
         );
     }
 
     public function create(Authenticatable $authenticatable): Response
     {
-        if (SettingsPermissions::active()) {
-            return $authenticatable->canOrElse(
-                abilities: 'settings.create',
-                denyResponse: 'You do not have permission to create organization industries.'
-            );
-        }
-
         return $authenticatable->canOrElse(
-            abilities: 'product_admin.create',
+            abilities: 'settings.create',
             denyResponse: 'You do not have permission to create organization industries.'
         );
     }
 
     public function update(Authenticatable $authenticatable, OrganizationIndustry $organizationIndustry): Response
     {
-        if (SettingsPermissions::active()) {
-            return $authenticatable->canOrElse(
-                abilities: 'settings.*.update',
-                denyResponse: 'You do not have permission to update this organization industry.'
-            );
-        }
-
         return $authenticatable->canOrElse(
-            abilities: ["product_admin.{$organizationIndustry->getKey()}.update"],
+            abilities: 'settings.*.update',
             denyResponse: 'You do not have permission to update this organization industry.'
         );
     }
 
     public function delete(Authenticatable $authenticatable, OrganizationIndustry $organizationIndustry): Response
     {
-        if (SettingsPermissions::active()) {
-            return $authenticatable->canOrElse(
-                abilities: 'settings.*.delete',
-                denyResponse: 'You do not have permission to delete this organization industry.'
-            );
-        }
-
         return $authenticatable->canOrElse(
-            abilities: ["product_admin.{$organizationIndustry->getKey()}.delete"],
+            abilities: 'settings.*.delete',
             denyResponse: 'You do not have permission to delete this organization industry.'
         );
     }
 
     public function restore(Authenticatable $authenticatable, OrganizationIndustry $organizationIndustry): Response
     {
-        if (SettingsPermissions::active()) {
-            return $authenticatable->canOrElse(
-                abilities: 'settings.*.restore',
-                denyResponse: 'You do not have permission to restore this organization industry.'
-            );
-        }
-
         return $authenticatable->canOrElse(
-            abilities: ["product_admin.{$organizationIndustry->getKey()}.restore"],
+            abilities: 'settings.*.restore',
             denyResponse: 'You do not have permission to restore this organization industry.'
         );
     }
 
     public function forceDelete(Authenticatable $authenticatable, OrganizationIndustry $organizationIndustry): Response
     {
-        if (SettingsPermissions::active()) {
-            return $authenticatable->canOrElse(
-                abilities: 'settings.*.force-delete',
-                denyResponse: 'You do not have permission to force delete this organization industry.'
-            );
-        }
-
         return $authenticatable->canOrElse(
-            abilities: ["product_admin.{$organizationIndustry->getKey()}.force-delete"],
+            abilities: 'settings.*.force-delete',
             denyResponse: 'You do not have permission to force delete this organization industry.'
         );
     }

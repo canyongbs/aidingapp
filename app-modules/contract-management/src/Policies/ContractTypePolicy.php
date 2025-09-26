@@ -38,7 +38,6 @@ namespace AidingApp\ContractManagement\Policies;
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\ContractManagement\Models\ContractType;
-use App\Features\SettingsPermissions;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
 
@@ -55,105 +54,56 @@ class ContractTypePolicy
 
     public function viewAny(Authenticatable $authenticatable): Response
     {
-        if (SettingsPermissions::active()) {
-            return $authenticatable->canOrElse(
-                abilities: 'settings.view-any',
-                denyResponse: 'You do not have permission to view contract types.'
-            );
-        }
-
         return $authenticatable->canOrElse(
-            abilities: 'product_admin.view-any',
+            abilities: 'settings.view-any',
             denyResponse: 'You do not have permission to view contract types.'
         );
     }
 
     public function view(Authenticatable $authenticatable, ContractType $contractType): Response
     {
-        if (SettingsPermissions::active()) {
-            return $authenticatable->canOrElse(
-                abilities: 'settings.*.view',
-                denyResponse: 'You do not have permission to view this contract type.'
-            );
-        }
-
         return $authenticatable->canOrElse(
-            abilities: ["product_admin.{$contractType->getKey()}.view"],
+            abilities: 'settings.*.view',
             denyResponse: 'You do not have permission to view this contract type.'
         );
     }
 
     public function create(Authenticatable $authenticatable): Response
     {
-        if (SettingsPermissions::active()) {
-            return $authenticatable->canOrElse(
-                abilities: 'settings.create',
-                denyResponse: 'You do not have permission to create contract types.'
-            );
-        }
-
         return $authenticatable->canOrElse(
-            abilities: 'product_admin.create',
+            abilities: 'settings.create',
             denyResponse: 'You do not have permission to create contract types.'
         );
     }
 
     public function update(Authenticatable $authenticatable, ContractType $contractType): Response
     {
-        if (SettingsPermissions::active()) {
-            return $authenticatable->canOrElse(
-                abilities: 'settings.*.update',
-                denyResponse: 'You do not have permission to update this contract type.'
-            );
-        }
-
         return $authenticatable->canOrElse(
-            abilities: ["product_admin.{$contractType->getKey()}.update"],
+            abilities: 'settings.*.update',
             denyResponse: 'You do not have permission to update this contract type.'
         );
     }
 
     public function delete(Authenticatable $authenticatable, ContractType $contractType): Response
     {
-        if (SettingsPermissions::active()) {
-            return $authenticatable->canOrElse(
-                abilities: 'settings.*.delete',
-                denyResponse: 'You do not have permission to delete this contract type.'
-            );
-        }
-
         return $authenticatable->canOrElse(
-            abilities: ["product_admin.{$contractType->getKey()}.delete"],
+            abilities: 'settings.*.delete',
             denyResponse: 'You do not have permission to delete this contract type.'
         );
     }
 
     public function restore(Authenticatable $authenticatable, ContractType $contractType): Response
     {
-        if (SettingsPermissions::active()) {
-            return $authenticatable->canOrElse(
-                abilities: 'settings.*.restore',
-                denyResponse: 'You do not have permission to restore this contract type.'
-            );
-        }
-
         return $authenticatable->canOrElse(
-            abilities: ["product_admin.{$contractType->getKey()}.restore"],
+            abilities: 'settings.*.restore',
             denyResponse: 'You do not have permission to restore this contract type.'
         );
     }
 
     public function forceDelete(Authenticatable $authenticatable, ContractType $contractType): Response
     {
-        if (SettingsPermissions::active()) {
-            return $authenticatable->canOrElse(
-                abilities: 'settings.*.force-delete',
-                denyResponse: 'You do not have permission to permanently delete this contract type.'
-            );
-        }
-
         return $authenticatable->canOrElse(
-            abilities: ["product_admin.{$contractType->getKey()}.force-delete"],
+            abilities: 'settings.*.force-delete',
             denyResponse: 'You do not have permission to permanently delete this contract type.'
         );
     }
