@@ -39,7 +39,6 @@ namespace AidingApp\Project\Filament\Resources\ProjectResource\Pages;
 use AidingApp\Project\Filament\Resources\ProjectResource;
 use AidingApp\Project\Filament\Resources\ProjectResource\RelationManagers\ManagerTeamsRelationManager;
 use AidingApp\Project\Filament\Resources\ProjectResource\RelationManagers\ManagerUsersRelationManager;
-use App\Features\ProjectManagersAuditorsFeature;
 use Filament\Resources\Pages\ManageRelatedRecords;
 
 class ManageManagers extends ManageRelatedRecords
@@ -65,6 +64,6 @@ class ManageManagers extends ManageRelatedRecords
     {
         $user = auth()->user();
 
-        return ProjectManagersAuditorsFeature::active() && $user->can(['project.view-any', 'project.*.view']) && parent::canAccess($arguments);
+        return $user->can(['project.view-any', 'project.*.view']) && parent::canAccess($arguments);
     }
 }
