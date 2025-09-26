@@ -36,7 +36,6 @@
 
 namespace AidingApp\Task\Filament\Concerns;
 
-use App\Features\ConfidentialTaskFeature;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Component;
 use Filament\Forms\Components\DateTimePicker;
@@ -57,7 +56,6 @@ trait TaskEditForm
     {
         return [
             Fieldset::make('Confidentiality')
-                ->visible(ConfidentialTaskFeature::active())
                 ->schema([
                     Checkbox::make('is_confidential')
                         ->label('Confidential')
