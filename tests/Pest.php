@@ -48,12 +48,16 @@
 use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Authorization\Models\Role;
 use App\Models\User;
+use Illuminate\Database\Events\MigrationStarted;
 use Illuminate\Support\Collection;
+use Tests\Exceptions\StopMigration;
 use Tests\LandlordTestCase;
+use Tests\TenantMigrationTestCase;
 use Tests\TenantTestCase;
 
 uses(TenantTestCase::class)->in('../tests/Tenant', '../app-modules/*/tests/Tenant');
 uses(LandlordTestCase::class)->in('../tests/Landlord', '../app-modules/*/tests/Landlord');
+uses(TenantMigrationTestCase::class)->in('../tests/TenantMigrationTests.php');
 
 /*
 |--------------------------------------------------------------------------
@@ -111,4 +115,35 @@ function user(LicenseType | array | null $licenses = null, array | null | string
         ->whenNotEmpty(fn () => $user->refresh());
 
     return $user;
+}
+
+function isolatedMigration(string $migrationName, callable $callback): void
+{
+    Event::listen(
+        MigrationStarted::class,
+        function (MigrationStarted $event) use ($migrationName) {
+            if (preg_match('/[^\/]*(?=\.php)/', get_class($event->migration), $matches)) {
+                if ($matches[0] === $migrationName) {
+                    throw new StopMigration();
+                }
+            }
+        }
+    );
+
+    $stopped = false;
+
+    try {
+        Artisan::call('migrate:fresh');
+    } catch (StopMigration $e) { // @phpstan-ignore catch.neverThrown
+        $stopped = true;
+    }
+
+    expect($stopped)->toBeTrue();
+
+    // There may be a better way to do this, to clear out the event listener we added specifically
+    // But this works for now.
+    Event::forget(MigrationStarted::class);
+
+    // TODO: Find a way to split the the call back into a setup, then migrate, then be able to assert
+    $callback();
 }
