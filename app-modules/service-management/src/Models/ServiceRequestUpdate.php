@@ -49,6 +49,7 @@ use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
 use OwenIt\Auditing\Contracts\Auditable;
@@ -91,6 +92,14 @@ class ServiceRequestUpdate extends BaseModel implements Auditable, ProvidesATime
     public static function getTimelineData(Model $forModel): Collection
     {
         return $forModel->serviceRequestUpdates()->get();
+    }
+
+    /**
+     * @return MorphTo<Model, $this>
+     */
+    public function createdBy(): MorphTo
+    {
+        return $this->morphTo();
     }
 
     protected function serializeDate(DateTimeInterface $date): string
