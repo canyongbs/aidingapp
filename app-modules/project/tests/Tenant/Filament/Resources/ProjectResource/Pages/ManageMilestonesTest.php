@@ -36,6 +36,7 @@
 
 use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Project\Database\Factories\ProjectMilestoneFactory;
+use AidingApp\Project\Database\Seeders\ProjectMilestoneStatusSeeder;
 use AidingApp\Project\Filament\Resources\ProjectResource\Pages\ManageMilestones;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectMilestone;
@@ -46,6 +47,7 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\assertDatabaseMissing;
 use function Pest\Laravel\get;
+use function Pest\Laravel\seed;
 use function Pest\Livewire\livewire;
 use function PHPUnit\Framework\assertCount;
 use function Tests\asSuperAdmin;
@@ -127,6 +129,8 @@ it('can create milestones', function () {
 });
 
 it('can edit milestones', function () {
+    seed(ProjectMilestoneStatusSeeder::class);
+
     asSuperAdmin();
 
     $project = Project::factory()->create();
