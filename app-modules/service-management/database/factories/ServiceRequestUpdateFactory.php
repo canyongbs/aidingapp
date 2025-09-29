@@ -42,6 +42,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use App\Features\ServiceRequestUpdateCreatedByFeature;
 use App\Models\User;
+use Exception;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -62,6 +63,7 @@ class ServiceRequestUpdateFactory extends Factory
                     return match ($attributes['created_by_type']) {
                         (new User())->getMorphClass() => User::factory(),
                         (new Contact())->getMorphClass() => Contact::factory(),
+                        default => throw new Exception('Unknown created_by_type ' . $attributes['created_by_type']),
                     };
                 },
             ] : [],
