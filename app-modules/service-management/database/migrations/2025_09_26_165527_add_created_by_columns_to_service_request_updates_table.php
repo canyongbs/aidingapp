@@ -38,6 +38,11 @@ return new class () extends Migration {
                     };
                 });
 
+            Schema::table('service_request_updates', function (Blueprint $table) {
+                $table->string('created_by_type')->nullable(false)->change();
+                $table->uuid('created_by_id')->nullable(false)->change();
+            });
+
             ServiceRequestUpdateCreatedByFeature::activate();
         });
     }
