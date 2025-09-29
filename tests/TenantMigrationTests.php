@@ -1,5 +1,6 @@
 <?php
 
+use AidingApp\Authorization\Models\Role;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateDirection;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
@@ -8,8 +9,11 @@ use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use AidingApp\Team\Models\Team;
 use App\Models\User;
+use Database\Seeders\NewTenantSeeder;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
+
+use function Pest\Laravel\seed;
 
 describe('2025_09_26_183417_tmp_data_backfill_service_request_update_created_by', function () {
     it('can set createdBy for inbound direction', function () {
@@ -119,5 +123,33 @@ describe('2025_09_26_183417_tmp_data_backfill_service_request_update_created_by'
         );
     });
 
-    it('can set createdBy for outbound direction when there is no assigned user AND no manager', function () {})->todo();
+    it('can set createdBy for outbound direction when there is no assigned user AND no manager', function () {
+        isolatedMigration(
+            '2025_09_26_183417_tmp_data_backfill_service_request_update_created_by',
+            function () {
+                seed(NewTenantSeeder::class);
+
+                $user = User::factory()->create();
+
+                $superAdminRoles = Role::superAdmin()->get();
+
+                $user->assignRole($superAdminRoles);
+
+                $serviceRequest = ServiceRequest::factory()
+                    ->create();
+
+                $serviceRequestUpdate = ServiceRequestUpdate::factory()
+                    ->for($serviceRequest, 'serviceRequest')
+                    ->create(['direction' => ServiceRequestUpdateDirection::Outbound]);
+
+                expect($serviceRequestUpdate->createdBy)->toBeNull();
+
+                $migrate = Artisan::call('migrate', ['--path' => 'app-modules/service-management/database/migrations/2025_09_26_183417_tmp_data_backfill_service_request_update_created_by.php']);
+
+                expect($migrate)->toBe(Command::SUCCESS);
+
+                expect($serviceRequestUpdate->refresh()->createdBy->is($user))->toBeTrue();
+            }
+        );
+    });
 });
