@@ -18,7 +18,7 @@ return new class () extends Migration {
                 $table->nullableUuidMorphs('created_by');
             });
 
-            // Backfill existing records SHOULD BE REMOVED DURING CLEANUP
+            // Backfill existing records SHOULD BE REMOVED DURING CLEANUP OF ServiceRequestUpdateCreatedByFeature
             ServiceRequestUpdate::query()
                 ->eachById(function (ServiceRequestUpdate $serviceRequestUpdate) {
                     match ($serviceRequestUpdate->direction) {
