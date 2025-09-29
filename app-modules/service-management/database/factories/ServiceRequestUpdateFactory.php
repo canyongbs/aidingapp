@@ -40,6 +40,7 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateDirection;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use App\Features\ServiceRequestUpdateCreatedByFeature;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -55,13 +56,15 @@ class ServiceRequestUpdateFactory extends Factory
             'update' => $this->faker->sentence(),
             'internal' => $this->faker->boolean(),
             'direction' => $this->faker->randomElement(ServiceRequestUpdateDirection::cases())->value,
-            'created_by_type' => $this->faker->randomElement([(new User())->getMorphClass(), (new Contact())->getMorphClass()]),
-            'created_by_id' => function (array $attributes) {
-                return match ($attributes['created_by_type']) {
-                    (new User())->getMorphClass() => User::factory(),
-                    (new Contact())->getMorphClass() => Contact::factory(),
-                };
-            },
+            ...ServiceRequestUpdateCreatedByFeature::active() ? [
+                'created_by_type' => $this->faker->randomElement([(new User())->getMorphClass(), (new Contact())->getMorphClass()]),
+                'created_by_id' => function (array $attributes) {
+                    return match ($attributes['created_by_type']) {
+                        (new User())->getMorphClass() => User::factory(),
+                        (new Contact())->getMorphClass() => Contact::factory(),
+                    };
+                },
+            ] : [],
         ];
     }
 }
