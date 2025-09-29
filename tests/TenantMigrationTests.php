@@ -78,6 +78,46 @@ describe('2025_09_26_183417_tmp_data_backfill_service_request_update_created_by'
         );
     });
 
-    it('can set createdBy for outbound direction when there is no assigned user', function () {})->todo();
+    it('can set createdBy for outbound direction when there is no assigned user', function () {
+        isolatedMigration(
+            '2025_09_26_183417_tmp_data_backfill_service_request_update_created_by',
+            function () {
+                $user = User::factory()->create();
+
+                $team = Team::factory()->create();
+
+                $user->team()->associate($team);
+                $user->save();
+
+                $serviceRequest = ServiceRequest::factory()
+                    ->for(
+                        ServiceRequestPriority::factory()
+                            ->for(
+                                ServiceRequestType::factory()
+                                    ->hasAttached(
+                                        factory: $team,
+                                        relationship: 'managers'
+                                    ),
+                                'type',
+                            ),
+                        'priority'
+                    )
+                    ->create();
+
+                $serviceRequestUpdate = ServiceRequestUpdate::factory()
+                    ->for($serviceRequest, 'serviceRequest')
+                    ->create(['direction' => ServiceRequestUpdateDirection::Outbound]);
+
+                expect($serviceRequestUpdate->createdBy)->toBeNull();
+
+                $migrate = Artisan::call('migrate', ['--path' => 'app-modules/service-management/database/migrations/2025_09_26_183417_tmp_data_backfill_service_request_update_created_by.php']);
+
+                expect($migrate)->toBe(Command::SUCCESS);
+
+                expect($serviceRequestUpdate->refresh()->createdBy->is($user))->toBeTrue();
+            }
+        );
+    });
+
     it('can set createdBy for outbound direction when there is no assigned user AND no manager', function () {})->todo();
 });
