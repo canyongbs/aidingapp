@@ -44,7 +44,6 @@ use AidingApp\Task\Filament\Concerns\TaskEditForm;
 use AidingApp\Task\Filament\Concerns\TaskViewActionInfoList;
 use AidingApp\Task\Filament\Resources\TaskResource\Components\TaskViewAction;
 use AidingApp\Task\Models\Task;
-use App\Features\ConfidentialTaskFeature;
 use App\Filament\Resources\UserResource;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Scopes\EducatableSearch;
@@ -93,8 +92,8 @@ class ManageTasks extends ManageRelatedRecords
                     ->searchable()
                     ->wrap()
                     ->limit(50)
-                    ->icon(fn ($record) => ConfidentialTaskFeature::active() && $record->is_confidential ? 'heroicon-m-lock-closed' : null)
-                    ->tooltip(fn ($record) => ConfidentialTaskFeature::active() && $record->is_confidential ? 'Confidential' : null),
+                    ->icon(fn ($record) => $record->is_confidential ? 'heroicon-m-lock-closed' : null)
+                    ->tooltip(fn ($record) => $record->is_confidential ? 'Confidential' : null),
                 TextColumn::make('status')
                     ->formatStateUsing(fn (TaskStatus $state): string => str($state->value)->title()->headline())
                     ->badge(),
@@ -165,7 +164,6 @@ class ManageTasks extends ManageRelatedRecords
                     ->authorize('create', Task::class)
                     ->form([
                         Fieldset::make('Confidentiality')
-                            ->visible(ConfidentialTaskFeature::active())
                             ->schema([
                                 Checkbox::make('is_confidential')
                                     ->label('Confidential')
