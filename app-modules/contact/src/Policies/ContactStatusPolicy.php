@@ -38,7 +38,6 @@ namespace AidingApp\Contact\Policies;
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactStatus;
-use App\Features\SettingsPermissions;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
 
@@ -55,105 +54,56 @@ class ContactStatusPolicy
 
     public function viewAny(Authenticatable $authenticatable): Response
     {
-        if (SettingsPermissions::active()) {
-            return $authenticatable->canOrElse(
-                abilities: 'settings.view-any',
-                denyResponse: 'You do not have permission to view contact statuses.'
-            );
-        }
-
         return $authenticatable->canOrElse(
-            abilities: 'product_admin.view-any',
+            abilities: 'settings.view-any',
             denyResponse: 'You do not have permission to view contact statuses.'
         );
     }
 
     public function view(Authenticatable $authenticatable, ContactStatus $contactStatus): Response
     {
-        if (SettingsPermissions::active()) {
-            return $authenticatable->canOrElse(
-                abilities: 'settings.*.view',
-                denyResponse: 'You do not have permission to view contact status.'
-            );
-        }
-
         return $authenticatable->canOrElse(
-            abilities: ["product_admin.{$contactStatus->getKey()}.view"],
+            abilities: 'settings.*.view',
             denyResponse: 'You do not have permission to view contact status.'
         );
     }
 
     public function create(Authenticatable $authenticatable): Response
     {
-        if (SettingsPermissions::active()) {
-            return $authenticatable->canOrElse(
-                abilities: 'settings.create',
-                denyResponse: 'You do not have permission to create contact statuses.'
-            );
-        }
-
         return $authenticatable->canOrElse(
-            abilities: 'product_admin.create',
+            abilities: 'settings.create',
             denyResponse: 'You do not have permission to create contact statuses.'
         );
     }
 
     public function update(Authenticatable $authenticatable, ContactStatus $contactStatus): Response
     {
-        if (SettingsPermissions::active()) {
-            return $authenticatable->canOrElse(
-                abilities: 'settings.*.update',
-                denyResponse: 'You do not have permission to update contact status.'
-            );
-        }
-
         return $authenticatable->canOrElse(
-            abilities: ["product_admin.{$contactStatus->getKey()}.update"],
+            abilities: 'settings.*.update',
             denyResponse: 'You do not have permission to update contact status.'
         );
     }
 
     public function delete(Authenticatable $authenticatable, ContactStatus $contactStatus): Response
     {
-        if (SettingsPermissions::active()) {
-            return $authenticatable->canOrElse(
-                abilities: 'settings.*.delete',
-                denyResponse: 'You do not have permission to delete contact status.'
-            );
-        }
-
         return $authenticatable->canOrElse(
-            abilities: ["product_admin.{$contactStatus->getKey()}.delete"],
+            abilities: 'settings.*.delete',
             denyResponse: 'You do not have permission to delete contact status.'
         );
     }
 
     public function restore(Authenticatable $authenticatable, ContactStatus $contactStatus): Response
     {
-        if (SettingsPermissions::active()) {
-            return $authenticatable->canOrElse(
-                abilities: 'settings.*.restore',
-                denyResponse: 'You do not have permission to restore contact status.'
-            );
-        }
-
         return $authenticatable->canOrElse(
-            abilities: ["product_admin.{$contactStatus->getKey()}.restore"],
+            abilities: 'settings.*.restore',
             denyResponse: 'You do not have permission to restore contact status.'
         );
     }
 
     public function forceDelete(Authenticatable $authenticatable, ContactStatus $contactStatus): Response
     {
-        if (SettingsPermissions::active()) {
-            return $authenticatable->canOrElse(
-                abilities: 'settings.*.force-delete',
-                denyResponse: 'You do not have permission to force delete contact status.'
-            );
-        }
-
         return $authenticatable->canOrElse(
-            abilities: ["product_admin.{$contactStatus->getKey()}.force-delete"],
+            abilities: 'settings.*.force-delete',
             denyResponse: 'You do not have permission to force delete contact status.'
         );
     }
