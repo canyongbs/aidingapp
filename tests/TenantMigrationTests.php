@@ -15,17 +15,15 @@ use Illuminate\Support\Facades\Artisan;
 
 use function Pest\Laravel\seed;
 
-describe('2025_09_26_183417_tmp_data_backfill_service_request_update_created_by', function () {
+describe('2025_09_26_165527_add_created_by_columns_to_service_request_updates_table', function () {
     it('can set createdBy for inbound direction', function () {
         isolatedMigration(
-            '2025_09_26_183417_tmp_data_backfill_service_request_update_created_by',
+            '2025_09_26_165527_add_created_by_columns_to_service_request_updates_table',
             function () {
                 $serviceRequestUpdate = ServiceRequestUpdate::factory()
                     ->create(['direction' => ServiceRequestUpdateDirection::Inbound]);
 
-                expect($serviceRequestUpdate->createdBy)->toBeNull();
-
-                $migrate = Artisan::call('migrate', ['--path' => 'app-modules/service-management/database/migrations/2025_09_26_183417_tmp_data_backfill_service_request_update_created_by.php']);
+                $migrate = Artisan::call('migrate', ['--path' => 'app-modules/service-management/database/migrations/2025_09_26_165527_add_created_by_columns_to_service_request_updates_table.php']);
 
                 expect($migrate)->toBe(Command::SUCCESS);
 
@@ -36,7 +34,7 @@ describe('2025_09_26_183417_tmp_data_backfill_service_request_update_created_by'
 
     it('can set createdBy for a outbound direction when there is an assigned User', function () {
         isolatedMigration(
-            '2025_09_26_183417_tmp_data_backfill_service_request_update_created_by',
+            '2025_09_26_165527_add_created_by_columns_to_service_request_updates_table',
             function () {
                 $user = User::factory()->create();
 
@@ -71,9 +69,7 @@ describe('2025_09_26_183417_tmp_data_backfill_service_request_update_created_by'
                     ->for($serviceRequest, 'serviceRequest')
                     ->create(['direction' => ServiceRequestUpdateDirection::Outbound]);
 
-                expect($serviceRequestUpdate->createdBy)->toBeNull();
-
-                $migrate = Artisan::call('migrate', ['--path' => 'app-modules/service-management/database/migrations/2025_09_26_183417_tmp_data_backfill_service_request_update_created_by.php']);
+                $migrate = Artisan::call('migrate', ['--path' => 'app-modules/service-management/database/migrations/2025_09_26_165527_add_created_by_columns_to_service_request_updates_table.php']);
 
                 expect($migrate)->toBe(Command::SUCCESS);
 
@@ -84,7 +80,7 @@ describe('2025_09_26_183417_tmp_data_backfill_service_request_update_created_by'
 
     it('can set createdBy for outbound direction when there is no assigned user', function () {
         isolatedMigration(
-            '2025_09_26_183417_tmp_data_backfill_service_request_update_created_by',
+            '2025_09_26_165527_add_created_by_columns_to_service_request_updates_table',
             function () {
                 $user = User::factory()->create();
 
@@ -112,9 +108,7 @@ describe('2025_09_26_183417_tmp_data_backfill_service_request_update_created_by'
                     ->for($serviceRequest, 'serviceRequest')
                     ->create(['direction' => ServiceRequestUpdateDirection::Outbound]);
 
-                expect($serviceRequestUpdate->createdBy)->toBeNull();
-
-                $migrate = Artisan::call('migrate', ['--path' => 'app-modules/service-management/database/migrations/2025_09_26_183417_tmp_data_backfill_service_request_update_created_by.php']);
+                $migrate = Artisan::call('migrate', ['--path' => 'app-modules/service-management/database/migrations/2025_09_26_165527_add_created_by_columns_to_service_request_updates_table.php']);
 
                 expect($migrate)->toBe(Command::SUCCESS);
 
@@ -125,7 +119,7 @@ describe('2025_09_26_183417_tmp_data_backfill_service_request_update_created_by'
 
     it('can set createdBy for outbound direction when there is no assigned user AND no manager', function () {
         isolatedMigration(
-            '2025_09_26_183417_tmp_data_backfill_service_request_update_created_by',
+            '2025_09_26_165527_add_created_by_columns_to_service_request_updates_table',
             function () {
                 seed(NewTenantSeeder::class);
 
@@ -142,9 +136,7 @@ describe('2025_09_26_183417_tmp_data_backfill_service_request_update_created_by'
                     ->for($serviceRequest, 'serviceRequest')
                     ->create(['direction' => ServiceRequestUpdateDirection::Outbound]);
 
-                expect($serviceRequestUpdate->createdBy)->toBeNull();
-
-                $migrate = Artisan::call('migrate', ['--path' => 'app-modules/service-management/database/migrations/2025_09_26_183417_tmp_data_backfill_service_request_update_created_by.php']);
+                $migrate = Artisan::call('migrate', ['--path' => 'app-modules/service-management/database/migrations/2025_09_26_165527_add_created_by_columns_to_service_request_updates_table.php']);
 
                 expect($migrate)->toBe(Command::SUCCESS);
 
