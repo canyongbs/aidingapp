@@ -36,7 +36,6 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources;
 
-use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateDirection;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource\Pages\CreateServiceRequestUpdate;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource\Pages\EditServiceRequestUpdate;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource\Pages\ListServiceRequestUpdates;
@@ -80,12 +79,6 @@ class ServiceRequestUpdateResource extends Resource
                     ->columnSpan('full')
                     ->required()
                     ->string(),
-                Select::make('direction')
-                    ->options(ServiceRequestUpdateDirection::class)
-                    ->label('Direction')
-                    ->required()
-                    ->enum(ServiceRequestUpdateDirection::class)
-                    ->default(ServiceRequestUpdateDirection::default()),
                 Toggle::make('internal')
                     ->label('Internal')
                     ->rule(['boolean']),
@@ -114,17 +107,10 @@ class ServiceRequestUpdateResource extends Resource
                 Tables\Columns\IconColumn::make('internal')
                     ->boolean()
                     ->label('Internal'),
-                Tables\Columns\TextColumn::make('direction')
-                    ->label('Direction')
-                    ->formatStateUsing(fn (ServiceRequestUpdateDirection $state): string => $state->getLabel())
-                    ->icon(fn (ServiceRequestUpdateDirection $state): string => $state->getIcon()),
             ])
             ->filters([
                 Tables\Filters\TernaryFilter::make('internal')
                     ->label('Internal'),
-                Tables\Filters\SelectFilter::make('direction')
-                    ->label('Direction')
-                    ->options(ServiceRequestUpdateDirection::class),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
