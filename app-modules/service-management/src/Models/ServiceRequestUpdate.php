@@ -42,6 +42,7 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateDirection;
 use AidingApp\ServiceManagement\Observers\ServiceRequestUpdateObserver;
 use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
 use AidingApp\Timeline\Timelines\ServiceRequestUpdateTimeline;
+use App\Features\ServiceRequestUpdateCreatedByFeature;
 use App\Models\BaseModel;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
@@ -74,11 +75,6 @@ class ServiceRequestUpdate extends BaseModel implements Auditable, ProvidesATime
         'direction',
     ];
 
-    protected $casts = [
-        'internal' => 'boolean',
-        'direction' => ServiceRequestUpdateDirection::class,
-    ];
-
     public function serviceRequest(): BelongsTo
     {
         return $this->belongsTo(ServiceRequest::class);
@@ -99,7 +95,20 @@ class ServiceRequestUpdate extends BaseModel implements Auditable, ProvidesATime
      */
     public function createdBy(): MorphTo
     {
-        return $this->morphTo();
+        return $this->morphTo(
+            name: 'created_by',
+            type: 'created_by_type',
+            id: 'created_by_id',
+        );
+    }
+
+    protected function casts()
+    {
+        return [
+            'internal' => 'boolean',
+            // // Can be removed as feature flag is being removed and converted back to $casts property
+            ...! ServiceRequestUpdateCreatedByFeature::active() ? ['direction' => ServiceRequestUpdateDirection::class] : [],
+        ];
     }
 
     protected function serializeDate(DateTimeInterface $date): string

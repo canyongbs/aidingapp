@@ -48,6 +48,7 @@ use AidingApp\ServiceManagement\Exceptions\ServiceRequestNumberExceededReRollsEx
 use AidingApp\ServiceManagement\Models\MediaCollections\UploadsMediaCollection;
 use AidingApp\ServiceManagement\Observers\ServiceRequestObserver;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
+use App\Features\ServiceRequestUpdateCreatedByFeature;
 use App\Models\Authenticatable;
 use App\Models\BaseModel;
 use App\Models\Concerns\BelongsToEducatable;
@@ -286,7 +287,12 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
                 'created_at' => 'max',
             ], function (Builder $query) {
                 $query
-                    ->where('direction', ServiceRequestUpdateDirection::Inbound)
+                    ->when(ServiceRequestUpdateCreatedByFeature::active(), function (Builder $query) {
+                        $query->whereHas('createdBy', function (Builder $query) {
+                            $query->where('type', Contact::class);
+                        });
+                    })
+                    ->when(! ServiceRequestUpdateCreatedByFeature::active(), fn (Builder $query) => $query->where('direction', ServiceRequestUpdateDirection::Inbound))
                     ->where('internal', false);
             });
     }
@@ -301,7 +307,12 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
                 'created_at' => 'max',
             ], function (Builder $query) {
                 $query
-                    ->where('direction', ServiceRequestUpdateDirection::Outbound)
+                    ->when(ServiceRequestUpdateCreatedByFeature::active(), function (Builder $query) {
+                        $query->whereHas('createdBy', function (Builder $query) {
+                            $query->where('type', User::class);
+                        });
+                    })
+                    ->when(! ServiceRequestUpdateCreatedByFeature::active(), fn (Builder $query) => $query->where('direction', ServiceRequestUpdateDirection::Outbound))
                     ->where('internal', false);
             });
     }

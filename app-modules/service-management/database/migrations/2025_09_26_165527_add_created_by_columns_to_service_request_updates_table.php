@@ -41,9 +41,8 @@ return new class () extends Migration {
             Schema::table('service_request_updates', function (Blueprint $table) {
                 $table->string('created_by_type')->nullable(false)->change();
                 $table->uuid('created_by_id')->nullable(false)->change();
+                $table->dropColumn('direction');
             });
-
-            // TODO: Maybe Drop direction column
 
             ServiceRequestUpdateCreatedByFeature::activate();
         });
@@ -52,7 +51,9 @@ return new class () extends Migration {
     public function down(): void
     {
         DB::transaction(function () {
-            // TODO: Maybe Restore direction column
+            Schema::table('service_request_updates', function (Blueprint $table) {
+                $table->string('direction');
+            });
 
             // TODO: Maybe backfill direction column
 
