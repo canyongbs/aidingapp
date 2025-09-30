@@ -274,7 +274,8 @@
 
                                             <div
                                                 :class="
-                                                    serviceRequestUpdate.created_by_type === 'contact' || serviceRequestUpdate.direction == directionEnums.Inbound
+                                                    serviceRequestUpdate.created_by_type === 'contact' ||
+                                                    serviceRequestUpdate.direction == directionEnums.Inbound
                                                         ? 'mb-4 p-4 bg-gray-50 border border-gray-200 rounded'
                                                         : 'mb-4 p-4 border border-blue-200 rounded bg-gradient-to-br from-brand-500 to-brand-800 text-white'
                                                 "
@@ -283,7 +284,8 @@
                                             >
                                                 <p
                                                     :class="
-                                                        serviceRequestUpdate.created_by_type === 'contact' || serviceRequestUpdate.direction == directionEnums.Inbound
+                                                        serviceRequestUpdate.created_by_type === 'contact' ||
+                                                        serviceRequestUpdate.direction == directionEnums.Inbound
                                                             ? 'text-gray-700'
                                                             : ''
                                                     "
@@ -292,7 +294,8 @@
                                                 </p>
                                                 <span
                                                     :class="
-                                                        serviceRequestUpdate.created_by_type === 'contact' || serviceRequestUpdate.direction == directionEnums.Inbound
+                                                        serviceRequestUpdate.created_by_type === 'contact' ||
+                                                        serviceRequestUpdate.direction == directionEnums.Inbound
                                                             ? 'text-sm text-gray-500'
                                                             : 'text-sm'
                                                     "
