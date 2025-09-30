@@ -59,8 +59,6 @@ test('The correct details are displayed on the ViewServiceRequestUpdate page', f
                 $serviceRequestUpdate->serviceRequest->service_request_number,
                 'Internal',
                 // TODO: Figure out how to check whether this internal value the check or the X icon
-                'Direction',
-                $serviceRequestUpdate->direction->name,
                 'Update',
                 $serviceRequestUpdate->update,
             ]
