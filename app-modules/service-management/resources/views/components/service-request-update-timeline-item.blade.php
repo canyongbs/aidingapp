@@ -34,6 +34,8 @@
 @php
     use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateDirection;
     use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource;
+    use App\Features\ServiceRequestUpdateCreatedByFeature;
+    use App\Models\User;
 @endphp
 
 <div>
@@ -55,7 +57,11 @@
                     @endif
                 </x-filament::badge>
 
-                @if ($record->direction === ServiceRequestUpdateDirection::Inbound)
+                @if (
+                    ServiceRequestUpdateCreatedByFeature::active()
+                        ? ! $record->createdBy instanceof User
+                        : $record->direction === ServiceRequestUpdateDirection::Inbound
+                    )
                     <x-filament::icon
                         class="w-5 text-gray-400 dark:text-gray-100"
                         icon="heroicon-o-arrow-down-tray"
