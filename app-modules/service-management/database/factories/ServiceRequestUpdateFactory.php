@@ -57,7 +57,7 @@ class ServiceRequestUpdateFactory extends Factory
             'update' => $this->faker->sentence(),
             'internal' => $this->faker->boolean(),
             // direction can be fully removed when we purge the ServiceRequestUpdateCreatedByFeature feature flag
-            ...ServiceRequestUpdateCreatedByFeature::active() ? ['direction' => $this->faker->randomElement(ServiceRequestUpdateDirection::cases())->value] : [],
+            ...! ServiceRequestUpdateCreatedByFeature::active() ? ['direction' => $this->faker->randomElement(ServiceRequestUpdateDirection::cases())->value] : [],
             ...ServiceRequestUpdateCreatedByFeature::active() ? [
                 'created_by_type' => $this->faker->randomElement([(new User())->getMorphClass(), (new Contact())->getMorphClass()]),
                 'created_by_id' => function (array $attributes) {
