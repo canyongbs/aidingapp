@@ -289,7 +289,7 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
                 $query
                     ->when(ServiceRequestUpdateCreatedByFeature::active(), function (Builder $query) {
                         $query->whereHas('createdBy', function (Builder $query) {
-                            $query->where('type', Contact::class);
+                            $query->where('created_by_type', (new Contact())->getMorphClass());
                         });
                     })
                     ->when(! ServiceRequestUpdateCreatedByFeature::active(), fn (Builder $query) => $query->where('direction', ServiceRequestUpdateDirection::Inbound))
@@ -309,7 +309,7 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
                 $query
                     ->when(ServiceRequestUpdateCreatedByFeature::active(), function (Builder $query) {
                         $query->whereHas('createdBy', function (Builder $query) {
-                            $query->where('type', User::class);
+                            $query->where('created_by_type', (new User())->getMorphClass());
                         });
                     })
                     ->when(! ServiceRequestUpdateCreatedByFeature::active(), fn (Builder $query) => $query->where('direction', ServiceRequestUpdateDirection::Outbound))

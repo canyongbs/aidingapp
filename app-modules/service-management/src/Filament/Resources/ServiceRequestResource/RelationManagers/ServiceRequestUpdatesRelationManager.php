@@ -112,7 +112,8 @@ class ServiceRequestUpdatesRelationManager extends RelationManager
                     ->boolean(),
                 TextColumn::make('direction')
                     ->icon(fn (ServiceRequestUpdateDirection $state): string => $state->getIcon())
-                    ->formatStateUsing(fn (ServiceRequestUpdateDirection $state): string => $state->getLabel()),
+                    ->formatStateUsing(fn (ServiceRequestUpdateDirection $state): string => $state->getLabel())
+                    ->visible(fn () => ! ServiceRequestUpdateCreatedByFeature::active()),
                 TextColumn::make('created_at')
                     ->sortable(),
                 TextColumn::make('updated_at')
