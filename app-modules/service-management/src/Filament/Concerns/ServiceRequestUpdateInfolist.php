@@ -36,13 +36,17 @@
 
 namespace AidingApp\ServiceManagement\Filament\Concerns;
 
-use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateDirection;
+use AidingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use App\Features\ServiceRequestUpdateCreatedByFeature;
+use App\Filament\Resources\UserResource;
+use App\Models\User;
+use Exception;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 
-// TODO Re-use this trait across other places where infolist is rendered
 trait ServiceRequestUpdateInfolist
 {
     public function serviceRequestUpdateInfolist(): array
@@ -54,9 +58,19 @@ trait ServiceRequestUpdateInfolist
                 ->color('primary'),
             IconEntry::make('internal')
                 ->boolean(),
-            TextEntry::make('direction')
-                ->icon(fn (ServiceRequestUpdateDirection $state): string => $state->getIcon())
-                ->formatStateUsing(fn (ServiceRequestUpdateDirection $state): string => $state->getLabel()),
+            TextEntry::make('createdBy')
+                ->label('Created By')
+                ->getStateUsing(fn (ServiceRequestUpdate $record): string => $record->createdBy ? match ($record->createdBy::class) {
+                    User::class => $record->createdBy->name,
+                    Contact::class => $record->createdBy->full_name,
+                    default => throw new Exception('Unknown createdBy type ' . $record->createdBy::class),
+                } : null)
+                ->url(fn (ServiceRequestUpdate $record): string => $record->createdBy ? match ($record->createdBy::class) {
+                    User::class => UserResource::getUrl('view', ['record' => $record->createdBy]),
+                    Contact::class => ContactResource::getUrl('view', ['record' => $record->createdBy]),
+                    default => throw new Exception('Unknown createdBy type ' . $record->createdBy::class),
+                } : null)
+                ->visible(fn (): bool => ServiceRequestUpdateCreatedByFeature::active()),
             TextEntry::make('update')
                 ->columnSpanFull(),
         ];
