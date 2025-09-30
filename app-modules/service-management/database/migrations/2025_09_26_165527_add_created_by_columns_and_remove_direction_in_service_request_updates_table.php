@@ -1,5 +1,6 @@
 <?php
 
+use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateDirection;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use App\Features\ServiceRequestUpdateCreatedByFeature;
@@ -52,14 +53,31 @@ return new class () extends Migration {
     {
         DB::transaction(function () {
             Schema::table('service_request_updates', function (Blueprint $table) {
-                $table->string('direction');
+                // Can be set back to non-nullable after cleanup of ServiceRequestUpdateCreatedByFeature
+                $table->string('direction')->nullable();
             });
 
-            // TODO: Maybe backfill direction column
+            // Revert backfill existing records SHOULD BE REMOVED DURING CLEANUP OF ServiceRequestUpdateCreatedByFeature
+            ServiceRequestUpdate::query()
+                ->eachById(function (ServiceRequestUpdate $serviceRequestUpdate) {
+                    match ($serviceRequestUpdate->createdBy::class) {
+                        Contact::class => (function () use ($serviceRequestUpdate) {
+                            $serviceRequestUpdate->direction = ServiceRequestUpdateDirection::Inbound;
+                            $serviceRequestUpdate->save();
+                        })(),
+                        User::class => (function () use ($serviceRequestUpdate) {
+                            $serviceRequestUpdate->direction = ServiceRequestUpdateDirection::Outbound;
+                            $serviceRequestUpdate->save();
+                        })(),
+                        default => throw new Exception('Unknown created_by type'),
+                    };
+                });
 
             ServiceRequestUpdateCreatedByFeature::deactivate();
 
             Schema::table('service_request_updates', function (Blueprint $table) {
+                // direction change can be removed here after cleanup of ServiceRequestUpdateCreatedByFeature
+                $table->string('direction')->nullable(false)->change();
                 $table->dropMorphs('created_by');
             });
         });

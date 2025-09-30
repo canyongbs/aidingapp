@@ -58,7 +58,7 @@ use OwenIt\Auditing\Contracts\Auditable;
 /**
  * TODO: Remove direction property when we purge ServiceRequestUpdateCreatedByFeature
  *
- * @property string $direction
+ * @property ServiceRequestUpdateDirection $direction
  *
  * @mixin IdeHelperServiceRequestUpdate
  */
