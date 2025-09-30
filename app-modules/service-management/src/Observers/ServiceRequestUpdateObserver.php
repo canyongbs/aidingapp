@@ -56,9 +56,11 @@ class ServiceRequestUpdateObserver
     public function creating(ServiceRequestUpdate $serviceRequestUpdate): void
     {
         if (
+            // @phpstan-ignore function.impossibleType
+            // @phpstan-ignore booleanAnd.alwaysFalse
             ServiceRequestUpdateCreatedByFeature::active()
             && auth()->check()
-            && is_null($serviceRequestUpdate->createdBy)
+            && is_null($serviceRequestUpdate->createdBy) // @phpstan-ignore function.impossibleType
         ) {
             $serviceRequestUpdate->createdBy()->associate(auth()->user());
         }
