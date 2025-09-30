@@ -53,7 +53,9 @@ class StoreServiceRequestUpdateController extends Controller
         $serviceRequestUpdate->update = $request->description;
         $serviceRequestUpdate->internal = false;
 
-        if (! ServiceRequestUpdateCreatedByFeature::active()) {
+        if (ServiceRequestUpdateCreatedByFeature::active()) {
+            $serviceRequestUpdate->createdBy()->associate($request->user(guard: 'contact'));
+        } else {
             $serviceRequestUpdate->direction = ServiceRequestUpdateDirection::Inbound;
         }
 
