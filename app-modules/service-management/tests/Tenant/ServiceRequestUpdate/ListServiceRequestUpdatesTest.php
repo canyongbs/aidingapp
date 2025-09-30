@@ -40,7 +40,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use App\Models\User;
 use App\Settings\LicenseSettings;
-use Illuminate\Support\Str;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -80,11 +79,6 @@ test('The correct details are displayed on the ListServiceRequestUpdates page', 
             ->assertTableColumnStateSet(
                 'internal',
                 $serviceRequestUpdate->internal,
-                $serviceRequestUpdate
-            )
-            ->assertTableColumnFormattedStateSet(
-                'direction',
-                Str::ucfirst($serviceRequestUpdate->direction->value),
                 $serviceRequestUpdate
             )
     );
