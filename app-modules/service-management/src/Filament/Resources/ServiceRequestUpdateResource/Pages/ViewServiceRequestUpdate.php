@@ -70,16 +70,16 @@ class ViewServiceRequestUpdate extends ViewRecord
                             ->boolean(),
                         TextEntry::make('createdBy')
                             ->label('Created By')
-                            ->getStateUsing(fn (ServiceRequestUpdate $record): string => $record->createdBy ? match ($record->createdBy::class) {
+                            ->getStateUsing(fn (ServiceRequestUpdate $record): string => match ($record->createdBy::class) {
                                 User::class => $record->createdBy->name,
                                 Contact::class => $record->createdBy->full_name,
                                 default => throw new Exception('Unknown createdBy type ' . $record->createdBy::class),
-                            } : null)
-                            ->url(fn (ServiceRequestUpdate $record): string => $record->createdBy ? match ($record->createdBy::class) {
+                            })
+                            ->url(fn (ServiceRequestUpdate $record): string => match ($record->createdBy::class) {
                                 User::class => UserResource::getUrl('view', ['record' => $record->createdBy]),
                                 Contact::class => ContactResource::getUrl('view', ['record' => $record->createdBy]),
                                 default => throw new Exception('Unknown createdBy type ' . $record->createdBy::class),
-                            } : null)
+                            })
                             ->visible(fn (): bool => ServiceRequestUpdateCreatedByFeature::active()),
                         TextEntry::make('update')
                             ->columnSpanFull(),
