@@ -40,6 +40,7 @@ use AidingApp\Portal\Http\Requests\StoreServiceRequestUpdateRequest;
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateDirection;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use App\Features\ServiceRequestUpdateCreatedByFeature;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 
@@ -65,7 +66,8 @@ class StoreServiceRequestUpdateController extends Controller
                 return [
                     'id' => $update->getKey(),
                     'update' => $update->update,
-                    'direction' => $update->direction,
+                    // Can be removed as feature flag is being removed
+                    ...(! ServiceRequestUpdateCreatedByFeature::active()) ? ['direction' => $update->direction->value] : [],
                     'created_at' => $update->created_at->format('m-d-Y g:i A'),
                 ];
             });
