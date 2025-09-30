@@ -56,6 +56,10 @@ use Illuminate\Support\Collection;
 use OwenIt\Auditing\Contracts\Auditable;
 
 /**
+ * TODO: Remove direction property when we purge ServiceRequestUpdateCreatedByFeature
+ *
+ * @property string $direction
+ *
  * @mixin IdeHelperServiceRequestUpdate
  */
 #[ObservedBy([ServiceRequestUpdateObserver::class])]
@@ -106,7 +110,7 @@ class ServiceRequestUpdate extends BaseModel implements Auditable, ProvidesATime
     {
         return [
             'internal' => 'boolean',
-            // // Can be removed as feature flag is being removed and converted back to $casts property
+            // Can be removed as feature flag is being removed and converted back to $casts property
             ...! ServiceRequestUpdateCreatedByFeature::active() ? ['direction' => ServiceRequestUpdateDirection::class] : [],
         ];
     }

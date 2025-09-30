@@ -52,7 +52,11 @@ class StoreServiceRequestUpdateController extends Controller
         $serviceRequestUpdate->service_request_id = $request->serviceRequestId;
         $serviceRequestUpdate->update = $request->description;
         $serviceRequestUpdate->internal = false;
-        $serviceRequestUpdate->direction = ServiceRequestUpdateDirection::Inbound;
+
+        if (! ServiceRequestUpdateCreatedByFeature::active()) {
+            $serviceRequestUpdate->direction = ServiceRequestUpdateDirection::Inbound;
+        }
+
         $serviceRequestUpdate->save();
 
         $serviceRequest = ServiceRequest::findOrFail($request->serviceRequestId);
@@ -67,7 +71,7 @@ class StoreServiceRequestUpdateController extends Controller
                     'id' => $update->getKey(),
                     'update' => $update->update,
                     // Can be removed as feature flag is being removed
-                    ...(! ServiceRequestUpdateCreatedByFeature::active()) ? ['direction' => $update->direction->value] : [],
+                    ...! ServiceRequestUpdateCreatedByFeature::active() ? ['direction' => $update->direction] : ['created_by_type' => $update->created_by_type],
                     'created_at' => $update->created_at->format('m-d-Y g:i A'),
                 ];
             });
