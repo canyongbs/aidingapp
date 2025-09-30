@@ -41,6 +41,7 @@ use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use App\Features\ServiceRequestUpdateCreatedByFeature;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -81,7 +82,9 @@ class ServiceRequestUpdatesRelationManager extends RelationManager
                     ->label('Direction')
                     ->required()
                     ->enum(ServiceRequestUpdateDirection::class)
-                    ->default(ServiceRequestUpdateDirection::default()),
+                    ->default(ServiceRequestUpdateDirection::default())
+                    // This entire input can be deleted when clearing out this feature flag
+                    ->visible(fn () => ! ServiceRequestUpdateCreatedByFeature::active()),
                 Select::make('status_id')
                     ->label('Status')
                     ->allowHtml()
