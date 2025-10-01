@@ -55,7 +55,6 @@ return new class () extends Migration {
 
             // Backfill existing records SHOULD BE REMOVED DURING CLEANUP OF ServiceRequestUpdateCreatedByFeature
             ServiceRequestUpdate::query()
-                ->whereHas('serviceRequest')
                 ->eachById(function (ServiceRequestUpdate $serviceRequestUpdate) {
                     match ($serviceRequestUpdate->direction) {
                         ServiceRequestUpdateDirection::Inbound => (function () use ($serviceRequestUpdate) {
