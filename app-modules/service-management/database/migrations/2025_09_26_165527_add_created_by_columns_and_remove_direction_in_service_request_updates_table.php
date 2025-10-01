@@ -66,7 +66,7 @@ return new class () extends Migration {
                         ServiceRequestUpdateDirection::Outbound => (function () use ($serviceRequestUpdate) {
                             $user = $serviceRequestUpdate->serviceRequest->assignedTo->user
                                 // @phpstan-ignore method.notFound
-                                ?? $serviceRequestUpdate->serviceRequest->priority->type->managers()->first()?->users()->first()
+                                ?? $serviceRequestUpdate->serviceRequest?->priority->type->managers()->first()?->users()->first()
                                 ?? User::role(Authenticatable::SUPER_ADMIN_ROLE)->first();
                             $serviceRequestUpdate->createdBy()->associate($user);
                             $serviceRequestUpdate->save();
@@ -94,7 +94,6 @@ return new class () extends Migration {
 
             // Revert backfill existing records SHOULD BE REMOVED DURING CLEANUP OF ServiceRequestUpdateCreatedByFeature
             ServiceRequestUpdate::query()
-                ->whereHas('serviceRequest')
                 ->eachById(function (ServiceRequestUpdate $serviceRequestUpdate) {
                     match ($serviceRequestUpdate->createdBy::class) {
                         Contact::class => (function () use ($serviceRequestUpdate) {
