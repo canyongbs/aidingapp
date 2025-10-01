@@ -65,7 +65,7 @@ return new class () extends Migration {
                         ServiceRequestUpdateDirection::Outbound => (function () use ($serviceRequestUpdate) {
                             $user = $serviceRequestUpdate->serviceRequest->assignedTo->user
                                 // @phpstan-ignore method.notFound
-                                ?? $serviceRequestUpdate->serviceRequest->priority->type->managers()->first()?->users()->first()
+                                ?? $serviceRequestUpdate->serviceRequest?->priority?->type?->managers()->first()?->users()->first()
                                 ?? User::role(Authenticatable::SUPER_ADMIN_ROLE)->first();
                             $serviceRequestUpdate->createdBy()->associate($user);
                             $serviceRequestUpdate->save();
