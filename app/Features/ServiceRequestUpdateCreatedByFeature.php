@@ -34,49 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace App\Jobs;
+namespace App\Features;
 
-use App\Models\Tenant;
-use Illuminate\Bus\Batchable;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Artisan;
-use Spatie\Multitenancy\Jobs\NotTenantAware;
+use App\Support\AbstractFeatureFlag;
 
-class MigrateTenantDatabase implements ShouldQueue, NotTenantAware
+class ServiceRequestUpdateCreatedByFeature extends AbstractFeatureFlag
 {
-    use Batchable;
-    use Dispatchable;
-    use InteractsWithQueue;
-    use Queueable;
-    use SerializesModels;
-
-    public function __construct(public Tenant $tenant) {}
-
-    /**
-     * @return array<int, SkipIfBatchCancelled>
-     */
-    public function middleware(): array
+    public function resolve(mixed $scope): mixed
     {
-        return [new SkipIfBatchCancelled()];
-    }
-
-    public function handle(): void
-    {
-        $this->tenant->execute(function () {
-            $currentQueueFailedConnection = config('queue.failed.database');
-
-            config(['queue.failed.database' => 'landlord']);
-
-            Artisan::call(
-                command: 'migrate:fresh --force'
-            );
-
-            config(['queue.failed.database' => $currentQueueFailedConnection]);
-        });
+        return false;
     }
 }

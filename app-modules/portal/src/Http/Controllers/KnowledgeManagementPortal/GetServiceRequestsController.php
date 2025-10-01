@@ -41,6 +41,7 @@ use AidingApp\Portal\Settings\PortalSettings;
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateDirection;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use App\Features\ServiceRequestUpdateCreatedByFeature;
 use App\Http\Controllers\Controller;
 use App\Settings\LicenseSettings;
 use Filament\Support\Colors\Color;
@@ -123,11 +124,12 @@ class GetServiceRequestsController extends Controller
                     return [
                         'id' => $serviceRequestUpdate->getKey(),
                         'update' => $serviceRequestUpdate->update,
-                        'direction' => $serviceRequestUpdate->direction,
+                        ...! ServiceRequestUpdateCreatedByFeature::active() ? ['direction' => $serviceRequestUpdate->direction] : ['created_by_type' => $serviceRequestUpdate->created_by_type],
                         'created_at' => $serviceRequestUpdate->created_at->format('m-d-Y g:i A'),
                     ];
                 })
                 ->toArray(),
+            // Remove during the purging of ServiceRequestUpdateCreatedByFeature
             'directionEnums' => collect(ServiceRequestUpdateDirection::cases())
                 ->mapWithKeys(fn ($case) => [$case->name => $case->value])
                 ->toArray(),

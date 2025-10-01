@@ -39,6 +39,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateDirection;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use App\Features\ServiceRequestUpdateCreatedByFeature;
 use App\Support\BulkProcessingMachine;
 use Closure;
 use Filament\Forms\Components\Textarea;
@@ -111,12 +112,19 @@ class AddServiceRequestUpdateBulkAction
                         };
                     })
                     ->process(function (ServiceRequest $serviceRequest) use ($data) {
-                        ServiceRequestUpdate::create([
+                        $update = new ServiceRequestUpdate([
                             'service_request_id' => $serviceRequest->getKey(),
                             'update' => $data['update'],
-                            'direction' => ServiceRequestUpdateDirection::Outbound,
                             'internal' => $data['internal'],
                         ]);
+
+                        if (ServiceRequestUpdateCreatedByFeature::active()) {
+                            $update->createdBy()->associate(auth()->user());
+                        } else {
+                            $update->direction = ServiceRequestUpdateDirection::Outbound;
+                        }
+
+                        $update->saveOrFail();
                     })
                     ->sendNotification(function (int $successCount): string {
                         if (! $successCount) {

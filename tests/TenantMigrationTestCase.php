@@ -34,49 +34,56 @@
 </COPYRIGHT>
 */
 
-namespace App\Jobs;
+namespace Tests;
 
 use App\Models\Tenant;
-use Illuminate\Bus\Batchable;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Artisan;
-use Spatie\Multitenancy\Jobs\NotTenantAware;
+use Illuminate\Contracts\Console\Kernel;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabaseState;
 
-class MigrateTenantDatabase implements ShouldQueue, NotTenantAware
+abstract class TenantMigrationTestCase extends TestCase
 {
-    use Batchable;
-    use Dispatchable;
-    use InteractsWithQueue;
-    use Queueable;
-    use SerializesModels;
+    use DatabaseMigrations;
 
-    public function __construct(public Tenant $tenant) {}
-
-    /**
-     * @return array<int, SkipIfBatchCancelled>
-     */
-    public function middleware(): array
+    protected function setUp(): void
     {
-        return [new SkipIfBatchCancelled()];
+        parent::setUp();
+
+        Tenant::first()->makeCurrent();
     }
 
-    public function handle(): void
+    /**
+     * Define hooks to migrate the database before and after each test.
+     *
+     * @return void
+     */
+    public function runDatabaseMigrations()
     {
-        $this->tenant->execute(function () {
-            $currentQueueFailedConnection = config('queue.failed.database');
+        $this->beforeRefreshingDatabase();
+        $this->refreshTestDatabase();
+        $this->afterRefreshingDatabase();
 
-            config(['queue.failed.database' => 'landlord']);
-
-            Artisan::call(
-                command: 'migrate:fresh --force'
-            );
-
-            config(['queue.failed.database' => $currentQueueFailedConnection]);
+        $this->beforeApplicationDestroyed(function () {
+            $this->refreshTenantTestingEnvironment();
         });
+    }
+
+    protected function refreshTestDatabase()
+    {
+        if (! RefreshDatabaseState::$migrated) {
+            $this->createLandlordTestingEnvironment();
+
+            $this->app[Kernel::class]->setArtisan(null);
+
+            RefreshDatabaseState::$migrated = true;
+        }
+
+        $beginLandlordTransaction = function () {
+            $this->beginDatabaseTransactionOnConnection($this->landlordDatabaseConnectionName());
+        };
+
+        if (! in_array($beginLandlordTransaction, $this->afterApplicationCreatedCallbacks)) {
+            $this->afterApplicationCreated($beginLandlordTransaction);
+        }
     }
 }

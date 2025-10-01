@@ -36,9 +36,13 @@
 
 namespace AidingApp\ServiceManagement\Database\Factories;
 
+use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateDirection;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use App\Features\ServiceRequestUpdateCreatedByFeature;
+use App\Models\User;
+use Exception;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -52,7 +56,18 @@ class ServiceRequestUpdateFactory extends Factory
             'service_request_id' => ServiceRequest::factory(),
             'update' => $this->faker->sentence(),
             'internal' => $this->faker->boolean(),
-            'direction' => $this->faker->randomElement(ServiceRequestUpdateDirection::cases())->value,
+            // direction can be fully removed when we purge the ServiceRequestUpdateCreatedByFeature feature flag
+            ...! ServiceRequestUpdateCreatedByFeature::active() ? ['direction' => $this->faker->randomElement(ServiceRequestUpdateDirection::cases())->value] : [],
+            ...ServiceRequestUpdateCreatedByFeature::active() ? [
+                'created_by_type' => $this->faker->randomElement([(new User())->getMorphClass(), (new Contact())->getMorphClass()]),
+                'created_by_id' => function (array $attributes) {
+                    return match ($attributes['created_by_type']) {
+                        (new User())->getMorphClass() => User::factory(),
+                        (new Contact())->getMorphClass() => Contact::factory(),
+                        default => throw new Exception('Unknown created_by_type ' . $attributes['created_by_type']),
+                    };
+                },
+            ] : [],
         ];
     }
 }

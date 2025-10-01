@@ -313,13 +313,13 @@
         const { setHasServiceManagement, setHasAssets, setHasLicense, setHasTasks } = useFeatureStore();
 
         if (authentication.value.isRequested) {
-            $data = {
+            const data = {
                 code: formData.code,
             };
 
             if (authentication.value.registrationAllowed) {
-                $data = {
-                    ...$data,
+                data = {
+                    ...data,
                     email: formData.email,
                     first_name: formData.first_name,
                     last_name: formData.last_name,
@@ -331,7 +331,7 @@
             }
 
             axios
-                .post(authentication.value.url, $data)
+                .post(authentication.value.url, data)
                 .then((response) => {
                     if (response.errors) {
                         node.setErrors([], response.errors);
