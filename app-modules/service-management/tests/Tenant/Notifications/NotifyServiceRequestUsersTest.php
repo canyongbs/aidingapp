@@ -285,6 +285,7 @@ it('does not notify a user twice if they belong to a team managing and auditing 
         true,
     );
 
-    Notification::assertSentToTimes($firstTeam->users, ServiceRequestCreated::class, 1);
+    Notification::assertSentToTimes($firstTeam->users[0], ServiceRequestCreated::class, 1);
+    Notification::assertSentToTimes($firstTeam->users[1], ServiceRequestCreated::class, 1);
     Notification::assertNotSentTo($secondTeam->users, ServiceRequestCreated::class);
 });
