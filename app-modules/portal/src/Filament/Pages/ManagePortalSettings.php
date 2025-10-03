@@ -162,8 +162,8 @@ class ManagePortalSettings extends SettingsPage
                         ])
                             ->visible(
                                 fn (Get $get) => $get('knowledge_management_portal_enabled') &&
-                            ! is_null($get('knowledge_management_portal_primary_color')) &&
-                            ! is_null($get('knowledge_management_portal_rounding'))
+                                    ! is_null($get('knowledge_management_portal_primary_color')) &&
+                                    ! is_null($get('knowledge_management_portal_rounding'))
                             )
                             ->columnSpanFull(),
                     ])->columns(2),
@@ -209,12 +209,12 @@ class ManagePortalSettings extends SettingsPage
                     ])
                     ->visible(fn (Get $get) => $get('knowledge_management_portal_enabled')),
             ])
-            ->disabled(! auth()->user()->can('product_admin.*.update'));
+            ->disabled(! auth()->user()->can('settings.*.update'));
     }
 
     public function save(): void
     {
-        if (! auth()->user()->can('product_admin.*.update')) {
+        if (! auth()->user()->can('settings.*.update')) {
             return;
         }
 
@@ -222,11 +222,11 @@ class ManagePortalSettings extends SettingsPage
     }
 
     /**
-    * @return array<Action | ActionGroup>
-    */
+     * @return array<Action | ActionGroup>
+     */
     public function getFormActions(): array
     {
-        if (! auth()->user()->can('product_admin.*.update')) {
+        if (! auth()->user()->can('settings.*.update')) {
             return [];
         }
 

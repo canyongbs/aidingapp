@@ -36,19 +36,25 @@
 
 namespace App\Providers;
 
+use App\Features\DisplaySettingsFeature;
 use App\Models\Export;
 use App\Models\FailedImportRow;
 use App\Models\Import;
 use App\Models\User;
+use App\Settings\DisplaySettings;
 use Filament\Actions\Exports\Models\Export as BaseExport;
 use Filament\Actions\Imports\Models\FailedImportRow as BaseFailedImportRow;
 use Filament\Actions\Imports\Models\Import as BaseImport;
 use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Support\Colors\Color;
 use Filament\Support\Facades\FilamentColor;
 use Filament\Support\Facades\FilamentView;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\View\View;
@@ -185,6 +191,69 @@ class FilamentServiceProvider extends ServiceProvider
             'panels::footer',
             fn (): View => view('filament.footer'),
         );
+
+        DateTimePicker::configureUsing(function (DateTimePicker $component) {
+            if ($component instanceof DatePicker) {
+                return;
+            }
+
+            $timezone = DisplaySettingsFeature::active() ?
+                app(DisplaySettings::class)->getTimezone() :
+                auth()->user()->timezone;
+            $timezoneLabel = DisplaySettingsFeature::active() ?
+                app(DisplaySettings::class)->getTimezoneLabel() :
+                auth()->user()->timezone;
+
+            $component
+                ->timezone($timezone)
+                ->hintIcon('heroicon-m-clock')
+                ->hintIconTooltip("This time is set in {$timezoneLabel}.");
+        });
+
+        TextColumn::configureUsing(function (TextColumn $column) {
+            $timezone = DisplaySettingsFeature::active() ?
+                app(DisplaySettings::class)->getTimezone() :
+                auth()->user()->timezone;
+            $timezoneLabel = DisplaySettingsFeature::active() ?
+                app(DisplaySettings::class)->getTimezoneLabel() :
+                auth()->user()->timezone;
+
+            $column
+                ->timezone($timezone)
+                ->tooltip(function (TextColumn $column) use ($timezoneLabel): ?string {
+                    if (! ($column->isTime() || $column->isDateTime())) {
+                        return null;
+                    }
+
+                    return "This time is set in {$timezoneLabel}.";
+                });
+        });
+
+        TextEntry::configureUsing(function (TextEntry $entry) {
+            $timezone = DisplaySettingsFeature::active() ?
+                app(DisplaySettings::class)->getTimezone() :
+                auth()->user()->timezone;
+            $timezoneLabel = DisplaySettingsFeature::active() ?
+                app(DisplaySettings::class)->getTimezoneLabel() :
+                auth()->user()->timezone;
+
+            $entry
+                ->timezone($timezone)
+                ->hintIcon(function (TextEntry $entry): ?string {
+                    if (! ($entry->isTime() || $entry->isDateTime())) {
+                        return null;
+                    }
+
+                    return 'heroicon-m-clock';
+                })
+                ->hintIconTooltip(function (TextEntry $entry) use ($timezoneLabel): ?string {
+                    if (! ($entry->isTime() || $entry->isDateTime())) {
+                        return null;
+                    }
+
+                    return "This time is set in {$timezoneLabel}.";
+                });
+        });
 
         Select::configureUsing(function (Select $select): void {
             $select->native(false);
