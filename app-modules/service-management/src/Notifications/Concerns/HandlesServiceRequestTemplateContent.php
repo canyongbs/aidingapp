@@ -143,7 +143,7 @@ trait HandlesServiceRequestTemplateContent
     {
         $recentUpdate = $this->serviceRequest
             ->serviceRequestUpdates()
-            ->orderBy('created_at', 'desc')
+            ->orderBy('updated_at', 'desc')
             ->first();
 
         if (! $recentUpdate) {
@@ -152,16 +152,16 @@ trait HandlesServiceRequestTemplateContent
 
         if ($recentUpdate->createdBy instanceof Contact) {
             $contact = $recentUpdate->createdBy;
-            $organizationName = $contact->organization ? $contact->organization->name : 'Unknown Organization';
+            $organizationName = $contact->organization ? $contact->organization->name : 'N/A';
             $creatorInfo = "{$contact->full_name} - {$organizationName}";
         } else {
             $user = $recentUpdate->createdBy;
-            $userName = ($user instanceof User) ? $user->name : 'Staff Member';
-            $creatorInfo = "{$userName} - Service Provider";
+            assert($user instanceof User);
+            $creatorInfo = "{$user->name} - Service Provider";
         }
 
-        $formattedDate = $recentUpdate->created_at->format('M. j, Y \a\t g:i A (T)');
+        $formattedDate = $recentUpdate->updated_at->format('M. j, Y \a\t g:i A (T)');
 
-        return "{$creatorInfo}\n{$formattedDate} - {$recentUpdate->update}";
+        return "{$creatorInfo}\n\n{$formattedDate} - {$recentUpdate->update}";
     }
 }
