@@ -34,16 +34,21 @@
 </COPYRIGHT>
 */
 
+use Spatie\LaravelSettings\Exceptions\SettingAlreadyExists;
 use Spatie\LaravelSettings\Migrations\SettingsMigration;
 
 return new class () extends SettingsMigration {
     public function up(): void
     {
-        $this->migrator->add('display.timezone');
+        try {
+            $this->migrator->add('display.timezone');
+        } catch (SettingAlreadyExists $e) {
+            //do nothing
+        }
     }
 
     public function down(): void
     {
-        $this->migrator->delete('display.timezone');
+        $this->migrator->deleteIfExists('display.timezone');
     }
 };
