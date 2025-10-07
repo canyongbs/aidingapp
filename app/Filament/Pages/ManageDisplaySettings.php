@@ -48,50 +48,50 @@ use Tapp\FilamentTimezoneField\Forms\Components\TimezoneSelect;
 
 class ManageDisplaySettings extends SettingsPage
 {
-  protected static ?string $navigationLabel = 'Dates and Times';
+    protected static ?string $navigationLabel = 'Dates and Times';
 
-  protected static ?int $navigationSort = 10;
+    protected static ?int $navigationSort = 10;
 
-  protected static string $settings = DisplaySettings::class;
+    protected static string $settings = DisplaySettings::class;
 
-  protected static ?string $cluster = DisplaySettingsCluster::class;
+    protected static ?string $cluster = DisplaySettingsCluster::class;
 
-  public static function canAccess(): bool
-  {
-    /** @var User $user */
-    $user = auth()->user();
+    public static function canAccess(): bool
+    {
+        /** @var User $user */
+        $user = auth()->user();
 
-    return DisplaySettingsFeature::active() && $user->can('settings.view-any');
-  }
-
-  public function form(Form $form): Form
-  {
-    return $form
-      ->schema([
-        TimezoneSelect::make('timezone')
-          ->helperText('Default: ' . config('app.timezone')),
-      ])
-      ->disabled(! auth()->user()->can('settings.*.update'));
-  }
-
-  public function save(): void
-  {
-    if (! auth()->user()->can('settings.*.update')) {
-      return;
+        return DisplaySettingsFeature::active() && $user->can('settings.view-any');
     }
 
-    parent::save();
-  }
-
-  /**
-   * @return array<Action | ActionGroup>
-   */
-  public function getFormActions(): array
-  {
-    if (! auth()->user()->can('settings.*.update')) {
-      return [];
+    public function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                TimezoneSelect::make('timezone')
+                    ->helperText('Default: ' . config('app.timezone')),
+            ])
+            ->disabled(! auth()->user()->can('settings.*.update'));
     }
 
-    return parent::getFormActions();
-  }
+    public function save(): void
+    {
+        if (! auth()->user()->can('settings.*.update')) {
+            return;
+        }
+
+        parent::save();
+    }
+
+    /**
+     * @return array<Action | ActionGroup>
+     */
+    public function getFormActions(): array
+    {
+        if (! auth()->user()->can('settings.*.update')) {
+            return [];
+        }
+
+        return parent::getFormActions();
+    }
 }
