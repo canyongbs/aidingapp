@@ -92,9 +92,9 @@ class SendEducatableServiceRequestClosedNotification extends Notification implem
                 ->salutation('Thank you for giving us a chance to help you with your issue.');
         }
 
-        $subject = $this->getSubject($template->subject);
-
-        $body = $this->getBody($template->body, ServiceRequestTypeEmailTemplateRole::Customer);
+        $assignedUser = $this->serviceRequest->assignedTo?->user;
+        $subject = $this->getSubject($template->subject, $assignedUser);
+        $body = $this->getBody($template->body, ServiceRequestTypeEmailTemplateRole::Customer, $assignedUser);
 
         return MailMessage::make()
             ->settings($this->resolveNotificationSetting($notifiable))

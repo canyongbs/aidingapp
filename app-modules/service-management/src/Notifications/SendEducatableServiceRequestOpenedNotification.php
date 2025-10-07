@@ -87,9 +87,9 @@ class SendEducatableServiceRequestOpenedNotification extends Notification implem
                 ->lines(str(nl2br($this->serviceRequest->close_details))->explode('<br />'));
         }
 
-        $subject = $this->getSubject($template->subject);
-
-        $body = $this->getBody($template->body);
+        $assignedUser = $this->serviceRequest->assignedTo?->user;
+        $subject = $this->getSubject($template->subject, $assignedUser);
+        $body = $this->getBody($template->body, null, $assignedUser);
 
         return MailMessage::make()
             ->settings($this->resolveNotificationSetting($notifiable))

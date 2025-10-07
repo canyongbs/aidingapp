@@ -40,6 +40,9 @@ use AidingApp\ServiceManagement\Actions\GenerateServiceRequestTypeEmailTemplateC
 use AidingApp\ServiceManagement\Actions\GenerateServiceRequestTypeEmailTemplateSubject;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
+use App\Features\DisplaySettingsFeature;
+use App\Models\User;
+use App\Settings\DisplaySettings;
 use Illuminate\Support\HtmlString;
 
 trait HandlesServiceRequestTemplateContent
@@ -47,8 +50,9 @@ trait HandlesServiceRequestTemplateContent
     /**
      * @param string|array<string, mixed> $body
      * @param ?ServiceRequestTypeEmailTemplateRole $urlType
+     * @param ?User $user
      */
-    public function getBody($body, ?ServiceRequestTypeEmailTemplateRole $urlType = null): HtmlString
+    public function getBody($body, ?ServiceRequestTypeEmailTemplateRole $urlType = null, ?User $user = null): HtmlString
     {
         if (is_array($body)) {
             $body = $this->injectButtonUrlIntoTiptapContent($body, $urlType);
@@ -56,7 +60,7 @@ trait HandlesServiceRequestTemplateContent
 
         return app(GenerateServiceRequestTypeEmailTemplateContent::class)(
             $body,
-            $this->getMergeData(),
+            $this->getMergeData($user),
             $this->serviceRequest,
             'body',
         );
@@ -64,27 +68,38 @@ trait HandlesServiceRequestTemplateContent
 
     /**
      * @param string|array<string, mixed> $subject
+     * @param ?User $user
      */
-    public function getSubject($subject): HtmlString
+    public function getSubject($subject, ?User $user = null): HtmlString
     {
         return app(GenerateServiceRequestTypeEmailTemplateSubject::class)(
             $subject,
-            $this->getMergeData(),
+            $this->getMergeData($user),
             $this->serviceRequest,
             'subject',
         );
     }
 
     /**
+     * @param ?User $user
+     *
      * @return array<string, string>
      */
-    public function getMergeData(): array
+    public function getMergeData(?User $user = null): array
     {
+        $createdDate = DisplaySettingsFeature::active()
+            ? $this->serviceRequest->created_at->setTimezone(app(DisplaySettings::class)->getTimezoneForUser($user))->format('d-m-Y H:i')
+            : $this->serviceRequest->created_at->format('d-m-Y H:i');
+
+        $updatedDate = DisplaySettingsFeature::active()
+            ? $this->serviceRequest->updated_at->setTimezone(app(DisplaySettings::class)->getTimezoneForUser($user))->format('d-m-Y H:i')
+            : $this->serviceRequest->updated_at->format('d-m-Y H:i');
+
         return [
             'contact name' => $this->serviceRequest->respondent->{$this->serviceRequest->respondent::displayNameKey()},
             'service request number' => $this->serviceRequest->service_request_number,
-            'created date' => $this->serviceRequest->created_at->format('d-m-Y H:i'),
-            'updated date' => $this->serviceRequest->updated_at->format('d-m-Y H:i'),
+            'created date' => $createdDate,
+            'updated date' => $updatedDate,
             'assigned staff name' => $this->serviceRequest->assignedTo->user->name ?? 'Unassigned',
             'status' => $this->serviceRequest->status->name,
             'title' => $this->serviceRequest->title,

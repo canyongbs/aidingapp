@@ -49,6 +49,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use AidingApp\ServiceManagement\Notifications\Concerns\HandlesServiceRequestTemplateContent;
 use App\Models\NotificationSetting;
+use App\Models\User;
 use Filament\Notifications\Notification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -97,9 +98,9 @@ class ServiceRequestUpdated extends BaseNotification implements ShouldQueue, Has
                 ->action('View Service Request', ServiceRequestResource::getUrl('view', ['record' => $this->serviceRequestUpdate->serviceRequest]));
         }
 
-        $subject = $this->getSubject($template->subject);
-
-        $body = $this->getBody($template->body);
+        $user = $notifiable instanceof User ? $notifiable : null;
+        $subject = $this->getSubject($template->subject, $user);
+        $body = $this->getBody($template->body, null, $user);
 
         return MailMessage::make()
             ->settings($this->resolveNotificationSetting($notifiable))

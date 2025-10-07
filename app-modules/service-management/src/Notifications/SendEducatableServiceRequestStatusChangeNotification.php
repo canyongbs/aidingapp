@@ -84,9 +84,9 @@ class SendEducatableServiceRequestStatusChangeNotification extends Notification 
                 ->action('View Service Request', route('portal.service-request.show', $this->serviceRequest));
         }
 
-        $subject = $this->getSubject($template->subject);
-
-        $body = $this->getBody($template->body, ServiceRequestTypeEmailTemplateRole::Customer);
+        $assignedUser = $this->serviceRequest->assignedTo?->user;
+        $subject = $this->getSubject($template->subject, $assignedUser);
+        $body = $this->getBody($template->body, ServiceRequestTypeEmailTemplateRole::Customer, $assignedUser);
 
         return MailMessage::make()
             ->settings($this->resolveNotificationSetting($notifiable))

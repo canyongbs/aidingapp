@@ -103,9 +103,9 @@ class SendClosedServiceFeedbackNotification extends Notification implements Shou
                 ->line('We appreciate your time and we value your feedback!')
                 ->salutation('Thank you.');
         } else {
-            $subject = $this->getSubject($template->subject);
-
-            $body = $this->getBody($template->body);
+            $assignedUser = $this->serviceRequest->assignedTo?->user;
+            $subject = $this->getSubject($template->subject, $assignedUser);
+            $body = $this->getBody($template->body, null, $assignedUser);
 
             $mail = MailMessage::make()
                 ->settings($this->resolveNotificationSetting($notifiable))

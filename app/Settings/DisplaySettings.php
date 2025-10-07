@@ -36,6 +36,7 @@
 
 namespace App\Settings;
 
+use App\Models\User;
 use Spatie\LaravelSettings\Settings;
 
 class DisplaySettings extends Settings
@@ -49,6 +50,23 @@ class DisplaySettings extends Settings
 
     public function getTimezone(): string
     {
+        if (filled($userTimezone = auth()->user()?->timezone)) {
+            return $userTimezone;
+        }
+
+        if (filled($this->timezone)) {
+            return $this->timezone;
+        }
+
+        return config('app.timezone');
+    }
+
+    public function getTimezoneForUser(?User $user): string
+    {
+        if (filled($userTimezone = $user?->timezone)) {
+            return $userTimezone;
+        }
+
         if (filled($this->timezone)) {
             return $this->timezone;
         }
