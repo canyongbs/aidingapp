@@ -88,18 +88,18 @@ trait HandlesServiceRequestTemplateContent
     public function getMergeData(?User $user = null): array
     {
         $createdDate = DisplaySettingsFeature::active()
-            ? $this->serviceRequest->created_at->setTimezone(app(DisplaySettings::class)->getTimezoneForUser($user))->format('d-m-Y H:i')
-            : $this->serviceRequest->created_at->format('d-m-Y H:i');
+            ? $this->serviceRequest->created_at->setTimezone(app(DisplaySettings::class)->getTimezoneForUser($user))
+            : $this->serviceRequest->created_at;
 
         $updatedDate = DisplaySettingsFeature::active()
-            ? $this->serviceRequest->updated_at->setTimezone(app(DisplaySettings::class)->getTimezoneForUser($user))->format('d-m-Y H:i')
-            : $this->serviceRequest->updated_at->format('d-m-Y H:i');
+            ? $this->serviceRequest->updated_at->setTimezone(app(DisplaySettings::class)->getTimezoneForUser($user))
+            : $this->serviceRequest->updated_at;
 
         return [
             'contact name' => $this->serviceRequest->respondent->{$this->serviceRequest->respondent::displayNameKey()},
             'service request number' => $this->serviceRequest->service_request_number,
-            'created date' => $createdDate,
-            'updated date' => $updatedDate,
+            'created date' => $createdDate->format('d-m-Y H:i'),
+            'updated date' => $updatedDate->format('d-m-Y H:i'),
             'assigned staff name' => $this->serviceRequest->assignedTo->user->name ?? 'Unassigned',
             'status' => $this->serviceRequest->status->name,
             'title' => $this->serviceRequest->title,
