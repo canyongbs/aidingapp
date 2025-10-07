@@ -37,18 +37,18 @@
 use Spatie\LaravelSettings\Exceptions\SettingAlreadyExists;
 use Spatie\LaravelSettings\Migrations\SettingsMigration;
 
-return new class() extends SettingsMigration {
-  public function up(): void
-  {
-    try {
-      $this->migrator->add('display.timezone');
-    } catch (SettingAlreadyExists $exception) {
-      //do nothing
+return new class () extends SettingsMigration {
+    public function up(): void
+    {
+        try {
+            $this->migrator->add('display.timezone');
+        } catch (SettingAlreadyExists $exception) {
+            //do nothing
+        }
     }
-  }
 
-  public function down(): void
-  {
-    $this->migrator->deleteIfExists('display.timezone');
-  }
+    public function down(): void
+    {
+        $this->migrator->deleteIfExists('display.timezone');
+    }
 };
