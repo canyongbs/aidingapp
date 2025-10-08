@@ -32,7 +32,6 @@
 </COPYRIGHT>
 --}}
 @php
-    use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateDirection;
     use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource;
     use App\Models\User;
 @endphp
