@@ -106,7 +106,7 @@ return [
 
         'sentry_logs' => [
             'driver' => 'sentry_logs',
-            'level' => env('SENTRY_LOG_LEVEL', 'info'),
+            'level' => env('SENTRY_LOGS_LEVEL', 'info'),
         ],
 
         'stderr' => [
