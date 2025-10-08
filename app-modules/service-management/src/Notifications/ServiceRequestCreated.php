@@ -44,7 +44,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use AidingApp\ServiceManagement\Notifications\Concerns\HandlesServiceRequestTemplateContent;
 use App\Models\NotificationSetting;
-use App\Models\User;
 use Filament\Notifications\Notification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -52,61 +51,61 @@ use Illuminate\Notifications\Notification as BaseNotification;
 
 class ServiceRequestCreated extends BaseNotification implements ShouldQueue
 {
-  use Queueable;
-  use HandlesServiceRequestTemplateContent;
+    use Queueable;
+    use HandlesServiceRequestTemplateContent;
 
-  /**
-   * @param class-string $channel
-   */
-  public function __construct(
-    public ServiceRequest $serviceRequest,
-    public ?ServiceRequestTypeEmailTemplate $emailTemplate,
-    public string $channel,
-  ) {}
+    /**
+     * @param class-string $channel
+     */
+    public function __construct(
+        public ServiceRequest $serviceRequest,
+        public ?ServiceRequestTypeEmailTemplate $emailTemplate,
+        public string $channel,
+    ) {}
 
-  /**
-   * @return array<int, string>
-   */
-  public function via(object $notifiable): array
-  {
-    return [match ($this->channel) {
-      DatabaseChannel::class => 'database',
-      MailChannel::class => 'mail',
-    }];
-  }
-
-  public function toMail(object $notifiable): MailMessage
-  {
-    $template = $this->emailTemplate;
-
-    if (! $template) {
-      return MailMessage::make()
-        ->settings($this->resolveNotificationSetting($notifiable))
-        ->subject("Service request {$this->serviceRequest->service_request_number} created")
-        ->line("The service request {$this->serviceRequest->service_request_number} has been created.")
-        ->action('View Service Request', ServiceRequestResource::getUrl('view', ['record' => $this->serviceRequest]));
+    /**
+     * @return array<int, string>
+     */
+    public function via(object $notifiable): array
+    {
+        return [match ($this->channel) {
+            DatabaseChannel::class => 'database',
+            MailChannel::class => 'mail',
+        }];
     }
 
-    $timezone = $notifiable->getTimezone();
-    $subject = $this->getSubject($template->subject, $timezone);
-    $body = $this->getBody($template->body, null, $timezone);
+    public function toMail(object $notifiable): MailMessage
+    {
+        $template = $this->emailTemplate;
 
-    return MailMessage::make()
-      ->settings($this->resolveNotificationSetting($notifiable))
-      ->subject(strip_tags($subject))
-      ->content($body);
-  }
+        if (! $template) {
+            return MailMessage::make()
+                ->settings($this->resolveNotificationSetting($notifiable))
+                ->subject("Service request {$this->serviceRequest->service_request_number} created")
+                ->line("The service request {$this->serviceRequest->service_request_number} has been created.")
+                ->action('View Service Request', ServiceRequestResource::getUrl('view', ['record' => $this->serviceRequest]));
+        }
 
-  public function toDatabase(object $notifiable): array
-  {
-    return Notification::make()
-      ->success()
-      ->title((string) str("[Service request {$this->serviceRequest->service_request_number}](" . ServiceRequestResource::getUrl('view', ['record' => $this->serviceRequest]) . ') created')->markdown())
-      ->getDatabaseMessage();
-  }
+        $timezone = $notifiable->getTimezone();
+        $subject = $this->getSubject($template->subject, $timezone);
+        $body = $this->getBody($template->body, null, $timezone);
 
-  private function resolveNotificationSetting(object $notifiable): ?NotificationSetting
-  {
-    return $this->serviceRequest->division?->notificationSetting?->setting;
-  }
+        return MailMessage::make()
+            ->settings($this->resolveNotificationSetting($notifiable))
+            ->subject(strip_tags($subject))
+            ->content($body);
+    }
+
+    public function toDatabase(object $notifiable): array
+    {
+        return Notification::make()
+            ->success()
+            ->title((string) str("[Service request {$this->serviceRequest->service_request_number}](" . ServiceRequestResource::getUrl('view', ['record' => $this->serviceRequest]) . ') created')->markdown())
+            ->getDatabaseMessage();
+    }
+
+    private function resolveNotificationSetting(object $notifiable): ?NotificationSetting
+    {
+        return $this->serviceRequest->division?->notificationSetting?->setting;
+    }
 }

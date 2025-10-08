@@ -55,60 +55,60 @@ use Illuminate\Support\Str;
 
 class SendEducatableServiceRequestClosedNotification extends Notification implements ShouldQueue, HasBeforeSendHook
 {
-  use Queueable;
-  use HandlesServiceRequestTemplateContent;
+    use Queueable;
+    use HandlesServiceRequestTemplateContent;
 
-  public function __construct(
-    protected ServiceRequest $serviceRequest,
-    protected ?ServiceRequestTypeEmailTemplate $emailTemplate,
-  ) {}
+    public function __construct(
+        protected ServiceRequest $serviceRequest,
+        protected ?ServiceRequestTypeEmailTemplate $emailTemplate,
+    ) {}
 
-  /**
-   * @return array<int, string>
-   */
-  public function via(object $notifiable): array
-  {
-    return ['mail'];
-  }
-
-  public function toMail(object $notifiable): MailMessage
-  {
-    $name = $notifiable->first_name;
-
-    $status = $this->serviceRequest->status;
-
-    $template = $this->emailTemplate;
-
-    if (! $template) {
-      return MailMessage::make()
-        ->settings($this->resolveNotificationSetting($notifiable))
-        ->subject(__('[Ticket #:ticketno]: Your Issue Has Been Resolved', ['ticketno' => $this->serviceRequest->service_request_number]))
-        ->greeting("Dear {$name},")
-        ->line(__('We wanted to update you that the issue you reported in Ticket #:ticketNo regarding :shortDescription has been :status.', [
-          'ticketNo' => $this->serviceRequest->service_request_number,
-          'status' => $status->name,
-          'shortDescription' => Str::limit($this->serviceRequest->res_details, 10, '...'),
-        ]))
-        ->line('If you experience any further issues or have additional questions, please do not hesitate to open a new ticket.')
-        ->salutation('Thank you for giving us a chance to help you with your issue.');
+    /**
+     * @return array<int, string>
+     */
+    public function via(object $notifiable): array
+    {
+        return ['mail'];
     }
-    $timezone = Tenant::current()->getTimezone();
-    $subject = $this->getSubject($template->subject, $timezone);
-    $body = $this->getBody($template->body, ServiceRequestTypeEmailTemplateRole::Customer, $timezone);
 
-    return MailMessage::make()
-      ->settings($this->resolveNotificationSetting($notifiable))
-      ->subject(strip_tags($subject))
-      ->content($body);
-  }
+    public function toMail(object $notifiable): MailMessage
+    {
+        $name = $notifiable->first_name;
 
-  public function beforeSend(AnonymousNotifiable|CanBeNotified $notifiable, Message $message, NotificationChannel $channel): void
-  {
-    $message->related()->associate($this->serviceRequest);
-  }
+        $status = $this->serviceRequest->status;
 
-  private function resolveNotificationSetting(object $notifiable): ?NotificationSetting
-  {
-    return $this->serviceRequest->division?->notificationSetting?->setting;
-  }
+        $template = $this->emailTemplate;
+
+        if (! $template) {
+            return MailMessage::make()
+                ->settings($this->resolveNotificationSetting($notifiable))
+                ->subject(__('[Ticket #:ticketno]: Your Issue Has Been Resolved', ['ticketno' => $this->serviceRequest->service_request_number]))
+                ->greeting("Dear {$name},")
+                ->line(__('We wanted to update you that the issue you reported in Ticket #:ticketNo regarding :shortDescription has been :status.', [
+                    'ticketNo' => $this->serviceRequest->service_request_number,
+                    'status' => $status->name,
+                    'shortDescription' => Str::limit($this->serviceRequest->res_details, 10, '...'),
+                ]))
+                ->line('If you experience any further issues or have additional questions, please do not hesitate to open a new ticket.')
+                ->salutation('Thank you for giving us a chance to help you with your issue.');
+        }
+        $timezone = Tenant::current()->getTimezone();
+        $subject = $this->getSubject($template->subject, $timezone);
+        $body = $this->getBody($template->body, ServiceRequestTypeEmailTemplateRole::Customer, $timezone);
+
+        return MailMessage::make()
+            ->settings($this->resolveNotificationSetting($notifiable))
+            ->subject(strip_tags($subject))
+            ->content($body);
+    }
+
+    public function beforeSend(AnonymousNotifiable|CanBeNotified $notifiable, Message $message, NotificationChannel $channel): void
+    {
+        $message->related()->associate($this->serviceRequest);
+    }
+
+    private function resolveNotificationSetting(object $notifiable): ?NotificationSetting
+    {
+        return $this->serviceRequest->division?->notificationSetting?->setting;
+    }
 }
