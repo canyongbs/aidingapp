@@ -50,9 +50,9 @@ trait HandlesServiceRequestTemplateContent
     /**
      * @param string|array<string, mixed> $body
      * @param ?ServiceRequestTypeEmailTemplateRole $urlType
-     * @param ?User $user
+     * @param ?string $timezone
      */
-    public function getBody($body, ?ServiceRequestTypeEmailTemplateRole $urlType = null, ?User $user = null): HtmlString
+    public function getBody($body, ?ServiceRequestTypeEmailTemplateRole $urlType = null, ?string $timezone): HtmlString
     {
         if (is_array($body)) {
             $body = $this->injectButtonUrlIntoTiptapContent($body, $urlType);
@@ -60,7 +60,7 @@ trait HandlesServiceRequestTemplateContent
 
         return app(GenerateServiceRequestTypeEmailTemplateContent::class)(
             $body,
-            $this->getMergeData($user),
+            $this->getMergeData($timezone),
             $this->serviceRequest,
             'body',
         );
@@ -68,38 +68,31 @@ trait HandlesServiceRequestTemplateContent
 
     /**
      * @param string|array<string, mixed> $subject
-     * @param ?User $user
+     * @param ?string $timezone
      */
-    public function getSubject($subject, ?User $user = null): HtmlString
+    public function getSubject($subject, ?string $timezone): HtmlString
     {
         return app(GenerateServiceRequestTypeEmailTemplateSubject::class)(
             $subject,
-            $this->getMergeData($user),
+            $this->getMergeData($timezone),
             $this->serviceRequest,
             'subject',
         );
     }
 
     /**
-     * @param ?User $user
+     * @param ?string $timezone
      *
      * @return array<string, string>
      */
-    public function getMergeData(?User $user = null): array
+    public function getMergeData(?string $timezone): array
     {
-        $createdDate = DisplaySettingsFeature::active()
-            ? $this->serviceRequest->created_at->setTimezone(app(DisplaySettings::class)->getTimezoneForUser($user))
-            : $this->serviceRequest->created_at;
-
-        $updatedDate = DisplaySettingsFeature::active()
-            ? $this->serviceRequest->updated_at->setTimezone(app(DisplaySettings::class)->getTimezoneForUser($user))
-            : $this->serviceRequest->updated_at;
 
         return [
             'contact name' => $this->serviceRequest->respondent->{$this->serviceRequest->respondent::displayNameKey()},
             'service request number' => $this->serviceRequest->service_request_number,
-            'created date' => $createdDate->format('d-m-Y H:i'),
-            'updated date' => $updatedDate->format('d-m-Y H:i'),
+            'created date' => $this->serviceRequest->created_at->setTimeZone($timezone)->format('M j, Y at h:i A (T)'),
+            'updated date' => $this->serviceRequest->updated_at->setTimeZone($timezone)->format('M j, Y at h:i A (T)'),
             'assigned staff name' => $this->serviceRequest->assignedTo->user->name ?? 'Unassigned',
             'status' => $this->serviceRequest->status->name,
             'title' => $this->serviceRequest->title,

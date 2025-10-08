@@ -46,6 +46,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use AidingApp\ServiceManagement\Notifications\Concerns\HandlesServiceRequestTemplateContent;
 use App\Models\NotificationSetting;
+use App\Models\Tenant;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\AnonymousNotifiable;
@@ -53,54 +54,54 @@ use Illuminate\Notifications\Notification;
 
 class SendEducatableServiceRequestUpdatedNotification extends Notification implements ShouldQueue, HasBeforeSendHook
 {
-    use Queueable;
-    use HandlesServiceRequestTemplateContent;
+  use Queueable;
+  use HandlesServiceRequestTemplateContent;
 
-    public function __construct(
-        protected ServiceRequest $serviceRequest,
-        protected ?ServiceRequestTypeEmailTemplate $emailTemplate,
-    ) {}
+  public function __construct(
+    protected ServiceRequest $serviceRequest,
+    protected ?ServiceRequestTypeEmailTemplate $emailTemplate,
+  ) {}
 
-    /**
-     * @return array<int, string>
-     */
-    public function via(object $notifiable): array
-    {
-        return ['mail'];
+  /**
+   * @return array<int, string>
+   */
+  public function via(object $notifiable): array
+  {
+    return ['mail'];
+  }
+
+  public function toMail(object $notifiable): MailMessage
+  {
+    $name = $notifiable->first_name;
+
+    $template = $this->emailTemplate;
+
+    if (! $template) {
+      return MailMessage::make()
+        ->settings($this->resolveNotificationSetting($notifiable))
+        ->subject("There’s an update on your service request {$this->serviceRequest->service_request_number}")
+        ->greeting("Hello {$name},")
+        ->line("There’s been a new update to your service request {$this->serviceRequest->service_request_number}. Please check the latest details.")
+        ->action('View Service Request', route('portal.service-request.show', $this->serviceRequest));
     }
 
-    public function toMail(object $notifiable): MailMessage
-    {
-        $name = $notifiable->first_name;
+    $timezone = Tenant::current()->getTimezone();
+    $subject = $this->getSubject($template->subject, $timezone);
+    $body = $this->getBody($template->body, ServiceRequestTypeEmailTemplateRole::Customer, $timezone);
 
-        $template = $this->emailTemplate;
+    return MailMessage::make()
+      ->settings($this->resolveNotificationSetting($notifiable))
+      ->subject(strip_tags($subject))
+      ->content($body);
+  }
 
-        if (! $template) {
-            return MailMessage::make()
-                ->settings($this->resolveNotificationSetting($notifiable))
-                ->subject("There’s an update on your service request {$this->serviceRequest->service_request_number}")
-                ->greeting("Hello {$name},")
-                ->line("There’s been a new update to your service request {$this->serviceRequest->service_request_number}. Please check the latest details.")
-                ->action('View Service Request', route('portal.service-request.show', $this->serviceRequest));
-        }
+  public function beforeSend(AnonymousNotifiable|CanBeNotified $notifiable, Message $message, NotificationChannel $channel): void
+  {
+    $message->related()->associate($this->serviceRequest);
+  }
 
-        $assignedUser = $this->serviceRequest->assignedTo?->user;
-        $subject = $this->getSubject($template->subject, $assignedUser);
-        $body = $this->getBody($template->body, ServiceRequestTypeEmailTemplateRole::Customer, $assignedUser);
-
-        return MailMessage::make()
-            ->settings($this->resolveNotificationSetting($notifiable))
-            ->subject(strip_tags($subject))
-            ->content($body);
-    }
-
-    public function beforeSend(AnonymousNotifiable|CanBeNotified $notifiable, Message $message, NotificationChannel $channel): void
-    {
-        $message->related()->associate($this->serviceRequest);
-    }
-
-    private function resolveNotificationSetting(object $notifiable): ?NotificationSetting
-    {
-        return $this->serviceRequest->division?->notificationSetting?->setting;
-    }
+  private function resolveNotificationSetting(object $notifiable): ?NotificationSetting
+  {
+    return $this->serviceRequest->division?->notificationSetting?->setting;
+  }
 }

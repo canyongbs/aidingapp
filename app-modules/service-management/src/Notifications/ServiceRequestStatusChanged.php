@@ -52,61 +52,61 @@ use Illuminate\Notifications\Notification as BaseNotification;
 
 class ServiceRequestStatusChanged extends BaseNotification implements ShouldQueue
 {
-    use Queueable;
-    use HandlesServiceRequestTemplateContent;
+  use Queueable;
+  use HandlesServiceRequestTemplateContent;
 
-    /**
-     * @param class-string $channel
-     */
-    public function __construct(
-        public ServiceRequest $serviceRequest,
-        public ?ServiceRequestTypeEmailTemplate $emailTemplate,
-        public string $channel,
-    ) {}
+  /**
+   * @param class-string $channel
+   */
+  public function __construct(
+    public ServiceRequest $serviceRequest,
+    public ?ServiceRequestTypeEmailTemplate $emailTemplate,
+    public string $channel,
+  ) {}
 
-    /**
-     * @return array<int, string>
-     */
-    public function via(object $notifiable): array
-    {
-        return [match ($this->channel) {
-            DatabaseChannel::class => 'database',
-            MailChannel::class => 'mail',
-        }];
+  /**
+   * @return array<int, string>
+   */
+  public function via(object $notifiable): array
+  {
+    return [match ($this->channel) {
+      DatabaseChannel::class => 'database',
+      MailChannel::class => 'mail',
+    }];
+  }
+
+  public function toMail(object $notifiable): MailMessage
+  {
+    $template = $this->emailTemplate;
+
+    if (! $template) {
+      return MailMessage::make()
+        ->settings($this->resolveNotificationSetting($notifiable))
+        ->subject("Service request {$this->serviceRequest->service_request_number} status changed to {$this->serviceRequest->status?->name}")
+        ->line("The service request {$this->serviceRequest->service_request_number} status has changed to {$this->serviceRequest->status?->name}.")
+        ->action('View Service Request', ServiceRequestResource::getUrl('view', ['record' => $this->serviceRequest]));
     }
 
-    public function toMail(object $notifiable): MailMessage
-    {
-        $template = $this->emailTemplate;
+    $timezone = $notifiable->getTimezone();
+    $subject = $this->getSubject($template->subject, $timezone);
+    $body = $this->getBody($template->body, null, $timezone);
 
-        if (! $template) {
-            return MailMessage::make()
-                ->settings($this->resolveNotificationSetting($notifiable))
-                ->subject("Service request {$this->serviceRequest->service_request_number} status changed to {$this->serviceRequest->status?->name}")
-                ->line("The service request {$this->serviceRequest->service_request_number} status has changed to {$this->serviceRequest->status?->name}.")
-                ->action('View Service Request', ServiceRequestResource::getUrl('view', ['record' => $this->serviceRequest]));
-        }
+    return MailMessage::make()
+      ->settings($this->resolveNotificationSetting($notifiable))
+      ->subject(strip_tags($subject))
+      ->content($body);
+  }
 
-        $user = $notifiable instanceof User ? $notifiable : null;
-        $subject = $this->getSubject($template->subject, $user);
-        $body = $this->getBody($template->body, null, $user);
+  public function toDatabase(object $notifiable): array
+  {
+    return Notification::make()
+      ->success()
+      ->title((string) str("[Service request {$this->serviceRequest->service_request_number}](" . ServiceRequestResource::getUrl('view', ['record' => $this->serviceRequest]) . ") status changed to {$this->serviceRequest->status?->name}")->markdown())
+      ->getDatabaseMessage();
+  }
 
-        return MailMessage::make()
-            ->settings($this->resolveNotificationSetting($notifiable))
-            ->subject(strip_tags($subject))
-            ->content($body);
-    }
-
-    public function toDatabase(object $notifiable): array
-    {
-        return Notification::make()
-            ->success()
-            ->title((string) str("[Service request {$this->serviceRequest->service_request_number}](" . ServiceRequestResource::getUrl('view', ['record' => $this->serviceRequest]) . ") status changed to {$this->serviceRequest->status?->name}")->markdown())
-            ->getDatabaseMessage();
-    }
-
-    private function resolveNotificationSetting(object $notifiable): ?NotificationSetting
-    {
-        return $this->serviceRequest->division?->notificationSetting?->setting;
-    }
+  private function resolveNotificationSetting(object $notifiable): ?NotificationSetting
+  {
+    return $this->serviceRequest->division?->notificationSetting?->setting;
+  }
 }

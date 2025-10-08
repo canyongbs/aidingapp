@@ -45,6 +45,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use AidingApp\ServiceManagement\Notifications\Concerns\HandlesServiceRequestTemplateContent;
 use App\Models\NotificationSetting;
+use App\Models\Tenant;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\AnonymousNotifiable;
@@ -52,58 +53,57 @@ use Illuminate\Notifications\Notification;
 
 class SendEducatableServiceRequestOpenedNotification extends Notification implements ShouldQueue, HasBeforeSendHook
 {
-    use Queueable;
-    use HandlesServiceRequestTemplateContent;
+  use Queueable;
+  use HandlesServiceRequestTemplateContent;
 
-    public function __construct(
-        protected ServiceRequest $serviceRequest,
-        protected ?ServiceRequestTypeEmailTemplate $emailTemplate,
-    ) {}
+  public function __construct(
+    protected ServiceRequest $serviceRequest,
+    protected ?ServiceRequestTypeEmailTemplate $emailTemplate,
+  ) {}
 
-    /**
-     * @return array<int, string>
-     */
-    public function via(object $notifiable): array
-    {
-        return ['mail'];
+  /**
+   * @return array<int, string>
+   */
+  public function via(object $notifiable): array
+  {
+    return ['mail'];
+  }
+
+  public function toMail(object $notifiable): MailMessage
+  {
+    $name = $notifiable->first_name;
+
+    $status = $this->serviceRequest->status;
+    $type = $this->serviceRequest->priority->type;
+
+    $template = $this->emailTemplate;
+
+    if (! $template) {
+      return MailMessage::make()
+        ->settings($this->resolveNotificationSetting($notifiable))
+        ->subject("{$this->serviceRequest->service_request_number} - is now {$status->name}")
+        ->greeting("Hello {$name},")
+        ->line("A new {$type->name} service request has been created and is now in a {$status->name} status. Your new ticket number is: {$this->serviceRequest->service_request_number}.")
+        ->line('The details of your service request are shown below:')
+        ->lines(str(nl2br($this->serviceRequest->close_details))->explode('<br />'));
     }
+    $timezone = Tenant::current()->getTimezone();
+    $subject = $this->getSubject($template->subject, $timezone);
+    $body = $this->getBody($template->body, null, $timezone);
 
-    public function toMail(object $notifiable): MailMessage
-    {
-        $name = $notifiable->first_name;
+    return MailMessage::make()
+      ->settings($this->resolveNotificationSetting($notifiable))
+      ->subject(strip_tags($subject))
+      ->content($body);
+  }
 
-        $status = $this->serviceRequest->status;
-        $type = $this->serviceRequest->priority->type;
+  public function beforeSend(AnonymousNotifiable|CanBeNotified $notifiable, Message $message, NotificationChannel $channel): void
+  {
+    $message->related()->associate($this->serviceRequest);
+  }
 
-        $template = $this->emailTemplate;
-
-        if (! $template) {
-            return MailMessage::make()
-                ->settings($this->resolveNotificationSetting($notifiable))
-                ->subject("{$this->serviceRequest->service_request_number} - is now {$status->name}")
-                ->greeting("Hello {$name},")
-                ->line("A new {$type->name} service request has been created and is now in a {$status->name} status. Your new ticket number is: {$this->serviceRequest->service_request_number}.")
-                ->line('The details of your service request are shown below:')
-                ->lines(str(nl2br($this->serviceRequest->close_details))->explode('<br />'));
-        }
-
-        $assignedUser = $this->serviceRequest->assignedTo?->user;
-        $subject = $this->getSubject($template->subject, $assignedUser);
-        $body = $this->getBody($template->body, null, $assignedUser);
-
-        return MailMessage::make()
-            ->settings($this->resolveNotificationSetting($notifiable))
-            ->subject(strip_tags($subject))
-            ->content($body);
-    }
-
-    public function beforeSend(AnonymousNotifiable|CanBeNotified $notifiable, Message $message, NotificationChannel $channel): void
-    {
-        $message->related()->associate($this->serviceRequest);
-    }
-
-    private function resolveNotificationSetting(object $notifiable): ?NotificationSetting
-    {
-        return $this->serviceRequest->division?->notificationSetting?->setting;
-    }
+  private function resolveNotificationSetting(object $notifiable): ?NotificationSetting
+  {
+    return $this->serviceRequest->division?->notificationSetting?->setting;
+  }
 }

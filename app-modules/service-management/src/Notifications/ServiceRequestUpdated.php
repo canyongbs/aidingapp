@@ -58,71 +58,70 @@ use Illuminate\Notifications\Notification as BaseNotification;
 
 class ServiceRequestUpdated extends BaseNotification implements ShouldQueue, HasBeforeSendHook
 {
-    use Queueable;
-    use HandlesServiceRequestTemplateContent;
+  use Queueable;
+  use HandlesServiceRequestTemplateContent;
 
-    /** @var ServiceRequest */
-    public ServiceRequest $serviceRequest;
+  /** @var ServiceRequest */
+  public ServiceRequest $serviceRequest;
 
-    /**
-     * @param class-string $channel
-     */
-    public function __construct(
-        public ServiceRequestUpdate $serviceRequestUpdate,
-        public ?ServiceRequestTypeEmailTemplate $emailTemplate,
-        public string $channel,
-    ) {
-        $this->serviceRequest = $serviceRequestUpdate->serviceRequest;
+  /**
+   * @param class-string $channel
+   */
+  public function __construct(
+    public ServiceRequestUpdate $serviceRequestUpdate,
+    public ?ServiceRequestTypeEmailTemplate $emailTemplate,
+    public string $channel,
+  ) {
+    $this->serviceRequest = $serviceRequestUpdate->serviceRequest;
+  }
+
+  /**
+   * @return array<int, string>
+   */
+  public function via(object $notifiable): array
+  {
+    return [match ($this->channel) {
+      DatabaseChannel::class => 'database',
+      MailChannel::class => 'mail',
+    }];
+  }
+
+  public function toMail(object $notifiable): MailMessage
+  {
+    $template = $this->emailTemplate;
+
+    if (! $template) {
+      return MailMessage::make()
+        ->settings($this->resolveNotificationSetting($notifiable))
+        ->subject("New update on service request {$this->serviceRequestUpdate->serviceRequest->service_request_number}")
+        ->line("The service request {$this->serviceRequestUpdate->serviceRequest->service_request_number} has a new update.")
+        ->action('View Service Request', ServiceRequestResource::getUrl('view', ['record' => $this->serviceRequestUpdate->serviceRequest]));
     }
+    $timezone = $notifiable->getTimezone();
+    $subject = $this->getSubject($template->subject, $timezone);
+    $body = $this->getBody($template->body, null, $timezone);
 
-    /**
-     * @return array<int, string>
-     */
-    public function via(object $notifiable): array
-    {
-        return [match ($this->channel) {
-            DatabaseChannel::class => 'database',
-            MailChannel::class => 'mail',
-        }];
-    }
+    return MailMessage::make()
+      ->settings($this->resolveNotificationSetting($notifiable))
+      ->subject(strip_tags($subject))
+      ->content($body);
+  }
 
-    public function toMail(object $notifiable): MailMessage
-    {
-        $template = $this->emailTemplate;
+  public function toDatabase(object $notifiable): array
+  {
+    return Notification::make()
+      ->success()
+      ->title((string) str("New update on [service request {$this->serviceRequestUpdate->serviceRequest->service_request_number}](" . ServiceRequestResource::getUrl('view', ['record' => $this->serviceRequestUpdate->serviceRequest]) . ')')->markdown())
+      ->getDatabaseMessage();
+  }
 
-        if (! $template) {
-            return MailMessage::make()
-                ->settings($this->resolveNotificationSetting($notifiable))
-                ->subject("New update on service request {$this->serviceRequestUpdate->serviceRequest->service_request_number}")
-                ->line("The service request {$this->serviceRequestUpdate->serviceRequest->service_request_number} has a new update.")
-                ->action('View Service Request', ServiceRequestResource::getUrl('view', ['record' => $this->serviceRequestUpdate->serviceRequest]));
-        }
+  public function beforeSend(AnonymousNotifiable|CanBeNotified $notifiable, Message $message, NotificationChannel $channel): void
+  {
+    $message->related()->associate($this->serviceRequestUpdate);
+  }
 
-        $user = $notifiable instanceof User ? $notifiable : null;
-        $subject = $this->getSubject($template->subject, $user);
-        $body = $this->getBody($template->body, null, $user);
-
-        return MailMessage::make()
-            ->settings($this->resolveNotificationSetting($notifiable))
-            ->subject(strip_tags($subject))
-            ->content($body);
-    }
-
-    public function toDatabase(object $notifiable): array
-    {
-        return Notification::make()
-            ->success()
-            ->title((string) str("New update on [service request {$this->serviceRequestUpdate->serviceRequest->service_request_number}](" . ServiceRequestResource::getUrl('view', ['record' => $this->serviceRequestUpdate->serviceRequest]) . ')')->markdown())
-            ->getDatabaseMessage();
-    }
-
-    public function beforeSend(AnonymousNotifiable|CanBeNotified $notifiable, Message $message, NotificationChannel $channel): void
-    {
-        $message->related()->associate($this->serviceRequestUpdate);
-    }
-
-    private function resolveNotificationSetting(object $notifiable): ?NotificationSetting
-    {
-        return $this->serviceRequestUpdate->serviceRequest->division?->notificationSetting?->setting;
-    }
+  private function resolveNotificationSetting(object $notifiable): ?NotificationSetting
+  {
+    return $this->serviceRequestUpdate->serviceRequest->division?->notificationSetting?->setting;
+  }
 }

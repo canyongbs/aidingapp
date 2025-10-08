@@ -37,6 +37,7 @@
 namespace App\Models;
 
 use App\Casts\LandlordEncrypted;
+use App\Settings\DisplaySettings;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Multitenancy\Models\Concerns\UsesLandlordConnection;
@@ -47,21 +48,30 @@ use Spatie\Multitenancy\Models\Tenant as SpatieTenant;
  */
 class Tenant extends SpatieTenant
 {
-    use UsesLandlordConnection;
-    use HasUuids;
-    use SoftDeletes;
+  use UsesLandlordConnection;
+  use HasUuids;
+  use SoftDeletes;
 
-    protected $fillable = [
-        'name',
-        'domain',
-        'key',
-        'config',
-        'setup_complete',
-    ];
+  protected $fillable = [
+    'name',
+    'domain',
+    'key',
+    'config',
+    'setup_complete',
+  ];
 
-    protected $casts = [
-        'key' => LandlordEncrypted::class,
-        'config' => LandlordEncrypted::class,
-        'setup_complete' => 'boolean',
-    ];
+  protected $casts = [
+    'key' => LandlordEncrypted::class,
+    'config' => LandlordEncrypted::class,
+    'setup_complete' => 'boolean',
+  ];
+
+  public function getTimezone(): string
+  {
+    if (filled($settingsTimezone = app(DisplaySettings::class)->timezone)) {
+      return $settingsTimezone;
+    }
+
+    return config('app.timezone');
+  }
 }

@@ -60,6 +60,7 @@ use AidingApp\Task\Models\Task;
 use AidingApp\Team\Models\Team;
 use AidingApp\Timeline\Models\Contracts\HasFilamentResource;
 use App\Filament\Resources\UserResource;
+use App\Settings\DisplaySettings;
 use App\Support\HasAdvancedFilter;
 use Database\Factories\UserFactory;
 use DateTimeInterface;
@@ -468,5 +469,18 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
     protected function serializeDate(DateTimeInterface $date): string
     {
         return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
+    }
+
+    public function getTimezone(): string
+    {
+        if (filled($userTimezone = $this->timezone)) {
+            return $userTimezone;
+        }
+
+        if (filled($settingsTimezone = app(DisplaySettings::class)->timezone)) {
+            return $settingsTimezone;
+        }
+
+        return config('app.timezone');
     }
 }

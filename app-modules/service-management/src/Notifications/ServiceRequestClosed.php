@@ -52,64 +52,63 @@ use Illuminate\Notifications\Notification as BaseNotification;
 
 class ServiceRequestClosed extends BaseNotification implements ShouldQueue
 {
-    use Queueable;
-    use HandlesServiceRequestTemplateContent;
+  use Queueable;
+  use HandlesServiceRequestTemplateContent;
 
-    /**
-     * @param class-string $channel
-     */
-    public function __construct(
-        public ServiceRequest $serviceRequest,
-        public ?ServiceRequestTypeEmailTemplate $emailTemplate,
-        public string $channel,
-    ) {}
+  /**
+   * @param class-string $channel
+   */
+  public function __construct(
+    public ServiceRequest $serviceRequest,
+    public ?ServiceRequestTypeEmailTemplate $emailTemplate,
+    public string $channel,
+  ) {}
 
-    /**
-     * @return array<int, string>
-     */
-    public function via(object $notifiable): array
-    {
-        return [match ($this->channel) {
-            DatabaseChannel::class => 'database',
-            MailChannel::class => 'mail',
-        }];
+  /**
+   * @return array<int, string>
+   */
+  public function via(object $notifiable): array
+  {
+    return [match ($this->channel) {
+      DatabaseChannel::class => 'database',
+      MailChannel::class => 'mail',
+    }];
+  }
+
+  public function toMail(object $notifiable): MailMessage
+  {
+    $template = $this->emailTemplate;
+
+    if (! $template) {
+      return MailMessage::make()
+        ->settings($this->resolveNotificationSetting($notifiable))
+        ->subject("Service request {$this->serviceRequest->service_request_number} closed")
+        ->line("The service request {$this->serviceRequest->service_request_number} has been closed.")
+        ->action('View Service Request', ServiceRequestResource::getUrl('view', ['record' => $this->serviceRequest]));
     }
+    $timezone = $notifiable->getTimezone();
+    $subject = $this->getSubject($template->subject, $timezone);
+    $body = $this->getBody($template->body, null, $timezone);
 
-    public function toMail(object $notifiable): MailMessage
-    {
-        $template = $this->emailTemplate;
+    return MailMessage::make()
+      ->settings($this->resolveNotificationSetting($notifiable))
+      ->subject(strip_tags($subject))
+      ->content($body);
+  }
 
-        if (! $template) {
-            return MailMessage::make()
-                ->settings($this->resolveNotificationSetting($notifiable))
-                ->subject("Service request {$this->serviceRequest->service_request_number} closed")
-                ->line("The service request {$this->serviceRequest->service_request_number} has been closed.")
-                ->action('View Service Request', ServiceRequestResource::getUrl('view', ['record' => $this->serviceRequest]));
-        }
+  /**
+   * @return array<string, mixed>
+   */
+  public function toDatabase(object $notifiable): array
+  {
+    return Notification::make()
+      ->success()
+      ->title((string) str("[Service request {$this->serviceRequest->service_request_number}](" . ServiceRequestResource::getUrl('view', ['record' => $this->serviceRequest]) . ') closed')->markdown())
+      ->getDatabaseMessage();
+  }
 
-        $user = $notifiable instanceof User ? $notifiable : null;
-        $subject = $this->getSubject($template->subject, $user);
-        $body = $this->getBody($template->body, null, $user);
-
-        return MailMessage::make()
-            ->settings($this->resolveNotificationSetting($notifiable))
-            ->subject(strip_tags($subject))
-            ->content($body);
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    public function toDatabase(object $notifiable): array
-    {
-        return Notification::make()
-            ->success()
-            ->title((string) str("[Service request {$this->serviceRequest->service_request_number}](" . ServiceRequestResource::getUrl('view', ['record' => $this->serviceRequest]) . ') closed')->markdown())
-            ->getDatabaseMessage();
-    }
-
-    private function resolveNotificationSetting(object $notifiable): ?NotificationSetting
-    {
-        return $this->serviceRequest->division?->notificationSetting?->setting;
-    }
+  private function resolveNotificationSetting(object $notifiable): ?NotificationSetting
+  {
+    return $this->serviceRequest->division?->notificationSetting?->setting;
+  }
 }

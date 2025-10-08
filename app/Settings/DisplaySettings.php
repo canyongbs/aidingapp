@@ -41,45 +41,45 @@ use Spatie\LaravelSettings\Settings;
 
 class DisplaySettings extends Settings
 {
-    public ?string $timezone = null;
+  public ?string $timezone = null;
 
-    public static function group(): string
-    {
-        return 'display';
+  public static function group(): string
+  {
+    return 'display';
+  }
+
+  public function getTimezone(): string
+  {
+    if (filled($userTimezone = auth()->user()?->timezone)) {
+      return $userTimezone;
     }
 
-    public function getTimezone(): string
-    {
-        if (filled($userTimezone = auth()->user()?->timezone)) {
-            return $userTimezone;
-        }
-
-        if (filled($this->timezone)) {
-            return $this->timezone;
-        }
-
-        return config('app.timezone');
+    if (filled($this->timezone)) {
+      return $this->timezone;
     }
 
-    public function getTimezoneForUser(?User $user): string
-    {
-        if (filled($userTimezone = $user?->timezone)) {
-            return $userTimezone;
-        }
+    return config('app.timezone');
+  }
 
-        if (filled($this->timezone)) {
-            return $this->timezone;
-        }
+  // public function getTimezoneForUser(?User $user): string
+  // {
+  //     if (filled($userTimezone = $user?->timezone)) {
+  //         return $userTimezone;
+  //     }
 
-        return config('app.timezone');
-    }
+  //     if (filled($this->timezone)) {
+  //         return $this->timezone;
+  //     }
 
-    public function getTimezoneLabel(): string
-    {
-        return str_replace(
-            ['/', '_', 'St '],
-            [', ', ' ', 'St. '],
-            $this->getTimezone(),
-        );
-    }
+  //     return config('app.timezone');
+  // }
+
+  public function getTimezoneLabel(): string
+  {
+    return str_replace(
+      ['/', '_', 'St '],
+      [', ', ' ', 'St. '],
+      $this->getTimezone(),
+    );
+  }
 }
