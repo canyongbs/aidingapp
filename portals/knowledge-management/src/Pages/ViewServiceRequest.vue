@@ -55,15 +55,10 @@
             type: Array,
             required: true,
         },
-        directionEnums: {
-            type: Array,
-            required: false,
-        },
     });
 
     const serviceRequest = ref(null);
     const serviceRequestUpdates = ref([]);
-    const directionEnums = ref([]);
     const loadingResults = ref(false);
     const updateMessage = ref('');
     const validationErrors = ref({});
@@ -107,7 +102,6 @@
         get(props.apiUrl + '/service-request/' + route.params.serviceRequestId, { page: page }).then((response) => {
             serviceRequest.value = response.data.serviceRequestDetails;
             serviceRequestUpdates.value = response.data.serviceRequestUpdates.data || [];
-            directionEnums.value = response.data.directionEnums || [];
             if (!fromPagination) {
                 loadingResults.value = false;
             }
@@ -274,8 +268,7 @@
 
                                             <div
                                                 :class="
-                                                    serviceRequestUpdate.created_by_type === 'contact' ||
-                                                    serviceRequestUpdate.direction == directionEnums.Inbound
+                                                    serviceRequestUpdate.created_by_type === 'contact'
                                                         ? 'mb-4 p-4 bg-gray-50 border border-gray-200 rounded'
                                                         : 'mb-4 p-4 border border-blue-200 rounded bg-gradient-to-br from-brand-500 to-brand-800 text-white'
                                                 "
@@ -284,8 +277,7 @@
                                             >
                                                 <p
                                                     :class="
-                                                        serviceRequestUpdate.created_by_type === 'contact' ||
-                                                        serviceRequestUpdate.direction == directionEnums.Inbound
+                                                        serviceRequestUpdate.created_by_type === 'contact'
                                                             ? 'text-gray-700'
                                                             : ''
                                                     "
@@ -294,8 +286,7 @@
                                                 </p>
                                                 <span
                                                     :class="
-                                                        serviceRequestUpdate.created_by_type === 'contact' ||
-                                                        serviceRequestUpdate.direction == directionEnums.Inbound
+                                                        serviceRequestUpdate.created_by_type === 'contact'
                                                             ? 'text-sm text-gray-500'
                                                             : 'text-sm'
                                                     "
