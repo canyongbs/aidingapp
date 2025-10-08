@@ -55,7 +55,7 @@
                     @endif
                 </x-filament::badge>
 
-                @if (! $record->createdBy instanceof User)
+                @if (!$record->createdBy instanceof User)
                     <x-filament::icon
                         class="w-5 text-gray-400 dark:text-gray-100"
                         icon="heroicon-o-arrow-down-tray"
