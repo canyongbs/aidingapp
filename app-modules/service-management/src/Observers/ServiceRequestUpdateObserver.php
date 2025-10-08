@@ -47,7 +47,6 @@ use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestUpdate
 use AidingApp\ServiceManagement\Notifications\ServiceRequestUpdated;
 use AidingApp\Timeline\Events\TimelineableRecordCreated;
 use AidingApp\Timeline\Events\TimelineableRecordDeleted;
-use App\Features\ServiceRequestUpdateCreatedByFeature;
 
 class ServiceRequestUpdateObserver
 {
@@ -58,8 +57,7 @@ class ServiceRequestUpdateObserver
         if (
             // @phpstan-ignore function.impossibleType
             // @phpstan-ignore booleanAnd.alwaysFalse
-            ServiceRequestUpdateCreatedByFeature::active()
-            && auth()->check()
+            auth()->check()
             && is_null($serviceRequestUpdate->createdBy) // @phpstan-ignore function.impossibleType
         ) {
             $serviceRequestUpdate->createdBy()->associate(auth()->user());

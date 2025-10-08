@@ -37,10 +37,8 @@
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use AidingApp\Portal\Http\Requests\StoreServiceRequestUpdateRequest;
-use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateDirection;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
-use App\Features\ServiceRequestUpdateCreatedByFeature;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 
@@ -53,11 +51,7 @@ class StoreServiceRequestUpdateController extends Controller
         $serviceRequestUpdate->update = $request->description;
         $serviceRequestUpdate->internal = false;
 
-        if (ServiceRequestUpdateCreatedByFeature::active()) {
-            $serviceRequestUpdate->createdBy()->associate($request->user(guard: 'contact'));
-        } else {
-            $serviceRequestUpdate->direction = ServiceRequestUpdateDirection::Inbound;
-        }
+        $serviceRequestUpdate->createdBy()->associate($request->user(guard: 'contact'));
 
         $serviceRequestUpdate->save();
 
@@ -72,8 +66,7 @@ class StoreServiceRequestUpdateController extends Controller
                 return [
                     'id' => $update->getKey(),
                     'update' => $update->update,
-                    // Can be removed as feature flag is being removed
-                    ...! ServiceRequestUpdateCreatedByFeature::active() ? ['direction' => $update->direction] : ['created_by_type' => $update->created_by_type],
+                    'created_by_type' => $update->created_by_type,
                     'created_at' => $update->created_at->format('m-d-Y g:i A'),
                 ];
             });

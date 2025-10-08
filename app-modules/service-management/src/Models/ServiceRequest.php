@@ -41,14 +41,12 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Database\Factories\ServiceRequestFactory;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
-use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateDirection;
 use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Exceptions\ServiceRequestNumberExceededReRollsException;
 use AidingApp\ServiceManagement\Models\MediaCollections\UploadsMediaCollection;
 use AidingApp\ServiceManagement\Observers\ServiceRequestObserver;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
-use App\Features\ServiceRequestUpdateCreatedByFeature;
 use App\Models\Authenticatable;
 use App\Models\BaseModel;
 use App\Models\Concerns\BelongsToEducatable;
@@ -287,12 +285,9 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
                 'created_at' => 'max',
             ], function (Builder $query) {
                 $query
-                    ->when(ServiceRequestUpdateCreatedByFeature::active(), function (Builder $query) {
-                        $query->whereHas('createdBy', function (Builder $query) {
-                            $query->where('created_by_type', (new Contact())->getMorphClass());
-                        });
+                    ->whereHas('createdBy', function (Builder $query) {
+                        $query->where('created_by_type', (new Contact())->getMorphClass());
                     })
-                    ->when(! ServiceRequestUpdateCreatedByFeature::active(), fn (Builder $query) => $query->where('direction', ServiceRequestUpdateDirection::Inbound))
                     ->where('internal', false);
             });
     }
@@ -307,12 +302,9 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
                 'created_at' => 'max',
             ], function (Builder $query) {
                 $query
-                    ->when(ServiceRequestUpdateCreatedByFeature::active(), function (Builder $query) {
-                        $query->whereHas('createdBy', function (Builder $query) {
-                            $query->where('created_by_type', (new User())->getMorphClass());
-                        });
+                    ->whereHas('createdBy', function (Builder $query) {
+                        $query->where('created_by_type', (new User())->getMorphClass());
                     })
-                    ->when(! ServiceRequestUpdateCreatedByFeature::active(), fn (Builder $query) => $query->where('direction', ServiceRequestUpdateDirection::Outbound))
                     ->where('internal', false);
             });
     }
