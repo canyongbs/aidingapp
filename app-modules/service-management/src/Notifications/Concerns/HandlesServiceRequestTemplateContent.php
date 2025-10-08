@@ -52,7 +52,7 @@ trait HandlesServiceRequestTemplateContent
      * @param ?ServiceRequestTypeEmailTemplateRole $urlType
      * @param ?string $timezone
      */
-    public function getBody($body, ?ServiceRequestTypeEmailTemplateRole $urlType = null, ?string $timezone): HtmlString
+    public function getBody($body, ?ServiceRequestTypeEmailTemplateRole $urlType = null, ?string $timezone = ''): HtmlString
     {
         if (is_array($body)) {
             $body = $this->injectButtonUrlIntoTiptapContent($body, $urlType);
@@ -70,7 +70,7 @@ trait HandlesServiceRequestTemplateContent
      * @param string|array<string, mixed> $subject
      * @param ?string $timezone
      */
-    public function getSubject($subject, ?string $timezone): HtmlString
+    public function getSubject($subject, ?string $timezone = ''): HtmlString
     {
         return app(GenerateServiceRequestTypeEmailTemplateSubject::class)(
             $subject,
@@ -85,7 +85,7 @@ trait HandlesServiceRequestTemplateContent
      *
      * @return array<string, string>
      */
-    public function getMergeData(?string $timezone): array
+    public function getMergeData(?string $timezone = ''): array
     {
 
         return [
