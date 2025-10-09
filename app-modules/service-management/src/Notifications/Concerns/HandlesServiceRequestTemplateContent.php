@@ -87,8 +87,8 @@ trait HandlesServiceRequestTemplateContent
         return [
             'contact name' => $this->serviceRequest->respondent->{$this->serviceRequest->respondent::displayNameKey()},
             'service request number' => $this->serviceRequest->service_request_number,
-            'created date' => $this->serviceRequest->created_at->setTimeZone($timezone)->format('M j, Y at h:i A (T)'),
-            'updated date' => $this->serviceRequest->updated_at->setTimeZone($timezone)->format('M j, Y at h:i A (T)'),
+            'created date' => $this->serviceRequest->created_at->setTimeZone($timezone)->format('M j, Y \a\t h:i A (T)'),
+            'updated date' => $this->serviceRequest->updated_at->setTimeZone($timezone)->format('M j, Y \a\t h:i A (T)'),
             'assigned staff name' => $this->serviceRequest->assignedTo->user->name ?? 'Unassigned',
             'status' => $this->serviceRequest->status->name,
             'title' => $this->serviceRequest->title,
