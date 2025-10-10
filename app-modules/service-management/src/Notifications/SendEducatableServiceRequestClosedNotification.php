@@ -46,6 +46,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use AidingApp\ServiceManagement\Notifications\Concerns\HandlesServiceRequestTemplateContent;
 use App\Models\NotificationSetting;
+use App\Models\Tenant;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\AnonymousNotifiable;
@@ -91,10 +92,9 @@ class SendEducatableServiceRequestClosedNotification extends Notification implem
                 ->line('If you experience any further issues or have additional questions, please do not hesitate to open a new ticket.')
                 ->salutation('Thank you for giving us a chance to help you with your issue.');
         }
-
-        $subject = $this->getSubject($template->subject);
-
-        $body = $this->getBody($template->body, ServiceRequestTypeEmailTemplateRole::Customer);
+        $timezone = Tenant::current()->getTimezone();
+        $subject = $this->getSubject($template->subject, $timezone);
+        $body = $this->getBody($template->body, ServiceRequestTypeEmailTemplateRole::Customer, $timezone);
 
         return MailMessage::make()
             ->settings($this->resolveNotificationSetting($notifiable))

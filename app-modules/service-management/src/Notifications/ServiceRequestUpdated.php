@@ -96,10 +96,9 @@ class ServiceRequestUpdated extends BaseNotification implements ShouldQueue, Has
                 ->line("The service request {$this->serviceRequestUpdate->serviceRequest->service_request_number} has a new update.")
                 ->action('View Service Request', ServiceRequestResource::getUrl('view', ['record' => $this->serviceRequestUpdate->serviceRequest]));
         }
-
-        $subject = $this->getSubject($template->subject);
-
-        $body = $this->getBody($template->body);
+        $timezone = $notifiable->getTimezone();
+        $subject = $this->getSubject($template->subject, $timezone);
+        $body = $this->getBody($template->body, null, $timezone);
 
         return MailMessage::make()
             ->settings($this->resolveNotificationSetting($notifiable))

@@ -59,7 +59,9 @@ use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\Task\Models\Task;
 use AidingApp\Team\Models\Team;
 use AidingApp\Timeline\Models\Contracts\HasFilamentResource;
+use App\Features\DisplaySettingsFeature;
 use App\Filament\Resources\UserResource;
+use App\Settings\DisplaySettings;
 use App\Support\HasAdvancedFilter;
 use Database\Factories\UserFactory;
 use DateTimeInterface;
@@ -463,6 +465,19 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
             ->belongsToMany(Project::class, 'project_auditor_users', 'user_id', 'project_id')
             ->using(ProjectAuditorUser::class)
             ->withTimestamps();
+    }
+
+    public function getTimezone(): string
+    {
+        if (filled($userTimezone = $this->timezone)) {
+            return $userTimezone;
+        }
+
+        if (DisplaySettingsFeature::active() && filled($settingsTimezone = app(DisplaySettings::class)->timezone)) {
+            return $settingsTimezone;
+        }
+
+        return config('app.timezone');
     }
 
     protected function serializeDate(DateTimeInterface $date): string

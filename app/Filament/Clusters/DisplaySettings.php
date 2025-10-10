@@ -34,45 +34,13 @@
 </COPYRIGHT>
 */
 
-namespace App\Models;
+namespace App\Filament\Clusters;
 
-use App\Casts\LandlordEncrypted;
-use App\Features\DisplaySettingsFeature;
-use App\Settings\DisplaySettings;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Spatie\Multitenancy\Models\Concerns\UsesLandlordConnection;
-use Spatie\Multitenancy\Models\Tenant as SpatieTenant;
+use Filament\Clusters\Cluster;
 
-/**
- * @mixin IdeHelperTenant
- */
-class Tenant extends SpatieTenant
+class DisplaySettings extends Cluster
 {
-    use UsesLandlordConnection;
-    use HasUuids;
-    use SoftDeletes;
+    protected static ?string $navigationGroup = 'Settings';
 
-    protected $fillable = [
-        'name',
-        'domain',
-        'key',
-        'config',
-        'setup_complete',
-    ];
-
-    protected $casts = [
-        'key' => LandlordEncrypted::class,
-        'config' => LandlordEncrypted::class,
-        'setup_complete' => 'boolean',
-    ];
-
-    public function getTimezone(): string
-    {
-        if (DisplaySettingsFeature::active() && filled($settingsTimezone = app(DisplaySettings::class)->timezone)) {
-            return $settingsTimezone;
-        }
-
-        return config('app.timezone');
-    }
+    protected static ?int $navigationSort = 110;
 }

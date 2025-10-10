@@ -47,8 +47,9 @@ trait HandlesServiceRequestTemplateContent
     /**
      * @param string|array<string, mixed> $body
      * @param ?ServiceRequestTypeEmailTemplateRole $urlType
+     * @param ?string $timezone
      */
-    public function getBody($body, ?ServiceRequestTypeEmailTemplateRole $urlType = null): HtmlString
+    public function getBody($body, ?ServiceRequestTypeEmailTemplateRole $urlType = null, ?string $timezone = null): HtmlString
     {
         if (is_array($body)) {
             $body = $this->injectButtonUrlIntoTiptapContent($body, $urlType);
@@ -56,7 +57,7 @@ trait HandlesServiceRequestTemplateContent
 
         return app(GenerateServiceRequestTypeEmailTemplateContent::class)(
             $body,
-            $this->getMergeData(),
+            $this->getMergeData($timezone),
             $this->serviceRequest,
             'body',
         );
@@ -64,27 +65,30 @@ trait HandlesServiceRequestTemplateContent
 
     /**
      * @param string|array<string, mixed> $subject
+     * @param ?string $timezone
      */
-    public function getSubject($subject): HtmlString
+    public function getSubject($subject, ?string $timezone = null): HtmlString
     {
         return app(GenerateServiceRequestTypeEmailTemplateSubject::class)(
             $subject,
-            $this->getMergeData(),
+            $this->getMergeData($timezone),
             $this->serviceRequest,
             'subject',
         );
     }
 
     /**
+     * @param ?string $timezone
+     *
      * @return array<string, string>
      */
-    public function getMergeData(): array
+    public function getMergeData(?string $timezone = null): array
     {
         return [
             'contact name' => $this->serviceRequest->respondent->{$this->serviceRequest->respondent::displayNameKey()},
             'service request number' => $this->serviceRequest->service_request_number,
-            'created date' => $this->serviceRequest->created_at->format('d-m-Y H:i'),
-            'updated date' => $this->serviceRequest->updated_at->format('d-m-Y H:i'),
+            'created date' => ! is_null($timezone) ? $this->serviceRequest->created_at->setTimeZone($timezone)->format('M j, Y \a\t h:i A (T)') : $this->serviceRequest->created_at->format('M j, Y \a\t h:i A (T)'),
+            'updated date' => ! is_null($timezone) ? $this->serviceRequest->updated_at->setTimeZone($timezone)->format('M j, Y \a\t h:i A (T)') : $this->serviceRequest->updated_at->format('M j, Y \a\t h:i A (T)'),
             'assigned staff name' => $this->serviceRequest->assignedTo->user->name ?? 'Unassigned',
             'status' => $this->serviceRequest->status->name,
             'title' => $this->serviceRequest->title,

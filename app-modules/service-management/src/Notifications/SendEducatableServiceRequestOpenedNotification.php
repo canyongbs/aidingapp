@@ -45,6 +45,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use AidingApp\ServiceManagement\Notifications\Concerns\HandlesServiceRequestTemplateContent;
 use App\Models\NotificationSetting;
+use App\Models\Tenant;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\AnonymousNotifiable;
@@ -86,10 +87,9 @@ class SendEducatableServiceRequestOpenedNotification extends Notification implem
                 ->line('The details of your service request are shown below:')
                 ->lines(str(nl2br($this->serviceRequest->close_details))->explode('<br />'));
         }
-
-        $subject = $this->getSubject($template->subject);
-
-        $body = $this->getBody($template->body);
+        $timezone = Tenant::current()->getTimezone();
+        $subject = $this->getSubject($template->subject, $timezone);
+        $body = $this->getBody($template->body, null, $timezone);
 
         return MailMessage::make()
             ->settings($this->resolveNotificationSetting($notifiable))

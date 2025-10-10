@@ -46,6 +46,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use AidingApp\ServiceManagement\Notifications\Concerns\HandlesServiceRequestTemplateContent;
 use App\Models\NotificationSetting;
+use App\Models\Tenant;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\AnonymousNotifiable;
@@ -84,9 +85,9 @@ class SendEducatableServiceRequestAssignedNotification extends Notification impl
                 ->action('View Service Request', route('portal.service-request.show', $this->serviceRequest));
         }
 
-        $subject = $this->getSubject($template->subject);
-
-        $body = $this->getBody($template->body, ServiceRequestTypeEmailTemplateRole::Customer);
+        $timezone = Tenant::current()->getTimezone();
+        $subject = $this->getSubject($template->subject, $timezone);
+        $body = $this->getBody($template->body, ServiceRequestTypeEmailTemplateRole::Customer, $timezone);
 
         return MailMessage::make()
             ->settings($this->resolveNotificationSetting($notifiable))

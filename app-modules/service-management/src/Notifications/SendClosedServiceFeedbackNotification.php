@@ -49,6 +49,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use AidingApp\ServiceManagement\Notifications\Concerns\HandlesServiceRequestTemplateContent;
 use App\Models\Contracts\Educatable;
 use App\Models\NotificationSetting;
+use App\Models\Tenant;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\AnonymousNotifiable;
@@ -103,9 +104,9 @@ class SendClosedServiceFeedbackNotification extends Notification implements Shou
                 ->line('We appreciate your time and we value your feedback!')
                 ->salutation('Thank you.');
         } else {
-            $subject = $this->getSubject($template->subject);
-
-            $body = $this->getBody($template->body);
+            $timezone = Tenant::current()->getTimezone();
+            $subject = $this->getSubject($template->subject, $timezone);
+            $body = $this->getBody($template->body, null, $timezone);
 
             $mail = MailMessage::make()
                 ->settings($this->resolveNotificationSetting($notifiable))

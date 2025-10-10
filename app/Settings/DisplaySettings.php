@@ -34,45 +34,38 @@
 </COPYRIGHT>
 */
 
-namespace App\Models;
+namespace App\Settings;
 
-use App\Casts\LandlordEncrypted;
-use App\Features\DisplaySettingsFeature;
-use App\Settings\DisplaySettings;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Spatie\Multitenancy\Models\Concerns\UsesLandlordConnection;
-use Spatie\Multitenancy\Models\Tenant as SpatieTenant;
+use Spatie\LaravelSettings\Settings;
 
-/**
- * @mixin IdeHelperTenant
- */
-class Tenant extends SpatieTenant
+class DisplaySettings extends Settings
 {
-    use UsesLandlordConnection;
-    use HasUuids;
-    use SoftDeletes;
+    public ?string $timezone = null;
 
-    protected $fillable = [
-        'name',
-        'domain',
-        'key',
-        'config',
-        'setup_complete',
-    ];
-
-    protected $casts = [
-        'key' => LandlordEncrypted::class,
-        'config' => LandlordEncrypted::class,
-        'setup_complete' => 'boolean',
-    ];
+    public static function group(): string
+    {
+        return 'display';
+    }
 
     public function getTimezone(): string
     {
-        if (DisplaySettingsFeature::active() && filled($settingsTimezone = app(DisplaySettings::class)->timezone)) {
-            return $settingsTimezone;
+        if (filled($userTimezone = auth()->user()?->timezone)) {
+            return $userTimezone;
+        }
+
+        if (filled($this->timezone)) {
+            return $this->timezone;
         }
 
         return config('app.timezone');
+    }
+
+    public function getTimezoneLabel(): string
+    {
+        return str_replace(
+            ['/', '_', 'St '],
+            [', ', ' ', 'St. '],
+            $this->getTimezone(),
+        );
     }
 }

@@ -34,45 +34,64 @@
 </COPYRIGHT>
 */
 
-namespace App\Models;
+namespace App\Filament\Pages;
 
-use App\Casts\LandlordEncrypted;
 use App\Features\DisplaySettingsFeature;
+use App\Filament\Clusters\DisplaySettings as DisplaySettingsCluster;
+use App\Models\User;
 use App\Settings\DisplaySettings;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Spatie\Multitenancy\Models\Concerns\UsesLandlordConnection;
-use Spatie\Multitenancy\Models\Tenant as SpatieTenant;
+use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
+use Filament\Forms\Form;
+use Filament\Pages\SettingsPage;
+use Tapp\FilamentTimezoneField\Forms\Components\TimezoneSelect;
 
-/**
- * @mixin IdeHelperTenant
- */
-class Tenant extends SpatieTenant
+class ManageDisplaySettings extends SettingsPage
 {
-    use UsesLandlordConnection;
-    use HasUuids;
-    use SoftDeletes;
+    protected static ?string $navigationLabel = 'Dates and Times';
 
-    protected $fillable = [
-        'name',
-        'domain',
-        'key',
-        'config',
-        'setup_complete',
-    ];
+    protected static ?int $navigationSort = 10;
 
-    protected $casts = [
-        'key' => LandlordEncrypted::class,
-        'config' => LandlordEncrypted::class,
-        'setup_complete' => 'boolean',
-    ];
+    protected static string $settings = DisplaySettings::class;
 
-    public function getTimezone(): string
+    protected static ?string $cluster = DisplaySettingsCluster::class;
+
+    public static function canAccess(): bool
     {
-        if (DisplaySettingsFeature::active() && filled($settingsTimezone = app(DisplaySettings::class)->timezone)) {
-            return $settingsTimezone;
+        /** @var User $user */
+        $user = auth()->user();
+
+        return DisplaySettingsFeature::active() && $user->can('settings.view-any');
+    }
+
+    public function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                TimezoneSelect::make('timezone')
+                    ->helperText('Default: ' . config('app.timezone')),
+            ])
+            ->disabled(! auth()->user()->can('settings.*.update'));
+    }
+
+    public function save(): void
+    {
+        if (! auth()->user()->can('settings.*.update')) {
+            return;
         }
 
-        return config('app.timezone');
+        parent::save();
+    }
+
+    /**
+     * @return array<Action | ActionGroup>
+     */
+    public function getFormActions(): array
+    {
+        if (! auth()->user()->can('settings.*.update')) {
+            return [];
+        }
+
+        return parent::getFormActions();
     }
 }

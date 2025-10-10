@@ -37,7 +37,9 @@
 namespace App\Filament\Pages;
 
 use AidingApp\Authorization\Enums\LicenseType;
+use App\Features\DisplaySettingsFeature;
 use App\Models\User;
+use App\Settings\DisplaySettings;
 use Exception;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
@@ -193,7 +195,19 @@ class EditProfile extends Page
                             ->hidden($user->is_external),
                         TimezoneSelect::make('timezone')
                             ->required()
-                            ->selectablePlaceholder(false),
+                            ->selectablePlaceholder(false)
+                            ->helperText(function (): string {
+                                $timezone = config('app.timezone');
+
+                                if (
+                                    DisplaySettingsFeature::active() &&
+                                    filled($displaySettingsTimezone = app(DisplaySettings::class)->timezone)
+                                ) {
+                                    $timezone = $displaySettingsTimezone;
+                                }
+
+                                return "Default: {$timezone}";
+                            }),
                     ]),
                 Section::make('Working Hours')
                     ->aside()

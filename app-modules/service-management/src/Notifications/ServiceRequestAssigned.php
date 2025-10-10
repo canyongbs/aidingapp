@@ -86,9 +86,9 @@ class ServiceRequestAssigned extends BaseNotification implements ShouldQueue
                 ->action('View Service Request', ServiceRequestResource::getUrl('view', ['record' => $this->serviceRequest]));
         }
 
-        $subject = $this->getSubject($template->subject);
-
-        $body = $this->getBody($template->body);
+        $timezone = $notifiable->getTimezone();
+        $subject = $this->getSubject($template->subject, $timezone);
+        $body = $this->getBody($template->body, null, $timezone);
 
         return MailMessage::make()
             ->settings($this->resolveNotificationSetting($notifiable))
