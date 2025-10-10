@@ -40,7 +40,6 @@ use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
-use App\Features\ServiceRequestUpdateCreatedByFeature;
 use App\Filament\Resources\UserResource;
 use App\Models\User;
 use Exception;
@@ -69,8 +68,7 @@ trait ServiceRequestUpdateInfolist
                     User::class => UserResource::getUrl('view', ['record' => $record->createdBy]),
                     Contact::class => ContactResource::getUrl('view', ['record' => $record->createdBy]),
                     default => throw new Exception('Unknown createdBy type ' . $record->createdBy::class),
-                })
-                ->visible(fn (): bool => ServiceRequestUpdateCreatedByFeature::active()),
+                }),
             TextEntry::make('update')
                 ->columnSpanFull(),
         ];

@@ -38,11 +38,9 @@ namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\ServiceManagement\Database\Factories\ServiceRequestUpdateFactory;
-use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateDirection;
 use AidingApp\ServiceManagement\Observers\ServiceRequestUpdateObserver;
 use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
 use AidingApp\Timeline\Timelines\ServiceRequestUpdateTimeline;
-use App\Features\ServiceRequestUpdateCreatedByFeature;
 use App\Models\BaseModel;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
@@ -56,10 +54,6 @@ use Illuminate\Support\Collection;
 use OwenIt\Auditing\Contracts\Auditable;
 
 /**
- * TODO: Remove direction property when we purge ServiceRequestUpdateCreatedByFeature
- *
- * @property ServiceRequestUpdateDirection $direction
- *
  * @mixin IdeHelperServiceRequestUpdate
  */
 #[ObservedBy([ServiceRequestUpdateObserver::class])]
@@ -76,7 +70,10 @@ class ServiceRequestUpdate extends BaseModel implements Auditable, ProvidesATime
         'service_request_id',
         'update',
         'internal',
-        'direction',
+    ];
+
+    protected $casts = [
+        'internal' => 'boolean',
     ];
 
     public function serviceRequest(): BelongsTo
@@ -104,15 +101,6 @@ class ServiceRequestUpdate extends BaseModel implements Auditable, ProvidesATime
             type: 'created_by_type',
             id: 'created_by_id',
         );
-    }
-
-    protected function casts()
-    {
-        return [
-            'internal' => 'boolean',
-            // Can be removed as feature flag is being removed and converted back to $casts property
-            ...! ServiceRequestUpdateCreatedByFeature::active() ? ['direction' => ServiceRequestUpdateDirection::class] : [],
-        ];
     }
 
     protected function serializeDate(DateTimeInterface $date): string

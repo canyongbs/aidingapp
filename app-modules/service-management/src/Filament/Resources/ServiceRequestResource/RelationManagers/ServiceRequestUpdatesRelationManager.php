@@ -38,12 +38,10 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\
 
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
-use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateDirection;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
-use App\Features\ServiceRequestUpdateCreatedByFeature;
 use App\Filament\Resources\UserResource;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\User;
@@ -82,14 +80,6 @@ class ServiceRequestUpdatesRelationManager extends RelationManager
                     ->label('Internal')
                     ->rule(['boolean'])
                     ->columnSpan('full'),
-                Select::make('direction')
-                    ->options(ServiceRequestUpdateDirection::class)
-                    ->label('Direction')
-                    ->required()
-                    ->enum(ServiceRequestUpdateDirection::class)
-                    ->default(ServiceRequestUpdateDirection::default())
-                    // This entire input can be deleted when clearing out this feature flag
-                    ->visible(fn () => ! ServiceRequestUpdateCreatedByFeature::active()),
                 Select::make('status_id')
                     ->label('Status')
                     ->allowHtml()
@@ -115,10 +105,6 @@ class ServiceRequestUpdatesRelationManager extends RelationManager
                     ->words(6),
                 IconColumn::make('internal')
                     ->boolean(),
-                TextColumn::make('direction')
-                    ->icon(fn (ServiceRequestUpdateDirection $state): string => $state->getIcon())
-                    ->formatStateUsing(fn (ServiceRequestUpdateDirection $state): string => $state->getLabel())
-                    ->visible(fn () => ! ServiceRequestUpdateCreatedByFeature::active()),
                 TextColumn::make('createdBy')
                     ->label('Created By')
                     ->getStateUsing(fn (ServiceRequestUpdate $record): string => match ($record->createdBy::class) {
@@ -130,8 +116,7 @@ class ServiceRequestUpdatesRelationManager extends RelationManager
                         User::class => UserResource::getUrl('view', ['record' => $record->createdBy]),
                         Contact::class => ContactResource::getUrl('view', ['record' => $record->createdBy]),
                         default => throw new Exception('Unknown createdBy type ' . $record->createdBy::class),
-                    })
-                    ->visible(fn (): bool => ServiceRequestUpdateCreatedByFeature::active()),
+                    }),
                 TextColumn::make('created_at')
                     ->sortable(),
                 TextColumn::make('updated_at')

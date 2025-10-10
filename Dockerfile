@@ -189,6 +189,9 @@ EXPOSE 80 443
 
 FROM base-setup AS development
 
+# Change the dialout group GID to avoid conflict with macOS 'staff' (GID 20)
+RUN groupmod -g 1200 dialout
+
 # Fix permission issues in development by setting the "webuser"
 # user to the same user and group that is running docker.
 COPY ./docker/set-id /set-id
@@ -219,7 +222,7 @@ RUN /generate-queues.sh "default" "\$SQS_QUEUE" \
     && /generate-queues.sh "landlord" "\$LANDLORD_SQS_QUEUE" \
     && /generate-queues.sh "outbound-communication" "\$OUTBOUND_COMMUNICATION_QUEUE" \
     && /generate-queues.sh "audit" "\$AUDIT_QUEUE_QUEUE" \
-    && /generate-queues.sh "import-export" "\$IMPORT_EXPORT_QUEUE" 
+    && /generate-queues.sh "import-export" "\$IMPORT_EXPORT_QUEUE"
 
 RUN rm /generate-queues.sh
 
