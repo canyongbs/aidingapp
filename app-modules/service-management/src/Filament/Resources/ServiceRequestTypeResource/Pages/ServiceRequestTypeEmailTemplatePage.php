@@ -86,7 +86,7 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
                     ->id('email-template-role-tabs')
                     ->tabs(array_map(
                         fn (ServiceRequestTypeEmailTemplateRole $role) => Tab::make($role->getLabel())
-                            ->schema($this->getEmailTemplateFormSchema())
+                            ->schema($this->getEmailTemplateFormSchema($role))
                             ->statePath($role->value),
                         $roles
                     ))
@@ -131,24 +131,43 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
     }
 
     /** @return array<int, TiptapEditor> */
-    protected function getEmailTemplateFormSchema(): array
+    protected function getEmailTemplateFormSchema(ServiceRequestTypeEmailTemplateRole $role): array
     {
+        $baseMergeTags = [
+            'contact name',
+            'service request number',
+            'created date',
+            'updated date',
+            'status',
+            'assigned staff name',
+            'title',
+            'type',
+        ];
+
+        $bodyMergeTags = [
+            'contact name',
+            'service request number',
+            'created date',
+            'updated date',
+            'status',
+            'assigned staff name',
+            'title',
+            'description',
+            'type',
+        ];
+
+        if ($this->type === ServiceRequestEmailTemplateType::Update) {
+            $baseMergeTags[] = 'recent update';
+            $bodyMergeTags[] = 'recent update';
+        }
+
         return [
             TiptapEditor::make('subject')
                 ->label('Subject')
                 ->placeholder('Enter the email subject here...')
                 ->extraInputAttributes(['style' => 'min-height: 2rem; overflow-y:none;'])
                 ->disableToolbarMenus()
-                ->mergeTags([
-                    'contact name',
-                    'service request number',
-                    'created date',
-                    'updated date',
-                    'status',
-                    'assigned staff name',
-                    'title',
-                    'type',
-                ])
+                ->mergeTags($baseMergeTags)
                 ->showMergeTagsInBlocksPanel(false)
                 ->helperText('You may use “merge tags” to substitute information about a service request into your subject line. Insert a “{{“ in the subject line field to see a list of available merge tags'),
 
@@ -157,17 +176,7 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
                 ->profile('email_template')
                 ->placeholder('Enter the email body here...')
                 ->extraInputAttributes(['style' => 'min-height: 12rem;'])
-                ->mergeTags([
-                    'contact name',
-                    'service request number',
-                    'created date',
-                    'updated date',
-                    'status',
-                    'assigned staff name',
-                    'title',
-                    'description',
-                    'type',
-                ])
+                ->mergeTags($bodyMergeTags)
                 ->blocks([
                     ServiceRequestTypeEmailTemplateButtonBlock::class,
                     SurveyResponseEmailTemplateTakeSurveyButtonBlock::class,
