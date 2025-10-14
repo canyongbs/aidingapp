@@ -143,7 +143,7 @@ trait HandlesServiceRequestTemplateContent
     {
         $recentUpdate = $this->serviceRequest
             ->serviceRequestUpdates()
-            ->orderBy('updated_at', 'desc')
+            ->orderBy('created_at', 'desc')
             ->first();
 
         if (! $recentUpdate) {
@@ -160,7 +160,7 @@ trait HandlesServiceRequestTemplateContent
             $creatorInfo = "{$user->name} - Service Provider";
         }
 
-        $updateDate = ! is_null($timezone) ? $recentUpdate->updated_at->setTimeZone($timezone)->format('M j, Y \a\t h:i A (T)') : $recentUpdate->updated_at->format('M j, Y \a\t h:i A (T)');
+        $updateDate = ! is_null($timezone) ? $recentUpdate->created_at->setTimeZone($timezone)->format('M j, Y \a\t h:i A (T)') : $recentUpdate->created_at->format('M j, Y \a\t h:i A (T)');
 
         return "{$creatorInfo}\n\n{$updateDate} - {$recentUpdate->update}";
     }
