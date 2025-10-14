@@ -265,13 +265,9 @@
 
 <template>
     <Page>
-        <template #heading>
-            Need help?
-        </template>
+        <template #heading> Need help? </template>
 
-        <template #description>
-            Search our knowledge base for advice and answers
-        </template>
+        <template #description> Search our knowledge base for advice and answers </template>
 
         <template #belowHeaderContent>
             <label for="search" class="sr-only">Search</label>
