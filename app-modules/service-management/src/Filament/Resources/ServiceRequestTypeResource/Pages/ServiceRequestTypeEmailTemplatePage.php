@@ -133,18 +133,7 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
     /** @return array<int, TiptapEditor> */
     protected function getEmailTemplateFormSchema(ServiceRequestTypeEmailTemplateRole $role): array
     {
-        $baseMergeTags = [
-            'contact name',
-            'service request number',
-            'created date',
-            'updated date',
-            'status',
-            'assigned staff name',
-            'title',
-            'type',
-        ];
-
-        $bodyMergeTags = [
+        $mergeTags = [
             'contact name',
             'service request number',
             'created date',
@@ -157,8 +146,7 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
         ];
 
         if ($this->type === ServiceRequestEmailTemplateType::Update) {
-            $baseMergeTags[] = 'recent update';
-            $bodyMergeTags[] = 'recent update';
+            $mergeTags[] = 'recent update';
         }
 
         return [
@@ -167,7 +155,7 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
                 ->placeholder('Enter the email subject here...')
                 ->extraInputAttributes(['style' => 'min-height: 2rem; overflow-y:none;'])
                 ->disableToolbarMenus()
-                ->mergeTags($baseMergeTags)
+                ->mergeTags($mergeTags)
                 ->showMergeTagsInBlocksPanel(false)
                 ->helperText('You may use “merge tags” to substitute information about a service request into your subject line. Insert a “{{“ in the subject line field to see a list of available merge tags'),
 
@@ -176,7 +164,7 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
                 ->profile('email_template')
                 ->placeholder('Enter the email body here...')
                 ->extraInputAttributes(['style' => 'min-height: 12rem;'])
-                ->mergeTags($bodyMergeTags)
+                ->mergeTags($mergeTags)
                 ->blocks([
                     ServiceRequestTypeEmailTemplateButtonBlock::class,
                     SurveyResponseEmailTemplateTakeSurveyButtonBlock::class,

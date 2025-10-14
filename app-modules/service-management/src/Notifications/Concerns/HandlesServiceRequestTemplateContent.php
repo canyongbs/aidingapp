@@ -96,7 +96,7 @@ trait HandlesServiceRequestTemplateContent
             'title' => $this->serviceRequest->title,
             'type' => $this->serviceRequest->priority->type->name,
             'description' => $this->serviceRequest->close_details,
-            'recent update' => $this->getRecentUpdateFormatted(),
+            'recent update' => $this->getRecentUpdateFormatted($timezone),
         ];
     }
 
@@ -139,7 +139,7 @@ trait HandlesServiceRequestTemplateContent
         return $content;
     }
 
-    protected function getRecentUpdateFormatted(): string
+    protected function getRecentUpdateFormatted(?string $timezone = null): string
     {
         $recentUpdate = $this->serviceRequest
             ->serviceRequestUpdates()
@@ -160,8 +160,8 @@ trait HandlesServiceRequestTemplateContent
             $creatorInfo = "{$user->name} - Service Provider";
         }
 
-        $formattedDate = $recentUpdate->updated_at->format('M. j, Y \a\t g:i A (T)');
+        $updateDate = ! is_null($timezone) ? $recentUpdate->updated_at->setTimeZone($timezone)->format('M j, Y \a\t h:i A (T)') : $recentUpdate->updated_at->format('M j, Y \a\t h:i A (T)');
 
-        return "{$creatorInfo}\n\n{$formattedDate} - {$recentUpdate->update}";
+        return "{$creatorInfo}\n\n{$updateDate} - {$recentUpdate->update}";
     }
 }
