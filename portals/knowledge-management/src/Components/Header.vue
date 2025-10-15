@@ -85,7 +85,7 @@
             command: () => router.push({ name: 'home' }),
         },
         {
-            label: 'Service',
+            label: 'Services',
             routeName: 'services',
             visible: hasServiceManagement && user !== null,
             command: () => router.push({ name: 'services' }),
@@ -158,11 +158,7 @@
                     </div>
 
                     <div class="flex items-center gap-4">
-                        <GlobalSearchBar
-                            v-if="
-                                route.name === 'view-article' || route.name === 'services' || route.name === 'licenses'
-                            "
-                        ></GlobalSearchBar>
+                        <GlobalSearchBar v-if="!['home', 'view-category'].includes(route.name)" />
 
                         <div v-if="requiresAuthentication || hasServiceManagement">
                             <button

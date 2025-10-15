@@ -37,6 +37,7 @@
     import AppLoading from '../Components/AppLoading.vue';
     import Badge from '../Components/Badge.vue';
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
+    import Page from '../Components/Page.vue';
     import Pagination from '../Components/Pagination.vue';
     import { consumer } from '../Services/Consumer.js';
 
@@ -159,160 +160,133 @@
 </script>
 
 <template>
-    <div class="sticky top-0 z-40 flex flex-col items-center bg-gray-50">
-        <div class="w-full px-6">
-            <div class="max-w-screen-xl flex flex-col gap-y-6 mx-auto py-8">
-                <div v-if="loadingResults">
-                    <AppLoading />
+    <div v-if="loadingResults">
+        <AppLoading />
+    </div>
+
+    <Page v-else>
+        <template #heading> Service Request Details </template>
+
+        <template #breadcrumbs>
+            <Breadcrumbs :breadcrumbs="breadcrumbs" :currentCrumb="serviceRequest.serviceRequestNumber" />
+        </template>
+
+        <div v-if="authorizationError" class="text-red-500 text-sm">
+            {{ authorizationError }}
+        </div>
+        <div v-if="validationErrors.serviceRequestId" class="text-red-500 text-sm">
+            <p v-for="error in validationErrors.serviceRequestId" :key="error">
+                {{ error }}
+            </p>
+        </div>
+
+        <div>
+            <div class="flex flex-col divide-y ring-1 ring-black/5 shadow-sm px-3 pt-3 pb-1 rounded bg-white mb-4">
+                <div class="mb-4">
+                    <h4 class="text-base font-semibold">Title:</h4>
+                    <p class="text-gray-700">
+                        {{ serviceRequest.title }}
+                    </p>
                 </div>
-                <div v-else>
-                    <main class="flex flex-col gap-8">
-                        <div class="flex flex-col gap-6">
-                            <Breadcrumbs
-                                :breadcrumbs="breadcrumbs"
-                                :currentCrumb="serviceRequest.serviceRequestNumber"
-                            ></Breadcrumbs>
-                            <div class="flex flex-col gap-6">
-                                <div v-if="authorizationError" class="text-red-500 text-sm">
-                                    {{ authorizationError }}
-                                </div>
-                                <div v-if="validationErrors.serviceRequestId" class="text-red-500 text-sm">
-                                    <p v-for="error in validationErrors.serviceRequestId" :key="error">
-                                        {{ error }}
-                                    </p>
-                                </div>
-                                <h2 class="text-xl font-bold text-brand-950">Service Request Details</h2>
 
-                                <div>
-                                    <div
-                                        class="flex flex-col divide-y ring-1 ring-black/5 shadow-sm px-3 pt-3 pb-1 rounded bg-white mb-4"
-                                    >
-                                        <!-- Service Request Details -->
-                                        <div class="mb-4">
-                                            <h4 class="text-base font-semibold">Title:</h4>
-                                            <p class="text-gray-700">
-                                                {{ serviceRequest.title }}
-                                            </p>
-                                        </div>
+                <div class="mb-4">
+                    <h2 class="text-base font-semibold">Description:</h2>
+                    <p class="text-gray-700">
+                        {{ serviceRequest.description }}
+                    </p>
+                </div>
 
-                                        <div class="mb-4">
-                                            <h2 class="text-base font-semibold">Description:</h2>
-                                            <p class="text-gray-700">
-                                                {{ serviceRequest.description }}
-                                            </p>
-                                        </div>
+                <div class="mb-4">
+                    <h2 class="text-base font-semibold">Service Request Number:</h2>
+                    <p class="text-gray-700">
+                        {{ serviceRequest.serviceRequestNumber }}
+                    </p>
+                </div>
 
-                                        <div class="mb-4">
-                                            <h2 class="text-base font-semibold">Service Request Number:</h2>
-                                            <p class="text-gray-700">
-                                                {{ serviceRequest.serviceRequestNumber }}
-                                            </p>
-                                        </div>
+                <div class="mb-4">
+                    <h2 class="text-base font-semibold">Status:</h2>
+                    <p class="text-gray-700">
+                        <Badge
+                            v-if="serviceRequest.statusName"
+                            :value="serviceRequest.statusName"
+                            :class="`inline-flex px-2 py-1 rounded-full`"
+                            :color="serviceRequest.statusColor"
+                        />
+                    </p>
+                </div>
 
-                                        <div class="mb-4">
-                                            <h2 class="text-base font-semibold">Status:</h2>
-                                            <p class="text-gray-700">
-                                                <Badge
-                                                    v-if="serviceRequest.statusName"
-                                                    :value="serviceRequest.statusName"
-                                                    :class="`inline-flex px-2 py-1 rounded-full`"
-                                                    :color="serviceRequest.statusColor"
-                                                />
-                                            </p>
-                                        </div>
+                <div class="mb-4">
+                    <h2 class="text-base font-semibold">Type:</h2>
+                    <p class="text-gray-700">
+                        {{ serviceRequest.typeName }}
+                    </p>
+                </div>
+            </div>
 
-                                        <div class="mb-4">
-                                            <h2 class="text-base font-semibold">Type:</h2>
-                                            <p class="text-gray-700">
-                                                {{ serviceRequest.typeName }}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <!-- Add New Update Form -->
-                                    <div
-                                        class="flex flex-col divide-y ring-1 ring-black/5 shadow-sm px-3 pt-3 pb-1 rounded bg-white mb-4"
-                                    >
-                                        <h2 class="text-xl font-bold mb-4">New Service Request Update</h2>
+            <div class="flex flex-col divide-y ring-1 ring-black/5 shadow-sm px-3 pt-3 pb-1 rounded bg-white mb-4">
+                <h2 class="text-xl font-bold mb-4">New Service Request Update</h2>
 
-                                        <form @submit.prevent="submitUpdate">
-                                            <div class="mb-4">
-                                                <textarea
-                                                    v-model="updateMessage"
-                                                    class="w-full h-32 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-500"
-                                                    placeholder="Enter your update here..."
-                                                    required
-                                                ></textarea>
-                                                <div v-if="validationErrors.description" class="text-red-500 text-sm">
-                                                    <p v-for="error in validationErrors.description" :key="error">
-                                                        {{ error }}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <button
-                                                type="submit"
-                                                class="w-auto py-2 px-4 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-500 transition duration-200"
-                                                :disabled="disableSubmitBtn"
-                                            >
-                                                Submit Update
-                                            </button>
-                                        </form>
-                                    </div>
-                                    <!-- Service Request Updates Section -->
-                                    <div
-                                        class="flex flex-col divide-y ring-1 ring-black/5 shadow-sm px-3 pt-3 pb-1 rounded bg-white mb-4"
-                                    >
-                                        <h2 class="text-xl font-bold mb-4">Service Request Updates</h2>
-
-                                        <div id="updates-list">
-                                            <!-- Updates will be dynamically inserted here -->
-
-                                            <div
-                                                :class="
-                                                    serviceRequestUpdate.created_by_type === 'contact'
-                                                        ? 'mb-4 p-4 bg-gray-50 border border-gray-200 rounded'
-                                                        : 'mb-4 p-4 border border-blue-200 rounded bg-gradient-to-br from-brand-500 to-brand-800 text-white'
-                                                "
-                                                v-for="serviceRequestUpdate in serviceRequestUpdates"
-                                                :key="serviceRequestUpdate.id"
-                                            >
-                                                <p
-                                                    :class="
-                                                        serviceRequestUpdate.created_by_type === 'contact'
-                                                            ? 'text-gray-700'
-                                                            : ''
-                                                    "
-                                                >
-                                                    {{ serviceRequestUpdate.update }}
-                                                </p>
-                                                <span
-                                                    :class="
-                                                        serviceRequestUpdate.created_by_type === 'contact'
-                                                            ? 'text-sm text-gray-500'
-                                                            : 'text-sm'
-                                                    "
-                                                >
-                                                    {{ serviceRequestUpdate.created_at }}
-                                                </span>
-                                            </div>
-                                            <Pagination
-                                                :currentPage="currentPage"
-                                                :lastPage="lastPage"
-                                                :fromArticle="fromRecord"
-                                                :toArticle="toRecord"
-                                                :totalArticles="totalRecords"
-                                                @fetchNextPage="fetchNextPage"
-                                                @fetchPreviousPage="fetchPreviousPage"
-                                                @fetchPage="fetchPage"
-                                            />
-                                            <!-- More updates can be added here -->
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                <form @submit.prevent="submitUpdate">
+                    <div class="mb-4">
+                        <textarea
+                            v-model="updateMessage"
+                            class="w-full h-32 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-500"
+                            placeholder="Enter your update here..."
+                            required
+                        ></textarea>
+                        <div v-if="validationErrors.description" class="text-red-500 text-sm">
+                            <p v-for="error in validationErrors.description" :key="error">
+                                {{ error }}
+                            </p>
                         </div>
-                    </main>
+                    </div>
+                    <button
+                        type="submit"
+                        class="w-auto py-2 px-4 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-500 transition duration-200"
+                        :disabled="disableSubmitBtn"
+                    >
+                        Submit Update
+                    </button>
+                </form>
+            </div>
+
+            <div class="flex flex-col divide-y ring-1 ring-black/5 shadow-sm px-3 pt-3 pb-1 rounded bg-white mb-4">
+                <h2 class="text-xl font-bold mb-4">Service Request Updates</h2>
+
+                <div id="updates-list">
+                    <div
+                        :class="
+                            serviceRequestUpdate.created_by_type === 'contact'
+                                ? 'mb-4 p-4 bg-gray-50 border border-gray-200 rounded'
+                                : 'mb-4 p-4 border border-blue-200 rounded bg-gradient-to-br from-brand-500 to-brand-800 text-white'
+                        "
+                        v-for="serviceRequestUpdate in serviceRequestUpdates"
+                        :key="serviceRequestUpdate.id"
+                    >
+                        <p :class="serviceRequestUpdate.created_by_type === 'contact' ? 'text-gray-700' : ''">
+                            {{ serviceRequestUpdate.update }}
+                        </p>
+                        <span
+                            :class="
+                                serviceRequestUpdate.created_by_type === 'contact' ? 'text-sm text-gray-500' : 'text-sm'
+                            "
+                        >
+                            {{ serviceRequestUpdate.created_at }}
+                        </span>
+                    </div>
+
+                    <Pagination
+                        :currentPage="currentPage"
+                        :lastPage="lastPage"
+                        :fromArticle="fromRecord"
+                        :toArticle="toRecord"
+                        :totalArticles="totalRecords"
+                        @fetchNextPage="fetchNextPage"
+                        @fetchPreviousPage="fetchPreviousPage"
+                        @fetchPage="fetchPage"
+                    />
                 </div>
             </div>
         </div>
-    </div>
+    </Page>
 </template>

@@ -32,10 +32,11 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { XMarkIcon } from '@heroicons/vue/24/outline';
     import { onMounted, ref } from 'vue';
     import AppLoading from '../Components/AppLoading.vue';
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
+    import EmptyState from '../Components/EmptyState.vue';
+    import Page from '../Components/Page.vue';
     import { consumer } from '../Services/Consumer';
 
     const checkedInAssets = ref({});
@@ -82,79 +83,78 @@
     <div v-if="loading">
         <AppLoading />
     </div>
-    <div v-else>
-        <main class="px-6 bg-gray-50 min-h-screen">
-            <div class="max-w-screen-xl flex flex-col gap-y-6 mx-auto py-8">
-                <Breadcrumbs :currentCrumb="'Assets'"></Breadcrumbs>
-                <div class="grid gap-4">
-                    <div v-if="checkedOutAssets?.length > 0">
-                        <h3 class="text-xl">Assets</h3>
-                        <div
-                            class="mt-4 overflow-hidden rounded bg-gray-200 shadow-sm ring-1 ring-black/5 grid gap-px divide-y-0 lg:grid-cols-2"
-                        >
-                            <div
-                                v-for="checkedOutAsset in checkedOutAssets"
-                                :key="checkedOutAsset?.id"
-                                class="group relative bg-white p-6 focus-within:bg-gray-50"
-                            >
-                                <div class="grid">
-                                    <div class="w-full">
-                                        <h3 class="text-base font-semibold leading-6 text-gray-900">
-                                            <span class="absolute inset-0" aria-hidden="true" />
-                                            {{ checkedOutAsset.asset?.name }}
-                                        </h3>
-                                        <div class="mt-2">
-                                            <span class="py-1 text-sm rounded">
-                                                Description: {{ checkedOutAsset.asset?.description }}<br />
-                                                Serial Number: {{ checkedOutAsset.asset?.serial_number }}<br />
-                                                Type: {{ checkedOutAsset.asset?.type?.name }}<br />
-                                                Date Checked Out: {{ checkedOutAsset.formatted_checked_out_at }}<br />
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div v-else class="p-3 flex items-start gap-2">
-                        <XMarkIcon class="h-5 w-5 text-gray-400" />
-                        <p class="text-gray-600 text-sm font-medium">No Checked Out Assets found.</p>
-                    </div>
+    <Page v-else>
+        <template #heading> Assets </template>
 
-                    <div v-if="checkedInAssets?.length > 0">
-                        <h3 class="text-xl">Returned Assets</h3>
-                        <div
-                            class="mt-4 overflow-hidden rounded bg-gray-200 shadow-sm ring-1 ring-black/5 grid gap-px divide-y-0 lg:grid-cols-2"
-                        >
-                            <div
-                                v-for="checkedInAsset in checkedInAssets"
-                                :key="checkedInAsset.id"
-                                class="group relative bg-white p-6 focus-within:bg-gray-50"
-                            >
-                                <div class="grid">
-                                    <div class="w-full">
-                                        <h3 class="text-base font-semibold leading-6 text-gray-900">
-                                            {{ checkedInAsset.asset?.name }}
-                                        </h3>
-                                        <div class="mt-2">
-                                            <span class="py-1 text-sm rounded">
-                                                Description: {{ checkedInAsset.asset?.description }}<br />
-                                                Serial Number: {{ checkedInAsset.asset?.serial_number }}<br />
-                                                Type: {{ checkedInAsset.asset?.type?.name }}<br />
-                                                Date Returned: {{ checkedInAsset.formatted_checked_in_at }}<br />
-                                            </span>
-                                        </div>
-                                    </div>
+        <template #breadcrumbs>
+            <Breadcrumbs :currentCrumb="'Assets'" />
+        </template>
+
+        <div class="grid divide-y divide-gray-200">
+            <div v-if="checkedOutAssets?.length > 0">
+                <h3 class="text-xl">Assets</h3>
+                <div
+                    class="mt-4 overflow-hidden rounded bg-gray-200 shadow-sm ring-1 ring-black/5 grid gap-px divide-y-0 lg:grid-cols-2"
+                >
+                    <div
+                        v-for="checkedOutAsset in checkedOutAssets"
+                        :key="checkedOutAsset?.id"
+                        class="group relative bg-white p-6 focus-within:bg-gray-50"
+                    >
+                        <div class="grid">
+                            <div class="w-full">
+                                <h3 class="text-base font-semibold leading-6 text-gray-900">
+                                    <span class="absolute inset-0" aria-hidden="true" />
+                                    {{ checkedOutAsset.asset?.name }}
+                                </h3>
+                                <div class="mt-2">
+                                    <span class="py-1 text-sm rounded">
+                                        Description: {{ checkedOutAsset.asset?.description }}<br />
+                                        Serial Number: {{ checkedOutAsset.asset?.serial_number }}<br />
+                                        Type: {{ checkedOutAsset.asset?.type?.name }}<br />
+                                        Date Checked Out: {{ checkedOutAsset.formatted_checked_out_at }}<br />
+                                    </span>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div v-else class="p-3 flex items-start gap-2">
-                        <XMarkIcon class="h-5 w-5 text-gray-400" />
-                        <p class="text-gray-600 text-sm font-medium">No Checked In Assets found.</p>
                     </div>
                 </div>
             </div>
-        </main>
-    </div>
+            <EmptyState v-else>
+                <template #heading>There are no checked out assets to display.</template>
+            </EmptyState>
+
+            <div v-if="checkedInAssets?.length > 0">
+                <h3 class="text-xl">Returned Assets</h3>
+                <div
+                    class="mt-4 overflow-hidden rounded bg-gray-200 shadow-sm ring-1 ring-black/5 grid gap-px divide-y-0 lg:grid-cols-2"
+                >
+                    <div
+                        v-for="checkedInAsset in checkedInAssets"
+                        :key="checkedInAsset.id"
+                        class="group relative bg-white p-6 focus-within:bg-gray-50"
+                    >
+                        <div class="grid">
+                            <div class="w-full">
+                                <h3 class="text-base font-semibold leading-6 text-gray-900">
+                                    {{ checkedInAsset.asset?.name }}
+                                </h3>
+                                <div class="mt-2">
+                                    <span class="py-1 text-sm rounded">
+                                        Description: {{ checkedInAsset.asset?.description }}<br />
+                                        Serial Number: {{ checkedInAsset.asset?.serial_number }}<br />
+                                        Type: {{ checkedInAsset.asset?.type?.name }}<br />
+                                        Date Returned: {{ checkedInAsset.formatted_checked_in_at }}<br />
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <EmptyState v-else>
+                <template #heading>There are no checked in assets to display.</template>
+            </EmptyState>
+        </div>
+    </Page>
 </template>

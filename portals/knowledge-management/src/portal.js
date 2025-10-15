@@ -99,7 +99,7 @@ customElements.define(
                     {
                         path: baseUrl + '/services',
                         name: 'services',
-                        component: () => import('./Components/Services.vue'),
+                        component: () => import('./Pages/Services.vue'),
                         meta: { requiresAuth: true },
                     },
                     {
@@ -127,7 +127,7 @@ customElements.define(
                     {
                         path: baseUrl + '/tasks',
                         name: 'tasks',
-                        component: () => import('./Components/ComingSoon.vue'),
+                        component: () => import('./Pages/ComingSoon.vue'),
                     },
                 ],
             });

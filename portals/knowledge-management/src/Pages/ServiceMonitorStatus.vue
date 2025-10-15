@@ -32,11 +32,11 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { XMarkIcon } from '@heroicons/vue/24/outline';
     import { computed, onMounted, ref } from 'vue';
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
+    import EmptyState from '../Components/EmptyState.vue';
+    import Page from '../Components/Page.vue';
     import Pagination from '../Components/Pagination.vue';
-    import ServiceMonitorAlert from '../Components/ServiceMonitorAlert.vue';
     import ServiceMonitorCard from '../Components/ServiceMonitorCard.vue';
     import { consumer } from '../Services/Consumer.js';
 
@@ -132,80 +132,72 @@
 </script>
 
 <template>
-    <div class="px-6 bg-gray-50">
-        <div class="max-w-screen-xl flex flex-col gap-y-6 mx-auto py-8">
-            <Breadcrumbs :currentCrumb="'Status'"></Breadcrumbs>
-            <div class="ring-1 ring-black/5 shadow-sm px-3 pt-3 pb-1 rounded bg-white">
-                <div v-if="!loading">
-                    <ServiceMonitorAlert
-                        class="my-3"
-                        v-if="hasAnyHistory && result.length > 0"
-                        :hasIssue="hasIssues"
-                        :title="systemTitle"
-                        :message="systemMessage"
+    <Page>
+        <template #heading> Status </template>
+
+        <template #breadcrumbs>
+            <Breadcrumbs :currentCrumb="'Status'" />
+        </template>
+
+        <template v-if="!loading">
+            <div v-if="result.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div v-for="(serviceMonitor, index) in result" :key="index">
+                    <ServiceMonitorCard
+                        :name="serviceMonitor.name"
+                        :status="serviceMonitor.latest_history?.succeeded ?? true"
+                        :message="
+                            serviceMonitor.latest_history?.status_message ??
+                            'No known issues (monitoring not yet started).'
+                        "
                     />
                 </div>
-                <div v-else class="p-5 border border-gray-200 bg-white rounded-md animate-pulse w-100 my-3">
-                    <div class="flex items-center space-x-3">
-                        <div class="h-5 w-5 bg-gray-300 rounded-full"></div>
-                        <div class="h-4 bg-gray-300 rounded w-48"></div>
-                    </div>
-                    <div class="mt-2 h-3 bg-gray-200 rounded w-3/4"></div>
-                    <div class="mt-1 h-3 bg-gray-200 rounded w-2/3"></div>
-                </div>
-
-                <template v-if="!loading">
-                    <div v-if="result.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <div v-for="(serviceMonitor, index) in result" :key="index">
-                            <ServiceMonitorCard
-                                :name="serviceMonitor.name"
-                                :status="serviceMonitor.latest_history?.succeeded ?? true"
-                                :message="
-                                    serviceMonitor.latest_history?.status_message ??
-                                    'No known issues (monitoring not yet started).'
-                                "
-                            />
-                        </div>
-                    </div>
-                    <div v-else class="p-3 flex items-start gap-2">
-                        <XMarkIcon class="h-5 w-5 text-gray-400" />
-                        <p class="text-gray-600 text-sm font-medium">No service monitors found.</p>
-                    </div>
-
-                    <Pagination
-                        class="mt-3"
-                        v-if="result.length > 0"
-                        :currentPage="currentPage"
-                        :lastPage="lastPage"
-                        :fromArticle="fromArticle"
-                        :toArticle="toArticle"
-                        :totalArticles="totalArticles"
-                        @fetchNextPage="fetchNextPage"
-                        @fetchPreviousPage="fetchPreviousPage"
-                        @fetchPage="fetchPage"
-                    />
-                </template>
-                <template v-else>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-3">
-                        <div
-                            v-for="n in 15"
-                            :key="`service-monitor-skeleton-${n}`"
-                            class="flex items-center justify-between p-5 bg-white border border-gray-200 rounded-lg shadow animate-pulse"
-                        >
-                            <div class="flex items-center">
-                                <div class="h-7 w-7 bg-gray-300 rounded-full"></div>
-
-                                <div class="ml-4">
-                                    <div class="h-4 bg-gray-300 rounded w-24 mb-2"></div>
-                                    <div class="h-3 bg-gray-200 rounded w-32"></div>
-                                </div>
-                            </div>
-
-                            <div class="h-5 w-5 bg-gray-300 rounded-full"></div>
-                        </div>
-                    </div>
-                </template>
             </div>
-        </div>
-    </div>
+
+            <EmptyState v-else>
+                <template #heading>There are no service monitors to display.</template>
+                <template #actions>
+                    <router-link
+                        :to="{ name: 'home' }"
+                        class="inline-block px-4 py-2 text-white bg-gradient-to-br from-brand-500 to-brand-800 rounded"
+                    >
+                        Return Home
+                    </router-link>
+                </template>
+            </EmptyState>
+
+            <Pagination
+                class="mt-3"
+                v-if="result.length > 0"
+                :currentPage="currentPage"
+                :lastPage="lastPage"
+                :fromArticle="fromArticle"
+                :toArticle="toArticle"
+                :totalArticles="totalArticles"
+                @fetchNextPage="fetchNextPage"
+                @fetchPreviousPage="fetchPreviousPage"
+                @fetchPage="fetchPage"
+            />
+        </template>
+
+        <template v-else>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-3">
+                <div
+                    v-for="n in 15"
+                    :key="`service-monitor-skeleton-${n}`"
+                    class="flex items-center justify-between p-5 bg-white border border-gray-200 rounded-lg shadow animate-pulse"
+                >
+                    <div class="flex items-center">
+                        <div class="h-7 w-7 bg-gray-300 rounded-full"></div>
+
+                        <div class="ml-4">
+                            <div class="h-4 bg-gray-300 rounded w-24 mb-2"></div>
+                            <div class="h-3 bg-gray-200 rounded w-32"></div>
+                        </div>
+                    </div>
+
+                    <div class="h-5 w-5 bg-gray-300 rounded-full"></div>
+                </div>
+            </div>
+        </template>
+    </Page>
 </template>

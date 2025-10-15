@@ -33,7 +33,10 @@
 -->
 <script setup>
     import { onMounted, ref } from 'vue';
+    import Breadcrumbs from '../Components/Breadcrumbs.vue';
+    import EmptyState from '../Components/EmptyState.vue';
     import Loader from '../Components/Loader.vue';
+    import Page from '../Components/Page.vue';
     import { consumer } from '../Services/Consumer';
 
     const incidents = ref([]);
@@ -129,8 +132,13 @@
     };
 </script>
 <template>
-    <div class="p-6 max-w-6xl mx-auto">
-        <h1 class="text-2xl font-semibold mb-6">Incident History</h1>
+    <Page>
+        <template #heading> Incident History </template>
+
+        <template #breadcrumbs>
+            <Breadcrumbs :currentCrumb="'Incidents'" />
+        </template>
+
         <div class="mb-6 bg-white shadow rounded-lg p-4" v-for="(incident, index) in incidents" :key="index">
             <time class="mb-1 text-lg font-semibold leading-none text-black">{{
                 formatDate(incident.created_at)
@@ -168,5 +176,17 @@
                 Load More
             </button>
         </div>
-    </div>
+
+        <EmptyState v-if="!loading && incidents.length === 0">
+            <template #heading>There are no incidents to display.</template>
+            <template #actions>
+                <router-link
+                    :to="{ name: 'home' }"
+                    class="inline-block px-4 py-2 text-white bg-gradient-to-br from-brand-500 to-brand-800 rounded"
+                >
+                    Return Home
+                </router-link>
+            </template>
+        </EmptyState>
+    </Page>
 </template>
