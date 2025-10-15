@@ -41,6 +41,7 @@
     import Badge from '../Components/Badge.vue';
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import FilterComponent from '../Components/FilterComponent.vue';
+    import Page from '../Components/Page.vue';
     import Pagination from '../Components/Pagination.vue';
     import SearchResults from '../Components/SearchResults.vue';
     import SubCategories from '../Components/SubCategories.vue';
@@ -300,129 +301,123 @@
 </script>
 
 <template>
-    <div class="top-0 z-40 flex flex-col items-center bg-gray-50">
-        <div class="bg-gradient-to-br from-brand-500 to-brand-800 w-full px-6">
-            <div class="max-w-screen-xl flex flex-col gap-y-6 mx-auto py-8">
-                <div class="flex flex-col gap-y-1 text-left">
-                    <h3 class="text-3xl font-semibold text-white">Need help?</h3>
-                    <p class="text-brand-100">Search our knowledge base for advice and answers</p>
-                </div>
+    <Page>
+        <template #heading> Need help? </template>
 
-                <label for="search" class="sr-only">Search</label>
-                <div class="relative rounded">
-                    <div>
-                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 py-3">
-                            <MagnifyingGlassIcon class="h-5 w-5 text-gray-400" aria-hidden="true" />
-                        </div>
-                        <input
-                            type="search"
-                            v-model="searchQuery"
-                            id="search"
-                            placeholder="Search for articles and categories"
-                            class="block w-full rounded border-0 pl-12 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-brand-2-- sm:text-sm sm:leading-6"
-                            :class="{ 'rounded-b-none': tags.length > 0 }"
-                        />
+        <template #description> Search our knowledge base for advice and answers </template>
+
+        <template #belowHeaderContent>
+            <label for="search" class="sr-only">Search</label>
+            <div class="relative rounded">
+                <div>
+                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 py-3">
+                        <MagnifyingGlassIcon class="h-5 w-5 text-gray-400" aria-hidden="true" />
                     </div>
+                    <input
+                        type="search"
+                        v-model="searchQuery"
+                        id="search"
+                        placeholder="Search for articles and categories"
+                        class="block w-full rounded border-0 pl-12 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-brand-2-- sm:text-sm sm:leading-6"
+                        :class="{ 'rounded-b-none': tags.length > 0 }"
+                    />
                 </div>
-                <details
-                    v-if="tags.length > 0"
-                    class="rounded rounded-t-none bg-white py-3 p-4 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-brand-2-- sm:text-sm sm:leading-6"
-                >
-                    <summary v-if="selectedTags.length > 0">Tags ({{ selectedTags.length }} selected)</summary>
-                    <summary v-else>Tags</summary>
-                    <div class="flex flex-wrap gap-2">
-                        <Badge
-                            v-for="tag in tags"
-                            :key="tag.id"
-                            :value="tag.name"
-                            class="cursor-pointer"
-                            :class="{ 'bg-brand-600 text-white': selectedTags.includes(tag.id) }"
-                            @click="toggleTag(tag.id)"
-                        />
-                    </div>
-                </details>
             </div>
-        </div>
-    </div>
-    <div class="sticky top-0 z-40 flex flex-col items-center bg-gray-50">
-        <div class="w-full px-6">
-            <div class="max-w-screen-xl flex flex-col gap-y-6 mx-auto py-8">
-                <div v-if="loadingResults">
-                    <AppLoading />
+            <details
+                v-if="tags.length > 0"
+                class="rounded rounded-t-none bg-white py-3 p-4 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-brand-2-- sm:text-sm sm:leading-6"
+            >
+                <summary v-if="selectedTags.length > 0">Tags ({{ selectedTags.length }} selected)</summary>
+                <summary v-else>Tags</summary>
+                <div class="flex flex-wrap gap-2">
+                    <Badge
+                        v-for="tag in tags"
+                        :key="tag.id"
+                        :value="tag.name"
+                        class="cursor-pointer"
+                        :class="{ '!bg-brand-600 text-white': selectedTags.includes(tag.id) }"
+                        @click="toggleTag(tag.id)"
+                    />
                 </div>
-                <div v-else>
-                    <main class="flex flex-col gap-8">
-                        <div v-if="searchQuery || selectedTags.length > 0" class="flex flex-col gap-6">
-                            <SearchResults
-                                :searchQuery="searchQuery"
-                                :searchResults="searchResults"
-                                :loadingResults="loadingeSearchResults"
-                                @change-filter="changeSearchFilter"
-                                :selected-filter="filter"
-                                :currentPage="currentPage"
-                                :lastPage="lastPage"
-                                :fromArticle="fromArticle"
-                                :toArticle="toArticle"
-                                :totalArticles="totalArticles"
-                                @fetchNextPage="fetchNextPage"
-                                @fetchPreviousPage="fetchPreviousPage"
-                                @fetchPage="fetchPage"
+            </details>
+        </template>
+
+        <template #breadcrumbs>
+            <Breadcrumbs
+                :currentCrumb="category.name"
+                :breadcrumbs="breadcrumbs"
+                v-if="!loadingResults && !(searchQuery || selectedTags.length > 0)"
+            />
+        </template>
+
+        <div v-if="loadingResults">
+            <AppLoading />
+        </div>
+        <div v-else>
+            <main class="flex flex-col gap-8">
+                <div v-if="searchQuery || selectedTags.length > 0" class="flex flex-col gap-6">
+                    <SearchResults
+                        :searchQuery="searchQuery"
+                        :searchResults="searchResults"
+                        :loadingResults="loadingeSearchResults"
+                        @change-filter="changeSearchFilter"
+                        :selected-filter="filter"
+                        :currentPage="currentPage"
+                        :lastPage="lastPage"
+                        :fromArticle="fromArticle"
+                        :toArticle="toArticle"
+                        :totalArticles="totalArticles"
+                        @fetchNextPage="fetchNextPage"
+                        @fetchPreviousPage="fetchPreviousPage"
+                        @fetchPage="fetchPage"
+                    >
+                    </SearchResults>
+                </div>
+                <div v-else class="flex flex-col gap-6">
+                    <div class="flex flex-col gap-6">
+                        <h2 class="text-2xl font-bold text-brand-950">
+                            {{ category.name }}
+                        </h2>
+                        <SubCategories
+                            v-if="category.subCategories.length > 0"
+                            :subCategories="category.subCategories"
+                        ></SubCategories>
+                        <filter-component @change-filter="changeFilter" :selected-filter="filter"></filter-component>
+                        <div>
+                            <div
+                                class="flex flex-col divide-y ring-1 ring-black/5 shadow-sm px-3 pt-3 pb-1 rounded bg-white"
                             >
-                            </SearchResults>
-                        </div>
-                        <div v-else class="flex flex-col gap-6">
-                            <Breadcrumbs :currentCrumb="category.name" :breadcrumbs="breadcrumbs"></Breadcrumbs>
-                            <div class="flex flex-col gap-6">
-                                <h2 class="text-2xl font-bold text-brand-950">
-                                    {{ category.name }}
-                                </h2>
-                                <SubCategories
-                                    v-if="category.subCategories.length > 0"
-                                    :subCategories="category.subCategories"
-                                ></SubCategories>
-                                <filter-component
-                                    @change-filter="changeFilter"
-                                    :selected-filter="filter"
-                                ></filter-component>
-                                <div>
-                                    <div
-                                        class="flex flex-col divide-y ring-1 ring-black/5 shadow-sm px-3 pt-3 pb-1 rounded bg-white"
-                                    >
-                                        <h3 class="text-lg font-semibold text-gray-800 px-3 pt-1 pb-3">
-                                            Articles ({{ totalArticles }})
-                                        </h3>
+                                <h3 class="text-lg font-semibold text-gray-800 px-3 pt-1 pb-3">
+                                    Articles ({{ totalArticles }})
+                                </h3>
 
-                                        <div v-if="articles.length > 0">
-                                            <ul role="list" class="divide-y">
-                                                <li v-for="article in articles" :key="article.id">
-                                                    <Article :article="article" />
-                                                </li>
-                                            </ul>
-                                            <Pagination
-                                                :currentPage="currentPage"
-                                                :lastPage="lastPage"
-                                                :fromArticle="fromArticle"
-                                                :toArticle="toArticle"
-                                                :totalArticles="totalArticles"
-                                                @fetchNextPage="fetchNextPage"
-                                                @fetchPreviousPage="fetchPreviousPage"
-                                                @fetchPage="fetchPage"
-                                            />
-                                        </div>
-                                        <div v-else class="p-3 flex items-start gap-2">
-                                            <XMarkIcon class="h-5 w-5 text-gray-400" />
+                                <div v-if="articles.length > 0">
+                                    <ul role="list" class="divide-y">
+                                        <li v-for="article in articles" :key="article.id">
+                                            <Article :article="article" />
+                                        </li>
+                                    </ul>
+                                    <Pagination
+                                        :currentPage="currentPage"
+                                        :lastPage="lastPage"
+                                        :fromArticle="fromArticle"
+                                        :toArticle="toArticle"
+                                        :totalArticles="totalArticles"
+                                        @fetchNextPage="fetchNextPage"
+                                        @fetchPreviousPage="fetchPreviousPage"
+                                        @fetchPage="fetchPage"
+                                    />
+                                </div>
+                                <div v-else class="p-3 flex items-start gap-2">
+                                    <XMarkIcon class="h-5 w-5 text-gray-400" />
 
-                                            <p class="text-gray-600 text-sm font-medium">
-                                                No articles found in this category.
-                                            </p>
-                                        </div>
-                                    </div>
+                                    <p class="text-gray-600 text-sm font-medium">No articles found in this category.</p>
                                 </div>
                             </div>
                         </div>
-                    </main>
+                    </div>
                 </div>
-            </div>
+            </main>
         </div>
-    </div>
+    </Page>
 </template>

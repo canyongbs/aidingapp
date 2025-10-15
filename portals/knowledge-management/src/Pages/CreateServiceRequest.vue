@@ -37,6 +37,7 @@
     import wizard from '../../../../widgets/service-request-form/src/FormKit/wizard.js';
     import AppLoading from '../Components/AppLoading.vue';
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
+    import Page from '../Components/Page.vue';
     import { consumer } from '../Services/Consumer.js';
     import { useAuthStore } from '../Stores/auth.js';
 
@@ -142,40 +143,36 @@
             <AppLoading />
         </div>
         <div v-else>
-            <div class="sticky top-0 z-40 flex flex-col items-center bg-gray-50">
-                <div class="bg-gradient-to-br from-brand-500 to-brand-800 w-full px-6">
-                    <div class="max-w-screen-xl flex flex-col gap-y-6 mx-auto py-8">
-                        <div class="text-right" v-if="submittedSuccess">
-                            <button class="p-2 font-bold rounded bg-white text-brand-700 dark:text-brand-400">
-                                <router-link :to="{ name: 'create-service-request' }">
-                                    Submit Another Request
-                                </router-link>
-                            </button>
-                        </div>
-                        <div class="flex flex-col text-left">
-                            <h3 class="text-3xl text-white">Help Center</h3>
-                            <p class="text-white">Welcome {{ user.first_name }}!</p>
-                            <p class="text-white">Please fill out the following information to submit your request.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="max-w-7xl mx-auto">
-                <Breadcrumbs
-                    class="py-8"
-                    currentCrumb="Submit Form"
-                    :breadcrumbs="[
-                        { name: 'Help Center', route: 'home' },
-                        { name: 'New Request', route: 'create-service-request' },
-                    ]"
-                >
-                </Breadcrumbs>
+            <Page :has-new-request-button="false">
+                <template #heading> Help Center </template>
 
-                <main class="grid gap-4" v-if="submittedSuccess">Thank you. Your request has been submitted.</main>
+                <template #description>
+                    <p>Welcome {{ user.first_name }}!</p>
+                    <p>Please fill out the following information to submit your request.</p>
+                </template>
+
+                <template #breadcrumbs>
+                    <Breadcrumbs
+                        currentCrumb="Submit Form"
+                        :breadcrumbs="[
+                            { name: 'Help Center', route: 'home' },
+                            { name: 'New Request', route: 'create-service-request' },
+                        ]"
+                    />
+                </template>
+
+                <main class="grid gap-4" v-if="submittedSuccess">
+                    Thank you. Your request has been submitted.
+
+                    <button class="p-2 font-bold rounded bg-white text-brand-700 dark:text-brand-400">
+                        <router-link :to="{ name: 'create-service-request' }"> Submit Another Request </router-link>
+                    </button>
+                </main>
+
                 <main class="grid gap-4" v-else>
                     <FormKitSchema :schema="schema" :data="data" />
                 </main>
-            </div>
+            </Page>
         </div>
     </div>
 </template>

@@ -299,7 +299,7 @@
                         :key="tag.id"
                         :value="tag.name"
                         class="cursor-pointer"
-                        :class="{ 'bg-brand-600 text-white': selectedTags.includes(tag.id) }"
+                        :class="{ '!bg-brand-600 text-white': selectedTags.includes(tag.id) }"
                         @click="toggleTag(tag.id)"
                     />
                 </div>

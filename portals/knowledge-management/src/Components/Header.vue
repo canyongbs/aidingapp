@@ -126,7 +126,7 @@
 </script>
 
 <template>
-    <div class="max-w-screen-xl flex flex-col gap-y-6 mx-auto">
+    <div class="max-w-screen-xl flex flex-col gap-y-6 mx-auto w-full">
         <Menubar class="border border-none md:px-1.5 xl:px-0">
             <template #start>
                 <router-link :to="{ name: 'home', query: {} }" class="flex items-center">

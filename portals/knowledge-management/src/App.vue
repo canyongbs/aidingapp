@@ -555,27 +555,27 @@
                     </FormKit>
                 </div>
             </div>
-            <div v-else class="min-h-screen">
-                <Header :api-url="apiUrl" @show-login="showLogin = true" :header-logo="headerLogo" :app-name="appName">
-                </Header>
+            <div v-else class="min-h-screen flex flex-col">
+                <Header
+                    :api-url="apiUrl"
+                    @show-login="showLogin = true"
+                    :header-logo="headerLogo"
+                    :app-name="appName"
+                />
 
-                <div v-if="errorLoading" class="text-center">
+                <div v-if="errorLoading" class="text-center w-full">
                     <h1 class="text-3xl font-bold text-red-500">Error Loading the Help Center</h1>
                     <p class="text-lg text-red-500">Please try again later</p>
                 </div>
 
-                <div v-else class="flex flex-row">
-                    <div class="w-full">
-                        <RouterView
-                            :search-url="searchUrl"
-                            :api-url="apiUrl"
-                            :categories="categories"
-                            :service-requests="serviceRequests"
-                            :tags="tags"
-                        >
-                        </RouterView>
-                    </div>
-                </div>
+                <RouterView
+                    :search-url="searchUrl"
+                    :api-url="apiUrl"
+                    :categories="categories"
+                    :service-requests="serviceRequests"
+                    :tags="tags"
+                    v-else
+                />
 
                 <Footer :logo="footerLogo"></Footer>
             </div>
