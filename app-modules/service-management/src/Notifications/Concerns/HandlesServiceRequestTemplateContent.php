@@ -36,10 +36,12 @@
 
 namespace AidingApp\ServiceManagement\Notifications\Concerns;
 
+use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Actions\GenerateServiceRequestTypeEmailTemplateContent;
 use AidingApp\ServiceManagement\Actions\GenerateServiceRequestTypeEmailTemplateSubject;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
+use App\Models\User;
 use Illuminate\Support\HtmlString;
 
 trait HandlesServiceRequestTemplateContent
@@ -94,6 +96,7 @@ trait HandlesServiceRequestTemplateContent
             'title' => $this->serviceRequest->title,
             'type' => $this->serviceRequest->priority->type->name,
             'description' => $this->serviceRequest->close_details,
+            'recent update' => $this->getRecentUpdateFormatted($timezone),
         ];
     }
 
@@ -134,5 +137,31 @@ trait HandlesServiceRequestTemplateContent
         }, $content['content']);
 
         return $content;
+    }
+
+    protected function getRecentUpdateFormatted(?string $timezone = null): string
+    {
+        $recentUpdate = $this->serviceRequest
+            ->serviceRequestUpdates()
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        if (! $recentUpdate) {
+            return 'No updates available';
+        }
+
+        if ($recentUpdate->createdBy instanceof Contact) {
+            $contact = $recentUpdate->createdBy;
+            $organizationName = $contact->organization ? $contact->organization->name : 'N/A';
+            $creatorInfo = "{$contact->full_name} - {$organizationName}";
+        } else {
+            $user = $recentUpdate->createdBy;
+            assert($user instanceof User);
+            $creatorInfo = "{$user->name} - Service Provider";
+        }
+
+        $updateDate = ! is_null($timezone) ? $recentUpdate->created_at->setTimeZone($timezone)->format('M j, Y \a\t h:i A (T)') : $recentUpdate->created_at->format('M j, Y \a\t h:i A (T)');
+
+        return "{$creatorInfo}\n\n{$updateDate} - {$recentUpdate->update}";
     }
 }
