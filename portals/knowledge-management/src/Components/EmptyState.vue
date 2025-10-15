@@ -42,7 +42,7 @@
                 <XMarkIcon class="h-6 w-6 text-brand-500 dark:text-brand-400" />
             </div>
 
-            <h4 class="text-base font-semibold leading-6 text-gray-950 dark:text-white">
+            <h4 class="text-base font-semibold leading-6 text-gray-950">
                 <slot name="heading" />
             </h4>
 
