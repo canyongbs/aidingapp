@@ -203,7 +203,9 @@
             <Breadcrumbs :breadcrumbs="breadcrumbs" :currentCrumb="currentCrumb" />
         </template>
 
-        <div v-html="DOMPurify.sanitize(article.content)"></div>
+        <div class="prose">
+            <div v-html="DOMPurify.sanitize(article.content)"></div>
+        </div>
 
         <div class="flex items-center mt-6 p-4 border rounded-lg bg-white">
             <p class="text-lg font-semibold mr-4">Was this content helpful?</p>
