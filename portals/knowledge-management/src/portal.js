@@ -97,9 +97,9 @@ customElements.define(
                         meta: { requiresAuth: true },
                     },
                     {
-                        path: baseUrl + '/services',
-                        name: 'services',
-                        component: () => import('./Pages/Services.vue'),
+                        path: baseUrl + '/service',
+                        name: 'service',
+                        component: () => import('./Pages/Service.vue'),
                         meta: { requiresAuth: true },
                     },
                     {

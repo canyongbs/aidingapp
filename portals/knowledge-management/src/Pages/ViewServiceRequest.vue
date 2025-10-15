@@ -152,8 +152,8 @@
 
     const breadcrumbs = [
         {
-            name: 'Services',
-            route: 'services',
+            name: 'Service',
+            route: 'service',
             params: null,
         },
     ];

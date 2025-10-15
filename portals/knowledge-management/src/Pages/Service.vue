@@ -54,7 +54,7 @@
         <template #heading> Service Requests </template>
 
         <template #breadcrumbs>
-            <Breadcrumbs :currentCrumb="'Services'" />
+            <Breadcrumbs :currentCrumb="'Service'" />
         </template>
 
         <div

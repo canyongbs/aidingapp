@@ -85,10 +85,10 @@
             command: () => router.push({ name: 'home' }),
         },
         {
-            label: 'Services',
-            routeName: 'services',
+            label: 'Service',
+            routeName: 'service',
             visible: hasServiceManagement && user !== null,
-            command: () => router.push({ name: 'services' }),
+            command: () => router.push({ name: 'service' }),
         },
         {
             label: 'Status',
