@@ -32,7 +32,6 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { XMarkIcon } from '@heroicons/vue/20/solid/index.js';
     import { ClockIcon, EyeIcon, HandThumbDownIcon, HandThumbUpIcon } from '@heroicons/vue/24/outline/index.js';
     import DOMPurify from 'dompurify';
     import truncate from 'lodash/truncate';
@@ -40,6 +39,8 @@
     import { useRoute, useRouter } from 'vue-router';
     import AppLoading from '../Components/AppLoading.vue';
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
+    import EmptyState from '../Components/EmptyState.vue';
+    import Page from '../Components/Page.vue';
     import Tags from '../Components/Tags.vue';
     import { consumer } from '../Services/Consumer.js';
 
@@ -172,95 +173,86 @@
 </script>
 
 <template>
-    <div class="sticky top-0 flex flex-col items-center bg-gray-50">
-        <div class="w-full px-6">
-            <div class="max-w-screen-xl flex flex-col gap-y-6 mx-auto py-8">
-                <div v-if="loading">
-                    <AppLoading />
+    <div v-if="loading">
+        <AppLoading />
+    </div>
+
+    <Page v-if="!loading && category && article">
+        <template #heading>
+            {{ article.name }}
+        </template>
+
+        <template #description>
+            <div class="flex mb-4">
+                <div class="flex items-center space-x-1 mr-2">
+                    <EyeIcon class="h-4 w-4 flex-shrink-0" aria-hidden="true" />
+                    <span class="text-xs">{{ portalViewCount }} Views</span>
                 </div>
-                <div v-else>
-                    <main class="flex flex-col gap-8">
-                        <Breadcrumbs :breadcrumbs="breadcrumbs" :currentCrumb="currentCrumb"></Breadcrumbs>
-
-                        <div class="grid space-y-2" v-if="category && article">
-                            <div class="flex flex-col gap-3">
-                                <div class="prose max-w-none" v-if="article">
-                                    <h1 class="font-semibold">{{ article.name }}</h1>
-                                    <div class="flex mb-4">
-                                        <div class="text-gray-500 flex items-center space-x-1 mr-2">
-                                            <EyeIcon class="h-4 w-4 flex-shrink-0" aria-hidden="true" />
-                                            <span class="text-xs">{{ portalViewCount }} Views</span>
-                                        </div>
-                                        <div class="text-gray-500 flex items-center space-x-1">
-                                            <ClockIcon class="h-4 w-4 flex-shrink-0" aria-hidden="true" />
-                                            <span class="text-xs">Last updated: {{ article.lastUpdated }}</span>
-                                        </div>
-                                    </div>
-                                    <Tags :tags="article.tags" :featured="article.featured" />
-                                    <hr class="my-4" />
-                                    <div v-html="DOMPurify.sanitize(article.content)"></div>
-                                    <div class="flex items-center mt-6 p-4 border rounded-lg bg-white">
-                                        <p class="text-lg font-semibold mr-4">Was this content helpful?</p>
-                                        <div class="flex space-x-2">
-                                            <button
-                                                @click="toggleFeedback(true)"
-                                                :class="[
-                                                    'px-4 py-2 flex items-center justify-center space-x-1.5 rounded-lg border-2 transition duration-200 focus:outline-none',
-                                                    feedback === true
-                                                        ? 'bg-gradient-to-br from-brand-500 to-brand-800 text-white border-brand-300'
-                                                        : 'bg-white text-gray-700 border-gray-300',
-                                                ]"
-                                            >
-                                                <HandThumbUpIcon
-                                                    class="w-5 h-5"
-                                                    :class="feedback === true ? 'text-white' : 'text-gray-600'"
-                                                />
-                                                <span class="text-sm">Yes</span>
-                                            </button>
-                                            <button
-                                                @click="toggleFeedback(false)"
-                                                :class="[
-                                                    'px-4 py-2 flex items-center justify-center space-x-1.5 rounded-lg border-2 transition duration-200 focus:outline-none',
-                                                    feedback === false
-                                                        ? 'bg-gradient-to-br from-brand-500 to-brand-800 text-white border-brand-300'
-                                                        : 'bg-white text-gray-700 border-gray-300',
-                                                ]"
-                                            >
-                                                <HandThumbDownIcon
-                                                    class="w-5 h-5"
-                                                    :class="feedback === false ? 'text-white' : 'text-gray-600'"
-                                                />
-                                                <span class="text-sm">No</span>
-                                            </button>
-                                        </div>
-                                        <p class="text-lg font-semibold ml-4" v-if="helpfulVotePercentage">
-                                            {{ helpfulVotePercentage }}% of visitors found this helpful.
-                                        </p>
-                                    </div>
-                                </div>
-                                <div class="flex items-center justify-center min-h-screen bg-gray-100" v-else>
-                                    <div class="text-center">
-                                        <p class="text-lg font-semibold text-gray-800">
-                                            The link you are attempting to access is invalid.
-                                        </p>
-                                        <router-link
-                                            :to="{ name: 'home' }"
-                                            class="mt-4 inline-block px-4 py-2 text-white bg-gradient-to-br from-brand-500 to-brand-800 m-3 p-2 rounded"
-                                        >
-                                            Return Home
-                                        </router-link>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div v-else class="p-3 flex items-start gap-2">
-                            <XMarkIcon class="h-5 w-5 text-gray-400" />
-
-                            <p class="text-gray-600 text-sm font-medium">No article found.</p>
-                        </div>
-                    </main>
+                <div class="flex items-center space-x-1">
+                    <ClockIcon class="h-4 w-4 flex-shrink-0" aria-hidden="true" />
+                    <span class="text-xs">Last updated: {{ article.lastUpdated }}</span>
                 </div>
             </div>
+        </template>
+
+        <template #belowHeaderContent>
+            <Tags :tags="article.tags" :featured="article.featured" />
+        </template>
+
+        <template #breadcrumbs>
+            <Breadcrumbs :breadcrumbs="breadcrumbs" :currentCrumb="currentCrumb" />
+        </template>
+
+        <div v-html="DOMPurify.sanitize(article.content)"></div>
+
+        <div class="flex items-center mt-6 p-4 border rounded-lg bg-white">
+            <p class="text-lg font-semibold mr-4">Was this content helpful?</p>
+            <div class="flex space-x-2">
+                <button
+                    @click="toggleFeedback(true)"
+                    :class="[
+                        'px-4 py-2 flex items-center justify-center space-x-1.5 rounded-lg border-2 transition duration-200 focus:outline-none',
+                        feedback === true
+                            ? 'bg-gradient-to-br from-brand-500 to-brand-800 text-white border-brand-300'
+                            : 'bg-white text-gray-700 border-gray-300',
+                    ]"
+                >
+                    <HandThumbUpIcon class="w-5 h-5" :class="feedback === true ? 'text-white' : 'text-gray-600'" />
+                    <span class="text-sm">Yes</span>
+                </button>
+                <button
+                    @click="toggleFeedback(false)"
+                    :class="[
+                        'px-4 py-2 flex items-center justify-center space-x-1.5 rounded-lg border-2 transition duration-200 focus:outline-none',
+                        feedback === false
+                            ? 'bg-gradient-to-br from-brand-500 to-brand-800 text-white border-brand-300'
+                            : 'bg-white text-gray-700 border-gray-300',
+                    ]"
+                >
+                    <HandThumbDownIcon class="w-5 h-5" :class="feedback === false ? 'text-white' : 'text-gray-600'" />
+                    <span class="text-sm">No</span>
+                </button>
+            </div>
+            <p class="text-lg font-semibold ml-4" v-if="helpfulVotePercentage">
+                {{ helpfulVotePercentage }}% of visitors found this helpful.
+            </p>
         </div>
-    </div>
+    </Page>
+
+    <Page v-if="!loading && (!category || !article)">
+        <template #heading> 404 Not Found </template>
+
+        <EmptyState>
+            <template #heading>Article Not Found</template>
+            <template #description>The article you are looking for does not exist or has been removed.</template>
+            <template #actions>
+                <router-link
+                    :to="{ name: 'home' }"
+                    class="inline-block px-4 py-2 text-white bg-gradient-to-br from-brand-500 to-brand-800 rounded"
+                >
+                    Return Home
+                </router-link>
+            </template>
+        </EmptyState>
+    </Page>
 </template>

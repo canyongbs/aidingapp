@@ -37,6 +37,7 @@
     import { useRoute, useRouter } from 'vue-router';
     import Badge from '../Components/Badge.vue';
     import HelpCenter from '../Components/HelpCenter.vue';
+    import Page from '../Components/Page.vue';
     import SearchResults from '../Components/SearchResults.vue';
     import { consumer } from '../Services/Consumer.js';
     import { useAuthStore } from '../Stores/auth.js';
@@ -263,81 +264,66 @@
 </script>
 
 <template>
-    <div class="top-0 z-40 flex flex-col items-center bg-gray-50">
-        <div class="bg-gradient-to-br from-brand-500 to-brand-800 w-full px-6">
-            <div class="max-w-screen-xl flex flex-col gap-y-6 mx-auto py-8">
-                <div class="text-right" v-if="hasServiceManagement && user">
-                    <router-link :to="{ name: 'create-service-request' }">
-                        <button class="p-2 font-bold rounded bg-white text-brand-700 dark:text-brand-400">
-                            New Request
-                        </button>
-                    </router-link>
-                </div>
+    <Page>
+        <template #heading> Need help? </template>
 
-                <div class="flex flex-col gap-y-1 text-left">
-                    <h3 class="text-3xl font-semibold text-white">Need help?</h3>
-                    <p class="text-brand-100">Search our knowledge base for advice and answers</p>
-                </div>
+        <template #description> Search our knowledge base for advice and answers </template>
 
-                <label for="search" class="sr-only">Search</label>
-                <div class="relative rounded">
-                    <div>
-                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 py-3">
-                            <MagnifyingGlassIcon class="h-5 w-5 text-gray-400" aria-hidden="true" />
-                        </div>
-                        <input
-                            ref="globalSearchInput"
-                            type="search"
-                            v-model="searchQuery"
-                            id="search"
-                            placeholder="Search for articles and categories"
-                            class="block w-full rounded border-0 pl-12 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-brand-2-- sm:text-sm sm:leading-6"
-                            :class="{ 'rounded-b-none': tags.length > 0 }"
-                        />
+        <template #belowHeaderContent>
+            <label for="search" class="sr-only">Search</label>
+            <div class="relative rounded">
+                <div>
+                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 py-3">
+                        <MagnifyingGlassIcon class="h-5 w-5 text-gray-400" aria-hidden="true" />
                     </div>
+                    <input
+                        ref="globalSearchInput"
+                        type="search"
+                        v-model="searchQuery"
+                        id="search"
+                        placeholder="Search for articles and categories"
+                        class="block w-full rounded border-0 pl-12 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-brand-2-- sm:text-sm sm:leading-6"
+                        :class="{ 'rounded-b-none': tags.length > 0 }"
+                    />
                 </div>
-                <details
-                    v-if="tags.length > 0"
-                    class="rounded rounded-t-none bg-white py-3 p-4 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-brand-2-- sm:text-sm sm:leading-6"
-                >
-                    <summary v-if="selectedTags.length > 0">Tags ({{ selectedTags.length }} selected)</summary>
-                    <summary v-else>Tags</summary>
-                    <div class="flex flex-wrap gap-2">
-                        <Badge
-                            v-for="tag in tags"
-                            :key="tag.id"
-                            :value="tag.name"
-                            class="cursor-pointer"
-                            :class="{ 'bg-brand-600 text-white': selectedTags.includes(tag.id) }"
-                            @click="toggleTag(tag.id)"
-                        />
-                    </div>
-                </details>
             </div>
-        </div>
-    </div>
-
-    <main class="px-6 bg-gray-50">
-        <div class="max-w-screen-xl flex flex-col gap-y-6 mx-auto py-8">
-            <SearchResults
-                v-if="searchQuery || selectedTags.length > 0"
-                :searchQuery="searchQuery"
-                :searchResults="searchResults"
-                :loadingResults="loadingResults"
-                @change-filter="changeSearchFilter"
-                :selected-filter="filter"
-                :currentPage="currentPage"
-                :lastPage="lastPage"
-                :fromArticle="fromArticle"
-                :toArticle="toArticle"
-                :totalArticles="totalArticles"
-                @fetchNextPage="fetchNextPage"
-                @fetchPreviousPage="fetchPreviousPage"
-                @fetchPage="fetchPage"
+            <details
+                v-if="tags.length > 0"
+                class="rounded rounded-t-none bg-white py-3 p-4 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-brand-2-- sm:text-sm sm:leading-6"
             >
-            </SearchResults>
+                <summary v-if="selectedTags.length > 0">Tags ({{ selectedTags.length }} selected)</summary>
+                <summary v-else>Tags</summary>
+                <div class="flex flex-wrap gap-2">
+                    <Badge
+                        v-for="tag in tags"
+                        :key="tag.id"
+                        :value="tag.name"
+                        class="cursor-pointer"
+                        :class="{ '!bg-brand-600 text-white': selectedTags.includes(tag.id) }"
+                        @click="toggleTag(tag.id)"
+                    />
+                </div>
+            </details>
+        </template>
 
-            <HelpCenter v-else :categories="categories" :service-requests="serviceRequests"></HelpCenter>
-        </div>
-    </main>
+        <SearchResults
+            v-if="searchQuery || selectedTags.length > 0"
+            :searchQuery="searchQuery"
+            :searchResults="searchResults"
+            :loadingResults="loadingResults"
+            @change-filter="changeSearchFilter"
+            :selected-filter="filter"
+            :currentPage="currentPage"
+            :lastPage="lastPage"
+            :fromArticle="fromArticle"
+            :toArticle="toArticle"
+            :totalArticles="totalArticles"
+            @fetchNextPage="fetchNextPage"
+            @fetchPreviousPage="fetchPreviousPage"
+            @fetchPage="fetchPage"
+        >
+        </SearchResults>
+
+        <HelpCenter v-else :categories="categories" :service-requests="serviceRequests"></HelpCenter>
+    </Page>
 </template>

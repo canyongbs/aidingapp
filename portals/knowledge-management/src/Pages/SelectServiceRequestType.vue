@@ -36,6 +36,7 @@
     import { useRoute } from 'vue-router';
     import AppLoading from '../Components/AppLoading.vue';
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
+    import Page from '../Components/Page.vue';
     import { consumer } from '../Services/Consumer.js';
     import { useAuthStore } from '../Stores/auth.js';
 
@@ -90,26 +91,17 @@
             <AppLoading />
         </div>
         <div v-else>
-            <div class="sticky top-0 z-40 flex flex-col items-center bg-gray-50">
-                <div class="bg-gradient-to-br from-brand-500 to-brand-800 w-full px-6">
-                    <div class="max-w-screen-xl flex flex-col gap-y-6 mx-auto py-8">
-                        <div class="flex flex-col gap-y-1 text-left">
-                            <h3 class="text-3xl text-white">Help Center</h3>
-                            <p class="text-white">Welcome {{ user.first_name }}!</p>
-                            <p class="text-white">
-                                We understand that you need some help, we're on it! Please complete the form below.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <Page :has-new-request-button="false">
+                <template #heading> Help Center </template>
 
-            <div class="max-w-7xl mx-auto">
-                <Breadcrumbs
-                    class="py-8"
-                    currentCrumb="New Request"
-                    :breadcrumbs="[{ name: 'Help Center', route: 'home' }]"
-                ></Breadcrumbs>
+                <template #description>
+                    <p>Welcome {{ user.first_name }}!</p>
+                    <p>We understand that you need some help, we're on it! Please complete the form below.</p>
+                </template>
+
+                <template #breadcrumbs>
+                    <Breadcrumbs currentCrumb="New Request" :breadcrumbs="[{ name: 'Help Center', route: 'home' }]" />
+                </template>
 
                 <main>
                     <h3 class="text-xl">Select Category</h3>
@@ -163,7 +155,7 @@
                         </div>
                     </div>
                 </main>
-            </div>
+            </Page>
         </div>
     </div>
 </template>

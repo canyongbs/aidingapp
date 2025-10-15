@@ -81,8 +81,8 @@ Route::prefix('portal')
                 ->name('service-request.create');
             Route::get('/service-request/{serviceRequest}', RenderKnowledgeManagementPortal::class)
                 ->name('service-request.show');
-            Route::get('/services', RenderKnowledgeManagementPortal::class)
-                ->name('services');
+            Route::get('/service', RenderKnowledgeManagementPortal::class)
+                ->name('service');
             Route::get('/incidents', RenderKnowledgeManagementPortal::class)
                 ->name('incidents');
             Route::get('/assets', RenderKnowledgeManagementPortal::class)
