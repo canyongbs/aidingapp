@@ -37,7 +37,6 @@
 namespace App\Filament\Pages;
 
 use AidingApp\Authorization\Enums\LicenseType;
-use App\Features\DisplaySettingsFeature;
 use App\Models\User;
 use App\Settings\DisplaySettings;
 use Exception;
@@ -200,7 +199,6 @@ class EditProfile extends Page
                                 $timezone = config('app.timezone');
 
                                 if (
-                                    DisplaySettingsFeature::active() &&
                                     filled($displaySettingsTimezone = app(DisplaySettings::class)->timezone)
                                 ) {
                                     $timezone = $displaySettingsTimezone;

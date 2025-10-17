@@ -36,7 +36,6 @@
 
 namespace App\Providers;
 
-use App\Features\DisplaySettingsFeature;
 use App\Models\Export;
 use App\Models\FailedImportRow;
 use App\Models\Import;
@@ -197,12 +196,8 @@ class FilamentServiceProvider extends ServiceProvider
                 return;
             }
 
-            $timezone = DisplaySettingsFeature::active() ?
-                app(DisplaySettings::class)->getTimezone() :
-                auth()->user()->timezone;
-            $timezoneLabel = DisplaySettingsFeature::active() ?
-                app(DisplaySettings::class)->getTimezoneLabel() :
-                auth()->user()->timezone;
+            $timezone = app(DisplaySettings::class)->getTimezone();
+            $timezoneLabel = app(DisplaySettings::class)->getTimezoneLabel();
 
             $component
                 ->timezone($timezone)
@@ -211,12 +206,8 @@ class FilamentServiceProvider extends ServiceProvider
         });
 
         TextColumn::configureUsing(function (TextColumn $column) {
-            $timezone = DisplaySettingsFeature::active() ?
-                app(DisplaySettings::class)->getTimezone() :
-                auth()->user()->timezone;
-            $timezoneLabel = DisplaySettingsFeature::active() ?
-                app(DisplaySettings::class)->getTimezoneLabel() :
-                auth()->user()->timezone;
+            $timezone = app(DisplaySettings::class)->getTimezone();
+            $timezoneLabel = app(DisplaySettings::class)->getTimezoneLabel();
 
             $column
                 ->timezone($timezone)
@@ -230,12 +221,8 @@ class FilamentServiceProvider extends ServiceProvider
         });
 
         TextEntry::configureUsing(function (TextEntry $entry) {
-            $timezone = DisplaySettingsFeature::active() ?
-                app(DisplaySettings::class)->getTimezone() :
-                auth()->user()->timezone;
-            $timezoneLabel = DisplaySettingsFeature::active() ?
-                app(DisplaySettings::class)->getTimezoneLabel() :
-                auth()->user()->timezone;
+            $timezone = app(DisplaySettings::class)->getTimezone();
+            $timezoneLabel = app(DisplaySettings::class)->getTimezoneLabel();
 
             $entry
                 ->timezone($timezone)

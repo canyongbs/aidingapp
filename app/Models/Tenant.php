@@ -37,7 +37,6 @@
 namespace App\Models;
 
 use App\Casts\LandlordEncrypted;
-use App\Features\DisplaySettingsFeature;
 use App\Settings\DisplaySettings;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -69,7 +68,7 @@ class Tenant extends SpatieTenant
 
     public function getTimezone(): string
     {
-        if (DisplaySettingsFeature::active() && filled($settingsTimezone = app(DisplaySettings::class)->timezone)) {
+        if (filled($settingsTimezone = app(DisplaySettings::class)->timezone)) {
             return $settingsTimezone;
         }
 

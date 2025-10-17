@@ -36,7 +36,6 @@
 
 namespace App\Filament\Pages;
 
-use App\Features\DisplaySettingsFeature;
 use App\Filament\Clusters\DisplaySettings as DisplaySettingsCluster;
 use App\Models\User;
 use App\Settings\DisplaySettings;
@@ -61,7 +60,7 @@ class ManageDisplaySettings extends SettingsPage
         /** @var User $user */
         $user = auth()->user();
 
-        return DisplaySettingsFeature::active() && $user->can('settings.view-any');
+        return $user->can('settings.view-any');
     }
 
     public function form(Form $form): Form
