@@ -34,9 +34,10 @@
 @props(['settings' => null])
 @php
     use AidingApp\IntegrationAwsSesEventHandling\Settings\SesSettings;
+    use Filament\Support\Colors\Color;
 
     $paragraphTextColor = app(SesSettings::class)->paragraph_text_color;
-    $color = \Filament\Support\Colors\Color::all()[$settings?->primary_color ?? 'blue'];
+    $color = Color::all()[$settings?->primary_color ?? 'blue'];
 @endphp
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
