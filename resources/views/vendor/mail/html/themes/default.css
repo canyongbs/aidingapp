@@ -44,7 +44,6 @@ body *:not(html):not(style):not(br):not(tr):not(code) {
 body {
     -webkit-text-size-adjust: none;
     background-color: #ffffff;
-    color: #718096;
     height: 100%;
     line-height: 1.4;
     margin: 0;
@@ -298,12 +297,7 @@ img {
 
 .panel-content {
     background-color: #edf2f7;
-    color: #718096;
     padding: 16px;
-}
-
-.panel-content p {
-    color: #718096;
 }
 
 .panel-item {

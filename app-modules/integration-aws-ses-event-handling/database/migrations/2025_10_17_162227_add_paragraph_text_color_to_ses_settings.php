@@ -34,30 +34,28 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\IntegrationAwsSesEventHandling\Settings;
+use App\Features\ParagraphTextColorFeature;
+use Illuminate\Support\Facades\DB;
+use Spatie\LaravelSettings\Migrations\SettingsMigration;
 
-use Spatie\LaravelSettings\Settings;
-
-class SesSettings extends Settings
-{
-    public ?string $configuration_set = null;
-
-    public bool $dynamic_engagements = false;
-
-    public string $paragraph_text_color = '#000000';
-
-    public static function group(): string
+return new class () extends SettingsMigration {
+    public function up(): void
     {
-        return 'ses';
+        DB::transaction(function () {
+            if (! $this->migrator->exists('ses.paragraph_text_color')) {
+                $this->migrator->add('ses.paragraph_text_color', '#000000');
+            }
+
+            ParagraphTextColorFeature::activate();
+        });
     }
 
-    /**
-     * @return array<string>
-     */
-    public static function encrypted(): array
+    public function down(): void
     {
-        return [
-            'configuration_set',
-        ];
+        DB::transaction(function () {
+            ParagraphTextColorFeature::deactivate();
+
+            $this->migrator->deleteIfExists('ses.paragraph_text_color');
+        });
     }
-}
+};

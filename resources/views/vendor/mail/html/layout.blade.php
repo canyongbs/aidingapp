@@ -32,8 +32,15 @@
 </COPYRIGHT>
 --}}
 @props(['settings' => null])
-    <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+@php
+    use AidingApp\IntegrationAwsSesEventHandling\Settings\SesSettings;
+    use Filament\Support\Colors\Color;
+
+    $paragraphTextColor = app(SesSettings::class)->paragraph_text_color;
+    $color = Color::all()[$settings?->primary_color ?? 'blue'];
+@endphp
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <title>{{ config('app.name') }}</title>
@@ -42,6 +49,12 @@
     <meta name="color-scheme" content="light">
     <meta name="supported-color-schemes" content="light">
     <style>
+        body,
+        .panel-content,
+        .panel-content p {
+            color: {{ $paragraphTextColor }};
+        }
+
         @media only screen and (max-width: 600px) {
             .inner-body {
                 width: 100% !important;
@@ -57,10 +70,6 @@
                 width: 100% !important;
             }
         }
-
-        @php
-            $color = \Filament\Support\Colors\Color::all()[$settings?->primary_color ?? 'blue'];
-        @endphp
 
         .button-primary {
             background-color: rgb({{ $color[600] }});

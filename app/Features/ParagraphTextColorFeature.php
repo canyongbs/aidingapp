@@ -34,30 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\IntegrationAwsSesEventHandling\Settings;
+namespace App\Features;
 
-use Spatie\LaravelSettings\Settings;
+use App\Support\AbstractFeatureFlag;
 
-class SesSettings extends Settings
+class ParagraphTextColorFeature extends AbstractFeatureFlag
 {
-    public ?string $configuration_set = null;
-
-    public bool $dynamic_engagements = false;
-
-    public string $paragraph_text_color = '#000000';
-
-    public static function group(): string
+    public function resolve(mixed $scope): mixed
     {
-        return 'ses';
-    }
-
-    /**
-     * @return array<string>
-     */
-    public static function encrypted(): array
-    {
-        return [
-            'configuration_set',
-        ];
+        return false;
     }
 }
