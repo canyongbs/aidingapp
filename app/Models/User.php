@@ -59,7 +59,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\Task\Models\Task;
 use AidingApp\Team\Models\Team;
 use AidingApp\Timeline\Models\Contracts\HasFilamentResource;
-use App\Features\DisplaySettingsFeature;
 use App\Filament\Resources\UserResource;
 use App\Settings\DisplaySettings;
 use App\Support\HasAdvancedFilter;
@@ -473,7 +472,7 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
             return $userTimezone;
         }
 
-        if (DisplaySettingsFeature::active() && filled($settingsTimezone = app(DisplaySettings::class)->timezone)) {
+        if (filled($settingsTimezone = app(DisplaySettings::class)->timezone)) {
             return $settingsTimezone;
         }
 
