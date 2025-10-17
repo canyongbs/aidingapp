@@ -37,11 +37,13 @@
 namespace AidingApp\IntegrationAwsSesEventHandling\Filament\Pages;
 
 use AidingApp\IntegrationAwsSesEventHandling\Settings\SesSettings;
+use App\Features\ParagraphTextColorFeature;
 use App\Filament\Clusters\ProductIntegrations;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Multitenancy\DataTransferObjects\TenantConfig;
 use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -127,6 +129,10 @@ class ManageAmazonSesSettings extends SettingsPage
                             ]),
                     ])
                     ->visible(fn (Get $get): bool => ! $get('isDemoModeEnabled')),
+                ColorPicker::make('paragraph_text_color')
+                    ->label('Default Font Color')
+                    ->regex('/^#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})\b$/')
+                    ->visible(ParagraphTextColorFeature::active()),
             ]);
     }
 

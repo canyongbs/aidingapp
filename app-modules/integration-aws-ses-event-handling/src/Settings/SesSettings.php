@@ -44,6 +44,8 @@ class SesSettings extends Settings
 
     public bool $dynamic_engagements = false;
 
+    public string $paragraph_text_color = '#000000';
+
     public static function group(): string
     {
         return 'ses';
