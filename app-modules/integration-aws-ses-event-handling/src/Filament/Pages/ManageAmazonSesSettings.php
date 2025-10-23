@@ -44,8 +44,6 @@ use App\Models\User;
 use App\Multitenancy\DataTransferObjects\TenantConfig;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\ColorPicker;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
@@ -88,46 +86,8 @@ class ManageAmazonSesSettings extends SettingsPage
                 Checkbox::make('isExcludingSystemNotificationsFromDemoMode')
                     ->label('Exclude authentication related messages')
                     ->visible(fn (Get $get): bool => (bool) $get('isDemoModeEnabled')),
-                Section::make()
-                    ->columnSpanFull()
-                    ->schema([
-                        TextInput::make('configuration_set')
-                            ->label('Configuration Set'),
-                        Toggle::make('dynamic_engagements')
-                            ->label('Dynamic Engagements'),
-                        TextInput::make('fromName')
-                            ->label('Fallback From Name')
-                            ->string()
-                            ->maxLength(150)
-                            ->required(),
-                        Section::make()
-                            ->heading('SMTP Settings')
-                            ->schema([
-                                TextInput::make('smtp_host')
-                                    ->label('Host')
-                                    ->nullable(),
-                                TextInput::make('smtp_port')
-                                    ->label('Port')
-                                    ->integer()
-                                    ->required(),
-                                TextInput::make('smtp_encryption')
-                                    ->label('Encryption')
-                                    ->nullable(),
-                                TextInput::make('smtp_username')
-                                    ->label('Username')
-                                    ->nullable(),
-                                TextInput::make('smtp_password')
-                                    ->label('Password')
-                                    ->nullable(),
-                                TextInput::make('smtp_timeout')
-                                    ->label('Timeout')
-                                    ->integer()
-                                    ->nullable(),
-                                TextInput::make('smtp_local_domain')
-                                    ->label('Local Domain')
-                                    ->nullable(),
-                            ]),
-                    ])
+                Toggle::make('dynamic_engagements')
+                    ->label('Dynamic Engagements')
                     ->visible(fn (Get $get): bool => ! $get('isDemoModeEnabled')),
                 ColorPicker::make('paragraph_text_color')
                     ->label('Default Font Color')
@@ -163,14 +123,6 @@ class ManageAmazonSesSettings extends SettingsPage
                 $config->mail->isExcludingSystemNotificationsFromDemoMode = $data['isExcludingSystemNotificationsFromDemoMode'];
             } else {
                 $config->mail->isDemoModeEnabled = $data['isDemoModeEnabled'];
-                $config->mail->fromName = $data['fromName'];
-                $config->mail->mailers->smtp->host = $data['smtp_host'];
-                $config->mail->mailers->smtp->port = $data['smtp_port'];
-                $config->mail->mailers->smtp->encryption = $data['smtp_encryption'];
-                $config->mail->mailers->smtp->username = $data['smtp_username'];
-                $config->mail->mailers->smtp->password = $data['smtp_password'];
-                $config->mail->mailers->smtp->timeout = $data['smtp_timeout'];
-                $config->mail->mailers->smtp->localDomain = $data['smtp_local_domain'];
             }
 
             $tenant->config = $config;
@@ -179,14 +131,6 @@ class ManageAmazonSesSettings extends SettingsPage
 
             unset(
                 $data['isDemoModeEnabled'],
-                $data['fromName'],
-                $data['smtp_host'],
-                $data['smtp_port'],
-                $data['smtp_encryption'],
-                $data['smtp_username'],
-                $data['smtp_password'],
-                $data['smtp_timeout'],
-                $data['smtp_local_domain'],
             );
 
             $settings = app(static::getSettings());
@@ -241,14 +185,6 @@ class ManageAmazonSesSettings extends SettingsPage
                 ...$settings->toArray(),
                 'isDemoModeEnabled' => $config->mail->isDemoModeEnabled ?? false,
                 'isExcludingSystemNotificationsFromDemoMode' => $config->mail->isExcludingSystemNotificationsFromDemoMode ?? true,
-                'fromName' => $config->mail->fromName,
-                'smtp_host' => $config->mail->mailers->smtp->host,
-                'smtp_port' => $config->mail->mailers->smtp->port,
-                'smtp_encryption' => $config->mail->mailers->smtp->encryption,
-                'smtp_username' => $config->mail->mailers->smtp->username,
-                'smtp_password' => $config->mail->mailers->smtp->password,
-                'smtp_timeout' => $config->mail->mailers->smtp->timeout,
-                'smtp_local_domain' => $config->mail->mailers->smtp->localDomain,
             ]
         );
 
