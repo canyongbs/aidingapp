@@ -36,13 +36,6 @@
 
 namespace App\Filament\Pages;
 
-use AidingApp\Authorization\Filament\Widgets\UnlicensedNotice;
-use App\Filament\Widgets\ListServiceRequestTableWidgets;
-use App\Filament\Widgets\ServiceRequestDonutChart;
-use App\Filament\Widgets\ServiceRequestLineChart;
-use App\Filament\Widgets\ServiceRequestWidget;
-use App\Filament\Widgets\WelcomeWidget;
-use App\Models\User;
 use Filament\Pages\Dashboard as BasePage;
 
 class Dashboard extends BasePage
@@ -51,36 +44,5 @@ class Dashboard extends BasePage
 
     protected ?string $heading = 'Home';
 
-    public function getWidgets(): array
-    {
-        /** @var User $user */
-        $user = auth()->user();
-
-        $widgets = [
-            WelcomeWidget::class,
-        ];
-
-        if (UnlicensedNotice::canView()) {
-            $widgets[] = UnlicensedNotice::class;
-
-            return $widgets;
-        }
-
-        return [
-            ...$widgets,
-            ServiceRequestWidget::class,
-            ServiceRequestLineChart::class,
-            ServiceRequestDonutChart::class,
-            ListServiceRequestTableWidgets::class,
-        ];
-    }
-
-    public function getColumns(): int | string | array
-    {
-        return [
-            'sm' => 2,
-            'md' => 4,
-            'lg' => 4,
-        ];
-    }
+    protected static string $view = 'filament.pages.dashboard';
 }
