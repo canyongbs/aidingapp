@@ -37,6 +37,8 @@
     use App\Filament\Widgets\ServiceRequestDonutChart;
     use App\Filament\Widgets\ServiceRequestLineChart;
     use App\Filament\Widgets\ServiceRequestWidget;
+    use App\Settings\DisplaySettings;
+    use Carbon\Carbon;
 @endphp
 
 <x-filament-panels::page>
@@ -87,12 +89,14 @@
 
 <script>
     document.getElementById('current-date').textContent = (new Date()).toLocaleDateString('en-US', {
+        timeZone: @json($timezone),
         weekday: 'long',
         year: 'numeric',
         month: 'long',
         day: 'numeric'
     });
     document.getElementById('current-time').textContent = (new Date()).toLocaleTimeString('en-US', {
+        timeZone: @json($timezone),
         hour: 'numeric',
         minute: '2-digit',
         hour12: true
