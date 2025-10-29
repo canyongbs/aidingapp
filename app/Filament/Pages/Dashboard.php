@@ -49,7 +49,7 @@ class Dashboard extends BasePage
 
     protected static string $view = 'filament.pages.dashboard';
 
-    public function mount()
+    public function mount(): void
     {
         $this->timezone = app(DisplaySettings::class)->getTimezone();
     }
