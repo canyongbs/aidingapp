@@ -72,6 +72,7 @@ class KnowledgeManagementPortalController extends Controller
             'rounding' => $settings->knowledge_management_portal_rounding,
             'requires_authentication' => $settings->knowledge_management_portal_requires_authentication,
             'service_management_enabled' => $settings->knowledge_management_portal_service_management,
+            'ai_support_assistant_enabled' => $settings->ai_support_assistant_enabled,
             'has_assets' => auth()->guard('contact')->user()?->assetCheckIns()->exists() || auth()->guard('contact')->user()?->assetCheckOuts()->exists() ?: false,
             'has_license' => auth()->guard('contact')->user()?->productLicenses()->exists() ?: false,
             'has_tasks' => auth()->guard('contact')->user()?->tasks()->exists() ?: false,
