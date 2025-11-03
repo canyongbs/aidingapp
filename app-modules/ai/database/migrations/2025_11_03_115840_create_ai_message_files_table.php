@@ -1,0 +1,28 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('ai_message_files', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->foreignUuid('message_id')->nullable()->constrained('ai_messages')->cascadeOnDelete();
+            $table->string('file_id')->nullable();
+            $table->string('name')->nullable();
+            $table->text('temporary_url')->nullable();
+            $table->string('mime_type')->nullable();
+            $table->longText('parsing_results')->nullable();
+            $table->timestamps();
+            $table->softDeletes();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('ai_message_files');
+    }
+};

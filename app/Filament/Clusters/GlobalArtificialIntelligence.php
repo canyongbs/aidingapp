@@ -34,31 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Ai\Providers;
+namespace App\Filament\Clusters;
 
-use AidingApp\Ai\AiPlugin;
-use AidingApp\Ai\Models\AiAssistant;
-use AidingApp\Ai\Models\AiMessage;
-use AidingApp\Ai\Models\Prompt;
-use AidingApp\Ai\Models\PromptType;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\ServiceProvider;
+use Filament\Clusters\Cluster;
 
-class AiServiceProvider extends ServiceProvider
+class GlobalArtificialIntelligence extends Cluster
 {
-    public function register()
-    {
-        Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new AiPlugin()));
-    }
+    protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
-    public function boot(): void
-    {
-        Relation::morphMap([
-            'ai_assistant' => AiAssistant::class,
-            'ai_message' => AiMessage::class,
-            'prompt_type' => PromptType::class,
-            'prompt' => Prompt::class,
-        ]);
-    }
+    protected static ?string $navigationGroup = 'Global Administration';
+
+    protected static ?string $title = 'Artificial Intelligence';
+
+    protected static ?int $navigationSort = 70;
 }

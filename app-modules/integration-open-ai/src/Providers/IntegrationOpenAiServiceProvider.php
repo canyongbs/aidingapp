@@ -34,57 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Ai\Filament\Pages;
+namespace AidingApp\IntegrationOpenAi\Providers;
 
-use AidingApp\Ai\Settings\AiSettings;
-use App\Filament\Clusters\ProductIntegrations;
-use App\Models\User;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
-use Filament\Pages\SettingsPage;
+use Filament\Panel;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\ServiceProvider;
+use AidingApp\IntegrationOpenAi\IntegrationOpenAiPlugin;
 
-class ManageAiSettings extends SettingsPage
+class IntegrationOpenAiServiceProvider extends ServiceProvider
 {
-    protected static string $settings = AiSettings::class;
-
-    protected static ?string $title = 'Cognitive Services Settings';
-
-    protected static ?string $navigationLabel = 'Cognitive Services';
-
-    protected static ?int $navigationSort = 100;
-
-    protected static ?string $cluster = ProductIntegrations::class;
-
-    public static function canAccess(): bool
+    public function register()
     {
-        /** @var User $user */
-        $user = auth()->user();
-
-        return $user->isSuperAdmin();
+        Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new IntegrationOpenAiPlugin()));
     }
 
-    public function form(Form $form): Form
+    public function boot()
     {
-        return $form
-            ->columns(1)
-            ->schema([
-                Section::make()
-                    ->schema([
-                        TextInput::make('url')
-                            ->label('URL')
-                            ->string()
-                            ->url(),
-                        TextInput::make('key')
-                            ->string()
-                            ->password()
-                            ->revealable(),
-                        TextInput::make('api_version')
-                            ->label('API Version')
-                            ->string(),
-                        TextInput::make('model')
-                            ->string(),
-                    ]),
-            ]);
+        Relation::morphMap([]);
     }
 }
