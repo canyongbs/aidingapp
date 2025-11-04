@@ -34,31 +34,60 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Ai\Providers;
+namespace AidingApp\Ai\Enums;
 
-use AidingApp\Ai\AiPlugin;
-use AidingApp\Ai\Models\AiAssistant;
-use AidingApp\Ai\Models\AiMessage;
-use AidingApp\Ai\Models\Prompt;
-use AidingApp\Ai\Models\PromptType;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\ServiceProvider;
+use Filament\Support\Contracts\HasLabel;
 
-class AiServiceProvider extends ServiceProvider
+enum AiModelApplicabilityFeature: string implements HasLabel
 {
-    public function register()
+    case StaffAdvisor = 'staff_advisor';
+
+    case CustomAdvisors = 'custom_advisors';
+
+    case IntegratedAdvisor = 'integrated_advisor';
+
+    public function getLabel(): string
     {
-        Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new AiPlugin()));
+        return match ($this) {
+            self::StaffAdvisor => 'Organization Copilot',
+            self::CustomAdvisors => 'Custom Copilots',
+            self::IntegratedAdvisor => 'Integrated Advisor',
+        };
     }
 
-    public function boot(): void
+    /**
+     * @return array<AiModel>
+     */
+    public function getModels(): array
     {
-        Relation::morphMap([
-            'ai_assistant' => AiAssistant::class,
-            'ai_message' => AiMessage::class,
-            'prompt_type' => PromptType::class,
-            'prompt' => Prompt::class,
-        ]);
+        return array_filter(
+            AiModel::cases(),
+            fn (AiModel $model): bool => in_array($this, $model->getApplicableFeatures()),
+        );
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function getModelsAsSelectOptions(): array
+    {
+        return array_reduce(
+            $this->getModels(),
+            function (array $carry, AiModel $model): array {
+                $carry[$model->value] = $model->getLabel();
+
+                return $carry;
+            },
+            initial: [],
+        );
+    }
+
+    public static function parse(string | self | null $value): ?self
+    {
+        if ($value instanceof self) {
+            return $value;
+        }
+
+        return self::tryFrom($value);
     }
 }

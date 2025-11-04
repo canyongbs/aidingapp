@@ -1,0 +1,28 @@
+{
+    "name": "canyon-gbs/integration-open-ai",
+    "description": "",
+    "type": "library",
+    "version": "1.0",
+    "license": "proprietary",
+    "require": {
+        "filament/filament": "^3.2",
+        "openai-php/client": "^v0.10",
+        "prism-php/prism": "^0.81"
+    },
+    "autoload": {
+        "psr-4": {
+            "AidingApp\\IntegrationOpenAi\\": "src/",
+            "AidingApp\\IntegrationOpenAi\\Tests\\": "tests/",
+            "AidingApp\\IntegrationOpenAi\\Database\\Factories\\": "database/factories/",
+            "AidingApp\\IntegrationOpenAi\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "minimum-stability": "stable",
+    "extra": {
+        "laravel": {
+            "providers": [
+                "AidingApp\\IntegrationOpenAi\\Providers\\IntegrationOpenAiServiceProvider"
+            ]
+        }
+    }
+}

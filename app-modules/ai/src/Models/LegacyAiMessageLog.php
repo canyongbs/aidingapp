@@ -34,31 +34,39 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Ai\Providers;
+namespace AidingApp\Ai\Models;
 
-use AidingApp\Ai\AiPlugin;
-use AidingApp\Ai\Models\AiAssistant;
-use AidingApp\Ai\Models\AiMessage;
-use AidingApp\Ai\Models\Prompt;
-use AidingApp\Ai\Models\PromptType;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\ServiceProvider;
+use AidingApp\Ai\Enums\AiMessageLogFeature;
+use App\Models\BaseModel;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class AiServiceProvider extends ServiceProvider
+class LegacyAiMessageLog extends BaseModel
 {
-    public function register()
-    {
-        Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new AiPlugin()));
-    }
+    protected $table = 'assistant_chat_message_logs';
 
-    public function boot(): void
+    protected $fillable = [
+        'message',
+        'metadata',
+        'request',
+        'sent_at',
+        'user_id',
+        'ai_assistant_name',
+        'feature',
+    ];
+
+    protected $casts = [
+        'metadata' => 'encrypted:array',
+        'request' => 'encrypted:array',
+        'sent_at' => 'datetime',
+        'feature' => AiMessageLogFeature::class,
+    ];
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function user(): BelongsTo
     {
-        Relation::morphMap([
-            'ai_assistant' => AiAssistant::class,
-            'ai_message' => AiMessage::class,
-            'prompt_type' => PromptType::class,
-            'prompt' => Prompt::class,
-        ]);
+        return $this->belongsTo(User::class);
     }
 }

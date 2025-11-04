@@ -34,31 +34,27 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Ai\Providers;
+namespace AidingApp\Ai\Database\Factories;
 
-use AidingApp\Ai\AiPlugin;
-use AidingApp\Ai\Models\AiAssistant;
-use AidingApp\Ai\Models\AiMessage;
 use AidingApp\Ai\Models\Prompt;
 use AidingApp\Ai\Models\PromptType;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\ServiceProvider;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-class AiServiceProvider extends ServiceProvider
+/**
+ * @extends Factory<Prompt>
+ */
+class PromptFactory extends Factory
 {
-    public function register()
+    /**
+     * @return array<string, mixed>
+     */
+    public function definition(): array
     {
-        Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new AiPlugin()));
-    }
-
-    public function boot(): void
-    {
-        Relation::morphMap([
-            'ai_assistant' => AiAssistant::class,
-            'ai_message' => AiMessage::class,
-            'prompt_type' => PromptType::class,
-            'prompt' => Prompt::class,
-        ]);
+        return [
+            'title' => str($this->faker->unique()->words(asText: true))->ucfirst()->toString(),
+            'description' => $this->faker->optional()->sentences(asText: true),
+            'prompt' => $this->faker->sentences(asText: true),
+            'type_id' => PromptType::query()->inRandomOrder()->first() ?? PromptType::factory()->create(),
+        ];
     }
 }

@@ -34,31 +34,28 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Ai\Providers;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\Ai\AiPlugin;
-use AidingApp\Ai\Models\AiAssistant;
-use AidingApp\Ai\Models\AiMessage;
-use AidingApp\Ai\Models\Prompt;
-use AidingApp\Ai\Models\PromptType;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\ServiceProvider;
-
-class AiServiceProvider extends ServiceProvider
-{
-    public function register()
+return new class () extends Migration {
+    public function up(): void
     {
-        Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new AiPlugin()));
+        Schema::create('consent_agreements', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+
+            $table->string('type');
+            $table->string('title');
+            $table->longText('description');
+            $table->longText('body');
+
+            $table->timestamps();
+            $table->softDeletes();
+        });
     }
 
-    public function boot(): void
+    public function down(): void
     {
-        Relation::morphMap([
-            'ai_assistant' => AiAssistant::class,
-            'ai_message' => AiMessage::class,
-            'prompt_type' => PromptType::class,
-            'prompt' => Prompt::class,
-        ]);
+        Schema::dropIfExists('consent_agreements');
     }
-}
+};

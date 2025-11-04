@@ -34,31 +34,40 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Ai\Providers;
+namespace AidingApp\Ai\Database\Factories;
 
-use AidingApp\Ai\AiPlugin;
 use AidingApp\Ai\Models\AiAssistant;
-use AidingApp\Ai\Models\AiMessage;
-use AidingApp\Ai\Models\Prompt;
-use AidingApp\Ai\Models\PromptType;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\ServiceProvider;
+use AidingApp\Ai\Models\AiThread;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-class AiServiceProvider extends ServiceProvider
+/**
+ * @extends Factory<AiThread>
+ */
+class AiThreadFactory extends Factory
 {
-    public function register()
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition(): array
     {
-        Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new AiPlugin()));
+        return [
+            'thread_id' => $this->faker->uuid(),
+            'name' => $this->faker->word(),
+            'assistant_id' => AiAssistant::factory(),
+            'user_id' => User::factory(),
+        ];
     }
 
-    public function boot(): void
+    public function saved(): AiThreadFactory
     {
-        Relation::morphMap([
-            'ai_assistant' => AiAssistant::class,
-            'ai_message' => AiMessage::class,
-            'prompt_type' => PromptType::class,
-            'prompt' => Prompt::class,
-        ]);
+        return $this->state(function (array $attributes) {
+            return [
+                'name' => $this->faker->word(),
+                'saved_at' => $this->faker->dateTime(),
+            ];
+        });
     }
 }

@@ -34,31 +34,36 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Ai\Providers;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\Ai\AiPlugin;
-use AidingApp\Ai\Models\AiAssistant;
-use AidingApp\Ai\Models\AiMessage;
-use AidingApp\Ai\Models\Prompt;
-use AidingApp\Ai\Models\PromptType;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\ServiceProvider;
-
-class AiServiceProvider extends ServiceProvider
-{
-    public function register()
+return new class () extends Migration {
+    public function up(): void
     {
-        Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new AiPlugin()));
+        Schema::table('assistant_chats', function (Blueprint $table) {
+            $table->string('assistant_id')->nullable();
+            $table->string('thread_id')->nullable();
+        });
+
+        Schema::table('assistant_chat_messages', function (Blueprint $table) {
+            $table->string('message_id')->nullable();
+            $table->string('run_id')->nullable();
+            $table->json('file_ids')->nullable();
+        });
     }
 
-    public function boot(): void
+    public function down(): void
     {
-        Relation::morphMap([
-            'ai_assistant' => AiAssistant::class,
-            'ai_message' => AiMessage::class,
-            'prompt_type' => PromptType::class,
-            'prompt' => Prompt::class,
-        ]);
+        Schema::table('assistant_chats', function (Blueprint $table) {
+            $table->dropColumn('assistant_id');
+            $table->dropColumn('thread_id');
+        });
+
+        Schema::table('assistant_chat_messages', function (Blueprint $table) {
+            $table->dropColumn('message_id');
+            $table->dropColumn('run_id');
+            $table->dropColumn('file_ids');
+        });
     }
-}
+};

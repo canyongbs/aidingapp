@@ -34,31 +34,49 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Ai\Providers;
+use Spatie\LaravelSettings\Exceptions\SettingAlreadyExists;
+use Spatie\LaravelSettings\Migrations\SettingsMigration;
 
-use AidingApp\Ai\AiPlugin;
-use AidingApp\Ai\Models\AiAssistant;
-use AidingApp\Ai\Models\AiMessage;
-use AidingApp\Ai\Models\Prompt;
-use AidingApp\Ai\Models\PromptType;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\ServiceProvider;
-
-class AiServiceProvider extends ServiceProvider
-{
-    public function register()
+return new class () extends SettingsMigration {
+    public function up(): void
     {
-        Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new AiPlugin()));
+        try {
+            $this->migrator->add('ai.open_ai_gpt_5_model_name');
+        } catch (SettingAlreadyExists $exception) {
+            // do nothing
+        }
+
+        try {
+            $this->migrator->add('ai.open_ai_gpt_5_base_uri', config('integration-open-ai.gpt_5_base_uri'), encrypted: true);
+        } catch (SettingAlreadyExists $exception) {
+            // do nothing
+        }
+
+        try {
+            $this->migrator->add('ai.open_ai_gpt_5_api_key', config('integration-open-ai.gpt_5_api_key'), encrypted: true);
+        } catch (SettingAlreadyExists $exception) {
+            // do nothing
+        }
+
+        try {
+            $this->migrator->add('ai.open_ai_gpt_5_model', config('integration-open-ai.gpt_5_model'), encrypted: true);
+        } catch (SettingAlreadyExists $exception) {
+            // do nothing
+        }
+
+        try {
+            $this->migrator->add('ai.open_ai_gpt_5_applicable_features', []);
+        } catch (SettingAlreadyExists $exception) {
+            // do nothing
+        }
     }
 
-    public function boot(): void
+    public function down(): void
     {
-        Relation::morphMap([
-            'ai_assistant' => AiAssistant::class,
-            'ai_message' => AiMessage::class,
-            'prompt_type' => PromptType::class,
-            'prompt' => Prompt::class,
-        ]);
+        $this->migrator->deleteIfExists('ai.open_ai_gpt_5_model_name');
+        $this->migrator->deleteIfExists('ai.open_ai_gpt_5_base_uri');
+        $this->migrator->deleteIfExists('ai.open_ai_gpt_5_api_key');
+        $this->migrator->deleteIfExists('ai.open_ai_gpt_5_model');
+        $this->migrator->deleteIfExists('ai.open_ai_gpt_5_applicable_features');
     }
-}
+};

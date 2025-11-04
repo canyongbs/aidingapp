@@ -34,31 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Ai\Providers;
+namespace AidingApp\IntegrationOpenAi\Prism\ValueObjects\Messages;
 
-use AidingApp\Ai\AiPlugin;
-use AidingApp\Ai\Models\AiAssistant;
-use AidingApp\Ai\Models\AiMessage;
-use AidingApp\Ai\Models\Prompt;
-use AidingApp\Ai\Models\PromptType;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\ServiceProvider;
+use Prism\Prism\Concerns\HasProviderOptions;
+use Prism\Prism\Contracts\Message;
 
-class AiServiceProvider extends ServiceProvider
+class DeveloperMessage implements Message
 {
-    public function register()
-    {
-        Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new AiPlugin()));
-    }
+    use HasProviderOptions;
 
-    public function boot(): void
-    {
-        Relation::morphMap([
-            'ai_assistant' => AiAssistant::class,
-            'ai_message' => AiMessage::class,
-            'prompt_type' => PromptType::class,
-            'prompt' => Prompt::class,
-        ]);
-    }
+    public function __construct(
+        public readonly string $content,
+    ) {}
 }

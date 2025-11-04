@@ -34,31 +34,32 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Ai\Providers;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\Ai\AiPlugin;
-use AidingApp\Ai\Models\AiAssistant;
-use AidingApp\Ai\Models\AiMessage;
-use AidingApp\Ai\Models\Prompt;
-use AidingApp\Ai\Models\PromptType;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\ServiceProvider;
-
-class AiServiceProvider extends ServiceProvider
-{
-    public function register()
+return new class () extends Migration {
+    public function up(): void
     {
-        Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new AiPlugin()));
+        Schema::create('ai_threads', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->string('thread_id')->nullable();
+            $table->string('name')->nullable();
+            $table->foreignUuid('assistant_id')->constrained('ai_assistants');
+            $table->foreignUuid('folder_id')->nullable()->constrained('ai_thread_folders')->nullOnDelete();
+            $table->foreignUuid('user_id')->constrained();
+            $table->dateTime('locked_at')->nullable();
+            $table->dateTime('saved_at')->nullable();
+            $table->integer('cloned_count')->default(0);
+            $table->integer('emailed_count')->default(0);
+            $table->string('locked_reason')->nullable();
+            $table->timestamps();
+            $table->softDeletes();
+        });
     }
 
-    public function boot(): void
+    public function down(): void
     {
-        Relation::morphMap([
-            'ai_assistant' => AiAssistant::class,
-            'ai_message' => AiMessage::class,
-            'prompt_type' => PromptType::class,
-            'prompt' => Prompt::class,
-        ]);
+        Schema::dropIfExists('ai_threads');
     }
-}
+};

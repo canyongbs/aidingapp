@@ -34,31 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Ai\Providers;
+namespace AidingApp\Ai\Models\Contracts;
 
-use AidingApp\Ai\AiPlugin;
-use AidingApp\Ai\Models\AiAssistant;
-use AidingApp\Ai\Models\AiMessage;
-use AidingApp\Ai\Models\Prompt;
-use AidingApp\Ai\Models\PromptType;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\ServiceProvider;
-
-class AiServiceProvider extends ServiceProvider
+interface AiFile
 {
-    public function register()
-    {
-        Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new AiPlugin()));
-    }
+    public function getKey(): string;
 
-    public function boot(): void
-    {
-        Relation::morphMap([
-            'ai_assistant' => AiAssistant::class,
-            'ai_message' => AiMessage::class,
-            'prompt_type' => PromptType::class,
-            'prompt' => Prompt::class,
-        ]);
-    }
+    public function getName(): ?string;
+
+    public function getMimeType(): ?string;
+
+    public function getFileId(): ?string;
+
+    public function getParsingResults(): ?string;
+
+    /**
+     * @deprecated Non-responses-API OpenAI services only.
+     */
+    public function getTemporaryUrl(): ?string;
 }

@@ -34,31 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Ai\Providers;
+return [
+    'gpt_5_base_uri' => env('OPEN_AI_GPT_5_BASE_URI'),
 
-use AidingApp\Ai\AiPlugin;
-use AidingApp\Ai\Models\AiAssistant;
-use AidingApp\Ai\Models\AiMessage;
-use AidingApp\Ai\Models\Prompt;
-use AidingApp\Ai\Models\PromptType;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\ServiceProvider;
+    'gpt_5_api_key' => env('OPEN_AI_GPT_5_API_KEY'),
 
-class AiServiceProvider extends ServiceProvider
-{
-    public function register()
-    {
-        Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new AiPlugin()));
-    }
+    'gpt_5_model' => env('OPEN_AI_GPT_5_MODEL'),
 
-    public function boot(): void
-    {
-        Relation::morphMap([
-            'ai_assistant' => AiAssistant::class,
-            'ai_message' => AiMessage::class,
-            'prompt_type' => PromptType::class,
-            'prompt' => Prompt::class,
-        ]);
-    }
-}
+    'gpt_5_mini_base_uri' => env('OPEN_AI_GPT_5_MINI_BASE_URI'),
+
+    'gpt_5_mini_api_key' => env('OPEN_AI_GPT_5_MINI_API_KEY'),
+
+    'gpt_5_mini_model' => env('OPEN_AI_GPT_5_MINI_MODEL'),
+
+    'gpt_5_nano_base_uri' => env('OPEN_AI_GPT_5_NANO_BASE_URI'),
+
+    'gpt_5_nano_api_key' => env('OPEN_AI_GPT_5_NANO_API_KEY'),
+
+    'gpt_5_nano_model' => env('OPEN_AI_GPT_5_NANO_MODEL'),
+];

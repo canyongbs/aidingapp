@@ -34,31 +34,43 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Ai\Providers;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\Ai\AiPlugin;
-use AidingApp\Ai\Models\AiAssistant;
-use AidingApp\Ai\Models\AiMessage;
-use AidingApp\Ai\Models\Prompt;
-use AidingApp\Ai\Models\PromptType;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\ServiceProvider;
-
-class AiServiceProvider extends ServiceProvider
-{
-    public function register()
+return new class () extends Migration {
+    public function up(): void
     {
-        Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new AiPlugin()));
+        Schema::create('ai_assistants', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->string('assistant_id')->nullable();
+
+            $table->string('name');
+            $table->string('type')->nullable();
+            $table->text('description')->nullable();
+            $table->longText('instructions')->nullable();
+            $table->longText('knowledge')->nullable();
+            $table->dateTime('archived_at')->nullable();
+            $table->boolean('is_confidential')->default(false);
+            $table->foreignUuid('created_by_id')
+                ->nullable()
+                ->constrained('users');
+
+            $table->timestamps();
+            $table->softDeletes();
+        });
+
+        Schema::table('assistant_chats', function (Blueprint $table) {
+            $table->foreignUuid('ai_assistant_id')->nullable()->constrained('ai_assistants');
+        });
     }
 
-    public function boot(): void
+    public function down(): void
     {
-        Relation::morphMap([
-            'ai_assistant' => AiAssistant::class,
-            'ai_message' => AiMessage::class,
-            'prompt_type' => PromptType::class,
-            'prompt' => Prompt::class,
-        ]);
+        Schema::table('assistant_chats', function (Blueprint $table) {
+            $table->dropColumn('ai_assistant_id');
+        });
+
+        Schema::dropIfExists('ai_assistants');
     }
-}
+};

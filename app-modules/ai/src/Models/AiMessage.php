@@ -34,31 +34,73 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Ai\Providers;
+namespace AidingApp\Ai\Models;
 
-use AidingApp\Ai\AiPlugin;
-use AidingApp\Ai\Models\AiAssistant;
-use AidingApp\Ai\Models\AiMessage;
-use AidingApp\Ai\Models\Prompt;
-use AidingApp\Ai\Models\PromptType;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\ServiceProvider;
+use AidingApp\Ai\Database\Factories\AiMessageFileFactory;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\Concerns\AsPivot;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
-class AiServiceProvider extends ServiceProvider
+/**
+ * @mixin IdeHelperAiMessage
+ */
+class AiMessage extends Model
 {
-    public function register()
+    /** @use HasFactory<AiMessageFileFactory> */
+    use HasFactory;
+
+    use AsPivot;
+    use SoftDeletes;
+
+    protected $fillable = [
+        'message_id',
+        'content',
+        'context',
+        'request',
+        'thread_id',
+        'user_id',
+        'prompt_id',
+    ];
+
+    protected $casts = [
+        'request' => 'encrypted:array',
+    ];
+
+    protected $table = 'ai_messages';
+
+    /**
+     * @return BelongsTo<AiThread, $this>
+     */
+    public function thread(): BelongsTo
     {
-        Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new AiPlugin()));
+        return $this->belongsTo(AiThread::class, 'thread_id');
     }
 
-    public function boot(): void
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function user(): BelongsTo
     {
-        Relation::morphMap([
-            'ai_assistant' => AiAssistant::class,
-            'ai_message' => AiMessage::class,
-            'prompt_type' => PromptType::class,
-            'prompt' => Prompt::class,
-        ]);
+        return $this->belongsTo(User::class);
+    }
+
+    /**
+     * @return BelongsTo<Prompt, $this>
+     */
+    public function prompt(): BelongsTo
+    {
+        return $this->belongsTo(Prompt::class)->withTrashed();
+    }
+
+    /**
+     * @return HasMany<AiMessageFile, $this>
+     */
+    public function files(): HasMany
+    {
+        return $this->hasMany(AiMessageFile::class, 'message_id');
     }
 }

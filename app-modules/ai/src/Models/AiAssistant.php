@@ -34,31 +34,62 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Ai\Providers;
+namespace AidingApp\Ai\Models;
 
-use AidingApp\Ai\AiPlugin;
-use AidingApp\Ai\Models\AiAssistant;
-use AidingApp\Ai\Models\AiMessage;
-use AidingApp\Ai\Models\Prompt;
-use AidingApp\Ai\Models\PromptType;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\ServiceProvider;
+use AidingApp\Ai\Database\Factories\AiAssistantFactory;
+use AidingApp\Ai\Enums\AiAssistantApplication;
+use AidingApp\Ai\Enums\AiModel;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class AiServiceProvider extends ServiceProvider
+/**
+ * @mixin IdeHelperAiAssistant
+ */
+class AiAssistant extends Model implements HasMedia
 {
-    public function register()
+    /** @use HasFactory<AiAssistantFactory> */
+    use HasFactory;
+
+    use HasUuids;
+    use InteractsWithMedia;
+    use SoftDeletes;
+
+    protected $fillable = [
+        'archived_at',
+        'assistant_id',
+        'name',
+        'application',
+        'model',
+        'is_default',
+        'description',
+        'instructions',
+        'knowledge',
+        'is_confidential',
+        'created_by_id',
+    ];
+
+    protected $casts = [
+        'application' => AiAssistantApplication::class,
+        'archived_at' => 'datetime',
+        'is_default' => 'bool',
+        'model' => AiModel::class,
+    ];
+
+    /**
+     * @return HasMany<AiAssistantFile, $this>
+     */
+    public function files(): HasMany
     {
-        Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new AiPlugin()));
+        return $this->hasMany(AiAssistantFile::class, 'assistant_id');
     }
 
-    public function boot(): void
+    public function isDefault(): bool
     {
-        Relation::morphMap([
-            'ai_assistant' => AiAssistant::class,
-            'ai_message' => AiMessage::class,
-            'prompt_type' => PromptType::class,
-            'prompt' => Prompt::class,
-        ]);
+        return $this->is_default ?? false;
     }
 }

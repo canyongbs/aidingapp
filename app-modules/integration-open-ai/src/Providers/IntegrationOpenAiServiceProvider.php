@@ -34,31 +34,28 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Ai\Providers;
+namespace AidingApp\IntegrationOpenAi\Providers;
 
-use AidingApp\Ai\AiPlugin;
-use AidingApp\Ai\Models\AiAssistant;
-use AidingApp\Ai\Models\AiMessage;
-use AidingApp\Ai\Models\Prompt;
-use AidingApp\Ai\Models\PromptType;
+use AidingApp\IntegrationOpenAi\IntegrationOpenAiPlugin;
+use AidingApp\IntegrationOpenAi\Prism\AzureOpenAi;
 use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
+use Prism\Prism\Providers\Provider;
 
-class AiServiceProvider extends ServiceProvider
+class IntegrationOpenAiServiceProvider extends ServiceProvider
 {
-    public function register()
+    public function register(): void
     {
-        Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new AiPlugin()));
+        Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new IntegrationOpenAiPlugin()));
     }
 
     public function boot(): void
     {
-        Relation::morphMap([
-            'ai_assistant' => AiAssistant::class,
-            'ai_message' => AiMessage::class,
-            'prompt_type' => PromptType::class,
-            'prompt' => Prompt::class,
-        ]);
+        $this->mergeConfigFrom(__DIR__ . '/../../config/integration-open-ai.php', 'integration-open-ai');
+
+        $this->app['prism-manager']->extend(
+            'azure_open_ai',
+            fn (): Provider => app(AzureOpenAi::class),
+        );
     }
 }

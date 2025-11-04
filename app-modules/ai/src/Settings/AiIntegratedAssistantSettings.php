@@ -34,31 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Ai\Providers;
+namespace AidingApp\Ai\Settings;
 
-use AidingApp\Ai\AiPlugin;
-use AidingApp\Ai\Models\AiAssistant;
-use AidingApp\Ai\Models\AiMessage;
-use AidingApp\Ai\Models\Prompt;
-use AidingApp\Ai\Models\PromptType;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\ServiceProvider;
+use AidingApp\Ai\Enums\AiModel;
+use Spatie\LaravelSettings\Settings;
 
-class AiServiceProvider extends ServiceProvider
+class AiIntegratedAssistantSettings extends Settings
 {
-    public function register()
+    public ?AiModel $default_model = null;
+
+    public static function group(): string
     {
-        Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new AiPlugin()));
+        return 'ai-integrated-assistant';
     }
 
-    public function boot(): void
+    public function getDefaultModel(): AiModel
     {
-        Relation::morphMap([
-            'ai_assistant' => AiAssistant::class,
-            'ai_message' => AiMessage::class,
-            'prompt_type' => PromptType::class,
-            'prompt' => Prompt::class,
-        ]);
+        return $this->default_model ?? AiModel::OpenAiGpt5;
     }
 }

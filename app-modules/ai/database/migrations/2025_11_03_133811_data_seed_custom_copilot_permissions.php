@@ -34,57 +34,42 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Ai\Filament\Pages;
+use CanyonGBS\Common\Database\Migrations\Concerns\CanModifyPermissions;
+use Illuminate\Database\Migrations\Migration;
 
-use AidingApp\Ai\Settings\AiSettings;
-use App\Filament\Clusters\ProductIntegrations;
-use App\Models\User;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
-use Filament\Pages\SettingsPage;
+return new class () extends Migration {
+    use CanModifyPermissions;
 
-class ManageAiSettings extends SettingsPage
-{
-    protected static string $settings = AiSettings::class;
+    /**
+     * @var array<string> $permissions
+     */
+    private array $permissions = [
+        'custom_copilot.view-any' => 'Custom Copilot',
+        'custom_copilot.*.view' => 'Custom Copilot',
+        'custom_copilot.create' => 'Custom Copilot',
+        'custom_copilot.*.update' => 'Custom Copilot',
+    ];
 
-    protected static ?string $title = 'Cognitive Services Settings';
+    /**
+     * @var array<string> $guards
+     */
+    private array $guards = [
+        'web',
+    ];
 
-    protected static ?string $navigationLabel = 'Cognitive Services';
-
-    protected static ?int $navigationSort = 100;
-
-    protected static ?string $cluster = ProductIntegrations::class;
-
-    public static function canAccess(): bool
+    public function up(): void
     {
-        /** @var User $user */
-        $user = auth()->user();
-
-        return $user->isSuperAdmin();
+        collect($this->guards)
+            ->each(function (string $guard) {
+                $this->createPermissions($this->permissions, $guard);
+            });
     }
 
-    public function form(Form $form): Form
+    public function down(): void
     {
-        return $form
-            ->columns(1)
-            ->schema([
-                Section::make()
-                    ->schema([
-                        TextInput::make('url')
-                            ->label('URL')
-                            ->string()
-                            ->url(),
-                        TextInput::make('key')
-                            ->string()
-                            ->password()
-                            ->revealable(),
-                        TextInput::make('api_version')
-                            ->label('API Version')
-                            ->string(),
-                        TextInput::make('model')
-                            ->string(),
-                    ]),
-            ]);
+        collect($this->guards)
+            ->each(function (string $guard) {
+                $this->deletePermissions(array_keys($this->permissions), $guard);
+            });
     }
-}
+};

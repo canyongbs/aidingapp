@@ -34,31 +34,42 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Ai\Providers;
+namespace AidingApp\IntegrationOpenAi\Models;
 
-use AidingApp\Ai\AiPlugin;
-use AidingApp\Ai\Models\AiAssistant;
-use AidingApp\Ai\Models\AiMessage;
-use AidingApp\Ai\Models\Prompt;
-use AidingApp\Ai\Models\PromptType;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\ServiceProvider;
+use AidingApp\IntegrationOpenAi\Database\Factories\OpenAiVectorStoreFactory;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
-class AiServiceProvider extends ServiceProvider
+/**
+ * @mixin IdeHelperOpenAiVectorStore
+ */
+class OpenAiVectorStore extends Model
 {
-    public function register()
-    {
-        Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new AiPlugin()));
-    }
+    /** @use HasFactory<OpenAiVectorStoreFactory> */
+    use HasFactory;
 
-    public function boot(): void
+    use HasUuids;
+    use SoftDeletes;
+
+    public $fillable = [
+        'deployment_hash',
+        'ready_until',
+        'vector_store_id',
+        'vector_store_file_id',
+    ];
+
+    protected $casts = [
+        'ready_until' => 'immutable_datetime',
+    ];
+
+    /**
+     * @return MorphTo<Model, $this>
+     */
+    public function file(): MorphTo
     {
-        Relation::morphMap([
-            'ai_assistant' => AiAssistant::class,
-            'ai_message' => AiMessage::class,
-            'prompt_type' => PromptType::class,
-            'prompt' => Prompt::class,
-        ]);
+        return $this->morphTo('file');
     }
 }

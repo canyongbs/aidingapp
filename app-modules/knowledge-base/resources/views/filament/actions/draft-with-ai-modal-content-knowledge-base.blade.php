@@ -1,6 +1,4 @@
-<?php
-
-/*
+{{--
 <COPYRIGHT>
 
     Copyright © 2016-2025, Canyon GBS LLC. All rights reserved.
@@ -32,33 +30,31 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
+--}}
+<div class="mb-3 flex gap-4 text-base md:gap-6">
+    <div class="flex flex-shrink-0 flex-col items-end">
+        <img
+            class="h-8 w-8 rounded-full object-cover object-center"
+            src="{{ $avatarUrl }}"
+            alt="Assistant avatar"
+        >
+    </div>
 
-namespace AidingApp\Ai\Providers;
-
-use AidingApp\Ai\AiPlugin;
-use AidingApp\Ai\Models\AiAssistant;
-use AidingApp\Ai\Models\AiMessage;
-use AidingApp\Ai\Models\Prompt;
-use AidingApp\Ai\Models\PromptType;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\ServiceProvider;
-
-class AiServiceProvider extends ServiceProvider
-{
-    public function register()
-    {
-        Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new AiPlugin()));
-    }
-
-    public function boot(): void
-    {
-        Relation::morphMap([
-            'ai_assistant' => AiAssistant::class,
-            'ai_message' => AiMessage::class,
-            'prompt_type' => PromptType::class,
-            'prompt' => Prompt::class,
-        ]);
-    }
-}
+    <div class="prose h-36 flex-1 dark:prose-invert sm:h-20">
+        <p
+            x-data="{ content: '' }"
+            x-init="const message = @js('Hi ' . auth()->user()->name . ", I am happy to help you draft your knowledge base item for {$recordTitle}. Please describe what information you would like in the item and I will take it from there:");
+            
+            const typeWord = async (word, delay) => {
+                content += word + ' ';
+            
+                await new Promise(resolve => setTimeout(resolve, delay));
+            };
+            
+            for (const word of message.split(' ')) {
+                await typeWord(word, Math.floor(Math.random() * 100));
+            }"
+            x-text="content"
+        ></p>
+    </div>
+</div>

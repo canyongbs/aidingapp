@@ -34,31 +34,37 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Ai\Providers;
+namespace AidingApp\IntegrationOpenAi\Services;
 
-use AidingApp\Ai\AiPlugin;
-use AidingApp\Ai\Models\AiAssistant;
-use AidingApp\Ai\Models\AiMessage;
-use AidingApp\Ai\Models\Prompt;
-use AidingApp\Ai\Models\PromptType;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\ServiceProvider;
-
-class AiServiceProvider extends ServiceProvider
+class OpenAiGpt5NanoService extends BaseOpenAiService
 {
-    public function register()
+    public function getApiKey(): string
     {
-        Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new AiPlugin()));
+        return $this->settings->open_ai_gpt_5_nano_api_key ?? config('integration-open-ai.gpt_5_nano_api_key');
     }
 
-    public function boot(): void
+    public function getModel(): string
     {
-        Relation::morphMap([
-            'ai_assistant' => AiAssistant::class,
-            'ai_message' => AiMessage::class,
-            'prompt_type' => PromptType::class,
-            'prompt' => Prompt::class,
-        ]);
+        return $this->settings->open_ai_gpt_5_nano_model ?? config('integration-open-ai.gpt_5_nano_model');
+    }
+
+    public function getDeployment(): ?string
+    {
+        return $this->settings->open_ai_gpt_5_nano_base_uri ?? config('integration-open-ai.gpt_5_nano_base_uri');
+    }
+
+    public function getImageGenerationDeployment(): ?string
+    {
+        return $this->settings->open_ai_gpt_5_nano_image_generation_deployment;
+    }
+
+    public function hasTemperature(): bool
+    {
+        return false;
+    }
+
+    public function hasReasoning(): bool
+    {
+        return true;
     }
 }

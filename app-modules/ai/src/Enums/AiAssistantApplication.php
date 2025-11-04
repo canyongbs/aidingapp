@@ -34,31 +34,46 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Ai\Providers;
+namespace AidingApp\Ai\Enums;
 
-use AidingApp\Ai\AiPlugin;
-use AidingApp\Ai\Models\AiAssistant;
-use AidingApp\Ai\Models\AiMessage;
-use AidingApp\Ai\Models\Prompt;
-use AidingApp\Ai\Models\PromptType;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\ServiceProvider;
+use AidingApp\Ai\Settings\AiSettings;
+use Filament\Support\Contracts\HasLabel;
 
-class AiServiceProvider extends ServiceProvider
+enum AiAssistantApplication: string implements HasLabel
 {
-    public function register()
+    case Copilot = 'personal_assistant';
+
+    case Test = 'test';
+
+    public function getLabel(): string
     {
-        Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new AiPlugin()));
+        return match ($this) {
+            self::Copilot => 'Copilot',
+            self::Test => 'Test',
+        };
     }
 
-    public function boot(): void
+    public static function getDefault(): self
     {
-        Relation::morphMap([
-            'ai_assistant' => AiAssistant::class,
-            'ai_message' => AiMessage::class,
-            'prompt_type' => PromptType::class,
-            'prompt' => Prompt::class,
-        ]);
+        return self::Copilot;
+    }
+
+    public function getDefaultModel(): AiModel
+    {
+        $settings = app(AiSettings::class);
+
+        return match ($this) {
+            self::Copilot => $settings->default_model ?? AiModel::OpenAiGpt5,
+            self::Test => AiModel::Test,
+        };
+    }
+
+    public static function parse(string | self | null $value): ?self
+    {
+        if ($value instanceof self) {
+            return $value;
+        }
+
+        return self::tryFrom($value);
     }
 }

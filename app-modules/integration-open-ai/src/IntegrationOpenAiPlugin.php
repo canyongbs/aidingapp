@@ -34,31 +34,25 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Ai\Providers;
+namespace AidingApp\IntegrationOpenAi;
 
-use AidingApp\Ai\AiPlugin;
-use AidingApp\Ai\Models\AiAssistant;
-use AidingApp\Ai\Models\AiMessage;
-use AidingApp\Ai\Models\Prompt;
-use AidingApp\Ai\Models\PromptType;
+use Filament\Contracts\Plugin;
 use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\ServiceProvider;
 
-class AiServiceProvider extends ServiceProvider
+class IntegrationOpenAiPlugin implements Plugin
 {
-    public function register()
+    public function getId(): string
     {
-        Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new AiPlugin()));
+        return 'integration-open-ai';
     }
 
-    public function boot(): void
+    public function register(Panel $panel): void
     {
-        Relation::morphMap([
-            'ai_assistant' => AiAssistant::class,
-            'ai_message' => AiMessage::class,
-            'prompt_type' => PromptType::class,
-            'prompt' => Prompt::class,
-        ]);
+        $panel->discoverResources(
+            in: __DIR__ . '/Filament/Resources',
+            for: 'AidingApp\\IntegrationOpenAi\\Filament\\Resources'
+        );
     }
+
+    public function boot(Panel $panel): void {}
 }

@@ -34,31 +34,34 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Ai\Providers;
+use Spatie\LaravelSettings\Exceptions\SettingAlreadyExists;
+use Spatie\LaravelSettings\Migrations\SettingsMigration;
 
-use AidingApp\Ai\AiPlugin;
-use AidingApp\Ai\Models\AiAssistant;
-use AidingApp\Ai\Models\AiMessage;
-use AidingApp\Ai\Models\Prompt;
-use AidingApp\Ai\Models\PromptType;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\ServiceProvider;
+return new class () extends SettingsMigration {
+    /**
+     * @var array<string>
+     **/
+    private array $properties = [
+        'ai.open_ai_gpt_5_image_generation_deployment',
+        'ai.open_ai_gpt_5_mini_image_generation_deployment',
+        'ai.open_ai_gpt_5_nano_image_generation_deployment',
+    ];
 
-class AiServiceProvider extends ServiceProvider
-{
-    public function register()
+    public function up(): void
     {
-        Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new AiPlugin()));
+        foreach ($this->properties as $property) {
+            try {
+                $this->migrator->add($property, encrypted: true);
+            } catch (SettingAlreadyExists $exception) {
+                // Do nothing
+            }
+        }
     }
 
-    public function boot(): void
+    public function down(): void
     {
-        Relation::morphMap([
-            'ai_assistant' => AiAssistant::class,
-            'ai_message' => AiMessage::class,
-            'prompt_type' => PromptType::class,
-            'prompt' => Prompt::class,
-        ]);
+        foreach ($this->properties as $property) {
+            $this->migrator->deleteIfExists($property);
+        }
     }
-}
+};

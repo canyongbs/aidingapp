@@ -34,31 +34,42 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Ai\Providers;
+namespace AidingApp\Ai\Actions;
 
-use AidingApp\Ai\AiPlugin;
-use AidingApp\Ai\Models\AiAssistant;
-use AidingApp\Ai\Models\AiMessage;
-use AidingApp\Ai\Models\Prompt;
-use AidingApp\Ai\Models\PromptType;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\ServiceProvider;
+use AidingApp\Ai\Enums\AiMessageLogFeature;
+use AidingApp\Ai\Enums\AiModel;
+use AidingApp\Ai\Models\LegacyAiMessageLog;
+use Illuminate\Support\Arr;
 
-class AiServiceProvider extends ServiceProvider
+class CompletePrompt
 {
-    public function register()
+    public function execute(AiModel $aiModel, string $prompt, string $content): string
     {
-        Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new AiPlugin()));
-    }
+        $service = $aiModel->getService();
 
-    public function boot(): void
-    {
-        Relation::morphMap([
-            'ai_assistant' => AiAssistant::class,
-            'ai_message' => AiMessage::class,
-            'prompt_type' => PromptType::class,
-            'prompt' => Prompt::class,
-        ]);
+        $completion = $service->complete($prompt, $content);
+
+        if (auth()->hasUser()) {
+            LegacyAiMessageLog::create([
+                'message' => $content,
+                'metadata' => [
+                    'prompt' => $prompt,
+                    'completion' => $completion,
+                ],
+                'request' => [
+                    'headers' => Arr::only(
+                        request()->headers->all(),
+                        ['host', 'sec-ch-ua', 'user-agent', 'sec-ch-ua-platform', 'origin', 'referer', 'accept-language'],
+                    ),
+                    'ip' => request()->ip(),
+                ],
+                'sent_at' => now(),
+                'user_id' => auth()->id(),
+                'ai_assistant_name' => 'Institutional Advisor',
+                'feature' => AiMessageLogFeature::DraftWithAi,
+            ]);
+        }
+
+        return $completion;
     }
 }

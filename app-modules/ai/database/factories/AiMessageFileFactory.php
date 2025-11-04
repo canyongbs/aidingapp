@@ -34,31 +34,31 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Ai\Providers;
+namespace AidingApp\Ai\Database\Factories;
 
-use AidingApp\Ai\AiPlugin;
-use AidingApp\Ai\Models\AiAssistant;
 use AidingApp\Ai\Models\AiMessage;
-use AidingApp\Ai\Models\Prompt;
-use AidingApp\Ai\Models\PromptType;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\ServiceProvider;
+use AidingApp\Ai\Models\AiMessageFile;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-class AiServiceProvider extends ServiceProvider
+/**
+ * @extends Factory<AiMessageFile>
+ */
+class AiMessageFileFactory extends Factory
 {
-    public function register()
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition(): array
     {
-        Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new AiPlugin()));
-    }
-
-    public function boot(): void
-    {
-        Relation::morphMap([
-            'ai_assistant' => AiAssistant::class,
-            'ai_message' => AiMessage::class,
-            'prompt_type' => PromptType::class,
-            'prompt' => Prompt::class,
-        ]);
+        return [
+            'message_id' => AiMessage::factory(),
+            'file_id' => $this->faker->uuid(),
+            'name' => $this->faker->word(),
+            'temporary_url' => $this->faker->url(),
+            'mime_type' => $this->faker->mimeType(),
+            'parsing_results' => $this->faker->text(),
+        ];
     }
 }

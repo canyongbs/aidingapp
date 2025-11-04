@@ -34,31 +34,30 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Ai\Providers;
+namespace AidingApp\IntegrationOpenAi\Prism\AzureOpenAi\Maps;
 
-use AidingApp\Ai\AiPlugin;
-use AidingApp\Ai\Models\AiAssistant;
-use AidingApp\Ai\Models\AiMessage;
-use AidingApp\Ai\Models\Prompt;
-use AidingApp\Ai\Models\PromptType;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\ServiceProvider;
+use AidingApp\IntegrationOpenAi\Prism\ValueObjects\Messages\DeveloperMessage;
+use Prism\Prism\Contracts\Message;
+use Prism\Prism\Providers\OpenAI\Maps\MessageMap as BaseMessageMap;
 
-class AiServiceProvider extends ServiceProvider
+class MessageMap extends BaseMessageMap
 {
-    public function register()
+    protected function mapMessage(Message $message): void
     {
-        Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new AiPlugin()));
+        if ($message instanceof DeveloperMessage) {
+            $this->mapDeveloperMessage($message);
+
+            return;
+        }
+
+        parent::mapMessage($message);
     }
 
-    public function boot(): void
+    protected function mapDeveloperMessage(DeveloperMessage $message): void
     {
-        Relation::morphMap([
-            'ai_assistant' => AiAssistant::class,
-            'ai_message' => AiMessage::class,
-            'prompt_type' => PromptType::class,
-            'prompt' => Prompt::class,
-        ]);
+        $this->mappedMessages[] = [
+            'role' => 'developer',
+            'content' => $message->content,
+        ];
     }
 }
