@@ -1,13 +1,9 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
 use Spatie\LaravelSettings\Exceptions\SettingAlreadyExists;
 use Spatie\LaravelSettings\Migrations\SettingsMigration;
-use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
-use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
 return new class () extends SettingsMigration {
-    
     /**
      * @var array<string>
      **/

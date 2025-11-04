@@ -3,12 +3,15 @@
 namespace AidingApp\IntegrationOpenAi\Models;
 
 use AidingApp\IntegrationOpenAi\Database\Factories\OpenAiVectorStoreFactory;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @mixin IdeHelperOpenAiVectorStore
+ */
 class OpenAiVectorStore extends Model
 {
     /** @use HasFactory<OpenAiVectorStoreFactory> */

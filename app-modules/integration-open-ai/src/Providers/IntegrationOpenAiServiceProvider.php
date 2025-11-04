@@ -36,10 +36,10 @@
 
 namespace AidingApp\IntegrationOpenAi\Providers;
 
+use AidingApp\IntegrationOpenAi\IntegrationOpenAiPlugin;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
-use AidingApp\IntegrationOpenAi\IntegrationOpenAiPlugin;
 
 class IntegrationOpenAiServiceProvider extends ServiceProvider
 {

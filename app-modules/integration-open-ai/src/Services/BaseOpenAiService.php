@@ -3,6 +3,7 @@
 namespace AidingApp\IntegrationOpenAi\Services;
 
 use AidingApp\Ai\Exceptions\MessageResponseException;
+use AidingApp\Ai\Models\AiAssistant;
 use AidingApp\Ai\Services\Contracts\AiService;
 use AidingApp\Ai\Settings\AiIntegrationsSettings;
 use AidingApp\Ai\Settings\AiSettings;
@@ -10,6 +11,7 @@ use AidingApp\Ai\Support\StreamingChunks\Finish;
 use AidingApp\Ai\Support\StreamingChunks\Image;
 use AidingApp\Ai\Support\StreamingChunks\Meta;
 use AidingApp\Ai\Support\StreamingChunks\Text;
+use AidingApp\IntegrationOpenAi\Models\OpenAiVectorStore;
 use AidingApp\IntegrationOpenAi\Services\BaseOpenAiService\Concerns\InteractsWithVectorStores;
 use App\Models\User;
 use Closure;
@@ -20,14 +22,16 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Prism\Prism\Contracts\Message;
-use Prism\Prism\Contracts\Schema;
-use Prism\Prism\Enums\ChunkType;
-use Prism\Prism\Enums\FinishReason;
 use Prism\Prism\Exceptions\PrismRateLimitedException;
 use Prism\Prism\Prism;
-use Prism\Prism\ValueObjects\Messages\AssistantMessage;
-use Prism\Prism\ValueObjects\Messages\UserMessage;
+// use Prism\Prism\Contracts\Message;
+// use Prism\Prism\Contracts\Schema;
+// use Prism\Prism\Enums\ChunkType;
+// use Prism\Prism\Enums\FinishReason;
+// use Prism\Prism\Exceptions\PrismRateLimitedException;
+// use Prism\Prism\Prism;
+// use Prism\Prism\ValueObjects\Messages\AssistantMessage;
+// use Prism\Prism\ValueObjects\Messages\UserMessage;
 use Throwable;
 
 abstract class BaseOpenAiService implements AiService
