@@ -43,6 +43,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
+/**
+ * @mixin IdeHelperPortalAssistantThread
+ */
 class PortalAssistantThread extends BaseModel
 {
     /** @use HasFactory<PortalAssistantThreadFactory> */

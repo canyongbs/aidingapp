@@ -43,6 +43,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
+/**
+ * @mixin IdeHelperPortalAssistantMessage
+ */
 class PortalAssistantMessage extends BaseModel
 {
     /** @use HasFactory<PortalAssistantMessageFactory> */
