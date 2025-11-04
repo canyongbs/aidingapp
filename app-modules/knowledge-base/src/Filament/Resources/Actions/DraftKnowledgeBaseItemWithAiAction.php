@@ -13,6 +13,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Notifications\Notification;
+use Filament\Resources\Pages\Page;
 use Filament\Support\Enums\MaxWidth;
 use Illuminate\Support\Facades\Vite;
 
@@ -26,8 +27,9 @@ class DraftKnowledgeBaseItemWithAiAction extends Action
             ->label('Draft with AI Assistant')
             ->link()
             ->icon('heroicon-m-pencil')
-            ->modalContent(fn () => view('knowledge-base::filament.actions.draft-with-ai-modal-content-knowledge-base', [
-                'recordTitle' => null, // We'll get this from the form state
+            ->modalContent(fn (Page $livewire) => view('knowledge-base::filament.actions.draft-with-ai-modal-content-knowledge-base', [
+                // @phpstan-ignore-next-line
+                'recordTitle' => $livewire->data['title'],
                 'avatarUrl' => AiAssistant::query()->where('is_default', true)->first()
                     ?->getFirstTemporaryUrl(now()->addHour(), 'avatar', 'avatar-height-250px') ?: Vite::asset('resources/images/canyon-ai-headshot.jpg'),
             ]))
@@ -40,13 +42,14 @@ class DraftKnowledgeBaseItemWithAiAction extends Action
                     ->placeholder('What do you want to write about?')
                     ->required(),
             ])
-            ->action(function (array $data, Get $get, Set $set) {
+            ->action(function (array $data, Get $get, Set $set, Page $livewire) {
                 $model = app(AiIntegratedAssistantSettings::class)->getDefaultModel();
 
                 $userName = auth()->user()->name;
                 $userJobTitle = auth()->user()->job_title ?? 'staff member';
                 $clientName = app(LicenseSettings::class)->data->subscription->clientName;
-                $itemTitle = $get('title') ?? 'Untitled';
+                // @phpstan-ignore-next-line
+                $itemTitle = $livewire->data['title'];
 
                 try {
                     $content = app(CompletePrompt::class)->execute(

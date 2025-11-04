@@ -65,6 +65,7 @@ class AiAssistant extends Model implements HasMedia
         'name',
         'application',
         'model',
+        'is_default',
         'description',
         'instructions',
         'knowledge',
@@ -75,6 +76,7 @@ class AiAssistant extends Model implements HasMedia
     protected $casts = [
         'application' => AiAssistantApplication::class,
         'archived_at' => 'datetime',
+        'is_default' => 'bool',
         'model' => AiModel::class,
     ];
 
