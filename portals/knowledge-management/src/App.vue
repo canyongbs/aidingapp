@@ -36,11 +36,13 @@
     import { onMounted, ref, watch } from 'vue';
     import { RouterView, useRoute } from 'vue-router';
     import AppLoading from './Components/AppLoading.vue';
+    import Assistant from './Components/Assistant.vue';
     import Footer from './Components/Footer.vue';
     import Header from './Components/Header.vue';
     import axios from './Globals/Axios.js';
     import { consumer } from './Services/Consumer.js';
     import determineIfUserIsAuthenticated from './Services/DetermineIfUserIsAuthenticated.js';
+    import { useAssistantStore } from './Stores/assistant.js';
     import { useAuthStore } from './Stores/auth.js';
     import { useFeatureStore } from './Stores/feature.js';
     import { useTokenStore } from './Stores/token.js';
@@ -164,6 +166,8 @@
 
                 const { setHasServiceManagement, setHasAssets, setHasLicense, setHasTasks } = useFeatureStore();
 
+                const { setAssistantSendMessageUrl, setWebsocketsConfig } = useAssistantStore();
+
                 portalPrimaryColor.value = response.data.primary_color;
 
                 headerLogo.value = response.data.header_logo;
@@ -193,6 +197,9 @@
                 setHasTasks(response.data.has_tasks).then(() => {
                     hasTasks.value = response.data.has_tasks;
                 });
+
+                setAssistantSendMessageUrl(response.data.assistant_send_message_url);
+                setWebsocketsConfig(response.data.websockets_config);
 
                 authentication.value.requestUrl = response.data.authentication_url ?? null;
 
@@ -312,6 +319,8 @@
 
         const { setHasServiceManagement, setHasAssets, setHasLicense, setHasTasks } = useFeatureStore();
 
+        const { setAssistantSendMessageUrl, setWebsocketsConfig } = useAssistantStore();
+
         if (authentication.value.isRequested) {
             const data = {
                 code: formData.code,
@@ -369,6 +378,9 @@
                         setHasTasks(response.data.has_tasks).then(() => {
                             hasTasks.value = response.data.has_tasks;
                         });
+
+                        setAssistantSendMessageUrl(response.data.assistant_send_message_url);
+                        setWebsocketsConfig(response.data.websockets_config);
 
                         const { hasServiceManagement, hasAssets, hasLicense, hasTasks } = useFeatureStore();
 
@@ -578,6 +590,8 @@
                 />
 
                 <Footer :logo="footerLogo"></Footer>
+
+                <Assistant />
             </div>
         </div>
     </div>

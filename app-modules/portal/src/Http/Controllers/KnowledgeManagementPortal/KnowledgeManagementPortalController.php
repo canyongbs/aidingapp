@@ -83,6 +83,8 @@ class KnowledgeManagementPortalController extends Controller
                 )
             ),
             'footer_logo' => Vite::asset('resources/svg/CGBS_Logo_FullColor_Light.svg'),
+            'assistant_send_message_url' => auth()->guard('contact')->user() ? URL::signedRoute('ai.portal-assistants.messages.send') : null,
+            'websockets_config' => auth()->guard('contact')->user() ? config('filament.broadcasting.echo') : null,
         ]);
     }
 }
