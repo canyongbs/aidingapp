@@ -5,6 +5,7 @@ namespace AidingApp\Ai\Models;
 use AidingApp\Ai\Database\Factories\AiMessageFileFactory;
 use AidingApp\Ai\Models\Contracts\AiFile;
 use AidingApp\IntegrationOpenAi\Models\OpenAiVectorStore;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,9 +16,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
-/**
- * @mixin IdeHelperAiMessageFile
- */
 class AiMessageFile extends Model implements AiFile, HasMedia
 {
     /** @use HasFactory<AiMessageFileFactory> */
@@ -49,6 +47,16 @@ class AiMessageFile extends Model implements AiFile, HasMedia
     {
         $this->addMediaCollection('files')
             ->singleFile();
+    }
+
+    /**
+     * @return Builder
+     */
+    public function prunable(): Builder
+    {
+        return static::query()
+            ->whereNotNull('deleted_at')
+            ->where('deleted_at', '<=', now()->subDays(7));
     }
 
     public function getKey(): string

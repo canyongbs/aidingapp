@@ -12,9 +12,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
-/**
- * @mixin IdeHelperAiAssistant
- */
 class AiAssistant extends Model implements HasMedia
 {
     /** @use HasFactory<AiAssistantFactory> */

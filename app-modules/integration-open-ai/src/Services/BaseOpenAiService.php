@@ -4,6 +4,9 @@ namespace AidingApp\IntegrationOpenAi\Services;
 
 use AidingApp\Ai\Exceptions\MessageResponseException;
 use AidingApp\Ai\Models\AiAssistant;
+use AidingApp\Ai\Models\AiMessage;
+use AidingApp\Ai\Models\AiMessageFile;
+use AidingApp\Ai\Models\Contracts\AiFile;
 use AidingApp\Ai\Services\Contracts\AiService;
 use AidingApp\Ai\Settings\AiIntegrationsSettings;
 use AidingApp\Ai\Settings\AiSettings;
@@ -12,6 +15,7 @@ use AidingApp\Ai\Support\StreamingChunks\Image;
 use AidingApp\Ai\Support\StreamingChunks\Meta;
 use AidingApp\Ai\Support\StreamingChunks\Text;
 use AidingApp\IntegrationOpenAi\Models\OpenAiVectorStore;
+use AidingApp\IntegrationOpenAi\Prism\ValueObjects\Messages\DeveloperMessage;
 use AidingApp\IntegrationOpenAi\Services\BaseOpenAiService\Concerns\InteractsWithVectorStores;
 use App\Models\User;
 use Closure;
