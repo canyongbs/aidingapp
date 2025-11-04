@@ -7,15 +7,11 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Prunable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Concerns\AsPivot;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-/**
- * @mixin IdeHelperAiMessage
- */
 class AiMessage extends Model
 {
     /** @use HasFactory<AiMessageFactory> */
@@ -23,7 +19,6 @@ class AiMessage extends Model
 
     use HasUuids;
     use AsPivot;
-    use Prunable;
     use SoftDeletes;
 
     protected $fillable = [

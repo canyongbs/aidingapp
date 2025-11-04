@@ -22,16 +22,14 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Prism\Prism\Contracts\Message;
+use Prism\Prism\Contracts\Schema;
+use Prism\Prism\Enums\ChunkType;
+use Prism\Prism\Enums\FinishReason;
 use Prism\Prism\Exceptions\PrismRateLimitedException;
 use Prism\Prism\Prism;
-// use Prism\Prism\Contracts\Message;
-// use Prism\Prism\Contracts\Schema;
-// use Prism\Prism\Enums\ChunkType;
-// use Prism\Prism\Enums\FinishReason;
-// use Prism\Prism\Exceptions\PrismRateLimitedException;
-// use Prism\Prism\Prism;
-// use Prism\Prism\ValueObjects\Messages\AssistantMessage;
-// use Prism\Prism\ValueObjects\Messages\UserMessage;
+use Prism\Prism\ValueObjects\Messages\AssistantMessage;
+use Prism\Prism\ValueObjects\Messages\UserMessage;
 use Throwable;
 
 abstract class BaseOpenAiService implements AiService

@@ -2,7 +2,6 @@
 
 namespace AidingApp\IntegrationOpenAi\Services;
 
-
 class OpenAiGpt5NanoService extends BaseOpenAiService
 {
     public function getApiKey(): string
