@@ -39,6 +39,15 @@ use Spatie\LaravelSettings\Migrations\SettingsMigration;
 return new class () extends SettingsMigration {
     public function up(): void
     {
-        $this->migrator->add('portal.ai_support_assistant', false);
+        if (! $this->migrator->exists('portal.ai_support_assistant')) {
+            $this->migrator->add('portal.ai_support_assistant', false);
+        }
+    }
+
+    public function down(): void
+    {
+        if ($this->migrator->exists('portal.ai_support_assistant')) {
+            $this->migrator->delete('portal.ai_support_assistant');
+        }
     }
 };
