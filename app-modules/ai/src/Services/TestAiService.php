@@ -3,6 +3,7 @@
 namespace AidingApp\Ai\Services;
 
 use AidingApp\Ai\Models\AiMessage;
+use AidingApp\Ai\Models\Contracts\AiFile;
 use AidingApp\Ai\Services\Contracts\AiService;
 use AidingApp\Ai\Support\StreamingChunks\Finish;
 use AidingApp\Ai\Support\StreamingChunks\Text;

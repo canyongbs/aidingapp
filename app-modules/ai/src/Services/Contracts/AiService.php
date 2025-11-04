@@ -37,6 +37,8 @@ interface AiService
      *
      * The method should return a new unsaved `AiMessage` model with the content
      * from the AI service set only, the other attributes will be set later.
+     * 
+     * @param array<AiFile> $files
      */
     public function sendMessage(AiMessage $message, array $files, bool $hasImageGeneration = false): Closure;
 
@@ -48,6 +50,8 @@ interface AiService
      *
      * The method should return a new unsaved `AiMessage` model with the content
      * from the AI service set only, the other attributes will be set later.
+     * 
+     * @param array<AiFile> $files
      */
     public function retryMessage(AiMessage $message, array $files, bool $hasImageGeneration = false): Closure;
 

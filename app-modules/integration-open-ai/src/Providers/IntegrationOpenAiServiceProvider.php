@@ -37,19 +37,25 @@
 namespace AidingApp\IntegrationOpenAi\Providers;
 
 use AidingApp\IntegrationOpenAi\IntegrationOpenAiPlugin;
+use AidingApp\IntegrationOpenAi\Prism\AzureOpenAi;
 use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
+use Prism\Prism\Providers\Provider;
 
 class IntegrationOpenAiServiceProvider extends ServiceProvider
 {
-    public function register()
+    public function register(): void
     {
         Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new IntegrationOpenAiPlugin()));
     }
 
-    public function boot()
+    public function boot(): void
     {
-        Relation::morphMap([]);
+        $this->mergeConfigFrom(__DIR__ . '/../../config/integration-open-ai.php', 'integration-open-ai');
+
+        $this->app['prism-manager']->extend(
+            'azure_open_ai',
+            fn (): Provider => app(AzureOpenAi::class),
+        );
     }
 }
