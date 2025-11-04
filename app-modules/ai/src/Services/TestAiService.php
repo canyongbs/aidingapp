@@ -45,7 +45,7 @@ class TestAiService implements AiService
         $message->thread->save();
 
         if (! empty($files)) {
-            $message->files()->saveMany($files);
+            $message->files()->saveMany($files);        // @phpstan-ignore-line
         }
 
         return function (): Generator {

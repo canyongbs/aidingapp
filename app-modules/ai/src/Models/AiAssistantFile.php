@@ -2,14 +2,12 @@
 
 namespace AidingApp\Ai\Models;
 
-use AidingApp\Ai\Database\Factories\AiMessageFileFactory;
+use AidingApp\Ai\Database\Factories\AiAssistantFileFactory;
 use AidingApp\Ai\Models\Contracts\AiFile;
 use AidingApp\IntegrationOpenAi\Models\OpenAiVectorStore;
-use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Prunable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -17,21 +15,20 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
 /**
- * @mixin IdeHelperAiMessageFile
+ * @mixin IdeHelperAiAssistantFile
  */
-class AiMessageFile extends Model implements AiFile, HasMedia
+class AiAssistantFile extends Model implements AiFile, HasMedia
 {
-    /** @use HasFactory<AiMessageFileFactory> */
+    /** @use HasFactory<AiAssistantFileFactory> */
     use HasFactory;
 
     use HasUuids;
     use SoftDeletes;
     use InteractsWithMedia;
-    use Prunable;
 
     protected $fillable = [
         'file_id',
-        'message_id',
+        'assistant_id',
         'mime_type',
         'name',
         'temporary_url',
@@ -39,27 +36,17 @@ class AiMessageFile extends Model implements AiFile, HasMedia
     ];
 
     /**
-     * @return BelongsTo<AiMessage, $this>
+     * @return BelongsTo<AiAssistant, $this>
      */
-    public function message(): BelongsTo
+    public function assistant(): BelongsTo
     {
-        return $this->belongsTo(AiMessage::class, 'message_id');
+        return $this->belongsTo(AiAssistant::class, 'assistant_id');
     }
 
     public function registerMediaCollections(): void
     {
-        $this->addMediaCollection('files')
+        $this->addMediaCollection('file')
             ->singleFile();
-    }
-
-    /**
-     * @return Builder
-     */
-    public function prunable(): Builder
-    {
-        return static::query()
-            ->whereNotNull('deleted_at')
-            ->where('deleted_at', '<=', now()->subDays(7));
     }
 
     public function getKey(): string

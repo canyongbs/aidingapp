@@ -8,10 +8,14 @@ use AidingApp\Ai\Enums\AiModel;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
+/**
+ * @mixin IdeHelperAiAssistant
+ */
 class AiAssistant extends Model implements HasMedia
 {
     /** @use HasFactory<AiAssistantFactory> */
@@ -39,4 +43,12 @@ class AiAssistant extends Model implements HasMedia
         'archived_at' => 'datetime',
         'model' => AiModel::class,
     ];
+
+    /**
+     * @return HasMany<AiAssistantFile, $this>
+     */
+    public function files(): HasMany
+    {
+        return $this->hasMany(AiAssistantFile::class, 'assistant_id');
+    }
 }
