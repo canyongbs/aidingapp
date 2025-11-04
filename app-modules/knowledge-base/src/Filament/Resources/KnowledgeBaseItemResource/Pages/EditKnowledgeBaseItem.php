@@ -36,11 +36,14 @@
 
 namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource\Pages;
 
+use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\KnowledgeBase\Filament\Resources\Actions\DraftKnowledgeBaseItemWithAiAction;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource;
 use App\Concerns\EditPageRedirection;
 use App\Filament\Pages\Concerns\BreadcrumbCharacterLimit;
 use Filament\Actions\Action as BaseAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Actions;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
@@ -98,6 +101,12 @@ class EditKnowledgeBaseItem extends EditRecord
                         'style' => 'min-height: 32rem;',
                         'class' => 'text-gray-900 dark:bg-gray-800 dark:text-gray-100 border-2 dark:border-0 border-gray-200 rounded-none mx-4 my-2 px-8 py-4',
                     ]),
+                Actions::make([
+                    DraftKnowledgeBaseItemWithAiAction::make(),
+                ])
+                    ->visible(
+                        auth()->user()->hasLicense(LicenseType::RecruitmentCrm)
+                    ),
             ]);
     }
 

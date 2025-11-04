@@ -34,62 +34,30 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Ai\Models;
+namespace AidingApp\Ai\Enums;
 
-use AidingApp\Ai\Database\Factories\AiAssistantFactory;
-use AidingApp\Ai\Enums\AiAssistantApplication;
-use AidingApp\Ai\Enums\AiModel;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Spatie\MediaLibrary\HasMedia;
-use Spatie\MediaLibrary\InteractsWithMedia;
+use Filament\Support\Contracts\HasLabel;
 
-/**
- * @mixin IdeHelperAiAssistant
- */
-class AiAssistant extends Model implements HasMedia
+enum AiMessageLogFeature: string implements HasLabel
 {
-    /** @use HasFactory<AiAssistantFactory> */
-    use HasFactory;
+    case DraftWithAi = 'draft_with_ai';
 
-    use HasUuids;
-    use InteractsWithMedia;
-    use SoftDeletes;
+    case Conversations = 'conversations';
 
-    protected $fillable = [
-        'archived_at',
-        'assistant_id',
-        'name',
-        'application',
-        'model',
-        'is_default',
-        'description',
-        'instructions',
-        'knowledge',
-        'is_confidential',
-        'created_by_id',
-    ];
-
-    protected $casts = [
-        'application' => AiAssistantApplication::class,
-        'archived_at' => 'datetime',
-        'is_default' => 'bool',
-        'model' => AiModel::class,
-    ];
-
-    /**
-     * @return HasMany<AiAssistantFile, $this>
-     */
-    public function files(): HasMany
+    public function getLabel(): string
     {
-        return $this->hasMany(AiAssistantFile::class, 'assistant_id');
+        return match ($this) {
+            self::DraftWithAi => 'Draft With AI',
+            self::Conversations => 'Conversations',
+        };
     }
 
-    public function isDefault(): bool
+    public static function parse(string | self | null $value): ?self
     {
-        return $this->is_default ?? false;
+        if ($value instanceof self) {
+            return $value;
+        }
+
+        return self::tryFrom($value);
     }
 }

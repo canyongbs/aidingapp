@@ -34,62 +34,26 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Ai\Models;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\Ai\Database\Factories\AiAssistantFactory;
-use AidingApp\Ai\Enums\AiAssistantApplication;
-use AidingApp\Ai\Enums\AiModel;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Spatie\MediaLibrary\HasMedia;
-use Spatie\MediaLibrary\InteractsWithMedia;
-
-/**
- * @mixin IdeHelperAiAssistant
- */
-class AiAssistant extends Model implements HasMedia
-{
-    /** @use HasFactory<AiAssistantFactory> */
-    use HasFactory;
-
-    use HasUuids;
-    use InteractsWithMedia;
-    use SoftDeletes;
-
-    protected $fillable = [
-        'archived_at',
-        'assistant_id',
-        'name',
-        'application',
-        'model',
-        'is_default',
-        'description',
-        'instructions',
-        'knowledge',
-        'is_confidential',
-        'created_by_id',
-    ];
-
-    protected $casts = [
-        'application' => AiAssistantApplication::class,
-        'archived_at' => 'datetime',
-        'is_default' => 'bool',
-        'model' => AiModel::class,
-    ];
-
-    /**
-     * @return HasMany<AiAssistantFile, $this>
-     */
-    public function files(): HasMany
+return new class () extends Migration {
+    public function up(): void
     {
-        return $this->hasMany(AiAssistantFile::class, 'assistant_id');
+        Schema::table('ai_assistants', function (Blueprint $table) {
+            $table->string('application')->nullable();
+            $table->boolean('is_default')->default(false);
+            $table->string('model')->nullable();
+        });
     }
 
-    public function isDefault(): bool
+    public function down(): void
     {
-        return $this->is_default ?? false;
+        Schema::table('ai_assistants', function (Blueprint $table) {
+            $table->dropColumn('application');
+            $table->dropColumn('model');
+            $table->dropColumn('is_default');
+        });
     }
-}
+};

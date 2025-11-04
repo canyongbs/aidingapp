@@ -1,6 +1,4 @@
-<?php
-
-/*
+{{--
 <COPYRIGHT>
 
     Copyright © 2016-2025, Canyon GBS LLC. All rights reserved.
@@ -32,64 +30,31 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
+--}}
+<div class="mb-3 flex gap-4 text-base md:gap-6">
+    <div class="flex flex-shrink-0 flex-col items-end">
+        <img
+            class="h-8 w-8 rounded-full object-cover object-center"
+            src="{{ $avatarUrl }}"
+            alt="Assistant avatar"
+        >
+    </div>
 
-namespace AidingApp\Ai\Models;
-
-use AidingApp\Ai\Database\Factories\AiAssistantFactory;
-use AidingApp\Ai\Enums\AiAssistantApplication;
-use AidingApp\Ai\Enums\AiModel;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Spatie\MediaLibrary\HasMedia;
-use Spatie\MediaLibrary\InteractsWithMedia;
-
-/**
- * @mixin IdeHelperAiAssistant
- */
-class AiAssistant extends Model implements HasMedia
-{
-    /** @use HasFactory<AiAssistantFactory> */
-    use HasFactory;
-
-    use HasUuids;
-    use InteractsWithMedia;
-    use SoftDeletes;
-
-    protected $fillable = [
-        'archived_at',
-        'assistant_id',
-        'name',
-        'application',
-        'model',
-        'is_default',
-        'description',
-        'instructions',
-        'knowledge',
-        'is_confidential',
-        'created_by_id',
-    ];
-
-    protected $casts = [
-        'application' => AiAssistantApplication::class,
-        'archived_at' => 'datetime',
-        'is_default' => 'bool',
-        'model' => AiModel::class,
-    ];
-
-    /**
-     * @return HasMany<AiAssistantFile, $this>
-     */
-    public function files(): HasMany
-    {
-        return $this->hasMany(AiAssistantFile::class, 'assistant_id');
-    }
-
-    public function isDefault(): bool
-    {
-        return $this->is_default ?? false;
-    }
-}
+    <div class="prose h-36 flex-1 dark:prose-invert sm:h-20">
+        <p
+            x-data="{ content: '' }"
+            x-init="const message = @js('Hi ' . auth()->user()->name . ", I am happy to help you draft your knowledge base item for {$recordTitle}. Please describe what information you would like in the item and I will take it from there:");
+            
+            const typeWord = async (word, delay) => {
+                content += word + ' ';
+            
+                await new Promise(resolve => setTimeout(resolve, delay));
+            };
+            
+            for (const word of message.split(' ')) {
+                await typeWord(word, Math.floor(Math.random() * 100));
+            }"
+            x-text="content"
+        ></p>
+    </div>
+</div>

@@ -36,60 +36,37 @@
 
 namespace AidingApp\Ai\Models;
 
-use AidingApp\Ai\Database\Factories\AiAssistantFactory;
-use AidingApp\Ai\Enums\AiAssistantApplication;
-use AidingApp\Ai\Enums\AiModel;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Spatie\MediaLibrary\HasMedia;
-use Spatie\MediaLibrary\InteractsWithMedia;
+use AidingApp\Ai\Enums\AiMessageLogFeature;
+use App\Models\BaseModel;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-/**
- * @mixin IdeHelperAiAssistant
- */
-class AiAssistant extends Model implements HasMedia
+class LegacyAiMessageLog extends BaseModel
 {
-    /** @use HasFactory<AiAssistantFactory> */
-    use HasFactory;
-
-    use HasUuids;
-    use InteractsWithMedia;
-    use SoftDeletes;
+    protected $table = 'assistant_chat_message_logs';
 
     protected $fillable = [
-        'archived_at',
-        'assistant_id',
-        'name',
-        'application',
-        'model',
-        'is_default',
-        'description',
-        'instructions',
-        'knowledge',
-        'is_confidential',
-        'created_by_id',
+        'message',
+        'metadata',
+        'request',
+        'sent_at',
+        'user_id',
+        'ai_assistant_name',
+        'feature',
     ];
 
     protected $casts = [
-        'application' => AiAssistantApplication::class,
-        'archived_at' => 'datetime',
-        'is_default' => 'bool',
-        'model' => AiModel::class,
+        'metadata' => 'encrypted:array',
+        'request' => 'encrypted:array',
+        'sent_at' => 'datetime',
+        'feature' => AiMessageLogFeature::class,
     ];
 
     /**
-     * @return HasMany<AiAssistantFile, $this>
+     * @return BelongsTo<User, $this>
      */
-    public function files(): HasMany
+    public function user(): BelongsTo
     {
-        return $this->hasMany(AiAssistantFile::class, 'assistant_id');
-    }
-
-    public function isDefault(): bool
-    {
-        return $this->is_default ?? false;
+        return $this->belongsTo(User::class);
     }
 }

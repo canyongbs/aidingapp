@@ -34,62 +34,42 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Ai\Models;
+namespace AidingApp\Ai\Actions;
 
-use AidingApp\Ai\Database\Factories\AiAssistantFactory;
-use AidingApp\Ai\Enums\AiAssistantApplication;
+use AidingApp\Ai\Enums\AiMessageLogFeature;
 use AidingApp\Ai\Enums\AiModel;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Spatie\MediaLibrary\HasMedia;
-use Spatie\MediaLibrary\InteractsWithMedia;
+use AidingApp\Ai\Models\LegacyAiMessageLog;
+use Illuminate\Support\Arr;
 
-/**
- * @mixin IdeHelperAiAssistant
- */
-class AiAssistant extends Model implements HasMedia
+class CompletePrompt
 {
-    /** @use HasFactory<AiAssistantFactory> */
-    use HasFactory;
-
-    use HasUuids;
-    use InteractsWithMedia;
-    use SoftDeletes;
-
-    protected $fillable = [
-        'archived_at',
-        'assistant_id',
-        'name',
-        'application',
-        'model',
-        'is_default',
-        'description',
-        'instructions',
-        'knowledge',
-        'is_confidential',
-        'created_by_id',
-    ];
-
-    protected $casts = [
-        'application' => AiAssistantApplication::class,
-        'archived_at' => 'datetime',
-        'is_default' => 'bool',
-        'model' => AiModel::class,
-    ];
-
-    /**
-     * @return HasMany<AiAssistantFile, $this>
-     */
-    public function files(): HasMany
+    public function execute(AiModel $aiModel, string $prompt, string $content): string
     {
-        return $this->hasMany(AiAssistantFile::class, 'assistant_id');
-    }
+        $service = $aiModel->getService();
 
-    public function isDefault(): bool
-    {
-        return $this->is_default ?? false;
+        $completion = $service->complete($prompt, $content);
+
+        if (auth()->hasUser()) {
+            LegacyAiMessageLog::create([
+                'message' => $content,
+                'metadata' => [
+                    'prompt' => $prompt,
+                    'completion' => $completion,
+                ],
+                'request' => [
+                    'headers' => Arr::only(
+                        request()->headers->all(),
+                        ['host', 'sec-ch-ua', 'user-agent', 'sec-ch-ua-platform', 'origin', 'referer', 'accept-language'],
+                    ),
+                    'ip' => request()->ip(),
+                ],
+                'sent_at' => now(),
+                'user_id' => auth()->id(),
+                'ai_assistant_name' => 'Institutional Advisor',
+                'feature' => AiMessageLogFeature::DraftWithAi,
+            ]);
+        }
+
+        return $completion;
     }
 }
