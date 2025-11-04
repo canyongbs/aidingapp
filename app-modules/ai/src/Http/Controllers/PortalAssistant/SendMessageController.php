@@ -36,19 +36,16 @@
 
 namespace AidingApp\Ai\Http\Controllers\PortalAssistant;
 
-use AidingApp\Ai\Actions\GetPortalAssistantInstructions;
-use AidingApp\Ai\Jobs\PortalAssistants\SendPortalAssistantMessage;
-use AidingApp\Ai\Models\PortalAssistant;
+use AidingApp\Ai\Jobs\PortalAssistant\SendMessage;
 use AidingApp\Ai\Models\PortalAssistantThread;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use Throwable;
 
 class SendMessageController
 {
-    public function __invoke(Request $request, GetPortalAssistantInstructions $getPortalAssistantInstructions, PortalAssistant $advisor): StreamedResponse | JsonResponse
+    public function __invoke(Request $request): StreamedResponse | JsonResponse
     {
         $data = $request->validate([
             'content' => ['required', 'string', 'max:25000'],
@@ -56,49 +53,20 @@ class SendMessageController
             'options' => ['nullable', 'array'],
         ]);
 
-        if ($request->query('preview')) {
-            $aiService = $advisor->model->getService();
-
-            try {
-                return new StreamedResponse(
-                    $aiService->stream(
-                        prompt: $getPortalAssistantInstructions->execute($advisor),
-                        content: $data['content'],
-                        shouldTrack: false,
-                        options: $data['options'] ?? [],
-                    ),
-                    headers: [
-                        'Content-Type' => 'text/html; charset=utf-8;',
-                        'Cache-Control' => 'no-cache',
-                        'X-Accel-Buffering' => 'no',
-                    ],
-                );
-            } catch (Throwable $exception) {
-                report($exception);
-
-                return response()->json([
-                    'message' => 'An error happened when sending your message.',
-                ], 503);
-            }
-        }
-
         $author = auth('student')->user() ?? auth('prospect')->user();
 
         if (filled($data['thread_id'] ?? null)) {
             $thread = PortalAssistantThread::query()
                 ->whereKey($data['thread_id'])
-                ->whereBelongsTo($advisor, 'advisor')
                 ->whereMorphedTo('author', $author)
                 ->firstOrFail();
         } else {
             $thread = new PortalAssistantThread();
-            $thread->advisor()->associate($advisor);
             $thread->author()->associate($author);
             $thread->save();
         }
 
-        dispatch(new SendPortalAssistantMessage(
-            $advisor,
+        dispatch(new SendMessage(
             $thread,
             $data['content'],
             request: [
