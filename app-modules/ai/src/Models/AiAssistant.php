@@ -85,4 +85,9 @@ class AiAssistant extends Model implements HasMedia
     {
         return $this->hasMany(AiAssistantFile::class, 'assistant_id');
     }
+
+    public function isDefault(): bool
+    {
+        return $this->is_default ?? false;
+    }
 }
