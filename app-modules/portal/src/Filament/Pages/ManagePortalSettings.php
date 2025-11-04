@@ -41,6 +41,7 @@ use AidingApp\Portal\Enums\GdprBannerButtonLabel;
 use AidingApp\Portal\Enums\GdprDeclineOptions;
 use AidingApp\Portal\Settings\PortalSettings;
 use App\Enums\Feature;
+use App\Features\AiSupportAssistantEnabledFeature;
 use App\Filament\Forms\Components\ColorSelect;
 use App\Models\User;
 use App\Rules\ValidUrl;
@@ -119,6 +120,10 @@ class ManagePortalSettings extends SettingsPage
                             ->visible(fn (Get $get) => $get('knowledge_management_portal_enabled'))
                             ->disabled(! Gate::check(Feature::ServiceManagement->getGateName()))
                             ->hintIcon(fn (Toggle $component) => $component->isDisabled() ? 'heroicon-m-lock-closed' : null)
+                            ->columnSpanFull(),
+                        Toggle::make('ai_support_assistant_enabled')
+                            ->label('AI Support Assistant')
+                            ->visible(AiSupportAssistantEnabledFeature::active())
                             ->columnSpanFull(),
                         Grid::make()->schema([
                             TextInput::make('page_title')

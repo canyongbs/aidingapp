@@ -56,6 +56,8 @@ class PortalSettings extends SettingsWithMedia
 
     public bool $knowledge_management_portal_requires_authentication = false;
 
+    public bool $ai_support_assistant = false;
+
     public ?string $knowledge_management_portal_primary_color = null;
 
     public ?string $knowledge_management_portal_rounding = null;
