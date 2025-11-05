@@ -32,6 +32,7 @@
 </COPYRIGHT>
 -->
 <script setup>
+    import { ChatBubbleLeftEllipsisIcon } from '@heroicons/vue/16/solid';
     import { ChatBubbleLeftRightIcon, ChevronDownIcon, PaperAirplaneIcon, XMarkIcon } from '@heroicons/vue/24/outline';
     import axios from 'axios';
     import DOMPurify from 'dompurify';
@@ -62,13 +63,29 @@
     const threadId = ref(null);
     const echo = ref(null);
     const isSending = ref(false);
+    const wordQueue = ref([]);
+    const isTyping = ref(false);
+    const autoScroll = ref(true);
 
-    const firstName = computed(() => {
-        return authStore.user?.name?.split(' ')[0] || 'there';
-    });
+    const isNearBottom = (el) => {
+        if (!el) return true;
+
+        const distanceFromBottom = el.scrollHeight - (el.scrollTop + el.clientHeight);
+        return distanceFromBottom <= 20;
+    };
+
+    const handleMessagesScroll = () => {
+        if (!messagesContainer.value) return;
+
+        autoScroll.value = isNearBottom(messagesContainer.value);
+    };
 
     const welcomeMessage = computed(() => {
-        return `Hi ${firstName.value}, I am your support assistant. I can help you find information and troubleshoot issues. How can I assist you today?`;
+        return `Hi ${authStore.user?.first_name || 'there'}, I am your support assistant. I can help you find information and troubleshoot issues. How can I assist you today?`;
+    });
+
+    const isAssistantResponding = computed(() => {
+        return messages.value.some((message) => message.author === 'assistant' && !message.isComplete);
     });
 
     const renderMarkdown = (content) => {
@@ -87,10 +104,20 @@
 
     const toggleChat = () => {
         isOpen.value = !isOpen.value;
+
+        if (isOpen.value) {
+            nextTick(() => {
+                scrollToBottom(true);
+            });
+        }
     };
 
-    const scrollToBottom = () => {
+    const scrollToBottom = (force = false) => {
         if (!messagesContainer.value) {
+            return;
+        }
+
+        if (!force && !autoScroll.value) {
             return;
         }
 
@@ -153,21 +180,60 @@
             return;
         }
 
-        messages.value[messageIndex].content += chunk;
+        if (chunk) {
+            const words = chunk.split(/(\s+)/);
+            wordQueue.value.push(...words);
 
-        if (isComplete) {
-            messages.value[messageIndex].isComplete = true;
+            if (!isTyping.value) {
+                typeNextWord(messageIndex);
+            }
         }
 
         if (error) {
             messages.value[messageIndex].error = error;
         }
 
+        if (isComplete && wordQueue.value.length === 0 && !isTyping.value) {
+            messages.value[messageIndex].isComplete = true;
+        } else if (isComplete) {
+            messages.value[messageIndex].shouldComplete = true;
+        }
+
         scrollToBottom();
     };
 
+    const typeNextWord = (messageIndex) => {
+        if (wordQueue.value.length === 0) {
+            isTyping.value = false;
+
+            if (messages.value[messageIndex]?.shouldComplete) {
+                messages.value[messageIndex].isComplete = true;
+                delete messages.value[messageIndex].shouldComplete;
+            }
+
+            return;
+        }
+
+        isTyping.value = true;
+
+        if (messageIndex === -1 || !messages.value[messageIndex]) {
+            wordQueue.value = [];
+            isTyping.value = false;
+            return;
+        }
+
+        const word = wordQueue.value.shift();
+        messages.value[messageIndex].content += word;
+
+        scrollToBottom();
+
+        const delay = word.trim() ? 50 : 0;
+
+        setTimeout(() => typeNextWord(messageIndex), delay);
+    };
+
     const sendMessage = async () => {
-        if (!message.value.trim() || isSending.value) {
+        if (!message.value.trim() || isSending.value || isAssistantResponding.value) {
             return;
         }
 
@@ -180,7 +246,10 @@
         };
 
         message.value = '';
-        adjustTextareaHeight();
+
+        nextTick(() => {
+            adjustTextareaHeight();
+        });
 
         try {
             const response = await axios.post(assistantSendMessageUrl, payload);
@@ -265,6 +334,10 @@
         }
 
         echo.value.disconnect();
+
+        if (messagesContainer.value) {
+            messagesContainer.value.removeEventListener('scroll', handleMessagesScroll);
+        }
     });
 
     watch(threadId, async (newThreadId) => {
@@ -274,6 +347,17 @@
 
         await setupWebsocket();
     });
+
+    watch(isOpen, (open) => {
+        nextTick(() => {
+            if (open && messagesContainer.value) {
+                autoScroll.value = isNearBottom(messagesContainer.value);
+                messagesContainer.value.addEventListener('scroll', handleMessagesScroll, { passive: true });
+            } else if (!open && messagesContainer.value) {
+                messagesContainer.value.removeEventListener('scroll', handleMessagesScroll);
+            }
+        });
+    });
 </script>
 
 <template>
@@ -281,111 +365,126 @@
         v-show="assistantSendMessageUrl"
         class="fixed bottom-4 end-4 z-50 flex flex-col items-end max-h-[calc(100vh-2rem)] max-w-[calc(100vw-2rem)]"
     >
-        <div
-            v-if="isOpen"
-            class="mb-4 w-[400px] max-w-full h-[650px] max-h-full bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden ring-1 ring-brand-950/5 backdrop-blur-sm"
+        <Transition
+            enter-active-class="transition-all duration-100 ease-out"
+            enter-from-class="opacity-0 scale-95 translate-y-4"
+            enter-to-class="opacity-100 scale-100 translate-y-0"
+            leave-active-class="transition-all duration-75 ease-in"
+            leave-from-class="opacity-100 scale-100 translate-y-0"
+            leave-to-class="opacity-0 scale-95 translate-y-4"
         >
             <div
-                class="bg-gradient-to-r from-brand-600 to-brand-700 text-white px-6 py-4 flex items-center justify-between shadow-md shrink-0"
+                v-if="isOpen"
+                class="mb-4 w-[400px] max-w-full h-[650px] max-h-full bg-white rounded-lg shadow-2xl flex flex-col overflow-hidden ring-1 ring-brand-950/5 backdrop-blur-sm origin-bottom-right"
             >
-                <div class="flex items-center gap-3">
-                    <div class="bg-white/20 p-2 rounded-lg">
-                        <ChatBubbleLeftRightIcon class="w-5 h-5" />
-                    </div>
-                    <h2 class="text-lg font-semibold tracking-tight">Support Assistant</h2>
-                </div>
-                <button
-                    @click="toggleChat"
-                    class="text-white/90 hover:text-white hover:bg-white/10 transition-all rounded-lg p-1.5"
-                    aria-label="Close chat"
-                >
-                    <XMarkIcon class="w-5 h-5" />
-                </button>
-            </div>
-
-            <div class="flex-1 overflow-y-auto p-6 bg-gradient-to-b from-gray-50 to-white" ref="messagesContainer">
-                <div class="flex gap-3 mb-4">
-                    <div class="shrink-0">
-                        <div class="w-8 h-8 rounded-full bg-brand-100 flex items-center justify-center">
-                            <ChatBubbleLeftRightIcon class="w-4 h-4 text-brand-600" />
-                        </div>
-                    </div>
-                    <div class="flex-1">
-                        <div class="bg-white rounded-2xl rounded-ts-sm px-4 py-3 shadow-sm border border-gray-200">
-                            <p class="text-sm text-gray-800 leading-relaxed">{{ welcomeMessage }}</p>
-                        </div>
-                    </div>
-                </div>
                 <div
-                    v-for="(chatMessage, index) in messages"
-                    :key="index"
-                    class="flex gap-3 mb-4"
-                    :class="chatMessage.author === 'user' ? 'justify-end' : ''"
+                    class="bg-gradient-to-r from-brand-600 to-brand-700 text-white px-6 py-4 flex items-center justify-between shadow-md shrink-0"
                 >
-                    <div v-if="chatMessage.author === 'assistant'" class="shrink-0">
-                        <div class="w-8 h-8 rounded-full bg-brand-100 flex items-center justify-center">
-                            <ChatBubbleLeftRightIcon class="w-4 h-4 text-brand-600" />
+                    <div class="flex items-center gap-3">
+                        <div class="bg-white/20 p-2 rounded-lg">
+                            <ChatBubbleLeftRightIcon class="w-5 h-5" />
                         </div>
+                        <h2 class="text-lg font-semibold tracking-tight">Support Assistant</h2>
                     </div>
-
-                    <div class="flex-1 max-w-[80%]">
-                        <div
-                            :class="
-                                chatMessage.author === 'assistant'
-                                    ? 'bg-white rounded-2xl rounded-ts-sm'
-                                    : 'bg-brand-50 rounded-2xl rounded-te-sm'
-                            "
-                            class="px-4 py-3 shadow-sm border border-gray-200"
-                        >
-                            <div
-                                v-if="chatMessage.author === 'assistant'"
-                                class="prose prose-sm max-w-none text-gray-800 leading-relaxed prose-p:my-0 prose-p:first:mt-0 prose-p:last:mb-0 prose-ul:my-1 prose-ol:my-1 prose-li:my-0"
-                                v-html="renderMarkdown(chatMessage.content)"
-                            ></div>
-                            <p v-else class="text-sm text-gray-800 leading-relaxed whitespace-pre-line">
-                                {{ chatMessage.content }}
-                            </p>
-
-                            <div v-if="chatMessage.error" class="text-xs text-red-500 mt-1">
-                                {{ chatMessage.error }}
-                            </div>
-
-                            <div
-                                v-if="chatMessage.author === 'assistant' && !chatMessage.isComplete"
-                                class="text-xs text-gray-400"
-                                :class="chatMessage.content ? 'mt-2' : ''"
-                            >
-                                Assistant is typing…
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="border-t border-gray-200/80 bg-white p-4 shadow-lg shrink-0">
-                <div class="flex items-end gap-2">
-                    <textarea
-                        ref="textarea"
-                        v-model="message"
-                        @input="handleInput"
-                        placeholder="Type your message..."
-                        rows="1"
-                        class="flex-1 resize-none rounded-xl border border-gray-300 px-4 py-3 text-sm leading-5 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent placeholder:text-gray-400 overflow-y-auto"
-                        style="height: 44px"
-                        @keydown.enter.exact.prevent="sendMessage"
-                        :disabled="isSending"
-                    ></textarea>
                     <button
-                        class="bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white rounded-xl p-3 font-medium transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
-                        aria-label="Send message"
-                        @click="sendMessage"
-                        :disabled="isSending || !message.trim()"
+                        @click="toggleChat"
+                        class="text-white/90 hover:text-white hover:bg-white/10 transition-all rounded-lg p-1.5"
+                        aria-label="Close chat"
                     >
-                        <PaperAirplaneIcon class="w-5 h-5" />
+                        <XMarkIcon class="w-5 h-5" />
                     </button>
                 </div>
+
+                <div class="flex-1 overflow-y-auto p-6 bg-gradient-to-b from-gray-50 to-white" ref="messagesContainer">
+                    <div class="flex gap-3 mb-4">
+                        <div class="shrink-0">
+                            <div class="w-8 h-8 rounded-full bg-brand-100 flex items-center justify-center">
+                                <ChatBubbleLeftEllipsisIcon class="w-4 h-4 text-brand-600" />
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="bg-white rounded-lg rounded-ts-sm px-4 py-3 shadow-sm border border-gray-200">
+                                <p class="text-sm text-gray-800 leading-relaxed">{{ welcomeMessage }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div
+                        v-for="(chatMessage, index) in messages"
+                        :key="index"
+                        class="flex gap-3 mb-4"
+                        :class="chatMessage.author === 'user' ? 'justify-end' : ''"
+                    >
+                        <div v-if="chatMessage.author === 'assistant'" class="shrink-0">
+                            <div class="w-8 h-8 rounded-full bg-brand-100 flex items-center justify-center">
+                                <ChatBubbleLeftEllipsisIcon class="w-4 h-4 text-brand-600" />
+                            </div>
+                        </div>
+
+                        <div class="flex-1 max-w-[80%]">
+                            <div
+                                :class="
+                                    chatMessage.author === 'assistant'
+                                        ? 'bg-white rounded-lg rounded-ts-sm'
+                                        : 'bg-brand-50 rounded-lg rounded-te-sm'
+                                "
+                                class="px-4 py-3 shadow-sm border border-gray-200"
+                            >
+                                <div
+                                    v-if="chatMessage.author === 'assistant'"
+                                    class="prose prose-sm max-w-none text-gray-800 leading-relaxed prose-p:my-0 prose-p:first:mt-0 prose-p:last:mb-0 prose-ul:my-1 prose-ol:my-1 prose-li:my-0"
+                                    v-html="renderMarkdown(chatMessage.content)"
+                                ></div>
+                                <p v-else class="text-sm text-gray-800 leading-relaxed whitespace-pre-line">
+                                    {{ chatMessage.content }}
+                                </p>
+
+                                <div v-if="chatMessage.error" class="text-xs text-red-500 mt-1">
+                                    {{ chatMessage.error }}
+                                </div>
+
+                                <div
+                                    v-if="chatMessage.author === 'assistant' && !chatMessage.isComplete"
+                                    class="flex items-center space-x-1"
+                                    :class="chatMessage.content ? 'mt-3' : ''"
+                                >
+                                    <div class="w-1.5 h-1.5 bg-brand-400 rounded-full animate-bounce"></div>
+                                    <div
+                                        class="w-1.5 h-1.5 bg-brand-400 rounded-full animate-bounce [animation-delay:0.2s]"
+                                    ></div>
+                                    <div
+                                        class="w-1.5 h-1.5 bg-brand-400 rounded-full animate-bounce [animation-delay:0.4s]"
+                                    ></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border-t border-gray-200/80 bg-white p-4 shadow-lg shrink-0">
+                    <div class="flex items-end gap-2">
+                        <textarea
+                            ref="textarea"
+                            v-model="message"
+                            @input="handleInput"
+                            placeholder="Type your message..."
+                            rows="1"
+                            class="flex-1 resize-none rounded-lg border border-gray-300 px-4 py-3 text-sm leading-5 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent placeholder:text-gray-400 overflow-y-auto"
+                            style="height: 44px"
+                            @keydown.enter.exact.prevent="sendMessage"
+                            :disabled="isSending"
+                        ></textarea>
+                        <button
+                            class="bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white rounded-lg p-3 font-medium transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+                            aria-label="Send message"
+                            @click="sendMessage"
+                            :disabled="isSending || isAssistantResponding || !message.trim()"
+                        >
+                            <PaperAirplaneIcon class="w-5 h-5" />
+                        </button>
+                    </div>
+                </div>
             </div>
-        </div>
+        </Transition>
 
         <button
             @click="toggleChat"
