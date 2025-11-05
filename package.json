@@ -30,6 +30,7 @@
         "esbuild": "^0.25.9",
         "flatpickr": "^4.6.9",
         "jquery": "^3.2",
+        "laravel-echo": "^1.14.0",
         "postcss": "^8.4.31",
         "postcss-import": "^16.1.0",
         "prettier": "^3.0.0",

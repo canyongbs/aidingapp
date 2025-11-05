@@ -32,11 +32,116 @@
 </COPYRIGHT>
 -->
 <script setup>
+    import { ref, computed } from 'vue';
+    import { ChatBubbleLeftRightIcon, ChevronDownIcon, PaperAirplaneIcon, XMarkIcon } from '@heroicons/vue/24/outline';
     import { useAssistantStore } from '../Stores/assistant.js';
+    import { useAuthStore } from '../Stores/auth.js';
 
     const { assistantSendMessageUrl } = useAssistantStore();
+    const authStore = useAuthStore();
+    
+    const isOpen = ref(false);
+    const message = ref('');
+    const textarea = ref(null);
+
+    const firstName = computed(() => {
+        return authStore.user?.name?.split(' ')[0] || 'there';
+    });
+
+    const welcomeMessage = computed(() => {
+        return `Hi ${firstName.value}, I am your support assistant. I can help you find information and troubleshoot issues. How can I assist you today?`;
+    });
+
+    const toggleChat = () => {
+        isOpen.value = !isOpen.value;
+    };
+
+    const adjustTextareaHeight = () => {
+        if (!textarea.value) return;
+        
+        // Reset height to auto to get the correct scrollHeight
+        textarea.value.style.height = 'auto';
+        
+        // Calculate the new height based on content, with a max of 3 lines
+        // Account for padding (py-3 = 12px top + 12px bottom = 24px total)
+        const lineHeight = 24; // Line height in pixels
+        const padding = 24; // Total vertical padding
+        const maxHeight = (lineHeight * 3) + padding;
+        const newHeight = Math.min(textarea.value.scrollHeight, maxHeight);
+        
+        textarea.value.style.height = `${newHeight}px`;
+    };
+
+    const handleInput = () => {
+        adjustTextareaHeight();
+    };
 </script>
 
 <template>
-    <div v-show="assistantSendMessageUrl" class="fixed bottom-4 end-4 z-50">Test Assistant</div>
+    <div v-show="assistantSendMessageUrl" class="fixed bottom-4 end-4 z-50 flex flex-col items-end max-h-[calc(100vh-2rem)] max-w-[calc(100vw-2rem)]">
+        <div
+            v-if="isOpen"
+            class="mb-4 w-[400px] max-w-full h-[650px] max-h-full bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-200/80 backdrop-blur-sm"
+        >
+            <div class="bg-gradient-to-r from-brand-600 to-brand-700 text-white px-6 py-4 flex items-center justify-between shadow-md shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="bg-white/20 p-2 rounded-lg">
+                        <ChatBubbleLeftRightIcon class="w-5 h-5" />
+                    </div>
+                    <h2 class="text-lg font-semibold tracking-tight">Assistant</h2>
+                </div>
+                <button
+                    @click="toggleChat"
+                    class="text-white/90 hover:text-white hover:bg-white/10 transition-all rounded-lg p-1.5"
+                    aria-label="Close chat"
+                >
+                    <XMarkIcon class="w-5 h-5" />
+                </button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-6 bg-gradient-to-b from-gray-50 to-white">
+                <div class="flex gap-3 mb-4">
+                    <div class="shrink-0">
+                        <div class="w-8 h-8 rounded-full bg-brand-100 flex items-center justify-center">
+                            <ChatBubbleLeftRightIcon class="w-4 h-4 text-brand-600" />
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <div class="bg-white rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm border border-gray-200">
+                            <p class="text-sm text-gray-800 leading-relaxed">{{ welcomeMessage }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-200/80 bg-white p-4 shadow-lg shrink-0">
+                <div class="flex items-end gap-2">
+                    <textarea
+                        ref="textarea"
+                        v-model="message"
+                        @input="handleInput"
+                        placeholder="Type your message..."
+                        rows="1"
+                        class="flex-1 resize-none rounded-xl border border-gray-300 px-4 py-3 text-sm leading-6 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent placeholder:text-gray-400 overflow-y-auto"
+                        style="min-height: 42px;"
+                    ></textarea>
+                    <button
+                        class="bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white rounded-xl p-3 font-medium transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+                        aria-label="Send message"
+                    >
+                        <PaperAirplaneIcon class="w-5 h-5" />
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <button
+            @click="toggleChat"
+            class="bg-gradient-to-br from-brand-600 to-brand-700 hover:from-brand-700 hover:to-brand-800 text-white rounded-full p-4 shadow-xl hover:shadow-2xl transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-brand-500/50 hover:scale-105 active:scale-95"
+            aria-label="Toggle chat assistant"
+        >
+            <ChatBubbleLeftRightIcon v-if="!isOpen" class="w-6 h-6" />
+            <ChevronDownIcon v-else class="w-6 h-6" />
+        </button>
+    </div>
 </template>
