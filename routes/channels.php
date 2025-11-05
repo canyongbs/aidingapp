@@ -34,6 +34,8 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Ai\Models\PortalAssistantThread;
+use AidingApp\Contact\Models\Contact;
 use App\Models\User;
 use Illuminate\Support\Facades\Broadcast;
 
@@ -50,4 +52,8 @@ use Illuminate\Support\Facades\Broadcast;
 
 Broadcast::channel('App.Models.User.{id}', function (User $user, int $id) {
     return (int) $user->id === (int) $id;
+});
+
+Broadcast::channel('portal-assistant-thread-{threadId}', function (Contact $user, string $threadId): bool {
+    return PortalAssistantThread::find($threadId)?->author()->is($user) ?? false;
 });

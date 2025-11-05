@@ -53,7 +53,7 @@ class SendMessageController
             'options' => ['nullable', 'array'],
         ]);
 
-        $author = auth('student')->user() ?? auth('prospect')->user();
+        $author = auth('contact')->user();
 
         if (filled($data['thread_id'] ?? null)) {
             $thread = PortalAssistantThread::query()
