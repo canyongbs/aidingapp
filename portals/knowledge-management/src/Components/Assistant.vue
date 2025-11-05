@@ -39,11 +39,13 @@
     import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
     import { useAssistantStore } from '../Stores/assistant.js';
     import { useAuthStore } from '../Stores/auth.js';
+    import { useTokenStore } from '../Stores/token.js';
 
     window.Pusher = Pusher;
 
     const { assistantSendMessageUrl, websocketsConfig } = useAssistantStore();
     const authStore = useAuthStore();
+    const { getToken } = useTokenStore();
 
     const isOpen = ref(false);
     const message = ref('');
@@ -155,7 +157,7 @@
         }
     };
 
-    const setupWebsocket = () => {
+    const setupWebsocket = async () => {
         if (!websocketsConfig || !threadId.value) {
             return;
         }
@@ -164,11 +166,36 @@
             echo.value.leave(`portal-assistant-thread-${threadId.value}`);
         }
 
+        const token = await getToken();
+
         echo.value = new Echo({
-            broadcaster: websocketsConfig.broadcaster,
-            key: websocketsConfig.key,
-            wsHost: websocketsConfig.wsHost,
-            wsPort: websocketsConfig.wsPort,
+            ...websocketsConfig,
+            authorizer: (channel, options) => {
+                return {
+                    authorize: async (socketId, callback) => {
+                        axios
+                            .post(
+                                '/api/broadcasting/auth',
+                                {
+                                    socket_id: socketId,
+                                    channel_name: channel.name,
+                                },
+                                {
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        Authorization: `Bearer ${token}`,
+                                    },
+                                },
+                            )
+                            .then((response) => {
+                                callback(false, response.data);
+                            })
+                            .catch((error) => {
+                                callback(true, error);
+                            });
+                    },
+                };
+            },
         });
 
         echo.value
@@ -178,12 +205,12 @@
             });
     };
 
-    onMounted(() => {
+    onMounted(async () => {
         if (!assistantSendMessageUrl || !websocketsConfig || !threadId.value) {
             return;
         }
 
-        setupWebsocket();
+        await setupWebsocket();
     });
 
     onUnmounted(() => {
@@ -198,12 +225,12 @@
         echo.value.disconnect();
     });
 
-    watch(threadId, (newThreadId) => {
+    watch(threadId, async (newThreadId) => {
         if (!newThreadId) {
             return;
         }
 
-        setupWebsocket();
+        await setupWebsocket();
     });
 </script>
 

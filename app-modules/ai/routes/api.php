@@ -38,9 +38,11 @@ use AidingApp\Ai\Http\Controllers\PortalAssistant\SendMessageController;
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEmbeddableAndAuthorized;
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEnabled;
 use Illuminate\Support\Facades\Route;
+use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
 Route::middleware([
     'api',
+    EnsureFrontendRequestsAreStateful::class,
     EnsureKnowledgeManagementPortalIsEnabled::class,
     EnsureKnowledgeManagementPortalIsEmbeddableAndAuthorized::class,
 ])

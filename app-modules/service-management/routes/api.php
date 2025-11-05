@@ -41,10 +41,12 @@ use AidingApp\ServiceManagement\Http\Middleware\EnsureServiceManagementFeatureIs
 use AidingApp\ServiceManagement\Http\Middleware\FeedbackManagementIsOn;
 use AidingApp\ServiceManagement\Http\Middleware\ServiceRequestTypeFeedbackIsOn;
 use Illuminate\Support\Facades\Route;
+use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
 Route::prefix('api')
     ->middleware([
         'api',
+        EnsureFrontendRequestsAreStateful::class,
     ])
     ->group(function () {
         Route::prefix('service-request-forms')
