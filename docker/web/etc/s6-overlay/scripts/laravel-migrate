@@ -25,14 +25,21 @@ fi
 if [ "${TENANT_MIGRATE:="true"}" == "true" ]; then
   echo "Processing tenant migrations..."
 
-  {
-    s6-setuidgid webuser php "$WEBUSER_HOME/artisan" tenants:artisan "migrate --database=tenant --force --isolated" \
-    && echo "Tenant migrations finished!"
-  } || {
+  output=$(s6-setuidgid webuser php "$WEBUSER_HOME/artisan" tenants:artisan "migrate --database=tenant --force --isolated" 2>&1)
+  exit_code=$?
+
+  echo "$output"
+
+  if [ $exit_code -eq 0 ]; then
+    echo "Tenant migrations finished!"
+  elif echo "$output" | grep -q "No tenant(s) found"; then
+    # No additional message needed - the command already outputs "No tenant(s) found."
+    :
+  else
     echo "Tenant migrations failed!"
 
     # TODO: Do something to send an alert that migration failed. Currently this will NOT stop the container.
-  }
+  fi
 else
     echo "Skipping tenant migrations because it was specifically disabled..."
 fi
