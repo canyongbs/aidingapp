@@ -45,7 +45,6 @@
 
     window.Pusher = Pusher;
 
-    // Configure marked options
     marked.setOptions({
         breaks: true,
         gfm: true,
@@ -284,7 +283,7 @@
     >
         <div
             v-if="isOpen"
-            class="mb-4 w-[400px] max-w-full h-[650px] max-h-full bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-200/80 backdrop-blur-sm"
+            class="mb-4 w-[400px] max-w-full h-[650px] max-h-full bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden ring-1 ring-brand-950/5 backdrop-blur-sm"
         >
             <div
                 class="bg-gradient-to-r from-brand-600 to-brand-700 text-white px-6 py-4 flex items-center justify-between shadow-md shrink-0"
@@ -293,7 +292,7 @@
                     <div class="bg-white/20 p-2 rounded-lg">
                         <ChatBubbleLeftRightIcon class="w-5 h-5" />
                     </div>
-                    <h2 class="text-lg font-semibold tracking-tight">Assistant</h2>
+                    <h2 class="text-lg font-semibold tracking-tight">Support Assistant</h2>
                 </div>
                 <button
                     @click="toggleChat"
