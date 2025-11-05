@@ -34,14 +34,22 @@
 <script setup>
     import { ChatBubbleLeftRightIcon, ChevronDownIcon, PaperAirplaneIcon, XMarkIcon } from '@heroicons/vue/24/outline';
     import axios from 'axios';
+    import DOMPurify from 'dompurify';
     import Echo from 'laravel-echo';
+    import { marked } from 'marked';
     import Pusher from 'pusher-js';
-    import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
+    import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
     import { useAssistantStore } from '../Stores/assistant.js';
     import { useAuthStore } from '../Stores/auth.js';
     import { useTokenStore } from '../Stores/token.js';
 
     window.Pusher = Pusher;
+
+    // Configure marked options
+    marked.setOptions({
+        breaks: true,
+        gfm: true,
+    });
 
     const { assistantSendMessageUrl, websocketsConfig } = useAssistantStore();
     const authStore = useAuthStore();
@@ -50,6 +58,7 @@
     const isOpen = ref(false);
     const message = ref('');
     const textarea = ref(null);
+    const messagesContainer = ref(null);
     const messages = ref([]);
     const threadId = ref(null);
     const echo = ref(null);
@@ -63,8 +72,34 @@
         return `Hi ${firstName.value}, I am your support assistant. I can help you find information and troubleshoot issues. How can I assist you today?`;
     });
 
+    const renderMarkdown = (content) => {
+        if (!content) {
+            return '';
+        }
+
+        try {
+            const html = marked.parse(content, { async: false });
+            return DOMPurify.sanitize(html);
+        } catch (error) {
+            console.error('Error rendering markdown:', error);
+            return DOMPurify.sanitize(content);
+        }
+    };
+
     const toggleChat = () => {
         isOpen.value = !isOpen.value;
+    };
+
+    const scrollToBottom = () => {
+        if (!messagesContainer.value) {
+            return;
+        }
+
+        nextTick(() => {
+            requestAnimationFrame(() => {
+                messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
+            });
+        });
     };
 
     const adjustTextareaHeight = () => {
@@ -93,6 +128,8 @@
             isComplete: true,
             error: null,
         });
+
+        scrollToBottom();
     };
 
     const addAssistantMessage = () => {
@@ -102,6 +139,8 @@
             isComplete: false,
             error: null,
         });
+
+        scrollToBottom();
 
         return messages.value.length - 1;
     };
@@ -124,6 +163,8 @@
         if (error) {
             messages.value[messageIndex].error = error;
         }
+
+        scrollToBottom();
     };
 
     const sendMessage = async () => {
@@ -155,6 +196,8 @@
         } finally {
             isSending.value = false;
         }
+
+        scrollToBottom();
     };
 
     const setupWebsocket = async () => {
@@ -261,7 +304,7 @@
                 </button>
             </div>
 
-            <div class="flex-1 overflow-y-auto p-6 bg-gradient-to-b from-gray-50 to-white">
+            <div class="flex-1 overflow-y-auto p-6 bg-gradient-to-b from-gray-50 to-white" ref="messagesContainer">
                 <div class="flex gap-3 mb-4">
                     <div class="shrink-0">
                         <div class="w-8 h-8 rounded-full bg-brand-100 flex items-center justify-center">
@@ -295,7 +338,12 @@
                             "
                             class="px-4 py-3 shadow-sm border border-gray-200"
                         >
-                            <p class="text-sm text-gray-800 leading-relaxed whitespace-pre-line">
+                            <div
+                                v-if="chatMessage.author === 'assistant'"
+                                class="prose prose-sm max-w-none text-gray-800 leading-relaxed prose-p:my-0 prose-p:first:mt-0 prose-p:last:mb-0 prose-ul:my-1 prose-ol:my-1 prose-li:my-0"
+                                v-html="renderMarkdown(chatMessage.content)"
+                            ></div>
+                            <p v-else class="text-sm text-gray-800 leading-relaxed whitespace-pre-line">
                                 {{ chatMessage.content }}
                             </p>
 
@@ -305,7 +353,8 @@
 
                             <div
                                 v-if="chatMessage.author === 'assistant' && !chatMessage.isComplete"
-                                class="text-xs text-gray-400 mt-1"
+                                class="text-xs text-gray-400"
+                                :class="chatMessage.content ? 'mt-2' : ''"
                             >
                                 Assistant is typing…
                             </div>
@@ -322,8 +371,8 @@
                         @input="handleInput"
                         placeholder="Type your message..."
                         rows="1"
-                        class="flex-1 resize-none rounded-xl border border-gray-300 px-4 py-3 text-sm leading-6 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent placeholder:text-gray-400 overflow-y-auto"
-                        style="min-height: 42px"
+                        class="flex-1 resize-none rounded-xl border border-gray-300 px-4 py-3 text-sm leading-5 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent placeholder:text-gray-400 overflow-y-auto"
+                        style="height: 44px"
                         @keydown.enter.exact.prevent="sendMessage"
                         :disabled="isSending"
                     ></textarea>
