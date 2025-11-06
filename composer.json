@@ -72,9 +72,9 @@
         "livewire/livewire": "^3.6.1",
         "maatwebsite/excel": "^3.1",
         "microsoft/microsoft-graph": "^1.109",
+        "orrison/meliorstan": "^0.3.2",
         "owen-it/laravel-auditing": "^14.0",
         "php-mime-mail-parser/php-mime-mail-parser": "^9.0",
-        "phpmd/phpmd": "^2.15",
         "saade/filament-fullcalendar": "^3.2",
         "sentry/sentry-laravel": "^4.16.0",
         "shuvroroy/filament-spatie-laravel-health": "^2.1.0",
@@ -177,12 +177,10 @@
         ],
         "generate-helper-files": [
             "@php artisan app:generate-helper-files",
-            "./vendor/bin/rector",
             "@php-cs-format"
         ],
         "lint": [
-            "./vendor/bin/phpstan analyse --memory-limit=2G",
-            "./vendor/bin/phpmd app/,app-modules/,database/,tests/,routes/ ansi phpmd.ruleset.xml --cache"
+            "./vendor/bin/phpstan analyse --memory-limit=2G"
         ],
         "checks": [
             "@format-dryrun",

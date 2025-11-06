@@ -117,7 +117,7 @@ jobs:
   test:
     strategy:
       matrix:
-        testsuite: [Landlord, Tenant]
+        testsuite: [ Landlord, Tenant ]
 
     runs-on: ubuntu-22.04
 
@@ -162,7 +162,7 @@ jobs:
       - name: Create tenant database
         run: psql -h 127.0.0.1 -d testing_landlord -U root -c 'CREATE DATABASE testing_tenant;'
         env:
-           PGPASSWORD: root
+          PGPASSWORD: root
 
       - name: Setup cache environment
         id: extcache
@@ -197,8 +197,8 @@ jobs:
         id: cache-composer
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 #4.3.0
         with:
-            path: vendor
-            key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock', 'app-modules/**/composer.lock') }}
+          path: vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock', 'app-modules/**/composer.lock') }}
 
       - if: ${{ steps.cache-composer.outputs.cache-hit != 'true' }}
         name: Install Dependencies
@@ -310,8 +310,8 @@ jobs:
         id: cache-composer
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 #4.3.0
         with:
-            path: vendor
-            key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock', 'app-modules/**/composer.lock') }}
+          path: vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock', 'app-modules/**/composer.lock') }}
 
       - if: ${{ steps.cache-composer.outputs.cache-hit != 'true' }}
         name: Install Dependencies
@@ -343,9 +343,6 @@ jobs:
 
       - name: Run PHPStan
         run: ./vendor/bin/phpstan analyse --configuration phpstan-ci.neon --no-progress
-
-      - name: Run PHP Mess Detector
-        run: ./vendor/bin/phpmd app/,app-modules/,database/,tests/,routes/ github phpmd.ruleset.xml --cache --cache-file /tmp/.phpmd.result-cache.php
 
       - name: "Save result cache"
         uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 #4.3.0

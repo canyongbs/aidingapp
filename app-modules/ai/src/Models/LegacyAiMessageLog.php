@@ -41,6 +41,9 @@ use App\Models\BaseModel;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @mixin IdeHelperLegacyAiMessageLog
+ */
 class LegacyAiMessageLog extends BaseModel
 {
     protected $table = 'assistant_chat_message_logs';
