@@ -42,6 +42,7 @@ use AidingApp\Engagement\Models\EmailTemplate;
 use AidingApp\Engagement\Models\Engagement;
 use AidingApp\Notification\Enums\NotificationChannel;
 use Filament\Actions\StaticAction;
+use Filament\Forms\Components\Actions;
 use Filament\Forms\Components\Actions\Action as FormComponentAction;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DateTimePicker;
@@ -78,7 +79,7 @@ class RelationManagerSendEngagementAction extends CreateAction
             })
             ->form(fn (Form $form) => $form->schema([
                 Select::make('channel')
-                    ->label('What would you like to send?')
+                    ->label('What would you like to send???')
                     ->options(NotificationChannel::getEngagementOptions())
                     ->default(NotificationChannel::Email->value)
                     // ->disableOptionWhen(fn (RelationManager $livewire, string $value): bool => (($value == (NotificationChannel::Sms->value) && ! $livewire->getOwnerRecord()->canRecieveSms())) || NotificationChannel::tryFrom($value)?->getCaseDisabled())
@@ -153,6 +154,10 @@ class RelationManagerSendEngagementAction extends CreateAction
                                 }))
                             ->helperText('You can insert student information by typing {{ and choosing a merge value to insert.')
                             ->columnSpanFull(),
+                        Actions::make([
+                            RelationManagerDraftWithAiAction::make()
+                                ->mergeTags($mergeTags),
+                        ]),
                     ]),
                 Fieldset::make('Send your email')
                     ->schema([
