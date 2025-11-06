@@ -42,8 +42,6 @@ use AidingApp\Engagement\Observers\EngagementBatchObserver;
 use AidingApp\Notification\Enums\NotificationChannel;
 use App\Models\BaseModel;
 use App\Models\User;
-use DOMDocument;
-use DOMXPath;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -88,23 +86,5 @@ class EngagementBatch extends BaseModel implements HasMedia
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
-    }
-
-    public static function renderWithMergeTags(string $html): string
-    {
-        $dom = new DOMDocument();
-        libxml_use_internal_errors(true);
-        $dom->loadHTML($html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
-
-        $xpath = new DOMXPath($dom);
-
-        $spans = $xpath->query("//span[@data-type='mergeTag']");
-
-        foreach ($spans as $span) {
-            $dataId = $span->getAttribute('data-id');
-            $span->nodeValue = "{{ {$dataId} }}";
-        }
-
-        return $dom->saveHTML();
     }
 }
