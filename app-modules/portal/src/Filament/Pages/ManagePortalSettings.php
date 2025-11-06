@@ -36,6 +36,7 @@
 
 namespace AidingApp\Portal\Filament\Pages;
 
+use AidingApp\Ai\Jobs\PrepareKnowledgeBaseVectorStore;
 use AidingApp\Form\Enums\Rounding;
 use AidingApp\Portal\Enums\GdprBannerButtonLabel;
 use AidingApp\Portal\Enums\GdprDeclineOptions;
@@ -224,6 +225,10 @@ class ManagePortalSettings extends SettingsPage
         }
 
         parent::save();
+
+        if (app(PortalSettings::class)->ai_support_assistant) {
+            PrepareKnowledgeBaseVectorStore::dispatch();
+        }
     }
 
     /**
