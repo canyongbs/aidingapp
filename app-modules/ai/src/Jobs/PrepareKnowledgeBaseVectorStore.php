@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -34,30 +34,44 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Ai\Database\Factories;
+namespace AidingApp\Ai\Jobs;
 
-use AidingApp\Ai\Models\PortalAssistantThread;
-use AidingApp\Contact\Models\Contact;
-use Illuminate\Database\Eloquent\Factories\Factory;
+use AidingApp\Ai\Settings\AiIntegratedAssistantSettings;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\Middleware\WithoutOverlapping;
+use Illuminate\Queue\SerializesModels;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AidingApp\Ai\Models\PortalAssistantMessage>
- */
-class PortalAssistantMessageFactory extends Factory
+class PrepareKnowledgeBaseVectorStore implements ShouldQueue
 {
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
+
+    public int $timeout = 600;
+
+    public int $tries = 24;
+
     /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
+     * @return array<object>
      */
-    public function definition(): array
+    public function middleware(): array
     {
-        return [
-            'content' => $this->faker->sentence(12),
-            'thread_id' => PortalAssistantThread::factory(),
-            'author_type' => 'contact',
-            'author_id' => Contact::factory(),
-            'is_assistant' => $this->faker->boolean(),
-        ];
+        return [(new WithoutOverlapping())->expireAfter(600)];
+    }
+
+    public function handle(): void
+    {
+        $aiService = app(AiIntegratedAssistantSettings::class)->getDefaultModel()->getService();
+
+        $files = KnowledgeBaseItem::query()->public()->get()->all();
+
+        if (! $aiService->areFilesReady($files)) {
+            $this->release(150);
+        }
     }
 }

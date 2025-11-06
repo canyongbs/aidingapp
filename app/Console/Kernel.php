@@ -36,6 +36,7 @@
 
 namespace App\Console;
 
+use AidingApp\Ai\Jobs\PrepareKnowledgeBaseVectorStore;
 use AidingApp\Audit\Models\Audit;
 use AidingApp\Engagement\Jobs\DeliverEngagements;
 use AidingApp\Engagement\Jobs\GatherAndDispatchSesS3InboundEmails;
@@ -111,6 +112,16 @@ class Kernel extends ConsoleKernel
                         });
                     })
                         ->hourly();
+
+                    $schedule->call(function () use ($tenant) {
+                        $tenant->execute(function () {
+                            dispatch(new PrepareKnowledgeBaseVectorStore());
+                        });
+                    })
+                        ->hourly()
+                        ->name("Prepare Knowledge Base Vector Store | Tenant {$tenant->domain}")
+                        ->onOneServer()
+                        ->withoutOverlapping(15);
 
                     $schedule->command("tenants:artisan \"cache:prune-stale-tags\" --tenant={$tenant->id}")
                         ->hourly()

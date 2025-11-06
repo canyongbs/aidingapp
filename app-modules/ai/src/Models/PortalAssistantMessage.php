@@ -36,8 +36,8 @@
 
 namespace AidingApp\Ai\Models;
 
+use AidingApp\Ai\Database\Factories\PortalAssistantMessageFactory;
 use App\Models\BaseModel;
-use Database\Factories\PortalAssistantMessageFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -60,13 +60,13 @@ class PortalAssistantMessage extends BaseModel
         'thread_id',
         'author_type',
         'author_id',
-        'is_advisor',
+        'is_assistant',
     ];
 
     protected $casts = [
         'next_request_options' => 'array',
         'request' => 'encrypted:array',
-        'is_advisor' => 'boolean',
+        'is_assistant' => 'boolean',
     ];
 
     /**

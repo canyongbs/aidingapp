@@ -36,6 +36,7 @@
 
 namespace AidingApp\KnowledgeBase\Models;
 
+use AidingApp\Ai\Models\Contracts\AiFile;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Division\Models\Division;
 use AidingApp\KnowledgeBase\Database\Factories\KnowledgeBaseItemFactory;
@@ -60,7 +61,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  * @mixin IdeHelperKnowledgeBaseItem
  */
 #[ObservedBy([KnowledgeBaseItemObserver::class])]
-class KnowledgeBaseItem extends BaseModel implements Auditable, HasMedia, HasTags
+class KnowledgeBaseItem extends BaseModel implements AiFile, Auditable, HasMedia, HasTags
 {
     use AuditableTrait;
     use HasUuids;
@@ -138,6 +139,21 @@ class KnowledgeBaseItem extends BaseModel implements Auditable, HasMedia, HasTag
     public function votes(): HasMany
     {
         return $this->hasMany(KnowledgeBaseArticleVote::class, 'article_id');
+    }
+
+    public function getKey(): string
+    {
+        return parent::getKey();
+    }
+
+    public function getName(): ?string
+    {
+        return $this->title;
+    }
+
+    public function getParsingResults(): ?string
+    {
+        return $this->article_details_fulltext;
     }
 
     protected function serializeDate(DateTimeInterface $date): string

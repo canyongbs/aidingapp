@@ -50,7 +50,7 @@ return new class () extends Migration {
             $table->text('context')->nullable();
             $table->text('request')->nullable();
             $table->jsonb('next_request_options')->nullable();
-            $table->boolean('is_advisor')->default(false);
+            $table->boolean('is_assistant')->default(false);
             $table->timestamps();
             $table->softDeletes();
         });

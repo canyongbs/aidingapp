@@ -42,6 +42,7 @@ use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Ai\Settings\AiIntegratedAssistantSettings;
 use AidingApp\Ai\Support\StreamingChunks\Meta;
 use AidingApp\Ai\Support\StreamingChunks\Text;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -74,11 +75,23 @@ class SendMessage implements ShouldQueue
         $message->author()->associate($this->thread->author);
         $message->content = $this->content;
         $message->request = $this->request;
-        $message->is_advisor = false;
+        $message->is_assistant = false;
         $message->save();
 
         $context = <<<EOT
-            You are an AI assistant with access to articles present in the knowledgebase. You should use these articles to help answer the user's questions. If you do not know the answer, you should respond with "I'm sorry, I don't have that information at the moment." Do not make up answers. Provide clear and concise responses based on the knowledgebase articles. Respond in a friendly and professional manner.
+            You are a helpful AI assistant for our support portal. Your role is to answer user questions by searching and referencing information from our knowledge base.
+            
+            Important guidelines:
+            - You have access to a knowledge base containing support articles and documentation
+            - Never mention "uploaded files" or suggest that the user has provided any files - the knowledge base is managed by the system, not by users
+            - Only provide answers based on information found in the knowledge base
+            - If you cannot find relevant information in the knowledge base, politely say "I don't have that information in our knowledge base at the moment" or suggest contacting support for further assistance
+            - Do not make up or assume information that isn't in the knowledge base
+            - Provide clear, concise, and accurate responses
+            - Be friendly and professional in your tone
+            - When referencing information, speak naturally about "our knowledge base" or "our documentation" rather than mentioning files or uploads
+            
+            CRITICAL: You MUST format ALL responses using Markdown. This is non-negotiable. Always use proper Markdown formatting. NEVER mention that you are responding using Markdown.
             EOT;
 
         try {
@@ -87,15 +100,15 @@ class SendMessage implements ShouldQueue
             $stream = $aiService->streamRaw(
                 prompt: $context,
                 content: $this->content,
-                files: [],
-                options: $this->thread->messages()->where('is_advisor', true)->latest()->value('next_request_options') ?? [],
+                files: KnowledgeBaseItem::query()->public()->get()->all(),
+                options: $this->thread->messages()->where('is_assistant', true)->latest()->value('next_request_options') ?? [],
             );
 
             $response = new PortalAssistantMessage();
             $response->thread()->associate($this->thread);
             $response->content = '';
             $response->context = $context;
-            $response->is_advisor = true;
+            $response->is_assistant = true;
 
             $chunkBuffer = [];
             $chunkCount = 0;
