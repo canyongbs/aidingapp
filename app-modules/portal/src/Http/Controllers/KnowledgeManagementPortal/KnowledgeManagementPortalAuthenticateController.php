@@ -85,8 +85,8 @@ class KnowledgeManagementPortalAuthenticateController extends Controller
             'has_assets' => auth()->guard('contact')->user()?->assetCheckIns()->exists() || auth()->guard('contact')->user()?->assetCheckOuts()->exists() ?: false,
             'has_license' => auth()->guard('contact')->user()?->productLicenses()->exists() ?: false,
             'has_tasks' => auth()->guard('contact')->user()?->tasks()->exists() ?: false,
-            'assistant_send_message_url' => URL::signedRoute('ai.portal-assistants.messages.send'),
-            'websockets_config' => config('filament.broadcasting.echo'),
+            'assistant_send_message_url' => app(PortalSettings::class)->ai_support_assistant ? URL::signedRoute('ai.portal-assistants.messages.send') : null,
+            'websockets_config' => app(PortalSettings::class)->ai_support_assistant ? config('filament.broadcasting.echo') : [],
         ]);
     }
 }

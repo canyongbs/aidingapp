@@ -38,6 +38,7 @@ namespace AidingApp\KnowledgeBase\Observers;
 
 use AidingApp\Ai\Jobs\PrepareKnowledgeBaseVectorStore;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use AidingApp\Portal\Settings\PortalSettings;
 
 class KnowledgeBaseItemObserver
 {
@@ -50,6 +51,8 @@ class KnowledgeBaseItemObserver
 
     public function saved(): void
     {
-        PrepareKnowledgeBaseVectorStore::dispatch();
+        if (app(PortalSettings::class)->ai_support_assistant) {
+            PrepareKnowledgeBaseVectorStore::dispatch();
+        }
     }
 }

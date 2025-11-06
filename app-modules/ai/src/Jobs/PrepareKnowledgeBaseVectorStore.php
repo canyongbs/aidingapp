@@ -38,6 +38,7 @@ namespace AidingApp\Ai\Jobs;
 
 use AidingApp\Ai\Settings\AiIntegratedAssistantSettings;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use AidingApp\Portal\Settings\PortalSettings;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -66,6 +67,10 @@ class PrepareKnowledgeBaseVectorStore implements ShouldQueue
 
     public function handle(): void
     {
+        if (! app(PortalSettings::class)->ai_support_assistant) {
+            return;
+        }
+
         $aiService = app(AiIntegratedAssistantSettings::class)->getDefaultModel()->getService();
 
         $files = KnowledgeBaseItem::query()->public()->get()->all();
