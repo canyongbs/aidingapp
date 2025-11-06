@@ -38,7 +38,10 @@ namespace AidingApp\Ai\Providers;
 
 use AidingApp\Ai\AiPlugin;
 use AidingApp\Ai\Models\AiAssistant;
+use AidingApp\Ai\Models\AiAssistantFile;
 use AidingApp\Ai\Models\AiMessage;
+use AidingApp\Ai\Models\AiMessageFile;
+use AidingApp\Ai\Models\AiThread;
 use AidingApp\Ai\Models\Prompt;
 use AidingApp\Ai\Models\PromptType;
 use Filament\Panel;
@@ -59,6 +62,9 @@ class AiServiceProvider extends ServiceProvider
             'ai_message' => AiMessage::class,
             'prompt_type' => PromptType::class,
             'prompt' => Prompt::class,
+            'ai_assistant_file' => AiAssistantFile::class,
+            'ai_message_file' => AiMessageFile::class,
+            'ai_thread' => AiThread::class,
         ]);
     }
 }
