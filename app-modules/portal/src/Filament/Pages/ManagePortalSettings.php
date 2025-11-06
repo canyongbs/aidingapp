@@ -122,7 +122,7 @@ class ManagePortalSettings extends SettingsPage
                             ->disabled(! Gate::check(Feature::ServiceManagement->getGateName()))
                             ->hintIcon(fn (Toggle $component) => $component->isDisabled() ? 'heroicon-m-lock-closed' : null)
                             ->columnSpanFull(),
-                        Toggle::make('ai_support_assistant_enabled')
+                        Toggle::make('ai_support_assistant')
                             ->label('AI Support Assistant')
                             ->visible(AiSupportAssistantEnabledFeature::active())
                             ->columnSpanFull(),
