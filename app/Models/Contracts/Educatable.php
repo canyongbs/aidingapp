@@ -48,4 +48,6 @@ interface Educatable
     public static function displayEmailKey(): string;
 
     public static function getLicenseType(): LicenseType;
+
+    public static function getLabel(): string;
 }

@@ -317,4 +317,9 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
             get: fn (?string $value, array $attributes) => $attributes[$this->displayNameKey()],
         );
     }
+
+    public static function getLabel(): string
+    {
+        return 'contact';
+    }
 }
