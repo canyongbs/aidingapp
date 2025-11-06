@@ -79,7 +79,7 @@ class RelationManagerSendEngagementAction extends CreateAction
             })
             ->form(fn (Form $form) => $form->schema([
                 Select::make('channel')
-                    ->label('What would you like to send???')
+                    ->label('What would you like to send?')
                     ->options(NotificationChannel::getEngagementOptions())
                     ->default(NotificationChannel::Email->value)
                     // ->disableOptionWhen(fn (RelationManager $livewire, string $value): bool => (($value == (NotificationChannel::Sms->value) && ! $livewire->getOwnerRecord()->canRecieveSms())) || NotificationChannel::tryFrom($value)?->getCaseDisabled())
