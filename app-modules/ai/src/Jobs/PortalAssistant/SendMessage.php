@@ -100,7 +100,7 @@ class SendMessage implements ShouldQueue
             $stream = $aiService->streamRaw(
                 prompt: $context,
                 content: $this->content,
-                files: KnowledgeBaseItem::query()->public()->get()->all(),
+                files: KnowledgeBaseItem::query()->public()->get(['id'])->all(),
                 options: $this->thread->messages()->where('is_assistant', true)->latest()->value('next_request_options') ?? [],
             );
 

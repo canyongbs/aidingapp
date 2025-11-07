@@ -36,11 +36,12 @@
 
 namespace AidingApp\Ai\Database\Factories;
 
+use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Contact\Models\Contact;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AidingApp\Ai\Models\PortalAssistantThread>
+ * @extends Factory<PortalAssistantThread>
  */
 class PortalAssistantThreadFactory extends Factory
 {
@@ -52,7 +53,7 @@ class PortalAssistantThreadFactory extends Factory
     public function definition(): array
     {
         return [
-            'author_type' => 'contact',
+            'author_type' => (new Contact())->getMorphClass(),
             'author_id' => Contact::factory(),
         ];
     }

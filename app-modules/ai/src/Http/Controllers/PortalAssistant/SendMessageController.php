@@ -49,8 +49,7 @@ class SendMessageController
     {
         $data = $request->validate([
             'content' => ['required', 'string', 'max:25000'],
-            'thread_id' => ['nullable', 'string', 'max:255'],
-            'options' => ['nullable', 'array'],
+            'thread_id' => ['nullable', 'uuid'],
         ]);
 
         $author = auth('contact')->user();
