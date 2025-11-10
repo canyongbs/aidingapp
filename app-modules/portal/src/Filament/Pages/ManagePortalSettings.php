@@ -41,7 +41,6 @@ use AidingApp\Portal\Enums\GdprBannerButtonLabel;
 use AidingApp\Portal\Enums\GdprDeclineOptions;
 use AidingApp\Portal\Settings\PortalSettings;
 use App\Enums\Feature;
-use App\Features\AiSupportAssistantEnabledFeature;
 use App\Filament\Forms\Components\ColorSelect;
 use App\Models\User;
 use App\Rules\ValidUrl;
@@ -123,7 +122,6 @@ class ManagePortalSettings extends SettingsPage
                             ->columnSpanFull(),
                         Toggle::make('ai_support_assistant_enabled')
                             ->label('AI Support Assistant')
-                            ->visible(AiSupportAssistantEnabledFeature::active())
                             ->columnSpanFull(),
                         Grid::make()->schema([
                             TextInput::make('page_title')
