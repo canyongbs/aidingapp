@@ -70,16 +70,13 @@
         },
     );
 
-    watch(
-        activeStep,
-        async function (newStep) {
-            if (!newStep || isGeneratingQuestions.value) {
-                return;
-            }
-
-            await checkAndGenerateQuestions(newStep);
+    watch(activeStep, async function (newStep) {
+        if (!newStep || isGeneratingQuestions.value) {
+            return;
         }
-    );
+
+        await checkAndGenerateQuestions(newStep);
+    });
 
     onMounted(function () {
         getData();
@@ -124,7 +121,7 @@
             for (let i = 0; i < targetIndex; i++) {
                 const stepToValidate = stepNames[i];
                 const stepNode = getNode(stepToValidate);
-                
+
                 if (stepNode) {
                     stepNode.walk((node) => {
                         node.store.set(
@@ -164,8 +161,6 @@
         submitForm: async (data, node) => {
             node.clearErrors();
 
-            
-
             const { post } = consumer();
 
             post(props.apiUrl + '/service-request/create/' + route.params.typeId, data)
@@ -188,15 +183,26 @@
         }
 
         const formKitSchema = schema.value;
-        
+
         if (!formKitSchema || !formKitSchema.children) {
             return;
         }
 
-        const rootChildren = Array.isArray(formKitSchema.children) ? formKitSchema.children : Object.values(formKitSchema.children);
+        const rootChildren = Array.isArray(formKitSchema.children)
+            ? formKitSchema.children
+            : Object.values(formKitSchema.children);
 
-        const formBody = rootChildren.find((child) => child && child.$el === 'div' && ((child.attrs && child.attrs.class === 'form-body') || (child.attrs && child.attrs.class && child.attrs.class.includes && child.attrs.class.includes('form-body'))));
-        
+        const formBody = rootChildren.find(
+            (child) =>
+                child &&
+                child.$el === 'div' &&
+                ((child.attrs && child.attrs.class === 'form-body') ||
+                    (child.attrs &&
+                        child.attrs.class &&
+                        child.attrs.class.includes &&
+                        child.attrs.class.includes('form-body'))),
+        );
+
         if (!formBody || !formBody.children) {
             return;
         }
@@ -205,14 +211,16 @@
 
         const groups = sections
             .filter((sectionNode) => sectionNode && sectionNode.$el === 'section')
-            .map((section) => (Array.isArray(section.children) ? section.children[0] : Object.values(section.children)[0]))
+            .map((section) =>
+                Array.isArray(section.children) ? section.children[0] : Object.values(section.children)[0],
+            )
             .filter(Boolean);
 
         const stepNames = groups.map((group) => group.name || group.id).filter(Boolean);
-            const lastStepName = stepNames[stepNames.length - 1];
-            if (stepName !== lastStepName) {
-                return;
-            }
+        const lastStepName = stepNames[stepNames.length - 1];
+        if (stepName !== lastStepName) {
+            return;
+        }
 
         const stepSchema = groups.find((group) => (group.name || group.id) === stepName);
 
@@ -221,7 +229,7 @@
         }
 
         const hasFields = stepSchema.children && stepSchema.children.length > 0;
-        
+
         if (!hasFields) {
             isGeneratingQuestions.value = true;
 
@@ -232,7 +240,7 @@
 
                 const response = await post(
                     props.apiUrl + '/service-request/create/' + route.params.typeId + '/generate-questions',
-                    { step: stepName, formData }
+                    { step: stepName, formData },
                 );
 
                 if (response.data.fields && response.data.fields.length > 0) {
@@ -297,11 +305,36 @@
                 </main>
 
                 <main class="grid gap-4" v-else>
-                    <div v-if="isGeneratingQuestions" class="fixed inset-0 z-50 flex items-center justify-center pointer-events-none" aria-hidden="false">
-                        <div role="status" aria-live="polite" class="pointer-events-auto flex items-center gap-3 px-4 py-2">
-                            <svg class="animate-spin h-4 w-4 text-brand-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                    <div
+                        v-if="isGeneratingQuestions"
+                        class="fixed inset-0 z-50 flex items-center justify-center pointer-events-none"
+                        aria-hidden="false"
+                    >
+                        <div
+                            role="status"
+                            aria-live="polite"
+                            class="pointer-events-auto flex items-center gap-3 px-4 py-2"
+                        >
+                            <svg
+                                class="animate-spin h-4 w-4 text-brand-600"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                aria-hidden="true"
+                            >
+                                <circle
+                                    class="opacity-25"
+                                    cx="12"
+                                    cy="12"
+                                    r="10"
+                                    stroke="currentColor"
+                                    stroke-width="3"
+                                ></circle>
+                                <path
+                                    class="opacity-75"
+                                    fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                                ></path>
                             </svg>
                             <span class="text-sm text-gray-700 dark:text-gray-300">Generating questions…</span>
                         </div>
