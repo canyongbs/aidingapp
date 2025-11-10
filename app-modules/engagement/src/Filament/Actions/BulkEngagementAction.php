@@ -40,6 +40,7 @@ use AidingApp\Engagement\Actions\CreateEngagementBatch;
 use AidingApp\Engagement\DataTransferObjects\EngagementCreationData;
 use AidingApp\Engagement\Models\EmailTemplate;
 use AidingApp\Notification\Enums\NotificationChannel;
+use Filament\Forms\Components\Actions;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DateTimePicker;
@@ -148,6 +149,10 @@ class BulkEngagementAction
                                 }))
                             ->helperText('You can insert student information by typing {{ and choosing a merge value to insert.')
                             ->columnSpanFull(),
+                        Actions::make([
+                            BulkDraftWithAiAction::make()
+                                ->mergeTags($mergeTags),
+                        ]),
                     ]),
                 Step::make('Schedule')
                     ->description('Choose when you would like to send this engagement.')

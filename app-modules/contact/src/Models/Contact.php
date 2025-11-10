@@ -287,6 +287,11 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
         return $this->hasMany(ProductLicense::class, 'assigned_to');
     }
 
+    public static function getLabel(): string
+    {
+        return 'contact';
+    }
+
     protected static function booted(): void
     {
         static::addGlobalScope('licensed', function (Builder $builder) {
