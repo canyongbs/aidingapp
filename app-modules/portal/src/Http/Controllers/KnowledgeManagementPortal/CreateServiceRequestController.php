@@ -44,6 +44,7 @@ use AidingApp\Form\Filament\Blocks\SelectFormFieldBlock;
 use AidingApp\Form\Filament\Blocks\TextAreaFormFieldBlock;
 use AidingApp\Form\Filament\Blocks\TextInputFormFieldBlock;
 use AidingApp\Form\Filament\Blocks\UploadFormFieldBlock;
+use AidingApp\Portal\Actions\GenerateServiceRequestQuestionsAiPrompt;
 use AidingApp\Portal\Jobs\PersistServiceRequestUpload;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
@@ -222,6 +223,34 @@ class CreateServiceRequestController extends Controller
         ]);
     }
 
+    public function generateQuestions(
+        Request $request,
+        ServiceRequestType $type
+    ): JsonResponse {
+        $contact = auth('contact')->user();
+
+        abort_if(is_null($contact), Response::HTTP_UNAUTHORIZED);
+
+        $formData = $request->input('formData', []);
+
+        $promptGenerator = new GenerateServiceRequestQuestionsAiPrompt();
+        $prompt = $promptGenerator($type, $formData, $contact);
+
+        $fields = [
+            [
+                '$formkit' => 'textarea',
+                'name' => 'question_1',
+                'label' => 'When did you first notice this issue?',
+                'validation' => 'required',
+                'help' => 'Include date and time if possible.',
+            ],
+        ];
+
+        return response()->json([
+            'fields' => $fields,
+        ]);
+    }
+
     private function processSubmissionField(
         ServiceRequestFormSubmission $submission,
         string $fieldId,
@@ -283,6 +312,9 @@ class CreateServiceRequestController extends Controller
         ]);
 
         $form->steps->prepend($this->formatStep('Main', -1, $content));
+
+        $maxOrder = $form->steps->max('order') ?? 0;
+        $form->steps->push($this->formatStep('Clarification', $maxOrder + 1, collect([])));
 
         return $form;
     }
