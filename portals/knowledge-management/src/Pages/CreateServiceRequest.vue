@@ -299,17 +299,13 @@
                 <main class="grid gap-4" v-if="submittedSuccess">
                     Thank you. Your request has been submitted.
 
-                    <button class="p-2 font-bold rounded bg-white text-brand-700 dark:text-brand-400">
+                    <button class="p-2 font-bold rounded bg-white text-brand-700">
                         <router-link :to="{ name: 'create-service-request' }"> Submit Another Request </router-link>
                     </button>
                 </main>
 
                 <main class="grid gap-4" v-else>
-                    <div
-                        v-if="isGeneratingQuestions"
-                        class="fixed inset-0 z-50 flex items-center justify-center pointer-events-none"
-                        aria-hidden="false"
-                    >
+                    <div v-if="isGeneratingQuestions" class="flex items-center justify-center">
                         <div
                             role="status"
                             aria-live="polite"
@@ -336,10 +332,10 @@
                                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
                                 ></path>
                             </svg>
-                            <span class="text-sm text-gray-700 dark:text-gray-300">Generating questions…</span>
+                            <span class="text-sm text-gray-700">Generating questions…</span>
                         </div>
                     </div>
-                    <FormKitSchema :schema="schema" :data="data" />
+                    <FormKitSchema :schema="schema" :data="data" v-show="!isGeneratingQuestions" />
                 </main>
             </Page>
         </div>

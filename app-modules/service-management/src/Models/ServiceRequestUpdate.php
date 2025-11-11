@@ -70,6 +70,8 @@ class ServiceRequestUpdate extends BaseModel implements Auditable, ProvidesATime
         'service_request_id',
         'update',
         'internal',
+        'created_by_id',
+        'created_by_type',
     ];
 
     protected $casts = [

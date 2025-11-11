@@ -40,6 +40,7 @@ use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use App\Filament\Resources\UserResource;
 use App\Models\User;
@@ -72,11 +73,13 @@ class ViewServiceRequestUpdate extends ViewRecord
                             ->getStateUsing(fn (ServiceRequestUpdate $record): string => match ($record->createdBy::class) {
                                 User::class => $record->createdBy->name,
                                 Contact::class => $record->createdBy->full_name,
+                                ServiceRequest::class => 'AI',
                                 default => throw new Exception('Unknown createdBy type ' . $record->createdBy::class),
                             })
-                            ->url(fn (ServiceRequestUpdate $record): string => match ($record->createdBy::class) {
+                            ->url(fn (ServiceRequestUpdate $record): ?string => match ($record->createdBy::class) {
                                 User::class => UserResource::getUrl('view', ['record' => $record->createdBy]),
                                 Contact::class => ContactResource::getUrl('view', ['record' => $record->createdBy]),
+                                ServiceRequest::class => null,
                                 default => throw new Exception('Unknown createdBy type ' . $record->createdBy::class),
                             }),
                         TextEntry::make('update')

@@ -12,7 +12,7 @@ class GenerateServiceRequestQuestionsAiPrompt
     /**
      * @param array<string, mixed> $formData
      */
-    public function __invoke(ServiceRequestType $serviceRequestType, array $formData, Contact $contact): string
+    public function execute(ServiceRequestType $serviceRequestType, array $formData, Contact $contact): string
     {
         $requesterName = $contact->full_name ?? $contact->name ?? 'the user';
 
