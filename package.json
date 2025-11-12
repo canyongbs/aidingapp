@@ -8,7 +8,8 @@
         "build:widgets": "npm run build:service-request-form && npm run build:service-request-feedback-form",
         "build:knowledge-management": "(cd portals/knowledge-management && vite build)",
         "build:portals": "npm run build:knowledge-management",
-        "build": "npm run build:vite && npm run build:widgets && npm run build:portals"
+        "build": "npm run build:vite && npm run build:widgets && npm run build:portals",
+        "postinstall": "node npm-postinstall.cjs"
     },
     "devDependencies": {
         "@headlessui/vue": "^1.7.16",
@@ -27,7 +28,7 @@
         "chokidar": "^3.6.0",
         "cross-env": "^7.0.3",
         "dropzone": "^5.9.2",
-        "esbuild": "^0.25.9",
+        "esbuild": "^0.27.0",
         "flatpickr": "^4.6.9",
         "jquery": "^3.2",
         "laravel-echo": "^1.14.0",
