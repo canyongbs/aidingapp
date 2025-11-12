@@ -34,29 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace App\Providers;
+use AidingApp\Ai\Http\Controllers\PortalAssistant\SendMessageController;
+use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEmbeddableAndAuthorized;
+use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEnabled;
+use Illuminate\Support\Facades\Route;
+use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
-use Illuminate\Support\Facades\Broadcast;
-use Illuminate\Support\ServiceProvider;
-
-class BroadcastServiceProvider extends ServiceProvider
-{
-    /**
-     * Bootstrap any application services.
-     */
-    public function boot(): void
-    {
-        if (blank(config('broadcasting.connections.ably.key'))) {
-            return;
-        }
-
-        Broadcast::routes();
-
-        Broadcast::routes([
-            'prefix' => 'api',
-            'middleware' => ['api', 'auth:sanctum'],
-        ]);
-
-        require base_path('routes/channels.php');
-    }
-}
+Route::middleware([
+    'api',
+    EnsureFrontendRequestsAreStateful::class,
+    EnsureKnowledgeManagementPortalIsEnabled::class,
+    EnsureKnowledgeManagementPortalIsEmbeddableAndAuthorized::class,
+])
+    ->name('ai.portal-assistants.')
+    ->prefix('api/ai/portal-assistant')
+    ->group(function () {
+        Route::post('/messages', SendMessageController::class)
+            ->middleware(['signed'])
+            ->name('messages.send');
+    });

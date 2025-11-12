@@ -34,29 +34,41 @@
 </COPYRIGHT>
 */
 
-namespace App\Providers;
+namespace AidingApp\Ai\Models;
 
-use Illuminate\Support\Facades\Broadcast;
-use Illuminate\Support\ServiceProvider;
+use AidingApp\Ai\Database\Factories\PortalAssistantThreadFactory;
+use App\Models\BaseModel;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
-class BroadcastServiceProvider extends ServiceProvider
+/**
+ * @mixin IdeHelperPortalAssistantThread
+ */
+class PortalAssistantThread extends BaseModel
 {
+    /** @use HasFactory<PortalAssistantThreadFactory> */
+    use HasFactory;
+
+    public $fillable = [
+        'author_type',
+        'author_id',
+    ];
+
     /**
-     * Bootstrap any application services.
+     * @return HasMany<PortalAssistantMessage, $this>
      */
-    public function boot(): void
+    public function messages(): HasMany
     {
-        if (blank(config('broadcasting.connections.ably.key'))) {
-            return;
-        }
+        return $this->hasMany(PortalAssistantMessage::class, 'thread_id');
+    }
 
-        Broadcast::routes();
-
-        Broadcast::routes([
-            'prefix' => 'api',
-            'middleware' => ['api', 'auth:sanctum'],
-        ]);
-
-        require base_path('routes/channels.php');
+    /**
+     * @return MorphTo<Model, $this>
+     */
+    public function author(): MorphTo
+    {
+        return $this->morphTo('author');
     }
 }

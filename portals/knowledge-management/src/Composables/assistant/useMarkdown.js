@@ -1,5 +1,3 @@
-<?php
-
 /*
 <COPYRIGHT>
 
@@ -33,30 +31,25 @@
 
 </COPYRIGHT>
 */
+import DOMPurify from 'dompurify';
+import { marked } from 'marked';
 
-namespace App\Providers;
+marked.setOptions({
+    breaks: true,
+    gfm: true,
+});
 
-use Illuminate\Support\Facades\Broadcast;
-use Illuminate\Support\ServiceProvider;
-
-class BroadcastServiceProvider extends ServiceProvider
-{
-    /**
-     * Bootstrap any application services.
-     */
-    public function boot(): void
-    {
-        if (blank(config('broadcasting.connections.ably.key'))) {
-            return;
+export function useMarkdown() {
+    const renderMarkdown = (content) => {
+        if (!content) return '';
+        try {
+            const html = marked.parse(content, { async: false });
+            return DOMPurify.sanitize(html);
+        } catch (error) {
+            console.error('Error rendering markdown:', error);
+            return DOMPurify.sanitize(content);
         }
+    };
 
-        Broadcast::routes();
-
-        Broadcast::routes([
-            'prefix' => 'api',
-            'middleware' => ['api', 'auth:sanctum'],
-        ]);
-
-        require base_path('routes/channels.php');
-    }
+    return { renderMarkdown };
 }

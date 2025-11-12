@@ -36,7 +36,9 @@
 
 namespace AidingApp\KnowledgeBase\Observers;
 
+use AidingApp\Ai\Jobs\PrepareKnowledgeBaseVectorStore;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use AidingApp\Portal\Settings\PortalSettings;
 
 class KnowledgeBaseItemObserver
 {
@@ -44,6 +46,13 @@ class KnowledgeBaseItemObserver
     {
         if (! blank($knowledgeBaseItem->article_details)) {
             $knowledgeBaseItem->article_details_fulltext = strip_tags(tiptap_converter()->asHTML($knowledgeBaseItem->article_details));
+        }
+    }
+
+    public function saved(): void
+    {
+        if (app(PortalSettings::class)->ai_support_assistant) {
+            PrepareKnowledgeBaseVectorStore::dispatch();
         }
     }
 }

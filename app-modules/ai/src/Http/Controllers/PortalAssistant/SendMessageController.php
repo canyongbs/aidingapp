@@ -34,29 +34,52 @@
 </COPYRIGHT>
 */
 
-namespace App\Providers;
+namespace AidingApp\Ai\Http\Controllers\PortalAssistant;
 
-use Illuminate\Support\Facades\Broadcast;
-use Illuminate\Support\ServiceProvider;
+use AidingApp\Ai\Jobs\PortalAssistant\SendMessage;
+use AidingApp\Ai\Models\PortalAssistantThread;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
-class BroadcastServiceProvider extends ServiceProvider
+class SendMessageController
 {
-    /**
-     * Bootstrap any application services.
-     */
-    public function boot(): void
+    public function __invoke(Request $request): StreamedResponse | JsonResponse
     {
-        if (blank(config('broadcasting.connections.ably.key'))) {
-            return;
-        }
-
-        Broadcast::routes();
-
-        Broadcast::routes([
-            'prefix' => 'api',
-            'middleware' => ['api', 'auth:sanctum'],
+        $data = $request->validate([
+            'content' => ['required', 'string', 'max:25000'],
+            'thread_id' => ['nullable', 'uuid'],
         ]);
 
-        require base_path('routes/channels.php');
+        $author = auth('contact')->user();
+
+        if (filled($data['thread_id'] ?? null)) {
+            $thread = PortalAssistantThread::query()
+                ->whereKey($data['thread_id'])
+                ->whereMorphedTo('author', $author)
+                ->firstOrFail();
+        } else {
+            $thread = new PortalAssistantThread();
+            $thread->author()->associate($author);
+            $thread->save();
+        }
+
+        dispatch(new SendMessage(
+            $thread,
+            $data['content'],
+            request: [
+                'headers' => Arr::only(
+                    request()->headers->all(),
+                    ['host', 'sec-ch-ua', 'user-agent', 'sec-ch-ua-platform', 'origin', 'referer', 'accept-language'],
+                ),
+                'ip' => request()->ip(),
+            ],
+        ));
+
+        return response()->json([
+            'message' => 'Message dispatched for processing via websockets.',
+            'thread_id' => $thread->getKey(),
+        ]);
     }
 }

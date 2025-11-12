@@ -39,10 +39,12 @@ use App\Http\Controllers\SetAzureSsoSettingController;
 use App\Http\Controllers\UtilizationMetricsApiController;
 use App\Multitenancy\Http\Middleware\CheckOlympusKey;
 use Illuminate\Support\Facades\Route;
+use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
 Route::group(['prefix' => 'v1', 'as' => 'api.', 'middleware' => ['auth:sanctum']], function () {});
 
 Route::middleware([
+    EnsureFrontendRequestsAreStateful::class,
     CheckOlympusKey::class,
 ])->group(function () {
     Route::post('/azure-sso/update', SetAzureSsoSettingController::class)

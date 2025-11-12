@@ -34,29 +34,54 @@
 </COPYRIGHT>
 */
 
-namespace App\Providers;
+namespace AidingApp\Ai\Models;
 
-use Illuminate\Support\Facades\Broadcast;
-use Illuminate\Support\ServiceProvider;
+use AidingApp\Ai\Database\Factories\PortalAssistantMessageFactory;
+use App\Models\BaseModel;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
-class BroadcastServiceProvider extends ServiceProvider
+/**
+ * @mixin IdeHelperPortalAssistantMessage
+ */
+class PortalAssistantMessage extends BaseModel
 {
+    /** @use HasFactory<PortalAssistantMessageFactory> */
+    use HasFactory;
+
+    public $fillable = [
+        'message_id',
+        'content',
+        'context',
+        'request',
+        'next_request_options',
+        'thread_id',
+        'author_type',
+        'author_id',
+        'is_assistant',
+    ];
+
+    protected $casts = [
+        'next_request_options' => 'array',
+        'request' => 'encrypted:array',
+        'is_assistant' => 'boolean',
+    ];
+
     /**
-     * Bootstrap any application services.
+     * @return BelongsTo<PortalAssistantThread, $this>
      */
-    public function boot(): void
+    public function thread(): BelongsTo
     {
-        if (blank(config('broadcasting.connections.ably.key'))) {
-            return;
-        }
+        return $this->belongsTo(PortalAssistantThread::class, 'thread_id');
+    }
 
-        Broadcast::routes();
-
-        Broadcast::routes([
-            'prefix' => 'api',
-            'middleware' => ['api', 'auth:sanctum'],
-        ]);
-
-        require base_path('routes/channels.php');
+    /**
+     * @return MorphTo<Model, $this>
+     */
+    public function author(): MorphTo
+    {
+        return $this->morphTo('author');
     }
 }

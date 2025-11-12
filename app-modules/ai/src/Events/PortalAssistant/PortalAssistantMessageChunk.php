@@ -34,29 +34,51 @@
 </COPYRIGHT>
 */
 
-namespace App\Providers;
+namespace AidingApp\Ai\Events\PortalAssistant;
 
-use Illuminate\Support\Facades\Broadcast;
-use Illuminate\Support\ServiceProvider;
+use AidingApp\Ai\Models\PortalAssistantThread;
+use Illuminate\Broadcasting\Channel;
+use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Broadcasting\PrivateChannel;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
+use Illuminate\Foundation\Events\Dispatchable;
 
-class BroadcastServiceProvider extends ServiceProvider
+class PortalAssistantMessageChunk implements ShouldBroadcastNow
 {
-    /**
-     * Bootstrap any application services.
-     */
-    public function boot(): void
+    use Dispatchable;
+    use InteractsWithSockets;
+
+    public function __construct(
+        public PortalAssistantThread $thread,
+        public string $content,
+        public bool $isComplete = false,
+        public ?string $error = null,
+    ) {}
+
+    public function broadcastAs(): string
     {
-        if (blank(config('broadcasting.connections.ably.key'))) {
-            return;
-        }
+        return 'portal-assistant-message.chunk';
+    }
 
-        Broadcast::routes();
+    /**
+     * @return array<string, mixed>
+     */
+    public function broadcastWith(): array
+    {
+        return [
+            'content' => $this->content,
+            'is_complete' => $this->isComplete,
+            'error' => $this->error,
+        ];
+    }
 
-        Broadcast::routes([
-            'prefix' => 'api',
-            'middleware' => ['api', 'auth:sanctum'],
-        ]);
+    /**
+     * @return array<int, Channel>
+     */
+    public function broadcastOn(): array
+    {
+        $channelName = "portal-assistant-thread-{$this->thread->getKey()}";
 
-        require base_path('routes/channels.php');
+        return [new PrivateChannel($channelName)];
     }
 }

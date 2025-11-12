@@ -72,7 +72,6 @@ class KnowledgeManagementPortalController extends Controller
             'rounding' => $settings->knowledge_management_portal_rounding,
             'requires_authentication' => $settings->knowledge_management_portal_requires_authentication,
             'service_management_enabled' => $settings->knowledge_management_portal_service_management,
-            'ai_support_assistant_enabled' => $settings->ai_support_assistant,
             'has_assets' => auth()->guard('contact')->user()?->assetCheckIns()->exists() || auth()->guard('contact')->user()?->assetCheckOuts()->exists() ?: false,
             'has_license' => auth()->guard('contact')->user()?->productLicenses()->exists() ?: false,
             'has_tasks' => auth()->guard('contact')->user()?->tasks()->exists() ?: false,
@@ -83,6 +82,8 @@ class KnowledgeManagementPortalController extends Controller
                 )
             ),
             'footer_logo' => Vite::asset('resources/svg/CGBS_Logo_FullColor_Light.svg'),
+            'assistant_send_message_url' => (app(PortalSettings::class)->ai_support_assistant && auth()->guard('contact')->user()) ? URL::signedRoute('ai.portal-assistants.messages.send') : null,
+            'websockets_config' => (app(PortalSettings::class)->ai_support_assistant && auth()->guard('contact')->user()) ? config('filament.broadcasting.echo') : [],
         ]);
     }
 }

@@ -36,6 +36,7 @@
 
 namespace AidingApp\Portal\Filament\Pages;
 
+use AidingApp\Ai\Jobs\PrepareKnowledgeBaseVectorStore;
 use AidingApp\Form\Enums\Rounding;
 use AidingApp\Portal\Enums\GdprBannerButtonLabel;
 use AidingApp\Portal\Enums\GdprDeclineOptions;
@@ -120,7 +121,7 @@ class ManagePortalSettings extends SettingsPage
                             ->disabled(! Gate::check(Feature::ServiceManagement->getGateName()))
                             ->hintIcon(fn (Toggle $component) => $component->isDisabled() ? 'heroicon-m-lock-closed' : null)
                             ->columnSpanFull(),
-                        Toggle::make('ai_support_assistant_enabled')
+                        Toggle::make('ai_support_assistant')
                             ->label('AI Support Assistant')
                             ->columnSpanFull(),
                         Grid::make()->schema([
@@ -222,6 +223,10 @@ class ManagePortalSettings extends SettingsPage
         }
 
         parent::save();
+
+        if (app(PortalSettings::class)->ai_support_assistant) {
+            PrepareKnowledgeBaseVectorStore::dispatch();
+        }
     }
 
     /**

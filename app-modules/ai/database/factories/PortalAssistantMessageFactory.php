@@ -34,29 +34,31 @@
 </COPYRIGHT>
 */
 
-namespace App\Providers;
+namespace AidingApp\Ai\Database\Factories;
 
-use Illuminate\Support\Facades\Broadcast;
-use Illuminate\Support\ServiceProvider;
+use AidingApp\Ai\Models\PortalAssistantMessage;
+use AidingApp\Ai\Models\PortalAssistantThread;
+use AidingApp\Contact\Models\Contact;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-class BroadcastServiceProvider extends ServiceProvider
+/**
+ * @extends Factory<PortalAssistantMessage>
+ */
+class PortalAssistantMessageFactory extends Factory
 {
     /**
-     * Bootstrap any application services.
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
      */
-    public function boot(): void
+    public function definition(): array
     {
-        if (blank(config('broadcasting.connections.ably.key'))) {
-            return;
-        }
-
-        Broadcast::routes();
-
-        Broadcast::routes([
-            'prefix' => 'api',
-            'middleware' => ['api', 'auth:sanctum'],
-        ]);
-
-        require base_path('routes/channels.php');
+        return [
+            'content' => $this->faker->sentence(12),
+            'thread_id' => PortalAssistantThread::factory(),
+            'author_type' => (new Contact())->getMorphClass(),
+            'author_id' => Contact::factory(),
+            'is_assistant' => $this->faker->boolean(),
+        ];
     }
 }

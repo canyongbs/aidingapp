@@ -56,8 +56,8 @@ use Closure;
 use Exception;
 use Generator;
 use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Prism\Prism\Contracts\Message;
@@ -497,63 +497,85 @@ abstract class BaseOpenAiService implements AiService
             return true;
         }
 
-        return DB::transaction(function () use ($files): bool {
-            $this->deleteExpiredVectorStoresForFiles($files);
+        $this->deleteExpiredVectorStoresForFiles($files);
 
-            $vectorStores = $this->getValidExistingVectorStoresForFiles($files);
+        $vectorStores = $this->getValidExistingVectorStoresForFiles($files);
+        $primaryVectorStore = Arr::first($vectorStores);
 
-            $vectorStore = Arr::first($vectorStores);
+        if (filled($primaryVectorStore)) {
+            $this->deleteOldFilesFromVectorStore($primaryVectorStore, newFiles: $files);
+        }
 
-            if (filled($vectorStore)) {
-                $this->deleteOldFilesFromVectorStore($vectorStore, newFiles: $files);
+        if (blank($primaryVectorStore)) {
+            $this->createVectorStoreForFiles($files);
+
+            return false;
+        }
+
+        $missingFiles = [];
+        $outdatedFiles = [];
+
+        foreach ($files as $file) {
+            $matchingVectorStore = null;
+
+            foreach ($vectorStores as $existingVectorStore) {
+                if ($existingVectorStore->file()->is($file)) { /** @phpstan-ignore argument.type */
+                    $matchingVectorStore = $existingVectorStore;
+
+                    break;
+                }
             }
 
-            if (blank($vectorStore)) {
+            if (blank($matchingVectorStore)) {
+                $missingFiles[] = $file;
+
+                continue;
+            }
+
+            if (
+                $file instanceof Model
+                && filled($file->getAttributeValue('updated_at'))
+                && $matchingVectorStore->getAttributeValue('updated_at')
+                && $file->getAttributeValue('updated_at')->isAfter($matchingVectorStore->getAttributeValue('updated_at'))
+            ) {
+                $outdatedFiles[] = [
+                    'file' => $file,
+                    'vectorStore' => $matchingVectorStore,
+                ];
+            }
+        }
+
+        if (filled($missingFiles) || filled($outdatedFiles)) {
+            $vectorStoreState = $this->getVectorStoreState($primaryVectorStore);
+
+            if (blank($vectorStoreState)) {
                 $this->createVectorStoreForFiles($files);
 
                 return false;
             }
 
-            $missingFiles = [];
-
-            foreach ($files as $file) {
-                foreach ($vectorStores as $vectorStore) {
-                    if ($vectorStore->file()->is($file)) { /** @phpstan-ignore argument.type */
-                        continue 2;
-                    }
-                }
-
-                $missingFiles[] = $file;
+            foreach ($missingFiles as $missingFile) {
+                $this->uploadMissingFileToVectorStore($primaryVectorStore, $missingFile);
             }
 
-            $vectorStore = Arr::first($vectorStores);
+            foreach ($outdatedFiles as $outdatedFileData) {
+                /** @var OpenAiVectorStore $outdatedVectorStore */
+                $outdatedVectorStore = $outdatedFileData['vectorStore'];
+                $this->updateFileInVectorStore($primaryVectorStore, $outdatedVectorStore, $outdatedFileData['file']);
+            }
 
-            if (filled($missingFiles)) {
+            return false;
+        }
+
+        foreach ($vectorStores as $vectorStore) {
+            if (! $vectorStore->ready_until?->isFuture()) {
                 $vectorStoreState = $this->getVectorStoreState($vectorStore);
 
-                if (blank($vectorStoreState)) {
-                    $this->createVectorStoreForFiles($files);
-
-                    return false;
-                }
-
-                foreach ($missingFiles as $missingFile) {
-                    $this->uploadMissingFileToVectorStore($vectorStore, $missingFile);
-                }
-
-                return false;
+                return $this->evaluateVectorStoreState($vectorStore, $vectorStoreState);
             }
+        }
 
-            foreach ($vectorStores as $vectorStore) {
-                if (! $vectorStore->ready_until?->isFuture()) {
-                    $vectorStoreState = $this->getVectorStoreState($vectorStore);
-
-                    return $this->evaluateVectorStoreState($vectorStore, $vectorStoreState);
-                }
-            }
-
-            return true;
-        });
+        return true;
     }
 
     public function getImageGenerationDeployment(): ?string

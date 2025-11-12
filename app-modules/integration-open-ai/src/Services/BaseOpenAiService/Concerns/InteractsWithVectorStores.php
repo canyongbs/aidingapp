@@ -42,6 +42,7 @@ use AidingApp\IntegrationOpenAi\Models\OpenAiVectorStore;
 use Carbon\CarbonImmutable;
 use Exception;
 use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
@@ -243,12 +244,15 @@ trait InteractsWithVectorStores
             }
         }
 
+        $initialVectorStores = array_slice($vectorStores, 0, 100);
+        $remainingVectorStores = array_slice($vectorStores, 100);
+
         $createVectorStoreResponse = $this->vectorStoresHttpClient()
             ->acceptJson()
             ->asJson()
             ->post('vector_stores', [
                 'name' => Arr::first($files)->getName(),
-                'file_ids' => Arr::pluck($vectorStores, 'vector_store_file_id'),
+                'file_ids' => Arr::pluck($initialVectorStores, 'vector_store_file_id'),
                 'expires_after' => [
                     'anchor' => 'last_active_at',
                     'days' => Arr::first($files) instanceof AiMessageFile ? 7 : 28,
@@ -265,9 +269,15 @@ trait InteractsWithVectorStores
             return;
         }
 
-        foreach ($vectorStores as $vectorStore) {
-            $vectorStore->vector_store_id = $createVectorStoreResponse->json('id');
+        $vectorStoreId = $createVectorStoreResponse->json('id');
+
+        foreach ($initialVectorStores as $vectorStore) {
+            $vectorStore->vector_store_id = $vectorStoreId;
             $vectorStore->save();
+        }
+
+        foreach ($remainingVectorStores as $remainingVectorStore) {
+            $this->attachFileToVectorStore($vectorStoreId, $remainingVectorStore);
         }
     }
 
@@ -277,8 +287,18 @@ trait InteractsWithVectorStores
         $vectorStore->file()->associate($file); /** @phpstan-ignore argument.type */
         $vectorStore->deployment_hash = $this->getDeploymentHash();
 
+        $parsingResults = $file->getParsingResults();
+        $name = $file->getName();
+
+        if ((blank($parsingResults) || blank($name)) && ($file instanceof Model)) {
+            $lazyLoadedFile = $file->fresh();
+
+            $parsingResults = $lazyLoadedFile->getParsingResults();
+            $name = $lazyLoadedFile->getName();
+        }
+
         $createFileResponse = $this->filesHttpClient()
-            ->attach('file', $file->getParsingResults(), (string) str($file->getName())->limit(100)->slug()->append('.md'), ['Content-Type' => 'text/markdown'])
+            ->attach('file', $parsingResults, (string) str($name)->limit(100)->slug()->append('.md'), ['Content-Type' => 'text/markdown'])
             ->post('files', [
                 'purpose' => 'assistants',
             ]);
@@ -300,21 +320,61 @@ trait InteractsWithVectorStores
     {
         $fileVectorStore = $this->uploadFileForVectorStore($file);
 
+        if (blank($fileVectorStore)) {
+            return;
+        }
+
+        $this->attachFileToVectorStore($vectorStore->vector_store_id, $fileVectorStore);
+    }
+
+    protected function attachFileToVectorStore(string $vectorStoreId, OpenAiVectorStore $fileVectorStore): void
+    {
         $createFileResponse = $this->vectorStoresHttpClient()
-            ->post("vector_stores/{$vectorStore->vector_store_id}/files", [
+            ->post("vector_stores/{$vectorStoreId}/files", [
                 'file_id' => $fileVectorStore->vector_store_file_id,
             ]);
 
         if ((! $createFileResponse->successful()) || ! $createFileResponse->json('id')) {
-            report(new Exception('Failed to attach file [' . $fileVectorStore->vector_store_file_id . '] to vector store [' . $vectorStore->vector_store_id . '], as a [' . $createFileResponse->status() . '] response was returned: [' . $createFileResponse->body() . '].'));
+            report(new Exception('Failed to attach file [' . $fileVectorStore->vector_store_file_id . '] to vector store [' . $vectorStoreId . '], as a [' . $createFileResponse->status() . '] response was returned: [' . $createFileResponse->body() . '].'));
 
             $fileVectorStore->save();
 
             return;
         }
 
-        $fileVectorStore->vector_store_id = $vectorStore->vector_store_id;
+        $fileVectorStore->vector_store_id = $vectorStoreId;
         $fileVectorStore->save();
+    }
+
+    protected function updateFileInVectorStore(OpenAiVectorStore $vectorStore, OpenAiVectorStore $oldVectorStore, AiFile $file): void
+    {
+        $newFileVectorStore = $this->uploadFileForVectorStore($file);
+
+        if (blank($newFileVectorStore)) {
+            return;
+        }
+
+        $createFileResponse = $this->vectorStoresHttpClient()
+            ->post("vector_stores/{$vectorStore->vector_store_id}/files", [
+                'file_id' => $newFileVectorStore->vector_store_file_id,
+            ]);
+
+        if ((! $createFileResponse->successful()) || ! $createFileResponse->json('id')) {
+            report(new Exception('Failed to attach updated file [' . $newFileVectorStore->vector_store_file_id . '] to vector store [' . $vectorStore->vector_store_id . '], as a [' . $createFileResponse->status() . '] response was returned: [' . $createFileResponse->body() . '].'));
+
+            $newFileVectorStore->save();
+
+            return;
+        }
+
+        if (filled($oldVectorStore->vector_store_file_id)) {
+            $this->removeFileFromVectorStore($vectorStore, $oldVectorStore->vector_store_file_id);
+            $this->deleteFile($oldVectorStore->vector_store_file_id);
+        }
+
+        $oldVectorStore->vector_store_file_id = $newFileVectorStore->vector_store_file_id;
+        $oldVectorStore->ready_until = null;
+        $oldVectorStore->save();
     }
 
     /**

@@ -1,6 +1,4 @@
-<?php
-
-/*
+<!--
 <COPYRIGHT>
 
     Copyright © 2016-2025, Canyon GBS LLC. All rights reserved.
@@ -32,31 +30,28 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
+-->
+<script setup>
+    import { ref } from 'vue';
+    import { useAssistantStore } from '../Stores/assistant.js';
+    import ChatPanel from './Assistant/ChatPanel.vue';
+    import ChatToggleButton from './Assistant/ChatToggleButton.vue';
 
-namespace App\Providers;
+    const isOpen = ref(false);
+    const { assistantSendMessageUrl } = useAssistantStore();
 
-use Illuminate\Support\Facades\Broadcast;
-use Illuminate\Support\ServiceProvider;
+    const toggleChat = () => {
+        isOpen.value = !isOpen.value;
+    };
+</script>
 
-class BroadcastServiceProvider extends ServiceProvider
-{
-    /**
-     * Bootstrap any application services.
-     */
-    public function boot(): void
-    {
-        if (blank(config('broadcasting.connections.ably.key'))) {
-            return;
-        }
+<template>
+    <div
+        v-show="assistantSendMessageUrl"
+        class="fixed bottom-4 end-4 z-50 flex flex-col items-end max-h-[calc(100vh-2rem)] max-w-[calc(100vw-2rem)]"
+    >
+        <ChatPanel :is-open="isOpen" @close="toggleChat" />
 
-        Broadcast::routes();
-
-        Broadcast::routes([
-            'prefix' => 'api',
-            'middleware' => ['api', 'auth:sanctum'],
-        ]);
-
-        require base_path('routes/channels.php');
-    }
-}
+        <ChatToggleButton :is-open="isOpen" @toggle="toggleChat" />
+    </div>
+</template>

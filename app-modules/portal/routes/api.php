@@ -66,6 +66,7 @@ Route::prefix('api')
     ->name('api.')
     ->middleware([
         'api',
+        EnsureFrontendRequestsAreStateful::class,
         EnsureKnowledgeManagementPortalIsEnabled::class,
         EnsureKnowledgeManagementPortalIsEmbeddableAndAuthorized::class,
     ])

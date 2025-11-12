@@ -34,29 +34,49 @@
 </COPYRIGHT>
 */
 
-namespace App\Providers;
+namespace AidingApp\Ai\Jobs;
 
-use Illuminate\Support\Facades\Broadcast;
-use Illuminate\Support\ServiceProvider;
+use AidingApp\Ai\Settings\AiIntegratedAssistantSettings;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use AidingApp\Portal\Settings\PortalSettings;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\Middleware\WithoutOverlapping;
+use Illuminate\Queue\SerializesModels;
 
-class BroadcastServiceProvider extends ServiceProvider
+class PrepareKnowledgeBaseVectorStore implements ShouldQueue
 {
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
+
+    public int $timeout = 600;
+
+    public int $tries = 24;
+
     /**
-     * Bootstrap any application services.
+     * @return array<object>
      */
-    public function boot(): void
+    public function middleware(): array
     {
-        if (blank(config('broadcasting.connections.ably.key'))) {
+        return [(new WithoutOverlapping())->expireAfter(600)];
+    }
+
+    public function handle(): void
+    {
+        if (! app(PortalSettings::class)->ai_support_assistant) {
             return;
         }
 
-        Broadcast::routes();
+        $aiService = app(AiIntegratedAssistantSettings::class)->getDefaultModel()->getService();
 
-        Broadcast::routes([
-            'prefix' => 'api',
-            'middleware' => ['api', 'auth:sanctum'],
-        ]);
+        $files = KnowledgeBaseItem::query()->public()->get(['id', 'updated_at'])->all();
 
-        require base_path('routes/channels.php');
+        if (! $aiService->areFilesReady($files)) {
+            $this->release(150);
+        }
     }
 }

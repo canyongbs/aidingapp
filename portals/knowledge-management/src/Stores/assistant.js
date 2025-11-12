@@ -1,5 +1,3 @@
-<?php
-
 /*
 <COPYRIGHT>
 
@@ -33,30 +31,35 @@
 
 </COPYRIGHT>
 */
+import { defineStore } from 'pinia';
+import { ref } from 'vue';
 
-namespace App\Providers;
+export const useAssistantStore = defineStore('assistant', () => {
+    const assistantSendMessageUrl = ref(null);
+    const websocketsConfig = ref(null);
 
-use Illuminate\Support\Facades\Broadcast;
-use Illuminate\Support\ServiceProvider;
-
-class BroadcastServiceProvider extends ServiceProvider
-{
-    /**
-     * Bootstrap any application services.
-     */
-    public function boot(): void
-    {
-        if (blank(config('broadcasting.connections.ably.key'))) {
-            return;
-        }
-
-        Broadcast::routes();
-
-        Broadcast::routes([
-            'prefix' => 'api',
-            'middleware' => ['api', 'auth:sanctum'],
-        ]);
-
-        require base_path('routes/channels.php');
+    async function setAssistantSendMessageUrl(url) {
+        assistantSendMessageUrl.value = url;
     }
-}
+
+    async function setWebsocketsConfig(config) {
+        websocketsConfig.value = config;
+    }
+
+    async function getAssistantSendMessageUrl() {
+        return assistantSendMessageUrl.value;
+    }
+
+    async function getWebsocketsConfig() {
+        return websocketsConfig.value;
+    }
+
+    return {
+        assistantSendMessageUrl,
+        getAssistantSendMessageUrl,
+        setAssistantSendMessageUrl,
+        websocketsConfig,
+        getWebsocketsConfig,
+        setWebsocketsConfig,
+    };
+});

@@ -1,6 +1,4 @@
-<?php
-
-/*
+<!--
 <COPYRIGHT>
 
     Copyright © 2016-2025, Canyon GBS LLC. All rights reserved.
@@ -32,31 +30,24 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
+-->
+<script setup>
+    import { ChatBubbleLeftRightIcon, ChevronDownIcon } from '@heroicons/vue/24/outline';
 
-namespace App\Providers;
+    const props = defineProps({
+        isOpen: { type: Boolean, default: false },
+    });
 
-use Illuminate\Support\Facades\Broadcast;
-use Illuminate\Support\ServiceProvider;
+    const emit = defineEmits(['toggle']);
+</script>
 
-class BroadcastServiceProvider extends ServiceProvider
-{
-    /**
-     * Bootstrap any application services.
-     */
-    public function boot(): void
-    {
-        if (blank(config('broadcasting.connections.ably.key'))) {
-            return;
-        }
-
-        Broadcast::routes();
-
-        Broadcast::routes([
-            'prefix' => 'api',
-            'middleware' => ['api', 'auth:sanctum'],
-        ]);
-
-        require base_path('routes/channels.php');
-    }
-}
+<template>
+    <button
+        @click="emit('toggle')"
+        class="bg-gradient-to-br from-brand-600 to-brand-700 hover:from-brand-700 hover:to-brand-800 text-white rounded-full p-4 shadow-xl hover:shadow-2xl transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-brand-500/50 hover:scale-105 active:scale-95"
+        aria-label="Toggle chat assistant"
+    >
+        <ChatBubbleLeftRightIcon v-if="!props.isOpen" class="w-6 h-6" />
+        <ChevronDownIcon v-else class="w-6 h-6" />
+    </button>
+</template>
