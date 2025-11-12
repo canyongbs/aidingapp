@@ -47,7 +47,10 @@ use Generator;
 
 class TestAiService implements AiService
 {
-    public function complete(string $prompt, string $content): string
+    /**
+     * @param array<AiFile> $files
+     */
+    public function complete(string $prompt, string $content, array $files = []): string
     {
         return fake()->paragraph();
     }

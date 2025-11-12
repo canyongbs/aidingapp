@@ -127,6 +127,10 @@ Route::prefix('api')
                     ->middleware(['auth:sanctum'])
                     ->name('service-request.store');
 
+                Route::post('/service-request/create/{type}/generate-questions', [CreateServiceRequestController::class, 'generateQuestions'])
+                    ->middleware(['auth:sanctum'])
+                    ->name('service-request.generate-questions');
+
                 Route::get('/service-request/request-upload-url', GetServiceRequestUploadUrl::class)
                     ->middleware(['auth:sanctum'])
                     ->name('service-request.request-upload-url');

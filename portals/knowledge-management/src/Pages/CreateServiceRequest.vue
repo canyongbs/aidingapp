@@ -32,7 +32,8 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { defineProps, onMounted, reactive, ref, watch } from 'vue';
+    import { createMessage, getNode } from '@formkit/core';
+    import { defineProps, nextTick, onMounted, reactive, ref, watch } from 'vue';
     import { useRoute } from 'vue-router';
     import wizard from '../../../../widgets/service-request-form/src/FormKit/wizard.js';
     import AppLoading from '../Components/AppLoading.vue';
@@ -56,6 +57,8 @@
     const user = ref(null);
     const schema = ref([]);
     const submittedSuccess = ref(false);
+    const hasGeneratedQuestions = ref(false);
+    const isGeneratingQuestions = ref(false);
 
     watch(
         route,
@@ -67,6 +70,14 @@
         },
     );
 
+    watch(activeStep, async function (newStep) {
+        if (!newStep || isGeneratingQuestions.value) {
+            return;
+        }
+
+        await checkAndGenerateQuestions(newStep);
+    });
+
     onMounted(function () {
         getData();
     });
@@ -77,10 +88,64 @@
         activeStep,
         plugins: [wizardPlugin],
         setStep: (target) => () => {
+            const currentStepNode = getNode(activeStep.value);
+
+            if (currentStepNode) {
+                currentStepNode.walk((node) => {
+                    node.store.set(
+                        createMessage({
+                            key: 'submitted',
+                            value: true,
+                            visible: false,
+                        }),
+                    );
+                });
+            }
+
+            if (target === 1) {
+                nextTick(() => {
+                    if (steps[activeStep.value].errorCount === 0 && steps[activeStep.value].blockingCount === 0) {
+                        setStep(target);
+                    }
+                });
+
+                return;
+            }
+
             setStep(target);
         },
         setActiveStep: (stepName) => () => {
-            data.activeStep = stepName;
+            const stepNames = Object.keys(steps);
+            const targetIndex = stepNames.indexOf(stepName);
+
+            for (let i = 0; i < targetIndex; i++) {
+                const stepToValidate = stepNames[i];
+                const stepNode = getNode(stepToValidate);
+
+                if (stepNode) {
+                    stepNode.walk((node) => {
+                        node.store.set(
+                            createMessage({
+                                key: 'submitted',
+                                value: true,
+                                visible: false,
+                            }),
+                        );
+                    });
+                }
+            }
+
+            nextTick(() => {
+                for (let i = 0; i < targetIndex; i++) {
+                    const step = stepNames[i];
+
+                    if (steps[step].errorCount > 0 || steps[step].blockingCount > 0) {
+                        return;
+                    }
+                }
+
+                data.activeStep = stepName;
+            });
         },
         showStepErrors: (stepName) => {
             return (
@@ -96,16 +161,6 @@
         submitForm: async (data, node) => {
             node.clearErrors();
 
-            // let recaptchaToken = null;
-
-            // if (formRecaptchaEnabled.value === true) {
-            //     recaptchaToken = await getRecaptchaToken(formRecaptchaKey.value);
-            // }
-
-            // if (recaptchaToken !== null) {
-            //     data['recaptcha-token'] = recaptchaToken;
-            // }
-
             const { post } = consumer();
 
             post(props.apiUrl + '/service-request/create/' + route.params.typeId, data)
@@ -117,6 +172,86 @@
                 });
         },
     });
+
+    async function checkAndGenerateQuestions(stepName) {
+        if (hasGeneratedQuestions.value) {
+            return;
+        }
+
+        if (stepName === 'Main') {
+            return;
+        }
+
+        const formKitSchema = schema.value;
+
+        if (!formKitSchema || !formKitSchema.children) {
+            return;
+        }
+
+        const rootChildren = Array.isArray(formKitSchema.children)
+            ? formKitSchema.children
+            : Object.values(formKitSchema.children);
+
+        const formBody = rootChildren.find(
+            (child) =>
+                child &&
+                child.$el === 'div' &&
+                ((child.attrs && child.attrs.class === 'form-body') ||
+                    (child.attrs &&
+                        child.attrs.class &&
+                        child.attrs.class.includes &&
+                        child.attrs.class.includes('form-body'))),
+        );
+
+        if (!formBody || !formBody.children) {
+            return;
+        }
+
+        const sections = Array.isArray(formBody.children) ? formBody.children : Object.values(formBody.children);
+
+        const groups = sections
+            .filter((sectionNode) => sectionNode && sectionNode.$el === 'section')
+            .map((section) =>
+                Array.isArray(section.children) ? section.children[0] : Object.values(section.children)[0],
+            )
+            .filter(Boolean);
+
+        const stepNames = groups.map((group) => group.name || group.id).filter(Boolean);
+        const lastStepName = stepNames[stepNames.length - 1];
+        if (stepName !== lastStepName) {
+            return;
+        }
+
+        const stepSchema = groups.find((group) => (group.name || group.id) === stepName);
+
+        if (!stepSchema) {
+            return;
+        }
+
+        const hasFields = stepSchema.children && stepSchema.children.length > 0;
+
+        if (!hasFields) {
+            isGeneratingQuestions.value = true;
+
+            try {
+                const { post } = consumer();
+                const formNode = getNode('form');
+                const formData = formNode ? formNode.value : {};
+
+                const response = await post(
+                    props.apiUrl + '/service-request/create/' + route.params.typeId + '/generate-questions',
+                    { step: stepName, formData },
+                );
+
+                if (response.data.fields && response.data.fields.length > 0) {
+                    stepSchema.children = response.data.fields;
+                    hasGeneratedQuestions.value = true;
+                }
+            } finally {
+                isGeneratingQuestions.value = false;
+            }
+        }
+    }
 
     async function getData() {
         loadingResults.value = true;
@@ -164,13 +299,41 @@
                 <main class="grid gap-4" v-if="submittedSuccess">
                     Thank you. Your request has been submitted.
 
-                    <button class="p-2 font-bold rounded bg-white text-brand-700 dark:text-brand-400">
+                    <button class="p-2 font-bold rounded bg-white text-brand-700">
                         <router-link :to="{ name: 'create-service-request' }"> Submit Another Request </router-link>
                     </button>
                 </main>
 
                 <main class="grid gap-4" v-else>
-                    <FormKitSchema :schema="schema" :data="data" />
+                    <div v-if="isGeneratingQuestions" class="flex items-center justify-center">
+                        <div
+                            role="status"
+                            aria-live="polite"
+                            class="pointer-events-auto flex items-center gap-3 px-4 py-2"
+                        >
+                            <svg
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="animate-spin h-4 w-4 text-brand-600"
+                            >
+                                <path
+                                    clip-rule="evenodd"
+                                    d="M12 19C15.866 19 19 15.866 19 12C19 8.13401 15.866 5 12 5C8.13401 5 5 8.13401 5 12C5 15.866 8.13401 19 12 19ZM12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
+                                    fill-rule="evenodd"
+                                    fill="currentColor"
+                                    opacity="0.2"
+                                ></path>
+                                <path
+                                    d="M2 12C2 6.47715 6.47715 2 12 2V5C8.13401 5 5 8.13401 5 12H2Z"
+                                    fill="currentColor"
+                                ></path>
+                            </svg>
+
+                            <span class="text-sm text-gray-700">Generating questions…</span>
+                        </div>
+                    </div>
+                    <FormKitSchema :schema="schema" :data="data" v-show="!isGeneratingQuestions" />
                 </main>
             </Page>
         </div>

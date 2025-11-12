@@ -36,6 +36,7 @@
 
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
+use AidingApp\Ai\Settings\AiIntegratedAssistantSettings;
 use AidingApp\Form\Actions\GenerateFormKitSchema;
 use AidingApp\Form\Actions\GenerateSubmissibleValidation;
 use AidingApp\Form\Actions\ResolveSubmissionAuthorFromEmail;
@@ -44,6 +45,8 @@ use AidingApp\Form\Filament\Blocks\SelectFormFieldBlock;
 use AidingApp\Form\Filament\Blocks\TextAreaFormFieldBlock;
 use AidingApp\Form\Filament\Blocks\TextInputFormFieldBlock;
 use AidingApp\Form\Filament\Blocks\UploadFormFieldBlock;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use AidingApp\Portal\Actions\GenerateServiceRequestQuestionsAiPrompt;
 use AidingApp\Portal\Jobs\PersistServiceRequestUpload;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
@@ -55,10 +58,12 @@ use AidingApp\ServiceManagement\Models\ServiceRequestFormStep;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormSubmission;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\Timeline\Events\TimelineableRecordCreated;
 use App\Http\Controllers\Controller;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\DB;
@@ -96,6 +101,8 @@ class CreateServiceRequestController extends Controller
 
         $validator = Validator::make($request->all(), [
             ...$generateValidation($form),
+            'Questions' => ['nullable', 'array'],
+            'Questions.*' => ['required', 'string'],
         ]);
 
         if ($validator->fails()) {
@@ -104,7 +111,7 @@ class CreateServiceRequestController extends Controller
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        $data = collect($validator->validated());
+        $data = collect($validator->validated())->except('Questions');
 
         $priority = $type->priorities()->findOrFail($data->pull('Main.priority'));
 
@@ -139,6 +146,32 @@ class CreateServiceRequestController extends Controller
             }
 
             $serviceRequest->refresh();
+
+            $updateUuids = collect(range(1, count($request->input('Questions', [])) * 2))
+                ->map(fn (): string => (string) Str::orderedUuid())
+                ->sort();
+
+            foreach ($request->input('Questions', []) as $question => $answer) {
+                $questionUpdate = $serviceRequest->serviceRequestUpdates()->createQuietly([
+                    'id' => $updateUuids->shift(),
+                    'update' => decrypt($question),
+                    'internal' => false,
+                    'created_by_id' => $serviceRequest->getKey(),
+                    'created_by_type' => $serviceRequest->getMorphClass(),
+                ]);
+
+                TimelineableRecordCreated::dispatch($serviceRequest, $questionUpdate);
+
+                $answerUpdate = $serviceRequest->serviceRequestUpdates()->createQuietly([
+                    'id' => $updateUuids->shift(),
+                    'update' => $answer,
+                    'internal' => false,
+                    'created_by_id' => $contact->getKey(),
+                    'created_by_type' => $contact->getMorphClass(),
+                ]);
+
+                TimelineableRecordCreated::dispatch($serviceRequest, $answerUpdate);
+            }
 
             $assignmentClass = $serviceRequest->priority->type?->assignment_type?->getAssignerClass();
 
@@ -222,6 +255,41 @@ class CreateServiceRequestController extends Controller
         ]);
     }
 
+    public function generateQuestions(
+        Request $request,
+        ServiceRequestType $type
+    ): JsonResponse {
+        $contact = auth('contact')->user();
+
+        abort_if(is_null($contact), Response::HTTP_UNAUTHORIZED);
+
+        $formData = $request->input('formData', []);
+
+        $prompt = app(GenerateServiceRequestQuestionsAiPrompt::class)->execute($type, $formData, $contact);
+
+        $aiService = app(AiIntegratedAssistantSettings::class)->getDefaultModel()->getService();
+
+        $response = $aiService->complete(
+            prompt: 'Return each question on a new line, no need to number them. There should be exactly three questions in total, clarifying the service request based on the provided form data.',
+            content: $prompt,
+            files: KnowledgeBaseItem::query()->public()->get(['id'])->all(),
+        );
+
+        $questions = array_filter(array_map(trim(...), explode(PHP_EOL, $response)));
+
+        return response()->json([
+            'fields' => Arr::map(
+                $questions,
+                fn (string $question): array => [
+                    '$formkit' => 'textarea',
+                    'name' => encrypt($question),
+                    'label' => $question,
+                    'validation' => 'required',
+                ],
+            ),
+        ]);
+    }
+
     private function processSubmissionField(
         ServiceRequestFormSubmission $submission,
         string $fieldId,
@@ -283,6 +351,9 @@ class CreateServiceRequestController extends Controller
         ]);
 
         $form->steps->prepend($this->formatStep('Main', -1, $content));
+
+        $maxOrder = $form->steps->max('order') ?? 0;
+        $form->steps->push($this->formatStep('Questions', $maxOrder + 1, collect([])));
 
         return $form;
     }

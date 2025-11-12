@@ -40,13 +40,13 @@ use AidingApp\Ai\Settings\AiIntegratedAssistantSettings;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\Portal\Settings\PortalSettings;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 
-class PrepareKnowledgeBaseVectorStore implements ShouldQueue
+class PrepareKnowledgeBaseVectorStore implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable;
     use InteractsWithQueue;
@@ -55,15 +55,9 @@ class PrepareKnowledgeBaseVectorStore implements ShouldQueue
 
     public int $timeout = 600;
 
-    public int $tries = 24;
+    public int $tries = 2;
 
-    /**
-     * @return array<object>
-     */
-    public function middleware(): array
-    {
-        return [(new WithoutOverlapping())->expireAfter(600)];
-    }
+    public int $uniqueFor = 600;
 
     public function handle(): void
     {

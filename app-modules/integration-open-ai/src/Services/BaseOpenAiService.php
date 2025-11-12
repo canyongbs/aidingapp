@@ -89,9 +89,14 @@ abstract class BaseOpenAiService implements AiService
 
     abstract public function getModel(): string;
 
-    public function complete(string $prompt, string $content): string
+    /**
+     * @param array<AiFile> $files
+     */
+    public function complete(string $prompt, string $content, array $files = []): string
     {
         $aiSettings = app(AiSettings::class);
+
+        $vectorStoreId = $this->getReadyVectorStoreId($files);
 
         try {
             $response = Prism::text()
@@ -103,6 +108,12 @@ abstract class BaseOpenAiService implements AiService
                 ])
                 ->withProviderOptions([
                     'truncation' => 'auto',
+                    ...(filled($vectorStoreId) ? [
+                        'tools' => [[
+                            'type' => 'file_search',
+                            'vector_store_ids' => [$vectorStoreId],
+                        ]],
+                    ] : []),
                 ])
                 ->withSystemPrompt($prompt)
                 ->withPrompt($content)

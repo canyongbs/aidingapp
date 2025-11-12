@@ -44,8 +44,10 @@ interface AiService
 {
     /**
      * This method is passed a prompt and should return a completion for it.
+     *
+     * @param array<AiFile> $files
      */
-    public function complete(string $prompt, string $content): string;
+    public function complete(string $prompt, string $content, array $files = []): string;
 
     /**
      * This method is passed a prompt and message and should return a stream of the response.
