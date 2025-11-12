@@ -73,7 +73,7 @@ class PrepareKnowledgeBaseVectorStore implements ShouldQueue
 
         $aiService = app(AiIntegratedAssistantSettings::class)->getDefaultModel()->getService();
 
-        $files = KnowledgeBaseItem::query()->public()->get()->all();
+        $files = KnowledgeBaseItem::query()->public()->get(['id', 'updated_at'])->all();
 
         if (! $aiService->areFilesReady($files)) {
             $this->release(150);

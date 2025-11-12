@@ -42,6 +42,7 @@ use AidingApp\IntegrationOpenAi\Models\OpenAiVectorStore;
 use Carbon\CarbonImmutable;
 use Exception;
 use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
@@ -286,8 +287,18 @@ trait InteractsWithVectorStores
         $vectorStore->file()->associate($file); /** @phpstan-ignore argument.type */
         $vectorStore->deployment_hash = $this->getDeploymentHash();
 
+        $parsingResults = $file->getParsingResults();
+        $name = $file->getName();
+
+        if ((blank($parsingResults) || blank($name)) && ($file instanceof Model)) {
+            $lazyLoadedFile = $file->fresh();
+
+            $parsingResults = $lazyLoadedFile->getParsingResults();
+            $name = $lazyLoadedFile->getName();
+        }
+
         $createFileResponse = $this->filesHttpClient()
-            ->attach('file', $file->getParsingResults(), (string) str($file->getName())->limit(100)->slug()->append('.md'), ['Content-Type' => 'text/markdown'])
+            ->attach('file', $parsingResults, (string) str($name)->limit(100)->slug()->append('.md'), ['Content-Type' => 'text/markdown'])
             ->post('files', [
                 'purpose' => 'assistants',
             ]);
