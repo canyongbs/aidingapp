@@ -62,7 +62,7 @@ class PrepareKnowledgeBaseVectorStore implements ShouldQueue
      */
     public function middleware(): array
     {
-        return [(new WithoutOverlapping())->expireAfter(600)];
+        return [(new WithoutOverlapping())->expireAfter(600)->releaseAfter(10)];
     }
 
     public function handle(): void
