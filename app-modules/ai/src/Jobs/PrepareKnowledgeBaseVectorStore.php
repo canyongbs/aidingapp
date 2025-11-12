@@ -57,7 +57,7 @@ class PrepareKnowledgeBaseVectorStore implements ShouldQueue, ShouldBeUnique
 
     public int $tries = 2;
 
-    public int $uniqueFor = 300;
+    public int $uniqueFor = 600;
 
     public function handle(): void
     {
