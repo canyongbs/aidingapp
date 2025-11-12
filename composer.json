@@ -134,8 +134,12 @@
             "@php artisan package:discover --ansi",
             "@php artisan filament:upgrade"
         ],
+        "post-install-cmd": [
+            "@php -r \"if (file_exists('vendor/ysfkaya/filament-phone-input/yarn.lock')) { unlink('vendor/ysfkaya/filament-phone-input/yarn.lock'); }\""
+        ],
         "post-update-cmd": [
-            "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
+            "@php artisan vendor:publish --tag=laravel-assets --ansi --force",
+            "@php -r \"if (file_exists('vendor/ysfkaya/filament-phone-input/yarn.lock')) { unlink('vendor/ysfkaya/filament-phone-input/yarn.lock'); }\""
         ],
         "post-root-package-install": [
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
