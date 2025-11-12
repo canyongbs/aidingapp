@@ -118,10 +118,10 @@ class Kernel extends ConsoleKernel
                             dispatch(new PrepareKnowledgeBaseVectorStore());
                         });
                     })
-                        ->hourly()
+                        ->everyFiveMinutes()
                         ->name("Prepare Knowledge Base Vector Store | Tenant {$tenant->domain}")
                         ->onOneServer()
-                        ->withoutOverlapping(15);
+                        ->withoutOverlapping(5);
 
                     $schedule->command("tenants:artisan \"cache:prune-stale-tags\" --tenant={$tenant->id}")
                         ->hourly()
