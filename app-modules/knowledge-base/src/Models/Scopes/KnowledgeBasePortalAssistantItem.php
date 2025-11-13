@@ -34,44 +34,21 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Ai\Jobs;
+namespace AidingApp\KnowledgeBase\Models\Scopes;
 
-use AidingApp\Ai\Settings\AiIntegratedAssistantSettings;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
-use AidingApp\KnowledgeBase\Models\Scopes\KnowledgeBasePortalAssistantItem;
-use AidingApp\Portal\Settings\PortalSettings;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
+use Illuminate\Database\Eloquent\Builder;
 
-class PrepareKnowledgeBaseVectorStore implements ShouldQueue, ShouldBeUnique
+class KnowledgeBasePortalAssistantItem
 {
-    use Dispatchable;
-    use InteractsWithQueue;
-    use Queueable;
-    use SerializesModels;
-
-    public int $timeout = 600;
-
-    public int $tries = 2;
-
-    public int $uniqueFor = 600;
-
-    public function handle(): void
+    /**
+     * @param Builder<KnowledgeBaseItem> $query
+     */
+    public function __invoke(Builder $query): void
     {
-        if (! app(PortalSettings::class)->ai_support_assistant) {
-            return;
-        }
-
-        $aiService = app(AiIntegratedAssistantSettings::class)->getDefaultModel()->getService();
-
-        $files = KnowledgeBaseItem::query()->tap(app(KnowledgeBasePortalAssistantItem::class))->get(['id', 'updated_at'])->all();
-
-        if (! $aiService->areFilesReady($files)) {
-            $this->release(150);
-        }
+        $query
+            ->where('public', true)
+            ->whereNotNull('title')
+            ->whereNotNull('article_details_fulltext');
     }
 }
