@@ -46,6 +46,7 @@ use AidingApp\Form\Filament\Blocks\TextAreaFormFieldBlock;
 use AidingApp\Form\Filament\Blocks\TextInputFormFieldBlock;
 use AidingApp\Form\Filament\Blocks\UploadFormFieldBlock;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use AidingApp\KnowledgeBase\Models\Scopes\KnowledgeBasePortalAssistantItem;
 use AidingApp\Portal\Actions\GenerateServiceRequestQuestionsAiPrompt;
 use AidingApp\Portal\Jobs\PersistServiceRequestUpload;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
@@ -272,7 +273,7 @@ class CreateServiceRequestController extends Controller
         $response = $aiService->complete(
             prompt: 'Return each question on a new line, no need to number them. There should be exactly three questions in total, clarifying the service request based on the provided form data.',
             content: $prompt,
-            files: KnowledgeBaseItem::query()->public()->get(['id'])->all(),
+            files: KnowledgeBaseItem::query()->tap(app(KnowledgeBasePortalAssistantItem::class))->get(['id'])->all(),
         );
 
         $questions = array_filter(array_map(trim(...), explode(PHP_EOL, $response)));

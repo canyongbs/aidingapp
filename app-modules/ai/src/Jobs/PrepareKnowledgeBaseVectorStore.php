@@ -38,6 +38,7 @@ namespace AidingApp\Ai\Jobs;
 
 use AidingApp\Ai\Settings\AiIntegratedAssistantSettings;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use AidingApp\KnowledgeBase\Models\Scopes\KnowledgeBasePortalAssistantItem;
 use AidingApp\Portal\Settings\PortalSettings;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -67,7 +68,7 @@ class PrepareKnowledgeBaseVectorStore implements ShouldQueue, ShouldBeUnique
 
         $aiService = app(AiIntegratedAssistantSettings::class)->getDefaultModel()->getService();
 
-        $files = KnowledgeBaseItem::query()->public()->get(['id', 'updated_at'])->all();
+        $files = KnowledgeBaseItem::query()->tap(app(KnowledgeBasePortalAssistantItem::class))->get(['id', 'updated_at'])->all();
 
         if (! $aiService->areFilesReady($files)) {
             $this->release(150);

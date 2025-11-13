@@ -43,6 +43,7 @@ use AidingApp\Ai\Settings\AiIntegratedAssistantSettings;
 use AidingApp\Ai\Support\StreamingChunks\Meta;
 use AidingApp\Ai\Support\StreamingChunks\Text;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use AidingApp\KnowledgeBase\Models\Scopes\KnowledgeBasePortalAssistantItem;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -100,7 +101,7 @@ class SendMessage implements ShouldQueue
             $stream = $aiService->streamRaw(
                 prompt: $context,
                 content: $this->content,
-                files: KnowledgeBaseItem::query()->public()->get(['id'])->all(),
+                files: KnowledgeBaseItem::query()->tap(app(KnowledgeBasePortalAssistantItem::class))->get(['id'])->all(),
                 options: $this->thread->messages()->where('is_assistant', true)->latest()->value('next_request_options') ?? [],
             );
 

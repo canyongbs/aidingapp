@@ -300,15 +300,11 @@ trait InteractsWithVectorStores
         if (blank($parsingResults)) {
             report(new Exception('Failed to create file [' . $file->getKey() . '] for vector store, as parsing results are blank.'));
 
-            $vectorStore->save();
-
             return null;
         }
 
         if (blank($name)) {
             report(new Exception('Failed to create file [' . $file->getKey() . '] for vector store, as the file name is blank.'));
-
-            $vectorStore->save();
 
             return null;
         }
