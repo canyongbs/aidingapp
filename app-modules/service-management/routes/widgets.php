@@ -33,3 +33,71 @@
 
 </COPYRIGHT>
 */
+
+use AidingApp\Form\Http\Middleware\EnsureSubmissibleIsEmbeddableAndAuthorized;
+use AidingApp\ServiceManagement\Http\Controllers\ServiceRequestFeedbackFormWidgetController;
+use AidingApp\ServiceManagement\Http\Controllers\ServiceRequestFormWidgetController;
+use AidingApp\ServiceManagement\Http\Middleware\EnsureServiceManagementFeatureIsActive;
+use AidingApp\ServiceManagement\Http\Middleware\FeedbackManagementIsOn;
+use AidingApp\ServiceManagement\Http\Middleware\ServiceRequestTypeFeedbackIsOn;
+use App\Http\Middleware\EncryptCookies;
+use Illuminate\Support\Facades\Route;
+use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
+
+Route::middleware([
+    'api',
+    EncryptCookies::class,
+    // TODO: This changes the feedback widget to check if Service Management is active. This was not done before, but should. Need to check if this breaks anything.
+    EnsureServiceManagementFeatureIsActive::class,
+    // TODO: Determine if this stateful middleware is needed
+    // EnsureFrontendRequestsAreStateful::class,
+    // TODO: Add CORS middleware, may need different one per widget?
+])
+    ->prefix('widgets/service-requests')
+    ->name('widgets.service-requests.')
+    ->group(function () {
+        // TODO: Need to determine where this should be located, should there be multiple per widget type, how unify it all?
+        // This route MUST remain at /widgets/... in order to catch requests to asset files and return the correct headers
+        // NGINX has been configured to route all requests for assets under /widgets to the application
+        Route::get('{file?}', [FormWidgetController::class, 'asset'])
+            ->where('file', '(.*)')
+            ->name('asset');
+
+        Route::prefix('forms/api/{serviceRequestForm}')
+            ->name('forms.api.')
+            ->middleware([
+                EnsureSubmissibleIsEmbeddableAndAuthorized::class . ':serviceRequestForm',
+            ])
+            ->group(function () {
+                Route::get('/', [ServiceRequestFormWidgetController::class, 'assets'])
+                    ->name('assets');
+
+                // Change to entry
+                Route::get('', [ServiceRequestFormWidgetController::class, 'view'])
+                    ->name('define');
+
+                Route::post('authenticate/request', [ServiceRequestFormWidgetController::class, 'requestAuthentication'])
+                    ->middleware(['signed:relative'])
+                    ->name('request-authentication');
+                Route::post('authenticate/{authentication}', [ServiceRequestFormWidgetController::class, 'authenticate'])
+                    ->middleware(['signed:relative'])
+                    ->name('authenticate');
+                Route::post('submit', [ServiceRequestFormWidgetController::class, 'store'])
+                    ->middleware(['signed:relative'])
+                    ->name('submit');
+            });
+
+        Route::prefix('service-requests/{serviceRequest}/feedback')
+            ->name('service-requests.feedback.')
+            ->middleware([
+                FeedbackManagementIsOn::class,
+                ServiceRequestTypeFeedbackIsOn::class,
+            ])
+            ->group(function () {
+                Route::get('/', [ServiceRequestFeedbackFormWidgetController::class, 'view'])
+                    ->name('define');
+                Route::post('/submit', [ServiceRequestFeedbackFormWidgetController::class, 'store'])
+                    ->middleware(['auth:sanctum'])
+                    ->name('submit');
+            });
+    });
