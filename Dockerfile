@@ -234,7 +234,7 @@ RUN npm ci --ignore-scripts \
     && rm -rf /var/www/html/vendor \
     && composer install --no-dev --no-interaction --no-progress --optimize-autoloader --apcu-autoloader \
     && npm run build \
-    && npm ci --ignore-scripts --omit=dev
+    && npm ci --omit=dev
 
 RUN chown -R "$PUID":"$PGID" /var/www/html \
     && chgrp "$PGID" /var/www/html/storage/logs \
