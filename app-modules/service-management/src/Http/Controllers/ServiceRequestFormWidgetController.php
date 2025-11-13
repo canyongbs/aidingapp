@@ -50,6 +50,7 @@ use Closure;
 use Filament\Support\Colors\Color;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\URL;
@@ -60,6 +61,22 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ServiceRequestFormWidgetController extends Controller
 {
+    public function assets(Request $request, ServiceRequestForm $serviceRequestForm): JsonResponse
+    {
+        // Read the Vite manifest to determine the correct asset paths
+        $manifestPath = public_path('storage/widgets/service-requests/forms/.vite/manifest.json');
+        /** @var array<string, array{file: string, name: string, src: string, isEntry: bool}> $manifest */
+        $manifest = json_decode(File::get($manifestPath), true, 512, JSON_THROW_ON_ERROR);
+
+        $widgetEntry = $manifest['src/widget.js'];
+
+        return response()->json([
+            'asset_url' => route('widgets.service-requests.asset'),
+            'entry' => route('widgets.service-requests.forms.api.entry', ['serviceRequestForm' => $serviceRequestForm]),
+            'js' => route('widgets.service-requests.asset', ['file' => $widgetEntry['file']]),
+        ]);
+    }
+
     public function view(GenerateServiceRequestFormKitSchema $generateSchema, ServiceRequestForm $serviceRequestForm): JsonResponse
     {
         return response()->json(

@@ -69,13 +69,11 @@ Route::middleware([
                 EnsureSubmissibleIsEmbeddableAndAuthorized::class . ':serviceRequestForm',
             ])
             ->group(function () {
-                Route::get('/', [ServiceRequestFormWidgetController::class, 'assets'])
+                Route::get('', [ServiceRequestFormWidgetController::class, 'assets'])
                     ->name('assets');
 
-                // Change to entry
-                Route::get('', [ServiceRequestFormWidgetController::class, 'view'])
-                    ->name('define');
-
+                Route::get('entry', [ServiceRequestFormWidgetController::class, 'view'])
+                    ->name('entry');
                 Route::post('authenticate/request', [ServiceRequestFormWidgetController::class, 'requestAuthentication'])
                     ->middleware(['signed:relative'])
                     ->name('request-authentication');
