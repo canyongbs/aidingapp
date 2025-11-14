@@ -37,6 +37,7 @@
 use AidingApp\Form\Http\Middleware\EnsureSubmissibleIsEmbeddableAndAuthorized;
 use AidingApp\ServiceManagement\Http\Controllers\ServiceRequestFeedbackFormWidgetController;
 use AidingApp\ServiceManagement\Http\Controllers\ServiceRequestFormWidgetController;
+use AidingApp\ServiceManagement\Http\Controllers\ServiceRequestWidgetAssetController;
 use AidingApp\ServiceManagement\Http\Middleware\EnsureServiceManagementFeatureIsActive;
 use AidingApp\ServiceManagement\Http\Middleware\FeedbackManagementIsOn;
 use AidingApp\ServiceManagement\Http\Middleware\ServiceRequestTypeFeedbackIsOn;
@@ -56,13 +57,6 @@ Route::middleware([
     ->prefix('widgets/service-requests')
     ->name('widgets.service-requests.')
     ->group(function () {
-        // TODO: Need to determine where this should be located, should there be multiple per widget type, how unify it all?
-        // This route MUST remain at /widgets/... in order to catch requests to asset files and return the correct headers
-        // NGINX has been configured to route all requests for assets under /widgets to the application
-        Route::get('{file?}', [FormWidgetController::class, 'asset'])
-            ->where('file', '(.*)')
-            ->name('asset');
-
         Route::prefix('forms/api/{serviceRequestForm}')
             ->name('forms.api.')
             ->middleware([
@@ -75,13 +69,13 @@ Route::middleware([
                 Route::get('entry', [ServiceRequestFormWidgetController::class, 'view'])
                     ->name('entry');
                 Route::post('authenticate/request', [ServiceRequestFormWidgetController::class, 'requestAuthentication'])
-                    ->middleware(['signed:relative'])
+                    ->middleware(['signed'])
                     ->name('request-authentication');
                 Route::post('authenticate/{authentication}', [ServiceRequestFormWidgetController::class, 'authenticate'])
-                    ->middleware(['signed:relative'])
+                    ->middleware(['signed'])
                     ->name('authenticate');
                 Route::post('submit', [ServiceRequestFormWidgetController::class, 'store'])
-                    ->middleware(['signed:relative'])
+                    ->middleware(['signed'])
                     ->name('submit');
             });
 
@@ -98,4 +92,11 @@ Route::middleware([
                     ->middleware(['auth:sanctum'])
                     ->name('submit');
             });
+
+        // TODO: Need to determine where this should be located, should there be multiple per widget type, how unify it all?
+        // This route MUST remain at /widgets/... in order to catch requests to asset files and return the correct headers
+        // NGINX has been configured to route all requests for assets under /widgets to the application
+        Route::get('{file?}', ServiceRequestWidgetAssetController::class)
+            ->where('file', '(.*)')
+            ->name('asset');
     });

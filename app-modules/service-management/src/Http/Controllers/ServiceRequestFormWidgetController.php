@@ -86,15 +86,13 @@ class ServiceRequestFormWidgetController extends Controller
                 'is_authenticated' => $serviceRequestForm->is_authenticated,
                 ...($serviceRequestForm->is_authenticated ? [
                     'authentication_url' => URL::signedRoute(
-                        name: 'service-request-forms.request-authentication',
+                        name: 'widgets.service-requests.forms.api.request-authentication',
                         parameters: ['serviceRequestForm' => $serviceRequestForm],
-                        absolute: false
                     ),
                 ] : [
                     'submission_url' => URL::signedRoute(
-                        name: 'service-request-forms.submit',
+                        name: 'widgets.service-requests.forms.api.submit',
                         parameters: ['serviceRequestForm' => $serviceRequestForm],
-                        absolute: false
                     ),
                 ]),
                 'recaptcha_enabled' => $serviceRequestForm->recaptcha_enabled,
@@ -137,12 +135,11 @@ class ServiceRequestFormWidgetController extends Controller
         return response()->json([
             'message' => "We've sent an authentication code to {$data['email']}.",
             'authentication_url' => URL::signedRoute(
-                name: 'service-request-forms.authenticate',
+                name: 'widgets.service-requests.forms.api.authenticate',
                 parameters: [
                     'serviceRequestForm' => $serviceRequestForm,
                     'authentication' => $authentication,
                 ],
-                absolute: false
             ),
         ]);
     }
@@ -167,12 +164,11 @@ class ServiceRequestFormWidgetController extends Controller
 
         return response()->json([
             'submission_url' => URL::signedRoute(
-                name: 'service-request-forms.submit',
+                name: 'widgets.service-requests.forms.api.submit',
                 parameters: [
                     'authentication' => $authentication,
                     'serviceRequestForm' => $authentication->submissible,
                 ],
-                absolute: false
             ),
         ]);
     }
