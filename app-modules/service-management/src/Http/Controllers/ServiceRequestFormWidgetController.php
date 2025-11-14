@@ -71,9 +71,9 @@ class ServiceRequestFormWidgetController extends Controller
         $widgetEntry = $manifest['src/widget.js'];
 
         return response()->json([
-            'asset_url' => route('widgets.service-requests.asset'),
+            'asset_url' => route('widgets.service-requests.forms.asset'),
             'entry' => route('widgets.service-requests.forms.api.entry', ['serviceRequestForm' => $serviceRequestForm]),
-            'js' => route('widgets.service-requests.asset', ['file' => $widgetEntry['file']]),
+            'js' => route('widgets.service-requests.forms.asset', ['file' => $widgetEntry['file']]),
         ]);
     }
 

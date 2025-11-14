@@ -40,7 +40,9 @@ use AidingApp\ServiceManagement\Http\Controllers\ServiceRequestFormWidgetControl
 use AidingApp\ServiceManagement\Http\Controllers\ServiceRequestWidgetAssetController;
 use AidingApp\ServiceManagement\Http\Middleware\EnsureServiceManagementFeatureIsActive;
 use AidingApp\ServiceManagement\Http\Middleware\FeedbackManagementIsOn;
+use AidingApp\ServiceManagement\Http\Middleware\ServiceRequestFormWidgetCors;
 use AidingApp\ServiceManagement\Http\Middleware\ServiceRequestTypeFeedbackIsOn;
+use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use App\Http\Middleware\EncryptCookies;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
@@ -52,31 +54,52 @@ Route::middleware([
     EnsureServiceManagementFeatureIsActive::class,
     // TODO: Determine if this stateful middleware is needed
     // EnsureFrontendRequestsAreStateful::class,
-    // TODO: Add CORS middleware, may need different one per widget?
 ])
     ->prefix('widgets/service-requests')
     ->name('widgets.service-requests.')
     ->group(function () {
-        Route::prefix('forms/api/{serviceRequestForm}')
-            ->name('forms.api.')
+        Route::prefix('forms')
+            ->name('forms.')
             ->middleware([
-                EnsureSubmissibleIsEmbeddableAndAuthorized::class . ':serviceRequestForm',
+                ServiceRequestFormWidgetCors::class,
             ])
             ->group(function () {
-                Route::get('', [ServiceRequestFormWidgetController::class, 'assets'])
-                    ->name('assets');
+                Route::prefix('api/{serviceRequestForm}')
+                    ->name('api.')
+                    ->middleware([
+                        EnsureSubmissibleIsEmbeddableAndAuthorized::class . ':serviceRequestForm',
+                    ])
+                    ->group(function () {
+                        Route::get('', [ServiceRequestFormWidgetController::class, 'assets'])
+                            ->name('assets');
 
-                Route::get('entry', [ServiceRequestFormWidgetController::class, 'view'])
-                    ->name('entry');
-                Route::post('authenticate/request', [ServiceRequestFormWidgetController::class, 'requestAuthentication'])
-                    ->middleware(['signed'])
-                    ->name('request-authentication');
-                Route::post('authenticate/{authentication}', [ServiceRequestFormWidgetController::class, 'authenticate'])
-                    ->middleware(['signed'])
-                    ->name('authenticate');
-                Route::post('submit', [ServiceRequestFormWidgetController::class, 'store'])
-                    ->middleware(['signed'])
-                    ->name('submit');
+                        Route::get('entry', [ServiceRequestFormWidgetController::class, 'view'])
+                            ->name('entry');
+                        Route::post('authenticate/request', [ServiceRequestFormWidgetController::class, 'requestAuthentication'])
+                            ->middleware(['signed'])
+                            ->name('request-authentication');
+                        Route::post('authenticate/{authentication}', [ServiceRequestFormWidgetController::class, 'authenticate'])
+                            ->middleware(['signed'])
+                            ->name('authenticate');
+                        Route::post('submit', [ServiceRequestFormWidgetController::class, 'store'])
+                            ->middleware(['signed'])
+                            ->name('submit');
+
+                        // Handle preflight CORS requests for all routes in this group
+                        // MUST remain the last route in this group
+                        Route::options('/{any}', function (Request $request, ServiceRequestForm $serviceRequestForm) {
+                            return response()->noContent();
+                        })
+                            ->where('any', '.*')
+                            ->name('preflight');
+                    });
+
+                // This route MUST remain at /widgets/... in order to catch requests to asset files and return the correct headers
+                // NGINX has been configured to route all requests for assets under /widgets to the application
+                // This route is NOT duplicative of the one below it. The different routes are required to match to the specific CORS middleware
+                Route::get('{file?}', ServiceRequestWidgetAssetController::class)
+                    ->where('file', '(.*)')
+                    ->name('asset');
             });
 
         Route::prefix('service-requests/{serviceRequest}/feedback')
@@ -92,11 +115,4 @@ Route::middleware([
                     ->middleware(['auth:sanctum'])
                     ->name('submit');
             });
-
-        // TODO: Need to determine where this should be located, should there be multiple per widget type, how unify it all?
-        // This route MUST remain at /widgets/... in order to catch requests to asset files and return the correct headers
-        // NGINX has been configured to route all requests for assets under /widgets to the application
-        Route::get('{file?}', ServiceRequestWidgetAssetController::class)
-            ->where('file', '(.*)')
-            ->name('asset');
     });

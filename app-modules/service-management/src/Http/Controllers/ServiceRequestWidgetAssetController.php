@@ -10,7 +10,7 @@ class ServiceRequestWidgetAssetController
 {
     public function __invoke(Request $request, string $file): StreamedResponse
     {
-        $path = "widgets/service-requests/{$file}";
+        $path = "widgets/service-requests/forms/{$file}";
 
         $disk = Storage::disk('public');
 
