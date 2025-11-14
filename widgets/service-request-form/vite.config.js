@@ -37,16 +37,34 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
     plugins: [vue()],
+    experimental: {
+        renderBuiltUrl(filename) {
+            return {
+                runtime: `window.__VITE_SERVICE_REQUEST_FORMS_ASSET_URL__ + ${JSON.stringify(filename)}`,
+            };
+        },
+    },
     build: {
         manifest: true,
-        lib: {
-            entry: resolve(__dirname, 'src/widget.js'),
-            name: 'AidingAppServiceRequestFormWidget',
-            fileName: 'aiding-app-service-request-form-widget',
-            cssFileName: 'style',
-            formats: ['es'],
+        rollupOptions: {
+            input: {
+                widget: resolve(__dirname, './src/widget.js'),
+                loader: resolve(__dirname, './src/loader.js'),
+            },
+            output: {
+                entryFileNames: (chunkInfo) => {
+                    return chunkInfo.name === 'loader'
+                        ? 'aiding-app-service-request-form-widget.js'
+                        : 'aiding-app-service-request-form-widget-app-[hash].js';
+                },
+                assetFileNames: (assetInfo) => {
+                    return '[name]-[hash][extname]';
+                },
+                // Place chunks directly in the root
+                chunkFileNames: '[name]-[hash].js',
+            },
         },
-        outDir: resolve(__dirname, '../../public/js/widgets/service-request-form'),
+        outDir: resolve(__dirname, '../../storage/app/public/widgets/service-requests/forms'),
         emptyOutDir: true,
         sourcemap: true,
     },
