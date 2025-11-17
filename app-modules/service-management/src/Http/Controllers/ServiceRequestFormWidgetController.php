@@ -144,7 +144,7 @@ class ServiceRequestFormWidgetController extends Controller
         ]);
     }
 
-    public function authenticate(Request $request, ServiceRequestFormAuthentication $authentication): JsonResponse
+    public function authenticate(Request $request, ServiceRequestForm $serviceRequestForm, ServiceRequestFormAuthentication $authentication): JsonResponse
     {
         if ($authentication->isExpired()) {
             return response()->json([
