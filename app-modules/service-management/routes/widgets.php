@@ -102,17 +102,33 @@ Route::middleware([
                     ->name('asset');
             });
 
-        Route::prefix('service-requests/{serviceRequest}/feedback')
-            ->name('service-requests.feedback.')
+        Route::prefix('feedback')
+            ->name('feedback.')
             ->middleware([
-                FeedbackManagementIsOn::class,
-                ServiceRequestTypeFeedbackIsOn::class,
+                // TODO: Add the CORS middleware for feedback widgets
             ])
             ->group(function () {
-                Route::get('/', [ServiceRequestFeedbackFormWidgetController::class, 'view'])
-                    ->name('define');
-                Route::post('/submit', [ServiceRequestFeedbackFormWidgetController::class, 'store'])
-                    ->middleware(['auth:sanctum'])
-                    ->name('submit');
+                Route::prefix('api/{serviceRequest}')
+                    ->name('api.')
+                    ->middleware([
+                        FeedbackManagementIsOn::class,
+                        ServiceRequestTypeFeedbackIsOn::class,
+                    ])
+                    ->group(function () {
+                        // TODO: assets routes
+                        Route::get('', [ServiceRequestFeedbackFormWidgetController::class, 'assets'])
+                            ->name('assets');
+
+                        // TODO: Fix this route and change it to "entry"
+                        Route::get('/', [ServiceRequestFeedbackFormWidgetController::class, 'view'])
+                            ->name('define');
+                        Route::post('/submit', [ServiceRequestFeedbackFormWidgetController::class, 'store'])
+                            ->middleware(['auth:sanctum'])
+                            ->name('submit');
+
+                        // TODO: preflight route
+                    });
+
+                // TODO: asset route
             });
     });
