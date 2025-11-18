@@ -107,18 +107,11 @@
     const submitForm = async (data, node) => {
         node.clearErrors();
 
-        fetch(formSubmissionUrl.value, {
-            method: 'POST',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data),
-        })
-            .then((response) => response.json())
-            .then((json) => {
-                if (json.errors) {
-                    node.setErrors([], json.errors);
+        axios
+            .post(formSubmissionUrl.value, data)
+            .then((response) => {
+                if (response.errors) {
+                    node.setErrors([], response.errors);
 
                     return;
                 }

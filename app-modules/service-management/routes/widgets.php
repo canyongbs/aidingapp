@@ -41,7 +41,6 @@ use AidingApp\ServiceManagement\Http\Middleware\EnsureServiceManagementFeatureIs
 use AidingApp\ServiceManagement\Http\Middleware\FeedbackManagementIsOn;
 use AidingApp\ServiceManagement\Http\Middleware\ServiceRequestFormWidgetCors;
 use AidingApp\ServiceManagement\Http\Middleware\ServiceRequestTypeFeedbackIsOn;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use App\Http\Middleware\EncryptCookies;
 use Illuminate\Support\Facades\Route;
@@ -52,8 +51,6 @@ Route::middleware([
     EncryptCookies::class,
     // TODO: This changes the feedback widget to check if Service Management is active. This was not done before, but should. Need to check if this breaks anything.
     EnsureServiceManagementFeatureIsActive::class,
-    // TODO: Determine if this stateful middleware is needed
-    // EnsureFrontendRequestsAreStateful::class,
 ])
     ->prefix('widgets/service-requests')
     ->name('widgets.service-requests.')
@@ -104,7 +101,8 @@ Route::middleware([
         Route::prefix('feedback')
             ->name('feedback.')
             ->middleware([
-                // TODO: Add the CORS middleware for feedback widgets
+                EnsureFrontendRequestsAreStateful::class,
+                // CORS middlware is not included in this since there is no way to embed this outside of Aiding App at the moment.
             ])
             ->group(function () {
                 Route::prefix('api/{serviceRequest}')
@@ -122,14 +120,6 @@ Route::middleware([
                         Route::post('/submit', [ServiceRequestFeedbackFormWidgetController::class, 'store'])
                             ->middleware(['auth:sanctum'])
                             ->name('submit');
-
-                        // Handle preflight CORS requests for all routes in this group
-                        // MUST remain the last route in this group
-                        Route::options('/{any}', function (Request $request, ServiceRequest $serviceRequest) {
-                            return response()->noContent();
-                        })
-                            ->where('any', '.*')
-                            ->name('preflight');
                     });
 
                 // This route MUST remain at /widgets/... in order to catch requests to asset files and return the correct headers
