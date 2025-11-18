@@ -47,32 +47,28 @@
             type: String,
             required: true,
         },
-        accessUrl: {
-            type: String,
-            required: true,
-        },
-        userAuthenticationUrl: {
-            type: String,
-            required: true,
-        },
-        appUrl: {
-            type: String,
-            required: true,
-        },
+        // accessUrl: {
+        //     type: String,
+        //     required: true,
+        // },
+        // userAuthenticationUrl: {
+        //     type: String,
+        //     required: true,
+        // },
+        // appUrl: {
+        //     type: String,
+        //     required: true,
+        // },
     });
 
     const submittedSuccess = ref(false);
 
-    const scriptUrl = new URL(document.currentScript.getAttribute('src'));
-    const protocol = scriptUrl.protocol;
-    const scriptHostname = scriptUrl.hostname;
     const feedbackSubmitted = ref(false);
     const errorLoading = ref(false);
     const loading = ref(true);
     const userIsAuthenticated = ref(false);
     const requiresAuthentication = ref(false);
 
-    const hostUrl = `${protocol}//${scriptHostname}`;
     const formSubmissionUrl = ref('');
     const formPrimaryColor = ref('');
     const formRounding = ref('');
@@ -89,20 +85,21 @@
         requestedMessage: null,
         requestUrl: null,
         url: null,
+        userAuthenticationUrl: null,
     });
 
     onMounted(async () => {
-        const { isEmbeddedInAidingApp } = getAppContext(props.accessUrl);
+        // const { isEmbeddedInAidingApp } = getAppContext(props.accessUrl);
 
-        if (isEmbeddedInAidingApp) {
-            await axios.get(props.appUrl + '/sanctum/csrf-cookie');
-        }
+        // if (isEmbeddedInAidingApp) {
+        //     await axios.get(props.appUrl + '/sanctum/csrf-cookie');
+        // }
 
-        await determineIfUserIsAuthenticated(props.userAuthenticationUrl).then((response) => {
-            userIsAuthenticated.value = response;
-        });
+        await getForm().then(async () => {
+            await determineIfUserIsAuthenticated(authenticate.userAuthenticationUrl).then((response) => {
+                userIsAuthenticated.value = response;
+            });
 
-        await getForm().then(() => {
             loading.value = false;
         });
     });
@@ -163,6 +160,8 @@
 
                 feedbackSubmitted.value = response.data.feedback_submitted;
 
+                authenticate.userAuthenticationUrl = response.data.user_auth_check_url;
+
                 const { setRequiresAuthentication } = useAuthStore();
 
                 setRequiresAuthentication(response.data.requires_authentication).then(() => {
@@ -219,11 +218,11 @@
         const { setToken } = useTokenStore();
         const { setUser } = useAuthStore();
 
-        const { isEmbeddedInAidingApp } = getAppContext(props.accessUrl);
+        // const { isEmbeddedInAidingApp } = getAppContext(props.accessUrl);
 
-        if (isEmbeddedInAidingApp) {
-            await axios.get(props.appUrl + '/sanctum/csrf-cookie');
-        }
+        // if (isEmbeddedInAidingApp) {
+        //     await axios.get(props.appUrl + '/sanctum/csrf-cookie');
+        // }
 
         if (authentication.value.isRequested) {
             axios
@@ -263,7 +262,7 @@
         axios
             .post(authentication.value.requestUrl, {
                 email: formData.email,
-                isSpa: isEmbeddedInAidingApp,
+                isSpa: true, // was isEmbeddedInAidingApp
             })
             .then((response) => {
                 if (response.errors) {
@@ -309,10 +308,6 @@
         }"
         class="font-sans px-6"
     >
-        <div>
-            <link rel="stylesheet" v-bind:href="hostUrl + '/js/widgets/service-request-feedback-form/style.css'" />
-        </div>
-
         <div v-if="loading">
             <AppLoading />
         </div>
@@ -411,10 +406,3 @@
         </div>
     </div>
 </template>
-
-<style scoped>
-    .bg-gradient {
-        @apply relative bg-no-repeat;
-        background-image: radial-gradient(circle at top, theme('colors.primary.200'), theme('colors.white') 50%);
-    }
-</style>

@@ -104,6 +104,7 @@ class ServiceRequestFeedbackFormWidgetController extends Controller
             [
                 'requires_authentication' => true,
                 'is_authenticated' => (bool) $request->user(),
+                'user_auth_check_url' => route('api.user.auth-check'),
                 'authentication_url' => URL::to(
                     URL::signedRoute(
                         name: 'api.portal.request-authentication',

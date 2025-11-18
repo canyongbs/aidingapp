@@ -37,31 +37,49 @@
 namespace AidingApp\Form\Actions;
 
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use Exception;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 
 class GenerateServiceRequestFeedbackFormEmbedCode
 {
     public function handle(ServiceRequest $serviceRequest): string
     {
-        $scriptUrl = url('js/widgets/service-request-feedback-form/aiding-app-service-request-feedback-form-widget.js?');
+        // $scriptUrl = url('js/widgets/service-request-feedback-form/aiding-app-service-request-feedback-form-widget.js?');
 
-        $formDefinitionUrl = URL::to(
-            URL::signedRoute(
-                name: 'service-requests.feedback.define',
-                parameters: ['serviceRequest' => $serviceRequest],
-                absolute: false,
-            )
-        );
+        // $formDefinitionUrl = URL::to(
+        //     URL::signedRoute(
+        //         name: 'service-requests.feedback.define',
+        //         parameters: ['serviceRequest' => $serviceRequest],
+        //         absolute: false,
+        //     )
+        // );
 
-        $portalAccessUrl = route('portal.show');
+        // // access-url
+        // $portalAccessUrl = route('portal.show');
 
-        $userAuthenticationUrl = route('api.user.auth-check');
+        // // user-authentication-url
+        // $userAuthenticationUrl = route('api.user.auth-check');
 
-        $appUrl = config('app.url');
+        // // app-url
+        // $appUrl = config('app.url');
+
+        $manifestPath = Storage::disk('public')->get('widgets/service-requests/feedback/.vite/manifest.json');
+
+        if (is_null($manifestPath)) {
+            throw new Exception('Vite manifest file not found.');
+        }
+
+        /** @var array<string, array{file: string, name: string, src: string, isEntry: bool}> $manifest */
+        $manifest = json_decode($manifestPath, true, 512, JSON_THROW_ON_ERROR);
+
+        $loaderScriptUrl = url("widgets/service-requests/feedback/{$manifest['src/loader.js']['file']}");
+
+        $assetsUrl = route(name: 'widgets.service-requests.feedback.api.assets', parameters: ['serviceRequest' => $serviceRequest]);
 
         return <<<EOD
-        <service-request-feedback-form-embed url="{$formDefinitionUrl}" user-authentication-url={$userAuthenticationUrl} access-url={$portalAccessUrl} app-url="{$appUrl}"></service-request-feedback-form-embed>
-        <script src="{$scriptUrl}"></script>
+        <service-request-feedback-form-embed url="{$assetsUrl}"></service-request-feedback-form-embed>
+        <script src="{$loaderScriptUrl}"></script>
         EOD;
     }
 }
