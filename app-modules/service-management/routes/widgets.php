@@ -41,6 +41,7 @@ use AidingApp\ServiceManagement\Http\Middleware\EnsureServiceManagementFeatureIs
 use AidingApp\ServiceManagement\Http\Middleware\FeedbackManagementIsOn;
 use AidingApp\ServiceManagement\Http\Middleware\ServiceRequestFormWidgetCors;
 use AidingApp\ServiceManagement\Http\Middleware\ServiceRequestTypeFeedbackIsOn;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use App\Http\Middleware\EncryptCookies;
 use Illuminate\Support\Facades\Route;
@@ -95,7 +96,6 @@ Route::middleware([
 
                 // This route MUST remain at /widgets/... in order to catch requests to asset files and return the correct headers
                 // NGINX has been configured to route all requests for assets under /widgets to the application
-                // This route is NOT duplicative of the one below it. The different routes are required to match to the specific CORS middleware
                 Route::get('{file?}', [ServiceRequestFormWidgetController::class, 'asset'])
                     ->where('file', '(.*)')
                     ->name('asset');
@@ -123,9 +123,19 @@ Route::middleware([
                             ->middleware(['auth:sanctum'])
                             ->name('submit');
 
-                        // TODO: preflight route
+                        // Handle preflight CORS requests for all routes in this group
+                        // MUST remain the last route in this group
+                        Route::options('/{any}', function (Request $request, ServiceRequest $serviceRequest) {
+                            return response()->noContent();
+                        })
+                            ->where('any', '.*')
+                            ->name('preflight');
                     });
 
-                // TODO: asset route
+                // This route MUST remain at /widgets/... in order to catch requests to asset files and return the correct headers
+                // NGINX has been configured to route all requests for assets under /widgets to the application
+                Route::get('{file?}', [ServiceRequestFeedbackFormWidgetController::class, 'asset'])
+                    ->where('file', '(.*)')
+                    ->name('asset');
             });
     });

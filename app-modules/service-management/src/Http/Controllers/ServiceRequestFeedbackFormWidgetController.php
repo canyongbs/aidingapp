@@ -45,11 +45,13 @@ use Filament\Support\Colors\Color;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Validation\Rule;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ServiceRequestFeedbackFormWidgetController extends Controller
 {
@@ -67,6 +69,30 @@ class ServiceRequestFeedbackFormWidgetController extends Controller
             'entry' => route('widgets.service-requests.feedback.api.entry', ['serviceRequest' => $serviceRequest]),
             'js' => route('widgets.service-requests.feedback.asset', ['file' => $widgetEntry['file']]),
         ]);
+    }
+
+    public function asset(Request $request, string $file): StreamedResponse
+    {
+        $path = "widgets/service-requests/feedback/{$file}";
+
+        $disk = Storage::disk('public');
+
+        abort_if(! $disk->exists($path), 404, 'File not found.');
+
+        $mimeType = $disk->mimeType($path);
+
+        $stream = $disk->readStream($path);
+
+        abort_if(is_null($stream), 404, 'File not found.');
+
+        return response()->streamDownload(
+            function () use ($stream) {
+                fpassthru($stream);
+                fclose($stream);
+            },
+            $file,
+            ['Content-Type' => $mimeType]
+        );
     }
 
     public function view(Request $request, ServiceRequest $serviceRequest): JsonResponse
