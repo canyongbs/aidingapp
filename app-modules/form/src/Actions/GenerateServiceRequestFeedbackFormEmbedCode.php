@@ -59,10 +59,8 @@ class GenerateServiceRequestFeedbackFormEmbedCode
 
         $appUrl = config('app.url');
 
-        $apiUrl = route('api.portal.define');
-
         return <<<EOD
-        <service-request-feedback-form-embed url="{$formDefinitionUrl}" user-authentication-url={$userAuthenticationUrl} access-url={$portalAccessUrl} app-url="{$appUrl}" api-url="{$apiUrl}"></service-request-feedback-form-embed>
+        <service-request-feedback-form-embed url="{$formDefinitionUrl}" user-authentication-url={$userAuthenticationUrl} access-url={$portalAccessUrl} app-url="{$appUrl}"></service-request-feedback-form-embed>
         <script src="{$scriptUrl}"></script>
         EOD;
     }

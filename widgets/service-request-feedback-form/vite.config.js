@@ -37,16 +37,34 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
     plugins: [vue()],
+    experimental: {
+        renderBuiltUrl(filename) {
+            return {
+                runtime: `window.__VITE_SERVICE_REQUEST_FEEDBACK_ASSET_URL__ + ${JSON.stringify(filename)}`,
+            };
+        },
+    },
     build: {
         manifest: true,
-        lib: {
-            entry: resolve(__dirname, 'src/widget.js'),
-            name: 'AidingAppServiceRequestFeedbackFormWidget',
-            fileName: 'aiding-app-service-request-feedback-form-widget',
-            cssFileName: 'style',
-            formats: ['es'],
+        rollupOptions: {
+            input: {
+                widget: resolve(__dirname, './src/widget.js'),
+                loader: resolve(__dirname, './src/loader.js'),
+            },
+            output: {
+                entryFileNames: (chunkInfo) => {
+                    return chunkInfo.name === 'loader'
+                        ? 'aiding-app-service-request-feedback-form-widget.js'
+                        : 'aiding-app-service-request-feedback-form-widget-app-[hash].js';
+                },
+                assetFileNames: (assetInfo) => {
+                    return '[name]-[hash][extname]';
+                },
+                // Place chunks directly in the root
+                chunkFileNames: '[name]-[hash].js',
+            },
         },
-        outDir: resolve(__dirname, '../../public/js/widgets/service-request-feedback-form'),
+        outDir: resolve(__dirname, '../../storage/app/public/widgets/service-requests/feedback'),
         emptyOutDir: true,
         sourcemap: true,
     },

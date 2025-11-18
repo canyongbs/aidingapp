@@ -43,11 +43,7 @@
     import Footer from './Components/Footer.vue';
 
     const props = defineProps({
-        url: {
-            type: String,
-            required: true,
-        },
-        apiUrl: {
+        entryUrl: {
             type: String,
             required: true,
         },
@@ -139,7 +135,7 @@
 
     async function getForm() {
         await axios
-            .get(props.url)
+            .get(props.entryUrl)
             .then((response) => {
                 errorLoading.value = false;
 
