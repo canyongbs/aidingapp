@@ -47,18 +47,6 @@
             type: String,
             required: true,
         },
-        // accessUrl: {
-        //     type: String,
-        //     required: true,
-        // },
-        // userAuthenticationUrl: {
-        //     type: String,
-        //     required: true,
-        // },
-        // appUrl: {
-        //     type: String,
-        //     required: true,
-        // },
     });
 
     const submittedSuccess = ref(false);
@@ -89,12 +77,6 @@
     });
 
     onMounted(async () => {
-        // const { isEmbeddedInAidingApp } = getAppContext(props.accessUrl);
-
-        // if (isEmbeddedInAidingApp) {
-        //     await axios.get(props.appUrl + '/sanctum/csrf-cookie');
-        // }
-
         await getForm().then(async () => {
             await determineIfUserIsAuthenticated(authenticate.userAuthenticationUrl).then((response) => {
                 userIsAuthenticated.value = response;
@@ -210,12 +192,6 @@
 
         const { setToken } = useTokenStore();
         const { setUser } = useAuthStore();
-
-        // const { isEmbeddedInAidingApp } = getAppContext(props.accessUrl);
-
-        // if (isEmbeddedInAidingApp) {
-        //     await axios.get(props.appUrl + '/sanctum/csrf-cookie');
-        // }
 
         if (authentication.value.isRequested) {
             axios
