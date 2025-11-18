@@ -49,7 +49,7 @@
         "canyon-gbs/report": "*",
         "canyongbs/common": "^1.7.0",
         "canyongbs/filament-tiptap-editor": "^1.2.9",
-        "canyongbs/model-state-machine": "^2.0",
+        "canyongbs/model-state-machine": "^2.0.2",
         "cknow/laravel-money": "^8.1",
         "composer/composer": "^2.7",
         "defectivecode/laravel-sqs-extended": "^1.1.0",
