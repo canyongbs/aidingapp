@@ -37,7 +37,6 @@
 use AidingApp\Form\Http\Middleware\EnsureSubmissibleIsEmbeddableAndAuthorized;
 use AidingApp\ServiceManagement\Http\Controllers\ServiceRequestFeedbackFormWidgetController;
 use AidingApp\ServiceManagement\Http\Controllers\ServiceRequestFormWidgetController;
-use AidingApp\ServiceManagement\Http\Controllers\ServiceRequestWidgetAssetController;
 use AidingApp\ServiceManagement\Http\Middleware\EnsureServiceManagementFeatureIsActive;
 use AidingApp\ServiceManagement\Http\Middleware\FeedbackManagementIsOn;
 use AidingApp\ServiceManagement\Http\Middleware\ServiceRequestFormWidgetCors;
@@ -97,7 +96,7 @@ Route::middleware([
                 // This route MUST remain at /widgets/... in order to catch requests to asset files and return the correct headers
                 // NGINX has been configured to route all requests for assets under /widgets to the application
                 // This route is NOT duplicative of the one below it. The different routes are required to match to the specific CORS middleware
-                Route::get('{file?}', ServiceRequestWidgetAssetController::class)
+                Route::get('{file?}', [ServiceRequestFormWidgetController::class, 'asset'])
                     ->where('file', '(.*)')
                     ->name('asset');
             });
@@ -115,13 +114,11 @@ Route::middleware([
                         ServiceRequestTypeFeedbackIsOn::class,
                     ])
                     ->group(function () {
-                        // TODO: assets routes
                         Route::get('', [ServiceRequestFeedbackFormWidgetController::class, 'assets'])
                             ->name('assets');
 
-                        // TODO: Fix this route and change it to "entry"
-                        Route::get('/', [ServiceRequestFeedbackFormWidgetController::class, 'view'])
-                            ->name('define');
+                        Route::get('entry', [ServiceRequestFeedbackFormWidgetController::class, 'view'])
+                            ->name('entry');
                         Route::post('/submit', [ServiceRequestFeedbackFormWidgetController::class, 'store'])
                             ->middleware(['auth:sanctum'])
                             ->name('submit');

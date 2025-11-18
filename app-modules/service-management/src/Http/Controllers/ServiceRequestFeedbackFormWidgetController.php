@@ -85,7 +85,7 @@ class ServiceRequestFeedbackFormWidgetController extends Controller
                     )
                 ),
                 'submission_url' => URL::signedRoute(
-                    name: 'service-requests.feedback.submit',
+                    name: 'widgets.service-requests.feedback.api.submit',
                     parameters: ['serviceRequest' => $serviceRequest],
                     absolute: false
                 ),
