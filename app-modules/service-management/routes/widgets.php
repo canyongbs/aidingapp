@@ -49,7 +49,6 @@ use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 Route::middleware([
     'api',
     EncryptCookies::class,
-    // TODO: This changes the feedback widget to check if Service Management is active. This was not done before, but should. Need to check if this breaks anything.
     EnsureServiceManagementFeatureIsActive::class,
 ])
     ->prefix('widgets/service-requests')
