@@ -39,31 +39,11 @@ namespace AidingApp\Form\Actions;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use Exception;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\URL;
 
 class GenerateServiceRequestFeedbackFormEmbedCode
 {
     public function handle(ServiceRequest $serviceRequest): string
     {
-        // $scriptUrl = url('js/widgets/service-request-feedback-form/aiding-app-service-request-feedback-form-widget.js?');
-
-        // $formDefinitionUrl = URL::to(
-        //     URL::signedRoute(
-        //         name: 'service-requests.feedback.define',
-        //         parameters: ['serviceRequest' => $serviceRequest],
-        //         absolute: false,
-        //     )
-        // );
-
-        // // access-url
-        // $portalAccessUrl = route('portal.show');
-
-        // // user-authentication-url
-        // $userAuthenticationUrl = route('api.user.auth-check');
-
-        // // app-url
-        // $appUrl = config('app.url');
-
         $manifestPath = Storage::disk('public')->get('widgets/service-requests/feedback/.vite/manifest.json');
 
         if (is_null($manifestPath)) {
