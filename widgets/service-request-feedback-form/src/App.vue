@@ -36,7 +36,6 @@
     import { defineProps, onMounted, ref } from 'vue';
     import axios from '../../../portals/knowledge-management/src/Globals/Axios.js';
     import determineIfUserIsAuthenticated from '../../../portals/knowledge-management/src/Services/DetermineIfUserIsAuthenticated.js';
-    import getAppContext from '../../../portals/knowledge-management/src/Services/GetAppContext.js';
     import { useAuthStore } from '../../../portals/knowledge-management/src/Stores/auth.js';
     import { useTokenStore } from '../../../portals/knowledge-management/src/Stores/token.js';
     import AppLoading from '../src/Components/AppLoading.vue';
