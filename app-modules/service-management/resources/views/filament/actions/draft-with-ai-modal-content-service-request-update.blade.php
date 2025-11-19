@@ -1,6 +1,4 @@
-<?php
-
-/*
+{{--
 <COPYRIGHT>
 
     Copyright © 2016-2025, Canyon GBS LLC. All rights reserved.
@@ -17,7 +15,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -32,48 +30,31 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
+--}}
+<div class="mb-3 flex gap-4 text-base md:gap-6">
+    <div class="flex flex-shrink-0 flex-col items-end">
+        <img
+            class="h-8 w-8 rounded-full object-cover object-center"
+            src="{{ $avatarUrl }}"
+            alt="Assistant avatar"
+        >
+    </div>
 
-namespace AidingApp\Ai\Actions;
-
-use AidingApp\Ai\Enums\AiMessageLogFeature;
-use AidingApp\Ai\Enums\AiModel;
-use AidingApp\Ai\Models\Contracts\AiFile;
-use AidingApp\Ai\Models\LegacyAiMessageLog;
-use Illuminate\Support\Arr;
-
-class CompletePrompt
-{
-    /**
-     * @param array<AiFile> $files
-     */
-    public function execute(AiModel $aiModel, string $prompt, string $content, array $files = []): string
-    {
-        $service = $aiModel->getService();
-
-        $completion = $service->complete($prompt, $content, $files);
-
-        if (auth()->hasUser()) {
-            LegacyAiMessageLog::create([
-                'message' => $content,
-                'metadata' => [
-                    'prompt' => $prompt,
-                    'completion' => $completion,
-                ],
-                'request' => [
-                    'headers' => Arr::only(
-                        request()->headers->all(),
-                        ['host', 'sec-ch-ua', 'user-agent', 'sec-ch-ua-platform', 'origin', 'referer', 'accept-language'],
-                    ),
-                    'ip' => request()->ip(),
-                ],
-                'sent_at' => now(),
-                'user_id' => auth()->id(),
-                'ai_assistant_name' => 'Institutional Advisor',
-                'feature' => AiMessageLogFeature::DraftWithAi,
-            ]);
-        }
-
-        return $completion;
-    }
-}
+    <div class="prose h-36 flex-1 dark:prose-invert sm:h-20">
+        <p
+            x-data="{ content: '' }"
+            x-init="const message = @js('Hi ' . auth()->user()->name . ", I am happy to help you draft this service request update for {$contactName} (re: #{$serviceRequestNumber}). Please describe the update you wish to share:");
+            
+            const typeWord = async (word, delay) => {
+                content += word + ' ';
+            
+                await new Promise(resolve => setTimeout(resolve, delay));
+            };
+            
+            for (const word of message.split(' ')) {
+                await typeWord(word, Math.floor(Math.random() * 100));
+            }"
+            x-text="content"
+        ></p>
+    </div>
+</div>
