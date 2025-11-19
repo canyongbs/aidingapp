@@ -44,14 +44,57 @@ use App\Http\Controllers\Controller;
 use Filament\Support\Colors\Color;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Validation\Rule;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ServiceRequestFeedbackFormWidgetController extends Controller
 {
+    public function assets(Request $request, ServiceRequest $serviceRequest): JsonResponse
+    {
+        // Read the Vite manifest to determine the correct asset paths
+        $manifestPath = public_path('storage/widgets/service-requests/feedback/.vite/manifest.json');
+        /** @var array<string, array{file: string, name: string, src: string, isEntry: bool}> $manifest */
+        $manifest = json_decode(File::get($manifestPath), true, 512, JSON_THROW_ON_ERROR);
+
+        $widgetEntry = $manifest['src/widget.js'];
+
+        return response()->json([
+            'asset_url' => route('widgets.service-requests.feedback.asset'),
+            'entry' => route('widgets.service-requests.feedback.api.entry', ['serviceRequest' => $serviceRequest]),
+            'js' => route('widgets.service-requests.feedback.asset', ['file' => $widgetEntry['file']]),
+        ]);
+    }
+
+    public function asset(Request $request, string $file): StreamedResponse
+    {
+        $path = "widgets/service-requests/feedback/{$file}";
+
+        $disk = Storage::disk('public');
+
+        abort_if(! $disk->exists($path), 404, 'File not found.');
+
+        $mimeType = $disk->mimeType($path);
+
+        $stream = $disk->readStream($path);
+
+        abort_if(is_null($stream), 404, 'File not found.');
+
+        return response()->streamDownload(
+            function () use ($stream) {
+                fpassthru($stream);
+                fclose($stream);
+            },
+            $file,
+            ['Content-Type' => $mimeType]
+        );
+    }
+
     public function view(Request $request, ServiceRequest $serviceRequest): JsonResponse
     {
         $logo = ThemeSettings::getSettingsPropertyModel('theme.is_logo_active')->getFirstMedia('logo');
@@ -61,6 +104,7 @@ class ServiceRequestFeedbackFormWidgetController extends Controller
             [
                 'requires_authentication' => true,
                 'is_authenticated' => (bool) $request->user(),
+                'user_auth_check_url' => route('api.user.auth-check'),
                 'authentication_url' => URL::to(
                     URL::signedRoute(
                         name: 'api.portal.request-authentication',
@@ -68,7 +112,7 @@ class ServiceRequestFeedbackFormWidgetController extends Controller
                     )
                 ),
                 'submission_url' => URL::signedRoute(
-                    name: 'service-requests.feedback.submit',
+                    name: 'widgets.service-requests.feedback.api.submit',
                     parameters: ['serviceRequest' => $serviceRequest],
                     absolute: false
                 ),

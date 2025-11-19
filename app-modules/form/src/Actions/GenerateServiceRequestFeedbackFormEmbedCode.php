@@ -37,33 +37,29 @@
 namespace AidingApp\Form\Actions;
 
 use AidingApp\ServiceManagement\Models\ServiceRequest;
-use Illuminate\Support\Facades\URL;
+use Exception;
+use Illuminate\Support\Facades\Storage;
 
 class GenerateServiceRequestFeedbackFormEmbedCode
 {
     public function handle(ServiceRequest $serviceRequest): string
     {
-        $scriptUrl = url('js/widgets/service-request-feedback-form/aiding-app-service-request-feedback-form-widget.js?');
+        $manifestPath = Storage::disk('public')->get('widgets/service-requests/feedback/.vite/manifest.json');
 
-        $formDefinitionUrl = URL::to(
-            URL::signedRoute(
-                name: 'service-requests.feedback.define',
-                parameters: ['serviceRequest' => $serviceRequest],
-                absolute: false,
-            )
-        );
+        if (is_null($manifestPath)) {
+            throw new Exception('Vite manifest file not found.');
+        }
 
-        $portalAccessUrl = route('portal.show');
+        /** @var array<string, array{file: string, name: string, src: string, isEntry: bool}> $manifest */
+        $manifest = json_decode($manifestPath, true, 512, JSON_THROW_ON_ERROR);
 
-        $userAuthenticationUrl = route('api.user.auth-check');
+        $loaderScriptUrl = url("widgets/service-requests/feedback/{$manifest['src/loader.js']['file']}");
 
-        $appUrl = config('app.url');
-
-        $apiUrl = route('api.portal.define');
+        $assetsUrl = route(name: 'widgets.service-requests.feedback.api.assets', parameters: ['serviceRequest' => $serviceRequest]);
 
         return <<<EOD
-        <service-request-feedback-form-embed url="{$formDefinitionUrl}" user-authentication-url={$userAuthenticationUrl} access-url={$portalAccessUrl} app-url="{$appUrl}" api-url="{$apiUrl}"></service-request-feedback-form-embed>
-        <script src="{$scriptUrl}"></script>
+        <service-request-feedback-form-embed url="{$assetsUrl}"></service-request-feedback-form-embed>
+        <script src="{$loaderScriptUrl}"></script>
         EOD;
     }
 }

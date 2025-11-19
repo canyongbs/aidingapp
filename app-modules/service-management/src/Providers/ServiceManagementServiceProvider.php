@@ -102,5 +102,7 @@ class ServiceManagementServiceProvider extends ServiceProvider
             'incident_update' => IncidentUpdate::class,
             'service_monitoring_target' => ServiceMonitoringTarget::class,
         ]);
+
+        $this->loadRoutesFrom(__DIR__ . '/../../routes/widgets.php');
     }
 }

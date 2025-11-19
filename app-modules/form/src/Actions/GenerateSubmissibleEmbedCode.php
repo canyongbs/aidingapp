@@ -39,6 +39,7 @@ namespace AidingApp\Form\Actions;
 use AidingApp\Form\Models\Submissible;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use Exception;
+use Illuminate\Support\Facades\Storage;
 
 class GenerateSubmissibleEmbedCode
 {
@@ -46,16 +47,22 @@ class GenerateSubmissibleEmbedCode
     {
         return match ($submissible::class) {
             ServiceRequestForm::class => (function () use ($submissible) {
-                /** @var ServiceRequestForm $submissible */
-                $scriptUrl = url('js/widgets/service-request-form/aiding-app-service-request-form-widget.js?v=' . app('current-commit'));
-                $formDefinitionUrl = route(
-                    name: 'service-request-forms.define',
-                    parameters: ['serviceRequestForm' => $submissible],
-                );
+                $manifestPath = Storage::disk('public')->get('widgets/service-requests/forms/.vite/manifest.json');
+
+                if (is_null($manifestPath)) {
+                    throw new Exception('Vite manifest file not found.');
+                }
+
+                /** @var array<string, array{file: string, name: string, src: string, isEntry: bool}> $manifest */
+                $manifest = json_decode($manifestPath, true, 512, JSON_THROW_ON_ERROR);
+
+                $loaderScriptUrl = url("widgets/service-requests/forms/{$manifest['src/loader.js']['file']}");
+
+                $assetsUrl = route(name: 'widgets.service-requests.forms.api.assets', parameters: ['serviceRequestForm' => $submissible]);
 
                 return <<<EOD
-                <service-request-form-embed url="{$formDefinitionUrl}"></service-request-form-embed>
-                <script src="{$scriptUrl}"></script>
+                <service-request-form-embed url="{$assetsUrl}"></service-request-form-embed>
+                <script src="{$loaderScriptUrl}"></script>
                 EOD;
             })(),
             default => throw new Exception('Unsupported submissible type.'),

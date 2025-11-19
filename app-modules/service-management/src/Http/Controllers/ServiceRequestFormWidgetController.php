@@ -50,16 +50,59 @@ use Closure;
 use Filament\Support\Colors\Color;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ServiceRequestFormWidgetController extends Controller
 {
+    public function assets(Request $request, ServiceRequestForm $serviceRequestForm): JsonResponse
+    {
+        // Read the Vite manifest to determine the correct asset paths
+        $manifestPath = public_path('storage/widgets/service-requests/forms/.vite/manifest.json');
+        /** @var array<string, array{file: string, name: string, src: string, isEntry: bool}> $manifest */
+        $manifest = json_decode(File::get($manifestPath), true, 512, JSON_THROW_ON_ERROR);
+
+        $widgetEntry = $manifest['src/widget.js'];
+
+        return response()->json([
+            'asset_url' => route('widgets.service-requests.forms.asset'),
+            'entry' => route('widgets.service-requests.forms.api.entry', ['serviceRequestForm' => $serviceRequestForm]),
+            'js' => route('widgets.service-requests.forms.asset', ['file' => $widgetEntry['file']]),
+        ]);
+    }
+
+    public function asset(Request $request, string $file): StreamedResponse
+    {
+        $path = "widgets/service-requests/forms/{$file}";
+
+        $disk = Storage::disk('public');
+
+        abort_if(! $disk->exists($path), 404, 'File not found.');
+
+        $mimeType = $disk->mimeType($path);
+
+        $stream = $disk->readStream($path);
+
+        abort_if(is_null($stream), 404, 'File not found.');
+
+        return response()->streamDownload(
+            function () use ($stream) {
+                fpassthru($stream);
+                fclose($stream);
+            },
+            $file,
+            ['Content-Type' => $mimeType]
+        );
+    }
+
     public function view(GenerateServiceRequestFormKitSchema $generateSchema, ServiceRequestForm $serviceRequestForm): JsonResponse
     {
         return response()->json(
@@ -69,15 +112,13 @@ class ServiceRequestFormWidgetController extends Controller
                 'is_authenticated' => $serviceRequestForm->is_authenticated,
                 ...($serviceRequestForm->is_authenticated ? [
                     'authentication_url' => URL::signedRoute(
-                        name: 'service-request-forms.request-authentication',
+                        name: 'widgets.service-requests.forms.api.request-authentication',
                         parameters: ['serviceRequestForm' => $serviceRequestForm],
-                        absolute: false
                     ),
                 ] : [
                     'submission_url' => URL::signedRoute(
-                        name: 'service-request-forms.submit',
+                        name: 'widgets.service-requests.forms.api.submit',
                         parameters: ['serviceRequestForm' => $serviceRequestForm],
-                        absolute: false
                     ),
                 ]),
                 'recaptcha_enabled' => $serviceRequestForm->recaptcha_enabled,
@@ -120,17 +161,16 @@ class ServiceRequestFormWidgetController extends Controller
         return response()->json([
             'message' => "We've sent an authentication code to {$data['email']}.",
             'authentication_url' => URL::signedRoute(
-                name: 'service-request-forms.authenticate',
+                name: 'widgets.service-requests.forms.api.authenticate',
                 parameters: [
                     'serviceRequestForm' => $serviceRequestForm,
                     'authentication' => $authentication,
                 ],
-                absolute: false
             ),
         ]);
     }
 
-    public function authenticate(Request $request, ServiceRequestFormAuthentication $authentication): JsonResponse
+    public function authenticate(Request $request, ServiceRequestForm $serviceRequestForm, ServiceRequestFormAuthentication $authentication): JsonResponse
     {
         if ($authentication->isExpired()) {
             return response()->json([
@@ -150,12 +190,11 @@ class ServiceRequestFormWidgetController extends Controller
 
         return response()->json([
             'submission_url' => URL::signedRoute(
-                name: 'service-request-forms.submit',
+                name: 'widgets.service-requests.forms.api.submit',
                 parameters: [
                     'authentication' => $authentication,
                     'serviceRequestForm' => $authentication->submissible,
                 ],
-                absolute: false
             ),
         ]);
     }
