@@ -39,6 +39,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
+use AidingApp\ServiceManagement\Filament\Actions\DraftServiceRequestUpdateWithAiAction;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
@@ -76,7 +77,10 @@ class ServiceRequestUpdatesRelationManager extends RelationManager
                     ->rows(3)
                     ->columnSpan('full')
                     ->required()
-                    ->string(),
+                    ->string()
+                    ->hintAction(
+                        DraftServiceRequestUpdateWithAiAction::make()
+                    ),
                 Toggle::make('internal')
                     ->label('Internal')
                     ->rule(['boolean'])

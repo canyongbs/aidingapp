@@ -99,7 +99,7 @@ class ServiceRequestUpdate extends BaseModel implements Auditable, ProvidesATime
     public function createdBy(): MorphTo
     {
         return $this->morphTo(
-            name: 'created_by',
+            name: 'createdBy',
             type: 'created_by_type',
             id: 'created_by_id',
         );
