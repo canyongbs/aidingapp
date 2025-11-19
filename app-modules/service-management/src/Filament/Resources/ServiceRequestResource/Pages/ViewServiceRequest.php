@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\
 
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
 use AidingApp\ServiceManagement\Filament\Concerns\ServiceRequestLocked;
@@ -79,6 +80,7 @@ class ViewServiceRequest extends ViewRecord
                         TextEntry::make('service_request_number')
                             ->label('Service Request Number'),
                         TextEntry::make('division.name')
+                            ->visible(fn (): bool => Division::count() > 1)
                             ->label('Division'),
                         TextEntry::make('status.name')
                             ->label('Status')

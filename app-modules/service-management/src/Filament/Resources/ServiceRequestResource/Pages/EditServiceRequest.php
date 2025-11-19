@@ -83,6 +83,7 @@ class EditServiceRequest extends EditRecord
                             ->relationship('division', 'name')
                             ->label('Division')
                             ->required()
+                            ->visible(fn (): bool => Division::count() > 1)
                             ->exists((new Division())->getTable(), 'id'),
                         Select::make('status_id')
                             ->relationship('status', 'name')
