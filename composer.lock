@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7146c1d67c37d4644f2331e7d4821502",
+    "content-hash": "8d854c401ced6be53f571f7ac1bf30f2",
     "packages": [
         {
             "name": "ably/ably-php",
@@ -1827,16 +1827,16 @@
         },
         {
             "name": "canyongbs/model-state-machine",
-            "version": "2.0.1",
+            "version": "2.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/canyongbs/model-state-machine.git",
-                "reference": "12e3a2d820d4dfc97ec9e414647407c5316f5d83"
+                "reference": "965fc8ad54ff15300341e68b4c6dac74f96999c6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/canyongbs/model-state-machine/zipball/12e3a2d820d4dfc97ec9e414647407c5316f5d83",
-                "reference": "12e3a2d820d4dfc97ec9e414647407c5316f5d83",
+                "url": "https://api.github.com/repos/canyongbs/model-state-machine/zipball/965fc8ad54ff15300341e68b4c6dac74f96999c6",
+                "reference": "965fc8ad54ff15300341e68b4c6dac74f96999c6",
                 "shasum": ""
             },
             "require": {
@@ -1895,9 +1895,9 @@
             ],
             "support": {
                 "issues": "https://github.com/canyongbs/model-state-machine/issues",
-                "source": "https://github.com/canyongbs/model-state-machine/tree/2.0.1"
+                "source": "https://github.com/canyongbs/model-state-machine/tree/2.0.2"
             },
-            "time": "2025-05-06T12:47:19+00:00"
+            "time": "2025-11-13T13:09:38+00:00"
         },
         {
             "name": "carbonphp/carbon-doctrine-types",
@@ -22250,5 +22250,5 @@
         "ext-pdo": "*"
     },
     "platform-dev": {},
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.9.0"
 }
