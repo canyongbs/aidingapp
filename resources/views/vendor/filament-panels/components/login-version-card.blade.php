@@ -31,7 +31,7 @@
 
 </COPYRIGHT>
 --}}
-<div class="bg-turkish-500 text-white rounded-xl p-6 mb-6">
+<div class="bg-turkish-500 text-white rounded-xl p-6 min-h-56">
     <div class="flex md:flex-row flex-col justify-center items-center gap-6">
         <div>
             <p class="text-white text-sm font-semibold">Version {{ app('current-version') }} is now available!</p>

@@ -58,7 +58,7 @@
         </x-filament-panels::form>
     </div>
 
-    <div class="w-full lg:w-1/2">
+    <div class="flex w-full flex-col gap-6 lg:w-1/2">
         <x-filament-panels::login-version-card />
         <x-filament-panels::login-resource-portal-card />
     </div>

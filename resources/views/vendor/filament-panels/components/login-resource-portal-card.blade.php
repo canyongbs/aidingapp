@@ -31,7 +31,7 @@
 
 </COPYRIGHT>
 --}}
-<div class="bg-turkish-300 text-white rounded-xl p-6">
+<div class="bg-turkish-300 text-white rounded-xl p-6 min-h-56">
     <div class="flex md:flex-row flex-col justify-center items-center gap-6">
         <div>
             <p class="text-gray-800 text-sm font-semibold">Resource Portal</p>

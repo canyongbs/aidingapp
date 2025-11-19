@@ -70,8 +70,11 @@
             @if (UnlicensedNotice::canView())
                 @livewire(UnlicensedNotice::class)
             @else
+                <div class="grid w-full gap-2 md:grid-cols-2">
+                    <x-filament-panels::login-version-card />
+                    <x-filament-panels::login-resource-portal-card />
+                </div>
                 @livewire(ServiceRequestWidget::class)
-
                 <div class="flex gap-3">
                     <div class="w-full md:w-1/2">
                         @livewire(ServiceRequestLineChart::class)
