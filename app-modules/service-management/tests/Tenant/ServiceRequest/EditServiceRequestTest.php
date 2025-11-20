@@ -36,6 +36,7 @@
 
 use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\EditServiceRequest;
@@ -147,7 +148,11 @@ test('check if time to resolution has correct value when status is changed', fun
     });
 });
 
-test('EditServiceRequest requires valid data', function ($data, $errors) {
+test('EditServiceRequest requires valid data', function ($data, $errors, $setup = null) {
+    if ($setup) {
+        $setup();
+    }
+
     $serviceRequest = ServiceRequest::factory([
         'status_id' => ServiceRequestStatus::factory()->create([
             'classification' => SystemServiceRequestClassification::Open,
@@ -175,11 +180,12 @@ test('EditServiceRequest requires valid data', function ($data, $errors) {
         ->toEqual($serviceRequest->priority->id);
 })->with(
     [
-        'division_id missing' => [EditServiceRequestRequestFactory::new()->state(['division_id' => null]), ['division_id' => 'required']],
+        'division_id missing' => [
+            EditServiceRequestRequestFactory::new()->state(['division_id' => null]),
+            ['division_id' => 'required'], fn () => Division::factory()->count(2)->create()],
         'division_id does not exist' => [
             EditServiceRequestRequestFactory::new()->state(['division_id' => fake()->uuid()]),
-            ['division_id' => 'exists'],
-        ],
+            ['division_id' => 'exists'], fn () => Division::factory()->count(2)->create()],
         'status_id missing' => [EditServiceRequestRequestFactory::new()->state(['status_id' => null]), ['status_id' => 'required']],
         'status_id does not exist' => [
             EditServiceRequestRequestFactory::new()->state(['status_id' => fake()->uuid()]),

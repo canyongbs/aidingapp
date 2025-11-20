@@ -37,6 +37,7 @@
 use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Authorization\Models\License;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
@@ -120,11 +121,10 @@ test('CreateServiceRequest requires valid data', function ($data, $errors, $setu
     assertDatabaseMissing(ServiceRequest::class, $request->except(['division_id', 'status_id', 'priority_id', 'type_id'])->toArray());
 })->with(
     [
-        'division_id missing' => [CreateServiceRequestRequestFactory::new()->without('division_id'), ['division_id' => 'required']],
+        'division_id missing' => [CreateServiceRequestRequestFactory::new()->without('division_id'), ['division_id' => 'required'], fn () => Division::factory()->count(2)->create()],
         'division_id does not exist' => [
             CreateServiceRequestRequestFactory::new()->state(['division_id' => fake()->uuid()]),
-            ['division_id' => 'exists'],
-        ],
+            ['division_id' => 'exists'], fn () => Division::factory()->count(2)->create()],
         'status_id missing' => [CreateServiceRequestRequestFactory::new()->without('status_id'), ['status_id' => 'required']],
         'status_id does not exist' => [
             CreateServiceRequestRequestFactory::new()->state(['status_id' => fake()->uuid()]),

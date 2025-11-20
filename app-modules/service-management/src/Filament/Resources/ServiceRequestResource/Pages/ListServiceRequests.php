@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages;
 
 use AidingApp\Contact\Models\Organization;
+use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
@@ -118,6 +119,7 @@ class ListServiceRequests extends ListRecords
                     ->label('Division')
                     ->searchable()
                     ->sortable()
+                    ->visible(fn (): bool => Division::count() > 1)
                     ->toggleable(),
                 TextColumn::make('assignedTo.user.name')
                     ->label('Assigned To')
