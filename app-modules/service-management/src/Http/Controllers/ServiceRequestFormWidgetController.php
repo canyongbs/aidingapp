@@ -257,7 +257,7 @@ class ServiceRequestFormWidgetController extends Controller
             $authentication->delete();
         }
 
-        $submission->submitted_at = now();
+        $submission->submitted_at = now()->toImmutable();
 
         $submission->save();
 

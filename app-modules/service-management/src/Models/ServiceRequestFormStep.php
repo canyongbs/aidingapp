@@ -66,6 +66,9 @@ class ServiceRequestFormStep extends SubmissibleStep
         return $this->belongsTo(ServiceRequestForm::class, 'service_request_form_id');
     }
 
+    /**
+     * @return HasMany<ServiceRequestFormField, $this>
+     */
     public function fields(): HasMany
     {
         return $this->hasMany(ServiceRequestFormField::class);

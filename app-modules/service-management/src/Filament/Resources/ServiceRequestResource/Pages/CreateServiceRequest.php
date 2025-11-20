@@ -39,13 +39,19 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Actions\CreateServiceRequestAction;
+use AidingApp\ServiceManagement\Actions\GenerateServiceRequestFilamentFormSchema;
 use AidingApp\ServiceManagement\DataTransferObjects\ServiceRequestDataObject;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
+use AidingApp\ServiceManagement\Models\ServiceRequestFormStep;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Rules\ManagedServiceRequestType;
+use Filament\Forms\Components\Component;
 use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -56,6 +62,8 @@ use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class CreateServiceRequest extends CreateRecord
 {
@@ -102,7 +110,16 @@ class CreateServiceRequest extends CreateRecord
                             })
                                 ->pluck('name', 'id'))
                             ->rule(new ManagedServiceRequestType())
-                            ->afterStateUpdated(fn (Set $set) => $set('priority_id', null))
+                            ->afterStateUpdated(function (Set $set, Select $component) {
+                                $set('priority_id', null);
+                                $component
+                                    ->getContainer()
+                                    ->getParentComponent()
+                                    ->getContainer()
+                                    ->getComponent('dynamicTypeFields')
+                                    ?->getChildComponentContainer()
+                                    ->fill();
+                            })
                             ->label('Type')
                             ->required()
                             ->live()
@@ -138,13 +155,105 @@ class CreateServiceRequest extends CreateRecord
                     ->label('Related To')
                     ->required()
                     ->exists((new Contact())->getTable(), 'id'),
+                Section::make('Additional Information')
+                    ->schema(fn (Get $get): array => $this->getDynamicFields($get('type_id')))
+                    ->statePath('dynamic_fields')
+                    ->key('dynamicTypeFields')
+                    ->visible(fn (Get $get): bool => filled($get('type_id')) && ! empty($this->getDynamicFields($get('type_id')))),
             ]);
+    }
+
+    /**
+     * @return array<Component>
+     */
+    protected function getDynamicFields(?string $typeId): array
+    {
+        if (! $typeId) {
+            return [];
+        }
+
+        $type = ServiceRequestType::with('form.fields', 'form.steps.fields')->find($typeId);
+
+        if (! $type || ! $type->form) {
+            return [];
+        }
+
+        return app(GenerateServiceRequestFilamentFormSchema::class)($type->form);
     }
 
     protected function handleRecordCreation(array $data): Model
     {
-        $serviceRequestDataObject = ServiceRequestDataObject::fromData($data);
+        return DB::transaction(function () use ($data) {
+            $dynamicFields = $data['dynamic_fields'] ?? [];
+            $typeId = $data['type_id'];
+            unset($data['dynamic_fields']);
 
-        return app(CreateServiceRequestAction::class)->execute($serviceRequestDataObject);
+            $serviceRequestDataObject = ServiceRequestDataObject::fromData($data);
+            $serviceRequest = app(CreateServiceRequestAction::class)->execute($serviceRequestDataObject);
+
+            $this->saveDynamicFormFields($serviceRequest, $typeId, $dynamicFields);
+
+            return $serviceRequest;
+        });
+    }
+
+    /**
+     * @param  array<string, mixed>  $dynamicFields
+     */
+    protected function saveDynamicFormFields(ServiceRequest $serviceRequest, string $typeId, array $dynamicFields): void
+    {
+        if (empty($dynamicFields)) {
+            return;
+        }
+
+        $type = ServiceRequestType::with('form.fields', 'form.steps.fields')->find($typeId);
+
+        if (! $type || ! $type->form) {
+            return;
+        }
+
+        $form = $type->form;
+
+        $submission = $form->submissions()->create([
+            'submitted_at' => now(),
+        ]);
+
+        $submission->priority()->associate($serviceRequest->priority);
+        $submission->save();
+
+        /** @var Collection<string, ServiceRequestFormField> $allFields */
+        $allFields = collect();
+
+        /** @var Collection<int, ServiceRequestFormField> $fields */
+        $fields = $form->fields;
+        $fields->each(function (ServiceRequestFormField $field) use (&$allFields) {
+            $allFields->put($field->id, $field);
+        });
+
+        if ($form->steps->isNotEmpty()) {
+            /** @var Collection<int, ServiceRequestFormStep> $steps */
+            $steps = $form->steps;
+            $steps->each(function (ServiceRequestFormStep $step) use (&$allFields) {
+                /** @var Collection<int, ServiceRequestFormField> $stepFields */
+                $stepFields = $step->fields;
+                $stepFields->each(function (ServiceRequestFormField $field) use (&$allFields) {
+                    $allFields->put($field->id, $field);
+                });
+            });
+        }
+
+        foreach ($dynamicFields as $fieldKey => $response) {
+            $field = $allFields->get($fieldKey);
+
+            if ($field && filled($response)) {
+                $submission->fields()->attach($field->id, [
+                    'id' => Str::orderedUuid(),
+                    'response' => $response,
+                ]);
+            }
+        }
+
+        $serviceRequest->serviceRequestFormSubmission()->associate($submission);
+        $serviceRequest->save();
     }
 }
