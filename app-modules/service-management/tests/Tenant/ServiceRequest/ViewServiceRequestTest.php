@@ -36,6 +36,7 @@
 
 use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ManageAssignments;
@@ -54,6 +55,7 @@ use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 test('The correct details are displayed on the ViewServiceRequest page', function () {
+    Division::factory()->count(2)->create();
     $serviceRequest = ServiceRequest::factory()->create();
 
     asSuperAdmin()
