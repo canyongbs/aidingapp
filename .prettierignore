@@ -1,4 +1,5 @@
 .env
+docker/devops/
 public/
 storage/
 bootstrap/cache/
