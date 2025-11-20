@@ -6,4 +6,5 @@ resources/views/vendor/mail/**/*.blade.php
 resources/views/mail/**/*.blade.php
 resources/lang/**/*.php
 **/vendor
+.composer/
 app-modules/service-management/resources/views/mail/service-monitoring-mail.blade.php
