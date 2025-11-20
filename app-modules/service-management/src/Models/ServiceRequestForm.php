@@ -69,16 +69,25 @@ class ServiceRequestForm extends Submissible
         'rounding' => Rounding::class,
     ];
 
+    /**
+     * @return HasMany<ServiceRequestFormField, $this>
+     */
     public function fields(): HasMany
     {
         return $this->hasMany(ServiceRequestFormField::class, 'service_request_form_id');
     }
 
+    /**
+     * @return HasMany<ServiceRequestFormStep, $this>
+     */
     public function steps(): HasMany
     {
         return $this->hasMany(ServiceRequestFormStep::class, 'service_request_form_id');
     }
 
+    /**
+     * @return HasMany<ServiceRequestFormSubmission, $this>
+     */
     public function submissions(): HasMany
     {
         return $this->hasMany(ServiceRequestFormSubmission::class, 'service_request_form_id');
