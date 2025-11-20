@@ -1,112 +1,121 @@
 services:
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: development
-      args:
-        PUID: '${PLS_USER_ID:-9999}'
-        PGID: '${PLS_GROUP_ID:-9999}'
-        TOTAL_QUEUE_WORKERS: '${TOTAL_QUEUE_WORKERS:-1}'
-        MULTIPLE_DEVELOPMENT_QUEUES: '${MULTIPLE_DEVELOPMENT_QUEUES:-false}'
-    environment:
-      SSL_MODE: "mixed"
-      LANDLORD_MIGRATE: '${LANDLORD_MIGRATE:-true}'
-      TENANT_MIGRATE: '${TENANT_MIGRATE:-true}'
-      LARAVEL_SCHEDULER_ENABLED: '${LARAVEL_SCHEDULER_ENABLED:-true}'
-      LARAVEL_QUEUE_ENABLED: '${LARAVEL_QUEUE_ENABLED:-true}'
-      LARAVEL_OCTANE_WATCH: '${LARAVEL_OCTANE_WATCH:-false}'
-      CACHE_MODULES: '${CACHE_MODULES:-false}'
-      CACHE_CONFIG: '${CACHE_CONFIG:-false}'
-      CACHE_ROUTES: '${CACHE_ROUTES:-false}'
-      CACHE_VIEWS: '${CACHE_VIEWS:-false}'
-      CACHE_EVENTS: '${CACHE_EVENTS:-false}'
-      CACHE_ICONS: '${CACHE_ICONS:-false}'
-      CACHE_FILAMENT_COMPONENTS: '${CACHE_FILAMENT_COMPONENTS:-false}'
-      PUID: '${PLS_USER_ID:-9999}'
-      PGID: '${PLS_GROUP_ID:-9999}'
-      SQS_QUEUE: '${SQS_QUEUE:-default}'
-      LANDLORD_SQS_QUEUE: '${LANDLORD_SQS_QUEUE:-landlord}'
-      OUTBOUND_COMMUNICATION_QUEUE: '${OUTBOUND_COMMUNICATION_QUEUE:-outbound-communication}'
-      AUDIT_QUEUE_QUEUE: '${AUDIT_QUEUE_QUEUE:-audit}'
-      IMPORT_EXPORT_QUEUE: '${IMPORT_EXPORT_QUEUE:-import-export}'
-      BUILD_ASSETS: '${BUILD_ASSETS:-false}'
-      FIX_PERMISSIONS: '${FIX_PERMISSIONS:-true}'
-      PHP_MEMORY_LIMIT: '${PHP_MEMORY_LIMIT:-512M}'
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.aidingapp-app.rule=HostRegexp(`aidingapp.local`, `{subdomain:[a-z0-9]+}.aidingapp.local`)"
-      - "traefik.http.routers.aidingapp-app.entrypoints=websecure"
-      - "traefik.http.routers.aidingapp-app.tls=true"
-      - "traefik.http.services.aidingapp-app.loadbalancer.server.port=443"
-      - "traefik.http.services.aidingapp-app.loadbalancer.server.scheme=https"
-    extra_hosts:
-      - 'host.docker.internal:host-gateway'
-    volumes:
-      - '.:/var/www/html'
-      # - '../common:/var/www/common'
-    networks:
-      cgbs-development:
-        ipv4_address: 172.16.1.4
-        aliases:
-          - aidingapp.local
-    dns:
-      - 172.16.1.1
-    depends_on:
-      - aidingapp-redis
-      - aidingapp-mailpit
-      - aidingapp-pgsql
+    app:
+        build:
+            context: .
+            dockerfile: Dockerfile
+            target: development
+            args:
+                PUID: "${PLS_USER_ID:-9999}"
+                PGID: "${PLS_GROUP_ID:-9999}"
+                TOTAL_QUEUE_WORKERS: "${TOTAL_QUEUE_WORKERS:-1}"
+                MULTIPLE_DEVELOPMENT_QUEUES: "${MULTIPLE_DEVELOPMENT_QUEUES:-false}"
+        environment:
+            SSL_MODE: "mixed"
+            LANDLORD_MIGRATE: "${LANDLORD_MIGRATE:-true}"
+            TENANT_MIGRATE: "${TENANT_MIGRATE:-true}"
+            LARAVEL_SCHEDULER_ENABLED: "${LARAVEL_SCHEDULER_ENABLED:-true}"
+            LARAVEL_QUEUE_ENABLED: "${LARAVEL_QUEUE_ENABLED:-true}"
+            LARAVEL_OCTANE_WATCH: "${LARAVEL_OCTANE_WATCH:-false}"
+            CACHE_MODULES: "${CACHE_MODULES:-false}"
+            CACHE_CONFIG: "${CACHE_CONFIG:-false}"
+            CACHE_ROUTES: "${CACHE_ROUTES:-false}"
+            CACHE_VIEWS: "${CACHE_VIEWS:-false}"
+            CACHE_EVENTS: "${CACHE_EVENTS:-false}"
+            CACHE_ICONS: "${CACHE_ICONS:-false}"
+            CACHE_FILAMENT_COMPONENTS: "${CACHE_FILAMENT_COMPONENTS:-false}"
+            PUID: "${PLS_USER_ID:-9999}"
+            PGID: "${PLS_GROUP_ID:-9999}"
+            SQS_QUEUE: "${SQS_QUEUE:-default}"
+            LANDLORD_SQS_QUEUE: "${LANDLORD_SQS_QUEUE:-landlord}"
+            OUTBOUND_COMMUNICATION_QUEUE: "${OUTBOUND_COMMUNICATION_QUEUE:-outbound-communication}"
+            AUDIT_QUEUE_QUEUE: "${AUDIT_QUEUE_QUEUE:-audit}"
+            IMPORT_EXPORT_QUEUE: "${IMPORT_EXPORT_QUEUE:-import-export}"
+            BUILD_ASSETS: "${BUILD_ASSETS:-false}"
+            FIX_PERMISSIONS: "${FIX_PERMISSIONS:-true}"
+            PHP_MEMORY_LIMIT: "${PHP_MEMORY_LIMIT:-512M}"
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.aidingapp-app.rule=(Host(`aidingapp.local`) || HostRegexp(`^[a-z0-9]+\\.aidingapp\\.local$`))"
+            - "traefik.http.routers.aidingapp-app.entrypoints=websecure"
+            - "traefik.http.routers.aidingapp-app.tls=true"
+            - "traefik.http.services.aidingapp-app.loadbalancer.server.port=443"
+            - "traefik.http.services.aidingapp-app.loadbalancer.server.scheme=https"
+        extra_hosts:
+            - "host.docker.internal:host-gateway"
+        volumes:
+            - ".:/var/www/html"
+            # - '../common:/var/www/common'
+        networks:
+            cgbs-development:
+                ipv4_address: 172.16.1.4
+                aliases:
+                    - aidingapp.local
+        dns:
+            - 172.16.1.1
+        depends_on:
+            - aidingapp-redis
+            - aidingapp-mailpit
+            - aidingapp-pgsql
 
-  aidingapp-redis:
-    image: 'redis:alpine'
-    ports:
-      - '${FORWARD_REDIS_PORT:-63793}:6379'
-    volumes:
-      - 'aidingapp-redis:/data'
-    networks:
-      - cgbs-development
-    healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
-      retries: 3
-      timeout: 5s
+    aidingapp-redis:
+        image: "redis:alpine"
+        ports:
+            - "${FORWARD_REDIS_PORT:-63793}:6379"
+        volumes:
+            - "aidingapp-redis:/data"
+        networks:
+            - cgbs-development
+        healthcheck:
+            test: ["CMD", "redis-cli", "ping"]
+            retries: 3
+            timeout: 5s
 
-  aidingapp-mailpit:
-    image: 'axllent/mailpit:latest'
-    networks:
-      - cgbs-development
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.aidingapp-mailpit.rule=Host(`mail.tools.aidingapp.local`)"
-      - "traefik.http.routers.aidingapp-mailpit.entrypoints=websecure"
-      - "traefik.http.routers.aidingapp-mailpit.tls=true"
-      - "traefik.http.services.aidingapp-mailpit.loadbalancer.server.port=8025"
-      - "traefik.http.services.aidingapp-mailpit.loadbalancer.server.scheme=http"
+    aidingapp-mailpit:
+        image: "axllent/mailpit:latest"
+        networks:
+            - cgbs-development
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.aidingapp-mailpit.rule=Host(`mail.tools.aidingapp.local`)"
+            - "traefik.http.routers.aidingapp-mailpit.entrypoints=websecure"
+            - "traefik.http.routers.aidingapp-mailpit.tls=true"
+            - "traefik.http.services.aidingapp-mailpit.loadbalancer.server.port=8025"
+            - "traefik.http.services.aidingapp-mailpit.loadbalancer.server.scheme=http"
 
-  aidingapp-pgsql:
-    image: 'postgres:15'
-    ports:
-      - '${FORWARD_DB_PORT:-5434}:5432'
-    environment:
-      PGPASSWORD: '${DB_PASSWORD:-secret}'
-      POSTGRES_DB: '${DB_DATABASE}'
-      POSTGRES_USER: '${DB_USERNAME}'
-      POSTGRES_PASSWORD: '${DB_PASSWORD:-secret}'
-    volumes:
-      - 'aidingapp-pgsql:/var/lib/postgresql/data'
-      - './docker/pgsql/create-testing-database.sql:/docker-entrypoint-initdb.d/10-create-testing-database.sql'
-    networks:
-      - cgbs-development
-    healthcheck:
-      test: [ "CMD", "pg_isready", "-q", "-d", "${DB_DATABASE}", "-U", "${DB_USERNAME}" ]
-      retries: 3
-      timeout: 5s
+    aidingapp-pgsql:
+        image: "postgres:15"
+        ports:
+            - "${FORWARD_DB_PORT:-5434}:5432"
+        environment:
+            PGPASSWORD: "${DB_PASSWORD:-secret}"
+            POSTGRES_DB: "${DB_DATABASE}"
+            POSTGRES_USER: "${DB_USERNAME}"
+            POSTGRES_PASSWORD: "${DB_PASSWORD:-secret}"
+        volumes:
+            - "aidingapp-pgsql:/var/lib/postgresql/data"
+            - "./docker/pgsql/create-testing-database.sql:/docker-entrypoint-initdb.d/10-create-testing-database.sql"
+        networks:
+            - cgbs-development
+        healthcheck:
+            test:
+                [
+                    "CMD",
+                    "pg_isready",
+                    "-q",
+                    "-d",
+                    "${DB_DATABASE}",
+                    "-U",
+                    "${DB_USERNAME}",
+                ]
+            retries: 3
+            timeout: 5s
 
 networks:
-  cgbs-development:
-    external: true
+    cgbs-development:
+        external: true
 
 volumes:
-  aidingapp-redis:
-    driver: local
-  aidingapp-pgsql:
-    driver: local
+    aidingapp-redis:
+        driver: local
+    aidingapp-pgsql:
+        driver: local
