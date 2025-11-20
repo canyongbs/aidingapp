@@ -1,4 +1,6 @@
 .env
+.npm/
+.vscode/
 docker/devops/
 public/
 storage/
