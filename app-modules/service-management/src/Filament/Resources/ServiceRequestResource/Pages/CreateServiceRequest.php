@@ -207,10 +207,11 @@ class CreateServiceRequest extends CreateRecord
 
         $form = $type->form;
 
-        $submission = $form->submissions()->create([
+        $submission = $form->submissions()->make([
             'submitted_at' => now(),
         ]);
 
+        $submission->author()->associate(auth()->user());
         $submission->priority()->associate($serviceRequest->priority);
         $submission->save();
 
