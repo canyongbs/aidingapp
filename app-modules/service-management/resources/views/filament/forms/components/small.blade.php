@@ -1,6 +1,4 @@
-<?php
-
-/*
+{{--
 <COPYRIGHT>
 
     Copyright © 2016-2025, Canyon GBS LLC. All rights reserved.
@@ -32,45 +30,7 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
-
-namespace AidingApp\ServiceManagement\Models;
-
-use AidingApp\Form\Models\SubmissibleStep;
-use App\Models\Attributes\NoPermissions;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
-
-/**
- * @mixin IdeHelperServiceRequestFormStep
- */
-#[NoPermissions]
-class ServiceRequestFormStep extends SubmissibleStep
-{
-    use SoftDeletes;
-
-    protected $fillable = [
-        'label',
-        'content',
-        'sort',
-    ];
-
-    protected $casts = [
-        'content' => 'array',
-        'sort' => 'integer',
-    ];
-
-    public function submissible(): BelongsTo
-    {
-        return $this->belongsTo(ServiceRequestForm::class, 'service_request_form_id');
-    }
-
-    /**
-     * @return HasMany<ServiceRequestFormField, $this>
-     */
-    public function fields(): HasMany
-    {
-        return $this->hasMany(ServiceRequestFormField::class);
-    }
-}
+--}}
+<div class="prose max-w-none dark:prose-invert">
+    <small>{!! str($content)->sanitizeHtml() !!}</small>
+</div>
