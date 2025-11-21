@@ -63,7 +63,7 @@ class ChangeRequestAwaitingApprovalNotification extends BaseNotification impleme
         return ['mail', 'database'];
     }
 
-    public function toEmail(object $notifiable): MailMessage
+    public function toMail(object $notifiable): MailMessage
     {
         return MailMessage::make()
             ->settings($this->resolveNotificationSetting($notifiable))
