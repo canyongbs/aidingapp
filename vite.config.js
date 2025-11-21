@@ -31,8 +31,8 @@
 
 </COPYRIGHT>
 */
-import { defineConfig } from 'vite';
 import laravel, { refreshPaths } from 'laravel-vite-plugin';
+import { defineConfig } from 'vite';
 
 export default defineConfig({
     plugins: [

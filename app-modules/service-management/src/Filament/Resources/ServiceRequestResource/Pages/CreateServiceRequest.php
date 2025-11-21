@@ -78,7 +78,14 @@ class CreateServiceRequest extends CreateRecord
                     ->label('Division')
                     ->required()
                     ->exists((new Division())->getTable(), 'id')
-                    ->default(auth()->user()->team()->count() ? auth()->user()?->team?->division?->id : ''),
+                    ->visible(fn (): bool => Division::count() > 1)
+                    ->saveRelationshipsWhenHidden()
+                    ->default(
+                        fn () => Division::count() === 1 ? (auth()->user()->team?->division?->getKey()
+                                    ?? Division::query()
+                                        ->first()
+                                        ?->getKey()) : null
+                    ),
                 Select::make('status_id')
                     ->relationship('status', 'name')
                     ->label('Status')

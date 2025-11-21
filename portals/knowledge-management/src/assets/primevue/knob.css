@@ -32,29 +32,29 @@
 </COPYRIGHT>
 */
 .p-knob-range {
-    @apply fill-none transition-[stroke] duration-100 ease-in
+    @apply fill-none transition-[stroke] duration-100 ease-in;
 }
 
 .p-knob-text {
-    @apply text-xl text-center
+    @apply text-xl text-center;
 }
 
 .p-knob svg {
     @apply rounded-full
         transition-colors duration-200
-        focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-primary
+        focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-primary;
 }
 
 .p-knob svg path:first-child {
-    @apply stroke-surface-200 dark:stroke-surface-700
+    @apply stroke-surface-200 dark:stroke-surface-700;
 }
 
 .p-knob svg path + path {
-    @apply stroke-primary
+    @apply stroke-primary;
 }
 
 .p-knob svg text {
-    @apply fill-surface-500 dark:fill-surface-400
+    @apply fill-surface-500 dark:fill-surface-400;
 }
 
 .p-knob-value {

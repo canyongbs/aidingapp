@@ -35,7 +35,7 @@
 
 @import 'tailwindcss/base';
 @import 'tailwindcss/components';
-@import "../src/assets/primevue/tailwind.css";
+@import '../src/assets/primevue/tailwind.css';
 @import 'tailwindcss/utilities';
 
 .formkit-inner {
