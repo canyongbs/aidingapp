@@ -396,6 +396,11 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
         return UserResource::class;
     }
 
+    public static function displayNameKey(): string
+    {
+        return 'name';
+    }
+
     public function grantLicense(LicenseType $type): bool
     {
         if ($this->hasLicense($type)) {
