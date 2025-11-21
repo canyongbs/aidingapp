@@ -91,10 +91,10 @@ trait TargetsRelationships
      *
      * @throws Exception
      *
-     * @return Model|null
+     * @return mixed
      *
      */
-    public function dynamicMethodChain(Model $model, array $methods): ?Model
+    public function dynamicMethodChain(Model $model, array $methods): mixed
     {
         $current = $model;
 
