@@ -149,4 +149,12 @@ class Project extends BaseModel implements Auditable
     {
         return $this->hasMany(ProjectMilestone::class, 'project_id');
     }
+
+    /**
+     * @return HasMany<Pipeline, $this>
+     */
+    public function pipelines(): HasMany
+    {
+        return $this->hasMany(Pipeline::class, 'project_id');
+    }
 }
