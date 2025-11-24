@@ -64,7 +64,7 @@ class ServiceUptimeWidget extends BaseWidget
     {
         $serviceChecks = $this->record->histories()->where('created_at', '>=', now()->subDays($days))->orderBy('created_at')->get();
 
-        if (now()->subDays($days)->diffInDays($serviceChecks->first()->created_at) > 1) {
+        if (now()->subDays($days)->diffInDays($serviceChecks->first()?->created_at) > 1) {
             return 'N/A';
         }
 
