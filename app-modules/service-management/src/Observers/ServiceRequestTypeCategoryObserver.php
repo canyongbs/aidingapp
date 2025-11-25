@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -36,41 +36,25 @@
 
 namespace AidingApp\ServiceManagement\Observers;
 
-use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 
-class ServiceRequestTypeObserver
+class ServiceRequestTypeCategoryObserver
 {
-    public function creating(ServiceRequestType $serviceRequestType): void
+    public function creating(ServiceRequestTypeCategory $category): void
     {
-        if ($serviceRequestType->sort === null) {
-            if ($serviceRequestType->category_id !== null) {
-                if (! Str::isUuid($serviceRequestType->category_id)) {
-                    throw new InvalidArgumentException('Category ID must be a valid UUID');
+        if ($category->sort === null) {
+            if ($category->parent_id !== null) {
+                if (! Str::isUuid($category->parent_id)) {
+                    throw new InvalidArgumentException('Parent ID must be a valid UUID');
                 }
 
-                $serviceRequestType->sort = DB::raw("(select coalesce(max(sort), 0) + 1 from service_request_types where category_id = '{$serviceRequestType->category_id}')");
+                $category->sort = DB::raw("(select coalesce(max(sort), 0) + 1 from service_request_type_categories where parent_id = '{$category->parent_id}')");
             } else {
-                $serviceRequestType->sort = DB::raw('(select coalesce(max(sort), 0) + 1 from service_request_types where category_id is null)');
+                $category->sort = DB::raw('(select coalesce(max(sort), 0) + 1 from service_request_type_categories where parent_id is null)');
             }
         }
-    }
-
-    public function deleted(ServiceRequestType $serviceRequestType): void
-    {
-        $serviceRequestType->priorities()->delete();
-    }
-
-    // It seems that trashed does not currently get called by Laravel. Investigate at some other time as they may be a Laravel bug, or it may be a L11 feature that is in the docs but doesn't work in L10
-    public function trashed(ServiceRequestType $serviceRequestType): void
-    {
-        $serviceRequestType->priorities()->delete();
-    }
-
-    public function restored(ServiceRequestType $serviceRequestType): void
-    {
-        $serviceRequestType->priorities()->restore();
     }
 }
