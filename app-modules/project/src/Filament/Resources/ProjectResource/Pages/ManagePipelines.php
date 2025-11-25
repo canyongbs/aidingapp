@@ -38,7 +38,6 @@ namespace AidingApp\Project\Filament\Resources\ProjectResource\Pages;
 
 use AidingApp\Project\Filament\Resources\ProjectResource;
 use AidingApp\Project\Models\Pipeline;
-use AidingApp\Project\Models\Project;
 use App\Features\ProjectPipelineFeature;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Textarea;
@@ -83,9 +82,6 @@ class ManagePipelines extends ManageRelatedRecords
                 Textarea::make('description')
                     ->required()
                     ->maxLength(65535),
-                TextInput::make('default_stage')
-                    ->required()
-                    ->label('Default Pipeline Stage name'),
                 Repeater::make('stages')
                     ->relationship('stages')
                     ->schema([
@@ -112,25 +108,21 @@ class ManagePipelines extends ManageRelatedRecords
             ])
             ->headerActions([
                 CreateAction::make()
-                    ->authorize('create', $this->getOwnerRecord())
-                    ->using(function (array $data, string $model): Model {
-                        $project = Project::find($this->getOwnerRecord()->getKey());
+                    ->authorize('create', $this->getOwnerRecord()),
+                // ->using(function (array $data, string $model): Model {
+                //     $project = $this->getOwnerRecord();
 
-                        if ($project && (! auth()->user()->can('update', $project))) {
-                            $project = null;
-                        }
+                //     $data['user_id'] = auth()->id();
+                //     $data['project_id'] = $project?->getKey();
 
-                        $data['user_id'] = auth()->id();
-                        $data['project_id'] = $project?->getKey();
-
-                        return $model::create($data);
-                    }),
+                //     return $model::create($data);
+                // }),
             ])
             ->filters([
                 Filter::make('createdBy')
                     ->label('My Pipelines')
                     ->default()
-                    ->query(fn (Builder $query) => $query->where('user_id', auth()->id())),
+                    ->query(fn (Builder $query) => $query->where('created_by_id', auth()->id())),
             ])
             ->actions([
                 ViewAction::make()

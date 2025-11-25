@@ -42,17 +42,17 @@ class CreatePipelineRequestFactory extends RequestFactory
 {
     public function definition(): array
     {
-        $stages = [
-            fake()->unique()->word(),
-            fake()->unique()->word(),
-            fake()->unique()->word(),
-        ];
-
         return [
             'name' => fake()->words(3, true),
             'description' => fake()->sentence(),
-            'default_stage' => $stages[0],
-            'stages' => array_map(fn ($stage) => ['name' => $stage], $stages),
+            'stages' => fn () => array_map(
+                fn ($stage) => ['name' => $stage],
+                [
+                    fake()->unique()->word(),
+                    fake()->unique()->word(),
+                    fake()->unique()->word(),
+                ]
+            ),
         ];
     }
 }

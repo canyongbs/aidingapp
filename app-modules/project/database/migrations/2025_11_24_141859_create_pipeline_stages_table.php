@@ -46,6 +46,8 @@ return new class () extends Migration {
             $table->string('name');
             $table->foreignUuid('pipeline_id')->constrained()->onDelete('cascade');
             $table->unsignedBigInteger('order');
+            $table->foreignUuid('created_by_id')->nullable()->constrained('users');
+            $table->foreignUuid('last_updated_by_id')->nullable()->constrained('users');
             $table->timestamps();
             $table->unique(['name', 'pipeline_id']);
         });

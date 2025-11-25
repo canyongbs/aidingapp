@@ -36,39 +36,33 @@
 
 namespace AidingApp\Project\Models;
 
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Project\Database\Factories\PipelineFactory;
 use App\Models\BaseModel;
-use App\Models\User;
+use CanyonGBS\Common\Models\Concerns\HasUserSaveTracking;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * @mixin IdeHelperPipeline
  */
-class Pipeline extends BaseModel
+class Pipeline extends BaseModel implements Auditable
 {
     /** @use HasFactory<PipelineFactory> */
     use HasFactory;
 
+    use AuditableTrait;
     use HasUuids;
+    use HasUserSaveTracking;
 
     protected $fillable = [
         'name',
         'description',
-        'user_id',
-        'default_stage',
         'project_id',
     ];
-
-    /**
-     * @return BelongsTo<User, $this>
-     */
-    public function createdBy(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'user_id');
-    }
 
     /**
      * @return BelongsTo<Project, $this>

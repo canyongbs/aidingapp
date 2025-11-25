@@ -117,7 +117,6 @@ it('can validate create pipeline inputs', function ($data, $errors) {
     '`name` is max 255 characters' => [['name' => str_repeat('a', 256)], 'name', 'The name may not be greater than 255 characters.'],
     '`description` is required' => [['description' => null], 'description', 'The description field is required.'],
     '`description` is max 65535 characters' => [['description' => str_repeat('a', 65536)], 'description', 'The description may not be greater than 65535 characters.'],
-    '`default_stage` is required' => [['default_stage' => null], 'default_stage', 'The default pipeline stage name field is required.'],
 ]);
 
 it('can create pipelines', function () {
@@ -157,7 +156,6 @@ it('can edit pipelines', function () {
         ->state([
             'name' => 'Test Pipeline',
             'description' => 'Test pipeline description',
-            'default_stage' => 'Initial Stage',
             'user_id' => $superAdmin->id,
         ])->create();
 
@@ -177,7 +175,6 @@ it('can edit pipelines', function () {
             'id' => $pipeline->id,
             'name' => $requestData['name'],
             'description' => $requestData['description'],
-            'default_stage' => $requestData['default_stage'],
         ]
     );
 

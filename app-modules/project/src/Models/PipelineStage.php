@@ -36,21 +36,26 @@
 
 namespace AidingApp\Project\Models;
 
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Project\Database\Factories\PipelineStageFactory;
 use App\Models\BaseModel;
+use CanyonGBS\Common\Models\Concerns\HasUserSaveTracking;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * @mixin IdeHelperPipelineStage
  */
-class PipelineStage extends BaseModel
+class PipelineStage extends BaseModel implements Auditable
 {
     /** @use HasFactory<PipelineStageFactory> */
     use HasFactory;
 
+    use AuditableTrait;
     use HasUuids;
+    use HasUserSaveTracking;
 
     protected $fillable = [
         'name',

@@ -45,9 +45,9 @@ return new class () extends Migration {
             $table->uuid('id')->primary();
             $table->string('name');
             $table->text('description');
-            $table->foreignUuid('user_id')->constrained('users')->cascadeOnDelete();
-            $table->string('default_stage')->nullable();
             $table->foreignUuid('project_id')->nullable()->constrained()->cascadeOnDelete();
+            $table->foreignUuid('created_by_id')->nullable()->constrained('users');
+            $table->foreignUuid('last_updated_by_id')->nullable()->constrained('users');
             $table->timestamps();
         });
     }
