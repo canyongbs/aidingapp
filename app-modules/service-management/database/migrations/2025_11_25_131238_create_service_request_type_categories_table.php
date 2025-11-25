@@ -47,12 +47,16 @@ return new class () extends Migration {
             Schema::create('service_request_type_categories', function (Blueprint $table) {
                 $table->uuid('id')->primary();
                 $table->string('name');
-                $table->foreignUuid('parent_id')
-                    ->nullable()
-                    ->constrained('service_request_type_categories');
+                $table->uuid('parent_id')->nullable();
                 $table->unsignedInteger('sort')->nullable();
                 $table->timestamps();
                 $table->softDeletes();
+            });
+
+            Schema::table('service_request_type_categories', function (Blueprint $table) {
+                $table->foreign('parent_id')
+                    ->references('id')
+                    ->on('service_request_type_categories');
             });
 
             Schema::table('service_request_types', function (Blueprint $table) {
