@@ -38,7 +38,6 @@ namespace AidingApp\Project\Database\Factories;
 
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\Project;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
