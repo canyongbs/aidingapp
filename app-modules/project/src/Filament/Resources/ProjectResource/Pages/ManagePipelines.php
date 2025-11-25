@@ -40,6 +40,7 @@ use AidingApp\Project\Filament\Resources\ProjectResource;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\Project;
 use App\Features\ProjectPipelineFeature;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -47,6 +48,7 @@ use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Tables\Actions\CreateAction;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
@@ -84,13 +86,26 @@ class ManagePipelines extends ManageRelatedRecords
                 TextInput::make('default_stage')
                     ->required()
                     ->label('Default Pipeline Stage name'),
+                Repeater::make('stages')
+                    ->relationship('stages')
+                    ->schema([
+                        TextInput::make('name')
+                            ->label('Stage')
+                            ->distinct()
+                            ->required(),
+                    ])
+                    ->orderColumn('order')
+                    ->reorderable()
+                    ->columnSpanFull()
+                    ->label('Pipeline Stages')
+                    ->minItems(1)
+                    ->maxItems(5),
             ]);
     }
 
     public function table(Table $table): Table
     {
         return $table
-            ->recordTitleAttribute('name')
             ->columns([
                 TextColumn::make('name'),
                 TextColumn::make('createdBy.name')->label('Created By'),
@@ -118,6 +133,8 @@ class ManagePipelines extends ManageRelatedRecords
                     ->query(fn (Builder $query) => $query->where('user_id', auth()->id())),
             ])
             ->actions([
+                ViewAction::make()
+                    ->authorize('view', $this->getOwnerRecord()),
                 EditAction::make()
                     ->authorize('update', $this->getOwnerRecord()),
                 DeleteAction::make()

@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -34,55 +34,25 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Models;
+namespace AidingApp\Project\Tests\Tenant\Pipeline\RequestFactories;
 
-use AidingApp\Project\Database\Factories\PipelineFactory;
-use App\Models\BaseModel;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Worksome\RequestFactories\RequestFactory;
 
-/**
- * @mixin IdeHelperPipeline
- */
-class Pipeline extends BaseModel
+class CreatePipelineRequestFactory extends RequestFactory
 {
-    /** @use HasFactory<PipelineFactory> */
-    use HasFactory;
-
-    use HasUuids;
-
-    protected $fillable = [
-        'name',
-        'description',
-        'user_id',
-        'default_stage',
-        'project_id',
-    ];
-
-    /**
-     * @return BelongsTo<User, $this>
-     */
-    public function createdBy(): BelongsTo
+    public function definition(): array
     {
-        return $this->belongsTo(User::class, 'user_id');
-    }
+        $stages = [
+            fake()->unique()->word(),
+            fake()->unique()->word(),
+            fake()->unique()->word(),
+        ];
 
-    /**
-     * @return BelongsTo<Project, $this>
-     */
-    public function project(): BelongsTo
-    {
-        return $this->belongsTo(Project::class);
-    }
-
-    /**
-     * @return HasMany<PipelineStage, $this>
-     */
-    public function stages(): HasMany
-    {
-        return $this->hasMany(PipelineStage::class, 'pipeline_id');
+        return [
+            'name' => fake()->words(3, true),
+            'description' => fake()->sentence(),
+            'default_stage' => $stages[0],
+            'stages' => array_map(fn ($stage) => ['name' => $stage], $stages),
+        ];
     }
 }
