@@ -1,6 +1,4 @@
-<?php
-
-/*
+{{--
 <COPYRIGHT>
 
     Copyright © 2016-2025, Canyon GBS LLC. All rights reserved.
@@ -17,7 +15,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -32,16 +30,7 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
-
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages;
-
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
-use Filament\Resources\Pages\ListRecords;
-
-class ListServiceRequestTypes extends ListRecords
-{
-    protected static string $resource = ServiceRequestTypeResource::class;
-
-    protected static string $view = 'service-management::filament.resources.service-request-type-resource.pages.list-service-request-types';
-}
+--}}
+<x-filament-panels::page>
+    Content
+</x-filament-panels::page>
