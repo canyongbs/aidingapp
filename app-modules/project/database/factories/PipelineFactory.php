@@ -57,7 +57,6 @@ class PipelineFactory extends Factory
             'project_id' => Project::factory(),
             'name' => $this->faker->word(),
             'description' => $this->faker->sentence(3),
-            'user_id' => User::factory(),
         ];
     }
 }

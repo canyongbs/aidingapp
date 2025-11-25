@@ -83,7 +83,6 @@ it('can list pipelines', function () {
     $pipelines = Pipeline::factory()
         ->has(PipelineStage::factory()->count(3), 'stages')
         ->for($project)
-        ->state(['user_id' => $superAdmin->id])
         ->count(2)
         ->create();
 
@@ -156,7 +155,6 @@ it('can edit pipelines', function () {
         ->state([
             'name' => 'Test Pipeline',
             'description' => 'Test pipeline description',
-            'user_id' => $superAdmin->id,
         ])->create();
 
     $requestData = EditPipelineRequestFactory::new()->create();
@@ -190,7 +188,6 @@ it('can delete pipelines', function () {
     $pipeline = Pipeline::factory()
         ->has(PipelineStage::factory()->count(3), 'stages')
         ->for($project)
-        ->state(['user_id' => $superAdmin->id])
         ->create();
 
     livewire(ManagePipelines::class, [
@@ -214,7 +211,6 @@ it('deletes pipeline stages when pipeline is deleted', function () {
     $pipeline = Pipeline::factory()
         ->has(PipelineStage::factory()->count(2), 'stages')
         ->for($project)
-        ->state(['user_id' => $superAdmin->id])
         ->create();
 
     $stageIds = $pipeline->stages->pluck('id')->toArray();
