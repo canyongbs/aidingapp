@@ -54,6 +54,7 @@ class ServiceRequestTypeCategory extends BaseModel implements Auditable
     protected $fillable = [
         'name',
         'sort',
+        'parent_id',
     ];
 
     protected $casts = [

@@ -399,6 +399,8 @@
                 },
 
                 renderType(type) {
+                    const requestCount = typeof type.service_requests_count === 'number' ? type.service_requests_count : 0;
+
                     return `<div data-type-id="${type.id}" class="type-item draggable flex items-center gap-2 rounded-lg border border-gray-200 bg-white p-2 dark:border-gray-600 dark:bg-gray-800 transition-all duration-150 ease-out cursor-grab active:cursor-grabbing" draggable="true">
                         <svg class="type-handle h-4 w-4 cursor-grab text-gray-400 opacity-60 transition-all duration-150 ease-in-out hover:opacity-100 hover:text-primary-500 hover:scale-110 active:cursor-grabbing" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
@@ -407,6 +409,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                         </svg>
                         <span class="flex-1 text-sm text-gray-700 dark:text-gray-300">${this.escapeHtml(type.name)}</span>
+                        <span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-600 dark:bg-gray-600 dark:text-gray-100">${requestCount}</span>
                     </div>`;
                 },
 
@@ -1597,7 +1600,8 @@
                         name: name.trim(),
                         type: 'type',
                         sort: 0,
-                        category_id: categoryId
+                        category_id: categoryId,
+                        service_requests_count: 0,
                     };
 
                     // Add to the appropriate location in tree data

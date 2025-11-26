@@ -63,7 +63,15 @@ class ListServiceRequestTypes extends ListRecords
     public function getHierarchicalData(): array
     {
         $categories = ServiceRequestTypeCategory::query()
-            ->with(['children', 'types'])
+            ->with([
+                'children' => function ($query) {
+                    $query->orderBy('sort')
+                        ->with([
+                            'types' => fn ($typeQuery) => $typeQuery->orderBy('sort')->withCount('serviceRequests'),
+                        ]);
+                },
+                'types' => fn ($query) => $query->orderBy('sort')->withCount('serviceRequests'),
+            ])
             ->whereNull('parent_id')
             ->orderBy('sort')
             ->get();
@@ -71,6 +79,7 @@ class ListServiceRequestTypes extends ListRecords
         $uncategorizedTypes = ServiceRequestType::query()
             ->whereNull('category_id')
             ->orderBy('sort')
+            ->withCount('serviceRequests')
             ->get();
 
         return [
@@ -188,6 +197,7 @@ class ListServiceRequestTypes extends ListRecords
                 'type' => 'type',
                 'sort' => $type->sort,
                 'category_id' => $type->category_id,
+                'service_requests_count' => $type->service_requests_count ?? 0,
             ];
         })->toArray();
     }
