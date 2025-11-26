@@ -44,6 +44,7 @@ use Filament\Resources\Pages\ListRecords;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Renderless;
 
@@ -88,6 +89,8 @@ class ListServiceRequestTypes extends ListRecords
             'treeData.new_categories' => 'array',
             'treeData.new_types' => 'array',
         ]);
+
+        $this->assertMaxCategoryDepth($treeData['categories'] ?? []);
 
         DB::transaction(function () use ($treeData) {
             // Create new categories first (so we can get their IDs)
@@ -239,6 +242,23 @@ class ListServiceRequestTypes extends ListRecords
             // Recursively update children
             if (! empty($category['children'])) {
                 $this->updateCategoriesRecursive($category['children'], $categoryId, $newCategoryIds);
+            }
+        }
+    }
+
+    private function assertMaxCategoryDepth(array $categories, int $depth = 0): void
+    {
+        if ($depth > 1) {
+            throw ValidationException::withMessages([
+                'treeData.categories' => 'Categories may only be nested two levels deep.',
+            ]);
+        }
+
+        foreach ($categories as $category) {
+            $children = $category['children'] ?? [];
+
+            if (! empty($children)) {
+                $this->assertMaxCategoryDepth($children, $depth + 1);
             }
         }
     }

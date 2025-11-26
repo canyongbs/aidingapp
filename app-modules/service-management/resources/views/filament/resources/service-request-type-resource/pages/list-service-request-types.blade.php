@@ -414,6 +414,7 @@
                     const indent = level * 24;
                     const showCategoryInput = this.categoryInputs[category.id] || false;
                     const showTypeInput = this.typeInputs[category.id] || false;
+                    const canAddChildCategory = level < 1;
 
                     return `<div class="category-wrapper" data-category-id="${category.id}">
                         <div class="category-item draggable flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-gray-600 dark:bg-gray-700 transition-all duration-150 ease-out hover:bg-gray-50 hover:-translate-y-px hover:shadow-lg dark:hover:bg-gray-600 cursor-grab active:cursor-grabbing" style="margin-left: ${indent}px" draggable="true" data-category-id="${category.id}">
@@ -424,11 +425,12 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
                             </svg>
                             <span class="flex-1 font-medium text-gray-900 dark:text-white">${this.escapeHtml(category.name)}</span>
+                            ${canAddChildCategory ? `
                             <button @click="showCategoryInput('${category.id}')" class="rounded p-1 text-gray-500 hover:bg-gray-200 hover:text-gray-700 dark:hover:bg-gray-600 dark:hover:text-gray-300" title="Add child category">
                                 <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 10.5v6m3-3H9m4.06-7.19l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
                                 </svg>
-                            </button>
+                            </button>` : ''}
                             <button @click="showTypeInput('${category.id}')" class="rounded p-1 text-gray-500 hover:bg-gray-200 hover:text-gray-700 dark:hover:bg-gray-600 dark:hover:text-gray-300" title="Add type">
                                 <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
@@ -436,13 +438,13 @@
                             </button>
                         </div>
 
-                        ${showCategoryInput ? `
-                                    <div id="category-input-${category.id}" class="flex gap-2 mt-2" style="margin-left: ${indent + 24}px">
-                                        <input id="child-category-${category.id}" type="text" placeholder="Child category name..." class="block w-full rounded-lg border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
-                                        <button @click="createCategory('${category.id}')" class="rounded-lg bg-primary-600 px-3 py-1 text-sm text-white hover:bg-primary-700">Add</button>
-                                        <button @click="hideCategoryInput('${category.id}')" class="rounded-lg border border-gray-300 bg-white px-3 py-1 text-sm text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">Cancel</button>
-                                    </div>
-                                ` : ''}
+                        ${canAddChildCategory && showCategoryInput ? `
+                            <div id="category-input-${category.id}" class="flex gap-2 mt-2" style="margin-left: ${indent + 24}px">
+                                <input id="child-category-${category.id}" type="text" placeholder="Child category name..." class="block w-full rounded-lg border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+                                <button @click="createCategory('${category.id}')" class="rounded-lg bg-primary-600 px-3 py-1 text-sm text-white hover:bg-primary-700">Add</button>
+                                <button @click="hideCategoryInput('${category.id}')" class="rounded-lg border border-gray-300 bg-white px-3 py-1 text-sm text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">Cancel</button>
+                            </div>
+                        ` : ''}
 
                         ${showTypeInput ? `
                                     <div id="type-input-${category.id}" class="flex gap-2 mt-2" style="margin-left: ${indent + 24}px">
@@ -943,23 +945,29 @@
                         }
 
                         if (allowInsertion) {
-                            // Find the container for insertion positioning
                             const targetWrapper = actualTarget.closest('.category-wrapper');
                             const container = targetWrapper.parentElement;
-
-                            // Check if we're hovering over the center for nesting
                             const rect = actualTarget.getBoundingClientRect();
                             const y = e.clientY - rect.top;
                             const height = rect.height;
 
                             if (y > height * 0.3 && y < height * 0.7) {
+                                const prospectiveParentId = actualTarget.dataset.categoryId;
+                                if (this.draggingCategoryWouldViolateDepth(this.dragData.draggedId, prospectiveParentId) || this.wouldExceedDepthLimit(actualTarget)) {
+                                    return null;
+                                }
+
                                 return {
                                     type: 'inside',
-                                    target: actualTarget
+                                    target: actualTarget,
                                 };
                             } else {
                                 // Calculate insertion position based on mouse Y
                                 const insertIndex = this.calculateInsertionPosition(container, e.clientY);
+                                const parentId = container?.dataset?.parentId || null;
+                                if (this.wouldExceedDepthLimit(null, parentId)) {
+                                    return null;
+                                }
                                 return {
                                     type: 'insert',
                                     container: container,
@@ -967,10 +975,14 @@
                                 };
                             }
                         } else {
-                            // Different contexts - only allow nesting
+                            const prospectiveParentId = actualTarget.dataset.categoryId;
+                            if (this.draggingCategoryWouldViolateDepth(this.dragData.draggedId, prospectiveParentId) || this.wouldExceedDepthLimit(actualTarget)) {
+                                return null;
+                            }
+
                             return {
                                 type: 'inside',
-                                target: actualTarget
+                                target: actualTarget,
                             };
                         }
                     }
@@ -1020,9 +1032,54 @@
                     document.removeEventListener('dragover', this.updateGhostPosition);
                 },
 
+                getParentIdFromPosition(position) {
+                    if (position.type === 'inside') {
+                        return position.target?.dataset?.categoryId || null;
+                    }
+
+                    if (position.type === 'insert') {
+                        const parentId = position.container?.dataset?.parentId;
+                        return parentId && parentId !== '' ? parentId : null;
+                    }
+
+                    return null;
+                },
+
+                draggingCategoryWouldViolateDepth(categoryId, newParentId) {
+                    if (!categoryId) {
+                        return false;
+                    }
+
+                    const movedCategory = this.findCategoryById(categoryId);
+                    if (!movedCategory) {
+                        return false;
+                    }
+
+                    const hasChildren = Array.isArray(movedCategory.children) && movedCategory.children.length > 0;
+
+                    if (!hasChildren) {
+                        return false;
+                    }
+
+                    if (!newParentId) {
+                        return false;
+                    }
+
+                    const prospectiveParentElement = document.querySelector(`[data-category-id="${newParentId}"]`);
+                    if (!prospectiveParentElement) {
+                        return false;
+                    }
+
+                    return this.getCategoryLevel(prospectiveParentElement) >= 0;
+                },
+
                 performDrop(target, position) {
-                    // Determine the drop operation based on dragged type and target
                     if (this.dragData.draggedType === 'category') {
+                        const prospectiveParentId = this.getParentIdFromPosition(position);
+                        if (this.draggingCategoryWouldViolateDepth(this.dragData.draggedId, prospectiveParentId)) {
+                            return;
+                        }
+
                         this.handleCategoryDrop(target, position);
                     } else if (this.dragData.draggedType === 'type') {
                         this.handleTypeDrop(target, position);
@@ -1064,8 +1121,74 @@
                     this.updateTypeInTreeData(typeId, newCategoryId, position);
                 },
 
+                wouldExceedDepthLimit(targetElement, parentId = null) {
+                    if (targetElement) {
+                        return this.getCategoryLevel(targetElement) >= 1;
+                    }
+
+                    if (parentId) {
+                        const parentCategory = document.querySelector(`[data-category-id="${parentId}"]`);
+                        if (parentCategory) {
+                            return this.getCategoryLevel(parentCategory) >= 1;
+                        }
+                    }
+
+                    return false;
+                },
+
+                updateCategoryInTreeData(categoryId, newParentId, position) {
+                    const category = this.findAndRemoveCategory(categoryId);
+                    if (!category) return;
+
+                    category.parent_id = newParentId;
+
+                    if (newParentId) {
+                        const parentCategory = this.findCategoryById(newParentId);
+                        if (parentCategory) {
+                            parentCategory.children = parentCategory.children || [];
+                            if (position.type === 'inside') {
+                                parentCategory.children.push(category);
+                            } else {
+                                parentCategory.children.splice(position.insertIndex, 0, category);
+                            }
+                        }
+                    } else {
+                        this.treeData.categories = this.treeData.categories || [];
+                        if (position.type === 'insert') {
+                            this.treeData.categories.splice(position.insertIndex, 0, category);
+                        } else {
+                            this.treeData.categories.push(category);
+                        }
+                    }
+                },
+
+                updateTypeInTreeData(typeId, newCategoryId, position) {
+                    const type = this.findAndRemoveType(typeId);
+                    if (!type) return;
+
+                    type.category_id = newCategoryId;
+
+                    if (newCategoryId) {
+                        const category = this.findCategoryById(newCategoryId);
+                        if (category) {
+                            category.types = category.types || [];
+                            if (position.type === 'inside') {
+                                category.types.push(type);
+                            } else {
+                                category.types.splice(position.insertIndex, 0, type);
+                            }
+                        }
+                    } else {
+                        this.treeData.uncategorized_types = this.treeData.uncategorized_types || [];
+                        if (position.type === 'insert') {
+                            this.treeData.uncategorized_types.splice(position.insertIndex, 0, type);
+                        } else {
+                            this.treeData.uncategorized_types.push(type);
+                        }
+                    }
+                },
+
                 findCategoryParent(categoryId) {
-                    // Search through the tree to find the parent of a category
                     const findParent = (categories, targetId, parentId = null) => {
                         for (const category of categories) {
                             if (category.id === targetId) {
@@ -1083,7 +1206,6 @@
                 },
 
                 findTypeCategory(typeId) {
-                    // Search through the tree to find which category a type belongs to
                     const findCategory = (categories) => {
                         for (const category of categories) {
                             if (category.types && category.types.some(type => type.id === typeId)) {
@@ -1097,11 +1219,9 @@
                         return null;
                     };
 
-                    // Check categories first
                     const categoryResult = findCategory(this.treeData.categories || []);
                     if (categoryResult) return categoryResult;
 
-                    // Check uncategorized types
                     if (this.treeData.uncategorized_types &&
                         this.treeData.uncategorized_types.some(type => type.id === typeId)) {
                         return null;
@@ -1111,7 +1231,6 @@
                 },
 
                 getCategoryLevel(categoryElement) {
-                    // Calculate the nesting level of a category by counting parent containers
                     let level = 0;
                     let current = categoryElement.closest('.category-wrapper');
 
@@ -1130,97 +1249,18 @@
                 },
 
                 getCategoryParentContext(categoryElement) {
-                    // Get the parent container ID for a category element
                     const wrapper = categoryElement.closest('.category-wrapper');
-                    if (!wrapper) return null;
+                    if (!wrapper) {
+                        return 'root';
+                    }
 
-                    // Find the immediate parent sortable container
                     const parentContainer = wrapper.parentElement.closest('[data-sortable="categories"]');
-
                     if (!parentContainer) {
-                        // This shouldn't happen, but treat as root
                         return 'root';
                     }
 
-                    // If the parent container has a parentId, use it; otherwise it's root level
                     const parentId = parentContainer.dataset.parentId;
-                    if (!parentId || parentId === '' || parentId === 'null') {
-                        return 'root';
-                    }
-
-                    return parentId;
-                },
-
-
-
-                updateCategoryInTreeData(categoryId, newParentId, position) {
-                    // Find and remove the category from its current position
-                    const category = this.findAndRemoveCategory(categoryId);
-                    if (!category) return;
-
-                    // Update the category's parent_id to reflect its new location
-                    category.parent_id = newParentId;
-
-                    // Add to new position
-                    if (newParentId) {
-                        // Add as child of parent category
-                        const parentCategory = this.findCategoryById(newParentId);
-                        if (parentCategory) {
-                            if (!parentCategory.children) {
-                                parentCategory.children = [];
-                            }
-                            if (position.type === 'inside') {
-                                parentCategory.children.push(category);
-                            } else {
-                                parentCategory.children.splice(position.insertIndex, 0, category);
-                            }
-                        }
-                    } else {
-                        // Add to root level
-                        if (!this.treeData.categories) {
-                            this.treeData.categories = [];
-                        }
-                        if (position.type === 'insert') {
-                            this.treeData.categories.splice(position.insertIndex, 0, category);
-                        } else {
-                            this.treeData.categories.push(category);
-                        }
-                    }
-                },
-
-                updateTypeInTreeData(typeId, newCategoryId, position) {
-                    // Find and remove the type from its current position
-                    const type = this.findAndRemoveType(typeId);
-                    if (!type) return;
-
-                    // Update the type's category_id to reflect its new location
-                    type.category_id = newCategoryId;
-
-                    // Add to new position
-                    if (newCategoryId) {
-                        // Add to category
-                        const category = this.findCategoryById(newCategoryId);
-                        if (category) {
-                            if (!category.types) {
-                                category.types = [];
-                            }
-                            if (position.type === 'inside') {
-                                category.types.push(type);
-                            } else {
-                                category.types.splice(position.insertIndex, 0, type);
-                            }
-                        }
-                    } else {
-                        // Add to uncategorized
-                        if (!this.treeData.uncategorized_types) {
-                            this.treeData.uncategorized_types = [];
-                        }
-                        if (position.type === 'insert') {
-                            this.treeData.uncategorized_types.splice(position.insertIndex, 0, type);
-                        } else {
-                            this.treeData.uncategorized_types.push(type);
-                        }
-                    }
+                    return parentId && parentId !== 'null' && parentId !== '' ? parentId : 'root';
                 },
 
                 findCategoryById(categoryId, categories = null) {
@@ -1241,13 +1281,11 @@
                 },
 
                 findAndRemoveCategory(categoryId) {
-                    // Search in root categories
                     const rootIndex = (this.treeData.categories || []).findIndex(c => c.id === categoryId);
                     if (rootIndex !== -1) {
                         return this.treeData.categories.splice(rootIndex, 1)[0];
                     }
 
-                    // Search in nested categories
                     return this.findAndRemoveCategoryRecursive(categoryId, this.treeData.categories || []);
                 },
 
@@ -1266,14 +1304,11 @@
                 },
 
                 findAndRemoveType(typeId) {
-                    // Search in uncategorized types
-                    const uncategorizedIndex = (this.treeData.uncategorized_types || []).findIndex(t => t.id ===
-                        typeId);
+                    const uncategorizedIndex = (this.treeData.uncategorized_types || []).findIndex(t => t.id === typeId);
                     if (uncategorizedIndex !== -1) {
                         return this.treeData.uncategorized_types.splice(uncategorizedIndex, 1)[0];
                     }
 
-                    // Search in categories
                     return this.findAndRemoveTypeRecursive(typeId, this.treeData.categories || []);
                 },
 
@@ -1487,6 +1522,11 @@
                     let name;
 
                     if (parentId) {
+                        const parentElement = document.querySelector(`[data-category-id="${parentId}"]`);
+                        if (parentElement && this.getCategoryLevel(parentElement) >= 1) {
+                            return;
+                        }
+
                         const input = document.getElementById(`child-category-${parentId}`);
                         name = input?.value;
                     } else {
