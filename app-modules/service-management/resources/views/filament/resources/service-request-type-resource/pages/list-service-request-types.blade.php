@@ -325,6 +325,8 @@
                 deepCopyTreeData() {
                     // Make a deep copy of the original data so we can track changes
                     this.treeData = JSON.parse(JSON.stringify(this.originalTreeData));
+                    this.deletedCategories = [];
+                    this.deletedTypes = [];
                 },
 
                 markAsChanged() {
@@ -399,7 +401,9 @@
                 },
 
                 renderType(type) {
-                    const requestCount = typeof type.service_requests_count === 'number' ? type.service_requests_count : 0;
+                    const requestCount = typeof type.service_requests_count === 'number' ? type
+                        .service_requests_count : 0;
+                    const canDelete = requestCount === 0;
 
                     return `<div data-type-id="${type.id}" class="type-item draggable flex items-center gap-2 rounded-lg border border-gray-200 bg-white p-2 dark:border-gray-600 dark:bg-gray-800 transition-all duration-150 ease-out cursor-grab active:cursor-grabbing" draggable="true">
                         <svg class="type-handle h-4 w-4 cursor-grab text-gray-400 opacity-60 transition-all duration-150 ease-in-out hover:opacity-100 hover:text-primary-500 hover:scale-110 active:cursor-grabbing" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -410,6 +414,11 @@
                         </svg>
                         <span class="flex-1 text-sm text-gray-700 dark:text-gray-300">${this.escapeHtml(type.name)}</span>
                         <span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-600 dark:bg-gray-600 dark:text-gray-100">${requestCount}</span>
+                        ${canDelete ? `<button type="button" class="text-red-600 hover:text-red-800" @click.stop="stageTypeDeletion('${type.id}')">
+                                    <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M6 18L18 6" />
+                                    </svg>
+                                </button>` : ''}
                     </div>`;
                 },
 
@@ -428,12 +437,17 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
                             </svg>
                             <span class="flex-1 font-medium text-gray-900 dark:text-white">${this.escapeHtml(category.name)}</span>
+                            ${this.canDeleteCategory(category) ? `<button type="button" class="text-red-600 hover:text-red-800" @click.stop="confirmDeleteCategory('${category.id}')">
+                                        <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M6 18L18 6" />
+                                        </svg>
+                                    </button>` : ''}
                             ${canAddChildCategory ? `
-                            <button @click="showCategoryInput('${category.id}')" class="rounded p-1 text-gray-500 hover:bg-gray-200 hover:text-gray-700 dark:hover:bg-gray-600 dark:hover:text-gray-300" title="Add child category">
-                                <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 10.5v6m3-3H9m4.06-7.19l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
-                                </svg>
-                            </button>` : ''}
+                                    <button @click="showCategoryInput('${category.id}')" class="rounded p-1 text-gray-500 hover:bg-gray-200 hover:text-gray-700 dark:hover:bg-gray-600 dark:hover:text-gray-300" title="Add child category">
+                                        <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 10.5v6m3-3H9m4.06-7.19l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
+                                        </svg>
+                                    </button>` : ''}
                             <button @click="showTypeInput('${category.id}')" class="rounded p-1 text-gray-500 hover:bg-gray-200 hover:text-gray-700 dark:hover:bg-gray-600 dark:hover:text-gray-300" title="Add type">
                                 <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
@@ -442,32 +456,32 @@
                         </div>
 
                         ${canAddChildCategory && showCategoryInput ? `
-                            <div id="category-input-${category.id}" class="flex gap-2 mt-2" style="margin-left: ${indent + 24}px">
-                                <input id="child-category-${category.id}" type="text" placeholder="Child category name..." class="block w-full rounded-lg border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
-                                <button @click="createCategory('${category.id}')" class="rounded-lg bg-primary-600 px-3 py-1 text-sm text-white hover:bg-primary-700">Add</button>
-                                <button @click="hideCategoryInput('${category.id}')" class="rounded-lg border border-gray-300 bg-white px-3 py-1 text-sm text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">Cancel</button>
-                            </div>
-                        ` : ''}
+                                    <div id="category-input-${category.id}" class="flex gap-2 mt-2" style="margin-left: ${indent + 24}px">
+                                        <input id="child-category-${category.id}" type="text" placeholder="Child category name..." class="block w-full rounded-lg border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+                                        <button @click="createCategory('${category.id}')" class="rounded-lg bg-primary-600 px-3 py-1 text-sm text-white hover:bg-primary-700">Add</button>
+                                        <button @click="hideCategoryInput('${category.id}')" class="rounded-lg border border-gray-300 bg-white px-3 py-1 text-sm text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">Cancel</button>
+                                    </div>
+                                ` : ''}
 
                         ${showTypeInput ? `
-                                    <div id="type-input-${category.id}" class="flex gap-2 mt-2" style="margin-left: ${indent + 24}px">
-                                        <input id="child-type-${category.id}" type="text" placeholder="Type name..." class="block w-full rounded-lg border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
-                                        <button @click="createType('${category.id}')" class="rounded-lg bg-primary-600 px-3 py-1 text-sm text-white hover:bg-primary-700">Add</button>
-                                        <button @click="hideTypeInput('${category.id}')" class="rounded-lg border border-gray-300 bg-white px-3 py-1 text-sm text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">Cancel</button>
-                                    </div>
-                                ` : ''}
+                                            <div id="type-input-${category.id}" class="flex gap-2 mt-2" style="margin-left: ${indent + 24}px">
+                                                <input id="child-type-${category.id}" type="text" placeholder="Type name..." class="block w-full rounded-lg border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+                                                <button @click="createType('${category.id}')" class="rounded-lg bg-primary-600 px-3 py-1 text-sm text-white hover:bg-primary-700">Add</button>
+                                                <button @click="hideTypeInput('${category.id}')" class="rounded-lg border border-gray-300 bg-white px-3 py-1 text-sm text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">Cancel</button>
+                                            </div>
+                                        ` : ''}
 
                         ${category.types && category.types.length > 0 ? `
-                                    <div data-sortable="types" data-category-id="${category.id}" class="mt-2 space-y-1 min-h-4 p-0.5 rounded transition-colors duration-150 ease-in-out" style="margin-left: ${indent + 24}px">
-                                        ${category.types.map(type => this.renderType(type)).join('')}
-                                    </div>
-                                ` : ''}
+                                            <div data-sortable="types" data-category-id="${category.id}" class="mt-2 space-y-1 min-h-4 p-0.5 rounded transition-colors duration-150 ease-in-out" style="margin-left: ${indent + 24}px">
+                                                ${category.types.map(type => this.renderType(type)).join('')}
+                                            </div>
+                                        ` : ''}
 
                         ${category.children && category.children.length > 0 ? `
-                                    <div data-sortable="categories" data-parent-id="${category.id}" class="mt-2 space-y-2 min-h-5 p-0.5 rounded-md transition-colors duration-150 ease-in-out">
-                                        ${category.children.map(child => this.renderCategoryRecursive(child, level + 1)).join('')}
-                                    </div>
-                                ` : ''}
+                                            <div data-sortable="categories" data-parent-id="${category.id}" class="mt-2 space-y-2 min-h-5 p-0.5 rounded-md transition-colors duration-150 ease-in-out">
+                                                ${category.children.map(child => this.renderCategoryRecursive(child, level + 1)).join('')}
+                                            </div>
+                                        ` : ''}
                     </div>`;
                 },
 
@@ -956,7 +970,8 @@
 
                             if (y > height * 0.3 && y < height * 0.7) {
                                 const prospectiveParentId = actualTarget.dataset.categoryId;
-                                if (this.draggingCategoryWouldViolateDepth(this.dragData.draggedId, prospectiveParentId) || this.wouldExceedDepthLimit(actualTarget)) {
+                                if (this.draggingCategoryWouldViolateDepth(this.dragData.draggedId,
+                                        prospectiveParentId) || this.wouldExceedDepthLimit(actualTarget)) {
                                     return null;
                                 }
 
@@ -979,7 +994,8 @@
                             }
                         } else {
                             const prospectiveParentId = actualTarget.dataset.categoryId;
-                            if (this.draggingCategoryWouldViolateDepth(this.dragData.draggedId, prospectiveParentId) || this.wouldExceedDepthLimit(actualTarget)) {
+                            if (this.draggingCategoryWouldViolateDepth(this.dragData.draggedId,
+                                prospectiveParentId) || this.wouldExceedDepthLimit(actualTarget)) {
                                 return null;
                             }
 
@@ -1307,7 +1323,8 @@
                 },
 
                 findAndRemoveType(typeId) {
-                    const uncategorizedIndex = (this.treeData.uncategorized_types || []).findIndex(t => t.id === typeId);
+                    const uncategorizedIndex = (this.treeData.uncategorized_types || []).findIndex(t => t.id ===
+                        typeId);
                     if (uncategorizedIndex !== -1) {
                         return this.treeData.uncategorized_types.splice(uncategorizedIndex, 1)[0];
                     }
@@ -1362,10 +1379,10 @@
                     const newCategories = [];
                     const newTypes = [];
 
-                    // First, update sort orders for all items based on their current positions
-                    this.updateSortOrders();
+                    this.deletedCategories = this.deletedCategories || [];
+                    this.deletedTypes = this.deletedTypes || [];
 
-                    // Extract new categories and types
+                    this.updateSortOrders();
                     this.extractNewItems(this.treeData.categories || [], newCategories, newTypes, null);
                     this.extractNewItemsFromUncategorized(newTypes);
 
@@ -1373,7 +1390,9 @@
                         categories: this.treeData.categories || [],
                         uncategorized_types: this.treeData.uncategorized_types || [],
                         new_categories: newCategories,
-                        new_types: newTypes
+                        new_types: newTypes,
+                        deleted_categories: this.deletedCategories,
+                        deleted_types: this.deletedTypes,
                     };
                 },
 
@@ -1632,6 +1651,88 @@
                         document.getElementById('new-type-name').value = '';
                     }
 
+                    this.render();
+                },
+
+                stageCategoryDeletion(categoryId) {
+                    this.deletedCategories = this.deletedCategories || [];
+                    if (!this.deletedCategories.includes(categoryId)) {
+                        this.deletedCategories.push(categoryId);
+                    }
+
+                    this.removeCategoryFromTree(categoryId);
+                    this.markAsChanged();
+                    this.render();
+                },
+
+                removeCategoryFromTree(categoryId) {
+                    const removedCategory = this.findAndRemoveCategory(categoryId);
+                    if (!removedCategory) {
+                        return;
+                    }
+
+                    const queue = [...(removedCategory.children || [])];
+
+                    while (queue.length) {
+                        const child = queue.shift();
+                        this.deletedCategories = this.deletedCategories || [];
+                        if (!this.deletedCategories.includes(child.id)) {
+                            this.deletedCategories.push(child.id);
+                        }
+
+                        queue.push(...(child.children || []));
+
+                        (child.types || []).forEach((type) => {
+                            this.deletedTypes = this.deletedTypes || [];
+                            if (!this.deletedTypes.includes(type.id)) {
+                                this.deletedTypes.push(type.id);
+                            }
+                        });
+                    }
+
+                    (removedCategory.types || []).forEach((type) => {
+                        this.deletedTypes = this.deletedTypes || [];
+                        if (!this.deletedTypes.includes(type.id)) {
+                            this.deletedTypes.push(type.id);
+                        }
+                    });
+                },
+
+                confirmDeleteCategory(categoryId) {
+                    this.stageCategoryDeletion(categoryId);
+                },
+
+                canDeleteCategory(category) {
+                    if (!category) {
+                        return false;
+                    }
+
+                    if ((category.descendant_service_requests_count ?? 0) > 0) {
+                        return false;
+                    }
+
+                    const typeHasRequests = (category.types || []).some(
+                        (type) => (type.service_requests_count ?? 0) > 0,
+                    );
+                    if (typeHasRequests) {
+                        return false;
+                    }
+
+                    return (category.children || []).every((child) => this.canDeleteCategory(child));
+                },
+
+                removeTypeFromTree(typeId) {
+                    this.findAndRemoveType(typeId);
+                },
+
+                stageTypeDeletion(typeId) {
+                    this.deletedTypes = this.deletedTypes || [];
+                    if (!this.deletedTypes.includes(typeId)) {
+                        this.deletedTypes.push(typeId);
+                    }
+
+                    this.removeTypeFromTree(typeId);
+                    this.markAsChanged();
                     this.render();
                 },
 

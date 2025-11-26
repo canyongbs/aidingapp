@@ -68,10 +68,19 @@ class ListServiceRequestTypes extends ListRecords
                     $query->orderBy('sort')
                         ->with([
                             'types' => fn ($typeQuery) => $typeQuery->orderBy('sort')->withCount('serviceRequests'),
-                        ]);
+                            'children' => function ($childQuery) {
+                                $childQuery->orderBy('sort')
+                                    ->with([
+                                        'types' => fn ($typeQuery) => $typeQuery->orderBy('sort')->withCount('serviceRequests'),
+                                    ])
+                                    ->withCount('descendantServiceRequests');
+                            },
+                        ])
+                        ->withCount('descendantServiceRequests');
                 },
                 'types' => fn ($query) => $query->orderBy('sort')->withCount('serviceRequests'),
             ])
+            ->withCount('descendantServiceRequests')
             ->whereNull('parent_id')
             ->orderBy('sort')
             ->get();
@@ -97,12 +106,13 @@ class ListServiceRequestTypes extends ListRecords
             'treeData.uncategorized_types' => 'array',
             'treeData.new_categories' => 'array',
             'treeData.new_types' => 'array',
+            'treeData.deleted_categories' => 'array',
+            'treeData.deleted_types' => 'array',
         ]);
 
         $this->assertMaxCategoryDepth($treeData['categories'] ?? []);
 
         DB::transaction(function () use ($treeData) {
-            // Create new categories first (so we can get their IDs)
             $newCategoryIds = [];
 
             if (! empty($treeData['new_categories'])) {
@@ -162,6 +172,9 @@ class ListServiceRequestTypes extends ListRecords
                     }
                 }
             }
+
+            $this->handleDeletedTypes($treeData['deleted_types'] ?? []);
+            $this->handleDeletedCategories($treeData['deleted_categories'] ?? []);
         });
 
         // Clear the cached hierarchicalData to force refresh
@@ -171,6 +184,61 @@ class ListServiceRequestTypes extends ListRecords
             ->success()
             ->title('Changes saved successfully')
             ->send();
+    }
+
+    protected function handleDeletedTypes(array $typeIds): void
+    {
+        if (empty($typeIds)) {
+            return;
+        }
+
+        $types = ServiceRequestType::query()
+            ->whereIn('id', $typeIds)
+            ->withCount('serviceRequests')
+            ->get();
+
+        foreach ($types as $type) {
+            if ($type->service_requests_count > 0) {
+                throw ValidationException::withMessages([
+                    'treeData.deleted_types' => "Cannot delete type {$type->name} while service requests exist.",
+                ]);
+            }
+
+            $type->forceDelete();
+        }
+    }
+
+    protected function handleDeletedCategories(array $categoryIds): void
+    {
+        if (empty($categoryIds)) {
+            return;
+        }
+
+        $categories = ServiceRequestTypeCategory::query()
+            ->whereIn('id', $categoryIds)
+            ->withCount('descendantServiceRequests')
+            ->get();
+
+        foreach ($categories as $category) {
+            if ($category->descendant_service_requests_count > 0) {
+                throw ValidationException::withMessages([
+                    'treeData.deleted_categories' => "Cannot delete category {$category->name} while service requests exist in its descendants.",
+                ]);
+            }
+
+            $this->deleteCategoryWithDescendants($category);
+        }
+    }
+
+    protected function deleteCategoryWithDescendants(ServiceRequestTypeCategory $category): void
+    {
+        $category->types()->forceDelete();
+
+        foreach ($category->children as $child) {
+            $this->deleteCategoryWithDescendants($child);
+        }
+
+        $category->forceDelete();
     }
 
     protected function formatCategories(Collection $categories): array
@@ -184,6 +252,7 @@ class ListServiceRequestTypes extends ListRecords
                 'parent_id' => $category->parent_id,
                 'children' => $this->formatCategories($category->children),
                 'types' => $this->formatTypes($category->types),
+                'descendant_service_requests_count' => $category->descendant_service_requests_count ?? 0,
             ];
         })->toArray();
     }

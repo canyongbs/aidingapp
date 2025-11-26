@@ -44,12 +44,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
+use Staudenmeir\EloquentHasManyDeep\HasManyDeep;
+use Staudenmeir\EloquentHasManyDeep\HasRelationships;
 
 #[ObservedBy([ServiceRequestTypeCategoryObserver::class])]
 class ServiceRequestTypeCategory extends BaseModel implements Auditable
 {
     use SoftDeletes;
     use AuditableTrait;
+    use HasRelationships;
 
     protected $fillable = [
         'name',
@@ -83,5 +86,29 @@ class ServiceRequestTypeCategory extends BaseModel implements Auditable
     public function types(): HasMany
     {
         return $this->hasMany(ServiceRequestType::class, 'category_id', 'id')->orderBy('sort');
+    }
+
+    /**
+     * @return HasManyDeep<ServiceRequest, $this>
+     */
+    public function descendantServiceRequests(): HasManyDeep
+    {
+        return $this->hasManyDeep(
+            ServiceRequest::class,
+            [
+                ServiceRequestType::class,
+                ServiceRequestPriority::class,
+            ],
+            [
+                'category_id',
+                'type_id',
+                'priority_id',
+            ],
+            [
+                'id',
+                'id',
+                'id',
+            ]
+        );
     }
 }

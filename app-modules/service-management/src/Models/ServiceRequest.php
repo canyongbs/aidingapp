@@ -66,6 +66,7 @@ use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Staudenmeir\EloquentHasManyDeep\HasRelationships;
+use Staudenmeir\EloquentHasManyDeep\Relations\BelongsToThrough;
 
 /**
  * @property-read Contact $respondent
@@ -393,6 +394,14 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
     public function isResolved(): bool
     {
         return $this->status->classification === SystemServiceRequestClassification::Closed;
+    }
+
+    /**
+     * @return BelongsToThrough<ServiceRequestType, $this>
+     */
+    public function type(): BelongsToThrough
+    {
+        return $this->belongsToThrough(ServiceRequestType::class, ServiceRequestPriority::class);
     }
 
     protected static function booted(): void
