@@ -114,6 +114,8 @@ class ServiceRequestType extends BaseModel implements Auditable
         'email_automatic_creation_priority_id',
         'email_automatic_creation_bcc',
         'is_reminders_enabled',
+        'sort',
+        'category_id',
     ];
 
     protected $casts = [

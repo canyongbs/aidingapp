@@ -73,7 +73,7 @@ class ServiceRequestTypeCategory extends BaseModel implements Auditable
      */
     public function children(): HasMany
     {
-        return $this->hasMany(ServiceRequestTypeCategory::class, 'parent_id');
+        return $this->hasMany(ServiceRequestTypeCategory::class, 'parent_id')->orderBy('sort');
     }
 
     /**
@@ -81,6 +81,6 @@ class ServiceRequestTypeCategory extends BaseModel implements Auditable
      */
     public function types(): HasMany
     {
-        return $this->hasMany(ServiceRequestType::class, 'category_id', 'id');
+        return $this->hasMany(ServiceRequestType::class, 'category_id', 'id')->orderBy('sort');
     }
 }
