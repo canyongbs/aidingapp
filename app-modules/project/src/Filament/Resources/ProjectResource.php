@@ -43,6 +43,7 @@ use AidingApp\Project\Filament\Resources\ProjectResource\Pages\ManageAuditors;
 use AidingApp\Project\Filament\Resources\ProjectResource\Pages\ManageFiles;
 use AidingApp\Project\Filament\Resources\ProjectResource\Pages\ManageManagers;
 use AidingApp\Project\Filament\Resources\ProjectResource\Pages\ManageMilestones;
+use AidingApp\Project\Filament\Resources\ProjectResource\Pages\ManagePipelines;
 use AidingApp\Project\Filament\Resources\ProjectResource\Pages\ManageTasks;
 use AidingApp\Project\Filament\Resources\ProjectResource\Pages\ViewProject;
 use AidingApp\Project\Models\Project;
@@ -68,6 +69,7 @@ class ProjectResource extends Resource
             ManageManagers::class,
             ManageAuditors::class,
             ManageFiles::class,
+            ManagePipelines::class,
             ManageMilestones::class,
         ]);
     }
@@ -83,6 +85,7 @@ class ProjectResource extends Resource
             'manage-managers' => ManageManagers::route('/{record}/managers'),
             'manage-auditors' => ManageAuditors::route('/{record}/auditors'),
             'manage-files' => ManageFiles::route('/{record}/files'),
+            'manage-pipelines' => ManagePipelines::route('/{record}/pipelines'),
             'manage-milestones' => ManageMilestones::route('/{record}/milestones'),
         ];
     }

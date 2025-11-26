@@ -34,35 +34,28 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Providers;
+namespace AidingApp\Project\Database\Factories;
 
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineStage;
-use AidingApp\Project\Models\Project;
-use AidingApp\Project\Models\ProjectFile;
-use AidingApp\Project\Models\ProjectMilestone;
-use AidingApp\Project\Models\ProjectMilestoneStatus;
-use AidingApp\Project\ProjectPlugin;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\ServiceProvider;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-class ProjectServiceProvider extends ServiceProvider
+/**
+ * @extends Factory<PipelineStage>
+ */
+class PipelineStageFactory extends Factory
 {
-    public function register()
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition(): array
     {
-        Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new ProjectPlugin()));
-    }
-
-    public function boot(): void
-    {
-        Relation::morphMap([
-            'pipeline' => Pipeline::class,
-            'pipeline_stage' => PipelineStage::class,
-            'project' => Project::class,
-            'project_file' => ProjectFile::class,
-            'project_milestone' => ProjectMilestone::class,
-            'project_milestone_status' => ProjectMilestoneStatus::class,
-        ]);
+        return [
+            'name' => $this->faker->unique()->words(3, true),
+            'pipeline_id' => Pipeline::factory(),
+            'order' => $this->faker->numberBetween(1, 5),
+        ];
     }
 }

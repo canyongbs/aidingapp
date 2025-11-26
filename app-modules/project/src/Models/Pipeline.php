@@ -34,35 +34,49 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Providers;
+namespace AidingApp\Project\Models;
 
-use AidingApp\Project\Models\Pipeline;
-use AidingApp\Project\Models\PipelineStage;
-use AidingApp\Project\Models\Project;
-use AidingApp\Project\Models\ProjectFile;
-use AidingApp\Project\Models\ProjectMilestone;
-use AidingApp\Project\Models\ProjectMilestoneStatus;
-use AidingApp\Project\ProjectPlugin;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\ServiceProvider;
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Project\Database\Factories\PipelineFactory;
+use App\Models\BaseModel;
+use CanyonGBS\Common\Models\Concerns\HasUserSaveTracking;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class ProjectServiceProvider extends ServiceProvider
+/**
+ * @mixin IdeHelperPipeline
+ */
+class Pipeline extends BaseModel implements Auditable
 {
-    public function register()
+    /** @use HasFactory<PipelineFactory> */
+    use HasFactory;
+
+    use AuditableTrait;
+    use HasUuids;
+    use HasUserSaveTracking;
+
+    protected $fillable = [
+        'name',
+        'description',
+        'project_id',
+    ];
+
+    /**
+     * @return BelongsTo<Project, $this>
+     */
+    public function project(): BelongsTo
     {
-        Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new ProjectPlugin()));
+        return $this->belongsTo(Project::class);
     }
 
-    public function boot(): void
+    /**
+     * @return HasMany<PipelineStage, $this>
+     */
+    public function stages(): HasMany
     {
-        Relation::morphMap([
-            'pipeline' => Pipeline::class,
-            'pipeline_stage' => PipelineStage::class,
-            'project' => Project::class,
-            'project_file' => ProjectFile::class,
-            'project_milestone' => ProjectMilestone::class,
-            'project_milestone_status' => ProjectMilestoneStatus::class,
-        ]);
+        return $this->hasMany(PipelineStage::class, 'pipeline_id');
     }
 }

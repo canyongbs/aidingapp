@@ -34,35 +34,40 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Providers;
+namespace AidingApp\Project\Models;
 
-use AidingApp\Project\Models\Pipeline;
-use AidingApp\Project\Models\PipelineStage;
-use AidingApp\Project\Models\Project;
-use AidingApp\Project\Models\ProjectFile;
-use AidingApp\Project\Models\ProjectMilestone;
-use AidingApp\Project\Models\ProjectMilestoneStatus;
-use AidingApp\Project\ProjectPlugin;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\ServiceProvider;
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Project\Database\Factories\PipelineStageFactory;
+use App\Models\BaseModel;
+use CanyonGBS\Common\Models\Concerns\HasUserSaveTracking;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class ProjectServiceProvider extends ServiceProvider
+/**
+ * @mixin IdeHelperPipelineStage
+ */
+class PipelineStage extends BaseModel implements Auditable
 {
-    public function register()
-    {
-        Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new ProjectPlugin()));
-    }
+    /** @use HasFactory<PipelineStageFactory> */
+    use HasFactory;
 
-    public function boot(): void
+    use AuditableTrait;
+    use HasUuids;
+    use HasUserSaveTracking;
+
+    protected $fillable = [
+        'name',
+        'pipeline_id',
+        'order',
+    ];
+
+    /**
+     * @return BelongsTo<Pipeline, $this>
+     */
+    public function pipeline(): BelongsTo
     {
-        Relation::morphMap([
-            'pipeline' => Pipeline::class,
-            'pipeline_stage' => PipelineStage::class,
-            'project' => Project::class,
-            'project_file' => ProjectFile::class,
-            'project_milestone' => ProjectMilestone::class,
-            'project_milestone_status' => ProjectMilestoneStatus::class,
-        ]);
+        return $this->belongsTo(Pipeline::class);
     }
 }

@@ -34,35 +34,57 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Providers;
+namespace AidingApp\Project\Policies;
 
 use AidingApp\Project\Models\Pipeline;
-use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
-use AidingApp\Project\Models\ProjectFile;
-use AidingApp\Project\Models\ProjectMilestone;
-use AidingApp\Project\Models\ProjectMilestoneStatus;
-use AidingApp\Project\ProjectPlugin;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\ServiceProvider;
+use App\Models\Authenticatable;
+use Illuminate\Auth\Access\Response;
 
-class ProjectServiceProvider extends ServiceProvider
+class PipelinePolicy
 {
-    public function register()
+    public function viewAny(Authenticatable $authenticatable, Project $project): Response
     {
-        Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new ProjectPlugin()));
+        if ($authenticatable->cannot('view', $project)) {
+            return Response::deny('You do not have permission to view pipelines.');
+        }
+
+        return Response::allow();
     }
 
-    public function boot(): void
+    public function view(Authenticatable $authenticatable, Pipeline $pipeline): Response
     {
-        Relation::morphMap([
-            'pipeline' => Pipeline::class,
-            'pipeline_stage' => PipelineStage::class,
-            'project' => Project::class,
-            'project_file' => ProjectFile::class,
-            'project_milestone' => ProjectMilestone::class,
-            'project_milestone_status' => ProjectMilestoneStatus::class,
-        ]);
+        if ($authenticatable->cannot('view', $pipeline->project)) {
+            return Response::deny('You do not have permission to view this pipeline.');
+        }
+
+        return Response::allow();
+    }
+
+    public function create(Authenticatable $authenticatable, Project $project): Response
+    {
+        if ($authenticatable->cannot('update', $project)) {
+            return Response::deny('You do not have permission to create pipelines.');
+        }
+
+        return Response::allow();
+    }
+
+    public function update(Authenticatable $authenticatable, Pipeline $pipeline): Response
+    {
+        if ($authenticatable->cannot('update', $pipeline->project)) {
+            return Response::deny('You do not have permission to update this pipeline.');
+        }
+
+        return Response::allow();
+    }
+
+    public function delete(Authenticatable $authenticatable, Pipeline $pipeline): Response
+    {
+        if ($authenticatable->cannot('update', $pipeline->project)) {
+            return Response::deny('You do not have permission to delete this pipeline.');
+        }
+
+        return Response::allow();
     }
 }

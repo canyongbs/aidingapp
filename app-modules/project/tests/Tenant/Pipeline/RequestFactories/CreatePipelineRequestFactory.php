@@ -34,35 +34,25 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Providers;
+namespace AidingApp\Project\Tests\Tenant\Pipeline\RequestFactories;
 
-use AidingApp\Project\Models\Pipeline;
-use AidingApp\Project\Models\PipelineStage;
-use AidingApp\Project\Models\Project;
-use AidingApp\Project\Models\ProjectFile;
-use AidingApp\Project\Models\ProjectMilestone;
-use AidingApp\Project\Models\ProjectMilestoneStatus;
-use AidingApp\Project\ProjectPlugin;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\ServiceProvider;
+use Worksome\RequestFactories\RequestFactory;
 
-class ProjectServiceProvider extends ServiceProvider
+class CreatePipelineRequestFactory extends RequestFactory
 {
-    public function register()
+    public function definition(): array
     {
-        Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new ProjectPlugin()));
-    }
-
-    public function boot(): void
-    {
-        Relation::morphMap([
-            'pipeline' => Pipeline::class,
-            'pipeline_stage' => PipelineStage::class,
-            'project' => Project::class,
-            'project_file' => ProjectFile::class,
-            'project_milestone' => ProjectMilestone::class,
-            'project_milestone_status' => ProjectMilestoneStatus::class,
-        ]);
+        return [
+            'name' => fake()->words(3, true),
+            'description' => fake()->sentence(),
+            'stages' => fn () => array_map(
+                fn ($stage) => ['name' => $stage],
+                [
+                    fake()->unique()->word(),
+                    fake()->unique()->word(),
+                    fake()->unique()->word(),
+                ]
+            ),
+        ];
     }
 }
