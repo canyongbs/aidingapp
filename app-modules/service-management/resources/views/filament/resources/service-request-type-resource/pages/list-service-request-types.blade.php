@@ -39,17 +39,32 @@
     'fi-resource-list-records-page',
     'fi-resource-' . str_replace('/', '-', $this->getResource()::getSlug()),
 ])>
-    <div id="service-request-type-manager" class="space-y-6" wire:ignore x-data="serviceRequestTypeManager">
+    <div
+        class="space-y-6"
+        id="service-request-type-manager"
+        wire:ignore
+        x-data="serviceRequestTypeManager"
+    >
         {{-- Hierarchical Tree --}}
         <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
             <h2 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Service Request Types & Categories</h2>
 
             <div class="space-y-2">
                 {{-- Uncategorized Types (at top) --}}
-                <div id="uncategorized-types" data-sortable="types" data-category-id="" class="space-y-1 min-h-4 p-0.5 rounded transition-colors duration-150 ease-in-out mb-4"></div>
+                <div
+                    class="mb-4 min-h-4 space-y-1 rounded p-0.5 transition-colors duration-150 ease-in-out"
+                    id="uncategorized-types"
+                    data-sortable="types"
+                    data-category-id=""
+                ></div>
 
                 {{-- Root Level Categories --}}
-                <div id="root-categories" data-sortable="categories" data-parent-id="" class="min-h-5 p-0.5 rounded-md transition-colors duration-150 ease-in-out flex flex-col gap-2"></div>
+                <div
+                    class="flex min-h-5 flex-col gap-2 rounded-md p-0.5 transition-colors duration-150 ease-in-out"
+                    id="root-categories"
+                    data-sortable="categories"
+                    data-parent-id=""
+                ></div>
             </div>
         </div>
 
@@ -60,33 +75,48 @@
                 {{-- Add Category Button --}}
                 <div class="flex-1">
                     <button
+                        class="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
                         id="show-category-btn"
                         type="button"
-                        class="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
                     >
-                        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                        <svg
+                            class="h-5 w-5"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke-width="1.5"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M12 4.5v15m7.5-7.5h-15"
+                            />
                         </svg>
                         Add Category
                     </button>
-                    <div id="category-input-form" class="flex gap-2" style="display: none;">
+                    <div
+                        class="flex gap-2"
+                        id="category-input-form"
+                        style="display: none;"
+                    >
                         <input
+                            class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:text-sm"
                             id="new-category-name"
                             type="text"
                             placeholder="Category name..."
-                            class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:text-sm"
                         />
                         <button
+                            class="inline-flex items-center rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
                             id="create-category-btn"
                             type="button"
-                            class="inline-flex items-center rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
                         >
                             Add
                         </button>
                         <button
+                            class="inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
                             id="cancel-category-btn"
                             type="button"
-                            class="inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
                         >
                             Cancel
                         </button>
@@ -96,33 +126,48 @@
                 {{-- Add Type Button --}}
                 <div class="flex-1">
                     <button
+                        class="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
                         id="show-type-btn"
                         type="button"
-                        class="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
                     >
-                        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                        <svg
+                            class="h-5 w-5"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke-width="1.5"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M12 4.5v15m7.5-7.5h-15"
+                            />
                         </svg>
                         Add Type
                     </button>
-                    <div id="type-input-form" class="flex gap-2" style="display: none;">
+                    <div
+                        class="flex gap-2"
+                        id="type-input-form"
+                        style="display: none;"
+                    >
                         <input
+                            class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:text-sm"
                             id="new-type-name"
                             type="text"
                             placeholder="Type name..."
-                            class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:text-sm"
                         />
                         <button
+                            class="inline-flex items-center rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
                             id="create-type-btn"
                             type="button"
-                            class="inline-flex items-center rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
                         >
                             Add
                         </button>
                         <button
+                            class="inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
                             id="cancel-type-btn"
                             type="button"
-                            class="inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
                         >
                             Cancel
                         </button>
@@ -131,26 +176,48 @@
             </div>
 
             {{-- Save/Discard Buttons --}}
-            <div class="flex gap-4 justify-center">
+            <div class="flex justify-center gap-4">
                 <button
+                    class="inline-flex items-center gap-2 rounded-lg bg-primary-600 px-6 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:cursor-not-allowed disabled:opacity-50"
                     id="save-changes-btn"
                     type="button"
                     disabled
-                    class="inline-flex items-center gap-2 rounded-lg bg-primary-600 px-6 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                    <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                    <svg
+                        class="h-4 w-4"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="1.5"
+                        stroke="currentColor"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M4.5 12.75l6 6 9-13.5"
+                        />
                     </svg>
                     Save Changes
                 </button>
                 <button
+                    class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-6 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
                     id="discard-changes-btn"
                     type="button"
                     disabled
-                    class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-6 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
                 >
-                    <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    <svg
+                        class="h-4 w-4"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="1.5"
+                        stroke="currentColor"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M6 18L18 6M6 6l12 12"
+                        />
                     </svg>
                     Discard Changes
                 </button>
@@ -159,180 +226,180 @@
     </div>
 
     @assets
-    <style>
-        /* Custom styles that cannot be replicated with Tailwind */
-        .drop-line {
-            position: absolute;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: rgb(59 130 246);
-            border-radius: 1px;
-            box-shadow: 0 0 6px rgba(59, 130, 246, 0.5);
-            z-index: 1000;
-            pointer-events: none;
-        }
+        <style>
+            /* Custom styles that cannot be replicated with Tailwind */
+            .drop-line {
+                position: absolute;
+                left: 0;
+                right: 0;
+                height: 2px;
+                background: rgb(59 130 246);
+                border-radius: 1px;
+                box-shadow: 0 0 6px rgba(59, 130, 246, 0.5);
+                z-index: 1000;
+                pointer-events: none;
+            }
 
-        .drop-line::before,
-        .drop-line::after {
-            content: '';
-            position: absolute;
-            top: -3px;
-            width: 8px;
-            height: 8px;
-            background: rgb(59 130 246);
-            border-radius: 50%;
-        }
+            .drop-line::before,
+            .drop-line::after {
+                content: '';
+                position: absolute;
+                top: -3px;
+                width: 8px;
+                height: 8px;
+                background: rgb(59 130 246);
+                border-radius: 50%;
+            }
 
-        .drop-line::before {
-            left: -6px;
-        }
+            .drop-line::before {
+                left: -6px;
+            }
 
-        .drop-line::after {
-            right: -6px;
-        }
+            .drop-line::after {
+                right: -6px;
+            }
 
-        .nest-target::after {
-            content: 'Drop to add as child';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgb(59 130 246);
-            color: white;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 500;
-            pointer-events: none;
-            z-index: 10;
-        }
+            .nest-target::after {
+                content: 'Drop to add as child';
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: rgb(59 130 246);
+                color: white;
+                padding: 4px 8px;
+                border-radius: 4px;
+                font-size: 12px;
+                font-weight: 500;
+                pointer-events: none;
+                z-index: 10;
+            }
 
-        .updating-order::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgb(255 255 255 / 0.8);
-            border-radius: 8px;
-            z-index: 10;
-        }
+            .updating-order::after {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgb(255 255 255 / 0.8);
+                border-radius: 8px;
+                z-index: 10;
+            }
 
-        /* Ensure sortable containers support absolute positioned insertion lines */
-        [data-sortable="categories"],
-        [data-sortable="types"] {
-            position: relative;
-        }
-    </style>
+            /* Ensure sortable containers support absolute positioned insertion lines */
+            [data-sortable="categories"],
+            [data-sortable="types"] {
+                position: relative;
+            }
+        </style>
     @endassets
 
     @script
-    <script>
-        Alpine.data('serviceRequestTypeManager', () => ({
-            originalTreeData: @json($this->hierarchicalData),
-            treeData: @json($this->hierarchicalData),
-            categoryInputs: {},
-            typeInputs: {},
-            hasUnsavedChanges: false,
-            isSaving: false,
-            nextTempId: 1,
-            dragData: {
-                isDragging: false,
-                draggedElement: null,
-                draggedType: null, // 'category' or 'type'
-                draggedId: null,
-                ghostElement: null,
-                currentDropTarget: null,
-                insertPosition: null, // 'before', 'after', or 'inside'
-            },
+        <script>
+            Alpine.data('serviceRequestTypeManager', () => ({
+                originalTreeData: @json($this->hierarchicalData),
+                treeData: @json($this->hierarchicalData),
+                categoryInputs: {},
+                typeInputs: {},
+                hasUnsavedChanges: false,
+                isSaving: false,
+                nextTempId: 1,
+                dragData: {
+                    isDragging: false,
+                    draggedElement: null,
+                    draggedType: null, // 'category' or 'type'
+                    draggedId: null,
+                    ghostElement: null,
+                    currentDropTarget: null,
+                    insertPosition: null, // 'before', 'after', or 'inside'
+                },
 
-            init() {
-                this.deepCopyTreeData();
-                this.render();
-                this.attachEventListeners();
-                this.setupDragAndDrop();
-            },
+                init() {
+                    this.deepCopyTreeData();
+                    this.render();
+                    this.attachEventListeners();
+                    this.setupDragAndDrop();
+                },
 
-            deepCopyTreeData() {
-                // Make a deep copy of the original data so we can track changes
-                this.treeData = JSON.parse(JSON.stringify(this.originalTreeData));
-            },
+                deepCopyTreeData() {
+                    // Make a deep copy of the original data so we can track changes
+                    this.treeData = JSON.parse(JSON.stringify(this.originalTreeData));
+                },
 
-            markAsChanged() {
-                this.hasUnsavedChanges = true;
-            },
+                markAsChanged() {
+                    this.hasUnsavedChanges = true;
+                },
 
-            render() {
-                this.renderCategories();
-                this.renderUncategorizedTypes();
-                this.updateSaveButton();
+                render() {
+                    this.renderCategories();
+                    this.renderUncategorizedTypes();
+                    this.updateSaveButton();
 
-                // Setup drag and drop after all DOM elements are rendered
-                this.setupDragAndDrop();
-            },
+                    // Setup drag and drop after all DOM elements are rendered
+                    this.setupDragAndDrop();
+                },
 
-            updateSaveButton() {
-                const saveButton = document.getElementById('save-changes-btn');
-                const discardButton = document.getElementById('discard-changes-btn');
+                updateSaveButton() {
+                    const saveButton = document.getElementById('save-changes-btn');
+                    const discardButton = document.getElementById('discard-changes-btn');
 
-                if (saveButton && discardButton) {
-                    if (this.hasUnsavedChanges) {
-                        saveButton.disabled = false;
-                        discardButton.disabled = false;
-                        saveButton.classList.remove('opacity-50', 'cursor-not-allowed');
-                        discardButton.classList.remove('opacity-50', 'cursor-not-allowed');
-                    } else {
-                        saveButton.disabled = true;
-                        discardButton.disabled = true;
-                        saveButton.classList.add('opacity-50', 'cursor-not-allowed');
-                        discardButton.classList.add('opacity-50', 'cursor-not-allowed');
+                    if (saveButton && discardButton) {
+                        if (this.hasUnsavedChanges) {
+                            saveButton.disabled = false;
+                            discardButton.disabled = false;
+                            saveButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                            discardButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                        } else {
+                            saveButton.disabled = true;
+                            discardButton.disabled = true;
+                            saveButton.classList.add('opacity-50', 'cursor-not-allowed');
+                            discardButton.classList.add('opacity-50', 'cursor-not-allowed');
+                        }
                     }
-                }
-            },
+                },
 
-            renderCategories() {
-                const container = document.getElementById('root-categories');
-                if (!container) return;
+                renderCategories() {
+                    const container = document.getElementById('root-categories');
+                    if (!container) return;
 
-                container.innerHTML = '';
+                    container.innerHTML = '';
 
-                if (this.treeData.categories && this.treeData.categories.length > 0) {
-                    this.treeData.categories.forEach(category => {
-                        const html = this.renderCategoryRecursive(category, 0);
-                        const wrapper = document.createElement('div');
-                        wrapper.innerHTML = html.trim();
-                        const element = wrapper.firstElementChild;
-                        if (element) {
-                            container.appendChild(element);
-                        }
-                    });
-                }
-            },
+                    if (this.treeData.categories && this.treeData.categories.length > 0) {
+                        this.treeData.categories.forEach(category => {
+                            const html = this.renderCategoryRecursive(category, 0);
+                            const wrapper = document.createElement('div');
+                            wrapper.innerHTML = html.trim();
+                            const element = wrapper.firstElementChild;
+                            if (element) {
+                                container.appendChild(element);
+                            }
+                        });
+                    }
+                },
 
-            renderUncategorizedTypes() {
-                const container = document.getElementById('uncategorized-types');
+                renderUncategorizedTypes() {
+                    const container = document.getElementById('uncategorized-types');
 
-                if (!container) return;
+                    if (!container) return;
 
-                container.innerHTML = '';
+                    container.innerHTML = '';
 
-                if (this.treeData.uncategorized_types && this.treeData.uncategorized_types.length > 0) {
-                    this.treeData.uncategorized_types.forEach(type => {
-                        const html = this.renderType(type);
-                        const wrapper = document.createElement('div');
-                        wrapper.innerHTML = html.trim();
-                        const element = wrapper.firstElementChild;
-                        if (element) {
-                            container.appendChild(element);
-                        }
-                    });
-                }
-            },
+                    if (this.treeData.uncategorized_types && this.treeData.uncategorized_types.length > 0) {
+                        this.treeData.uncategorized_types.forEach(type => {
+                            const html = this.renderType(type);
+                            const wrapper = document.createElement('div');
+                            wrapper.innerHTML = html.trim();
+                            const element = wrapper.firstElementChild;
+                            if (element) {
+                                container.appendChild(element);
+                            }
+                        });
+                    }
+                },
 
-            renderType(type) {
-                return `<div data-type-id="${type.id}" class="type-item draggable flex items-center gap-2 rounded-lg border border-gray-200 bg-white p-2 dark:border-gray-600 dark:bg-gray-800 transition-all duration-150 ease-out cursor-grab active:cursor-grabbing" draggable="true">
+                renderType(type) {
+                    return `<div data-type-id="${type.id}" class="type-item draggable flex items-center gap-2 rounded-lg border border-gray-200 bg-white p-2 dark:border-gray-600 dark:bg-gray-800 transition-all duration-150 ease-out cursor-grab active:cursor-grabbing" draggable="true">
                         <svg class="type-handle h-4 w-4 cursor-grab text-gray-400 opacity-60 transition-all duration-150 ease-in-out hover:opacity-100 hover:text-primary-500 hover:scale-110 active:cursor-grabbing" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
                         </svg>
@@ -341,14 +408,14 @@
                         </svg>
                         <span class="flex-1 text-sm text-gray-700 dark:text-gray-300">${this.escapeHtml(type.name)}</span>
                     </div>`;
-            },
+                },
 
-            renderCategoryRecursive(category, level) {
-                const indent = level * 24;
-                const showCategoryInput = this.categoryInputs[category.id] || false;
-                const showTypeInput = this.typeInputs[category.id] || false;
+                renderCategoryRecursive(category, level) {
+                    const indent = level * 24;
+                    const showCategoryInput = this.categoryInputs[category.id] || false;
+                    const showTypeInput = this.typeInputs[category.id] || false;
 
-                return `<div class="category-wrapper" data-category-id="${category.id}">
+                    return `<div class="category-wrapper" data-category-id="${category.id}">
                         <div class="category-item draggable flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-gray-600 dark:bg-gray-700 transition-all duration-150 ease-out hover:bg-gray-50 hover:-translate-y-px hover:shadow-lg dark:hover:bg-gray-600 cursor-grab active:cursor-grabbing" style="margin-left: ${indent}px" draggable="true" data-category-id="${category.id}">
                             <svg class="category-handle h-5 w-5 cursor-grab text-gray-400 opacity-60 transition-all duration-150 ease-in-out hover:opacity-100 hover:text-primary-500 hover:scale-110 active:cursor-grabbing" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
@@ -370,345 +437,350 @@
                         </div>
 
                         ${showCategoryInput ? `
-                            <div id="category-input-${category.id}" class="flex gap-2 mt-2" style="margin-left: ${indent + 24}px">
-                                <input id="child-category-${category.id}" type="text" placeholder="Child category name..." class="block w-full rounded-lg border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
-                                <button @click="createCategory('${category.id}')" class="rounded-lg bg-primary-600 px-3 py-1 text-sm text-white hover:bg-primary-700">Add</button>
-                                <button @click="hideCategoryInput('${category.id}')" class="rounded-lg border border-gray-300 bg-white px-3 py-1 text-sm text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">Cancel</button>
-                            </div>
-                        ` : ''}
+                                    <div id="category-input-${category.id}" class="flex gap-2 mt-2" style="margin-left: ${indent + 24}px">
+                                        <input id="child-category-${category.id}" type="text" placeholder="Child category name..." class="block w-full rounded-lg border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+                                        <button @click="createCategory('${category.id}')" class="rounded-lg bg-primary-600 px-3 py-1 text-sm text-white hover:bg-primary-700">Add</button>
+                                        <button @click="hideCategoryInput('${category.id}')" class="rounded-lg border border-gray-300 bg-white px-3 py-1 text-sm text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">Cancel</button>
+                                    </div>
+                                ` : ''}
 
                         ${showTypeInput ? `
-                            <div id="type-input-${category.id}" class="flex gap-2 mt-2" style="margin-left: ${indent + 24}px">
-                                <input id="child-type-${category.id}" type="text" placeholder="Type name..." class="block w-full rounded-lg border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
-                                <button @click="createType('${category.id}')" class="rounded-lg bg-primary-600 px-3 py-1 text-sm text-white hover:bg-primary-700">Add</button>
-                                <button @click="hideTypeInput('${category.id}')" class="rounded-lg border border-gray-300 bg-white px-3 py-1 text-sm text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">Cancel</button>
-                            </div>
-                        ` : ''}
+                                    <div id="type-input-${category.id}" class="flex gap-2 mt-2" style="margin-left: ${indent + 24}px">
+                                        <input id="child-type-${category.id}" type="text" placeholder="Type name..." class="block w-full rounded-lg border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+                                        <button @click="createType('${category.id}')" class="rounded-lg bg-primary-600 px-3 py-1 text-sm text-white hover:bg-primary-700">Add</button>
+                                        <button @click="hideTypeInput('${category.id}')" class="rounded-lg border border-gray-300 bg-white px-3 py-1 text-sm text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">Cancel</button>
+                                    </div>
+                                ` : ''}
 
                         ${category.types && category.types.length > 0 ? `
-                            <div data-sortable="types" data-category-id="${category.id}" class="mt-2 space-y-1 min-h-4 p-0.5 rounded transition-colors duration-150 ease-in-out" style="margin-left: ${indent + 24}px">
-                                ${category.types.map(type => this.renderType(type)).join('')}
-                            </div>
-                        ` : ''}
+                                    <div data-sortable="types" data-category-id="${category.id}" class="mt-2 space-y-1 min-h-4 p-0.5 rounded transition-colors duration-150 ease-in-out" style="margin-left: ${indent + 24}px">
+                                        ${category.types.map(type => this.renderType(type)).join('')}
+                                    </div>
+                                ` : ''}
 
                         ${category.children && category.children.length > 0 ? `
-                            <div data-sortable="categories" data-parent-id="${category.id}" class="mt-2 space-y-2 min-h-5 p-0.5 rounded-md transition-colors duration-150 ease-in-out">
-                                ${category.children.map(child => this.renderCategoryRecursive(child, level + 1)).join('')}
-                            </div>
-                        ` : ''}
+                                    <div data-sortable="categories" data-parent-id="${category.id}" class="mt-2 space-y-2 min-h-5 p-0.5 rounded-md transition-colors duration-150 ease-in-out">
+                                        ${category.children.map(child => this.renderCategoryRecursive(child, level + 1)).join('')}
+                                    </div>
+                                ` : ''}
                     </div>`;
-            },
+                },
 
-            attachEventListeners() {
-                // Show category input button
-                document.getElementById('show-category-btn')?.addEventListener('click', () => {
-                    document.getElementById('show-category-btn').style.display = 'none';
-                    document.getElementById('category-input-form').style.display = 'flex';
-                    document.getElementById('new-category-name')?.focus();
-                });
+                attachEventListeners() {
+                    // Show category input button
+                    document.getElementById('show-category-btn')?.addEventListener('click', () => {
+                        document.getElementById('show-category-btn').style.display = 'none';
+                        document.getElementById('category-input-form').style.display = 'flex';
+                        document.getElementById('new-category-name')?.focus();
+                    });
 
-                // Cancel category button
-                document.getElementById('cancel-category-btn')?.addEventListener('click', () => {
-                    document.getElementById('show-category-btn').style.display = 'block';
-                    document.getElementById('category-input-form').style.display = 'none';
-                    document.getElementById('new-category-name').value = '';
-                });
+                    // Cancel category button
+                    document.getElementById('cancel-category-btn')?.addEventListener('click', () => {
+                        document.getElementById('show-category-btn').style.display = 'block';
+                        document.getElementById('category-input-form').style.display = 'none';
+                        document.getElementById('new-category-name').value = '';
+                    });
 
-                // Create category button
-                document.getElementById('create-category-btn')?.addEventListener('click', () => {
-                    this.createCategory(null);
-                });
-
-                // Category input enter key
-                document.getElementById('new-category-name')?.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter') {
+                    // Create category button
+                    document.getElementById('create-category-btn')?.addEventListener('click', () => {
                         this.createCategory(null);
-                    } else if (e.key === 'Escape') {
-                        document.getElementById('cancel-category-btn')?.click();
-                    }
-                });
+                    });
 
-                // Show type input button
-                document.getElementById('show-type-btn')?.addEventListener('click', () => {
-                    document.getElementById('show-type-btn').style.display = 'none';
-                    document.getElementById('type-input-form').style.display = 'flex';
-                    document.getElementById('new-type-name')?.focus();
-                });
+                    // Category input enter key
+                    document.getElementById('new-category-name')?.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter') {
+                            this.createCategory(null);
+                        } else if (e.key === 'Escape') {
+                            document.getElementById('cancel-category-btn')?.click();
+                        }
+                    });
 
-                // Cancel type button
-                document.getElementById('cancel-type-btn')?.addEventListener('click', () => {
-                    document.getElementById('show-type-btn').style.display = 'block';
-                    document.getElementById('type-input-form').style.display = 'none';
-                    document.getElementById('new-type-name').value = '';
-                });
+                    // Show type input button
+                    document.getElementById('show-type-btn')?.addEventListener('click', () => {
+                        document.getElementById('show-type-btn').style.display = 'none';
+                        document.getElementById('type-input-form').style.display = 'flex';
+                        document.getElementById('new-type-name')?.focus();
+                    });
 
-                // Create type button
-                document.getElementById('create-type-btn')?.addEventListener('click', () => {
-                    this.createType(null);
-                });
+                    // Cancel type button
+                    document.getElementById('cancel-type-btn')?.addEventListener('click', () => {
+                        document.getElementById('show-type-btn').style.display = 'block';
+                        document.getElementById('type-input-form').style.display = 'none';
+                        document.getElementById('new-type-name').value = '';
+                    });
 
-                // Type input enter key
-                document.getElementById('new-type-name')?.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter') {
+                    // Create type button
+                    document.getElementById('create-type-btn')?.addEventListener('click', () => {
                         this.createType(null);
-                    } else if (e.key === 'Escape') {
-                        document.getElementById('cancel-type-btn')?.click();
-                    }
-                });
+                    });
 
-                // Save changes button
-                document.getElementById('save-changes-btn')?.addEventListener('click', () => {
-                    this.saveChanges();
-                });
-
-                // Discard changes button
-                document.getElementById('discard-changes-btn')?.addEventListener('click', () => {
-                    this.discardChanges();
-                });
-            },
-
-            setupDragAndDrop() {
-                // Use a small timeout to ensure DOM elements are fully rendered
-                setTimeout(() => {
-                    const draggableElements = document.querySelectorAll('.draggable');
-
-                    // Add event listeners to all draggable elements
-                    draggableElements.forEach(el => {
-                        // Remove existing listeners first
-                        if (el._dragStartHandler) {
-                            el.removeEventListener('dragstart', el._dragStartHandler);
-                        }
-                        if (el._dragEndHandler) {
-                            el.removeEventListener('dragend', el._dragEndHandler);
-                        }
-
-                        // Create bound handlers and store references
-                        el._dragStartHandler = this.handleDragStart.bind(this);
-                        el._dragEndHandler = this.handleDragEnd.bind(this);
-
-                        // Add event listeners
-                        el.addEventListener('dragstart', el._dragStartHandler);
-                        el.addEventListener('dragend', el._dragEndHandler);
-
-                        // Verify draggable attribute
-                        if (!el.draggable) {
-                            el.draggable = true;
+                    // Type input enter key
+                    document.getElementById('new-type-name')?.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter') {
+                            this.createType(null);
+                        } else if (e.key === 'Escape') {
+                            document.getElementById('cancel-type-btn')?.click();
                         }
                     });
 
-                    // Add event listeners for drop zones
-                    document.querySelectorAll('.category-item, .type-item').forEach(el => {
-                        // Remove existing listeners first
-                        if (el._dragOverHandler) {
-                            el.removeEventListener('dragover', el._dragOverHandler);
-                        }
-                        if (el._dropHandler) {
-                            el.removeEventListener('drop', el._dropHandler);
-                        }
-                        if (el._dragEnterHandler) {
-                            el.removeEventListener('dragenter', el._dragEnterHandler);
-                        }
-                        if (el._dragLeaveHandler) {
-                            el.removeEventListener('dragleave', el._dragLeaveHandler);
-                        }
-
-                        // Create bound handlers and store references
-                        el._dragOverHandler = this.handleDragOver.bind(this);
-                        el._dropHandler = this.handleDrop.bind(this);
-                        el._dragEnterHandler = this.handleDragEnter.bind(this);
-                        el._dragLeaveHandler = this.handleDragLeave.bind(this);
-
-                        // Add event listeners
-                        el.addEventListener('dragover', el._dragOverHandler);
-                        el.addEventListener('drop', el._dropHandler);
-                        el.addEventListener('dragenter', el._dragEnterHandler);
-                        el.addEventListener('dragleave', el._dragLeaveHandler);
+                    // Save changes button
+                    document.getElementById('save-changes-btn')?.addEventListener('click', () => {
+                        this.saveChanges();
                     });
-                }, 100);
-            },
 
-            handleDragStart(e) {
+                    // Discard changes button
+                    document.getElementById('discard-changes-btn')?.addEventListener('click', () => {
+                        this.discardChanges();
+                    });
+                },
 
-                this.dragData.isDragging = true;
-                this.dragData.draggedElement = e.target;
+                setupDragAndDrop() {
+                    // Use a small timeout to ensure DOM elements are fully rendered
+                    setTimeout(() => {
+                        const draggableElements = document.querySelectorAll('.draggable');
 
-                // Determine what type of element is being dragged
-                if (e.target.dataset.categoryId) {
-                    this.dragData.draggedType = 'category';
-                    this.dragData.draggedId = e.target.dataset.categoryId;
-                } else if (e.target.dataset.typeId) {
-                    this.dragData.draggedType = 'type';
-                    this.dragData.draggedId = e.target.dataset.typeId;
-                }
+                        // Add event listeners to all draggable elements
+                        draggableElements.forEach(el => {
+                            // Remove existing listeners first
+                            if (el._dragStartHandler) {
+                                el.removeEventListener('dragstart', el._dragStartHandler);
+                            }
+                            if (el._dragEndHandler) {
+                                el.removeEventListener('dragend', el._dragEndHandler);
+                            }
 
-                // Add dragging visual feedback with Tailwind classes (NO pointer-events-none during drag!)
-                e.target.classList.add('opacity-50', 'rotate-1', 'scale-105', 'z-50', 'shadow-2xl');
+                            // Create bound handlers and store references
+                            el._dragStartHandler = this.handleDragStart.bind(this);
+                            el._dragEndHandler = this.handleDragEnd.bind(this);
 
+                            // Add event listeners
+                            el.addEventListener('dragstart', el._dragStartHandler);
+                            el.addEventListener('dragend', el._dragEndHandler);
 
-                // If dragging a category, also add subtle visual feedback to the entire wrapper to show children will move
-                if (this.dragData.draggedType === 'category') {
-                    const wrapper = e.target.closest('.category-wrapper');
-                    if (wrapper) {
-                        // Add a subtle outline to the entire wrapper to indicate all children will move
-                        wrapper.classList.add('ring-2', 'ring-primary-300', 'ring-opacity-50');
+                            // Verify draggable attribute
+                            if (!el.draggable) {
+                                el.draggable = true;
+                            }
+                        });
 
+                        // Add event listeners for drop zones
+                        document.querySelectorAll('.category-item, .type-item').forEach(el => {
+                            // Remove existing listeners first
+                            if (el._dragOverHandler) {
+                                el.removeEventListener('dragover', el._dragOverHandler);
+                            }
+                            if (el._dropHandler) {
+                                el.removeEventListener('drop', el._dropHandler);
+                            }
+                            if (el._dragEnterHandler) {
+                                el.removeEventListener('dragenter', el._dragEnterHandler);
+                            }
+                            if (el._dragLeaveHandler) {
+                                el.removeEventListener('dragleave', el._dragLeaveHandler);
+                            }
+
+                            // Create bound handlers and store references
+                            el._dragOverHandler = this.handleDragOver.bind(this);
+                            el._dropHandler = this.handleDrop.bind(this);
+                            el._dragEnterHandler = this.handleDragEnter.bind(this);
+                            el._dragLeaveHandler = this.handleDragLeave.bind(this);
+
+                            // Add event listeners
+                            el.addEventListener('dragover', el._dragOverHandler);
+                            el.addEventListener('drop', el._dropHandler);
+                            el.addEventListener('dragenter', el._dragEnterHandler);
+                            el.addEventListener('dragleave', el._dragLeaveHandler);
+                        });
+                    }, 100);
+                },
+
+                handleDragStart(e) {
+
+                    this.dragData.isDragging = true;
+                    this.dragData.draggedElement = e.target;
+
+                    // Determine what type of element is being dragged
+                    if (e.target.dataset.categoryId) {
+                        this.dragData.draggedType = 'category';
+                        this.dragData.draggedId = e.target.dataset.categoryId;
+                    } else if (e.target.dataset.typeId) {
+                        this.dragData.draggedType = 'type';
+                        this.dragData.draggedId = e.target.dataset.typeId;
                     }
-                }
 
-                // Set drag data
-                e.dataTransfer.effectAllowed = 'move';
-                e.dataTransfer.setData('text/plain', this.dragData.draggedId);
+                    // Add dragging visual feedback with Tailwind classes (NO pointer-events-none during drag!)
+                    e.target.classList.add('opacity-50', 'rotate-1', 'scale-105', 'z-50', 'shadow-2xl');
 
-                // Create a transparent drag image to hide the default ghost
-                const dragImage = document.createElement('div');
-                dragImage.style.cssText = 'width: 1px; height: 1px; opacity: 0;';
-                document.body.appendChild(dragImage);
-                e.dataTransfer.setDragImage(dragImage, 0, 0);
-                setTimeout(() => document.body.removeChild(dragImage), 0);
 
-                // Create custom ghost element
-                this.createDragGhost(e.target);
-
-                // Add mousemove listener for ghost positioning
-                document.addEventListener('dragover', this.updateGhostPosition.bind(this));
-            },
-
-            handleDragEnd(e) {
-
-                this.dragData.isDragging = false;
-
-                // Remove all drag visual classes
-                e.target.classList.remove('opacity-50', 'rotate-1', 'scale-105', 'z-50', 'shadow-2xl');
-
-                // Also remove any updating classes that might be stuck
-                e.target.classList.remove('updating-order', 'opacity-70');
-
-                // Remove wrapper visual feedback for categories
-                if (this.dragData.draggedType === 'category') {
-                    const wrapper = e.target.closest('.category-wrapper');
-                    if (wrapper) {
-                        wrapper.classList.remove('ring-2', 'ring-primary-300', 'ring-opacity-50');
-                    }
-                }
-
-                // Find the actual dragged element (might be different due to DOM manipulation)
-                if (this.dragData.draggedElement && this.dragData.draggedElement !== e.target) {
-                    this.dragData.draggedElement.classList.remove('opacity-50', 'rotate-1', 'scale-105', 'z-50', 'shadow-2xl', 'updating-order', 'opacity-70');
-
-                    // Also clean wrapper for moved elements
+                    // If dragging a category, also add subtle visual feedback to the entire wrapper to show children will move
                     if (this.dragData.draggedType === 'category') {
-                        const wrapper = this.dragData.draggedElement.closest('.category-wrapper');
+                        const wrapper = e.target.closest('.category-wrapper');
+                        if (wrapper) {
+                            // Add a subtle outline to the entire wrapper to indicate all children will move
+                            wrapper.classList.add('ring-2', 'ring-primary-300', 'ring-opacity-50');
+
+                        }
+                    }
+
+                    // Set drag data
+                    e.dataTransfer.effectAllowed = 'move';
+                    e.dataTransfer.setData('text/plain', this.dragData.draggedId);
+
+                    // Create a transparent drag image to hide the default ghost
+                    const dragImage = document.createElement('div');
+                    dragImage.style.cssText = 'width: 1px; height: 1px; opacity: 0;';
+                    document.body.appendChild(dragImage);
+                    e.dataTransfer.setDragImage(dragImage, 0, 0);
+                    setTimeout(() => document.body.removeChild(dragImage), 0);
+
+                    // Create custom ghost element
+                    this.createDragGhost(e.target);
+
+                    // Add mousemove listener for ghost positioning
+                    document.addEventListener('dragover', this.updateGhostPosition.bind(this));
+                },
+
+                handleDragEnd(e) {
+
+                    this.dragData.isDragging = false;
+
+                    // Remove all drag visual classes
+                    e.target.classList.remove('opacity-50', 'rotate-1', 'scale-105', 'z-50', 'shadow-2xl');
+
+                    // Also remove any updating classes that might be stuck
+                    e.target.classList.remove('updating-order', 'opacity-70');
+
+                    // Remove wrapper visual feedback for categories
+                    if (this.dragData.draggedType === 'category') {
+                        const wrapper = e.target.closest('.category-wrapper');
                         if (wrapper) {
                             wrapper.classList.remove('ring-2', 'ring-primary-300', 'ring-opacity-50');
                         }
                     }
-                }
 
-                // Clean up visual feedback
-                this.cleanupDragVisuals();
+                    // Find the actual dragged element (might be different due to DOM manipulation)
+                    if (this.dragData.draggedElement && this.dragData.draggedElement !== e.target) {
+                        this.dragData.draggedElement.classList.remove('opacity-50', 'rotate-1', 'scale-105', 'z-50',
+                            'shadow-2xl', 'updating-order', 'opacity-70');
 
-                // Remove ghost element
-                if (this.dragData.ghostElement) {
-                    this.dragData.ghostElement.remove();
-                    this.dragData.ghostElement = null;
-                }
-            },
+                        // Also clean wrapper for moved elements
+                        if (this.dragData.draggedType === 'category') {
+                            const wrapper = this.dragData.draggedElement.closest('.category-wrapper');
+                            if (wrapper) {
+                                wrapper.classList.remove('ring-2', 'ring-primary-300', 'ring-opacity-50');
+                            }
+                        }
+                    }
 
-            handleDragOver(e) {
-                e.preventDefault();
-
-                if (!this.dragData.isDragging) {
-                    return;
-                }
-
-                // Check if this is a valid drop zone
-                const dropPosition = this.determineDropPosition(e.currentTarget, e);
-
-                if (dropPosition) {
-                    e.dataTransfer.dropEffect = 'move';
-                } else {
-                    e.dataTransfer.dropEffect = 'none';
-                }
-
-                // Update ghost position
-                this.updateGhostPosition(e);
-
-                // Update drop indicators
-                this.updateDropIndicators(e);
-            },
-
-            handleDragEnter(e) {
-                e.preventDefault();
-                if (!this.dragData.isDragging) return;
-
-                this.updateDropIndicators(e);
-            },
-
-            handleDragLeave(e) {
-                // Only clean up if we're actually leaving the element
-                if (!e.currentTarget.contains(e.relatedTarget)) {
-                    this.cleanupDropIndicators();
-                }
-            },
-
-            handleDrop(e) {
-                e.preventDefault();
-
-
-                if (!this.dragData.isDragging) return;
-
-                const dropTarget = e.currentTarget;
-                const dropPosition = this.determineDropPosition(dropTarget, e);
-
-
-
-                // If no valid drop position, cancel the drop
-                if (!dropPosition) {
-
+                    // Clean up visual feedback
                     this.cleanupDragVisuals();
-                    return;
-                }
 
-                this.performDrop(dropTarget, dropPosition);
+                    // Remove ghost element
+                    if (this.dragData.ghostElement) {
+                        this.dragData.ghostElement.remove();
+                        this.dragData.ghostElement = null;
+                    }
+                },
 
-                // Clean up drag visuals immediately
-                this.cleanupDragVisuals();
+                handleDragOver(e) {
+                    e.preventDefault();
 
-                // Remove drag classes from the original element immediately
-                if (this.dragData.draggedElement) {
-                    this.dragData.draggedElement.classList.remove('opacity-50', 'rotate-1', 'scale-105', 'z-50', 'shadow-2xl', 'updating-order', 'opacity-70');
+                    if (!this.dragData.isDragging) {
+                        return;
+                    }
 
-                }
+                    // Check if this is a valid drop zone
+                    const dropPosition = this.determineDropPosition(e.currentTarget, e);
 
-                // Also clean up any elements with the dragged ID (in case DOM was manipulated)
-                if (this.dragData.draggedType === 'category' && this.dragData.draggedId) {
-                    const categoryElement = document.querySelector(`[data-category-id="${this.dragData.draggedId}"]`);
-                    if (categoryElement) {
-                        categoryElement.classList.remove('opacity-50', 'rotate-1', 'scale-105', 'z-50', 'shadow-2xl', 'updating-order', 'opacity-70');
+                    if (dropPosition) {
+                        e.dataTransfer.dropEffect = 'move';
+                    } else {
+                        e.dataTransfer.dropEffect = 'none';
+                    }
 
-                        // Also clean wrapper classes
-                        const wrapper = categoryElement.closest('.category-wrapper');
-                        if (wrapper) {
-                            wrapper.classList.remove('ring-2', 'ring-primary-300', 'ring-opacity-50');
+                    // Update ghost position
+                    this.updateGhostPosition(e);
+
+                    // Update drop indicators
+                    this.updateDropIndicators(e);
+                },
+
+                handleDragEnter(e) {
+                    e.preventDefault();
+                    if (!this.dragData.isDragging) return;
+
+                    this.updateDropIndicators(e);
+                },
+
+                handleDragLeave(e) {
+                    // Only clean up if we're actually leaving the element
+                    if (!e.currentTarget.contains(e.relatedTarget)) {
+                        this.cleanupDropIndicators();
+                    }
+                },
+
+                handleDrop(e) {
+                    e.preventDefault();
+
+
+                    if (!this.dragData.isDragging) return;
+
+                    const dropTarget = e.currentTarget;
+                    const dropPosition = this.determineDropPosition(dropTarget, e);
+
+
+
+                    // If no valid drop position, cancel the drop
+                    if (!dropPosition) {
+
+                        this.cleanupDragVisuals();
+                        return;
+                    }
+
+                    this.performDrop(dropTarget, dropPosition);
+
+                    // Clean up drag visuals immediately
+                    this.cleanupDragVisuals();
+
+                    // Remove drag classes from the original element immediately
+                    if (this.dragData.draggedElement) {
+                        this.dragData.draggedElement.classList.remove('opacity-50', 'rotate-1', 'scale-105', 'z-50',
+                            'shadow-2xl', 'updating-order', 'opacity-70');
+
+                    }
+
+                    // Also clean up any elements with the dragged ID (in case DOM was manipulated)
+                    if (this.dragData.draggedType === 'category' && this.dragData.draggedId) {
+                        const categoryElement = document.querySelector(
+                            `[data-category-id="${this.dragData.draggedId}"]`);
+                        if (categoryElement) {
+                            categoryElement.classList.remove('opacity-50', 'rotate-1', 'scale-105', 'z-50',
+                                'shadow-2xl', 'updating-order', 'opacity-70');
+
+                            // Also clean wrapper classes
+                            const wrapper = categoryElement.closest('.category-wrapper');
+                            if (wrapper) {
+                                wrapper.classList.remove('ring-2', 'ring-primary-300', 'ring-opacity-50');
+                            }
+                        }
+                    } else if (this.dragData.draggedType === 'type' && this.dragData.draggedId) {
+                        const typeElement = document.querySelector(`[data-type-id="${this.dragData.draggedId}"]`);
+                        if (typeElement) {
+                            typeElement.classList.remove('opacity-50', 'rotate-1', 'scale-105', 'z-50',
+                                'shadow-2xl', 'updating-order', 'opacity-70');
                         }
                     }
-                } else if (this.dragData.draggedType === 'type' && this.dragData.draggedId) {
-                    const typeElement = document.querySelector(`[data-type-id="${this.dragData.draggedId}"]`);
-                    if (typeElement) {
-                        typeElement.classList.remove('opacity-50', 'rotate-1', 'scale-105', 'z-50', 'shadow-2xl', 'updating-order', 'opacity-70');
-                    }
-                }
-            },
+                },
 
-            createDragGhost(element) {
+                createDragGhost(element) {
 
 
-                // Create a simplified ghost element
-                const ghost = document.createElement('div');
-                ghost.className = 'drag-ghost';
-                const spanElement = element.querySelector('span');
-                ghost.textContent = spanElement ? spanElement.textContent : 'Dragging...';
-                ghost.style.cssText = `
+                    // Create a simplified ghost element
+                    const ghost = document.createElement('div');
+                    ghost.className = 'drag-ghost';
+                    const spanElement = element.querySelector('span');
+                    ghost.textContent = spanElement ? spanElement.textContent : 'Dragging...';
+                    ghost.style.cssText = `
                     position: fixed;
                     pointer-events: none;
                     z-index: 9999;
@@ -724,793 +796,807 @@
                     top: -9999px;
                 `;
 
-                document.body.appendChild(ghost);
-                this.dragData.ghostElement = ghost;
+                    document.body.appendChild(ghost);
+                    this.dragData.ghostElement = ghost;
 
-            },
+                },
 
-            updateGhostPosition(e) {
-                if (this.dragData.ghostElement) {
-                    const x = e.clientX + 15;
-                    const y = e.clientY - 10;
-                    this.dragData.ghostElement.style.left = x + 'px';
-                    this.dragData.ghostElement.style.top = y + 'px';
+                updateGhostPosition(e) {
+                    if (this.dragData.ghostElement) {
+                        const x = e.clientX + 15;
+                        const y = e.clientY - 10;
+                        this.dragData.ghostElement.style.left = x + 'px';
+                        this.dragData.ghostElement.style.top = y + 'px';
 
-                    // Log occasionally to see positioning
+                        // Log occasionally to see positioning
 
-                }
-            },
-
-            updateDropIndicators(e) {
-                this.cleanupDropIndicators();
-
-                const target = e.currentTarget;
-                const dropPosition = this.determineDropPosition(target, e);
-
-                // If no valid drop position, show no visual feedback
-                if (!dropPosition) {
-                    return;
-                }
-
-                if (dropPosition.type === 'inside') {
-                    // Highlight category for nesting with Tailwind classes
-                    if (dropPosition.target.classList.contains('category-item')) {
-                        dropPosition.target.classList.add('nest-target', 'bg-primary-500/10', 'border-primary-500/50', 'border-2', 'rounded-lg', 'relative');
                     }
-                } else if (dropPosition.type === 'insert') {
-                    // Show single insertion line at calculated position
-                    this.showInsertionLine(dropPosition.container, dropPosition.insertIndex);
-                }
-            },
+                },
 
-            showInsertionLine(container, insertIndex) {
-                // Remove any existing insertion lines
-                this.cleanupInsertionLines();
+                updateDropIndicators(e) {
+                    this.cleanupDropIndicators();
 
-                // Get all children of the container
-                const children = Array.from(container.children).filter(child =>
-                    !child.classList.contains('insertion-line') &&
-                    (child.classList.contains('category-wrapper') || child.classList.contains('category-item') || child.classList.contains('type-item'))
-                );
+                    const target = e.currentTarget;
+                    const dropPosition = this.determineDropPosition(target, e);
 
-                // Calculate the Y position for the insertion line
-                let yPosition = 0;
-                const containerRect = container.getBoundingClientRect();
-
-                if (insertIndex === 0 && children.length > 0) {
-                    // Position above the first child
-                    const firstChildRect = children[0].getBoundingClientRect();
-                    yPosition = firstChildRect.top - containerRect.top - 1;
-                } else if (insertIndex >= children.length && children.length > 0) {
-                    // Position below the last child
-                    const lastChildRect = children[children.length - 1].getBoundingClientRect();
-                    yPosition = lastChildRect.bottom - containerRect.top + 1;
-                } else if (children.length > 0 && insertIndex > 0) {
-                    // Position between children
-                    const prevChildRect = children[insertIndex - 1].getBoundingClientRect();
-                    const nextChildRect = children[insertIndex].getBoundingClientRect();
-                    yPosition = prevChildRect.bottom - containerRect.top + ((nextChildRect.top - prevChildRect.bottom) / 2);
-                } else {
-                    // Empty container or single item
-                    yPosition = 10;
-                }
-
-                // Create insertion line with absolute positioning
-                const line = document.createElement('div');
-                line.className = 'insertion-line drop-line';
-                line.style.top = yPosition + 'px';
-
-
-
-                container.appendChild(line);
-            },
-
-            cleanupInsertionLines() {
-                document.querySelectorAll('.insertion-line').forEach(line => line.remove());
-            },
-
-            calculateInsertionPosition(container, mouseY) {
-                const children = Array.from(container.children).filter(child =>
-                    !child.classList.contains('insertion-line') &&
-                    (child.classList.contains('category-wrapper') || child.classList.contains('category-item') || child.classList.contains('type-item'))
-                );
-
-                if (children.length === 0) {
-                    return 0;
-                }
-
-                // Find the insertion position based on mouse Y coordinate
-                for (let i = 0; i < children.length; i++) {
-                    const rect = children[i].getBoundingClientRect();
-                    const childCenterY = rect.top + (rect.height / 2);
-
-                    if (mouseY < childCenterY) {
-                        return i;
+                    // If no valid drop position, show no visual feedback
+                    if (!dropPosition) {
+                        return;
                     }
-                }
 
-                // If we're past all children, insert at the end
-                return children.length;
-            },
+                    if (dropPosition.type === 'inside') {
+                        // Highlight category for nesting with Tailwind classes
+                        if (dropPosition.target.classList.contains('category-item')) {
+                            dropPosition.target.classList.add('nest-target', 'bg-primary-500/10',
+                                'border-primary-500/50', 'border-2', 'rounded-lg', 'relative');
+                        }
+                    } else if (dropPosition.type === 'insert') {
+                        // Show single insertion line at calculated position
+                        this.showInsertionLine(dropPosition.container, dropPosition.insertIndex);
+                    }
+                },
 
-            determineDropPosition(target, e) {
-                // Ensure we're working with the actual category-item or type-item element
-                const categoryItem = target.closest('.category-item');
-                const typeItem = target.closest('.type-item');
+                showInsertionLine(container, insertIndex) {
+                    // Remove any existing insertion lines
+                    this.cleanupInsertionLines();
 
-                if (categoryItem && this.dragData.draggedType === 'category') {
-                    const actualTarget = categoryItem;
-                    const draggedLevel = this.getCategoryLevel(this.dragData.draggedElement);
-                    const targetLevel = this.getCategoryLevel(actualTarget);
+                    // Get all children of the container
+                    const children = Array.from(container.children).filter(child =>
+                        !child.classList.contains('insertion-line') &&
+                        (child.classList.contains('category-wrapper') || child.classList.contains(
+                            'category-item') || child.classList.contains('type-item'))
+                    );
 
-                    // Check if they share the same parent context
-                    const draggedParentContext = this.getCategoryParentContext(this.dragData.draggedElement);
-                    const targetParentContext = this.getCategoryParentContext(actualTarget);
+                    // Calculate the Y position for the insertion line
+                    let yPosition = 0;
+                    const containerRect = container.getBoundingClientRect();
 
-                    // Determine if insertion lines should be shown
-                    let allowInsertion = false;
-
-                    if (targetParentContext === 'root') {
-                        // Target is at root level - always allow insertion (can move anything to root)
-                        allowInsertion = true;
-
-                    } else if (draggedLevel === targetLevel && draggedParentContext === targetParentContext) {
-                        // Same level and same parent context - allow insertion
-                        allowInsertion = true;
-
-                    } else if (draggedLevel === targetLevel) {
-                        // Same level but different parents - could be valid reordering
-                        allowInsertion = true;
-
+                    if (insertIndex === 0 && children.length > 0) {
+                        // Position above the first child
+                        const firstChildRect = children[0].getBoundingClientRect();
+                        yPosition = firstChildRect.top - containerRect.top - 1;
+                    } else if (insertIndex >= children.length && children.length > 0) {
+                        // Position below the last child
+                        const lastChildRect = children[children.length - 1].getBoundingClientRect();
+                        yPosition = lastChildRect.bottom - containerRect.top + 1;
+                    } else if (children.length > 0 && insertIndex > 0) {
+                        // Position between children
+                        const prevChildRect = children[insertIndex - 1].getBoundingClientRect();
+                        const nextChildRect = children[insertIndex].getBoundingClientRect();
+                        yPosition = prevChildRect.bottom - containerRect.top + ((nextChildRect.top - prevChildRect
+                            .bottom) / 2);
                     } else {
-
+                        // Empty container or single item
+                        yPosition = 10;
                     }
 
-                    if (allowInsertion) {
-                        // Find the container for insertion positioning
-                        const targetWrapper = actualTarget.closest('.category-wrapper');
-                        const container = targetWrapper.parentElement;
+                    // Create insertion line with absolute positioning
+                    const line = document.createElement('div');
+                    line.className = 'insertion-line drop-line';
+                    line.style.top = yPosition + 'px';
 
-                        // Check if we're hovering over the center for nesting
-                        const rect = actualTarget.getBoundingClientRect();
-                        const y = e.clientY - rect.top;
-                        const height = rect.height;
 
-                        if (y > height * 0.3 && y < height * 0.7) {
-                            return { type: 'inside', target: actualTarget };
+
+                    container.appendChild(line);
+                },
+
+                cleanupInsertionLines() {
+                    document.querySelectorAll('.insertion-line').forEach(line => line.remove());
+                },
+
+                calculateInsertionPosition(container, mouseY) {
+                    const children = Array.from(container.children).filter(child =>
+                        !child.classList.contains('insertion-line') &&
+                        (child.classList.contains('category-wrapper') || child.classList.contains(
+                            'category-item') || child.classList.contains('type-item'))
+                    );
+
+                    if (children.length === 0) {
+                        return 0;
+                    }
+
+                    // Find the insertion position based on mouse Y coordinate
+                    for (let i = 0; i < children.length; i++) {
+                        const rect = children[i].getBoundingClientRect();
+                        const childCenterY = rect.top + (rect.height / 2);
+
+                        if (mouseY < childCenterY) {
+                            return i;
+                        }
+                    }
+
+                    // If we're past all children, insert at the end
+                    return children.length;
+                },
+
+                determineDropPosition(target, e) {
+                    // Ensure we're working with the actual category-item or type-item element
+                    const categoryItem = target.closest('.category-item');
+                    const typeItem = target.closest('.type-item');
+
+                    if (categoryItem && this.dragData.draggedType === 'category') {
+                        const actualTarget = categoryItem;
+                        const draggedLevel = this.getCategoryLevel(this.dragData.draggedElement);
+                        const targetLevel = this.getCategoryLevel(actualTarget);
+
+                        // Check if they share the same parent context
+                        const draggedParentContext = this.getCategoryParentContext(this.dragData.draggedElement);
+                        const targetParentContext = this.getCategoryParentContext(actualTarget);
+
+                        // Determine if insertion lines should be shown
+                        let allowInsertion = false;
+
+                        if (targetParentContext === 'root') {
+                            // Target is at root level - always allow insertion (can move anything to root)
+                            allowInsertion = true;
+
+                        } else if (draggedLevel === targetLevel && draggedParentContext === targetParentContext) {
+                            // Same level and same parent context - allow insertion
+                            allowInsertion = true;
+
+                        } else if (draggedLevel === targetLevel) {
+                            // Same level but different parents - could be valid reordering
+                            allowInsertion = true;
+
                         } else {
-                            // Calculate insertion position based on mouse Y
-                            const insertIndex = this.calculateInsertionPosition(container, e.clientY);
+
+                        }
+
+                        if (allowInsertion) {
+                            // Find the container for insertion positioning
+                            const targetWrapper = actualTarget.closest('.category-wrapper');
+                            const container = targetWrapper.parentElement;
+
+                            // Check if we're hovering over the center for nesting
+                            const rect = actualTarget.getBoundingClientRect();
+                            const y = e.clientY - rect.top;
+                            const height = rect.height;
+
+                            if (y > height * 0.3 && y < height * 0.7) {
+                                return {
+                                    type: 'inside',
+                                    target: actualTarget
+                                };
+                            } else {
+                                // Calculate insertion position based on mouse Y
+                                const insertIndex = this.calculateInsertionPosition(container, e.clientY);
+                                return {
+                                    type: 'insert',
+                                    container: container,
+                                    insertIndex: insertIndex
+                                };
+                            }
+                        } else {
+                            // Different contexts - only allow nesting
                             return {
-                                type: 'insert',
-                                container: container,
-                                insertIndex: insertIndex
+                                type: 'inside',
+                                target: actualTarget
                             };
                         }
-                    } else {
-                        // Different contexts - only allow nesting
-                        return { type: 'inside', target: actualTarget };
                     }
-                }
 
-                if (typeItem && this.dragData.draggedType === 'type') {
-                    const actualTarget = typeItem;
-                    // For types, check if they're in the same category container
-                    const draggedContainer = this.dragData.draggedElement.closest('[data-sortable="types"]');
-                    const targetContainer = actualTarget.closest('[data-sortable="types"]');
+                    if (typeItem && this.dragData.draggedType === 'type') {
+                        const actualTarget = typeItem;
+                        // For types, check if they're in the same category container
+                        const draggedContainer = this.dragData.draggedElement.closest('[data-sortable="types"]');
+                        const targetContainer = actualTarget.closest('[data-sortable="types"]');
 
-                    if (draggedContainer && targetContainer &&
-                        draggedContainer.dataset.categoryId === targetContainer.dataset.categoryId) {
-                        // Same category container - allow insertion
-                        const insertIndex = this.calculateInsertionPosition(targetContainer, e.clientY);
+                        if (draggedContainer && targetContainer &&
+                            draggedContainer.dataset.categoryId === targetContainer.dataset.categoryId) {
+                            // Same category container - allow insertion
+                            const insertIndex = this.calculateInsertionPosition(targetContainer, e.clientY);
+                            return {
+                                type: 'insert',
+                                container: targetContainer,
+                                insertIndex: insertIndex
+                            };
+                        } else {
+                            // Different categories - don't allow type-to-type drops across categories
+                            return null;
+                        }
+                    }
+
+                    // For category-to-type or type-to-category interactions, only allow nesting types into categories
+                    if (categoryItem && this.dragData.draggedType === 'type') {
                         return {
-                            type: 'insert',
-                            container: targetContainer,
-                            insertIndex: insertIndex
+                            type: 'inside',
+                            target: categoryItem
                         };
-                    } else {
-                        // Different categories - don't allow type-to-type drops across categories
+                    }
+
+                    return null; // Invalid drop
+                },
+
+                cleanupDropIndicators() {
+                    this.cleanupInsertionLines();
+                    document.querySelectorAll('.nest-target').forEach(target => {
+                        target.classList.remove('nest-target', 'bg-primary-500/10', 'border-primary-500/50',
+                            'border-2', 'rounded-lg', 'relative');
+                    });
+                },
+
+                cleanupDragVisuals() {
+                    this.cleanupDropIndicators();
+                    document.removeEventListener('dragover', this.updateGhostPosition);
+                },
+
+                performDrop(target, position) {
+                    // Determine the drop operation based on dragged type and target
+                    if (this.dragData.draggedType === 'category') {
+                        this.handleCategoryDrop(target, position);
+                    } else if (this.dragData.draggedType === 'type') {
+                        this.handleTypeDrop(target, position);
+                    }
+
+                    // Mark as changed and re-render
+                    this.markAsChanged();
+                    this.render();
+                },
+
+                handleCategoryDrop(target, position) {
+                    const categoryId = this.dragData.draggedId;
+                    let newParentId = null;
+
+                    if (position.type === 'inside') {
+                        newParentId = position.target.dataset.categoryId;
+                    } else if (position.type === 'insert') {
+                        newParentId = position.container.dataset.parentId || null;
+                        if (newParentId === '') {
+                            newParentId = null;
+                        }
+                    }
+
+                    // Update the tree data structure
+                    this.updateCategoryInTreeData(categoryId, newParentId, position);
+                },
+
+                handleTypeDrop(target, position) {
+                    const typeId = this.dragData.draggedId;
+                    let newCategoryId = null;
+
+                    if (position.type === 'inside') {
+                        newCategoryId = position.target.dataset.categoryId;
+                    } else if (position.type === 'insert') {
+                        newCategoryId = position.container.dataset.categoryId || null;
+                    }
+
+                    // Update the tree data structure
+                    this.updateTypeInTreeData(typeId, newCategoryId, position);
+                },
+
+                findCategoryParent(categoryId) {
+                    // Search through the tree to find the parent of a category
+                    const findParent = (categories, targetId, parentId = null) => {
+                        for (const category of categories) {
+                            if (category.id === targetId) {
+                                return parentId;
+                            }
+                            if (category.children && category.children.length > 0) {
+                                const result = findParent(category.children, targetId, category.id);
+                                if (result !== undefined) return result;
+                            }
+                        }
+                        return undefined;
+                    };
+
+                    return findParent(this.treeData.categories || [], categoryId);
+                },
+
+                findTypeCategory(typeId) {
+                    // Search through the tree to find which category a type belongs to
+                    const findCategory = (categories) => {
+                        for (const category of categories) {
+                            if (category.types && category.types.some(type => type.id === typeId)) {
+                                return category.id;
+                            }
+                            if (category.children && category.children.length > 0) {
+                                const result = findCategory(category.children);
+                                if (result) return result;
+                            }
+                        }
+                        return null;
+                    };
+
+                    // Check categories first
+                    const categoryResult = findCategory(this.treeData.categories || []);
+                    if (categoryResult) return categoryResult;
+
+                    // Check uncategorized types
+                    if (this.treeData.uncategorized_types &&
+                        this.treeData.uncategorized_types.some(type => type.id === typeId)) {
                         return null;
                     }
-                }
 
-                // For category-to-type or type-to-category interactions, only allow nesting types into categories
-                if (categoryItem && this.dragData.draggedType === 'type') {
-                    return { type: 'inside', target: categoryItem };
-                }
+                    return null;
+                },
 
-                return null; // Invalid drop
-            },
+                getCategoryLevel(categoryElement) {
+                    // Calculate the nesting level of a category by counting parent containers
+                    let level = 0;
+                    let current = categoryElement.closest('.category-wrapper');
 
-            cleanupDropIndicators() {
-                this.cleanupInsertionLines();
-                document.querySelectorAll('.nest-target').forEach(target => {
-                    target.classList.remove('nest-target', 'bg-primary-500/10', 'border-primary-500/50', 'border-2', 'rounded-lg', 'relative');
-                });
-            },
+                    while (current && current.parentElement) {
+                        const parent = current.parentElement.closest('[data-sortable="categories"]');
 
-            cleanupDragVisuals() {
-                this.cleanupDropIndicators();
-                document.removeEventListener('dragover', this.updateGhostPosition);
-            },
-
-            performDrop(target, position) {
-                // Determine the drop operation based on dragged type and target
-                if (this.dragData.draggedType === 'category') {
-                    this.handleCategoryDrop(target, position);
-                } else if (this.dragData.draggedType === 'type') {
-                    this.handleTypeDrop(target, position);
-                }
-
-                // Mark as changed and re-render
-                this.markAsChanged();
-                this.render();
-            },
-
-            handleCategoryDrop(target, position) {
-                const categoryId = this.dragData.draggedId;
-                let newParentId = null;
-
-                if (position.type === 'inside') {
-                    newParentId = position.target.dataset.categoryId;
-                } else if (position.type === 'insert') {
-                    newParentId = position.container.dataset.parentId || null;
-                    if (newParentId === '') {
-                        newParentId = null;
-                    }
-                }
-
-                // Update the tree data structure
-                this.updateCategoryInTreeData(categoryId, newParentId, position);
-            },
-
-            handleTypeDrop(target, position) {
-                const typeId = this.dragData.draggedId;
-                let newCategoryId = null;
-
-                if (position.type === 'inside') {
-                    newCategoryId = position.target.dataset.categoryId;
-                } else if (position.type === 'insert') {
-                    newCategoryId = position.container.dataset.categoryId || null;
-                }
-
-                // Update the tree data structure
-                this.updateTypeInTreeData(typeId, newCategoryId, position);
-            },
-
-            findCategoryParent(categoryId) {
-                // Search through the tree to find the parent of a category
-                const findParent = (categories, targetId, parentId = null) => {
-                    for (const category of categories) {
-                        if (category.id === targetId) {
-                            return parentId;
-                        }
-                        if (category.children && category.children.length > 0) {
-                            const result = findParent(category.children, targetId, category.id);
-                            if (result !== undefined) return result;
+                        if (parent && parent.dataset.parentId) {
+                            level++;
+                            current = parent.closest('.category-wrapper');
+                        } else {
+                            break;
                         }
                     }
-                    return undefined;
-                };
 
-                return findParent(this.treeData.categories || [], categoryId);
-            },
+                    return level;
+                },
 
-            findTypeCategory(typeId) {
-                // Search through the tree to find which category a type belongs to
-                const findCategory = (categories) => {
-                    for (const category of categories) {
-                        if (category.types && category.types.some(type => type.id === typeId)) {
-                            return category.id;
+                getCategoryParentContext(categoryElement) {
+                    // Get the parent container ID for a category element
+                    const wrapper = categoryElement.closest('.category-wrapper');
+                    if (!wrapper) return null;
+
+                    // Find the immediate parent sortable container
+                    const parentContainer = wrapper.parentElement.closest('[data-sortable="categories"]');
+
+                    if (!parentContainer) {
+                        // This shouldn't happen, but treat as root
+                        return 'root';
+                    }
+
+                    // If the parent container has a parentId, use it; otherwise it's root level
+                    const parentId = parentContainer.dataset.parentId;
+                    if (!parentId || parentId === '' || parentId === 'null') {
+                        return 'root';
+                    }
+
+                    return parentId;
+                },
+
+
+
+                updateCategoryInTreeData(categoryId, newParentId, position) {
+                    // Find and remove the category from its current position
+                    const category = this.findAndRemoveCategory(categoryId);
+                    if (!category) return;
+
+                    // Update the category's parent_id to reflect its new location
+                    category.parent_id = newParentId;
+
+                    // Add to new position
+                    if (newParentId) {
+                        // Add as child of parent category
+                        const parentCategory = this.findCategoryById(newParentId);
+                        if (parentCategory) {
+                            if (!parentCategory.children) {
+                                parentCategory.children = [];
+                            }
+                            if (position.type === 'inside') {
+                                parentCategory.children.push(category);
+                            } else {
+                                parentCategory.children.splice(position.insertIndex, 0, category);
+                            }
                         }
-                        if (category.children && category.children.length > 0) {
-                            const result = findCategory(category.children);
-                            if (result) return result;
+                    } else {
+                        // Add to root level
+                        if (!this.treeData.categories) {
+                            this.treeData.categories = [];
+                        }
+                        if (position.type === 'insert') {
+                            this.treeData.categories.splice(position.insertIndex, 0, category);
+                        } else {
+                            this.treeData.categories.push(category);
+                        }
+                    }
+                },
+
+                updateTypeInTreeData(typeId, newCategoryId, position) {
+                    // Find and remove the type from its current position
+                    const type = this.findAndRemoveType(typeId);
+                    if (!type) return;
+
+                    // Update the type's category_id to reflect its new location
+                    type.category_id = newCategoryId;
+
+                    // Add to new position
+                    if (newCategoryId) {
+                        // Add to category
+                        const category = this.findCategoryById(newCategoryId);
+                        if (category) {
+                            if (!category.types) {
+                                category.types = [];
+                            }
+                            if (position.type === 'inside') {
+                                category.types.push(type);
+                            } else {
+                                category.types.splice(position.insertIndex, 0, type);
+                            }
+                        }
+                    } else {
+                        // Add to uncategorized
+                        if (!this.treeData.uncategorized_types) {
+                            this.treeData.uncategorized_types = [];
+                        }
+                        if (position.type === 'insert') {
+                            this.treeData.uncategorized_types.splice(position.insertIndex, 0, type);
+                        } else {
+                            this.treeData.uncategorized_types.push(type);
+                        }
+                    }
+                },
+
+                findCategoryById(categoryId, categories = null) {
+                    if (!categories) {
+                        categories = this.treeData.categories || [];
+                    }
+
+                    for (const category of categories) {
+                        if (category.id === categoryId) {
+                            return category;
+                        }
+                        if (category.children) {
+                            const found = this.findCategoryById(categoryId, category.children);
+                            if (found) return found;
                         }
                     }
                     return null;
-                };
+                },
 
-                // Check categories first
-                const categoryResult = findCategory(this.treeData.categories || []);
-                if (categoryResult) return categoryResult;
+                findAndRemoveCategory(categoryId) {
+                    // Search in root categories
+                    const rootIndex = (this.treeData.categories || []).findIndex(c => c.id === categoryId);
+                    if (rootIndex !== -1) {
+                        return this.treeData.categories.splice(rootIndex, 1)[0];
+                    }
 
-                // Check uncategorized types
-                if (this.treeData.uncategorized_types &&
-                    this.treeData.uncategorized_types.some(type => type.id === typeId)) {
+                    // Search in nested categories
+                    return this.findAndRemoveCategoryRecursive(categoryId, this.treeData.categories || []);
+                },
+
+                findAndRemoveCategoryRecursive(categoryId, categories) {
+                    for (const category of categories) {
+                        if (category.children) {
+                            const childIndex = category.children.findIndex(c => c.id === categoryId);
+                            if (childIndex !== -1) {
+                                return category.children.splice(childIndex, 1)[0];
+                            }
+                            const found = this.findAndRemoveCategoryRecursive(categoryId, category.children);
+                            if (found) return found;
+                        }
+                    }
                     return null;
-                }
+                },
 
-                return null;
-            },
-
-            getCategoryLevel(categoryElement) {
-                // Calculate the nesting level of a category by counting parent containers
-                let level = 0;
-                let current = categoryElement.closest('.category-wrapper');
-
-                while (current && current.parentElement) {
-                    const parent = current.parentElement.closest('[data-sortable="categories"]');
-
-                    if (parent && parent.dataset.parentId) {
-                        level++;
-                        current = parent.closest('.category-wrapper');
-                    } else {
-                        break;
+                findAndRemoveType(typeId) {
+                    // Search in uncategorized types
+                    const uncategorizedIndex = (this.treeData.uncategorized_types || []).findIndex(t => t.id ===
+                        typeId);
+                    if (uncategorizedIndex !== -1) {
+                        return this.treeData.uncategorized_types.splice(uncategorizedIndex, 1)[0];
                     }
-                }
 
-                return level;
-            },
+                    // Search in categories
+                    return this.findAndRemoveTypeRecursive(typeId, this.treeData.categories || []);
+                },
 
-            getCategoryParentContext(categoryElement) {
-                // Get the parent container ID for a category element
-                const wrapper = categoryElement.closest('.category-wrapper');
-                if (!wrapper) return null;
-
-                // Find the immediate parent sortable container
-                const parentContainer = wrapper.parentElement.closest('[data-sortable="categories"]');
-
-                if (!parentContainer) {
-                    // This shouldn't happen, but treat as root
-                    return 'root';
-                }
-
-                // If the parent container has a parentId, use it; otherwise it's root level
-                const parentId = parentContainer.dataset.parentId;
-                if (!parentId || parentId === '' || parentId === 'null') {
-                    return 'root';
-                }
-
-                return parentId;
-            },
-
-
-
-            updateCategoryInTreeData(categoryId, newParentId, position) {
-                // Find and remove the category from its current position
-                const category = this.findAndRemoveCategory(categoryId);
-                if (!category) return;
-
-                // Update the category's parent_id to reflect its new location
-                category.parent_id = newParentId;
-
-                // Add to new position
-                if (newParentId) {
-                    // Add as child of parent category
-                    const parentCategory = this.findCategoryById(newParentId);
-                    if (parentCategory) {
-                        if (!parentCategory.children) {
-                            parentCategory.children = [];
+                findAndRemoveTypeRecursive(typeId, categories) {
+                    for (const category of categories) {
+                        if (category.types) {
+                            const typeIndex = category.types.findIndex(t => t.id === typeId);
+                            if (typeIndex !== -1) {
+                                return category.types.splice(typeIndex, 1)[0];
+                            }
                         }
-                        if (position.type === 'inside') {
-                            parentCategory.children.push(category);
-                        } else {
-                            parentCategory.children.splice(position.insertIndex, 0, category);
+                        if (category.children) {
+                            const found = this.findAndRemoveTypeRecursive(typeId, category.children);
+                            if (found) return found;
                         }
                     }
-                } else {
-                    // Add to root level
-                    if (!this.treeData.categories) {
-                        this.treeData.categories = [];
+                    return null;
+                },
+
+                async saveChanges() {
+                    if (!this.hasUnsavedChanges || this.isSaving) return;
+
+                    this.isSaving = true;
+
+                    try {
+                        // Prepare the tree data for saving with new items separated
+                        const saveData = this.prepareSaveData();
+                        await $wire.saveChanges(saveData);
+
+                        // The server will clear the cached data, so we can just wait a moment
+                        // and then get the fresh data
+                        await new Promise(resolve => setTimeout(resolve, 100));
+
+                        // Get fresh data from the server
+                        const freshData = await $wire.call('getHierarchicalData');
+                        this.originalTreeData = freshData;
+                        this.treeData = JSON.parse(JSON.stringify(this.originalTreeData));
+                        this.hasUnsavedChanges = false;
+                        this.render();
+                    } catch (error) {
+                        console.error('Save failed:', error);
+                    } finally {
+                        this.isSaving = false;
                     }
-                    if (position.type === 'insert') {
-                        this.treeData.categories.splice(position.insertIndex, 0, category);
-                    } else {
-                        this.treeData.categories.push(category);
-                    }
-                }
-            },
+                },
 
-            updateTypeInTreeData(typeId, newCategoryId, position) {
-                // Find and remove the type from its current position
-                const type = this.findAndRemoveType(typeId);
-                if (!type) return;
+                prepareSaveData() {
+                    const newCategories = [];
+                    const newTypes = [];
 
-                // Update the type's category_id to reflect its new location
-                type.category_id = newCategoryId;
+                    // First, update sort orders for all items based on their current positions
+                    this.updateSortOrders();
 
-                // Add to new position
-                if (newCategoryId) {
-                    // Add to category
-                    const category = this.findCategoryById(newCategoryId);
-                    if (category) {
-                        if (!category.types) {
-                            category.types = [];
-                        }
-                        if (position.type === 'inside') {
-                            category.types.push(type);
-                        } else {
-                            category.types.splice(position.insertIndex, 0, type);
-                        }
-                    }
-                } else {
-                    // Add to uncategorized
-                    if (!this.treeData.uncategorized_types) {
-                        this.treeData.uncategorized_types = [];
-                    }
-                    if (position.type === 'insert') {
-                        this.treeData.uncategorized_types.splice(position.insertIndex, 0, type);
-                    } else {
-                        this.treeData.uncategorized_types.push(type);
-                    }
-                }
-            },
+                    // Extract new categories and types
+                    this.extractNewItems(this.treeData.categories || [], newCategories, newTypes, null);
+                    this.extractNewItemsFromUncategorized(newTypes);
 
-            findCategoryById(categoryId, categories = null) {
-                if (!categories) {
-                    categories = this.treeData.categories || [];
-                }
+                    return {
+                        categories: this.treeData.categories || [],
+                        uncategorized_types: this.treeData.uncategorized_types || [],
+                        new_categories: newCategories,
+                        new_types: newTypes
+                    };
+                },
 
-                for (const category of categories) {
-                    if (category.id === categoryId) {
-                        return category;
-                    }
-                    if (category.children) {
-                        const found = this.findCategoryById(categoryId, category.children);
-                        if (found) return found;
-                    }
-                }
-                return null;
-            },
-
-            findAndRemoveCategory(categoryId) {
-                // Search in root categories
-                const rootIndex = (this.treeData.categories || []).findIndex(c => c.id === categoryId);
-                if (rootIndex !== -1) {
-                    return this.treeData.categories.splice(rootIndex, 1)[0];
-                }
-
-                // Search in nested categories
-                return this.findAndRemoveCategoryRecursive(categoryId, this.treeData.categories || []);
-            },
-
-            findAndRemoveCategoryRecursive(categoryId, categories) {
-                for (const category of categories) {
-                    if (category.children) {
-                        const childIndex = category.children.findIndex(c => c.id === categoryId);
-                        if (childIndex !== -1) {
-                            return category.children.splice(childIndex, 1)[0];
-                        }
-                        const found = this.findAndRemoveCategoryRecursive(categoryId, category.children);
-                        if (found) return found;
-                    }
-                }
-                return null;
-            },
-
-            findAndRemoveType(typeId) {
-                // Search in uncategorized types
-                const uncategorizedIndex = (this.treeData.uncategorized_types || []).findIndex(t => t.id === typeId);
-                if (uncategorizedIndex !== -1) {
-                    return this.treeData.uncategorized_types.splice(uncategorizedIndex, 1)[0];
-                }
-
-                // Search in categories
-                return this.findAndRemoveTypeRecursive(typeId, this.treeData.categories || []);
-            },
-
-            findAndRemoveTypeRecursive(typeId, categories) {
-                for (const category of categories) {
-                    if (category.types) {
-                        const typeIndex = category.types.findIndex(t => t.id === typeId);
-                        if (typeIndex !== -1) {
-                            return category.types.splice(typeIndex, 1)[0];
-                        }
-                    }
-                    if (category.children) {
-                        const found = this.findAndRemoveTypeRecursive(typeId, category.children);
-                        if (found) return found;
-                    }
-                }
-                return null;
-            },
-
-            async saveChanges() {
-                if (!this.hasUnsavedChanges || this.isSaving) return;
-
-                this.isSaving = true;
-
-                try {
-                    // Prepare the tree data for saving with new items separated
-                    const saveData = this.prepareSaveData();
-                    await $wire.saveChanges(saveData);
-
-                    // The server will clear the cached data, so we can just wait a moment
-                    // and then get the fresh data
-                    await new Promise(resolve => setTimeout(resolve, 100));
-
-                    // Get fresh data from the server
-                    const freshData = await $wire.call('getHierarchicalData');
-                    this.originalTreeData = freshData;
-                    this.treeData = JSON.parse(JSON.stringify(this.originalTreeData));
-                    this.hasUnsavedChanges = false;
-                    this.render();
-                } catch (error) {
-                    console.error('Save failed:', error);
-                } finally {
-                    this.isSaving = false;
-                }
-            },
-
-            prepareSaveData() {
-                const newCategories = [];
-                const newTypes = [];
-
-                // First, update sort orders for all items based on their current positions
-                this.updateSortOrders();
-
-                // Extract new categories and types
-                this.extractNewItems(this.treeData.categories || [], newCategories, newTypes, null);
-                this.extractNewItemsFromUncategorized(newTypes);
-
-                return {
-                    categories: this.treeData.categories || [],
-                    uncategorized_types: this.treeData.uncategorized_types || [],
-                    new_categories: newCategories,
-                    new_types: newTypes
-                };
-            },
-
-            updateSortOrders() {
-                // Update sort orders for root categories
-                if (this.treeData.categories) {
-                    this.treeData.categories.forEach((category, index) => {
-                        category.sort = index + 1;
-                        category.parent_id = null; // Ensure root categories have null parent_id
-                        this.updateCategorySortOrders(category);
-                    });
-                }
-
-                // Update sort orders for uncategorized types
-                if (this.treeData.uncategorized_types) {
-                    this.treeData.uncategorized_types.forEach((type, index) => {
-                        type.sort = index + 1;
-                        type.category_id = null; // Ensure uncategorized types have null category_id
-                    });
-                }
-            },
-
-            updateCategorySortOrders(category) {
-                // Update sort orders for types in this category
-                if (category.types) {
-                    category.types.forEach((type, index) => {
-                        type.sort = index + 1;
-                        type.category_id = category.id;
-                    });
-                }
-
-                // Update sort orders for child categories
-                if (category.children) {
-                    category.children.forEach((child, index) => {
-                        child.sort = index + 1;
-                        child.parent_id = category.id;
-                        this.updateCategorySortOrders(child);
-                    });
-                }
-            },
-
-            extractNewItems(categories, newCategories, newTypes, parentId) {
-                categories.forEach((category, index) => {
-                    if (typeof category.id === 'string' && category.id.startsWith('temp_')) {
-                        // This is a new category
-                        newCategories.push({
-                            temp_id: category.id,
-                            name: category.name,
-                            parent_id: parentId,
-                            sort: index + 1
+                updateSortOrders() {
+                    // Update sort orders for root categories
+                    if (this.treeData.categories) {
+                        this.treeData.categories.forEach((category, index) => {
+                            category.sort = index + 1;
+                            category.parent_id = null; // Ensure root categories have null parent_id
+                            this.updateCategorySortOrders(category);
                         });
                     }
 
-                    // Extract new types from this category
+                    // Update sort orders for uncategorized types
+                    if (this.treeData.uncategorized_types) {
+                        this.treeData.uncategorized_types.forEach((type, index) => {
+                            type.sort = index + 1;
+                            type.category_id = null; // Ensure uncategorized types have null category_id
+                        });
+                    }
+                },
+
+                updateCategorySortOrders(category) {
+                    // Update sort orders for types in this category
                     if (category.types) {
-                        category.types.forEach((type, typeIndex) => {
+                        category.types.forEach((type, index) => {
+                            type.sort = index + 1;
+                            type.category_id = category.id;
+                        });
+                    }
+
+                    // Update sort orders for child categories
+                    if (category.children) {
+                        category.children.forEach((child, index) => {
+                            child.sort = index + 1;
+                            child.parent_id = category.id;
+                            this.updateCategorySortOrders(child);
+                        });
+                    }
+                },
+
+                extractNewItems(categories, newCategories, newTypes, parentId) {
+                    categories.forEach((category, index) => {
+                        if (typeof category.id === 'string' && category.id.startsWith('temp_')) {
+                            // This is a new category
+                            newCategories.push({
+                                temp_id: category.id,
+                                name: category.name,
+                                parent_id: parentId,
+                                sort: index + 1
+                            });
+                        }
+
+                        // Extract new types from this category
+                        if (category.types) {
+                            category.types.forEach((type, typeIndex) => {
+                                if (typeof type.id === 'string' && type.id.startsWith('temp_')) {
+                                    // This is a new type
+                                    newTypes.push({
+                                        temp_id: type.id,
+                                        name: type.name,
+                                        category_id: category.id,
+                                        sort: typeIndex + 1
+                                    });
+                                }
+                            });
+                        }
+
+                        // Recursively handle children
+                        if (category.children) {
+                            this.extractNewItems(category.children, newCategories, newTypes, category.id);
+                        }
+                    });
+                },
+
+                extractNewItemsFromUncategorized(newTypes) {
+                    if (this.treeData.uncategorized_types) {
+                        this.treeData.uncategorized_types.forEach((type, index) => {
                             if (typeof type.id === 'string' && type.id.startsWith('temp_')) {
-                                // This is a new type
                                 newTypes.push({
                                     temp_id: type.id,
                                     name: type.name,
-                                    category_id: category.id,
-                                    sort: typeIndex + 1
+                                    category_id: null,
+                                    sort: index + 1
                                 });
                             }
                         });
                     }
+                },
 
-                    // Recursively handle children
-                    if (category.children) {
-                        this.extractNewItems(category.children, newCategories, newTypes, category.id);
-                    }
-                });
-            },
+                discardChanges() {
+                    this.deepCopyTreeData();
+                    this.hasUnsavedChanges = false;
+                    this.categoryInputs = {};
+                    this.typeInputs = {};
+                    this.render();
+                },
 
-            extractNewItemsFromUncategorized(newTypes) {
-                if (this.treeData.uncategorized_types) {
-                    this.treeData.uncategorized_types.forEach((type, index) => {
-                        if (typeof type.id === 'string' && type.id.startsWith('temp_')) {
-                            newTypes.push({
-                                temp_id: type.id,
-                                name: type.name,
-                                category_id: null,
-                                sort: index + 1
-                            });
+                showCategoryInput(categoryId) {
+                    this.categoryInputs[categoryId] = true;
+                    this.render();
+                    setTimeout(() => {
+                        document.getElementById(`child-category-${categoryId}`)?.focus();
+                        this.attachInputKeyHandlers(categoryId, 'category');
+                    }, 50);
+                },
+
+                hideCategoryInput(categoryId) {
+                    this.categoryInputs[categoryId] = false;
+                    this.render();
+                },
+
+                showTypeInput(categoryId) {
+                    this.typeInputs[categoryId] = true;
+                    this.render();
+                    setTimeout(() => {
+                        document.getElementById(`child-type-${categoryId}`)?.focus();
+                        this.attachInputKeyHandlers(categoryId, 'type');
+                    }, 50);
+                },
+
+                hideTypeInput(categoryId) {
+                    this.typeInputs[categoryId] = false;
+                    this.render();
+                },
+
+                attachInputKeyHandlers(categoryId, inputType) {
+                    const input = document.getElementById(`child-${inputType}-${categoryId}`);
+                    if (!input) return;
+
+                    input.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter') {
+                            if (inputType === 'category') {
+                                this.createCategory(categoryId);
+                            } else {
+                                this.createType(categoryId);
+                            }
+                        } else if (e.key === 'Escape') {
+                            if (inputType === 'category') {
+                                this.hideCategoryInput(categoryId);
+                            } else {
+                                this.hideTypeInput(categoryId);
+                            }
                         }
                     });
-                }
-            },
+                },
 
-            discardChanges() {
-                this.deepCopyTreeData();
-                this.hasUnsavedChanges = false;
-                this.categoryInputs = {};
-                this.typeInputs = {};
-                this.render();
-            },
+                createCategory(parentId) {
+                    let name;
 
-            showCategoryInput(categoryId) {
-                this.categoryInputs[categoryId] = true;
-                this.render();
-                setTimeout(() => {
-                    document.getElementById(`child-category-${categoryId}`)?.focus();
-                    this.attachInputKeyHandlers(categoryId, 'category');
-                }, 50);
-            },
+                    if (parentId) {
+                        const input = document.getElementById(`child-category-${parentId}`);
+                        name = input?.value;
+                    } else {
+                        const input = document.getElementById('new-category-name');
+                        name = input?.value;
+                    }
 
-            hideCategoryInput(categoryId) {
-                this.categoryInputs[categoryId] = false;
-                this.render();
-            },
+                    if (!name?.trim()) return;
 
-            showTypeInput(categoryId) {
-                this.typeInputs[categoryId] = true;
-                this.render();
-                setTimeout(() => {
-                    document.getElementById(`child-type-${categoryId}`)?.focus();
-                    this.attachInputKeyHandlers(categoryId, 'type');
-                }, 50);
-            },
+                    // Create new category with temporary ID
+                    const newCategory = {
+                        id: `temp_${this.nextTempId++}`,
+                        name: name.trim(),
+                        type: 'category',
+                        sort: 0,
+                        parent_id: parentId,
+                        children: [],
+                        types: []
+                    };
 
-            hideTypeInput(categoryId) {
-                this.typeInputs[categoryId] = false;
-                this.render();
-            },
-
-            attachInputKeyHandlers(categoryId, inputType) {
-                const input = document.getElementById(`child-${inputType}-${categoryId}`);
-                if (!input) return;
-
-                input.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter') {
-                        if (inputType === 'category') {
-                            this.createCategory(categoryId);
-                        } else {
-                            this.createType(categoryId);
+                    // Add to the appropriate location in tree data
+                    if (parentId) {
+                        const parentCategory = this.findCategoryById(parentId);
+                        if (parentCategory) {
+                            if (!parentCategory.children) {
+                                parentCategory.children = [];
+                            }
+                            parentCategory.children.push(newCategory);
                         }
-                    } else if (e.key === 'Escape') {
-                        if (inputType === 'category') {
-                            this.hideCategoryInput(categoryId);
-                        } else {
-                            this.hideTypeInput(categoryId);
+                    } else {
+                        if (!this.treeData.categories) {
+                            this.treeData.categories = [];
                         }
+                        this.treeData.categories.push(newCategory);
                     }
-                });
-            },
 
-            createCategory(parentId) {
-                let name;
+                    // Mark as changed and re-render
+                    this.markAsChanged();
 
-                if (parentId) {
-                    const input = document.getElementById(`child-category-${parentId}`);
-                    name = input?.value;
-                } else {
-                    const input = document.getElementById('new-category-name');
-                    name = input?.value;
-                }
+                    // Hide input and clear form
+                    if (parentId) {
+                        this.hideCategoryInput(parentId);
+                    } else {
+                        document.getElementById('show-category-btn').style.display = 'block';
+                        document.getElementById('category-input-form').style.display = 'none';
+                        document.getElementById('new-category-name').value = '';
+                    }
 
-                if (!name?.trim()) return;
+                    this.render();
+                },
 
-                // Create new category with temporary ID
-                const newCategory = {
-                    id: `temp_${this.nextTempId++}`,
-                    name: name.trim(),
-                    type: 'category',
-                    sort: 0,
-                    parent_id: parentId,
-                    children: [],
-                    types: []
-                };
+                createType(categoryId) {
+                    let name;
 
-                // Add to the appropriate location in tree data
-                if (parentId) {
-                    const parentCategory = this.findCategoryById(parentId);
-                    if (parentCategory) {
-                        if (!parentCategory.children) {
-                            parentCategory.children = [];
+                    if (categoryId) {
+                        const input = document.getElementById(`child-type-${categoryId}`);
+                        name = input?.value;
+                    } else {
+                        const input = document.getElementById('new-type-name');
+                        name = input?.value;
+                    }
+
+                    if (!name?.trim()) return;
+
+                    // Create new type with temporary ID
+                    const newType = {
+                        id: `temp_${this.nextTempId++}`,
+                        name: name.trim(),
+                        type: 'type',
+                        sort: 0,
+                        category_id: categoryId
+                    };
+
+                    // Add to the appropriate location in tree data
+                    if (categoryId) {
+                        const category = this.findCategoryById(categoryId);
+                        if (category) {
+                            if (!category.types) {
+                                category.types = [];
+                            }
+                            category.types.push(newType);
                         }
-                        parentCategory.children.push(newCategory);
-                    }
-                } else {
-                    if (!this.treeData.categories) {
-                        this.treeData.categories = [];
-                    }
-                    this.treeData.categories.push(newCategory);
-                }
-
-                // Mark as changed and re-render
-                this.markAsChanged();
-
-                // Hide input and clear form
-                if (parentId) {
-                    this.hideCategoryInput(parentId);
-                } else {
-                    document.getElementById('show-category-btn').style.display = 'block';
-                    document.getElementById('category-input-form').style.display = 'none';
-                    document.getElementById('new-category-name').value = '';
-                }
-
-                this.render();
-            },
-
-            createType(categoryId) {
-                let name;
-
-                if (categoryId) {
-                    const input = document.getElementById(`child-type-${categoryId}`);
-                    name = input?.value;
-                } else {
-                    const input = document.getElementById('new-type-name');
-                    name = input?.value;
-                }
-
-                if (!name?.trim()) return;
-
-                // Create new type with temporary ID
-                const newType = {
-                    id: `temp_${this.nextTempId++}`,
-                    name: name.trim(),
-                    type: 'type',
-                    sort: 0,
-                    category_id: categoryId
-                };
-
-                // Add to the appropriate location in tree data
-                if (categoryId) {
-                    const category = this.findCategoryById(categoryId);
-                    if (category) {
-                        if (!category.types) {
-                            category.types = [];
+                    } else {
+                        if (!this.treeData.uncategorized_types) {
+                            this.treeData.uncategorized_types = [];
                         }
-                        category.types.push(newType);
+                        this.treeData.uncategorized_types.push(newType);
                     }
-                } else {
-                    if (!this.treeData.uncategorized_types) {
-                        this.treeData.uncategorized_types = [];
+
+                    // Mark as changed and re-render
+                    this.markAsChanged();
+
+                    // Hide input and clear form
+                    if (categoryId) {
+                        this.hideTypeInput(categoryId);
+                    } else {
+                        document.getElementById('show-type-btn').style.display = 'block';
+                        document.getElementById('type-input-form').style.display = 'none';
+                        document.getElementById('new-type-name').value = '';
                     }
-                    this.treeData.uncategorized_types.push(newType);
+
+                    this.render();
+                },
+
+                escapeHtml(text) {
+                    const div = document.createElement('div');
+                    div.textContent = text;
+                    return div.innerHTML;
                 }
-
-                // Mark as changed and re-render
-                this.markAsChanged();
-
-                // Hide input and clear form
-                if (categoryId) {
-                    this.hideTypeInput(categoryId);
-                } else {
-                    document.getElementById('show-type-btn').style.display = 'block';
-                    document.getElementById('type-input-form').style.display = 'none';
-                    document.getElementById('new-type-name').value = '';
-                }
-
-                this.render();
-            },
-
-            escapeHtml(text) {
-                const div = document.createElement('div');
-                div.textContent = text;
-                return div.innerHTML;
-            }
-        }));
-    </script>
+            }));
+        </script>
     @endscript
 </x-filament-panels::page>
-
