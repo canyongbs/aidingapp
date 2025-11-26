@@ -109,14 +109,6 @@ class ManagePipelines extends ManageRelatedRecords
             ->headerActions([
                 CreateAction::make()
                     ->authorize('create', $this->getOwnerRecord()),
-                // ->using(function (array $data, string $model): Model {
-                //     $project = $this->getOwnerRecord();
-
-                //     $data['user_id'] = auth()->id();
-                //     $data['project_id'] = $project?->getKey();
-
-                //     return $model::create($data);
-                // }),
             ])
             ->filters([
                 Filter::make('createdBy')
