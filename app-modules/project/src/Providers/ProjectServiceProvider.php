@@ -36,6 +36,8 @@
 
 namespace AidingApp\Project\Providers;
 
+use AidingApp\Project\Models\Pipeline;
+use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectFile;
 use AidingApp\Project\Models\ProjectMilestone;
@@ -55,6 +57,8 @@ class ProjectServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Relation::morphMap([
+            'pipeline' => Pipeline::class,
+            'pipeline_stage' => PipelineStage::class,
             'project' => Project::class,
             'project_file' => ProjectFile::class,
             'project_milestone' => ProjectMilestone::class,
