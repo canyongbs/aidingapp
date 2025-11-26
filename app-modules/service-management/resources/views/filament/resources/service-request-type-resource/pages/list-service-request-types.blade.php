@@ -54,77 +54,106 @@
         </div>
 
         {{-- Bottom Action Buttons --}}
-        <div class="flex gap-4">
-            {{-- Add Category Button --}}
-            <div class="flex-1">
-                <button
-                    id="show-category-btn"
-                    type="button"
-                    class="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
-                >
-                    <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                    </svg>
-                    Add Category
-                </button>
-                <div id="category-input-form" class="flex gap-2" style="display: none;">
-                    <input
-                        id="new-category-name"
-                        type="text"
-                        placeholder="Category name..."
-                        class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:text-sm"
-                    />
+        <div class="space-y-4">
+            {{-- Add Category/Type Buttons --}}
+            <div class="flex gap-4">
+                {{-- Add Category Button --}}
+                <div class="flex-1">
                     <button
-                        id="create-category-btn"
+                        id="show-category-btn"
                         type="button"
-                        class="inline-flex items-center rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        class="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
                     >
-                        Create
+                        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                        </svg>
+                        Add Category
                     </button>
+                    <div id="category-input-form" class="flex gap-2" style="display: none;">
+                        <input
+                            id="new-category-name"
+                            type="text"
+                            placeholder="Category name..."
+                            class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:text-sm"
+                        />
+                        <button
+                            id="create-category-btn"
+                            type="button"
+                            class="inline-flex items-center rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        >
+                            Add
+                        </button>
+                        <button
+                            id="cancel-category-btn"
+                            type="button"
+                            class="inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+
+                {{-- Add Type Button --}}
+                <div class="flex-1">
                     <button
-                        id="cancel-category-btn"
+                        id="show-type-btn"
                         type="button"
-                        class="inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+                        class="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
                     >
-                        Cancel
+                        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                        </svg>
+                        Add Type
                     </button>
+                    <div id="type-input-form" class="flex gap-2" style="display: none;">
+                        <input
+                            id="new-type-name"
+                            type="text"
+                            placeholder="Type name..."
+                            class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:text-sm"
+                        />
+                        <button
+                            id="create-type-btn"
+                            type="button"
+                            class="inline-flex items-center rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        >
+                            Add
+                        </button>
+                        <button
+                            id="cancel-type-btn"
+                            type="button"
+                            class="inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+                        >
+                            Cancel
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            {{-- Add Type Button --}}
-            <div class="flex-1">
+            {{-- Save/Discard Buttons --}}
+            <div class="flex gap-4 justify-center">
                 <button
-                    id="show-type-btn"
+                    id="save-changes-btn"
                     type="button"
-                    class="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+                    disabled
+                    class="inline-flex items-center gap-2 rounded-lg bg-primary-600 px-6 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                    <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                     </svg>
-                    Add Type
+                    Save Changes
                 </button>
-                <div id="type-input-form" class="flex gap-2" style="display: none;">
-                    <input
-                        id="new-type-name"
-                        type="text"
-                        placeholder="Type name..."
-                        class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:text-sm"
-                    />
-                    <button
-                        id="create-type-btn"
-                        type="button"
-                        class="inline-flex items-center rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                    >
-                        Create
-                    </button>
-                    <button
-                        id="cancel-type-btn"
-                        type="button"
-                        class="inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
-                    >
-                        Cancel
-                    </button>
-                </div>
+                <button
+                    id="discard-changes-btn"
+                    type="button"
+                    disabled
+                    class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-6 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+                >
+                    <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    Discard Changes
+                </button>
             </div>
         </div>
     </div>
@@ -202,9 +231,13 @@
     @script
     <script>
         Alpine.data('serviceRequestTypeManager', () => ({
+            originalTreeData: @json($this->hierarchicalData),
             treeData: @json($this->hierarchicalData),
             categoryInputs: {},
             typeInputs: {},
+            hasUnsavedChanges: false,
+            isSaving: false,
+            nextTempId: 1,
             dragData: {
                 isDragging: false,
                 draggedElement: null,
@@ -216,25 +249,47 @@
             },
 
             init() {
+                this.deepCopyTreeData();
                 this.render();
                 this.attachEventListeners();
-                this.setupDebouncedHandlers();
                 this.setupDragAndDrop();
+            },
 
-                // Watch for Livewire updates
-                $wire.$watch('hierarchicalData', (value) => {
-                    this.treeData = value;
-                    this.render();
-                    this.setupDragAndDrop();
-                });
+            deepCopyTreeData() {
+                // Make a deep copy of the original data so we can track changes
+                this.treeData = JSON.parse(JSON.stringify(this.originalTreeData));
+            },
+
+            markAsChanged() {
+                this.hasUnsavedChanges = true;
             },
 
             render() {
                 this.renderCategories();
                 this.renderUncategorizedTypes();
+                this.updateSaveButton();
 
                 // Setup drag and drop after all DOM elements are rendered
                 this.setupDragAndDrop();
+            },
+
+            updateSaveButton() {
+                const saveButton = document.getElementById('save-changes-btn');
+                const discardButton = document.getElementById('discard-changes-btn');
+
+                if (saveButton && discardButton) {
+                    if (this.hasUnsavedChanges) {
+                        saveButton.disabled = false;
+                        discardButton.disabled = false;
+                        saveButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                        discardButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                    } else {
+                        saveButton.disabled = true;
+                        discardButton.disabled = true;
+                        saveButton.classList.add('opacity-50', 'cursor-not-allowed');
+                        discardButton.classList.add('opacity-50', 'cursor-not-allowed');
+                    }
+                }
             },
 
             renderCategories() {
@@ -317,7 +372,7 @@
                         ${showCategoryInput ? `
                             <div id="category-input-${category.id}" class="flex gap-2 mt-2" style="margin-left: ${indent + 24}px">
                                 <input id="child-category-${category.id}" type="text" placeholder="Child category name..." class="block w-full rounded-lg border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
-                                <button @click="createCategory('${category.id}')" class="rounded-lg bg-primary-600 px-3 py-1 text-sm text-white hover:bg-primary-700">Create</button>
+                                <button @click="createCategory('${category.id}')" class="rounded-lg bg-primary-600 px-3 py-1 text-sm text-white hover:bg-primary-700">Add</button>
                                 <button @click="hideCategoryInput('${category.id}')" class="rounded-lg border border-gray-300 bg-white px-3 py-1 text-sm text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">Cancel</button>
                             </div>
                         ` : ''}
@@ -325,7 +380,7 @@
                         ${showTypeInput ? `
                             <div id="type-input-${category.id}" class="flex gap-2 mt-2" style="margin-left: ${indent + 24}px">
                                 <input id="child-type-${category.id}" type="text" placeholder="Type name..." class="block w-full rounded-lg border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
-                                <button @click="createType('${category.id}')" class="rounded-lg bg-primary-600 px-3 py-1 text-sm text-white hover:bg-primary-700">Create</button>
+                                <button @click="createType('${category.id}')" class="rounded-lg bg-primary-600 px-3 py-1 text-sm text-white hover:bg-primary-700">Add</button>
                                 <button @click="hideTypeInput('${category.id}')" class="rounded-lg border border-gray-300 bg-white px-3 py-1 text-sm text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">Cancel</button>
                             </div>
                         ` : ''}
@@ -399,6 +454,16 @@
                     } else if (e.key === 'Escape') {
                         document.getElementById('cancel-type-btn')?.click();
                     }
+                });
+
+                // Save changes button
+                document.getElementById('save-changes-btn')?.addEventListener('click', () => {
+                    this.saveChanges();
+                });
+
+                // Discard changes button
+                document.getElementById('discard-changes-btn')?.addEventListener('click', () => {
+                    this.discardChanges();
                 });
             },
 
@@ -769,15 +834,18 @@
             },
 
             determineDropPosition(target, e) {
-                if (target.classList.contains('category-item') && this.dragData.draggedType === 'category') {
+                // Ensure we're working with the actual category-item or type-item element
+                const categoryItem = target.closest('.category-item');
+                const typeItem = target.closest('.type-item');
+
+                if (categoryItem && this.dragData.draggedType === 'category') {
+                    const actualTarget = categoryItem;
                     const draggedLevel = this.getCategoryLevel(this.dragData.draggedElement);
-                    const targetLevel = this.getCategoryLevel(target);
+                    const targetLevel = this.getCategoryLevel(actualTarget);
 
                     // Check if they share the same parent context
                     const draggedParentContext = this.getCategoryParentContext(this.dragData.draggedElement);
-                    const targetParentContext = this.getCategoryParentContext(target);
-
-
+                    const targetParentContext = this.getCategoryParentContext(actualTarget);
 
                     // Determine if insertion lines should be shown
                     let allowInsertion = false;
@@ -800,16 +868,16 @@
 
                     if (allowInsertion) {
                         // Find the container for insertion positioning
-                        const targetWrapper = target.closest('.category-wrapper');
+                        const targetWrapper = actualTarget.closest('.category-wrapper');
                         const container = targetWrapper.parentElement;
 
                         // Check if we're hovering over the center for nesting
-                        const rect = target.getBoundingClientRect();
+                        const rect = actualTarget.getBoundingClientRect();
                         const y = e.clientY - rect.top;
                         const height = rect.height;
 
                         if (y > height * 0.3 && y < height * 0.7) {
-                            return { type: 'inside', target: target };
+                            return { type: 'inside', target: actualTarget };
                         } else {
                             // Calculate insertion position based on mouse Y
                             const insertIndex = this.calculateInsertionPosition(container, e.clientY);
@@ -821,14 +889,15 @@
                         }
                     } else {
                         // Different contexts - only allow nesting
-                        return { type: 'inside', target: target };
+                        return { type: 'inside', target: actualTarget };
                     }
                 }
 
-                if (target.classList.contains('type-item') && this.dragData.draggedType === 'type') {
+                if (typeItem && this.dragData.draggedType === 'type') {
+                    const actualTarget = typeItem;
                     // For types, check if they're in the same category container
                     const draggedContainer = this.dragData.draggedElement.closest('[data-sortable="types"]');
-                    const targetContainer = target.closest('[data-sortable="types"]');
+                    const targetContainer = actualTarget.closest('[data-sortable="types"]');
 
                     if (draggedContainer && targetContainer &&
                         draggedContainer.dataset.categoryId === targetContainer.dataset.categoryId) {
@@ -846,8 +915,8 @@
                 }
 
                 // For category-to-type or type-to-category interactions, only allow nesting types into categories
-                if (target.classList.contains('category-item') && this.dragData.draggedType === 'type') {
-                    return { type: 'inside', target: target };
+                if (categoryItem && this.dragData.draggedType === 'type') {
+                    return { type: 'inside', target: categoryItem };
                 }
 
                 return null; // Invalid drop
@@ -866,88 +935,54 @@
             },
 
             performDrop(target, position) {
-                // Add updating state to the dragged element
-                const draggedElement = this.dragData.draggedElement;
-                if (draggedElement) {
-                    draggedElement.classList.add('updating-order', 'opacity-70', 'relative');
-
-                }
-
                 // Determine the drop operation based on dragged type and target
                 if (this.dragData.draggedType === 'category') {
                     this.handleCategoryDrop(target, position);
                 } else if (this.dragData.draggedType === 'type') {
                     this.handleTypeDrop(target, position);
                 }
+
+                // Mark as changed and re-render
+                this.markAsChanged();
+                this.render();
             },
 
             handleCategoryDrop(target, position) {
                 const categoryId = this.dragData.draggedId;
                 let newParentId = null;
-                let insertIndex = null;
 
                 if (position.type === 'inside') {
-                    // Nesting inside another category
                     newParentId = position.target.dataset.categoryId;
                 } else if (position.type === 'insert') {
-                    // Inserting at specific position
-                    insertIndex = position.insertIndex;
-                    // Determine parent from container's data-parent-id
                     newParentId = position.container.dataset.parentId || null;
-
-                    // Handle empty string as null for root level
                     if (newParentId === '') {
                         newParentId = null;
                     }
                 }
 
-                // Update immediately to move the element in DOM
-                this.updateCategoryPositionInDOM(categoryId, newParentId, position);
-
-                // Reattach event listeners to moved elements
-                this.setupDragAndDrop();
-
-                // Then send the update to backend
-                this.debouncedUpdateCategoriesOrder({
-                    categoryId,
-                    newParentId,
-                    insertIndex
-                });
+                // Update the tree data structure
+                this.updateCategoryInTreeData(categoryId, newParentId, position);
             },
 
             handleTypeDrop(target, position) {
                 const typeId = this.dragData.draggedId;
                 let newCategoryId = null;
-                let insertIndex = null;
 
                 if (position.type === 'inside') {
-                    // Moving type to a category
                     newCategoryId = position.target.dataset.categoryId;
                 } else if (position.type === 'insert') {
-                    // Inserting at specific position within same category
-                    insertIndex = position.insertIndex;
                     newCategoryId = position.container.dataset.categoryId || null;
                 }
 
-                // Update immediately to move the element in DOM
-                this.updateTypePositionInDOM(typeId, newCategoryId, position);
-
-                // Reattach event listeners to moved elements
-                this.setupDragAndDrop();
-
-                // Then send the update to backend
-                this.debouncedUpdateTypesOrder({
-                    typeId,
-                    newCategoryId,
-                    insertIndex
-                });
+                // Update the tree data structure
+                this.updateTypeInTreeData(typeId, newCategoryId, position);
             },
 
             findCategoryParent(categoryId) {
                 // Search through the tree to find the parent of a category
                 const findParent = (categories, targetId, parentId = null) => {
                     for (const category of categories) {
-                        if (category.id == targetId) {
+                        if (category.id === targetId) {
                             return parentId;
                         }
                         if (category.children && category.children.length > 0) {
@@ -965,7 +1000,7 @@
                 // Search through the tree to find which category a type belongs to
                 const findCategory = (categories) => {
                     for (const category of categories) {
-                        if (category.types && category.types.some(type => type.id == typeId)) {
+                        if (category.types && category.types.some(type => type.id === typeId)) {
                             return category.id;
                         }
                         if (category.children && category.children.length > 0) {
@@ -982,160 +1017,11 @@
 
                 // Check uncategorized types
                 if (this.treeData.uncategorized_types &&
-                    this.treeData.uncategorized_types.some(type => type.id == typeId)) {
+                    this.treeData.uncategorized_types.some(type => type.id === typeId)) {
                     return null;
                 }
 
                 return null;
-            },
-
-            calculateInsertIndex(targetId, position, type) {
-                // Calculate where to insert the item based on target and position
-                // This would need to be implemented based on your specific requirements
-                // For now, return null to append at the end
-                return null;
-            },
-
-            updateCategoryPositionInDOM(categoryId, newParentId, position) {
-                // Find the complete category wrapper that includes all children
-                const draggedWrapper = document.querySelector(`[data-category-id="${categoryId}"]`).closest('.category-wrapper');
-                if (!draggedWrapper) {
-                    return;
-                }
-
-                // Calculate the new nesting level based on position type
-                let newLevel = 0;
-                if (position.type === 'inside') {
-                    // Nesting inside - calculate target's level + 1
-                    newLevel = this.getCategoryLevel(position.target) + 1;
-                } else if (position.type === 'insert') {
-                    // Inserting at container level - determine level from parent container
-                    const parentContainer = position.container.closest('[data-sortable="categories"]');
-                    if (parentContainer && parentContainer.dataset.parentId) {
-                        // Find a category in this container to get the level
-                        const siblingCategory = position.container.querySelector('.category-item');
-                        if (siblingCategory) {
-                            newLevel = this.getCategoryLevel(siblingCategory);
-                        }
-                    } else {
-                        // Root level
-                        newLevel = 0;
-                    }
-                }
-
-                // Update the indentation of the dragged element and all its children
-                this.updateCategoryIndentation(draggedWrapper, newLevel);
-
-                // Remove the entire wrapper from current position (this includes all children)
-                draggedWrapper.remove();
-
-                // Find target container and insert based on position type
-                if (position.type === 'inside') {
-                    // Insert as child of target category - always append to the end
-                    const targetWrapper = position.target.closest('.category-wrapper');
-                    let childContainer = targetWrapper.querySelector(`[data-parent-id="${position.target.dataset.categoryId}"]`);
-
-                    if (!childContainer) {
-                        // Create the child container if it doesn't exist
-                        childContainer = document.createElement('div');
-                        childContainer.setAttribute('data-sortable', 'categories');
-                        childContainer.setAttribute('data-parent-id', position.target.dataset.categoryId);
-                        childContainer.className = 'mt-2 space-y-2 min-h-5 p-0.5 rounded-md transition-colors duration-150 ease-in-out';
-
-                        // Insert the container after types but before any existing child categories
-                        const existingChildContainer = targetWrapper.querySelector(`[data-parent-id="${position.target.dataset.categoryId}"]`);
-                        const typesContainer = targetWrapper.querySelector(`[data-sortable="types"]`);
-
-                        if (existingChildContainer) {
-                            // If there's already a child container, we shouldn't be here, but append anyway
-                            targetWrapper.appendChild(childContainer);
-                        } else if (typesContainer) {
-                            // Insert after the types container
-                            typesContainer.insertAdjacentElement('afterend', childContainer);
-                        } else {
-                            // Just append to the category wrapper
-                            targetWrapper.appendChild(childContainer);
-                        }
-                    }
-
-                    // Always append to the end of existing children (entire wrapper with all children)
-                    childContainer.appendChild(draggedWrapper);
-                } else if (position.type === 'insert') {
-                    // Insert at specific index in container
-                    const children = Array.from(position.container.children).filter(child =>
-                        child.classList.contains('category-wrapper')
-                    );
-
-                    if (position.insertIndex >= children.length) {
-                        // Insert at end
-                        position.container.appendChild(draggedWrapper);
-                    } else {
-                        // Insert at specific position
-                        position.container.insertBefore(draggedWrapper, children[position.insertIndex]);
-                    }
-                }
-
-
-            },
-
-            updateTypePositionInDOM(typeId, newCategoryId, position) {
-                const draggedElement = document.querySelector(`[data-type-id="${typeId}"]`);
-                if (!draggedElement) {
-                    return;
-                }
-
-                // Remove from current position
-                draggedElement.remove();
-
-                // Find or create target container based on position type
-                let targetContainer;
-
-                if (position.type === 'inside') {
-                    // Moving to a category
-                    const categoryWrapper = position.target.closest('.category-wrapper');
-                    targetContainer = categoryWrapper.querySelector(`[data-sortable="types"][data-category-id="${position.target.dataset.categoryId}"]`);
-
-                    if (!targetContainer) {
-                        // Create the types container if it doesn't exist
-                        targetContainer = document.createElement('div');
-                        targetContainer.setAttribute('data-sortable', 'types');
-                        targetContainer.setAttribute('data-category-id', position.target.dataset.categoryId);
-                        targetContainer.className = 'mt-2 space-y-1 min-h-4 p-0.5 rounded transition-colors duration-150 ease-in-out';
-
-                        // Calculate the indentation for the types container
-                        const categoryLevel = this.getCategoryLevel(position.target);
-                        const indent = (categoryLevel + 1) * 24;
-                        targetContainer.style.marginLeft = `${indent}px`;
-
-                        // Find the right place to insert it (after the category item but before child categories)
-                        const childCategories = categoryWrapper.querySelector(`[data-parent-id="${position.target.dataset.categoryId}"]`);
-                        if (childCategories) {
-                            categoryWrapper.insertBefore(targetContainer, childCategories);
-                        } else {
-                            categoryWrapper.appendChild(targetContainer);
-                        }
-                    }
-
-                    // Always append to the end when moving to a category
-                    targetContainer.appendChild(draggedElement);
-                } else if (position.type === 'insert') {
-                    // Moving within same container at specific position
-                    targetContainer = position.container;
-
-                    const children = Array.from(targetContainer.children).filter(child =>
-                        child.classList.contains('type-item')
-                    );
-
-                    if (position.insertIndex >= children.length) {
-                        // Insert at end
-                        targetContainer.appendChild(draggedElement);
-                    } else {
-                        // Insert at specific position
-                        targetContainer.insertBefore(draggedElement, children[position.insertIndex]);
-                    }
-                }
-
-
             },
 
             getCategoryLevel(categoryElement) {
@@ -1179,103 +1065,286 @@
                 return parentId;
             },
 
-            updateCategoryIndentation(categoryWrapper, level) {
-                // Update indentation for the main category element
-                const categoryItem = categoryWrapper.querySelector(':scope > .category-item');
-                if (categoryItem) {
-                    const indent = level * 24;
-                    categoryItem.style.marginLeft = `${indent}px`;
+
+
+            updateCategoryInTreeData(categoryId, newParentId, position) {
+                // Find and remove the category from its current position
+                const category = this.findAndRemoveCategory(categoryId);
+                if (!category) return;
+
+                // Update the category's parent_id to reflect its new location
+                category.parent_id = newParentId;
+
+                // Add to new position
+                if (newParentId) {
+                    // Add as child of parent category
+                    const parentCategory = this.findCategoryById(newParentId);
+                    if (parentCategory) {
+                        if (!parentCategory.children) {
+                            parentCategory.children = [];
+                        }
+                        if (position.type === 'inside') {
+                            parentCategory.children.push(category);
+                        } else {
+                            parentCategory.children.splice(position.insertIndex, 0, category);
+                        }
+                    }
+                } else {
+                    // Add to root level
+                    if (!this.treeData.categories) {
+                        this.treeData.categories = [];
+                    }
+                    if (position.type === 'insert') {
+                        this.treeData.categories.splice(position.insertIndex, 0, category);
+                    } else {
+                        this.treeData.categories.push(category);
+                    }
+                }
+            },
+
+            updateTypeInTreeData(typeId, newCategoryId, position) {
+                // Find and remove the type from its current position
+                const type = this.findAndRemoveType(typeId);
+                if (!type) return;
+
+                // Update the type's category_id to reflect its new location
+                type.category_id = newCategoryId;
+
+                // Add to new position
+                if (newCategoryId) {
+                    // Add to category
+                    const category = this.findCategoryById(newCategoryId);
+                    if (category) {
+                        if (!category.types) {
+                            category.types = [];
+                        }
+                        if (position.type === 'inside') {
+                            category.types.push(type);
+                        } else {
+                            category.types.splice(position.insertIndex, 0, type);
+                        }
+                    }
+                } else {
+                    // Add to uncategorized
+                    if (!this.treeData.uncategorized_types) {
+                        this.treeData.uncategorized_types = [];
+                    }
+                    if (position.type === 'insert') {
+                        this.treeData.uncategorized_types.splice(position.insertIndex, 0, type);
+                    } else {
+                        this.treeData.uncategorized_types.push(type);
+                    }
+                }
+            },
+
+            findCategoryById(categoryId, categories = null) {
+                if (!categories) {
+                    categories = this.treeData.categories || [];
                 }
 
-                // Update indentation for direct type containers in this category
-                const directTypeContainers = categoryWrapper.querySelectorAll(':scope > [data-sortable="types"]');
-                directTypeContainers.forEach(container => {
-                    const indent = (level + 1) * 24;
-                    container.style.marginLeft = `${indent}px`;
-                });
-
-                // Recursively update all child categories
-                const childContainers = categoryWrapper.querySelectorAll(':scope > [data-sortable="categories"]');
-                childContainers.forEach(childContainer => {
-                    const childWrappers = childContainer.querySelectorAll(':scope > .category-wrapper');
-                    childWrappers.forEach(childWrapper => {
-                        this.updateCategoryIndentation(childWrapper, level + 1);
-                    });
-                });
+                for (const category of categories) {
+                    if (category.id === categoryId) {
+                        return category;
+                    }
+                    if (category.children) {
+                        const found = this.findCategoryById(categoryId, category.children);
+                        if (found) return found;
+                    }
+                }
+                return null;
             },
 
-            debouncedUpdateCategoriesOrder: null,
-            debouncedUpdateTypesOrder: null,
+            findAndRemoveCategory(categoryId) {
+                // Search in root categories
+                const rootIndex = (this.treeData.categories || []).findIndex(c => c.id === categoryId);
+                if (rootIndex !== -1) {
+                    return this.treeData.categories.splice(rootIndex, 1)[0];
+                }
 
-            setupDebouncedHandlers() {
-                // Debounce category updates
-                this.debouncedUpdateCategoriesOrder = this.debounce((dropData) => {
-                    const { categoryId, newParentId, insertIndex } = dropData;
-
-                    // Get the current order of categories in the target container
-                    const targetContainer = newParentId
-                        ? document.querySelector(`[data-sortable="categories"][data-parent-id="${newParentId}"]`)
-                        : document.querySelector('[data-sortable="categories"][data-parent-id=""]');
-
-                    let orderedIds = [];
-                    if (targetContainer) {
-                        orderedIds = Array.from(targetContainer.children)
-                            .map(child => child.dataset.categoryId)
-                            .filter(Boolean);
-                    }
-
-                    $wire.updateCategoriesOrder(orderedIds, newParentId)
-                        .finally(() => {
-                            const element = document.querySelector(`[data-category-id="${categoryId}"]`);
-                            if (element) {
-                                // Only remove updating classes, preserve normal opacity
-                                element.classList.remove('updating-order', 'opacity-70', 'relative');
-                                // Ensure no drag classes remain
-                                element.classList.remove('opacity-50', 'rotate-1', 'scale-105', 'z-50', 'shadow-2xl');
-                            }
-                        });
-                }, 250);
-
-                // Debounce type updates
-                this.debouncedUpdateTypesOrder = this.debounce((dropData) => {
-                    const { typeId, newCategoryId, insertIndex } = dropData;
-
-                    // Get the current order of types in the target container
-                    const targetContainer = newCategoryId
-                        ? document.querySelector(`[data-sortable="types"][data-category-id="${newCategoryId}"]`)
-                        : document.querySelector('[data-sortable="types"][data-category-id=""]');
-
-                    let orderedIds = [];
-                    if (targetContainer) {
-                        orderedIds = Array.from(targetContainer.children)
-                            .map(child => child.dataset.typeId)
-                            .filter(Boolean);
-                    }
-
-                    $wire.updateTypesOrder(orderedIds, newCategoryId)
-                        .finally(() => {
-                            const element = document.querySelector(`[data-type-id="${typeId}"]`);
-                            if (element) {
-                                // Only remove updating classes, preserve normal opacity
-                                element.classList.remove('updating-order', 'opacity-70', 'relative');
-                                // Ensure no drag classes remain
-                                element.classList.remove('opacity-50', 'rotate-1', 'scale-105', 'z-50', 'shadow-2xl');
-                            }
-                        });
-                }, 250);
+                // Search in nested categories
+                return this.findAndRemoveCategoryRecursive(categoryId, this.treeData.categories || []);
             },
 
-            // Debounce utility function
-            debounce(func, wait) {
-                let timeout;
-                return function executedFunction(...args) {
-                    const later = () => {
-                        clearTimeout(timeout);
-                        func(...args);
-                    };
-                    clearTimeout(timeout);
-                    timeout = setTimeout(later, wait);
+            findAndRemoveCategoryRecursive(categoryId, categories) {
+                for (const category of categories) {
+                    if (category.children) {
+                        const childIndex = category.children.findIndex(c => c.id === categoryId);
+                        if (childIndex !== -1) {
+                            return category.children.splice(childIndex, 1)[0];
+                        }
+                        const found = this.findAndRemoveCategoryRecursive(categoryId, category.children);
+                        if (found) return found;
+                    }
+                }
+                return null;
+            },
+
+            findAndRemoveType(typeId) {
+                // Search in uncategorized types
+                const uncategorizedIndex = (this.treeData.uncategorized_types || []).findIndex(t => t.id === typeId);
+                if (uncategorizedIndex !== -1) {
+                    return this.treeData.uncategorized_types.splice(uncategorizedIndex, 1)[0];
+                }
+
+                // Search in categories
+                return this.findAndRemoveTypeRecursive(typeId, this.treeData.categories || []);
+            },
+
+            findAndRemoveTypeRecursive(typeId, categories) {
+                for (const category of categories) {
+                    if (category.types) {
+                        const typeIndex = category.types.findIndex(t => t.id === typeId);
+                        if (typeIndex !== -1) {
+                            return category.types.splice(typeIndex, 1)[0];
+                        }
+                    }
+                    if (category.children) {
+                        const found = this.findAndRemoveTypeRecursive(typeId, category.children);
+                        if (found) return found;
+                    }
+                }
+                return null;
+            },
+
+            async saveChanges() {
+                if (!this.hasUnsavedChanges || this.isSaving) return;
+
+                this.isSaving = true;
+
+                try {
+                    // Prepare the tree data for saving with new items separated
+                    const saveData = this.prepareSaveData();
+                    await $wire.saveChanges(saveData);
+
+                    // The server will clear the cached data, so we can just wait a moment
+                    // and then get the fresh data
+                    await new Promise(resolve => setTimeout(resolve, 100));
+
+                    // Get fresh data from the server
+                    const freshData = await $wire.call('getHierarchicalData');
+                    this.originalTreeData = freshData;
+                    this.treeData = JSON.parse(JSON.stringify(this.originalTreeData));
+                    this.hasUnsavedChanges = false;
+                    this.render();
+                } catch (error) {
+                    console.error('Save failed:', error);
+                } finally {
+                    this.isSaving = false;
+                }
+            },
+
+            prepareSaveData() {
+                const newCategories = [];
+                const newTypes = [];
+
+                // First, update sort orders for all items based on their current positions
+                this.updateSortOrders();
+
+                // Extract new categories and types
+                this.extractNewItems(this.treeData.categories || [], newCategories, newTypes, null);
+                this.extractNewItemsFromUncategorized(newTypes);
+
+                return {
+                    categories: this.treeData.categories || [],
+                    uncategorized_types: this.treeData.uncategorized_types || [],
+                    new_categories: newCategories,
+                    new_types: newTypes
                 };
+            },
+
+            updateSortOrders() {
+                // Update sort orders for root categories
+                if (this.treeData.categories) {
+                    this.treeData.categories.forEach((category, index) => {
+                        category.sort = index + 1;
+                        category.parent_id = null; // Ensure root categories have null parent_id
+                        this.updateCategorySortOrders(category);
+                    });
+                }
+
+                // Update sort orders for uncategorized types
+                if (this.treeData.uncategorized_types) {
+                    this.treeData.uncategorized_types.forEach((type, index) => {
+                        type.sort = index + 1;
+                        type.category_id = null; // Ensure uncategorized types have null category_id
+                    });
+                }
+            },
+
+            updateCategorySortOrders(category) {
+                // Update sort orders for types in this category
+                if (category.types) {
+                    category.types.forEach((type, index) => {
+                        type.sort = index + 1;
+                        type.category_id = category.id;
+                    });
+                }
+
+                // Update sort orders for child categories
+                if (category.children) {
+                    category.children.forEach((child, index) => {
+                        child.sort = index + 1;
+                        child.parent_id = category.id;
+                        this.updateCategorySortOrders(child);
+                    });
+                }
+            },
+
+            extractNewItems(categories, newCategories, newTypes, parentId) {
+                categories.forEach((category, index) => {
+                    if (typeof category.id === 'string' && category.id.startsWith('temp_')) {
+                        // This is a new category
+                        newCategories.push({
+                            temp_id: category.id,
+                            name: category.name,
+                            parent_id: parentId,
+                            sort: index + 1
+                        });
+                    }
+
+                    // Extract new types from this category
+                    if (category.types) {
+                        category.types.forEach((type, typeIndex) => {
+                            if (typeof type.id === 'string' && type.id.startsWith('temp_')) {
+                                // This is a new type
+                                newTypes.push({
+                                    temp_id: type.id,
+                                    name: type.name,
+                                    category_id: category.id,
+                                    sort: typeIndex + 1
+                                });
+                            }
+                        });
+                    }
+
+                    // Recursively handle children
+                    if (category.children) {
+                        this.extractNewItems(category.children, newCategories, newTypes, category.id);
+                    }
+                });
+            },
+
+            extractNewItemsFromUncategorized(newTypes) {
+                if (this.treeData.uncategorized_types) {
+                    this.treeData.uncategorized_types.forEach((type, index) => {
+                        if (typeof type.id === 'string' && type.id.startsWith('temp_')) {
+                            newTypes.push({
+                                temp_id: type.id,
+                                name: type.name,
+                                category_id: null,
+                                sort: index + 1
+                            });
+                        }
+                    });
+                }
+            },
+
+            discardChanges() {
+                this.deepCopyTreeData();
+                this.hasUnsavedChanges = false;
+                this.categoryInputs = {};
+                this.typeInputs = {};
+                this.render();
             },
 
             showCategoryInput(categoryId) {
@@ -1327,7 +1396,7 @@
                 });
             },
 
-            async createCategory(parentId) {
+            createCategory(parentId) {
                 let name;
 
                 if (parentId) {
@@ -1340,8 +1409,37 @@
 
                 if (!name?.trim()) return;
 
-                await $wire.createCategory(parentId, name.trim());
+                // Create new category with temporary ID
+                const newCategory = {
+                    id: `temp_${this.nextTempId++}`,
+                    name: name.trim(),
+                    type: 'category',
+                    sort: 0,
+                    parent_id: parentId,
+                    children: [],
+                    types: []
+                };
 
+                // Add to the appropriate location in tree data
+                if (parentId) {
+                    const parentCategory = this.findCategoryById(parentId);
+                    if (parentCategory) {
+                        if (!parentCategory.children) {
+                            parentCategory.children = [];
+                        }
+                        parentCategory.children.push(newCategory);
+                    }
+                } else {
+                    if (!this.treeData.categories) {
+                        this.treeData.categories = [];
+                    }
+                    this.treeData.categories.push(newCategory);
+                }
+
+                // Mark as changed and re-render
+                this.markAsChanged();
+
+                // Hide input and clear form
                 if (parentId) {
                     this.hideCategoryInput(parentId);
                 } else {
@@ -1349,9 +1447,11 @@
                     document.getElementById('category-input-form').style.display = 'none';
                     document.getElementById('new-category-name').value = '';
                 }
+
+                this.render();
             },
 
-            async createType(categoryId) {
+            createType(categoryId) {
                 let name;
 
                 if (categoryId) {
@@ -1364,8 +1464,35 @@
 
                 if (!name?.trim()) return;
 
-                await $wire.createType(categoryId, name.trim());
+                // Create new type with temporary ID
+                const newType = {
+                    id: `temp_${this.nextTempId++}`,
+                    name: name.trim(),
+                    type: 'type',
+                    sort: 0,
+                    category_id: categoryId
+                };
 
+                // Add to the appropriate location in tree data
+                if (categoryId) {
+                    const category = this.findCategoryById(categoryId);
+                    if (category) {
+                        if (!category.types) {
+                            category.types = [];
+                        }
+                        category.types.push(newType);
+                    }
+                } else {
+                    if (!this.treeData.uncategorized_types) {
+                        this.treeData.uncategorized_types = [];
+                    }
+                    this.treeData.uncategorized_types.push(newType);
+                }
+
+                // Mark as changed and re-render
+                this.markAsChanged();
+
+                // Hide input and clear form
                 if (categoryId) {
                     this.hideTypeInput(categoryId);
                 } else {
@@ -1373,6 +1500,8 @@
                     document.getElementById('type-input-form').style.display = 'none';
                     document.getElementById('new-type-name').value = '';
                 }
+
+                this.render();
             },
 
             escapeHtml(text) {

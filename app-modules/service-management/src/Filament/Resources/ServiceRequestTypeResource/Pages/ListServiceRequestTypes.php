@@ -56,6 +56,11 @@ class ListServiceRequestTypes extends ListRecords
     #[Computed]
     public function hierarchicalData(): array
     {
+        return $this->getHierarchicalData();
+    }
+
+    public function getHierarchicalData(): array
+    {
         $categories = ServiceRequestTypeCategory::query()
             ->with(['children', 'types'])
             ->whereNull('parent_id')
@@ -102,86 +107,141 @@ class ListServiceRequestTypes extends ListRecords
     }
 
     #[Renderless]
-    public function createCategory(?string $parentId, string $name): void
+    public function saveChanges(array $treeData): void
     {
-        Validator::validate(['name' => $name], [
-            'name' => 'required|string|max:255',
+        Validator::validate(['treeData' => $treeData], [
+            'treeData' => 'required|array',
+            'treeData.categories' => 'array',
+            'treeData.uncategorized_types' => 'array',
+            'treeData.new_categories' => 'array',
+            'treeData.new_types' => 'array',
         ]);
 
-        ServiceRequestTypeCategory::create([
-            'name' => trim($name),
-            'parent_id' => $parentId,
-        ]);
 
+
+        DB::transaction(function () use ($treeData) {
+            // Create new categories first (so we can get their IDs)
+            $newCategoryIds = [];
+            if (!empty($treeData['new_categories'])) {
+                foreach ($treeData['new_categories'] as $newCategory) {
+                    $parentId = null;
+                    if (!empty($newCategory['parent_id']) && $newCategory['parent_id'] !== 'temp') {
+                        $parentId = isset($newCategoryIds[$newCategory['parent_id']])
+                            ? $newCategoryIds[$newCategory['parent_id']]
+                            : $newCategory['parent_id']; // Could be UUID
+                    }
+
+                    $category = ServiceRequestTypeCategory::create([
+                        'name' => trim($newCategory['name']),
+                        'parent_id' => $parentId,
+                        'sort' => $newCategory['sort'],
+                    ]);
+                    $newCategoryIds[$newCategory['temp_id']] = $category->id;
+                }
+            }
+
+            // Create new types
+            if (!empty($treeData['new_types'])) {
+                foreach ($treeData['new_types'] as $newType) {
+                    $categoryId = null;
+                    if (!empty($newType['category_id']) && $newType['category_id'] !== 'temp') {
+                        $categoryId = isset($newCategoryIds[$newType['category_id']])
+                            ? $newCategoryIds[$newType['category_id']]
+                            : $newType['category_id']; // Could be UUID
+                    }
+
+                    $type = ServiceRequestType::create([
+                        'name' => trim($newType['name']),
+                        'category_id' => $categoryId,
+                        'sort' => $newType['sort'],
+                    ]);
+
+                    $type->priorities()->createMany([
+                        ['name' => 'High', 'order' => 1],
+                        ['name' => 'Medium', 'order' => 2],
+                        ['name' => 'Low', 'order' => 3],
+                    ]);
+                }
+            }
+
+            // Update existing categories
+            $this->updateCategoriesRecursive($treeData['categories'] ?? [], null, $newCategoryIds);
+
+            // Update uncategorized types
+            if (!empty($treeData['uncategorized_types'])) {
+                foreach ($treeData['uncategorized_types'] as $index => $type) {
+                    // Update existing types (non-temp IDs)
+                    if (!str_starts_with($type['id'], 'temp_')) {
+                        ServiceRequestType::where('id', $type['id'])->update([
+                            'category_id' => null,
+                            'sort' => $index + 1,
+                        ]);
+                    }
+                }
+            }
+        });
+
+        // Clear the cached hierarchicalData to force refresh
         unset($this->hierarchicalData);
 
         Notification::make()
             ->success()
-            ->title('Category created')
+            ->title('Changes saved successfully')
             ->send();
     }
 
-    #[Renderless]
-    public function createType(?string $categoryId, string $name): void
+    protected function updateCategoriesRecursive(array $categories, $parentId, array $newCategoryIds): void
     {
-        Validator::validate(['name' => $name], [
-            'name' => 'required|string|max:255',
-        ]);
+        foreach ($categories as $index => $category) {
+            $originalCategoryId = $category['id'];
+            $categoryId = $originalCategoryId;
 
-        $type = ServiceRequestType::create([
-            'name' => trim($name),
-            'category_id' => $categoryId,
-        ]);
-
-        $type->priorities()->createMany([
-            ['name' => 'High', 'order' => 1],
-            ['name' => 'Medium', 'order' => 2],
-            ['name' => 'Low', 'order' => 3],
-        ]);
-
-        unset($this->hierarchicalData);
-
-        Notification::make()
-            ->success()
-            ->title('Type created')
-            ->send();
-    }
-
-    #[Renderless]
-    public function updateCategoriesOrder(array $orderedIds, ?string $parentId): void
-    {
-        if (empty($orderedIds)) {
-            return;
-        }
-
-        DB::transaction(function () use ($orderedIds, $parentId) {
-            foreach ($orderedIds as $index => $categoryId) {
-                ServiceRequestTypeCategory::where('id', $categoryId)->update([
-                    'parent_id' => $parentId,
-                    'sort' => $index + 1,
-                ]);
+            // Handle new categories by mapping temp IDs to real IDs
+            if (isset($newCategoryIds[$originalCategoryId])) {
+                $categoryId = $newCategoryIds[$originalCategoryId];
             }
-        });
 
-        unset($this->hierarchicalData);
-    }
-
-    #[Renderless]
-    public function updateTypesOrder(array $orderedIds, ?string $categoryId): void
-    {
-        if (empty($orderedIds)) {
-            return;
-        }
-
-        DB::transaction(function () use ($orderedIds, $categoryId) {
-            foreach ($orderedIds as $index => $typeId) {
-                ServiceRequestType::where('id', $typeId)->update([
-                    'category_id' => $categoryId,
-                    'sort' => $index + 1,
-                ]);
+            // Skip if this is a new category (temp IDs start with 'temp_')
+            if (str_starts_with($originalCategoryId, 'temp_')) {
+                // For new categories, still process their children
+                if (!empty($category['children'])) {
+                    $this->updateCategoriesRecursive($category['children'], $categoryId, $newCategoryIds);
+                }
+                continue;
             }
-        });
 
-        unset($this->hierarchicalData);
+            // Update existing categories (UUIDs or any non-temp IDs)
+            $actualParentId = $parentId;
+
+            // If parent is a new category, map its temp ID to real ID
+            if ($actualParentId && isset($newCategoryIds[$actualParentId])) {
+                $actualParentId = $newCategoryIds[$actualParentId];
+            }
+
+            ServiceRequestTypeCategory::where('id', $categoryId)->update([
+                'parent_id' => $actualParentId,
+                'sort' => $index + 1,
+            ]);
+
+            // Update types in this category
+            if (!empty($category['types'])) {
+                foreach ($category['types'] as $typeIndex => $type) {
+                    // Update existing types (non-temp IDs)
+                    if (!str_starts_with($type['id'], 'temp_')) {
+                        ServiceRequestType::where('id', $type['id'])->update([
+                            'category_id' => $categoryId,
+                            'sort' => $typeIndex + 1,
+                        ]);
+                    }
+                }
+            }
+
+            // Recursively update children
+            if (!empty($category['children'])) {
+                $this->updateCategoriesRecursive($category['children'], $categoryId, $newCategoryIds);
+            }
+        }
     }
+
+
 }
