@@ -171,7 +171,6 @@
                         color="gray"
                         outlined="true"
                         size="sm"
-                        icon="heroicon-m-plus"
                     >
                         Add Category
                     </x-filament::button>
@@ -212,7 +211,6 @@
                         color="gray"
                         outlined="true"
                         size="sm"
-                        icon="heroicon-m-plus"
                     >
                         Add Type
                     </x-filament::button>
