@@ -293,6 +293,7 @@ class ListServiceRequestTypes extends ListRecords
                 'sort' => $type->sort,
                 'category_id' => $type->category_id,
                 'service_requests_count' => $type->service_requests_count ?? 0,
+                'view_url' => ServiceRequestTypeResource::getUrl('view', ['record' => $type]),
             ];
         })->toArray();
     }
