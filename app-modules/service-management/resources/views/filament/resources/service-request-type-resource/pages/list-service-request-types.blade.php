@@ -390,8 +390,11 @@
                     this.renderUncategorizedTypes();
                     this.updateSaveButton();
 
-                    // Setup drag and drop after all DOM elements are rendered
-                    this.setupDragAndDrop();
+                    // Only setup drag and drop if we're not currently dragging
+                    // to avoid attaching duplicate event listeners during a drag operation
+                    if (!this.dragData.isDragging) {
+                        this.setupDragAndDrop();
+                    }
                 },
 
                 updateSaveButton() {
@@ -834,6 +837,12 @@
                         this.dragData.ghostElement.remove();
                         this.dragData.ghostElement = null;
                     }
+
+                    // Re-setup drag and drop handlers after the DOM has been updated
+                    // Use setTimeout to run after the current event loop completes
+                    setTimeout(() => {
+                        this.setupDragAndDrop();
+                    }, 100);
                 },
 
                 handleDragOver(e) {
@@ -875,14 +884,12 @@
 
                 handleDrop(e) {
                     e.preventDefault();
-
+                    e.stopPropagation(); // Prevent event from bubbling to parent elements
 
                     if (!this.dragData.isDragging) return;
 
                     const dropTarget = e.currentTarget;
                     const dropPosition = this.determineDropPosition(dropTarget, e);
-
-
 
                     // If no valid drop position, cancel the drop
                     if (!dropPosition) {
@@ -994,12 +1001,28 @@
                     // Remove any existing insertion lines
                     this.cleanupInsertionLines();
 
-                    // Get all children of the container
-                    const children = Array.from(container.children).filter(child =>
+                    // Get all children of the container, excluding the dragged element
+                    let children = Array.from(container.children).filter(child =>
                         !child.classList.contains('insertion-line') &&
                         (child.classList.contains('category-wrapper') || child.classList.contains(
                             'category-item') || child.classList.contains('type-item'))
                     );
+
+                    // Exclude the currently dragged element from the children list
+                    const draggedElement = this.dragData.draggedElement;
+                    if (draggedElement) {
+                        children = children.filter(child => {
+                            // For types, check data-type-id
+                            if (this.dragData.draggedType === 'type') {
+                                return child.dataset.typeId !== this.dragData.draggedId;
+                            }
+                            // For categories, check the wrapper's data-category-id
+                            if (this.dragData.draggedType === 'category') {
+                                return child.dataset.categoryId !== this.dragData.draggedId;
+                            }
+                            return true;
+                        });
+                    }
 
                     // Calculate the Y position for the insertion line
                     let yPosition = 0;
@@ -1029,8 +1052,6 @@
                     line.className = 'insertion-line drop-line';
                     line.style.top = yPosition + 'px';
 
-
-
                     container.appendChild(line);
                 },
 
@@ -1039,11 +1060,32 @@
                 },
 
                 calculateInsertionPosition(container, mouseY) {
-                    const children = Array.from(container.children).filter(child =>
+                    // Get all valid children from the container
+                    let children = Array.from(container.children).filter(child =>
                         !child.classList.contains('insertion-line') &&
                         (child.classList.contains('category-wrapper') || child.classList.contains(
                             'category-item') || child.classList.contains('type-item'))
                     );
+
+                    // Filter out the dragged element to get accurate positioning
+                    const draggedElement = this.dragData.draggedElement;
+                    if (draggedElement) {
+                        children = children.filter(child => {
+                            // For types, compare data-type-id
+                            if (this.dragData.draggedType === 'type') {
+                                const childId = String(child.dataset.typeId || '');
+                                const draggedId = String(this.dragData.draggedId || '');
+                                return childId !== draggedId;
+                            }
+                            // For categories, compare data-category-id on the wrapper
+                            if (this.dragData.draggedType === 'category') {
+                                const childId = String(child.dataset.categoryId || '');
+                                const draggedId = String(this.dragData.draggedId || '');
+                                return childId !== draggedId;
+                            }
+                            return true;
+                        });
+                    }
 
                     if (children.length === 0) {
                         return 0;
@@ -1311,11 +1353,14 @@
                 },
 
                 updateCategoryInTreeData(categoryId, newParentId, position) {
+                    // Remove the category from its current location
                     const category = this.findAndRemoveCategory(categoryId);
                     if (!category) return;
 
                     category.parent_id = newParentId;
 
+                    // The insertIndex from calculateInsertionPosition is already correct
+                    // because it excluded the dragged element from the calculation
                     if (newParentId) {
                         const parentCategory = this.findCategoryById(newParentId);
                         if (parentCategory) {
@@ -1337,11 +1382,14 @@
                 },
 
                 updateTypeInTreeData(typeId, newCategoryId, position) {
+                    // Remove the type from its current location
                     const type = this.findAndRemoveType(typeId);
                     if (!type) return;
 
                     type.category_id = newCategoryId;
 
+                    // The insertIndex from calculateInsertionPosition is already correct
+                    // because it excluded the dragged element from the calculation
                     if (newCategoryId) {
                         const category = this.findCategoryById(newCategoryId);
                         if (category) {
