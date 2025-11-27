@@ -610,6 +610,31 @@
                             el.addEventListener('dragenter', el._dragEnterHandler);
                             el.addEventListener('dragleave', el._dragLeaveHandler);
                         });
+
+                        document.querySelectorAll('[data-sortable="types"]').forEach(container => {
+                            if (container._dragOverHandler) {
+                                container.removeEventListener('dragover', container._dragOverHandler);
+                            }
+                            if (container._dropHandler) {
+                                container.removeEventListener('drop', container._dropHandler);
+                            }
+                            if (container._dragEnterHandler) {
+                                container.removeEventListener('dragenter', container._dragEnterHandler);
+                            }
+                            if (container._dragLeaveHandler) {
+                                container.removeEventListener('dragleave', container._dragLeaveHandler);
+                            }
+
+                            container._dragOverHandler = this.handleDragOver.bind(this);
+                            container._dropHandler = this.handleDrop.bind(this);
+                            container._dragEnterHandler = this.handleDragEnter.bind(this);
+                            container._dragLeaveHandler = this.handleDragLeave.bind(this);
+
+                            container.addEventListener('dragover', container._dragOverHandler);
+                            container.addEventListener('drop', container._dropHandler);
+                            container.addEventListener('dragenter', container._dragEnterHandler);
+                            container.addEventListener('dragleave', container._dragLeaveHandler);
+                        });
                     }, 100);
                 },
 
@@ -1008,13 +1033,11 @@
 
                     if (typeItem && this.dragData.draggedType === 'type') {
                         const actualTarget = typeItem;
-                        // For types, check if they're in the same category container
                         const draggedContainer = this.dragData.draggedElement.closest('[data-sortable="types"]');
                         const targetContainer = actualTarget.closest('[data-sortable="types"]');
 
                         if (draggedContainer && targetContainer &&
                             draggedContainer.dataset.categoryId === targetContainer.dataset.categoryId) {
-                            // Same category container - allow insertion
                             const insertIndex = this.calculateInsertionPosition(targetContainer, e.clientY);
                             return {
                                 type: 'insert',
@@ -1022,12 +1045,33 @@
                                 insertIndex: insertIndex
                             };
                         } else {
-                            // Different categories - don't allow type-to-type drops across categories
                             return null;
                         }
                     }
 
-                    // For category-to-type or type-to-category interactions, only allow nesting types into categories
+                    if (this.dragData.draggedType === 'type') {
+                        const typeContainer = target.closest('[data-sortable="types"]');
+
+                        if (typeContainer) {
+                            const draggedContainer = this.dragData.draggedElement?.closest('[data-sortable="types"]');
+                            const containerCategoryId = typeContainer.dataset.categoryId || null;
+                            const draggedCategoryId = draggedContainer?.dataset?.categoryId || null;
+                            const sameContainer = draggedContainer === typeContainer;
+                            const targetIsUncategorized = !typeContainer.dataset.categoryId;
+
+                            if (sameContainer || targetIsUncategorized) {
+                                const insertIndex = this.calculateInsertionPosition(typeContainer, e.clientY);
+                                return {
+                                    type: 'insert',
+                                    container: typeContainer,
+                                    insertIndex,
+                                };
+                            }
+
+                            return null;
+                        }
+                    }
+
                     if (categoryItem && this.dragData.draggedType === 'type') {
                         return {
                             type: 'inside',
