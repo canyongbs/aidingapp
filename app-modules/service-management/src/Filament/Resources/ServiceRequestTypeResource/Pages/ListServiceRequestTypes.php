@@ -106,6 +106,8 @@ class ListServiceRequestTypes extends ListRecords
             'treeData.uncategorized_types' => 'array',
             'treeData.new_categories' => 'array',
             'treeData.new_types' => 'array',
+            'treeData.updated_categories' => 'array',
+            'treeData.updated_types' => 'array',
             'treeData.deleted_categories' => 'array',
             'treeData.deleted_types' => 'array',
         ]);
@@ -153,6 +155,24 @@ class ListServiceRequestTypes extends ListRecords
                         ['name' => 'High', 'order' => 1],
                         ['name' => 'Medium', 'order' => 2],
                         ['name' => 'Low', 'order' => 3],
+                    ]);
+                }
+            }
+
+            // Update renamed categories
+            if (! empty($treeData['updated_categories'])) {
+                foreach ($treeData['updated_categories'] as $updatedCategory) {
+                    ServiceRequestTypeCategory::where('id', $updatedCategory['id'])->update([
+                        'name' => trim($updatedCategory['name']),
+                    ]);
+                }
+            }
+
+            // Update renamed types
+            if (! empty($treeData['updated_types'])) {
+                foreach ($treeData['updated_types'] as $updatedType) {
+                    ServiceRequestType::where('id', $updatedType['id'])->update([
+                        'name' => trim($updatedType['name']),
                     ]);
                 }
             }

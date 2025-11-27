@@ -302,6 +302,8 @@
                 treeData: @json($this->hierarchicalData),
                 categoryInputs: {},
                 typeInputs: {},
+                renamingCategories: {},
+                renamingTypes: {},
                 hasUnsavedChanges: false,
                 isSaving: false,
                 nextTempId: 1,
@@ -327,6 +329,8 @@
                     this.treeData = JSON.parse(JSON.stringify(this.originalTreeData));
                     this.deletedCategories = [];
                     this.deletedTypes = [];
+                    this.renamingCategories = {};
+                    this.renamingTypes = {};
                 },
 
                 markAsChanged() {
@@ -404,6 +408,7 @@
                     const requestCount = typeof type.service_requests_count === 'number' ? type
                         .service_requests_count : 0;
                     const canDelete = requestCount === 0;
+                    const isRenaming = this.renamingTypes[type.id] || false;
 
                     return `<div data-type-id="${type.id}" class="type-item draggable flex items-center gap-2 rounded-lg border border-gray-200 bg-white p-2 dark:border-gray-600 dark:bg-gray-800 transition-all duration-150 ease-out cursor-grab active:cursor-grabbing" draggable="true">
                         <svg class="type-handle h-4 w-4 cursor-grab text-gray-400 opacity-60 transition-all duration-150 ease-in-out hover:opacity-100 hover:text-primary-500 hover:scale-110 active:cursor-grabbing" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -412,13 +417,37 @@
                         <svg class="h-4 w-4 text-primary-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                         </svg>
-                        <span class="flex-1 text-sm text-gray-700 dark:text-gray-300">${this.escapeHtml(type.name)}</span>
+                        ${isRenaming ? `
+                            <input
+                                id="rename-type-${type.id}"
+                                type="text"
+                                value="${this.escapeHtml(type.name)}"
+                                class="flex-1 text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-primary-500 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            />
+                            <button
+                                type="button"
+                                class="text-green-600 hover:text-green-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                                @click.stop="confirmTypeRename('${type.id}')"
+                                id="confirm-rename-type-${type.id}"
+                            >
+                                <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                </svg>
+                            </button>
+                        ` : `
+                            <span class="flex-1 text-sm text-gray-700 dark:text-gray-300">${this.escapeHtml(type.name)}</span>
+                            <button type="button" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" @click.stop="startTypeRename('${type.id}')" title="Rename">
+                                <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                                </svg>
+                            </button>
+                        `}
                         <span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-600 dark:bg-gray-600 dark:text-gray-100">${requestCount}</span>
                         ${canDelete ? `<button type="button" class="text-red-600 hover:text-red-800" @click.stop="stageTypeDeletion('${type.id}')">
-                                                    <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M6 18L18 6" />
-                                                    </svg>
-                                                </button>` : ''}
+                                            <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M6 18L18 6" />
+                                            </svg>
+                                        </button>` : ''}
                     </div>`;
                 },
 
@@ -427,6 +456,7 @@
                     const showCategoryInput = this.categoryInputs[category.id] || false;
                     const showTypeInput = this.typeInputs[category.id] || false;
                     const canAddChildCategory = level < 1;
+                    const isRenaming = this.renamingCategories[category.id] || false;
 
                     return `<div class="category-wrapper" data-category-id="${category.id}">
                         <div class="category-item draggable flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-gray-600 dark:bg-gray-700 transition-all duration-150 ease-out hover:bg-gray-50 hover:-translate-y-px hover:shadow-lg dark:hover:bg-gray-600 cursor-grab active:cursor-grabbing" style="margin-left: ${indent}px" draggable="true" data-category-id="${category.id}">
@@ -436,18 +466,42 @@
                             <svg class="h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
                             </svg>
-                            <span class="flex-1 font-medium text-gray-900 dark:text-white">${this.escapeHtml(category.name)}</span>
+                            ${isRenaming ? `
+                                <input
+                                    id="rename-category-${category.id}"
+                                    type="text"
+                                    value="${this.escapeHtml(category.name)}"
+                                    class="flex-1 font-medium text-gray-900 dark:text-white bg-white dark:bg-gray-600 border border-primary-500 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                />
+                                <button
+                                    type="button"
+                                    class="text-green-600 hover:text-green-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    @click.stop="confirmCategoryRename('${category.id}')"
+                                    id="confirm-rename-category-${category.id}"
+                                >
+                                    <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                    </svg>
+                                </button>
+                            ` : `
+                                <span class="flex-1 font-medium text-gray-900 dark:text-white">${this.escapeHtml(category.name)}</span>
+                                <button type="button" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" @click.stop="startCategoryRename('${category.id}')" title="Rename">
+                                    <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                                    </svg>
+                                </button>
+                            `}
                             ${this.canDeleteCategory(category) ? `<button type="button" class="text-red-600 hover:text-red-800" @click.stop="confirmDeleteCategory('${category.id}')">
-                                                        <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M6 18L18 6" />
-                                                        </svg>
-                                                    </button>` : ''}
+                                                <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M6 18L18 6" />
+                                                </svg>
+                                            </button>` : ''}
                             ${canAddChildCategory ? `
-                                                    <button @click="showCategoryInput('${category.id}')" class="rounded p-1 text-gray-500 hover:bg-gray-200 hover:text-gray-700 dark:hover:bg-gray-600 dark:hover:text-gray-300" title="Add child category">
-                                                        <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 10.5v6m3-3H9m4.06-7.19l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
-                                                        </svg>
-                                                    </button>` : ''}
+                                            <button @click="showCategoryInput('${category.id}')" class="rounded p-1 text-gray-500 hover:bg-gray-200 hover:text-gray-700 dark:hover:bg-gray-600 dark:hover:text-gray-300" title="Add child category">
+                                                <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 10.5v6m3-3H9m4.06-7.19l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
+                                                </svg>
+                                            </button>` : ''}
                             <button @click="showTypeInput('${category.id}')" class="rounded p-1 text-gray-500 hover:bg-gray-200 hover:text-gray-700 dark:hover:bg-gray-600 dark:hover:text-gray-300" title="Add type">
                                 <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
@@ -1347,6 +1401,31 @@
                     return null;
                 },
 
+                findTypeById(typeId) {
+                    // Check uncategorized types first
+                    if (this.treeData.uncategorized_types) {
+                        const type = this.treeData.uncategorized_types.find(t => t.id === typeId);
+                        if (type) return type;
+                    }
+
+                    // Search in categories recursively
+                    const findInCategories = (categories) => {
+                        for (const category of categories) {
+                            if (category.types) {
+                                const type = category.types.find(t => t.id === typeId);
+                                if (type) return type;
+                            }
+                            if (category.children) {
+                                const found = findInCategories(category.children);
+                                if (found) return found;
+                            }
+                        }
+                        return null;
+                    };
+
+                    return findInCategories(this.treeData.categories || []);
+                },
+
                 findAndRemoveCategory(categoryId) {
                     const rootIndex = (this.treeData.categories || []).findIndex(c => c.id === categoryId);
                     if (rootIndex !== -1) {
@@ -1426,6 +1505,8 @@
                 prepareSaveData() {
                     const newCategories = [];
                     const newTypes = [];
+                    const updatedCategories = [];
+                    const updatedTypes = [];
 
                     this.deletedCategories = this.deletedCategories || [];
                     this.deletedTypes = this.deletedTypes || [];
@@ -1433,12 +1514,16 @@
                     this.updateSortOrders();
                     this.extractNewItems(this.treeData.categories || [], newCategories, newTypes, null);
                     this.extractNewItemsFromUncategorized(newTypes);
+                    this.extractUpdatedItems(this.treeData.categories || [], updatedCategories, updatedTypes);
+                    this.extractUpdatedItemsFromUncategorized(updatedTypes);
 
                     return {
                         categories: this.treeData.categories || [],
                         uncategorized_types: this.treeData.uncategorized_types || [],
                         new_categories: newCategories,
                         new_types: newTypes,
+                        updated_categories: updatedCategories,
+                        updated_types: updatedTypes,
                         deleted_categories: this.deletedCategories,
                         deleted_types: this.deletedTypes,
                     };
@@ -1529,6 +1614,99 @@
                             }
                         });
                     }
+                },
+
+                extractUpdatedItems(categories, updatedCategories, updatedTypes) {
+                    categories.forEach(category => {
+                        // Only check existing categories (not temp ones)
+                        if (!(typeof category.id === 'string' && category.id.startsWith('temp_'))) {
+                            const originalCategory = this.findOriginalCategoryById(category.id);
+                            if (originalCategory && originalCategory.name !== category.name) {
+                                updatedCategories.push({
+                                    id: category.id,
+                                    name: category.name
+                                });
+                            }
+                        }
+
+                        // Check types in this category
+                        if (category.types) {
+                            category.types.forEach(type => {
+                                if (!(typeof type.id === 'string' && type.id.startsWith('temp_'))) {
+                                    const originalType = this.findOriginalTypeById(type.id);
+                                    if (originalType && originalType.name !== type.name) {
+                                        updatedTypes.push({
+                                            id: type.id,
+                                            name: type.name
+                                        });
+                                    }
+                                }
+                            });
+                        }
+
+                        // Recursively handle children
+                        if (category.children) {
+                            this.extractUpdatedItems(category.children, updatedCategories, updatedTypes);
+                        }
+                    });
+                },
+
+                extractUpdatedItemsFromUncategorized(updatedTypes) {
+                    if (this.treeData.uncategorized_types) {
+                        this.treeData.uncategorized_types.forEach(type => {
+                            if (!(typeof type.id === 'string' && type.id.startsWith('temp_'))) {
+                                const originalType = this.findOriginalTypeById(type.id);
+                                if (originalType && originalType.name !== type.name) {
+                                    updatedTypes.push({
+                                        id: type.id,
+                                        name: type.name
+                                    });
+                                }
+                            }
+                        });
+                    }
+                },
+
+                findOriginalCategoryById(categoryId, categories = null) {
+                    if (!categories) {
+                        categories = this.originalTreeData.categories || [];
+                    }
+
+                    for (const category of categories) {
+                        if (category.id === categoryId) {
+                            return category;
+                        }
+                        if (category.children) {
+                            const found = this.findOriginalCategoryById(categoryId, category.children);
+                            if (found) return found;
+                        }
+                    }
+                    return null;
+                },
+
+                findOriginalTypeById(typeId) {
+                    // Check uncategorized types first
+                    if (this.originalTreeData.uncategorized_types) {
+                        const type = this.originalTreeData.uncategorized_types.find(t => t.id === typeId);
+                        if (type) return type;
+                    }
+
+                    // Search in categories recursively
+                    const findInCategories = (categories) => {
+                        for (const category of categories) {
+                            if (category.types) {
+                                const type = category.types.find(t => t.id === typeId);
+                                if (type) return type;
+                            }
+                            if (category.children) {
+                                const found = findInCategories(category.children);
+                                if (found) return found;
+                            }
+                        }
+                        return null;
+                    };
+
+                    return findInCategories(this.originalTreeData.categories || []);
                 },
 
                 discardChanges() {
@@ -1784,6 +1962,112 @@
                     this.render();
                 },
 
+                startTypeRename(typeId) {
+                    this.renamingTypes[typeId] = true;
+                    this.render();
+                    setTimeout(() => {
+                        const input = document.getElementById(`rename-type-${typeId}`);
+                        const confirmBtn = document.getElementById(`confirm-rename-type-${typeId}`);
+
+                        if (input) {
+                            input.focus();
+                            input.select();
+
+                            // Add input event listener for real-time validation
+                            input.addEventListener('input', (e) => {
+                                if (confirmBtn) {
+                                    confirmBtn.disabled = !e.target.value.trim();
+                                }
+                            });
+
+                            // Add keydown listener for Enter and Escape
+                            input.addEventListener('keydown', (e) => {
+                                if (e.key === 'Enter' && input.value.trim()) {
+                                    this.confirmTypeRename(typeId);
+                                } else if (e.key === 'Escape') {
+                                    this.cancelTypeRename(typeId);
+                                }
+                            });
+                        }
+                    }, 50);
+                },
+
+                confirmTypeRename(typeId) {
+                    const input = document.getElementById(`rename-type-${typeId}`);
+                    const newName = input?.value.trim();
+
+                    if (!newName) {
+                        return;
+                    }
+
+                    const type = this.findTypeById(typeId);
+                    if (type && type.name !== newName) {
+                        type.name = newName;
+                        this.markAsChanged();
+                    }
+
+                    this.renamingTypes[typeId] = false;
+                    this.render();
+                },
+
+                cancelTypeRename(typeId) {
+                    this.renamingTypes[typeId] = false;
+                    this.render();
+                },
+
+                startCategoryRename(categoryId) {
+                    this.renamingCategories[categoryId] = true;
+                    this.render();
+                    setTimeout(() => {
+                        const input = document.getElementById(`rename-category-${categoryId}`);
+                        const confirmBtn = document.getElementById(`confirm-rename-category-${categoryId}`);
+
+                        if (input) {
+                            input.focus();
+                            input.select();
+
+                            // Add input event listener for real-time validation
+                            input.addEventListener('input', (e) => {
+                                if (confirmBtn) {
+                                    confirmBtn.disabled = !e.target.value.trim();
+                                }
+                            });
+
+                            // Add keydown listener for Enter and Escape
+                            input.addEventListener('keydown', (e) => {
+                                if (e.key === 'Enter' && input.value.trim()) {
+                                    this.confirmCategoryRename(categoryId);
+                                } else if (e.key === 'Escape') {
+                                    this.cancelCategoryRename(categoryId);
+                                }
+                            });
+                        }
+                    }, 50);
+                },
+
+                confirmCategoryRename(categoryId) {
+                    const input = document.getElementById(`rename-category-${categoryId}`);
+                    const newName = input?.value.trim();
+
+                    if (!newName) {
+                        return;
+                    }
+
+                    const category = this.findCategoryById(categoryId);
+                    if (category && category.name !== newName) {
+                        category.name = newName;
+                        this.markAsChanged();
+                    }
+
+                    this.renamingCategories[categoryId] = false;
+                    this.render();
+                },
+
+                cancelCategoryRename(categoryId) {
+                    this.renamingCategories[categoryId] = false;
+                    this.render();
+                },
+
                 escapeHtml(text) {
                     const div = document.createElement('div');
                     div.textContent = text;
@@ -1793,3 +2077,4 @@
         </script>
     @endscript
 </x-filament-panels::page>
+
