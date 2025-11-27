@@ -55,6 +55,12 @@ class ListServiceRequestTypes extends ListRecords
     protected static string $view = 'service-management::filament.resources.service-request-type-resource.pages.list-service-request-types';
 
     #[Computed]
+    public function canEdit(): bool
+    {
+        return auth()->user()->can('updateAny', ServiceRequestType::class);
+    }
+
+    #[Computed]
     public function hierarchicalData(): array
     {
         return $this->getHierarchicalData();

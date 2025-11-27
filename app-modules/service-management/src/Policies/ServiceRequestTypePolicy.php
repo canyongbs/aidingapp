@@ -93,6 +93,14 @@ class ServiceRequestTypePolicy
         );
     }
 
+    public function updateAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: 'settings.*.update',
+            denyResponse: 'You do not have permissions to update this service request type.'
+        );
+    }
+
     public function delete(Authenticatable $authenticatable, ServiceRequestType $serviceRequestType): Response
     {
         return $authenticatable->canOrElse(
