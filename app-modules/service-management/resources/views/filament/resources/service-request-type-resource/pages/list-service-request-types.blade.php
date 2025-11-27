@@ -40,7 +40,7 @@
     'fi-resource-' . str_replace('/', '-', $this->getResource()::getSlug()),
 ])>
     <div
-        class="space-y-6"
+        class="flex flex-col gap-6"
         id="service-request-type-manager"
         wire:ignore
         x-data="serviceRequestTypeManager"
@@ -80,56 +80,32 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
-                    <button
-                        class="inline-flex items-center gap-2 rounded-lg bg-primary-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                        @click="saveChanges()"
-                        :disabled="isSaving"
-                    >
-                        <svg
-                            class="h-5 w-5"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke-width="1.5"
-                            stroke="currentColor"
+                    <div x-data="{ saving: false }" x-init="$watch('isSaving', value => saving = value)">
+                        <x-filament::button
+                            @click="saveChanges()"
+                            x-bind:disabled="isSaving"
+                            icon="heroicon-m-arrow-down-tray"
+                            size="sm"
                         >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"
-                            />
-                        </svg>
-                        <span x-text="isSaving ? 'Saving...' : 'Save Changes'"></span>
-                    </button>
-                    <button
-                        class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-all hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+                            <span x-text="isSaving ? 'Saving...' : 'Save Changes'"></span>
+                        </x-filament::button>
+                    </div>
+
+                    <x-filament::button
                         @click="discardChanges()"
-                        :disabled="isSaving"
+                        x-bind:disabled="isSaving"
+                        color="gray"
+                        icon="heroicon-m-x-mark"
+                        size="sm"
                     >
-                        <svg
-                            class="h-4 w-4"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke-width="1.5"
-                            stroke="currentColor"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="M6 18L18 6M6 6l12 12"
-                            />
-                        </svg>
                         Discard
-                    </button>
+                    </x-filament::button>
                 </div>
             </div>
         </div>
 
         {{-- Hierarchical Tree --}}
-        <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-            <h2 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Service Request Types & Categories</h2>
-
+        <div>
             <div class="space-y-2">
                 {{-- Uncategorized Types (at top) --}}
                 <div
@@ -150,161 +126,93 @@
         </div>
 
         {{-- Bottom Action Buttons --}}
-        <div
-            class="space-y-4"
-            x-show="canEdit"
-        >
-            {{-- Add Category/Type Buttons --}}
-            <div class="flex gap-4">
+        <div x-show="canEdit" class="flex flex-wrap items-center gap-4">
+            {{-- Save/Discard Buttons (Left) --}}
+            <div class="flex gap-3 shrink-0" x-show="hasUnsavedChanges">
+                <x-filament::button
+                    id="save-changes-btn"
+                    type="button"
+                    size="sm"
+                    icon="heroicon-m-check"
+                    x-bind:disabled="isSaving"
+                    @click="saveChanges()"
+                >
+                    <span x-text="isSaving ? 'Saving...' : 'Save Changes'"></span>
+                </x-filament::button>
+
+                <x-filament::button
+                    id="discard-changes-btn"
+                    type="button"
+                    color="gray"
+                    size="sm"
+                    icon="heroicon-m-x-mark"
+                    x-bind:disabled="isSaving"
+                    @click="discardChanges()"
+                >
+                    Discard Changes
+                </x-filament::button>
+            </div>
+
+            {{-- Spacer to push Add buttons to the right --}}
+            <div class="flex-1"></div>
+
+            {{-- Add Category/Type Buttons (Right) --}}
+            <div class="flex shrink-0 gap-3">
                 {{-- Add Category Button --}}
-                <div class="flex-1">
-                    <button
-                        class="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+                <div>
+                    <x-filament::button
                         id="show-category-btn"
                         type="button"
+                        color="gray"
+                        outlined="true"
+                        size="sm"
+                        icon="heroicon-m-plus"
                     >
-                        <svg
-                            class="h-5 w-5"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke-width="1.5"
-                            stroke="currentColor"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="M12 4.5v15m7.5-7.5h-15"
-                            />
-                        </svg>
                         Add Category
-                    </button>
-                    <div
-                        class="flex gap-2"
-                        id="category-input-form"
-                        style="display: none;"
-                    >
+                    </x-filament::button>
+                    <div class="mt-2 flex gap-2" id="category-input-form" style="display: none;">
                         <input
                             class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:text-sm"
                             id="new-category-name"
                             type="text"
                             placeholder="Category name..."
                         />
-                        <button
-                            class="inline-flex items-center rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                            id="create-category-btn"
-                            type="button"
-                        >
+                        <x-filament::button id="create-category-btn" type="button" size="sm">
                             Add
-                        </button>
-                        <button
-                            class="inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
-                            id="cancel-category-btn"
-                            type="button"
-                        >
+                        </x-filament::button>
+                        <x-filament::button id="cancel-category-btn" type="button" color="gray" size="sm">
                             Cancel
-                        </button>
+                        </x-filament::button>
                     </div>
                 </div>
 
                 {{-- Add Type Button --}}
-                <div class="flex-1">
-                    <button
-                        class="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+                <div>
+                    <x-filament::button
                         id="show-type-btn"
                         type="button"
+                        color="gray"
+                        outlined="true"
+                        size="sm"
+                        icon="heroicon-m-plus"
                     >
-                        <svg
-                            class="h-5 w-5"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke-width="1.5"
-                            stroke="currentColor"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="M12 4.5v15m7.5-7.5h-15"
-                            />
-                        </svg>
                         Add Type
-                    </button>
-                    <div
-                        class="flex gap-2"
-                        id="type-input-form"
-                        style="display: none;"
-                    >
+                    </x-filament::button>
+                    <div class="mt-2 flex gap-2" id="type-input-form" style="display: none;">
                         <input
                             class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:text-sm"
                             id="new-type-name"
                             type="text"
                             placeholder="Type name..."
                         />
-                        <button
-                            class="inline-flex items-center rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                            id="create-type-btn"
-                            type="button"
-                        >
+                        <x-filament::button id="create-type-btn" type="button" size="sm">
                             Add
-                        </button>
-                        <button
-                            class="inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
-                            id="cancel-type-btn"
-                            type="button"
-                        >
+                        </x-filament::button>
+                        <x-filament::button id="cancel-type-btn" type="button" color="gray" size="sm">
                             Cancel
-                        </button>
+                        </x-filament::button>
                     </div>
                 </div>
-            </div>
-
-            {{-- Save/Discard Buttons --}}
-            <div class="flex justify-center gap-4">
-                <button
-                    class="inline-flex items-center gap-2 rounded-lg bg-primary-600 px-6 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:cursor-not-allowed disabled:opacity-50"
-                    id="save-changes-btn"
-                    type="button"
-                    disabled
-                >
-                    <svg
-                        class="h-4 w-4"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke-width="1.5"
-                        stroke="currentColor"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M4.5 12.75l6 6 9-13.5"
-                        />
-                    </svg>
-                    Save Changes
-                </button>
-                <button
-                    class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-6 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
-                    id="discard-changes-btn"
-                    type="button"
-                    disabled
-                >
-                    <svg
-                        class="h-4 w-4"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke-width="1.5"
-                        stroke="currentColor"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M6 18L18 6M6 6l12 12"
-                        />
-                    </svg>
-                    Discard Changes
-                </button>
             </div>
         </div>
     </div>
@@ -435,22 +343,8 @@
                 },
 
                 updateSaveButton() {
-                    const saveButton = document.getElementById('save-changes-btn');
-                    const discardButton = document.getElementById('discard-changes-btn');
-
-                    if (saveButton && discardButton) {
-                        if (this.hasUnsavedChanges) {
-                            saveButton.disabled = false;
-                            discardButton.disabled = false;
-                            saveButton.classList.remove('opacity-50', 'cursor-not-allowed');
-                            discardButton.classList.remove('opacity-50', 'cursor-not-allowed');
-                        } else {
-                            saveButton.disabled = true;
-                            discardButton.disabled = true;
-                            saveButton.classList.add('opacity-50', 'cursor-not-allowed');
-                            discardButton.classList.add('opacity-50', 'cursor-not-allowed');
-                        }
-                    }
+                    // Buttons are now reactive using x-bind:disabled in Alpine.js
+                    // No need to manually update DOM
                 },
 
                 renderCategories() {
