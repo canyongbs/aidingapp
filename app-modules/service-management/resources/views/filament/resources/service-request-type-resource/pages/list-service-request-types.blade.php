@@ -126,15 +126,16 @@
         </div>
 
         {{-- Bottom Action Buttons --}}
-        <div x-show="canEdit" class="flex flex-wrap items-center gap-4">
+        <div x-show="canEdit" class="flex items-center justify-between gap-4">
             {{-- Save/Discard Buttons (Left) --}}
-            <div class="flex gap-3 shrink-0" x-show="hasUnsavedChanges">
+            <div class="flex gap-3 shrink-0">
                 <x-filament::button
                     id="save-changes-btn"
                     type="button"
                     size="sm"
                     icon="heroicon-m-check"
                     x-bind:disabled="isSaving"
+                    x-show="hasUnsavedChanges"
                     @click="saveChanges()"
                 >
                     <span x-text="isSaving ? 'Saving...' : 'Save Changes'"></span>
@@ -147,14 +148,12 @@
                     size="sm"
                     icon="heroicon-m-x-mark"
                     x-bind:disabled="isSaving"
+                    x-show="hasUnsavedChanges"
                     @click="discardChanges()"
                 >
                     Discard Changes
                 </x-filament::button>
             </div>
-
-            {{-- Spacer to push Add buttons to the right --}}
-            <div class="flex-1"></div>
 
             {{-- Add Category/Type Buttons (Right) --}}
             <div class="flex shrink-0 gap-3">
