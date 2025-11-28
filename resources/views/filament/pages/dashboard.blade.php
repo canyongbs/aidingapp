@@ -33,10 +33,7 @@
 --}}
 @php
     use AidingApp\Authorization\Filament\Widgets\UnlicensedNotice;
-    use App\Filament\Widgets\ListServiceRequestTableWidgets;
-    use App\Filament\Widgets\ServiceRequestDonutChart;
-    use App\Filament\Widgets\ServiceRequestLineChart;
-    use App\Filament\Widgets\ServiceRequestWidget;
+    use App\Filament\Widgets\Notifications;
     use App\Settings\DisplaySettings;
     use Carbon\Carbon;
 @endphp
@@ -74,17 +71,7 @@
                     <x-filament-panels::login-version-card />
                     <x-filament-panels::login-resource-portal-card />
                 </div>
-                @livewire(ServiceRequestWidget::class)
-                <div class="flex gap-3">
-                    <div class="w-full md:w-1/2">
-                        @livewire(ServiceRequestLineChart::class)
-                    </div>
-                    <div class="w-full md:w-1/2">
-                        @livewire(ServiceRequestDonutChart::class)
-                    </div>
-                </div>
-
-                @livewire(ListServiceRequestTableWidgets::class)
+                @livewire(Notifications::class)
             @endif
         </div>
     </div>
