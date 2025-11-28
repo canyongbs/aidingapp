@@ -62,8 +62,8 @@
             x-transition:leave-end="opacity-0 -translate-y-2"
         >
             <!-- Responsive layout: column on mobile, row on small+ screens -->
-            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div class="flex-1 flex items-start sm:items-center gap-3">
+            <div class="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+                <div class="flex flex-1 items-start gap-3 sm:items-center">
                     <svg
                         class="h-6 w-6 text-warning-600 dark:text-warning-400"
                         xmlns="http://www.w3.org/2000/svg"
@@ -85,8 +85,8 @@
                     </div>
                 </div>
                 <!-- Buttons: full-width and centered on mobile, aligned to right on sm+ -->
-                <div class="w-full sm:w-auto mt-3 sm:mt-0">
-                    <div class="flex w-full sm:w-auto justify-center sm:justify-end gap-2">
+                <div class="mt-3 w-full sm:mt-0 sm:w-auto">
+                    <div class="flex w-full justify-center gap-2 sm:w-auto sm:justify-end">
                         <div
                             x-data="{ saving: false }"
                             x-init="$watch('isSaving', value => saving = value)"
