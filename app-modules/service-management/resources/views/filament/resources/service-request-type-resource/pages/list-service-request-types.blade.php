@@ -179,7 +179,7 @@
                         Add Category
                     </x-filament::button>
                     <div
-                        class="mt-2 flex gap-2"
+                        class="flex gap-2"
                         id="category-input-form"
                         style="display: none;"
                     >
@@ -187,7 +187,7 @@
                             class="block h-8 w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:text-sm"
                             id="new-category-name"
                             type="text"
-                            placeholder="Category name..."
+                            placeholder="Name of new category"
                         />
                         <x-filament::button
                             id="create-category-btn"
@@ -219,7 +219,7 @@
                         Add Type
                     </x-filament::button>
                     <div
-                        class="mt-2 flex gap-2"
+                        class="flex gap-2"
                         id="type-input-form"
                         style="display: none;"
                     >
@@ -227,7 +227,7 @@
                             class="block h-8 w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:text-sm"
                             id="new-type-name"
                             type="text"
-                            placeholder="Type name..."
+                            placeholder="Name of new type"
                         />
                         <x-filament::button
                             id="create-type-btn"
