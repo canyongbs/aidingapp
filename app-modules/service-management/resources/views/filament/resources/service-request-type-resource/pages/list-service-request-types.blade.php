@@ -251,16 +251,17 @@
     </div>
 
     @assets
+        @vite(['app-modules/service-management/resources/js/serviceRequestTypeManager.js'])
+
         <style>
-            /* Custom styles that cannot be replicated with Tailwind */
             .drop-line {
                 position: absolute;
                 left: 0;
                 right: 0;
                 height: 2px;
-                background: rgb(59 130 246);
+                background: rgb(254, 195, 33);
                 border-radius: 1px;
-                box-shadow: 0 0 6px rgba(59, 130, 246, 0.5);
+                box-shadow: 0 0 6px rgba(254, 195, 33, 0.5);
                 z-index: 1000;
                 pointer-events: none;
             }
@@ -272,7 +273,7 @@
                 top: -3px;
                 width: 8px;
                 height: 8px;
-                background: rgb(59 130 246);
+                background: rgb(254, 195, 33);
                 border-radius: 50%;
             }
 
@@ -290,7 +291,7 @@
                 top: 50%;
                 left: 50%;
                 transform: translate(-50%, -50%);
-                background: rgb(59 130 246);
+                background: rgb(254, 195, 33);
                 color: white;
                 padding: 4px 8px;
                 border-radius: 4px;
@@ -312,13 +313,10 @@
                 z-index: 10;
             }
 
-            /* Ensure sortable containers support absolute positioned insertion lines */
             [data-sortable="categories"],
             [data-sortable="types"] {
                 position: relative;
             }
         </style>
-
-        @vite(['app-modules/service-management/resources/js/serviceRequestTypeManager.js'])
     @endassets
 </x-filament-panels::page>
