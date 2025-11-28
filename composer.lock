@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4d0acc1e9dcc45752359df3c7afdc0d5",
+    "content-hash": "16aa651c401ca1b43eb30e08008043fd",
     "packages": [
         {
             "name": "ably/ably-php",
@@ -706,7 +706,7 @@
             "dist": {
                 "type": "path",
                 "url": "app-modules/audit",
-                "reference": "f78a180e6801de09ca727e4c71f8a6230c1ed71c"
+                "reference": "55225385e97f5952a6238a0e20dd25f47ebc4b72"
             },
             "require": {
                 "filament/filament": "^3.2",
@@ -744,7 +744,7 @@
             "dist": {
                 "type": "path",
                 "url": "app-modules/authorization",
-                "reference": "21b2406d9354f5e1043c9019b9717527e2e7314b"
+                "reference": "bbd50a583a50b900036b13eec8871c0786db03a9"
             },
             "require": {
                 "filament/filament": "^3.2",
@@ -780,7 +780,7 @@
             "dist": {
                 "type": "path",
                 "url": "app-modules/contact",
-                "reference": "6bb845a2299d51bd92ed85caced18dbe2f6fbd41"
+                "reference": "3387fae3a854c84cab2a20cce2aea57337ffb1fc"
             },
             "require": {
                 "filament/filament": "^3.2"
@@ -815,7 +815,7 @@
             "dist": {
                 "type": "path",
                 "url": "app-modules/division",
-                "reference": "c60a52cc232c911aff0f93abd662d06b3f41411a"
+                "reference": "9d2f9f4b100e7ab0918d6cb7494a09e64b4d60f2"
             },
             "require": {
                 "filament/filament": "^3.2"
@@ -850,7 +850,7 @@
             "dist": {
                 "type": "path",
                 "url": "app-modules/engagement",
-                "reference": "da8ad3c82fb52c9376be0ee62ca331b8a26baa6c"
+                "reference": "a5f5b279060567e530515956c805bda8df74ceb8"
             },
             "require": {
                 "filament/filament": "^3.2"
@@ -885,7 +885,7 @@
             "dist": {
                 "type": "path",
                 "url": "app-modules/form",
-                "reference": "e8ee2a6be26fe1aa3248e4b1694927eb8e281afa"
+                "reference": "50e01a337dd46a8fdd7088f568742076975137dd"
             },
             "require": {
                 "filament/filament": "^3.2"
@@ -920,7 +920,7 @@
             "dist": {
                 "type": "path",
                 "url": "app-modules/in-app-communication",
-                "reference": "ce3a1fdaa033a1001121a9e7fdd60764c3309aa4"
+                "reference": "ae40fa179010317326e7497de3c116157e0de06b"
             },
             "require": {
                 "filament/filament": "^3.2"
@@ -955,7 +955,7 @@
             "dist": {
                 "type": "path",
                 "url": "app-modules/integration-aws-ses-event-handling",
-                "reference": "d681d767e8f46251d7a473cd12cec781b93cd730"
+                "reference": "8bff794ab7def3d099ec010e4e82eed8c835a658"
             },
             "require": {
                 "filament/filament": "^3.2"
@@ -990,7 +990,7 @@
             "dist": {
                 "type": "path",
                 "url": "app-modules/integration-google-analytics",
-                "reference": "6c666a403c07759a2813994e235c73664440ddcb"
+                "reference": "2298706f46ffc6b8efd389b83ed44e9f8e7a82e0"
             },
             "require": {
                 "filament/filament": "^3.2"
@@ -1025,7 +1025,7 @@
             "dist": {
                 "type": "path",
                 "url": "app-modules/integration-google-recaptcha",
-                "reference": "5e6290d7a6b3ee5980e909a4809c0b4cfcd62112"
+                "reference": "5322d15a76fe16752d124d0b9d2e813e91eef221"
             },
             "require": {
                 "filament/filament": "^3.2"
@@ -1060,7 +1060,7 @@
             "dist": {
                 "type": "path",
                 "url": "app-modules/integration-microsoft-clarity",
-                "reference": "3f070921e96b4719762629a5d781133e06467317"
+                "reference": "d6b75a7f50c76c0df4b853a0bb2b33943a88e372"
             },
             "require": {
                 "filament/filament": "^3.2"
@@ -1132,7 +1132,7 @@
             "dist": {
                 "type": "path",
                 "url": "app-modules/inventory-management",
-                "reference": "fadb5275c22e95bc6a27af793deaa3e09d2c1e89"
+                "reference": "a4dfa25154a6d3d604fc61d9c7de27ef74b78d39"
             },
             "require": {
                 "filament/filament": "^3.2"
@@ -1237,7 +1237,7 @@
             "dist": {
                 "type": "path",
                 "url": "app-modules/portal",
-                "reference": "d00faa3ae2caf3af6a171084df95b4d38ce51999"
+                "reference": "cf05850b4ddbf3726211ce5d8c45327b63d3602f"
             },
             "require": {
                 "filament/filament": "^3.2"
@@ -1342,7 +1342,7 @@
             "dist": {
                 "type": "path",
                 "url": "app-modules/team",
-                "reference": "16efa165ed3394c624223c34372db2af1a4608dd"
+                "reference": "63a9cafc58bc85314eebe6dad1946324b2a80a36"
             },
             "require": {
                 "filament/filament": "^3.2"
@@ -1414,7 +1414,7 @@
             "dist": {
                 "type": "path",
                 "url": "app-modules/timeline",
-                "reference": "b27f41d7cc639f942e0358a44bd12d9a5474458d"
+                "reference": "09730613b6d9af2ae961e9ca568aa5fddc8dca0b"
             },
             "require": {
                 "filament/filament": "^3.2"
@@ -1484,7 +1484,7 @@
             "dist": {
                 "type": "path",
                 "url": "app-modules/contract-management",
-                "reference": "27ab21d11df2aa1dc30f04e2a2e1fcb40fad610d"
+                "reference": "35369c08ba3270c9774052861005a663075f2ce8"
             },
             "require": {
                 "filament/filament": "^3.2"
@@ -1519,7 +1519,7 @@
             "dist": {
                 "type": "path",
                 "url": "app-modules/integration-open-ai",
-                "reference": "fef35dc4c85b6e2d42bbc336a2e9a522f896c21b"
+                "reference": "25768f64691b2405367f27cd0565b3160a14d024"
             },
             "require": {
                 "filament/filament": "^3.2",
@@ -1556,7 +1556,7 @@
             "dist": {
                 "type": "path",
                 "url": "app-modules/license-management",
-                "reference": "a64350690a857101cec5da5d94ec97aa0a2f26fd"
+                "reference": "bf0d06248258a70f26631d4e40160e10fb9aa538"
             },
             "require": {
                 "filament/filament": "^3.2"
@@ -1591,7 +1591,7 @@
             "dist": {
                 "type": "path",
                 "url": "app-modules/project",
-                "reference": "d3e33583549c7d62f8827c5d536f68e0cb469420"
+                "reference": "ba0e1e7213f70fae6f94e3aa201845caacbcc3ea"
             },
             "require": {
                 "filament/filament": "^3.2"
@@ -1626,7 +1626,7 @@
             "dist": {
                 "type": "path",
                 "url": "app-modules/purchasing",
-                "reference": "669737b96696f494114fca5cbc9e08c34057f4be"
+                "reference": "858912e9170da393133435c050808712682226f6"
             },
             "require": {
                 "filament/filament": "^3.2"
@@ -1661,7 +1661,7 @@
             "dist": {
                 "type": "path",
                 "url": "app-modules/report",
-                "reference": "b114593ff853af5cf7d32cd0c1285cd49921a60a"
+                "reference": "25aa0d3448269a3e287a5a7a4928a317bbf5fef9"
             },
             "require": {
                 "filament/filament": "^3.0.0"
@@ -13626,6 +13626,73 @@
                 "source": "https://github.com/sqids/sqids-php/tree/0.5.0"
             },
             "time": "2025-01-05T05:37:48+00:00"
+        },
+        {
+            "name": "staudenmeir/belongs-to-through",
+            "version": "v2.17",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/staudenmeir/belongs-to-through.git",
+                "reference": "e45460f8eecd882e5daea2af8f948d7596c20ba0"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/staudenmeir/belongs-to-through/zipball/e45460f8eecd882e5daea2af8f948d7596c20ba0",
+                "reference": "e45460f8eecd882e5daea2af8f948d7596c20ba0",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/database": "^12.0",
+                "php": "^8.2"
+            },
+            "require-dev": {
+                "barryvdh/laravel-ide-helper": "^3.0",
+                "larastan/larastan": "^3.0",
+                "laravel/framework": "^12.0",
+                "mockery/mockery": "^1.5.1",
+                "orchestra/testbench-core": "^10.0",
+                "phpunit/phpunit": "^11.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Staudenmeir\\BelongsToThrough\\IdeHelperServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Znck\\Eloquent\\": "src/",
+                    "Staudenmeir\\BelongsToThrough\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Rahul Kadyan",
+                    "email": "hi@znck.me"
+                },
+                {
+                    "name": "Jonas Staudenmeir",
+                    "email": "mail@jonas-staudenmeir.de"
+                }
+            ],
+            "description": "Laravel Eloquent BelongsToThrough relationships",
+            "support": {
+                "issues": "https://github.com/staudenmeir/belongs-to-through/issues",
+                "source": "https://github.com/staudenmeir/belongs-to-through/tree/v2.17"
+            },
+            "funding": [
+                {
+                    "url": "https://paypal.me/JonasStaudenmeir",
+                    "type": "custom"
+                }
+            ],
+            "time": "2025-02-20T19:24:03+00:00"
         },
         {
             "name": "staudenmeir/eloquent-has-many-deep",

@@ -89,7 +89,7 @@ test('EditServiceRequestType requires valid data', function ($data, $errors) {
         ->call('save')
         ->assertHasFormErrors($errors);
 
-    assertDatabaseHas(ServiceRequestType::class, $serviceRequestType->toArray());
+    assertDatabaseHas(ServiceRequestType::class, $serviceRequestType->fresh()->toArray());
 })->with(
     [
         'name missing' => [EditServiceRequestTypeRequestFactory::new()->state(['name' => null]), ['name' => 'required']],

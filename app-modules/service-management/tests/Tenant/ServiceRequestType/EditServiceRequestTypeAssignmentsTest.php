@@ -122,7 +122,7 @@ test('EditServiceRequestTypeAssignments requires valid data', function (EditServ
         ->call('save')
         ->assertHasFormErrors($errors);
 
-    assertDatabaseHas(ServiceRequestType::class, $serviceRequestType->toArray());
+    assertDatabaseHas(ServiceRequestType::class, $serviceRequestType->fresh()->toArray());
 })->with(
     [
         'assignment_type is required' => [EditServiceRequestTypeAssignmentsRequestFactory::new()->state(['assignment_type' => null]), ['assignment_type' => 'required']],

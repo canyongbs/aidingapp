@@ -90,6 +90,7 @@
         "spiral/roadrunner-cli": "^2.6",
         "spiral/roadrunner-http": "^3.5",
         "sqids/sqids": "^0.5.0",
+        "staudenmeir/belongs-to-through": "^2.5",
         "staudenmeir/eloquent-has-many-deep": "^1.19",
         "stechstudio/filament-impersonate": "^3.5",
         "tapp/filament-timezone-field": "^3.0",

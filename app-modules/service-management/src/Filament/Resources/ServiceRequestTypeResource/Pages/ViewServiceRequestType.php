@@ -67,6 +67,9 @@ class ViewServiceRequestType extends ViewRecord
                         TextEntry::make('icon')
                             ->state(fn (ServiceRequestType $record): string => str($record->icon)->after('heroicon-o-')->headline()->toString())
                             ->icon(fn (ServiceRequestType $record): string => $record->icon),
+                        TextEntry::make('category.name')
+                            ->label('Category')
+                            ->placeholder('None'),
                         TextEntry::make('form.name')
                             ->label('Form')
                             ->hidden(fn (ServiceRequestType $record) => ! $record->form)

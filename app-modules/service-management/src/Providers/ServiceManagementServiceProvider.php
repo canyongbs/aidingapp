@@ -56,6 +56,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestHistory;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use AidingApp\ServiceManagement\Models\Sla;
@@ -92,6 +93,7 @@ class ServiceManagementServiceProvider extends ServiceProvider
             'service_request_priority' => ServiceRequestPriority::class,
             'service_request_status' => ServiceRequestStatus::class,
             'service_request_type' => ServiceRequestType::class,
+            'service_request_type_category' => ServiceRequestTypeCategory::class,
             'service_request_update' => ServiceRequestUpdate::class,
             'service_request' => ServiceRequest::class,
             'sla' => Sla::class,
