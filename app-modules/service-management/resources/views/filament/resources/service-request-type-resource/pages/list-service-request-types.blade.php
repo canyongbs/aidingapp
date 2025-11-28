@@ -51,7 +51,7 @@
     >
         {{-- Sticky Save Banner --}}
         <div
-            class="sticky top-20 z-50 rounded-lg border-2 border-warning-500 bg-warning-50 p-4 shadow-lg dark:border-warning-400 dark:bg-warning-900"
+            class="sticky top-20 z-50 rounded-lg border border-warning-500 bg-warning-50 p-4 shadow-lg dark:border-warning-400 dark:bg-warning-900"
             style="display: none;"
             x-show="hasUnsavedChanges && canEdit"
             x-transition:enter="transition ease-out duration-200"

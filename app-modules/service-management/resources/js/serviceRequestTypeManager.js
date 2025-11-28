@@ -951,7 +951,6 @@ document.addEventListener('alpine:init', () => {
                     'bg-primary-500/10',
                     'border-primary-500/50',
                     'border-2',
-                    'rounded-lg',
                     'relative',
                 );
             });
