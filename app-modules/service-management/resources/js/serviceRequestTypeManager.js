@@ -86,8 +86,7 @@ document.addEventListener('alpine:init', () => {
         },
 
         updateSaveButton() {
-            // Buttons are now reactive using x-bind:disabled in Alpine.js
-            // No need to manually update DOM
+            // Buttons are reactive via Alpine's bindings; no DOM updates needed here.
         },
 
         renderCategories() {
@@ -327,46 +326,37 @@ document.addEventListener('alpine:init', () => {
         },
 
         attachEventListeners() {
-            // Show category input button
             document.getElementById('show-category-btn')?.addEventListener('click', () => {
-                // Completely hide the add-type button while adding a category
                 const showTypeBtn = document.getElementById('show-type-btn');
                 if (showTypeBtn) showTypeBtn.style.display = 'none';
                 document.getElementById('type-input-form').style.display = 'none';
                 if (document.getElementById('new-type-name')) document.getElementById('new-type-name').value = '';
 
-                // Show category input
                 document.getElementById('show-category-btn').style.display = 'none';
                 document.getElementById('category-input-form').style.display = 'flex';
                 document.getElementById('new-category-name')?.focus();
             });
 
-            // Cancel category button
             document.getElementById('cancel-category-btn')?.addEventListener('click', () => {
                 document.getElementById('show-category-btn').style.display = 'block';
                 document.getElementById('category-input-form').style.display = 'none';
                 document.getElementById('new-category-name').value = '';
 
-                // Reshow the add-type button when category add is cancelled
                 const showTypeBtn = document.getElementById('show-type-btn');
                 if (showTypeBtn) showTypeBtn.style.display = 'block';
             });
 
-            // Create category button
             document.getElementById('create-category-btn')?.addEventListener('click', () => {
                 this.createCategory(null);
 
-                // After confirming create, reshow the add-type button
                 const showTypeBtn = document.getElementById('show-type-btn');
                 if (showTypeBtn) showTypeBtn.style.display = 'block';
             });
 
-            // Category input enter key
             document.getElementById('new-category-name')?.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
                     this.createCategory(null);
 
-                    // After confirming create via Enter, reshow add-type
                     const showTypeBtn = document.getElementById('show-type-btn');
                     if (showTypeBtn) showTypeBtn.style.display = 'block';
                 } else if (e.key === 'Escape') {
@@ -374,46 +364,37 @@ document.addEventListener('alpine:init', () => {
                 }
             });
 
-            // Show type input button
             document.getElementById('show-type-btn')?.addEventListener('click', () => {
-                // Completely hide the add-category button while adding a type
                 const showCategoryBtn = document.getElementById('show-category-btn');
                 if (showCategoryBtn) showCategoryBtn.style.display = 'none';
                 document.getElementById('category-input-form').style.display = 'none';
                 if (document.getElementById('new-category-name')) document.getElementById('new-category-name').value = '';
 
-                // Show type input
                 document.getElementById('show-type-btn').style.display = 'none';
                 document.getElementById('type-input-form').style.display = 'flex';
                 document.getElementById('new-type-name')?.focus();
             });
 
-            // Cancel type button
             document.getElementById('cancel-type-btn')?.addEventListener('click', () => {
                 document.getElementById('show-type-btn').style.display = 'block';
                 document.getElementById('type-input-form').style.display = 'none';
                 document.getElementById('new-type-name').value = '';
 
-                // Reshow add-category when type add is cancelled
                 const showCategoryBtn = document.getElementById('show-category-btn');
                 if (showCategoryBtn) showCategoryBtn.style.display = 'block';
             });
 
-            // Create type button
             document.getElementById('create-type-btn')?.addEventListener('click', () => {
                 this.createType(null);
 
-                // After confirming create, reshow add-category
                 const showCategoryBtn = document.getElementById('show-category-btn');
                 if (showCategoryBtn) showCategoryBtn.style.display = 'block';
             });
 
-            // Type input enter key
             document.getElementById('new-type-name')?.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
                     this.createType(null);
 
-                    // After confirming create via Enter, reshow add-category
                     const showCategoryBtn = document.getElementById('show-category-btn');
                     if (showCategoryBtn) showCategoryBtn.style.display = 'block';
                 } else if (e.key === 'Escape') {
@@ -421,30 +402,24 @@ document.addEventListener('alpine:init', () => {
                 }
             });
 
-            // Save changes button
             document.getElementById('save-changes-btn')?.addEventListener('click', () => {
                 this.saveChanges();
             });
 
-            // Discard changes button
             document.getElementById('discard-changes-btn')?.addEventListener('click', () => {
                 this.discardChanges();
             });
         },
 
         setupDragAndDrop() {
-            // Skip drag and drop setup if user doesn't have edit permission
             if (!this.canEdit) {
                 return;
             }
 
-            // Use a small timeout to ensure DOM elements are fully rendered
             setTimeout(() => {
                 const draggableElements = document.querySelectorAll('.draggable');
 
-                // Add event listeners to all draggable elements
                 draggableElements.forEach((el) => {
-                    // Remove existing listeners first
                     if (el._dragStartHandler) {
                         el.removeEventListener('dragstart', el._dragStartHandler);
                     }
@@ -452,23 +427,18 @@ document.addEventListener('alpine:init', () => {
                         el.removeEventListener('dragend', el._dragEndHandler);
                     }
 
-                    // Create bound handlers and store references
                     el._dragStartHandler = this.handleDragStart.bind(this);
                     el._dragEndHandler = this.handleDragEnd.bind(this);
 
-                    // Add event listeners
                     el.addEventListener('dragstart', el._dragStartHandler);
                     el.addEventListener('dragend', el._dragEndHandler);
 
-                    // Verify draggable attribute
                     if (!el.draggable) {
                         el.draggable = true;
                     }
                 });
 
-                // Add event listeners for drop zones
                 document.querySelectorAll('.category-item, .type-item').forEach((el) => {
-                    // Remove existing listeners first
                     if (el._dragOverHandler) {
                         el.removeEventListener('dragover', el._dragOverHandler);
                     }
@@ -482,13 +452,11 @@ document.addEventListener('alpine:init', () => {
                         el.removeEventListener('dragleave', el._dragLeaveHandler);
                     }
 
-                    // Create bound handlers and store references
                     el._dragOverHandler = this.handleDragOver.bind(this);
                     el._dropHandler = this.handleDrop.bind(this);
                     el._dragEnterHandler = this.handleDragEnter.bind(this);
                     el._dragLeaveHandler = this.handleDragLeave.bind(this);
 
-                    // Add event listeners
                     el.addEventListener('dragover', el._dragOverHandler);
                     el.addEventListener('drop', el._dropHandler);
                     el.addEventListener('dragenter', el._dragEnterHandler);
@@ -526,7 +494,6 @@ document.addEventListener('alpine:init', () => {
             this.dragData.isDragging = true;
             this.dragData.draggedElement = e.target;
 
-            // Determine what type of element is being dragged
             if (e.target.dataset.categoryId) {
                 this.dragData.draggedType = 'category';
                 this.dragData.draggedId = e.target.dataset.categoryId;
@@ -535,46 +502,36 @@ document.addEventListener('alpine:init', () => {
                 this.dragData.draggedId = e.target.dataset.typeId;
             }
 
-            // Add dragging visual feedback with Tailwind classes (NO pointer-events-none during drag!)
             e.target.classList.add('opacity-50', 'rotate-1', 'scale-105', 'z-50', 'shadow-2xl');
 
-            // If dragging a category, also add subtle visual feedback to the entire wrapper to show children will move
             if (this.dragData.draggedType === 'category') {
                 const wrapper = e.target.closest('.category-wrapper');
                 if (wrapper) {
-                    // Add a subtle outline to the entire wrapper to indicate all children will move
                     wrapper.classList.add('ring-2', 'ring-primary-300', 'ring-opacity-50');
                 }
             }
 
-            // Set drag data
             e.dataTransfer.effectAllowed = 'move';
             e.dataTransfer.setData('text/plain', this.dragData.draggedId);
 
-            // Create a transparent drag image to hide the default ghost
             const dragImage = document.createElement('div');
             dragImage.style.cssText = 'width: 1px; height: 1px; opacity: 0;';
             document.body.appendChild(dragImage);
             e.dataTransfer.setDragImage(dragImage, 0, 0);
             setTimeout(() => document.body.removeChild(dragImage), 0);
 
-            // Create custom ghost element
             this.createDragGhost(e.target);
 
-            // Add mousemove listener for ghost positioning
             document.addEventListener('dragover', this.updateGhostPosition.bind(this));
         },
 
         handleDragEnd(e) {
             this.dragData.isDragging = false;
 
-            // Remove all drag visual classes
             e.target.classList.remove('opacity-50', 'rotate-1', 'scale-105', 'z-50', 'shadow-2xl');
 
-            // Also remove any updating classes that might be stuck
             e.target.classList.remove('updating-order', 'opacity-70');
 
-            // Remove wrapper visual feedback for categories
             if (this.dragData.draggedType === 'category') {
                 const wrapper = e.target.closest('.category-wrapper');
                 if (wrapper) {
@@ -582,7 +539,6 @@ document.addEventListener('alpine:init', () => {
                 }
             }
 
-            // Find the actual dragged element (might be different due to DOM manipulation)
             if (this.dragData.draggedElement && this.dragData.draggedElement !== e.target) {
                 this.dragData.draggedElement.classList.remove(
                     'opacity-50',
@@ -594,7 +550,6 @@ document.addEventListener('alpine:init', () => {
                     'opacity-70',
                 );
 
-                // Also clean wrapper for moved elements
                 if (this.dragData.draggedType === 'category') {
                     const wrapper = this.dragData.draggedElement.closest('.category-wrapper');
                     if (wrapper) {
@@ -603,17 +558,13 @@ document.addEventListener('alpine:init', () => {
                 }
             }
 
-            // Clean up visual feedback
             this.cleanupDragVisuals();
 
-            // Remove ghost element
             if (this.dragData.ghostElement) {
                 this.dragData.ghostElement.remove();
                 this.dragData.ghostElement = null;
             }
 
-            // Re-setup drag and drop handlers after the DOM has been updated
-            // Use setTimeout to run after the current event loop completes
             setTimeout(() => {
                 this.setupDragAndDrop();
             }, 100);
@@ -626,7 +577,6 @@ document.addEventListener('alpine:init', () => {
                 return;
             }
 
-            // Check if this is a valid drop zone
             const dropPosition = this.determineDropPosition(e.currentTarget, e);
 
             if (dropPosition) {
@@ -635,10 +585,8 @@ document.addEventListener('alpine:init', () => {
                 e.dataTransfer.dropEffect = 'none';
             }
 
-            // Update ghost position
             this.updateGhostPosition(e);
 
-            // Update drop indicators
             this.updateDropIndicators(e);
         },
 
@@ -757,8 +705,6 @@ document.addEventListener('alpine:init', () => {
                 const y = e.clientY - 10;
                 this.dragData.ghostElement.style.left = x + 'px';
                 this.dragData.ghostElement.style.top = y + 'px';
-
-                // Log occasionally to see positioning
             }
         },
 
@@ -768,13 +714,11 @@ document.addEventListener('alpine:init', () => {
             const target = e.currentTarget;
             const dropPosition = this.determineDropPosition(target, e);
 
-            // If no valid drop position, show no visual feedback
             if (!dropPosition) {
                 return;
             }
 
             if (dropPosition.type === 'inside') {
-                // Highlight category for nesting with Tailwind classes
                 if (dropPosition.target.classList.contains('category-item')) {
                     dropPosition.target.classList.add(
                         'nest-target',
@@ -786,16 +730,13 @@ document.addEventListener('alpine:init', () => {
                     );
                 }
             } else if (dropPosition.type === 'insert') {
-                // Show single insertion line at calculated position
                 this.showInsertionLine(dropPosition.container, dropPosition.insertIndex);
             }
         },
 
         showInsertionLine(container, insertIndex) {
-            // Remove any existing insertion lines
             this.cleanupInsertionLines();
 
-            // Get all children of the container, excluding the dragged element
             let children = Array.from(container.children).filter(
                 (child) =>
                     !child.classList.contains('insertion-line') &&
@@ -804,15 +745,12 @@ document.addEventListener('alpine:init', () => {
                         child.classList.contains('type-item')),
             );
 
-            // Exclude the currently dragged element from the children list
             const draggedElement = this.dragData.draggedElement;
             if (draggedElement) {
                 children = children.filter((child) => {
-                    // For types, check data-type-id
                     if (this.dragData.draggedType === 'type') {
                         return child.dataset.typeId !== this.dragData.draggedId;
                     }
-                    // For categories, check the wrapper's data-category-id
                     if (this.dragData.draggedType === 'category') {
                         return child.dataset.categoryId !== this.dragData.draggedId;
                     }
@@ -820,29 +758,23 @@ document.addEventListener('alpine:init', () => {
                 });
             }
 
-            // Calculate the Y position for the insertion line
             let yPosition = 0;
             const containerRect = container.getBoundingClientRect();
 
             if (insertIndex === 0 && children.length > 0) {
-                // Position above the first child
                 const firstChildRect = children[0].getBoundingClientRect();
                 yPosition = firstChildRect.top - containerRect.top - 1;
             } else if (insertIndex >= children.length && children.length > 0) {
-                // Position below the last child
                 const lastChildRect = children[children.length - 1].getBoundingClientRect();
                 yPosition = lastChildRect.bottom - containerRect.top + 1;
             } else if (children.length > 0 && insertIndex > 0) {
-                // Position between children
                 const prevChildRect = children[insertIndex - 1].getBoundingClientRect();
                 const nextChildRect = children[insertIndex].getBoundingClientRect();
                 yPosition = prevChildRect.bottom - containerRect.top + (nextChildRect.top - prevChildRect.bottom) / 2;
             } else {
-                // Empty container or single item
                 yPosition = 10;
             }
 
-            // Create insertion line with absolute positioning
             const line = document.createElement('div');
             line.className = 'insertion-line drop-line';
             line.style.top = yPosition + 'px';
@@ -855,7 +787,6 @@ document.addEventListener('alpine:init', () => {
         },
 
         calculateInsertionPosition(container, mouseY) {
-            // Get all valid children from the container
             let children = Array.from(container.children).filter(
                 (child) =>
                     !child.classList.contains('insertion-line') &&
@@ -864,17 +795,14 @@ document.addEventListener('alpine:init', () => {
                         child.classList.contains('type-item')),
             );
 
-            // Filter out the dragged element to get accurate positioning
             const draggedElement = this.dragData.draggedElement;
             if (draggedElement) {
                 children = children.filter((child) => {
-                    // For types, compare data-type-id
                     if (this.dragData.draggedType === 'type') {
                         const childId = String(child.dataset.typeId || '');
                         const draggedId = String(this.dragData.draggedId || '');
                         return childId !== draggedId;
                     }
-                    // For categories, compare data-category-id on the wrapper
                     if (this.dragData.draggedType === 'category') {
                         const childId = String(child.dataset.categoryId || '');
                         const draggedId = String(this.dragData.draggedId || '');
@@ -888,7 +816,6 @@ document.addEventListener('alpine:init', () => {
                 return 0;
             }
 
-            // Find the insertion position based on mouse Y coordinate
             for (let i = 0; i < children.length; i++) {
                 const rect = children[i].getBoundingClientRect();
                 const childCenterY = rect.top + rect.height / 2;
@@ -898,12 +825,10 @@ document.addEventListener('alpine:init', () => {
                 }
             }
 
-            // If we're past all children, insert at the end
             return children.length;
         },
 
         determineDropPosition(target, e) {
-            // Ensure we're working with the actual category-item or type-item element
             const categoryItem = target.closest('.category-item');
             const typeItem = target.closest('.type-item');
 
@@ -912,21 +837,16 @@ document.addEventListener('alpine:init', () => {
                 const draggedLevel = this.getCategoryLevel(this.dragData.draggedElement);
                 const targetLevel = this.getCategoryLevel(actualTarget);
 
-                // Check if they share the same parent context
                 const draggedParentContext = this.getCategoryParentContext(this.dragData.draggedElement);
                 const targetParentContext = this.getCategoryParentContext(actualTarget);
 
-                // Determine if insertion lines should be shown
                 let allowInsertion = false;
 
                 if (targetParentContext === 'root') {
-                    // Target is at root level - always allow insertion (can move anything to root)
                     allowInsertion = true;
                 } else if (draggedLevel === targetLevel && draggedParentContext === targetParentContext) {
-                    // Same level and same parent context - allow insertion
                     allowInsertion = true;
                 } else if (draggedLevel === targetLevel) {
-                    // Same level but different parents - could be valid reordering
                     allowInsertion = true;
                 } else {
                 }
@@ -952,7 +872,6 @@ document.addEventListener('alpine:init', () => {
                             target: actualTarget,
                         };
                     } else {
-                        // Calculate insertion position based on mouse Y
                         const insertIndex = this.calculateInsertionPosition(container, e.clientY);
                         const parentId = container?.dataset?.parentId || null;
                         if (this.wouldExceedDepthLimit(null, parentId)) {
@@ -1106,7 +1025,6 @@ document.addEventListener('alpine:init', () => {
                 this.handleTypeDrop(target, position);
             }
 
-            // Mark as changed and re-render
             this.markAsChanged();
             this.render();
         },
@@ -1124,7 +1042,6 @@ document.addEventListener('alpine:init', () => {
                 }
             }
 
-            // Update the tree data structure
             this.updateCategoryInTreeData(categoryId, newParentId, position);
         },
 
@@ -1138,7 +1055,6 @@ document.addEventListener('alpine:init', () => {
                 newCategoryId = position.container.dataset.categoryId || null;
             }
 
-            // Update the tree data structure
             this.updateTypeInTreeData(typeId, newCategoryId, position);
         },
 
@@ -1158,14 +1074,11 @@ document.addEventListener('alpine:init', () => {
         },
 
         updateCategoryInTreeData(categoryId, newParentId, position) {
-            // Remove the category from its current location
             const category = this.findAndRemoveCategory(categoryId);
             if (!category) return;
 
             category.parent_id = newParentId;
 
-            // The insertIndex from calculateInsertionPosition is already correct
-            // because it excluded the dragged element from the calculation
             if (newParentId) {
                 const parentCategory = this.findCategoryById(newParentId);
                 if (parentCategory) {
@@ -1187,14 +1100,11 @@ document.addEventListener('alpine:init', () => {
         },
 
         updateTypeInTreeData(typeId, newCategoryId, position) {
-            // Remove the type from its current location
             const type = this.findAndRemoveType(typeId);
             if (!type) return;
 
             type.category_id = newCategoryId;
 
-            // The insertIndex from calculateInsertionPosition is already correct
-            // because it excluded the dragged element from the calculation
             if (newCategoryId) {
                 const category = this.findCategoryById(newCategoryId);
                 if (category) {
@@ -1310,13 +1220,11 @@ document.addEventListener('alpine:init', () => {
         },
 
         findTypeById(typeId) {
-            // Check uncategorized types first
             if (this.treeData.uncategorized_types) {
                 const type = this.treeData.uncategorized_types.find((t) => t.id === typeId);
                 if (type) return type;
             }
 
-            // Search in categories recursively
             const findInCategories = (categories) => {
                 for (const category of categories) {
                     if (category.types) {
@@ -1388,15 +1296,11 @@ document.addEventListener('alpine:init', () => {
             this.isSaving = true;
 
             try {
-                // Prepare the tree data for saving with new items separated
                 const saveData = this.prepareSaveData();
                 await $wire.saveChanges(saveData);
 
-                // The server will clear the cached data, so we can just wait a moment
-                // and then get the fresh data
                 await new Promise((resolve) => setTimeout(resolve, 100));
 
-                // Get fresh data from the server
                 const freshData = await $wire.call('getHierarchicalData');
                 this.originalTreeData = freshData;
                 this.treeData = JSON.parse(JSON.stringify(this.originalTreeData));
@@ -1437,26 +1341,23 @@ document.addEventListener('alpine:init', () => {
         },
 
         updateSortOrders() {
-            // Update sort orders for root categories
             if (this.treeData.categories) {
                 this.treeData.categories.forEach((category, index) => {
                     category.sort = index + 1;
-                    category.parent_id = null; // Ensure root categories have null parent_id
+                    category.parent_id = null;
                     this.updateCategorySortOrders(category);
                 });
             }
 
-            // Update sort orders for uncategorized types
             if (this.treeData.uncategorized_types) {
                 this.treeData.uncategorized_types.forEach((type, index) => {
                     type.sort = index + 1;
-                    type.category_id = null; // Ensure uncategorized types have null category_id
+                    type.category_id = null;
                 });
             }
         },
 
         updateCategorySortOrders(category) {
-            // Update sort orders for types in this category
             if (category.types) {
                 category.types.forEach((type, index) => {
                     type.sort = index + 1;
@@ -1464,7 +1365,6 @@ document.addEventListener('alpine:init', () => {
                 });
             }
 
-            // Update sort orders for child categories
             if (category.children) {
                 category.children.forEach((child, index) => {
                     child.sort = index + 1;
@@ -1878,14 +1778,12 @@ document.addEventListener('alpine:init', () => {
                     input.focus();
                     input.select();
 
-                    // Add input event listener for real-time validation
                     input.addEventListener('input', (e) => {
                         if (confirmBtn) {
                             confirmBtn.disabled = !e.target.value.trim();
                         }
                     });
 
-                    // Add keydown listener for Enter and Escape
                     input.addEventListener('keydown', (e) => {
                         if (e.key === 'Enter' && input.value.trim()) {
                             this.confirmTypeRename(typeId);
@@ -1931,14 +1829,12 @@ document.addEventListener('alpine:init', () => {
                     input.focus();
                     input.select();
 
-                    // Add input event listener for real-time validation
                     input.addEventListener('input', (e) => {
                         if (confirmBtn) {
                             confirmBtn.disabled = !e.target.value.trim();
                         }
                     });
 
-                    // Add keydown listener for Enter and Escape
                     input.addEventListener('keydown', (e) => {
                         if (e.key === 'Enter' && input.value.trim()) {
                             this.confirmCategoryRename(categoryId);
