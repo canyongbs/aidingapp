@@ -172,7 +172,7 @@ document.addEventListener('alpine:init', () => {
                                     >${this.escapeHtml(type.name)}</a>
                             `
                         }
-                        <span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-600 dark:bg-gray-600 dark:text-gray-100">${requestCount}</span>
+                        <span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-600 dark:bg-gray-600 dark:text-gray-100" x-tooltip.raw="Number of service requests">${requestCount}</span>
                         ${
                             this.canEdit && !isRenaming
                                 ? `<button type="button" class="p-1.5 -m-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors" @click.stop="startTypeRename('${type.id}')" x-tooltip.raw="Rename">
