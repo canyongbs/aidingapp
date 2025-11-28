@@ -287,6 +287,7 @@ class ListServiceRequestTypes extends ListRecords
 
     /**
      * @param Collection<int, ServiceRequestTypeCategory> $categories
+     *
      * @return array<int, array<string, mixed>>
      */
     protected function formatCategories(Collection $categories): array
@@ -307,6 +308,7 @@ class ListServiceRequestTypes extends ListRecords
 
     /**
      * @param Collection<int, ServiceRequestType> $types
+     *
      * @return array<int, array<string, mixed>>
      */
     protected function formatTypes(Collection $types): array
