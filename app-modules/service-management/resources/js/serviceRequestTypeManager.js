@@ -149,7 +149,7 @@ document.addEventListener('alpine:init', () => {
                                     />
                                     <button
                                         type="button"
-                                        class="text-green-600 hover:text-green-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        class="text-success-600 hover:text-success-800 dark:hover:text-success-400 disabled:opacity-50 disabled:cursor-not-allowed"
                                         @click.stop="confirmTypeRename('${type.id}')"
                                         id="confirm-rename-type-${type.id}"
                                     >
@@ -179,7 +179,7 @@ document.addEventListener('alpine:init', () => {
                         }
                         ${
                             this.canEdit && canDelete && !isRenaming
-                                ? `<button type="button" class="p-1.5 -m-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 hover:text-red-800 transition-colors" @click.stop="stageTypeDeletion('${type.id}')" x-tooltip.raw="Delete">
+                                ? `<button type="button" class="p-1.5 -m-1 rounded hover:bg-danger-50 dark:hover:bg-danger-600/20 dark:hover:text-danger-300 text-danger-600 hover:text-danger-800 transition-colors" @click.stop="stageTypeDeletion('${type.id}')" x-tooltip.raw="Delete">
                                         <svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
                                             <path fill-rule="evenodd" d="M5 3.25V4H2.75a.75.75 0 0 0 0 1.5h.3l.815 8.15A1.5 1.5 0 0 0 5.357 15h5.285a1.5 1.5 0 0 0 1.493-1.35l.815-8.15h.3a.75.75 0 0 0 0-1.5H11v-.75A2.25 2.25 0 0 0 8.75 1h-1.5A2.25 2.25 0 0 0 5 3.25Zm2.25-.75a.75.75 0 0 0-.75.75V4h3v-.75a.75.75 0 0 0-.75-.75h-1.5ZM6.05 6a.75.75 0 0 1 .787.713l.275 5.5a.75.75 0 0 1-1.498.075l-.275-5.5A.75.75 0 0 1 6.05 6Zm3.9 0a.75.75 0 0 1 .712.787l-.275 5.5a.75.75 0 0 1-1.498-.075l.275-5.5a.75.75 0 0 1 .786-.711Z" clip-rule="evenodd" />
                                         </svg>
@@ -221,7 +221,7 @@ document.addEventListener('alpine:init', () => {
                                         />
                                         <button
                                             type="button"
-                                            class="text-green-600 hover:text-green-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            class="text-success-600 hover:text-success-800 dark:hover:text-success-400 disabled:opacity-50 disabled:cursor-not-allowed"
                                             @click.stop="confirmCategoryRename('${category.id}')"
                                             id="confirm-rename-category-${category.id}"
                                         >
@@ -265,7 +265,7 @@ document.addEventListener('alpine:init', () => {
                             }
                             ${
                                 this.canEdit && this.canDeleteCategory(category) && !isRenaming
-                                    ? `<button type="button" class="p-1.5 -m-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 hover:text-red-800 transition-colors" @click.stop="confirmDeleteCategory('${category.id}')" x-tooltip.raw="Delete">
+                                    ? `<button type="button" class="p-1.5 -m-1 rounded hover:bg-danger-50 dark:hover:bg-danger-600/20 dark:hover:text-danger-300 text-danger-600 hover:text-danger-800 transition-colors" @click.stop="confirmDeleteCategory('${category.id}')" x-tooltip.raw="Delete">
                                             <svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
                                                 <path fill-rule="evenodd" d="M5 3.25V4H2.75a.75.75 0 0 0 0 1.5h.3l.815 8.15A1.5 1.5 0 0 0 5.357 15h5.285a1.5 1.5 0 0 0 1.493-1.35l.815-8.15h.3a.75.75 0 0 0 0-1.5H11v-.75A2.25 2.25 0 0 0 8.75 1h-1.5A2.25 2.25 0 0 0 5 3.25Zm2.25-.75a.75.75 0 0 0-.75.75V4h3v-.75a.75.75 0 0 0-.75-.75h-1.5ZM6.05 6a.75.75 0 0 1 .787.713l.275 5.5a.75.75 0 0 1-1.498.075l-.275-5.5A.75.75 0 0 1 6.05 6Zm3.9 0a.75.75 0 0 1 .712.787l-.275 5.5a.75.75 0 0 1-1.498-.075l.275-5.5a.75.75 0 0 1 .786-.711Z" clip-rule="evenodd" />
                                             </svg>
@@ -348,13 +348,13 @@ document.addEventListener('alpine:init', () => {
                 if (showTypeBtn) showTypeBtn.style.display = 'block';
             });
 
-            document.getElementById('new-category-name')?.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
+            document.getElementById('new-category-name')?.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') {
                     this.createCategory(null);
 
                     const showTypeBtn = document.getElementById('show-type-btn');
                     if (showTypeBtn) showTypeBtn.style.display = 'block';
-                } else if (e.key === 'Escape') {
+                } else if (event.key === 'Escape') {
                     document.getElementById('cancel-category-btn')?.click();
                 }
             });
@@ -363,7 +363,8 @@ document.addEventListener('alpine:init', () => {
                 const showCategoryBtn = document.getElementById('show-category-btn');
                 if (showCategoryBtn) showCategoryBtn.style.display = 'none';
                 document.getElementById('category-input-form').style.display = 'none';
-                if (document.getElementById('new-category-name')) document.getElementById('new-category-name').value = '';
+                if (document.getElementById('new-category-name'))
+                    document.getElementById('new-category-name').value = '';
 
                 document.getElementById('show-type-btn').style.display = 'none';
                 document.getElementById('type-input-form').style.display = 'flex';
@@ -386,13 +387,13 @@ document.addEventListener('alpine:init', () => {
                 if (showCategoryBtn) showCategoryBtn.style.display = 'block';
             });
 
-            document.getElementById('new-type-name')?.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
+            document.getElementById('new-type-name')?.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') {
                     this.createType(null);
 
                     const showCategoryBtn = document.getElementById('show-category-btn');
                     if (showCategoryBtn) showCategoryBtn.style.display = 'block';
-                } else if (e.key === 'Escape') {
+                } else if (event.key === 'Escape') {
                     document.getElementById('cancel-type-btn')?.click();
                 }
             });
@@ -414,48 +415,48 @@ document.addEventListener('alpine:init', () => {
             setTimeout(() => {
                 const draggableElements = document.querySelectorAll('.draggable');
 
-                draggableElements.forEach((el) => {
-                    if (el._dragStartHandler) {
-                        el.removeEventListener('dragstart', el._dragStartHandler);
+                draggableElements.forEach((element) => {
+                    if (element._dragStartHandler) {
+                        element.removeEventListener('dragstart', element._dragStartHandler);
                     }
-                    if (el._dragEndHandler) {
-                        el.removeEventListener('dragend', el._dragEndHandler);
+                    if (element._dragEndHandler) {
+                        element.removeEventListener('dragend', element._dragEndHandler);
                     }
 
-                    el._dragStartHandler = this.handleDragStart.bind(this);
-                    el._dragEndHandler = this.handleDragEnd.bind(this);
+                    element._dragStartHandler = this.handleDragStart.bind(this);
+                    element._dragEndHandler = this.handleDragEnd.bind(this);
 
-                    el.addEventListener('dragstart', el._dragStartHandler);
-                    el.addEventListener('dragend', el._dragEndHandler);
+                    element.addEventListener('dragstart', element._dragStartHandler);
+                    element.addEventListener('dragend', element._dragEndHandler);
 
-                    if (!el.draggable) {
-                        el.draggable = true;
+                    if (!element.draggable) {
+                        element.draggable = true;
                     }
                 });
 
-                document.querySelectorAll('.category-item, .type-item').forEach((el) => {
-                    if (el._dragOverHandler) {
-                        el.removeEventListener('dragover', el._dragOverHandler);
+                document.querySelectorAll('.category-item, .type-item').forEach((element) => {
+                    if (element._dragOverHandler) {
+                        element.removeEventListener('dragover', element._dragOverHandler);
                     }
-                    if (el._dropHandler) {
-                        el.removeEventListener('drop', el._dropHandler);
+                    if (element._dropHandler) {
+                        element.removeEventListener('drop', element._dropHandler);
                     }
-                    if (el._dragEnterHandler) {
-                        el.removeEventListener('dragenter', el._dragEnterHandler);
+                    if (element._dragEnterHandler) {
+                        element.removeEventListener('dragenter', element._dragEnterHandler);
                     }
-                    if (el._dragLeaveHandler) {
-                        el.removeEventListener('dragleave', el._dragLeaveHandler);
+                    if (element._dragLeaveHandler) {
+                        element.removeEventListener('dragleave', element._dragLeaveHandler);
                     }
 
-                    el._dragOverHandler = this.handleDragOver.bind(this);
-                    el._dropHandler = this.handleDrop.bind(this);
-                    el._dragEnterHandler = this.handleDragEnter.bind(this);
-                    el._dragLeaveHandler = this.handleDragLeave.bind(this);
+                    element._dragOverHandler = this.handleDragOver.bind(this);
+                    element._dropHandler = this.handleDrop.bind(this);
+                    element._dragEnterHandler = this.handleDragEnter.bind(this);
+                    element._dragLeaveHandler = this.handleDragLeave.bind(this);
 
-                    el.addEventListener('dragover', el._dragOverHandler);
-                    el.addEventListener('drop', el._dropHandler);
-                    el.addEventListener('dragenter', el._dragEnterHandler);
-                    el.addEventListener('dragleave', el._dragLeaveHandler);
+                    element.addEventListener('dragover', element._dragOverHandler);
+                    element.addEventListener('drop', element._dropHandler);
+                    element.addEventListener('dragenter', element._dragEnterHandler);
+                    element.addEventListener('dragleave', element._dragLeaveHandler);
                 });
 
                 document.querySelectorAll('[data-sortable="types"]').forEach((container) => {
@@ -485,56 +486,56 @@ document.addEventListener('alpine:init', () => {
             }, 100);
         },
 
-        handleDragStart(e) {
+        handleDragStart(event) {
             this.dragData.isDragging = true;
-            this.dragData.draggedElement = e.target;
+            this.dragData.draggedElement = event.target;
 
-            if (e.target.dataset.categoryId) {
+            if (event.target.dataset.categoryId) {
                 this.dragData.draggedType = 'category';
-                this.dragData.draggedId = e.target.dataset.categoryId;
-            } else if (e.target.dataset.typeId) {
+                this.dragData.draggedId = event.target.dataset.categoryId;
+            } else if (event.target.dataset.typeId) {
                 this.dragData.draggedType = 'type';
-                this.dragData.draggedId = e.target.dataset.typeId;
+                this.dragData.draggedId = event.target.dataset.typeId;
             }
 
-            e.target.classList.add('opacity-50', 'rotate-1', 'scale-105', 'z-50', 'shadow-2xl');
+            event.target.classList.add('opacity-50', 'rotate-1', 'scale-105', 'z-50', 'shadow-2xl');
 
             if (this.dragData.draggedType === 'category') {
-                const wrapper = e.target.closest('.category-wrapper');
+                const wrapper = event.target.closest('.category-wrapper');
                 if (wrapper) {
                     wrapper.classList.add('ring-2', 'ring-primary-300', 'ring-opacity-50');
                 }
             }
 
-            e.dataTransfer.effectAllowed = 'move';
-            e.dataTransfer.setData('text/plain', this.dragData.draggedId);
+            event.dataTransfer.effectAllowed = 'move';
+            event.dataTransfer.setData('text/plain', this.dragData.draggedId);
 
             const dragImage = document.createElement('div');
             dragImage.style.cssText = 'width: 1px; height: 1px; opacity: 0;';
             document.body.appendChild(dragImage);
-            e.dataTransfer.setDragImage(dragImage, 0, 0);
+            event.dataTransfer.setDragImage(dragImage, 0, 0);
             setTimeout(() => document.body.removeChild(dragImage), 0);
 
-            this.createDragGhost(e.target);
+            this.createDragGhost(event.target);
 
             document.addEventListener('dragover', this.updateGhostPosition.bind(this));
         },
 
-        handleDragEnd(e) {
+        handleDragEnd(event) {
             this.dragData.isDragging = false;
 
-            e.target.classList.remove('opacity-50', 'rotate-1', 'scale-105', 'z-50', 'shadow-2xl');
+            event.target.classList.remove('opacity-50', 'rotate-1', 'scale-105', 'z-50', 'shadow-2xl');
 
-            e.target.classList.remove('updating-order', 'opacity-70');
+            event.target.classList.remove('updating-order', 'opacity-70');
 
             if (this.dragData.draggedType === 'category') {
-                const wrapper = e.target.closest('.category-wrapper');
+                const wrapper = event.target.closest('.category-wrapper');
                 if (wrapper) {
                     wrapper.classList.remove('ring-2', 'ring-primary-300', 'ring-opacity-50');
                 }
             }
 
-            if (this.dragData.draggedElement && this.dragData.draggedElement !== e.target) {
+            if (this.dragData.draggedElement && this.dragData.draggedElement !== event.target) {
                 this.dragData.draggedElement.classList.remove(
                     'opacity-50',
                     'rotate-1',
@@ -565,50 +566,48 @@ document.addEventListener('alpine:init', () => {
             }, 100);
         },
 
-        handleDragOver(e) {
-            e.preventDefault();
+        handleDragOver(event) {
+            event.preventDefault();
 
             if (!this.dragData.isDragging) {
                 return;
             }
 
-            const dropPosition = this.determineDropPosition(e.currentTarget, e);
+            const dropPosition = this.determineDropPosition(event.currentTarget, event);
 
             if (dropPosition) {
-                e.dataTransfer.dropEffect = 'move';
+                event.dataTransfer.dropEffect = 'move';
             } else {
-                e.dataTransfer.dropEffect = 'none';
+                event.dataTransfer.dropEffect = 'none';
             }
 
-            this.updateGhostPosition(e);
+            this.updateGhostPosition(event);
 
-            this.updateDropIndicators(e);
+            this.updateDropIndicators(event);
         },
 
-        handleDragEnter(e) {
-            e.preventDefault();
+        handleDragEnter(event) {
+            event.preventDefault();
             if (!this.dragData.isDragging) return;
 
-            this.updateDropIndicators(e);
+            this.updateDropIndicators(event);
         },
 
-        handleDragLeave(e) {
-            // Only clean up if we're actually leaving the element
-            if (!e.currentTarget.contains(e.relatedTarget)) {
+        handleDragLeave(event) {
+            if (!event.currentTarget.contains(event.relatedTarget)) {
                 this.cleanupDropIndicators();
             }
         },
 
-        handleDrop(e) {
-            e.preventDefault();
-            e.stopPropagation(); // Prevent event from bubbling to parent elements
+        handleDrop(event) {
+            event.preventDefault();
+            event.stopPropagation(); // Prevent event from bubbling to parent elements
 
             if (!this.dragData.isDragging) return;
 
-            const dropTarget = e.currentTarget;
-            const dropPosition = this.determineDropPosition(dropTarget, e);
+            const dropTarget = event.currentTarget;
+            const dropPosition = this.determineDropPosition(dropTarget, event);
 
-            // If no valid drop position, cancel the drop
             if (!dropPosition) {
                 this.cleanupDragVisuals();
                 return;
@@ -616,10 +615,8 @@ document.addEventListener('alpine:init', () => {
 
             this.performDrop(dropTarget, dropPosition);
 
-            // Clean up drag visuals immediately
             this.cleanupDragVisuals();
 
-            // Remove drag classes from the original element immediately
             if (this.dragData.draggedElement) {
                 this.dragData.draggedElement.classList.remove(
                     'opacity-50',
@@ -632,7 +629,6 @@ document.addEventListener('alpine:init', () => {
                 );
             }
 
-            // Also clean up any elements with the dragged ID (in case DOM was manipulated)
             if (this.dragData.draggedType === 'category' && this.dragData.draggedId) {
                 const categoryElement = document.querySelector(`[data-category-id="${this.dragData.draggedId}"]`);
                 if (categoryElement) {
@@ -646,7 +642,6 @@ document.addEventListener('alpine:init', () => {
                         'opacity-70',
                     );
 
-                    // Also clean wrapper classes
                     const wrapper = categoryElement.closest('.category-wrapper');
                     if (wrapper) {
                         wrapper.classList.remove('ring-2', 'ring-primary-300', 'ring-opacity-50');
@@ -694,20 +689,20 @@ document.addEventListener('alpine:init', () => {
             this.dragData.ghostElement = ghost;
         },
 
-        updateGhostPosition(e) {
+        updateGhostPosition(event) {
             if (this.dragData.ghostElement) {
-                const x = e.clientX + 15;
-                const y = e.clientY - 10;
+                const x = event.clientX + 15;
+                const y = event.clientY - 10;
                 this.dragData.ghostElement.style.left = x + 'px';
                 this.dragData.ghostElement.style.top = y + 'px';
             }
         },
 
-        updateDropIndicators(e) {
+        updateDropIndicators(event) {
             this.cleanupDropIndicators();
 
-            const target = e.currentTarget;
-            const dropPosition = this.determineDropPosition(target, e);
+            const target = event.currentTarget;
+            const dropPosition = this.determineDropPosition(target, event);
 
             if (!dropPosition) {
                 return;
@@ -811,19 +806,19 @@ document.addEventListener('alpine:init', () => {
                 return 0;
             }
 
-            for (let i = 0; i < children.length; i++) {
-                const rect = children[i].getBoundingClientRect();
+            for (let index = 0; index < children.length; index++) {
+                const rect = children[index].getBoundingClientRect();
                 const childCenterY = rect.top + rect.height / 2;
 
                 if (mouseY < childCenterY) {
-                    return i;
+                    return index;
                 }
             }
 
             return children.length;
         },
 
-        determineDropPosition(target, e) {
+        determineDropPosition(target, event) {
             const categoryItem = target.closest('.category-item');
             const typeItem = target.closest('.type-item');
 
@@ -850,7 +845,7 @@ document.addEventListener('alpine:init', () => {
                     const targetWrapper = actualTarget.closest('.category-wrapper');
                     const container = targetWrapper.parentElement;
                     const rect = actualTarget.getBoundingClientRect();
-                    const y = e.clientY - rect.top;
+                    const y = event.clientY - rect.top;
                     const height = rect.height;
 
                     if (y > height * 0.3 && y < height * 0.7) {
@@ -867,7 +862,7 @@ document.addEventListener('alpine:init', () => {
                             target: actualTarget,
                         };
                     } else {
-                        const insertIndex = this.calculateInsertionPosition(container, e.clientY);
+                        const insertIndex = this.calculateInsertionPosition(container, event.clientY);
                         const parentId = container?.dataset?.parentId || null;
                         if (this.wouldExceedDepthLimit(null, parentId)) {
                             return null;
@@ -904,7 +899,7 @@ document.addEventListener('alpine:init', () => {
                     targetContainer &&
                     draggedContainer.dataset.categoryId === targetContainer.dataset.categoryId
                 ) {
-                    const insertIndex = this.calculateInsertionPosition(targetContainer, e.clientY);
+                    const insertIndex = this.calculateInsertionPosition(targetContainer, event.clientY);
                     return {
                         type: 'insert',
                         container: targetContainer,
@@ -926,7 +921,7 @@ document.addEventListener('alpine:init', () => {
                     const targetIsUncategorized = !typeContainer.dataset.categoryId;
 
                     if (sameContainer || targetIsUncategorized) {
-                        const insertIndex = this.calculateInsertionPosition(typeContainer, e.clientY);
+                        const insertIndex = this.calculateInsertionPosition(typeContainer, event.clientY);
                         return {
                             type: 'insert',
                             container: typeContainer,
@@ -1216,14 +1211,14 @@ document.addEventListener('alpine:init', () => {
 
         findTypeById(typeId) {
             if (this.treeData.uncategorized_types) {
-                const type = this.treeData.uncategorized_types.find((t) => t.id === typeId);
+                const type = this.treeData.uncategorized_types.find((type) => type.id === typeId);
                 if (type) return type;
             }
 
             const findInCategories = (categories) => {
                 for (const category of categories) {
                     if (category.types) {
-                        const type = category.types.find((t) => t.id === typeId);
+                        const type = category.types.find((type) => type.id === typeId);
                         if (type) return type;
                     }
                     if (category.children) {
@@ -1238,7 +1233,7 @@ document.addEventListener('alpine:init', () => {
         },
 
         findAndRemoveCategory(categoryId) {
-            const rootIndex = (this.treeData.categories || []).findIndex((c) => c.id === categoryId);
+            const rootIndex = (this.treeData.categories || []).findIndex((category) => category.id === categoryId);
             if (rootIndex !== -1) {
                 return this.treeData.categories.splice(rootIndex, 1)[0];
             }
@@ -1249,7 +1244,7 @@ document.addEventListener('alpine:init', () => {
         findAndRemoveCategoryRecursive(categoryId, categories) {
             for (const category of categories) {
                 if (category.children) {
-                    const childIndex = category.children.findIndex((c) => c.id === categoryId);
+                    const childIndex = category.children.findIndex((child) => child.id === categoryId);
                     if (childIndex !== -1) {
                         return category.children.splice(childIndex, 1)[0];
                     }
@@ -1261,7 +1256,9 @@ document.addEventListener('alpine:init', () => {
         },
 
         findAndRemoveType(typeId) {
-            const uncategorizedIndex = (this.treeData.uncategorized_types || []).findIndex((t) => t.id === typeId);
+            const uncategorizedIndex = (this.treeData.uncategorized_types || []).findIndex(
+                (type) => type.id === typeId,
+            );
             if (uncategorizedIndex !== -1) {
                 return this.treeData.uncategorized_types.splice(uncategorizedIndex, 1)[0];
             }
@@ -1272,7 +1269,7 @@ document.addEventListener('alpine:init', () => {
         findAndRemoveTypeRecursive(typeId, categories) {
             for (const category of categories) {
                 if (category.types) {
-                    const typeIndex = category.types.findIndex((t) => t.id === typeId);
+                    const typeIndex = category.types.findIndex((type) => type.id === typeId);
                     if (typeIndex !== -1) {
                         return category.types.splice(typeIndex, 1)[0];
                     }
@@ -1292,11 +1289,11 @@ document.addEventListener('alpine:init', () => {
 
             try {
                 const saveData = this.prepareSaveData();
-                await $wire.saveChanges(saveData);
+                await this.$wire.saveChanges(saveData);
 
                 await new Promise((resolve) => setTimeout(resolve, 100));
 
-                const freshData = await $wire.call('getHierarchicalData');
+                const freshData = await this.$wire.call('getHierarchicalData');
                 this.originalTreeData = freshData;
                 this.treeData = JSON.parse(JSON.stringify(this.originalTreeData));
                 this.hasUnsavedChanges = false;
@@ -1489,7 +1486,7 @@ document.addEventListener('alpine:init', () => {
         findOriginalTypeById(typeId) {
             // Check uncategorized types first
             if (this.originalTreeData.uncategorized_types) {
-                const type = this.originalTreeData.uncategorized_types.find((t) => t.id === typeId);
+                const type = this.originalTreeData.uncategorized_types.find((type) => type.id === typeId);
                 if (type) return type;
             }
 
@@ -1497,7 +1494,7 @@ document.addEventListener('alpine:init', () => {
             const findInCategories = (categories) => {
                 for (const category of categories) {
                     if (category.types) {
-                        const type = category.types.find((t) => t.id === typeId);
+                        const type = category.types.find((type) => type.id === typeId);
                         if (type) return type;
                     }
                     if (category.children) {
@@ -1551,14 +1548,14 @@ document.addEventListener('alpine:init', () => {
             const input = document.getElementById(`child-${inputType}-${categoryId}`);
             if (!input) return;
 
-            input.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
+            input.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') {
                     if (inputType === 'category') {
                         this.createCategory(categoryId);
                     } else {
                         this.createType(categoryId);
                     }
-                } else if (e.key === 'Escape') {
+                } else if (event.key === 'Escape') {
                     if (inputType === 'category') {
                         this.hideCategoryInput(categoryId);
                     } else {
@@ -1674,8 +1671,7 @@ document.addEventListener('alpine:init', () => {
             if (categoryId) {
                 this.hideTypeInput(categoryId);
             } else {
-                document.getElementById('show-type-btn').style.display = 'block';
-                document.getElementById('type-input-form').style.display = 'none';
+                document.getElementById('show-type-btn')?.click();
                 document.getElementById('new-type-name').value = '';
             }
 
@@ -1773,16 +1769,16 @@ document.addEventListener('alpine:init', () => {
                     input.focus();
                     input.select();
 
-                    input.addEventListener('input', (e) => {
+                    input.addEventListener('input', (event) => {
                         if (confirmBtn) {
-                            confirmBtn.disabled = !e.target.value.trim();
+                            confirmBtn.disabled = !event.target.value.trim();
                         }
                     });
 
-                    input.addEventListener('keydown', (e) => {
-                        if (e.key === 'Enter' && input.value.trim()) {
+                    input.addEventListener('keydown', (event) => {
+                        if (event.key === 'Enter' && input.value.trim()) {
                             this.confirmTypeRename(typeId);
-                        } else if (e.key === 'Escape') {
+                        } else if (event.key === 'Escape') {
                             this.cancelTypeRename(typeId);
                         }
                     });
@@ -1824,16 +1820,16 @@ document.addEventListener('alpine:init', () => {
                     input.focus();
                     input.select();
 
-                    input.addEventListener('input', (e) => {
+                    input.addEventListener('input', (event) => {
                         if (confirmBtn) {
-                            confirmBtn.disabled = !e.target.value.trim();
+                            confirmBtn.disabled = !event.target.value.trim();
                         }
                     });
 
-                    input.addEventListener('keydown', (e) => {
-                        if (e.key === 'Enter' && input.value.trim()) {
+                    input.addEventListener('keydown', (event) => {
+                        if (event.key === 'Enter' && input.value.trim()) {
                             this.confirmCategoryRename(categoryId);
-                        } else if (e.key === 'Escape') {
+                        } else if (event.key === 'Escape') {
                             this.cancelCategoryRename(categoryId);
                         }
                     });
