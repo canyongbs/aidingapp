@@ -37,12 +37,14 @@
 namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\ServiceManagement\Database\Factories\ServiceRequestTypeCategoryFactory;
 use AidingApp\ServiceManagement\Observers\ServiceRequestTypeCategoryObserver;
 use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use OwenIt\Auditing\Contracts\Auditable;
 use Staudenmeir\EloquentHasManyDeep\HasManyDeep;
 use Staudenmeir\EloquentHasManyDeep\HasRelationships;
@@ -56,6 +58,8 @@ class ServiceRequestTypeCategory extends BaseModel implements Auditable
     use SoftDeletes;
     use AuditableTrait;
     use HasRelationships;
+    /** @use HasFactory<ServiceRequestTypeCategoryFactory> */
+    use HasFactory;
 
     protected $fillable = [
         'name',
