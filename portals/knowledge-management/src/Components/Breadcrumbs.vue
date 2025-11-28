@@ -33,7 +33,7 @@
 -->
 <script setup>
     import { ChevronRightIcon, HomeIcon } from '@heroicons/vue/24/outline';
-    import { defineProps } from 'vue';
+    import { defineEmits, defineProps } from 'vue';
 
     defineProps({
         currentCrumb: {
@@ -41,10 +41,12 @@
             required: true,
         },
         breadcrumbs: {
-            type: Object,
-            default: {},
+            type: Array,
+            default: () => [],
         },
     });
+
+    const emit = defineEmits(['crumb-click']);
 </script>
 
 <template>
@@ -58,15 +60,26 @@
                     </router-link>
                 </div>
             </li>
-            <li v-for="(crumb, index) in breadcrumbs" :key="crumb.route + index">
+            <li v-for="(crumb, index) in breadcrumbs" :key="(crumb.id || crumb.name) + index">
                 <div class="flex items-center">
                     <ChevronRightIcon class="h-5 w-5 flex-shrink-0 text-gray-400" aria-hidden="true" />
-                    <router-link
-                        :to="{ name: crumb.route, params: crumb.params }"
-                        class="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700"
-                    >
-                        {{ crumb.name }}
-                    </router-link>
+
+                    <!-- If crumb.route is provided, use router-link. Otherwise render a button that emits an event so pages like SelectServiceRequestType can handle category navigation -->
+                    <div class="ml-4 text-sm font-medium">
+                        <template v-if="crumb.route">
+                            <router-link
+                                :to="{ name: crumb.route, params: crumb.params }"
+                                class="text-gray-500 hover:text-gray-700"
+                            >
+                                {{ crumb.name }}
+                            </router-link>
+                        </template>
+                        <template v-else>
+                            <button @click="emit('crumb-click', crumb)" class="text-gray-500 hover:text-gray-700">
+                                {{ crumb.name }}
+                            </button>
+                        </template>
+                    </div>
                 </div>
             </li>
             <li>
