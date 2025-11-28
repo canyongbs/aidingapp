@@ -129,6 +129,22 @@
                     data-sortable="categories"
                     data-parent-id=""
                 ></div>
+
+                {{-- Empty state: show when there are no categories and no types --}}
+                <div
+                    x-cloak
+                    x-show="(!treeData.categories || treeData.categories.length === 0) && (!treeData.uncategorized_types || treeData.uncategorized_types.length === 0)"
+                    class="flex flex-col items-center justify-center gap-3 py-12 text-center"
+                    style="min-height: 120px;"
+                >
+                    {{-- Icon rendered server-side via @svg helper, pass heroicon name --}}
+                    <div class="flex items-center justify-center">
+                        @svg('heroicon-m-inbox', 'class="h-12 w-12 text-gray-400 dark:text-gray-400"')
+                    </div>
+
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">No types or categories yet</h3>
+                    <p class="max-w-xl text-sm text-gray-600 dark:text-gray-400">Create a category or add a type to get started. Use the buttons below to add your first items.</p>
+                </div>
             </div>
         </div>
 
@@ -168,7 +184,7 @@
             {{-- Add Category/Type Buttons (Right) --}}
             <div class="flex shrink-0 gap-3">
                 {{-- Add Category Button --}}
-                <div>
+                <div id="show-category-wrapper">
                     <x-filament::button
                         id="show-category-btn"
                         type="button"
@@ -208,7 +224,7 @@
                 </div>
 
                 {{-- Add Type Button --}}
-                <div>
+                <div id="show-type-wrapper">
                     <x-filament::button
                         id="show-type-btn"
                         type="button"
