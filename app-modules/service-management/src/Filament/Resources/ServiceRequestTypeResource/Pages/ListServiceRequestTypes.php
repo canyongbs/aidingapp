@@ -342,17 +342,17 @@ class ListServiceRequestTypes extends ListRecords
                 $categoryId = $newCategoryIds[$originalCategoryId];
             }
 
-            // Skip if this is a new category (temp IDs start with 'temp_')
-            if (str_starts_with($originalCategoryId, 'temp_')) {
-                // For new categories, still process their children
-                if (! empty($category['children'])) {
-                    $this->updateCategoriesRecursive($category['children'], $categoryId, $newCategoryIds);
-                }
-
+            // If this is a new category that hasn't been created yet (no mapping), skip it.
+            // Otherwise (mapping exists) fall through and update the created category so
+            // moved types get their category_id updated and parent/sort can be set.
+            if (str_starts_with($originalCategoryId, 'temp_') && ! isset($newCategoryIds[$originalCategoryId])) {
+                // For truly new-but-not-yet-created categories we can't do anything here.
+                // Still attempt to recurse into children using the (unknown) category id would be wrong,
+                // so skip.
                 continue;
             }
 
-            // Update existing categories (UUIDs or any non-temp IDs)
+            // Update existing or newly-created categories (UUIDs or any non-temp IDs)
             $actualParentId = $parentId;
 
             // If parent is a new category, map its temp ID to real ID
