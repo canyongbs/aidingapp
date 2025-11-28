@@ -667,13 +667,42 @@ document.addEventListener('alpine:init', () => {
             // Create a simplified ghost element
             const ghost = document.createElement('div');
             ghost.className = 'drag-ghost';
-            const spanElement = element.querySelector('span');
-            ghost.textContent = spanElement ? spanElement.textContent : 'Dragging...';
+
+            // Prefer the visible name text. Order: input (rename), anchor (type link), then a non-numeric span
+            let nameText = '';
+            const inputEl = element.querySelector('input');
+            const anchorEl = element.querySelector('a');
+
+            if (inputEl) {
+                nameText = inputEl.value || inputEl.textContent || '';
+            } else if (anchorEl) {
+                nameText = anchorEl.textContent || '';
+            } else {
+                const spans = element.querySelectorAll('span');
+                if (spans && spans.length > 0) {
+                    // Prefer the first non-numeric span (to avoid the request count like "0")
+                    let found = '';
+                    for (let i = 0; i < spans.length; i++) {
+                        const txt = (spans[i].textContent || '').trim();
+                        if (!txt) continue;
+                        if (!/^\d+$/.test(txt)) {
+                            found = txt;
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        found = (spans[0].textContent || '').trim();
+                    }
+                    nameText = found;
+                }
+            }
+
+            ghost.textContent = nameText || 'Dragging...';
             ghost.style.cssText = `
                     position: fixed;
                     pointer-events: none;
                     z-index: 9999;
-                    background: rgba(59, 130, 246, 0.9);
+                    background: rgba(248, 162, 8, 0.9);
                     color: white;
                     padding: 8px 12px;
                     border-radius: 6px;
