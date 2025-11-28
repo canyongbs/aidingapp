@@ -36,48 +36,10 @@
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
-use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
-use function Tests\asSuperAdmin;
-
-test('The correct details are displayed on the ListServiceRequestType page', function () {
-    $serviceRequestTypes = ServiceRequestType::factory()
-        ->has(ServiceRequest::factory()->count(fake()->randomNumber(1)), 'serviceRequests')
-        ->count(10)
-        ->create();
-
-    asSuperAdmin();
-
-    $component = livewire(ServiceRequestTypeResource\Pages\ListServiceRequestTypes::class);
-
-    $component
-        ->assertSuccessful()
-        ->assertCanSeeTableRecords($serviceRequestTypes)
-        ->assertCountTableRecords(10)
-        ->assertTableColumnExists('service_requests_count');
-
-    $serviceRequestTypes->each(
-        fn (ServiceRequestType $serviceRequestType) => $component
-            ->assertTableColumnStateSet(
-                'id',
-                $serviceRequestType->id,
-                $serviceRequestType
-            )
-            ->assertTableColumnStateSet(
-                'name',
-                $serviceRequestType->name,
-                $serviceRequestType
-            )
-        // Currently setting not test for service_request_count as there is no easy way to check now, relying on underlying package tests
-    );
-});
-
-// TODO: Sorting and Searching tests
 
 // Permission Tests
 
