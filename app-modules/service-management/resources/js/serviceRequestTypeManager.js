@@ -894,20 +894,23 @@ document.addEventListener('alpine:init', () => {
                 const draggedContainer = this.dragData.draggedElement.closest('[data-sortable="types"]');
                 const targetContainer = actualTarget.closest('[data-sortable="types"]');
 
-                if (
-                    draggedContainer &&
-                    targetContainer &&
-                    draggedContainer.dataset.categoryId === targetContainer.dataset.categoryId
-                ) {
-                    const insertIndex = this.calculateInsertionPosition(targetContainer, event.clientY);
-                    return {
-                        type: 'insert',
-                        container: targetContainer,
-                        insertIndex: insertIndex,
-                    };
-                } else {
-                    return null;
+                if (draggedContainer && targetContainer) {
+                    // Normalize category ids: undefined/empty -> null (uncategorized)
+                    const draggedCat = draggedContainer.dataset.categoryId || null;
+                    const targetCat = targetContainer.dataset.categoryId || null;
+
+                    // Allow insert when both containers are same category OR when the target is uncategorized
+                    if (draggedCat === targetCat || targetCat === null) {
+                        const insertIndex = this.calculateInsertionPosition(targetContainer, event.clientY);
+                        return {
+                            type: 'insert',
+                            container: targetContainer,
+                            insertIndex: insertIndex,
+                        };
+                    }
                 }
+
+                return null;
             }
 
             if (this.dragData.draggedType === 'type') {
