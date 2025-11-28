@@ -242,7 +242,7 @@ document.addEventListener('alpine:init', () => {
                             }
                             ${
                                 this.canEdit && !isRenaming
-                                    ? `<button @click="showTypeInput('${category.id}')" class="p-1.5 -m-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors" x-tooltip.raw="Add type">
+                                    ? `<button @click="showTypeInput('${category.id}')" class="p-1.5 -m-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors" x-tooltip.raw="Add type in category">
                                             <svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
                                                 <path d="M8.75 3.75a.75.75 0 0 0-1.5 0v3.5h-3.5a.75.75 0 0 0 0 1.5h3.5v3.5a.75.75 0 0 0 1.5 0v-3.5h3.5a.75.75 0 0 0 0-1.5h-3.5v-3.5Z" />
                                             </svg>
@@ -284,7 +284,7 @@ document.addEventListener('alpine:init', () => {
                             this.canEdit && canAddChildCategory && showCategoryInput
                                 ? `
                                     <div id="category-input-${category.id}" class="flex gap-2 mt-2" style="margin-left: ${indent + 24}px">
-                                        <input id="child-category-${category.id}" type="text" placeholder="Name of new child category" class="block w-full rounded-lg border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+                                        <input id="child-category-${category.id}" type="text" placeholder="New child category name." class="block w-full rounded-lg border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
                                         <button @click="createCategory('${category.id}')" class="rounded-lg bg-primary-600 px-3 py-1 text-sm text-white hover:bg-primary-700">Add</button>
                                         <button @click="hideCategoryInput('${category.id}')" class="rounded-lg border border-gray-300 bg-white px-3 py-1 text-sm text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">Cancel</button>
                                     </div>
@@ -296,7 +296,7 @@ document.addEventListener('alpine:init', () => {
                             this.canEdit && showTypeInput
                                 ? `
                                     <div id="type-input-${category.id}" class="flex gap-2 mt-2" style="margin-left: ${indent + 24}px">
-                                        <input id="child-type-${category.id}" type="text" placeholder="Name of new type" class="block w-full rounded-lg border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+                                        <input id="child-type-${category.id}" type="text" placeholder="Type name..." class="block w-full rounded-lg border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
                                         <button @click="createType('${category.id}')" class="rounded-lg bg-primary-600 px-3 py-1 text-sm text-white hover:bg-primary-700">Add</button>
                                         <button @click="hideTypeInput('${category.id}')" class="rounded-lg border border-gray-300 bg-white px-3 py-1 text-sm text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">Cancel</button>
                                     </div>
@@ -329,10 +329,11 @@ document.addEventListener('alpine:init', () => {
         attachEventListeners() {
             // Show category input button
             document.getElementById('show-category-btn')?.addEventListener('click', () => {
-                // Close type input if open
-                document.getElementById('show-type-btn').style.display = 'block';
+                // Completely hide the add-type button while adding a category
+                const showTypeBtn = document.getElementById('show-type-btn');
+                if (showTypeBtn) showTypeBtn.style.display = 'none';
                 document.getElementById('type-input-form').style.display = 'none';
-                document.getElementById('new-type-name').value = '';
+                if (document.getElementById('new-type-name')) document.getElementById('new-type-name').value = '';
 
                 // Show category input
                 document.getElementById('show-category-btn').style.display = 'none';
@@ -345,17 +346,29 @@ document.addEventListener('alpine:init', () => {
                 document.getElementById('show-category-btn').style.display = 'block';
                 document.getElementById('category-input-form').style.display = 'none';
                 document.getElementById('new-category-name').value = '';
+
+                // Reshow the add-type button when category add is cancelled
+                const showTypeBtn = document.getElementById('show-type-btn');
+                if (showTypeBtn) showTypeBtn.style.display = 'block';
             });
 
             // Create category button
             document.getElementById('create-category-btn')?.addEventListener('click', () => {
                 this.createCategory(null);
+
+                // After confirming create, reshow the add-type button
+                const showTypeBtn = document.getElementById('show-type-btn');
+                if (showTypeBtn) showTypeBtn.style.display = 'block';
             });
 
             // Category input enter key
             document.getElementById('new-category-name')?.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
                     this.createCategory(null);
+
+                    // After confirming create via Enter, reshow add-type
+                    const showTypeBtn = document.getElementById('show-type-btn');
+                    if (showTypeBtn) showTypeBtn.style.display = 'block';
                 } else if (e.key === 'Escape') {
                     document.getElementById('cancel-category-btn')?.click();
                 }
@@ -363,10 +376,11 @@ document.addEventListener('alpine:init', () => {
 
             // Show type input button
             document.getElementById('show-type-btn')?.addEventListener('click', () => {
-                // Close category input if open
-                document.getElementById('show-category-btn').style.display = 'block';
+                // Completely hide the add-category button while adding a type
+                const showCategoryBtn = document.getElementById('show-category-btn');
+                if (showCategoryBtn) showCategoryBtn.style.display = 'none';
                 document.getElementById('category-input-form').style.display = 'none';
-                document.getElementById('new-category-name').value = '';
+                if (document.getElementById('new-category-name')) document.getElementById('new-category-name').value = '';
 
                 // Show type input
                 document.getElementById('show-type-btn').style.display = 'none';
@@ -379,17 +393,29 @@ document.addEventListener('alpine:init', () => {
                 document.getElementById('show-type-btn').style.display = 'block';
                 document.getElementById('type-input-form').style.display = 'none';
                 document.getElementById('new-type-name').value = '';
+
+                // Reshow add-category when type add is cancelled
+                const showCategoryBtn = document.getElementById('show-category-btn');
+                if (showCategoryBtn) showCategoryBtn.style.display = 'block';
             });
 
             // Create type button
             document.getElementById('create-type-btn')?.addEventListener('click', () => {
                 this.createType(null);
+
+                // After confirming create, reshow add-category
+                const showCategoryBtn = document.getElementById('show-category-btn');
+                if (showCategoryBtn) showCategoryBtn.style.display = 'block';
             });
 
             // Type input enter key
             document.getElementById('new-type-name')?.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
                     this.createType(null);
+
+                    // After confirming create via Enter, reshow add-category
+                    const showCategoryBtn = document.getElementById('show-category-btn');
+                    if (showCategoryBtn) showCategoryBtn.style.display = 'block';
                 } else if (e.key === 'Escape') {
                     document.getElementById('cancel-type-btn')?.click();
                 }
