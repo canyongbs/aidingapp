@@ -8,20 +8,12 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\ListServiceRequestTypes;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
-use AidingApp\ServiceManagement\Database\Factories\ServiceRequestTypeCategoryFactory;
-use App\Models\User;
-use AidingApp\Contact\Models\Contact;
 
 use function Pest\Livewire\livewire;
-use function Pest\Laravel\actingAs;
-use function Pest\Laravel\assertDatabaseHas;
-use function Pest\Laravel\assertDatabaseCount;
 use function Tests\asSuperAdmin;
-
 
 beforeEach(function () {
     asSuperAdmin();
@@ -150,4 +142,3 @@ it('moves type from one existing category to another existing category', functio
 
     expect($type->fresh()->category_id)->toBe($catB->id);
 });
-

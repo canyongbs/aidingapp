@@ -36,4 +36,3 @@ class ServiceRequestTypeCategoryFactory extends Factory
         });
     }
 }
-
