@@ -151,7 +151,7 @@ document.addEventListener('alpine:init', () => {
                                         id="rename-type-${type.id}"
                                         type="text"
                                         value="${this.escapeHtml(type.name)}"
-                                        class="flex-1 text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-primary-500 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                        class="flex-1 h-5 text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-primary-500 rounded px-2 py-0 focus:outline-none focus:ring-2 focus:ring-primary-500"
                                     />
                                     <button
                                         type="button"
@@ -223,7 +223,7 @@ document.addEventListener('alpine:init', () => {
                                             id="rename-category-${category.id}"
                                             type="text"
                                             value="${this.escapeHtml(category.name)}"
-                                            class="flex-1 font-medium text-gray-900 dark:text-white bg-white dark:bg-gray-600 border border-primary-500 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                            class="flex-1 h-6 font-medium text-gray-900 dark:text-white bg-white dark:bg-gray-600 border border-primary-500 rounded px-2 py-0 focus:outline-none focus:ring-2 focus:ring-primary-500"
                                         />
                                         <button
                                             type="button"

@@ -184,7 +184,7 @@
                         style="display: none;"
                     >
                         <input
-                            class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:text-sm"
+                            class="block h-8 w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:text-sm"
                             id="new-category-name"
                             type="text"
                             placeholder="Category name..."
@@ -224,7 +224,7 @@
                         style="display: none;"
                     >
                         <input
-                            class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:text-sm"
+                            class="block h-8 w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:text-sm"
                             id="new-type-name"
                             type="text"
                             placeholder="Type name..."
@@ -259,9 +259,9 @@
                 left: 0;
                 right: 0;
                 height: 2px;
-                background: rgb(254, 195, 33);
+                background: rgb(248, 162, 8);
                 border-radius: 1px;
-                box-shadow: 0 0 6px rgba(254, 195, 33, 0.5);
+                box-shadow: 0 0 6px rgba(248, 162, 8, 0.5);
                 z-index: 1000;
                 pointer-events: none;
             }
@@ -273,7 +273,7 @@
                 top: -3px;
                 width: 8px;
                 height: 8px;
-                background: rgb(254, 195, 33);
+                background: rgb(248, 162, 8);
                 border-radius: 50%;
             }
 
@@ -291,7 +291,7 @@
                 top: 50%;
                 left: 50%;
                 transform: translate(-50%, -50%);
-                background: rgb(254, 195, 33);
+                background: rgb(248, 162, 8);
                 color: white;
                 padding: 4px 8px;
                 border-radius: 4px;
