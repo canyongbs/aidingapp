@@ -103,15 +103,15 @@ class ServiceRequestTypesController extends Controller
         }
 
         // Recursive sort for children and types using a closure to avoid function redeclaration
-        $sortRecursive = function (&$nodes) use (&$sortRecursive) {
-            usort($nodes, function ($a, $b) {
-                return ($a['sort'] ?? 0) <=> ($b['sort'] ?? 0);
+        $sortRecursive = function (array &$nodes) use (&$sortRecursive) {
+            usort($nodes, function (array $left, array $right): int {
+                return ($left['sort'] ?? 0) <=> ($right['sort'] ?? 0);
             });
 
             foreach ($nodes as &$node) {
                 if (! empty($node['types'])) {
-                    usort($node['types'], function ($a, $b) {
-                        return ($a['sort'] ?? 0) <=> ($b['sort'] ?? 0);
+                    usort($node['types'], function (array $left, array $right): int {
+                        return ($left['sort'] ?? 0) <=> ($right['sort'] ?? 0);
                     });
                 }
 
@@ -124,8 +124,8 @@ class ServiceRequestTypesController extends Controller
         $sortRecursive($topLevelCategories);
 
         // Also sort top-level types
-        usort($topLevelTypes, function ($a, $b) {
-            return ($a['sort'] ?? 0) <=> ($b['sort'] ?? 0);
+        usort($topLevelTypes, function (array $left, array $right): int {
+            return ($left['sort'] ?? 0) <=> ($right['sort'] ?? 0);
         });
 
         return response()->json([
