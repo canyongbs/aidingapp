@@ -76,17 +76,12 @@ document.addEventListener('alpine:init', () => {
         render() {
             this.renderCategories();
             this.renderUncategorizedTypes();
-            this.updateSaveButton();
 
             // Only setup drag and drop if we're not currently dragging
             // to avoid attaching duplicate event listeners during a drag operation
             if (!this.dragData.isDragging) {
                 this.setupDragAndDrop();
             }
-        },
-
-        updateSaveButton() {
-            // Buttons are reactive via Alpine's bindings; no DOM updates needed here.
         },
 
         renderCategories() {
