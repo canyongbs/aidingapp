@@ -61,8 +61,9 @@
             x-transition:leave-start="opacity-100 translate-y-0"
             x-transition:leave-end="opacity-0 -translate-y-2"
         >
-            <div class="flex items-center justify-between gap-4">
-                <div class="flex items-center gap-3">
+            <!-- Responsive layout: column on mobile, row on small+ screens -->
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div class="flex-1 flex items-start sm:items-center gap-3">
                     <svg
                         class="h-6 w-6 text-warning-600 dark:text-warning-400"
                         xmlns="http://www.w3.org/2000/svg"
@@ -83,30 +84,35 @@
                         </p>
                     </div>
                 </div>
-                <div class="flex items-center gap-2">
-                    <div
-                        x-data="{ saving: false }"
-                        x-init="$watch('isSaving', value => saving = value)"
-                    >
-                        <x-filament::button
-                            @click="saveChanges()"
-                            x-bind:disabled="isSaving"
-                            icon="heroicon-m-arrow-down-tray"
-                            size="sm"
+                <!-- Buttons: full-width and centered on mobile, aligned to right on sm+ -->
+                <div class="w-full sm:w-auto mt-3 sm:mt-0">
+                    <div class="flex w-full sm:w-auto justify-center sm:justify-end gap-2">
+                        <div
+                            x-data="{ saving: false }"
+                            x-init="$watch('isSaving', value => saving = value)"
                         >
-                            <span x-text="isSaving ? 'Saving...' : 'Save Changes'"></span>
+                            <x-filament::button
+                                @click="saveChanges()"
+                                x-bind:disabled="isSaving"
+                                icon="heroicon-m-arrow-down-tray"
+                                size="sm"
+                                x-show="hasUnsavedChanges"
+                            >
+                                <span x-text="isSaving ? 'Saving...' : 'Save Changes'"></span>
+                            </x-filament::button>
+                        </div>
+
+                        <x-filament::button
+                            @click="discardChanges()"
+                            x-bind:disabled="isSaving"
+                            color="gray"
+                            icon="heroicon-m-x-mark"
+                            size="sm"
+                            x-show="hasUnsavedChanges"
+                        >
+                            Discard
                         </x-filament::button>
                     </div>
-
-                    <x-filament::button
-                        @click="discardChanges()"
-                        x-bind:disabled="isSaving"
-                        color="gray"
-                        icon="heroicon-m-x-mark"
-                        size="sm"
-                    >
-                        Discard
-                    </x-filament::button>
                 </div>
             </div>
         </div>
@@ -151,11 +157,11 @@
 
         {{-- Bottom Action Buttons --}}
         <div
-            class="flex items-center justify-between gap-4"
+            class="flex flex-col items-center justify-between gap-4 sm:flex-row sm:items-center"
             x-show="canEdit"
         >
             {{-- Save/Discard Buttons (Left) --}}
-            <div class="flex shrink-0 gap-3">
+            <div class="flex w-full justify-start gap-3 sm:w-auto">
                 <x-filament::button
                     id="save-changes-btn"
                     type="button"
@@ -183,7 +189,7 @@
             </div>
 
             {{-- Add Category/Type Buttons (Right) --}}
-            <div class="flex shrink-0 gap-3">
+            <div class="flex w-full justify-end gap-3 sm:w-auto">
                 {{-- Add Category Button --}}
                 <div id="show-category-wrapper">
                     <x-filament::button
@@ -196,31 +202,35 @@
                         Add Category
                     </x-filament::button>
                     <div
-                        class="flex gap-2"
+                        class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row"
                         id="category-input-form"
                         style="display: none;"
                     >
-                        <input
-                            class="block h-8 w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:text-sm"
-                            id="new-category-name"
-                            type="text"
-                            placeholder="Name of new category"
-                        />
-                        <x-filament::button
-                            id="create-category-btn"
-                            type="button"
-                            size="sm"
-                        >
-                            Add
-                        </x-filament::button>
-                        <x-filament::button
-                            id="cancel-category-btn"
-                            type="button"
-                            color="gray"
-                            size="sm"
-                        >
-                            Cancel
-                        </x-filament::button>
+                        <div class="w-full">
+                            <input
+                                class="block h-8 w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:text-sm"
+                                id="new-category-name"
+                                type="text"
+                                placeholder="Name of new category"
+                            />
+                        </div>
+                        <div class="flex gap-2">
+                            <x-filament::button
+                                id="create-category-btn"
+                                type="button"
+                                size="sm"
+                            >
+                                Add
+                            </x-filament::button>
+                            <x-filament::button
+                                id="cancel-category-btn"
+                                type="button"
+                                color="gray"
+                                size="sm"
+                            >
+                                Cancel
+                            </x-filament::button>
+                        </div>
                     </div>
                 </div>
 
@@ -236,31 +246,35 @@
                         Add Type
                     </x-filament::button>
                     <div
-                        class="flex gap-2"
+                        class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row"
                         id="type-input-form"
                         style="display: none;"
                     >
-                        <input
-                            class="block h-8 w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:text-sm"
-                            id="new-type-name"
-                            type="text"
-                            placeholder="Name of new type"
-                        />
-                        <x-filament::button
-                            id="create-type-btn"
-                            type="button"
-                            size="sm"
-                        >
-                            Add
-                        </x-filament::button>
-                        <x-filament::button
-                            id="cancel-type-btn"
-                            type="button"
-                            color="gray"
-                            size="sm"
-                        >
-                            Cancel
-                        </x-filament::button>
+                        <div class="w-full">
+                            <input
+                                class="block h-8 w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:text-sm"
+                                id="new-type-name"
+                                type="text"
+                                placeholder="Name of new type"
+                            />
+                        </div>
+                        <div class="flex gap-2">
+                            <x-filament::button
+                                id="create-type-btn"
+                                type="button"
+                                size="sm"
+                            >
+                                Add
+                            </x-filament::button>
+                            <x-filament::button
+                                id="cancel-type-btn"
+                                type="button"
+                                color="gray"
+                                size="sm"
+                            >
+                                Cancel
+                            </x-filament::button>
+                        </div>
                     </div>
                 </div>
             </div>
