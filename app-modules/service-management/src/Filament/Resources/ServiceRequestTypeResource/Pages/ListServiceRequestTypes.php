@@ -79,14 +79,14 @@ class ListServiceRequestTypes extends ListRecords
     public function getHierarchicalData(): array
     {
         $categories = ServiceRequestTypeCategory::query()
-            ->with([ /** @phpstan-ignore argument.type */
+            ->with([/** @phpstan-ignore argument.type */
                 'children' => function (HasMany $query) {
                     $query->orderBy('sort')
-                        ->with([ /** @phpstan-ignore argument.type */
+                        ->with([/** @phpstan-ignore argument.type */
                             'types' => fn (HasMany $typeQuery) => $typeQuery->orderBy('sort')->withCount('serviceRequests'),
                             'children' => function (HasMany $childQuery) {
                                 $childQuery->orderBy('sort')
-                                    ->with([ /** @phpstan-ignore argument.type */
+                                    ->with([/** @phpstan-ignore argument.type */
                                         'types' => fn (HasMany $typeQuery) => $typeQuery->orderBy('sort')->withCount('serviceRequests'),
                                     ])
                                     ->withCount('descendantServiceRequests');
