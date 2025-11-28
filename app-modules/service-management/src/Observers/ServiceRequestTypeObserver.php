@@ -51,9 +51,9 @@ class ServiceRequestTypeObserver
                     throw new InvalidArgumentException('Category ID must be a valid UUID');
                 }
 
-                $serviceRequestType->sort = DB::raw("(select coalesce(max(sort), 0) + 1 from service_request_types where category_id = '{$serviceRequestType->category_id}')");
+                $serviceRequestType->sort = DB::raw("(select coalesce(max(sort), 0) + 1 from service_request_types where category_id = '{$serviceRequestType->category_id}')"); /** @phpstan-ignore assign.propertyType */
             } else {
-                $serviceRequestType->sort = DB::raw('(select coalesce(max(sort), 0) + 1 from service_request_types where category_id is null)');
+                $serviceRequestType->sort = DB::raw('(select coalesce(max(sort), 0) + 1 from service_request_types where category_id is null)'); /** @phpstan-ignore assign.propertyType */
             }
         }
     }

@@ -51,9 +51,9 @@ class ServiceRequestTypeCategoryObserver
                     throw new InvalidArgumentException('Parent ID must be a valid UUID');
                 }
 
-                $category->sort = DB::raw("(select coalesce(max(sort), 0) + 1 from service_request_type_categories where parent_id = '{$category->parent_id}')");
+                $category->sort = DB::raw("(select coalesce(max(sort), 0) + 1 from service_request_type_categories where parent_id = '{$category->parent_id}')"); /** @phpstan-ignore assign.propertyType */
             } else {
-                $category->sort = DB::raw('(select coalesce(max(sort), 0) + 1 from service_request_type_categories where parent_id is null)');
+                $category->sort = DB::raw('(select coalesce(max(sort), 0) + 1 from service_request_type_categories where parent_id is null)'); /** @phpstan-ignore assign.propertyType */
             }
         }
     }

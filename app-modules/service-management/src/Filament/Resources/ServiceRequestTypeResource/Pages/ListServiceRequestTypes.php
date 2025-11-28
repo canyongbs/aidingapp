@@ -41,6 +41,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -78,15 +79,15 @@ class ListServiceRequestTypes extends ListRecords
     public function getHierarchicalData(): array
     {
         $categories = ServiceRequestTypeCategory::query()
-            ->with([
-                'children' => function ($query) {
+            ->with([ /** @phpstan-ignore argument.type */
+                'children' => function (HasMany $query) {
                     $query->orderBy('sort')
-                        ->with([
-                            'types' => fn ($typeQuery) => $typeQuery->orderBy('sort')->withCount('serviceRequests'),
-                            'children' => function ($childQuery) {
+                        ->with([ /** @phpstan-ignore argument.type */
+                            'types' => fn (HasMany $typeQuery) => $typeQuery->orderBy('sort')->withCount('serviceRequests'),
+                            'children' => function (HasMany $childQuery) {
                                 $childQuery->orderBy('sort')
-                                    ->with([
-                                        'types' => fn ($typeQuery) => $typeQuery->orderBy('sort')->withCount('serviceRequests'),
+                                    ->with([ /** @phpstan-ignore argument.type */
+                                        'types' => fn (HasMany $typeQuery) => $typeQuery->orderBy('sort')->withCount('serviceRequests'),
                                     ])
                                     ->withCount('descendantServiceRequests');
                             },

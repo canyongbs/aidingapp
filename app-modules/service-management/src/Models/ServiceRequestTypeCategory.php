@@ -47,6 +47,9 @@ use OwenIt\Auditing\Contracts\Auditable;
 use Staudenmeir\EloquentHasManyDeep\HasManyDeep;
 use Staudenmeir\EloquentHasManyDeep\HasRelationships;
 
+/**
+ * @mixin IdeHelperServiceRequestTypeCategory
+ */
 #[ObservedBy([ServiceRequestTypeCategoryObserver::class])]
 class ServiceRequestTypeCategory extends BaseModel implements Auditable
 {
