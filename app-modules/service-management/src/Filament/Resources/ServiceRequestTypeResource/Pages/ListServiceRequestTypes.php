@@ -48,6 +48,9 @@ use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Renderless;
 
+/**
+ * @property-read array<string, mixed> $hierarchicalData
+ */
 class ListServiceRequestTypes extends ListRecords
 {
     protected static string $resource = ServiceRequestTypeResource::class;
@@ -60,12 +63,18 @@ class ListServiceRequestTypes extends ListRecords
         return auth()->user()->can('updateAny', ServiceRequestType::class);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     #[Computed]
     public function hierarchicalData(): array
     {
         return $this->getHierarchicalData();
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getHierarchicalData(): array
     {
         $categories = ServiceRequestTypeCategory::query()
@@ -103,6 +112,9 @@ class ListServiceRequestTypes extends ListRecords
         ];
     }
 
+    /**
+     * @param array<string, mixed> $treeData
+     */
     #[Renderless]
     public function saveChanges(array $treeData): void
     {
@@ -212,6 +224,9 @@ class ListServiceRequestTypes extends ListRecords
             ->send();
     }
 
+    /**
+     * @param array<int, string> $typeIds
+     */
     protected function handleDeletedTypes(array $typeIds): void
     {
         if (empty($typeIds)) {
@@ -234,6 +249,9 @@ class ListServiceRequestTypes extends ListRecords
         }
     }
 
+    /**
+     * @param array<int, string> $categoryIds
+     */
     protected function handleDeletedCategories(array $categoryIds): void
     {
         if (empty($categoryIds)) {
@@ -267,6 +285,10 @@ class ListServiceRequestTypes extends ListRecords
         $category->forceDelete();
     }
 
+    /**
+     * @param Collection<int, ServiceRequestTypeCategory> $categories
+     * @return array<int, array<string, mixed>>
+     */
     protected function formatCategories(Collection $categories): array
     {
         return $categories->map(function (ServiceRequestTypeCategory $category) {
@@ -283,6 +305,10 @@ class ListServiceRequestTypes extends ListRecords
         })->toArray();
     }
 
+    /**
+     * @param Collection<int, ServiceRequestType> $types
+     * @return array<int, array<string, mixed>>
+     */
     protected function formatTypes(Collection $types): array
     {
         return $types->map(function (ServiceRequestType $type) {
@@ -298,7 +324,11 @@ class ListServiceRequestTypes extends ListRecords
         })->toArray();
     }
 
-    protected function updateCategoriesRecursive(array $categories, $parentId, array $newCategoryIds): void
+    /**
+     * @param array<int, array<string, mixed>> $categories
+     * @param array<string, string> $newCategoryIds
+     */
+    protected function updateCategoriesRecursive(array $categories, ?string $parentId, array $newCategoryIds): void
     {
         foreach ($categories as $index => $category) {
             $originalCategoryId = $category['id'];
@@ -352,7 +382,10 @@ class ListServiceRequestTypes extends ListRecords
         }
     }
 
-    private function assertMaxCategoryDepth(array $categories, int $depth = 0): void
+    /**
+     * @param array<int, array<string, mixed>> $categories
+     */
+    protected function assertMaxCategoryDepth(array $categories, int $depth = 0): void
     {
         if ($depth > 1) {
             throw ValidationException::withMessages([
