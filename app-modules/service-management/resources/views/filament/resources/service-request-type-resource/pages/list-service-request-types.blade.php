@@ -117,77 +117,11 @@
             </div>
         </div>
 
-        {{-- Hierarchical Tree --}}
-        <div>
-            <div class="space-y-2">
-                {{-- Uncategorized Types (at top) --}}
-                <div
-                    class="mb-4 min-h-4 space-y-1 rounded p-0.5 transition-colors duration-150 ease-in-out"
-                    id="uncategorized-types"
-                    data-sortable="types"
-                    data-category-id=""
-                ></div>
-
-                {{-- Root Level Categories --}}
-                <div
-                    class="flex min-h-5 flex-col gap-2 rounded-md p-0.5 transition-colors duration-150 ease-in-out"
-                    id="root-categories"
-                    data-sortable="categories"
-                    data-parent-id=""
-                ></div>
-
-                {{-- Empty state: show when there are no categories and no types --}}
-                <div
-                    class="flex flex-col items-center justify-center gap-3 py-12 text-center"
-                    style="min-height: 120px;"
-                    x-cloak
-                    x-show="(!treeData.categories || treeData.categories.length === 0) && (!treeData.uncategorized_types || treeData.uncategorized_types.length === 0)"
-                >
-                    {{-- Icon rendered server-side via @svg helper, pass heroicon name --}}
-                    <div class="flex items-center justify-center">
-                        @svg('heroicon-m-inbox', 'class="h-12 w-12 text-gray-400 dark:text-gray-400"')
-                    </div>
-
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">No types or categories yet</h3>
-                    <p class="max-w-xl text-sm text-gray-600 dark:text-gray-400">Create a category or add a type to get
-                        started. Use the buttons below to add your first items.</p>
-                </div>
-            </div>
-        </div>
-
-        {{-- Bottom Action Buttons --}}
+        {{-- Top Action Buttons --}}
         <div
-            class="flex flex-col items-center justify-between gap-4 sm:flex-row sm:items-center"
+            class="flex flex-col items-center justify-end gap-4 sm:flex-row sm:items-center"
             x-show="canEdit"
         >
-            {{-- Save/Discard Buttons (Left) --}}
-            <div class="flex w-full justify-start gap-3 sm:w-auto">
-                <x-filament::button
-                    id="save-changes-btn"
-                    type="button"
-                    size="sm"
-                    icon="heroicon-m-check"
-                    x-bind:disabled="isSaving"
-                    x-show="hasUnsavedChanges"
-                    @click="saveChanges()"
-                >
-                    <span x-text="isSaving ? 'Saving...' : 'Save Changes'"></span>
-                </x-filament::button>
-
-                <x-filament::button
-                    id="discard-changes-btn"
-                    type="button"
-                    color="gray"
-                    size="sm"
-                    icon="heroicon-m-x-mark"
-                    x-bind:disabled="isSaving"
-                    x-show="hasUnsavedChanges"
-                    @click="discardChanges()"
-                >
-                    Discard Changes
-                </x-filament::button>
-            </div>
-
             {{-- Add Category/Type Buttons (Right) --}}
             <div class="flex w-full justify-end gap-3 sm:w-auto">
                 {{-- Add Category Button --}}
@@ -277,6 +211,78 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        {{-- Hierarchical Tree --}}
+        <div>
+            <div class="space-y-2">
+                {{-- Uncategorized Types (at top) --}}
+                <div
+                    class="mb-4 min-h-4 space-y-1 rounded p-0.5 transition-colors duration-150 ease-in-out"
+                    id="uncategorized-types"
+                    data-sortable="types"
+                    data-category-id=""
+                ></div>
+
+                {{-- Root Level Categories --}}
+                <div
+                    class="flex min-h-5 flex-col gap-2 rounded-md p-0.5 transition-colors duration-150 ease-in-out"
+                    id="root-categories"
+                    data-sortable="categories"
+                    data-parent-id=""
+                ></div>
+
+                {{-- Empty state: show when there are no categories and no types --}}
+                <div
+                    class="flex flex-col items-center justify-center gap-3 py-12 text-center"
+                    style="min-height: 120px;"
+                    x-cloak
+                    x-show="(!treeData.categories || treeData.categories.length === 0) && (!treeData.uncategorized_types || treeData.uncategorized_types.length === 0)"
+                >
+                    {{-- Icon rendered server-side via @svg helper, pass heroicon name --}}
+                    <div class="flex items-center justify-center">
+                        @svg('heroicon-m-inbox', 'class="h-12 w-12 text-gray-400 dark:text-gray-400"')
+                    </div>
+
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">No types or categories yet</h3>
+                    <p class="max-w-xl text-sm text-gray-600 dark:text-gray-400">Create a category or add a type to get
+                        started. Use the buttons below to add your first items.</p>
+                </div>
+            </div>
+        </div>
+
+        {{-- Bottom Action Buttons --}}
+        <div
+            class="flex flex-col items-center justify-between gap-4 sm:flex-row sm:items-center"
+            x-show="canEdit"
+        >
+            {{-- Save/Discard Buttons --}}
+            <div class="flex w-full justify-start gap-3 sm:w-auto">
+                <x-filament::button
+                    id="save-changes-btn"
+                    type="button"
+                    size="sm"
+                    icon="heroicon-m-check"
+                    x-bind:disabled="isSaving"
+                    x-show="hasUnsavedChanges"
+                    @click="saveChanges()"
+                >
+                    <span x-text="isSaving ? 'Saving...' : 'Save Changes'"></span>
+                </x-filament::button>
+
+                <x-filament::button
+                    id="discard-changes-btn"
+                    type="button"
+                    color="gray"
+                    size="sm"
+                    icon="heroicon-m-x-mark"
+                    x-bind:disabled="isSaving"
+                    x-show="hasUnsavedChanges"
+                    @click="discardChanges()"
+                >
+                    Discard Changes
+                </x-filament::button>
             </div>
         </div>
     </div>
