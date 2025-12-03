@@ -114,6 +114,8 @@ class ServiceRequestType extends BaseModel implements Auditable
         'email_automatic_creation_priority_id',
         'email_automatic_creation_bcc',
         'is_reminders_enabled',
+        'sort',
+        'category_id',
     ];
 
     protected $casts = [
@@ -155,6 +157,7 @@ class ServiceRequestType extends BaseModel implements Auditable
         'is_email_automatic_creation_enabled' => 'boolean',
         'is_email_automatic_creation_contact_create_enabled' => 'boolean',
         'is_reminders_enabled' => 'boolean',
+        'sort' => 'integer',
     ];
 
     public function serviceRequests(): HasManyThrough
@@ -228,6 +231,14 @@ class ServiceRequestType extends BaseModel implements Auditable
     public function emailAutomaticCreationPriority(): BelongsTo
     {
         return $this->belongsTo(ServiceRequestPriority::class, 'email_automatic_creation_priority_id', 'id');
+    }
+
+    /**
+     * @return BelongsTo<ServiceRequestTypeCategory, $this>
+     */
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(ServiceRequestTypeCategory::class, 'category_id');
     }
 
     protected function serializeDate(DateTimeInterface $date): string

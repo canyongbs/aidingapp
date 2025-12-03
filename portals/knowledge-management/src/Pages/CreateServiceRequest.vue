@@ -33,7 +33,8 @@
 -->
 <script setup>
     import { createMessage, getNode } from '@formkit/core';
-    import { defineProps, nextTick, onMounted, reactive, ref, watch } from 'vue';
+    import { FormKitSchema } from '@formkit/vue';
+    import { computed, defineProps, nextTick, onMounted, reactive, ref, watch } from 'vue';
     import { useRoute } from 'vue-router';
     import wizard from '../../../../widgets/service-request-form/src/FormKit/wizard.js';
     import AppLoading from '../Components/AppLoading.vue';
@@ -59,6 +60,7 @@
     const submittedSuccess = ref(false);
     const hasGeneratedQuestions = ref(false);
     const isGeneratingQuestions = ref(false);
+    const categoryData = ref(null);
 
     watch(
         route,
@@ -81,6 +83,54 @@
     onMounted(function () {
         getData();
     });
+
+    // Computed property to build breadcrumbs from category data
+    const categoryBreadcrumbs = computed(() => {
+        if (!categoryData.value) return [];
+
+        const breadcrumbs = [];
+
+        // Add ancestors first (root to parent)
+        if (categoryData.value.ancestors) {
+            categoryData.value.ancestors.forEach((ancestor) => {
+                breadcrumbs.push({
+                    name: ancestor.name,
+                    route: 'create-service-request',
+                    params: { categoryId: ancestor.id },
+                });
+            });
+        }
+
+        // Add the category itself
+        breadcrumbs.push({
+            name: categoryData.value.name,
+            route: 'create-service-request',
+            params: { categoryId: categoryData.value.id },
+        });
+
+        return breadcrumbs;
+    });
+
+    async function getData() {
+        loadingResults.value = true;
+
+        const { getUser } = useAuthStore();
+
+        await getUser().then((authUser) => {
+            user.value = authUser;
+        });
+
+        const { get } = consumer();
+
+        get(props.apiUrl + '/service-request/create/' + route.params.typeId).then((response) => {
+            loadingResults.value = false;
+
+            schema.value = response.data.schema;
+
+            // Set category data from API response
+            categoryData.value = response.data.category || null;
+        });
+    }
 
     const data = reactive({
         steps,
@@ -252,24 +302,6 @@
             }
         }
     }
-
-    async function getData() {
-        loadingResults.value = true;
-
-        const { getUser } = useAuthStore();
-
-        await getUser().then((authUser) => {
-            user.value = authUser;
-        });
-
-        const { get } = consumer();
-
-        get(props.apiUrl + '/service-request/create/' + route.params.typeId).then((response) => {
-            loadingResults.value = false;
-
-            schema.value = response.data.schema;
-        });
-    }
 </script>
 
 <template>
@@ -292,6 +324,7 @@
                         :breadcrumbs="[
                             { name: 'Help Center', route: 'home' },
                             { name: 'New Request', route: 'create-service-request' },
+                            ...categoryBreadcrumbs,
                         ]"
                     />
                 </template>

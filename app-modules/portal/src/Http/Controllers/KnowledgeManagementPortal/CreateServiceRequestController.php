@@ -80,8 +80,47 @@ class CreateServiceRequestController extends Controller
         ResolveUploadsMediaCollectionForServiceRequest $resolveUploadsMediaCollectionForServiceRequest,
         ServiceRequestType $type
     ): JsonResponse {
+        // Load the category relationship
+        $type->load('category');
+
+        $category = null;
+
+        if ($type->category) {
+            // Build the category data with ancestors
+            $ancestors = [];
+            $currentCategory = $type->category;
+
+            // Walk up the tree to collect all ancestors
+            while ($currentCategory->parent_id) {
+                // Load parent if not already loaded
+                if (! $currentCategory->relationLoaded('parent')) {
+                    $currentCategory->load('parent');
+                }
+
+                $currentCategory = $currentCategory->parent;
+
+                if ($currentCategory) {
+                    $ancestors[] = [
+                        'id' => $currentCategory->id,
+                        'name' => $currentCategory->name,
+                        'parent_id' => $currentCategory->parent_id,
+                    ];
+                }
+            }
+
+            $ancestors = array_reverse($ancestors);
+
+            $category = [
+                'id' => $type->category->id,
+                'name' => $type->category->name,
+                'parent_id' => $type->category->parent_id,
+                'ancestors' => $ancestors,
+            ];
+        }
+
         return response()->json([
             'schema' => $generateSchema($this->generateForm($type, $resolveUploadsMediaCollectionForServiceRequest())),
+            'category' => $category,
         ]);
     }
 

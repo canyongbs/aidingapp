@@ -79,7 +79,7 @@ customElements.define(
                         component: () => import('./Pages/ViewArticle.vue'),
                     },
                     {
-                        path: baseUrl + '/service-request-type/select',
+                        path: baseUrl + '/service-request-type/select/:categoryId?',
                         name: 'create-service-request',
                         component: () => import('./Pages/SelectServiceRequestType.vue'),
                         meta: { requiresAuth: true },

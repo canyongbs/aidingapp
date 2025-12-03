@@ -1,3 +1,5 @@
+<?php
+
 /*
 <COPYRIGHT>
 
@@ -31,30 +33,32 @@
 
 </COPYRIGHT>
 */
-import laravel, { refreshPaths } from 'laravel-vite-plugin';
-import { defineConfig } from 'vite';
 
-export default defineConfig({
-    plugins: [
-        laravel({
-            input: [
-                'resources/css/app.css',
-                'resources/js/app.js',
-                'resources/css/filament/admin/theme.css',
-                'app-modules/in-app-communication/resources/js/userToUserChat.js',
-                'app-modules/service-management/resources/js/serviceRequestTypeManager.js',
-                'app-modules/task/resources/js/kanban.js',
-            ],
-            refresh: [
-                ...refreshPaths,
-                'app/Filament/**',
-                'app/Forms/Components/**',
-                'app/Livewire/**',
-                'app/Infolists/Components/**',
-                'app/Providers/Filament/**',
-                'app/Tables/Columns/**',
-                'portals/**',
-            ],
-        }),
-    ],
-});
+namespace AidingApp\ServiceManagement\Database\Factories;
+
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+/**
+ * @extends Factory<ServiceRequestTypeCategory>
+ */
+class ServiceRequestTypeCategoryFactory extends Factory
+{
+    protected $model = ServiceRequestTypeCategory::class;
+
+    public function definition(): array
+    {
+        return [
+            'name' => str($this->faker->word())->ucfirst()->toString(),
+            'sort' => $this->faker->randomNumber(1),
+            'parent_id' => null,
+        ];
+    }
+
+    public function withParent(?string $parentId): self
+    {
+        return $this->state(function (array $attributes) use ($parentId) {
+            return ['parent_id' => $parentId];
+        });
+    }
+}
