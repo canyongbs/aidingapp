@@ -1,0 +1,194 @@
+<?php
+
+/*
+<COPYRIGHT>
+
+    Copyright © 2016-2025, Canyon GBS LLC. All rights reserved.
+
+    Notice:
+
+    - This software is closed source and the source code is a trade secret.
+    - You may not alter, remove, or obscure any licensing, copyright, or other notices
+      of the licensor in the software.
+    - Canyon GBS LLC respects the intellectual property rights of others and expects the
+      same in return. Canyon GBS™ is a registered trademarks of Canyon GBS LLC, and we are
+      committed to enforcing and protecting our trademarks vigorously.
+
+    For more information or inquiries please visit our website at
+    https://www.canyongbs.com or contact us via email at legal@canyongbs.com.
+
+</COPYRIGHT>
+*/
+
+namespace AidingApp\Project\Livewire;
+
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Project\Filament\Resources\PipelineResource;
+use AidingApp\Project\Models\Pipeline;
+use AidingApp\Project\Models\PipelineEntry;
+use AidingApp\Project\Models\PipelineStage;
+use Exception;
+use Filament\Actions\Action;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\Contracts\HasActions;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\MorphToSelect;
+use Filament\Forms\Components\MorphToSelect\Type;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
+use Filament\Forms\Get;
+use Filament\Notifications\Notification;
+use Filament\Support\RawJs;
+use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Collection;
+use Livewire\Component;
+use Symfony\Component\HttpFoundation\Response as ResponseAlias;
+
+class PipelineEntriesKanban extends Component implements HasForms, HasActions
+{
+    use InteractsWithActions;
+    use InteractsWithForms;
+
+    public Pipeline $pipeline;
+
+    public ?PipelineEntry $currentPipelineEntry = null;
+
+    public function mount(Pipeline $pipeline): void
+    {
+        $this->pipeline = $pipeline;
+    }
+
+    /**
+     * @return Collection<string, Collection<int, PipelineEntry>>
+     */
+    public function getPipelineEntries(): Collection
+    {
+        /**
+         * @var Collection<int, PipelineEntry> $entries
+         */
+        $entries = $this->pipeline->entries()->get();
+
+        return $entries->groupBy(function (PipelineEntry $entry): string {
+            /** @var int|string|null $stageId */
+            $stageId = $entry->pipeline_stage_id;
+
+            return (string) $stageId;
+        });
+    }
+
+    /**
+     * @return Collection<string, mixed>
+     */
+    public function getStages(): Collection
+    {
+        return PipelineStage::whereHas('pipeline', function (Builder $query) {
+                return $query->where('id', $this->pipeline->getKey());
+            })
+            ->pluck('name', 'id');
+    }
+
+    public function moveEntry(Pipeline $pipeline, string $entryId, string $fromStage = '', string $toStage = ''): JsonResponse
+    {
+        try {
+            PipelineEntry::where('pipeline_stage_id', $fromStage)
+                ->where('id', $entryId)
+                ->update([
+                    'pipeline_stage_id' => $toStage,
+                ]);
+        } catch (Exception $e) {
+            report($e);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Pipline could not be moved. Something went wrong, if this continues please contact support.',
+            ], ResponseAlias::HTTP_BAD_REQUEST);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Pipeline stage updated successfully.',
+        ], ResponseAlias::HTTP_OK);
+    }
+
+    public function addEntryAction(): Action
+    {
+        return Action::make('addEntry')
+            ->make('Add pipeline entry')
+            ->model(PipelineEntry::class)
+            ->form([
+                Grid::make()->schema([
+                    TextInput::make('name')
+                        ->maxLength(255)
+                        ->label('Description')
+                        ->string(),
+                ]),
+                MorphToSelect::make('organizable')
+                    ->types([
+                        Type::make(Contact::class)
+                            ->label('Contact')
+                            ->titleAttribute('full_name')
+                            ->modifyOptionsQueryUsing(fn (Builder $query) => $query->limit(50)),
+                        
+                    ])
+                    ->searchable()
+                    ->preload()
+                    ->required(),
+                Repeater::make('checklist_items')
+                    ->label('Checklist Items')
+                    ->schema([
+                        TextInput::make('title')
+                            ->label('Item')
+                            ->required()
+                            ->maxLength(255),
+                    ])
+                    ->default([])
+                    ->addActionLabel('Add Checklist Item')
+                    ->columns(1)
+                    ->reorderable(false),
+            ])
+            ->action(function (array $data, array $arguments) {
+                $entry = new PipelineEntry([
+                    'name' => $data['name'],
+                    'organizable_type' => $data['organizable_type'],
+                    'organizable_id' => $data['organizable_id'],
+                    'pipeline_stage_id' => $arguments['stage'],
+                ]);
+
+                $entry->saveOrFail();
+
+                foreach ($data['checklist_items'] ?? [] as $item) {
+                    $entry->checklistItems()->create([
+                        'title' => $item['title'],
+                        'created_by' => auth()->id(),
+                    ]);
+                }
+
+                Notification::make()
+                    ->success()
+                    ->title('Entry Added!')
+                    ->send();
+            });
+    }
+
+    public function render(): View
+    {
+        return view('livewire.pipeline-entries-kanban', [
+            'pipelineEntries' => $this->getPipelineEntries(),
+            'stages' => $this->getStages(),
+        ]);
+    }
+
+    public function viewPipelineEntry(PipelineEntry $pipelineEntry): void
+    {
+        $this->redirect(PipelineResource::getUrl('view-pipeline-entry', [
+            'record' => $this->pipeline->getKey(),
+            'pipelineEntry' => $pipelineEntry->getKey(),
+            'from' => 'kanban',
+        ]));
+    }
+}

@@ -44,6 +44,7 @@ use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use OwenIt\Auditing\Contracts\Auditable;
 
 /**
@@ -78,5 +79,20 @@ class Pipeline extends BaseModel implements Auditable
     public function stages(): HasMany
     {
         return $this->hasMany(PipelineStage::class, 'pipeline_id');
+    }
+
+    /**
+     * @return HasManyThrough<PipelineEntry, PipelineStage, $this>
+     */
+    public function entries(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            PipelineEntry::class,
+            PipelineStage::class,
+            'pipeline_id',
+            'pipeline_stage_id',
+            'id',
+            'id'
+        );
     }
 }

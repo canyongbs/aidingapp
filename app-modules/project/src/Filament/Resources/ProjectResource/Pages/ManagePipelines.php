@@ -36,6 +36,7 @@
 
 namespace AidingApp\Project\Filament\Resources\ProjectResource\Pages;
 
+use AidingApp\Project\Filament\Resources\PipelineResource;
 use AidingApp\Project\Filament\Resources\ProjectResource;
 use AidingApp\Project\Models\Pipeline;
 use Filament\Forms\Components\Repeater;
@@ -106,7 +107,8 @@ class ManagePipelines extends ManageRelatedRecords
             ])
             ->headerActions([
                 CreateAction::make()
-                    ->authorize('create', $this->getOwnerRecord()),
+                    ->url(PipelineResource::getUrl('create', ['project' => $this->getRecord()->getKey()]))
+                    ->authorize(fn (): bool => auth()->user()->can('create', Pipeline::class) && auth()->user()->can('update', $this->getRecord())),
             ])
             ->filters([
                 Filter::make('createdBy')
@@ -116,11 +118,9 @@ class ManagePipelines extends ManageRelatedRecords
             ])
             ->actions([
                 ViewAction::make()
-                    ->authorize('view', $this->getOwnerRecord()),
+                    ->url(fn (Pipeline $record): string => PipelineResource::getUrl('view', ['record' => $record])),
                 EditAction::make()
-                    ->authorize('update', $this->getOwnerRecord()),
-                DeleteAction::make()
-                    ->authorize('update', $this->getOwnerRecord()),
+                    ->url(fn (Pipeline $record): string => PipelineResource::getUrl('edit', ['record' => $record])),
             ]);
     }
 }

@@ -44,6 +44,7 @@ export default defineConfig({
                 'app-modules/in-app-communication/resources/js/userToUserChat.js',
                 'app-modules/service-management/resources/js/serviceRequestTypeManager.js',
                 'app-modules/task/resources/js/kanban.js',
+                'app-modules/project/resources/js/kanban.js',
             ],
             refresh: [
                 ...refreshPaths,
