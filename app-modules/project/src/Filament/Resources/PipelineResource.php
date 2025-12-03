@@ -40,18 +40,7 @@ use AidingApp\Project\Filament\Resources\PipelineResource\Pages\CreatePipeline;
 use AidingApp\Project\Filament\Resources\PipelineResource\Pages\EditPipeline;
 use AidingApp\Project\Filament\Resources\PipelineResource\Pages\ManagePipelineEntries;
 use AidingApp\Project\Filament\Resources\PipelineResource\Pages\ViewPipeline;
-use AidingApp\Project\Filament\Resources\ProjectResource\Pages\CreateProject;
-use AidingApp\Project\Filament\Resources\ProjectResource\Pages\EditProject;
-use AidingApp\Project\Filament\Resources\ProjectResource\Pages\ListProjects;
-use AidingApp\Project\Filament\Resources\ProjectResource\Pages\ManageAuditors;
-use AidingApp\Project\Filament\Resources\ProjectResource\Pages\ManageFiles;
-use AidingApp\Project\Filament\Resources\ProjectResource\Pages\ManageManagers;
-use AidingApp\Project\Filament\Resources\ProjectResource\Pages\ManageMilestones;
-use AidingApp\Project\Filament\Resources\ProjectResource\Pages\ManagePipelines;
-use AidingApp\Project\Filament\Resources\ProjectResource\Pages\ManageTasks;
-use AidingApp\Project\Filament\Resources\ProjectResource\Pages\ViewProject;
 use AidingApp\Project\Models\Pipeline;
-use AidingApp\Project\Models\Project;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 
