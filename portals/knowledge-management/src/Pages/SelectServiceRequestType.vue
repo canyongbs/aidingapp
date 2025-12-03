@@ -33,7 +33,7 @@
 -->
 <script setup>
     import { computed, defineProps, onMounted, ref, watch } from 'vue';
-    import { useRoute } from 'vue-router';
+    import { useRoute, useRouter } from 'vue-router';
     import AppLoading from '../Components/AppLoading.vue';
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import Page from '../Components/Page.vue';
@@ -41,6 +41,7 @@
     import { useAuthStore } from '../Stores/auth.js';
 
     const route = useRoute();
+    const router = useRouter();
 
     const props = defineProps({
         apiUrl: {
@@ -54,11 +55,31 @@
     const types = ref([]);
     const currentCategory = ref(null);
     const user = ref(null);
-    const navigating = ref(false);
 
-    watch(route, getData, {
-        immediate: true,
-    });
+    // Helper function to find a category by ID in the tree
+    const findById = (nodes, id) => {
+        for (const node of nodes) {
+            if (node.id === id) return node;
+            if (node.children) {
+                const found = findById(node.children, id);
+                if (found) return found;
+            }
+        }
+        return null;
+    };
+
+    // Watch for route changes to update current category
+    watch(
+        () => route.params.categoryId,
+        (categoryId) => {
+            if (categoryId && categories.value.length > 0) {
+                const category = findById(categories.value, categoryId);
+                currentCategory.value = category || null;
+            } else {
+                currentCategory.value = null;
+            }
+        },
+    );
 
     onMounted(function () {
         getData();
@@ -78,24 +99,26 @@
         get(props.apiUrl + '/service-request-type/select').then((response) => {
             categories.value = response.data.categories || [];
             types.value = response.data.types || [];
-            currentCategory.value = null;
-            navigating.value = false;
+
+            // Set current category based on URL parameter
+            const categoryId = route.params.categoryId;
+            if (categoryId) {
+                const category = findById(categories.value, categoryId);
+                currentCategory.value = category || null;
+            } else {
+                currentCategory.value = null;
+            }
+
             loadingResults.value = false;
         });
     }
 
     function openCategory(category) {
-        // prevent opening if we're already navigating
-        if (navigating.value) return;
-
-        // simulate a small page-change delay so a user can't immediately click a type
-        navigating.value = true;
-
-        // small visual delay (200ms) before applying the category change
-        setTimeout(() => {
-            currentCategory.value = category;
-            navigating.value = false;
-        }, 200);
+        // Navigate to the category using the router
+        router.push({
+            name: 'create-service-request',
+            params: { categoryId: category.id },
+        });
     }
 
     function backToParent() {
@@ -104,52 +127,16 @@
         // find parent from breadcrumb (we store parent_id on categories)
         const parentId = currentCategory.value.parent_id;
         if (!parentId) {
-            currentCategory.value = null;
+            // Navigate back to root (no category)
+            router.push({ name: 'create-service-request' });
             return;
         }
 
-        // find parent in the full tree
-        const findById = (nodes, id) => {
-            for (const node of nodes) {
-                if (node.id === id) return node;
-                if (node.children) {
-                    const found = findById(node.children, id);
-                    if (found) return found;
-                }
-            }
-            return null;
-        };
-
-        currentCategory.value = findById(categories.value, parentId);
-    }
-
-    function onTypeClick(event) {
-        if (navigating.value) {
-            // prevent navigation while we're transitioning
-            event.preventDefault();
-        }
-    }
-
-    function onBreadcrumbClick(crumb) {
-        // crumb contains at least { id, name }
-        if (!crumb || !crumb.id) return;
-
-        // find the category by id and set it as current
-        const findById = (nodes, id) => {
-            for (const node of nodes) {
-                if (node.id === id) return node;
-                if (node.children) {
-                    const found = findById(node.children, id);
-                    if (found) return found;
-                }
-            }
-            return null;
-        };
-
-        const cat = findById(categories.value, crumb.id);
-        if (cat) {
-            currentCategory.value = cat;
-        }
+        // Navigate to parent category
+        router.push({
+            name: 'create-service-request',
+            params: { categoryId: parentId },
+        });
     }
 
     const displayedCategories = computed(() => {
@@ -163,23 +150,52 @@
     });
 
     const breadcrumbs = computed(() => {
-        // build breadcrumb trail from root to currentCategory
-        if (!currentCategory.value) return [];
+        // Always start with Help Center
+        const baseBreadcrumbs = [{ name: 'Help Center', route: 'home' }];
 
-        const findTrail = (nodes, targetId, acc = []) => {
-            for (const n of nodes) {
-                const nextAcc = [...acc, { name: n.name, id: n.id }];
-                if (n.id === targetId) return nextAcc;
-                if (n.children) {
-                    const found = findTrail(n.children, targetId, nextAcc);
+        // If we're at root (no category), "New Request" will be the currentCrumb
+        // So we don't include it in breadcrumbs
+        if (!currentCategory.value) {
+            return baseBreadcrumbs;
+        }
+
+        // When in a category, add "New Request" as a breadcrumb
+        const breadcrumbsWithNewRequest = [
+            ...baseBreadcrumbs,
+            { name: 'New Request', route: 'create-service-request' },
+        ];
+
+        // Build trail from root to current category (inclusive)
+        const findTrail = (nodes, targetId, accumulator = []) => {
+            for (const node of nodes) {
+                const nextAccumulator = [
+                    ...accumulator,
+                    {
+                        name: node.name,
+                        id: node.id,
+                        route: 'create-service-request',
+                        params: { categoryId: node.id },
+                    },
+                ];
+                if (node.id === targetId) return nextAccumulator;
+                if (node.children) {
+                    const found = findTrail(node.children, targetId, nextAccumulator);
                     if (found) return found;
                 }
             }
             return null;
         };
 
-        const t = findTrail(categories.value, currentCategory.value.id, []);
-        return t || [];
+        const trail = findTrail(categories.value, currentCategory.value.id, []) || [];
+
+        // Remove the last item (current category) from the trail since it will be currentCrumb
+        const parentTrail = trail.slice(0, -1);
+
+        return [...breadcrumbsWithNewRequest, ...parentTrail];
+    });
+
+    const currentCrumb = computed(() => {
+        return currentCategory.value ? currentCategory.value.name : 'New Request';
     });
 </script>
 
@@ -198,15 +214,7 @@
                 </template>
 
                 <template #breadcrumbs>
-                    <Breadcrumbs
-                        currentCrumb="New Request"
-                        :breadcrumbs="
-                            [{ name: 'Help Center', route: 'home' }].concat(
-                                breadcrumbs.map((b) => ({ id: b.id, name: b.name, route: null })),
-                            )
-                        "
-                        @crumb-click="onBreadcrumbClick"
-                    />
+                    <Breadcrumbs :currentCrumb="currentCrumb" :breadcrumbs="breadcrumbs" />
                 </template>
 
                 <main>
@@ -215,16 +223,16 @@
                         <span v-else>{{ currentCategory.name }}</span>
                     </h3>
 
-                    <div class="my-4 grid gap-y-4" :class="{ 'opacity-60 pointer-events-none': navigating }">
+                    <div class="my-4 grid gap-y-4">
                         <div v-if="currentCategory" class="mb-4">
                             <button @click="backToParent" class="text-sm text-gray-500">&larr; Back</button>
                         </div>
 
                         <div
-                            v-for="cat in displayedCategories"
-                            :key="cat.id"
+                            v-for="category in displayedCategories"
+                            :key="category.id"
                             class="group relative bg-slate-50 p-6 rounded shadow cursor-pointer hover:shadow-md"
-                            @click="openCategory(cat)"
+                            @click="openCategory(category)"
                         >
                             <div class="flex items-center gap-x-3">
                                 <div class="flex-shrink-0">
@@ -251,7 +259,7 @@
                                 <div class="w-full">
                                     <h3 class="text-base font-semibold leading-6 text-gray-900">
                                         <span class="absolute inset-0" aria-hidden="true" />
-                                        {{ cat.name }}
+                                        {{ category.name }}
                                     </h3>
                                 </div>
                                 <span
@@ -312,7 +320,6 @@
                                                 name: 'create-service-request-from-type',
                                                 params: { typeId: type.id },
                                             }"
-                                            @click="onTypeClick"
                                         >
                                             <span class="absolute inset-0" aria-hidden="true" />
                                             {{ type.name }}
