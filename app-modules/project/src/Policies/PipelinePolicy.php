@@ -37,7 +37,6 @@
 namespace AidingApp\Project\Policies;
 
 use AidingApp\Project\Models\Pipeline;
-use AidingApp\Project\Models\Project;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
 

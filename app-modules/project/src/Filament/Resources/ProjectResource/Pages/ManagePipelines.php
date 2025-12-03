@@ -39,15 +39,9 @@ namespace AidingApp\Project\Filament\Resources\ProjectResource\Pages;
 use AidingApp\Project\Filament\Resources\PipelineResource;
 use AidingApp\Project\Filament\Resources\ProjectResource;
 use AidingApp\Project\Models\Pipeline;
-use AidingApp\Project\Models\Project;
 use App\Features\ProjectPipelineFeature;
-use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Tables\Actions\CreateAction;
-use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
@@ -71,7 +65,7 @@ class ManagePipelines extends ManageRelatedRecords
         $user = auth()->user();
 
         return ProjectPipelineFeature::active() && $user->can('viewAny', [Pipeline::class, $arguments['record']]);
-    }    
+    }
 
     public function table(Table $table): Table
     {
