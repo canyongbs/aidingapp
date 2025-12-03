@@ -36,8 +36,10 @@
 
 namespace AidingApp\Project\Filament\Resources\ProjectResource\Pages;
 
+use AidingApp\Project\Filament\Resources\PipelineResource;
 use AidingApp\Project\Filament\Resources\ProjectResource;
 use AidingApp\Project\Models\Pipeline;
+use AidingApp\Project\Models\Project;
 use App\Features\ProjectPipelineFeature;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Textarea;
@@ -69,34 +71,7 @@ class ManagePipelines extends ManageRelatedRecords
         $user = auth()->user();
 
         return ProjectPipelineFeature::active() && $user->can('viewAny', [Pipeline::class, $arguments['record']]);
-    }
-
-    public function form(Form $form): Form
-    {
-        return $form
-            ->schema([
-                TextInput::make('name')
-                    ->required()
-                    ->maxLength(255),
-                Textarea::make('description')
-                    ->required()
-                    ->maxLength(65535),
-                Repeater::make('stages')
-                    ->relationship('stages')
-                    ->schema([
-                        TextInput::make('name')
-                            ->label('Stage')
-                            ->distinct()
-                            ->required(),
-                    ])
-                    ->orderColumn('order')
-                    ->reorderable()
-                    ->columnSpanFull()
-                    ->label('Pipeline Stages')
-                    ->minItems(1)
-                    ->maxItems(5),
-            ]);
-    }
+    }    
 
     public function table(Table $table): Table
     {
@@ -107,7 +82,8 @@ class ManagePipelines extends ManageRelatedRecords
             ])
             ->headerActions([
                 CreateAction::make()
-                    ->authorize('create', $this->getOwnerRecord()),
+                    ->url(PipelineResource::getUrl('create', ['project' => $this->getRecord()->getKey()]))
+                    ->authorize(fn (): bool => auth()->user()->can('create', Pipeline::class) && auth()->user()->can('update', $this->getRecord())),
             ])
             ->filters([
                 Filter::make('createdBy')
@@ -117,11 +93,9 @@ class ManagePipelines extends ManageRelatedRecords
             ])
             ->actions([
                 ViewAction::make()
-                    ->authorize('view', $this->getOwnerRecord()),
+                    ->url(fn (Pipeline $record): string => PipelineResource::getUrl('view', ['record' => $record])),
                 EditAction::make()
-                    ->authorize('update', $this->getOwnerRecord()),
-                DeleteAction::make()
-                    ->authorize('update', $this->getOwnerRecord()),
+                    ->url(fn (Pipeline $record): string => PipelineResource::getUrl('edit', ['record' => $record])),
             ]);
     }
 }

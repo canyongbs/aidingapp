@@ -36,6 +36,7 @@
 
 namespace AidingApp\Project\Providers;
 
+use AidingApp\Project\Livewire\PipelineEntriesKanban;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
@@ -46,6 +47,7 @@ use AidingApp\Project\ProjectPlugin;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
+use Livewire\Livewire;
 
 class ProjectServiceProvider extends ServiceProvider
 {
@@ -64,5 +66,7 @@ class ProjectServiceProvider extends ServiceProvider
             'project_milestone' => ProjectMilestone::class,
             'project_milestone_status' => ProjectMilestoneStatus::class,
         ]);
+
+        Livewire::component('pipeline-entries-kanban', PipelineEntriesKanban::class);
     }
 }
