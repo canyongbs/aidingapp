@@ -45,7 +45,6 @@ return new class () extends Migration {
             $table->uuid('id')->primary();
             $table->string('name');
             $table->foreignUuid('pipeline_stage_id')->references('id')->on('pipeline_stages');
-            // $table->foreignUuid('pipeline_entry_type_id')->references('id')->on('pipeline_entry_types');
             $table->uuidMorphs('organizable');
             $table->timestamps();
         });

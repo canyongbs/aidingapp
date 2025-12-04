@@ -48,7 +48,6 @@ use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\MorphToSelect;
 use Filament\Forms\Components\MorphToSelect\Type;
-use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -60,7 +59,7 @@ use Illuminate\Support\Collection;
 use Livewire\Component;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
-class PipelineEntriesKanban extends Component implements HasForms, HasActions
+class PipelineEntryKanban extends Component implements HasForms, HasActions
 {
     use InteractsWithActions;
     use InteractsWithForms;
@@ -111,8 +110,8 @@ class PipelineEntriesKanban extends Component implements HasForms, HasActions
                 ->update([
                     'pipeline_stage_id' => $toStage,
                 ]);
-        } catch (Exception $e) {
-            report($e);
+        } catch (Exception $exception) {
+            report($exception);
 
             return response()->json([
                 'success' => false,
@@ -148,18 +147,6 @@ class PipelineEntriesKanban extends Component implements HasForms, HasActions
                     ->searchable()
                     ->preload()
                     ->required(),
-                Repeater::make('checklist_items')
-                    ->label('Checklist Items')
-                    ->schema([
-                        TextInput::make('title')
-                            ->label('Item')
-                            ->required()
-                            ->maxLength(255),
-                    ])
-                    ->default([])
-                    ->addActionLabel('Add Checklist Item')
-                    ->columns(1)
-                    ->reorderable(false),
             ])
             ->action(function (array $data, array $arguments) {
                 $entry = new PipelineEntry([
@@ -171,13 +158,6 @@ class PipelineEntriesKanban extends Component implements HasForms, HasActions
 
                 $entry->saveOrFail();
 
-                foreach ($data['checklist_items'] ?? [] as $item) {
-                    $entry->checklistItems()->create([
-                        'title' => $item['title'],
-                        'created_by' => auth()->id(),
-                    ]);
-                }
-
                 Notification::make()
                     ->success()
                     ->title('Entry Added!')
@@ -185,9 +165,32 @@ class PipelineEntriesKanban extends Component implements HasForms, HasActions
             });
     }
 
+    public function movedEntry(Pipeline $pipeline, string $entryId, string $fromStage = '', string $toStage = ''): JsonResponse
+    {
+        try {
+            PipelineEntry::where('pipeline_stage_id', $fromStage)
+                ->where('id', $entryId)
+                ->update([
+                    'pipeline_stage_id' => $toStage,
+                ]);
+        } catch (Exception $exception) {
+            report($exception);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Pipline could not be moved. Something went wrong, if this continues please contact support.',
+            ], ResponseAlias::HTTP_BAD_REQUEST);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Pipeline stage updated successfully.',
+        ], ResponseAlias::HTTP_OK);
+    }
+
     public function render(): View
     {
-        return view('livewire.pipeline-entries-kanban', [
+        return view('livewire.pipeline-entry-kanban', [
             'pipelineEntries' => $this->getPipelineEntries(),
             'stages' => $this->getStages(),
         ]);

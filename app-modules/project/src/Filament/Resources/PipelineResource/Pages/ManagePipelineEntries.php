@@ -36,14 +36,11 @@
 
 namespace AidingApp\Project\Filament\Resources\PipelineResource\Pages;
 
-use AidingApp\Contact\Models\Contact;
 use AidingApp\Project\Filament\Resources\PipelineResource;
 use AidingApp\Project\Filament\Resources\ProjectResource;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\Project;
 use Exception;
-use Filament\Forms\Components\MorphToSelect;
-use Filament\Forms\Components\MorphToSelect\Type;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -152,6 +149,9 @@ class ManagePipelineEntries extends ManageRelatedRecords
 
     public function table(Table $table): Table
     {
+        $pipeline = $this->getOwnerRecord();
+        assert($pipeline instanceof Pipeline);
+
         return $table
             ->columns([
                 TextColumn::make('pipelineStage.name')
@@ -172,22 +172,13 @@ class ManagePipelineEntries extends ManageRelatedRecords
                 DeleteAction::make(),
             ])
             ->headerActions([
-                // CreateAction::make()
-                //     ->form([
-                //         Select::make('stage_id')
-                //             ->label('Stage')
-                //             ->relationship('stage', 'name', fn (Builder $query) => $query->where('pipeline_id', $this->getOwnerRecord()->id))
-                //             ->required(),
-                //         MorphToSelect::make('entryable')
-                //             ->label('Entry')
-                //             ->required()
-                //             ->types([
-                //                 Type::make(Contact::class)
-                //                     ->titleAttribute('full_name'),
-                //                 Type::make(Project::class)
-                //                     ->titleAttribute('name'),
-                //             ]),
-                //     ]),
+                CreateAction::make()
+                    ->form([
+                        Select::make('stage_id')
+                            ->label('Stage')
+                            ->relationship('pipelineStage', 'name', fn (Builder $query) => $query->where('pipeline_id', $pipeline->id))
+                            ->required(),
+                    ]),
             ])
             ->defaultSort('created_at', 'desc');
     }

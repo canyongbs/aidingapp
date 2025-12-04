@@ -1,6 +1,4 @@
-<?php
-
-/*
+{{--
 <COPYRIGHT>
 
     Copyright © 2016-2025, Canyon GBS LLC. All rights reserved.
@@ -32,49 +30,22 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
+--}}
+<x-filament-panels::page>
+    <div>
+        <x-filament::link
+            :href="$this->getBackUrl()"
+            icon="heroicon-m-arrow-left"
+        >
+            Back to Pipeline Entry
+        </x-filament::link>
+    </div>
 
-namespace AidingApp\Project\Models;
+    <form wire:submit="save">
+        {{ $this->form }}
 
-use AidingApp\Project\Database\Factories\PipelineEntryFactory;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
-
-/**
- * @mixin IdeHelperPipelineEntry
- */
-class PipelineEntry extends Model
-{
-    /** @use HasFactory<PipelineEntryFactory> */
-    use HasFactory;
-
-    use HasUuids;
-
-    protected $table = 'pipeline_entries';
-
-    protected $fillable = [
-        'name',
-        'pipeline_stage_id',
-        'organizable_id',
-        'organizable_type',
-    ];
-
-    /**
-     * @return BelongsTo<PipelineStage, $this>
-     */
-    public function pipelineStage(): BelongsTo
-    {
-        return $this->belongsTo(PipelineStage::class);
-    }
-
-    /**
-     * @return MorphTo<Model, $this>
-     */
-    public function organizable(): MorphTo
-    {
-        return $this->morphTo();
-    }
-}
+        <div class="mt-8">
+            <x-filament-panels::form.actions :actions="$this->getFormActions()" />
+        </div>
+    </form>
+</x-filament-panels::page>

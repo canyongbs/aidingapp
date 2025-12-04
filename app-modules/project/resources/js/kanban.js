@@ -46,10 +46,11 @@ document.addEventListener('alpine:init', () => {
                     easing: 'cubic-bezier(0, 0.55, 0.45, 1)',
                     onAdd: async function (evt) {
                         try {
-                            const result = await $wire.movedTask(
-                                evt.item.dataset.task,
-                                evt.from.dataset.status,
-                                evt.to.dataset.status,
+                            const result = await $wire.movedEntry(
+                                evt.item.dataset.pipeline,
+                                evt.item.dataset.entry,
+                                evt.from.dataset.stage,
+                                evt.to.dataset.stage,
                             );
 
                             if (result.original.success) {
