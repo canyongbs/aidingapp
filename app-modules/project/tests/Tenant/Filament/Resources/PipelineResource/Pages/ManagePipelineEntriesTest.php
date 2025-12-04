@@ -214,7 +214,7 @@ it('can switch view types', function () {
     expect($component->viewType)->toBe('table');
 
     $component->call('setViewType', 'kanban');
-    
+
     expect($component->viewType)->toBe('kanban');
     expect(session('pipeline-view-type'))->toBe('kanban');
 });
@@ -223,12 +223,12 @@ it('can switch view types', function () {
 //     asSuperAdmin();
 
 //     $project = Project::factory()->create();
-    
+
 //     $pipeline1 = Pipeline::factory()
 //         ->for($project)
 //         ->has(PipelineStage::factory()->count(2), 'stages')
 //         ->create();
-        
+
 //     $pipeline2 = Pipeline::factory()
 //         ->for($project)
 //         ->has(PipelineStage::factory()->count(2), 'stages')
@@ -242,4 +242,3 @@ it('can switch view types', function () {
 
 //     expect($component)->not->toBeNull();
 // });
-
