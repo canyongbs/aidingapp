@@ -42,9 +42,9 @@ use AidingApp\Portal\Enums\GdprBannerButtonLabel;
 use AidingApp\Portal\Enums\GdprDeclineOptions;
 use AidingApp\Portal\Settings\PortalSettings;
 use App\Enums\Feature;
-use App\Filament\Forms\Components\ColorSelect;
 use App\Models\User;
 use App\Rules\ValidUrl;
+use CanyonGBS\Common\Filament\Forms\Components\ColorSelect;
 use Filament\Forms\Components\Actions;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\Grid;
@@ -98,7 +98,7 @@ class ManagePortalSettings extends SettingsPage
                             ->label('Primary Color')
                             ->visible(fn (Get $get) => $get('knowledge_management_portal_enabled'))
                             ->disabled(! Gate::check(Feature::KnowledgeManagement->getGateName()))
-                            ->hintIcon(fn (ColorSelect $component) => $component->isDisabled() ? 'heroicon-m-lock-closed' : null)
+                            ->hintIcon(fn (Select $component) => $component->isDisabled() ? 'heroicon-m-lock-closed' : null)
                             ->hintIconTooltip('Knowledge Management is not a part of your current subscription.')
                             ->columnSpan(1),
                         Select::make('knowledge_management_portal_rounding')
