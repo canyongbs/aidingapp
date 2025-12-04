@@ -36,11 +36,13 @@
 
 namespace AidingApp\Project\Filament\Resources\PipelineResource\Pages;
 
+use AidingApp\Contact\Models\Contact;
 use AidingApp\Project\Filament\Resources\PipelineResource;
 use AidingApp\Project\Filament\Resources\ProjectResource;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\Project;
 use Exception;
+use Filament\Forms\Components\MorphToSelect;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -54,6 +56,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
+use Filament\Forms\Components\MorphToSelect\Type;
 
 class ManagePipelineEntries extends ManageRelatedRecords
 {
@@ -174,10 +177,23 @@ class ManagePipelineEntries extends ManageRelatedRecords
             ->headerActions([
                 CreateAction::make()
                     ->form([
-                        Select::make('stage_id')
+                        TextInput::make('name')
+                            ->required()
+                            ->maxLength(255),
+                        Select::make('pipeline_stage_id')
                             ->label('Stage')
                             ->relationship('pipelineStage', 'name', fn (Builder $query) => $query->where('pipeline_id', $pipeline->id))
                             ->required(),
+                            MorphToSelect::make('organizable')
+                    ->types([
+                        Type::make(Contact::class)
+                            ->label('Contact')
+                            ->titleAttribute('full_name')
+                            ->modifyOptionsQueryUsing(fn (Builder $query) => $query->limit(50)),
+                    ])
+                    ->searchable()
+                    ->preload()
+                    ->required(),
                     ]),
             ])
             ->defaultSort('created_at', 'desc');

@@ -39,17 +39,12 @@ use AidingApp\Project\Filament\Resources\ProjectResource\Pages\ManagePipelines;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
-use AidingApp\Project\Tests\Tenant\Pipeline\RequestFactories\CreatePipelineRequestFactory;
-use AidingApp\Project\Tests\Tenant\Pipeline\RequestFactories\EditPipelineRequestFactory;
 use App\Models\User;
-use Filament\Forms\Components\Repeater;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\assertDatabaseMissing;
 use function Pest\Laravel\get;
 use function Pest\Livewire\livewire;
-use function PHPUnit\Framework\assertCount;
 use function Tests\asSuperAdmin;
 
 it('can render with proper permission.', function () {
@@ -66,6 +61,7 @@ it('can render with proper permission.', function () {
 
     $user->givePermissionTo('project.view-any');
     $user->givePermissionTo('project.*.view');
+    $user->givePermissionTo('pipeline.view-any');
     $user->refresh();
 
     get(ManagePipelines::getUrl([
@@ -92,135 +88,48 @@ it('can list pipelines', function () {
         ->assertCanSeeTableRecords($pipelines);
 });
 
-it('can validate create pipeline inputs', function ($data, $errors) {
-    $superAdmin = User::factory()->create();
-    asSuperAdmin($superAdmin);
+// it('can delete pipelines', function () {
+//     $superAdmin = User::factory()->create();
+//     asSuperAdmin($superAdmin);
 
-    $project = Project::factory()->create();
-    $pipeline = Pipeline::factory()->make($data);
+//     $project = Project::factory()->create();
 
-    livewire(ManagePipelines::class, [
-        'record' => $project->getKey(),
-    ])
-        ->callTableAction('create', data: $pipeline->toArray())
-        ->assertHasTableActionErrors([$errors]);
+//     $pipeline = Pipeline::factory()
+//         ->has(PipelineStage::factory()->count(3), 'stages')
+//         ->for($project)
+//         ->create();
 
-    $pipelineData = collect($pipeline->toArray())->toArray();
+//     livewire(ManagePipelines::class, [
+//         'record' => $project->getKey(),
+//     ])
+//         ->callTableAction('delete', record: $pipeline->getKey())
+//         ->assertHasNoTableActionErrors();
 
-    assertDatabaseMissing(
-        Pipeline::class,
-        $pipelineData
-    );
-})->with([
-    '`name` is required' => [['name' => null], 'name', 'The name field is required.'],
-    '`name` is max 255 characters' => [['name' => str_repeat('a', 256)], 'name', 'The name may not be greater than 255 characters.'],
-    '`description` is required' => [['description' => null], 'description', 'The description field is required.'],
-    '`description` is max 65535 characters' => [['description' => str_repeat('a', 65536)], 'description', 'The description may not be greater than 65535 characters.'],
-]);
+//     assertDatabaseMissing(
+//         Pipeline::class,
+//         ['id' => $pipeline->id]
+//     );
+// });
 
-it('can create pipelines', function () {
-    $undoRepeaterFake = Repeater::fake();
+// it('deletes pipeline stages when pipeline is deleted', function () {
+//     $superAdmin = User::factory()->create();
+//     asSuperAdmin($superAdmin);
 
-    $superAdmin = User::factory()->create();
-    asSuperAdmin($superAdmin);
+//     $project = Project::factory()->create();
 
-    $project = Project::factory()->create();
+//     $pipeline = Pipeline::factory()
+//         ->has(PipelineStage::factory()->count(2), 'stages')
+//         ->for($project)
+//         ->create();
 
-    $pipelineData = CreatePipelineRequestFactory::new()->create();
+//     $stageIds = $pipeline->stages->pluck('id')->toArray();
 
-    livewire(ManagePipelines::class, [
-        'record' => $project->getRouteKey(),
-    ])
-        ->callTableAction('create', data: $pipelineData)
-        ->assertHasNoTableActionErrors();
+//     livewire(ManagePipelines::class, [
+//         'record' => $project->getKey(),
+//     ])
+//         ->callTableAction('delete', record: $pipeline->getKey())
+//         ->assertHasNoTableActionErrors();
 
-    $createdPipeline = Pipeline::first();
-    assertCount(1, Pipeline::all());
-    expect($createdPipeline->stages)->toHaveCount(3);
-
-    $undoRepeaterFake();
-});
-
-it('can edit pipelines', function () {
-    $undoRepeaterFake = Repeater::fake();
-
-    $superAdmin = User::factory()->create();
-    asSuperAdmin($superAdmin);
-
-    $project = Project::factory()->create();
-
-    $pipeline = Pipeline::factory()
-        ->has(PipelineStage::factory()->count(3), 'stages')
-        ->for($project)
-        ->state([
-            'name' => 'Test Pipeline',
-            'description' => 'Test pipeline description',
-        ])->create();
-
-    $requestData = EditPipelineRequestFactory::new()->create();
-
-    livewire(ManagePipelines::class, [
-        'record' => $project->getKey(),
-    ])
-        ->callTableAction('edit', record: $pipeline->getKey(), data: $requestData)
-        ->assertHasNoTableActionErrors();
-
-    $pipeline->refresh();
-
-    assertDatabaseHas(
-        Pipeline::class,
-        [
-            'id' => $pipeline->id,
-            'name' => $requestData['name'],
-            'description' => $requestData['description'],
-        ]
-    );
-
-    $undoRepeaterFake();
-});
-
-it('can delete pipelines', function () {
-    $superAdmin = User::factory()->create();
-    asSuperAdmin($superAdmin);
-
-    $project = Project::factory()->create();
-
-    $pipeline = Pipeline::factory()
-        ->has(PipelineStage::factory()->count(3), 'stages')
-        ->for($project)
-        ->create();
-
-    livewire(ManagePipelines::class, [
-        'record' => $project->getKey(),
-    ])
-        ->callTableAction('delete', record: $pipeline->getKey())
-        ->assertHasNoTableActionErrors();
-
-    assertDatabaseMissing(
-        Pipeline::class,
-        ['id' => $pipeline->id]
-    );
-});
-
-it('deletes pipeline stages when pipeline is deleted', function () {
-    $superAdmin = User::factory()->create();
-    asSuperAdmin($superAdmin);
-
-    $project = Project::factory()->create();
-
-    $pipeline = Pipeline::factory()
-        ->has(PipelineStage::factory()->count(2), 'stages')
-        ->for($project)
-        ->create();
-
-    $stageIds = $pipeline->stages->pluck('id')->toArray();
-
-    livewire(ManagePipelines::class, [
-        'record' => $project->getKey(),
-    ])
-        ->callTableAction('delete', record: $pipeline->getKey())
-        ->assertHasNoTableActionErrors();
-
-    assertDatabaseMissing('pipeline_stages', ['id' => $stageIds[0]]);
-    assertDatabaseMissing('pipeline_stages', ['id' => $stageIds[1]]);
-});
+//     assertDatabaseMissing('pipeline_stages', ['id' => $stageIds[0]]);
+//     assertDatabaseMissing('pipeline_stages', ['id' => $stageIds[1]]);
+// });

@@ -57,7 +57,7 @@ class PipelinePolicy
         }
 
         return $authenticatable->canOrElse(
-            abilities: ["pipeline.{$pipeline->getKey()}.view"],
+            abilities: ['pipeline.*.view'],
             denyResponse: 'You do not have permission to view this pipeline.'
         );
     }
@@ -77,7 +77,7 @@ class PipelinePolicy
         }
 
         return $authenticatable->canOrElse(
-            abilities: ["pipeline.{$pipeline->getKey()}.update"],
+            abilities: ['pipeline.*.update'],
             denyResponse: 'You do not have permission to update this pipeline.'
         );
     }
@@ -89,7 +89,7 @@ class PipelinePolicy
         }
 
         return $authenticatable->canOrElse(
-            abilities: ["pipeline.{$pipeline->getKey()}.delete"],
+            abilities: ['pipeline.*.delete'],
             denyResponse: 'You do not have permission to delete this pipeline.'
         );
     }
@@ -101,7 +101,7 @@ class PipelinePolicy
         }
 
         return $authenticatable->canOrElse(
-            abilities: ["pipeline.{$pipeline->getKey()}.restore"],
+            abilities: ['pipeline.*.restore'],
             denyResponse: 'You do not have permission to restore this pipeline.'
         );
     }
@@ -113,7 +113,7 @@ class PipelinePolicy
         }
 
         return $authenticatable->canOrElse(
-            abilities: ["pipeline.{$pipeline->getKey()}.force-delete"],
+            abilities: ['pipeline.*.force-delete'],
             denyResponse: 'You do not have permission to force delete this pipeline.'
         );
     }

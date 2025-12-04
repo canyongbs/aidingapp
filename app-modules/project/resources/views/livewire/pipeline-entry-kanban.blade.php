@@ -65,10 +65,10 @@
                                     ])
                                 >
                                     @foreach ($pipelineEntries[$stageKey] ?? [] as $entry)
-                                        <x-entry-card
+                                        <x-project::entry-card
                                             :pipeline="$pipeline"
                                             :entry="$entry"
-                                        ></x-entry-card>
+                                        ></x-project::entry-card>
                                     @endforeach
 
                                     <div
