@@ -34,47 +34,41 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Models;
+namespace AidingApp\Project\Database\Factories;
 
-use AidingApp\Project\Database\Factories\PipelineEntryFactory;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Project\Models\PipelineEntry;
+use AidingApp\Project\Models\PipelineStage;
+use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 /**
- * @mixin IdeHelperPipelineEntry
+ * @extends Factory<PipelineEntry>
  */
-class PipelineEntry extends Model
+class PipelineEntryFactory extends Factory
 {
-    /** @use HasFactory<PipelineEntryFactory> */
-    use HasFactory;
-
-    use HasUuids;
-
-    protected $table = 'pipeline_entries';
-
-    protected $fillable = [
-        'name',
-        'pipeline_stage_id',
-        'organizable_id',
-        'organizable_type',
-    ];
-
     /**
-     * @return BelongsTo<PipelineStage, $this>
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
      */
-    public function pipelineStage(): BelongsTo
+    public function definition(): array
     {
-        return $this->belongsTo(PipelineStage::class);
-    }
+        return [
+            'name' => $this->faker->word(),
+            'pipeline_stage_id' => PipelineStage::factory(),
+            'organizable_type' => function () {
+                /** @var Contact $organizable */
+                $organizable = $this->faker->randomElement([new Contact()]);
 
-    /**
-     * @return MorphTo<Model, $this>
-     */
-    public function organizable(): MorphTo
-    {
-        return $this->morphTo();
+                return $organizable->getMorphClass();
+            },
+            'organizable_id' => function (array $attributes) {
+                /** @var class-string<Contact> $class */
+                $class = Relation::getMorphedModel($attributes['organizable_type']);
+
+                return $class::factory();
+            },
+        ];
     }
 }

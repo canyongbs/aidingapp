@@ -40,6 +40,8 @@ use AidingApp\Project\Filament\Resources\PipelineResource\Pages\CreatePipeline;
 use AidingApp\Project\Filament\Resources\PipelineResource\Pages\EditPipeline;
 use AidingApp\Project\Filament\Resources\PipelineResource\Pages\ManagePipelineEntries;
 use AidingApp\Project\Filament\Resources\PipelineResource\Pages\ViewPipeline;
+use AidingApp\Project\Filament\Resources\PipelineResource\Pages\ViewPipelineEntry;
+use AidingApp\Project\Filament\Resources\ProjectResource\Pages\EditPipelineEntry;
 use AidingApp\Project\Models\Pipeline;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
@@ -68,6 +70,8 @@ class PipelineResource extends Resource
             'view' => ViewPipeline::route('/{record}'),
             'edit' => EditPipeline::route('/{record}/edit'),
             'manage-entries' => ManagePipelineEntries::route('/{record}/entries'),
+            'view-pipeline-entry' => ViewPipelineEntry::route('/{record}/entry/{pipelineEntry}/view'),
+            'edit-pipeline-entry' => EditPipelineEntry::route('/{record}/entry/{pipelineEntry}/edit'),
         ];
     }
 }
