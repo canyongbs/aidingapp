@@ -34,24 +34,54 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Tests\Tenant\Pipeline\RequestFactories;
+use AidingApp\Project\Filament\Resources\PipelineResource\Pages\EditPipeline;
+use AidingApp\Project\Models\Pipeline;
+use AidingApp\Project\Models\PipelineStage;
+use AidingApp\Project\Models\Project;
+use AidingApp\Project\Tests\Tenant\Filament\Resources\PipelineResource\RequestFactory\EditPipelineRequestFactory;
+use App\Models\User;
+use Filament\Forms\Components\Repeater;
 
-use Worksome\RequestFactories\RequestFactory;
+use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Livewire\livewire;
+use function Tests\asSuperAdmin;
 
-class EditPipelineRequestFactory extends RequestFactory
-{
-    public function definition(): array
-    {
-        return [
-            'name' => fake()->words(3, true),
-            'description' => fake()->sentence(),
-            'stages' => fn () => array_map(
-                fn ($stage) => ['name' => $stage],
-                [
-                    fake()->unique()->word(),
-                    fake()->unique()->word(),
-                ]
-            ),
-        ];
-    }
-}
+it('can edit pipelines', function () {
+    $undoRepeaterFake = Repeater::fake();
+
+    $superAdmin = User::factory()->create();
+    asSuperAdmin($superAdmin);
+
+    $project = Project::factory()->create();
+
+    $pipeline = Pipeline::factory()
+        ->has(PipelineStage::factory()->count(3), 'stages')
+        ->for($project)
+        ->state([
+            'name' => 'Test Pipeline',
+            'description' => 'Test pipeline description',
+        ])->create();
+
+    $requestData = EditPipelineRequestFactory::new()->create();
+
+    livewire(EditPipeline::class, [
+        'record' => $pipeline->getKey(),
+    ])
+        ->fillForm($requestData)
+        ->call('save')
+        ->assertHasNoFormErrors()
+        ->assertHasNoErrors();
+
+    $pipeline->refresh();
+
+    assertDatabaseHas(
+        Pipeline::class,
+        [
+            'id' => $pipeline->id,
+            'name' => $requestData['name'],
+            'description' => $requestData['description'],
+        ]
+    );
+
+    $undoRepeaterFake();
+});

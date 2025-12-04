@@ -113,7 +113,7 @@
             </div>
         @endif
     @elseif($viewType === 'kanban')
-        @livewire('pipeline-entry-kanban', [
+        @livewire('project::livewire.pipeline-entry-kanban', [
             'pipeline' => $this->getOwnerRecord(),
         ])
         <x-filament-actions::modals />

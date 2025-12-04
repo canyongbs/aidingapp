@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Tests\Tenant\Pipeline\RequestFactories;
+namespace AidingApp\Project\Tests\Tenant\Filament\Resources\PipelineResource\RequestFactory;
 
 use Worksome\RequestFactories\RequestFactory;
 

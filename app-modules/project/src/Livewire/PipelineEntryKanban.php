@@ -190,7 +190,7 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
 
     public function render(): View
     {
-        return view('livewire.pipeline-entry-kanban', [
+        return view('project::livewire.pipeline-entry-kanban', [
             'pipelineEntries' => $this->getPipelineEntries(),
             'stages' => $this->getStages(),
         ]);
