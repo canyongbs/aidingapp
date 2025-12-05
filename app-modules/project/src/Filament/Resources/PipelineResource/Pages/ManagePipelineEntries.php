@@ -41,8 +41,7 @@ use AidingApp\Project\Filament\Resources\PipelineResource;
 use AidingApp\Project\Filament\Resources\ProjectResource;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
-use AidingApp\Project\Models\Project;
-use Exception;
+use App\Features\PipelineEntryFeature;
 use Filament\Forms\Components\MorphToSelect;
 use Filament\Forms\Components\MorphToSelect\Type;
 use Filament\Forms\Components\Select;
@@ -53,7 +52,6 @@ use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
-use App\Features\PipelineEntryFeature;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
@@ -83,7 +81,6 @@ class ManagePipelineEntries extends ManageRelatedRecords
     {
         return PipelineEntryFeature::active();
     }
-
 
     public function mount(int | string $record): void
     {
