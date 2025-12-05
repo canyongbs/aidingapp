@@ -78,7 +78,7 @@ it('can render with proper permission.', function () {
         'record' => $pipeline->getKey(),
     ])
         ->assertSuccessful();
-})->only();
+});
 
 it('can validate edit pipeline inputs', function ($data, $errors) {
     $superAdmin = User::factory()->create();
