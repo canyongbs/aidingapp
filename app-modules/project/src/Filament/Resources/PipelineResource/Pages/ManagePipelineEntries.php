@@ -53,6 +53,7 @@ use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
+use App\Features\PipelineEntryFeature;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
@@ -77,6 +78,12 @@ class ManagePipelineEntries extends ManageRelatedRecords
     protected static string $view = 'project::filament.pages.manage-pipeline-entries';
 
     protected static ?string $navigationLabel = 'Pipeline Entries';
+
+    public static function canAccess(array $arguments = []): bool
+    {
+        return PipelineEntryFeature::active();
+    }
+
 
     public function mount(int | string $record): void
     {
@@ -113,10 +120,11 @@ class ManagePipelineEntries extends ManageRelatedRecords
      */
     public function getBreadcrumbs(): array
     {
-        $record = $this->getRecord();
-        throw_if(! $record instanceof Pipeline, new Exception('Pipeline not found.'));
+        $pipeline = $this->getOwnerRecord();
 
-        $project = Project::find($this->project);
+        assert($pipeline instanceof Pipeline);
+
+        $project = $pipeline->project;
 
         $breadcrumbs = [
             ProjectResource::getUrl() => ProjectResource::getBreadcrumb(),
@@ -124,8 +132,8 @@ class ManagePipelineEntries extends ManageRelatedRecords
                 ProjectResource::getUrl('view', ['record' => $project]) => $project->name ?? '',
                 ProjectResource::getUrl('manage-pipelines', ['record' => $project]) => 'Pipelines',
             ] : []),
-            '#' => Str::limit($record->name, 16),
-            ...(filled($breadcrumb = $this->getBreadcrumb()) ? ['##' => $breadcrumb] : []),
+            PipelineResource::getUrl('view', ['record' => $this->getRecord()]) => Str::limit($this->getRecordTitle(), 16),
+            ...(filled($breadcrumb = $this->getBreadcrumb()) ? [$breadcrumb] : []),
         ];
 
         if (filled($cluster = static::getCluster())) {
