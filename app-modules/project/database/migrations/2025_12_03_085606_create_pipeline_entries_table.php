@@ -34,65 +34,24 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Models;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\Project\Database\Factories\PipelineFactory;
-use App\Models\BaseModel;
-use CanyonGBS\Common\Models\Concerns\HasUserSaveTracking;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasManyThrough;
-use OwenIt\Auditing\Contracts\Auditable;
-
-/**
- * @mixin IdeHelperPipeline
- */
-class Pipeline extends BaseModel implements Auditable
-{
-    /** @use HasFactory<PipelineFactory> */
-    use HasFactory;
-
-    use AuditableTrait;
-    use HasUuids;
-    use HasUserSaveTracking;
-
-    protected $fillable = [
-        'name',
-        'description',
-        'project_id',
-    ];
-
-    /**
-     * @return BelongsTo<Project, $this>
-     */
-    public function project(): BelongsTo
+return new class () extends Migration {
+    public function up(): void
     {
-        return $this->belongsTo(Project::class);
+        Schema::create('pipeline_entries', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->string('name');
+            $table->foreignUuid('pipeline_stage_id')->references('id')->on('pipeline_stages');
+            $table->uuidMorphs('organizable');
+            $table->timestamps();
+        });
     }
 
-    /**
-     * @return HasMany<PipelineStage, $this>
-     */
-    public function stages(): HasMany
+    public function down(): void
     {
-        return $this->hasMany(PipelineStage::class, 'pipeline_id');
+        Schema::dropIfExists('pipeline_entries');
     }
-
-    /**
-     * @return HasManyThrough<PipelineEntry, PipelineStage, $this>
-     */
-    public function entries(): HasManyThrough
-    {
-        return $this->hasManyThrough(
-            PipelineEntry::class,
-            PipelineStage::class,
-            'pipeline_id',
-            'pipeline_stage_id',
-            'id',
-            'id'
-        );
-    }
-}
+};

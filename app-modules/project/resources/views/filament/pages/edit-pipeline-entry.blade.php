@@ -1,6 +1,4 @@
-<?php
-
-/*
+{{--
 <COPYRIGHT>
 
     Copyright © 2016-2025, Canyon GBS LLC. All rights reserved.
@@ -32,51 +30,22 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
+--}}
+<x-filament-panels::page>
+    <div>
+        <x-filament::link
+            :href="$this->getBackUrl()"
+            icon="heroicon-m-arrow-left"
+        >
+            Back to Pipeline Entry
+        </x-filament::link>
+    </div>
 
-namespace AidingApp\Project\Models;
+    <form wire:submit="save">
+        {{ $this->form }}
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\Project\Database\Factories\PipelineStageFactory;
-use App\Models\BaseModel;
-use CanyonGBS\Common\Models\Concerns\HasUserSaveTracking;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use OwenIt\Auditing\Contracts\Auditable;
-
-/**
- * @mixin IdeHelperPipelineStage
- */
-class PipelineStage extends BaseModel implements Auditable
-{
-    /** @use HasFactory<PipelineStageFactory> */
-    use HasFactory;
-
-    use AuditableTrait;
-    use HasUuids;
-    use HasUserSaveTracking;
-
-    protected $fillable = [
-        'name',
-        'pipeline_id',
-        'order',
-    ];
-
-    /**
-     * @return BelongsTo<Pipeline, $this>
-     */
-    public function pipeline(): BelongsTo
-    {
-        return $this->belongsTo(Pipeline::class);
-    }
-
-    /**
-     * @return HasMany<PipelineEntry, $this>
-     */
-    public function pipelineEntries(): HasMany
-    {
-        return $this->hasMany(PipelineEntry::class);
-    }
-}
+        <div class="mt-8">
+            <x-filament-panels::form.actions :actions="$this->getFormActions()" />
+        </div>
+    </form>
+</x-filament-panels::page>

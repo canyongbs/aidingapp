@@ -34,24 +34,47 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Tests\Tenant\Pipeline\RequestFactories;
+namespace AidingApp\Project\Models;
 
-use Worksome\RequestFactories\RequestFactory;
+use AidingApp\Project\Database\Factories\PipelineEntryFactory;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
-class EditPipelineRequestFactory extends RequestFactory
+/**
+ * @mixin IdeHelperPipelineEntry
+ */
+class PipelineEntry extends Model
 {
-    public function definition(): array
+    /** @use HasFactory<PipelineEntryFactory> */
+    use HasFactory;
+
+    use HasUuids;
+
+    protected $table = 'pipeline_entries';
+
+    protected $fillable = [
+        'name',
+        'pipeline_stage_id',
+        'organizable_id',
+        'organizable_type',
+    ];
+
+    /**
+     * @return BelongsTo<PipelineStage, $this>
+     */
+    public function pipelineStage(): BelongsTo
     {
-        return [
-            'name' => fake()->words(3, true),
-            'description' => fake()->sentence(),
-            'stages' => fn () => array_map(
-                fn ($stage) => ['name' => $stage],
-                [
-                    fake()->unique()->word(),
-                    fake()->unique()->word(),
-                ]
-            ),
-        ];
+        return $this->belongsTo(PipelineStage::class);
+    }
+
+    /**
+     * @return MorphTo<Model, $this>
+     */
+    public function organizable(): MorphTo
+    {
+        return $this->morphTo();
     }
 }

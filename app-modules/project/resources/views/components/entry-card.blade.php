@@ -1,6 +1,4 @@
-<?php
-
-/*
+{{--
 <COPYRIGHT>
 
     Copyright © 2016-2025, Canyon GBS LLC. All rights reserved.
@@ -32,51 +30,28 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
-
-namespace AidingApp\Project\Models;
-
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\Project\Database\Factories\PipelineStageFactory;
-use App\Models\BaseModel;
-use CanyonGBS\Common\Models\Concerns\HasUserSaveTracking;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use OwenIt\Auditing\Contracts\Auditable;
-
-/**
- * @mixin IdeHelperPipelineStage
- */
-class PipelineStage extends BaseModel implements Auditable
-{
-    /** @use HasFactory<PipelineStageFactory> */
-    use HasFactory;
-
-    use AuditableTrait;
-    use HasUuids;
-    use HasUserSaveTracking;
-
-    protected $fillable = [
-        'name',
-        'pipeline_id',
-        'order',
-    ];
-
-    /**
-     * @return BelongsTo<Pipeline, $this>
-     */
-    public function pipeline(): BelongsTo
-    {
-        return $this->belongsTo(Pipeline::class);
-    }
-
-    /**
-     * @return HasMany<PipelineEntry, $this>
-     */
-    public function pipelineEntries(): HasMany
-    {
-        return $this->hasMany(PipelineEntry::class);
-    }
-}
+--}}
+<div
+    class="z-10 flex max-w-md transform cursor-move flex-col rounded-lg bg-white p-5 shadow dark:bg-gray-800"
+    data-pipeline="{{ $pipeline->getKey() }}"
+    data-entry="{{ $entry->getKey() }}"
+    wire:key="pipeline-{{ $pipeline->getKey() }}-{{ time() }}"
+>
+    <div class="flex items-center justify-between">
+        <div class="text-base font-semibold text-gray-900 dark:text-white">
+            <small class="capitalize">
+                {{ $entry->name }}
+            </small>
+            <br>
+            <x-filament::badge color="success">
+                {{ $entry->organizable?->full_name }}
+            </x-filament::badge>
+            <br>
+        </div>
+        <x-filament::icon-button
+            class="fi-primary-color"
+            wire:click="viewPipelineEntry('{{ $entry->getKey() }}')"
+            icon="heroicon-m-arrow-top-right-on-square"
+        />
+    </div>
+</div>

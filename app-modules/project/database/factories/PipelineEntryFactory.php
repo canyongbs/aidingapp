@@ -34,65 +34,41 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Models;
+namespace AidingApp\Project\Database\Factories;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\Project\Database\Factories\PipelineFactory;
-use App\Models\BaseModel;
-use CanyonGBS\Common\Models\Concerns\HasUserSaveTracking;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasManyThrough;
-use OwenIt\Auditing\Contracts\Auditable;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Project\Models\PipelineEntry;
+use AidingApp\Project\Models\PipelineStage;
+use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 /**
- * @mixin IdeHelperPipeline
+ * @extends Factory<PipelineEntry>
  */
-class Pipeline extends BaseModel implements Auditable
+class PipelineEntryFactory extends Factory
 {
-    /** @use HasFactory<PipelineFactory> */
-    use HasFactory;
-
-    use AuditableTrait;
-    use HasUuids;
-    use HasUserSaveTracking;
-
-    protected $fillable = [
-        'name',
-        'description',
-        'project_id',
-    ];
-
     /**
-     * @return BelongsTo<Project, $this>
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
      */
-    public function project(): BelongsTo
+    public function definition(): array
     {
-        return $this->belongsTo(Project::class);
-    }
+        return [
+            'name' => $this->faker->word(),
+            'pipeline_stage_id' => PipelineStage::factory(),
+            'organizable_type' => function () {
+                /** @var Contact $organizable */
+                $organizable = $this->faker->randomElement([new Contact()]);
 
-    /**
-     * @return HasMany<PipelineStage, $this>
-     */
-    public function stages(): HasMany
-    {
-        return $this->hasMany(PipelineStage::class, 'pipeline_id');
-    }
+                return $organizable->getMorphClass();
+            },
+            'organizable_id' => function (array $attributes) {
+                /** @var class-string<Contact> $class */
+                $class = Relation::getMorphedModel($attributes['organizable_type']);
 
-    /**
-     * @return HasManyThrough<PipelineEntry, PipelineStage, $this>
-     */
-    public function entries(): HasManyThrough
-    {
-        return $this->hasManyThrough(
-            PipelineEntry::class,
-            PipelineStage::class,
-            'pipeline_id',
-            'pipeline_stage_id',
-            'id',
-            'id'
-        );
+                return $class::factory();
+            },
+        ];
     }
 }

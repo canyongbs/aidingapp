@@ -34,65 +34,54 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Models;
+use AidingApp\Project\Filament\Resources\PipelineResource\Pages\EditPipeline;
+use AidingApp\Project\Models\Pipeline;
+use AidingApp\Project\Models\PipelineStage;
+use AidingApp\Project\Models\Project;
+use AidingApp\Project\Tests\Tenant\Filament\Resources\PipelineResource\RequestFactory\EditPipelineRequestFactory;
+use App\Models\User;
+use Filament\Forms\Components\Repeater;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\Project\Database\Factories\PipelineFactory;
-use App\Models\BaseModel;
-use CanyonGBS\Common\Models\Concerns\HasUserSaveTracking;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasManyThrough;
-use OwenIt\Auditing\Contracts\Auditable;
+use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Livewire\livewire;
+use function Tests\asSuperAdmin;
 
-/**
- * @mixin IdeHelperPipeline
- */
-class Pipeline extends BaseModel implements Auditable
-{
-    /** @use HasFactory<PipelineFactory> */
-    use HasFactory;
+it('can edit pipelines', function () {
+    $undoRepeaterFake = Repeater::fake();
 
-    use AuditableTrait;
-    use HasUuids;
-    use HasUserSaveTracking;
+    $superAdmin = User::factory()->create();
+    asSuperAdmin($superAdmin);
 
-    protected $fillable = [
-        'name',
-        'description',
-        'project_id',
-    ];
+    $project = Project::factory()->create();
 
-    /**
-     * @return BelongsTo<Project, $this>
-     */
-    public function project(): BelongsTo
-    {
-        return $this->belongsTo(Project::class);
-    }
+    $pipeline = Pipeline::factory()
+        ->has(PipelineStage::factory()->count(3), 'stages')
+        ->for($project)
+        ->state([
+            'name' => 'Test Pipeline',
+            'description' => 'Test pipeline description',
+        ])->create();
 
-    /**
-     * @return HasMany<PipelineStage, $this>
-     */
-    public function stages(): HasMany
-    {
-        return $this->hasMany(PipelineStage::class, 'pipeline_id');
-    }
+    $requestData = EditPipelineRequestFactory::new()->create();
 
-    /**
-     * @return HasManyThrough<PipelineEntry, PipelineStage, $this>
-     */
-    public function entries(): HasManyThrough
-    {
-        return $this->hasManyThrough(
-            PipelineEntry::class,
-            PipelineStage::class,
-            'pipeline_id',
-            'pipeline_stage_id',
-            'id',
-            'id'
-        );
-    }
-}
+    livewire(EditPipeline::class, [
+        'record' => $pipeline->getKey(),
+    ])
+        ->fillForm($requestData)
+        ->call('save')
+        ->assertHasNoFormErrors()
+        ->assertHasNoErrors();
+
+    $pipeline->refresh();
+
+    assertDatabaseHas(
+        Pipeline::class,
+        [
+            'id' => $pipeline->id,
+            'name' => $requestData['name'],
+            'description' => $requestData['description'],
+        ]
+    );
+
+    $undoRepeaterFake();
+});
