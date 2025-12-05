@@ -91,4 +91,4 @@ it('can create pipelines', function () {
     expect($createdPipeline->stages)->toHaveCount(3);
 
     $undoRepeaterFake();
-})->only();
+});
