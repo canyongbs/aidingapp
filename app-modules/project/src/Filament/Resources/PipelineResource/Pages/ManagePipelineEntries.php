@@ -64,14 +64,14 @@ class ManagePipelineEntries extends ManageRelatedRecords
 
     protected static string $relationship = 'entries';
 
-    public ?string $viewType = 'null';
+    public ?string $viewType = null;
 
     #[Locked, Url]
     public ?string $project = null;
 
     protected static ?string $navigationIcon = 'heroicon-o-adjustments-vertical';
 
-    protected static ?string $title = 'Pipeline Entries List';
+    protected static ?string $title = 'Manage Pipeline Entries';
 
     protected static string $view = 'project::filament.pages.manage-pipeline-entries';
 
@@ -85,31 +85,7 @@ class ManagePipelineEntries extends ManageRelatedRecords
     public function mount(int | string $record): void
     {
         parent::mount($record);
-
-        $ownerRecord = $this->getRecord();
-        assert($ownerRecord instanceof Pipeline);
-        $this->viewType = 'table';
-        session('pipeline-view-type', $this->viewType);
-    }
-
-    public function getTitle(): string
-    {
-        $record = $this->getRecord();
-
-        assert($record instanceof Pipeline);
-
-        return 'Manage Pipeline Entries';
-    }
-
-    public static function getNavigationItems(array $urlParameters = []): array
-    {
-        $item = parent::getNavigationItems($urlParameters)[0];
-
-        $ownerRecord = $urlParameters['record'];
-
-        assert($ownerRecord instanceof Pipeline);
-
-        return [$item];
+        $this->viewType = session('pipeline-view-type') ?? 'table';
     }
 
     /**
