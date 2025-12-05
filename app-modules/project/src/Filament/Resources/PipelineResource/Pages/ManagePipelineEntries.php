@@ -40,16 +40,17 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Project\Filament\Resources\PipelineResource;
 use AidingApp\Project\Filament\Resources\ProjectResource;
 use AidingApp\Project\Models\Pipeline;
+use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\Project;
 use Exception;
 use Filament\Forms\Components\MorphToSelect;
 use Filament\Forms\Components\MorphToSelect\Type;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Tables\Actions\CreateAction;
 use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -82,9 +83,9 @@ class ManagePipelineEntries extends ManageRelatedRecords
         parent::mount($record);
 
         $ownerRecord = $this->getRecord();
-
         assert($ownerRecord instanceof Pipeline);
-        $this->viewType = session('pipeline-view-type') ?? 'table';
+        $this->viewType = 'table';
+        session('pipeline-view-type', $this->viewType);
     }
 
     public function getTitle(): string
@@ -140,16 +141,6 @@ class ManagePipelineEntries extends ManageRelatedRecords
         session(['pipeline-view-type' => $viewType]);
     }
 
-    public function form(Form $form): Form
-    {
-        return $form
-            ->schema([
-                TextInput::make('full_name')
-                    ->required()
-                    ->maxLength(255),
-            ]);
-    }
-
     public function table(Table $table): Table
     {
         $pipeline = $this->getOwnerRecord();
@@ -157,6 +148,10 @@ class ManagePipelineEntries extends ManageRelatedRecords
 
         return $table
             ->columns([
+                TextColumn::make('name')
+                    ->label('Name')
+                    ->sortable()
+                    ->searchable(),
                 TextColumn::make('pipelineStage.name')
                     ->label('Stage')
                     ->sortable(),
@@ -172,6 +167,13 @@ class ManagePipelineEntries extends ManageRelatedRecords
                     ->preload(),
             ])
             ->actions([
+                ViewAction::make()
+                    ->label('View')
+                    ->url(fn (PipelineEntry $record): string => PipelineResource::getUrl('view-pipeline-entry', [
+                        'record' => $pipeline->getKey(),
+                        'pipelineEntry' => $record->getKey(),
+                        'from' => 'table',
+                    ])),
                 DeleteAction::make(),
             ])
             ->headerActions([

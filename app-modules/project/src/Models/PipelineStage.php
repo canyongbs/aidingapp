@@ -43,6 +43,7 @@ use CanyonGBS\Common\Models\Concerns\HasUserSaveTracking;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use OwenIt\Auditing\Contracts\Auditable;
 
 /**
@@ -69,5 +70,13 @@ class PipelineStage extends BaseModel implements Auditable
     public function pipeline(): BelongsTo
     {
         return $this->belongsTo(Pipeline::class);
+    }
+
+    /**
+     * @return HasMany<PipelineEntry, $this>
+     */
+    public function pipelineEntries(): HasMany
+    {
+        return $this->hasMany(PipelineEntry::class);
     }
 }
