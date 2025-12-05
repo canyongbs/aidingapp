@@ -39,7 +39,6 @@ namespace AidingApp\ServiceManagement\Policies;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Enums\Feature;
-use App\Features\ServiceRequestTypeCategoriesFeature;
 use App\Models\Authenticatable;
 use App\Support\FeatureAccessResponse;
 use Illuminate\Auth\Access\Response;
@@ -49,10 +48,6 @@ class ServiceRequestTypePolicy
 {
     public function before(Authenticatable $authenticatable): ?Response
     {
-        if (! ServiceRequestTypeCategoriesFeature::active()) {
-            return Response::deny('Service Request Type Categories feature is not active.');
-        }
-
         if (! $authenticatable->hasAnyLicense([Contact::getLicenseType()])) {
             return Response::deny('You are not licensed for the Recruitment CRM.');
         }

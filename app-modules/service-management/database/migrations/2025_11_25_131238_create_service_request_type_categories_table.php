@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use App\Features\ServiceRequestTypeCategoriesFeature;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
@@ -65,16 +64,12 @@ return new class () extends Migration {
                     ->constrained('service_request_type_categories');
                 $table->unsignedInteger('sort')->nullable();
             });
-
-            ServiceRequestTypeCategoriesFeature::activate();
         });
     }
 
     public function down(): void
     {
         DB::transaction(function () {
-            ServiceRequestTypeCategoriesFeature::deactivate();
-
             Schema::table('service_request_types', function (Blueprint $table) {
                 $table->dropConstrainedForeignId('category_id');
                 $table->dropColumn('sort');
