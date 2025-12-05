@@ -37,7 +37,7 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\IncidentSeverityResource\Pages;
 
 use AidingApp\ServiceManagement\Filament\Resources\IncidentSeverityResource;
-use App\Filament\Forms\Components\ColorSelect;
+use CanyonGBS\Common\Filament\Forms\Components\ColorSelect;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Pages\CreateRecord;

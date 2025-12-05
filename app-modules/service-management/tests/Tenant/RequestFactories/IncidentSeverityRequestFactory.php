@@ -36,7 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Tests\Tenant\RequestFactories;
 
-use Filament\Support\Colors\Color;
+use CanyonGBS\Common\Enums\Color;
 use Worksome\RequestFactories\RequestFactory;
 
 class IncidentSeverityRequestFactory extends RequestFactory
@@ -46,7 +46,7 @@ class IncidentSeverityRequestFactory extends RequestFactory
         return [
             'name' => fake()->word(10),
             'color' => fake()->randomElement(
-                collect(Color::all())->keys()
+                collect(Color::cases())->values()
             ),
         ];
     }

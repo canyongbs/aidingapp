@@ -37,7 +37,7 @@
 namespace AidingApp\ServiceManagement\Database\Factories;
 
 use AidingApp\ServiceManagement\Models\IncidentSeverity;
-use Filament\Support\Colors\Color;
+use CanyonGBS\Common\Enums\Color;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -55,7 +55,7 @@ class IncidentSeverityFactory extends Factory
         return [
             'name' => $this->faker->word(10),
             'color' => $this->faker->randomElement(
-                collect(Color::all())->keys()
+                collect(Color::cases())->values()
             ),
         ];
     }
