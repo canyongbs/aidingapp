@@ -38,7 +38,6 @@ namespace AidingApp\Project\Filament\Resources\ProjectResource\Pages;
 
 use AidingApp\Project\Filament\Resources\ProjectResource;
 use AidingApp\Project\Models\Pipeline;
-use App\Features\ProjectPipelineFeature;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -68,7 +67,7 @@ class ManagePipelines extends ManageRelatedRecords
     {
         $user = auth()->user();
 
-        return ProjectPipelineFeature::active() && $user->can('viewAny', [Pipeline::class, $arguments['record']]);
+        return $user->can('viewAny', [Pipeline::class, $arguments['record']]);
     }
 
     public function form(Form $form): Form
