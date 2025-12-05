@@ -64,7 +64,7 @@ test('The correct details are displayed on the ViewIncidentSeverity page', funct
                 'Name',
                 $incidentSeverity->name,
                 'Color',
-                $incidentSeverity->rgb_color,
+                $incidentSeverity->getRgb,
             ]
         );
 });
