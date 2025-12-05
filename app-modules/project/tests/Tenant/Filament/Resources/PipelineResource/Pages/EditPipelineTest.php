@@ -34,6 +34,7 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Project\Filament\Resources\PipelineResource\Pages\EditPipeline;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineStage;
@@ -42,9 +43,42 @@ use AidingApp\Project\Tests\Tenant\Filament\Resources\PipelineResource\RequestFa
 use App\Models\User;
 use Filament\Forms\Components\Repeater;
 
+use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
+
+it('can render with proper permission.', function () {
+    $user = User::factory()->licensed(LicenseType::cases())->create();
+
+    actingAs($user);
+
+    $project = Project::factory()->create();
+     $pipeline = Pipeline::factory()
+        ->has(PipelineStage::factory()->count(3), 'stages')
+        ->for($project)
+        ->state([
+            'name' => 'Test Pipeline',
+            'description' => 'Test pipeline description',
+        ])->create();
+
+    livewire(EditPipeline::class, [
+        'record' => $pipeline->getKey(),
+    ])
+        ->assertForbidden();
+
+    $user->givePermissionTo('project.view-any');
+    $user->givePermissionTo('project.*.view');
+    $user->givePermissionTo('pipeline.view-any');
+    $user->givePermissionTo('project.*.update');
+    $user->givePermissionTo('pipeline.*.update');
+    $user->refresh();
+
+    livewire(EditPipeline::class, [
+        'record' => $pipeline->getKey(),
+    ])
+        ->assertSuccessful();
+})->only();
 
 it('can validate edit pipeline inputs', function ($data, $errors) {
     $superAdmin = User::factory()->create();

@@ -34,15 +34,36 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Project\Filament\Resources\PipelineResource\Pages\CreatePipeline;
 use AidingApp\Project\Models\Pipeline;
+use AidingApp\Project\Models\Project;
 use AidingApp\Project\Tests\Tenant\Filament\Resources\PipelineResource\RequestFactory\CreatePipelineRequestFactory;
 use App\Models\User;
 use Filament\Forms\Components\Repeater;
 
+use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 use function PHPUnit\Framework\assertCount;
 use function Tests\asSuperAdmin;
+
+it('can render with proper permission.', function () {
+    $user = User::factory()->licensed(LicenseType::cases())->create();
+
+    actingAs($user);
+
+    livewire(CreatePipeline::class)
+        ->assertForbidden();
+
+    $user->givePermissionTo('project.view-any');
+    $user->givePermissionTo('project.*.view');
+    $user->givePermissionTo('pipeline.view-any');
+    $user->givePermissionTo('pipeline.create');
+    $user->refresh();
+
+    livewire(CreatePipeline::class)
+        ->assertSuccessful();
+});
 
 it('can validate create pipeline inputs', function ($data, $errors) {
     $superAdmin = User::factory()->create();
