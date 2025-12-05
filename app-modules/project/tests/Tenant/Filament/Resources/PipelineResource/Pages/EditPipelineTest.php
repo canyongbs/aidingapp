@@ -46,6 +46,36 @@ use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
+it('can validate edit pipeline inputs', function ($data, $errors) {
+    $superAdmin = User::factory()->create();
+    asSuperAdmin($superAdmin);
+
+    $request = EditPipelineRequestFactory::new($data)->create();
+
+    livewire(EditPipeline::class)
+        ->fillForm($request)
+        ->call('save')
+        ->assertHasFormErrors($errors);
+})->with([
+    'name required' => [
+        EditPipelineRequestFactory::new()->without('name'),
+        ['name' => 'required'],
+    ],
+    'name max' => [
+        EditPipelineRequestFactory::new()->state(['name' => str()->random(256)]),
+        ['name' => 'max'],
+    ],
+    'description required' => [
+        EditPipelineRequestFactory::new()->without('description'),
+        ['description' => 'required'],
+    ],
+    'description max' => [
+        EditPipelineRequestFactory::new()->state(['description' => str()->random(65536)]),
+        ['description' => 'max'],
+    ],
+]);
+
+
 it('can edit pipelines', function () {
     $undoRepeaterFake = Repeater::fake();
 
@@ -84,4 +114,22 @@ it('can edit pipelines', function () {
     );
 
     $undoRepeaterFake();
+});
+
+it('can delete pipelines', function () {
+    $superAdmin = User::factory()->create();
+    asSuperAdmin($superAdmin);
+
+    $project = Project::factory()->create();
+
+    $pipeline = Pipeline::factory()
+        ->has(PipelineStage::factory()->count(3), 'stages')
+        ->for($project)
+        ->create();
+
+    livewire(EditPipeline::class, [
+        'record' => $pipeline->getKey(),
+    ])
+        ->callAction('delete')
+        ->assertRedirect();
 });
