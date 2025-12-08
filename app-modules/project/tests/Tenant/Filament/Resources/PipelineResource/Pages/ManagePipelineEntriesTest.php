@@ -169,7 +169,7 @@ it('validates stage_id is required when creating pipeline entries', function () 
         ->callTableAction('create', data: [
             'stage_id' => null,
         ])
-        ->assertHasTableActionErrors(['stage_id' => 'required']);
+        ->assertHasTableActionErrors(['pipeline_stage_id' => 'required']);
 });
 
 it('can delete pipeline entries', function () {

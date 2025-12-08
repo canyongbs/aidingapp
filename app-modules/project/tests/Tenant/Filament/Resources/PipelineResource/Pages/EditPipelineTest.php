@@ -84,15 +84,23 @@ it('can validate edit pipeline inputs', function ($data, $errors) {
     $superAdmin = User::factory()->create();
     asSuperAdmin($superAdmin);
 
+    $project = Project::factory()->create();
+    $pipeline = Pipeline::factory()
+        ->has(PipelineStage::factory()->count(2), 'stages')
+        ->for($project)
+        ->create();
+
     $request = EditPipelineRequestFactory::new($data)->create();
 
-    livewire(EditPipeline::class)
+    livewire(EditPipeline::class, [
+        'record' => $pipeline->getKey(),
+    ])
         ->fillForm($request)
         ->call('save')
         ->assertHasFormErrors($errors);
 })->with([
     'name required' => [
-        EditPipelineRequestFactory::new()->without('name'),
+        EditPipelineRequestFactory::new()->state(['name' => null]),
         ['name' => 'required'],
     ],
     'name max' => [
@@ -100,7 +108,7 @@ it('can validate edit pipeline inputs', function ($data, $errors) {
         ['name' => 'max'],
     ],
     'description required' => [
-        EditPipelineRequestFactory::new()->without('description'),
+        EditPipelineRequestFactory::new()->state(['description' => null]),
         ['description' => 'required'],
     ],
     'description max' => [
