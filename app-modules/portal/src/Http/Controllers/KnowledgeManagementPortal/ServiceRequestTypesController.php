@@ -38,7 +38,6 @@ namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
-use App\Features\ServiceRequestTypeCategoriesFeature;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 
@@ -46,13 +45,6 @@ class ServiceRequestTypesController extends Controller
 {
     public function index(): JsonResponse
     {
-        if (! ServiceRequestTypeCategoriesFeature::active()) {
-            return response()->json([
-                'categories' => [],
-                'types' => [],
-            ]);
-        }
-
         // Load all categories and types and build a nested tree in PHP so the frontend can
         // render top-level categories/types and navigate into subcategories without
         // additional requests.
