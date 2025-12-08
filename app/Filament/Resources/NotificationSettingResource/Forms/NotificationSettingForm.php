@@ -36,7 +36,7 @@
 
 namespace App\Filament\Resources\NotificationSettingResource\Forms;
 
-use App\Filament\Forms\Components\ColorSelect;
+use CanyonGBS\Common\Filament\Forms\Components\ColorSelect;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
