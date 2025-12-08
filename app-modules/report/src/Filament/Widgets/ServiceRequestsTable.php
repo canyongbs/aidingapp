@@ -120,6 +120,10 @@ class ServiceRequestsTable extends BaseWidget
                         query: fn (Builder $query, $search) => $query->whereHas(
                             'respondent',
                             fn (Builder $query) => $query->whereRaw('lower(full_name) like ?', ['%' . strtolower($search) . '%'])
+                                ->orWhereHas(
+                                    'organization',
+                                    fn (Builder $query) => $query->whereRaw('lower(name) like ?', ['%' . strtolower($search) . '%'])
+                                )
                         )
                     )
                     ->url(fn (ServiceRequest $record): string => ContactResource::getUrl('view', ['record' => $record->respondent]))

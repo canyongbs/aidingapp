@@ -116,7 +116,7 @@ class ServiceRequestsStats extends StatsOverviewReportWidget
         $serviceRequestsCreatedBeforeIntervalStartQuery = ServiceRequest::query()
             ->with(['histories' => function ($query) use ($intervalStart) {
                 $query->whereBetween('created_at', [$intervalStart, now()])
-                    ->whereRaw("original_values->>'status_id' IS NOT NULL")
+                    ->whereRaw("original_values->>'status_id' IS NOT NULL")  // Checks if status_id was actually changed
                     ->orderBy('created_at', 'asc')
                     ->limit(1);
             }])
@@ -145,10 +145,12 @@ class ServiceRequestsStats extends StatsOverviewReportWidget
 
     private function wasOpenAtIntervalStart(ServiceRequest $serviceRequest, $openStatusIds): bool
     {
+        // If the service request has no history and it is open, it was open at interval date
         if ($serviceRequest->histories->isEmpty()) {
             return $openStatusIds->contains($serviceRequest->status_id);
         }
 
+        // If the service requests first history after the interval was a change from open to something else, it was open at interval date
         if ($history = $serviceRequest->histories->first()) {
             $originalStatusId = $history->original_values['status_id'] ?? null;
 
