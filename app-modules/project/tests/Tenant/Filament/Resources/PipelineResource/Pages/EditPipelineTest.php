@@ -54,7 +54,7 @@ it('can render with proper permission.', function () {
     actingAs($user);
 
     $project = Project::factory()->create();
-     $pipeline = Pipeline::factory()
+    $pipeline = Pipeline::factory()
         ->has(PipelineStage::factory()->count(3), 'stages')
         ->for($project)
         ->state([
@@ -108,7 +108,6 @@ it('can validate edit pipeline inputs', function ($data, $errors) {
         ['description' => 'max'],
     ],
 ]);
-
 
 it('can edit pipelines', function () {
     $undoRepeaterFake = Repeater::fake();

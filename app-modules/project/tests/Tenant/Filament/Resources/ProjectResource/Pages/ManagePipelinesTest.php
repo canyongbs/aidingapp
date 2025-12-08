@@ -42,7 +42,6 @@ use AidingApp\Project\Models\Project;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Laravel\assertDatabaseMissing;
 use function Pest\Laravel\get;
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
