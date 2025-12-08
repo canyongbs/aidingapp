@@ -36,18 +36,22 @@
 
 namespace AidingApp\Report\Filament\Widgets;
 
+use AidingApp\Report\Filament\Widgets\Concerns\InteractsWithPageFilters;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use Carbon\Carbon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
+use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\On;
 
-class TopServiceRequestTypesTable extends BaseWidget
+class ServiceRequestTypesTable extends BaseWidget
 {
+    use InteractsWithPageFilters;
+
     public string $cacheTag;
 
-    protected static ?string $heading = 'Top Request Types';
+    protected static ?string $heading = 'Request Types';
 
     protected static bool $isLazy = false;
 
@@ -72,12 +76,32 @@ class TopServiceRequestTypesTable extends BaseWidget
 
     public function table(Table $table): Table
     {
+        $startDate = $this->getStartDate();
+        $endDate = $this->getEndDate();
+
         return $table
             ->query(
-                function () {
-                    return ServiceRequestType::withCount('serviceRequests')
-                        ->withAvg('serviceRequests', 'time_to_resolution')
-                        ->orderBy('service_requests_count', 'desc');
+                function () use ($startDate, $endDate) {
+                    $query = ServiceRequestType::withCount([
+                        'serviceRequests' => function (Builder $query) use ($startDate, $endDate) {
+                            $query->when(
+                                $startDate && $endDate,
+                                fn (Builder $query): Builder => $query->whereBetween('service_requests.created_at', [$startDate, $endDate])
+                            );
+                        }
+                    ]);
+
+                    if ($startDate && $endDate) {
+                        $query->withAvg([
+                            'serviceRequests as service_requests_avg_time_to_resolution' => function (Builder $query) use ($startDate, $endDate) {
+                                $query->whereBetween('service_requests.created_at', [$startDate, $endDate]);
+                            }
+                        ], 'time_to_resolution');
+                    } else {
+                        $query->withAvg('serviceRequests', 'time_to_resolution');
+                    }
+
+                    return $query->orderBy('service_requests_count', 'desc');
                 }
             )
             ->columns([
@@ -86,7 +110,7 @@ class TopServiceRequestTypesTable extends BaseWidget
                 TextColumn::make('service_requests_count')
                     ->label('Count'),
                 TextColumn::make('service_requests_avg_time_to_resolution')
-                    ->formatStateUsing(function ($state) {
+                    ->formatStateUsing(function (?float $state) {
                         $interval = Carbon::now()->diffAsCarbonInterval(Carbon::now()->addSeconds((float) $state));
                         $days = $interval->d;
                         $hours = $interval->h;
@@ -96,6 +120,6 @@ class TopServiceRequestTypesTable extends BaseWidget
                     })
                     ->label('Average resolution time'),
             ])
-            ->paginated([5]);
+            ->paginated([5, 10, 15, 20, 25]);
     }
 }

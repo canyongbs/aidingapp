@@ -36,18 +36,25 @@
 
 namespace AidingApp\Report\Filament\Pages;
 
-use AidingApp\Report\Filament\Widgets\RecentServiceRequestsTable;
 use AidingApp\Report\Filament\Widgets\RefreshWidget;
-use AidingApp\Report\Filament\Widgets\ServiceRequestsOverTimeLineChart;
+use AidingApp\Report\Filament\Widgets\ServiceRequestsOverTimeBarChart;
 use AidingApp\Report\Filament\Widgets\ServiceRequestsStats;
+use AidingApp\Report\Filament\Widgets\ServiceRequestsTable;
 use AidingApp\Report\Filament\Widgets\ServiceRequestStatusDistributionDonutChart;
-use AidingApp\Report\Filament\Widgets\TopServiceRequestTypesTable;
+use AidingApp\Report\Filament\Widgets\ServiceRequestTypesTable;
 use App\Filament\Clusters\ReportLibrary;
 use App\Models\User;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Pages\Dashboard;
+use Filament\Pages\Dashboard\Concerns\HasFiltersForm;
 
 class ServiceRequests extends Dashboard
 {
+    use HasFiltersForm;
+
     protected static ?string $cluster = ReportLibrary::class;
 
     protected static ?string $navigationGroup = 'Service Management';
@@ -62,6 +69,8 @@ class ServiceRequests extends Dashboard
 
     protected $cacheTag = 'report-service-requests';
 
+    protected static string $view = 'report::filament.pages.report';
+
     public static function canAccess(): bool
     {
         /** @var User $user */
@@ -70,15 +79,44 @@ class ServiceRequests extends Dashboard
         return $user->can('report-library.view-any');
     }
 
+    public function filtersForm(Form $form): Form
+    {
+        return $form->schema([
+            Section::make()
+                ->schema([
+                    DatePicker::make('startDate')
+                        ->displayFormat('m-d-Y')
+                        ->native(false)
+                        ->maxDate(fn (Get $get) => $get('endDate') ?: now())
+                        ->afterStateUpdated(function (callable $set, mixed $state, Get $get) {
+                            if (blank($get('endDate')) && filled($state)) {
+                                $set('endDate', $state);
+                            }
+                        }),
+                    DatePicker::make('endDate')
+                        ->displayFormat('m-d-Y')
+                        ->native(false)
+                        ->minDate(fn (Get $get) => $get('startDate') ?: now())
+                        ->maxDate(now())
+                        ->afterStateUpdated(function (callable $set, mixed $state, Get $get) {
+                            if (blank($get('startDate')) && filled($state)) {
+                                $set('startDate', $state);
+                            }
+                        }),
+                ])
+                ->columns(2),
+        ]);
+    }
+
     public function getWidgets(): array
     {
         return [
             RefreshWidget::make(['cacheTag' => $this->cacheTag]),
             ServiceRequestsStats::make(['cacheTag' => $this->cacheTag]),
             ServiceRequestStatusDistributionDonutChart::make(['cacheTag' => $this->cacheTag]),
-            ServiceRequestsOverTimeLineChart::make(['cacheTag' => $this->cacheTag]),
-            RecentServiceRequestsTable::make(['cacheTag' => $this->cacheTag]),
-            TopServiceRequestTypesTable::make(['cacheTag' => $this->cacheTag]),
+            ServiceRequestsOverTimeBarChart::make(['cacheTag' => $this->cacheTag]),
+            ServiceRequestTypesTable::make(['cacheTag' => $this->cacheTag]),
+            ServiceRequestsTable::make(['cacheTag' => $this->cacheTag]),
         ];
     }
 
@@ -88,6 +126,13 @@ class ServiceRequests extends Dashboard
             'sm' => 2,
             'md' => 4,
             'lg' => 4,
+        ];
+    }
+
+    public function getWidgetData(): array
+    {
+        return [
+            'filters' => $this->filters,
         ];
     }
 }
