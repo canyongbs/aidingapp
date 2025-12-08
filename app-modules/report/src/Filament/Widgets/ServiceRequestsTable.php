@@ -177,6 +177,7 @@ class ServiceRequestsTable extends BaseWidget
                     ->searchable()
                     ->preload(),
                 SelectFilter::make('assigned_to')
+                    ->label('Assigned To')
                     ->relationship('assignedTo.user', 'name')
                     ->searchable()
                     ->preload(),
