@@ -44,6 +44,12 @@ enum ServiceMonitoringFrequency: string implements HasLabel
 
     case TwentyFourHours = '24_hours';
 
+    case FiveMinutes = '5_minutes';
+
+    case FifteenMinutes = '15_minutes';
+
+    case ThirtyMinutes = '30_minutes';
+
     public function getLabel(): string
     {
         return str_replace('_', ' ', $this->value);
