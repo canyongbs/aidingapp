@@ -40,6 +40,12 @@ use Filament\Support\Contracts\HasLabel;
 
 enum ServiceMonitoringFrequency: string implements HasLabel
 {
+    case FiveMinutes = '5_minutes';
+
+    case FifteenMinutes = '15_minutes';
+
+    case ThirtyMinutes = '30_minutes';
+
     case OneHour = '1_hour';
 
     case TwentyFourHours = '24_hours';
