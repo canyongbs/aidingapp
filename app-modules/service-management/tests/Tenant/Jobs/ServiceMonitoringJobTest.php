@@ -53,7 +53,7 @@ it('successfully dispatches', function ($frequency) {
 })
     ->with(
         [
-          fn () => ServiceMonitoringFrequency::FiveMinutes,
+            fn () => ServiceMonitoringFrequency::FiveMinutes,
             fn () => ServiceMonitoringFrequency::FifteenMinutes,
             fn () => ServiceMonitoringFrequency::ThirtyMinutes,
             fn () => ServiceMonitoringFrequency::OneHour,

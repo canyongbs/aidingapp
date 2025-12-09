@@ -92,7 +92,7 @@ class Kernel extends ConsoleKernel
                         ->onOneServer()
                         ->withoutOverlapping(720);
 
-                        $schedule->call(function () use ($tenant) {
+                    $schedule->call(function () use ($tenant) {
                         $tenant->execute(function () {
                             dispatch(new ServiceMonitoringJob(ServiceMonitoringFrequency::FiveMinutes));
                         });
@@ -106,7 +106,7 @@ class Kernel extends ConsoleKernel
                     })
                         ->everyFifteenMinutes();
 
-                        $schedule->call(function () use ($tenant) {
+                    $schedule->call(function () use ($tenant) {
                         $tenant->execute(function () {
                             dispatch(new ServiceMonitoringJob(ServiceMonitoringFrequency::ThirtyMinutes));
                         });
