@@ -36,6 +36,7 @@
 
 namespace AidingApp\Report\Filament\Exports;
 
+use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Exporter;
@@ -58,47 +59,49 @@ class ServiceRequestsExporter extends Exporter
                 ->label('Status'),
             ExportColumn::make('respondent_name')
                 ->label('Related To')
-                ->state(fn (ServiceRequest $record): ?string => 
-                    $record->respondent->{$record->respondent::displayNameKey()}
+                ->state(
+                    fn (ServiceRequest $record): ?string => $record->respondent->{$record->respondent::displayNameKey()}
                 ),
             ExportColumn::make('organization_name')
                 ->label('Organization')
-                ->state(fn (ServiceRequest $record): ?string => 
-                    $record->respondent->organization->name ?? null
+                ->state(
+                    fn (ServiceRequest $record): ?string => $record->respondent->organization->name ?? null
                 ),
             ExportColumn::make('assignedTo.user.name')
                 ->label('Assigned To'),
             ExportColumn::make('created_at')
-                ->label('Date/Time Opened'),
+                ->label('Date/Time Opened')
+                ->dateTime('m/d/Y g:i A'),
             ExportColumn::make('closed_at')
                 ->label('Date/Time Closed')
                 ->state(function (ServiceRequest $record): ?string {
-                    if ($record->status->classification->value !== 'closed') {
+                    if ($record->status->classification !== SystemServiceRequestClassification::Closed) {
                         return null;
                     }
                     $resolvedAt = $record->getResolvedAt();
+
                     return $resolvedAt->format('m/d/Y g:i A');
                 }),
             ExportColumn::make('age')
                 ->label('Age')
                 ->state(function (ServiceRequest $record): ?string {
-                    if ($record->status->classification->value !== 'closed') {
+                    if ($record->status->classification !== SystemServiceRequestClassification::Closed) {
                         return null;
                     }
-                    
+
                     $resolvedAt = $record->getResolvedAt();
                     $interval = $record->created_at->diff($resolvedAt);
                     $days = $interval->days;
                     $hours = $interval->h;
                     $minutes = $interval->i;
-                    
+
                     if ($days > 0) {
                         return "{$days}d {$hours}h {$minutes}m";
                     } elseif ($hours > 0) {
                         return "{$hours}h {$minutes}m";
-                    } else {
-                        return "{$minutes}m";
                     }
+
+                    return "{$minutes}m";
                 }),
         ];
     }

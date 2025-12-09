@@ -39,6 +39,7 @@ namespace AidingApp\Report\Filament\Widgets;
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Report\Filament\Exports\ServiceRequestsExporter;
 use AidingApp\Report\Filament\Widgets\Concerns\InteractsWithPageFilters;
+use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use Filament\Tables\Actions\ExportAction;
@@ -138,32 +139,33 @@ class ServiceRequestsTable extends BaseWidget
                 TextColumn::make('resolved_at')
                     ->label('Date/Time Closed')
                     ->getStateUsing(function (ServiceRequest $record): ?string {
-                        if ($record->status->classification->value !== 'closed') {
+                        if ($record->status->classification !== SystemServiceRequestClassification::Closed) {
                             return null;
                         }
                         $resolvedAt = $record->getResolvedAt();
+
                         return $resolvedAt->format('m/d/Y g:i A');
                     })
                     ->placeholder('Not closed'),
                 TextColumn::make('age')
                     ->label('Age')
                     ->getStateUsing(function (ServiceRequest $record): ?string {
-                        if ($record->status->classification->value !== 'closed') {
+                        if ($record->status->classification !== SystemServiceRequestClassification::Closed) {
                             return null;
                         }
-                        
+
                         $interval = $record->created_at->diff($record->getResolvedAt());
                         $days = $interval->days;
                         $hours = $interval->h;
                         $minutes = $interval->i;
-                        
+
                         if ($days > 0) {
                             return "{$days}d {$hours}h {$minutes}m";
                         } elseif ($hours > 0) {
                             return "{$hours}h {$minutes}m";
-                        } else {
-                            return "{$minutes}m";
                         }
+
+                        return "{$minutes}m";
                     })
                     ->placeholder(''),
             ])
