@@ -293,7 +293,7 @@
                                 <div class="flex-shrink-0">
                                     <!-- Type icon container; fall back to a document icon when no custom icon is provided -->
                                     <div
-                                        class="w-10 h-10 flex items-center justify-center rounded bg-slate-100 text-brand-600"
+                                        class="w-10 h-10 flex items-center justify-center rounded bg-gray-100 text-brand-600"
                                     >
                                         <span v-if="type.icon" v-html="type.icon"></span>
                                         <svg
