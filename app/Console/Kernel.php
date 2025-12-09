@@ -92,6 +92,27 @@ class Kernel extends ConsoleKernel
                         ->onOneServer()
                         ->withoutOverlapping(720);
 
+                        $schedule->call(function () use ($tenant) {
+                        $tenant->execute(function () {
+                            dispatch(new ServiceMonitoringJob(ServiceMonitoringFrequency::FiveMinutes));
+                        });
+                    })
+                        ->everyFiveMinutes();
+
+                    $schedule->call(function () use ($tenant) {
+                        $tenant->execute(function () {
+                            dispatch(new ServiceMonitoringJob(ServiceMonitoringFrequency::FifteenMinutes));
+                        });
+                    })
+                        ->everyFifteenMinutes();
+
+                        $schedule->call(function () use ($tenant) {
+                        $tenant->execute(function () {
+                            dispatch(new ServiceMonitoringJob(ServiceMonitoringFrequency::ThirtyMinutes));
+                        });
+                    })
+                        ->everyThirtyMinutes();
+
                     $schedule->call(function () use ($tenant) {
                         $tenant->execute(function () {
                             dispatch(new ServiceMonitoringJob(ServiceMonitoringFrequency::OneHour));

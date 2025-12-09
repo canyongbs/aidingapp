@@ -66,11 +66,11 @@ class ServiceMonitoringJob implements ShouldQueue, ShouldBeUnique
     public function uniqueFor(): int
     {
         $seconds = match ($this->interval) {
-            ServiceMonitoringFrequency::OneHour => 60 * 60,
-            ServiceMonitoringFrequency::TwentyFourHours => 24 * 60 * 60,
             ServiceMonitoringFrequency::FiveMinutes => 5 * 60,
             ServiceMonitoringFrequency::FifteenMinutes => 15 * 60,
             ServiceMonitoringFrequency::ThirtyMinutes => 30 * 60,
+            ServiceMonitoringFrequency::OneHour => 60 * 60,
+            ServiceMonitoringFrequency::TwentyFourHours => 24 * 60 * 60,
         };
 
         return $seconds + (30 * 60);
