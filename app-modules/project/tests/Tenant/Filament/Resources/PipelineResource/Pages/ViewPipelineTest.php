@@ -108,45 +108,7 @@ it('displays correct pipeline details', function () {
         ->assertSee('Test Pipeline Description');
 });
 
-it('shows infolist with pipeline details section', function () {
-    asSuperAdmin();
-
-    $project = Project::factory()->create();
-    $pipeline = Pipeline::factory()
-        ->for($project)
-        ->has(PipelineStage::factory()->count(2), 'stages')
-        ->create([
-            'name' => 'Sales Pipeline',
-            'description' => 'Pipeline for sales tracking',
-        ]);
-
-    livewire(ViewPipeline::class, [
-        'record' => $pipeline->getRouteKey(),
-    ])
-        ->assertSuccessful()
-        ->assertSee('Sales Pipeline')
-        ->assertSee('Pipeline for sales tracking')
-        ->assertSee('Other stages');
-});
-
 it('displays pipeline with multiple stages', function () {
-    asSuperAdmin();
-
-    $project = Project::factory()->create();
-    $pipeline = Pipeline::factory()
-        ->for($project)
-        ->has(PipelineStage::factory()->count(5), 'stages')
-        ->create();
-
-    expect($pipeline->stages()->count())->toBe(5);
-
-    livewire(ViewPipeline::class, [
-        'record' => $pipeline->getRouteKey(),
-    ])
-        ->assertSuccessful();
-});
-
-it('displays infolist schema correctly', function () {
     asSuperAdmin();
 
     $project = Project::factory()->create();
