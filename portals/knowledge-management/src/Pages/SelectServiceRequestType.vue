@@ -231,14 +231,14 @@
                         <div
                             v-for="category in displayedCategories"
                             :key="category.id"
-                            class="group relative bg-slate-50 p-6 rounded shadow cursor-pointer hover:shadow-md"
+                            class="group relative bg-brand-700 text-white p-6 rounded shadow cursor-pointer hover:shadow-md"
                             @click="openCategory(category)"
                         >
                             <div class="flex items-center gap-x-3">
                                 <div class="flex-shrink-0">
                                     <!-- Folder icon for categories (neutral color) -->
                                     <div
-                                        class="w-10 h-10 flex items-center justify-center rounded bg-slate-100 text-gray-700"
+                                        class="w-10 h-10 flex items-center justify-center rounded bg-white/10 text-white/70"
                                     >
                                         <svg
                                             xmlns="http://www.w3.org/2000/svg"
@@ -257,13 +257,13 @@
                                     </div>
                                 </div>
                                 <div class="w-full">
-                                    <h3 class="text-base font-semibold leading-6 text-gray-900">
+                                    <h3 class="text-base font-semibold leading-6">
                                         <span class="absolute inset-0" aria-hidden="true" />
                                         {{ category.name }}
                                     </h3>
                                 </div>
                                 <span
-                                    class="pointer-events-none text-gray-300 group-hover:text-gray-600"
+                                    class="pointer-events-none text-white/60 group-hover:text-white/80"
                                     aria-hidden="true"
                                 >
                                     <svg
@@ -293,7 +293,7 @@
                                 <div class="flex-shrink-0">
                                     <!-- Type icon container; fall back to a document icon when no custom icon is provided -->
                                     <div
-                                        class="w-10 h-10 flex items-center justify-center rounded bg-slate-100 text-brand-600"
+                                        class="w-10 h-10 flex items-center justify-center rounded bg-gray-100 text-brand-600"
                                     >
                                         <span v-if="type.icon" v-html="type.icon"></span>
                                         <svg
