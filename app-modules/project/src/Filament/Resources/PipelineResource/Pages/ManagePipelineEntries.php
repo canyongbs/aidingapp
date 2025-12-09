@@ -79,7 +79,7 @@ class ManagePipelineEntries extends ManageRelatedRecords
 
     public static function canAccess(array $arguments = []): bool
     {
-        return PipelineEntryFeature::active();
+        return PipelineEntryFeature::active() && parent::canAccess($arguments);
     }
 
     public function mount(int | string $record): void
