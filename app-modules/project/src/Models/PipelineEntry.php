@@ -36,22 +36,25 @@
 
 namespace AidingApp\Project\Models;
 
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Project\Database\Factories\PipelineEntryFactory;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * @mixin IdeHelperPipelineEntry
  */
-class PipelineEntry extends Model
+class PipelineEntry extends Model implements Auditable
 {
     /** @use HasFactory<PipelineEntryFactory> */
     use HasFactory;
 
     use HasUuids;
+    use AuditableTrait;
 
     protected $table = 'pipeline_entries';
 
