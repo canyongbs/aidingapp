@@ -134,7 +134,7 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
                 Grid::make()->schema([
                     TextInput::make('name')
                         ->maxLength(255)
-                        ->label('Description')
+                        ->required()
                         ->string(),
                 ]),
                 MorphToSelect::make('organizable')
