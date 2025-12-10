@@ -79,7 +79,7 @@ class ServiceMonitorTable extends BaseWidget
                     ->label('Last 30 Days')
                     ->getStateUsing(fn (ServiceMonitoringTarget $record) => $record->getUptimePercentage(30)),
                 TextColumn::make('one_year')
-                    ->label('Last 1 Year')
+                    ->label('Last Year')
                     ->getStateUsing(fn (ServiceMonitoringTarget $record) => $record->getUptimePercentage(365)),
             ])
             ->headerActions([

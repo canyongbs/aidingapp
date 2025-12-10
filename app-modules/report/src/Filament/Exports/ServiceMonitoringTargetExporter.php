@@ -62,7 +62,7 @@ class ServiceMonitoringTargetExporter extends Exporter
                 ->label('Last 30 Days')
                 ->state(fn (ServiceMonitoringTarget $record) => $record->getUptimePercentage(30)),
             ExportColumn::make('one_year')
-                ->label('Last 1 Year')
+                ->label('Last Year')
                 ->state(fn (ServiceMonitoringTarget $record) => $record->getUptimePercentage(365)),
         ];
     }
