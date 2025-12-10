@@ -42,7 +42,11 @@ use Carbon\Carbon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
+use Illuminate\Contracts\Pagination\CursorPaginator;
+use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\On;
 
 class ServiceRequestTypesTable extends BaseWidget
@@ -121,5 +125,24 @@ class ServiceRequestTypesTable extends BaseWidget
                     ->label('Average resolution time'),
                 ])
             ->paginated([5]);
+    }
+
+    /**
+     * @param  Builder<Model>  $query
+     *
+     * @return Paginator<int, Model>|CursorPaginator<int, Model>
+     */
+    protected function paginateTableQuery(Builder $query): Paginator|CursorPaginator
+    {
+        $perPage = $this->getTableRecordsPerPage();
+
+        /** @var LengthAwarePaginator<int, Model> $records */
+        $records = $query->paginate(
+            perPage: ($perPage === 'all') ? $query->toBase()->getCountForPagination() : (int) $perPage,
+            columns: ['*'],
+            pageName: $this->getTablePaginationPageName(),
+        );
+
+        return $records->onEachSide(0);
     }
 }
