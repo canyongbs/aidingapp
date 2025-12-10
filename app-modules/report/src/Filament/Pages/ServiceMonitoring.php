@@ -36,6 +36,7 @@
 
 namespace AidingApp\Report\Filament\Pages;
 
+use AidingApp\Report\Filament\Widgets\ServiceMonitorTable;
 use App\Filament\Clusters\ReportLibrary;
 use App\Models\User;
 use Filament\Pages\Dashboard;
@@ -52,8 +53,6 @@ class ServiceMonitoring extends Dashboard
 
     protected static string $routePath = 'service-monitoring';
 
-    protected static string $view = 'filament.pages.coming-soon';
-
     protected static ?int $navigationSort = 70;
 
     public static function canAccess(): bool
@@ -62,5 +61,21 @@ class ServiceMonitoring extends Dashboard
         $user = auth()->user();
 
         return $user->can('report-library.view-any');
+    }
+
+    public function getWidgets(): array
+    {
+        return [
+            ServiceMonitorTable::make(),
+        ];
+    }
+
+    public function getColumns(): int | string | array
+    {
+        return [
+            'sm' => 2,
+            'md' => 4,
+            'lg' => 4,
+        ];
     }
 }

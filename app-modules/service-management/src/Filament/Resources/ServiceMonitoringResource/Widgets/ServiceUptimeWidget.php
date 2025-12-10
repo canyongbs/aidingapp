@@ -49,33 +49,14 @@ class ServiceUptimeWidget extends BaseWidget
     protected function getStats(): array
     {
         return [
-            Stat::make('Last 1 Day', $this->getUptimePercentage(1))
+            Stat::make('Last 1 Day', $this->record->getUptimePercentage(1))
                 ->description('Uptime Percentage'),
-            Stat::make('Last 7 Days', $this->getUptimePercentage(7))
+            Stat::make('Last 7 Days', $this->record->getUptimePercentage(7))
                 ->description('Uptime Percentage'),
-            Stat::make('Last 30 Days', $this->getUptimePercentage(30))
+            Stat::make('Last 30 Days', $this->record->getUptimePercentage(30))
                 ->description('Uptime Percentage'),
-            Stat::make('Last 1 Year', $this->getUptimePercentage(365))
+            Stat::make('Last 1 Year', $this->record->getUptimePercentage(365))
                 ->description('Uptime Percentage'),
         ];
-    }
-
-    private function getUptimePercentage(int $days): string
-    {
-        $serviceChecks = $this->record->histories()->where('created_at', '>=', now()->subDays($days))->orderBy('created_at')->get();
-
-        if (now()->subDays($days)->diffInDays($serviceChecks->first()?->created_at) > 1) {
-            return 'N/A';
-        }
-
-        $successes = $serviceChecks->where('succeeded', true);
-
-        $percentage = ($successes->count() / $serviceChecks->count()) * 100;
-
-        if ((int) $percentage === $percentage) {
-            return (int) $percentage . '%';
-        }
-
-        return round($percentage, 1) . '%';
     }
 }
