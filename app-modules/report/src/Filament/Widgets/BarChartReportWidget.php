@@ -36,31 +36,25 @@
 
 namespace AidingApp\Report\Filament\Widgets;
 
-use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use Carbon\Carbon;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
-use Filament\Widgets\TableWidget as BaseWidget;
+use Filament\Widgets\ChartWidget;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 
-class TopServiceRequestTypesTable extends BaseWidget
+abstract class BarChartReportWidget extends ChartWidget
 {
+    #[Locked]
     public string $cacheTag;
-
-    protected static ?string $heading = 'Top Request Types';
-
-    protected static bool $isLazy = false;
 
     protected static ?string $pollingInterval = null;
 
-    protected int | string | array $columnSpan = [
-        'sm' => 1,
-        'md' => 4,
-        'lg' => 4,
-    ];
+    protected static ?string $maxHeight = '200px';
 
-    public function mount(string $cacheTag): void
+    protected static bool $isLazy = false;
+
+    public function mount(?string $cacheTag = null): void
     {
+        parent::mount();
+
         $this->cacheTag = $cacheTag;
     }
 
@@ -70,32 +64,8 @@ class TopServiceRequestTypesTable extends BaseWidget
         $this->dispatch('$refresh');
     }
 
-    public function table(Table $table): Table
+    protected function getType(): string
     {
-        return $table
-            ->query(
-                function () {
-                    return ServiceRequestType::withCount('serviceRequests')
-                        ->withAvg('serviceRequests', 'time_to_resolution')
-                        ->orderBy('service_requests_count', 'desc');
-                }
-            )
-            ->columns([
-                TextColumn::make('name')
-                    ->label('Type'),
-                TextColumn::make('service_requests_count')
-                    ->label('Count'),
-                TextColumn::make('service_requests_avg_time_to_resolution')
-                    ->formatStateUsing(function ($state) {
-                        $interval = Carbon::now()->diffAsCarbonInterval(Carbon::now()->addSeconds((float) $state));
-                        $days = $interval->d;
-                        $hours = $interval->h;
-                        $minutes = $interval->i;
-
-                        return "{$days}d {$hours}h {$minutes}m";
-                    })
-                    ->label('Average resolution time'),
-            ])
-            ->paginated([5]);
+        return 'bar';
     }
 }

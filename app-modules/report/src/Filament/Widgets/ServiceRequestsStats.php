@@ -42,27 +42,49 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use Carbon\Carbon;
 use Filament\Widgets\StatsOverviewWidget\Stat;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Cache;
 
 class ServiceRequestsStats extends StatsOverviewReportWidget
 {
     protected int $daysAgo = 30;
 
-    protected function getStats(): array
+    protected int | string | array $columnSpan = [
+        'sm' => 2,
+        'md' => 4,
+        'lg' => 4,
+    ];
+
+    public function getStats(): array
     {
+        $startDate = $this->getStartDate();
+        $endDate = $this->getEndDate();
         $intervalStart = now()->subDays($this->daysAgo);
 
-        [$currentAllServiceRequests, $allServiceRequestsPercentageChange, $allServiceRequestsIcon, $allServiceRequestsColor] = Cache::tags(["{{$this->cacheTag}}"])->remember('all-service-requests_count', now()->addHours(24), function () use ($intervalStart): array {
-            return $this->calculateAllServiceRequestStats($intervalStart);
-        });
+        $shouldBypassCache = filled($startDate) || filled($endDate);
 
-        [$currentOpenServiceRequests, $openServiceRequestsPercentageChange, $openServiceRequestsIcon, $openServiceRequestsColor] = Cache::tags(["{{$this->cacheTag}}"])->remember('open-service-requests_count', now()->addHours(24), function () use ($intervalStart): array {
-            return $this->calculateOpenServiceRequestStats($intervalStart);
-        });
+        $applyFilters = function (Builder $query) use ($startDate, $endDate) {
+            return $query
+                ->when($startDate && $endDate, fn (Builder $query): Builder => $query->whereBetween('created_at', [$startDate, $endDate]));
+        };
 
-        [$averageServiceResolutionTime, $averageServiceResolutionTimePercentageChange, $averageServiceResolutionTimeIcon, $averageServiceResolutionTimeColor] = Cache::tags(["{{$this->cacheTag}}"])->remember('average-service-resolution-time', now()->addHours(24), function () use ($intervalStart): array {
-            return $this->calculateAverageServiceResolutionTime($intervalStart);
-        });
+        [$currentAllServiceRequests, $allServiceRequestsPercentageChange, $allServiceRequestsIcon, $allServiceRequestsColor] = $shouldBypassCache
+            ? $this->calculateAllServiceRequestStats($intervalStart, $applyFilters)
+            : Cache::tags(["{{$this->cacheTag}}"])->remember('all-service-requests_count', now()->addHours(24), function () use ($intervalStart): array {
+                return $this->calculateAllServiceRequestStats($intervalStart);
+            });
+
+        [$currentOpenServiceRequests, $openServiceRequestsPercentageChange, $openServiceRequestsIcon, $openServiceRequestsColor] = $shouldBypassCache
+            ? $this->calculateOpenServiceRequestStats($intervalStart, $applyFilters)
+            : Cache::tags(["{{$this->cacheTag}}"])->remember('open-service-requests_count', now()->addHours(24), function () use ($intervalStart): array {
+                return $this->calculateOpenServiceRequestStats($intervalStart);
+            });
+
+        [$averageServiceResolutionTime, $averageServiceResolutionTimePercentageChange, $averageServiceResolutionTimeIcon, $averageServiceResolutionTimeColor] = $shouldBypassCache
+            ? $this->calculateAverageServiceResolutionTime($intervalStart, $applyFilters)
+            : Cache::tags(["{{$this->cacheTag}}"])->remember('average-service-resolution-time', now()->addHours(24), function () use ($intervalStart): array {
+                return $this->calculateAverageServiceResolutionTime($intervalStart);
+            });
 
         return [
             Stat::make('Total Service Requests', $currentAllServiceRequests)
@@ -80,20 +102,30 @@ class ServiceRequestsStats extends StatsOverviewReportWidget
         ];
     }
 
-    private function calculateOpenServiceRequestStats(Carbon $intervalStart): array
+    private function calculateOpenServiceRequestStats(Carbon $intervalStart, ?callable $applyFilters = null): array
     {
         $openStatusIds = ServiceRequestStatus::tap(new ClassifiedIn(SystemServiceRequestClassification::getUnclosedClassifications()))->pluck('id');
 
-        $currentOpenServiceRequests = ServiceRequest::whereIn('status_id', $openStatusIds)->count();
+        $currentOpenServiceRequestsQuery = ServiceRequest::whereIn('status_id', $openStatusIds);
 
-        $serviceRequestsCreatedBeforeIntervalStart = ServiceRequest::query()
+        if ($applyFilters) {
+            $currentOpenServiceRequestsQuery = $applyFilters($currentOpenServiceRequestsQuery);
+        }
+        $currentOpenServiceRequests = $currentOpenServiceRequestsQuery->count();
+
+        $serviceRequestsCreatedBeforeIntervalStartQuery = ServiceRequest::query()
             ->with(['histories' => function ($query) use ($intervalStart) {
                 $query->whereBetween('created_at', [$intervalStart, now()])
                     ->whereRaw("original_values->>'status_id' IS NOT NULL")  // Checks if status_id was actually changed
                     ->orderBy('created_at', 'asc')
                     ->limit(1);
             }])
-            ->where('created_at', '<=', $intervalStart)->get();
+            ->where('created_at', '<=', $intervalStart);
+
+        if ($applyFilters) {
+            $serviceRequestsCreatedBeforeIntervalStartQuery = $applyFilters($serviceRequestsCreatedBeforeIntervalStartQuery);
+        }
+        $serviceRequestsCreatedBeforeIntervalStart = $serviceRequestsCreatedBeforeIntervalStartQuery->get();
 
         $openServiceRequestsAtIntervalCount = $serviceRequestsCreatedBeforeIntervalStart->filter(function (ServiceRequest $serviceRequest) use ($openStatusIds) {
             return $this->wasOpenAtIntervalStart($serviceRequest, $openStatusIds);
@@ -128,13 +160,22 @@ class ServiceRequestsStats extends StatsOverviewReportWidget
         return false;
     }
 
-    private function calculateAllServiceRequestStats(Carbon $intervalStart): array
+    private function calculateAllServiceRequestStats(Carbon $intervalStart, ?callable $applyFilters = null): array
     {
-        $currentAllServiceRequests = ServiceRequest::count();
+        $currentAllServiceRequestsQuery = ServiceRequest::query();
 
-        $allServiceRequestsAtIntervalCount = ServiceRequest::query()
-            ->where('created_at', '<=', $intervalStart)
-            ->count();
+        if ($applyFilters) {
+            $currentAllServiceRequestsQuery = $applyFilters($currentAllServiceRequestsQuery);
+        }
+        $currentAllServiceRequests = $currentAllServiceRequestsQuery->count();
+
+        $allServiceRequestsAtIntervalQuery = ServiceRequest::query()
+            ->where('created_at', '<=', $intervalStart);
+
+        if ($applyFilters) {
+            $allServiceRequestsAtIntervalQuery = $applyFilters($allServiceRequestsAtIntervalQuery);
+        }
+        $allServiceRequestsAtIntervalCount = $allServiceRequestsAtIntervalQuery->count();
 
         $percentageChange = $this->getPercentageChange($allServiceRequestsAtIntervalCount, $currentAllServiceRequests);
 
@@ -148,16 +189,27 @@ class ServiceRequestsStats extends StatsOverviewReportWidget
         ];
     }
 
-    private function calculateAverageServiceResolutionTime(Carbon $intervalStart): array
+    private function calculateAverageServiceResolutionTime(Carbon $intervalStart, ?callable $applyFilters = null): array
     {
-        $averageServiceResolutionTime = ServiceRequest::avg('time_to_resolution');
+        $averageServiceResolutionTimeQuery = ServiceRequest::query();
+
+        if ($applyFilters) {
+            $averageServiceResolutionTimeQuery = $applyFilters($averageServiceResolutionTimeQuery);
+        }
+        $averageServiceResolutionTime = $averageServiceResolutionTimeQuery->avg('time_to_resolution');
+
         $interval = Carbon::now()->diffAsCarbonInterval(Carbon::now()->addSeconds((float) $averageServiceResolutionTime));
         $days = $interval->d;
         $hours = $interval->h;
         $minutes = $interval->i;
-        $averageServiceResolutionTimeAtIntervalCount = ServiceRequest::query()
-            ->where('created_at', '<=', $intervalStart)
-            ->avg('time_to_resolution');
+
+        $averageServiceResolutionTimeAtIntervalQuery = ServiceRequest::query()
+            ->where('created_at', '<=', $intervalStart);
+
+        if ($applyFilters) {
+            $averageServiceResolutionTimeAtIntervalQuery = $applyFilters($averageServiceResolutionTimeAtIntervalQuery);
+        }
+        $averageServiceResolutionTimeAtIntervalCount = $averageServiceResolutionTimeAtIntervalQuery->avg('time_to_resolution');
 
         $percentageChange = $this->getPercentageChange((int) $averageServiceResolutionTimeAtIntervalCount, (int) $averageServiceResolutionTime);
 
