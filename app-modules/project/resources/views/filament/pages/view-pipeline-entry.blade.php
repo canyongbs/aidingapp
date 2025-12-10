@@ -1,6 +1,4 @@
-<?php
-
-/*
+{{--
 <COPYRIGHT>
 
     Copyright © 2016-2025, Canyon GBS LLC. All rights reserved.
@@ -32,26 +30,22 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
+--}}
+<x-filament-panels::page>
+    <div>
+        <x-filament::link
+            :href="$this->getBackUrl()"
+            icon="heroicon-m-arrow-left"
+        >
+            Back to Pipeline Entries
+        </x-filament::link>
+    </div>
 
-namespace AidingApp\Project\Tests\Tenant\Pipeline\RequestFactories;
-
-use Worksome\RequestFactories\RequestFactory;
-
-class EditPipelineRequestFactory extends RequestFactory
-{
-    public function definition(): array
-    {
-        return [
-            'name' => fake()->words(3, true),
-            'description' => fake()->sentence(),
-            'stages' => fn () => array_map(
-                fn ($stage) => ['name' => $stage],
-                [
-                    fake()->unique()->word(),
-                    fake()->unique()->word(),
-                ]
-            ),
-        ];
-    }
-}
+    <div class="mt-6">
+        <div class="mt-6">
+            <div class="space-y-6">
+                {{ $this->entryDetailsInfolist }}
+            </div>
+        </div>
+    </div>
+</x-filament-panels::page>

@@ -34,41 +34,27 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Filament\Resources\ProjectResource\Pages;
+namespace AidingApp\Project\Filament\Resources\PipelineResource\Pages;
 
 use AidingApp\Project\Filament\Resources\PipelineResource;
 use AidingApp\Project\Filament\Resources\ProjectResource;
-use AidingApp\Project\Models\Pipeline;
+use AidingApp\Project\Models\Project;
+use Filament\Actions\Action;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
-use Filament\Resources\Pages\ManageRelatedRecords;
-use Filament\Tables\Actions\CreateAction;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\ViewAction;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\Filter;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
+use Filament\Resources\Pages\CreateRecord;
+use Illuminate\Support\Js;
+use Livewire\Attributes\Locked;
+use Livewire\Attributes\Url;
 
-class ManagePipelines extends ManageRelatedRecords
+class CreatePipeline extends CreateRecord
 {
-    protected static string $resource = ProjectResource::class;
+    protected static string $resource = PipelineResource::class;
 
-    protected static string $relationship = 'pipelines';
-
-    public static function getNavigationLabel(): string
-    {
-        return 'Pipelines';
-    }
-
-    public static function canAccess(array $arguments = []): bool
-    {
-        $user = auth()->user();
-
-        return $user->can('viewAny', [Pipeline::class, $arguments['record']]);
-    }
+    #[Locked, Url]
+    public ?string $project = null;
 
     public function form(Form $form): Form
     {
@@ -97,29 +83,47 @@ class ManagePipelines extends ManageRelatedRecords
             ]);
     }
 
-    public function table(Table $table): Table
+    public function getBreadcrumbs(): array
     {
-        return $table
-            ->columns([
-                TextColumn::make('name'),
-                TextColumn::make('createdBy.name')->label('Created By'),
-            ])
-            ->headerActions([
-                CreateAction::make()
-                    ->url(PipelineResource::getUrl('create', ['project' => $this->getRecord()->getKey()]))
-                    ->authorize(fn (): bool => auth()->user()->can('create', Pipeline::class) && auth()->user()->can('update', $this->getRecord())),
-            ])
-            ->filters([
-                Filter::make('createdBy')
-                    ->label('My Pipelines')
-                    ->default()
-                    ->query(fn (Builder $query) => $query->where('created_by_id', auth()->id())),
-            ])
-            ->actions([
-                ViewAction::make()
-                    ->url(fn (Pipeline $record): string => PipelineResource::getUrl('view', ['record' => $record])),
-                EditAction::make()
-                    ->url(fn (Pipeline $record): string => PipelineResource::getUrl('edit', ['record' => $record])),
-            ]);
+        $project = Project::find($this->project);
+
+        $breadcrumbs = [
+            ProjectResource::getUrl() => ProjectResource::getBreadcrumb(),
+            ...($project ? [
+                ProjectResource::getUrl('view', ['record' => $project]) => $project->name ?? '',
+                ProjectResource::getUrl('manage-pipelines', ['record' => $project]) => 'Pipelines',
+            ] : []),
+            ...(filled($breadcrumb = $this->getBreadcrumb()) ? [$breadcrumb] : []),
+        ];
+
+        if (filled($cluster = static::getCluster())) {
+            return $cluster::unshiftClusterBreadcrumbs($breadcrumbs);
+        }
+
+        return $breadcrumbs;
+    }
+
+    protected function mutateFormDataBeforeCreate(array $data): array
+    {
+        $project = Project::find($this->project);
+
+        if ($project && (! auth()->user()->can('update', $project))) {
+            $project = null;
+        }
+
+        $data['user_id'] = auth()->id();
+        $data['project_id'] = $project?->getKey();
+
+        return $data;
+    }
+
+    protected function getCancelFormAction(): Action
+    {
+        $project = Project::find($this->project);
+
+        return Action::make('cancel')
+            ->label(__('filament-panels::resources/pages/create-record.form.actions.cancel.label'))
+            ->alpineClickHandler('document.referrer ? window.history.back() : (window.location.href = ' . Js::from($this->previousUrl ?? ($project ? ProjectResource::getUrl('manage-pipelines', ['record' => $project]) : null)) . ')')
+            ->color('gray');
     }
 }

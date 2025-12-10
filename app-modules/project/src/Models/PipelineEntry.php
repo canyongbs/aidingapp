@@ -37,62 +37,47 @@
 namespace AidingApp\Project\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\Project\Database\Factories\PipelineFactory;
-use App\Models\BaseModel;
-use CanyonGBS\Common\Models\Concerns\HasUserSaveTracking;
+use AidingApp\Project\Database\Factories\PipelineEntryFactory;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use OwenIt\Auditing\Contracts\Auditable;
 
 /**
- * @mixin IdeHelperPipeline
+ * @mixin IdeHelperPipelineEntry
  */
-class Pipeline extends BaseModel implements Auditable
+class PipelineEntry extends Model implements Auditable
 {
-    /** @use HasFactory<PipelineFactory> */
+    /** @use HasFactory<PipelineEntryFactory> */
     use HasFactory;
 
-    use AuditableTrait;
     use HasUuids;
-    use HasUserSaveTracking;
+    use AuditableTrait;
+
+    protected $table = 'pipeline_entries';
 
     protected $fillable = [
         'name',
-        'description',
-        'project_id',
+        'pipeline_stage_id',
+        'organizable_id',
+        'organizable_type',
     ];
 
     /**
-     * @return BelongsTo<Project, $this>
+     * @return BelongsTo<PipelineStage, $this>
      */
-    public function project(): BelongsTo
+    public function pipelineStage(): BelongsTo
     {
-        return $this->belongsTo(Project::class);
+        return $this->belongsTo(PipelineStage::class);
     }
 
     /**
-     * @return HasMany<PipelineStage, $this>
+     * @return MorphTo<Model, $this>
      */
-    public function stages(): HasMany
+    public function organizable(): MorphTo
     {
-        return $this->hasMany(PipelineStage::class, 'pipeline_id');
-    }
-
-    /**
-     * @return HasManyThrough<PipelineEntry, PipelineStage, $this>
-     */
-    public function entries(): HasManyThrough
-    {
-        return $this->hasManyThrough(
-            PipelineEntry::class,
-            PipelineStage::class,
-            'pipeline_id',
-            'pipeline_stage_id',
-            'id',
-            'id'
-        );
+        return $this->morphTo();
     }
 }

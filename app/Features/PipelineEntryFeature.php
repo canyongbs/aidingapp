@@ -34,65 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Models;
+namespace App\Features;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\Project\Database\Factories\PipelineFactory;
-use App\Models\BaseModel;
-use CanyonGBS\Common\Models\Concerns\HasUserSaveTracking;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasManyThrough;
-use OwenIt\Auditing\Contracts\Auditable;
+use App\Support\AbstractFeatureFlag;
 
-/**
- * @mixin IdeHelperPipeline
- */
-class Pipeline extends BaseModel implements Auditable
+class PipelineEntryFeature extends AbstractFeatureFlag
 {
-    /** @use HasFactory<PipelineFactory> */
-    use HasFactory;
-
-    use AuditableTrait;
-    use HasUuids;
-    use HasUserSaveTracking;
-
-    protected $fillable = [
-        'name',
-        'description',
-        'project_id',
-    ];
-
-    /**
-     * @return BelongsTo<Project, $this>
-     */
-    public function project(): BelongsTo
+    public function resolve(mixed $scope): mixed
     {
-        return $this->belongsTo(Project::class);
-    }
-
-    /**
-     * @return HasMany<PipelineStage, $this>
-     */
-    public function stages(): HasMany
-    {
-        return $this->hasMany(PipelineStage::class, 'pipeline_id');
-    }
-
-    /**
-     * @return HasManyThrough<PipelineEntry, PipelineStage, $this>
-     */
-    public function entries(): HasManyThrough
-    {
-        return $this->hasManyThrough(
-            PipelineEntry::class,
-            PipelineStage::class,
-            'pipeline_id',
-            'pipeline_stage_id',
-            'id',
-            'id'
-        );
+        return false;
     }
 }

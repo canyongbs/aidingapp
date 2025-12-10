@@ -1,6 +1,4 @@
-<?php
-
-/*
+{{--
 <COPYRIGHT>
 
     Copyright © 2016-2025, Canyon GBS LLC. All rights reserved.
@@ -32,57 +30,28 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
-
-use AidingApp\Authorization\Enums\LicenseType;
-use AidingApp\Project\Filament\Resources\ProjectResource\Pages\ManagePipelines;
-use AidingApp\Project\Models\Pipeline;
-use AidingApp\Project\Models\PipelineStage;
-use AidingApp\Project\Models\Project;
-use App\Models\User;
-
-use function Pest\Laravel\actingAs;
-use function Pest\Laravel\get;
-use function Pest\Livewire\livewire;
-use function Tests\asSuperAdmin;
-
-it('can render with proper permission.', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
-
-    actingAs($user);
-
-    $project = Project::factory()->create();
-
-    get(ManagePipelines::getUrl([
-        'record' => $project->getRouteKey(),
-    ]))
-        ->assertForbidden();
-
-    $user->givePermissionTo('project.view-any');
-    $user->givePermissionTo('project.*.view');
-    $user->givePermissionTo('pipeline.view-any');
-    $user->refresh();
-
-    get(ManagePipelines::getUrl([
-        'record' => $project->getRouteKey(),
-    ]))
-        ->assertSuccessful();
-});
-
-it('can list pipelines', function () {
-    $superAdmin = User::factory()->create();
-    asSuperAdmin($superAdmin);
-
-    $project = Project::factory()->create();
-
-    $pipelines = Pipeline::factory()
-        ->has(PipelineStage::factory()->count(3), 'stages')
-        ->for($project)
-        ->count(2)
-        ->create();
-
-    livewire(ManagePipelines::class, [
-        'record' => $project->getRouteKey(),
-    ])
-        ->assertCanSeeTableRecords($pipelines);
-});
+--}}
+<div
+    class="z-10 flex max-w-md transform cursor-move flex-col rounded-lg bg-white p-5 shadow dark:bg-gray-800"
+    data-pipeline="{{ $pipeline->getKey() }}"
+    data-entry="{{ $entry->getKey() }}"
+    wire:key="pipeline-{{ $pipeline->getKey() }}-{{ time() }}"
+>
+    <div class="flex items-center justify-between">
+        <div class="text-base font-semibold text-gray-900 dark:text-white">
+            <small class="capitalize">
+                {{ $entry->name }}
+            </small>
+            <br>
+            <x-filament::badge color="success">
+                {{ $entry->organizable?->full_name }}
+            </x-filament::badge>
+            <br>
+        </div>
+        <x-filament::icon-button
+            class="fi-primary-color"
+            wire:click="viewPipelineEntry('{{ $entry->getKey() }}')"
+            icon="heroicon-m-arrow-top-right-on-square"
+        />
+    </div>
+</div>

@@ -35,15 +35,15 @@
 */
 
 use AidingApp\Authorization\Enums\LicenseType;
-use AidingApp\Project\Filament\Resources\ProjectResource\Pages\ManagePipelines;
+use AidingApp\Project\Filament\Resources\PipelineResource\Pages\CreatePipeline;
 use AidingApp\Project\Models\Pipeline;
-use AidingApp\Project\Models\PipelineStage;
-use AidingApp\Project\Models\Project;
+use AidingApp\Project\Tests\Tenant\Filament\Resources\PipelineResource\RequestFactory\CreatePipelineRequestFactory;
 use App\Models\User;
+use Filament\Forms\Components\Repeater;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Laravel\get;
 use function Pest\Livewire\livewire;
+use function PHPUnit\Framework\assertCount;
 use function Tests\asSuperAdmin;
 
 it('can render with proper permission.', function () {
@@ -51,38 +51,64 @@ it('can render with proper permission.', function () {
 
     actingAs($user);
 
-    $project = Project::factory()->create();
-
-    get(ManagePipelines::getUrl([
-        'record' => $project->getRouteKey(),
-    ]))
+    livewire(CreatePipeline::class)
         ->assertForbidden();
 
     $user->givePermissionTo('project.view-any');
     $user->givePermissionTo('project.*.view');
     $user->givePermissionTo('pipeline.view-any');
+    $user->givePermissionTo('pipeline.create');
     $user->refresh();
 
-    get(ManagePipelines::getUrl([
-        'record' => $project->getRouteKey(),
-    ]))
+    livewire(CreatePipeline::class)
         ->assertSuccessful();
 });
 
-it('can list pipelines', function () {
+it('can validate create pipeline inputs', function ($data, $errors) {
     $superAdmin = User::factory()->create();
     asSuperAdmin($superAdmin);
 
-    $project = Project::factory()->create();
+    $request = CreatePipelineRequestFactory::new($data)->create();
 
-    $pipelines = Pipeline::factory()
-        ->has(PipelineStage::factory()->count(3), 'stages')
-        ->for($project)
-        ->count(2)
-        ->create();
+    livewire(CreatePipeline::class)
+        ->fillForm($request)
+        ->call('create')
+        ->assertHasFormErrors($errors);
+})->with([
+    'name required' => [
+        CreatePipelineRequestFactory::new()->without('name'),
+        ['name' => 'required'],
+    ],
+    'name max' => [
+        CreatePipelineRequestFactory::new()->state(['name' => str()->random(256)]),
+        ['name' => 'max'],
+    ],
+    'description required' => [
+        CreatePipelineRequestFactory::new()->without('description'),
+        ['description' => 'required'],
+    ],
+    'description max' => [
+        CreatePipelineRequestFactory::new()->state(['description' => str()->random(65536)]),
+        ['description' => 'max'],
+    ],
+]);
 
-    livewire(ManagePipelines::class, [
-        'record' => $project->getRouteKey(),
-    ])
-        ->assertCanSeeTableRecords($pipelines);
+it('can create pipelines', function () {
+    $undoRepeaterFake = Repeater::fake();
+
+    $superAdmin = User::factory()->create();
+    asSuperAdmin($superAdmin);
+
+    $pipelineData = CreatePipelineRequestFactory::new()->create();
+
+    livewire(CreatePipeline::class)
+        ->fillForm($pipelineData)
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    $createdPipeline = Pipeline::first();
+    assertCount(1, Pipeline::all());
+    expect($createdPipeline->stages)->toHaveCount(3);
+
+    $undoRepeaterFake();
 });

@@ -1,6 +1,4 @@
-<?php
-
-/*
+{{--
 <COPYRIGHT>
 
     Copyright © 2016-2025, Canyon GBS LLC. All rights reserved.
@@ -32,57 +30,22 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
+--}}
+<x-filament-panels::page>
+    <div>
+        <x-filament::link
+            :href="$this->getBackUrl()"
+            icon="heroicon-m-arrow-left"
+        >
+            Back to Pipeline Entry
+        </x-filament::link>
+    </div>
 
-use AidingApp\Authorization\Enums\LicenseType;
-use AidingApp\Project\Filament\Resources\ProjectResource\Pages\ManagePipelines;
-use AidingApp\Project\Models\Pipeline;
-use AidingApp\Project\Models\PipelineStage;
-use AidingApp\Project\Models\Project;
-use App\Models\User;
+    <form wire:submit="save">
+        {{ $this->form }}
 
-use function Pest\Laravel\actingAs;
-use function Pest\Laravel\get;
-use function Pest\Livewire\livewire;
-use function Tests\asSuperAdmin;
-
-it('can render with proper permission.', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
-
-    actingAs($user);
-
-    $project = Project::factory()->create();
-
-    get(ManagePipelines::getUrl([
-        'record' => $project->getRouteKey(),
-    ]))
-        ->assertForbidden();
-
-    $user->givePermissionTo('project.view-any');
-    $user->givePermissionTo('project.*.view');
-    $user->givePermissionTo('pipeline.view-any');
-    $user->refresh();
-
-    get(ManagePipelines::getUrl([
-        'record' => $project->getRouteKey(),
-    ]))
-        ->assertSuccessful();
-});
-
-it('can list pipelines', function () {
-    $superAdmin = User::factory()->create();
-    asSuperAdmin($superAdmin);
-
-    $project = Project::factory()->create();
-
-    $pipelines = Pipeline::factory()
-        ->has(PipelineStage::factory()->count(3), 'stages')
-        ->for($project)
-        ->count(2)
-        ->create();
-
-    livewire(ManagePipelines::class, [
-        'record' => $project->getRouteKey(),
-    ])
-        ->assertCanSeeTableRecords($pipelines);
-});
+        <div class="mt-8">
+            <x-filament-panels::form.actions :actions="$this->getFormActions()" />
+        </div>
+    </form>
+</x-filament-panels::page>

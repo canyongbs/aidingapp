@@ -34,41 +34,44 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Providers;
+namespace AidingApp\Project\Filament\Resources;
 
-use AidingApp\Project\Livewire\PipelineEntryKanban;
+use AidingApp\Project\Filament\Resources\PipelineResource\Pages\CreatePipeline;
+use AidingApp\Project\Filament\Resources\PipelineResource\Pages\EditPipeline;
+use AidingApp\Project\Filament\Resources\PipelineResource\Pages\EditPipelineEntry;
+use AidingApp\Project\Filament\Resources\PipelineResource\Pages\ManagePipelineEntries;
+use AidingApp\Project\Filament\Resources\PipelineResource\Pages\ViewPipeline;
+use AidingApp\Project\Filament\Resources\PipelineResource\Pages\ViewPipelineEntry;
 use AidingApp\Project\Models\Pipeline;
-use AidingApp\Project\Models\PipelineEntry;
-use AidingApp\Project\Models\PipelineStage;
-use AidingApp\Project\Models\Project;
-use AidingApp\Project\Models\ProjectFile;
-use AidingApp\Project\Models\ProjectMilestone;
-use AidingApp\Project\Models\ProjectMilestoneStatus;
-use AidingApp\Project\ProjectPlugin;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\ServiceProvider;
-use Livewire\Livewire;
+use Filament\Resources\Pages\Page;
+use Filament\Resources\Resource;
 
-class ProjectServiceProvider extends ServiceProvider
+class PipelineResource extends Resource
 {
-    public function register()
+    protected static ?string $model = Pipeline::class;
+
+    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+
+    protected static bool $shouldRegisterNavigation = false;
+
+    public static function getRecordSubNavigation(Page $page): array
     {
-        Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new ProjectPlugin()));
+        return $page->generateNavigationItems([
+            ViewPipeline::class,
+            EditPipeline::class,
+            ManagePipelineEntries::class,
+        ]);
     }
 
-    public function boot(): void
+    public static function getPages(): array
     {
-        Relation::morphMap([
-            'pipeline_entry' => PipelineEntry::class,
-            'pipeline' => Pipeline::class,
-            'pipeline_stage' => PipelineStage::class,
-            'project' => Project::class,
-            'project_file' => ProjectFile::class,
-            'project_milestone' => ProjectMilestone::class,
-            'project_milestone_status' => ProjectMilestoneStatus::class,
-        ]);
-
-        Livewire::component('project::livewire.pipeline-entry-kanban', PipelineEntryKanban::class);
+        return [
+            'create' => CreatePipeline::route('/create'),
+            'view' => ViewPipeline::route('/{record}'),
+            'edit' => EditPipeline::route('/{record}/edit'),
+            'manage-entries' => ManagePipelineEntries::route('/{record}/entries'),
+            'view-pipeline-entry' => ViewPipelineEntry::route('/{record}/entry/{pipelineEntry}/view'),
+            'edit-pipeline-entry' => EditPipelineEntry::route('/{record}/entry/{pipelineEntry}/edit'),
+        ];
     }
 }

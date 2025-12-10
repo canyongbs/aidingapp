@@ -34,65 +34,24 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Models;
+namespace AidingApp\Project\Tests\Tenant\Filament\Resources\PipelineResource\RequestFactory;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\Project\Database\Factories\PipelineFactory;
-use App\Models\BaseModel;
-use CanyonGBS\Common\Models\Concerns\HasUserSaveTracking;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasManyThrough;
-use OwenIt\Auditing\Contracts\Auditable;
+use Worksome\RequestFactories\RequestFactory;
 
-/**
- * @mixin IdeHelperPipeline
- */
-class Pipeline extends BaseModel implements Auditable
+class EditPipelineRequestFactory extends RequestFactory
 {
-    /** @use HasFactory<PipelineFactory> */
-    use HasFactory;
-
-    use AuditableTrait;
-    use HasUuids;
-    use HasUserSaveTracking;
-
-    protected $fillable = [
-        'name',
-        'description',
-        'project_id',
-    ];
-
-    /**
-     * @return BelongsTo<Project, $this>
-     */
-    public function project(): BelongsTo
+    public function definition(): array
     {
-        return $this->belongsTo(Project::class);
-    }
-
-    /**
-     * @return HasMany<PipelineStage, $this>
-     */
-    public function stages(): HasMany
-    {
-        return $this->hasMany(PipelineStage::class, 'pipeline_id');
-    }
-
-    /**
-     * @return HasManyThrough<PipelineEntry, PipelineStage, $this>
-     */
-    public function entries(): HasManyThrough
-    {
-        return $this->hasManyThrough(
-            PipelineEntry::class,
-            PipelineStage::class,
-            'pipeline_id',
-            'pipeline_stage_id',
-            'id',
-            'id'
-        );
+        return [
+            'name' => fake()->words(3, true),
+            'description' => fake()->sentence(),
+            'stages' => fn () => array_map(
+                fn ($stage) => ['name' => $stage],
+                [
+                    fake()->unique()->word(),
+                    fake()->unique()->word(),
+                ]
+            ),
+        ];
     }
 }
