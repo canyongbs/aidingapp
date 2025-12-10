@@ -38,10 +38,10 @@ namespace AidingApp\Project\Filament\Resources;
 
 use AidingApp\Project\Filament\Resources\PipelineResource\Pages\CreatePipeline;
 use AidingApp\Project\Filament\Resources\PipelineResource\Pages\EditPipeline;
+use AidingApp\Project\Filament\Resources\PipelineResource\Pages\EditPipelineEntry;
 use AidingApp\Project\Filament\Resources\PipelineResource\Pages\ManagePipelineEntries;
 use AidingApp\Project\Filament\Resources\PipelineResource\Pages\ViewPipeline;
 use AidingApp\Project\Filament\Resources\PipelineResource\Pages\ViewPipelineEntry;
-use AidingApp\Project\Filament\Resources\ProjectResource\Pages\EditPipelineEntry;
 use AidingApp\Project\Models\Pipeline;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;

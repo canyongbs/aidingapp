@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Filament\Resources\ProjectResource\Pages;
+namespace AidingApp\Project\Filament\Resources\PipelineResource\Pages;
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Project\Filament\Resources\PipelineResource;
