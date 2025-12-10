@@ -189,7 +189,7 @@ class ServiceRequestsTable extends BaseWidget
                     ->label('Export')
                     ->exporter(ServiceRequestsExporter::class),
             ])
-            ->paginated([5, 10, 15, 20, 25])
+            ->paginated([5])
             ->defaultSort('created_at', 'desc');
     }
 }

@@ -38,6 +38,7 @@ namespace AidingApp\Report\Filament\Widgets;
 
 use AidingApp\Report\Filament\Widgets\Concerns\InteractsWithPageFilters;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -80,9 +81,9 @@ class ServiceRequestStatusDistributionDonutChart extends ChartReportWidget
         $shouldBypassCache = filled($startDate) || filled($endDate);
 
         $serviceRequestByStatus = $shouldBypassCache
-            ? $this->getFilteredData($startDate, $endDate)
+            ? $this->getServiceRequestStatusData($startDate, $endDate)
             : Cache::tags(["{{$this->cacheTag}}"])->remember('service-request-status-distribution', now()->addHours(24), function (): Collection {
-                return $this->getUnfilteredData();
+                return $this->getServiceRequestStatusData();
             });
 
         return [
@@ -98,7 +99,7 @@ class ServiceRequestStatusDistributionDonutChart extends ChartReportWidget
         ];
     }
 
-    public function getType(): string
+    protected function getType(): string
     {
         return 'doughnut';
     }
@@ -106,7 +107,7 @@ class ServiceRequestStatusDistributionDonutChart extends ChartReportWidget
     /**
      * @return Collection<int, ServiceRequestStatus>
      */
-    private function getFilteredData(?string $startDate, ?string $endDate): Collection
+    private function getServiceRequestStatusData(?Carbon $startDate = null, ?Carbon $endDate = null): Collection
     {
         $serviceRequestByStatusData = ServiceRequestStatus::withCount([
             'serviceRequests' => function (Builder $query) use ($startDate, $endDate) {
@@ -117,28 +118,10 @@ class ServiceRequestStatusDistributionDonutChart extends ChartReportWidget
             },
         ])->get(['id', 'name']);
 
-        $serviceRequestByStatusData = $serviceRequestByStatusData->map(function (ServiceRequestStatus $status) {
+        return $serviceRequestByStatusData->map(function (ServiceRequestStatus $status) {
             $status['bg_color'] = $status->color->getRgb();
 
             return $status;
         });
-
-        return $serviceRequestByStatusData;
-    }
-
-    /**
-     * @return Collection<int, ServiceRequestStatus>
-     */
-    private function getUnfilteredData(): Collection
-    {
-        $serviceRequestByStatusData = ServiceRequestStatus::withCount(['serviceRequests'])->get(['id', 'name']);
-
-        $serviceRequestByStatusData = $serviceRequestByStatusData->map(function (ServiceRequestStatus $status) {
-            $status['bg_color'] = $status->color->getRgb();
-
-            return $status;
-        });
-
-        return $serviceRequestByStatusData;
     }
 }

@@ -73,9 +73,9 @@ class ServiceRequestsOverTimeBarChart extends BarChartReportWidget
         $shouldBypassCache = filled($startDate) || filled($endDate);
 
         $serviceRequestTotalPerMonth = $shouldBypassCache
-            ? $this->getFilteredData($startDate, $endDate)
+            ? $this->getServiceRequestsOverTimeData($startDate, $endDate)
             : Cache::tags(["{{$this->cacheTag}}"])->remember('service-requests-over-time-bar-chart', now()->addHours(24), function (): array {
-                return $this->getUnfilteredData();
+                return $this->getServiceRequestsOverTimeData();
             });
 
         return [
@@ -92,14 +92,17 @@ class ServiceRequestsOverTimeBarChart extends BarChartReportWidget
     /**
      * @return array<string, int>
      */
-    private function getFilteredData(?string $startDate, ?string $endDate): array
+    private function getServiceRequestsOverTimeData(?Carbon $startDate = null, ?Carbon $endDate = null): array
     {
         $serviceRequestTotalPerMonthData = ServiceRequest::query()
             ->toBase()
             ->selectRaw('date_trunc(\'month\', created_at) as month')
             ->selectRaw('COUNT(*) as total')
-            ->when($startDate && $endDate, fn ($query) => $query->whereBetween('created_at', [$startDate, $endDate]))
-            ->when(! ($startDate && $endDate), fn ($query) => $query->where('created_at', '>', now()->subYear()))
+            ->when(
+                $startDate && $endDate,
+                fn ($query) => $query->whereBetween('created_at', [$startDate, $endDate]),
+                fn ($query) => $query->where('created_at', '>', now()->subYear())
+            )
             ->groupBy('month')
             ->orderBy('month')
             ->pluck('total', 'month');
@@ -112,33 +115,8 @@ class ServiceRequestsOverTimeBarChart extends BarChartReportWidget
 
         foreach ($monthRange as $monthOffset) {
             $month = ($startDate && $endDate)
-                ? Carbon::parse($startDate)->addMonths($monthOffset)
+                ? $startDate->copy()->addMonths($monthOffset)
                 : Carbon::now()->subMonths($monthOffset);
-
-            $serviceRequestTotalPerMonthArray[$month->format('M Y')] = $serviceRequestTotalPerMonthData[$month->startOfMonth()->toDateTimeString()] ?? 0;
-        }
-
-        return $serviceRequestTotalPerMonthArray;
-    }
-
-    /**
-     * @return array<string, int>
-     */
-    private function getUnfilteredData(): array
-    {
-        $serviceRequestTotalPerMonthData = ServiceRequest::query()
-            ->toBase()
-            ->selectRaw('date_trunc(\'month\', created_at) as month')
-            ->selectRaw('COUNT(*) as total')
-            ->where('created_at', '>', now()->subYear())
-            ->groupBy('month')
-            ->orderBy('month')
-            ->pluck('total', 'month');
-
-        $serviceRequestTotalPerMonthArray = [];
-
-        foreach (range(11, 0) as $month) {
-            $month = Carbon::now()->subMonths($month);
 
             $serviceRequestTotalPerMonthArray[$month->format('M Y')] = $serviceRequestTotalPerMonthData[$month->startOfMonth()->toDateTimeString()] ?? 0;
         }
@@ -149,10 +127,10 @@ class ServiceRequestsOverTimeBarChart extends BarChartReportWidget
     /**
      * @return array<int>
      */
-    private function getMonthRangeFromDates(?string $startDate, ?string $endDate): array
+    private function getMonthRangeFromDates(?Carbon $startDate, ?Carbon $endDate): array
     {
-        $start = Carbon::parse($startDate)->startOfMonth();
-        $end = Carbon::parse($endDate)->endOfMonth();
+        $start = $startDate->copy()->startOfMonth();
+        $end = $endDate->copy()->endOfMonth();
         $months = [];
 
         $current = $start->copy();

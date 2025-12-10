@@ -119,7 +119,7 @@ class ServiceRequestTypesTable extends BaseWidget
                         return "{$days}d {$hours}h {$minutes}m";
                     })
                     ->label('Average resolution time'),
-            ])
-            ->paginated([5, 10, 15, 20, 25]);
+                ])
+            ->paginated([5]);
     }
 }
