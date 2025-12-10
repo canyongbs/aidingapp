@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor's trademarks is subject
+      of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -47,13 +47,13 @@ it('returns correct service request statistics within the given date range', fun
 
     $type = ServiceRequestType::factory()->create();
     $priority = ServiceRequestPriority::factory()->state(['type_id' => $type->id])->create();
-    
+
     $openStatus = ServiceRequestStatus::factory()->state([
-        'classification' => SystemServiceRequestClassification::Open
+        'classification' => SystemServiceRequestClassification::Open,
     ])->create();
-    
+
     $closedStatus = ServiceRequestStatus::factory()->state([
-        'classification' => SystemServiceRequestClassification::Closed
+        'classification' => SystemServiceRequestClassification::Closed,
     ])->create();
 
     $requestOne = ServiceRequest::factory()->state([
@@ -85,31 +85,31 @@ it('returns correct service request statistics within the given date range', fun
     ];
 
     $stats = $widget->getStats();
-    
+
     $expectedTotal = 2;
     $expectedAvgResolution = (3600 + 7200) / 2; // 5400 seconds
     $expectedOpenRequests = 1;
-    
+
     $hours = floor($expectedAvgResolution / 3600);
     $minutes = floor(($expectedAvgResolution % 3600) / 60);
     $expectedAvgFormat = "0d {$hours}h {$minutes}m";
-    
+
     expect($stats)->toHaveCount(3)
-        ->and($stats[0]->getValue())->toEqual((string)$expectedTotal) // Total Service Requests
+        ->and($stats[0]->getValue())->toEqual((string) $expectedTotal) // Total Service Requests
         ->and($stats[1]->getValue())->toEqual($expectedAvgFormat) // Average Resolution Time
-        ->and($stats[2]->getValue())->toEqual((string)$expectedOpenRequests); // Total Open Requests
+        ->and($stats[2]->getValue())->toEqual((string) $expectedOpenRequests); // Total Open Requests
 });
 
 it('returns correct statistics when no date filters are applied', function () {
     $type = ServiceRequestType::factory()->create();
     $priority = ServiceRequestPriority::factory()->state(['type_id' => $type->id])->create();
-    
+
     $openStatus = ServiceRequestStatus::factory()->state([
-        'classification' => SystemServiceRequestClassification::Open
+        'classification' => SystemServiceRequestClassification::Open,
     ])->create();
-    
+
     $closedStatus = ServiceRequestStatus::factory()->state([
-        'classification' => SystemServiceRequestClassification::Closed
+        'classification' => SystemServiceRequestClassification::Closed,
     ])->create();
 
     ServiceRequest::factory()->count(3)->state([
@@ -135,13 +135,13 @@ it('returns correct statistics when no date filters are applied', function () {
     $expectedTotal = 5; // 3 open + 2 closed
     $expectedAvgResolution = (3 * 3600 + 2 * 7200) / 5; // 5040 seconds
     $expectedOpenRequests = 3; // 3 open requests
-    
+
     $hours = floor($expectedAvgResolution / 3600);
     $minutes = floor(($expectedAvgResolution % 3600) / 60);
     $expectedAvgFormat = "0d {$hours}h {$minutes}m";
-    
+
     expect($stats)->toHaveCount(3)
-        ->and($stats[0]->getValue())->toEqual((string)$expectedTotal) // Total Service Requests
+        ->and($stats[0]->getValue())->toEqual((string) $expectedTotal) // Total Service Requests
         ->and($stats[1]->getValue())->toEqual($expectedAvgFormat) // Average Resolution Time
-        ->and($stats[2]->getValue())->toEqual((string)$expectedOpenRequests); // Total Open Requests
+        ->and($stats[2]->getValue())->toEqual((string) $expectedOpenRequests); // Total Open Requests
 });

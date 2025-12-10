@@ -92,14 +92,14 @@ class ServiceRequestTypesTable extends BaseWidget
                                 $startDate && $endDate,
                                 fn (Builder $query): Builder => $query->whereBetween('service_requests.created_at', [$startDate, $endDate])
                             );
-                        }
+                        },
                     ]);
 
                     if ($startDate && $endDate) {
                         $query->withAvg([
                             'serviceRequests as service_requests_avg_time_to_resolution' => function (Builder $query) use ($startDate, $endDate) {
                                 $query->whereBetween('service_requests.created_at', [$startDate, $endDate]);
-                            }
+                            },
                         ], 'time_to_resolution');
                     } else {
                         $query->withAvg('serviceRequests', 'time_to_resolution');
@@ -123,7 +123,7 @@ class ServiceRequestTypesTable extends BaseWidget
                         return "{$days}d {$hours}h {$minutes}m";
                     })
                     ->label('Average resolution time'),
-                ])
+            ])
             ->paginated([5]);
     }
 

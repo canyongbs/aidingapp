@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor's trademarks is subject
+      of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -40,7 +40,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use CanyonGBS\Common\Enums\Color;
 
 it('returns correct service request status distribution within the given date range', function () {
     $startDate = now()->subDays(10);
@@ -103,17 +102,17 @@ it('returns correct service request status distribution within the given date ra
 
     $labels = $data['labels']->toArray();
     $counts = $data['datasets'][0]['data']->toArray();
-    
+
     expect($labels)->toContain(
         SystemServiceRequestClassification::Open->getLabel(),
-        SystemServiceRequestClassification::InProgress->getLabel(), 
+        SystemServiceRequestClassification::InProgress->getLabel(),
         SystemServiceRequestClassification::Closed->getLabel()
     );
-    
+
     $openIndex = array_search(SystemServiceRequestClassification::Open->getLabel(), $labels);
     $inProgressIndex = array_search(SystemServiceRequestClassification::InProgress->getLabel(), $labels);
     $closedIndex = array_search(SystemServiceRequestClassification::Closed->getLabel(), $labels);
-    
+
     expect($counts[$openIndex])->toBe(3)
         ->and($counts[$inProgressIndex])->toBe(2)
         ->and($counts[$closedIndex])->toBe(1);
