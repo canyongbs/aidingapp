@@ -60,7 +60,7 @@ class ProjectServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Relation::morphMap([
-          'pipeline_entry' => PipelineEntry::class,
+            'pipeline_entry' => PipelineEntry::class,
             'pipeline' => Pipeline::class,
             'pipeline_stage' => PipelineStage::class,
             'project' => Project::class,
