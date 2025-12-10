@@ -38,6 +38,7 @@ namespace AidingApp\Project\Providers;
 
 use AidingApp\Project\Livewire\PipelineEntryKanban;
 use AidingApp\Project\Models\Pipeline;
+use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectFile;
@@ -59,6 +60,7 @@ class ProjectServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Relation::morphMap([
+          'pipeline_entry' => PipelineEntry::class,
             'pipeline' => Pipeline::class,
             'pipeline_stage' => PipelineStage::class,
             'project' => Project::class,
