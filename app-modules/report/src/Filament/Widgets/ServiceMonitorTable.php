@@ -36,7 +36,10 @@
 
 namespace AidingApp\Report\Filament\Widgets;
 
+use AidingApp\Report\Filament\Exports\ServiceMonitoringTargetExporter;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+use Filament\Actions\Exports\Enums\ExportFormat;
+use Filament\Tables\Actions\ExportAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
@@ -79,7 +82,12 @@ class ServiceMonitorTable extends BaseWidget
                     ->label('Last 1 Year')
                     ->getStateUsing(fn (ServiceMonitoringTarget $record) => $record->getUptimePercentage(365)),
             ])
+            ->headerActions([
+                ExportAction::make()
+                    ->label('Export Service Monitoring Targets')
+                    ->exporter(ServiceMonitoringTargetExporter::class)
+                    ->formats([ExportFormat::Csv]),
+            ])
             ->paginated([10]);
-        //export action
     }
 }
