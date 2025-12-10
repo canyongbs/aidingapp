@@ -36,6 +36,9 @@
 
 namespace AidingApp\Report\Filament\Pages;
 
+use AidingApp\Report\Filament\Widgets\AssetsTable;
+use AidingApp\Report\Filament\Widgets\AssetStats;
+use AidingApp\Report\Filament\Widgets\RefreshWidget;
 use App\Filament\Clusters\ReportLibrary;
 use App\Models\User;
 use Filament\Pages\Dashboard;
@@ -52,9 +55,9 @@ class AssetManagement extends Dashboard
 
     protected static string $routePath = 'asset-management';
 
-    protected static string $view = 'filament.pages.coming-soon';
-
     protected static ?int $navigationSort = 40;
+
+    protected string $cacheTag = 'report-asset-management';
 
     public static function canAccess(): bool
     {
@@ -62,5 +65,23 @@ class AssetManagement extends Dashboard
         $user = auth()->user();
 
         return $user->can('report-library.view-any');
+    }
+
+    public function getWidgets(): array
+    {
+        return [
+            RefreshWidget::make(['cacheTag' => $this->cacheTag]),
+            AssetStats::make(['cacheTag' => $this->cacheTag]),
+            AssetsTable::make(['cacheTag' => $this->cacheTag]),
+        ];
+    }
+
+    public function getColumns(): int|string|array
+    {
+        return [
+            'sm' => 2,
+            'md' => 4,
+            'lg' => 4,
+        ];
     }
 }
