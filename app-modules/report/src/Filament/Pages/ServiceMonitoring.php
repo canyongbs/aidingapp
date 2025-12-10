@@ -62,7 +62,7 @@ class ServiceMonitoring extends Dashboard
 
         return $user->can('report-library.view-any');
     }
-    
+
     public function getWidgets(): array
     {
         return [
