@@ -64,7 +64,7 @@ class ServiceRequestFeedback extends Dashboard
     protected static ?string $title = 'CSAT/NPS';
 
     protected static string $routePath = 'csat-nps';
-    
+
     protected static ?int $navigationSort = 20;
 
     protected string $cacheTag = 'report-service-request-feedback';
