@@ -4,10 +4,7 @@ namespace AidingApp\Report\Filament\Widgets;
 
 use AidingApp\InventoryManagement\Enums\MaintenanceActivityStatus;
 use AidingApp\InventoryManagement\Models\Asset;
-use AidingApp\InventoryManagement\Models\AssetLocation;
-use AidingApp\InventoryManagement\Models\AssetStatus;
-use AidingApp\InventoryManagement\Models\AssetType;
-use App\Filament\Tables\Columns\IdColumn;
+use AidingApp\Report\Filament\Exports\AssetsExporter;
 use Filament\Tables\Actions\ExportAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -65,22 +62,22 @@ class AssetsTable extends BaseWidget
                     ->label('Deployment')
                     ->getStateUsing(function (Asset $record): string {
                         $hasActiveMaintenance = $record->maintenanceActivities()
-                            ->whereIn('status', [
-                                MaintenanceActivityStatus::Scheduled,
-                                MaintenanceActivityStatus::InProgress,
-                                MaintenanceActivityStatus::Delayed,
+                            ->whereNotIn('status', [
+                                MaintenanceActivityStatus::Completed,
+                                MaintenanceActivityStatus::Canceled,
                             ])
                             ->exists();
-                        
+
                         if ($hasActiveMaintenance) {
                             return 'Maintenance';
                         }
-                        
+
                         $isCheckedOut = $record->latestCheckOut && is_null($record->latestCheckOut->asset_check_in_id);
+
                         if ($isCheckedOut) {
                             return 'Checked Out';
                         }
-                        
+
                         return 'Bench Stock';
                     })
                     ->badge(),
@@ -111,47 +108,44 @@ class AssetsTable extends BaseWidget
                     ->label('Deployment')
                     ->options([
                         'Maintenance' => 'Maintenance',
-                        'Checked Out' => 'Checked Out', 
+                        'Checked Out' => 'Checked Out',
                         'Bench Stock' => 'Bench Stock',
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         if (empty($data['values'])) {
                             return $query;
                         }
-                        
+
                         return $query->where(function (Builder $query) use ($data) {
                             foreach ($data['values'] as $status) {
                                 $query->orWhere(function (Builder $subQuery) use ($status) {
                                     if ($status === 'Maintenance') {
                                         $subQuery->whereHas('maintenanceActivities', function (Builder $maintenanceQuery) {
-                                            $maintenanceQuery->whereIn('status', [
-                                                MaintenanceActivityStatus::Scheduled,
-                                                MaintenanceActivityStatus::InProgress,
-                                                MaintenanceActivityStatus::Delayed,
+                                            $maintenanceQuery->whereNotIn('status', [
+                                                MaintenanceActivityStatus::Completed,
+                                                MaintenanceActivityStatus::Canceled,
                                             ]);
                                         });
                                     } elseif ($status === 'Checked Out') {
                                         $subQuery->whereHas('latestCheckOut', function (Builder $checkoutQuery) {
                                             $checkoutQuery->whereNull('asset_check_in_id');
                                         })->whereDoesntHave('maintenanceActivities', function (Builder $maintenanceQuery) {
-                                            $maintenanceQuery->whereIn('status', [
-                                                MaintenanceActivityStatus::Scheduled,
-                                                MaintenanceActivityStatus::InProgress,
-                                                MaintenanceActivityStatus::Delayed,
+                                            $maintenanceQuery->whereNotIn('status', [
+                                                MaintenanceActivityStatus::Completed,
+                                                MaintenanceActivityStatus::Canceled,
                                             ]);
                                         });
                                     } elseif ($status === 'Bench Stock') {
                                         $subQuery->whereDoesntHave('maintenanceActivities', function (Builder $maintenanceQuery) {
-                                            $maintenanceQuery->whereIn('status', [
-                                                MaintenanceActivityStatus::Scheduled,
-                                                MaintenanceActivityStatus::InProgress,
-                                                MaintenanceActivityStatus::Delayed,
+                                            $maintenanceQuery->whereNotIn('status', [
+                                                MaintenanceActivityStatus::Completed,
+                                                MaintenanceActivityStatus::Canceled,
                                             ]);
                                         })->where(function (Builder $checkoutQuery) {
                                             $checkoutQuery->whereDoesntHave('latestCheckOut')
-                                              ->orWhereHas('latestCheckOut', function (Builder $checkinQuery) {
-                                                  $checkinQuery->whereNotNull('asset_check_in_id');
-                                              });
+                                                ->orWhereHas('latestCheckOut', function (Builder $checkinQuery) {
+                                                    $checkinQuery->whereNotNull('asset_check_in_id');
+                                                });
                                         });
                                     }
                                 });
@@ -164,6 +158,8 @@ class AssetsTable extends BaseWidget
             ->searchable()
             ->headerActions([
                 ExportAction::make()
+                    ->label('Export')
+                    ->exporter(AssetsExporter::class),
             ])
             ->paginated([5]);
     }
