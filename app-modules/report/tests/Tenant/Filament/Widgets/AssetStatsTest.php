@@ -137,7 +137,6 @@ it('returns correct asset statistics with various asset states', function () {
         ->for($contact1, 'checkedOutTo')
         ->create();
 
-    // Create a check-in record to mark the asset as returned
     $checkIn = AssetCheckIn::factory()
         ->for($assetReturned, 'asset')
         ->for($contact1, 'checkedInFrom')
