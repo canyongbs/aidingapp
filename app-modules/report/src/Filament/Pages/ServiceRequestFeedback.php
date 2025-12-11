@@ -59,12 +59,12 @@ class ServiceRequestFeedback extends Dashboard
 
     protected static ?string $navigationGroup = 'Service Management';
 
-    protected static ?string $navigationLabel = 'SCSAT/NPS';
+    protected static ?string $navigationLabel = 'CSAT/NPS';
 
-    protected static ?string $title = 'Service Request Feedback';
+    protected static ?string $title = 'CSAT/NPS';
 
-    protected static string $routePath = 'scsat-nps';
-
+    protected static string $routePath = 'csat-nps';
+    
     protected static ?int $navigationSort = 20;
 
     protected string $cacheTag = 'report-service-request-feedback';
