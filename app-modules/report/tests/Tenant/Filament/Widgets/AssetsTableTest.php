@@ -59,7 +59,6 @@ it('displays all assets with correct information', function () {
     $status1 = AssetStatus::factory()->available()->create(['name' => 'Available']);
     $status2 = AssetStatus::factory()->create(['name' => 'Retired']);
 
-    // Create the "Under Maintenance" status that the Asset model expects
     AssetStatus::factory()->state(['name' => 'Under Maintenance'])->create();
 
     $benchAsset = Asset::factory()
