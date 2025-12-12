@@ -80,7 +80,7 @@ class AssetsTable extends BaseWidget
             ->query(
                 Asset::query()
                     ->with(['type', 'status', 'location', 'maintenanceActivities', 'latestCheckOut'])
-                    ->orderBy('name')
+                    ->orderBy('created_at', 'desc')
             )
             ->columns([
                 TextColumn::make('name')
@@ -90,8 +90,7 @@ class AssetsTable extends BaseWidget
                     ->label('Type')
                     ->searchable(),
                 TextColumn::make('status.name')
-                    ->label('Status')
-                    ->searchable(),
+                    ->label('Status'),
                 TextColumn::make('deployment_status')
                     ->label('Deployment')
                     ->getStateUsing(function (Asset $record): string {
@@ -124,7 +123,7 @@ class AssetsTable extends BaseWidget
             ->filters([
                 SelectFilter::make('name')
                     ->label('Name')
-                    ->options(fn (): array => Asset::query()->orderBy('name')->pluck('name', 'name')->toArray())
+                    ->options(fn (): array => Asset::query()->orderBy('name')->limit(50)->pluck('name', 'name')->toArray())
                     ->searchable()
                     ->multiple(),
                 SelectFilter::make('type')
@@ -186,10 +185,8 @@ class AssetsTable extends BaseWidget
                             }
                         });
                     })
-                    ->searchable()
                     ->multiple(),
             ])
-            ->searchable()
             ->headerActions([
                 ExportAction::make()
                     ->label('Export')
