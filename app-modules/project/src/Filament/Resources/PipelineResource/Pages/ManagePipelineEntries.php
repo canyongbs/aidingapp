@@ -41,7 +41,6 @@ use AidingApp\Project\Filament\Resources\PipelineResource;
 use AidingApp\Project\Filament\Resources\ProjectResource;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
-use App\Features\PipelineEntryFeature;
 use Filament\Forms\Components\MorphToSelect;
 use Filament\Forms\Components\MorphToSelect\Type;
 use Filament\Forms\Components\Select;
@@ -76,11 +75,6 @@ class ManagePipelineEntries extends ManageRelatedRecords
     protected static string $view = 'project::filament.pages.manage-pipeline-entries';
 
     protected static ?string $navigationLabel = 'Pipeline Entries';
-
-    public static function canAccess(array $arguments = []): bool
-    {
-        return PipelineEntryFeature::active() && parent::canAccess($arguments);
-    }
 
     public function mount(int | string $record): void
     {
