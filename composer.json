@@ -47,7 +47,7 @@
         "canyon-gbs/project": "*",
         "canyon-gbs/purchasing": "*",
         "canyon-gbs/report": "*",
-        "canyongbs/common": "^1.9.0",
+        "canyongbs/common": "^1.10.0",
         "canyongbs/filament-tiptap-editor": "^1.3.1",
         "canyongbs/model-state-machine": "^2.0.2",
         "cknow/laravel-money": "^8.1",
@@ -136,11 +136,13 @@
             "@php artisan filament:upgrade"
         ],
         "post-install-cmd": [
-            "@php -r \"if (file_exists('vendor/ysfkaya/filament-phone-input/yarn.lock')) { unlink('vendor/ysfkaya/filament-phone-input/yarn.lock'); }\""
+            "@php -r \"if (file_exists('vendor/ysfkaya/filament-phone-input/yarn.lock')) { unlink('vendor/ysfkaya/filament-phone-input/yarn.lock'); }\"",
+            "@php -r \"if (file_exists('vendor/spatie/laravel-health/yarn.lock')) { unlink('vendor/spatie/laravel-health/yarn.lock'); }\""
         ],
         "post-update-cmd": [
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force",
-            "@php -r \"if (file_exists('vendor/ysfkaya/filament-phone-input/yarn.lock')) { unlink('vendor/ysfkaya/filament-phone-input/yarn.lock'); }\""
+            "@php -r \"if (file_exists('vendor/ysfkaya/filament-phone-input/yarn.lock')) { unlink('vendor/ysfkaya/filament-phone-input/yarn.lock'); }\"",
+            "@php -r \"if (file_exists('vendor/spatie/laravel-health/yarn.lock')) { unlink('vendor/spatie/laravel-health/yarn.lock'); }\""
         ],
         "post-root-package-install": [
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
