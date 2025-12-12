@@ -65,6 +65,8 @@ class ServiceMonitoringTarget extends BaseModel implements Auditable
         'description',
         'domain',
         'frequency',
+        'is_notified_via_database',
+        'is_notified_via_email',
     ];
 
     protected $casts = [
@@ -106,6 +108,17 @@ class ServiceMonitoringTarget extends BaseModel implements Auditable
             ->belongsToMany(User::class)
             ->using(ServiceMonitoringTargetUser::class)
             ->withTimestamps();
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function casts(): array
+    {
+        return [
+            'is_notified_via_database' => 'boolean',
+            'is_notified_via_email' => 'boolean',
+        ];
     }
 
     public function getUptimePercentage(int $days): string

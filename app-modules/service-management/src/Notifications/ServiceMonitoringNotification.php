@@ -36,39 +36,59 @@
 
 namespace AidingApp\ServiceManagement\Notifications;
 
+use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
+use AidingApp\Notification\Notifications\Channels\MailChannel;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Models\HistoricalServiceMonitoring;
 use App\Models\User;
+use Filament\Notifications\Notification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Notification;
+use Illuminate\Notifications\Notification as BaseNotification;
 
-class ServiceMonitoringNotification extends Notification implements ShouldQueue
+class ServiceMonitoringNotification extends BaseNotification implements ShouldQueue
 {
-    use Queueable;
+  use Queueable;
 
-    public function __construct(public HistoricalServiceMonitoring $historicalServiceMonitoring) {}
+  public function __construct(public HistoricalServiceMonitoring $historicalServiceMonitoring, public string $channel) {}
 
-    /**
-     * @return array<int, string>
-     */
-    public function via(User $notifiable): array
-    {
-        return ['mail'];
-    }
+  /**
+   * @return array<int, string>
+   */
+  public function via(object $notifiable): array
+  {
+    return [match ($this->channel) {
+      DatabaseChannel::class => 'database',
+      MailChannel::class => 'mail',
+    }];
+  }
 
-    public function toMail(User $notifiable): MailMessage
-    {
-        $this->historicalServiceMonitoring->loadMissing('serviceMonitoringTarget');
+  public function toMail(User $notifiable): MailMessage
+  {
+    $this->historicalServiceMonitoring->loadMissing('serviceMonitoringTarget');
 
-        return MailMessage::make()
-            ->subject('Alert: Service Check Failure for [' . $this->historicalServiceMonitoring->serviceMonitoringTarget->name . '] ([' . $this->historicalServiceMonitoring->serviceMonitoringTarget->domain . '])')
-            ->markdown(
-                'service-management::mail.service-monitoring-mail',
-                [
-                    'historicalServiceMonitoring' => $this->historicalServiceMonitoring,
-                    'user' => $notifiable,
-                ]
-            );
-    }
+    return MailMessage::make()
+      ->subject('Aiding App Service Monitoring Alert for ' . $this->historicalServiceMonitoring->serviceMonitoringTarget->name)
+      ->markdown(
+        'service-management::mail.service-monitoring-mail',
+        [
+          'historicalServiceMonitoring' => $this->historicalServiceMonitoring,
+          'user' => $notifiable,
+        ]
+      );
+  }
+
+  /**
+   * @return array<string, mixed>
+   */
+  public function toDatabase(object $notifiable): array
+  {
+    $target = $this->historicalServiceMonitoring->serviceMonitoringTarget;
+
+    return Notification::make()
+      ->danger()
+      ->title((string) str("The last service monitoring check for [{$target->name}](" . ServiceMonitoringResource::getUrl('view', ['record' => $target]) . ") has failed.")->markdown())
+      ->getDatabaseMessage();
+  }
 }
