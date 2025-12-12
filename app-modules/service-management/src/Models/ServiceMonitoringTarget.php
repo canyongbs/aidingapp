@@ -54,57 +54,70 @@ use OwenIt\Auditing\Contracts\Auditable;
  */
 class ServiceMonitoringTarget extends BaseModel implements Auditable
 {
-    /** @use HasFactory<ServiceMonitoringTargetFactory> */
-    use HasFactory;
+  /** @use HasFactory<ServiceMonitoringTargetFactory> */
+  use HasFactory;
 
-    use AuditableTrait;
-    use SoftDeletes;
+  use AuditableTrait;
+  use SoftDeletes;
 
-    protected $fillable = [
-        'name',
-        'description',
-        'domain',
-        'frequency',
+  protected $fillable = [
+    'name',
+    'description',
+    'domain',
+    'frequency',
+    'is_notified_via_database',
+    'is_notified_via_email',
+  ];
+
+  protected $casts = [
+    'frequency' => ServiceMonitoringFrequency::class,
+  ];
+
+  /**
+   * @return HasMany<HistoricalServiceMonitoring, $this>
+   */
+  public function histories(): HasMany
+  {
+    return $this->hasMany(HistoricalServiceMonitoring::class);
+  }
+
+  /**
+   * @return HasOne<HistoricalServiceMonitoring, $this>
+   */
+  public function latestHistory(): HasOne
+  {
+    return $this->hasOne(HistoricalServiceMonitoring::class)->latestOfMany();
+  }
+
+  /**
+   * @return BelongsToMany<Team, $this, covariant ServiceMonitoringTargetTeam>
+   */
+  public function teams(): BelongsToMany
+  {
+    return $this->belongsToMany(Team::class)
+      ->using(ServiceMonitoringTargetTeam::class)
+      ->withTimestamps();
+  }
+
+  /**
+   * @return BelongsToMany<User, $this, covariant ServiceMonitoringTargetUser>
+   */
+  public function users(): BelongsToMany
+  {
+    return $this
+      ->belongsToMany(User::class)
+      ->using(ServiceMonitoringTargetUser::class)
+      ->withTimestamps();
+  }
+
+  /**
+   * @return array<string, string>
+   */
+  public function casts(): array
+  {
+    return [
+      'is_notified_via_database' => 'boolean',
+      'is_notified_via_email' => 'boolean',
     ];
-
-    protected $casts = [
-        'frequency' => ServiceMonitoringFrequency::class,
-    ];
-
-    /**
-     * @return HasMany<HistoricalServiceMonitoring, $this>
-     */
-    public function histories(): HasMany
-    {
-        return $this->hasMany(HistoricalServiceMonitoring::class);
-    }
-
-    /**
-     * @return HasOne<HistoricalServiceMonitoring, $this>
-     */
-    public function latestHistory(): HasOne
-    {
-        return $this->hasOne(HistoricalServiceMonitoring::class)->latestOfMany();
-    }
-
-    /**
-     * @return BelongsToMany<Team, $this, covariant ServiceMonitoringTargetTeam>
-     */
-    public function teams(): BelongsToMany
-    {
-        return $this->belongsToMany(Team::class)
-            ->using(ServiceMonitoringTargetTeam::class)
-            ->withTimestamps();
-    }
-
-    /**
-     * @return BelongsToMany<User, $this, covariant ServiceMonitoringTargetUser>
-     */
-    public function users(): BelongsToMany
-    {
-        return $this
-            ->belongsToMany(User::class)
-            ->using(ServiceMonitoringTargetUser::class)
-            ->withTimestamps();
-    }
+  }
 }

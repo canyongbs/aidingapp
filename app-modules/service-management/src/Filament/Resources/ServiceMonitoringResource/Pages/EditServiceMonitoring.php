@@ -48,6 +48,7 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Str;
@@ -82,7 +83,7 @@ class EditServiceMonitoring extends EditRecord
                     ->options(ServiceMonitoringFrequency::class)
                     ->enum(ServiceMonitoringFrequency::class)
                     ->required(),
-                Section::make('Notification Group')
+                Section::make('Notification Settings')
                     ->schema([
                         Select::make('team')
                             ->relationship('teams', 'name')
@@ -96,6 +97,12 @@ class EditServiceMonitoring extends EditRecord
                             ->multiple()
                             ->preload()
                             ->searchable(),
+                        Toggle::make('is_notified_via_database')
+                            ->label('Product notifications')
+                            ->default(false),
+                        Toggle::make('is_notified_via_email')
+                            ->label('Email Notifications')
+                            ->default(false),
                     ])
                     ->columns(2),
             ]);
