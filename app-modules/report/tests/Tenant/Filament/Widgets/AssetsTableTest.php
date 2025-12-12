@@ -277,34 +277,34 @@ it('filters assets by deployment status', function () {
         ->assertCanNotSeeTableRecords(collect([$checkedOutAsset, $benchAsset]));
 });
 
-it('shows assets ordered by name', function () {
+it('shows assets ordered by created date descending', function () {
     actingAs(User::factory()->state(['timezone' => 'UTC'])->create());
 
     $type = AssetType::factory()->create();
     $status = AssetStatus::factory()->available()->create();
 
-    $assetC = Asset::factory()
+    $assetOldest = Asset::factory()
         ->for($type, 'type')
         ->for($status, 'status')
-        ->state(['name' => 'CAsset'])
+        ->state(['name' => 'Asset Oldest', 'created_at' => now()->subDays(3)])
         ->create();
 
-    $assetA = Asset::factory()
+    $assetMiddle = Asset::factory()
         ->for($type, 'type')
         ->for($status, 'status')
-        ->state(['name' => 'AAsset'])
+        ->state(['name' => 'Asset Middle', 'created_at' => now()->subDays(2)])
         ->create();
 
-    $assetB = Asset::factory()
+    $assetNewest = Asset::factory()
         ->for($type, 'type')
         ->for($status, 'status')
-        ->state(['name' => 'BAsset'])
+        ->state(['name' => 'Asset Newest', 'created_at' => now()->subDay()])
         ->create();
 
     livewire(AssetsTable::class, [
         'cacheTag' => 'test-assets-table-ordering',
     ])
-        ->assertCanSeeTableRecords(collect([$assetA, $assetB, $assetC]), inOrder: true);
+        ->assertCanSeeTableRecords(collect([$assetNewest, $assetMiddle, $assetOldest]), inOrder: true);
 });
 
 it('handles multiple deployment status filters simultaneously', function () {
