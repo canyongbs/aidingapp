@@ -90,8 +90,7 @@ class CreateServiceRequest extends CreateRecord
                     ->relationship('status', 'name')
                     ->label('Status')
                     ->allowHtml()
-                    ->options(fn () => ServiceRequestStatus::withoutGlobalScope('sort')
-                        ->orderBy('sort')
+                    ->options(fn () => ServiceRequestStatus::orderBy('sort')
                         ->get(['id', 'name', 'classification', 'color'])
                         ->groupBy(fn (ServiceRequestStatus $status) => $status->classification->getlabel())
                         ->map(fn (Collection $group) => $group->mapWithKeys(fn (ServiceRequestStatus $status): array => [
