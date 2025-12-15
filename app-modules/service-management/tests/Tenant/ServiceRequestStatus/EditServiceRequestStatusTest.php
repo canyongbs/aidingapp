@@ -196,42 +196,56 @@ test('EditServiceRequestStatus is gated with proper feature access control', fun
     assertEquals($request['name'], $serviceRequestStatus->fresh()->name);
 });
 
-test('EditServiceRequestStatus is gated with proper system protection access control', function () {
+test('EditServiceRequestStatus allows modifying sort on system protected rows but blocks other columns', function (array $data, bool $shouldSucceed) {
     /** @var ServiceRequestStatus $serviceRequestStatus */
     $serviceRequestStatus = ServiceRequestStatus::factory()
         ->systemProtected()
-        ->create();
+        ->create()
+        ->refresh();
 
-    asSuperAdmin()
-        ->get(
-            ServiceRequestStatusResource::getUrl('edit', [
-                'record' => $serviceRequestStatus,
-            ])
-        )->assertForbidden();
+    asSuperAdmin();
 
-    livewire(EditServiceRequestStatus::class, [
-        'record' => $serviceRequestStatus->getRouteKey(),
-    ])
-        ->assertForbidden();
+    if ($shouldSucceed) {
+        $originalValues = $serviceRequestStatus->only(['name', 'classification', 'color']);
 
+        $serviceRequestStatus->update($data);
+
+        $serviceRequestStatus->refresh();
+
+        // Verify sort was updated if provided
+        if (isset($data['sort'])) {
+            assertEquals($data['sort'], $serviceRequestStatus->sort);
+        }
+
+        // Verify protected columns were not modified
+        assertEquals($originalValues['name'], $serviceRequestStatus->name);
+        assertEquals($originalValues['classification'], $serviceRequestStatus->classification);
+        assertEquals($originalValues['color'], $serviceRequestStatus->color);
+    } else {
+        expect(fn () => $serviceRequestStatus->update($data))
+            ->toThrow(Exception::class, 'Cannot modify system protected row columns');
+    }
+})->with([
+    'modify sort only' => [['sort' => 5], true],
+    'modify name' => [['name' => 'New Name'], false],
+    'modify color' => [['color' => 'red'], false],
+    'modify classification' => [['classification' => 'in_progress'], false],
+    'modify sort and name' => [['sort' => 5, 'name' => 'New Name'], false],
+]);
+
+test('EditServiceRequestStatus allows modifying all columns on non-system protected rows', function () {
     $serviceRequestStatus = ServiceRequestStatus::factory()
         ->create();
 
-    asSuperAdmin()
-        ->get(
-            ServiceRequestStatusResource::getUrl('edit', [
-                'record' => $serviceRequestStatus,
-            ])
-        )->assertSuccessful();
+    asSuperAdmin();
 
     $request = collect(EditServiceRequestStatusRequestFactory::new()->create());
 
-    livewire(EditServiceRequestStatus::class, [
-        'record' => $serviceRequestStatus->getRouteKey(),
-    ])
-        ->fillForm($request->toArray())
-        ->call('save')
-        ->assertHasNoFormErrors();
+    $serviceRequestStatus->update($request->toArray());
 
-    assertEquals($request['name'], $serviceRequestStatus->fresh()->name);
+    $serviceRequestStatus->refresh();
+
+    assertEquals($request['name'], $serviceRequestStatus->name);
+    assertEquals($request['classification'], $serviceRequestStatus->classification);
+    assertEquals($request['color'], $serviceRequestStatus->color);
 });
