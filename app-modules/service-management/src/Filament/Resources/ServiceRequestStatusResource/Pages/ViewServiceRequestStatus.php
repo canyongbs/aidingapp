@@ -74,6 +74,8 @@ class ViewServiceRequestStatus extends ViewRecord
                             ->label('Color')
                             ->badge()
                             ->color(fn (ServiceRequestStatus $serviceRequestStatus) => $serviceRequestStatus->color->value),
+                        TextEntry::make('sort')
+                            ->numeric(),
                     ])
                     ->columns(),
             ]);

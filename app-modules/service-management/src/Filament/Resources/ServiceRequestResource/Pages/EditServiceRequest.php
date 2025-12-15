@@ -92,8 +92,7 @@ class EditServiceRequest extends EditRecord
                             ->options(fn (ServiceRequest $record) => ServiceRequestStatus::withTrashed()
                                 ->whereKey($record->status_id)
                                 ->orWhereNull('deleted_at')
-                                ->orderBy('classification')
-                                ->orderBy('name')
+                                ->orderBy('sort')
                                 ->get(['id', 'name', 'classification', 'color'])
                                 ->groupBy(fn (ServiceRequestStatus $status) => $status->classification->getlabel())
                                 ->map(fn (Collection $group) => $group->mapWithKeys(fn (ServiceRequestStatus $status): array => [

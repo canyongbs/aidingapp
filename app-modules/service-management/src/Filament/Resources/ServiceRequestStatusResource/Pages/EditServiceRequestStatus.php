@@ -75,6 +75,11 @@ class EditServiceRequestStatus extends EditRecord
                             ->enum(SystemServiceRequestClassification::class),
                         ColorSelect::make()
                             ->required(),
+                        TextInput::make('sort')
+                            ->required()
+                            ->integer()
+                            ->minValue(1)
+                            ->maxValue(2147483647),
                     ]),
             ])->disabled(fn (ServiceRequestStatus $record) => $record->trashed());
     }

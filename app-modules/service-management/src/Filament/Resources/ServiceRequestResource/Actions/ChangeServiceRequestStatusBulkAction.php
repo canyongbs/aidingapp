@@ -57,7 +57,7 @@ class ChangeServiceRequestStatusBulkAction
             ->form([
                 Select::make('statusId')
                     ->label('New status')
-                    ->options(ServiceRequestStatus::query()->pluck('name', 'id'))
+                    ->options(ServiceRequestStatus::query()->orderBy('sort')->pluck('name', 'id'))
                     ->exists(ServiceRequestStatus::class, 'id')
                     ->required(),
             ])
