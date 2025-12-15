@@ -152,7 +152,7 @@ WORKDIR /var/www/html
 ENV NVM_VERSION=v0.40.3
 # If we change this version, remember to also update the .nvmrc file
 ENV NODE_VERSION=24.11.1
-ENV NPM_VERSION=^11.6.2
+ENV NPM_VERSION=^11.7.0
 ENV NVM_DIR=/usr/local/nvm
 RUN mkdir "$NVM_DIR"
 
@@ -184,7 +184,7 @@ COPY --chmod=644 ./docker/cron.d/ /etc/cron.d/
 COPY --chmod=755 docker/web/etc/s6-overlay/ /etc/s6-overlay/
 COPY --chmod=755 docker/scheduler/etc/s6-overlay/ /etc/s6-overlay/
 
-COPY --from=ghcr.io/roadrunner-server/roadrunner:2025.1.5 --chown=$PUID:$PGID --chmod=0755 /usr/bin/rr /usr/local/bin/rr
+COPY --from=ghcr.io/roadrunner-server/roadrunner:2025.1.6 --chown=$PUID:$PGID --chmod=0755 /usr/bin/rr /usr/local/bin/rr
 
 EXPOSE 80 443
 
