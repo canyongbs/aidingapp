@@ -1,4 +1,4 @@
-/*
+<!--
 <COPYRIGHT>
 
     Copyright © 2016-2025, Canyon GBS LLC. All rights reserved.
@@ -30,34 +30,25 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
-import vue from '@vitejs/plugin-vue';
-import laravel, { refreshPaths } from 'laravel-vite-plugin';
-import { defineConfig } from 'vite';
+-->
 
-export default defineConfig({
-    plugins: [
-        vue(),
-        laravel({
-            input: [
-                'resources/css/app.css',
-                'resources/js/app.js',
-                'resources/css/filament/admin/theme.css',
-                'app-modules/in-app-communication/resources/js/chat.js',
-                'app-modules/service-management/resources/js/serviceRequestTypeManager.js',
-                'app-modules/task/resources/js/kanban.js',
-                'app-modules/project/resources/js/kanban.js',
-            ],
-            refresh: [
-                ...refreshPaths,
-                'app/Filament/**',
-                'app/Forms/Components/**',
-                'app/Livewire/**',
-                'app/Infolists/Components/**',
-                'app/Providers/Filament/**',
-                'app/Tables/Columns/**',
-                'portals/**',
-            ],
-        }),
-    ],
-});
+<script setup>
+    defineProps({
+        icon: { type: Object, required: true },
+        title: { type: String, default: null },
+        message: { type: String, required: true },
+    });
+</script>
+
+<template>
+    <div class="flex flex-col items-center justify-center py-8 text-center">
+        <div
+            class="mx-auto w-12 h-12 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center mb-3"
+        >
+            <component :is="icon" class="w-6 h-6 text-primary-600 dark:text-primary-400" />
+        </div>
+        <h3 v-if="title" class="text-sm font-medium text-gray-900 dark:text-white mb-1">{{ title }}</h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400">{{ message }}</p>
+        <slot />
+    </div>
+</template>

@@ -31,33 +31,20 @@
 
 </COPYRIGHT>
 */
-import vue from '@vitejs/plugin-vue';
-import laravel, { refreshPaths } from 'laravel-vite-plugin';
-import { defineConfig } from 'vite';
 
-export default defineConfig({
-    plugins: [
-        vue(),
-        laravel({
-            input: [
-                'resources/css/app.css',
-                'resources/js/app.js',
-                'resources/css/filament/admin/theme.css',
-                'app-modules/in-app-communication/resources/js/chat.js',
-                'app-modules/service-management/resources/js/serviceRequestTypeManager.js',
-                'app-modules/task/resources/js/kanban.js',
-                'app-modules/project/resources/js/kanban.js',
-            ],
-            refresh: [
-                ...refreshPaths,
-                'app/Filament/**',
-                'app/Forms/Components/**',
-                'app/Livewire/**',
-                'app/Infolists/Components/**',
-                'app/Providers/Filament/**',
-                'app/Tables/Columns/**',
-                'portals/**',
-            ],
-        }),
-    ],
+import { createPinia } from 'pinia';
+import { createApp } from 'vue';
+import ChatApp from './App.vue';
+
+document.addEventListener('DOMContentLoaded', () => {
+    const chatContainer = document.getElementById('user-chat-app');
+    if (chatContainer) {
+        const app = createApp(ChatApp, {
+            userId: chatContainer.dataset.userId,
+            userName: chatContainer.dataset.userName,
+            userAvatar: chatContainer.dataset.userAvatar || null,
+        });
+        app.use(createPinia());
+        app.mount(chatContainer);
+    }
 });

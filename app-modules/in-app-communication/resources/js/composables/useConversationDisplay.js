@@ -31,33 +31,52 @@
 
 </COPYRIGHT>
 */
-import vue from '@vitejs/plugin-vue';
-import laravel, { refreshPaths } from 'laravel-vite-plugin';
-import { defineConfig } from 'vite';
 
-export default defineConfig({
-    plugins: [
-        vue(),
-        laravel({
-            input: [
-                'resources/css/app.css',
-                'resources/js/app.js',
-                'resources/css/filament/admin/theme.css',
-                'app-modules/in-app-communication/resources/js/chat.js',
-                'app-modules/service-management/resources/js/serviceRequestTypeManager.js',
-                'app-modules/task/resources/js/kanban.js',
-                'app-modules/project/resources/js/kanban.js',
-            ],
-            refresh: [
-                ...refreshPaths,
-                'app/Filament/**',
-                'app/Forms/Components/**',
-                'app/Livewire/**',
-                'app/Infolists/Components/**',
-                'app/Providers/Filament/**',
-                'app/Tables/Columns/**',
-                'portals/**',
-            ],
-        }),
-    ],
-});
+import { computed, toValue } from 'vue';
+
+export function useConversationDisplay(conversation, currentUserId) {
+    const otherParticipant = computed(() => {
+        const conv = toValue(conversation);
+        const userId = toValue(currentUserId);
+
+        if (conv?.type === 'channel') return null;
+
+        return conv?.participants?.find((participant) => participant.participant_id !== userId) || null;
+    });
+
+    const displayName = computed(() => {
+        const conv = toValue(conversation);
+
+        if (conv?.type === 'channel') {
+            return conv.name || 'Unnamed Channel';
+        }
+
+        return otherParticipant.value?.participant?.name || 'Unknown User';
+    });
+
+    const subtitle = computed(() => {
+        const conv = toValue(conversation);
+
+        if (conv?.type === 'channel') {
+            const count = conv.participants?.length || 0;
+            return `${count} ${count === 1 ? 'member' : 'members'}`;
+        }
+
+        return 'Direct message';
+    });
+
+    const avatarUrl = computed(() => {
+        const conv = toValue(conversation);
+
+        if (conv?.type === 'channel') return null;
+
+        return otherParticipant.value?.participant?.avatar_url || null;
+    });
+
+    return {
+        displayName,
+        subtitle,
+        avatarUrl,
+        otherParticipant,
+    };
+}

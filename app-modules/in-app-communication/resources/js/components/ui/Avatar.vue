@@ -1,4 +1,4 @@
-/*
+<!--
 <COPYRIGHT>
 
     Copyright © 2016-2025, Canyon GBS LLC. All rights reserved.
@@ -30,34 +30,42 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
-import vue from '@vitejs/plugin-vue';
-import laravel, { refreshPaths } from 'laravel-vite-plugin';
-import { defineConfig } from 'vite';
+-->
 
-export default defineConfig({
-    plugins: [
-        vue(),
-        laravel({
-            input: [
-                'resources/css/app.css',
-                'resources/js/app.js',
-                'resources/css/filament/admin/theme.css',
-                'app-modules/in-app-communication/resources/js/chat.js',
-                'app-modules/service-management/resources/js/serviceRequestTypeManager.js',
-                'app-modules/task/resources/js/kanban.js',
-                'app-modules/project/resources/js/kanban.js',
-            ],
-            refresh: [
-                ...refreshPaths,
-                'app/Filament/**',
-                'app/Forms/Components/**',
-                'app/Livewire/**',
-                'app/Infolists/Components/**',
-                'app/Providers/Filament/**',
-                'app/Tables/Columns/**',
-                'portals/**',
-            ],
-        }),
-    ],
-});
+<script setup>
+    import { computed } from 'vue';
+    import { getInitials } from '../../utils/helpers';
+
+    const props = defineProps({
+        src: { type: String, default: null },
+        name: { type: String, required: true },
+        size: { type: String, default: 'md' },
+        ring: { type: Boolean, default: false },
+    });
+
+    const initials = computed(() => getInitials(props.name));
+
+    const sizeClasses = computed(() => {
+        const sizes = {
+            sm: 'h-8 w-8 text-xs',
+            md: 'h-10 w-10 text-sm',
+            lg: 'h-12 w-12 text-base',
+        };
+        return sizes[props.size] || sizes.md;
+    });
+
+    const ringClasses = computed(() => {
+        return props.ring ? 'ring-2 ring-white dark:ring-gray-800' : '';
+    });
+</script>
+
+<template>
+    <img v-if="src" :src="src" :alt="name" class="rounded-full object-cover" :class="[sizeClasses, ringClasses]" />
+    <div
+        v-else
+        class="flex items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900/30 font-medium text-primary-600 dark:text-primary-400"
+        :class="[sizeClasses, ringClasses]"
+    >
+        {{ initials }}
+    </div>
+</template>

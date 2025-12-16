@@ -31,33 +31,11 @@
 
 </COPYRIGHT>
 */
-import vue from '@vitejs/plugin-vue';
-import laravel, { refreshPaths } from 'laravel-vite-plugin';
-import { defineConfig } from 'vite';
 
-export default defineConfig({
-    plugins: [
-        vue(),
-        laravel({
-            input: [
-                'resources/css/app.css',
-                'resources/js/app.js',
-                'resources/css/filament/admin/theme.css',
-                'app-modules/in-app-communication/resources/js/chat.js',
-                'app-modules/service-management/resources/js/serviceRequestTypeManager.js',
-                'app-modules/task/resources/js/kanban.js',
-                'app-modules/project/resources/js/kanban.js',
-            ],
-            refresh: [
-                ...refreshPaths,
-                'app/Filament/**',
-                'app/Forms/Components/**',
-                'app/Livewire/**',
-                'app/Infolists/Components/**',
-                'app/Providers/Filament/**',
-                'app/Tables/Columns/**',
-                'portals/**',
-            ],
-        }),
-    ],
-});
+export const mentionClasses = {
+    currentUser:
+        'inline-block bg-primary-500/15 text-primary-700 dark:bg-primary-400/30 dark:text-primary-300 rounded px-1.5 py-0.5 mx-1 font-medium',
+    otherUser:
+        'inline-block bg-gray-500/10 text-gray-700 dark:bg-gray-400/25 dark:text-gray-300 rounded px-1.5 py-0.5 mx-1 font-medium',
+    input: 'bg-primary-100 dark:bg-primary-500/20 text-primary-700 dark:text-primary-300 rounded px-1 py-0.5 font-medium',
+};

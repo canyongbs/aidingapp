@@ -31,33 +31,51 @@
 
 </COPYRIGHT>
 */
-import vue from '@vitejs/plugin-vue';
-import laravel, { refreshPaths } from 'laravel-vite-plugin';
-import { defineConfig } from 'vite';
 
-export default defineConfig({
-    plugins: [
-        vue(),
-        laravel({
-            input: [
-                'resources/css/app.css',
-                'resources/js/app.js',
-                'resources/css/filament/admin/theme.css',
-                'app-modules/in-app-communication/resources/js/chat.js',
-                'app-modules/service-management/resources/js/serviceRequestTypeManager.js',
-                'app-modules/task/resources/js/kanban.js',
-                'app-modules/project/resources/js/kanban.js',
-            ],
-            refresh: [
-                ...refreshPaths,
-                'app/Filament/**',
-                'app/Forms/Components/**',
-                'app/Livewire/**',
-                'app/Infolists/Components/**',
-                'app/Providers/Filament/**',
-                'app/Tables/Columns/**',
-                'portals/**',
-            ],
-        }),
-    ],
-});
+export function getInitials(name) {
+    return name
+        .split(' ')
+        .map((word) => word[0])
+        .join('')
+        .toUpperCase()
+        .substring(0, 2);
+}
+
+export function cleanTipTapContent(node) {
+    if (!node || typeof node !== 'object') return node;
+
+    if (node.content && Array.isArray(node.content)) {
+        node.content = node.content
+            .filter((child) => {
+                if (child.type === 'text' && (child.text === null || child.text === undefined)) {
+                    return false;
+                }
+                return true;
+            })
+            .map(cleanTipTapContent);
+    }
+
+    return node;
+}
+
+export function extractTextFromTipTap(node) {
+    if (!node) return '';
+
+    let text = '';
+
+    if (node.type === 'text') {
+        text += node.text || '';
+    } else if (node.type === 'mention') {
+        text += ` @${node.attrs?.label || node.attrs?.id || ''} `;
+    } else if (node.type === 'hardBreak') {
+        text += ' ';
+    }
+
+    if (node.content && Array.isArray(node.content)) {
+        for (const child of node.content) {
+            text += extractTextFromTipTap(child);
+        }
+    }
+
+    return text;
+}
