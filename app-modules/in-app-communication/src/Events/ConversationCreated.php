@@ -36,6 +36,7 @@
 
 namespace AidingApp\InAppCommunication\Events;
 
+use AidingApp\InAppCommunication\Enums\ConversationType;
 use AidingApp\InAppCommunication\Models\Conversation;
 use AidingApp\InAppCommunication\Models\ConversationParticipant;
 use App\Models\User;
@@ -84,10 +85,23 @@ class ConversationCreated implements ShouldBroadcastNow
             ];
         });
 
+        if ($this->conversation->type === ConversationType::Channel) {
+            $displayName = $this->conversation->name ?? 'Unnamed Channel';
+            $avatarUrl = null;
+        } else {
+            $otherParticipant = $this->conversation->conversationParticipants
+                ->first(fn (ConversationParticipant $otherParticipant) => $otherParticipant->participant_id !== $this->recipientId);
+            $otherUser = $otherParticipant?->participant;
+            $displayName = $otherUser instanceof User ? $otherUser->name : 'Unknown User';
+            $avatarUrl = $otherUser instanceof User ? Filament::getUserAvatarUrl($otherUser) : null;
+        }
+
         return [
             'id' => $this->conversation->getKey(),
             'type' => $this->conversation->type->value,
             'name' => $this->conversation->name,
+            'display_name' => $displayName,
+            'avatar_url' => $avatarUrl,
             'is_private' => $this->conversation->is_private,
             'participants' => $participants->values()->all(),
             'created_at' => $this->conversation->created_at->toIso8601String(),

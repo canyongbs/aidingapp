@@ -41,6 +41,8 @@ use AidingApp\InAppCommunication\Enums\ConversationType;
 use AidingApp\InAppCommunication\Http\Resources\ConversationParticipantResource;
 use AidingApp\InAppCommunication\Models\Conversation;
 use App\Http\Controllers\Controller;
+use App\Models\User;
+use Filament\Facades\Filament;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -76,11 +78,24 @@ class CreateConversationController extends Controller
 
         $participants = ConversationParticipantResource::collection($conversation->conversationParticipants)->resolve();
 
+        if ($conversation->type === ConversationType::Channel) {
+            $displayName = $conversation->name ?? 'Unnamed Channel';
+            $avatarUrl = null;
+        } else {
+            $otherParticipant = $conversation->conversationParticipants
+                ->first(fn ($otherParticipant) => $otherParticipant->participant_id !== $request->user()->getKey());
+            $otherUser = $otherParticipant?->participant;
+            $displayName = $otherUser instanceof User ? $otherUser->name : 'Unknown User';
+            $avatarUrl = $otherUser instanceof User ? Filament::getUserAvatarUrl($otherUser) : null;
+        }
+
         return response()->json([
             'data' => [
                 'id' => $conversation->getKey(),
                 'type' => $conversation->type->value,
                 'name' => $conversation->name,
+                'display_name' => $displayName,
+                'avatar_url' => $avatarUrl,
                 'is_private' => $conversation->is_private,
                 'participants' => $participants,
                 'created_at' => $conversation->created_at->toIso8601String(),
