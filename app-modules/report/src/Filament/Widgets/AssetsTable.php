@@ -123,8 +123,13 @@ class AssetsTable extends BaseWidget
             ->filters([
                 SelectFilter::make('name')
                     ->label('Name')
-                    ->options(fn (): array => Asset::query()->orderBy('name')->limit(50)->pluck('name', 'name')->toArray())
                     ->searchable()
+                    ->getSearchResultsUsing(fn (string $search): array => Asset::query()
+                        ->whereRaw('lower(name) like ?', ['%' . strtolower($search) . '%'])
+                        ->limit(50)
+                        ->pluck('name', 'id')
+                        ->toArray())
+                    ->getOptionLabelUsing(fn ($value): ?string => Asset::find($value)?->name)
                     ->multiple(),
                 SelectFilter::make('type')
                     ->label('Type')
