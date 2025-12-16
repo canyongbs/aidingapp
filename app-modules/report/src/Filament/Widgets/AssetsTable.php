@@ -127,9 +127,8 @@ class AssetsTable extends BaseWidget
                     ->getSearchResultsUsing(fn (string $search): array => Asset::query()
                         ->whereRaw('lower(name) like ?', ['%' . strtolower($search) . '%'])
                         ->limit(50)
-                        ->pluck('name', 'id')
+                        ->pluck('name', 'name')
                         ->toArray())
-                    ->getOptionLabelUsing(fn ($value): ?string => Asset::find($value)?->name)
                     ->multiple(),
                 SelectFilter::make('type')
                     ->label('Type')
