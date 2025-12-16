@@ -36,7 +36,6 @@
 
 use AidingApp\InAppCommunication\Http\Controllers\Conversations\AddParticipantController;
 use AidingApp\InAppCommunication\Http\Controllers\Conversations\CreateConversationController;
-use AidingApp\InAppCommunication\Http\Controllers\Conversations\DeleteConversationController;
 use AidingApp\InAppCommunication\Http\Controllers\Conversations\JoinChannelController;
 use AidingApp\InAppCommunication\Http\Controllers\Conversations\LeaveConversationController;
 use AidingApp\InAppCommunication\Http\Controllers\Conversations\ListConversationsController;
@@ -74,9 +73,6 @@ Route::middleware(['web', 'auth'])
 
         Route::patch('/conversations/{conversation}', UpdateConversationController::class)
             ->name('conversations.update');
-
-        Route::delete('/conversations/{conversation}', DeleteConversationController::class)
-            ->name('conversations.destroy');
 
         Route::post('/conversations/{conversation}/participants', AddParticipantController::class)
             ->name('conversations.participants.add');

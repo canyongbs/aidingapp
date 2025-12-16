@@ -85,11 +85,6 @@ export function useConversations() {
         return data.data;
     }
 
-    async function deleteConversation(conversationId) {
-        await api.delete(`/conversations/${conversationId}`);
-        store.removeConversation(conversationId);
-    }
-
     async function addParticipant(conversationId, userId) {
         const { data } = await api.post(`/conversations/${conversationId}/participants`, {
             user_id: userId,
@@ -159,7 +154,6 @@ export function useConversations() {
         loadConversations,
         createConversation,
         updateConversation,
-        deleteConversation,
         addParticipant,
         fetchConversation,
         removeParticipant,
