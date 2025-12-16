@@ -46,6 +46,8 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class ServiceRequestStatusFactory extends Factory
 {
+    private int $maxOrder;
+
     public function definition(): array
     {
         return [
@@ -53,6 +55,7 @@ class ServiceRequestStatusFactory extends Factory
             'name' => $this->faker->word,
             'color' => $this->faker->randomElement(Color::cases()),
             'is_system_protected' => false,
+            'sort' => $this->getNewOrder(),
         ];
     }
 
@@ -101,5 +104,17 @@ class ServiceRequestStatusFactory extends Factory
                 'color' => Color::Red,
             ];
         });
+    }
+
+    public function getNewOrder(): int
+    {
+        return $this->maxOrder = $this->getMaxOrder() + 1;
+    }
+
+    public function getMaxOrder(): int
+    {
+        $maxOrder = ServiceRequestStatus::max('sort');
+
+        return $this->maxOrder ??= is_numeric($maxOrder) ? (int) $maxOrder : 0;
     }
 }

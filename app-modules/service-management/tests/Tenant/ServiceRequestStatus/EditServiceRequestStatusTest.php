@@ -35,12 +35,14 @@
 */
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusResource\Pages\EditServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\EditServiceRequestStatusRequestFactory;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use CanyonGBS\Common\Enums\Color;
 use Illuminate\Validation\Rules\Enum;
 
 use function Pest\Laravel\actingAs;
@@ -228,8 +230,8 @@ test('EditServiceRequestStatus allows modifying sort on system protected rows bu
 })->with([
     'modify sort only' => [['sort' => 5], true],
     'modify name' => [['name' => 'New Name'], false],
-    'modify color' => [['color' => 'red'], false],
-    'modify classification' => [['classification' => 'in_progress'], false],
+    'modify color' => [['color' => Color::Red], false],
+    'modify classification' => [['classification' => SystemServiceRequestClassification::InProgress], false],
     'modify sort and name' => [['sort' => 5, 'name' => 'New Name'], false],
 ]);
 

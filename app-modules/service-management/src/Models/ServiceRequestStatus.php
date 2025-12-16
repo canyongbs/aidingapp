@@ -43,6 +43,7 @@ use AidingApp\ServiceManagement\Observers\ServiceRequestStatusObserver;
 use App\Models\BaseModel;
 use CanyonGBS\Common\Enums\Color;
 use DateTimeInterface;
+use Exception;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -72,6 +73,22 @@ class ServiceRequestStatus extends BaseModel implements Auditable
     public function serviceRequests(): HasMany
     {
         return $this->hasMany(ServiceRequest::class, 'status_id');
+    }
+
+    public function update(array $attributes = [], array $options = []): bool
+    {
+        // Check system protection before updating
+        if ($this->is_system_protected) {
+            $protectedFields = ['name', 'classification', 'color'];
+            
+            $attemptingToModify = array_intersect(array_keys($attributes), $protectedFields);
+            
+            if (!empty($attemptingToModify)) {
+                throw new Exception('Cannot modify system protected row columns');
+            }
+        }
+        
+        return parent::update($attributes, $options);
     }
 
     /**

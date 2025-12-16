@@ -37,17 +37,33 @@
 namespace AidingApp\ServiceManagement\Tests\Tenant\RequestFactories;
 
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
+use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use CanyonGBS\Common\Enums\Color;
 use Worksome\RequestFactories\RequestFactory;
 
 class EditServiceRequestStatusRequestFactory extends RequestFactory
 {
+    private int $maxOrder;
+
     public function definition(): array
     {
         return [
             'classification' => fake()->randomElement(SystemServiceRequestClassification::cases()),
             'name' => fake()->name(),
             'color' => fake()->randomElement(Color::cases()),
+            'sort' => $this->getNewOrder(),
         ];
+    }
+
+    public function getNewOrder(): int
+    {
+        return $this->maxOrder = $this->getMaxOrder() + 1;
+    }
+
+    public function getMaxOrder(): int
+    {
+        $maxOrder = ServiceRequestStatus::max('sort');
+
+        return $this->maxOrder ??= is_numeric($maxOrder) ? (int) $maxOrder : 0;
     }
 }

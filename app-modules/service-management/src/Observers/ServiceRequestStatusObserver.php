@@ -54,12 +54,6 @@ class ServiceRequestStatusObserver
     public function updating(ServiceRequestStatus $serviceRequestStatus): void
     {
         if ($serviceRequestStatus->isDirty('sort') && isset($serviceRequestStatus->sort)) {
-            $maxSort = ServiceRequestStatus::count();
-
-            if ($serviceRequestStatus->sort > $maxSort) {
-                $serviceRequestStatus->sort = $maxSort;
-            }
-
             if ($serviceRequestStatus->sort < 1) {
                 $serviceRequestStatus->sort = 1;
             }
@@ -71,15 +65,6 @@ class ServiceRequestStatusObserver
     public function deleted(ServiceRequestStatus $serviceRequestStatus): void
     {
         $this->reorderAllItems();
-    }
-
-    public function restored(ServiceRequestStatus $serviceRequestStatus): void
-    {
-        $serviceRequestStatus->setAttribute(
-            'sort',
-            DB::raw('(SELECT COALESCE(MAX(service_request_statuses.sort), 0) + 1 FROM service_request_statuses)')
-        );
-        $serviceRequestStatus->saveQuietly();
     }
 
     protected function reorderStatusItems(ServiceRequestStatus $updatingStatus): void

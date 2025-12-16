@@ -50,6 +50,7 @@ class ServiceRequestStatusSeeder extends Seeder
             'name' => 'New',
             'color' => Color::Blue,
             'is_system_protected' => true,
+            'sort' => 1,
         ]);
 
         ServiceRequestStatus::factory()
@@ -59,16 +60,19 @@ class ServiceRequestStatusSeeder extends Seeder
                         'classification' => SystemServiceRequestClassification::InProgress,
                         'name' => 'In-Progress',
                         'color' => Color::Blue,
+                        'sort' => 2,
                     ],
                     [
                         'classification' => SystemServiceRequestClassification::Waiting,
                         'name' => 'Pending for Customer',
                         'color' => Color::Amber,
+                        'sort' => 3,
                     ],
                     [
                         'classification' => SystemServiceRequestClassification::Closed,
                         'name' => 'Closed',
                         'color' => Color::Red,
+                        'sort' => 4,
                     ],
                 ]
             );

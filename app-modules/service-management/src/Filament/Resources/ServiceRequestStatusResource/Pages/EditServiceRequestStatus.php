@@ -76,6 +76,7 @@ class EditServiceRequestStatus extends EditRecord
                         ColorSelect::make()
                             ->required(),
                         TextInput::make('sort')
+                            ->label('Sort Order')
                             ->required()
                             ->integer()
                             ->minValue(1)
