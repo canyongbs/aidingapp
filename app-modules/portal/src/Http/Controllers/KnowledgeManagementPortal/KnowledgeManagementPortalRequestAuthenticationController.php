@@ -131,7 +131,7 @@ class KnowledgeManagementPortalRequestAuthenticationController extends Controlle
             : (
                 ($request->safe()->isSpa)
                     ? 'portal.register'
-                    : 'api.portal.register.embedded'
+                    : 'api.portal.authenticate.register.embedded'
             );
 
         return URL::to(
