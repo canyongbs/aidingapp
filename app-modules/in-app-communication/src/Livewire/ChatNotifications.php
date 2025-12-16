@@ -167,7 +167,7 @@ class ChatNotifications extends Component
     protected function getInitials(string $name): string
     {
         return collect(explode(' ', $name))
-            ->map(fn ($word) => mb_substr($word, 0, 1))
+            ->map(fn (string $word) => mb_substr($word, 0, 1))
             ->take(2)
             ->implode('');
     }
