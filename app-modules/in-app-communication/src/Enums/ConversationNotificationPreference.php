@@ -41,46 +41,45 @@ use Filament\Support\Contracts\HasDescription;
 use Filament\Support\Contracts\HasIcon;
 use Filament\Support\Contracts\HasLabel;
 
-enum ConversationNotificationPreference: string implements HasColor, HasDescription, HasLabel, HasIcon
+enum ConversationNotificationPreference: string implements HasLabel, HasColor, HasDescription, HasIcon
 {
     case All = 'all';
-
     case Mentions = 'mentions';
-
     case None = 'none';
 
     public function getLabel(): string
     {
         return match ($this) {
-            self::All => 'All messages',
-            self::Mentions => 'Mentions only',
-            self::None => 'Mute',
+            self::All => 'All Messages',
+            self::Mentions => 'Mentions Only',
+            self::None => 'Muted',
         };
     }
 
     public function getColor(): string
     {
         return match ($this) {
+            self::All => 'success',
+            self::Mentions => 'warning',
             self::None => 'gray',
-            default => 'warning',
         };
     }
 
     public function getDescription(): string
     {
         return match ($this) {
-            self::All => 'Receive notifications for all messages.',
-            self::Mentions => 'Receive notifications for messages that mention you.',
-            self::None => 'Do not receive notifications for any messages.',
+            self::All => 'Receive notifications for all messages',
+            self::Mentions => 'Only receive notifications when mentioned',
+            self::None => 'Do not receive any notifications',
         };
     }
 
     public function getIcon(): string
     {
         return match ($this) {
-            self::All => 'heroicon-m-bell-alert',
-            self::Mentions => 'heroicon-m-at-symbol',
-            self::None => 'heroicon-m-bell-slash',
+            self::All => 'heroicon-o-bell',
+            self::Mentions => 'heroicon-o-at-symbol',
+            self::None => 'heroicon-o-bell-slash',
         };
     }
 }

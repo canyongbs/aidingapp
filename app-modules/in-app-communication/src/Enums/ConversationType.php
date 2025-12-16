@@ -36,9 +36,18 @@
 
 namespace AidingApp\InAppCommunication\Enums;
 
-enum ConversationType: string
-{
-    case UserToUser = 'user_to_user';
+use Filament\Support\Contracts\HasLabel;
 
+enum ConversationType: string implements HasLabel
+{
+    case Direct = 'direct';
     case Channel = 'channel';
+
+    public function getLabel(): string
+    {
+        return match ($this) {
+            self::Direct => 'Direct Message',
+            self::Channel => 'Channel',
+        };
+    }
 }
