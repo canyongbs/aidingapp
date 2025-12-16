@@ -40,6 +40,7 @@ use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use App\Concerns\EditPageRedirection;
+use App\Features\ServiceRequestStatusOrderingFeature;
 use CanyonGBS\Common\Filament\Forms\Components\ColorSelect;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
@@ -80,7 +81,8 @@ class EditServiceRequestStatus extends EditRecord
                             ->required()
                             ->integer()
                             ->minValue(1)
-                            ->maxValue(2147483647),
+                            ->maxValue(2147483647)
+                            ->visible(ServiceRequestStatusOrderingFeature::active()),
                     ]),
             ])->disabled(fn (ServiceRequestStatus $record) => $record->trashed());
     }

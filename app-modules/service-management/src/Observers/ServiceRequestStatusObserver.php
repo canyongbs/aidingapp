@@ -37,13 +37,14 @@
 namespace AidingApp\ServiceManagement\Observers;
 
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use App\Features\ServiceRequestStatusOrderingFeature;
 use Illuminate\Support\Facades\DB;
 
 class ServiceRequestStatusObserver
 {
     public function creating(ServiceRequestStatus $serviceRequestStatus): void
     {
-        if (! isset($serviceRequestStatus->sort)) {
+        if (ServiceRequestStatusOrderingFeature::active() && ! isset($serviceRequestStatus->sort)) {
             $serviceRequestStatus->setAttribute(
                 'sort',
                 DB::raw('(SELECT COALESCE(MAX(service_request_statuses.sort), 0) + 1 FROM service_request_statuses)')
@@ -53,7 +54,7 @@ class ServiceRequestStatusObserver
 
     public function updating(ServiceRequestStatus $serviceRequestStatus): void
     {
-        if ($serviceRequestStatus->isDirty('sort') && isset($serviceRequestStatus->sort)) {
+        if (ServiceRequestStatusOrderingFeature::active() && $serviceRequestStatus->isDirty('sort') && isset($serviceRequestStatus->sort)) {
             if ($serviceRequestStatus->sort < 1) {
                 $serviceRequestStatus->sort = 1;
             }
@@ -64,7 +65,9 @@ class ServiceRequestStatusObserver
 
     public function deleted(ServiceRequestStatus $serviceRequestStatus): void
     {
-        $this->reorderAllItems();
+        if (ServiceRequestStatusOrderingFeature::active()) {
+            $this->reorderAllItems();
+        }
     }
 
     protected function reorderStatusItems(ServiceRequestStatus $updatingStatus): void
