@@ -42,8 +42,6 @@ use AidingApp\Authorization\Models\License;
 use AidingApp\Authorization\Models\Role;
 use AidingApp\Engagement\Models\Concerns\HasManyEngagementBatches;
 use AidingApp\Engagement\Models\Concerns\HasManyEngagements;
-use AidingApp\InAppCommunication\Models\TwilioConversation;
-use AidingApp\InAppCommunication\Models\TwilioConversationUser;
 use AidingApp\Notification\Models\Contracts\CanBeNotified;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectAuditorUser;
@@ -191,28 +189,6 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
     public function canRecieveSms(): bool
     {
         return false;
-    }
-
-    /**
-     * @return BelongsToMany<TwilioConversation, $this, covariant TwilioConversationUser, 'participant'>
-     */
-    public function conversations(): BelongsToMany
-    {
-        return $this->belongsToMany(TwilioConversation::class, 'twilio_conversation_user', 'user_id', 'conversation_sid')
-            ->withPivot([
-                'participant_sid',
-                'is_channel_manager',
-                'is_pinned',
-                'notification_preference',
-                'first_unread_message_sid',
-                'first_unread_message_at',
-                'last_unread_message_content',
-                'last_read_at',
-                'unread_messages_count',
-            ])
-            ->withTimestamps()
-            ->as('participant')
-            ->using(TwilioConversationUser::class);
     }
 
     /**
