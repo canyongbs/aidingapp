@@ -34,63 +34,77 @@
 </COPYRIGHT>
 */
 
-use AidingApp\InAppCommunication\Http\Controllers\ConversationController;
-use AidingApp\InAppCommunication\Http\Controllers\MessageController;
-use AidingApp\InAppCommunication\Http\Controllers\UserController;
+use AidingApp\InAppCommunication\Http\Controllers\Conversations\AddParticipantController;
+use AidingApp\InAppCommunication\Http\Controllers\Conversations\CreateConversationController;
+use AidingApp\InAppCommunication\Http\Controllers\Conversations\DeleteConversationController;
+use AidingApp\InAppCommunication\Http\Controllers\Conversations\JoinChannelController;
+use AidingApp\InAppCommunication\Http\Controllers\Conversations\LeaveConversationController;
+use AidingApp\InAppCommunication\Http\Controllers\Conversations\ListConversationsController;
+use AidingApp\InAppCommunication\Http\Controllers\Conversations\ListPublicChannelsController;
+use AidingApp\InAppCommunication\Http\Controllers\Conversations\MarkAsReadController;
+use AidingApp\InAppCommunication\Http\Controllers\Conversations\RemoveParticipantController;
+use AidingApp\InAppCommunication\Http\Controllers\Conversations\ShowConversationController;
+use AidingApp\InAppCommunication\Http\Controllers\Conversations\UpdateConversationController;
+use AidingApp\InAppCommunication\Http\Controllers\Conversations\UpdateParticipantController;
+use AidingApp\InAppCommunication\Http\Controllers\Conversations\UpdateSettingsController;
+use AidingApp\InAppCommunication\Http\Controllers\Messages\BroadcastTypingController;
+use AidingApp\InAppCommunication\Http\Controllers\Messages\CreateMessageController;
+use AidingApp\InAppCommunication\Http\Controllers\Messages\ListMessagesController;
+use AidingApp\InAppCommunication\Http\Controllers\Users\SearchUsersController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['web', 'auth'])
     ->name('in-app-communication.')
     ->prefix('api/chat')
     ->group(function () {
-        Route::get('/users/search', [UserController::class, 'search'])
+        Route::get('/users/search', SearchUsersController::class)
             ->name('users.search');
 
-        Route::get('/conversations', [ConversationController::class, 'index'])
+        Route::get('/conversations', ListConversationsController::class)
             ->name('conversations.index');
 
-        Route::get('/conversations/public', [ConversationController::class, 'publicChannels'])
+        Route::get('/conversations/public', ListPublicChannelsController::class)
             ->name('conversations.public');
 
-        Route::post('/conversations', [ConversationController::class, 'store'])
+        Route::post('/conversations', CreateConversationController::class)
             ->name('conversations.store');
 
-        Route::get('/conversations/{conversation}', [ConversationController::class, 'show'])
+        Route::get('/conversations/{conversation}', ShowConversationController::class)
             ->name('conversations.show');
 
-        Route::patch('/conversations/{conversation}', [ConversationController::class, 'update'])
+        Route::patch('/conversations/{conversation}', UpdateConversationController::class)
             ->name('conversations.update');
 
-        Route::delete('/conversations/{conversation}', [ConversationController::class, 'destroy'])
+        Route::delete('/conversations/{conversation}', DeleteConversationController::class)
             ->name('conversations.destroy');
 
-        Route::post('/conversations/{conversation}/participants', [ConversationController::class, 'addParticipant'])
+        Route::post('/conversations/{conversation}/participants', AddParticipantController::class)
             ->name('conversations.participants.add');
 
-        Route::patch('/conversations/{conversation}/participants/{user}', [ConversationController::class, 'updateParticipant'])
+        Route::patch('/conversations/{conversation}/participants/{user}', UpdateParticipantController::class)
             ->name('conversations.participants.update');
 
-        Route::delete('/conversations/{conversation}/participants/{user}', [ConversationController::class, 'removeParticipant'])
+        Route::delete('/conversations/{conversation}/participants/{user}', RemoveParticipantController::class)
             ->name('conversations.participants.remove');
 
-        Route::post('/conversations/{conversation}/leave', [ConversationController::class, 'leave'])
+        Route::post('/conversations/{conversation}/leave', LeaveConversationController::class)
             ->name('conversations.leave');
 
-        Route::post('/conversations/{conversation}/join', [ConversationController::class, 'join'])
+        Route::post('/conversations/{conversation}/join', JoinChannelController::class)
             ->name('conversations.join');
 
-        Route::patch('/conversations/{conversation}/settings', [ConversationController::class, 'updateSettings'])
+        Route::patch('/conversations/{conversation}/settings', UpdateSettingsController::class)
             ->name('conversations.settings.update');
 
-        Route::post('/conversations/{conversation}/read', [ConversationController::class, 'markAsRead'])
+        Route::post('/conversations/{conversation}/read', MarkAsReadController::class)
             ->name('conversations.read');
 
-        Route::get('/conversations/{conversation}/messages', [MessageController::class, 'index'])
+        Route::get('/conversations/{conversation}/messages', ListMessagesController::class)
             ->name('conversations.messages.index');
 
-        Route::post('/conversations/{conversation}/messages', [MessageController::class, 'store'])
+        Route::post('/conversations/{conversation}/messages', CreateMessageController::class)
             ->name('conversations.messages.store');
 
-        Route::post('/conversations/{conversation}/typing', [MessageController::class, 'typing'])
+        Route::post('/conversations/{conversation}/typing', BroadcastTypingController::class)
             ->name('conversations.typing');
     });
