@@ -37,9 +37,9 @@
 namespace AidingApp\InAppCommunication\Http\Controllers\Messages;
 
 use AidingApp\InAppCommunication\Actions\SendMessage;
+use AidingApp\InAppCommunication\Http\Resources\MessageResource;
 use AidingApp\InAppCommunication\Models\Conversation;
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -59,21 +59,8 @@ class CreateMessageController extends Controller
             content: $validated['content'],
         );
 
-        $author = $message->author;
-
-        assert($author instanceof User);
-
         return response()->json([
-            'data' => [
-                'id' => $message->getKey(),
-                'conversation_id' => $message->conversation_id,
-                'author_type' => $message->author_type,
-                'author_id' => $message->author_id,
-                'author_name' => $author->name,
-                'author_avatar' => $author->getFilamentAvatarUrl(),
-                'content' => $message->content,
-                'created_at' => $message->created_at->toIso8601String(),
-            ],
+            'data' => (new MessageResource($message))->resolve(),
         ], 201);
     }
 }

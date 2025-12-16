@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -34,36 +34,35 @@
 </COPYRIGHT>
 */
 
-use App\Features\UserChatFeature;
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Support\Facades\DB;
-use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
-use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
+namespace AidingApp\InAppCommunication\Http\Resources;
 
-return new class () extends Migration {
-    public function up(): void
+use AidingApp\InAppCommunication\Models\ConversationParticipant;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+/**
+ * @mixin ConversationParticipant
+ */
+class ConversationParticipantResource extends JsonResource
+{
+    /**
+     * @return array<string, mixed>
+     */
+    public function toArray(Request $request): array
     {
-        DB::transaction(function () {
-            Schema::create('messages', function (Blueprint $table) {
-                $table->uuid('id')->primary();
-                $table->foreignUuid('conversation_id')->constrained('conversations')->cascadeOnDelete();
-                $table->uuidMorphs('author');
-                $table->jsonb('content');
-                $table->timestamps();
+        $participantModel = $this->participant;
 
-                $table->index(['conversation_id', 'created_at']);
-            });
-
-            UserChatFeature::activate();
-        });
+        return [
+            'id' => $this->getKey(),
+            'participant_id' => $this->participant_id,
+            'participant_type' => $this->participant_type,
+            'participant' => $participantModel instanceof User ? [
+                'id' => $participantModel->getKey(),
+                'name' => $participantModel->name,
+                'avatar_url' => $participantModel->getFilamentAvatarUrl(),
+            ] : null,
+            'is_manager' => $this->is_manager,
+        ];
     }
-
-    public function down(): void
-    {
-        DB::transaction(function () {
-            UserChatFeature::deactivate();
-
-            Schema::dropIfExists('messages');
-        });
-    }
-};
+}

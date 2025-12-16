@@ -38,8 +38,8 @@ namespace AidingApp\InAppCommunication\Http\Controllers\Conversations;
 
 use AidingApp\InAppCommunication\Actions\GetUserConversations;
 use AidingApp\InAppCommunication\Enums\ConversationNotificationPreference;
+use AidingApp\InAppCommunication\Http\Resources\ConversationParticipantResource;
 use AidingApp\InAppCommunication\Models\Conversation;
-use AidingApp\InAppCommunication\Models\ConversationParticipant;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -58,21 +58,7 @@ class ListConversationsController extends Controller
                     ->where('participant_id', $request->user()->getKey())
                     ->first();
 
-                $participants = $conversation->conversationParticipants->map(function (ConversationParticipant $participant) {
-                    $participantModel = $participant->participant;
-
-                    return [
-                        'id' => $participant->getKey(),
-                        'participant_id' => $participant->participant_id,
-                        'participant_type' => $participant->participant_type,
-                        'participant' => $participantModel instanceof User ? [
-                            'id' => $participantModel->getKey(),
-                            'name' => $participantModel->name,
-                            'avatar_url' => $participantModel->getFilamentAvatarUrl(),
-                        ] : null,
-                        'is_manager' => $participant->is_manager,
-                    ];
-                });
+                $participants = ConversationParticipantResource::collection($conversation->conversationParticipants)->resolve();
 
                 $isPinned = $currentParticipant !== null ? $currentParticipant->is_pinned : false;
                 $notificationPreference = $currentParticipant !== null
@@ -97,7 +83,7 @@ class ListConversationsController extends Controller
                         'author_name' => $conversation->latestMessage->author instanceof User ? $conversation->latestMessage->author->name : null,
                         'created_at' => $conversation->latestMessage->created_at->toIso8601String(),
                     ] : null,
-                    'participants' => $participants->values()->all(),
+                    'participants' => $participants,
                     'participant_count' => $conversation->conversationParticipants->count(),
                     'created_at' => $conversation->created_at->toIso8601String(),
                 ];

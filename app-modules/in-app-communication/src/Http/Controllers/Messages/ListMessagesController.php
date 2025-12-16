@@ -37,10 +37,9 @@
 namespace AidingApp\InAppCommunication\Http\Controllers\Messages;
 
 use AidingApp\InAppCommunication\Actions\GetConversationMessages;
+use AidingApp\InAppCommunication\Http\Resources\MessageResource;
 use AidingApp\InAppCommunication\Models\Conversation;
-use AidingApp\InAppCommunication\Models\Message;
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -65,25 +64,8 @@ class ListMessagesController extends Controller
             afterId: $validated['after'] ?? null,
         );
 
-        $data = $messages->map(function (Message $message) {
-            $author = $message->author;
-            $authorName = $author instanceof User ? $author->name : null;
-            $authorAvatar = $author instanceof User ? $author->getFilamentAvatarUrl() : null;
-
-            return [
-                'id' => $message->getKey(),
-                'conversation_id' => $message->conversation_id,
-                'author_type' => $message->author_type,
-                'author_id' => $message->author_id,
-                'author_name' => $authorName,
-                'author_avatar' => $authorAvatar,
-                'content' => $message->content,
-                'created_at' => $message->created_at->toIso8601String(),
-            ];
-        });
-
         return response()->json([
-            'data' => $data,
+            'data' => MessageResource::collection($messages)->resolve(),
             'meta' => [
                 'has_more' => $messages->count() >= $limit,
             ],

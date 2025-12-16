@@ -38,8 +38,8 @@ namespace AidingApp\InAppCommunication\Http\Controllers\Conversations;
 
 use AidingApp\InAppCommunication\Actions\JoinChannel;
 use AidingApp\InAppCommunication\Enums\ConversationNotificationPreference;
+use AidingApp\InAppCommunication\Http\Resources\ConversationParticipantResource;
 use AidingApp\InAppCommunication\Models\Conversation;
-use AidingApp\InAppCommunication\Models\ConversationParticipant;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -61,21 +61,7 @@ class JoinChannelController extends Controller
 
         $conversation->load('conversationParticipants');
 
-        $participants = $conversation->conversationParticipants->map(function (ConversationParticipant $conversationParticipant) {
-            $participantModel = $conversationParticipant->participant;
-
-            return [
-                'id' => $conversationParticipant->getKey(),
-                'participant_id' => $conversationParticipant->participant_id,
-                'participant_type' => $conversationParticipant->participant_type,
-                'participant' => $participantModel instanceof User ? [
-                    'id' => $participantModel->getKey(),
-                    'name' => $participantModel->name,
-                    'avatar_url' => $participantModel->getFilamentAvatarUrl(),
-                ] : null,
-                'is_manager' => $conversationParticipant->is_manager,
-            ];
-        });
+        $participants = ConversationParticipantResource::collection($conversation->conversationParticipants)->resolve();
 
         return response()->json([
             'data' => [
@@ -87,7 +73,7 @@ class JoinChannelController extends Controller
                 'notification_preference' => ConversationNotificationPreference::All->value,
                 'unread_count' => 0,
                 'last_message' => null,
-                'participants' => $participants->values()->all(),
+                'participants' => $participants,
                 'participant_count' => $conversation->conversationParticipants->count(),
                 'created_at' => $conversation->created_at->toIso8601String(),
             ],

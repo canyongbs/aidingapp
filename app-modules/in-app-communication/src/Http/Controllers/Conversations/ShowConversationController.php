@@ -37,8 +37,8 @@
 namespace AidingApp\InAppCommunication\Http\Controllers\Conversations;
 
 use AidingApp\InAppCommunication\Enums\ConversationNotificationPreference;
+use AidingApp\InAppCommunication\Http\Resources\ConversationParticipantResource;
 use AidingApp\InAppCommunication\Models\Conversation;
-use AidingApp\InAppCommunication\Models\ConversationParticipant;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -57,21 +57,7 @@ class ShowConversationController extends Controller
             ->where('participant_id', $request->user()->getKey())
             ->first();
 
-        $participants = $conversation->conversationParticipants->map(function (ConversationParticipant $record): array {
-            $participantModel = $record->participant;
-
-            return [
-                'id' => $record->getKey(),
-                'participant_id' => $record->participant_id,
-                'participant_type' => $record->participant_type,
-                'participant' => $participantModel instanceof User ? [
-                    'id' => $participantModel->getKey(),
-                    'name' => $participantModel->name,
-                    'avatar_url' => $participantModel->getFilamentAvatarUrl(),
-                ] : null,
-                'is_manager' => $record->is_manager,
-            ];
-        })->values()->all();
+        $participants = ConversationParticipantResource::collection($conversation->conversationParticipants)->resolve();
 
         $isPinned = $participant !== null ? $participant->is_pinned : false;
         $notificationPreference = $participant !== null
