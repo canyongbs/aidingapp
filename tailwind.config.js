@@ -55,7 +55,7 @@ export default {
     content: [
         './app/Filament/**/*.php',
         './app-modules/**/src/Filament/**/*.php',
-        './app-modules/**/resources/js/**/*.js',
+        './app-modules/**/resources/js/**/*.{js,vue}',
         './app-modules/**/resources/views/**/*.php',
         './resources/views/**/*.blade.php',
         './resources/views/filament/**/*.blade.php',
