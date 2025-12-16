@@ -151,9 +151,16 @@ class EditServiceRequest extends EditRecord
                             ->string()
                             ->columnSpan(1),
                         Select::make('respondent_id')
-                            ->relationship('respondent', 'full_name')
+                            ->relationship(
+                                name: 'respondent',
+                                titleAttribute: 'full_name',
+                                modifyQueryUsing: fn (Builder $query) => $query->with('status')->orderBy('first_name')->limit(50)
+                            )
                             ->label('Related To')
                             ->required()
+                            ->searchable()
+                            ->preload()
+                            ->getOptionLabelFromRecordUsing(fn (Contact $record) => $record->full_name . ' (' . ($record->status->name ?? 'N/A') . ")\n" . ($record->organization->name ?? 'Unaffiliated'))
                             ->exists((new Contact())->getTable(), 'id'),
                     ]),
                 Section::make('Uploads')
