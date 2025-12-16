@@ -62,6 +62,8 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\HtmlString;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Saade\FilamentFullCalendar\FilamentFullCalendarPlugin;
 use ShuvroRoy\FilamentSpatieLaravelHealth\FilamentSpatieLaravelHealthPlugin;
@@ -188,6 +190,10 @@ class AdminPanelProvider extends PanelProvider
                 'profile' => MenuItem::make()
                     ->url(fn () => EditProfile::getUrl()),
             ])
+            ->renderHook(
+                'panels::scripts.before',
+                fn () => new HtmlString(Blade::render('@vite(\'resources/js/app.js\')')),
+            )
             ->renderHook(
                 'panels::scripts.before',
                 fn () => view('filament.scripts.scroll-sidebar-to-active-menu-item'),
