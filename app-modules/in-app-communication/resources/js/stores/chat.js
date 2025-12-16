@@ -197,7 +197,6 @@ export const useChatStore = defineStore('chat', () => {
         setMessages,
         addMessage,
         prependMessages,
-        removeMessage,
         setTyping,
         clearTyping,
         clearAllTyping,
