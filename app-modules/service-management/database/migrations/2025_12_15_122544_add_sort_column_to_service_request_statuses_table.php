@@ -43,12 +43,14 @@ return new class () extends Migration {
     {
         Schema::table('service_request_statuses', function (Blueprint $table) {
             $table->integer('sort')->default(0);
+            $table->index('sort');
         });
     }
 
     public function down(): void
     {
         Schema::table('service_request_statuses', function (Blueprint $table) {
+            $table->dropIndex(['sort']);
             $table->dropColumn('sort');
         });
     }
