@@ -40,7 +40,6 @@ use AidingApp\InAppCommunication\Models\ConversationParticipant;
 use App\Models\User;
 
 use function Pest\Laravel\assertDatabaseCount;
-use function Pest\Laravel\assertDatabaseHas;
 
 it('adds a participant to a channel conversation', function () {
     $conversation = Conversation::factory()->channel()->create();
