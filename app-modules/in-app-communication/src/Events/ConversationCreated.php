@@ -39,6 +39,7 @@ namespace AidingApp\InAppCommunication\Events;
 use AidingApp\InAppCommunication\Models\Conversation;
 use AidingApp\InAppCommunication\Models\ConversationParticipant;
 use App\Models\User;
+use Filament\Facades\Filament;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
@@ -77,7 +78,7 @@ class ConversationCreated implements ShouldBroadcastNow
                 'participant' => $participantModel instanceof User ? [
                     'id' => $participantModel->getKey(),
                     'name' => $participantModel->name,
-                    'avatar_url' => $participantModel->getFilamentAvatarUrl(),
+                    'avatar_url' => Filament::getUserAvatarUrl($participantModel),
                 ] : null,
                 'is_manager' => $participant->is_manager,
             ];

@@ -38,6 +38,7 @@ namespace AidingApp\InAppCommunication\Events;
 
 use AidingApp\InAppCommunication\Models\Message;
 use App\Models\User;
+use Filament\Facades\Filament;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
@@ -65,7 +66,7 @@ class MessageSent implements ShouldBroadcastNow
     {
         $author = $this->message->author;
         $authorName = $author instanceof User ? $author->name : 'Unknown';
-        $authorAvatar = $author instanceof User ? $author->getFilamentAvatarUrl() : null;
+        $authorAvatar = $author instanceof User ? Filament::getUserAvatarUrl($author) : null;
 
         return [
             'id' => $this->message->getKey(),

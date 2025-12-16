@@ -45,7 +45,6 @@
     } from '@heroicons/vue/24/outline';
     import { computed, ref } from 'vue';
     import { useConversationDisplay } from '../composables/useConversationDisplay';
-    import { getInitials } from '../utils/helpers';
     import ConfirmModal from './ui/ConfirmModal.vue';
     import DropdownMenu from './ui/DropdownMenu.vue';
 
@@ -119,8 +118,6 @@
         () => props.conversation,
         () => props.currentUserId,
     );
-
-    const initials = computed(() => getInitials(displayName.value));
 </script>
 
 <template>
@@ -143,17 +140,10 @@
             </template>
             <template v-else>
                 <img
-                    v-if="avatarUrl"
                     :src="avatarUrl"
                     :alt="displayName"
                     class="h-10 w-10 rounded-full object-cover ring-2 ring-white/30"
                 />
-                <div
-                    v-else
-                    class="flex h-10 w-10 items-center justify-center rounded-full bg-white/20 text-sm font-medium text-white ring-2 ring-white/30"
-                >
-                    {{ initials }}
-                </div>
             </template>
 
             <!-- Info -->

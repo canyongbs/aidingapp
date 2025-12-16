@@ -42,6 +42,7 @@ use AidingApp\InAppCommunication\Models\ConversationParticipant;
 use AidingApp\InAppCommunication\Models\Scopes\WhereHasUnread;
 use AidingApp\InAppCommunication\Models\Scopes\WithUnreadCount;
 use App\Models\User;
+use Filament\Facades\Filament;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -103,7 +104,6 @@ class ChatNotifications extends Component
      *     display_name: string,
      *     unread_count: int,
      *     avatar_url: ?string,
-     *     initials: string,
      *     message_preview: ?string,
      *     author_name: ?string,
      *     created_at: ?string,
@@ -121,7 +121,7 @@ class ChatNotifications extends Component
                 ->first(fn (ConversationParticipant $participant) => $participant->participant_id !== $currentUser->getKey());
             $otherUser = $otherParticipant?->participant;
             $displayName = $otherUser instanceof User ? $otherUser->name : 'Unknown User';
-            $avatarUrl = $otherUser instanceof User ? $otherUser->getFilamentAvatarUrl() : null;
+            $avatarUrl = $otherUser instanceof User ? Filament::getUserAvatarUrl($otherUser) : null;
         }
 
         $latestMessage = $conversation->latestMessage;
@@ -157,18 +157,9 @@ class ChatNotifications extends Component
             'display_name' => $displayName,
             'unread_count' => $unreadCount,
             'avatar_url' => $avatarUrl,
-            'initials' => $this->getInitials($displayName),
             'message_preview' => $messagePreview,
             'author_name' => $latestMessage?->author instanceof User ? $latestMessage->author->name : null,
             'created_at' => $latestMessage?->created_at?->diffForHumans(),
         ];
-    }
-
-    protected function getInitials(string $name): string
-    {
-        return collect(explode(' ', $name))
-            ->map(fn (string $word) => mb_substr($word, 0, 1))
-            ->take(2)
-            ->implode('');
     }
 }

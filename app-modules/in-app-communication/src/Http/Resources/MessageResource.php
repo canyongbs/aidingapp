@@ -38,6 +38,7 @@ namespace AidingApp\InAppCommunication\Http\Resources;
 
 use AidingApp\InAppCommunication\Models\Message;
 use App\Models\User;
+use Filament\Facades\Filament;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -59,7 +60,7 @@ class MessageResource extends JsonResource
             'author_type' => $this->author_type,
             'author_id' => $this->author_id,
             'author_name' => $author instanceof User ? $author->name : null,
-            'author_avatar' => $author instanceof User ? $author->getFilamentAvatarUrl() : null,
+            'author_avatar' => $author instanceof User ? Filament::getUserAvatarUrl($author) : null,
             'content' => $this->content,
             'created_at' => $this->created_at->toIso8601String(),
         ];

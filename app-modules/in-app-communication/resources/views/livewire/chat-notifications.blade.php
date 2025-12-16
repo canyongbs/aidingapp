@@ -73,17 +73,12 @@
                                     class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-100 dark:bg-primary-900/30">
                                     <x-heroicon-o-hashtag class="h-5 w-5 text-primary-600 dark:text-primary-400" />
                                 </div>
-                            @elseif ($notification['avatar_url'])
+                            @else
                                 <img
                                     class="h-10 w-10 shrink-0 rounded-full object-cover"
                                     src="{{ $notification['avatar_url'] }}"
                                     alt="{{ $notification['display_name'] }}"
                                 />
-                            @else
-                                <div
-                                    class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-100 text-sm font-medium text-primary-600 dark:bg-primary-900/30 dark:text-primary-400">
-                                    {{ $notification['initials'] }}
-                                </div>
                             @endif
 
                             <div class="min-w-0 flex-1">

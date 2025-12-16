@@ -40,6 +40,7 @@ use AidingApp\InAppCommunication\Actions\SearchUsers;
 use App\Enums\Feature;
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Filament\Facades\Filament;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -65,7 +66,7 @@ class SearchUsersController extends Controller
             'id' => $user->getKey(),
             'name' => $user->name,
             'email' => $user->email,
-            'avatar_url' => $user->getFilamentAvatarUrl(),
+            'avatar_url' => Filament::getUserAvatarUrl($user),
         ]);
 
         return response()->json(['data' => $users]);

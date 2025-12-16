@@ -32,15 +32,6 @@
 </COPYRIGHT>
 */
 
-export function getInitials(name) {
-    return name
-        .split(' ')
-        .map((word) => word[0])
-        .join('')
-        .toUpperCase()
-        .substring(0, 2);
-}
-
 export function cleanTipTapContent(node) {
     if (!node || typeof node !== 'object') return node;
 

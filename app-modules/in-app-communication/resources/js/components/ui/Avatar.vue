@@ -34,22 +34,19 @@
 
 <script setup>
     import { computed } from 'vue';
-    import { getInitials } from '../../utils/helpers';
 
     const props = defineProps({
-        src: { type: String, default: null },
+        src: { type: String, required: true },
         name: { type: String, required: true },
         size: { type: String, default: 'md' },
         ring: { type: Boolean, default: false },
     });
 
-    const initials = computed(() => getInitials(props.name));
-
     const sizeClasses = computed(() => {
         const sizes = {
-            sm: 'h-8 w-8 text-xs',
-            md: 'h-10 w-10 text-sm',
-            lg: 'h-12 w-12 text-base',
+            sm: 'h-8 w-8',
+            md: 'h-10 w-10',
+            lg: 'h-12 w-12',
         };
         return sizes[props.size] || sizes.md;
     });
@@ -60,12 +57,5 @@
 </script>
 
 <template>
-    <img v-if="src" :src="src" :alt="name" class="rounded-full object-cover" :class="[sizeClasses, ringClasses]" />
-    <div
-        v-else
-        class="flex items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900/30 font-medium text-primary-600 dark:text-primary-400"
-        :class="[sizeClasses, ringClasses]"
-    >
-        {{ initials }}
-    </div>
+    <img :src="src" :alt="name" class="rounded-full object-cover" :class="[sizeClasses, ringClasses]" />
 </template>

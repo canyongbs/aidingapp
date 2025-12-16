@@ -38,6 +38,7 @@ namespace AidingApp\InAppCommunication\Http\Resources;
 
 use AidingApp\InAppCommunication\Models\ConversationParticipant;
 use App\Models\User;
+use Filament\Facades\Filament;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -60,7 +61,7 @@ class ConversationParticipantResource extends JsonResource
             'participant' => $participantModel instanceof User ? [
                 'id' => $participantModel->getKey(),
                 'name' => $participantModel->name,
-                'avatar_url' => $participantModel->getFilamentAvatarUrl(),
+                'avatar_url' => Filament::getUserAvatarUrl($participantModel),
             ] : null,
             'is_manager' => $this->is_manager,
         ];
