@@ -39,6 +39,7 @@ namespace AidingApp\InAppCommunication\Models;
 use AidingApp\InAppCommunication\Database\Factories\MessageFactory;
 use App\Models\BaseModel;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -51,6 +52,8 @@ class Message extends BaseModel
 {
     /** @use HasFactory<MessageFactory> */
     use HasFactory;
+
+    use HasUuids;
 
     protected $fillable = [
         'conversation_id',

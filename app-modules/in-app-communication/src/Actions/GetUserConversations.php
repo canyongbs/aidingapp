@@ -37,6 +37,7 @@
 namespace AidingApp\InAppCommunication\Actions;
 
 use AidingApp\InAppCommunication\Models\Conversation;
+use AidingApp\InAppCommunication\Models\Scopes\WithUnreadCount;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -52,6 +53,7 @@ class GetUserConversations
             ->whereHas('conversationParticipants', function (Builder $query) use ($user) {
                 $query->whereMorphedTo('participant', $user);
             })
+            ->tap(new WithUnreadCount($user))
             ->with(['latestMessage.author', 'conversationParticipants'])
             ->get();
     }

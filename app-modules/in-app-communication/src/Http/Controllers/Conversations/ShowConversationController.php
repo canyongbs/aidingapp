@@ -39,6 +39,7 @@ namespace AidingApp\InAppCommunication\Http\Controllers\Conversations;
 use AidingApp\InAppCommunication\Enums\ConversationNotificationPreference;
 use AidingApp\InAppCommunication\Http\Resources\ConversationParticipantResource;
 use AidingApp\InAppCommunication\Models\Conversation;
+use AidingApp\InAppCommunication\Models\Scopes\WithUnreadCount;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -50,7 +51,11 @@ class ShowConversationController extends Controller
     {
         $this->authorize('view', $conversation);
 
-        $conversation->load(['conversationParticipants']);
+        $conversation = Conversation::query()
+            ->where('id', $conversation->getKey())
+            ->tap(new WithUnreadCount($request->user()))
+            ->with(['conversationParticipants'])
+            ->first();
 
         $participant = $conversation->conversationParticipants
             ->where('participant_type', app(User::class)->getMorphClass())
@@ -63,7 +68,6 @@ class ShowConversationController extends Controller
         $notificationPreference = $participant !== null
             ? $participant->notification_preference->value
             : ConversationNotificationPreference::All->value;
-        $unreadCount = $participant !== null ? $participant->unreadCount() : 0;
 
         return response()->json([
             'data' => [
@@ -73,7 +77,7 @@ class ShowConversationController extends Controller
                 'is_private' => $conversation->is_private,
                 'is_pinned' => $isPinned,
                 'notification_preference' => $notificationPreference,
-                'unread_count' => $unreadCount,
+                'unread_count' => $conversation->unread_count ?? 0,
                 'participants' => $participants,
                 'created_by' => $conversation->created_by,
                 'created_at' => $conversation->created_at->toIso8601String(),

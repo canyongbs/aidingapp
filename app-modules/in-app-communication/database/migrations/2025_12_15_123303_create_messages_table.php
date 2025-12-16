@@ -52,6 +52,7 @@ return new class () extends Migration {
                 $table->timestamps();
 
                 $table->index(['conversation_id', 'created_at']);
+                $table->index(['conversation_id', 'author_type', 'author_id', 'created_at'], 'messages_unread_count_index');
             });
 
             UserChatFeature::activate();

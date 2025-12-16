@@ -40,6 +40,7 @@ use AidingApp\InAppCommunication\Database\Factories\ConversationFactory;
 use AidingApp\InAppCommunication\Enums\ConversationType;
 use App\Models\BaseModel;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -54,6 +55,7 @@ class Conversation extends BaseModel
     /** @use HasFactory<ConversationFactory> */
     use HasFactory;
 
+    use HasUuids;
     use SoftDeletes;
 
     protected $fillable = [

@@ -34,57 +34,38 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\InAppCommunication\Models;
+namespace AidingApp\InAppCommunication\Models\Scopes;
 
-use AidingApp\InAppCommunication\Database\Factories\ConversationParticipantFactory;
-use AidingApp\InAppCommunication\Enums\ConversationNotificationPreference;
-use App\Models\BaseModel;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
+use AidingApp\InAppCommunication\Models\Conversation;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 
-/**
- * @mixin IdeHelperConversationParticipant
- */
-class ConversationParticipant extends BaseModel
+class WhereHasUnread
 {
-    /** @use HasFactory<ConversationParticipantFactory> */
-    use HasFactory;
-
-    use HasUuids;
-
-    protected $fillable = [
-        'conversation_id',
-        'participant_type',
-        'participant_id',
-        'is_manager',
-        'is_pinned',
-        'notification_preference',
-        'last_read_at',
-    ];
-
-    protected $casts = [
-        'notification_preference' => ConversationNotificationPreference::class,
-        'is_manager' => 'boolean',
-        'is_pinned' => 'boolean',
-        'last_read_at' => 'datetime',
-    ];
+    public function __construct(
+        protected User $user,
+    ) {}
 
     /**
-     * @return BelongsTo<Conversation, $this>
+     * @param Builder<Conversation> $query
      */
-    public function conversation(): BelongsTo
+    public function __invoke(Builder $query): void
     {
-        return $this->belongsTo(Conversation::class);
-    }
+        $userType = $this->user->getMorphClass();
+        $userId = $this->user->getKey();
 
-    /**
-     * @return MorphTo<Model, $this>
-     */
-    public function participant(): MorphTo
-    {
-        return $this->morphTo();
+        $query->whereRaw('(
+            select count(*)
+            from messages
+            where messages.conversation_id = conversations.id
+                and (messages.author_type != ? or messages.author_id != ?)
+                and messages.created_at > coalesce(
+                    (select last_read_at from conversation_participants
+                        where conversation_id = conversations.id
+                            and participant_type = ?
+                            and participant_id = ?),
+                    \'1970-01-01\'
+                )
+        ) > 0', [$userType, $userId, $userType, $userId]);
     }
 }

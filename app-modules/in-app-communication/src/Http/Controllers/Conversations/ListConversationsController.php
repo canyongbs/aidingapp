@@ -64,7 +64,7 @@ class ListConversationsController extends Controller
                 $notificationPreference = $currentParticipant !== null
                     ? $currentParticipant->notification_preference->value
                     : ConversationNotificationPreference::All->value;
-                $unreadCount = $currentParticipant !== null ? $currentParticipant->unreadCount() : 0;
+                $unreadCount = $conversation->unread_count ?? 0;
                 $lastReadAt = $currentParticipant?->last_read_at?->toIso8601String();
 
                 return [

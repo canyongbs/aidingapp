@@ -38,6 +38,7 @@ namespace AidingApp\InAppCommunication\Actions;
 
 use AidingApp\InAppCommunication\Models\Conversation;
 use AidingApp\InAppCommunication\Models\Message;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
 class GetConversationMessages
@@ -54,7 +55,8 @@ class GetConversationMessages
         $query = Message::query()
             ->whereBelongsTo($conversation)
             ->with('author')
-            ->orderBy('created_at', 'desc');
+            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc');
 
         if ($beforeId !== null) {
             $beforeMessage = Message::query()
@@ -62,7 +64,13 @@ class GetConversationMessages
                 ->find($beforeId);
 
             if ($beforeMessage) {
-                $query->where('created_at', '<', $beforeMessage->created_at);
+                $query->where(function (Builder $query) use ($beforeMessage) {
+                    $query->where('created_at', '<', $beforeMessage->created_at)
+                        ->orWhere(function (Builder $query) use ($beforeMessage) {
+                            $query->where('created_at', '=', $beforeMessage->created_at)
+                                ->where('id', '<', $beforeMessage->id);
+                        });
+                });
             }
         }
 
@@ -72,17 +80,18 @@ class GetConversationMessages
                 ->find($afterId);
 
             if ($afterMessage) {
-                $query->where('created_at', '>', $afterMessage->created_at)
-                    ->orderBy('created_at', 'asc');
+                $query->where(function (Builder $query) use ($afterMessage) {
+                    $query->where('created_at', '>', $afterMessage->created_at)
+                        ->orWhere(function (Builder $query) use ($afterMessage) {
+                            $query->where('created_at', '=', $afterMessage->created_at)
+                                ->where('id', '>', $afterMessage->id);
+                        });
+                })
+                    ->reorder('created_at', 'asc')
+                    ->orderBy('id', 'asc');
             }
         }
 
-        $messages = $query->limit($limit)->get();
-
-        if ($afterId !== null) {
-            $messages = $messages->reverse()->values();
-        }
-
-        return $messages;
+        return $query->limit($limit)->get();
     }
 }
