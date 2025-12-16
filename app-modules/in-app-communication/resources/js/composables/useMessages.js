@@ -84,11 +84,6 @@ export function useMessages(conversationId) {
         return data.data;
     }
 
-    async function deleteMessage(messageId) {
-        await api.delete(`/messages/${messageId}`);
-        store.removeMessage(conversationId.value, messageId);
-    }
-
     watch(conversationId, (newId, oldId) => {
         if (newId !== oldId) {
             hasMore.value = true;
@@ -104,6 +99,5 @@ export function useMessages(conversationId) {
         hasMore,
         loadMessages,
         sendMessage,
-        deleteMessage,
     };
 }
