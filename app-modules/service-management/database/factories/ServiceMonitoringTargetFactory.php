@@ -45,20 +45,20 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class ServiceMonitoringTargetFactory extends Factory
 {
-  /**
-   * Define the model's default state.
-   *
-   * @return array<string, mixed>
-   */
-  public function definition(): array
-  {
-    return [
-      'name' => $this->faker->word(10),
-      'description' => $this->faker->paragraph(),
-      'domain' => $this->faker->url(),
-      'frequency' => $this->faker->randomElement(ServiceMonitoringFrequency::cases()),
-      'is_notified_via_database' => $this->faker->boolean(),
-      'is_notified_via_email' => $this->faker->boolean(),
-    ];
-  }
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition(): array
+    {
+        return [
+            'name' => $this->faker->word(10),
+            'description' => $this->faker->paragraph(),
+            'domain' => $this->faker->url(),
+            'frequency' => $this->faker->randomElement(ServiceMonitoringFrequency::cases()),
+            'is_notified_via_database' => $this->faker->boolean(),
+            'is_notified_via_email' => $this->faker->boolean(),
+        ];
+    }
 }
