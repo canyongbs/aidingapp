@@ -62,11 +62,11 @@ class SearchUsersController extends Controller
             excludeUser: $request->user(),
             searchTerm: $searchTerm ?: null,
         )->map(fn (User $user) => [
-                'id' => $user->getKey(),
-                'name' => $user->name,
-                'email' => $user->email,
-                'avatar_url' => $user->getFilamentAvatarUrl(),
-            ]);
+            'id' => $user->getKey(),
+            'name' => $user->name,
+            'email' => $user->email,
+            'avatar_url' => $user->getFilamentAvatarUrl(),
+        ]);
 
         return response()->json(['data' => $users]);
     }

@@ -54,16 +54,16 @@ class ListPublicChannelsController extends Controller
             excludeUser: $request->user(),
             search: $search,
         )->map(function (Conversation $conversation): array {
-                /** @var int $memberCount */
-                $memberCount = $conversation->getAttribute('member_count');
+            /** @var int $memberCount */
+            $memberCount = $conversation->getAttribute('member_count');
 
-                return [
-                    'id' => $conversation->getKey(),
-                    'name' => $conversation->name,
-                    'member_count' => $memberCount,
-                    'created_at' => $conversation->created_at->toIso8601String(),
-                ];
-            });
+            return [
+                'id' => $conversation->getKey(),
+                'name' => $conversation->name,
+                'member_count' => $memberCount,
+                'created_at' => $conversation->created_at->toIso8601String(),
+            ];
+        });
 
         return response()->json(['data' => $channels]);
     }
