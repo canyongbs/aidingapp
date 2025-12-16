@@ -37,24 +37,26 @@
 namespace AidingApp\InAppCommunication\Providers;
 
 use AidingApp\InAppCommunication\InAppCommunicationPlugin;
-use AidingApp\InAppCommunication\Models\TwilioConversation;
+use AidingApp\InAppCommunication\Models\Conversation;
+use AidingApp\InAppCommunication\Models\ConversationParticipant;
+use AidingApp\InAppCommunication\Models\Message;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 
 class InAppCommunicationServiceProvider extends ServiceProvider
 {
-    public function register()
+    public function register(): void
     {
         Panel::configureUsing(fn (Panel $panel) => ($panel->getId() !== 'admin') || $panel->plugin(new InAppCommunicationPlugin()));
     }
 
     public function boot(): void
     {
-        Relation::morphMap(
-            [
-                'twilio_conversation' => TwilioConversation::class,
-            ]
-        );
+        Relation::morphMap([
+            'conversation' => Conversation::class,
+            'conversation_participant' => ConversationParticipant::class,
+            'message' => Message::class,
+        ]);
     }
 }
