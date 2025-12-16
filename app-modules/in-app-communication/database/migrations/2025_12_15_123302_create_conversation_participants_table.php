@@ -52,6 +52,7 @@ return new class () extends Migration {
             $table->timestamps();
 
             $table->unique(['conversation_id', 'participant_type', 'participant_id'], 'conversation_participant_unique');
+            $table->index(['participant_type', 'participant_id', 'conversation_id'], 'conversation_participants_user_lookup_index');
         });
     }
 
