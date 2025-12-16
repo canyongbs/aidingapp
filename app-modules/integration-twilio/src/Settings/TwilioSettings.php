@@ -36,14 +36,11 @@
 
 namespace AidingApp\IntegrationTwilio\Settings;
 
-use AidingApp\IntegrationTwilio\DataTransferObjects\TwilioApiKey;
 use Spatie\LaravelSettings\Settings;
 
 class TwilioSettings extends Settings
 {
     public bool $is_enabled = false;
-
-    public ?TwilioApiKey $api_key = null;
 
     public ?string $account_sid = null;
 
@@ -62,7 +59,6 @@ class TwilioSettings extends Settings
     public static function encrypted(): array
     {
         return [
-            'api_key',
             'account_sid',
             'auth_token',
             'from_number',
