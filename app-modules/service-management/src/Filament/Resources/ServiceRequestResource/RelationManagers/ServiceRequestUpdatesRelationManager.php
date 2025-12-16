@@ -88,8 +88,7 @@ class ServiceRequestUpdatesRelationManager extends RelationManager
                 Select::make('status_id')
                     ->label('Status')
                     ->allowHtml()
-                    ->options(fn () => ServiceRequestStatus::orderBy('classification')
-                        ->orderBy('name')
+                    ->options(fn () => ServiceRequestStatus::orderBy('sort')
                         ->get(['id', 'name', 'classification', 'color'])
                         ->groupBy(fn (ServiceRequestStatus $status) => $status->classification->getlabel())
                         ->map(fn (Collection $group) => $group->mapWithKeys(fn (ServiceRequestStatus $status): array => [

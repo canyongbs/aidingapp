@@ -82,7 +82,12 @@ class ListServiceRequestStatuses extends ListRecords
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->defaultSort('sort')
-            ->reorderable('sort')
+            ->reorderable('sort', function () {
+                $trashedFilterValue = $this->getTableFilterState('trashed');
+                $filterValue = $trashedFilterValue['value'] ?? null;
+
+                return is_null($filterValue);
+            })
             ->actions([
                 ViewAction::make(),
                 EditAction::make(),
