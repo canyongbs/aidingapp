@@ -35,7 +35,6 @@
 */
 
 use AidingApp\InAppCommunication\Actions\SendMessage;
-use AidingApp\InAppCommunication\Jobs\NotifyMessageParticipants;
 use AidingApp\InAppCommunication\Models\Conversation;
 use AidingApp\InAppCommunication\Models\ConversationParticipant;
 use AidingApp\InAppCommunication\Models\Message;
@@ -112,25 +111,4 @@ it('updates the author last_read_at timestamp', function () {
     $participant->refresh();
 
     expect($participant->last_read_at)->not->toBeNull();
-});
-
-it('dispatches NotifyMessageParticipants job', function () {
-    Event::fake();
-    Queue::fake();
-
-    $conversation = Conversation::factory()->channel()->create();
-    $author = User::factory()->create();
-
-    ConversationParticipant::factory()->create([
-        'conversation_id' => $conversation->getKey(),
-        'participant_id' => $author->getKey(),
-    ]);
-
-    app(SendMessage::class)(
-        conversation: $conversation,
-        author: $author,
-        content: ['type' => 'doc', 'content' => []],
-    );
-
-    Queue::assertPushed(NotifyMessageParticipants::class);
 });

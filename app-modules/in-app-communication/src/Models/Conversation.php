@@ -34,46 +34,70 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\InAppCommunication\Actions;
+namespace AidingApp\InAppCommunication\Models;
 
-use AidingApp\InAppCommunication\Events\MessageSent;
-use AidingApp\InAppCommunication\Models\Conversation;
-use AidingApp\InAppCommunication\Models\ConversationParticipant;
-use AidingApp\InAppCommunication\Models\Message;
+use AidingApp\InAppCommunication\Database\Factories\ConversationFactory;
+use AidingApp\InAppCommunication\Enums\ConversationType;
+use App\Models\BaseModel;
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
-class SendMessage
+/**
+ * @mixin IdeHelperConversation
+ */
+class Conversation extends BaseModel
 {
+    /** @use HasFactory<ConversationFactory> */
+    use HasFactory;
+
+    use SoftDeletes;
+
+    protected $fillable = [
+        'type',
+        'name',
+        'is_private',
+        'created_by',
+    ];
+
+    protected $casts = [
+        'type' => ConversationType::class,
+        'is_private' => 'boolean',
+    ];
+
     /**
-     * @param  array<string, mixed>  $content
+     * @return HasMany<ConversationParticipant, $this>
      */
-    public function __invoke(
-        Conversation $conversation,
-        User $author,
-        array $content,
-    ): Message {
-        return DB::transaction(function () use ($conversation, $author, $content) {
-            $message = new Message();
-            $message->conversation_id = $conversation->getKey();
-            $message->author_type = app(User::class)->getMorphClass();
-            $message->author_id = $author->getKey();
-            $message->content = $content;
-            $message->save();
+    public function conversationParticipants(): HasMany
+    {
+        return $this->hasMany(ConversationParticipant::class);
+    }
 
-            $participant = ConversationParticipant::query()
-                ->whereBelongsTo($conversation)
-                ->whereMorphedTo('participant', $author)
-                ->first();
+    /**
+     * @return HasMany<Message, $this>
+     */
+    public function messages(): HasMany
+    {
+        return $this->hasMany(Message::class);
+    }
 
-            if ($participant) {
-                $participant->last_read_at = now();
-                $participant->save();
-            }
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
 
-            broadcast(new MessageSent($message));
-
-            return $message;
-        });
+    /**
+     * @return HasOne<Message, $this>
+     */
+    public function latestMessage(): HasOne
+    {
+        return $this->hasOne(Message::class)->latestOfMany();
     }
 }

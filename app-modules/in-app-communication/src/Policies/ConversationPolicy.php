@@ -91,19 +91,6 @@ class ConversationPolicy
         return Response::deny('Direct message conversations cannot be updated.');
     }
 
-    public function delete(Authenticatable $authenticatable, Conversation $conversation): Response
-    {
-        if ($conversation->type === ConversationType::Channel) {
-            if ($this->isManager($authenticatable, $conversation)) {
-                return Response::allow();
-            }
-
-            return Response::deny('You do not have permission to delete this conversation.');
-        }
-
-        return Response::deny('Direct message conversations cannot be deleted.');
-    }
-
     public function addParticipant(Authenticatable $authenticatable, Conversation $conversation): Response
     {
         if ($conversation->type !== ConversationType::Channel) {
@@ -182,7 +169,7 @@ class ConversationPolicy
         return Response::allow();
     }
 
-    private function isParticipant(Authenticatable $authenticatable, Conversation $conversation): bool
+    protected function isParticipant(Authenticatable $authenticatable, Conversation $conversation): bool
     {
         return ConversationParticipant::query()
             ->whereBelongsTo($conversation)
@@ -190,7 +177,7 @@ class ConversationPolicy
             ->exists();
     }
 
-    private function isManager(Authenticatable $authenticatable, Conversation $conversation): bool
+    protected function isManager(Authenticatable $authenticatable, Conversation $conversation): bool
     {
         return ConversationParticipant::query()
             ->whereBelongsTo($conversation)

@@ -101,7 +101,7 @@ class CreateConversation
         return $conversation;
     }
 
-    private function findExistingDirect(User $user1, string $user2Id): ?Conversation
+    protected function findExistingDirect(User $user1, string $user2Id): ?Conversation
     {
         return Conversation::query()
             ->where('type', ConversationType::Direct)

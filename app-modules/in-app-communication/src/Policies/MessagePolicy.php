@@ -63,7 +63,7 @@ class MessagePolicy
         return Response::deny('You do not have permission to view this message.');
     }
 
-    private function isParticipant(Authenticatable $authenticatable, string $conversationId): bool
+    protected function isParticipant(Authenticatable $authenticatable, string $conversationId): bool
     {
         return ConversationParticipant::query()
             ->where('conversation_id', $conversationId)
