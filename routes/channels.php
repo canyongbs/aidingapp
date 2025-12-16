@@ -36,6 +36,8 @@
 
 use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\InAppCommunication\Models\ConversationParticipant;
+use App\Models\User;
 use Illuminate\Support\Facades\Broadcast;
 
 /*
@@ -51,4 +53,15 @@ use Illuminate\Support\Facades\Broadcast;
 
 Broadcast::channel('portal-assistant-thread-{threadId}', function (Contact $user, string $threadId): bool {
     return PortalAssistantThread::find($threadId)?->author()->is($user) ?? false;
+});
+
+Broadcast::channel('conversation.{conversationId}', function (User $user, string $conversationId): bool {
+    return ConversationParticipant::query()
+        ->where('conversation_id', $conversationId)
+        ->whereMorphedTo('participant', $user)
+        ->exists();
+});
+
+Broadcast::channel('user.{userId}', function (User $user, string $userId): bool {
+    return $user->id === $userId;
 });
