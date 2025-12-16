@@ -78,6 +78,7 @@ it('sorts conversations by last message date', function () {
     ConversationParticipant::factory()->create([
         'conversation_id' => $olderConversation->getKey(),
         'participant_id' => $user->getKey(),
+        'created_at' => now()->subWeek(),
     ]);
     Message::factory()->create([
         'conversation_id' => $olderConversation->getKey(),
@@ -89,6 +90,7 @@ it('sorts conversations by last message date', function () {
     ConversationParticipant::factory()->create([
         'conversation_id' => $newerConversation->getKey(),
         'participant_id' => $user->getKey(),
+        'created_at' => now()->subWeek(),
     ]);
     Message::factory()->create([
         'conversation_id' => $newerConversation->getKey(),
@@ -101,6 +103,67 @@ it('sorts conversations by last message date', function () {
         ->assertOk()
         ->assertJsonPath('data.0.id', $newerConversation->getKey())
         ->assertJsonPath('data.1.id', $olderConversation->getKey());
+});
+
+it('sorts conversations without messages by participant join date', function () {
+    $user = User::factory()->licensed(LicenseType::cases())->create();
+
+    $olderJoinConversation = Conversation::factory()->channel()->create();
+    ConversationParticipant::factory()->create([
+        'conversation_id' => $olderJoinConversation->getKey(),
+        'participant_id' => $user->getKey(),
+        'created_at' => now()->subDay(),
+    ]);
+
+    $newerJoinConversation = Conversation::factory()->channel()->create();
+    ConversationParticipant::factory()->create([
+        'conversation_id' => $newerJoinConversation->getKey(),
+        'participant_id' => $user->getKey(),
+        'created_at' => now(),
+    ]);
+
+    actingAs($user)
+        ->getJson(route('in-app-communication.conversations.index'))
+        ->assertOk()
+        ->assertJsonPath('data.0.id', $newerJoinConversation->getKey())
+        ->assertJsonPath('data.1.id', $olderJoinConversation->getKey());
+});
+
+it('uses the more recent of message date or join date for sorting', function () {
+    $user = User::factory()->licensed(LicenseType::cases())->create();
+
+    // Conversation with old message but user joined recently
+    $recentJoinConversation = Conversation::factory()->channel()->create();
+    ConversationParticipant::factory()->create([
+        'conversation_id' => $recentJoinConversation->getKey(),
+        'participant_id' => $user->getKey(),
+        'created_at' => now(),
+    ]);
+    Message::factory()->create([
+        'conversation_id' => $recentJoinConversation->getKey(),
+        'author_id' => $user->getKey(),
+        'created_at' => now()->subWeek(),
+    ]);
+
+    // Conversation with recent message but user joined long ago
+    $recentMessageConversation = Conversation::factory()->channel()->create();
+    ConversationParticipant::factory()->create([
+        'conversation_id' => $recentMessageConversation->getKey(),
+        'participant_id' => $user->getKey(),
+        'created_at' => now()->subMonth(),
+    ]);
+    Message::factory()->create([
+        'conversation_id' => $recentMessageConversation->getKey(),
+        'author_id' => $user->getKey(),
+        'created_at' => now()->subHour(),
+    ]);
+
+    // The conversation with the recent join should appear first (now > 1 hour ago)
+    actingAs($user)
+        ->getJson(route('in-app-communication.conversations.index'))
+        ->assertOk()
+        ->assertJsonPath('data.0.id', $recentJoinConversation->getKey())
+        ->assertJsonPath('data.1.id', $recentMessageConversation->getKey());
 });
 
 it('requires authentication', function () {

@@ -37,6 +37,8 @@
 namespace AidingApp\InAppCommunication\Actions;
 
 use AidingApp\InAppCommunication\Models\Conversation;
+use AidingApp\InAppCommunication\Models\ConversationParticipant;
+use AidingApp\InAppCommunication\Models\Message;
 use AidingApp\InAppCommunication\Models\Scopes\WithUnreadCount;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
@@ -49,12 +51,22 @@ class GetUserConversations
      */
     public function __invoke(User $user): Collection
     {
+        $userType = $user->getMorphClass();
+        $userId = $user->getKey();
+
         return Conversation::query()
             ->whereHas('conversationParticipants', function (Builder $query) use ($user) {
                 $query->whereMorphedTo('participant', $user);
             })
             ->tap(new WithUnreadCount($user))
             ->with(['latestMessage.author', 'conversationParticipants'])
+            ->orderByRaw('coalesce(
+                greatest(
+                    (select created_at from messages where messages.conversation_id = conversations.id order by created_at desc limit 1),
+                    (select created_at from conversation_participants where conversation_id = conversations.id and participant_type = ? and participant_id = ? limit 1)
+                ),
+                (select created_at from conversation_participants where conversation_id = conversations.id and participant_type = ? and participant_id = ? limit 1)
+            ) desc', [$userType, $userId, $userType, $userId])
             ->get();
     }
 }

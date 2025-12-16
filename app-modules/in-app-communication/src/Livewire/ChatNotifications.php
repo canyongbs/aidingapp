@@ -37,14 +37,17 @@
 namespace AidingApp\InAppCommunication\Livewire;
 
 use AidingApp\InAppCommunication\Enums\ConversationType;
+use AidingApp\InAppCommunication\Filament\Pages\UserChat;
 use AidingApp\InAppCommunication\Models\Conversation;
 use AidingApp\InAppCommunication\Models\ConversationParticipant;
+use AidingApp\InAppCommunication\Models\Message;
 use AidingApp\InAppCommunication\Models\Scopes\WhereHasUnread;
 use AidingApp\InAppCommunication\Models\Scopes\WithUnreadCount;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Lazy;
@@ -69,11 +72,21 @@ class ChatNotifications extends Component
             })
             ->tap(new WithUnreadCount($user))
             ->tap(new WhereHasUnread($user))
-            ->with(['latestMessage.author', 'conversationParticipants.participant'])
+            ->with([
+                'latestMessage.author',
+                'conversationParticipants' => fn (HasMany $query) => $query
+                    ->whereNot(fn (Builder $subQuery) => $subQuery->whereMorphedTo('participant', $user))
+                    ->with('participant'),
+            ])
+            ->orderByDesc(
+                Message::query()
+                    ->select('created_at')
+                    ->whereColumn('conversation_id', 'conversations.id')
+                    ->latest()
+                    ->limit(1)
+            )
             ->get()
-            ->sortByDesc(fn (Conversation $conversation) => $conversation->latestMessage?->created_at)
-            ->map(fn (Conversation $conversation) => $this->formatNotification($conversation, $user))
-            ->values();
+            ->map(fn (Conversation $conversation) => $this->formatNotification($conversation, $user));
     }
 
     public function getTotalUnreadCount(): int
@@ -132,14 +145,7 @@ class ChatNotifications extends Component
             $content = $latestMessage->content;
 
             if (is_array($content)) {
-                /** @var array<int, mixed> $contentArray */
-                $contentArray = data_get($content, 'content', []);
-                $messagePreview = collect($contentArray)
-                    ->pluck('content')
-                    ->flatten()
-                    ->pluck('text')
-                    ->filter()
-                    ->implode(' ');
+                $messagePreview = $this->extractTextFromTipTap($content);
             } else {
                 $messagePreview = strip_tags($content);
             }
@@ -152,7 +158,7 @@ class ChatNotifications extends Component
 
         return [
             'id' => $conversation->getKey(),
-            'url' => route('filament.admin.pages.user-chat', ['conversation' => $conversation->getKey()]),
+            'url' => UserChat::getUrl(['conversation' => $conversation]),
             'type' => $conversation->type,
             'display_name' => $displayName,
             'unread_count' => $unreadCount,
@@ -161,5 +167,33 @@ class ChatNotifications extends Component
             'author_name' => $latestMessage?->author instanceof User ? $latestMessage->author->name : null,
             'created_at' => $latestMessage?->created_at?->diffForHumans(),
         ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $node
+     */
+    protected function extractTextFromTipTap(array $node): string
+    {
+        $text = '';
+
+        $type = $node['type'] ?? null;
+
+        if ($type === 'text') {
+            $text .= $node['text'] ?? '';
+        } elseif ($type === 'mention') {
+            $text .= ' @' . ($node['attrs']['label'] ?? $node['attrs']['id'] ?? '') . ' ';
+        } elseif ($type === 'hardBreak') {
+            $text .= ' ';
+        }
+
+        if (isset($node['content']) && is_array($node['content'])) {
+            foreach ($node['content'] as $child) {
+                if (is_array($child)) {
+                    $text .= $this->extractTextFromTipTap($child);
+                }
+            }
+        }
+
+        return $text;
     }
 }

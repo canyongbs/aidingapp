@@ -87,11 +87,7 @@ class ListConversationsController extends Controller
                     'participant_count' => $conversation->conversationParticipants->count(),
                     'created_at' => $conversation->created_at->toIso8601String(),
                 ];
-            })
-            ->sortByDesc(function (array $conversation) {
-                return $conversation['last_message']['created_at'] ?? $conversation['created_at'];
-            })
-            ->values();
+            });
 
         return response()->json(['data' => $conversations]);
     }
