@@ -1,4 +1,4 @@
-/*
+<!--
 <COPYRIGHT>
 
     Copyright © 2016-2025, Canyon GBS LLC. All rights reserved.
@@ -30,53 +30,46 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
+-->
 
-import { computed, toValue } from 'vue';
+<script setup>
+    import { computed } from 'vue';
 
-export function useConversationDisplay(conversation, currentUserId) {
-    const otherParticipant = computed(() => {
-        const conversationValue = toValue(conversation);
-        const userId = toValue(currentUserId);
-
-        if (conversationValue?.type === 'channel') return null;
-
-        return conversationValue?.participants?.find((participant) => participant.participant_id !== userId) || null;
+    const props = defineProps({
+        size: {
+            type: String,
+            default: 'md',
+            validator: (value) => ['sm', 'md', 'lg'].includes(value),
+        },
+        label: { type: String, default: '' },
     });
 
-    const displayName = computed(() => {
-        const conversationValue = toValue(conversation);
-
-        if (conversationValue?.type === 'channel') {
-            return conversationValue.name || 'Unnamed Channel';
-        }
-
-        return otherParticipant.value?.participant?.name || 'Unknown User';
+    const sizeClasses = computed(() => {
+        const sizes = {
+            sm: 'h-4 w-4',
+            md: 'h-5 w-5',
+            lg: 'h-6 w-6',
+        };
+        return sizes[props.size];
     });
+</script>
 
-    const subtitle = computed(() => {
-        const conversationValue = toValue(conversation);
-
-        if (conversationValue?.type === 'channel') {
-            const count = conversationValue.participants?.length || 0;
-            return `${count} ${count === 1 ? 'member' : 'members'}`;
-        }
-
-        return 'Direct message';
-    });
-
-    const avatarUrl = computed(() => {
-        const conversationValue = toValue(conversation);
-
-        if (conversationValue?.type === 'channel') return null;
-
-        return otherParticipant.value?.participant?.avatar_url || null;
-    });
-
-    return {
-        displayName,
-        subtitle,
-        avatarUrl,
-        otherParticipant,
-    };
-}
+<template>
+    <div class="flex items-center justify-center gap-2 text-gray-500 dark:text-gray-400">
+        <svg
+            class="animate-spin text-primary-500"
+            :class="sizeClasses"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+        >
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
+        </svg>
+        <span v-if="label" class="text-sm">{{ label }}</span>
+    </div>
+</template>

@@ -1,4 +1,4 @@
-/*
+<!--
 <COPYRIGHT>
 
     Copyright © 2016-2025, Canyon GBS LLC. All rights reserved.
@@ -30,53 +30,18 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
+-->
 
-import { computed, toValue } from 'vue';
-
-export function useConversationDisplay(conversation, currentUserId) {
-    const otherParticipant = computed(() => {
-        const conversationValue = toValue(conversation);
-        const userId = toValue(currentUserId);
-
-        if (conversationValue?.type === 'channel') return null;
-
-        return conversationValue?.participants?.find((participant) => participant.participant_id !== userId) || null;
+<script setup>
+    defineProps({
+        message: { type: String, required: true },
     });
+</script>
 
-    const displayName = computed(() => {
-        const conversationValue = toValue(conversation);
-
-        if (conversationValue?.type === 'channel') {
-            return conversationValue.name || 'Unnamed Channel';
-        }
-
-        return otherParticipant.value?.participant?.name || 'Unknown User';
-    });
-
-    const subtitle = computed(() => {
-        const conversationValue = toValue(conversation);
-
-        if (conversationValue?.type === 'channel') {
-            const count = conversationValue.participants?.length || 0;
-            return `${count} ${count === 1 ? 'member' : 'members'}`;
-        }
-
-        return 'Direct message';
-    });
-
-    const avatarUrl = computed(() => {
-        const conversationValue = toValue(conversation);
-
-        if (conversationValue?.type === 'channel') return null;
-
-        return otherParticipant.value?.participant?.avatar_url || null;
-    });
-
-    return {
-        displayName,
-        subtitle,
-        avatarUrl,
-        otherParticipant,
-    };
-}
+<template>
+    <div
+        class="rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-3 text-sm text-red-600 dark:text-red-400"
+    >
+        {{ message }}
+    </div>
+</template>

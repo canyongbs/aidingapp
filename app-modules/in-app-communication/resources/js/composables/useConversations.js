@@ -1,0 +1,174 @@
+/*
+<COPYRIGHT>
+
+    Copyright © 2016-2025, Canyon GBS LLC. All rights reserved.
+
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
+
+    Notice:
+
+    - You may not provide the software to third parties as a hosted or managed
+      service, where the service provides users with access to any substantial set of
+      the features or functionality of the software.
+    - You may not move, change, disable, or circumvent the license key functionality
+      in the software, and you may not remove or obscure any functionality in the
+      software that is protected by the license key.
+    - You may not alter, remove, or obscure any licensing, copyright, or other notices
+      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      to applicable law.
+    - Canyon GBS LLC respects the intellectual property rights of others and expects the
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
+      Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
+      vigorously.
+    - The software solution, including services, infrastructure, and code, is offered as a
+      Software as a Service (SaaS) by Canyon GBS LLC.
+    - Use of this software implies agreement to the license terms and conditions as stated
+      in the Elastic License 2.0.
+
+    For more information or inquiries please visit our website at
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
+
+</COPYRIGHT>
+*/
+
+import { computed } from 'vue';
+import api from '../services/api';
+import { useChatStore } from '../stores/chat';
+
+export function useConversations() {
+    const store = useChatStore();
+
+    const conversations = computed(() => store.conversations);
+    const loading = computed(() => store.conversationsLoading);
+
+    async function loadConversations() {
+        store.conversationsLoading = true;
+        try {
+            const { data } = await api.get('/conversations');
+            store.setConversations(data.data);
+
+            // Populate unread counts from loaded conversations
+            const counts = {};
+            data.data.forEach((conversation) => {
+                if (conversation.unread_count !== undefined) {
+                    counts[conversation.id] = conversation.unread_count;
+                }
+            });
+            store.setAllUnreadCounts(counts);
+
+            return data.data;
+        } finally {
+            store.conversationsLoading = false;
+        }
+    }
+
+    async function createConversation(type, participantIds, name = null, isPrivate = true) {
+        const payload = {
+            type,
+            participant_ids: participantIds,
+        };
+
+        if (type === 'channel') {
+            payload.name = name;
+            payload.is_private = isPrivate;
+        }
+
+        const { data } = await api.post('/conversations', payload);
+        store.addConversation(data.data);
+        return data.data;
+    }
+
+    async function updateConversation(conversationId, updates) {
+        const { data } = await api.patch(`/conversations/${conversationId}`, updates);
+        store.updateConversation(conversationId, data.data);
+        return data.data;
+    }
+
+    async function deleteConversation(conversationId) {
+        await api.delete(`/conversations/${conversationId}`);
+        store.removeConversation(conversationId);
+    }
+
+    async function addParticipant(conversationId, userId) {
+        const { data } = await api.post(`/conversations/${conversationId}/participants`, {
+            user_id: userId,
+        });
+        return data.data;
+    }
+
+    async function fetchConversation(conversationId) {
+        const { data } = await api.get(`/conversations/${conversationId}`);
+        store.updateConversation(conversationId, data.data);
+        return data.data;
+    }
+
+    async function removeParticipant(conversationId, userId) {
+        await api.delete(`/conversations/${conversationId}/participants/${userId}`);
+    }
+
+    async function updateParticipant(conversationId, userId, data) {
+        const { data: response } = await api.patch(`/conversations/${conversationId}/participants/${userId}`, data);
+        store.updateParticipant(conversationId, userId, response.data);
+        return response.data;
+    }
+
+    async function leaveConversation(conversationId) {
+        await api.post(`/conversations/${conversationId}/leave`);
+        store.removeConversation(conversationId);
+    }
+
+    async function updateSettings(conversationId, settings) {
+        const { data } = await api.patch(`/conversations/${conversationId}/settings`, settings);
+        store.updateConversation(conversationId, settings);
+        return data.data;
+    }
+
+    async function togglePin(conversationId) {
+        const conversation = conversations.value.find(
+            (existingConversation) => existingConversation.id === conversationId,
+        );
+        const newPinnedState = !conversation?.is_pinned;
+        const { data } = await api.patch(`/conversations/${conversationId}/settings`, {
+            is_pinned: newPinnedState,
+        });
+        store.updateConversation(conversationId, { is_pinned: data.data.is_pinned });
+        return data.data;
+    }
+
+    async function markAsRead(conversationId) {
+        await api.post(`/conversations/${conversationId}/read`);
+        store.markAsRead(conversationId);
+    }
+
+    async function fetchPublicChannels(search = '') {
+        const params = search ? { search } : {};
+        const { data } = await api.get('/conversations/public', { params });
+        return data.data;
+    }
+
+    async function joinChannel(conversationId) {
+        const { data } = await api.post(`/conversations/${conversationId}/join`);
+        store.addConversation(data.data);
+        return data.data;
+    }
+
+    return {
+        conversations,
+        loading,
+        loadConversations,
+        createConversation,
+        updateConversation,
+        deleteConversation,
+        addParticipant,
+        fetchConversation,
+        removeParticipant,
+        updateParticipant,
+        leaveConversation,
+        updateSettings,
+        togglePin,
+        markAsRead,
+        fetchPublicChannels,
+        joinChannel,
+    };
+}

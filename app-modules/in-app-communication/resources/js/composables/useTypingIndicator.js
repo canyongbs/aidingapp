@@ -32,51 +32,39 @@
 </COPYRIGHT>
 */
 
-import { computed, toValue } from 'vue';
+import { useDebounceFn } from '@vueuse/core';
+import { computed, ref } from 'vue';
+import api from '../services/api';
+import { useChatStore } from '../stores/chat';
 
-export function useConversationDisplay(conversation, currentUserId) {
-    const otherParticipant = computed(() => {
-        const conversationValue = toValue(conversation);
-        const userId = toValue(currentUserId);
+export function useTypingIndicator(conversationId) {
+    const store = useChatStore();
+    const lastTypingBroadcast = ref(0);
 
-        if (conversationValue?.type === 'channel') return null;
+    const typingUsers = computed(() => store.typingUsers[conversationId.value] || []);
 
-        return conversationValue?.participants?.find((participant) => participant.participant_id !== userId) || null;
-    });
+    const broadcastTyping = useDebounceFn(
+        async () => {
+            if (!conversationId.value) return;
 
-    const displayName = computed(() => {
-        const conversationValue = toValue(conversation);
+            const now = Date.now();
+            if (now - lastTypingBroadcast.value < 3000) {
+                return;
+            }
 
-        if (conversationValue?.type === 'channel') {
-            return conversationValue.name || 'Unnamed Channel';
-        }
+            lastTypingBroadcast.value = now;
+            await api.post(`/conversations/${conversationId.value}/typing`);
+        },
+        300,
+        { maxWait: 3000 },
+    );
 
-        return otherParticipant.value?.participant?.name || 'Unknown User';
-    });
-
-    const subtitle = computed(() => {
-        const conversationValue = toValue(conversation);
-
-        if (conversationValue?.type === 'channel') {
-            const count = conversationValue.participants?.length || 0;
-            return `${count} ${count === 1 ? 'member' : 'members'}`;
-        }
-
-        return 'Direct message';
-    });
-
-    const avatarUrl = computed(() => {
-        const conversationValue = toValue(conversation);
-
-        if (conversationValue?.type === 'channel') return null;
-
-        return otherParticipant.value?.participant?.avatar_url || null;
-    });
+    function onTyping() {
+        broadcastTyping();
+    }
 
     return {
-        displayName,
-        subtitle,
-        avatarUrl,
-        otherParticipant,
+        typingUsers,
+        onTyping,
     };
 }

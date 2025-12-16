@@ -1,4 +1,4 @@
-/*
+<!--
 <COPYRIGHT>
 
     Copyright © 2016-2025, Canyon GBS LLC. All rights reserved.
@@ -30,53 +30,46 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
+-->
 
-import { computed, toValue } from 'vue';
+<script setup>
+    import { ExclamationTriangleIcon } from '@heroicons/vue/24/outline';
+    import BaseButton from './BaseButton.vue';
+    import BaseModal from './BaseModal.vue';
 
-export function useConversationDisplay(conversation, currentUserId) {
-    const otherParticipant = computed(() => {
-        const conversationValue = toValue(conversation);
-        const userId = toValue(currentUserId);
-
-        if (conversationValue?.type === 'channel') return null;
-
-        return conversationValue?.participants?.find((participant) => participant.participant_id !== userId) || null;
+    defineProps({
+        isOpen: { type: Boolean, default: false },
+        title: { type: String, required: true },
+        message: { type: String, required: true },
+        confirmText: { type: String, default: 'Confirm' },
+        cancelText: { type: String, default: 'Cancel' },
+        variant: { type: String, default: 'primary' }, // 'primary' or 'danger'
+        loading: { type: Boolean, default: false },
     });
 
-    const displayName = computed(() => {
-        const conversationValue = toValue(conversation);
+    const emit = defineEmits(['confirm', 'cancel']);
+</script>
 
-        if (conversationValue?.type === 'channel') {
-            return conversationValue.name || 'Unnamed Channel';
-        }
+<template>
+    <BaseModal :is-open="isOpen" :title="title" @close="emit('cancel')">
+        <template #icon>
+            <ExclamationTriangleIcon
+                class="w-5 h-5"
+                :class="[
+                    variant === 'danger' ? 'text-red-600 dark:text-red-400' : 'text-primary-600 dark:text-primary-400',
+                ]"
+            />
+        </template>
 
-        return otherParticipant.value?.participant?.name || 'Unknown User';
-    });
+        <p class="text-sm text-gray-600 dark:text-gray-400">{{ message }}</p>
 
-    const subtitle = computed(() => {
-        const conversationValue = toValue(conversation);
-
-        if (conversationValue?.type === 'channel') {
-            const count = conversationValue.participants?.length || 0;
-            return `${count} ${count === 1 ? 'member' : 'members'}`;
-        }
-
-        return 'Direct message';
-    });
-
-    const avatarUrl = computed(() => {
-        const conversationValue = toValue(conversation);
-
-        if (conversationValue?.type === 'channel') return null;
-
-        return otherParticipant.value?.participant?.avatar_url || null;
-    });
-
-    return {
-        displayName,
-        subtitle,
-        avatarUrl,
-        otherParticipant,
-    };
-}
+        <template #footer>
+            <BaseButton variant="secondary" :disabled="loading" @click="emit('cancel')">
+                {{ cancelText }}
+            </BaseButton>
+            <BaseButton :variant="variant" :loading="loading" @click="emit('confirm')">
+                {{ confirmText }}
+            </BaseButton>
+        </template>
+    </BaseModal>
+</template>

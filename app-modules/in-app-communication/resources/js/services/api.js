@@ -32,51 +32,24 @@
 </COPYRIGHT>
 */
 
-import { computed, toValue } from 'vue';
+import axios from 'axios';
 
-export function useConversationDisplay(conversation, currentUserId) {
-    const otherParticipant = computed(() => {
-        const conversationValue = toValue(conversation);
-        const userId = toValue(currentUserId);
+const api = axios.create({
+    baseURL: '/api/chat',
+    headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+    },
+    withCredentials: true,
+});
 
-        if (conversationValue?.type === 'channel') return null;
+api.interceptors.request.use((config) => {
+    const token = document.querySelector('meta[name="csrf-token"]')?.content;
+    if (token) {
+        config.headers['X-CSRF-TOKEN'] = token;
+    }
+    return config;
+});
 
-        return conversationValue?.participants?.find((participant) => participant.participant_id !== userId) || null;
-    });
-
-    const displayName = computed(() => {
-        const conversationValue = toValue(conversation);
-
-        if (conversationValue?.type === 'channel') {
-            return conversationValue.name || 'Unnamed Channel';
-        }
-
-        return otherParticipant.value?.participant?.name || 'Unknown User';
-    });
-
-    const subtitle = computed(() => {
-        const conversationValue = toValue(conversation);
-
-        if (conversationValue?.type === 'channel') {
-            const count = conversationValue.participants?.length || 0;
-            return `${count} ${count === 1 ? 'member' : 'members'}`;
-        }
-
-        return 'Direct message';
-    });
-
-    const avatarUrl = computed(() => {
-        const conversationValue = toValue(conversation);
-
-        if (conversationValue?.type === 'channel') return null;
-
-        return otherParticipant.value?.participant?.avatar_url || null;
-    });
-
-    return {
-        displayName,
-        subtitle,
-        avatarUrl,
-        otherParticipant,
-    };
-}
+export default api;
