@@ -37,8 +37,6 @@
 namespace AidingApp\InAppCommunication\Actions;
 
 use AidingApp\InAppCommunication\Models\Conversation;
-use AidingApp\InAppCommunication\Models\ConversationParticipant;
-use AidingApp\InAppCommunication\Models\Message;
 use AidingApp\InAppCommunication\Models\Scopes\WithUnreadCount;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
