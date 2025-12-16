@@ -130,14 +130,6 @@ export const useChatStore = defineStore('chat', () => {
         messages.value[conversationId] = [...newMessages, ...messages.value[conversationId]];
     }
 
-    function removeMessage(conversationId, messageId) {
-        if (messages.value[conversationId]) {
-            messages.value[conversationId] = messages.value[conversationId].filter(
-                (message) => message.id !== messageId,
-            );
-        }
-    }
-
     function setTyping(conversationId, userId, isTyping) {
         if (!typingUsers.value[conversationId]) {
             typingUsers.value[conversationId] = [];
