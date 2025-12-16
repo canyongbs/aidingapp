@@ -42,6 +42,7 @@
     import MessageList from './components/MessageList.vue';
     import NewConversationModal from './components/NewConversationModal.vue';
     import ParticipantList from './components/ParticipantList.vue';
+    import LoadingSpinner from './components/ui/LoadingSpinner.vue';
     import { useConversations } from './composables/useConversations';
     import { useMessages } from './composables/useMessages';
     import { useTypingIndicator } from './composables/useTypingIndicator';
@@ -58,6 +59,7 @@
     const {
         conversations,
         loading: conversationsLoading,
+        hasMore: conversationsHasMore,
         loadConversations,
         markAsRead,
         updateSettings,
@@ -65,7 +67,16 @@
         togglePin,
         fetchConversation,
     } = useConversations();
-    const { subscribeToUserChannel, subscribeToAllConversations, subscribeToConversation, disconnect } = useWebSocket();
+
+    const loadingMoreConversations = ref(false);
+    const {
+        subscribeToUserChannel,
+        subscribeToAllConversations,
+        subscribeToConversation,
+        joinPresence,
+        leavePresence,
+        disconnect,
+    } = useWebSocket();
 
     const selectedConversationId = computed(() => store.selectedConversationId);
     const selectedConversation = computed(() => store.selectedConversation);
@@ -82,6 +93,20 @@
     const showNewConversationModal = ref(false);
     const showFindChannelsModal = ref(false);
     const showParticipants = ref(false);
+
+    function handlePageClose() {
+        disconnect();
+    }
+
+    function handleVisibilityChange() {
+        if (document.hidden) {
+            // Leave presence when tab is hidden (but stay subscribed for messages)
+            leavePresence();
+        } else if (selectedConversationId.value) {
+            // Rejoin presence when tab becomes visible again
+            joinPresence(selectedConversationId.value);
+        }
+    }
 
     onMounted(async () => {
         store.setCurrentUser({
@@ -104,9 +129,17 @@
                 store.selectConversation(conversationId);
             }
         }
+
+        // Handle browser tab close/navigation
+        window.addEventListener('beforeunload', handlePageClose);
+        window.addEventListener('pagehide', handlePageClose);
+        document.addEventListener('visibilitychange', handleVisibilityChange);
     });
 
     onUnmounted(() => {
+        window.removeEventListener('beforeunload', handlePageClose);
+        window.removeEventListener('pagehide', handlePageClose);
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
         disconnect();
     });
 
@@ -115,10 +148,13 @@
         const url = new URL(window.location.href);
         if (newId) {
             url.searchParams.set('conversation', newId);
+            joinPresence(newId);
+            await fetchConversation(newId);
             await loadMessages();
             await markAsRead(newId);
         } else {
             url.searchParams.delete('conversation');
+            joinPresence(null);
         }
         window.history.replaceState({}, '', url);
     });
@@ -185,6 +221,18 @@
         await togglePin(conversationId);
     }
 
+    async function handleLoadMoreConversations() {
+        if (loadingMoreConversations.value || !conversationsHasMore.value) return;
+
+        loadingMoreConversations.value = true;
+        try {
+            const loaded = await loadConversations(true);
+            subscribeToAllConversations(loaded);
+        } finally {
+            loadingMoreConversations.value = false;
+        }
+    }
+
     async function handleParticipantsUpdated() {
         if (selectedConversationId.value) {
             await fetchConversation(selectedConversationId.value);
@@ -205,11 +253,14 @@
                 :selected-id="selectedConversationId"
                 :unread-counts="store.unreadCounts"
                 :loading="conversationsLoading"
+                :loading-more="loadingMoreConversations"
+                :has-more="conversationsHasMore"
                 :current-user-id="userId"
                 @select="handleSelectConversation"
                 @new-conversation="handleNewConversation"
                 @find-channels="handleFindChannels"
                 @pin="handleTogglePin"
+                @load-more="handleLoadMoreConversations"
             />
         </div>
 
@@ -256,6 +307,14 @@
                     @send="handleSendMessage"
                     @typing="onTyping"
                 />
+            </template>
+
+            <template v-else-if="conversationsLoading">
+                <div
+                    class="flex flex-1 items-center justify-center bg-gradient-to-b from-gray-50 to-white dark:from-gray-800 dark:to-gray-900"
+                >
+                    <LoadingSpinner label="Loading..." />
+                </div>
             </template>
 
             <template v-else>

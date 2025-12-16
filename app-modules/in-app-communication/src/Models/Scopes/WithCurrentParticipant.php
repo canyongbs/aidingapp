@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -37,10 +37,11 @@
 namespace AidingApp\InAppCommunication\Models\Scopes;
 
 use AidingApp\InAppCommunication\Models\Conversation;
+use AidingApp\InAppCommunication\Models\ConversationParticipant;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 
-class WhereHasUnread
+class WithCurrentParticipant
 {
     public function __construct(
         protected User $user,
@@ -54,18 +55,16 @@ class WhereHasUnread
         $userType = $this->user->getMorphClass();
         $userId = $this->user->getKey();
 
-        $query->whereRaw('(
-            select count(*)
-            from messages
-            where messages.conversation_id = conversations.id
-                and (messages.author_type != ? or messages.author_id != ?)
-                and messages.created_at > coalesce(
-                    (select last_read_at from conversation_participants
-                        where conversation_id = conversations.id
-                            and participant_type = ?
-                            and participant_id = ?),
-                    \'1970-01-01\'
-                )
-        ) > 0', [$userType, $userId, $userType, $userId]);
+        $subQuery = ConversationParticipant::query()
+            ->whereColumn('conversation_id', 'conversations.id')
+            ->where('participant_type', $userType)
+            ->where('participant_id', $userId)
+            ->limit(1);
+
+        $query->addSelect([
+            'current_participant_is_pinned' => (clone $subQuery)->select('is_pinned'),
+            'current_participant_notification_preference' => (clone $subQuery)->select('notification_preference'),
+            'current_participant_last_read_at' => (clone $subQuery)->select('last_read_at'),
+        ]);
     }
 }

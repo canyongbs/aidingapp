@@ -46,7 +46,6 @@ use AidingApp\InAppCommunication\Http\Controllers\Conversations\ShowConversation
 use AidingApp\InAppCommunication\Http\Controllers\Conversations\UpdateConversationController;
 use AidingApp\InAppCommunication\Http\Controllers\Conversations\UpdateParticipantController;
 use AidingApp\InAppCommunication\Http\Controllers\Conversations\UpdateSettingsController;
-use AidingApp\InAppCommunication\Http\Controllers\Messages\BroadcastTypingController;
 use AidingApp\InAppCommunication\Http\Controllers\Messages\CreateMessageController;
 use AidingApp\InAppCommunication\Http\Controllers\Messages\ListMessagesController;
 use AidingApp\InAppCommunication\Http\Controllers\Users\SearchUsersController;
@@ -100,7 +99,4 @@ Route::middleware(['web', 'auth'])
 
         Route::post('/conversations/{conversation}/messages', CreateMessageController::class)
             ->name('conversations.messages.store');
-
-        Route::post('/conversations/{conversation}/typing', BroadcastTypingController::class)
-            ->name('conversations.typing');
     });

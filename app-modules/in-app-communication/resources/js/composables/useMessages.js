@@ -76,12 +76,36 @@ export function useMessages(conversationId) {
     async function sendMessage(content) {
         if (!conversationId.value) return;
 
-        const { data } = await api.post(`/conversations/${conversationId.value}/messages`, {
+        // Create optimistic message
+        const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        const optimisticMessage = {
+            id: tempId,
+            conversation_id: conversationId.value,
+            author_type: 'user',
+            author_id: store.currentUser.id,
+            author_name: store.currentUser.name,
+            author_avatar: store.currentUser.avatar,
             content,
-        });
+            created_at: new Date().toISOString(),
+            _sending: true,
+        };
 
-        store.addMessage(conversationId.value, data.data);
-        return data.data;
+        // Add message immediately
+        store.addMessage(conversationId.value, optimisticMessage);
+
+        try {
+            const { data } = await api.post(`/conversations/${conversationId.value}/messages`, {
+                content,
+            });
+
+            // Replace temp message with real one
+            store.updateMessage(conversationId.value, tempId, data.data);
+            return data.data;
+        } catch (error) {
+            // Mark message as failed
+            store.setMessageFailed(conversationId.value, tempId);
+            throw error;
+        }
     }
 
     watch(conversationId, (newId, oldId) => {

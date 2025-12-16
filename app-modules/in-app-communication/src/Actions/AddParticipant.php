@@ -67,6 +67,7 @@ class AddParticipant
         $participant->participant_type = app(User::class)->getMorphClass();
         $participant->participant_id = $user->getKey();
         $participant->is_manager = $isManager;
+        $participant->last_activity_at = now();
         $participant->save();
 
         return $participant;

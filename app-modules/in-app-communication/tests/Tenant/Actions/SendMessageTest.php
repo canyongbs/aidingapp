@@ -35,6 +35,8 @@
 */
 
 use AidingApp\InAppCommunication\Actions\SendMessage;
+use AidingApp\InAppCommunication\Enums\ConversationNotificationPreference;
+use AidingApp\InAppCommunication\Events\UnreadCountUpdated;
 use AidingApp\InAppCommunication\Models\Conversation;
 use AidingApp\InAppCommunication\Models\ConversationParticipant;
 use AidingApp\InAppCommunication\Models\Message;
@@ -87,7 +89,7 @@ it('creates a message in a conversation', function () {
         ->content->toBe($content);
 });
 
-it('updates the author last_read_at timestamp', function () {
+it('updates the author `last_read_at` timestamp', function () {
     Event::fake();
     Queue::fake();
 
@@ -111,4 +113,303 @@ it('updates the author last_read_at timestamp', function () {
     $participant->refresh();
 
     expect($participant->last_read_at)->not->toBeNull();
+});
+
+it('updates the author `last_activity_at` timestamp', function () {
+    Event::fake();
+    Queue::fake();
+
+    $conversation = Conversation::factory()->channel()->create();
+    $author = User::factory()->create();
+
+    $participant = ConversationParticipant::factory()->create([
+        'conversation_id' => $conversation->getKey(),
+        'participant_id' => $author->getKey(),
+        'last_activity_at' => now()->subDay(),
+    ]);
+
+    $oldActivityAt = $participant->last_activity_at;
+
+    app(SendMessage::class)(
+        conversation: $conversation,
+        author: $author,
+        content: ['type' => 'doc', 'content' => []],
+    );
+
+    $participant->refresh();
+
+    expect($participant->last_activity_at->isAfter($oldActivityAt))->toBeTrue();
+});
+
+it('updates `last_activity_at` for all other participants', function () {
+    Event::fake();
+    Queue::fake();
+
+    $conversation = Conversation::factory()->channel()->create();
+    $author = User::factory()->create();
+    $otherUser = User::factory()->create();
+
+    $authorParticipant = ConversationParticipant::factory()->create([
+        'conversation_id' => $conversation->getKey(),
+        'participant_id' => $author->getKey(),
+        'last_activity_at' => now()->subDay(),
+    ]);
+
+    $otherParticipant = ConversationParticipant::factory()->create([
+        'conversation_id' => $conversation->getKey(),
+        'participant_id' => $otherUser->getKey(),
+        'last_activity_at' => now()->subDay(),
+    ]);
+
+    $oldActivityAt = $otherParticipant->last_activity_at;
+
+    app(SendMessage::class)(
+        conversation: $conversation,
+        author: $author,
+        content: ['type' => 'doc', 'content' => []],
+    );
+
+    $otherParticipant->refresh();
+
+    expect($otherParticipant->last_activity_at->isAfter($oldActivityAt))->toBeTrue();
+});
+
+it('increments `unread_count` for participants with All notification preference', function () {
+    Event::fake();
+    Queue::fake();
+
+    $conversation = Conversation::factory()->channel()->create();
+    $author = User::factory()->create();
+    $otherUser = User::factory()->create();
+
+    ConversationParticipant::factory()->create([
+        'conversation_id' => $conversation->getKey(),
+        'participant_id' => $author->getKey(),
+        'unread_count' => 0,
+    ]);
+
+    $otherParticipant = ConversationParticipant::factory()->create([
+        'conversation_id' => $conversation->getKey(),
+        'participant_id' => $otherUser->getKey(),
+        'notification_preference' => ConversationNotificationPreference::All,
+        'unread_count' => 0,
+    ]);
+
+    app(SendMessage::class)(
+        conversation: $conversation,
+        author: $author,
+        content: ['type' => 'doc', 'content' => []],
+    );
+
+    $otherParticipant->refresh();
+
+    expect($otherParticipant->unread_count)->toBe(1);
+});
+
+it('does not increment `unread_count` for the message author', function () {
+    Event::fake();
+    Queue::fake();
+
+    $conversation = Conversation::factory()->channel()->create();
+    $author = User::factory()->create();
+
+    $authorParticipant = ConversationParticipant::factory()->create([
+        'conversation_id' => $conversation->getKey(),
+        'participant_id' => $author->getKey(),
+        'notification_preference' => ConversationNotificationPreference::All,
+        'unread_count' => 0,
+    ]);
+
+    app(SendMessage::class)(
+        conversation: $conversation,
+        author: $author,
+        content: ['type' => 'doc', 'content' => []],
+    );
+
+    $authorParticipant->refresh();
+
+    expect($authorParticipant->unread_count)->toBe(0);
+});
+
+it('does not increment `unread_count` for participants with None notification preference', function () {
+    Event::fake();
+    Queue::fake();
+
+    $conversation = Conversation::factory()->channel()->create();
+    $author = User::factory()->create();
+    $otherUser = User::factory()->create();
+
+    ConversationParticipant::factory()->create([
+        'conversation_id' => $conversation->getKey(),
+        'participant_id' => $author->getKey(),
+    ]);
+
+    $otherParticipant = ConversationParticipant::factory()->create([
+        'conversation_id' => $conversation->getKey(),
+        'participant_id' => $otherUser->getKey(),
+        'notification_preference' => ConversationNotificationPreference::None,
+        'unread_count' => 0,
+    ]);
+
+    app(SendMessage::class)(
+        conversation: $conversation,
+        author: $author,
+        content: ['type' => 'doc', 'content' => []],
+    );
+
+    $otherParticipant->refresh();
+
+    expect($otherParticipant->unread_count)->toBe(0);
+});
+
+it('increments `unread_count` for participants with Mentions preference only when mentioned', function () {
+    Event::fake();
+    Queue::fake();
+
+    $conversation = Conversation::factory()->channel()->create();
+    $author = User::factory()->create();
+    $mentionedUser = User::factory()->create();
+    $notMentionedUser = User::factory()->create();
+
+    ConversationParticipant::factory()->create([
+        'conversation_id' => $conversation->getKey(),
+        'participant_id' => $author->getKey(),
+    ]);
+
+    $mentionedParticipant = ConversationParticipant::factory()->create([
+        'conversation_id' => $conversation->getKey(),
+        'participant_id' => $mentionedUser->getKey(),
+        'notification_preference' => ConversationNotificationPreference::Mentions,
+        'unread_count' => 0,
+    ]);
+
+    $notMentionedParticipant = ConversationParticipant::factory()->create([
+        'conversation_id' => $conversation->getKey(),
+        'participant_id' => $notMentionedUser->getKey(),
+        'notification_preference' => ConversationNotificationPreference::Mentions,
+        'unread_count' => 0,
+    ]);
+
+    $contentWithMention = [
+        'type' => 'doc',
+        'content' => [
+            [
+                'type' => 'paragraph',
+                'content' => [
+                    [
+                        'type' => 'mention',
+                        'attrs' => [
+                            'id' => $mentionedUser->getKey(),
+                            'label' => $mentionedUser->name,
+                        ],
+                    ],
+                ],
+            ],
+        ],
+    ];
+
+    app(SendMessage::class)(
+        conversation: $conversation,
+        author: $author,
+        content: $contentWithMention,
+    );
+
+    $mentionedParticipant->refresh();
+    $notMentionedParticipant->refresh();
+
+    expect($mentionedParticipant->unread_count)->toBe(1);
+    expect($notMentionedParticipant->unread_count)->toBe(0);
+});
+
+it('atomically increments `unread_count` for multiple messages', function () {
+    Event::fake();
+    Queue::fake();
+
+    $conversation = Conversation::factory()->channel()->create();
+    $author = User::factory()->create();
+    $otherUser = User::factory()->create();
+
+    ConversationParticipant::factory()->create([
+        'conversation_id' => $conversation->getKey(),
+        'participant_id' => $author->getKey(),
+    ]);
+
+    $otherParticipant = ConversationParticipant::factory()->create([
+        'conversation_id' => $conversation->getKey(),
+        'participant_id' => $otherUser->getKey(),
+        'notification_preference' => ConversationNotificationPreference::All,
+        'unread_count' => 5,
+    ]);
+
+    app(SendMessage::class)(
+        conversation: $conversation,
+        author: $author,
+        content: ['type' => 'doc', 'content' => []],
+    );
+
+    $otherParticipant->refresh();
+
+    expect($otherParticipant->unread_count)->toBe(6);
+});
+
+it('broadcasts `UnreadCountUpdated` event to affected participants', function () {
+    Event::fake();
+    Queue::fake();
+
+    $conversation = Conversation::factory()->channel()->create();
+    $author = User::factory()->create();
+    $otherUser = User::factory()->create();
+
+    ConversationParticipant::factory()->create([
+        'conversation_id' => $conversation->getKey(),
+        'participant_id' => $author->getKey(),
+    ]);
+
+    ConversationParticipant::factory()->create([
+        'conversation_id' => $conversation->getKey(),
+        'participant_id' => $otherUser->getKey(),
+        'notification_preference' => ConversationNotificationPreference::All,
+    ]);
+
+    app(SendMessage::class)(
+        conversation: $conversation,
+        author: $author,
+        content: ['type' => 'doc', 'content' => []],
+    );
+
+    Event::assertDispatched(UnreadCountUpdated::class, function ($event) use ($conversation, $otherUser) {
+        return $event->userId === $otherUser->getKey()
+            && $event->conversationId === $conversation->getKey()
+            && $event->unreadCount === 1;
+    });
+});
+
+it('does not broadcast `UnreadCountUpdated` event to participants with None preference', function () {
+    Event::fake();
+    Queue::fake();
+
+    $conversation = Conversation::factory()->channel()->create();
+    $author = User::factory()->create();
+    $otherUser = User::factory()->create();
+
+    ConversationParticipant::factory()->create([
+        'conversation_id' => $conversation->getKey(),
+        'participant_id' => $author->getKey(),
+    ]);
+
+    ConversationParticipant::factory()->create([
+        'conversation_id' => $conversation->getKey(),
+        'participant_id' => $otherUser->getKey(),
+        'notification_preference' => ConversationNotificationPreference::None,
+    ]);
+
+    app(SendMessage::class)(
+        conversation: $conversation,
+        author: $author,
+        content: ['type' => 'doc', 'content' => []],
+    );
+
+    Event::assertNotDispatched(UnreadCountUpdated::class, function ($event) use ($otherUser) {
+        return $event->userId === $otherUser->getKey();
+    });
 });

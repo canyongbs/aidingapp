@@ -37,36 +37,38 @@
 namespace AidingApp\InAppCommunication\Actions;
 
 use AidingApp\InAppCommunication\Models\Conversation;
-use AidingApp\InAppCommunication\Models\ConversationParticipant;
-use AidingApp\InAppCommunication\Models\Message;
-use AidingApp\InAppCommunication\Models\Scopes\WithUnreadCount;
+use AidingApp\InAppCommunication\Models\Scopes\WithCurrentParticipant;
 use App\Models\User;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Contracts\Pagination\CursorPaginator;
+use Illuminate\Database\Query\JoinClause;
 
 class GetUserConversations
 {
     /**
-     * @return Collection<int, Conversation>
+     * @return CursorPaginator<int, Conversation>
      */
-    public function __invoke(User $user): Collection
-    {
+    public function __invoke(
+        User $user,
+        int $limit = 20,
+        ?string $cursor = null,
+    ): CursorPaginator {
         $userType = $user->getMorphClass();
         $userId = $user->getKey();
 
         return Conversation::query()
-            ->whereHas('conversationParticipants', function (Builder $query) use ($user) {
-                $query->whereMorphedTo('participant', $user);
+            ->select('conversations.*')
+            ->selectRaw('cp.last_activity_at as participant_last_activity_at')
+            ->selectRaw('cp.unread_count as unread_count')
+            ->join('conversation_participants as cp', function (JoinClause $join) use ($userType, $userId) {
+                $join->on('cp.conversation_id', '=', 'conversations.id')
+                    ->where('cp.participant_type', '=', $userType)
+                    ->where('cp.participant_id', '=', $userId);
             })
-            ->tap(new WithUnreadCount($user))
-            ->with(['latestMessage.author', 'conversationParticipants'])
-            ->orderByRaw('coalesce(
-                greatest(
-                    (select created_at from messages where messages.conversation_id = conversations.id order by created_at desc limit 1),
-                    (select created_at from conversation_participants where conversation_id = conversations.id and participant_type = ? and participant_id = ? limit 1)
-                ),
-                (select created_at from conversation_participants where conversation_id = conversations.id and participant_type = ? and participant_id = ? limit 1)
-            ) desc', [$userType, $userId, $userType, $userId])
-            ->get();
+            ->tap(new WithCurrentParticipant($user))
+            ->withCount('conversationParticipants as participant_count')
+            ->with(['latestMessage.author'])
+            ->orderBy('participant_last_activity_at', 'desc')
+            ->orderBy('conversations.id', 'desc')
+            ->cursorPaginate($limit, ['*'], 'cursor', $cursor);
     }
 }

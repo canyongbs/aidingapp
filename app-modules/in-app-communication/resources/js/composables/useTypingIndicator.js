@@ -34,7 +34,6 @@
 
 import { useDebounceFn } from '@vueuse/core';
 import { computed, ref } from 'vue';
-import api from '../services/api';
 import { useChatStore } from '../stores/chat';
 
 export function useTypingIndicator(conversationId) {
@@ -44,7 +43,7 @@ export function useTypingIndicator(conversationId) {
     const typingUsers = computed(() => store.typingUsers[conversationId.value] || []);
 
     const broadcastTyping = useDebounceFn(
-        async () => {
+        () => {
             if (!conversationId.value) return;
 
             const now = Date.now();
@@ -52,8 +51,16 @@ export function useTypingIndicator(conversationId) {
                 return;
             }
 
+            const echo = window.Echo;
+            if (!echo) return;
+
             lastTypingBroadcast.value = now;
-            await api.post(`/conversations/${conversationId.value}/typing`);
+
+            // Use whisper on the presence channel for instant client-to-client typing
+            echo.join(`conversation.${conversationId.value}`).whisper('typing', {
+                user_id: store.currentUser.id,
+                user_name: store.currentUser.name,
+            });
         },
         300,
         { maxWait: 3000 },

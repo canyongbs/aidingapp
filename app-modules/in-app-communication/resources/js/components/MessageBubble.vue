@@ -141,11 +141,13 @@
 
             <!-- Bubble -->
             <div
-                class="px-4 py-2 shadow-sm border"
+                class="px-4 py-2 shadow-sm border w-fit max-w-full"
                 :class="[
                     isOwn
                         ? 'bg-primary-50 dark:bg-primary-900/30 border-primary-200 dark:border-primary-800 rounded-lg rounded-tr-sm'
                         : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-lg rounded-tl-sm',
+                    message._sending ? 'opacity-70' : '',
+                    message._failed ? 'border-red-300 dark:border-red-700' : '',
                 ]"
             >
                 <div
@@ -156,9 +158,11 @@
                 />
             </div>
 
-            <!-- Timestamp -->
-            <p v-if="showTimestamp" class="mt-0.5 text-xs text-gray-500 dark:text-gray-500">
-                {{ formattedTime }}
+            <!-- Timestamp / Status -->
+            <p v-if="showTimestamp || message._sending || message._failed" class="mt-0.5 text-xs">
+                <span v-if="message._failed" class="text-red-500 dark:text-red-400">Failed to send</span>
+                <span v-else-if="message._sending" class="text-gray-400 dark:text-gray-500">Sending...</span>
+                <span v-else class="text-gray-500 dark:text-gray-500">{{ formattedTime }}</span>
             </p>
         </div>
     </div>

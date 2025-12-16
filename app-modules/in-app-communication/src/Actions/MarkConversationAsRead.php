@@ -36,6 +36,7 @@
 
 namespace AidingApp\InAppCommunication\Actions;
 
+use AidingApp\InAppCommunication\Events\UnreadCountUpdated;
 use AidingApp\InAppCommunication\Models\Conversation;
 use AidingApp\InAppCommunication\Models\ConversationParticipant;
 use App\Models\User;
@@ -56,7 +57,14 @@ class MarkConversationAsRead
         }
 
         $participant->last_read_at = now();
+        $participant->unread_count = 0;
         $participant->save();
+
+        broadcast(new UnreadCountUpdated(
+            userId: $user->getKey(),
+            conversationId: $conversation->getKey(),
+            unreadCount: 0,
+        ));
 
         return true;
     }

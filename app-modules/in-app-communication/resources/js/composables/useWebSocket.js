@@ -38,6 +38,7 @@ import { useChatStore } from '../stores/chat';
 export function useWebSocket() {
     const subscribedChannels = ref(new Set());
     const userChannelSubscribed = ref(false);
+    const currentPresenceChannel = ref(null);
     const store = useChatStore();
 
     function getEcho() {
@@ -50,14 +51,20 @@ export function useWebSocket() {
             return;
         }
 
-        echo.private(`user.${userId}`).listen('.conversation.created', (event) => {
-            store.addConversation(event);
-            subscribeToConversation(event.id);
+        echo.private(`user.${userId}`)
+            .listen('.conversation.created', (event) => {
+                store.addConversation(event);
+                subscribeToConversation(event.id);
 
-            if (onNewConversation) {
-                onNewConversation(event);
-            }
-        });
+                if (onNewConversation) {
+                    onNewConversation(event);
+                }
+            })
+            .listen('.unread-count.updated', (event) => {
+                if (store.selectedConversationId !== event.conversationId) {
+                    store.setUnreadCount(event.conversationId, event.unreadCount);
+                }
+            });
 
         userChannelSubscribed.value = true;
     }
@@ -68,18 +75,29 @@ export function useWebSocket() {
             return;
         }
 
-        echo.private(`conversation.${conversationId}`)
-            .listen('.message.sent', (event) => {
-                if (event.author_id !== store.currentUser.id) {
-                    store.addMessage(conversationId, event);
-                    store.clearTyping(conversationId, event.author_id);
+        // Use private channel for event subscription (all conversations)
+        echo.private(`conversation.${conversationId}`).listen('.message.sent', (event) => {
+            if (event.author_id !== store.currentUser.id) {
+                store.addMessage(conversationId, event);
+                store.clearTyping(conversationId, event.author_id);
+            }
+        });
 
-                    if (store.selectedConversationId !== conversationId) {
-                        store.incrementUnread(conversationId);
-                    }
-                }
-            })
-            .listen('.participant.typing', (event) => {
+        subscribedChannels.value.add(conversationId);
+    }
+
+    function joinPresence(conversationId) {
+        const echo = getEcho();
+        if (!echo) return;
+
+        // Leave previous presence channel if any
+        if (currentPresenceChannel.value && currentPresenceChannel.value !== conversationId) {
+            echo.leave(`conversation.${currentPresenceChannel.value}`);
+        }
+
+        // Join presence channel for the selected conversation
+        if (conversationId) {
+            echo.join(`conversation.${conversationId}`).listenForWhisper('typing', (event) => {
                 if (event.user_id !== store.currentUser.id) {
                     store.setTyping(conversationId, event.user_id, true);
 
@@ -89,7 +107,18 @@ export function useWebSocket() {
                 }
             });
 
-        subscribedChannels.value.add(conversationId);
+            currentPresenceChannel.value = conversationId;
+        } else {
+            currentPresenceChannel.value = null;
+        }
+    }
+
+    function leavePresence() {
+        const echo = getEcho();
+        if (!echo || !currentPresenceChannel.value) return;
+
+        echo.leave(`conversation.${currentPresenceChannel.value}`);
+        currentPresenceChannel.value = null;
     }
 
     function unsubscribeFromConversation(conversationId) {
@@ -112,6 +141,13 @@ export function useWebSocket() {
         const echo = getEcho();
         if (!echo) return;
 
+        // Leave presence channel
+        if (currentPresenceChannel.value) {
+            echo.leave(`conversation.${currentPresenceChannel.value}`);
+            currentPresenceChannel.value = null;
+        }
+
+        // Leave all private channels
         subscribedChannels.value.forEach((conversationId) => {
             echo.leave(`conversation.${conversationId}`);
         });
@@ -129,6 +165,8 @@ export function useWebSocket() {
         subscribeToConversation,
         unsubscribeFromConversation,
         subscribeToAllConversations,
+        joinPresence,
+        leavePresence,
         disconnect,
     };
 }

@@ -47,18 +47,14 @@ export function useConversationDisplay(conversation, currentUserId) {
     const displayName = computed(() => {
         const conversationValue = toValue(conversation);
 
-        if (conversationValue?.type === 'channel') {
-            return conversationValue.name || 'Unnamed Channel';
-        }
-
-        return otherParticipant.value?.participant?.name || 'Unknown User';
+        return conversationValue?.display_name || 'Unknown';
     });
 
     const subtitle = computed(() => {
         const conversationValue = toValue(conversation);
 
         if (conversationValue?.type === 'channel') {
-            const count = conversationValue.participants?.length || 0;
+            const count = conversationValue.participant_count ?? conversationValue.participants?.length ?? 0;
             return `${count} ${count === 1 ? 'member' : 'members'}`;
         }
 
@@ -68,9 +64,7 @@ export function useConversationDisplay(conversation, currentUserId) {
     const avatarUrl = computed(() => {
         const conversationValue = toValue(conversation);
 
-        if (conversationValue?.type === 'channel') return null;
-
-        return otherParticipant.value?.participant?.avatar_url || null;
+        return conversationValue?.avatar_url || null;
     });
 
     return {

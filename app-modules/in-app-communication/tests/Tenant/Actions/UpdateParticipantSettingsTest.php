@@ -40,7 +40,7 @@ use AidingApp\InAppCommunication\Models\Conversation;
 use AidingApp\InAppCommunication\Models\ConversationParticipant;
 use App\Models\User;
 
-it('updates is_pinned setting', function () {
+it('updates `is_pinned` setting', function () {
     $conversation = Conversation::factory()->channel()->create();
     $user = User::factory()->create();
 
@@ -61,7 +61,7 @@ it('updates is_pinned setting', function () {
         ->is_pinned->toBeTrue();
 });
 
-it('updates notification_preference setting', function () {
+it('updates `notification_preference` setting', function () {
     $conversation = Conversation::factory()->channel()->create();
     $user = User::factory()->create();
 

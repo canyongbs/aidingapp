@@ -39,7 +39,6 @@ namespace AidingApp\InAppCommunication\Events;
 use AidingApp\InAppCommunication\Models\Message;
 use App\Models\User;
 use Filament\Facades\Filament;
-use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
@@ -81,7 +80,7 @@ class MessageSent implements ShouldBroadcastNow
     }
 
     /**
-     * @return array<int, Channel>
+     * @return array<int, PrivateChannel>
      */
     public function broadcastOn(): array
     {

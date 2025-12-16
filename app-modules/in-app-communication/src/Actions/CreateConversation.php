@@ -77,6 +77,7 @@ class CreateConversation
             $creatorParticipant->participant_type = app(User::class)->getMorphClass();
             $creatorParticipant->participant_id = $creator->getKey();
             $creatorParticipant->is_manager = $type === ConversationType::Channel;
+            $creatorParticipant->last_activity_at = now();
             $creatorParticipant->save();
 
             foreach ($participantIds as $userId) {
@@ -85,6 +86,7 @@ class CreateConversation
                     $participant->conversation_id = $conversation->getKey();
                     $participant->participant_type = app(User::class)->getMorphClass();
                     $participant->participant_id = $userId;
+                    $participant->last_activity_at = now();
                     $participant->save();
                 }
             }

@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -34,42 +34,35 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\InAppCommunication\Models\Scopes;
+namespace AidingApp\InAppCommunication\Events;
 
-use AidingApp\InAppCommunication\Models\Conversation;
-use AidingApp\InAppCommunication\Models\Message;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Broadcasting\Channel;
+use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Broadcasting\PrivateChannel;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
+use Illuminate\Foundation\Events\Dispatchable;
 
-class WithUnreadCount
+class UnreadCountUpdated implements ShouldBroadcastNow
 {
+    use Dispatchable;
+    use InteractsWithSockets;
+
     public function __construct(
-        protected User $user,
+        public string $userId,
+        public string $conversationId,
+        public int $unreadCount,
     ) {}
 
-    /**
-     * @param Builder<Conversation> $query
-     */
-    public function __invoke(Builder $query): void
+    public function broadcastAs(): string
     {
-        $userType = $this->user->getMorphClass();
-        $userId = $this->user->getKey();
+        return 'unread-count.updated';
+    }
 
-        $query->addSelect([
-            'unread_count' => Message::query()
-                ->selectRaw('count(*)')
-                ->whereColumn('messages.conversation_id', 'conversations.id')
-                ->where(function (Builder $query) use ($userType, $userId) {
-                    $query->where('messages.author_type', '!=', $userType)
-                        ->orWhere('messages.author_id', '!=', $userId);
-                })
-                ->whereRaw('messages.created_at > coalesce(
-                    (select last_read_at from conversation_participants
-                        where conversation_id = conversations.id
-                            and participant_type = ?
-                            and participant_id = ?),
-                    \'1970-01-01\'
-                )', [$userType, $userId]),
-        ]);
+    /**
+     * @return array<int, Channel>
+     */
+    public function broadcastOn(): array
+    {
+        return [new PrivateChannel("user.{$this->userId}")];
     }
 }

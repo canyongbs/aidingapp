@@ -84,28 +84,38 @@ class Message extends BaseModel
 
     public function mentionsUser(User $user): bool
     {
-        return $this->checkContentForMention($this->content, $user->getKey());
+        return in_array($user->getKey(), $this->getMentionedUserIds(), true);
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public function getMentionedUserIds(): array
+    {
+        $userIds = [];
+        $this->extractMentionIds($this->content, $userIds);
+
+        return array_unique($userIds);
     }
 
     /**
      * @param  array<string, mixed>  $content
+     * @param  array<int, string>  $userIds
      */
-    protected function checkContentForMention(array $content, string $userId): bool
+    protected function extractMentionIds(array $content, array &$userIds): void
     {
         if (isset($content['type']) && $content['type'] === 'mention') {
-            if (isset($content['attrs']['id']) && $content['attrs']['id'] === $userId) {
-                return true;
+            if (isset($content['attrs']['id']) && is_string($content['attrs']['id'])) {
+                $userIds[] = $content['attrs']['id'];
             }
         }
 
         if (isset($content['content']) && is_array($content['content'])) {
             foreach ($content['content'] as $child) {
-                if ($this->checkContentForMention($child, $userId)) {
-                    return true;
+                if (is_array($child)) {
+                    $this->extractMentionIds($child, $userIds);
                 }
             }
         }
-
-        return false;
     }
 }

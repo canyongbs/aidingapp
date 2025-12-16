@@ -63,6 +63,8 @@ class ConversationParticipant extends BaseModel
         'is_pinned',
         'notification_preference',
         'last_read_at',
+        'last_activity_at',
+        'unread_count',
     ];
 
     protected $casts = [
@@ -70,6 +72,8 @@ class ConversationParticipant extends BaseModel
         'is_manager' => 'boolean',
         'is_pinned' => 'boolean',
         'last_read_at' => 'datetime',
+        'last_activity_at' => 'datetime',
+        'unread_count' => 'integer',
     ];
 
     /**

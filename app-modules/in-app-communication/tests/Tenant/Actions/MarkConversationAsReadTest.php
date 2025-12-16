@@ -35,9 +35,11 @@
 */
 
 use AidingApp\InAppCommunication\Actions\MarkConversationAsRead;
+use AidingApp\InAppCommunication\Events\UnreadCountUpdated;
 use AidingApp\InAppCommunication\Models\Conversation;
 use AidingApp\InAppCommunication\Models\ConversationParticipant;
 use App\Models\User;
+use Illuminate\Support\Facades\Event;
 
 it('marks conversation as read for a participant', function () {
     $conversation = Conversation::factory()->channel()->create();
@@ -63,7 +65,7 @@ it('marks conversation as read for a participant', function () {
     expect($participant->last_read_at)->not->toBeNull();
 });
 
-it('updates existing last_read_at timestamp', function () {
+it('updates existing `last_read_at` timestamp', function () {
     $conversation = Conversation::factory()->channel()->create();
     $user = User::factory()->create();
     $oldTimestamp = now()->subHour();
@@ -97,6 +99,8 @@ it('returns false when participant does not exist', function () {
 });
 
 it('only marks the specified user as read', function () {
+    Event::fake();
+
     $conversation = Conversation::factory()->channel()->create();
     $user1 = User::factory()->create();
     $user2 = User::factory()->create();
@@ -123,4 +127,83 @@ it('only marks the specified user as read', function () {
 
     expect($participant1->last_read_at)->not->toBeNull();
     expect($participant2->last_read_at)->toBeNull();
+});
+
+it('resets `unread_count` to zero', function () {
+    Event::fake();
+
+    $conversation = Conversation::factory()->channel()->create();
+    $user = User::factory()->create();
+
+    $participant = ConversationParticipant::factory()->create([
+        'conversation_id' => $conversation->getKey(),
+        'participant_id' => $user->getKey(),
+        'unread_count' => 10,
+    ]);
+
+    expect($participant->unread_count)->toBe(10);
+
+    app(MarkConversationAsRead::class)(
+        conversation: $conversation,
+        user: $user,
+    );
+
+    $participant->refresh();
+
+    expect($participant->unread_count)->toBe(0);
+});
+
+it('broadcasts `UnreadCountUpdated` event', function () {
+    Event::fake();
+
+    $conversation = Conversation::factory()->channel()->create();
+    $user = User::factory()->create();
+
+    ConversationParticipant::factory()->create([
+        'conversation_id' => $conversation->getKey(),
+        'participant_id' => $user->getKey(),
+        'unread_count' => 5,
+    ]);
+
+    app(MarkConversationAsRead::class)(
+        conversation: $conversation,
+        user: $user,
+    );
+
+    Event::assertDispatched(UnreadCountUpdated::class, function ($event) use ($conversation, $user) {
+        return $event->userId === $user->getKey()
+            && $event->conversationId === $conversation->getKey()
+            && $event->unreadCount === 0;
+    });
+});
+
+it('only resets `unread_count` for the specified user', function () {
+    Event::fake();
+
+    $conversation = Conversation::factory()->channel()->create();
+    $user1 = User::factory()->create();
+    $user2 = User::factory()->create();
+
+    $participant1 = ConversationParticipant::factory()->create([
+        'conversation_id' => $conversation->getKey(),
+        'participant_id' => $user1->getKey(),
+        'unread_count' => 5,
+    ]);
+
+    $participant2 = ConversationParticipant::factory()->create([
+        'conversation_id' => $conversation->getKey(),
+        'participant_id' => $user2->getKey(),
+        'unread_count' => 8,
+    ]);
+
+    app(MarkConversationAsRead::class)(
+        conversation: $conversation,
+        user: $user1,
+    );
+
+    $participant1->refresh();
+    $participant2->refresh();
+
+    expect($participant1->unread_count)->toBe(0);
+    expect($participant2->unread_count)->toBe(8);
 });

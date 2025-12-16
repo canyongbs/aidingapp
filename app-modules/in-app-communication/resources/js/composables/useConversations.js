@@ -41,15 +41,30 @@ export function useConversations() {
 
     const conversations = computed(() => store.conversations);
     const loading = computed(() => store.conversationsLoading);
+    const hasMore = computed(() => store.conversationsHasMore);
 
-    async function loadConversations() {
+    async function loadConversations(loadMore = false) {
+        if (store.conversationsLoading) return store.conversations;
+
         store.conversationsLoading = true;
         try {
-            const { data } = await api.get('/conversations');
-            store.setConversations(data.data);
+            const params = {};
+            if (loadMore && store.conversationsNextCursor) {
+                params.cursor = store.conversationsNextCursor;
+            }
+
+            const { data } = await api.get('/conversations', { params });
+
+            if (loadMore) {
+                store.appendConversations(data.data);
+            } else {
+                store.setConversations(data.data);
+            }
+
+            store.setConversationsPagination(data.next_cursor, data.has_more);
 
             // Populate unread counts from loaded conversations
-            const counts = {};
+            const counts = loadMore ? { ...store.unreadCounts } : {};
             data.data.forEach((conversation) => {
                 if (conversation.unread_count !== undefined) {
                     counts[conversation.id] = conversation.unread_count;
@@ -151,6 +166,7 @@ export function useConversations() {
     return {
         conversations,
         loading,
+        hasMore,
         loadConversations,
         createConversation,
         updateConversation,

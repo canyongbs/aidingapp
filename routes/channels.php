@@ -55,11 +55,21 @@ Broadcast::channel('portal-assistant-thread-{threadId}', function (Contact $user
     return PortalAssistantThread::find($threadId)?->author()->is($user) ?? false;
 });
 
-Broadcast::channel('conversation.{conversationId}', function (User $user, string $conversationId): bool {
-    return ConversationParticipant::query()
+Broadcast::channel('conversation.{conversationId}', function (User $user, string $conversationId): array|bool {
+    $isParticipant = ConversationParticipant::query()
         ->where('conversation_id', $conversationId)
         ->whereMorphedTo('participant', $user)
         ->exists();
+
+    if (! $isParticipant) {
+        return false;
+    }
+
+    // Return user data for presence channel
+    return [
+        'id' => $user->getKey(),
+        'name' => $user->name,
+    ];
 });
 
 Broadcast::channel('user.{userId}', function (User $user, string $userId): bool {

@@ -71,31 +71,21 @@ it('returns conversations for the authenticated user', function () {
         ->assertJsonPath('data.0.id', $conversation->getKey());
 });
 
-it('sorts conversations by last message date', function () {
+it('sorts conversations by last activity date', function () {
     $user = User::factory()->licensed(LicenseType::cases())->create();
 
     $olderConversation = Conversation::factory()->channel()->create();
     ConversationParticipant::factory()->create([
         'conversation_id' => $olderConversation->getKey(),
         'participant_id' => $user->getKey(),
-        'created_at' => now()->subWeek(),
-    ]);
-    Message::factory()->create([
-        'conversation_id' => $olderConversation->getKey(),
-        'author_id' => $user->getKey(),
-        'created_at' => now()->subDay(),
+        'last_activity_at' => now()->subDay(),
     ]);
 
     $newerConversation = Conversation::factory()->channel()->create();
     ConversationParticipant::factory()->create([
         'conversation_id' => $newerConversation->getKey(),
         'participant_id' => $user->getKey(),
-        'created_at' => now()->subWeek(),
-    ]);
-    Message::factory()->create([
-        'conversation_id' => $newerConversation->getKey(),
-        'author_id' => $user->getKey(),
-        'created_at' => now(),
+        'last_activity_at' => now(),
     ]);
 
     actingAs($user)
@@ -105,21 +95,21 @@ it('sorts conversations by last message date', function () {
         ->assertJsonPath('data.1.id', $olderConversation->getKey());
 });
 
-it('sorts conversations without messages by participant join date', function () {
+it('sorts newly joined conversations at the top', function () {
     $user = User::factory()->licensed(LicenseType::cases())->create();
 
     $olderJoinConversation = Conversation::factory()->channel()->create();
     ConversationParticipant::factory()->create([
         'conversation_id' => $olderJoinConversation->getKey(),
         'participant_id' => $user->getKey(),
-        'created_at' => now()->subDay(),
+        'last_activity_at' => now()->subDay(),
     ]);
 
     $newerJoinConversation = Conversation::factory()->channel()->create();
     ConversationParticipant::factory()->create([
         'conversation_id' => $newerJoinConversation->getKey(),
         'participant_id' => $user->getKey(),
-        'created_at' => now(),
+        'last_activity_at' => now(),
     ]);
 
     actingAs($user)
@@ -127,43 +117,6 @@ it('sorts conversations without messages by participant join date', function () 
         ->assertOk()
         ->assertJsonPath('data.0.id', $newerJoinConversation->getKey())
         ->assertJsonPath('data.1.id', $olderJoinConversation->getKey());
-});
-
-it('uses the more recent of message date or join date for sorting', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
-
-    // Conversation with old message but user joined recently
-    $recentJoinConversation = Conversation::factory()->channel()->create();
-    ConversationParticipant::factory()->create([
-        'conversation_id' => $recentJoinConversation->getKey(),
-        'participant_id' => $user->getKey(),
-        'created_at' => now(),
-    ]);
-    Message::factory()->create([
-        'conversation_id' => $recentJoinConversation->getKey(),
-        'author_id' => $user->getKey(),
-        'created_at' => now()->subWeek(),
-    ]);
-
-    // Conversation with recent message but user joined long ago
-    $recentMessageConversation = Conversation::factory()->channel()->create();
-    ConversationParticipant::factory()->create([
-        'conversation_id' => $recentMessageConversation->getKey(),
-        'participant_id' => $user->getKey(),
-        'created_at' => now()->subMonth(),
-    ]);
-    Message::factory()->create([
-        'conversation_id' => $recentMessageConversation->getKey(),
-        'author_id' => $user->getKey(),
-        'created_at' => now()->subHour(),
-    ]);
-
-    // The conversation with the recent join should appear first (now > 1 hour ago)
-    actingAs($user)
-        ->getJson(route('in-app-communication.conversations.index'))
-        ->assertOk()
-        ->assertJsonPath('data.0.id', $recentJoinConversation->getKey())
-        ->assertJsonPath('data.1.id', $recentMessageConversation->getKey());
 });
 
 it('requires authentication', function () {
@@ -181,4 +134,137 @@ it('requires the realtime chat feature to be enabled', function () {
     actingAs($user)
         ->getJson(route('in-app-communication.conversations.index'))
         ->assertForbidden();
+});
+
+it('returns pagination metadata', function () {
+    $user = User::factory()->licensed(LicenseType::cases())->create();
+
+    $conversation = Conversation::factory()->channel()->create();
+    ConversationParticipant::factory()->create([
+        'conversation_id' => $conversation->getKey(),
+        'participant_id' => $user->getKey(),
+    ]);
+
+    actingAs($user)
+        ->getJson(route('in-app-communication.conversations.index'))
+        ->assertOk()
+        ->assertJsonStructure([
+            'data',
+            'next_cursor',
+            'has_more',
+        ])
+        ->assertJsonPath('has_more', false);
+});
+
+it('respects the limit parameter', function () {
+    $user = User::factory()->licensed(LicenseType::cases())->create();
+
+    $conversations = Conversation::factory()->channel()->count(5)->create();
+
+    foreach ($conversations as $conversation) {
+        ConversationParticipant::factory()->create([
+            'conversation_id' => $conversation->getKey(),
+            'participant_id' => $user->getKey(),
+        ]);
+    }
+
+    actingAs($user)
+        ->getJson(route('in-app-communication.conversations.index', ['limit' => 2]))
+        ->assertOk()
+        ->assertJsonCount(2, 'data')
+        ->assertJsonPath('has_more', true);
+});
+
+it('can paginate through conversations using cursor', function () {
+    $user = User::factory()->licensed(LicenseType::cases())->create();
+
+    for ($i = 0; $i < 5; $i++) {
+        $conversation = Conversation::factory()->channel()->create();
+        ConversationParticipant::factory()->create([
+            'conversation_id' => $conversation->getKey(),
+            'participant_id' => $user->getKey(),
+            'last_activity_at' => now()->subMinutes($i),
+        ]);
+    }
+
+    $response = actingAs($user)
+        ->getJson(route('in-app-communication.conversations.index', ['limit' => 2]))
+        ->assertOk()
+        ->assertJsonCount(2, 'data')
+        ->assertJsonPath('has_more', true);
+
+    $nextCursor = $response->json('next_cursor');
+    expect($nextCursor)->not->toBeNull();
+
+    $response = actingAs($user)
+        ->getJson(route('in-app-communication.conversations.index', ['limit' => 2, 'cursor' => $nextCursor]))
+        ->assertOk()
+        ->assertJsonCount(2, 'data')
+        ->assertJsonPath('has_more', true);
+
+    $nextCursor = $response->json('next_cursor');
+
+    actingAs($user)
+        ->getJson(route('in-app-communication.conversations.index', ['limit' => 2, 'cursor' => $nextCursor]))
+        ->assertOk()
+        ->assertJsonCount(1, 'data')
+        ->assertJsonPath('has_more', false)
+        ->assertJsonPath('next_cursor', null);
+});
+
+it('returns correct conversation data structure', function () {
+    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $otherUser = User::factory()->licensed(LicenseType::cases())->create();
+
+    $conversation = Conversation::factory()->channel()->create([
+        'name' => 'Test Channel',
+    ]);
+
+    ConversationParticipant::factory()->create([
+        'conversation_id' => $conversation->getKey(),
+        'participant_id' => $user->getKey(),
+        'is_pinned' => true,
+    ]);
+
+    ConversationParticipant::factory()->create([
+        'conversation_id' => $conversation->getKey(),
+        'participant_id' => $otherUser->getKey(),
+    ]);
+
+    Message::factory()->create([
+        'conversation_id' => $conversation->getKey(),
+        'author_id' => $otherUser->getKey(),
+        'author_type' => $otherUser->getMorphClass(),
+        'content' => 'Hello world',
+    ]);
+
+    actingAs($user)
+        ->getJson(route('in-app-communication.conversations.index'))
+        ->assertOk()
+        ->assertJsonStructure([
+            'data' => [
+                '*' => [
+                    'id',
+                    'type',
+                    'name',
+                    'is_private',
+                    'is_pinned',
+                    'notification_preference',
+                    'unread_count',
+                    'last_read_at',
+                    'last_message' => [
+                        'id',
+                        'content',
+                        'author_id',
+                        'author_name',
+                        'created_at',
+                    ],
+                    'participant_count',
+                    'created_at',
+                ],
+            ],
+        ])
+        ->assertJsonPath('data.0.name', 'Test Channel')
+        ->assertJsonPath('data.0.is_pinned', true)
+        ->assertJsonPath('data.0.participant_count', 2);
 });

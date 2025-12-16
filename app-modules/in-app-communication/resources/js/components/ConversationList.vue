@@ -34,7 +34,7 @@
 
 <script setup>
     import { ChatBubbleLeftRightIcon, HashtagIcon, PlusIcon } from '@heroicons/vue/24/outline';
-    import { computed } from 'vue';
+    import { computed, ref } from 'vue';
     import ConversationListItem from './ConversationListItem.vue';
     import EmptyState from './ui/EmptyState.vue';
 
@@ -43,14 +43,30 @@
         selectedId: { type: String, default: null },
         unreadCounts: { type: Object, default: () => ({}) },
         loading: { type: Boolean, default: false },
+        loadingMore: { type: Boolean, default: false },
+        hasMore: { type: Boolean, default: false },
         currentUserId: { type: String, required: true },
     });
 
-    const emit = defineEmits(['select', 'new-conversation', 'find-channels', 'pin']);
+    const emit = defineEmits(['select', 'new-conversation', 'find-channels', 'pin', 'load-more']);
+
+    const scrollContainer = ref(null);
 
     const pinnedConversations = computed(() => props.conversations.filter((conversation) => conversation.is_pinned));
 
     const unpinnedConversations = computed(() => props.conversations.filter((conversation) => !conversation.is_pinned));
+
+    function handleScroll(event) {
+        if (props.loadingMore || !props.hasMore) return;
+
+        const container = event.target;
+        const scrollBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
+
+        // Load more when within 100px of the bottom
+        if (scrollBottom < 100) {
+            emit('load-more');
+        }
+    }
 </script>
 
 <template>
@@ -89,7 +105,7 @@
         </div>
 
         <!-- Conversation List -->
-        <div class="flex-1 overflow-y-auto">
+        <div ref="scrollContainer" class="flex-1 overflow-y-auto" @scroll="handleScroll">
             <div v-if="loading" class="flex items-center justify-center p-8">
                 <div class="flex items-center space-x-2">
                     <div class="w-2 h-2 bg-primary-400 rounded-full animate-bounce"></div>
@@ -154,6 +170,15 @@
                             @click="emit('select', conversation.id)"
                             @pin="emit('pin', $event)"
                         />
+                    </div>
+                </div>
+
+                <!-- Loading More Indicator -->
+                <div v-if="loadingMore" class="flex items-center justify-center py-4">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-2 h-2 bg-primary-400 rounded-full animate-bounce"></div>
+                        <div class="w-2 h-2 bg-primary-400 rounded-full animate-bounce [animation-delay:0.2s]"></div>
+                        <div class="w-2 h-2 bg-primary-400 rounded-full animate-bounce [animation-delay:0.4s]"></div>
                     </div>
                 </div>
             </div>

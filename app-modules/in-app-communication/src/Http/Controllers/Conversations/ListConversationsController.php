@@ -38,10 +38,13 @@ namespace AidingApp\InAppCommunication\Http\Controllers\Conversations;
 
 use AidingApp\InAppCommunication\Actions\GetUserConversations;
 use AidingApp\InAppCommunication\Enums\ConversationNotificationPreference;
-use AidingApp\InAppCommunication\Http\Resources\ConversationParticipantResource;
+use AidingApp\InAppCommunication\Enums\ConversationType;
 use AidingApp\InAppCommunication\Models\Conversation;
+use AidingApp\InAppCommunication\Models\ConversationParticipant;
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Carbon\Carbon;
+use Filament\Facades\Filament;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -51,31 +54,71 @@ class ListConversationsController extends Controller
     {
         $this->authorize('viewAny', Conversation::class);
 
-        $conversations = app(GetUserConversations::class)($request->user())
-            ->map(function (Conversation $conversation) use ($request) {
-                $currentParticipant = $conversation->conversationParticipants
-                    ->where('participant_type', app(User::class)->getMorphClass())
-                    ->where('participant_id', $request->user()->getKey())
-                    ->first();
+        $cursor = $request->query('cursor');
+        $limit = min((int) $request->query('limit', 20), 50);
 
-                $participants = ConversationParticipantResource::collection($conversation->conversationParticipants)->resolve();
+        $paginator = app(GetUserConversations::class)(
+            user: $request->user(),
+            limit: $limit,
+            cursor: $cursor,
+        );
 
-                $isPinned = $currentParticipant !== null ? $currentParticipant->is_pinned : false;
-                $notificationPreference = $currentParticipant !== null
-                    ? $currentParticipant->notification_preference->value
-                    : ConversationNotificationPreference::All->value;
+        /** @var array<int, Conversation> $items */
+        $items = $paginator->items();
+
+        $currentUserId = $request->user()->getKey();
+
+        // Batch load other participants for all DMs
+        $dmConversationIds = collect($items)
+            ->filter(fn (Conversation $conversation) => $conversation->type === ConversationType::Direct)
+            ->pluck('id')
+            ->all();
+
+        $otherParticipants = ConversationParticipant::query()
+            ->whereIn('conversation_id', $dmConversationIds)
+            ->where('participant_id', '!=', $currentUserId)
+            ->with('participant')
+            ->get()
+            ->keyBy('conversation_id');
+
+        $conversations = collect($items)
+            ->map(function (Conversation $conversation) use ($otherParticipants): array {
+                /** @var bool $isPinned */
+                $isPinned = $conversation->getAttribute('current_participant_is_pinned') ?? false;
+
+                /** @var ?string $notificationPreference */
+                $notificationPreference = $conversation->getAttribute('current_participant_notification_preference');
+
+                /** @var ?string $lastReadAt */
+                $lastReadAt = $conversation->getAttribute('current_participant_last_read_at');
+
+                /** @var int $unreadCount */
                 $unreadCount = $conversation->unread_count ?? 0;
-                $lastReadAt = $currentParticipant?->last_read_at?->toIso8601String();
+
+                /** @var int $participantCount */
+                $participantCount = $conversation->participant_count ?? 0;
+
+                // Compute display name and avatar
+                if ($conversation->type === ConversationType::Channel) {
+                    $displayName = $conversation->name ?? 'Unnamed Channel';
+                    $avatarUrl = null;
+                } else {
+                    $otherUser = $otherParticipants->get($conversation->getKey())?->participant;
+                    $displayName = $otherUser instanceof User ? $otherUser->name : 'Unknown User';
+                    $avatarUrl = $otherUser instanceof User ? Filament::getUserAvatarUrl($otherUser) : null;
+                }
 
                 return [
                     'id' => $conversation->getKey(),
                     'type' => $conversation->type->value,
                     'name' => $conversation->name,
+                    'display_name' => $displayName,
+                    'avatar_url' => $avatarUrl,
                     'is_private' => $conversation->is_private,
                     'is_pinned' => $isPinned,
-                    'notification_preference' => $notificationPreference,
+                    'notification_preference' => $notificationPreference ?? ConversationNotificationPreference::All->value,
                     'unread_count' => $unreadCount,
-                    'last_read_at' => $lastReadAt,
+                    'last_read_at' => $lastReadAt ? Carbon::parse($lastReadAt)->toIso8601String() : null,
                     'last_message' => $conversation->latestMessage ? [
                         'id' => $conversation->latestMessage->getKey(),
                         'content' => $conversation->latestMessage->content,
@@ -83,12 +126,15 @@ class ListConversationsController extends Controller
                         'author_name' => $conversation->latestMessage->author instanceof User ? $conversation->latestMessage->author->name : null,
                         'created_at' => $conversation->latestMessage->created_at->toIso8601String(),
                     ] : null,
-                    'participants' => $participants,
-                    'participant_count' => $conversation->conversationParticipants->count(),
+                    'participant_count' => $participantCount,
                     'created_at' => $conversation->created_at->toIso8601String(),
                 ];
             });
 
-        return response()->json(['data' => $conversations]);
+        return response()->json([
+            'data' => $conversations,
+            'next_cursor' => $paginator->nextCursor()?->encode(),
+            'has_more' => $paginator->hasMorePages(),
+        ]);
     }
 }

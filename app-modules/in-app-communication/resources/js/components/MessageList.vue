@@ -121,7 +121,7 @@
         if (!containerRef.value) return;
 
         const { scrollTop, scrollHeight, clientHeight } = containerRef.value;
-        isAtBottom.value = scrollHeight - scrollTop - clientHeight < 50;
+        isAtBottom.value = scrollHeight - scrollTop - clientHeight < 100;
 
         // Trigger load more when within 500px of top for seamless loading
         if (scrollTop < 500 && props.hasMore && !props.loading && !isLoadingMore.value) {
@@ -133,8 +133,8 @@
 
     // Watch for messages changes
     watch(
-        () => props.messages,
-        (newMessages, oldMessages) => {
+        () => props.messages.length,
+        (newLength, oldLength) => {
             if (!containerRef.value) return;
 
             nextTick(() => {
@@ -144,19 +144,22 @@
                     const scrollDiff = newScrollHeight - previousScrollHeight.value;
                     containerRef.value.scrollTop = scrollDiff;
                     isLoadingMore.value = false;
-                } else if (isInitialLoad.value && newMessages.length > 0) {
+                } else if (isInitialLoad.value && newLength > 0) {
                     // Scroll to bottom on initial load
                     scrollToBottom();
                     isInitialLoad.value = false;
-                } else if (!oldMessages || newMessages.length > oldMessages.length) {
-                    // New message added - scroll to bottom if already at bottom
-                    if (isAtBottom.value) {
+                } else if (newLength > (oldLength || 0)) {
+                    // New message added
+                    const latestMessage = props.messages[props.messages.length - 1];
+                    const isOwnMessage = latestMessage?.author_id === props.currentUserId;
+
+                    // Always scroll for own messages, otherwise only if at bottom
+                    if (isOwnMessage || isAtBottom.value) {
                         scrollToBottom(true);
                     }
                 }
             });
         },
-        { deep: false },
     );
 
     // Reset state when conversation changes

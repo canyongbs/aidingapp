@@ -150,7 +150,7 @@ it('creates a channel conversation with creator as manager', function () {
     ]);
 });
 
-it('creates a public channel when isPrivate is false', function () {
+it('creates a public channel when `isPrivate` is false', function () {
     Event::fake();
 
     $creator = User::factory()->create();
@@ -167,7 +167,7 @@ it('creates a public channel when isPrivate is false', function () {
         ->is_private->toBeFalse();
 });
 
-it('does not duplicate the creator in participants if included in participantIds', function () {
+it('does not duplicate the creator in participants if included in `participantIds`', function () {
     Event::fake();
 
     $creator = User::factory()->create();
@@ -181,4 +181,64 @@ it('does not duplicate the creator in participants if included in participantIds
     );
 
     assertDatabaseCount(ConversationParticipant::class, 2);
+});
+
+it('sets `last_activity_at` for all participants when creating a conversation', function () {
+    Event::fake();
+
+    $creator = User::factory()->create();
+    $participant1 = User::factory()->create();
+    $participant2 = User::factory()->create();
+
+    $conversation = app(CreateConversation::class)(
+        creator: $creator,
+        type: ConversationType::Channel,
+        participantIds: [$participant1->getKey(), $participant2->getKey()],
+        name: 'Test Channel',
+    );
+
+    $creatorParticipant = ConversationParticipant::query()
+        ->where('conversation_id', $conversation->getKey())
+        ->where('participant_id', $creator->getKey())
+        ->first();
+
+    $participant1Record = ConversationParticipant::query()
+        ->where('conversation_id', $conversation->getKey())
+        ->where('participant_id', $participant1->getKey())
+        ->first();
+
+    $participant2Record = ConversationParticipant::query()
+        ->where('conversation_id', $conversation->getKey())
+        ->where('participant_id', $participant2->getKey())
+        ->first();
+
+    expect($creatorParticipant->last_activity_at)->not->toBeNull();
+    expect($participant1Record->last_activity_at)->not->toBeNull();
+    expect($participant2Record->last_activity_at)->not->toBeNull();
+});
+
+it('sets `last_activity_at` for direct message participants', function () {
+    Event::fake();
+
+    $creator = User::factory()->create();
+    $participant = User::factory()->create();
+
+    $conversation = app(CreateConversation::class)(
+        creator: $creator,
+        type: ConversationType::Direct,
+        participantIds: [$participant->getKey()],
+    );
+
+    $creatorParticipant = ConversationParticipant::query()
+        ->where('conversation_id', $conversation->getKey())
+        ->where('participant_id', $creator->getKey())
+        ->first();
+
+    $participantRecord = ConversationParticipant::query()
+        ->where('conversation_id', $conversation->getKey())
+        ->where('participant_id', $participant->getKey())
+        ->first();
+
+    expect($creatorParticipant->last_activity_at)->not->toBeNull();
+    expect($participantRecord->last_activity_at)->not->toBeNull();
 });

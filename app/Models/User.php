@@ -460,6 +460,11 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
         return config('app.timezone');
     }
 
+    public function receivesBroadcastNotificationsOn(): string
+    {
+        return "user.{$this->getKey()}";
+    }
+
     protected function serializeDate(DateTimeInterface $date): string
     {
         return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');

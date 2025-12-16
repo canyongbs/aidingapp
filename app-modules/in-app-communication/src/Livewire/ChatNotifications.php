@@ -41,13 +41,12 @@ use AidingApp\InAppCommunication\Filament\Pages\UserChat;
 use AidingApp\InAppCommunication\Models\Conversation;
 use AidingApp\InAppCommunication\Models\ConversationParticipant;
 use AidingApp\InAppCommunication\Models\Message;
-use AidingApp\InAppCommunication\Models\Scopes\WhereHasUnread;
-use AidingApp\InAppCommunication\Models\Scopes\WithUnreadCount;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Lazy;
@@ -65,14 +64,20 @@ class ChatNotifications extends Component
 
         assert($user instanceof User);
 
+        $userType = $user->getMorphClass();
+        $userId = $user->getKey();
+
         /** @var Collection<int, array<string, mixed>> */
         return Conversation::query()
-            ->whereHas('conversationParticipants', function (Builder $query) use ($user) {
-                $query->whereMorphedTo('participant', $user);
+            ->select('conversations.*')
+            ->selectRaw('cp.unread_count as unread_count')
+            ->join('conversation_participants as cp', function (JoinClause $join) use ($userType, $userId) {
+                $join->on('cp.conversation_id', '=', 'conversations.id')
+                    ->where('cp.participant_type', '=', $userType)
+                    ->where('cp.participant_id', '=', $userId);
             })
-            ->tap(new WithUnreadCount($user))
-            ->tap(new WhereHasUnread($user))
-            ->with([
+            ->where('cp.unread_count', '>', 0)
+            ->with([ // @phpstan-ignore argument.type
                 'latestMessage.author',
                 'conversationParticipants' => fn (HasMany $query) => $query
                     ->whereNot(fn (Builder $subQuery) => $subQuery->whereMorphedTo('participant', $user))
@@ -95,12 +100,8 @@ class ChatNotifications extends Component
 
         assert($user instanceof User);
 
-        return Conversation::query()
-            ->whereHas('conversationParticipants', function (Builder $query) use ($user) {
-                $query->whereMorphedTo('participant', $user);
-            })
-            ->tap(new WithUnreadCount($user))
-            ->get()
+        return (int) ConversationParticipant::query()
+            ->whereMorphedTo('participant', $user)
             ->sum('unread_count');
     }
 

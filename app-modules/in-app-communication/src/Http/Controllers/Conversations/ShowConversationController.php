@@ -39,9 +39,8 @@ namespace AidingApp\InAppCommunication\Http\Controllers\Conversations;
 use AidingApp\InAppCommunication\Enums\ConversationNotificationPreference;
 use AidingApp\InAppCommunication\Http\Resources\ConversationParticipantResource;
 use AidingApp\InAppCommunication\Models\Conversation;
-use AidingApp\InAppCommunication\Models\Scopes\WithUnreadCount;
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use Illuminate\Database\Query\JoinClause;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -51,15 +50,25 @@ class ShowConversationController extends Controller
     {
         $this->authorize('view', $conversation);
 
+        $user = $request->user();
+        $userType = $user->getMorphClass();
+        $userId = $user->getKey();
+
         $conversation = Conversation::query()
-            ->where('id', $conversation->getKey())
-            ->tap(new WithUnreadCount($request->user()))
-            ->with(['conversationParticipants'])
+            ->select('conversations.*')
+            ->selectRaw('cp.unread_count as unread_count')
+            ->leftJoin('conversation_participants as cp', function (JoinClause $join) use ($userType, $userId) {
+                $join->on('cp.conversation_id', '=', 'conversations.id')
+                    ->where('cp.participant_type', '=', $userType)
+                    ->where('cp.participant_id', '=', $userId);
+            })
+            ->where('conversations.id', $conversation->getKey())
+            ->with(['conversationParticipants.participant'])
             ->first();
 
         $participant = $conversation->conversationParticipants
-            ->where('participant_type', app(User::class)->getMorphClass())
-            ->where('participant_id', $request->user()->getKey())
+            ->where('participant_type', $userType)
+            ->where('participant_id', $userId)
             ->first();
 
         $participants = ConversationParticipantResource::collection($conversation->conversationParticipants)->resolve();

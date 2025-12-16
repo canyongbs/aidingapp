@@ -59,6 +59,8 @@ class ConversationParticipantFactory extends Factory
             'is_pinned' => false,
             'notification_preference' => ConversationNotificationPreference::All,
             'last_read_at' => null,
+            'last_activity_at' => now(),
+            'unread_count' => 0,
         ];
     }
 

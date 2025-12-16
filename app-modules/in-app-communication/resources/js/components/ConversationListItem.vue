@@ -63,25 +63,11 @@
     }
 
     const displayName = computed(() => {
-        if (props.conversation.type === 'channel') {
-            return props.conversation.name || 'Unnamed Channel';
-        }
-
-        const otherParticipant = props.conversation.participants?.find(
-            (participant) => participant.participant_id !== props.currentUserId,
-        );
-        return otherParticipant?.participant?.name || 'Unknown User';
+        return props.conversation.display_name || 'Unknown';
     });
 
     const avatarUrl = computed(() => {
-        if (props.conversation.type === 'channel') {
-            return null;
-        }
-
-        const otherParticipant = props.conversation.participants?.find(
-            (participant) => participant.participant_id !== props.currentUserId,
-        );
-        return otherParticipant?.participant?.avatar_url || null;
+        return props.conversation.avatar_url || null;
     });
 
     const lastMessagePreview = computed(() => {

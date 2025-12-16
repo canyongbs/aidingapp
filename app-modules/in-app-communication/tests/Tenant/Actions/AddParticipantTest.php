@@ -106,3 +106,15 @@ it('throws exception when adding participant to direct message', function () {
         user: $user,
     );
 })->throws(InvalidArgumentException::class, 'Cannot add participants to direct message conversations.');
+
+it('sets `last_activity_at` when adding a participant', function () {
+    $conversation = Conversation::factory()->channel()->create();
+    $user = User::factory()->create();
+
+    $participant = app(AddParticipant::class)(
+        conversation: $conversation,
+        user: $user,
+    );
+
+    expect($participant->last_activity_at)->not->toBeNull();
+});

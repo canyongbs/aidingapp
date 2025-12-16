@@ -49,10 +49,13 @@ return new class () extends Migration {
             $table->boolean('is_pinned')->default(false);
             $table->string('notification_preference')->default('all');
             $table->timestamp('last_read_at')->nullable();
+            $table->timestamp('last_activity_at')->nullable();
+            $table->unsignedInteger('unread_count')->default(0);
             $table->timestamps();
 
             $table->unique(['conversation_id', 'participant_type', 'participant_id'], 'conversation_participant_unique');
             $table->index(['participant_type', 'participant_id', 'conversation_id'], 'conversation_participants_user_lookup_index');
+            $table->index(['participant_type', 'participant_id', 'last_activity_at'], 'conversation_participants_activity_index');
         });
     }
 

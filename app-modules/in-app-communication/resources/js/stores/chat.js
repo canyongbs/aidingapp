@@ -37,6 +37,8 @@ import { computed, ref } from 'vue';
 
 export const useChatStore = defineStore('chat', () => {
     const conversations = ref([]);
+    const conversationsNextCursor = ref(null);
+    const conversationsHasMore = ref(false);
     const messages = ref({});
     const typingUsers = ref({});
     const unreadCounts = ref({});
@@ -58,6 +60,17 @@ export const useChatStore = defineStore('chat', () => {
 
     function setConversations(data) {
         conversations.value = data;
+    }
+
+    function appendConversations(data) {
+        const existingIds = new Set(conversations.value.map((c) => c.id));
+        const newConversations = data.filter((c) => !existingIds.has(c.id));
+        conversations.value = [...conversations.value, ...newConversations];
+    }
+
+    function setConversationsPagination(nextCursor, hasMore) {
+        conversationsNextCursor.value = nextCursor;
+        conversationsHasMore.value = hasMore;
     }
 
     function addConversation(conversation) {
@@ -130,6 +143,28 @@ export const useChatStore = defineStore('chat', () => {
         messages.value[conversationId] = [...newMessages, ...messages.value[conversationId]];
     }
 
+    function updateMessage(conversationId, tempId, updatedMessage) {
+        if (!messages.value[conversationId]) return;
+
+        const index = messages.value[conversationId].findIndex((message) => message.id === tempId);
+        if (index !== -1) {
+            messages.value[conversationId][index] = updatedMessage;
+        }
+    }
+
+    function setMessageFailed(conversationId, tempId) {
+        if (!messages.value[conversationId]) return;
+
+        const index = messages.value[conversationId].findIndex((message) => message.id === tempId);
+        if (index !== -1) {
+            messages.value[conversationId][index] = {
+                ...messages.value[conversationId][index],
+                _failed: true,
+                _sending: false,
+            };
+        }
+    }
+
     function setTyping(conversationId, userId, isTyping) {
         if (!typingUsers.value[conversationId]) {
             typingUsers.value[conversationId] = [];
@@ -179,6 +214,8 @@ export const useChatStore = defineStore('chat', () => {
 
     return {
         conversations,
+        conversationsNextCursor,
+        conversationsHasMore,
         messages,
         typingUsers,
         unreadCounts,
@@ -190,6 +227,8 @@ export const useChatStore = defineStore('chat', () => {
         selectedConversationTypingUsers,
         setCurrentUser,
         setConversations,
+        appendConversations,
+        setConversationsPagination,
         addConversation,
         updateConversation,
         updateParticipant,
@@ -197,6 +236,8 @@ export const useChatStore = defineStore('chat', () => {
         setMessages,
         addMessage,
         prependMessages,
+        updateMessage,
+        setMessageFailed,
         setTyping,
         clearTyping,
         clearAllTyping,

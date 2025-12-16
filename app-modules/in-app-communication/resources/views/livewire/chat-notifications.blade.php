@@ -41,7 +41,11 @@
 
 <div
     class="flex"
-    wire:poll.10s
+    x-data="{}"
+    x-init="window.Echo.private('user.{{ auth()->id() }}')
+        .listen('.unread-count.updated', () => {
+            $wire.$refresh();
+        });"
 >
     <x-filament::icon-button
         label="Open chat notifications"

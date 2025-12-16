@@ -36,15 +36,22 @@
 
 namespace AidingApp\InAppCommunication\Actions;
 
+use AidingApp\InAppCommunication\Enums\ConversationNotificationPreference;
 use AidingApp\InAppCommunication\Events\MessageSent;
+use AidingApp\InAppCommunication\Events\UnreadCountUpdated;
 use AidingApp\InAppCommunication\Models\Conversation;
 use AidingApp\InAppCommunication\Models\ConversationParticipant;
 use AidingApp\InAppCommunication\Models\Message;
+use AidingApp\InAppCommunication\Services\ConversationPresence;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class SendMessage
 {
+    public function __construct(
+        protected ConversationPresence $presence,
+    ) {}
+
     /**
      * @param  array<string, mixed>  $content
      */
@@ -53,7 +60,9 @@ class SendMessage
         User $author,
         array $content,
     ): Message {
-        return DB::transaction(function () use ($conversation, $author, $content) {
+        $presentUserIds = $this->presence->getPresentUserIds($conversation->getKey());
+
+        return DB::transaction(function () use ($conversation, $author, $content, $presentUserIds) {
             $message = new Message();
             $message->conversation_id = $conversation->getKey();
             $message->author_type = app(User::class)->getMorphClass();
@@ -61,17 +70,85 @@ class SendMessage
             $message->content = $content;
             $message->save();
 
-            $participant = ConversationParticipant::query()
-                ->whereBelongsTo($conversation)
-                ->whereMorphedTo('participant', $author)
-                ->first();
+            $userType = app(User::class)->getMorphClass();
 
-            if ($participant) {
-                $participant->last_read_at = now();
-                $participant->save();
+            ConversationParticipant::query()
+                ->where('conversation_id', $conversation->getKey())
+                ->where('participant_type', $userType)
+                ->where('participant_id', $author->getKey())
+                ->update([
+                    'last_read_at' => now(),
+                    'last_activity_at' => now(),
+                ]);
+
+            ConversationParticipant::query()
+                ->where('conversation_id', $conversation->getKey())
+                ->where('participant_id', '!=', $author->getKey())
+                ->update([
+                    'last_activity_at' => now(),
+                ]);
+
+            $affectedAllParticipantIds = ConversationParticipant::query()
+                ->where('conversation_id', $conversation->getKey())
+                ->where('participant_id', '!=', $author->getKey())
+                ->whereNotIn('participant_id', $presentUserIds)
+                ->where('notification_preference', ConversationNotificationPreference::All)
+                ->pluck('participant_id')
+                ->all();
+
+            if (count($affectedAllParticipantIds) > 0) {
+                ConversationParticipant::query()
+                    ->where('conversation_id', $conversation->getKey())
+                    ->whereIn('participant_id', $affectedAllParticipantIds)
+                    ->update([
+                        'unread_count' => DB::raw('unread_count + 1'),
+                    ]);
+            }
+
+            $mentionedUserIds = $message->getMentionedUserIds();
+            $affectedMentionParticipantIds = [];
+
+            if (count($mentionedUserIds) > 0) {
+                $affectedMentionParticipantIds = ConversationParticipant::query()
+                    ->where('conversation_id', $conversation->getKey())
+                    ->where('participant_id', '!=', $author->getKey())
+                    ->whereNotIn('participant_id', $presentUserIds)
+                    ->where('notification_preference', ConversationNotificationPreference::Mentions)
+                    ->whereIn('participant_id', $mentionedUserIds)
+                    ->pluck('participant_id')
+                    ->all();
+
+                if (count($affectedMentionParticipantIds) > 0) {
+                    ConversationParticipant::query()
+                        ->where('conversation_id', $conversation->getKey())
+                        ->whereIn('participant_id', $affectedMentionParticipantIds)
+                        ->update([
+                            'unread_count' => DB::raw('unread_count + 1'),
+                        ]);
+                }
             }
 
             broadcast(new MessageSent($message));
+
+            $allAffectedParticipantIds = array_unique(array_merge(
+                $affectedAllParticipantIds,
+                $affectedMentionParticipantIds
+            ));
+
+            if (count($allAffectedParticipantIds) > 0) {
+                $unreadCounts = ConversationParticipant::query()
+                    ->where('conversation_id', $conversation->getKey())
+                    ->whereIn('participant_id', $allAffectedParticipantIds)
+                    ->pluck('unread_count', 'participant_id');
+
+                foreach ($allAffectedParticipantIds as $participantId) {
+                    broadcast(new UnreadCountUpdated(
+                        userId: $participantId,
+                        conversationId: $conversation->getKey(),
+                        unreadCount: $unreadCounts->get($participantId, 0),
+                    ));
+                }
+            }
 
             return $message;
         });
