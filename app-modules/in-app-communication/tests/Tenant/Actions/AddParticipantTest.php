@@ -46,7 +46,6 @@ use function Pest\Laravel\assertDatabaseCount;
 beforeEach(fn () => Event::fake());
 
 it('adds a participant to a channel conversation', function () {
-
     $conversation = Conversation::factory()->channel()->create();
     $user = User::factory()->create();
 
