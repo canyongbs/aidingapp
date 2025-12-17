@@ -39,6 +39,7 @@ export function useWebSocket() {
     const subscribedChannels = ref(new Set());
     const userChannelSubscribed = ref(false);
     const currentPresenceChannel = ref(null);
+    const typingTimeouts = ref({});
     const store = useChatStore();
 
     function getEcho() {
@@ -71,6 +72,14 @@ export function useWebSocket() {
                     }
 
                     store.addMessage(event.conversation_id, event);
+
+                    // Clear typing indicator when message is received from that user
+                    store.clearTyping(event.conversation_id, event.author_id);
+                    const timeoutKey = `${event.conversation_id}:${event.author_id}`;
+                    if (typingTimeouts.value[timeoutKey]) {
+                        clearTimeout(typingTimeouts.value[timeoutKey]);
+                        delete typingTimeouts.value[timeoutKey];
+                    }
                 }
             })
             .listen('.unread-count.updated', (event) => {
@@ -147,8 +156,16 @@ export function useWebSocket() {
                 if (event.user_id !== store.currentUser.id) {
                     store.setTyping(conversationId, event.user_id, true);
 
-                    setTimeout(() => {
+                    // Clear any existing timeout for this user
+                    const timeoutKey = `${conversationId}:${event.user_id}`;
+                    if (typingTimeouts.value[timeoutKey]) {
+                        clearTimeout(typingTimeouts.value[timeoutKey]);
+                    }
+
+                    // Set new timeout - clears typing 4s after last typing event
+                    typingTimeouts.value[timeoutKey] = setTimeout(() => {
                         store.clearTyping(conversationId, event.user_id);
+                        delete typingTimeouts.value[timeoutKey];
                     }, 4000);
                 }
             });
@@ -159,12 +176,29 @@ export function useWebSocket() {
         }
     }
 
+    function clearTypingTimeouts(conversationId = null) {
+        if (conversationId) {
+            // Clear timeouts for a specific conversation
+            Object.keys(typingTimeouts.value).forEach((key) => {
+                if (key.startsWith(`${conversationId}:`)) {
+                    clearTimeout(typingTimeouts.value[key]);
+                    delete typingTimeouts.value[key];
+                }
+            });
+        } else {
+            // Clear all typing timeouts
+            Object.values(typingTimeouts.value).forEach((timeout) => clearTimeout(timeout));
+            typingTimeouts.value = {};
+        }
+    }
+
     function leavePresence() {
         const echo = getEcho();
         if (!echo || !currentPresenceChannel.value) return;
 
         const previousConversationId = currentPresenceChannel.value;
         echo.leave(`conversation.${previousConversationId}`);
+        clearTypingTimeouts(previousConversationId);
         currentPresenceChannel.value = null;
 
         // Re-subscribe to private channel since echo.leave() unsubscribes from both
@@ -191,6 +225,9 @@ export function useWebSocket() {
     function disconnect() {
         const echo = getEcho();
         if (!echo) return;
+
+        // Clear all typing timeouts
+        clearTypingTimeouts();
 
         // Leave presence channel
         if (currentPresenceChannel.value) {

@@ -32,29 +32,23 @@
 </COPYRIGHT>
 */
 
-import { useDebounceFn } from '@vueuse/core';
-import { computed, ref } from 'vue';
+import { useThrottleFn } from '@vueuse/core';
+import { computed } from 'vue';
 import { useChatStore } from '../stores/chat';
 
 export function useTypingIndicator(conversationId) {
     const store = useChatStore();
-    const lastTypingBroadcast = ref(0);
 
     const typingUsers = computed(() => store.typingUsers[conversationId.value] || []);
 
-    const broadcastTyping = useDebounceFn(
+    // Throttle typing broadcasts - fires immediately on first call, then at most once per 2.5s
+    // Using 2.5s interval so receiver's 4s timeout won't expire between broadcasts
+    const broadcastTyping = useThrottleFn(
         () => {
             if (!conversationId.value) return;
 
-            const now = Date.now();
-            if (now - lastTypingBroadcast.value < 3000) {
-                return;
-            }
-
             const echo = window.Echo;
             if (!echo) return;
-
-            lastTypingBroadcast.value = now;
 
             // Use whisper on the presence channel for instant client-to-client typing
             echo.join(`conversation.${conversationId.value}`).whisper('typing', {
@@ -62,8 +56,8 @@ export function useTypingIndicator(conversationId) {
                 user_name: store.currentUser.name,
             });
         },
-        300,
-        { maxWait: 3000 },
+        2500,
+        false, // trailing: false - don't fire after throttle period ends
     );
 
     function onTyping() {
