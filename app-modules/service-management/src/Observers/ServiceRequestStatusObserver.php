@@ -52,72 +52,11 @@ class ServiceRequestStatusObserver
         }
     }
 
-    public function updating(ServiceRequestStatus $serviceRequestStatus): void
-    {
-        if (ServiceRequestStatusOrderingFeature::active() && $serviceRequestStatus->isDirty('sort') && isset($serviceRequestStatus->sort)) {
-            if ($serviceRequestStatus->sort < 1) {
-                $serviceRequestStatus->sort = 1;
-            }
-
-            $this->reorderStatusItems($serviceRequestStatus);
-        }
-    }
-
     public function deleted(ServiceRequestStatus $serviceRequestStatus): void
     {
         if (ServiceRequestStatusOrderingFeature::active()) {
             $this->reorderAllItems();
         }
-    }
-
-    protected function reorderStatusItems(ServiceRequestStatus $updatingStatus): void
-    {
-        DB::transaction(function () use ($updatingStatus) {
-            $oldSort = $updatingStatus->getOriginal('sort');
-            $newSort = $updatingStatus->sort;
-
-            if ($oldSort === $newSort) {
-                return;
-            }
-
-            if ($newSort > $oldSort) {
-                // Moving down: shift items up between old and new position
-                $statusesToUpdate = ServiceRequestStatus::whereBetween('sort', [$oldSort + 1, $newSort])
-                    ->where('id', '!=', $updatingStatus->id)
-                    ->orderBy('sort')
-                    ->pluck('id')
-                    ->toArray();
-
-                if (! empty($statusesToUpdate)) {
-                    $caseStatements = collect($statusesToUpdate)
-                        ->map(function (string $id, int $index) use ($oldSort) {
-                            return "WHEN id = '{$id}' THEN " . ($oldSort + $index);
-                        })
-                        ->join(' ');
-
-                    ServiceRequestStatus::whereIn('id', $statusesToUpdate)
-                        ->update(['sort' => DB::raw("(CASE {$caseStatements} END)")]);
-                }
-            } else {
-                // Moving up: shift items down between new and old position
-                $statusesToUpdate = ServiceRequestStatus::whereBetween('sort', [$newSort, $oldSort - 1])
-                    ->where('id', '!=', $updatingStatus->id)
-                    ->orderBy('sort')
-                    ->pluck('id')
-                    ->toArray();
-
-                if (! empty($statusesToUpdate)) {
-                    $caseStatements = collect($statusesToUpdate)
-                        ->map(function (string $id, int $index) use ($newSort) {
-                            return "WHEN id = '{$id}' THEN " . ($newSort + $index + 1);
-                        })
-                        ->join(' ');
-
-                    ServiceRequestStatus::whereIn('id', $statusesToUpdate)
-                        ->update(['sort' => DB::raw("(CASE {$caseStatements} END)")]);
-                }
-            }
-        });
     }
 
     protected function reorderAllItems(): void
