@@ -36,7 +36,6 @@
 
 namespace AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers;
 
-use AidingApp\Contact\Models\Contact;
 use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Actions\CreateServiceRequestAction;
 use AidingApp\ServiceManagement\Actions\GenerateServiceRequestFilamentFormSchema;
