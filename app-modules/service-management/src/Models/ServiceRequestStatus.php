@@ -75,22 +75,6 @@ class ServiceRequestStatus extends BaseModel implements Auditable
         return $this->hasMany(ServiceRequest::class, 'status_id');
     }
 
-    public function update(array $attributes = [], array $options = []): bool
-    {
-        // Check system protection before updating
-        if ($this->is_system_protected) {
-            $protectedFields = ['name', 'classification', 'color'];
-            
-            $attemptingToModify = array_intersect(array_keys($attributes), $protectedFields);
-            
-            if (!empty($attemptingToModify)) {
-                throw new Exception('Cannot modify system protected row columns');
-            }
-        }
-        
-        return parent::update($attributes, $options);
-    }
-
     /**
      * @return array<string, string>
      */

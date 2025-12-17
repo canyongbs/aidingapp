@@ -43,23 +43,16 @@ return new class() extends Migration
     public function up(): void
     {
         DB::transaction(function () {
-            $statuses = ServiceRequestStatus::orderBy('created_at')
-                ->orderBy('id')
-                ->pluck('id')
-                ->toArray();
-
-            if (!empty($statuses)) {
-                $caseStatements = collect($statuses)
-                    ->map(fn (string $id, int $index) => "WHEN id = '{$id}' THEN " . ($index + 1))
-                    ->join(' ');
-
-                DB::table('service_request_statuses')
-                    ->whereIn('id', $statuses)
-                    ->update([
-                        'sort' => DB::raw("(CASE {$caseStatements} END)"),
-                        'updated_at' => now(),
-                    ]);
-            }
+            DB::statement("
+                UPDATE service_request_statuses 
+                SET sort = subquery.row_num,
+                    updated_at = NOW()
+                FROM (
+                    SELECT id, ROW_NUMBER() OVER (ORDER BY created_at, id) as row_num
+                    FROM service_request_statuses
+                ) as subquery
+                WHERE service_request_statuses.id = subquery.id
+            ");
         });
     }
 

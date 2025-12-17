@@ -202,6 +202,10 @@ test('EditServiceRequestStatus allows modifying sort on system protected rows bu
     /** @var ServiceRequestStatus $serviceRequestStatus */
     $serviceRequestStatus = ServiceRequestStatus::factory()
         ->systemProtected()
+        ->state([
+            'classification' => SystemServiceRequestClassification::Open,
+            'color' => Color::Blue,
+        ])
         ->create()
         ->refresh();
 
