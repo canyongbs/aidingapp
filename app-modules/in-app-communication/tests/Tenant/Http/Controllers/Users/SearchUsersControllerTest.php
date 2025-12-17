@@ -54,7 +54,7 @@ it('returns users matching the search query by name', function () {
     $nonMatchingUser = User::factory()->create(['name' => 'Jane Smith']);
 
     actingAs($user)
-        ->getJson(route('in-app-communication.users.search', ['q' => 'John']))
+        ->getJson(route('in-app-communication.users.search', ['query' => 'John']))
         ->assertOk()
         ->assertJsonCount(1, 'data')
         ->assertJsonPath('data.0.name', 'John Doe');
@@ -66,7 +66,7 @@ it('searches users case insensitively by name', function () {
     User::factory()->create(['name' => 'John Doe']);
 
     actingAs($user)
-        ->getJson(route('in-app-communication.users.search', ['q' => 'john']))
+        ->getJson(route('in-app-communication.users.search', ['query' => 'john']))
         ->assertOk()
         ->assertJsonCount(1, 'data')
         ->assertJsonPath('data.0.name', 'John Doe');
@@ -78,7 +78,7 @@ it('searches users case insensitively by email', function () {
     User::factory()->create(['email' => 'John.Doe@Example.com']);
 
     actingAs($user)
-        ->getJson(route('in-app-communication.users.search', ['q' => 'john.doe@example']))
+        ->getJson(route('in-app-communication.users.search', ['query' => 'john.doe@example']))
         ->assertOk()
         ->assertJsonCount(1, 'data')
         ->assertJsonPath('data.0.email', 'John.Doe@Example.com');
@@ -91,7 +91,7 @@ it('returns users matching the search query by email', function () {
     $nonMatchingUser = User::factory()->create(['email' => 'jane@example.com']);
 
     actingAs($user)
-        ->getJson(route('in-app-communication.users.search', ['q' => 'john@']))
+        ->getJson(route('in-app-communication.users.search', ['query' => 'john@']))
         ->assertOk()
         ->assertJsonCount(1, 'data')
         ->assertJsonPath('data.0.email', 'john@example.com');
@@ -102,7 +102,7 @@ it('excludes the current user from search results', function () {
     $otherUser = User::factory()->create(['name' => 'Other User']);
 
     actingAs($user)
-        ->getJson(route('in-app-communication.users.search', ['q' => 'User']))
+        ->getJson(route('in-app-communication.users.search', ['query' => 'User']))
         ->assertOk()
         ->assertJsonCount(1, 'data')
         ->assertJsonPath('data.0.name', 'Other User');
@@ -139,7 +139,7 @@ it('returns user data with correct structure', function () {
     ]);
 
     actingAs($user)
-        ->getJson(route('in-app-communication.users.search', ['q' => 'Test']))
+        ->getJson(route('in-app-communication.users.search', ['query' => 'Test']))
         ->assertOk()
         ->assertJsonStructure([
             'data' => [
@@ -158,9 +158,9 @@ it('validates request', function (array $data, array $expectedErrors) {
         ->assertStatus(422)
         ->assertJsonValidationErrors($expectedErrors);
 })->with([
-    'q max length' => [
-        ['q' => str_repeat('a', 256)],
-        ['q' => 'The q may not be greater than 255 characters.'],
+    'query max length' => [
+        ['query' => str_repeat('a', 256)],
+        ['query' => 'The query field must not be greater than 255 characters.'],
     ],
 ]);
 

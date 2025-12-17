@@ -54,10 +54,10 @@ class SearchUsersController extends Controller
         }
 
         $validated = $request->validate([
-            'q' => ['nullable', 'string', 'max:255'],
+            'query' => ['nullable', 'string', 'max:255'],
         ]);
 
-        $searchTerm = $validated['q'] ?? '';
+        $searchTerm = $validated['query'] ?? '';
 
         $users = app(SearchUsers::class)(
             excludeUser: $request->user(),

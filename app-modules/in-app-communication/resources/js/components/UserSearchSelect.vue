@@ -80,7 +80,7 @@
         isSearching.value = true;
         try {
             const response = await api.get('/users/search', {
-                params: { q: query },
+                params: { query },
             });
             searchResults.value = response.data.data || [];
         } catch {
