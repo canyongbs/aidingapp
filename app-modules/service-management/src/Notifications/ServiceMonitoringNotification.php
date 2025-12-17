@@ -46,6 +46,7 @@ use Filament\Notifications\Notification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification as BaseNotification;
+use InvalidArgumentException;
 
 class ServiceMonitoringNotification extends BaseNotification implements ShouldQueue
 {
@@ -58,10 +59,14 @@ class ServiceMonitoringNotification extends BaseNotification implements ShouldQu
      */
     public function via(object $notifiable): array
     {
-        return [match ($this->channel) {
-            DatabaseChannel::class => 'database',
-            MailChannel::class => 'mail',
-        }];
+        return match ($this->channel) {
+            DatabaseChannel::class => ['database'],
+            MailChannel::class => ['mail'],
+            'both' => ['database', 'mail'],
+            default => throw new InvalidArgumentException(
+              "Unsupported notification channel: {$this->channel}"
+          ),
+        };
     }
 
     public function toMail(User $notifiable): MailMessage
@@ -84,6 +89,7 @@ class ServiceMonitoringNotification extends BaseNotification implements ShouldQu
      */
     public function toDatabase(object $notifiable): array
     {
+        $this->historicalServiceMonitoring->loadMissing('serviceMonitoringTarget');
         $target = $this->historicalServiceMonitoring->serviceMonitoringTarget;
 
         return Notification::make()
