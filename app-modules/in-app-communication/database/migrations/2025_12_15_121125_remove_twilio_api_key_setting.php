@@ -34,21 +34,19 @@
 </COPYRIGHT>
 */
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Support\Facades\Schema;
+use Spatie\LaravelSettings\Migrations\SettingsBlueprint;
 use Spatie\LaravelSettings\Migrations\SettingsMigration;
 
 return new class () extends SettingsMigration {
     public function up(): void
     {
-        Schema::dropIfExists('twilio_conversation_user');
-        Schema::dropIfExists('twilio_conversations');
-
         $this->migrator->deleteIfExists('twilio.api_key');
     }
 
     public function down(): void
     {
-        // This migration is not reversible as it removes a feature
+        $this->migrator->inGroup('twilio', function (SettingsBlueprint $blueprint): void {
+            $blueprint->addEncrypted('api_key');
+        });
     }
 };
