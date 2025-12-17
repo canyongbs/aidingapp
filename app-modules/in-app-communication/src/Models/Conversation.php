@@ -36,6 +36,7 @@
 
 namespace AidingApp\InAppCommunication\Models;
 
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\InAppCommunication\Database\Factories\ConversationFactory;
 use AidingApp\InAppCommunication\Enums\ConversationType;
 use App\Models\BaseModel;
@@ -46,12 +47,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * @mixin IdeHelperConversation
  */
-class Conversation extends BaseModel
+class Conversation extends BaseModel implements Auditable
 {
+    use AuditableTrait;
+
     /** @use HasFactory<ConversationFactory> */
     use HasFactory;
 
