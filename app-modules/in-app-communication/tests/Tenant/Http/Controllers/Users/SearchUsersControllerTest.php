@@ -160,7 +160,7 @@ it('validates request', function (array $data, array $expectedErrors) {
 })->with([
     'query max length' => [
         ['query' => str_repeat('a', 256)],
-        ['query' => 'The query field must not be greater than 255 characters.'],
+        ['query' => 'The query may not be greater than 255 characters.'],
     ],
 ]);
 
