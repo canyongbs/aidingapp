@@ -293,13 +293,7 @@
 
         <!-- Leave Button -->
         <div class="border-t border-gray-200 p-4 dark:border-gray-700">
-            <BaseButton
-                variant="danger"
-                class="w-full"
-                :loading="isLeaving"
-                :disabled="!canLeave"
-                @click="handleLeave"
-            >
+            <BaseButton variant="danger" class="w-full" :loading="isLeaving" :disabled="!canLeave" @click="handleLeave">
                 {{ isLeaving ? 'Leaving...' : 'Leave Channel' }}
             </BaseButton>
             <p v-if="!canLeave" class="mt-2 text-xs text-center text-gray-500 dark:text-gray-400">

@@ -96,6 +96,7 @@ class ParticipantAdded implements ShouldBroadcastNow
         }
 
         $lastMessage = null;
+
         if ($conversation->latestMessage) {
             $lastMessage = [
                 'id' => $conversation->latestMessage->getKey(),

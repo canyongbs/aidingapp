@@ -44,7 +44,7 @@
         PencilIcon,
         UserGroupIcon,
     } from '@heroicons/vue/24/outline';
-    import { computed, ref, watch } from 'vue';
+    import { computed, ref } from 'vue';
     import { useConversationDisplay } from '../composables/useConversationDisplay';
     import BaseButton from './ui/BaseButton.vue';
     import BaseInput from './ui/BaseInput.vue';
