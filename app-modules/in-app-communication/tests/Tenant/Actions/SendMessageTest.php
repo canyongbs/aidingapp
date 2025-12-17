@@ -36,6 +36,7 @@
 
 use AidingApp\InAppCommunication\Actions\SendMessage;
 use AidingApp\InAppCommunication\Enums\ConversationNotificationPreference;
+use AidingApp\InAppCommunication\Events\MessageSent;
 use AidingApp\InAppCommunication\Events\UnreadCountUpdated;
 use AidingApp\InAppCommunication\Models\Conversation;
 use AidingApp\InAppCommunication\Models\ConversationParticipant;
@@ -412,4 +413,43 @@ it('does not broadcast `UnreadCountUpdated` event to participants with None pref
     Event::assertNotDispatched(UnreadCountUpdated::class, function ($event) use ($otherUser) {
         return $event->userId === $otherUser->getKey();
     });
+});
+
+it('broadcasts `MessageSent` event to user channels for all participants except author', function () {
+    $conversation = Conversation::factory()->channel()->create();
+    $author = User::factory()->create();
+    $participant1 = User::factory()->create();
+    $participant2 = User::factory()->create();
+
+    ConversationParticipant::factory()->create([
+        'conversation_id' => $conversation->getKey(),
+        'participant_id' => $author->getKey(),
+    ]);
+
+    ConversationParticipant::factory()->create([
+        'conversation_id' => $conversation->getKey(),
+        'participant_id' => $participant1->getKey(),
+    ]);
+
+    ConversationParticipant::factory()->create([
+        'conversation_id' => $conversation->getKey(),
+        'participant_id' => $participant2->getKey(),
+    ]);
+
+    $message = app(SendMessage::class)(
+        conversation: $conversation,
+        author: $author,
+        content: ['type' => 'doc', 'content' => []],
+    );
+
+    $event = new MessageSent($message);
+    $channels = $event->broadcastOn();
+
+    // Should broadcast to participant1 and participant2, but NOT author
+    expect($channels)->toHaveCount(2);
+
+    $channelNames = collect($channels)->map(fn ($channel) => $channel->name)->all();
+    expect($channelNames)->toContain("private-user.{$participant1->getKey()}");
+    expect($channelNames)->toContain("private-user.{$participant2->getKey()}");
+    expect($channelNames)->not->toContain("private-user.{$author->getKey()}");
 });

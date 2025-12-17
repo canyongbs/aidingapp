@@ -97,7 +97,7 @@
     function handleSelection(user) {
         if (!user || !canSelectMore.value) return;
 
-        const alreadySelected = selectedUsers.value.some((u) => u.id === user.id);
+        const alreadySelected = selectedUsers.value.some((selectedUser) => selectedUser.id === user.id);
         if (alreadySelected) return;
 
         selectedUsers.value = [...selectedUsers.value, user];

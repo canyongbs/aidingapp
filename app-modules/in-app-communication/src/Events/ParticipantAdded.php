@@ -68,19 +68,19 @@ class ParticipantAdded implements ShouldBroadcastNow
         $conversation = $this->participant->conversation;
         $conversation->load(['conversationParticipants.participant', 'latestMessage.author']);
 
-        $participants = $conversation->conversationParticipants->map(function (ConversationParticipant $p) {
-            $pModel = $p->participant;
+        $participants = $conversation->conversationParticipants->map(function (ConversationParticipant $conversationParticipant) {
+            $userModel = $conversationParticipant->participant;
 
             return [
-                'id' => $p->getKey(),
-                'participant_id' => $p->participant_id,
-                'participant_type' => $p->participant_type,
-                'participant' => $pModel instanceof User ? [
-                    'id' => $pModel->getKey(),
-                    'name' => $pModel->name,
-                    'avatar_url' => Filament::getUserAvatarUrl($pModel),
+                'id' => $conversationParticipant->getKey(),
+                'participant_id' => $conversationParticipant->participant_id,
+                'participant_type' => $conversationParticipant->participant_type,
+                'participant' => $userModel instanceof User ? [
+                    'id' => $userModel->getKey(),
+                    'name' => $userModel->name,
+                    'avatar_url' => Filament::getUserAvatarUrl($userModel),
                 ] : null,
-                'is_manager' => $p->is_manager,
+                'is_manager' => $conversationParticipant->is_manager,
             ];
         });
 
@@ -89,7 +89,7 @@ class ParticipantAdded implements ShouldBroadcastNow
             $avatarUrl = null;
         } else {
             $otherParticipant = $conversation->conversationParticipants
-                ->first(fn (ConversationParticipant $p) => $p->participant_id !== $this->participant->participant_id);
+                ->first(fn (ConversationParticipant $conversationParticipant) => $conversationParticipant->participant_id !== $this->participant->participant_id);
             $otherUser = $otherParticipant?->participant;
             $displayName = $otherUser instanceof User ? $otherUser->name : 'Unknown User';
             $avatarUrl = $otherUser instanceof User ? Filament::getUserAvatarUrl($otherUser) : null;

@@ -32,12 +32,14 @@
 </COPYRIGHT>
 */
 
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import api from '../services/api';
 import { useChatStore } from '../stores/chat';
 
 export function useConversations() {
     const store = useChatStore();
+    const markAsReadTimeout = ref(null);
+    const pendingMarkAsRead = ref(null);
 
     const conversations = computed(() => store.conversations);
     const loading = computed(() => store.conversationsLoading);
@@ -109,7 +111,18 @@ export function useConversations() {
 
     async function fetchConversation(conversationId) {
         const { data } = await api.get(`/conversations/${conversationId}`);
-        store.updateConversation(conversationId, data.data);
+        const exists = store.conversations.some((conversation) => conversation.id === conversationId);
+
+        if (exists) {
+            store.updateConversation(conversationId, data.data);
+        } else {
+            store.addConversation(data.data);
+        }
+
+        if (data.data.unread_count !== undefined) {
+            store.setUnreadCount(conversationId, data.data.unread_count);
+        }
+
         return data.data;
     }
 
@@ -147,8 +160,23 @@ export function useConversations() {
     }
 
     async function markAsRead(conversationId) {
-        await api.post(`/conversations/${conversationId}/read`);
+        // Clear any pending mark-as-read for a different conversation
+        if (markAsReadTimeout.value) {
+            clearTimeout(markAsReadTimeout.value);
+            markAsReadTimeout.value = null;
+        }
+
+        // Update UI immediately
         store.markAsRead(conversationId);
+
+        // Debounce the API call to avoid rapid requests when switching conversations
+        pendingMarkAsRead.value = conversationId;
+        markAsReadTimeout.value = setTimeout(async () => {
+            if (pendingMarkAsRead.value === conversationId) {
+                await api.post(`/conversations/${conversationId}/read`);
+                pendingMarkAsRead.value = null;
+            }
+        }, 500);
     }
 
     async function fetchPublicChannels(search = '') {

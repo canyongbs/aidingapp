@@ -63,8 +63,8 @@ export const useChatStore = defineStore('chat', () => {
     }
 
     function appendConversations(data) {
-        const existingIds = new Set(conversations.value.map((c) => c.id));
-        const newConversations = data.filter((c) => !existingIds.has(c.id));
+        const existingIds = new Set(conversations.value.map((conversation) => conversation.id));
+        const newConversations = data.filter((conversation) => !existingIds.has(conversation.id));
         conversations.value = [...conversations.value, ...newConversations];
     }
 
@@ -199,6 +199,25 @@ export const useChatStore = defineStore('chat', () => {
         }
     }
 
+    function removeMessage(conversationId, messageId) {
+        if (!messages.value[conversationId]) return;
+
+        messages.value[conversationId] = messages.value[conversationId].filter((message) => message.id !== messageId);
+    }
+
+    function setMessageRetrying(conversationId, messageId) {
+        if (!messages.value[conversationId]) return;
+
+        const index = messages.value[conversationId].findIndex((message) => message.id === messageId);
+        if (index !== -1) {
+            messages.value[conversationId][index] = {
+                ...messages.value[conversationId][index],
+                _failed: false,
+                _sending: true,
+            };
+        }
+    }
+
     function setTyping(conversationId, userId, isTyping) {
         if (!typingUsers.value[conversationId]) {
             typingUsers.value[conversationId] = [];
@@ -274,6 +293,8 @@ export const useChatStore = defineStore('chat', () => {
         prependMessages,
         updateMessage,
         setMessageFailed,
+        removeMessage,
+        setMessageRetrying,
         setTyping,
         clearTyping,
         clearAllTyping,

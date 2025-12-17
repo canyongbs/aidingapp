@@ -45,7 +45,7 @@ export function useWebSocket() {
         return window.Echo;
     }
 
-    function subscribeToUserChannel(userId, onNewConversation) {
+    function subscribeToUserChannel(userId, { onNewConversation, onUnknownConversation } = {}) {
         const echo = getEcho();
         if (!echo || userChannelSubscribed.value) {
             return;
@@ -60,10 +60,21 @@ export function useWebSocket() {
                     onNewConversation(event);
                 }
             })
-            .listen('.unread-count.updated', (event) => {
-                if (store.selectedConversationId !== event.conversationId) {
-                    store.setUnreadCount(event.conversationId, event.unreadCount);
+            .listen('.message.sent', async (event) => {
+                if (event.author_id !== store.currentUser.id) {
+                    const conversationExists = store.conversations.some(
+                        (conversation) => conversation.id === event.conversation_id,
+                    );
+
+                    if (!conversationExists && onUnknownConversation) {
+                        await onUnknownConversation(event.conversation_id);
+                    }
+
+                    store.addMessage(event.conversation_id, event);
                 }
+            })
+            .listen('.unread-count.updated', (event) => {
+                store.setUnreadCount(event.conversationId, event.unreadCount);
             })
             .listen('.participant.removed', (event) => {
                 if (event.user_id === userId) {
@@ -87,14 +98,8 @@ export function useWebSocket() {
             return;
         }
 
-        // Use private channel for event subscription (all conversations)
+        // Use private channel for participant and conversation update events
         echo.private(`conversation.${conversationId}`)
-            .listen('.message.sent', (event) => {
-                if (event.author_id !== store.currentUser.id) {
-                    store.addMessage(conversationId, event);
-                    store.clearTyping(conversationId, event.author_id);
-                }
-            })
             .listen('.participant.added', (event) => {
                 if (event.participant_id !== store.currentUser.id) {
                     store.addParticipant(event.conversation_id, event);

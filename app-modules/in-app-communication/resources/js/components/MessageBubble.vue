@@ -33,6 +33,7 @@
 -->
 
 <script setup>
+    import { ArrowPathIcon, XMarkIcon } from '@heroicons/vue/20/solid';
     import Mention from '@tiptap/extension-mention';
     import { generateHTML } from '@tiptap/html';
     import StarterKit from '@tiptap/starter-kit';
@@ -51,6 +52,8 @@
         showTimestamp: { type: Boolean, default: true },
         currentUserId: { type: String, default: null },
     });
+
+    const emit = defineEmits(['retry', 'dismiss']);
 
     const sanitizedContent = computed(() => {
         const content = props.message.content;
@@ -159,11 +162,31 @@
             </div>
 
             <!-- Timestamp / Status -->
-            <p v-if="showTimestamp || message._sending || message._failed" class="mt-0.5 text-xs">
-                <span v-if="message._failed" class="text-red-500 dark:text-red-400">Failed to send</span>
+            <div v-if="showTimestamp || message._sending || message._failed" class="mt-0.5 text-xs">
+                <template v-if="message._failed">
+                    <span class="text-red-500 dark:text-red-400">Failed to send</span>
+                    <span class="mx-1 text-gray-300 dark:text-gray-600">·</span>
+                    <button
+                        type="button"
+                        class="inline-flex items-center gap-0.5 text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300"
+                        @click="emit('retry', message.id)"
+                    >
+                        <ArrowPathIcon class="w-3 h-3" />
+                        Retry
+                    </button>
+                    <span class="mx-1 text-gray-300 dark:text-gray-600">·</span>
+                    <button
+                        type="button"
+                        class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                        @click="emit('dismiss', message.id)"
+                    >
+                        <XMarkIcon class="w-3 h-3 inline" />
+                        Dismiss
+                    </button>
+                </template>
                 <span v-else-if="message._sending" class="text-gray-400 dark:text-gray-500">Sending...</span>
                 <span v-else class="text-gray-500 dark:text-gray-500">{{ formattedTime }}</span>
-            </p>
+            </div>
         </div>
     </div>
 </template>

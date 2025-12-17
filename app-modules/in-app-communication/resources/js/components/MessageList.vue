@@ -48,7 +48,7 @@
         conversation: { type: Object, required: true },
     });
 
-    const emit = defineEmits(['load-more']);
+    const emit = defineEmits(['load-more', 'retry', 'dismiss']);
 
     const containerRef = ref(null);
     const isAtBottom = ref(true);
@@ -214,6 +214,8 @@
                 :is-grouped="isGroupedWithPrevious(message, index)"
                 :show-timestamp="isLastInGroup(message, index)"
                 :current-user-id="currentUserId"
+                @retry="emit('retry', $event)"
+                @dismiss="emit('dismiss', $event)"
             />
         </div>
 

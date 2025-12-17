@@ -87,6 +87,8 @@
         hasMore,
         loadMessages,
         sendMessage,
+        retryMessage,
+        removeFailedMessage,
     } = useMessages(selectedConversationId);
     const { typingUsers, onTyping } = useTypingIndicator(selectedConversationId);
 
@@ -98,13 +100,14 @@
         disconnect();
     }
 
-    function handleVisibilityChange() {
+    async function handleVisibilityChange() {
         if (document.hidden) {
             // Leave presence when tab is hidden (but stay subscribed for messages)
             leavePresence();
         } else if (selectedConversationId.value) {
             // Rejoin presence when tab becomes visible again
             joinPresence(selectedConversationId.value);
+            await markAsRead(selectedConversationId.value);
         }
     }
 
@@ -115,7 +118,12 @@
             avatar: props.userAvatar,
         });
 
-        subscribeToUserChannel(props.userId);
+        subscribeToUserChannel(props.userId, {
+            onUnknownConversation: async (conversationId) => {
+                await fetchConversation(conversationId);
+                subscribeToConversation(conversationId);
+            },
+        });
 
         const loaded = await loadConversations();
         subscribeToAllConversations(loaded);
@@ -238,6 +246,18 @@
             await fetchConversation(selectedConversationId.value);
         }
     }
+
+    async function handleRetryMessage(messageId) {
+        try {
+            await retryMessage(messageId);
+        } catch {
+            // Error is already handled by marking message as failed
+        }
+    }
+
+    function handleDismissMessage(messageId) {
+        removeFailedMessage(messageId);
+    }
 </script>
 
 <template>
@@ -298,6 +318,8 @@
                     :typing-users="typingUsers"
                     :conversation="selectedConversation"
                     @load-more="handleLoadMore"
+                    @retry="handleRetryMessage"
+                    @dismiss="handleDismissMessage"
                 />
 
                 <MessageInput

@@ -66,7 +66,9 @@
     const isRenaming = ref(false);
 
     const isManager = computed(() => {
-        const participant = props.conversation.participants?.find((p) => p.participant_id === props.currentUserId);
+        const participant = props.conversation.participants?.find(
+            (conversationParticipant) => conversationParticipant.participant_id === props.currentUserId,
+        );
         return participant?.is_manager || false;
     });
 

@@ -84,6 +84,13 @@ class MessageSent implements ShouldBroadcastNow
      */
     public function broadcastOn(): array
     {
-        return [new PrivateChannel("conversation.{$this->message->conversation_id}")];
+        $participantIds = $this->message->conversation
+            ->conversationParticipants()
+            ->where('participant_id', '!=', $this->message->author_id)
+            ->pluck('participant_id');
+
+        return $participantIds->map(
+            fn (string $id) => new PrivateChannel("user.{$id}")
+        )->all();
     }
 }

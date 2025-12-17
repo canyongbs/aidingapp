@@ -40,6 +40,7 @@ use AidingApp\InAppCommunication\Enums\ConversationNotificationPreference;
 use AidingApp\InAppCommunication\Enums\ConversationType;
 use AidingApp\InAppCommunication\Http\Resources\ConversationParticipantResource;
 use AidingApp\InAppCommunication\Models\Conversation;
+use AidingApp\InAppCommunication\Models\ConversationParticipant;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Filament\Facades\Filament;
@@ -86,7 +87,7 @@ class ShowConversationController extends Controller
             $avatarUrl = null;
         } else {
             $otherParticipant = $conversation->conversationParticipants
-                ->first(fn ($p) => $p->participant_id !== $userId);
+                ->first(fn (ConversationParticipant $conversationParticipant) => $conversationParticipant->participant_id !== $userId);
             $otherUser = $otherParticipant?->participant;
             $displayName = $otherUser instanceof User ? $otherUser->name : 'Unknown User';
             $avatarUrl = $otherUser instanceof User ? Filament::getUserAvatarUrl($otherUser) : null;

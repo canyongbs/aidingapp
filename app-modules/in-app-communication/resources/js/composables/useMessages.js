@@ -108,6 +108,35 @@ export function useMessages(conversationId) {
         }
     }
 
+    async function retryMessage(messageId) {
+        if (!conversationId.value) return;
+
+        const message = messages.value.find((existingMessage) => existingMessage.id === messageId);
+        if (!message || !message._failed) return;
+
+        // Mark as retrying
+        store.setMessageRetrying(conversationId.value, messageId);
+
+        try {
+            const { data } = await api.post(`/conversations/${conversationId.value}/messages`, {
+                content: message.content,
+            });
+
+            // Replace temp message with real one
+            store.updateMessage(conversationId.value, messageId, data.data);
+            return data.data;
+        } catch (error) {
+            // Mark as failed again
+            store.setMessageFailed(conversationId.value, messageId);
+            throw error;
+        }
+    }
+
+    function removeFailedMessage(messageId) {
+        if (!conversationId.value) return;
+        store.removeMessage(conversationId.value, messageId);
+    }
+
     watch(conversationId, (newId, oldId) => {
         if (newId !== oldId) {
             hasMore.value = true;
@@ -123,5 +152,7 @@ export function useMessages(conversationId) {
         hasMore,
         loadMessages,
         sendMessage,
+        retryMessage,
+        removeFailedMessage,
     };
 }
