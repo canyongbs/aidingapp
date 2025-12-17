@@ -56,7 +56,7 @@ it('sends a notification if the response is not 200', function ($frequency) {
 
     $serviceMonitorTarget = ServiceMonitoringTarget::factory()
         ->hasAttached($user)
-        ->create(['frequency' => $frequency]);
+        ->create(['frequency' => $frequency, 'is_notified_via_email' => true]);
 
     (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
 
@@ -107,7 +107,7 @@ it('handles unresolvable host errors gracefully', function ($frequency) {
 
     $serviceMonitorTarget = ServiceMonitoringTarget::factory()
         ->hasAttached($user)
-        ->create(['frequency' => $frequency]);
+        ->create(['frequency' => $frequency, 'is_notified_via_email' => true]);
 
     (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
 

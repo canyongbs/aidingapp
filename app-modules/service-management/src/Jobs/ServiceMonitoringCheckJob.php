@@ -41,6 +41,7 @@ use AidingApp\Notification\Notifications\Channels\MailChannel;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Notifications\ServiceMonitoringNotification;
+use App\Features\ServiceMonitoringNotificationFeature;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -112,6 +113,12 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
                 $users = $team->users()->get();
                 $recipients = $recipients->merge($users)->unique('id');
             });
+
+            if (! ServiceMonitoringNotificationFeature::active()) {
+                Notification::send($recipients, new ServiceMonitoringNotification($history, MailChannel::class));
+
+                return;
+            }
 
             $channel = match (true) {
                 $this->serviceMonitoringTarget->is_notified_via_email && $this->serviceMonitoringTarget->is_notified_via_database => 'both',

@@ -41,6 +41,7 @@ use AidingApp\ServiceManagement\Filament\Actions\ResetAction;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use App\Concerns\EditPageRedirection;
+use App\Features\ServiceMonitoringNotificationFeature;
 use App\Rules\ValidUrl;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
@@ -98,10 +99,12 @@ class EditServiceMonitoring extends EditRecord
                             ->preload()
                             ->searchable(),
                         Toggle::make('is_notified_via_database')
-                            ->label('Product notifications')
+                            ->label('In Product notifications')
+                            ->visible(fn (): bool => ServiceMonitoringNotificationFeature::active())
                             ->default(false),
                         Toggle::make('is_notified_via_email')
                             ->label('Email Notifications')
+                            ->visible(fn (): bool => ServiceMonitoringNotificationFeature::active())
                             ->default(false),
                     ])
                     ->columns(2),
