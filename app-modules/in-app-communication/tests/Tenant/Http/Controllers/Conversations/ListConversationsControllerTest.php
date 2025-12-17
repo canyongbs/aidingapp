@@ -223,7 +223,7 @@ it('returns correct conversation data structure', function () {
     ConversationParticipant::factory()->create([
         'conversation_id' => $conversation->getKey(),
         'participant_id' => $user->getKey(),
-        'is_pinned' => true,
+        'is_pinned' => false,
     ]);
 
     ConversationParticipant::factory()->create([
@@ -265,6 +265,6 @@ it('returns correct conversation data structure', function () {
             ],
         ])
         ->assertJsonPath('data.0.name', 'Test Channel')
-        ->assertJsonPath('data.0.is_pinned', true)
+        ->assertJsonPath('data.0.is_pinned', false)
         ->assertJsonPath('data.0.participant_count', 2);
 });

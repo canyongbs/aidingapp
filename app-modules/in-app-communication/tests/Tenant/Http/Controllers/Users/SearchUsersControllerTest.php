@@ -119,15 +119,15 @@ it('returns all users when no search query is provided', function () {
         ->assertJsonCount(5, 'data');
 });
 
-it('limits results to 20 users', function () {
+it('limits results to 25 users', function () {
     $user = User::factory()->licensed(LicenseType::cases())->create();
 
-    User::factory()->count(25)->create();
+    User::factory()->count(30)->create();
 
     actingAs($user)
         ->getJson(route('in-app-communication.users.search'))
         ->assertOk()
-        ->assertJsonCount(20, 'data');
+        ->assertJsonCount(25, 'data');
 });
 
 it('returns user data with correct structure', function () {
