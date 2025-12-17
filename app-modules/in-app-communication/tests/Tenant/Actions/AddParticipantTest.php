@@ -43,8 +43,9 @@ use Illuminate\Support\Facades\Event;
 
 use function Pest\Laravel\assertDatabaseCount;
 
+beforeEach(fn () => Event::fake());
+
 it('adds a participant to a channel conversation', function () {
-    Event::fake();
 
     $conversation = Conversation::factory()->channel()->create();
     $user = User::factory()->create();
@@ -65,8 +66,6 @@ it('adds a participant to a channel conversation', function () {
 });
 
 it('adds a participant as a manager when specified', function () {
-    Event::fake();
-
     $conversation = Conversation::factory()->channel()->create();
     $user = User::factory()->create();
 
@@ -81,8 +80,6 @@ it('adds a participant as a manager when specified', function () {
 });
 
 it('returns existing participant if already in conversation', function () {
-    Event::fake();
-
     $conversation = Conversation::factory()->channel()->create();
     $user = User::factory()->create();
 
@@ -116,8 +113,6 @@ it('throws exception when adding participant to direct message', function () {
 })->throws(InvalidArgumentException::class, 'Cannot add participants to direct message conversations.');
 
 it('sets `last_activity_at` when adding a participant', function () {
-    Event::fake();
-
     $conversation = Conversation::factory()->channel()->create();
     $user = User::factory()->create();
 
@@ -130,8 +125,6 @@ it('sets `last_activity_at` when adding a participant', function () {
 });
 
 it('broadcasts `ParticipantAdded` event when adding participant to public channel', function () {
-    Event::fake([ParticipantAdded::class]);
-
     $conversation = Conversation::factory()->channel()->create([
         'is_private' => false,
     ]);
@@ -149,8 +142,6 @@ it('broadcasts `ParticipantAdded` event when adding participant to public channe
 });
 
 it('broadcasts `ParticipantAdded` event when adding participant to private channel', function () {
-    Event::fake([ParticipantAdded::class]);
-
     $conversation = Conversation::factory()->channel()->create([
         'is_private' => true,
     ]);
@@ -168,8 +159,6 @@ it('broadcasts `ParticipantAdded` event when adding participant to private chann
 });
 
 it('does not broadcast `ParticipantAdded` event when participant already exists', function () {
-    Event::fake();
-
     $conversation = Conversation::factory()->channel()->create();
     $user = User::factory()->create();
 
@@ -192,8 +181,6 @@ it('does not broadcast `ParticipantAdded` event when participant already exists'
 });
 
 it('broadcasts `ParticipantAdded` event to both conversation and user channels', function () {
-    Event::fake();
-
     $conversation = Conversation::factory()->channel()->create([
         'is_private' => true,
         'name' => 'Test Private Channel',
@@ -214,8 +201,6 @@ it('broadcasts `ParticipantAdded` event to both conversation and user channels',
 });
 
 it('includes conversation data with display_name in `ParticipantAdded` event', function () {
-    Event::fake();
-
     $conversation = Conversation::factory()->channel()->create([
         'is_private' => true,
         'name' => 'My Private Channel',

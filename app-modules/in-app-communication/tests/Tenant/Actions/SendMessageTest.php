@@ -43,14 +43,12 @@ use AidingApp\InAppCommunication\Models\ConversationParticipant;
 use AidingApp\InAppCommunication\Models\Message;
 use App\Models\User;
 use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Queue;
 
 use function Pest\Laravel\assertDatabaseCount;
 
-it('creates a message in a conversation', function () {
-    Event::fake();
-    Queue::fake();
+beforeEach(fn () => Event::fake());
 
+it('creates a message in a conversation', function () {
     $conversation = Conversation::factory()->channel()->create();
     $author = User::factory()->create();
 
@@ -91,9 +89,6 @@ it('creates a message in a conversation', function () {
 });
 
 it('updates the author `last_read_at` timestamp', function () {
-    Event::fake();
-    Queue::fake();
-
     $conversation = Conversation::factory()->channel()->create();
     $author = User::factory()->create();
 
@@ -117,9 +112,6 @@ it('updates the author `last_read_at` timestamp', function () {
 });
 
 it('updates the author `last_activity_at` timestamp', function () {
-    Event::fake();
-    Queue::fake();
-
     $conversation = Conversation::factory()->channel()->create();
     $author = User::factory()->create();
 
@@ -143,9 +135,6 @@ it('updates the author `last_activity_at` timestamp', function () {
 });
 
 it('updates `last_activity_at` for all other participants', function () {
-    Event::fake();
-    Queue::fake();
-
     $conversation = Conversation::factory()->channel()->create();
     $author = User::factory()->create();
     $otherUser = User::factory()->create();
@@ -176,9 +165,6 @@ it('updates `last_activity_at` for all other participants', function () {
 });
 
 it('increments `unread_count` for participants with All notification preference', function () {
-    Event::fake();
-    Queue::fake();
-
     $conversation = Conversation::factory()->channel()->create();
     $author = User::factory()->create();
     $otherUser = User::factory()->create();
@@ -208,9 +194,6 @@ it('increments `unread_count` for participants with All notification preference'
 });
 
 it('does not increment `unread_count` for the message author', function () {
-    Event::fake();
-    Queue::fake();
-
     $conversation = Conversation::factory()->channel()->create();
     $author = User::factory()->create();
 
@@ -233,9 +216,6 @@ it('does not increment `unread_count` for the message author', function () {
 });
 
 it('does not increment `unread_count` for participants with None notification preference', function () {
-    Event::fake();
-    Queue::fake();
-
     $conversation = Conversation::factory()->channel()->create();
     $author = User::factory()->create();
     $otherUser = User::factory()->create();
@@ -264,9 +244,6 @@ it('does not increment `unread_count` for participants with None notification pr
 });
 
 it('increments `unread_count` for participants with Mentions preference only when mentioned', function () {
-    Event::fake();
-    Queue::fake();
-
     $conversation = Conversation::factory()->channel()->create();
     $author = User::factory()->create();
     $mentionedUser = User::factory()->create();
@@ -323,9 +300,6 @@ it('increments `unread_count` for participants with Mentions preference only whe
 });
 
 it('atomically increments `unread_count` for multiple messages', function () {
-    Event::fake();
-    Queue::fake();
-
     $conversation = Conversation::factory()->channel()->create();
     $author = User::factory()->create();
     $otherUser = User::factory()->create();
@@ -354,9 +328,6 @@ it('atomically increments `unread_count` for multiple messages', function () {
 });
 
 it('broadcasts `UnreadCountUpdated` event to affected participants', function () {
-    Event::fake();
-    Queue::fake();
-
     $conversation = Conversation::factory()->channel()->create();
     $author = User::factory()->create();
     $otherUser = User::factory()->create();
@@ -386,9 +357,6 @@ it('broadcasts `UnreadCountUpdated` event to affected participants', function ()
 });
 
 it('does not broadcast `UnreadCountUpdated` event to participants with None preference', function () {
-    Event::fake();
-    Queue::fake();
-
     $conversation = Conversation::factory()->channel()->create();
     $author = User::factory()->create();
     $otherUser = User::factory()->create();

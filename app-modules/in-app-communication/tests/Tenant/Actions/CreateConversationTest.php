@@ -44,9 +44,9 @@ use Illuminate\Support\Facades\Event;
 use function Pest\Laravel\assertDatabaseCount;
 use function Pest\Laravel\assertDatabaseHas;
 
-it('creates a direct message conversation between two users', function () {
-    Event::fake();
+beforeEach(fn () => Event::fake());
 
+it('creates a direct message conversation between two users', function () {
     $creator = User::factory()->create();
     $participant = User::factory()->create();
 
@@ -81,8 +81,6 @@ it('creates a direct message conversation between two users', function () {
 });
 
 it('returns existing direct conversation if one already exists', function () {
-    Event::fake();
-
     $creator = User::factory()->create();
     $participant = User::factory()->create();
 
@@ -106,8 +104,6 @@ it('returns existing direct conversation if one already exists', function () {
 });
 
 it('creates a channel conversation with creator as manager', function () {
-    Event::fake();
-
     $creator = User::factory()->create();
     $participant1 = User::factory()->create();
     $participant2 = User::factory()->create();
@@ -151,8 +147,6 @@ it('creates a channel conversation with creator as manager', function () {
 });
 
 it('creates a public channel when `isPrivate` is false', function () {
-    Event::fake();
-
     $creator = User::factory()->create();
 
     $conversation = app(CreateConversation::class)(
@@ -168,8 +162,6 @@ it('creates a public channel when `isPrivate` is false', function () {
 });
 
 it('does not duplicate the creator in participants if included in `participantIds`', function () {
-    Event::fake();
-
     $creator = User::factory()->create();
     $participant = User::factory()->create();
 
@@ -184,8 +176,6 @@ it('does not duplicate the creator in participants if included in `participantId
 });
 
 it('sets `last_activity_at` for all participants when creating a conversation', function () {
-    Event::fake();
-
     $creator = User::factory()->create();
     $participant1 = User::factory()->create();
     $participant2 = User::factory()->create();
@@ -218,8 +208,6 @@ it('sets `last_activity_at` for all participants when creating a conversation', 
 });
 
 it('sets `last_activity_at` for direct message participants', function () {
-    Event::fake();
-
     $creator = User::factory()->create();
     $participant = User::factory()->create();
 

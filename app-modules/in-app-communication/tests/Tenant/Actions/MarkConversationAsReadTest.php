@@ -41,6 +41,8 @@ use AidingApp\InAppCommunication\Models\ConversationParticipant;
 use App\Models\User;
 use Illuminate\Support\Facades\Event;
 
+beforeEach(fn () => Event::fake());
+
 it('marks conversation as read for a participant', function () {
     $conversation = Conversation::factory()->channel()->create();
     $user = User::factory()->create();
@@ -99,8 +101,6 @@ it('returns false when participant does not exist', function () {
 });
 
 it('only marks the specified user as read', function () {
-    Event::fake();
-
     $conversation = Conversation::factory()->channel()->create();
     $user1 = User::factory()->create();
     $user2 = User::factory()->create();
@@ -130,8 +130,6 @@ it('only marks the specified user as read', function () {
 });
 
 it('resets `unread_count` to zero', function () {
-    Event::fake();
-
     $conversation = Conversation::factory()->channel()->create();
     $user = User::factory()->create();
 
@@ -154,8 +152,6 @@ it('resets `unread_count` to zero', function () {
 });
 
 it('broadcasts `UnreadCountUpdated` event', function () {
-    Event::fake();
-
     $conversation = Conversation::factory()->channel()->create();
     $user = User::factory()->create();
 
@@ -178,8 +174,6 @@ it('broadcasts `UnreadCountUpdated` event', function () {
 });
 
 it('only resets `unread_count` for the specified user', function () {
-    Event::fake();
-
     $conversation = Conversation::factory()->channel()->create();
     $user1 = User::factory()->create();
     $user2 = User::factory()->create();

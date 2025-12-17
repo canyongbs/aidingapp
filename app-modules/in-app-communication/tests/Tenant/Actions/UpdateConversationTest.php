@@ -39,6 +39,8 @@ use AidingApp\InAppCommunication\Events\ConversationUpdated;
 use AidingApp\InAppCommunication\Models\Conversation;
 use Illuminate\Support\Facades\Event;
 
+beforeEach(fn () => Event::fake());
+
 it('updates the conversation name', function () {
     $conversation = Conversation::factory()->channel()->create([
         'name' => 'Original Name',
@@ -101,8 +103,6 @@ it('does not save when no changes are made', function () {
 });
 
 it('broadcasts `ConversationUpdated` event when name is updated', function () {
-    Event::fake([ConversationUpdated::class]);
-
     $conversation = Conversation::factory()->channel()->create([
         'name' => 'Original Name',
     ]);
@@ -118,8 +118,6 @@ it('broadcasts `ConversationUpdated` event when name is updated', function () {
 });
 
 it('broadcasts `ConversationUpdated` event when privacy is updated', function () {
-    Event::fake([ConversationUpdated::class]);
-
     $conversation = Conversation::factory()->channel()->create([
         'is_private' => true,
     ]);
@@ -135,8 +133,6 @@ it('broadcasts `ConversationUpdated` event when privacy is updated', function ()
 });
 
 it('does not broadcast `ConversationUpdated` event when no changes are made', function () {
-    Event::fake([ConversationUpdated::class]);
-
     $conversation = Conversation::factory()->channel()->create();
 
     app(UpdateConversation::class)(
