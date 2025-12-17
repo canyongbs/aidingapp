@@ -38,11 +38,14 @@ use AidingApp\InAppCommunication\Actions\JoinChannel;
 use AidingApp\InAppCommunication\Models\Conversation;
 use AidingApp\InAppCommunication\Models\ConversationParticipant;
 use App\Models\User;
+use Illuminate\Support\Facades\Event;
 
 use function Pest\Laravel\assertDatabaseCount;
 use function Pest\Laravel\assertDatabaseHas;
 
 it('allows user to join a public channel', function () {
+    Event::fake();
+
     $conversation = Conversation::factory()->channel()->create([
         'is_private' => false,
     ]);
@@ -103,6 +106,8 @@ it('throws exception when user is already a member', function () {
 })->throws(InvalidArgumentException::class, 'User is already a member of this channel.');
 
 it('adds user as non-manager when joining', function () {
+    Event::fake();
+
     $conversation = Conversation::factory()->channel()->create([
         'is_private' => false,
     ]);

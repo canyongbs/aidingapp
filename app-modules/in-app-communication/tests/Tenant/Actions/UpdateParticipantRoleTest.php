@@ -38,8 +38,11 @@ use AidingApp\InAppCommunication\Actions\UpdateParticipantRole;
 use AidingApp\InAppCommunication\Models\Conversation;
 use AidingApp\InAppCommunication\Models\ConversationParticipant;
 use App\Models\User;
+use Illuminate\Support\Facades\Event;
 
 it('promotes a participant to manager', function () {
+    Event::fake();
+
     $conversation = Conversation::factory()->channel()->create();
     $user = User::factory()->create();
 
@@ -61,6 +64,8 @@ it('promotes a participant to manager', function () {
 });
 
 it('demotes a manager to regular participant when other managers exist', function () {
+    Event::fake();
+
     $conversation = Conversation::factory()->channel()->create();
     $manager1 = User::factory()->create();
     $manager2 = User::factory()->create();
@@ -127,6 +132,8 @@ it('throws exception when updating role in direct message', function () {
 })->throws(InvalidArgumentException::class, 'Cannot update participant roles in direct message conversations.');
 
 it('allows setting manager to true when already a manager', function () {
+    Event::fake();
+
     $conversation = Conversation::factory()->channel()->create();
     $manager = User::factory()->create();
 

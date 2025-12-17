@@ -38,11 +38,14 @@ use AidingApp\InAppCommunication\Actions\RemoveParticipant;
 use AidingApp\InAppCommunication\Models\Conversation;
 use AidingApp\InAppCommunication\Models\ConversationParticipant;
 use App\Models\User;
+use Illuminate\Support\Facades\Event;
 
 use function Pest\Laravel\assertDatabaseCount;
 use function Pest\Laravel\assertDatabaseMissing;
 
 it('removes a participant from a channel conversation', function () {
+    Event::fake();
+
     $conversation = Conversation::factory()->channel()->create();
     $user = User::factory()->create();
 
@@ -102,6 +105,8 @@ it('throws exception when removing the last manager from a public channel', func
 })->throws(InvalidArgumentException::class, 'Cannot remove the last manager from a channel.');
 
 it('allows removing a manager when other managers exist', function () {
+    Event::fake();
+
     $conversation = Conversation::factory()->channel()->create();
     $manager1 = User::factory()->create();
     $manager2 = User::factory()->create();
@@ -133,6 +138,8 @@ it('allows removing a manager when other managers exist', function () {
 });
 
 it('allows removing non-manager participants regardless of manager count', function () {
+    Event::fake();
+
     $conversation = Conversation::factory()->channel()->create();
     $manager = User::factory()->create();
     $regularUser = User::factory()->create();
@@ -159,6 +166,8 @@ it('allows removing non-manager participants regardless of manager count', funct
 });
 
 it('allows last manager to leave a private channel when they are the only participant', function () {
+    Event::fake();
+
     $conversation = Conversation::factory()->channel()->create([
         'is_private' => true,
     ]);

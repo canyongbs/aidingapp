@@ -44,6 +44,8 @@ use Illuminate\Support\Facades\Event;
 use function Pest\Laravel\assertDatabaseCount;
 
 it('adds a participant to a channel conversation', function () {
+    Event::fake();
+
     $conversation = Conversation::factory()->channel()->create();
     $user = User::factory()->create();
 
@@ -63,6 +65,8 @@ it('adds a participant to a channel conversation', function () {
 });
 
 it('adds a participant as a manager when specified', function () {
+    Event::fake();
+
     $conversation = Conversation::factory()->channel()->create();
     $user = User::factory()->create();
 
@@ -77,6 +81,8 @@ it('adds a participant as a manager when specified', function () {
 });
 
 it('returns existing participant if already in conversation', function () {
+    Event::fake();
+
     $conversation = Conversation::factory()->channel()->create();
     $user = User::factory()->create();
 
@@ -110,6 +116,8 @@ it('throws exception when adding participant to direct message', function () {
 })->throws(InvalidArgumentException::class, 'Cannot add participants to direct message conversations.');
 
 it('sets `last_activity_at` when adding a participant', function () {
+    Event::fake();
+
     $conversation = Conversation::factory()->channel()->create();
     $user = User::factory()->create();
 
@@ -160,6 +168,8 @@ it('broadcasts `ParticipantAdded` event when adding participant to private chann
 });
 
 it('does not broadcast `ParticipantAdded` event when participant already exists', function () {
+    Event::fake();
+
     $conversation = Conversation::factory()->channel()->create();
     $user = User::factory()->create();
 
@@ -169,7 +179,7 @@ it('does not broadcast `ParticipantAdded` event when participant already exists'
         user: $user,
     );
 
-    Event::fake([ParticipantAdded::class]);
+    Event::assertDispatchedTimes(ParticipantAdded::class, 1);
 
     // Try to add again
     app(AddParticipant::class)(
@@ -177,10 +187,13 @@ it('does not broadcast `ParticipantAdded` event when participant already exists'
         user: $user,
     );
 
-    Event::assertNotDispatched(ParticipantAdded::class);
+    // Should still only be 1 dispatch (not 2)
+    Event::assertDispatchedTimes(ParticipantAdded::class, 1);
 });
 
 it('broadcasts `ParticipantAdded` event to both conversation and user channels', function () {
+    Event::fake();
+
     $conversation = Conversation::factory()->channel()->create([
         'is_private' => true,
         'name' => 'Test Private Channel',
@@ -201,6 +214,8 @@ it('broadcasts `ParticipantAdded` event to both conversation and user channels',
 });
 
 it('includes conversation data with display_name in `ParticipantAdded` event', function () {
+    Event::fake();
+
     $conversation = Conversation::factory()->channel()->create([
         'is_private' => true,
         'name' => 'My Private Channel',
