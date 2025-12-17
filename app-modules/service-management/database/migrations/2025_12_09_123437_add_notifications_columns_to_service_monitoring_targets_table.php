@@ -50,8 +50,7 @@ return new class () extends Migration {
     public function down(): void
     {
         Schema::table('service_monitoring_targets', function (Blueprint $table) {
-            $table->dropColumn('is_notified_via_database');
-            $table->dropColumn('is_notified_via_email');
+            $table->dropColumn(['is_notified_via_database', 'is_notified_via_email']);
         });
     }
 };
