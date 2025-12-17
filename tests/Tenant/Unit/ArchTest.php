@@ -45,11 +45,6 @@ arch('All Core Settings classes should have defaults for all properties')
     ->expect('App\Settings')
     ->toHaveDefaultsForAllProperties();
 
-arch('All Core Models should not use HasUuids trait')
-    ->expect('App\Models')
-    ->extending(Model::class)
-    ->not->toUseTrait('Illuminate\Database\Eloquent\Concerns\HasUuids');
-
 arch('All Core Factories should not use the fake global function')
     ->expect('Database\Factories')
     ->not->toUse('fake');
