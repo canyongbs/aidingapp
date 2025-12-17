@@ -154,7 +154,7 @@
                 ]"
             >
                 <div
-                    class="prose prose-sm max-w-none leading-relaxed prose-p:my-0 prose-p:first:mt-0 prose-p:last:mb-0 prose-ul:my-1 prose-ol:my-1 prose-li:my-0"
+                    class="prose prose-sm max-w-none leading-relaxed prose-p:my-0 prose-p:first:mt-0 prose-p:last:mb-0 prose-ul:my-1 prose-ol:my-1 prose-li:my-0 dark:prose-invert"
                     :class="[isOwn ? 'text-gray-800 dark:text-gray-200' : 'text-gray-800 dark:text-gray-200']"
                     v-html="sanitizedContent"
                     @click="handleContentClick"
