@@ -40,14 +40,13 @@ use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use CanyonGBS\Common\Enums\Color;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\DB;
 
 /**
  * @extends Factory<ServiceRequestStatus>
  */
 class ServiceRequestStatusFactory extends Factory
 {
-    private int $maxOrder;
-
     public function definition(): array
     {
         return [
@@ -55,7 +54,7 @@ class ServiceRequestStatusFactory extends Factory
             'name' => $this->faker->word,
             'color' => $this->faker->randomElement(Color::cases()),
             'is_system_protected' => false,
-            'sort' => $this->getNewOrder(),
+            'sort' => DB::raw('(SELECT COALESCE(MAX(service_request_statuses.sort), 0) + 1 FROM service_request_statuses)'),
         ];
     }
 
@@ -104,17 +103,5 @@ class ServiceRequestStatusFactory extends Factory
                 'color' => Color::Red,
             ];
         });
-    }
-
-    public function getNewOrder(): int
-    {
-        return $this->maxOrder = $this->getMaxOrder() + 1;
-    }
-
-    public function getMaxOrder(): int
-    {
-        $maxOrder = ServiceRequestStatus::max('sort');
-
-        return $this->maxOrder ??= is_numeric($maxOrder) ? (int) $maxOrder : 0;
     }
 }
