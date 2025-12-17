@@ -74,8 +74,14 @@ abstract class BaseTaskRelationManager extends ManageRelatedRecords
                     ->schema([
                         Checkbox::make('is_confidential')
                             ->label('Confidential')
-                            ->live()
-                            ->columnSpanFull(),
+                            ->live(),
+                        Select::make('confidential_task_projects')
+                            ->relationship('confidentialAccessProjects', 'name')
+                            ->preload()
+                            ->label('Projects')
+                            ->multiple()
+                            ->exists('projects', 'id')
+                            ->visible(fn (Get $get) => $get('is_confidential')),
                         Select::make('confidential_task_users')
                             ->relationship('confidentialAccessUsers', 'name')
                             ->preload()
