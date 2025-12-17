@@ -64,8 +64,8 @@ class ServiceMonitoringNotification extends BaseNotification implements ShouldQu
             MailChannel::class => ['mail'],
             'both' => ['database', 'mail'],
             default => throw new InvalidArgumentException(
-              "Unsupported notification channel: {$this->channel}"
-          ),
+                "Unsupported notification channel: {$this->channel}"
+            ),
         };
     }
 
