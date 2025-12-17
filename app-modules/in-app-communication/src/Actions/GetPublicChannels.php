@@ -52,7 +52,7 @@ class GetPublicChannels
     public function __invoke(
         User $excludeUser,
         ?string $search = null,
-        int $limit = 50,
+        int $limit = 25,
     ): Collection {
         return Conversation::query()
             ->where('type', ConversationType::Channel)

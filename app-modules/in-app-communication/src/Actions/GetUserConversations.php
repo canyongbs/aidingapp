@@ -40,7 +40,9 @@ use AidingApp\InAppCommunication\Models\Conversation;
 use AidingApp\InAppCommunication\Models\Scopes\WithCurrentParticipant;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\CursorPaginator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\JoinClause;
+use Illuminate\Support\Collection;
 
 class GetUserConversations
 {
@@ -49,20 +51,24 @@ class GetUserConversations
      */
     public function __invoke(
         User $user,
-        int $limit = 20,
+        int $limit = 25,
         ?string $cursor = null,
+        bool $excludePinned = false,
     ): CursorPaginator {
         $userType = $user->getMorphClass();
         $userId = $user->getKey();
 
         return Conversation::query()
             ->select('conversations.*')
-            ->selectRaw('cp.last_activity_at as participant_last_activity_at')
-            ->selectRaw('cp.unread_count as unread_count')
-            ->join('conversation_participants as cp', function (JoinClause $join) use ($userType, $userId) {
-                $join->on('cp.conversation_id', '=', 'conversations.id')
-                    ->where('cp.participant_type', '=', $userType)
-                    ->where('cp.participant_id', '=', $userId);
+            ->selectRaw('conversation_participants.last_activity_at as participant_last_activity_at')
+            ->selectRaw('conversation_participants.unread_count as unread_count')
+            ->join('conversation_participants', function (JoinClause $join) use ($userType, $userId) {
+                $join->on('conversation_participants.conversation_id', '=', 'conversations.id')
+                    ->where('conversation_participants.participant_type', '=', $userType)
+                    ->where('conversation_participants.participant_id', '=', $userId);
+            })
+            ->when($excludePinned, function (Builder $query) {
+                $query->where('conversation_participants.is_pinned', false);
             })
             ->tap(new WithCurrentParticipant($user))
             ->withCount('conversationParticipants as participant_count')
@@ -70,5 +76,31 @@ class GetUserConversations
             ->orderBy('participant_last_activity_at', 'desc')
             ->orderBy('conversations.id', 'desc')
             ->cursorPaginate($limit, ['*'], 'cursor', $cursor);
+    }
+
+    /**
+     * @return Collection<int, Conversation>
+     */
+    public function pinned(User $user): Collection
+    {
+        $userType = $user->getMorphClass();
+        $userId = $user->getKey();
+
+        return Conversation::query()
+            ->select('conversations.*')
+            ->selectRaw('conversation_participants.last_activity_at as participant_last_activity_at')
+            ->selectRaw('conversation_participants.unread_count as unread_count')
+            ->join('conversation_participants', function (JoinClause $join) use ($userType, $userId) {
+                $join->on('conversation_participants.conversation_id', '=', 'conversations.id')
+                    ->where('conversation_participants.participant_type', '=', $userType)
+                    ->where('conversation_participants.participant_id', '=', $userId);
+            })
+            ->where('conversation_participants.is_pinned', true)
+            ->tap(new WithCurrentParticipant($user))
+            ->withCount('conversationParticipants as participant_count')
+            ->with(['latestMessage.author'])
+            ->orderBy('participant_last_activity_at', 'desc')
+            ->orderBy('conversations.id', 'desc')
+            ->get();
     }
 }

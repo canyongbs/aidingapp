@@ -70,13 +70,13 @@ class ChatNotifications extends Component
         /** @var Collection<int, array<string, mixed>> */
         return Conversation::query()
             ->select('conversations.*')
-            ->selectRaw('cp.unread_count as unread_count')
-            ->join('conversation_participants as cp', function (JoinClause $join) use ($userType, $userId) {
-                $join->on('cp.conversation_id', '=', 'conversations.id')
-                    ->where('cp.participant_type', '=', $userType)
-                    ->where('cp.participant_id', '=', $userId);
+            ->selectRaw('conversation_participants.unread_count as unread_count')
+            ->join('conversation_participants', function (JoinClause $join) use ($userType, $userId) {
+                $join->on('conversation_participants.conversation_id', '=', 'conversations.id')
+                    ->where('conversation_participants.participant_type', '=', $userType)
+                    ->where('conversation_participants.participant_id', '=', $userId);
             })
-            ->where('cp.unread_count', '>', 0)
+            ->where('conversation_participants.unread_count', '>', 0)
             ->with([ // @phpstan-ignore argument.type
                 'latestMessage.author',
                 'conversationParticipants' => fn (HasMany $query) => $query

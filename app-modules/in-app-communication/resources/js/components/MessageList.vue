@@ -34,7 +34,7 @@
 
 <script setup>
     import { ChatBubbleLeftEllipsisIcon } from '@heroicons/vue/24/outline';
-    import { nextTick, onMounted, ref, watch } from 'vue';
+    import { computed, nextTick, onMounted, ref, watch } from 'vue';
     import MessageBubble from './MessageBubble.vue';
     import TypingIndicator from './TypingIndicator.vue';
     import LoadingSpinner from './ui/LoadingSpinner.vue';
@@ -57,6 +57,51 @@
     const previousScrollHeight = ref(0);
 
     const MESSAGE_GROUP_THRESHOLD_MS = 5 * 60 * 1000; // 5 minutes
+
+    function getDateKey(date) {
+        return new Date(date).toDateString();
+    }
+
+    function formatDateSeparator(date) {
+        const messageDate = new Date(date);
+        const today = new Date();
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+
+        if (getDateKey(messageDate) === getDateKey(today)) {
+            return 'Today';
+        }
+
+        if (getDateKey(messageDate) === getDateKey(yesterday)) {
+            return 'Yesterday';
+        }
+
+        return messageDate.toLocaleDateString(undefined, {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+        });
+    }
+
+    // Computed set of message IDs that should show a date separator
+    const messagesWithDateSeparator = computed(() => {
+        const ids = new Set();
+
+        props.messages.forEach((message, index) => {
+            if (index === 0) {
+                ids.add(message.id);
+                return;
+            }
+
+            const prevMessage = props.messages[index - 1];
+            if (getDateKey(message.created_at) !== getDateKey(prevMessage.created_at)) {
+                ids.add(message.id);
+            }
+        });
+
+        return ids;
+    });
 
     function isWithinGroupThreshold(message, prevMessage) {
         if (!prevMessage) return false;
@@ -205,18 +250,27 @@
 
         <!-- Messages -->
         <div>
-            <MessageBubble
-                v-for="(message, index) in messages"
-                :key="message.id"
-                :message="message"
-                :is-own="message.author_id === currentUserId"
-                :show-author="shouldShowAuthor(message, index)"
-                :is-grouped="isGroupedWithPrevious(message, index)"
-                :show-timestamp="isLastInGroup(message, index)"
-                :current-user-id="currentUserId"
-                @retry="emit('retry', $event)"
-                @dismiss="emit('dismiss', $event)"
-            />
+            <template v-for="(message, index) in messages" :key="message.id">
+                <!-- Date Separator -->
+                <div v-if="messagesWithDateSeparator.has(message.id)" class="flex items-center justify-center my-6">
+                    <div class="flex-1 border-t border-gray-200 dark:border-gray-700"></div>
+                    <span class="px-4 text-xs font-medium text-gray-500 dark:text-gray-400">
+                        {{ formatDateSeparator(message.created_at) }}
+                    </span>
+                    <div class="flex-1 border-t border-gray-200 dark:border-gray-700"></div>
+                </div>
+
+                <MessageBubble
+                    :message="message"
+                    :is-own="message.author_id === currentUserId"
+                    :show-author="shouldShowAuthor(message, index)"
+                    :is-grouped="isGroupedWithPrevious(message, index)"
+                    :show-timestamp="isLastInGroup(message, index)"
+                    :current-user-id="currentUserId"
+                    @retry="emit('retry', $event)"
+                    @dismiss="emit('dismiss', $event)"
+                />
+            </template>
         </div>
 
         <!-- Typing Indicator -->

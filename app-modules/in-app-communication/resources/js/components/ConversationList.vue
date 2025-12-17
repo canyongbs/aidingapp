@@ -73,16 +73,13 @@
     <div class="flex h-full flex-col bg-white dark:bg-gray-900">
         <!-- Header -->
         <div
-            class="flex items-center justify-between bg-gradient-to-r from-primary-600 to-primary-700 dark:from-primary-700 dark:to-primary-800 px-6 py-4 shadow-md shrink-0"
+            class="flex items-center justify-between bg-gradient-to-r from-primary-600 to-primary-700 dark:from-primary-700 dark:to-primary-800 px-6 py-4 shadow-md shrink-0 min-h-[75px]"
         >
             <div class="flex items-center gap-3">
                 <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-white/20">
                     <ChatBubbleLeftRightIcon class="w-5 h-5 text-white" />
                 </div>
-                <div>
-                    <h2 class="font-semibold text-white tracking-tight">Messages</h2>
-                    <p class="text-sm text-white/80">{{ conversations.length }} conversations</p>
-                </div>
+                <h2 class="font-semibold text-white tracking-tight">Messages</h2>
             </div>
             <div class="flex items-center gap-1">
                 <button

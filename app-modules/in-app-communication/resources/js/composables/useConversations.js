@@ -48,7 +48,9 @@ export function useConversations() {
     async function loadConversations(loadMore = false) {
         if (store.conversationsLoading) return store.conversations;
 
-        store.conversationsLoading = true;
+        if (!loadMore) {
+            store.conversationsLoading = true;
+        }
         try {
             const params = {};
             if (loadMore && store.conversationsNextCursor) {
@@ -58,15 +60,30 @@ export function useConversations() {
             const { data } = await api.get('/conversations', { params });
 
             if (loadMore) {
+                // Only append non-pinned conversations when loading more
                 store.appendConversations(data.data);
             } else {
-                store.setConversations(data.data);
+                // On initial load, combine pinned (all) + non-pinned (first page)
+                const pinned = data.pinned || [];
+                const allConversations = [...pinned, ...data.data];
+                store.setConversations(allConversations);
             }
 
             store.setConversationsPagination(data.next_cursor, data.has_more);
 
             // Populate unread counts from loaded conversations
             const counts = loadMore ? { ...store.unreadCounts } : {};
+
+            // Count from pinned (only on initial load)
+            if (!loadMore && data.pinned) {
+                data.pinned.forEach((conversation) => {
+                    if (conversation.unread_count !== undefined) {
+                        counts[conversation.id] = conversation.unread_count;
+                    }
+                });
+            }
+
+            // Count from regular data
             data.data.forEach((conversation) => {
                 if (conversation.unread_count !== undefined) {
                     counts[conversation.id] = conversation.unread_count;
@@ -74,7 +91,7 @@ export function useConversations() {
             });
             store.setAllUnreadCounts(counts);
 
-            return data.data;
+            return loadMore ? data.data : [...(data.pinned || []), ...data.data];
         } finally {
             store.conversationsLoading = false;
         }

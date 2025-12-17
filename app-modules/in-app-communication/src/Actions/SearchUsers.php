@@ -50,7 +50,7 @@ class SearchUsers
     public function __invoke(
         User $excludeUser,
         ?string $searchTerm = null,
-        int $limit = 20,
+        int $limit = 25,
     ): Collection {
         return User::query()
             ->when(filled($searchTerm), function (Builder $query) use ($searchTerm) {

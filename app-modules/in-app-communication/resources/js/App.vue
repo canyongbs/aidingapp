@@ -135,6 +135,11 @@
             const conversation = loaded.find((loadedConversation) => loadedConversation.id === conversationId);
             if (conversation) {
                 store.selectConversation(conversationId);
+            } else {
+                // Conversation not in first page, fetch it directly
+                await fetchConversation(conversationId);
+                subscribeToConversation(conversationId);
+                store.selectConversation(conversationId);
             }
         }
 
@@ -230,7 +235,7 @@
     }
 
     async function handleLoadMoreConversations() {
-        if (loadingMoreConversations.value || !conversationsHasMore.value) return;
+        if (loadingMoreConversations.value || conversationsLoading.value || !conversationsHasMore.value) return;
 
         loadingMoreConversations.value = true;
         try {
@@ -265,8 +270,8 @@
         <!-- Conversation List (Left Sidebar) -->
         <!-- On mobile: hidden when conversation is selected -->
         <div
-            class="w-full md:w-80 flex-shrink-0 border-r border-gray-200 dark:border-gray-700"
-            :class="[selectedConversationId ? 'hidden md:block' : 'block']"
+            class="w-full lg:w-80 flex-shrink-0 border-r border-gray-200 dark:border-gray-700"
+            :class="[selectedConversationId ? 'hidden lg:block' : 'block']"
         >
             <ConversationList
                 :conversations="conversations"
@@ -288,7 +293,7 @@
         <!-- On mobile: hidden when no conversation is selected -->
         <div
             class="flex-1 flex-col bg-white dark:bg-gray-900"
-            :class="[selectedConversationId ? 'flex' : 'hidden md:flex']"
+            :class="[selectedConversationId ? 'flex' : 'hidden lg:flex']"
         >
             <template v-if="selectedConversation">
                 <ConversationHeader
@@ -302,7 +307,7 @@
                     <template #prepend>
                         <button
                             type="button"
-                            class="md:hidden text-white/90 hover:text-white hover:bg-white/10 transition-all rounded-lg p-1.5"
+                            class="lg:hidden text-white/90 hover:text-white hover:bg-white/10 transition-all rounded-lg p-1.5"
                             @click="handleBackToList"
                         >
                             <ArrowLeftIcon class="w-5 h-5" />
@@ -360,7 +365,7 @@
         <!-- Mobile: full overlay, Desktop: sliding sidebar -->
         <div
             v-if="selectedConversation?.type === 'channel'"
-            class="hidden md:block overflow-hidden flex-shrink-0 border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 transition-[width] duration-200 ease-out"
+            class="hidden lg:block overflow-hidden flex-shrink-0 border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 transition-[width] duration-200 ease-out"
             :style="{ width: showParticipants ? '16rem' : '0' }"
         >
             <div class="w-64">
@@ -383,7 +388,7 @@
         >
             <div
                 v-if="showParticipants && selectedConversation?.type === 'channel'"
-                class="md:hidden absolute inset-0 bg-white dark:bg-gray-900 z-10"
+                class="lg:hidden absolute inset-0 bg-white dark:bg-gray-900 z-10"
             >
                 <ParticipantList
                     :conversation="selectedConversation"

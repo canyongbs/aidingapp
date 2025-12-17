@@ -154,7 +154,7 @@
 
 <template>
     <div
-        class="flex items-center justify-between bg-gradient-to-r from-primary-600 to-primary-700 dark:from-primary-700 dark:to-primary-800 px-4 md:px-6 py-4 shadow-md shrink-0"
+        class="relative z-10 flex items-center justify-between bg-gradient-to-r from-primary-600 to-primary-700 dark:from-primary-700 dark:to-primary-800 px-4 lg:px-6 py-4 shadow-md shrink-0"
     >
         <div class="flex items-center gap-3">
             <!-- Prepend slot (for mobile back button) -->
