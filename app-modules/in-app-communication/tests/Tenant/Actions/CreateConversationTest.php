@@ -1,0 +1,232 @@
+<?php
+
+/*
+<COPYRIGHT>
+
+    Copyright © 2016-2025, Canyon GBS LLC. All rights reserved.
+
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
+
+    Notice:
+
+    - You may not provide the software to third parties as a hosted or managed
+      service, where the service provides users with access to any substantial set of
+      the features or functionality of the software.
+    - You may not move, change, disable, or circumvent the license key functionality
+      in the software, and you may not remove or obscure any functionality in the
+      software that is protected by the license key.
+    - You may not alter, remove, or obscure any licensing, copyright, or other notices
+      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      to applicable law.
+    - Canyon GBS LLC respects the intellectual property rights of others and expects the
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
+      Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
+      vigorously.
+    - The software solution, including services, infrastructure, and code, is offered as a
+      Software as a Service (SaaS) by Canyon GBS LLC.
+    - Use of this software implies agreement to the license terms and conditions as stated
+      in the Elastic License 2.0.
+
+    For more information or inquiries please visit our website at
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
+
+</COPYRIGHT>
+*/
+
+use AidingApp\InAppCommunication\Actions\CreateConversation;
+use AidingApp\InAppCommunication\Enums\ConversationType;
+use AidingApp\InAppCommunication\Models\Conversation;
+use AidingApp\InAppCommunication\Models\ConversationParticipant;
+use App\Models\User;
+use Illuminate\Support\Facades\Event;
+
+use function Pest\Laravel\assertDatabaseCount;
+use function Pest\Laravel\assertDatabaseHas;
+
+beforeEach(fn () => Event::fake());
+
+it('creates a direct message conversation between two users', function () {
+    $creator = User::factory()->create();
+    $participant = User::factory()->create();
+
+    assertDatabaseCount(Conversation::class, 0);
+    assertDatabaseCount(ConversationParticipant::class, 0);
+
+    $conversation = app(CreateConversation::class)(
+        creator: $creator,
+        type: ConversationType::Direct,
+        participantIds: [$participant->getKey()],
+    );
+
+    assertDatabaseCount(Conversation::class, 1);
+    assertDatabaseCount(ConversationParticipant::class, 2);
+
+    expect($conversation)
+        ->type->toBe(ConversationType::Direct)
+        ->name->toBeNull()
+        ->created_by->toBe($creator->getKey());
+
+    assertDatabaseHas(ConversationParticipant::class, [
+        'conversation_id' => $conversation->getKey(),
+        'participant_id' => $creator->getKey(),
+        'is_manager' => false,
+    ]);
+
+    assertDatabaseHas(ConversationParticipant::class, [
+        'conversation_id' => $conversation->getKey(),
+        'participant_id' => $participant->getKey(),
+        'is_manager' => false,
+    ]);
+});
+
+it('returns existing direct conversation if one already exists', function () {
+    $creator = User::factory()->create();
+    $participant = User::factory()->create();
+
+    $firstConversation = app(CreateConversation::class)(
+        creator: $creator,
+        type: ConversationType::Direct,
+        participantIds: [$participant->getKey()],
+    );
+
+    assertDatabaseCount(Conversation::class, 1);
+
+    $secondConversation = app(CreateConversation::class)(
+        creator: $creator,
+        type: ConversationType::Direct,
+        participantIds: [$participant->getKey()],
+    );
+
+    assertDatabaseCount(Conversation::class, 1);
+
+    expect($secondConversation->getKey())->toBe($firstConversation->getKey());
+});
+
+it('creates a channel conversation with creator as manager', function () {
+    $creator = User::factory()->create();
+    $participant1 = User::factory()->create();
+    $participant2 = User::factory()->create();
+
+    assertDatabaseCount(Conversation::class, 0);
+
+    $conversation = app(CreateConversation::class)(
+        creator: $creator,
+        type: ConversationType::Channel,
+        participantIds: [$participant1->getKey(), $participant2->getKey()],
+        name: 'Test Channel',
+        isPrivate: true,
+    );
+
+    assertDatabaseCount(Conversation::class, 1);
+    assertDatabaseCount(ConversationParticipant::class, 3);
+
+    expect($conversation)
+        ->type->toBe(ConversationType::Channel)
+        ->name->toBe('Test Channel')
+        ->is_private->toBeTrue()
+        ->created_by->toBe($creator->getKey());
+
+    assertDatabaseHas(ConversationParticipant::class, [
+        'conversation_id' => $conversation->getKey(),
+        'participant_id' => $creator->getKey(),
+        'is_manager' => true,
+    ]);
+
+    assertDatabaseHas(ConversationParticipant::class, [
+        'conversation_id' => $conversation->getKey(),
+        'participant_id' => $participant1->getKey(),
+        'is_manager' => false,
+    ]);
+
+    assertDatabaseHas(ConversationParticipant::class, [
+        'conversation_id' => $conversation->getKey(),
+        'participant_id' => $participant2->getKey(),
+        'is_manager' => false,
+    ]);
+});
+
+it('creates a public channel when `isPrivate` is false', function () {
+    $creator = User::factory()->create();
+
+    $conversation = app(CreateConversation::class)(
+        creator: $creator,
+        type: ConversationType::Channel,
+        participantIds: [],
+        name: 'Public Channel',
+        isPrivate: false,
+    );
+
+    expect($conversation)
+        ->is_private->toBeFalse();
+});
+
+it('does not duplicate the creator in participants if included in `participantIds`', function () {
+    $creator = User::factory()->create();
+    $participant = User::factory()->create();
+
+    $conversation = app(CreateConversation::class)(
+        creator: $creator,
+        type: ConversationType::Channel,
+        participantIds: [$creator->getKey(), $participant->getKey()],
+        name: 'Test Channel',
+    );
+
+    assertDatabaseCount(ConversationParticipant::class, 2);
+});
+
+it('sets `last_activity_at` for all participants when creating a conversation', function () {
+    $creator = User::factory()->create();
+    $participant1 = User::factory()->create();
+    $participant2 = User::factory()->create();
+
+    $conversation = app(CreateConversation::class)(
+        creator: $creator,
+        type: ConversationType::Channel,
+        participantIds: [$participant1->getKey(), $participant2->getKey()],
+        name: 'Test Channel',
+    );
+
+    $creatorParticipant = ConversationParticipant::query()
+        ->where('conversation_id', $conversation->getKey())
+        ->where('participant_id', $creator->getKey())
+        ->first();
+
+    $participant1Record = ConversationParticipant::query()
+        ->where('conversation_id', $conversation->getKey())
+        ->where('participant_id', $participant1->getKey())
+        ->first();
+
+    $participant2Record = ConversationParticipant::query()
+        ->where('conversation_id', $conversation->getKey())
+        ->where('participant_id', $participant2->getKey())
+        ->first();
+
+    expect($creatorParticipant->last_activity_at)->not->toBeNull();
+    expect($participant1Record->last_activity_at)->not->toBeNull();
+    expect($participant2Record->last_activity_at)->not->toBeNull();
+});
+
+it('sets `last_activity_at` for direct message participants', function () {
+    $creator = User::factory()->create();
+    $participant = User::factory()->create();
+
+    $conversation = app(CreateConversation::class)(
+        creator: $creator,
+        type: ConversationType::Direct,
+        participantIds: [$participant->getKey()],
+    );
+
+    $creatorParticipant = ConversationParticipant::query()
+        ->where('conversation_id', $conversation->getKey())
+        ->where('participant_id', $creator->getKey())
+        ->first();
+
+    $participantRecord = ConversationParticipant::query()
+        ->where('conversation_id', $conversation->getKey())
+        ->where('participant_id', $participant->getKey())
+        ->first();
+
+    expect($creatorParticipant->last_activity_at)->not->toBeNull();
+    expect($participantRecord->last_activity_at)->not->toBeNull();
+});

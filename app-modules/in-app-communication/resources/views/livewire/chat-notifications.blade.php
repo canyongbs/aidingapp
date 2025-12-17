@@ -32,20 +32,26 @@
 </COPYRIGHT>
 --}}
 @php
+    use AidingApp\InAppCommunication\Enums\ConversationType;
     use AidingApp\InAppCommunication\Filament\Pages\UserChat;
 
     $notifications = $this->getNotifications();
+    $totalUnread = $this->getTotalUnreadCount();
 @endphp
 
 <div
     class="flex"
-    wire:poll.10s
+    x-data="{}"
+    x-init="window.Echo.private('user.{{ auth()->id() }}')
+        .listen('.unread-count.updated', () => {
+            $wire.$refresh();
+        });"
 >
     <x-filament::icon-button
         label="Open chat notifications"
         icon="heroicon-o-chat-bubble-oval-left-ellipsis"
         color="gray"
-        :badge="count($notifications)"
+        :badge="$totalUnread ?: null"
         x-on:click="$dispatch('open-modal', { id: 'chat-notifications' })"
     />
 
@@ -61,10 +67,55 @@
             <div
                 class="chat-notifications -mx-6 divide-y divide-gray-200 border-y border-gray-200 dark:divide-white/10 dark:border-white/10">
                 @foreach ($notifications as $notification)
-                    <div
-                        class="relative before:absolute before:start-0 before:h-full before:w-0.5 before:bg-primary-600 dark:before:bg-primary-500">
-                        {{ $notification->participant->getNotification()->inline() }}
-                    </div>
+                    <a
+                        class="relative block px-6 py-4 before:absolute before:start-0 before:top-0 before:h-full before:w-0.5 before:bg-primary-600 hover:bg-gray-50 dark:before:bg-primary-500 dark:hover:bg-white/5"
+                        href="{{ $notification['url'] }}"
+                    >
+                        <div class="flex items-start gap-3">
+                            @if ($notification['type'] === ConversationType::Channel)
+                                <div
+                                    class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-100 dark:bg-primary-900/30">
+                                    <x-heroicon-o-hashtag class="h-5 w-5 text-primary-600 dark:text-primary-400" />
+                                </div>
+                            @else
+                                <img
+                                    class="h-10 w-10 shrink-0 rounded-full object-cover"
+                                    src="{{ $notification['avatar_url'] }}"
+                                    alt="{{ $notification['display_name'] }}"
+                                />
+                            @endif
+
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-center justify-between gap-2">
+                                    <p class="truncate font-medium text-gray-950 dark:text-white">
+                                        {{ $notification['display_name'] }}
+                                    </p>
+                                    @if ($notification['unread_count'] > 0)
+                                        <span
+                                            class="inline-flex items-center justify-center rounded-full bg-primary-600 px-2 py-0.5 text-xs font-medium text-white"
+                                        >
+                                            {{ $notification['unread_count'] > 99 ? '99+' : $notification['unread_count'] }}
+                                        </span>
+                                    @endif
+                                </div>
+
+                                @if ($notification['message_preview'])
+                                    <p class="mt-1 truncate text-sm text-gray-500 dark:text-gray-400">
+                                        @if ($notification['author_name'] && $notification['type'] === ConversationType::Channel)
+                                            <span class="font-medium">{{ $notification['author_name'] }}:</span>
+                                        @endif
+                                        {{ $notification['message_preview'] }}
+                                    </p>
+                                @endif
+
+                                @if ($notification['created_at'])
+                                    <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
+                                        {{ $notification['created_at'] }}
+                                    </p>
+                                @endif
+                            </div>
+                        </div>
+                    </a>
                 @endforeach
             </div>
         @else

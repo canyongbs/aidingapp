@@ -34,6 +34,9 @@
 </COPYRIGHT>
 */
 
+use AidingApp\InAppCommunication\Models\Conversation;
+use AidingApp\InAppCommunication\Models\ConversationParticipant;
+use AidingApp\InAppCommunication\Models\Message;
 use App\Concerns\EditPageRedirection;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Database\Eloquent\Model;
@@ -48,7 +51,8 @@ arch('All Core Settings classes should have defaults for all properties')
 arch('All Core Models should not use HasUuids trait')
     ->expect('App\Models')
     ->extending(Model::class)
-    ->not->toUseTrait('Illuminate\Database\Eloquent\Concerns\HasUuids');
+    ->not->toUseTrait('Illuminate\Database\Eloquent\Concerns\HasUuids')
+    ->ignoring([Conversation::class, ConversationParticipant::class, Message::class]);
 
 arch('All Core Factories should not use the fake global function')
     ->expect('Database\Factories')
@@ -65,7 +69,8 @@ app(ModuleRegistry::class, [
     arch("All {$module->name} Models should not use HasUuids trait")
         ->expect($module->namespace() . 'Models')
         ->extending(Model::class)
-        ->not->toUseTrait('Illuminate\Database\Eloquent\Concerns\HasUuids');
+        ->not->toUseTrait('Illuminate\Database\Eloquent\Concerns\HasUuids')
+        ->ignoring([Conversation::class, ConversationParticipant::class, Message::class]);
 
     arch("All {$module->name} Factories should not use the fake global function")
         ->expect($module->namespace() . 'Database\Factories')

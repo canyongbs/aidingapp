@@ -79,7 +79,7 @@ abstract class SubmissibleField extends BaseModel
     }
 
     /**
-     * @return Attribute<string, never>
+     * @return Attribute<array<string, mixed>, array<string, mixed>>
      */
     protected function config(): Attribute
     {

@@ -31,17 +31,19 @@
 
 </COPYRIGHT>
 */
+import vue from '@vitejs/plugin-vue';
 import laravel, { refreshPaths } from 'laravel-vite-plugin';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
     plugins: [
+        vue(),
         laravel({
             input: [
                 'resources/css/app.css',
                 'resources/js/app.js',
                 'resources/css/filament/admin/theme.css',
-                'app-modules/in-app-communication/resources/js/userToUserChat.js',
+                'app-modules/in-app-communication/resources/js/chat.js',
                 'app-modules/service-management/resources/js/serviceRequestTypeManager.js',
                 'app-modules/task/resources/js/kanban.js',
                 'app-modules/project/resources/js/kanban.js',
