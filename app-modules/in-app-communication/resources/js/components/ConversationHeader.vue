@@ -41,10 +41,14 @@
         GlobeAltIcon,
         HashtagIcon,
         LockClosedIcon,
+        PencilIcon,
         UserGroupIcon,
     } from '@heroicons/vue/24/outline';
-    import { computed, ref } from 'vue';
+    import { computed, ref, watch } from 'vue';
     import { useConversationDisplay } from '../composables/useConversationDisplay';
+    import BaseButton from './ui/BaseButton.vue';
+    import BaseInput from './ui/BaseInput.vue';
+    import BaseModal from './ui/BaseModal.vue';
     import ConfirmModal from './ui/ConfirmModal.vue';
     import DropdownMenu from './ui/DropdownMenu.vue';
 
@@ -57,6 +61,9 @@
 
     const isUpdatingPrivacy = ref(false);
     const showPrivacyConfirm = ref(false);
+    const showRenameModal = ref(false);
+    const newChannelName = ref('');
+    const isRenaming = ref(false);
 
     const isManager = computed(() => {
         const participant = props.conversation.participants?.find((p) => p.participant_id === props.currentUserId);
@@ -109,6 +116,29 @@
 
     function cancelPrivacyChange() {
         showPrivacyConfirm.value = false;
+    }
+
+    function openRenameModal() {
+        settingsMenuRef.value?.close();
+        newChannelName.value = props.conversation.name || '';
+        showRenameModal.value = true;
+    }
+
+    async function confirmRename() {
+        if (isRenaming.value || !newChannelName.value.trim()) return;
+
+        isRenaming.value = true;
+        try {
+            emit('update-conversation', { name: newChannelName.value.trim() });
+            showRenameModal.value = false;
+        } finally {
+            isRenaming.value = false;
+        }
+    }
+
+    function cancelRename() {
+        showRenameModal.value = false;
+        newChannelName.value = '';
     }
 
     const notificationMenuRef = ref(null);
@@ -226,6 +256,18 @@
                 <button
                     type="button"
                     class="w-full flex items-start gap-3 px-3 py-2 rounded-md text-left transition-colors text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    @click="openRenameModal"
+                >
+                    <PencilIcon class="w-5 h-5 shrink-0 mt-0.5 text-gray-400 dark:text-gray-500" />
+                    <div>
+                        <p class="text-sm font-medium">Rename Channel</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Change the channel name</p>
+                    </div>
+                </button>
+
+                <button
+                    type="button"
+                    class="w-full flex items-start gap-3 px-3 py-2 rounded-md text-left transition-colors text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                     :disabled="isUpdatingPrivacy"
                     @click="requestPrivacyChange"
                 >
@@ -265,4 +307,32 @@
         @confirm="confirmPrivacyChange"
         @cancel="cancelPrivacyChange"
     />
+
+    <!-- Rename Channel Modal -->
+    <BaseModal :is-open="showRenameModal" title="Rename Channel" @close="cancelRename">
+        <template #icon>
+            <PencilIcon class="w-5 h-5 text-primary-600 dark:text-primary-400" />
+        </template>
+
+        <form @submit.prevent="confirmRename">
+            <BaseInput
+                v-model="newChannelName"
+                label="Channel Name"
+                placeholder="Enter channel name"
+                :disabled="isRenaming"
+            />
+        </form>
+
+        <template #footer>
+            <BaseButton variant="secondary" :disabled="isRenaming" @click="cancelRename">Cancel</BaseButton>
+            <BaseButton
+                variant="primary"
+                :loading="isRenaming"
+                :disabled="!newChannelName.trim() || isRenaming"
+                @click="confirmRename"
+            >
+                Rename
+            </BaseButton>
+        </template>
+    </BaseModal>
 </template>

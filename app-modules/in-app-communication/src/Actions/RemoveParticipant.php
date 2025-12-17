@@ -37,6 +37,7 @@
 namespace AidingApp\InAppCommunication\Actions;
 
 use AidingApp\InAppCommunication\Enums\ConversationType;
+use AidingApp\InAppCommunication\Events\ParticipantRemoved;
 use AidingApp\InAppCommunication\Models\Conversation;
 use AidingApp\InAppCommunication\Models\ConversationParticipant;
 use App\Models\User;
@@ -53,7 +54,9 @@ class RemoveParticipant
             throw new InvalidArgumentException('Cannot remove participants from direct message conversations.');
         }
 
-        return DB::transaction(function () use ($conversation, $user) {
+        $userId = $user->getKey();
+
+        $result = DB::transaction(function () use ($conversation, $user) {
             $participant = ConversationParticipant::query()
                 ->whereBelongsTo($conversation)
                 ->whereMorphedTo('participant', $user)
@@ -71,11 +74,26 @@ class RemoveParticipant
                     ->exists();
 
                 if (! $hasOtherManagers) {
-                    throw new InvalidArgumentException('Cannot remove the last manager from a channel.');
+                    $isLastParticipant = ConversationParticipant::query()
+                        ->whereBelongsTo($conversation)
+                        ->whereKeyNot($participant)
+                        ->doesntExist();
+
+                    $canLeaveAsLastManager = $conversation->is_private && $isLastParticipant;
+
+                    if (! $canLeaveAsLastManager) {
+                        throw new InvalidArgumentException('Cannot remove the last manager from a channel.');
+                    }
                 }
             }
 
             return (bool) $participant->delete();
         });
+
+        if ($result) {
+            broadcast(new ParticipantRemoved($conversation, $userId));
+        }
+
+        return $result;
     }
 }

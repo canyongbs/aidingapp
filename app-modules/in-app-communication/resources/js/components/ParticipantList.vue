@@ -95,8 +95,19 @@
 
     const isLastManager = computed(() => isManager.value && managerCount.value === 1);
 
+    const canLeaveAsLastManager = computed(() => {
+        return props.conversation.is_private && participants.value.length === 1;
+    });
+
+    const canLeave = computed(() => {
+        if (isLastManager.value) {
+            return canLeaveAsLastManager.value;
+        }
+        return true;
+    });
+
     function handleLeave() {
-        if (isLeaving.value || isLastManager.value) return;
+        if (isLeaving.value || !canLeave.value) return;
 
         showConfirm({
             title: 'Leave Channel',
@@ -286,12 +297,12 @@
                 variant="danger"
                 class="w-full"
                 :loading="isLeaving"
-                :disabled="isLastManager"
+                :disabled="!canLeave"
                 @click="handleLeave"
             >
                 {{ isLeaving ? 'Leaving...' : 'Leave Channel' }}
             </BaseButton>
-            <p v-if="isLastManager" class="mt-2 text-xs text-center text-gray-500 dark:text-gray-400">
+            <p v-if="!canLeave" class="mt-2 text-xs text-center text-gray-500 dark:text-gray-400">
                 You must assign another manager before leaving.
             </p>
         </div>

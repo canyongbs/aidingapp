@@ -84,8 +84,10 @@ it('throws exception when removing participant from direct message', function ()
     );
 })->throws(InvalidArgumentException::class, 'Cannot remove participants from direct message conversations.');
 
-it('throws exception when removing the last manager', function () {
-    $conversation = Conversation::factory()->channel()->create();
+it('throws exception when removing the last manager from a public channel', function () {
+    $conversation = Conversation::factory()->channel()->create([
+        'is_private' => false,
+    ]);
     $manager = User::factory()->create();
 
     ConversationParticipant::factory()->manager()->create([
@@ -155,3 +157,65 @@ it('allows removing non-manager participants regardless of manager count', funct
     expect($result)->toBeTrue();
     assertDatabaseCount(ConversationParticipant::class, 1);
 });
+
+it('allows last manager to leave a private channel when they are the only participant', function () {
+    $conversation = Conversation::factory()->channel()->create([
+        'is_private' => true,
+    ]);
+    $manager = User::factory()->create();
+
+    ConversationParticipant::factory()->manager()->create([
+        'conversation_id' => $conversation->getKey(),
+        'participant_id' => $manager->getKey(),
+    ]);
+
+    assertDatabaseCount(ConversationParticipant::class, 1);
+
+    $result = app(RemoveParticipant::class)(
+        conversation: $conversation,
+        user: $manager,
+    );
+
+    expect($result)->toBeTrue();
+    assertDatabaseCount(ConversationParticipant::class, 0);
+});
+
+it('throws exception when last manager tries to leave a private channel with other participants', function () {
+    $conversation = Conversation::factory()->channel()->create([
+        'is_private' => true,
+    ]);
+    $manager = User::factory()->create();
+    $regularUser = User::factory()->create();
+
+    ConversationParticipant::factory()->manager()->create([
+        'conversation_id' => $conversation->getKey(),
+        'participant_id' => $manager->getKey(),
+    ]);
+
+    ConversationParticipant::factory()->create([
+        'conversation_id' => $conversation->getKey(),
+        'participant_id' => $regularUser->getKey(),
+    ]);
+
+    app(RemoveParticipant::class)(
+        conversation: $conversation,
+        user: $manager,
+    );
+})->throws(InvalidArgumentException::class, 'Cannot remove the last manager from a channel.');
+
+it('throws exception when last manager tries to leave a public channel even as only participant', function () {
+    $conversation = Conversation::factory()->channel()->create([
+        'is_private' => false,
+    ]);
+    $manager = User::factory()->create();
+
+    ConversationParticipant::factory()->manager()->create([
+        'conversation_id' => $conversation->getKey(),
+        'participant_id' => $manager->getKey(),
+    ]);
+
+    app(RemoveParticipant::class)(
+        conversation: $conversation,
+        user: $manager,
+    );
+})->throws(InvalidArgumentException::class, 'Cannot remove the last manager from a channel.');

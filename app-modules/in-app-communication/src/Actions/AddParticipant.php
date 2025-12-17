@@ -37,6 +37,7 @@
 namespace AidingApp\InAppCommunication\Actions;
 
 use AidingApp\InAppCommunication\Enums\ConversationType;
+use AidingApp\InAppCommunication\Events\ParticipantAdded;
 use AidingApp\InAppCommunication\Models\Conversation;
 use AidingApp\InAppCommunication\Models\ConversationParticipant;
 use App\Models\User;
@@ -69,6 +70,10 @@ class AddParticipant
         $participant->is_manager = $isManager;
         $participant->last_activity_at = now();
         $participant->save();
+
+        $participant->load('participant');
+
+        broadcast(new ParticipantAdded($participant));
 
         return $participant;
     }

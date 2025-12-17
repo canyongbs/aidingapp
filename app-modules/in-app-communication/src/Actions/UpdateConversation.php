@@ -36,6 +36,7 @@
 
 namespace AidingApp\InAppCommunication\Actions;
 
+use AidingApp\InAppCommunication\Events\ConversationUpdated;
 use AidingApp\InAppCommunication\Models\Conversation;
 
 class UpdateConversation
@@ -59,6 +60,8 @@ class UpdateConversation
 
         if ($changed) {
             $conversation->save();
+
+            broadcast(new ConversationUpdated($conversation));
         }
 
         return $conversation;

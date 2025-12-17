@@ -37,6 +37,7 @@
 namespace AidingApp\InAppCommunication\Actions;
 
 use AidingApp\InAppCommunication\Enums\ConversationType;
+use AidingApp\InAppCommunication\Events\ParticipantUpdated;
 use AidingApp\InAppCommunication\Models\Conversation;
 use AidingApp\InAppCommunication\Models\ConversationParticipant;
 use App\Models\User;
@@ -76,6 +77,8 @@ class UpdateParticipantRole
 
         $participant->is_manager = $isManager;
         $participant->save();
+
+        broadcast(new ParticipantUpdated($participant));
 
         return $participant;
     }

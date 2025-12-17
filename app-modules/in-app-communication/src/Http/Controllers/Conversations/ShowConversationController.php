@@ -37,9 +37,12 @@
 namespace AidingApp\InAppCommunication\Http\Controllers\Conversations;
 
 use AidingApp\InAppCommunication\Enums\ConversationNotificationPreference;
+use AidingApp\InAppCommunication\Enums\ConversationType;
 use AidingApp\InAppCommunication\Http\Resources\ConversationParticipantResource;
 use AidingApp\InAppCommunication\Models\Conversation;
 use App\Http\Controllers\Controller;
+use App\Models\User;
+use Filament\Facades\Filament;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -78,11 +81,24 @@ class ShowConversationController extends Controller
             ? $participant->notification_preference->value
             : ConversationNotificationPreference::All->value;
 
+        if ($conversation->type === ConversationType::Channel) {
+            $displayName = $conversation->name ?? 'Unnamed Channel';
+            $avatarUrl = null;
+        } else {
+            $otherParticipant = $conversation->conversationParticipants
+                ->first(fn ($p) => $p->participant_id !== $userId);
+            $otherUser = $otherParticipant?->participant;
+            $displayName = $otherUser instanceof User ? $otherUser->name : 'Unknown User';
+            $avatarUrl = $otherUser instanceof User ? Filament::getUserAvatarUrl($otherUser) : null;
+        }
+
         return response()->json([
             'data' => [
                 'id' => $conversation->getKey(),
                 'type' => $conversation->type->value,
                 'name' => $conversation->name,
+                'display_name' => $displayName,
+                'avatar_url' => $avatarUrl,
                 'is_private' => $conversation->is_private,
                 'is_pinned' => $isPinned,
                 'notification_preference' => $notificationPreference,

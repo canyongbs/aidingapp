@@ -35,9 +35,11 @@
 */
 
 use AidingApp\InAppCommunication\Actions\AddParticipant;
+use AidingApp\InAppCommunication\Events\ParticipantAdded;
 use AidingApp\InAppCommunication\Models\Conversation;
 use AidingApp\InAppCommunication\Models\ConversationParticipant;
 use App\Models\User;
+use Illuminate\Support\Facades\Event;
 
 use function Pest\Laravel\assertDatabaseCount;
 
@@ -117,4 +119,107 @@ it('sets `last_activity_at` when adding a participant', function () {
     );
 
     expect($participant->last_activity_at)->not->toBeNull();
+});
+
+it('broadcasts `ParticipantAdded` event when adding participant to public channel', function () {
+    Event::fake([ParticipantAdded::class]);
+
+    $conversation = Conversation::factory()->channel()->create([
+        'is_private' => false,
+    ]);
+    $user = User::factory()->create();
+
+    app(AddParticipant::class)(
+        conversation: $conversation,
+        user: $user,
+    );
+
+    Event::assertDispatched(ParticipantAdded::class, function ($event) use ($conversation, $user) {
+        return $event->participant->conversation_id === $conversation->getKey()
+            && $event->participant->participant_id === $user->getKey();
+    });
+});
+
+it('broadcasts `ParticipantAdded` event when adding participant to private channel', function () {
+    Event::fake([ParticipantAdded::class]);
+
+    $conversation = Conversation::factory()->channel()->create([
+        'is_private' => true,
+    ]);
+    $user = User::factory()->create();
+
+    app(AddParticipant::class)(
+        conversation: $conversation,
+        user: $user,
+    );
+
+    Event::assertDispatched(ParticipantAdded::class, function ($event) use ($conversation, $user) {
+        return $event->participant->conversation_id === $conversation->getKey()
+            && $event->participant->participant_id === $user->getKey();
+    });
+});
+
+it('does not broadcast `ParticipantAdded` event when participant already exists', function () {
+    $conversation = Conversation::factory()->channel()->create();
+    $user = User::factory()->create();
+
+    // Add participant first
+    app(AddParticipant::class)(
+        conversation: $conversation,
+        user: $user,
+    );
+
+    Event::fake([ParticipantAdded::class]);
+
+    // Try to add again
+    app(AddParticipant::class)(
+        conversation: $conversation,
+        user: $user,
+    );
+
+    Event::assertNotDispatched(ParticipantAdded::class);
+});
+
+it('broadcasts `ParticipantAdded` event to both conversation and user channels', function () {
+    $conversation = Conversation::factory()->channel()->create([
+        'is_private' => true,
+        'name' => 'Test Private Channel',
+    ]);
+    $user = User::factory()->create();
+
+    $participant = app(AddParticipant::class)(
+        conversation: $conversation,
+        user: $user,
+    );
+
+    $event = new ParticipantAdded($participant);
+    $channels = $event->broadcastOn();
+
+    expect($channels)->toHaveCount(2);
+    expect($channels[0]->name)->toBe("private-conversation.{$conversation->getKey()}");
+    expect($channels[1]->name)->toBe("private-user.{$user->getKey()}");
+});
+
+it('includes conversation data with display_name in `ParticipantAdded` event', function () {
+    $conversation = Conversation::factory()->channel()->create([
+        'is_private' => true,
+        'name' => 'My Private Channel',
+    ]);
+    $user = User::factory()->create();
+
+    $participant = app(AddParticipant::class)(
+        conversation: $conversation,
+        user: $user,
+    );
+
+    $event = new ParticipantAdded($participant);
+    $payload = $event->broadcastWith();
+
+    expect($payload)
+        ->toHaveKey('conversation')
+        ->toHaveKey('participant_id')
+        ->and($payload['participant_id'])->toBe($user->getKey())
+        ->and($payload['conversation']['id'])->toBe($conversation->getKey())
+        ->and($payload['conversation']['display_name'])->toBe('My Private Channel')
+        ->and($payload['conversation']['is_private'])->toBeTrue();
 });

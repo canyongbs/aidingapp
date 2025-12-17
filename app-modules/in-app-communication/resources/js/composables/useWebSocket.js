@@ -64,6 +64,18 @@ export function useWebSocket() {
                 if (store.selectedConversationId !== event.conversationId) {
                     store.setUnreadCount(event.conversationId, event.unreadCount);
                 }
+            })
+            .listen('.participant.removed', (event) => {
+                if (event.user_id === userId) {
+                    unsubscribeFromConversation(event.conversation_id);
+                    store.removeConversation(event.conversation_id);
+                }
+            })
+            .listen('.participant.added', (event) => {
+                if (event.participant_id === userId && event.conversation) {
+                    store.addConversation(event.conversation);
+                    subscribeToConversation(event.conversation.id);
+                }
             });
 
         userChannelSubscribed.value = true;
@@ -76,12 +88,35 @@ export function useWebSocket() {
         }
 
         // Use private channel for event subscription (all conversations)
-        echo.private(`conversation.${conversationId}`).listen('.message.sent', (event) => {
-            if (event.author_id !== store.currentUser.id) {
-                store.addMessage(conversationId, event);
-                store.clearTyping(conversationId, event.author_id);
-            }
-        });
+        echo.private(`conversation.${conversationId}`)
+            .listen('.message.sent', (event) => {
+                if (event.author_id !== store.currentUser.id) {
+                    store.addMessage(conversationId, event);
+                    store.clearTyping(conversationId, event.author_id);
+                }
+            })
+            .listen('.participant.added', (event) => {
+                if (event.participant_id !== store.currentUser.id) {
+                    store.addParticipant(event.conversation_id, event);
+                }
+            })
+            .listen('.participant.removed', (event) => {
+                if (event.user_id !== store.currentUser.id) {
+                    store.removeParticipant(event.conversation_id, event.user_id);
+                }
+            })
+            .listen('.participant.updated', (event) => {
+                store.updateParticipant(event.conversation_id, event.participant_id, {
+                    is_manager: event.is_manager,
+                });
+            })
+            .listen('.conversation.updated', (event) => {
+                store.updateConversation(event.id, {
+                    name: event.name,
+                    display_name: event.display_name,
+                    is_private: event.is_private,
+                });
+            });
 
         subscribedChannels.value.add(conversationId);
     }
@@ -92,7 +127,13 @@ export function useWebSocket() {
 
         // Leave previous presence channel if any
         if (currentPresenceChannel.value && currentPresenceChannel.value !== conversationId) {
-            echo.leave(`conversation.${currentPresenceChannel.value}`);
+            const previousConversationId = currentPresenceChannel.value;
+            echo.leave(`conversation.${previousConversationId}`);
+
+            // Re-subscribe to private channel since echo.leave() unsubscribes from both
+            // private and presence channels with the same name
+            subscribedChannels.value.delete(previousConversationId);
+            subscribeToConversation(previousConversationId);
         }
 
         // Join presence channel for the selected conversation
@@ -117,8 +158,13 @@ export function useWebSocket() {
         const echo = getEcho();
         if (!echo || !currentPresenceChannel.value) return;
 
-        echo.leave(`conversation.${currentPresenceChannel.value}`);
+        const previousConversationId = currentPresenceChannel.value;
+        echo.leave(`conversation.${previousConversationId}`);
         currentPresenceChannel.value = null;
+
+        // Re-subscribe to private channel since echo.leave() unsubscribes from both
+        subscribedChannels.value.delete(previousConversationId);
+        subscribeToConversation(previousConversationId);
     }
 
     function unsubscribeFromConversation(conversationId) {

@@ -101,6 +101,40 @@ export const useChatStore = defineStore('chat', () => {
         }
     }
 
+    function addParticipant(conversationId, participant) {
+        const conversation = conversations.value.find(
+            (existingConversation) => existingConversation.id === conversationId,
+        );
+        if (conversation) {
+            if (!conversation.participants) {
+                conversation.participants = [];
+            }
+            const exists = conversation.participants.find(
+                (existingParticipant) => existingParticipant.participant_id === participant.participant_id,
+            );
+            if (!exists) {
+                conversation.participants.push(participant);
+                if (conversation.participant_count !== undefined) {
+                    conversation.participant_count++;
+                }
+            }
+        }
+    }
+
+    function removeParticipant(conversationId, participantId) {
+        const conversation = conversations.value.find(
+            (existingConversation) => existingConversation.id === conversationId,
+        );
+        if (conversation && conversation.participants) {
+            conversation.participants = conversation.participants.filter(
+                (existingParticipant) => existingParticipant.participant_id !== participantId,
+            );
+            if (conversation.participant_count !== undefined) {
+                conversation.participant_count--;
+            }
+        }
+    }
+
     function removeConversation(conversationId) {
         conversations.value = conversations.value.filter((conversation) => conversation.id !== conversationId);
         if (selectedConversationId.value === conversationId) {
@@ -231,7 +265,9 @@ export const useChatStore = defineStore('chat', () => {
         setConversationsPagination,
         addConversation,
         updateConversation,
+        addParticipant,
         updateParticipant,
+        removeParticipant,
         removeConversation,
         setMessages,
         addMessage,

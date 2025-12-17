@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -34,40 +34,48 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\InAppCommunication\Http\Controllers\Conversations;
+namespace AidingApp\InAppCommunication\Events;
 
-use AidingApp\InAppCommunication\Actions\UpdateConversation;
 use AidingApp\InAppCommunication\Models\Conversation;
-use App\Http\Controllers\Controller;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Broadcasting\PrivateChannel;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
+use Illuminate\Foundation\Events\Dispatchable;
 
-class UpdateConversationController extends Controller
+class ParticipantRemoved implements ShouldBroadcastNow
 {
-    public function __invoke(Request $request, Conversation $conversation): JsonResponse
+    use Dispatchable;
+    use InteractsWithSockets;
+
+    public function __construct(
+        public Conversation $conversation,
+        public string $removedUserId,
+    ) {}
+
+    public function broadcastAs(): string
     {
-        $this->authorize('update', $conversation);
+        return 'participant.removed';
+    }
 
-        $validated = $request->validate([
-            'name' => ['sometimes', 'string', 'max:255'],
-            'is_private' => ['sometimes', 'boolean'],
-        ]);
+    /**
+     * @return array<string, mixed>
+     */
+    public function broadcastWith(): array
+    {
+        return [
+            'conversation_id' => $this->conversation->getKey(),
+            'user_id' => $this->removedUserId,
+        ];
+    }
 
-        $conversation = app(UpdateConversation::class)(
-            conversation: $conversation,
-            name: $validated['name'] ?? null,
-            isPrivate: $validated['is_private'] ?? null,
-        );
-
-        return response()->json([
-            'data' => [
-                'id' => $conversation->getKey(),
-                'type' => $conversation->type->value,
-                'name' => $conversation->name,
-                'display_name' => $conversation->name ?? 'Unnamed Channel',
-                'is_private' => $conversation->is_private,
-                'updated_at' => $conversation->updated_at->toIso8601String(),
-            ],
-        ]);
+    /**
+     * @return array<int, PrivateChannel>
+     */
+    public function broadcastOn(): array
+    {
+        return [
+            new PrivateChannel("conversation.{$this->conversation->getKey()}"),
+            new PrivateChannel("user.{$this->removedUserId}"),
+        ];
     }
 }

@@ -68,6 +68,8 @@ class JoinChannelController extends Controller
                 'id' => $conversation->getKey(),
                 'type' => $conversation->type->value,
                 'name' => $conversation->name,
+                'display_name' => $conversation->name ?? 'Unnamed Channel',
+                'avatar_url' => null,
                 'is_private' => $conversation->is_private,
                 'is_pinned' => false,
                 'notification_preference' => ConversationNotificationPreference::All->value,
