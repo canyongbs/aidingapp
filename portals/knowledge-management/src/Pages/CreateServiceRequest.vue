@@ -58,9 +58,14 @@
     const user = ref(null);
     const schema = ref([]);
     const submittedSuccess = ref(false);
+    const wasAiResolved = ref(false);
     const hasGeneratedQuestions = ref(false);
     const isGeneratingQuestions = ref(false);
     const categoryData = ref(null);
+    const isEvaluatingAiResolution = ref(false);
+    const aiResolutionData = ref(null);
+    const aiResolutionAttempted = ref(null);
+    const showAiResolutionStep = ref(false);
 
     watch(
         route,
@@ -208,12 +213,26 @@
             return steps[stepName].valid && steps[stepName].errorCount === 0;
         },
         stringify: (value) => JSON.stringify(value, null, 2),
-        submitForm: async (data, node) => {
+        submitForm: async (formData, node) => {
             node.clearErrors();
+
+            if (hasGeneratedQuestions.value && !showAiResolutionStep.value && !aiResolutionData.value) {
+                const shouldShowAiResolution = await evaluateAiResolution();
+                if (shouldShowAiResolution) {
+                    return;
+                }
+            }
 
             const { post } = consumer();
 
-            post(props.apiUrl + '/service-request/create/' + route.params.typeId, data)
+            const submitData = { ...formData };
+
+            if (aiResolutionAttempted.value) {
+                submitData.is_ai_resolution_attempted = true;
+                submitData.ai_resolution_confidence_score = aiResolutionAttempted.value.confidenceScore;
+            }
+
+            post(props.apiUrl + '/service-request/create/' + route.params.typeId, submitData)
                 .then((response) => {
                     submittedSuccess.value = true;
                 })
@@ -222,6 +241,87 @@
                 });
         },
     });
+
+    async function evaluateAiResolution() {
+        isEvaluatingAiResolution.value = true;
+
+        try {
+            const { post } = consumer();
+            const formNode = getNode('form');
+            const formData = formNode ? formNode.value : {};
+
+            const response = await post(
+                props.apiUrl + '/service-request/create/' + route.params.typeId + '/evaluate-ai-resolution',
+                { formData },
+            );
+
+            if (response.data.confidence_score !== undefined) {
+                aiResolutionAttempted.value = {
+                    confidenceScore: response.data.confidence_score,
+                };
+            }
+
+            if (response.data.is_ai_resolution_available) {
+                aiResolutionData.value = {
+                    confidenceScore: response.data.confidence_score,
+                    proposedAnswer: response.data.proposed_answer,
+                    encryptedProposedAnswer: response.data.encrypted_proposed_answer,
+                };
+                showAiResolutionStep.value = true;
+                return true;
+            }
+
+            return false;
+        } catch (error) {
+            console.error('Error evaluating AI resolution:', error);
+            return false;
+        } finally {
+            isEvaluatingAiResolution.value = false;
+        }
+    }
+
+    async function handleAiResolutionAccepted() {
+        const { post } = consumer();
+        const formNode = getNode('form');
+        const formData = formNode ? formNode.value : {};
+
+        try {
+            await post(props.apiUrl + '/service-request/create/' + route.params.typeId, {
+                ...formData,
+                is_ai_resolution_attempted: true,
+                is_ai_resolution_successful: true,
+                ai_resolution_confidence_score: aiResolutionData.value?.confidenceScore,
+                encrypted_ai_proposed_answer: aiResolutionData.value?.encryptedProposedAnswer,
+            });
+
+            wasAiResolved.value = true;
+            submittedSuccess.value = true;
+        } catch (error) {
+            console.error('Error submitting with AI resolution:', error);
+        }
+    }
+
+    async function handleAiResolutionDeclined() {
+        showAiResolutionStep.value = false;
+
+        const { post } = consumer();
+        const formNode = getNode('form');
+        const formData = formNode ? formNode.value : {};
+
+        try {
+            await post(props.apiUrl + '/service-request/create/' + route.params.typeId, {
+                ...formData,
+                is_ai_resolution_attempted: true,
+                is_ai_resolution_successful: false,
+                ai_resolution_confidence_score: aiResolutionData.value?.confidenceScore,
+                encrypted_ai_proposed_answer: aiResolutionData.value?.encryptedProposedAnswer,
+            });
+
+            submittedSuccess.value = true;
+        } catch (error) {
+            console.error('Error submitting after declining AI resolution:', error);
+        }
+    }
 
     async function checkAndGenerateQuestions(stepName) {
         if (hasGeneratedQuestions.value) {
@@ -330,15 +430,27 @@
                 </template>
 
                 <main class="grid gap-4" v-if="submittedSuccess">
-                    Thank you. Your request has been submitted.
+                    <template v-if="wasAiResolved">
+                        <p>Great! We're glad the AI was able to resolve your issue.</p>
+                        <p class="text-sm text-gray-600">
+                            A record of this interaction has been saved. If you need further assistance, feel free to
+                            submit a new request.
+                        </p>
+                    </template>
+                    <template v-else>
+                        <p>Thank you. Your request has been submitted.</p>
+                    </template>
 
-                    <button class="p-2 font-bold rounded bg-white text-brand-700">
+                    <button class="px-3 py-2 text-sm font-medium rounded bg-white text-brand-700">
                         <router-link :to="{ name: 'create-service-request' }"> Submit Another Request </router-link>
                     </button>
                 </main>
 
                 <main class="grid gap-4" v-else>
-                    <div v-if="isGeneratingQuestions" class="flex items-center justify-center">
+                    <div
+                        v-if="isGeneratingQuestions || isEvaluatingAiResolution"
+                        class="flex items-center justify-center"
+                    >
                         <div
                             role="status"
                             aria-live="polite"
@@ -363,10 +475,53 @@
                                 ></path>
                             </svg>
 
-                            <span class="text-sm text-gray-700">Generating questions…</span>
+                            <span v-if="isGeneratingQuestions" class="text-sm text-gray-700"
+                                >Generating questions…</span
+                            >
+                            <span v-else class="text-sm text-gray-700">Evaluating your request…</span>
                         </div>
                     </div>
-                    <FormKitSchema :schema="schema" :data="data" v-show="!isGeneratingQuestions" />
+
+                    <div v-if="showAiResolutionStep" class="bg-white rounded-lg p-6 shadow-sm">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">AI Resolution Available</h3>
+
+                        <p class="text-gray-600 mb-4">
+                            Our AI has considered your request and may be able to answer it immediately. Please review
+                            the potential answer below:
+                        </p>
+
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                            <div class="prose prose-sm max-w-none text-gray-800 whitespace-pre-wrap">
+                                {{ aiResolutionData?.proposedAnswer }}
+                            </div>
+                        </div>
+
+                        <p class="text-gray-600 mb-6">
+                            Please tell us if this resolved your issue. If not, we will escalate this ticket to a
+                            support team member.
+                        </p>
+
+                        <div class="flex gap-3">
+                            <button
+                                @click="handleAiResolutionAccepted"
+                                class="px-3 py-2 text-sm font-medium rounded bg-green-600 text-white hover:bg-green-700 focus-visible:outline-2 focus-visible:outline-green-600 focus-visible:outline-offset-2"
+                            >
+                                Yes (Resolved)
+                            </button>
+                            <button
+                                @click="handleAiResolutionDeclined"
+                                class="px-3 py-2 text-sm font-medium rounded bg-white text-gray-700 ring-1 ring-gray-300 hover:bg-gray-50 focus-visible:outline-2 focus-visible:outline-gray-400 focus-visible:outline-offset-2"
+                            >
+                                No
+                            </button>
+                        </div>
+                    </div>
+
+                    <FormKitSchema
+                        :schema="schema"
+                        :data="data"
+                        v-show="!isGeneratingQuestions && !isEvaluatingAiResolution && !showAiResolutionStep"
+                    />
                 </main>
             </Page>
         </div>

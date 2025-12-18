@@ -98,6 +98,9 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
         'service_request_form_submission_id',
         'survey_sent_at',
         'reminder_sent_at',
+        'ai_resolution_confidence_score',
+        'is_ai_resolution_attempted',
+        'is_ai_resolution_successful',
     ];
 
     protected $casts = [
@@ -105,6 +108,9 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
         'time_to_resolution' => 'integer',
         'survey_sent_at' => 'datetime',
         'reminder_sent_at' => 'datetime',
+        'ai_resolution_confidence_score' => 'integer',
+        'is_ai_resolution_attempted' => 'boolean',
+        'is_ai_resolution_successful' => 'boolean',
     ];
 
     public function registerMediaCollections(): void

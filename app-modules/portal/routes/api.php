@@ -35,8 +35,10 @@
 */
 
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\AssetManagementPortalController;
-use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\CreateServiceRequestController;
+use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\EvaluateServiceRequestAiResolutionController;
+use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\GenerateServiceRequestQuestionsController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\GetKnowledgeManagementPortalTagsController;
+use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\GetServiceRequestFormController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\GetServiceRequestsController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\GetServiceRequestUploadUrl;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\IncidentController;
@@ -53,6 +55,7 @@ use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\LicenseManagemen
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\ServiceMonitorStatusController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\ServiceRequestTypesController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\StoreKnowledgeBaseArticleVoteController;
+use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\StoreServiceRequestController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\StoreServiceRequestUpdateController;
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEmbeddableAndAuthorized;
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEnabled;
@@ -120,16 +123,20 @@ Route::prefix('api')
                 Route::get('/service-requests', [GetServiceRequestsController::class, 'index'])
                     ->name('service-request.index');
 
-                Route::get('/service-request/create/{type}', [CreateServiceRequestController::class, 'create'])
+                Route::get('/service-request/create/{type}', GetServiceRequestFormController::class)
                     ->name('service-request.create');
 
-                Route::post('/service-request/create/{type}', [CreateServiceRequestController::class, 'store'])
+                Route::post('/service-request/create/{type}', StoreServiceRequestController::class)
                     ->middleware(['auth:sanctum'])
                     ->name('service-request.store');
 
-                Route::post('/service-request/create/{type}/generate-questions', [CreateServiceRequestController::class, 'generateQuestions'])
+                Route::post('/service-request/create/{type}/generate-questions', GenerateServiceRequestQuestionsController::class)
                     ->middleware(['auth:sanctum'])
                     ->name('service-request.generate-questions');
+
+                Route::post('/service-request/create/{type}/evaluate-ai-resolution', EvaluateServiceRequestAiResolutionController::class)
+                    ->middleware(['auth:sanctum'])
+                    ->name('service-request.evaluate-ai-resolution');
 
                 Route::get('/service-request/request-upload-url', GetServiceRequestUploadUrl::class)
                     ->middleware(['auth:sanctum'])

@@ -83,6 +83,7 @@ class ViewServiceRequestUpdate extends ViewRecord
                                 default => throw new Exception('Unknown createdBy type ' . $record->createdBy::class),
                             }),
                         TextEntry::make('update')
+                            ->markdown()
                             ->columnSpanFull(),
                     ])
                     ->columns(),
