@@ -71,7 +71,9 @@ class PrepareKnowledgeBaseVectorStore implements ShouldQueue, ShouldBeUnique
         $files = KnowledgeBaseItem::query()->tap(app(KnowledgeBasePortalAssistantItem::class))->get(['id', 'updated_at'])->all();
 
         if (! $aiService->areFilesReady($files)) {
-            $this->release(150);
+            if ($this->attempts() < $this->tries) {
+                $this->release(150);
+            }
         }
     }
 }
