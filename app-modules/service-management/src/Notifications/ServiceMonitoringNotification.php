@@ -94,7 +94,7 @@ class ServiceMonitoringNotification extends BaseNotification implements ShouldQu
 
         return Notification::make()
             ->danger()
-            ->title((string) str("The last service monitoring check for [{$target->name}](" . ServiceMonitoringResource::getUrl('view', ['record' => $target]) . ') has failed.')->markdown())
+            ->title((string) str("The last service monitoring check for <ins>[{$target->name}](" . ServiceMonitoringResource::getUrl('view', ['record' => $target]) . ')</ins> has failed.')->markdown())
             ->getDatabaseMessage();
     }
 }

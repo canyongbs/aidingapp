@@ -48,13 +48,10 @@ Aiding App has detected a failure in a monitored service.
 
 ## Monitor Information
 
-**Monitor name:** {{ $historicalServiceMonitoring->serviceMonitoringTarget->name }}
-
-**URL or endpoint:** {{ $historicalServiceMonitoring->serviceMonitoringTarget->domain }}
-
-**Status:** Down
-
-**Most recent failed check:** {{ $historicalServiceMonitoring->created_at }}
+- Monitor name: {{ $historicalServiceMonitoring->serviceMonitoringTarget->name }}
+- URL or endpoint: {{ $historicalServiceMonitoring->serviceMonitoringTarget->domain }}
+- Status: Down
+- Most recent failed check: {{ $historicalServiceMonitoring->created_at }}
 
 ## Details
 The monitored service did not respond to a health check. The service may be offline or unreachable due to an outage, degraded performance, or network interruption.
