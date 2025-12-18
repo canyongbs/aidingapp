@@ -85,11 +85,11 @@ class ViewServiceMonitoring extends ViewRecord
                                     ->visible($this->getRecord()->users()->count()),
                                 IconEntry::make('is_notified_via_database')
                                     ->label('In Product notifications')
-                                    ->visible(fn(): bool => ServiceMonitoringNotificationFeature::active())
+                                    ->visible(fn (): bool => ServiceMonitoringNotificationFeature::active())
                                     ->boolean(),
                                 IconEntry::make('is_notified_via_email')
                                     ->label('Email Notifications')
-                                    ->visible(fn(): bool => ServiceMonitoringNotificationFeature::active())
+                                    ->visible(fn (): bool => ServiceMonitoringNotificationFeature::active())
                                     ->boolean(),
                             ])
                             ->columns(),
