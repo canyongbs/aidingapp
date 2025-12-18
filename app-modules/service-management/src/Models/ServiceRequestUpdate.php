@@ -67,6 +67,7 @@ class ServiceRequestUpdate extends BaseModel implements Auditable, ProvidesATime
     use HasFactory;
 
     protected $fillable = [
+        'id', // To allow assignment in the correct order during bulk-creation.
         'service_request_id',
         'update',
         'internal',

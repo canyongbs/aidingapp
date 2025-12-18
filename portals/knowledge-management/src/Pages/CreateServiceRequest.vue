@@ -210,11 +210,26 @@
             );
         },
         stepIsValid: (stepName) => {
-            return steps[stepName].valid && steps[stepName].errorCount === 0;
+            const stepNames = Object.keys(steps);
+            const stepIndex = stepNames.indexOf(stepName);
+            const activeIndex = stepNames.indexOf(activeStep.value);
+            const isPastOrCurrentStep = stepIndex <= activeIndex;
+
+            return isPastOrCurrentStep && steps[stepName].valid && steps[stepName].errorCount === 0;
+        },
+        isLastStep: () => {
+            const stepNames = Object.keys(steps);
+            return activeStep.value === stepNames[stepNames.length - 1];
         },
         stringify: (value) => JSON.stringify(value, null, 2),
         submitForm: async (formData, node) => {
             node.clearErrors();
+
+            // If not on the last step, move to next step instead of submitting
+            if (!data.isLastStep()) {
+                data.setStep(1)();
+                return;
+            }
 
             if (hasGeneratedQuestions.value && !showAiResolutionStep.value && !aiResolutionData.value) {
                 const shouldShowAiResolution = await evaluateAiResolution();
