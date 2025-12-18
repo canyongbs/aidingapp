@@ -92,6 +92,7 @@ class ViewServiceMonitoring extends ViewRecord
                                     ->visible(fn (): bool => ServiceMonitoringNotificationFeature::active())
                                     ->boolean(),
                             ])
+                            ->visible(fn (): bool => ! ServiceMonitoringNotificationFeature::active() ? ($this->getRecord()->teams()->count() || $this->getRecord()->users()->count()) : true)
                             ->columns(),
                     ])
                     ->columns(),
