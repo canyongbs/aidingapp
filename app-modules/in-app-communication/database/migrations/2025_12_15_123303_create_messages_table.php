@@ -43,8 +43,7 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        DB::transaction(function () {
-            Schema::create('messages', function (Blueprint $table) {
+        Schema::create('messages', function (Blueprint $table) {
                 $table->uuid('id')->primary();
                 $table->foreignUuid('conversation_id')->constrained('conversations')->cascadeOnDelete();
                 $table->uuidMorphs('author');
@@ -53,17 +52,10 @@ return new class () extends Migration {
 
                 $table->index(['conversation_id', 'created_at']);
             });
-
-            UserChatFeature::activate();
-        });
     }
 
     public function down(): void
     {
-        DB::transaction(function () {
-            UserChatFeature::deactivate();
-
-            Schema::dropIfExists('messages');
-        });
+        Schema::dropIfExists('messages');
     }
 };

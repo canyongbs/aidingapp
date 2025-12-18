@@ -61,10 +61,6 @@ class UserChat extends Page
 
     public static function canAccess(): bool
     {
-        if (! UserChatFeature::active()) {
-            return false;
-        }
-
         if (! Gate::check(Feature::RealtimeChat->getGateName())) {
             return false;
         }
