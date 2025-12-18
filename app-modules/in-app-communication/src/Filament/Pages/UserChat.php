@@ -38,7 +38,6 @@ namespace AidingApp\InAppCommunication\Filament\Pages;
 
 use AidingApp\Authorization\Enums\LicenseType;
 use App\Enums\Feature;
-use App\Features\UserChatFeature;
 use App\Models\User;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Gate;
