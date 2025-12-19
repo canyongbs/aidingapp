@@ -38,7 +38,6 @@ namespace AidingApp\InAppCommunication\Filament\Pages;
 
 use AidingApp\Authorization\Enums\LicenseType;
 use App\Enums\Feature;
-use App\Features\UserChatFeature;
 use App\Models\User;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Gate;
@@ -61,10 +60,6 @@ class UserChat extends Page
 
     public static function canAccess(): bool
     {
-        if (! UserChatFeature::active()) {
-            return false;
-        }
-
         if (! Gate::check(Feature::RealtimeChat->getGateName())) {
             return false;
         }
