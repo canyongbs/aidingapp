@@ -1,0 +1,71 @@
+{
+    "data": {
+        "articles": {
+            "data": [
+                {
+                    "id": "9dbe944d-330e-40c1-94b2-3312b07a1355",
+                    "categorySlug": "teaching-techniques-unlocked",
+                    "name": "The Science of Learning: Cognitive Strategies That Work",
+                    "lastUpdated": null,
+                    "content": null,
+                    "tags": [],
+                    "vote": null,
+                    "featured": true
+                },
+                {
+                    "id": "9dbe944d-330e-40c1-94b2-3312b07b7589",
+                    "categorySlug": "student-centered-learning",
+                    "name": "Personalized Learning: Tailoring Education for Every Student",
+                    "lastUpdated": null,
+                    "content": null,
+                    "tags": [],
+                    "vote": null,
+                    "featured": false
+                }
+            ],
+            "links": [
+                {
+                    "url": null,
+                    "label": "&laquo; Previous",
+                    "page": null,
+                    "active": false
+                },
+                {
+                    "url": "https:\/\/test.aidingapp.local\/api\/portal\/search?page=1",
+                    "label": "1",
+                    "page": 1,
+                    "active": true
+                },
+                {
+                    "url": null,
+                    "label": "Next &raquo;",
+                    "page": null,
+                    "active": false
+                }
+            ],
+            "meta": {
+                "current_page": 1,
+                "first_page_url": "https:\/\/test.aidingapp.local\/api\/portal\/search?page=1",
+                "from": 1,
+                "last_page": 1,
+                "last_page_url": "https:\/\/test.aidingapp.local\/api\/portal\/search?page=1",
+                "next_page_url": null,
+                "path": "https:\/\/test.aidingapp.local\/api\/portal\/search",
+                "per_page": 5,
+                "prev_page_url": null,
+                "to": 2,
+                "total": 2
+            }
+        },
+        "categories": [
+            {
+                "slug": "student-centered-learning",
+                "name": "Student-Centered Learning",
+                "description": "Focus on approaches that place students' needs, interests, and goals at the forefront of education.",
+                "icon": null,
+                "parentCategory": null,
+                "subCategories": null
+            }
+        ]
+    }
+}
