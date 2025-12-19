@@ -60,7 +60,6 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Mockery\MockInterface;
 
-use function Pest\Faker\fake;
 use function Pest\Laravel\assertDatabaseCount;
 use function Pest\Laravel\assertDatabaseEmpty;
 use function Pest\Laravel\assertDatabaseHas;
