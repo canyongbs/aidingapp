@@ -134,6 +134,10 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->navigationGroups([
                 NavigationGroup::make()
+                    ->label('Engagement')
+                    ->icon('heroicon-o-users')
+                    ->collapsed(),
+                NavigationGroup::make()
                     ->label('Clients')
                     ->icon('heroicon-o-users')
                     ->collapsed(),
@@ -148,10 +152,6 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make()
                     ->label('Purchasing')
                     ->icon('heroicon-o-building-storefront')
-                    ->collapsed(),
-                NavigationGroup::make()
-                    ->label('Staff Engagement')
-                    ->icon('heroicon-o-users')
                     ->collapsed(),
                 NavigationGroup::make()
                     ->label('Analytics')
