@@ -427,6 +427,10 @@ class StoreServiceRequestController extends Controller
         ServiceRequest $serviceRequest,
         ServiceRequestPriority $priority
     ): bool {
+        if (empty($priority->type->form)) {
+            return false;
+        }
+
         $submission = $form->submissions()
             ->make([
                 'submitted_at' => now(),
