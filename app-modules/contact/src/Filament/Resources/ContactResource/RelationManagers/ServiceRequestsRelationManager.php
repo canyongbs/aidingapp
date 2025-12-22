@@ -261,6 +261,7 @@ class ServiceRequestsRelationManager extends RelationManager
             $dynamicFields = $data['dynamic_fields'] ?? [];
             $typeId = $data['type_id'];
             unset($data['dynamic_fields']);
+            $data['respondent_id'] = $this->getOwnerRecord()->getKey();
 
             $serviceRequestDataObject = ServiceRequestDataObject::fromData($data);
             $serviceRequest = app(CreateServiceRequestAction::class)->execute($serviceRequestDataObject);
